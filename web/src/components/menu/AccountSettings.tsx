@@ -30,7 +30,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import SetPasswordDialog from "../overlay/SetPasswordDialog";
 import { useTranslation } from "react-i18next";
-import { verifyPassword } from "@/utils/authUtil";
 
 type AccountSettingsProps = {
   className?: string;
@@ -44,19 +43,16 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
 
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
   const Content = isDesktop ? DropdownMenuContent : DrawerContent;
   const MenuItem = isDesktop ? DropdownMenuItem : DrawerClose;
 
-  const verifyOldPassword = async (oldPassword: string): Promise<boolean> => {
-    if (!profile?.username || profile.username === "anonymous") return false;
-    return verifyPassword(profile.username, oldPassword);
-  };
-
   const handlePasswordSave = async (password: string, oldPassword?: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
+    setIsPasswordLoading(true);
     axios
       .put(`users/${profile.username}/password`, {
         password,
@@ -66,6 +62,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
           setPasswordError(null);
+          setIsPasswordLoading(false);
           toast.success(t("users.toast.success.updatePassword"), {
             position: "top-center",
           });
@@ -77,16 +74,9 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           error.response?.data?.detail ||
           "Unknown error";
 
-        setPasswordDialogOpen(false);
-        setPasswordError(null);
-        toast.error(
-          t("users.toast.error.setPasswordFailed", {
-            errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
+        // Keep dialog open and show error
+        setPasswordError(errorMessage);
+        setIsPasswordLoading(false);
       });
   };
 
@@ -172,9 +162,9 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           setPasswordDialogOpen(false);
           setPasswordError(null);
         }}
-        onVerifyOldPassword={verifyOldPassword}
         initialError={passwordError}
         username={profile?.username}
+        isLoading={isPasswordLoading}
       />
     </Container>
   );

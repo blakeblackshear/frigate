@@ -66,7 +66,6 @@ import { supportedLanguageKeys } from "@/lib/const";
 
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { MdCategory } from "react-icons/md";
-import { verifyPassword } from "@/utils/authUtil";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -118,14 +117,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const Portal = isDesktop ? DropdownMenuPortal : DialogPortal;
 
   const [passwordError, setPasswordError] = useState<string | null>(null);
-
-  const verifyOldPassword = async (oldPassword: string): Promise<boolean> => {
-    if (!profile?.username || profile.username === "anonymous") return false;
-    return verifyPassword(profile.username, oldPassword);
-  };
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const handlePasswordSave = async (password: string, oldPassword?: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
+    setIsPasswordLoading(true);
     axios
       .put(`users/${profile.username}/password`, {
         password,
@@ -135,6 +131,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
           setPasswordError(null);
+          setIsPasswordLoading(false);
           toast.success(
             t("users.toast.success.updatePassword", {
               ns: "views/settings",
@@ -151,17 +148,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           error.response?.data?.detail ||
           "Unknown error";
 
-        setPasswordDialogOpen(false);
-        setPasswordError(null);
-        toast.error(
-          t("users.toast.error.setPasswordFailed", {
-            ns: "views/settings",
-            errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
+        // Keep dialog open and show error
+        setPasswordError(errorMessage);
+        setIsPasswordLoading(false);
       });
   };
 
@@ -573,9 +562,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           setPasswordDialogOpen(false);
           setPasswordError(null);
         }}
-        onVerifyOldPassword={verifyOldPassword}
         initialError={passwordError}
         username={profile?.username}
+        isLoading={isPasswordLoading}
       />
     </>
   );

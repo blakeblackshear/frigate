@@ -22,18 +22,18 @@ type SetPasswordProps = {
   show: boolean;
   onSave: (password: string, oldPassword?: string) => void;
   onCancel: () => void;
-  onVerifyOldPassword?: (oldPassword: string) => Promise<boolean>;
   initialError?: string | null;
   username?: string;
+  isLoading?: boolean;
 };
 
 export default function SetPasswordDialog({
   show,
   onSave,
   onCancel,
-  onVerifyOldPassword,
   initialError,
   username,
+  isLoading = false,
 }: SetPasswordProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -49,8 +49,6 @@ export default function SetPasswordDialog({
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
-  const [isValidatingOldPassword, setIsValidatingOldPassword] =
-    useState<boolean>(false);
 
   // visibility toggles for password fields
   const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
@@ -58,6 +56,7 @@ export default function SetPasswordDialog({
     useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+  const [hasInitialized, setHasInitialized] = useState<boolean>(false);
 
   // Password strength requirements
 
@@ -68,14 +67,23 @@ export default function SetPasswordDialog({
     special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   };
 
-  // Reset state when dialog opens/closes
-
   useEffect(() => {
     if (show) {
-      setOldPassword("");
-      setPassword("");
-      setConfirmPassword("");
-      setError(initialError || null);
+      if (!hasInitialized) {
+        setOldPassword("");
+        setPassword("");
+        setConfirmPassword("");
+        setError(null);
+        setHasInitialized(true);
+      }
+    } else {
+      setHasInitialized(false);
+    }
+  }, [show, hasInitialized]);
+
+  useEffect(() => {
+    if (show && initialError) {
+      setError(initialError);
     }
   }, [show, initialError]);
 
@@ -131,24 +139,6 @@ export default function SetPasswordDialog({
     if (username && !oldPassword) {
       setError(t("users.dialog.passwordSetting.currentPasswordRequired"));
       return;
-    }
-
-    // Verify old password if callback is provided and old password is provided
-    if (username && oldPassword && onVerifyOldPassword) {
-      setIsValidatingOldPassword(true);
-      try {
-        const isValid = await onVerifyOldPassword(oldPassword);
-        if (!isValid) {
-          setError(t("users.dialog.passwordSetting.incorrectCurrentPassword"));
-          setIsValidatingOldPassword(false);
-          return;
-        }
-      } catch (err) {
-        setError(t("users.dialog.passwordSetting.passwordVerificationFailed"));
-        setIsValidatingOldPassword(false);
-        return;
-      }
-      setIsValidatingOldPassword(false);
     }
 
     onSave(password, oldPassword || undefined);
@@ -465,6 +455,7 @@ export default function SetPasswordDialog({
                 aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
                 type="button"
+                disabled={isLoading}
               >
                 {t("button.cancel", { ns: "common" })}
               </Button>
@@ -474,7 +465,7 @@ export default function SetPasswordDialog({
                 className="flex flex-1"
                 onClick={handleSave}
                 disabled={
-                  isValidatingOldPassword ||
+                  isLoading ||
                   !password ||
                   password !== confirmPassword ||
                   (username && !oldPassword) ||
@@ -484,7 +475,7 @@ export default function SetPasswordDialog({
                   !requirements.special
                 }
               >
-                {isValidatingOldPassword ? (
+                {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
                     <span>{t("button.saving", { ns: "common" })}</span>

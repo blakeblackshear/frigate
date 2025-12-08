@@ -55,7 +55,6 @@ def require_admin_by_default():
         "/auth",
         "/auth/first_time_login",
         "/login",
-        "/auth/verify",
         "/logout",
         # Authenticated user endpoints (allow_any_authenticated)
         "/profile",
@@ -751,30 +750,6 @@ def login(request: Request, body: AppPostLoginBody):
 
         return response
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
-
-
-@router.post("/auth/verify", dependencies=[Depends(allow_public())])
-@limiter.limit(limit_value=rateLimiter.get_limit)
-def verify(request: Request, body: AppPostLoginBody):
-    """Verify credentials without creating a session.
-
-    This endpoint is used for password change verification and other
-    credential validation scenarios that don't require session creation.
-    """
-    user = body.user
-    password = body.password
-
-    try:
-        db_user: User = User.get_by_id(user)
-    except DoesNotExist:
-        return JSONResponse(content={"message": "Verification failed"}, status_code=401)
-
-    password_hash = db_user.password_hash
-    if verify_password(password, password_hash):
-        return JSONResponse(
-            content={"message": "Verification successful"}, status_code=200
-        )
-    return JSONResponse(content={"message": "Verification failed"}, status_code=401)
 
 
 @router.get("/users", dependencies=[Depends(require_role(["admin"]))])

@@ -37,7 +37,6 @@ import { useTranslation } from "react-i18next";
 import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
 import { Separator } from "@/components/ui/separator";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
-import { verifyPassword } from "@/utils/authUtil";
 
 type AuthenticationViewProps = {
   section?: "users" | "roles";
@@ -59,6 +58,7 @@ export default function AuthenticationView({
   const [showEditRole, setShowEditRole] = useState(false);
   const [showDeleteRole, setShowDeleteRole] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<string>();
   const [selectedUserRole, setSelectedUserRole] = useState<string>();
@@ -71,22 +71,16 @@ export default function AuthenticationView({
     document.title = t("documentTitle.authentication");
   }, [t]);
 
-  const onVerifyOldPassword = useCallback(
-    async (oldPassword: string): Promise<boolean> => {
-      if (!selectedUser) return false;
-      return verifyPassword(selectedUser, oldPassword);
-    },
-    [selectedUser],
-  );
-
   const onSavePassword = useCallback(
     (user: string, password: string, oldPassword?: string) => {
+      setIsPasswordLoading(true);
       axios
         .put(`users/${user}/password`, { password, old_password: oldPassword })
         .then((response) => {
           if (response.status === 200) {
             setShowSetPassword(false);
             setPasswordError(null);
+            setIsPasswordLoading(false);
             toast.success(t("users.toast.success.updatePassword"), {
               position: "top-center",
             });
@@ -98,17 +92,9 @@ export default function AuthenticationView({
             error.response?.data?.detail ||
             "Unknown error";
 
-          // Close dialog and show toast for any errors
-          setShowSetPassword(false);
-          setPasswordError(null);
-          toast.error(
-            t("users.toast.error.setPasswordFailed", {
-              errorMessage,
-            }),
-            {
-              position: "top-center",
-            },
-          );
+          // Keep dialog open and show error
+          setPasswordError(errorMessage);
+          setIsPasswordLoading(false);
         });
     },
     [t],
@@ -582,11 +568,11 @@ export default function AuthenticationView({
           setShowSetPassword(false);
           setPasswordError(null);
         }}
-        onVerifyOldPassword={onVerifyOldPassword}
         initialError={passwordError}
         onSave={(password, oldPassword) =>
           onSavePassword(selectedUser!, password, oldPassword)
         }
+        isLoading={isPasswordLoading}
       />
       <DeleteUserDialog
         show={showDelete}
