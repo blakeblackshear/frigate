@@ -56,8 +56,8 @@ def require_admin_by_default():
         "/auth/first_time_login",
         "/login",
         "/auth/verify",
-        # Authenticated user endpoints (allow_any_authenticated)
         "/logout",
+        # Authenticated user endpoints (allow_any_authenticated)
         "/profile",
         # Public info endpoints (allow_public)
         "/",
