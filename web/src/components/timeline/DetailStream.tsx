@@ -25,7 +25,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { useUserPersistence } from "@/hooks/use-user-persistence";
-import { isDesktop, isOpera } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
 import { MdAutoAwesome } from "react-icons/md";
