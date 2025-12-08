@@ -11,8 +11,11 @@ import {
 } from "../ui/dialog";
 
 import { Label } from "../ui/label";
-import { LuCheck, LuX, LuEye, LuEyeOff } from "react-icons/lu";
+import { LuCheck, LuX, LuEye, LuEyeOff, LuExternalLink } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import useSWR from "swr";
+import { formatSecondsToDuration } from "@/utils/dateUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
 
 type SetPasswordProps = {
@@ -32,7 +35,15 @@ export default function SetPasswordDialog({
   initialError,
   username,
 }: SetPasswordProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation(["views/settings", "common"]);
+  const { getLocaleDocUrl } = useDocDomain();
+
+  const { data: config } = useSWR("config");
+  const refreshSeconds: number | undefined =
+    config?.auth?.refresh_time ?? undefined;
+  const refreshTimeLabel = refreshSeconds
+    ? formatSecondsToDuration(refreshSeconds)
+    : "30 minutes";
   const [oldPassword, setOldPassword] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -177,6 +188,26 @@ export default function SetPasswordDialog({
           <DialogDescription>
             {t("users.dialog.passwordSetting.desc")}
           </DialogDescription>
+
+          <p className="text-sm text-muted-foreground">
+            {t("users.dialog.passwordSetting.multiDeviceWarning", {
+              refresh_time: refreshTimeLabel,
+              ns: "views/settings",
+            })}
+          </p>
+          <p className="text-sm text-primary-variant">
+            <a
+              href={getLocaleDocUrl(
+                "configuration/authentication#jwt-token-secret",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-primary"
+            >
+              {t("readTheDocumentation", { ns: "common" })}
+              <LuExternalLink className="ml-2 size-3" />
+            </a>
+          </p>
         </DialogHeader>
 
         <div className="space-y-4 pt-4">
