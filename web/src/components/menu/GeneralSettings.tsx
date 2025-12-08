@@ -66,6 +66,7 @@ import { supportedLanguageKeys } from "@/lib/const";
 
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { MdCategory } from "react-icons/md";
+import { verifyPassword } from "@/utils/authUtil";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -120,15 +121,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   const verifyOldPassword = async (oldPassword: string): Promise<boolean> => {
     if (!profile?.username || profile.username === "anonymous") return false;
-    try {
-      const response = await axios.post("login", {
-        user: profile.username,
-        password: oldPassword,
-      });
-      return response.status === 200;
-    } catch (error) {
-      return false;
-    }
+    return verifyPassword(profile.username, oldPassword);
   };
 
   const handlePasswordSave = async (password: string, oldPassword?: string) => {

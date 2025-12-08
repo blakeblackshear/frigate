@@ -55,6 +55,7 @@ def require_admin_by_default():
         "/auth",
         "/auth/first_time_login",
         "/login",
+        "/auth/verify",
         # Authenticated user endpoints (allow_any_authenticated)
         "/logout",
         "/profile",
@@ -751,6 +752,30 @@ def login(request: Request, body: AppPostLoginBody):
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
+@router.post("/auth/verify", dependencies=[Depends(allow_public())])
+@limiter.limit(limit_value=rateLimiter.get_limit)
+def verify(request: Request, body: AppPostLoginBody):
+    """Verify credentials without creating a session.
+
+    This endpoint is used for password change verification and other
+    credential validation scenarios that don't require session creation.
+    """
+    user = body.user
+    password = body.password
+
+    try:
+        db_user: User = User.get_by_id(user)
+    except DoesNotExist:
+        return JSONResponse(content={"message": "Verification failed"}, status_code=401)
+
+    password_hash = db_user.password_hash
+    if verify_password(password, password_hash):
+        return JSONResponse(
+            content={"message": "Verification successful"}, status_code=200
+        )
+    return JSONResponse(content={"message": "Verification failed"}, status_code=401)
+
+
 @router.get("/users", dependencies=[Depends(require_role(["admin"]))])
 def get_users():
     exports = (
@@ -863,6 +888,8 @@ async def update_password(
         }
     ).where(User.username == username).execute()
 
+    response = JSONResponse(content={"success": True})
+
     # If user changed their own password, issue a new JWT to keep them logged in
     if current_username == username:
         JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
@@ -873,13 +900,12 @@ async def update_password(
         encoded_jwt = create_encoded_jwt(
             username, current_role, expiration, request.app.jwt_token
         )
-        response = JSONResponse(content={"success": True})
+        # Set new JWT cookie on response
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
-        return response
 
-    return JSONResponse(content={"success": True})
+    return response
 
 
 @router.put(

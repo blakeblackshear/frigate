@@ -30,6 +30,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import SetPasswordDialog from "../overlay/SetPasswordDialog";
 import { useTranslation } from "react-i18next";
+import { verifyPassword } from "@/utils/authUtil";
 
 type AccountSettingsProps = {
   className?: string;
@@ -51,15 +52,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
 
   const verifyOldPassword = async (oldPassword: string): Promise<boolean> => {
     if (!profile?.username || profile.username === "anonymous") return false;
-    try {
-      const response = await axios.post("login", {
-        user: profile.username,
-        password: oldPassword,
-      });
-      return response.status === 200;
-    } catch (error) {
-      return false;
-    }
+    return verifyPassword(profile.username, oldPassword);
   };
 
   const handlePasswordSave = async (password: string, oldPassword?: string) => {

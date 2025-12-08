@@ -37,6 +37,7 @@ import { useTranslation } from "react-i18next";
 import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
 import { Separator } from "@/components/ui/separator";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import { verifyPassword } from "@/utils/authUtil";
 
 type AuthenticationViewProps = {
   section?: "users" | "roles";
@@ -73,15 +74,7 @@ export default function AuthenticationView({
   const onVerifyOldPassword = useCallback(
     async (oldPassword: string): Promise<boolean> => {
       if (!selectedUser) return false;
-      try {
-        const response = await axios.post("login", {
-          user: selectedUser,
-          password: oldPassword,
-        });
-        return response.status === 200;
-      } catch (error) {
-        return false;
-      }
+      return verifyPassword(selectedUser, oldPassword);
     },
     [selectedUser],
   );
