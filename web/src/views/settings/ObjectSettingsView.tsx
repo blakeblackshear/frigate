@@ -252,6 +252,10 @@ export default function ObjectSettingsView({
                         className="ml-1"
                         id={param}
                         checked={options && options[param]}
+                        disabled={
+                          param === "paths" &&
+                          cameraConfig?.onvif?.autotracking?.enabled_in_config
+                        }
                         onCheckedChange={(isChecked) => {
                           handleSetOption(param, isChecked);
                         }}
