@@ -28,12 +28,14 @@ type LiveBirdseyeViewProps = {
   supportsFullscreen: boolean;
   fullscreen: boolean;
   toggleFullscreen: () => void;
+  onSelectCamera?: (cameraName: string) => void;
 };
 
 export default function LiveBirdseyeView({
   supportsFullscreen,
   fullscreen,
   toggleFullscreen,
+  onSelectCamera,
 }: LiveBirdseyeViewProps) {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -181,13 +183,13 @@ export default function LiveBirdseyeView({
             canvasY >= parsedCoords.y &&
             canvasY < parsedCoords.y + parsedCoords.height
           ) {
-            navigate(`/#${cameraName}`);
+            onSelectCamera?.(cameraName);
             break;
           }
         }
       }
     },
-    [playerRef, config, birdseyeLayout, navigate],
+    [playerRef, config, birdseyeLayout, onSelectCamera],
   );
 
   if (!config) {

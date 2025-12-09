@@ -710,7 +710,7 @@ def delete_classification_dataset_images(
         if os.path.isfile(file_path):
             os.unlink(file_path)
 
-    if os.path.exists(folder) and not os.listdir(folder):
+    if os.path.exists(folder) and not os.listdir(folder) and category.lower() != "none":
         os.rmdir(folder)
 
     return JSONResponse(

@@ -607,23 +607,27 @@ class Dispatcher:
         )
         self.publish(f"{camera_name}/snapshots/state", payload, retain=True)
 
-    def _on_ptz_command(self, camera_name: str, payload: str) -> None:
+    def _on_ptz_command(self, camera_name: str, payload: str | bytes) -> None:
         """Callback for ptz topic."""
         try:
-            if "preset" in payload.lower():
+            preset: str = (
+                payload.decode("utf-8") if isinstance(payload, bytes) else payload
+            ).lower()
+
+            if "preset" in preset:
                 command = OnvifCommandEnum.preset
-                param = payload.lower()[payload.index("_") + 1 :]
-            elif "move_relative" in payload.lower():
+                param = preset[preset.index("_") + 1 :]
+            elif "move_relative" in preset:
                 command = OnvifCommandEnum.move_relative
-                param = payload.lower()[payload.index("_") + 1 :]
+                param = preset[preset.index("_") + 1 :]
             else:
-                command = OnvifCommandEnum[payload.lower()]
+                command = OnvifCommandEnum[preset]
                 param = ""
 
             self.onvif.handle_command(camera_name, command, param)
             logger.info(f"Setting ptz command to {command} for {camera_name}")
         except KeyError as k:
-            logger.error(f"Invalid PTZ command {payload}: {k}")
+            logger.error(f"Invalid PTZ command {preset}: {k}")
 
     def _on_birdseye_command(self, camera_name: str, payload: str) -> None:
         """Callback for birdseye topic."""

@@ -316,7 +316,7 @@ function ReviewGroup({
     date_style: "medium",
   });
 
-  const shouldFetchEvents = review?.data?.detections?.length > 0;
+  const shouldFetchEvents = open && review?.data?.detections?.length > 0;
 
   const { data: fetchedEvents, isValidating } = useSWR<Event[]>(
     shouldFetchEvents

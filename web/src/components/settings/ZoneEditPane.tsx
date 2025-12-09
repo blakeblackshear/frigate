@@ -441,7 +441,7 @@ export default function ZoneEditPane({
       }
 
       let friendlyNameQuery = "";
-      if (friendly_name) {
+      if (friendly_name && friendly_name !== zoneName) {
         friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.friendly_name=${encodeURIComponent(friendly_name)}`;
       }
 
