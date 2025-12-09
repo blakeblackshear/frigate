@@ -19,6 +19,7 @@ import {
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type ReviewActionGroupProps = {
   selectedReviews: ReviewSegment[];
@@ -33,6 +34,7 @@ export default function ReviewActionGroup({
   pullLatestData,
 }: ReviewActionGroupProps) {
   const { t } = useTranslation(["components/dialog"]);
+  const isAdmin = useIsAdmin();
   const onClearSelected = useCallback(() => {
     setSelectedReviews([]);
   }, [setSelectedReviews]);
@@ -185,21 +187,23 @@ export default function ReviewActionGroup({
               </div>
             )}
           </Button>
-          <Button
-            className="flex items-center gap-2 p-2"
-            aria-label={t("button.delete", { ns: "common" })}
-            size="sm"
-            onClick={handleDelete}
-          >
-            <HiTrash className="text-secondary-foreground" />
-            {isDesktop && (
-              <div className="text-primary">
-                {bypassDialog
-                  ? t("recording.button.deleteNow")
-                  : t("button.delete", { ns: "common" })}
-              </div>
-            )}
-          </Button>
+          {isAdmin && (
+            <Button
+              className="flex items-center gap-2 p-2"
+              aria-label={t("button.delete", { ns: "common" })}
+              size="sm"
+              onClick={handleDelete}
+            >
+              <HiTrash className="text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {bypassDialog
+                    ? t("recording.button.deleteNow")
+                    : t("button.delete", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </>
