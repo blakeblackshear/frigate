@@ -134,10 +134,20 @@ function Live() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config, cameraGroup, allowedCameras]);
 
-  const selectedCamera = useMemo(
-    () => cameras.find((cam) => cam.name == selectedCameraName),
-    [cameras, selectedCameraName],
-  );
+  const selectedCamera = useMemo(() => {
+    if (!config || !selectedCameraName || selectedCameraName === "birdseye") {
+      return undefined;
+    }
+    const camera = config.cameras[selectedCameraName];
+    if (
+      camera &&
+      allowedCameras.includes(selectedCameraName) &&
+      camera.enabled_in_config
+    ) {
+      return camera;
+    }
+    return undefined;
+  }, [config, selectedCameraName, allowedCameras]);
 
   return (
     <div className="size-full" ref={mainRef}>
@@ -146,6 +156,7 @@ function Live() {
           supportsFullscreen={supportsFullScreen}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
+          onSelectCamera={setSelectedCameraName}
         />
       ) : selectedCamera ? (
         <LiveCameraView
