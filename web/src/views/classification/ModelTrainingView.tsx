@@ -421,10 +421,10 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               isMobileOnly && "justify-between",
             )}
           >
-            <div className="flex w-48 items-center justify-center text-sm text-muted-foreground">
+            <div className="flex w-auto items-center justify-center text-sm text-muted-foreground md:w-auto">
               <div className="p-1">
                 {t("selected", {
-                  ns: "views/event",
+                  ns: "views/events",
                   count: selectedImages.length,
                 })}
               </div>
@@ -435,6 +435,26 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               >
                 {t("button.unselect", { ns: "common" })}
               </div>
+              {selectedImages.length <
+                (pageToggle === "train"
+                  ? trainImages?.length || 0
+                  : dataset?.[pageToggle]?.length || 0) && (
+                <>
+                  <div className="p-1">{"|"}</div>
+                  <div
+                    className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                    onClick={() =>
+                      setSelectedImages([
+                        ...(pageToggle === "train"
+                          ? trainImages || []
+                          : dataset?.[pageToggle] || []),
+                      ])
+                    }
+                  >
+                    {t("select_all", { ns: "views/events" })}
+                  </div>
+                </>
+              )}
             </div>
             <Button
               className="flex gap-2"

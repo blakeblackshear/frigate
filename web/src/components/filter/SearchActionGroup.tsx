@@ -22,11 +22,15 @@ type SearchActionGroupProps = {
   selectedObjects: string[];
   setSelectedObjects: (ids: string[]) => void;
   pullLatestData: () => void;
+  onSelectAllObjects: () => void;
+  totalItems: number;
 };
 export default function SearchActionGroup({
   selectedObjects,
   setSelectedObjects,
   pullLatestData,
+  onSelectAllObjects,
+  totalItems,
 }: SearchActionGroupProps) {
   const { t } = useTranslation(["components/filter"]);
   const isAdmin = useIsAdmin();
@@ -124,6 +128,17 @@ export default function SearchActionGroup({
           >
             {t("button.unselect", { ns: "common" })}
           </div>
+          {selectedObjects.length < totalItems && (
+            <>
+              <div className="p-1">{"|"}</div>
+              <div
+                className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                onClick={onSelectAllObjects}
+              >
+                {t("select_all", { ns: "views/events" })}
+              </div>
+            </>
+          )}
         </div>
         {isAdmin && (
           <div className="flex items-center gap-1 md:gap-2">
