@@ -114,6 +114,30 @@ class CustomClassificationConfig(FrigateBaseModel):
     state_config: CustomClassificationStateConfig | None = Field(default=None)
 
 
+class SemanticSearchProviderEnum(str, Enum):
+    local = "local"
+    openai = "openai"
+    ollama = "ollama"
+
+
+class RemoteSemanticSearchConfig(FrigateBaseModel):
+    """Config for remote semantic search providers."""
+
+    api_key: Optional[str] = Field(
+        default=None, title="API key for the remote embedding provider."
+    )
+    model: Optional[str] = Field(
+        default=None, title="The embedding model to use for semantic search."
+    )
+    url: Optional[str] = Field(
+        default=None, title="URL for the remote embedding provider."
+    )
+    vision_model_prompt: Optional[str] = Field(
+        default="A detailed description of the image for semantic search.",
+        title="Prompt for the vision model to describe the image for embedding. This uses the configured GenAI provider.",
+    )
+
+
 class ClassificationConfig(FrigateBaseModel):
     bird: BirdClassificationConfig = Field(
         default_factory=BirdClassificationConfig, title="Bird classification config."
@@ -124,21 +148,31 @@ class ClassificationConfig(FrigateBaseModel):
 
 
 class SemanticSearchConfig(FrigateBaseModel):
+    """Config for semantic search."""
+
     enabled: bool = Field(default=False, title="Enable semantic search.")
     reindex: Optional[bool] = Field(
         default=False, title="Reindex all tracked objects on startup."
     )
-    model: Optional[SemanticSearchModelEnum] = Field(
-        default=SemanticSearchModelEnum.jinav1,
-        title="The CLIP model to use for semantic search.",
+    provider: SemanticSearchProviderEnum = Field(
+        default=SemanticSearchProviderEnum.local,
+        title="The semantic search provider to use.",
     )
-    model_size: str = Field(
-        default="small", title="The size of the embeddings model used."
+    local_model: Optional[SemanticSearchModelEnum] = Field(
+        default=SemanticSearchModelEnum.jinav1,
+        title="The local CLIP model to use for semantic search.",
+    )
+    local_model_size: str = Field(
+        default="small", title="The size of the local embeddings model used."
     )
     device: Optional[str] = Field(
         default=None,
         title="The device key to use for semantic search.",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+    )
+    remote: RemoteSemanticSearchConfig = Field(
+        default_factory=RemoteSemanticSearchConfig,
+        title="Remote semantic search provider config.",
     )
 
 

@@ -291,6 +291,15 @@ Rules for the report:
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(prompt, thumbnails)
 
+    def generate_image_description(
+        self,
+        prompt: str,
+        images: list[bytes],
+    ) -> Optional[str]:
+        """Generate a description for an image."""
+        logger.debug(f"Sending images to genai provider with prompt: {prompt}")
+        return self._send(prompt, images)
+
     def _init_provider(self):
         """Initialize the client."""
         return None

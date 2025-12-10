@@ -5,13 +5,13 @@ title: Semantic Search
 
 Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
 
-Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings to Frigate's database. All of this runs locally.
+Frigate can run models locally or be configured to use a remote service. All local processing runs on your own hardware.
 
 Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
 ## Minimum System Requirements
 
-Semantic Search works by running a large AI model locally on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.
+When running models locally, Semantic Search works by running a large AI model on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.
 
 A minimum of 8GB of RAM is required to use Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
 
@@ -35,7 +35,11 @@ If you are enabling Semantic Search for the first time, be advised that Frigate 
 
 :::
 
-### Jina AI CLIP (version 1)
+### Local Providers
+
+Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings to Frigate's database. All of this runs locally.
+
+#### Jina AI CLIP (version 1)
 
 The [V1 model from Jina](https://huggingface.co/jinaai/jina-clip-v1) has a vision model which is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
 
@@ -46,14 +50,14 @@ Differently weighted versions of the Jina models are available and can be select
 ```yaml
 semantic_search:
   enabled: True
-  model: "jinav1"
-  model_size: small
+  local_model: "jinav1"
+  local_model_size: small
 ```
 
 - Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
 - Configuring the `small` model employs a quantized version of the Jina model that uses less RAM and runs on CPU with a very negligible difference in embedding quality.
 
-### Jina AI CLIP (version 2)
+#### Jina AI CLIP (version 2)
 
 Frigate also supports the [V2 model from Jina](https://huggingface.co/jinaai/jina-clip-v2), which introduces multilingual support (89 languages). In contrast, the V1 model only supports English.
 
@@ -64,8 +68,8 @@ To use the V2 model, update the `model` parameter in your config:
 ```yaml
 semantic_search:
   enabled: True
-  model: "jinav2"
-  model_size: large
+  local_model: "jinav2"
+  local_model_size: large
 ```
 
 For most users, especially native English speakers, the V1 model remains the recommended choice.
@@ -76,6 +80,25 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 :::
 
+### Remote Providers
+
+Frigate can be configured to use remote services for generating embeddings. This is done by setting the `provider` field to `openai` or `ollama`.
+
+For vision embeddings, remote providers use a two-step process:
+1. A text description of the image is generated using the configured GenAI provider.
+2. An embedding is created from that description using the configured remote embedding provider.
+
+This means that you must have a GenAI provider configured to use vision embeddings with a remote provider.
+
+```yaml
+semantic_search:
+  enabled: True
+  provider: openai
+  remote:
+    model: "text-embedding-3-small"
+    vision_model_prompt: "A detailed description of the image for semantic search."
+```
+
 ### GPU Acceleration
 
 The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used. You can also target a specific device in a multi-GPU installation.
@@ -83,7 +106,7 @@ The CLIP models are downloaded in ONNX format, and the `large` model can be acce
 ```yaml
 semantic_search:
   enabled: True
-  model_size: large
+  local_model_size: large
   # Optional, if using the 'large' model in a multi-GPU installation
   device: 0
 ```

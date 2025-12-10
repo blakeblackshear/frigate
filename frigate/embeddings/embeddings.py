@@ -16,8 +16,7 @@ from frigate.comms.embeddings_updater import (
     EmbeddingsRequestEnum,
 )
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import FrigateConfig
-from frigate.config.classification import SemanticSearchModelEnum
+from frigate.config import FrigateConfig, SemanticSearchModelEnum, SemanticSearchProviderEnum
 from frigate.const import (
     CONFIG_DIR,
     TRIGGER_DIR,
@@ -26,6 +25,7 @@ from frigate.const import (
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
+from frigate.embeddings.remote import get_embedding_client
 from frigate.models import Event, Trigger
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, serialize
@@ -96,43 +96,48 @@ class Embeddings:
         # Create tables if they don't exist
         self.db.create_embeddings_tables()
 
-        models = self.get_model_definitions()
+        if self.config.semantic_search.provider == SemanticSearchProviderEnum.local:
+            models = self.get_model_definitions()
 
-        for model in models:
-            self.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": model,
-                    "state": ModelStatusTypesEnum.not_downloaded,
-                },
-            )
+            for model in models:
+                self.requestor.send_data(
+                    UPDATE_MODEL_STATE,
+                    {
+                        "model": model,
+                        "state": ModelStatusTypesEnum.not_downloaded,
+                    },
+                )
 
-        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
-            # Single JinaV2Embedding instance for both text and vision
-            self.embedding = JinaV2Embedding(
-                model_size=self.config.semantic_search.model_size,
-                requestor=self.requestor,
-                device=config.semantic_search.device
-                or ("GPU" if config.semantic_search.model_size == "large" else "CPU"),
-            )
-            self.text_embedding = lambda input_data: self.embedding(
-                input_data, embedding_type="text"
-            )
-            self.vision_embedding = lambda input_data: self.embedding(
-                input_data, embedding_type="vision"
-            )
-        else:  # Default to jinav1
-            self.text_embedding = JinaV1TextEmbedding(
-                model_size=config.semantic_search.model_size,
-                requestor=self.requestor,
-                device="CPU",
-            )
-            self.vision_embedding = JinaV1ImageEmbedding(
-                model_size=config.semantic_search.model_size,
-                requestor=self.requestor,
-                device=config.semantic_search.device
-                or ("GPU" if config.semantic_search.model_size == "large" else "CPU"),
-            )
+            if self.config.semantic_search.local_model == SemanticSearchModelEnum.jinav2:
+                # Single JinaV2Embedding instance for both text and vision
+                self.embedding = JinaV2Embedding(
+                    model_size=self.config.semantic_search.local_model_size,
+                    requestor=self.requestor,
+                    device=config.semantic_search.device
+                    or ("GPU" if config.semantic_search.local_model_size == "large" else "CPU"),
+                )
+                self.text_embedding = lambda input_data: self.embedding(
+                    input_data, embedding_type="text"
+                )
+                self.vision_embedding = lambda input_data: self.embedding(
+                    input_data, embedding_type="vision"
+                )
+            else:  # Default to jinav1
+                self.text_embedding = JinaV1TextEmbedding(
+                    model_size=config.semantic_search.local_model_size,
+                    requestor=self.requestor,
+                    device="CPU",
+                )
+                self.vision_embedding = JinaV1ImageEmbedding(
+                    model_size=config.semantic_search.local_model_size,
+                    requestor=self.requestor,
+                    device=config.semantic_search.device
+                    or ("GPU" if config.semantic_search.local_model_size == "large" else "CPU"),
+                )
+        else:
+            self.remote_embedding_client = get_embedding_client(self.config)
+            self.text_embedding = self.remote_embedding_client.embed_texts
+            self.vision_embedding = self.remote_embedding_client.embed_images
 
     def update_stats(self) -> None:
         self.metrics.image_embeddings_eps.value = self.image_eps.eps()
