@@ -50,8 +50,8 @@ Differently weighted versions of the Jina models are available and can be select
 ```yaml
 semantic_search:
   enabled: True
-  local_model: "jinav1"
-  local_model_size: small
+  model: "jinav1"
+  model_size: small
 ```
 
 - Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
@@ -68,8 +68,8 @@ To use the V2 model, update the `model` parameter in your config:
 ```yaml
 semantic_search:
   enabled: True
-  local_model: "jinav2"
-  local_model_size: large
+  model: "jinav2"
+  model_size: large
 ```
 
 For most users, especially native English speakers, the V1 model remains the recommended choice.
@@ -123,7 +123,7 @@ The CLIP models are downloaded in ONNX format, and the `large` model can be acce
 ```yaml
 semantic_search:
   enabled: True
-  local_model_size: large
+  model_size: large
   # Optional, if using the 'large' model in a multi-GPU installation
   device: 0
 ```

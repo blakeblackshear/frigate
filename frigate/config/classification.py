@@ -159,11 +159,11 @@ class SemanticSearchConfig(FrigateBaseModel):
         default=SemanticSearchProviderEnum.local,
         title="The semantic search provider to use.",
     )
-    local_model: Optional[SemanticSearchModelEnum] = Field(
+    model: Optional[SemanticSearchModelEnum] = Field(
         default=SemanticSearchModelEnum.jinav1,
         title="The local CLIP model to use for semantic search.",
     )
-    local_model_size: str = Field(
+    model_size: str = Field(
         default="small", title="The size of the local embeddings model used."
     )
     device: Optional[str] = Field(

@@ -108,13 +108,13 @@ class Embeddings:
                     },
                 )
 
-            if self.config.semantic_search.local_model == SemanticSearchModelEnum.jinav2:
+            if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
                 # Single JinaV2Embedding instance for both text and vision
                 self.embedding = JinaV2Embedding(
-                    model_size=self.config.semantic_search.local_model_size,
+                    model_size=self.config.semantic_search.model_size,
                     requestor=self.requestor,
                     device=config.semantic_search.device
-                    or ("GPU" if config.semantic_search.local_model_size == "large" else "CPU"),
+                    or ("GPU" if config.semantic_search.model_size == "large" else "CPU"),
                 )
                 self.text_embedding = lambda input_data: self.embedding(
                     input_data, embedding_type="text"
@@ -124,15 +124,15 @@ class Embeddings:
                 )
             else:  # Default to jinav1
                 self.text_embedding = JinaV1TextEmbedding(
-                    model_size=config.semantic_search.local_model_size,
+                    model_size=config.semantic_search.model_size,
                     requestor=self.requestor,
                     device="CPU",
                 )
                 self.vision_embedding = JinaV1ImageEmbedding(
-                    model_size=config.semantic_search.local_model_size,
+                    model_size=config.semantic_search.model_size,
                     requestor=self.requestor,
                     device=config.semantic_search.device
-                    or ("GPU" if config.semantic_search.local_model_size == "large" else "CPU"),
+                    or ("GPU" if config.semantic_search.model_size == "large" else "CPU"),
                 )
         else:
             self.remote_embedding_client = get_embedding_client(self.config)
