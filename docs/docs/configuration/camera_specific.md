@@ -293,4 +293,4 @@ cameras:
 
 ## Wyze Wireless Cammeras
 
-Some community members have found success amilerating high CPU/GPU cycles associated with frequent FFMPEG restarting (i.e. DTS/PTS/Non-monotonic DTS, refractory to various input arguments) caused by OEM RTSP firmware with alternative firmware [Thingino](https://thingino.com/).
+Some community members have found better performance on Wyze cameras by using an alternative firmware known as [Thingino](https://thingino.com/).
