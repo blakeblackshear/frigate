@@ -291,6 +291,6 @@ cameras:
       height: 576
 ```
 
-## Wyze Wireless Cammeras
+### Wyze Wireless Cameras
 
 Some community members have found better performance on Wyze cameras by using an alternative firmware known as [Thingino](https://thingino.com/).
