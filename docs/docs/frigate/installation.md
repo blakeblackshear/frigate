@@ -172,7 +172,8 @@ In your `docker-compose.yml`, also add:
 ```yaml
 privileged: true
 
-volumes: /run/mxa_manager:/run/mxa_manager
+volumes:
+  - /run/mxa_manager:/run/mxa_manager
 ```
 
 If you can't use Docker Compose, you can run the container with something similar to this:
