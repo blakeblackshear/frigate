@@ -189,7 +189,7 @@ export default function SearchResultActions({
         </AlertDialogContent>
       </AlertDialog>
       {isContextMenu ? (
-        <ContextMenu>
+        <ContextMenu modal={false}>
           <ContextMenuTrigger>{children}</ContextMenuTrigger>
           <ContextMenuContent>{menuItems}</ContextMenuContent>
         </ContextMenu>
