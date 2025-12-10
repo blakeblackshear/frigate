@@ -118,6 +118,7 @@ class SemanticSearchProviderEnum(str, Enum):
     local = "local"
     openai = "openai"
     ollama = "ollama"
+    clip_as_service = "clip_as_service"
 
 
 class RemoteSemanticSearchConfig(FrigateBaseModel):

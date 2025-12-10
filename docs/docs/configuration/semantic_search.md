@@ -82,13 +82,15 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 ### Remote Providers
 
-Frigate can be configured to use remote services for generating embeddings. This is done by setting the `provider` field to `openai` or `ollama`.
+Frigate can be configured to use remote services for generating embeddings. This is done by setting the `provider` field to `openai`, `ollama`, or `clip_as_service`.
 
-For vision embeddings, remote providers use a two-step process:
+#### OpenAI and Ollama
+
+For OpenAI and Ollama, vision embeddings use a two-step process:
 1. A text description of the image is generated using the configured GenAI provider.
 2. An embedding is created from that description using the configured remote embedding provider.
 
-This means that you must have a GenAI provider configured to use vision embeddings with a remote provider.
+This means that you must have a GenAI provider configured to use vision embeddings with these providers.
 
 ```yaml
 semantic_search:
@@ -97,6 +99,21 @@ semantic_search:
   remote:
     model: "text-embedding-3-small"
     vision_model_prompt: "A detailed description of the image for semantic search."
+```
+
+#### Jina CLIP-as-Service
+
+Frigate supports [Jina CLIP-as-Service](https://clip-as-service.jina.ai/) which provides a multi-modal embedding service that can be hosted locally or remotely. This provider supports both text and image embeddings directly, without requiring a separate GenAI provider for image descriptions.
+
+You can run CLIP-as-Service using their [getting started guide](https://clip-as-service.jina.ai/user-guides/server/).
+
+```yaml
+semantic_search:
+  enabled: True
+  provider: clip_as_service
+  remote:
+    url: "http://localhost:51000"
+    # model is typically handled by the service configuration
 ```
 
 ### GPU Acceleration
