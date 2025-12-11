@@ -6,6 +6,8 @@ body:
       value: |
         Use this form to submit a reproducible bug in Frigate or Frigate's UI.
 
+        **⚠️ If you are running a beta version (0.17.0-beta or similar), please use the [Beta Support template](https://github.com/blakeblackshear/frigate/discussions/new?category=beta-support) instead.**
+
         Before submitting your bug report, please ask the AI with the "Ask AI" button on the [official documentation site][ai] about your issue, [search the discussions][discussions], look at recent open and closed [pull requests][prs], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your bug has already been fixed by the developers or reported by the community.
 
         **If you are unsure if your issue is actually a bug or not, please submit a support request first.**
