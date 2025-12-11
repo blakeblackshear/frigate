@@ -24,11 +24,12 @@ birdseye:
   restream: True
 ```
 
-:::tip 
+:::tip
 
-To improve connection speed when using Birdseye via restream you can enable a small idle heartbeat by setting `birdseye.idle_heartbeat_fps` to a low value (e.g. `1–2`).  This makes Frigate periodically push the last frame even when no motion is detected, reducing initial connection latency.
+To improve connection speed when using Birdseye via restream you can enable a small idle heartbeat by setting `birdseye.idle_heartbeat_fps` to a low value (e.g. `1–2`). This makes Frigate periodically push the last frame even when no motion is detected, reducing initial connection latency.
 
 :::
+
 ### Securing Restream With Authentication
 
 The go2rtc restream can be secured with RTSP based username / password authentication. Ex:
@@ -158,6 +159,31 @@ go2rtc:
 ```
 
 See [this comment](https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
+
+## Preventing go2rtc from blocking two-way audio {#two-way-talk-restream}
+
+For cameras that support two-way talk, go2rtc will automatically establish an audio output backchannel when connecting to an RTSP stream. This backchannel blocks access to the camera's audio output for two-way talk functionality, preventing both Frigate and other applications from using it.
+
+To prevent this, you must configure two separate stream instances:
+
+1. One stream instance with `#backchannel=0` for Frigate's viewing, recording, and detection (prevents go2rtc from establishing the blocking backchannel)
+2. A second stream instance without `#backchannel=0` for two-way talk functionality (can be used by Frigate's WebRTC viewer or other applications)
+
+Configuration example:
+
+```yaml
+go2rtc:
+  streams:
+    front_door:
+      - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2#backchannel=0
+    front_door_twoway:
+      - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+```
+
+In this configuration:
+
+- `front_door` stream is used by Frigate for viewing, recording, and detection. The `#backchannel=0` parameter prevents go2rtc from establishing the audio output backchannel, so it won't block two-way talk access.
+- `front_door_twoway` stream is used for two-way talk functionality. This stream can be used by Frigate's WebRTC viewer when two-way talk is enabled, or by other applications (like Home Assistant Advanced Camera Card) that need access to the camera's audio output channel.
 
 ## Advanced Restream Configurations
 
