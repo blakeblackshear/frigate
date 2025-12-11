@@ -10,6 +10,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { LuInfo } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type Props = {
   className?: string;
@@ -17,6 +18,7 @@ type Props = {
 
 export default function AnnotationOffsetSlider({ className }: Props) {
   const { annotationOffset, setAnnotationOffset, camera } = useDetailStream();
+  const isAdmin = useIsAdmin();
   const { mutate } = useSWRConfig();
   const { t } = useTranslation(["views/explore"]);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,11 +103,13 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           <Button size="sm" variant="ghost" onClick={reset}>
             {t("button.reset", { ns: "common" })}
           </Button>
-          <Button size="sm" onClick={save} disabled={isSaving}>
-            {isSaving
-              ? t("button.saving", { ns: "common" })
-              : t("button.save", { ns: "common" })}
-          </Button>
+          {isAdmin && (
+            <Button size="sm" onClick={save} disabled={isSaving}>
+              {isSaving
+                ? t("button.saving", { ns: "common" })
+                : t("button.save", { ns: "common" })}
+            </Button>
+          )}
         </div>
       </div>
       <div

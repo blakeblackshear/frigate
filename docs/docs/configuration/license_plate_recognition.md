@@ -374,9 +374,19 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 
 Start with ["Why isn't my license plate being detected and recognized?"](#why-isnt-my-license-plate-being-detected-and-recognized). If you are still having issues, work through these steps.
 
-1. Enable debug logs to see exactly what Frigate is doing.
+1. Start with a simplified LPR config.
 
-   - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only keep this enabled when necessary.
+   - Remove or comment out everything in your LPR config, including `min_area`, `min_plate_length`, `format`, `known_plates`, or `enhancement` values so that the only values left are `enabled` and `debug_save_plates`. This will run LPR with Frigate's default values.
+
+     ```yaml
+     lpr:
+       enabled: true
+       debug_save_plates: true
+     ```
+
+2. Enable debug logs to see exactly what Frigate is doing.
+
+   - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only keep this enabled when necessary. Restart Frigate after this change.
 
      ```yaml
      logger:
@@ -385,7 +395,7 @@ Start with ["Why isn't my license plate being detected and recognized?"](#why-is
          frigate.data_processing.common.license_plate: debug
      ```
 
-2. Ensure your plates are being _detected_.
+3. Ensure your plates are being _detected_.
 
    If you are using a Frigate+ or `license_plate` detecting model:
 
@@ -398,7 +408,7 @@ Start with ["Why isn't my license plate being detected and recognized?"](#why-is
    - Watch the debug logs for messages from the YOLOv9 plate detector.
    - You may need to adjust your `detection_threshold` if your plates are not being detected.
 
-3. Ensure the characters on detected plates are being _recognized_.
+4. Ensure the characters on detected plates are being _recognized_.
 
    - Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`). Ensure these images are readable and the text is clear.
    - Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` or `motorcycle` label will change to the recognized plate when LPR is enabled and working.

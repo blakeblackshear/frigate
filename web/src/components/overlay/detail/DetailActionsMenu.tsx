@@ -15,6 +15,7 @@ import {
 import { HiDotsHorizontal } from "react-icons/hi";
 import { SearchResult } from "@/types/search";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type Props = {
   search: SearchResult | Event;
@@ -35,6 +36,7 @@ export default function DetailActionsMenu({
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const isAdmin = useIsAdmin();
 
   const clipTimeRange = useMemo(() => {
     const startTime = (search.start_time ?? 0) - REVIEW_PADDING;
@@ -130,22 +132,24 @@ export default function DetailActionsMenu({
             </DropdownMenuItem>
           )}
 
-          {config?.semantic_search.enabled && search.data.type == "object" && (
-            <DropdownMenuItem
-              onClick={() => {
-                setIsOpen(false);
-                setTimeout(() => {
-                  navigate(
-                    `/settings?page=triggers&camera=${search.camera}&event_id=${search.id}`,
-                  );
-                }, 0);
-              }}
-            >
-              <div className="flex cursor-pointer items-center gap-2">
-                <span>{t("itemMenu.addTrigger.label")}</span>
-              </div>
-            </DropdownMenuItem>
-          )}
+          {isAdmin &&
+            config?.semantic_search.enabled &&
+            search.data.type == "object" && (
+              <DropdownMenuItem
+                onClick={() => {
+                  setIsOpen(false);
+                  setTimeout(() => {
+                    navigate(
+                      `/settings?page=triggers&camera=${search.camera}&event_id=${search.id}`,
+                    );
+                  }, 0);
+                }}
+              >
+                <div className="flex cursor-pointer items-center gap-2">
+                  <span>{t("itemMenu.addTrigger.label")}</span>
+                </div>
+              </DropdownMenuItem>
+            )}
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>

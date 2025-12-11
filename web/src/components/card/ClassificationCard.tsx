@@ -7,7 +7,7 @@ import {
 } from "@/types/classification";
 import { Event } from "@/types/event";
 import { forwardRef, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
+import { isDesktop, isIOS, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -127,6 +127,15 @@ export const ClassificationCard = forwardRef<
           imgClassName,
           isMobile && "w-full",
         )}
+        style={
+          isIOS
+            ? {
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }
+            : undefined
+        }
+        draggable={false}
         loading="lazy"
         onLoad={() => setImageLoaded(true)}
         src={`${baseUrl}${data.filepath}`}

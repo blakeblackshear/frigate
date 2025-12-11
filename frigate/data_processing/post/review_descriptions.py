@@ -251,20 +251,22 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             if not primary_segments:
                 return "No concerns were found during this time period."
 
-            # For each primary segment, find overlapping contextual items from other cameras
-            all_items_for_summary = []
+            # Build hierarchical structure: each primary event with its contextual items
+            events_with_context = []
 
             for primary_seg in primary_segments:
-                # Add the primary item with marker
+                # Start building the primary event structure
                 primary_item = copy.deepcopy(primary_seg["metadata"])
-                primary_item["_is_primary"] = True
-                primary_item["_camera"] = primary_seg["camera"]
-                all_items_for_summary.append(primary_item)
+                primary_item["camera"] = primary_seg["camera"]
+                primary_item["start_time"] = primary_seg["start_time"]
+                primary_item["end_time"] = primary_seg["end_time"]
 
                 # Find overlapping contextual items from other cameras
                 primary_start = primary_seg["start_time"]
                 primary_end = primary_seg["end_time"]
                 primary_camera = primary_seg["camera"]
+                contextual_items = []
+                seen_contextual_cameras = set()
 
                 for seg in segments:
                     seg_camera = seg["camera"]
@@ -279,21 +281,25 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     seg_end = seg["end_time"]
 
                     if seg_start < primary_end and primary_start < seg_end:
-                        contextual_item = copy.deepcopy(seg["metadata"])
-                        contextual_item["_is_primary"] = False
-                        contextual_item["_camera"] = seg_camera
-                        contextual_item["_related_to_camera"] = primary_camera
+                        # Avoid duplicates if same camera has multiple overlapping segments
+                        if seg_camera not in seen_contextual_cameras:
+                            contextual_item = copy.deepcopy(seg["metadata"])
+                            contextual_item["camera"] = seg_camera
+                            contextual_item["start_time"] = seg_start
+                            contextual_item["end_time"] = seg_end
+                            contextual_items.append(contextual_item)
+                            seen_contextual_cameras.add(seg_camera)
 
-                        if not any(
-                            item.get("_camera") == seg_camera
-                            and item.get("time") == contextual_item.get("time")
-                            for item in all_items_for_summary
-                        ):
-                            all_items_for_summary.append(contextual_item)
+                # Add context array to primary item
+                primary_item["context"] = contextual_items
+                events_with_context.append(primary_item)
 
+            total_context_items = sum(
+                len(event.get("context", [])) for event in events_with_context
+            )
             logger.debug(
-                f"Summary includes {len(primary_segments)} primary items and "
-                f"{len(all_items_for_summary) - len(primary_segments)} contextual items"
+                f"Summary includes {len(events_with_context)} primary events with "
+                f"{total_context_items} total contextual items"
             )
 
             if self.config.review.genai.debug_save_thumbnails:
@@ -304,7 +310,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             return self.genai_client.generate_review_summary(
                 start_ts,
                 end_ts,
-                all_items_for_summary,
+                events_with_context,
                 self.config.review.genai.debug_save_thumbnails,
             )
         else:

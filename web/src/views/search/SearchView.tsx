@@ -572,6 +572,8 @@ export default function SearchView({
                     selectedObjects={selectedObjects}
                     setSelectedObjects={setSelectedObjects}
                     pullLatestData={refresh}
+                    onSelectAllObjects={onSelectAllObjects}
+                    totalItems={uniqueResults.length}
                   />
                 </div>
               )}

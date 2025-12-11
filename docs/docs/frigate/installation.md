@@ -135,13 +135,13 @@ Finally, configure [hardware object detection](/configuration/object_detectors#h
 ### MemryX MX3
 
 The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVMe SSD), and supports a variety of configurations:
+
 - x86 (Intel/AMD) PCs
 - Raspberry Pi 5
 - Orange Pi 5 Plus/Max
 - Multi-M.2 PCIe carrier cards
 
 #### Configuration
-
 
 #### Installation
 
@@ -156,7 +156,7 @@ Then follow these steps for installing the correct driver/runtime configuration:
 
 #### Setup
 
-To set up Frigate, follow the default installation instructions, for example:   `ghcr.io/blakeblackshear/frigate:stable`
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
 Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
 
@@ -173,7 +173,7 @@ In your `docker-compose.yml`, also add:
 privileged: true
 
 volumes:
-    /run/mxa_manager:/run/mxa_manager
+  - /run/mxa_manager:/run/mxa_manager
 ```
 
 If you can't use Docker Compose, you can run the container with something similar to this:
@@ -411,7 +411,7 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 ## Proxmox
 
-[According to Proxmox documentation](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_pct) it is recommended that you run application containers like Frigate inside a Proxmox QEMU VM. This will give you all the advantages of application containerization, while also providing the benefits that VMs offer, such as strong isolation from the host and the ability to live-migrate, which otherwise isn’t possible with containers.
+[According to Proxmox documentation](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_pct) it is recommended that you run application containers like Frigate inside a Proxmox QEMU VM. This will give you all the advantages of application containerization, while also providing the benefits that VMs offer, such as strong isolation from the host and the ability to live-migrate, which otherwise isn’t possible with containers. Ensure that ballooning is **disabled**, especially if you are passing through a GPU to the VM.
 
 :::warning
 

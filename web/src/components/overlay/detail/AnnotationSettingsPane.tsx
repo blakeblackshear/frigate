@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type AnnotationSettingsPaneProps = {
   event: Event;
@@ -36,6 +37,7 @@ export function AnnotationSettingsPane({
   setAnnotationOffset,
 }: AnnotationSettingsPaneProps) {
   const { t } = useTranslation(["views/explore"]);
+  const isAdmin = useIsAdmin();
   const { getLocaleDocUrl } = useDocDomain();
 
   const { data: config, mutate: updateConfig } =
@@ -201,22 +203,24 @@ export function AnnotationSettingsPane({
               >
                 {t("button.apply", { ns: "common" })}
               </Button>
-              <Button
-                variant="select"
-                aria-label={t("button.save", { ns: "common" })}
-                disabled={isLoading}
-                className="flex flex-1"
-                type="submit"
-              >
-                {isLoading ? (
-                  <div className="flex flex-row items-center gap-2">
-                    <ActivityIndicator />
-                    <span>{t("button.saving", { ns: "common" })}</span>
-                  </div>
-                ) : (
-                  t("button.save", { ns: "common" })
-                )}
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant="select"
+                  aria-label={t("button.save", { ns: "common" })}
+                  disabled={isLoading}
+                  className="flex flex-1"
+                  type="submit"
+                >
+                  {isLoading ? (
+                    <div className="flex flex-row items-center gap-2">
+                      <ActivityIndicator />
+                      <span>{t("button.saving", { ns: "common" })}</span>
+                    </div>
+                  ) : (
+                    t("button.save", { ns: "common" })
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </form>

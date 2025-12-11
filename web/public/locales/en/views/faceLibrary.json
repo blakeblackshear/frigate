@@ -29,6 +29,7 @@
   },
   "train": {
     "title": "Recent Recognitions",
+    "titleShort": "Recent",
     "aria": "Select recent recognitions",
     "empty": "There are no recent face recognition attempts"
   },
