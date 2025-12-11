@@ -12,9 +12,6 @@ from peewee import DoesNotExist, IntegrityError
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
-from frigate.comms.embeddings_updater import (
-    EmbeddingsRequestEnum,
-)
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.classification import SemanticSearchModelEnum
@@ -495,7 +492,7 @@ class Embeddings:
                         or thumbnail_missing
                     ):
                         existing_trigger.embedding = self._calculate_trigger_embedding(
-                            trigger
+                            trigger, trigger_name, camera.name
                         )
                         needs_embedding_update = True
 
@@ -532,7 +529,7 @@ class Embeddings:
                         )
 
                         # Calculate embedding for new trigger
-                        embedding = self._calculate_trigger_embedding(trigger)
+                        embedding = self._calculate_trigger_embedding(trigger, trigger_name, camera.name)
 
                         Trigger.create(
                             camera=camera.name,
@@ -588,13 +585,12 @@ class Embeddings:
                 f"Failed to delete thumbnail for trigger with data {event_id} in {camera}: {e}"
             )
 
-    def _calculate_trigger_embedding(self, trigger) -> bytes:
+    def _calculate_trigger_embedding(self, trigger, trigger_name: str, camera_name: str) -> bytes:
         """Calculate embedding for a trigger based on its type and data."""
         if trigger.type == "description":
-            logger.debug(f"Generating embedding for trigger description {trigger.name}")
-            embedding = self.requestor.send_data(
-                EmbeddingsRequestEnum.embed_description.value,
-                {"id": None, "description": trigger.data, "upsert": False},
+            logger.debug(f"Generating embedding for trigger description {trigger_name}")
+            embedding = self.embed_description(
+                None, trigger.data, upsert=False
             )
             return embedding.astype(np.float32).tobytes()
 
@@ -616,27 +612,22 @@ class Embeddings:
                 try:
                     with open(
                         os.path.join(
-                            TRIGGER_DIR, trigger.camera, f"{trigger.data}.webp"
+                            TRIGGER_DIR, camera_name, f"{trigger.data}.webp"
                         ),
                         "rb",
                     ) as f:
                         thumbnail = f.read()
                 except Exception as e:
                     logger.error(
-                        f"Failed to read thumbnail for trigger {trigger.name} with ID {trigger.data}: {e}"
+                        f"Failed to read thumbnail for trigger {trigger_name} with ID {trigger.data}: {e}"
                     )
                     return b""
 
                 logger.debug(
-                    f"Generating embedding for trigger thumbnail {trigger.name} with ID {trigger.data}"
+                    f"Generating embedding for trigger thumbnail {trigger_name} with ID {trigger.data}"
                 )
-                embedding = self.requestor.send_data(
-                    EmbeddingsRequestEnum.embed_thumbnail.value,
-                    {
-                        "id": str(trigger.data),
-                        "thumbnail": str(thumbnail),
-                        "upsert": False,
-                    },
+                embedding = self.embed_thumbnail(
+                    str(trigger.data), thumbnail, upsert=False
                 )
                 return embedding.astype(np.float32).tobytes()
 
