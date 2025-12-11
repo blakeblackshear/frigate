@@ -26,7 +26,7 @@ import {
   toRGBColorString,
 } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import axios from "axios";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -34,7 +34,6 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -61,7 +60,6 @@ export default function PolygonItem({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const { addMessage } = useContext(StatusBarMessagesContext)!;
   const [isLoading, setIsLoading] = useState(false);
 
   const cameraConfig = useMemo(() => {
@@ -171,10 +169,22 @@ export default function PolygonItem({
         }
       }
 
+      const updateTopicType =
+        polygon.type === "zone"
+          ? "zones"
+          : polygon.type === "motion_mask"
+            ? "motion"
+            : polygon.type === "object_mask"
+              ? "objects"
+              : polygon.type;
+
       setIsLoading(true);
 
       await axios
-        .put(`config/set?${url}`, { requires_restart: 0 })
+        .put(`config/set?${url}`, {
+          requires_restart: 0,
+          update_topic: `config/cameras/${polygon.camera}/${updateTopicType}`,
+        })
         .then((res) => {
           if (res.status === 200) {
             toast.success(
@@ -220,12 +230,6 @@ export default function PolygonItem({
   const handleDelete = () => {
     setActivePolygonIndex(undefined);
     saveToConfig(polygon);
-    addMessage(
-      "masks_zones",
-      t("masksAndZones.restart_required"),
-      undefined,
-      "masks_zones",
-    );
   };
 
   return (
