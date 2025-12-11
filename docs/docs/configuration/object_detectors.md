@@ -395,6 +395,7 @@ After placing the downloaded onnx model in your config/model_cache folder, you c
 detectors:
   ov:
     type: openvino
+    device: CPU
 
 model:
   model_type: dfine
