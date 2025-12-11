@@ -769,7 +769,8 @@
         "updatePassword": "Update Password for {{username}}",
         "setPassword": "Set Password",
         "desc": "Create a strong password to secure this account.",
-        "multiDeviceWarning": "Any other devices where you are logged in will be required to re-login within {{refresh_time}}. You can also force all users to re-authenticate immediately by rotating your JWT secret."
+        "multiDeviceWarning": "Any other devices where you are logged in will be required to re-login within {{refresh_time}}.",
+        "multiDeviceAdmin": "You can also force all users to re-authenticate immediately by rotating your JWT secret."
       },
       "changeRole": {
         "title": "Change User Role",
