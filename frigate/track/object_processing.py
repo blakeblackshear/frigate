@@ -80,6 +80,7 @@ class TrackedObjectProcessor(threading.Thread):
                 CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.remove,
                 CameraConfigUpdateEnum.zones,
+                CameraConfigUpdateEnum.motion,
             ],
         )
 
