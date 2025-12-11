@@ -1,0 +1,129 @@
+title: "[Beta Support]: "
+labels: ["support", "triage", "beta"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing Frigate beta versions! Use this form for support with beta releases.
+
+        **Note:** Beta versions may have incomplete features, known issues, or unexpected behavior. Please check the [release notes](https://github.com/blakeblackshear/frigate/releases) and [recent discussions][discussions] for known beta issues before submitting.
+
+        Before submitting, read the [beta documentation][docs].
+
+        [docs]: https://deploy-preview-19787--frigate-docs.netlify.app/
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the problem you are having
+      description: Please be as detailed as possible. Include what you expected to happen vs what actually happened.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Beta Version
+      description: Visible on the System page in the Web UI. Please include the full version including the build identifier (eg. 0.17.0-beta1)
+      placeholder: "0.17.0-beta1"
+    validations:
+      required: true
+  - type: dropdown
+    id: issue-category
+    attributes:
+      label: Issue Category
+      description: What area is your issue related to? This helps us understand the context.
+      options:
+        - Object Detection / Detectors
+        - Hardware Acceleration
+        - Configuration / Setup
+        - WebUI / Frontend
+        - Recordings / Storage
+        - Notifications / Events
+        - Integration (Home Assistant, etc)
+        - Performance / Stability
+        - Installation / Updates
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Frigate config file
+      description: This will be automatically formatted into code, so no need for backticks. Remove any sensitive information like passwords or URLs.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: frigatelogs
+    attributes:
+      label: Relevant Frigate log output
+      description: Please copy and paste any relevant Frigate log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: go2rtclogs
+    attributes:
+      label: Relevant go2rtc log output (if applicable)
+      description: If your issue involves cameras, streams, or playback, please include go2rtc logs. Logs can be viewed via the Frigate UI, Docker, or the go2rtc dashboard. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: Install method
+      options:
+        - Home Assistant Add-on
+        - Docker Compose
+        - Docker CLI
+        - Proxmox via Docker
+        - Proxmox via TTeck Script
+        - Windows WSL2
+    validations:
+      required: true
+  - type: textarea
+    id: docker
+    attributes:
+      label: docker-compose file or Docker CLI command
+      description: This will be automatically formatted into code, so no need for backticks. Include relevant environment variables and device mappings.
+      render: yaml
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Home Assistant OS
+        - Debian
+        - Ubuntu
+        - Other Linux
+        - Proxmox
+        - UNRAID
+        - Windows
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: CPU / GPU / Hardware
+      description: Provide details about your hardware (e.g., Intel i5-9400, NVIDIA RTX 3060, Raspberry Pi 4, etc)
+      placeholder: "Intel i7-10700, NVIDIA GTX 1660"
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Screenshots of the issue, System metrics pages, or any relevant UI. Drag and drop or paste images directly.
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: If applicable, provide detailed steps to reproduce the issue
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+  - type: textarea
+    id: other
+    attributes:
+      label: Any other information that may be helpful
+      description: Additional context, related issues, when the problem started appearing, etc.
