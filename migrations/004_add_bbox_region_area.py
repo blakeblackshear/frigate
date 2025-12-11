@@ -5,7 +5,7 @@ Some examples (model - class or model name)::
     > Model = migrator.orm['model_name']            # Return model in current state by name
 
     > migrator.sql(sql)                             # Run custom SQL
-    > migrator.python(func, *args, **kwargs)        # Run python code
+    > migrator.run(func, *args, **kwargs)           # Run python code
     > migrator.create_model(Model)                  # Create a model (could be used as decorator)
     > migrator.remove_model(model, cascade=True)    # Remove a model
     > migrator.add_fields(model, **fields)          # Add fields to a model
