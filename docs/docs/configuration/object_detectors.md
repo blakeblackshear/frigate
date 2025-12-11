@@ -395,7 +395,7 @@ After placing the downloaded onnx model in your config/model_cache folder, you c
 detectors:
   ov:
     type: openvino
-    device: GPU
+    device: CPU
 
 model:
   model_type: dfine
@@ -431,10 +431,10 @@ When using Docker Compose:
 ```yaml
 services:
   frigate:
----
-devices:
-  - /dev/dri
-  - /dev/kfd
+    ...
+    devices:
+      - /dev/dri
+      - /dev/kfd
 ```
 
 For reference on recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
@@ -462,9 +462,9 @@ When using Docker Compose:
 ```yaml
 services:
   frigate:
-
-environment:
-  HSA_OVERRIDE_GFX_VERSION: "10.0.0"
+    ...
+    environment:
+      HSA_OVERRIDE_GFX_VERSION: "10.0.0"
 ```
 
 Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
