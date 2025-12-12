@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import { generateFixedHash, isValidId } from "./stringUtil";
+import type { LiveStreamMetadata } from "@/types/live";
 
 /**
  * Processes a user-entered camera name and returns both the final camera name
@@ -26,8 +27,6 @@ export function processCameraName(userInput: string): {
     friendlyName: userInput,
   };
 }
-
-// ==================== Reolink Camera Detection ====================
 
 /**
  * Detect Reolink camera capabilities and recommend optimal protocol
@@ -97,4 +96,54 @@ export function maskUri(uri: string): string {
     // ignore
   }
   return uri;
+}
+
+/**
+ * Represents the audio features supported by a camera stream
+ */
+export type CameraAudioFeatures = {
+  twoWayAudio: boolean;
+  audioOutput: boolean;
+};
+
+/**
+ * Detects camera audio features from go2rtc stream metadata.
+ * Checks for two-way audio (backchannel) and audio output capabilities.
+ *
+ * @param metadata - The LiveStreamMetadata from go2rtc stream
+ * @param requireSecureContext - If true, two-way audio requires secure context (default: true)
+ * @returns CameraAudioFeatures object with detected capabilities
+ */
+export function detectCameraAudioFeatures(
+  metadata: LiveStreamMetadata | null | undefined,
+  requireSecureContext: boolean = true,
+): CameraAudioFeatures {
+  if (!metadata) {
+    return {
+      twoWayAudio: false,
+      audioOutput: false,
+    };
+  }
+
+  const twoWayAudio =
+    (!requireSecureContext || window.isSecureContext) &&
+    metadata.producers.find(
+      (prod) =>
+        prod.medias &&
+        prod.medias.find((media) => media.includes("audio, sendonly")) !=
+          undefined,
+    ) != undefined;
+
+  const audioOutput =
+    metadata.producers.find(
+      (prod) =>
+        prod.medias &&
+        prod.medias.find((media) => media.includes("audio, recvonly")) !=
+          undefined,
+    ) != undefined;
+
+  return {
+    twoWayAudio: !!twoWayAudio,
+    audioOutput: !!audioOutput,
+  };
 }

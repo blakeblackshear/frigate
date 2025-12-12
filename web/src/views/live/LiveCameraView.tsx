@@ -110,6 +110,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
 import PtzControlPanel from "@/components/overlay/PtzControlPanel";
 import ObjectSettingsView from "../settings/ObjectSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
@@ -168,34 +169,12 @@ export default function LiveCameraView({
     },
   );
 
-  const supports2WayTalk = useMemo(() => {
-    if (!window.isSecureContext || !cameraMetadata) {
-      return false;
-    }
-
-    return (
-      cameraMetadata.producers.find(
-        (prod) =>
-          prod.medias &&
-          prod.medias.find((media) => media.includes("audio, sendonly")) !=
-            undefined,
-      ) != undefined
-    );
+  const audioFeatures = useMemo(() => {
+    return detectCameraAudioFeatures(cameraMetadata);
   }, [cameraMetadata]);
-  const supportsAudioOutput = useMemo(() => {
-    if (!cameraMetadata) {
-      return false;
-    }
 
-    return (
-      cameraMetadata.producers.find(
-        (prod) =>
-          prod.medias &&
-          prod.medias.find((media) => media.includes("audio, recvonly")) !=
-            undefined,
-      ) != undefined
-    );
-  }, [cameraMetadata]);
+  const supports2WayTalk = audioFeatures.twoWayAudio;
+  const supportsAudioOutput = audioFeatures.audioOutput;
 
   // camera enabled state
   const { payload: enabledState } = useEnabledState(camera.name);

@@ -14,7 +14,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import MSEPlayer from "@/components/player/MsePlayer";
 import { WizardFormData, StreamConfig, TestResult } from "@/types/cameraWizard";
-import { PlayerStatsType } from "@/types/live";
+import { PlayerStatsType, LiveStreamMetadata } from "@/types/live";
+import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
 import { FaCircleCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { LuX } from "react-icons/lu";
 import { Card, CardContent } from "../../ui/card";
@@ -125,6 +126,33 @@ export default function Step4Validation({
     [],
   );
 
+  const checkBackchannel = useCallback(
+    async (go2rtcStreamId: string, useFfmpeg: boolean) => {
+      if (wizardData.hasBackchannel !== undefined) {
+        return;
+      }
+
+      // ffmpeg compatibility mode guarantees no backchannel connection
+      if (useFfmpeg) {
+        onUpdate({ hasBackchannel: false });
+        return;
+      }
+
+      try {
+        // Query the specific go2rtc stream we just created
+        const response = await axios.get<LiveStreamMetadata>(
+          `go2rtc/streams/${go2rtcStreamId}`,
+        );
+
+        const audioFeatures = detectCameraAudioFeatures(response.data, false);
+        onUpdate({ hasBackchannel: audioFeatures.twoWayAudio });
+      } catch {
+        onUpdate({ hasBackchannel: false });
+      }
+    },
+    [wizardData.hasBackchannel, onUpdate],
+  );
+
   const validateStream = useCallback(
     async (stream: StreamConfig) => {
       if (!stream.url.trim()) {
@@ -223,6 +251,7 @@ export default function Step4Validation({
       brandTemplate: wizardData.brandTemplate,
       customUrl: wizardData.customUrl,
       streams: wizardData.streams,
+      hasBackchannel: wizardData.hasBackchannel,
     };
 
     onSave(configData);
@@ -324,6 +353,12 @@ export default function Step4Validation({
                       <StreamPreview
                         stream={stream}
                         onBandwidthUpdate={handleBandwidthUpdate}
+                        onStreamRegistered={(go2rtcStreamId) => {
+                          checkBackchannel(
+                            go2rtcStreamId,
+                            stream.useFfmpeg ?? false,
+                          );
+                        }}
                       />
                     </div>
                   )}
@@ -683,10 +718,15 @@ function BandwidthDisplay({
 type StreamPreviewProps = {
   stream: StreamConfig;
   onBandwidthUpdate?: (streamId: string, bandwidth: number) => void;
+  onStreamRegistered?: (go2rtcStreamId: string) => void;
 };
 
 // live stream preview using MSEPlayer with temp go2rtc streams
-function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
+function StreamPreview({
+  stream,
+  onBandwidthUpdate,
+  onStreamRegistered,
+}: StreamPreviewProps) {
   const { t } = useTranslation(["views/settings"]);
   const [streamId, setStreamId] = useState(`wizard_${stream.id}_${Date.now()}`);
   const [registered, setRegistered] = useState(false);
@@ -722,11 +762,11 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
       .put(`go2rtc/streams/${streamId}`, null, {
         params: { src: streamUrl },
       })
-      .then(() => {
+      .then(async () => {
         // Add small delay to allow go2rtc api to run and initialize the stream
-        setTimeout(() => {
-          setRegistered(true);
-        }, 500);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setRegistered(true);
+        onStreamRegistered?.(streamId);
       })
       .catch(() => {
         setError(true);
@@ -738,6 +778,7 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
         // do nothing on cleanup errors - go2rtc won't consume the streams
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stream.url, stream.useFfmpeg, streamId]);
 
   const resolution = stream.testResult?.resolution;
