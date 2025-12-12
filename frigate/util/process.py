@@ -14,6 +14,7 @@ from setproctitle import setproctitle
 
 import frigate.log
 from frigate.config.logger import LoggerConfig
+from frigate.const import CONFIG_DIR
 
 
 class BaseProcess(mp.Process):
@@ -92,7 +93,7 @@ class FrigateProcess(BaseProcess):
         try:
             import memray
 
-            reports_dir = pathlib.Path("/config/memray_reports")
+            reports_dir = pathlib.Path(CONFIG_DIR) / "memray_reports"
             reports_dir.mkdir(parents=True, exist_ok=True)
             safe_name = (
                 process_name.replace(":", "_").replace("/", "_").replace("\\", "_")
@@ -126,7 +127,7 @@ class FrigateProcess(BaseProcess):
             self.__memray_tracker.__exit__(None, None, None)
             self.__memray_tracker = None
 
-            reports_dir = pathlib.Path("/config/memray_reports")
+            reports_dir = pathlib.Path(CONFIG_DIR) / "memray_reports"
             html_file = reports_dir / f"{safe_name}.html"
 
             result = subprocess.run(
