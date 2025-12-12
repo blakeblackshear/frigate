@@ -529,7 +529,9 @@ class Embeddings:
                         )
 
                         # Calculate embedding for new trigger
-                        embedding = self._calculate_trigger_embedding(trigger, trigger_name, camera.name)
+                        embedding = self._calculate_trigger_embedding(
+                            trigger, trigger_name, camera.name
+                        )
 
                         Trigger.create(
                             camera=camera.name,
@@ -585,13 +587,13 @@ class Embeddings:
                 f"Failed to delete thumbnail for trigger with data {event_id} in {camera}: {e}"
             )
 
-    def _calculate_trigger_embedding(self, trigger, trigger_name: str, camera_name: str) -> bytes:
+    def _calculate_trigger_embedding(
+        self, trigger, trigger_name: str, camera_name: str
+    ) -> bytes:
         """Calculate embedding for a trigger based on its type and data."""
         if trigger.type == "description":
             logger.debug(f"Generating embedding for trigger description {trigger_name}")
-            embedding = self.embed_description(
-                None, trigger.data, upsert=False
-            )
+            embedding = self.embed_description(None, trigger.data, upsert=False)
             return embedding.astype(np.float32).tobytes()
 
         elif trigger.type == "thumbnail":
@@ -611,9 +613,7 @@ class Embeddings:
 
                 try:
                     with open(
-                        os.path.join(
-                            TRIGGER_DIR, camera_name, f"{trigger.data}.webp"
-                        ),
+                        os.path.join(TRIGGER_DIR, camera_name, f"{trigger.data}.webp"),
                         "rb",
                     ) as f:
                         thumbnail = f.read()
