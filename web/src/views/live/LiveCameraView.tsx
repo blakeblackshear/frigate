@@ -169,12 +169,8 @@ export default function LiveCameraView({
     },
   );
 
-  const audioFeatures = useMemo(() => {
-    return detectCameraAudioFeatures(cameraMetadata);
-  }, [cameraMetadata]);
-
-  const supports2WayTalk = audioFeatures.twoWayAudio;
-  const supportsAudioOutput = audioFeatures.audioOutput;
+  const { twoWayAudio: supports2WayTalk, audioOutput: supportsAudioOutput } =
+    useMemo(() => detectCameraAudioFeatures(cameraMetadata), [cameraMetadata]);
 
   // camera enabled state
   const { payload: enabledState } = useEnabledState(camera.name);

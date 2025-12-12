@@ -81,11 +81,10 @@ export function CameraStreamingDialog({
 
   const cameraMetadata = streamName ? streamMetadata?.[streamName] : undefined;
 
-  const audioFeatures = useMemo(() => {
-    return detectCameraAudioFeatures(cameraMetadata);
-  }, [cameraMetadata]);
-
-  const supportsAudioOutput = audioFeatures.audioOutput;
+  const { audioOutput: supportsAudioOutput } = useMemo(
+    () => detectCameraAudioFeatures(cameraMetadata),
+    [cameraMetadata],
+  );
 
   // handlers
 

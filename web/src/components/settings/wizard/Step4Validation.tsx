@@ -139,7 +139,6 @@ export default function Step4Validation({
       }
 
       try {
-        // Query the specific go2rtc stream we just created
         const response = await axios.get<LiveStreamMetadata>(
           `go2rtc/streams/${go2rtcStreamId}`,
         );
