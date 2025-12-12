@@ -42,6 +42,9 @@ export default function Step4Validation({
   const [measuredBandwidth, setMeasuredBandwidth] = useState<
     Map<string, number>
   >(new Map());
+  const [registeredStreamIds, setRegisteredStreamIds] = useState<
+    Map<string, string>
+  >(new Map());
 
   const streams = useMemo(() => wizardData.streams || [], [wizardData.streams]);
 
@@ -127,15 +130,10 @@ export default function Step4Validation({
   );
 
   const checkBackchannel = useCallback(
-    async (go2rtcStreamId: string, useFfmpeg: boolean) => {
-      if (wizardData.hasBackchannel !== undefined) {
-        return;
-      }
-
+    async (go2rtcStreamId: string, useFfmpeg: boolean): Promise<boolean> => {
       // ffmpeg compatibility mode guarantees no backchannel connection
       if (useFfmpeg) {
-        onUpdate({ hasBackchannel: false });
-        return;
+        return false;
       }
 
       try {
@@ -144,12 +142,12 @@ export default function Step4Validation({
         );
 
         const audioFeatures = detectCameraAudioFeatures(response.data, false);
-        onUpdate({ hasBackchannel: audioFeatures.twoWayAudio });
+        return audioFeatures.twoWayAudio;
       } catch {
-        onUpdate({ hasBackchannel: false });
+        return false;
       }
     },
-    [wizardData.hasBackchannel, onUpdate],
+    [],
   );
 
   const validateStream = useCallback(
@@ -235,11 +233,30 @@ export default function Step4Validation({
     }
   }, [streams, onUpdate, t, performStreamValidation]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!wizardData.cameraName || !wizardData.streams?.length) {
       toast.error(t("cameraWizard.step4.saveError"));
       return;
     }
+
+    const candidateStreams =
+      wizardData.streams?.filter(
+        (s) => s.testResult?.success && !(s.useFfmpeg ?? false),
+      ) || [];
+
+    let hasBackchannelResult = false;
+    if (candidateStreams.length > 0) {
+      // Check all candidate streams for backchannel support
+      const backchanelChecks = candidateStreams.map((stream) => {
+        const actualStreamId = registeredStreamIds.get(stream.id);
+        return actualStreamId
+          ? checkBackchannel(actualStreamId, stream.useFfmpeg ?? false)
+          : Promise.resolve(false);
+      });
+      const results = await Promise.all(backchanelChecks);
+      hasBackchannelResult = results.some((result) => result);
+    }
+    onUpdate({ hasBackchannel: hasBackchannelResult });
 
     // Convert wizard data to final config format
     const configData = {
@@ -254,7 +271,7 @@ export default function Step4Validation({
     };
 
     onSave(configData);
-  }, [wizardData, onSave, t]);
+  }, [wizardData, onSave, t, onUpdate, checkBackchannel, registeredStreamIds]);
 
   const canSave = useMemo(() => {
     return (
@@ -353,9 +370,8 @@ export default function Step4Validation({
                         stream={stream}
                         onBandwidthUpdate={handleBandwidthUpdate}
                         onStreamRegistered={(go2rtcStreamId) => {
-                          checkBackchannel(
-                            go2rtcStreamId,
-                            stream.useFfmpeg ?? false,
+                          setRegisteredStreamIds((prev) =>
+                            new Map(prev).set(stream.id, go2rtcStreamId),
                           );
                         }}
                       />
@@ -763,9 +779,10 @@ function StreamPreview({
       })
       .then(async () => {
         // Add small delay to allow go2rtc api to run and initialize the stream
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setRegistered(true);
-        onStreamRegistered?.(streamId);
+        setTimeout(() => {
+          setRegistered(true);
+          onStreamRegistered?.(streamId);
+        }, 500);
       })
       .catch(() => {
         setError(true);
