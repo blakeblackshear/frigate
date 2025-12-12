@@ -99,7 +99,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/react-grid-layout": "^1.3.5",
     "@types/react-icons": "^3.0.0",
-    "@types/react-transition-group": "^4.4.10",
+    "@types/react-transition-group": "^4.4.12",
     "@types/strftime": "^0.9.8",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
