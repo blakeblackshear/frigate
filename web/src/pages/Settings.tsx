@@ -37,6 +37,7 @@ import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { usePersistence } from "@/hooks/use-persistence";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -207,7 +208,21 @@ export default function Settings() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState<string>("");
+  const [persistedCamera, setPersistedCamera] = usePersistence(
+    "selectedCamera",
+    "",
+  );
+  const [selectedCamera, setSelectedCamera] = useState(persistedCamera);
+  useEffect(() => {
+    if (persistedCamera) {
+      setSelectedCamera(persistedCamera);
+    }
+  }, [persistedCamera]);
+  useEffect(() => {
+    if (selectedCamera) {
+      setPersistedCamera(selectedCamera);
+    }
+  }, [selectedCamera, setPersistedCamera]);
 
   const { payload: allCameraStates } = useInitialCameraState(
     cameras.length > 0 ? cameras[0].name : "",
