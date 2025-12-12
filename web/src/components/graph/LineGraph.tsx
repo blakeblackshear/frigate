@@ -80,6 +80,9 @@ export function CameraLineGraph({
         zoom: {
           enabled: false,
         },
+        animations: {
+          enabled: false,
+        },
       },
       colors: GRAPH_COLORS,
       grid: {
@@ -221,6 +224,9 @@ export function EventsPerSecondsLineGraph({
           show: false,
         },
         zoom: {
+          enabled: false,
+        },
+        animations: {
           enabled: false,
         },
       },
