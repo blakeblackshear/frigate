@@ -122,7 +122,7 @@ lpr:
       replacement: "0"
     - pattern: "I" # Swap 'I' to '1'
       replacement: "1"
-    - pattern: '(\w{3})(\w{3})' # Split 6 chars into groups (e.g., ABC123 → ABC-123) - use single quotes preserve backslashes
+    - pattern: '(\w{3})(\w{3})' # Split 6 chars into groups (e.g., ABC123 → ABC-123) - use single quotes to preserve backslashes
       replacement: '\1-\2'
 ```
 
