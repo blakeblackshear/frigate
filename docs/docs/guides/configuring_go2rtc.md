@@ -113,6 +113,7 @@ section.
 
 1. If the stream you added to go2rtc is also used by Frigate for the `record` or `detect` role, you can migrate your config to pull from the RTSP restream to reduce the number of connections to your camera as shown [here](/configuration/restream#reduce-connections-to-camera).
 2. You can [set up WebRTC](/configuration/live#webrtc-extra-configuration) if your camera supports two-way talk. Note that WebRTC only supports specific audio formats and may require opening ports on your router.
+3. If your camera supports two-way talk, you must configure your stream with `#backchannel=0` to prevent go2rtc from blocking other applications from accessing the camera's audio output. See [preventing go2rtc from blocking two-way audio](/configuration/restream#two-way-talk-restream) in the restream documentation.
 
 ## Homekit Configuration
 

@@ -330,7 +330,8 @@
         "audioCodecRequired": "An audio stream is required to support audio detection.",
         "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP is not recommended. Enable HTTP in the camera's firmware settings and restart the wizard."
+          "reolink-rtsp": "Reolink RTSP is not recommended. Enable HTTP in the camera's firmware settings and restart the wizard.",
+          "reolink-http": "Reolink HTTP streams should use FFmpeg for better compatibility. Enable 'Use stream compatibility mode' for this stream."
         },
         "dahua": {
           "substreamWarning": "Substream 1 is locked to a low resolution. Many Dahua / Amcrest / EmpireTech cameras support additional substreams that need to be enabled in the camera's settings. It is recommended to check and utilize those streams if available."
@@ -769,7 +770,8 @@
         "updatePassword": "Update Password for {{username}}",
         "setPassword": "Set Password",
         "desc": "Create a strong password to secure this account.",
-        "multiDeviceWarning": "Any other devices where you are logged in will be required to re-login within {{refresh_time}}. You can also force all users to re-authenticate immediately by rotating your JWT secret."
+        "multiDeviceWarning": "Any other devices where you are logged in will be required to re-login within {{refresh_time}}.",
+        "multiDeviceAdmin": "You can also force all users to re-authenticate immediately by rotating your JWT secret."
       },
       "changeRole": {
         "title": "Change User Role",

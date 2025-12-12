@@ -490,6 +490,13 @@ function StreamIssues({
           message: t("cameraWizard.step4.issues.brands.reolink-rtsp"),
         });
       }
+
+      if (streamUrl.startsWith("http://") && !stream.useFfmpeg) {
+        result.push({
+          type: "warning",
+          message: t("cameraWizard.step4.issues.brands.reolink-http"),
+        });
+      }
     }
 
     // Video codec check

@@ -26,6 +26,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type SetPasswordProps = {
   show: boolean;
@@ -46,6 +47,7 @@ export default function SetPasswordDialog({
 }: SetPasswordProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
+  const isAdmin = useIsAdmin();
 
   const { data: config } = useSWR("config");
   const refreshSeconds: number | undefined =
@@ -233,19 +235,28 @@ export default function SetPasswordDialog({
               ns: "views/settings",
             })}
           </p>
-          <p className="text-sm text-primary-variant">
-            <a
-              href={getLocaleDocUrl(
-                "configuration/authentication#jwt-token-secret",
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-primary"
-            >
-              {t("readTheDocumentation", { ns: "common" })}
-              <LuExternalLink className="ml-2 size-3" />
-            </a>
-          </p>
+          {isAdmin && (
+            <>
+              <p className="text-sm text-muted-foreground">
+                {t("users.dialog.passwordSetting.multiDeviceAdmin", {
+                  ns: "views/settings",
+                })}
+              </p>
+              <p className="text-sm text-primary-variant">
+                <a
+                  href={getLocaleDocUrl(
+                    "configuration/authentication#jwt-token-secret",
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-primary"
+                >
+                  {t("readTheDocumentation", { ns: "common" })}
+                  <LuExternalLink className="ml-2 size-3" />
+                </a>
+              </p>
+            </>
+          )}
         </DialogHeader>
 
         <Form {...form}>
