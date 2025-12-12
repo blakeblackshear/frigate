@@ -114,16 +114,16 @@ These rules must be defined at the global level of your `lpr` config.
 ```yaml
 lpr:
   replace_rules:
-    - pattern: r'[%#*?]' # Remove noise symbols
+    - pattern: "[%#*?]" # Remove noise symbols
       replacement: ""
-    - pattern: r'[= ]' # Normalize = or space to dash
+    - pattern: "[= ]" # Normalize = or space to dash
       replacement: "-"
     - pattern: "O" # Swap 'O' to '0' (common OCR error)
       replacement: "0"
-    - pattern: r'I' # Swap 'I' to '1'
+    - pattern: "I" # Swap 'I' to '1'
       replacement: "1"
-    - pattern: r'(\w{3})(\w{3})' # Split 6 chars into groups (e.g., ABC123 → ABC-123)
-      replacement: r'\1-\2'
+    - pattern: '(\w{3})(\w{3})' # Split 6 chars into groups (e.g., ABC123 → ABC-123) - use single quotes preserve backslashes
+      replacement: '\1-\2'
 ```
 
 - Rules fire in order: In the example above: clean noise first, then separators, then swaps, then splits.
