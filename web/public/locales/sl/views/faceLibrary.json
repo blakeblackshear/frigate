@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Dodajanje nove zbirke v knjižnico obrazov z nalaganjem slike",
+    "addFace": "Dodajanje nove zbirke v knjižnico obrazov z nalaganjem slike.",
     "placeholder": "Vnesite ime za to zbirko",
     "invalidName": "Neveljavno ime. Ime lahko vsebuje črke, števila, presledke, narekovaje, podčrtaje in pomišljaje."
   },
