@@ -27,9 +27,10 @@
     "nextSteps": "Sağlam bir temel oluşturmak için:<li>Her tespit edilen kişi için **Recent Recognitions (Son Tanımalar)** sekmesini kullanarak görüntüleri seçin ve eğitim gerçekleştirin.</li> <li>En iyi sonuçlar için doğrudan önden çekilmiş yüz görüntülerine odaklanın; yüzlerin açılı göründüğü fotoğrafları eğitimde kullanmaktan kaçının.</li>"
   },
   "train": {
-    "title": "Son Algılananlar",
+    "title": "Son Tanımalar",
     "aria": "Son algılanan nesneleri seç",
-    "empty": "Yakın zamanda yüz tanıma denemesi olmadı"
+    "empty": "Yakın zamanda yüz tanıma denemesi olmadı",
+    "titleShort": "Son"
   },
   "deleteFaceLibrary": {
     "title": "İsmi Sil",
@@ -49,7 +50,7 @@
     "validation": {
       "selectImage": "Lütfen bir resim dosyası seçin."
     },
-    "dropInstructions": "Bir görseli buraya sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın."
+    "dropInstructions": "Bir görseli buraya sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın"
   },
   "trainFaceAs": "Yüzü şu olarak eğit:",
   "toast": {
@@ -61,7 +62,7 @@
       "addFaceLibrary": "{{name}} başarıyla Yüz Kütüphanesi’ne eklendi!",
       "trainedFace": "Yüz başarıyla eğitildi.",
       "uploadedImage": "Resim başarıyla yüklendi.",
-      "updatedFaceScore": "Yüz skoru başarıyla güncellendi.",
+      "updatedFaceScore": "Yüz tanıma skoru {{name}} ({{score}}) olarak başarıyla güncellendi.",
       "renamedFace": "Yüz başarıyla {{name}} olarak adlandırıldı"
     },
     "error": {

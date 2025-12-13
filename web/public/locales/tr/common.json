@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyyy"
-    }
+    },
+    "inProgress": "Devam ediyor",
+    "invalidStartTime": "Geçersiz başlangıç zamanı",
+    "invalidEndTime": "Geçersiz bitiş zamanı"
   },
   "button": {
     "off": "KAPALI",
@@ -118,7 +121,8 @@
     "cancel": "İptal",
     "twoWayTalk": "Çift Yönlü Ses",
     "close": "Kapat",
-    "delete": "Sil"
+    "delete": "Sil",
+    "continue": "Devam Et"
   },
   "menu": {
     "systemLogs": "Sistem günlükleri",
@@ -219,10 +223,16 @@
     "help": "Yardım",
     "faceLibrary": "Yüz Veritabanı",
     "systemMetrics": "Sistem metrikleri",
-    "uiPlayground": "UI Deneme Alanı"
+    "uiPlayground": "UI Deneme Alanı",
+    "classification": "Sınıflandırma"
   },
   "label": {
-    "back": "Geri"
+    "back": "Geri",
+    "hide": "{{item}} öğesini gizle",
+    "show": "{{item}} öğesini göster",
+    "ID": "ID",
+    "none": "Yok",
+    "all": "Tümü"
   },
   "notFound": {
     "documentTitle": "Bulunamadı - Frigate",
@@ -237,6 +247,14 @@
     "length": {
       "feet": "feet",
       "meters": "metre"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/saat",
+      "mbph": "MB/saat",
+      "gbph": "GB/saat"
     }
   },
   "pagination": {
@@ -273,5 +291,17 @@
     "admin": "Yönetici",
     "desc": "Yöneticiler Frigate arayüzündeki bütün özelliklere tam erişim sahibidir. Görüntüleyiciler ise yalnızca kameraları, eski görüntüleri ve inceleme öğelerini görüntülemekle sınırlıdır."
   },
-  "readTheDocumentation": "Dökümantasyonu oku"
+  "readTheDocumentation": "Dökümantasyonu oku",
+  "list": {
+    "two": "{{0}} ve {{1}}",
+    "many": "{{items}} ve {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "İsteğe bağlı",
+    "internalID": "Frigate’ın yapılandırma ve veritabanında kullandığı Dahili Kimlik"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

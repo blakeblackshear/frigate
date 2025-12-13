@@ -43,7 +43,12 @@
       "gpuEncoder": "GPU Kodlayıcı",
       "title": "Donanım Bilgisi",
       "npuUsage": "NPU Kullanımı",
-      "npuMemory": "NPU Bellek Kullanımı"
+      "npuMemory": "NPU Bellek Kullanımı",
+      "intelGpuWarning": {
+        "title": "Intel GPU İstatistik Uyarısı",
+        "message": "GPU istatistikleri kullanılamıyor",
+        "description": "Bu, Intel’in GPU istatistik raporlama araçlarında (intel_gpu_top) bilinen bir hatadır; araç çalışmayı bozarak, donanımsal hızlandırma ve nesne tespiti (i)GPU üzerinde doğru şekilde çalışıyor olsa bile, GPU kullanımını tekrar tekrar %0 olarak döndürür. Bu bir Frigate hatası değildir. Sorunu geçici olarak düzeltmek ve GPU’nun doğru çalıştığını doğrulamak için host sistemini yeniden başlatabilirsiniz. Bu durum performansı etkilemez."
+      }
     },
     "otherProcesses": {
       "title": "Diğer İşlemler",
@@ -154,10 +159,17 @@
       "plate_recognition": "Plaka Tanıma",
       "face_recognition_speed": "Yüz Tanıma Hızı",
       "yolov9_plate_detection_speed": "YOLOv9 Plaka Tanıma Hızı",
-      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma"
+      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma",
+      "review_description": "İnceleme Açıklaması",
+      "review_description_speed": "İnceleme Açıklama Hızı",
+      "review_description_events_per_second": "İnceleme Açıklaması",
+      "object_description": "Nesne Açıklaması",
+      "object_description_speed": "Nesne Açıklama Hızı",
+      "object_description_events_per_second": "Nesne Açıklaması"
     },
     "infPerSecond": "Saniye Başına Çıkarım",
-    "title": "Zenginleştirmeler"
+    "title": "Zenginleştirmeler",
+    "averageInf": "Ortalama Çıkarım Süresi"
   },
   "logs": {
     "download": {
