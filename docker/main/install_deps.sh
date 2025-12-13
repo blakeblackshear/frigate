@@ -33,16 +33,10 @@ unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
 
-# install mesa-teflon-delegate from bookworm-backports
+# install mesa-teflon-delegate
 # Only available for arm64 at the moment
 if [[ "${TARGETARCH}" == "arm64" ]]; then
-    if [[ "${BASE_IMAGE}" == *"nvcr.io/nvidia/tensorrt"* ]]; then
-        echo "Info: Skipping apt-get commands because BASE_IMAGE includes 'nvcr.io/nvidia/tensorrt' for arm64."
-    else
-        echo "deb http://deb.debian.org/debian bookworm-backports main" | tee /etc/apt/sources.list.d/bookworm-backbacks.list
-        apt-get -qq update
-        apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate/bookworm-backports
-    fi
+    wget -qO /usr/lib/teflon/libteflon.so https://github.com/jimmyhon/frigate-builds/releases/download/mesa-25.3.1/libteflon.so
 fi
 
 # ffmpeg -> amd64
