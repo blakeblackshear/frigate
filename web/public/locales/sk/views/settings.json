@@ -551,10 +551,12 @@
       "probeMode": "Probe kamera",
       "manualMode": "Ručný výber",
       "detectionMethodDescription": "Vyskúša cez ONVIF (ak je podporovaný) nájsť kamery streamové adresy, alebo ručne vyberte značku kamery a jej preddefinované URL. Ak chcete zadať vlastnú URL RTSP, vyberte manuálne zadanie a označte \"Ostatné\".",
-      "onvifPortDescription": "Pre kamery, ktoré podporujú ONVIF, to je zvyčajne 80 alebo 8080."
+      "onvifPortDescription": "Pre kamery, ktoré podporujú ONVIF, to je zvyčajne 80 alebo 8080.",
+      "useDigestAuth": "Použite overenie súhrnu",
+      "useDigestAuthDescription": "Použite HTTP stráviteľné overenie pre ONVIF. Niektoré kamery môžu vyžadovať vyhradený ONVIF užívateľské meno/password namiesto štandardného správcu."
     },
     "step2": {
-      "description": "Konfigurovať prúdové role a pridať ďalšie prúdy pre vašu kameru.",
+      "description": "Vyhľadajte dostupné streamy z kamery alebo nakonfigurujte manuálne nastavenia na základe zvolenej metódy detekcie.",
       "streamsTitle": "Kamerové prúdy",
       "addStream": "Pridať Stream",
       "addAnotherStream": "Pridať ďalší Stream",
@@ -573,8 +575,8 @@
         "audio": "Zvuk"
       },
       "testStream": "Testovacie pripojenie",
-      "testSuccess": "Stream test úspešné!",
-      "testFailed": "Stream test zlyhal",
+      "testSuccess": "Test pripojenia bol úspešný!",
+      "testFailed": "Test pripojenia zlyhal. Skontrolujte zadané údaje a skúste to znova.",
       "testFailedTitle": "Test Zlyhal",
       "connected": "Pripojené",
       "notConnected": "Nie je pripojený",
@@ -590,6 +592,38 @@
       "featuresPopover": {
         "title": "Funkcie streamu",
         "description": "Použite prekrytie go2rtc na zníženie pripojenia k fotoaparátu."
+      },
+      "streamDetails": "Detaily vysielania",
+      "probing": "Skúmajúca kamera...",
+      "retry": "Skúste to znova",
+      "testing": {
+        "probingMetadata": "Skúmanie metadát kamery...",
+        "fetchingSnapshot": "Načítava sa snímka z fotoaparátu..."
+      },
+      "probeFailed": "Nepodarilo sa otestovať kameru: {{error}}",
+      "probingDevice": "Snímacie zariadenie...",
+      "probeSuccessful": "Sonda úspešná",
+      "probeError": "Chyba sondy",
+      "probeNoSuccess": "Sonda neúspešná",
+      "deviceInfo": "Informácie o zariadení",
+      "manufacturer": "Výrobca",
+      "model": "Model",
+      "firmware": "Firmvér",
+      "profiles": "Profily",
+      "ptzSupport": "PTZ Podpora",
+      "autotrackingSupport": "Podpora automatického sledovania",
+      "presets": "Prestavby",
+      "rtspCandidates": "RTSP kandidátov",
+      "rtspCandidatesDescription": "Z kamery boli nájdené nasledujúce adresy URL RTSP. Otestujte pripojenie a zobrazte metadáta streamu.",
+      "noRtspCandidates": "Z kamery sa nenašli žiadne URL adresy RTSP. Vaše prihlasovacie údaje môžu byť nesprávne alebo kamera nepodporuje protokol ONVIF alebo metódu použitú na získanie URL adries RTSP. Vráťte sa späť a zadajte URL adresu RTSP manuálne.",
+      "candidateStreamTitle": "Kandidát {{number}}",
+      "useCandidate": "Použitie",
+      "uriCopy": "Kopírovať",
+      "uriCopied": "URI skopírované do schránky",
+      "testConnection": "Testovacie pripojenie",
+      "toggleUriView": "Kliknutím prepnete zobrazenie celého URI",
+      "errors": {
+        "hostRequired": "Vyžaduje sa hostiteľská/IP adresa"
       }
     },
     "step3": {
@@ -621,6 +655,57 @@
         "resolutionHigh": "Rozlíšenie {{resolution}} môže spôsobiť zvýšenú spotrebu zdrojov.",
         "resolutionLow": "Rozlíšenie {{resolution}} môže byť príliš nízka pre spoľahlivú detekciu malých objektov."
       },
+      "description": "Nakonfigurujte role streamov a pridajte ďalšie streamy pre vašu kameru.",
+      "validationTitle": "Stream Platnosť",
+      "connectAllStreams": "Pripojte všetky prúdy",
+      "reconnectionSuccess": "Opätovné pripojenie bolo úspešné.",
+      "reconnectionPartial": "Niektoré prúdy sa nepodarilo prepojiť.",
+      "streamUnavailable": "Ukážka streamu nie je k dispozícii",
+      "reload": "Znovu načítať",
+      "connecting": "Pripája...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Platné",
+      "failed": "Zlyhanie",
+      "notTested": "Netestované",
+      "streamsTitle": "Kamerové prúdy",
+      "addStream": "Pridať Stream",
+      "addAnotherStream": "Pridať ďalší Stream",
+      "streamUrl": "Stream URL",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "selectStream": "Vyberte stream",
+      "searchCandidates": "Hľadať kandidátov...",
+      "noStreamFound": "Nenašiel sa žiadny stream",
+      "url": "URL",
+      "resolution": "Rozlíšenie",
+      "selectResolution": "Vyberte rozlíšenie",
+      "quality": "Kvalita",
+      "selectQuality": "Vyberte kvalitu",
+      "roleLabels": {
+        "detect": "Detekcia objektov",
+        "record": "Nahrávanie",
+        "audio": "Zvuk"
+      },
+      "testStream": "Testovanie pripojenia",
+      "testSuccess": "Stream test úspešné!",
+      "testFailed": "Stream test zlyhal",
+      "testFailedTitle": "Test Zlyhal",
+      "connected": "Pripojené",
+      "notConnected": "Nie je pripojený",
+      "featuresTitle": "Vlastnosti",
+      "go2rtc": "Znížte počet pripojení ku kamere",
+      "detectRoleWarning": "Aspoň jeden prúd musí mať \"detekt\" úlohu pokračovať.",
+      "rolesPopover": {
+        "title": "Roly streamu",
+        "detect": "Hlavné krmivo pre detekciu objektu.",
+        "record": "Ukladá segmenty video kanála na základe nastavení konfigurácie.",
+        "audio": "Kŕmenie pre detekciu zvuku."
+      },
+      "featuresPopover": {
+        "title": "Funkcie streamu",
+        "description": "Použite prekrytie go2rtc na zníženie pripojenia k fotoaparátu."
+      }
+    },
+    "step4": {
       "description": "Záverečné overenie a analýza pred uložením nového fotoaparátu. Pripojte každý prúd pred uložením.",
       "validationTitle": "Stream Platnosť",
       "connectAllStreams": "Pripojte všetky prúdy",
@@ -632,7 +717,40 @@
       "streamTitle": "Stream {{number}}",
       "valid": "Platné",
       "failed": "Zlyhanie",
-      "notTested": "Netestované"
+      "notTested": "Netestované",
+      "connectStream": "Pripojiť",
+      "connectingStream": "Pripája",
+      "disconnectStream": "Odpojiť",
+      "estimatedBandwidth": "Odhadovaná šírka pásma",
+      "roles": "Roly",
+      "ffmpegModule": "Použite režim kompatibility prúdu",
+      "ffmpegModuleDescription": "Ak sa stream nenačíta ani po niekoľkých pokusoch, skúste túto funkciu povoliť. Keď je táto funkcia povolená, Frigate použije modul ffmpeg s go2rtc. To môže poskytnúť lepšiu kompatibilitu s niektorými streammi z kamier.",
+      "none": "Žiadne",
+      "error": "Chyba",
+      "streamValidated": "Stream {{number}} úspešne overený",
+      "streamValidationFailed": "Stream {{number}} validácia zlyhala",
+      "saveAndApply": "Uložiť novú kameru",
+      "saveError": "Neplatná konfigurácia. Skontrolujte nastavenia.",
+      "issues": {
+        "title": "Platnosť Streamu",
+        "videoCodecGood": "Kód videa je {{codec}}.",
+        "audioCodecGood": "Audio kódc je {{codec}}.",
+        "resolutionHigh": "Rozlíšenie {{resolution}} môže spôsobiť zvýšenú spotrebu zdrojov.",
+        "resolutionLow": "Rozlíšenie {{resolution}} môže byť príliš nízka pre spoľahlivú detekciu malých objektov.",
+        "noAudioWarning": "Žiadne audio nebolo detekovane pre tento prúd, nahrávanie nebude mať audio.",
+        "audioCodecRecordError": "AAC audio kodek je potrebný na podporu audio v záznamoch.",
+        "audioCodecRequired": "Zvukový prúd je povinný podporovať detekciu zvuku.",
+        "restreamingWarning": "Zníženie pripojenia ku kamery pre rekordný prúd môže mierne zvýšiť využitie CPU.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP sa neodporúča. Odporúča sa povoliť HTTP v nastavení kamery a reštartovať sprievodca kamery."
+        },
+        "dahua": {
+          "substreamWarning": "Čiastkový stream 1 je uzamknutý na nízke rozlíšenie. Mnoho kamier Dahua / Amcrest / EmpireTech podporuje ďalšie čiastkové streamy, ktoré je potrebné povoliť v nastaveniach kamery. Odporúča sa skontrolovať a využiť tieto streamy, ak sú k dispozícii."
+        },
+        "hikvision": {
+          "substreamWarning": "Čiastkový stream 1 je uzamknutý na nízke rozlíšenie. Mnoho kamier Hikvision podporuje ďalšie čiastkové streamy, ktoré je potrebné povoliť v nastaveniach kamery. Odporúča sa skontrolovať a využiť tieto streamy, ak sú k dispozícii."
+        }
+      }
     }
   },
   "cameraManagement": {
@@ -829,9 +947,9 @@
         "createRole": "Rola {{role}} bola úspešne vytvorená",
         "updateCameras": "Kamery aktualizované pre rolu {{role}}",
         "deleteRole": "Rola {{role}} bola úspešne odstránená",
-        "userRolesUpdated_one": "{{count}} užívateľ (y) priradené tejto úlohe boli aktualizované pre \"viewer\", ktorý má prístup ku všetkým kamerám.",
+        "userRolesUpdated_one": "",
         "userRolesUpdated_few": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_other": "{{count}} užívatelia priradené tejto úlohe boli aktualizované pre \"viewer\", ktorý má prístup ku všetkým kamerám."
       },
       "error": {
         "createRoleFailed": "Nepodarilo sa vytvoriť rolu: {{errorMessage}}",

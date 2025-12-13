@@ -188,7 +188,10 @@
       "yolov9_plate_detection": "YOLOv9 Detekcia ŠPZ",
       "review_description": "Popis recenzie",
       "review_description_speed": "Popis recenzie Rýchlosťi",
-      "review_description_events_per_second": "Popis"
+      "review_description_events_per_second": "Popis",
+      "object_description": "Popis objektu",
+      "object_description_speed": "Popis objektu Rýchlosť",
+      "object_description_events_per_second": "Popis objektu"
     },
     "averageInf": "Priemerný čas inferencie"
   }

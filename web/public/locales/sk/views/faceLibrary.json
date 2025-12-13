@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Sprievodca pridaním novej kolekcie do Knižnice tvárí.",
+    "addFace": "Pridajte novú kolekciu do Face Library nahrať svoj prvý obrázok.",
     "invalidName": "Neplatné meno. Mená môžu obsahovať iba písmená, čísla, medzery, apostrofy, podčiarkovníky a spojovníky.",
     "placeholder": "Zadajte názov pre túto kolekciu"
   },
