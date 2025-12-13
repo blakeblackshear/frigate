@@ -160,7 +160,8 @@
     "snapshot": "zrzut ekranu",
     "video": "wideo",
     "object_lifecycle": "cykl życia obiektu",
-    "thumbnail": "miniaturka"
+    "thumbnail": "miniaturka",
+    "tracking_details": "szczegóły śledzenia"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -232,6 +233,32 @@
     "createObjectMask": "Utwórz maskę obiektu",
     "adjustAnnotationSettings": "Dostosuj ustawienia adnotacji",
     "scrollViewTips": "Kliknij, aby zobaczyć najważniejsze momenty cyklu życia tego obiektu.",
-    "count": "{{first}} z {{second}}"
+    "count": "{{first}} z {{second}}",
+    "autoTrackingTips": "Pozycja znacznika obiektu jest niedokładna dla kamer z automatycznym śledzeniem.",
+    "lifecycleItemDesc": {
+      "visible": "Wykryto {{label}}",
+      "entered_zone": "{{label}} pojawił się w {{zones}}",
+      "active": "{{label}} poruszył się",
+      "stationary": "{{label}} zatrzymał się",
+      "attribute": {
+        "faceOrLicense_plate": "Wykryto {{attribute}} dla obiektu {{label}}",
+        "other": "{{label}} został rozpoznany jako {{attribute}}"
+      },
+      "gone": "Utracono śledzenie dla {{label}}",
+      "external": "Wykryto {{label}}",
+      "header": {
+        "zones": "Strefy",
+        "area": "Powierzchnia",
+        "score": "Wynik"
+      }
+    },
+    "annotationSettings": {
+      "title": "Ustawienia adnotacji",
+      "showAllZones": {
+        "title": "Pokaż wszystkie strefy",
+        "desc": "Pokazuj linie stref w momencie wejścia obiektu w strefę."
+      }
+    },
+    "trackedPoint": "Śledzony Punkt"
   }
 }

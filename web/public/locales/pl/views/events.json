@@ -43,8 +43,8 @@
     "label": "Szczegóły",
     "noDataFound": "Brak szczegółów do przejrzenia",
     "aria": "Przełącz widok szczegółów",
-    "trackedObject_one": "obiekt",
-    "trackedObject_other": "obiekty",
+    "trackedObject_one": "{{count}} obiekt",
+    "trackedObject_other": "{{count}} obiekty",
     "noObjectDetailData": "Brak danych szczegółowych dla obiektu.",
     "settings": "Ustawienia widoku szczegółów",
     "alwaysExpandActive": {
@@ -55,5 +55,7 @@
   "objectTrack": {
     "trackedPoint": "Śledzony punkt",
     "clickToSeek": "Kliknij aby przewinąć do tego miejsca"
-  }
+  },
+  "needsReview": "Wymaga manualnego sprawdzenia",
+  "normalActivity": "Normalne"
 }

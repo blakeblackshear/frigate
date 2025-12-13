@@ -1,9 +1,9 @@
 {
-  "documentTitle": "Modele klasyfikacji",
+  "documentTitle": "Modele klasyfikacji - Frigate",
   "button": {
     "deleteClassificationAttempts": "Usuń obrazy klasyfikacyjne",
     "renameCategory": "Zmień nazwę klasy",
-    "deleteCategory": "Usuń klasę",
+    "deleteCategory": "Usuń klasyfikację",
     "deleteImages": "Usuń obrazy",
     "trainModel": "Przeszkol model",
     "addClassification": "Dodaj klasyfikację",
@@ -39,7 +39,9 @@
   },
   "deleteCategory": {
     "title": "Usuń klasę",
-    "desc": "Czy na pewno chcesz usunąć klasę {{name}}? Spowoduje to trawałe usunięcie wszystkich powiązanych obrazków i konieczność ponownego trenowania modelu."
+    "desc": "Czy na pewno chcesz usunąć klasę {{name}}? Spowoduje to trawałe usunięcie wszystkich powiązanych obrazków i konieczność ponownego trenowania modelu.",
+    "minClassesTitle": "Nie można usunąć kategorii",
+    "minClassesDesc": "Model klasyfikacyjny musi posiadać co najmniej dwie kategorie. Dodaj inną kategorię aby możliwe było usunięcie tej kategorii."
   },
   "deleteModel": {
     "title": "Usuń model klasyfikacji",
@@ -49,10 +51,69 @@
     "desc_many": "Czy na pewno chcesz usunąć {{count}} modeli? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji."
   },
   "edit": {
-    "title": "Edytuj model klasyfikacji"
+    "title": "Edytuj model klasyfikacji",
+    "descriptionObject": "Zmień typ obiektu i kryteria dla tego modelu klasyfikacji.",
+    "stateClassesInfo": "Uwaga: Zmiana typu klasyfikacji wymaga treningu nowego modelu.",
+    "descriptionState": "Edycja klas dla tego modelu klasyfikacji stanu. Zmiany będą wymagały przekwalifikowania modelu."
   },
   "tooltip": {
     "trainingInProgress": "Trwa trenowanie modelu",
-    "modelNotReady": "Mode nie jest gotowy do trenowania"
+    "modelNotReady": "Mode nie jest gotowy do trenowania",
+    "noChanges": "Brak zmian w zbiorze danych od czasu ostatniego treningu.",
+    "noNewImages": "Nie ma więcej obrazów do trenowania. Zaklasyfikuj więcej obrazów do zbioru danych."
+  },
+  "deleteDatasetImages": {
+    "title": "Usuń obrazy z puli danych",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} obraz z {{dataset}}? Ta akcja nie może zostać cofnięta i będzie wymagała przetrenowania modelu.",
+    "desc_few": "Czy na pewno chcesz usunąć obrazy {{count}} z {{dataset}}? Ta akcja nie może zostać cofnięta i będzie wymagała przetrenowania modelu.",
+    "desc_many": "Czy na pewno chcesz usunąć obrazy {{count}} z {{dataset}}? Ta akcja nie może zostać cofnięta i będzie wymagała przetrenowania modelu."
+  },
+  "renameCategory": {
+    "title": "Zmień nazwę klasy",
+    "desc": "Wprowadź nową nazwę dla {{name}}. Zastosowanie tej zmiany wymagać będzie treningu nowego modelu."
+  },
+  "description": {
+    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki."
+  },
+  "train": {
+    "title": "Ostatnie Klasyfikacje",
+    "titleShort": "Najnowsze",
+    "aria": "Wybierz Najnowsze Klasyfikacje"
+  },
+  "createCategory": {
+    "new": "Stwórz nową klasyfikację"
+  },
+  "deleteTrainImages": {
+    "title": "Usuń obrazy pociągów",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} obraz? Tego działania nie da się cofnąć.",
+    "desc_few": "Czy na pewno chcesz usunąć obrazy {{count}}? Tego działania nie da się cofnąć.",
+    "desc_many": "Czy na pewno chcesz usunąć obrazy {{count}}? Tego działania nie da się cofnąć."
+  },
+  "categories": "Zajęcia",
+  "none": "Nic",
+  "categorizeImageAs": "Klasyfikuj Obraz Jako:",
+  "categorizeImage": "Klasyfikuj obraz",
+  "menu": {
+    "objects": "Obiekty",
+    "states": "Stany"
+  },
+  "noModels": {
+    "object": {
+      "title": "Brak modeli klasyfikacji obiektów",
+      "description": "Utwórz model niestandardowy do klasyfikacji wykrytych obiektów.",
+      "buttonText": "Tworzenie modelu obiektu"
+    },
+    "state": {
+      "title": "Brak państwowych modeli klasyfikacji",
+      "description": "Utwórz niestandardowy model do monitorowania i klasyfikacji zmian stanu w określonych obszarach kamery.",
+      "buttonText": "Utwórz model stanu"
+    }
+  },
+  "wizard": {
+    "title": "Tworzenie nowej klasyfikacji",
+    "steps": {
+      "nameAndDefine": "Nazwij i zdefiniuj",
+      "stateArea": "Obszar stanu"
+    }
   }
 }
