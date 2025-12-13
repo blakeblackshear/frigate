@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Klassifiseringsmodeller",
+  "documentTitle": "Klassifiseringsmodeller - Frigate",
   "button": {
     "deleteClassificationAttempts": "Slett klassifiseringsbilder",
     "renameCategory": "Omdøp klasse",
@@ -12,19 +12,19 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Kategori slettet",
+      "deletedCategory": "Klasse slettet",
       "deletedImage": "Bilder slettet",
-      "categorizedImage": "Bildet ble klassifisert",
+      "categorizedImage": "Klassifiserte bildet",
       "trainedModel": "Modellen ble trent.",
       "trainingModel": "Modelltrening startet.",
       "deletedModel_one": "{{count}} modell ble slettet",
       "deletedModel_other": "{{count}} modeller ble slettet",
       "updatedModel": "Modellkonfigurasjonen ble oppdatert",
-      "renamedCategory": "Kategorien ble omdøpt til {{name}}"
+      "renamedCategory": "Klassen ble omdøpt til {{name}}"
     },
     "error": {
       "deleteImageFailed": "Kunne ikke slette: {{errorMessage}}",
-      "deleteCategoryFailed": "Kunne ikke slette kategori: {{errorMessage}}",
+      "deleteCategoryFailed": "Kunne ikke slette klasse: {{errorMessage}}",
       "categorizeFailed": "Kunne ikke klassifisere bilde: {{errorMessage}}",
       "trainingFailed": "Modelltrening mislyktes. Sjekk Frigate-loggene for detaljer.",
       "deleteModelFailed": "Kunne ikke slette modell: {{errorMessage}}",
@@ -34,10 +34,10 @@
     }
   },
   "deleteCategory": {
-    "title": "Slett kategori",
-    "desc": "Er du sikker på at du vil slette kategorien {{name}}? Dette vil permanent slette alle tilknyttede bilder og kreve at modellen trenes på nytt.",
+    "title": "Slett klasse",
+    "desc": "Er du sikker på at du vil slette klassen {{name}}? Dette vil permanent slette alle tilknyttede bilder og kreve at modellen trenes på nytt.",
     "minClassesTitle": "Kan ikke slette klasse",
-    "minClassesDesc": "En klassifiseringsmodell må ha minst 2 kategorier. Legg til en ny kategori før du sletter denne."
+    "minClassesDesc": "En klassifiseringsmodell må ha minst 2 klasser. Legg til en ny klasse før du sletter denne."
   },
   "deleteDatasetImages": {
     "title": "Slett datasettbilder",
@@ -48,7 +48,7 @@
     "desc": "Er du sikker på at du vil slette {{count}} bilder? Denne handlingen kan ikke angres."
   },
   "renameCategory": {
-    "title": "Gi nytt navn til kategori",
+    "title": "Omdøp klasse",
     "desc": "Skriv inn et nytt navn for {{name}}. Du må trene modellen på nytt for at navneendringen skal tre i kraft."
   },
   "description": {
@@ -57,11 +57,11 @@
   "train": {
     "title": "Nylige klassifiseringer",
     "aria": "Velg nylige klassifiseringer",
-    "titleShort": "Nylig"
+    "titleShort": "Nylige"
   },
-  "categories": "Kategorier",
+  "categories": "Klasser",
   "createCategory": {
-    "new": "Opprett ny kategori"
+    "new": "Opprett ny klasse"
   },
   "categorizeImageAs": "Klassifiser bilde som:",
   "categorizeImage": "Klassifiser bilde",
@@ -98,18 +98,18 @@
       "classificationTypeDesc": "Underetiketter legger til ekstra tekst på objektetiketten (f.eks. 'Person: Posten'). Attributter er søkbare metadata som lagres separat i objektets metadata.",
       "classificationSubLabel": "Underetikett",
       "classificationAttribute": "Attributt",
-      "classes": "Kategorier",
-      "classesTip": "Lær om kategorier",
+      "classes": "Klasser",
+      "classesTip": "Lær om klasser",
       "classesStateDesc": "Definer de ulike tilstandene kamerasonen kan være i. For eksempel: 'åpen' og 'lukket' for en garasjeport.",
-      "classesObjectDesc": "Definer kategoriene du vil klassifisere oppdagede objekter i. For eksempel: 'bud', 'beboer', 'fremmed' for personklassifisering.",
-      "classPlaceholder": "Skriv inn tilstandsnavn...",
+      "classesObjectDesc": "Definer klassene du vil klassifisere oppdagede objekter i. For eksempel: 'bud', 'beboer', 'fremmed' for personklassifisering.",
+      "classPlaceholder": "Skriv inn klassenavn...",
       "errors": {
         "nameRequired": "Modellnavn er påkrevd",
         "nameLength": "Modellnavn må være på 64 tegn eller mindre",
         "nameOnlyNumbers": "Modellnavn kan ikke bare inneholde tall",
-        "classRequired": "Minst én kategori er påkrevd",
-        "classesUnique": "Kategorinavn må være unike",
-        "stateRequiresTwoClasses": "Tilstandsmodeller krever minst to kategorier",
+        "classRequired": "Minst én klasse er påkrevd",
+        "classesUnique": "Klassenavn må være unike",
+        "stateRequiresTwoClasses": "Tilstandsmodeller krever minst 2 klasser",
         "objectLabelRequired": "Velg en objektetikett",
         "objectTypeRequired": "Velg en klassifiseringstype"
       },
@@ -124,7 +124,7 @@
     },
     "step3": {
       "selectImagesPrompt": "Velg alle bilder med: {{className}}",
-      "selectImagesDescription": "Klikk på bilder for å velge dem. Klikk Fortsett når du er ferdig med denne kategorien.",
+      "selectImagesDescription": "Klikk på bilder for å velge dem. Klikk Fortsett når du er ferdig med denne klassen.",
       "generating": {
         "title": "Genererer eksempelbilder",
         "description": "Frigate henter representative bilder fra opptakene dine. Dette kan ta litt tid..."
@@ -146,7 +146,12 @@
       },
       "generateSuccess": "Eksempelbilder ble generert",
       "allImagesRequired_one": "Vennligst klassifiser alle bildene. {{count}} bilde gjenstår.",
-      "allImagesRequired_other": "Vennligst klassifiser alle bildene. {{count}} bilder gjenstår."
+      "allImagesRequired_other": "Vennligst klassifiser alle bildene. {{count}} bilder gjenstår.",
+      "modelCreated": "Modellen ble opprettet. Bruk visningen Nylige klassifiseringer for å legge til bilder for manglende tilstander, og tren deretter modellen.",
+      "missingStatesWarning": {
+        "title": "Manglende tilstandseksempler",
+        "description": "Det anbefales å velge eksempler for alle tilstander for å oppnå best mulig resultat. Du kan fortsette uten å velge alle tilstander, men modellen vil ikke bli trent før alle tilstander har bilder. Etter at du har gått videre, bruk visningen Nylige klassifiseringer for å klassifisere bilder for de manglende tilstandene, og tren deretter modellen."
+      }
     }
   },
   "deleteModel": {
@@ -159,10 +164,10 @@
     "states": "Tilstander"
   },
   "details": {
-    "scoreInfo": "Poengsummen representerer gjennomsnittlig klassifiseringskonfidens på tvers av alle deteksjoner av dette objektet."
+    "scoreInfo": "Score representerer gjennomsnittlig klassifiseringskonfidens på tvers av alle deteksjoner av dette objektet."
   },
   "tooltip": {
-    "trainingInProgress": "Modellen trenes for øyeblikket",
+    "trainingInProgress": "Modellen trenes nå",
     "noNewImages": "Ingen nye bilder å trene på. Klassifiser flere bilder i datasettet først.",
     "noChanges": "Ingen endringer i datasettet siden forrige trening.",
     "modelNotReady": "Modellen er ikke klar til å trenes"
@@ -172,5 +177,6 @@
     "descriptionState": "Rediger klassene for denne tilstandsklassifiseringsmodellen. Endringer vil kreve at modellen trenes på nytt.",
     "descriptionObject": "Rediger objekttypen og klassifiseringstypen for denne objektklassifiseringsmodellen.",
     "stateClassesInfo": "Merk: Endring av tilstandsklasser krever at modellen trenes på nytt med de oppdaterte klassene."
-  }
+  },
+  "none": "Ingen"
 }

@@ -77,7 +77,7 @@
       "showOptions": "Vis alternativer",
       "hideOptions": "Skjul alternativer"
     },
-    "boundingBox": "Omsluttende boks",
+    "boundingBox": "Avgrensningsboks",
     "timestamp": "Tidsstempel",
     "zones": "Soner",
     "mask": "Maske",

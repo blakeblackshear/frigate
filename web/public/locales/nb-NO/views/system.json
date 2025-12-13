@@ -74,9 +74,9 @@
       "title": "Maskinvareinformasjon",
       "gpuUsage": "GPU-belastning",
       "npuMemory": "NPU minne",
-      "npuUsage": "NPU belastning",
+      "npuUsage": "NPU-belastning",
       "intelGpuWarning": {
-        "title": "Advarsel om Intel GPU-statistikk",
+        "title": "Til info om Intel GPU-statistikk",
         "message": "GPU statistikk ikke tilgjengelig",
         "description": "Dette er en kjent feil i Intels verktøy for rapportering av GPU-statistikk (intel_gpu_top), der verktøyet slutter å fungere og gjentatte ganger viser 0 % GPU-bruk, selv om maskinvareakselerasjon og objektdeteksjon kjører korrekt på (i)GPU-en. Dette er ikke en feil i Frigate. Du kan starte verten på nytt for å løse problemet midlertidig, og for å bekrefte at GPU-en fungerer som den skal. Dette påvirker ikke ytelsen."
       }

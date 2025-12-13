@@ -11,7 +11,7 @@
     "face": "Ansiktsdetaljer",
     "faceDesc": "Detaljer for sporet objekt som genererte dette ansiktet",
     "timestamp": "Tidsstempel",
-    "scoreInfo": "Under-merkelappens poengsum er basert på en vektet sum ut ifra hvor sikre gjenkjenningene av ansiktene er, så den kan avvike fra poengsummen som vises på øyeblikksbildet.",
+    "scoreInfo": "Score er et vektet gjennomsnitt av alle ansiktsscorer, vektet etter størrelsen på ansiktet i hvert bilde.",
     "subLabelScore": "Poengsum for under-merkelapp",
     "unknown": "Ukjent"
   },
@@ -25,7 +25,8 @@
   "train": {
     "aria": "Velg nylige gjenkjennelser",
     "title": "Nylige gjenkjennelser",
-    "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning"
+    "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning",
+    "titleShort": "Nylige"
   },
   "selectFace": "Velg ansikt",
   "deleteFaceLibrary": {
@@ -38,7 +39,7 @@
       "deleteFaceFailed": "Kunne ikke slette: {{errorMessage}}",
       "uploadingImageFailed": "Kunne ikke laste opp bilde: {{errorMessage}}",
       "trainFailed": "Kunne ikke trene: {{errorMessage}}",
-      "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsskåring: {{errorMessage}}",
+      "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsscore: {{errorMessage}}",
       "addFaceLibraryFailed": "Kunne ikke angi ansiktsnavn: {{errorMessage}}",
       "deleteNameFailed": "Kunne ikke slette navn: {{errorMessage}}",
       "renameFaceFailed": "Kunne ikke gi nytt navn til ansikt: {{errorMessage}}"
@@ -49,7 +50,7 @@
       "deletedName_one": "{{count}} ansikt ble slettet.",
       "deletedName_other": "{{count}} ansikter ble slettet.",
       "trainedFace": "Ansiktet ble trent.",
-      "updatedFaceScore": "Ansiktsskåring ble oppdatert til {{name}} ({{score}}).",
+      "updatedFaceScore": "Oppdaterte ansiktsscore for {{name}} ({{score}}).",
       "uploadedImage": "Bildet ble lastet opp.",
       "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!",
       "renamedFace": "Nytt navn ble gitt til ansikt {{name}}"

@@ -61,7 +61,8 @@
         "failed": "Klarte ikke å starte eksport: {{error}}",
         "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
         "endTimeMustAfterStartTime": "Sluttid må være etter starttid"
-      }
+      },
+      "view": "Vis"
     },
     "fromTimeline": {
       "previewExport": "Forhåndsvis eksport",
