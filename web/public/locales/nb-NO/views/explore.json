@@ -19,7 +19,7 @@
         "visionModel": "Visjonsmodell",
         "visionModelFeatureExtractor": "Funksjonsekstraktor for visjonsmodell",
         "textModel": "Tekstmodell",
-        "textTokenizer": "Tekst symbolbygger"
+        "textTokenizer": "Tekst-tokeniserer"
       },
       "context": "Frigate laster ned de nødvendige vektorrepresentasjonsmodellene for å støtte funksjonen for semantisk søk. Dette kan ta flere minutter, avhengig av hastigheten på nettverksforbindelsen din.",
       "tips": {
@@ -90,7 +90,7 @@
           "updatedSublabel": "Underetikett ble oppdatert.",
           "updatedLPR": "Vellykket oppdatering av kjennemerke.",
           "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere.",
-          "audioTranscription": "Lydtranskripsjon ble forespurt."
+          "audioTranscription": "Lydtranskripsjon ble forespurt. Avhengig av ytelsen på din Frigate server kan transkripsjonen ta noe tid å fullføre."
         },
         "error": {
           "regenerate": "Feil ved anrop til {{provider}} for en ny beskrivelse: {{errorMessage}}",
@@ -107,8 +107,8 @@
       }
     },
     "topScore": {
-      "info": "Den høyeste poengsummen er den høyeste medianverdi for det sporede objektet, så denne kan avvike fra poengsummen som vises på miniatyrbildet for søkeresultatet.",
-      "label": "Høyeste poengsum"
+      "info": "Toppscoren er den høyeste medianverdien for det sporede objektet, så denne kan avvike fra scoren som vises på miniatyrbildet i søkeresultatet.",
+      "label": "Toppscore"
     },
     "estimatedSpeed": "Estimert hastighet",
     "objects": "Objekter",
@@ -140,17 +140,17 @@
     "zones": "Soner",
     "timestamp": "Tidsstempel",
     "expandRegenerationMenu": "Utvid regenereringsmenyen",
-    "regenerateFromSnapshot": "Regenerer fra øyeblikksbilde",
+    "regenerateFromSnapshot": "Regenerer fra stillbilde",
     "editSubLabel": {
       "title": "Rediger underetikett",
       "desc": "Angi en ny underetikett for \"{{label}}\"",
       "descNoLabel": "Angi en ny underetikett for dette sporede objektet"
     },
     "snapshotScore": {
-      "label": "Øyeblikksbilde poengsum"
+      "label": "Stillbilde score"
     },
     "score": {
-      "label": "Poengsum"
+      "label": "Score"
     }
   },
   "itemMenu": {
@@ -163,8 +163,8 @@
       "label": "Last ned video"
     },
     "downloadSnapshot": {
-      "label": "Last ned øyeblikksbilde",
-      "aria": "Last ned øyeblikksbilde"
+      "label": "Last ned stillbilde",
+      "aria": "Last ned stillbilde"
     },
     "viewObjectLifecycle": {
       "label": "Vis objektets livssyklus",
@@ -193,11 +193,15 @@
       "label": "Vis objektets sti"
     },
     "hideObjectDetails": {
-      "label": "Gjem objektets sti"
+      "label": "Skjul objektets sti"
     },
     "viewTrackingDetails": {
       "label": "Vis sporingsdetaljer",
       "aria": "Vis sporingsdetaljene"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Last ned rent stillbilde",
+      "aria": "Last ned stillbilde uten markeringer"
     }
   },
   "searchResult": {
@@ -214,7 +218,7 @@
   "trackedObjectDetails": "Detaljer om sporet objekt",
   "type": {
     "details": "detaljer",
-    "snapshot": "øyeblikksbilde",
+    "snapshot": "stillbilde",
     "video": "video",
     "object_lifecycle": "objektets livssyklus",
     "thumbnail": "miniatyrbilde",
@@ -223,7 +227,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Bekreft sletting",
-      "desc": "Sletting av dette sporede objektet fjerner øyeblikksbildet, alle lagrede vektorrepresentasjoner og tilknyttede oppføringer for sporingsdetaljer. Opptak av dette objektet i Historikk-visningen vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?"
+      "desc": "Sletting av dette sporede objektet fjerner stillbildet, alle lagrede vektorrepresentasjoner og tilknyttede oppføringer for sporingsdetaljer. Opptak av dette objektet i Historikk-visningen vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?"
     }
   },
   "noTrackedObjects": "Fant ingen sporede objekter",
@@ -260,8 +264,9 @@
       "external": "{{label}} oppdaget",
       "header": {
         "zones": "Soner",
-        "ratio": "Forhold",
-        "area": "Område"
+        "ratio": "Sideforhold",
+        "area": "Område",
+        "score": "Score"
       }
     },
     "annotationSettings": {
@@ -276,7 +281,7 @@
         "millisecondsToOffset": "Antall millisekunder deteksjonsannoteringene skal forskyves med. <em>Standard: 0</em>",
         "tips": "TIPS: Se for deg et hendelsesklipp med en person som går fra venstre mot høyre. Hvis avgrensningsboksen på tidslinjen for hendelsen konsekvent er til venstre for personen, bør verdien reduseres. På samme måte, hvis en person går fra venstre mot høyre og avgrensningsboksen konsekvent er foran personen, bør verdien økes.",
         "toast": {
-          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å aktivere endringene."
+          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen."
         }
       }
     },

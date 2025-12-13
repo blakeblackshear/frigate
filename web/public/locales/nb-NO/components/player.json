@@ -37,7 +37,7 @@
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller høyere kreves for denne typen direkte-strømming.",
   "streamOffline": {
     "title": "Strømmen er frakoblet",
-    "desc": "Ingen bilder er mottatt på {{cameraName}} <code>detekt</code> strømmen, sjekk feilloggene"
+    "desc": "Ingen bilder er mottatt på {{cameraName}} <code>detekt</code>-strømmen, sjekk feilloggene"
   },
   "cameraDisabled": "Kameraet er deaktivert",
   "toast": {

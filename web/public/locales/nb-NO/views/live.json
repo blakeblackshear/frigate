@@ -38,10 +38,10 @@
     },
     "focus": {
       "in": {
-        "label": "Fokuser inn på PTZ kamera"
+        "label": "Fokuser inn på PTZ-kameraet"
       },
       "out": {
-        "label": "Fokuser ut på PTZ kamera"
+        "label": "Fokuser ut på PTZ-kameraet"
       }
     }
   },
@@ -50,8 +50,8 @@
     "disable": "Deaktiver kamera"
   },
   "snapshots": {
-    "enable": "Aktiver øyeblikksbilder",
-    "disable": "Deaktiver øyeblikksbilder"
+    "enable": "Aktiver stillbilder",
+    "disable": "Deaktiver stillbilder"
   },
   "audioDetect": {
     "enable": "Aktiver lydregistrering",
@@ -62,7 +62,7 @@
     "disable": "Deaktiver automatisk sporing"
   },
   "manualRecording": {
-    "tips": "Last ned et øyeblikksbilde, eller start en manuell hendelse basert på dette kameraets innstillinger for opptaksbevaring.",
+    "tips": "Last ned et stillbilde, eller start en manuell hendelse basert på dette kameraets innstillinger for opptaksbevaring.",
     "playInBackground": {
       "label": "Spill av i bakgrunnen",
       "desc": "Aktiver dette alternativet for å fortsette strømming når spilleren er skjult."
@@ -77,7 +77,7 @@
     "debugView": "Feilsøkingsvisning",
     "start": "Start manuelt opptak",
     "failedToStart": "Kunne ikke starte manuelt opptak.",
-    "recordDisabledTips": "Siden opptak er deaktivert eller begrenset i konfigurasjonen for dette kameraet, vil kun et øyeblikksbilde bli lagret.",
+    "recordDisabledTips": "Siden opptak er deaktivert eller begrenset i konfigurasjonen for dette kameraet, vil kun et stillbilde bli lagret.",
     "ended": "Avsluttet manuelt opptak.",
     "failedToEnd": "Kunne ikke avslutte manuelt opptak."
   },
@@ -162,7 +162,7 @@
     "cameraEnabled": "Kamera aktivert",
     "objectDetection": "Objektdeteksjon",
     "recording": "Opptak",
-    "snapshots": "Øyeblikksbilder",
+    "snapshots": "Stillbilder",
     "audioDetection": "Lydregistrering",
     "autotracking": "Automatisk sporing",
     "transcription": "Lydtranskripsjon"
@@ -172,10 +172,10 @@
     "disable": "Deaktiver direkte lydtranskripsjon"
   },
   "snapshot": {
-    "noVideoSource": "Ingen videokilde tilgjengelig for øyeblikksbilde.",
-    "captureFailed": "Kunne ikke ta øyeblikksbilde.",
-    "downloadStarted": "Nedlasting av øyeblikksbilde startet.",
-    "takeSnapshot": "Last ned øyeblikksbilde"
+    "noVideoSource": "Ingen videokilde tilgjengelig for stillbilde.",
+    "captureFailed": "Kunne ikke ta stillbilde.",
+    "downloadStarted": "Nedlasting av stillbilde startet.",
+    "takeSnapshot": "Last ned stillbilde"
   },
   "noCameras": {
     "title": "Ingen kameraer konfigurert",

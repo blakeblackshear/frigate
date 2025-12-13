@@ -23,7 +23,7 @@
   },
   "allCameras": "Alle kameraer",
   "timeline.aria": "Velg tidslinje",
-  "documentTitle": "Inspiser - Frigate",
+  "documentTitle": "Inspeksjon - Frigate",
   "recordings": {
     "documentTitle": "Opptak - Frigate"
   },
@@ -55,5 +55,9 @@
     "clickToSeek": "Klikk for å gå til dette tidspunktet"
   },
   "zoomIn": "Zoom inn",
-  "zoomOut": "Zoom ut"
+  "zoomOut": "Zoom ut",
+  "normalActivity": "Normal",
+  "needsReview": "Trenger inspeksjon",
+  "securityConcern": "Sikkerhetsrisiko",
+  "select_all": "Alle"
 }

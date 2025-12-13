@@ -3,7 +3,7 @@
   "labels": {
     "label": "Etiketter",
     "all": {
-      "title": "Alle masker / soner",
+      "title": "Alle etiketter",
       "short": "Etiketter"
     },
     "count": "{{count}} merkelapper",
@@ -14,17 +14,17 @@
     "hasVideoClip": "Har et videoklipp",
     "submittedToFrigatePlus": {
       "label": "Sendt til Frigate+",
-      "tips": "Du må først filtrere på sporede objekter som har et øyeblikksbilde.<br /><br />Sporede objekter uten et øyeblikksbilde kan ikke sendes til Frigate+."
+      "tips": "Du må først filtrere på sporede objekter som har et stillbilde.<br /><br />Sporede objekter uten et stillbilde kan ikke sendes til Frigate+."
     },
     "label": "Funksjoner",
-    "hasSnapshot": "Har et øyeblikksbilde"
+    "hasSnapshot": "Har et stillbilde"
   },
   "sort": {
     "label": "Sorter",
     "dateAsc": "Dato (Stigende)",
     "dateDesc": "Dato (Synkende)",
-    "scoreAsc": "Objektpoengsum (Stigende)",
-    "scoreDesc": "Objektpoengsum (Synkende)",
+    "scoreAsc": "Objektscore (Stigende)",
+    "scoreDesc": "Objektscore (Synkende)",
     "speedAsc": "Estimert hastighet (Stigende)",
     "speedDesc": "Estimert hastighet (Synkende)",
     "relevance": "Relevans"
@@ -69,7 +69,7 @@
   },
   "trackedObjectDelete": {
     "title": "Bekreft sletting",
-    "desc": "Sletting av disse {{objectLength}} sporede objektene fjerner øyeblikksbildet, eventuelle lagrede vektorrepresentasjoner og tilhørende objekt livssyklusoppføringer. Opptak av disse sporede objektene i Historikkvisning vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?<br /><br />Hold <em>Shift</em>-tasten for å unngå denne dialogboksen i fremtiden.",
+    "desc": "Sletting av disse {{objectLength}} sporede objektene fjerner stillbildet, eventuelle lagrede vektorrepresentasjoner og tilhørende objekt livssyklusoppføringer. Opptak av disse sporede objektene i Historikkvisning vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?<br /><br />Hold <em>Shift</em>-tasten for å unngå denne dialogboksen i fremtiden.",
     "toast": {
       "success": "Sporede objekter ble slettet.",
       "error": "Kunne ikke slette sporede objekter: {{errorMessage}}"
@@ -104,7 +104,7 @@
     "label": "Underetiketter",
     "all": "Alle underetiketter"
   },
-  "score": "Poengsum",
+  "score": "Score",
   "estimatedSpeed": "Estimert hastighet ({{unit}})",
   "cameras": {
     "all": {

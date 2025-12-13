@@ -6,11 +6,11 @@
     "masksAndZones": "Maske- og soneeditor - Frigate",
     "motionTuner": "Bevegelsesjustering - Frigate",
     "object": "Test og feilsøk - Frigate",
-    "general": "Brukergrensesnitt innstillinger - Frigate",
+    "general": "Innstillinger for brukergrensesnitt - Frigate",
     "classification": "Klassifiseringsinnstillinger - Frigate",
     "frigatePlus": "Frigate+ innstillinger - Frigate",
-    "notifications": "Meldingsvarsler Innstillinger - Frigate",
-    "enrichments": "Utvidelser Innstillinger - Frigate",
+    "notifications": "Innstillinger for meldingsvarsler - Frigate",
+    "enrichments": "Innstillinger for utvidelser - Frigate",
     "cameraManagement": "Administrer kameraer - Frigate",
     "cameraReview": "Innstillinger for kamerainspeksjon - Frigate"
   },
@@ -91,7 +91,7 @@
         "clearStreamingSettingsFailed": "Kunne ikke fjerne strømmingsinnstillinger: {{errorMessage}}"
       }
     },
-    "title": "Brukergrensesnitt innstillinger",
+    "title": "Innstillinger for brukergrensesnitt",
     "cameraGroupStreaming": {
       "title": "Strømmingsinnstillinger for kameragrupper",
       "desc": "Strømmingsinnstillingene lagres lokalt i nettleseren.",
@@ -314,7 +314,7 @@
       "name": {
         "title": "Navn",
         "inputPlaceHolder": "Skriv inn et navn…",
-        "tips": "Navnet må være minst 2 tegn langt, inneholde minst én bokstav, og må ikke være det samme som et kamera- eller sone-navn."
+        "tips": "Navnet må være minst 2 tegn langt, inneholde minst én bokstav, og må ikke være det samme som et kamera- eller sone-navn for dette kameraet."
       },
       "loiteringTime": {
         "title": "Oppholdstid",
@@ -345,7 +345,7 @@
         }
       },
       "toast": {
-        "success": "Sone ({{zoneName}}) er lagret. Start Frigate på nytt for å aktivere endringer."
+        "success": "Sone ({{zoneName}}) er lagret."
       }
     },
     "motionMasks": {
@@ -371,8 +371,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å aktivere endringene.",
-          "noName": "Bevegelsesmasken er lagret. Start Frigate på nytt for å aktivere endringene."
+          "title": "{{polygonName}} er lagret.",
+          "noName": "Bevegelsesmasken er lagret."
         }
       }
     },
@@ -396,8 +396,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å aktivere endringene.",
-          "noName": "Objektmasken er lagret. Start Frigate på nytt for å aktivere endringene."
+          "title": "{{polygonName}} er lagret.",
+          "noName": "Objektmasken er lagret."
         }
       }
     },
@@ -433,7 +433,7 @@
     "objectList": "Objektliste",
     "noObjects": "Ingen objekter",
     "boundingBoxes": {
-      "title": "Omsluttende bokser",
+      "title": "Avgrensningsbokser",
       "desc": "Vis omsluttende bokser rundt sporede objekter",
       "colors": {
         "label": "Farge på omsluttende bokser for objekt",
@@ -460,8 +460,8 @@
     },
     "objectShapeFilterDrawing": {
       "document": "Se dokumentasjonen ",
-      "score": "Poengsum",
-      "ratio": "Forhold",
+      "score": "Score",
+      "ratio": "Sideforhold",
       "area": "Areal",
       "title": "Tegning av objektformfilter",
       "desc": "Tegn et rektangel på bildet for å vise areal- og størrelsesforhold",
@@ -478,7 +478,7 @@
     "audio": {
       "title": "Lyd",
       "noAudioDetections": "Ingen lyddeteksjoner",
-      "score": "poengsum",
+      "score": "score",
       "currentRMS": "Nåværende RMS",
       "currentdbFS": "Nåværende dbFS"
     },
@@ -532,7 +532,16 @@
             "strong": "Sterkt"
           },
           "match": "Passordene samsvarer",
-          "notMatch": "Passordene samsvarer ikke"
+          "notMatch": "Passordene samsvarer ikke",
+          "show": "Vis passord",
+          "hide": "Skjul passord",
+          "requirements": {
+            "title": "Passordkrav:",
+            "length": "Minst 8 tegn",
+            "uppercase": "Minst en stor bokstav",
+            "digit": "Minst ett tall",
+            "special": "Minst ett spesialtegn (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "Nytt passord",
@@ -542,7 +551,11 @@
           }
         },
         "usernameIsRequired": "Brukernavn er påkrevd",
-        "passwordIsRequired": "Passord er påkrevd"
+        "passwordIsRequired": "Passord er påkrevd",
+        "currentPassword": {
+          "title": "Nåværende passord",
+          "placeholder": "Skriv inn nåværende passord"
+        }
       },
       "changeRole": {
         "desc": "Oppdater tillatelser for <strong>{{username}}</strong>",
@@ -573,7 +586,12 @@
         "setPassword": "Angi passord",
         "desc": "Opprett et sterkt passord for å sikre denne kontoen.",
         "cannotBeEmpty": "Passordet kan ikke være tomt",
-        "doNotMatch": "Passordene samsvarer ikke"
+        "doNotMatch": "Passordene samsvarer ikke",
+        "currentPasswordRequired": "Nåværende passord er påkrevd",
+        "incorrectCurrentPassword": "Nåværende passord er feil",
+        "passwordVerificationFailed": "Kunne ikke verifisere passord",
+        "multiDeviceWarning": "Andre enheter du er logget inn på vil kreve ny innlogging innen {{refresh_time}}.",
+        "multiDeviceAdmin": "Du kan også tvinge alle brukere til å logge inn på nytt umiddelbart ved å rotere JWT-hemmeligheten din."
       }
     },
     "table": {
@@ -669,15 +687,15 @@
     },
     "title": "Frigate+ Innstillinger",
     "snapshotConfig": {
-      "title": "Konfigurasjon av øyeblikksbilde",
-      "desc": "Innsending til Frigate+ krever at både øyeblikksbilder og <code>clean_copy</code>-øyeblikksbilder er aktivert i konfigurasjonen din.",
+      "title": "Konfigurasjon av stillbilde",
+      "desc": "Innsending til Frigate+ krever at både stillbilder og <code>clean_copy</code>-stillbilder er aktivert i konfigurasjonen din.",
       "documentation": "Se dokumentasjonen",
       "table": {
         "camera": "Kamera",
-        "snapshots": "Øyeblikksbilder",
-        "cleanCopySnapshots": "<code>clean_copy</code>-øyeblikksbilder"
+        "snapshots": "Stillbilder",
+        "cleanCopySnapshots": "<code>clean_copy</code>-stillbilder"
       },
-      "cleanCopyWarning": "Noen kameraer har øyeblikksbilder aktivert, men ren kopi er deaktivert. Du må aktivere <code>clean_copy</code> i øyeblikksbilde-konfigurasjonen for å kunne sende bilder fra disse kameraene til Frigate+."
+      "cleanCopyWarning": "Noen kameraer har stillbilder aktivert, men ren kopi er deaktivert. Du må aktivere <code>clean_copy</code> i stillbilde-konfigurasjonen for å kunne sende bilder fra disse kameraene til Frigate+."
     },
     "toast": {
       "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å aktivere endringene.",
@@ -943,7 +961,7 @@
       "nameAndConnection": "Navn og tilkobling",
       "streamConfiguration": "Strømkonfigurasjon",
       "validationAndTesting": "Validering og testing",
-      "probeOrSnapshot": "Sjekk eller øyeblikksbilde"
+      "probeOrSnapshot": "Sjekk eller stillbilde"
     },
     "save": {
       "success": "Lagret nytt kamera {{cameraName}}.",
@@ -1054,7 +1072,7 @@
       "retry": "Prøv på nytt",
       "testing": {
         "probingMetadata": "Sjekker metadata for kamera...",
-        "fetchingSnapshot": "Henter øyeblikksbilde fra kamera..."
+        "fetchingSnapshot": "Henter stillbilde fra kamera..."
       },
       "probeFailed": "Kunne ikke å sjekke kamera: {{error}}",
       "probingDevice": "Tester enhet...",
@@ -1200,7 +1218,8 @@
         "audioCodecRequired": "En lydstrøm kreves for å støtte lyddeteksjon.",
         "restreamingWarning": "Å redusere tilkoblinger til kameraet for opptaksstrømmen kan øke CPU-bruken noe.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvareinnstillinger og start veiviseren på nytt."
+          "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvareinnstillinger og start veiviseren på nytt.",
+          "reolink-http": "Reolink HTTP-strømmer bør bruke FFmpeg for bedre kompatibilitet. Aktiver 'Bruk kompatibilitetsmodus for strøm' for denne strømmen."
         },
         "dahua": {
           "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Dahua / Amcrest / EmpireTech-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
@@ -1268,7 +1287,7 @@
       "detections": "Deteksjoner "
     },
     "reviewClassification": {
-      "title": "Inspeksjonssklassifisering",
+      "title": "Inspeksjonsklassifisering",
       "desc": "Frigate kategoriserer inspeksjonselementer som Varsler og Deteksjoner. Som standard regnes alle <em>person</em>- og <em>bil</em>-objekter som Varsler. Du kan finjustere klassifiseringen ved å konfigurere nødvendige soner.",
       "noDefinedZones": "Ingen soner er definert for dette kameraet.",
       "objectAlertsTips": "Alle {{alertsLabels}}-objekter på {{cameraName}} vil bli vist som varsler.",
