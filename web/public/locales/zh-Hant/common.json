@@ -39,8 +39,8 @@
       "24hour": "M 月 d 日 HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "MM 月 dd 日 ah:mm:ss",
-      "24hour": "MM 月 dd 日 HH:mm:ss"
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
       "12hour": "a h:mm",
@@ -64,9 +64,12 @@
     },
     "formattedTimestampMonthDay": "M 月 d 日",
     "formattedTimestampFilename": {
-      "12hour": "yy年MM月dd日 ah時mm分ss秒",
+      "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "yy年MM月dd日 HH時mm分ss秒"
-    }
+    },
+    "inProgress": "處理中",
+    "invalidStartTime": "無效的起始時間",
+    "invalidEndTime": "無效的結束時間"
   },
   "unit": {
     "speed": {
@@ -76,10 +79,23 @@
     "length": {
       "feet": "英尺",
       "meters": "公尺"
+    },
+    "data": {
+      "kbps": "kB/秒",
+      "mbps": "MB/秒",
+      "gbps": "GB/秒",
+      "kbph": "kB/小時",
+      "mbph": "MB/小時",
+      "gbph": "GB/小時"
     }
   },
   "label": {
-    "back": "返回"
+    "back": "返回",
+    "hide": "隱藏{{item}}",
+    "show": "顯示{{item}}",
+    "ID": "ID",
+    "none": "無",
+    "all": "全部"
   },
   "button": {
     "apply": "套用",
@@ -116,7 +132,8 @@
     "unselect": "取消選取",
     "export": "匯出",
     "deleteNow": "立即刪除",
-    "next": "繼續"
+    "next": "繼續",
+    "continue": "繼續"
   },
   "menu": {
     "system": "系統",
@@ -160,7 +177,15 @@
       "ca": "Català (加泰隆尼亞文)",
       "withSystem": {
         "label": "使用系統語言設定"
-      }
+      },
+      "ptBR": "Português brasileiro (巴西葡萄牙文)",
+      "sr": "Српски (塞爾維亞文)",
+      "sl": "Slovenščina (斯洛文尼亞文)",
+      "lt": "Lietuvių (立陶宛文)",
+      "bg": "Български (保加利亞文)",
+      "gl": "Galego (加利西亞文)",
+      "id": "Bahasa Indonesia (印尼文)",
+      "ur": "اردو (烏爾都文)"
     },
     "appearance": "外觀",
     "darkMode": {
@@ -207,7 +232,8 @@
       "anonymous": "匿名",
       "logout": "登出",
       "setPassword": "設定密碼"
-    }
+    },
+    "classification": "標籤分類"
   },
   "toast": {
     "copyUrlToClipboard": "已複製連結至剪貼簿。",
@@ -248,5 +274,17 @@
     "desc": "找不到頁面"
   },
   "selectItem": "選擇 {{item}}",
-  "readTheDocumentation": "閱讀文件"
+  "readTheDocumentation": "閱讀文件",
+  "list": {
+    "two": "{{0}} 和 {{1}}",
+    "many": "{{items}}, 及 {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "可選的",
+    "internalID": "在Frigate 設定檔與資料庫使用的內部ID"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

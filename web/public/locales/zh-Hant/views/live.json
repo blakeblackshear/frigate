@@ -86,8 +86,8 @@
     "disable": "隱藏串流統計資料"
   },
   "manualRecording": {
-    "title": "應需錄影",
-    "tips": "根據此鏡頭的錄影保留設定手動啟動事件。",
+    "title": "應需",
+    "tips": "根據此鏡頭的錄影保留設定，下載快照或手動啟動事件。",
     "playInBackground": {
       "label": "背景播放",
       "desc": "啟用此選項以在播放器被隱藏時繼續播放串流。"
@@ -166,5 +166,11 @@
   "transcription": {
     "enable": "啟用即時語音轉錄",
     "disable": "停用即時語音轉錄"
+  },
+  "snapshot": {
+    "takeSnapshot": "下載即時快照",
+    "noVideoSource": "沒有可用的影片資源以擷取快照。",
+    "captureFailed": "快照擷取失敗。",
+    "downloadStarted": "已開始下載快照。"
   }
 }

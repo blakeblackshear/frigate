@@ -2,7 +2,84 @@
   "toast": {
     "success": {
       "deletedImage": "已刪除的圖片",
-      "deletedModel_other": "成功刪除 {{count}} 個模型"
+      "deletedModel_other": "成功刪除 {{count}} 個模型",
+      "deletedCategory": "刪除分類",
+      "categorizedImage": "成功分類圖片",
+      "trainedModel": "訓練模型成功。",
+      "trainingModel": "已開始訓練模型。",
+      "updatedModel": "已更新模型配置",
+      "renamedCategory": "成功修改分類名稱為{{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "刪除失敗：{{errorMessage}}",
+      "deleteCategoryFailed": "刪除分類標籤失敗: {{errorMessage}}",
+      "deleteModelFailed": "刪除模型失敗: {{errorMessage}}",
+      "categorizeFailed": "圖片分類失敗: {{errorMessage}}",
+      "trainingFailed": "模型訓練失敗。請至Frigate 日誌查看詳情。",
+      "trainingFailedToStart": "模型訓練啟動失敗: {{errorMessage}}",
+      "updateModelFailed": "模型更新失敗: {{errorMessage}}",
+      "renameCategoryFailed": "類別重新命名失敗: {{errorMessage}}"
     }
+  },
+  "documentTitle": "分類模型",
+  "details": {
+    "scoreInfo": "分數表示該目標所有偵測結果的平均分類置信度。"
+  },
+  "button": {
+    "deleteClassificationAttempts": "刪除分類圖片",
+    "renameCategory": "重新命名分類",
+    "deleteCategory": "刪除分類",
+    "deleteImages": "刪除圖片",
+    "trainModel": "訓練模型",
+    "addClassification": "添加分類",
+    "deleteModels": "刪除模型",
+    "editModel": "編輯模型"
+  },
+  "tooltip": {
+    "trainingInProgress": "模型正在訓練中",
+    "noNewImages": "沒有新的圖片可用於訓練。請先對數據集中的更多圖片進行分類。",
+    "noChanges": "自上次訓練以來，數據集未作任何更改。",
+    "modelNotReady": "模型尚未準備好進行訓練"
+  },
+  "deleteCategory": {
+    "title": "刪除類別",
+    "desc": "你確定要刪除類別{{name}}嗎? 這將刪除所有有關的圖片並需要重新訓練模型。",
+    "minClassesTitle": "無法刪除此類別",
+    "minClassesDesc": "分類模型必須至少擁有2個類別，新增一個新的類別已刪除這個。"
+  },
+  "deleteModel": {
+    "title": "刪除分類模型",
+    "single": "你確定要刪除{{name}}嗎? 這將永久刪除包含圖片和訓練資料在內的所有相關資料。這個操作無法被復原。",
+    "desc_other": "你確定要刪除{{count}}個模型? 這將永久刪除包含圖片和訓練資料在內的所有相關資料。這個操作無法被復原。"
+  },
+  "edit": {
+    "title": "編輯分類模型",
+    "descriptionState": "編輯這個狀態分類模型的類別，變更將需要重新訓練模型。",
+    "descriptionObject": "編輯這個物件分類模型的物件種類與分類種類。",
+    "stateClassesInfo": "注意: 變更狀態類別後需要以更新後的類別重新訓練模型。"
+  },
+  "deleteDatasetImages": {
+    "title": "刪除圖片資料集合",
+    "desc_other": "你確定要從{{dataset}}中刪除{{count}}個圖片嗎? 這個操作將無法被復原且將需要重新訓練模型。"
+  },
+  "deleteTrainImages": {
+    "title": "刪除訓練圖片",
+    "desc_other": "你確定要刪除{{count}}個圖片? 這個操作無法被復原。"
+  },
+  "renameCategory": {
+    "title": "重新命名類別",
+    "desc": "輸入 {{name}} 的新名稱。您需要在名稱變更後重新訓練模型以套用變更。"
+  },
+  "description": {
+    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。"
+  },
+  "train": {
+    "title": "最近的分類紀錄",
+    "titleShort": "最近",
+    "aria": "選取最近的分類紀錄"
+  },
+  "categories": "類別",
+  "createCategory": {
+    "new": "建立新的類別"
   }
 }

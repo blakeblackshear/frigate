@@ -2,8 +2,8 @@
   "documentTitle": {
     "cameras": "鏡頭統計 - Frigate",
     "storage": "儲存裝置統計 - Frigate",
-    "general": "統計總覽 - Frigate",
-    "enrichments": "進階統計 - Frigate",
+    "general": "一般統計 - Frigate",
+    "enrichments": "進階功能統計 - Frigate",
     "logs": {
       "frigate": "Frigate 日誌 - Frigate",
       "go2rtc": "Go2RTC 日誌 - Frigate",
@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "NPU 使用率",
-      "npuMemory": "NPU 記憶體"
+      "npuMemory": "NPU 記憶體",
+      "intelGpuWarning": {
+        "title": "Intel GPU 狀態警告",
+        "message": "GPU 狀態資訊不可用",
+        "description": "這是一個在Intel GPU 狀態回報工具 (intel_gpu_top) 中已知的 Bug，該工具會故障並重複的回報 GPU占用率為 0%，甚至在硬體加速與物件偵測在 (i)GPU上正確運作時也是如此。這不是 Frigate 的 Bug。您可以透過重新啟動主機來暫時修復此問題以確認 GPU 運作正常。這不會影響效能。"
+      }
     },
     "otherProcesses": {
       "title": "其他行程",

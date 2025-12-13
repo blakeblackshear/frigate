@@ -13,5 +13,11 @@
       "renameExportFailed": "重新命名匯出內容失敗：{{errorMessage}}"
     }
   },
-  "deleteExport.desc": "你確定要刪除 {{exportName}} 嗎？"
+  "deleteExport.desc": "你確定要刪除 {{exportName}} 嗎？",
+  "tooltip": {
+    "shareExport": "分享匯出",
+    "downloadVideo": "下載影片",
+    "editName": "編輯名稱",
+    "deleteExport": "刪除匯出"
+  }
 }
