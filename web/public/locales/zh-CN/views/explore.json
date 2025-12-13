@@ -97,14 +97,14 @@
       },
       "tips": {
         "mismatch_other": "检测到 {{count}} 个不可用的目标，并已包含在此核查项中。这些目标可能未达到警报或检测标准，或者已被清理/删除。",
-        "hasMissingObjects": "如果希望 Frigate 保存 <em>{{objects}}</em> 标签的追踪目标，请调整您的配置。"
+        "hasMissingObjects": "如果希望 Frigate 保存 <em>{{objects}}</em> 标签的追踪目标，请调整您的配置"
       },
       "toast": {
         "success": {
           "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
           "updatedSublabel": "成功更新子标签。",
           "updatedLPR": "成功更新车牌。",
-          "audioTranscription": "成功请求音频转录。"
+          "audioTranscription": "成功请求音频转录。根据你运行 Frigate 的服务器速度，转录可能需要一些时间才能完成。"
         },
         "error": {
           "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
@@ -206,12 +206,16 @@
     "viewTrackingDetails": {
       "label": "查看追踪详情",
       "aria": "显示追踪详情"
+    },
+    "downloadCleanSnapshot": {
+      "label": "下载干净快照",
+      "aria": "下载干净快照"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "确认删除",
-      "desc": "删除此追踪目标后，将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中追踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
+      "desc": "删除此追踪目标后，将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中追踪目标的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
     }
   },
   "noTrackedObjects": "未找到追踪目标",
@@ -259,7 +263,8 @@
       "header": {
         "zones": "区",
         "ratio": "占比",
-        "area": "坐标区域"
+        "area": "坐标区域",
+        "score": "分数"
       }
     },
     "annotationSettings": {
@@ -274,7 +279,7 @@
         "millisecondsToOffset": "用于偏移检测标记的毫秒数。<em> 默认值：0</em>",
         "tips": "提示：假设有一段人从左向右走的事件录制，如果事件时间轴中的边框始终在人的左侧（即后方），则应该减小偏移值；反之，如果边框始终领先于人物，则应增大偏移值。",
         "toast": {
-          "success": "{{camera}} 的标记偏移量已保存。请重启 Frigate 以应用更改。"
+          "success": "{{camera}} 的标记偏移量已保存。"
         }
       }
     },

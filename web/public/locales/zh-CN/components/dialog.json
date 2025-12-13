@@ -64,7 +64,8 @@
         "failed": "导出失败：{{error}}",
         "endTimeMustAfterStartTime": "结束时间必须在开始时间之后",
         "noVaildTimeSelected": "未选择有效的时间范围"
-      }
+      },
+      "view": "查看"
     },
     "fromTimeline": {
       "saveExport": "保存导出",
