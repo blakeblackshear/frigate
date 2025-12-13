@@ -75,7 +75,10 @@
     "formattedTimestampFilename": {
       "12hour": "dd-MM-yy-h-mm-ss-a",
       "24hour": "dd-MM-yy-HH-mm-s"
-    }
+    },
+    "inProgress": "Đang tiến hành",
+    "invalidStartTime": "Thời gian bắt đầu không hợp lệ",
+    "invalidEndTime": "Thời gian kết thúc không hợp lệ"
   },
   "menu": {
     "systemLogs": "Nhật ký hệ thống",
@@ -122,14 +125,14 @@
       "yue": "粵語 (Tiếng Quảng Đông)",
       "ca": "Català (Tiếng Catalan)",
       "th": "ไทย (Tiếng Thái)",
-      "ptBR": "Português brasileiro (Brazilian Portuguese)",
-      "sr": "Српски (Serbian)",
-      "sl": "Slovenščina (Slovenian)",
-      "lt": "Lietuvių (Lithuanian)",
-      "bg": "Български (Bulgarian)",
-      "gl": "Galego (Galician)",
-      "id": "Bahasa Indonesia (Indonesian)",
-      "ur": "اردو (Urdu)"
+      "ptBR": "Português brasileiro (Tiếng Bồ Đào Nha Brazil)",
+      "sr": "Српски (Tiếng Serbian)",
+      "sl": "Slovenščina (Tiếng Slovenian)",
+      "lt": "Lietuvių (Tiếng Lithuanian)",
+      "bg": "Български (Tiếng Bulgarian)",
+      "gl": "Galego (Tiếng Galician)",
+      "id": "Bahasa Indonesia (Tiếng Indonesian)",
+      "ur": "اردو (Tiếng Urdu)"
     },
     "system": "Hệ thống",
     "systemMetrics": "Thông số hệ thống",
@@ -175,7 +178,8 @@
     "explore": "Khám phá",
     "export": "Xuất",
     "uiPlayground": "UI Playground",
-    "faceLibrary": "Thư viện khuôn mặt"
+    "faceLibrary": "Thư viện khuôn mặt",
+    "classification": "Phân loại"
   },
   "unit": {
     "speed": {
@@ -185,10 +189,23 @@
     "length": {
       "meters": "mét (m)",
       "feet": "feet (ft)"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/giờ",
+      "mbph": "MB/giờ",
+      "gbph": "GB/giờ"
     }
   },
   "label": {
-    "back": "Quay lại"
+    "back": "Quay lại",
+    "hide": "Ẩn {{item}}",
+    "show": "Hiển thị {{item}}",
+    "ID": "ID",
+    "none": "Không có",
+    "all": "Tất cả"
   },
   "button": {
     "apply": "Áp dụng",
@@ -225,7 +242,8 @@
     "export": "Xuất",
     "deleteNow": "Xóa ngay",
     "next": "Tiếp theo",
-    "saving": "Đang lưu…"
+    "saving": "Đang lưu…",
+    "continue": "Tiếp tục"
   },
   "toast": {
     "copyUrlToClipboard": "Đã sao chép liên kết.",
@@ -266,5 +284,17 @@
     "desc": "Trang bạn đang tìm không tồn tại"
   },
   "selectItem": "Chọn mục {{item}}",
-  "readTheDocumentation": "Đọc tài liệu"
+  "readTheDocumentation": "Đọc tài liệu",
+  "list": {
+    "two": "{{0}} và {{1}}",
+    "many": "{{items}}, và {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Không bắt buộc",
+    "internalID": "Internal ID Frigate sử dụng trong cấu hình và cơ sở dữ liệu"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

@@ -67,7 +67,7 @@
           "regenerate": "Một mô tả mới đã được yêu cầu từ {{provider}}. Tùy thuộc vào tốc độ của nhà cung cấp của bạn, mô tả mới có thể mất một chút thời gian để tạo lại.",
           "updatedLPR": "Cập nhật biển số xe thành công.",
           "updatedSublabel": "Cập nhật nhãn phụ thành công.",
-          "audioTranscription": "Đã yêu cầu phiên âm thành công."
+          "audioTranscription": "Đã yêu cầu chuyển đổi âm thanh thành văn bản thành công. Tùy vào tốc độ của máy chủ Frigate, quá trình chuyển đổi có thể mất một khoảng thời gian để hoàn tất."
         }
       },
       "tips": {
@@ -152,11 +152,25 @@
     },
     "addTrigger": {
       "label": "Thêm sự kiện kích hoạt",
-      "aria": "Thêm sự kiện kích hoạt cho đối tượng này."
+      "aria": "Thêm trình kích hoạt cho đối tượng được theo dõi này"
     },
     "audioTranscription": {
       "label": "Phiên âm",
       "aria": "Yêu cầu phiên âm"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Tải xuống ảnh chụp nhanh",
+      "aria": "Tải xuống ảnh chụp nhanh"
+    },
+    "viewTrackingDetails": {
+      "label": "Xem chi tiết theo dõi",
+      "aria": "Xem chi tiết theo dõi"
+    },
+    "showObjectDetails": {
+      "label": "Hiển thị đường dẫn đối tượng"
+    },
+    "hideObjectDetails": {
+      "label": "Ẩn đường dẫn đối tượng"
     }
   },
   "exploreIsUnavailable": {
@@ -189,7 +203,7 @@
   },
   "dialog": {
     "confirmDelete": {
-      "desc": "Việc xóa đối tượng được theo dõi này sẽ xóa ảnh chụp nhanh, mọi dữ liệu nhúng đã lưu và mọi mục nhập vòng đời đối tượng liên quan. Đoạn ghi hình đã ghi của đối tượng được theo dõi này trong chế độ xem Lịch sử sẽ <em>KHÔNG</em> bị xóa.<br /><br />Bạn có chắc chắn muốn tiếp tục không?",
+      "desc": "Việc xóa đối tượng được theo dõi này sẽ xóa ảnh chụp nhanh, mọi phần nhúng đã lưu và mọi mục nhập chi tiết theo dõi được liên kết. Đoạn phim đã ghi của đối tượng được theo dõi này trong chế độ xem Lịch sử sẽ <em>KHÔNG</em> bị xóa.<br /><br />Bạn có chắc chắn muốn tiếp tục không?",
       "title": "Xác nhận Xóa"
     }
   },
@@ -201,7 +215,9 @@
         "error": "Không thể xóa đối tượng được theo dõi: {{errorMessage}}"
       }
     },
-    "tooltip": "Khớp {{type}} ở mức {{confidence}}%"
+    "tooltip": "Khớp {{type}} ở mức {{confidence}}%",
+    "previousTrackedObject": "Đối tượng được theo dõi trước đó",
+    "nextTrackedObject": "Đối tượng được theo dõi tiếp theo"
   },
   "exploreMore": "Khám phá thêm các đối tượng {{label}}",
   "trackedObjectDetails": "Chi tiết Đối tượng được theo dõi",
@@ -209,7 +225,9 @@
     "details": "chi tiết",
     "snapshot": "ảnh chụp nhanh",
     "video": "video",
-    "object_lifecycle": "vòng đời đối tượng"
+    "object_lifecycle": "vòng đời đối tượng",
+    "thumbnail": "Ảnh thu nhỏ",
+    "tracking_details": "chi tiết theo dõi"
   },
   "fetchingTrackedObjectsFailed": "Lỗi khi tìm nạp các đối tượng được theo dõi: {{errorMessage}}",
   "documentTitle": "Khám phá - Frigate",
@@ -220,5 +238,54 @@
   },
   "concerns": {
     "label": "Mối lo ngại"
+  },
+  "trackingDetails": {
+    "title": "Chi tiết theo dõi",
+    "noImageFound": "Không tìm thấy hình ảnh cho mốc thời gian này.",
+    "createObjectMask": "Tạo mặt nạ đối tượng",
+    "adjustAnnotationSettings": "Điều chỉnh cài đặt chú thích",
+    "scrollViewTips": "Nhấn để xem những khoảnh khắc quan trọng trong vòng đời của đối tượng này.",
+    "autoTrackingTips": "Vị trí khung bao sẽ không chính xác đối với các camera tự động theo dõi (autotracking).",
+    "count": "{{first}} của {{second}}",
+    "trackedPoint": "Điểm theo dõi",
+    "lifecycleItemDesc": {
+      "visible": "Đã phát hiện được {{label}}",
+      "entered_zone": "{{label}} đã vào {{zones}}",
+      "active": "{{label}} đã hoạt động",
+      "stationary": "{{label}} đã đứng yên",
+      "attribute": {
+        "faceOrLicense_plate": "Đã phát hiện {{attribute}} đối với {{label}}",
+        "other": "{{label}} được nhận diện là {{attribute}}"
+      },
+      "gone": "{{label}} đã rời đi",
+      "heard": "Đã nghe thấy {{label}}",
+      "external": "{{label}} đã được nhận diện",
+      "header": {
+        "zones": "Vùng",
+        "ratio": "Tỷ lệ",
+        "area": "Khu vực",
+        "score": "Điểm"
+      }
+    },
+    "annotationSettings": {
+      "title": "Cài đặt chú thích",
+      "showAllZones": {
+        "title": "Hiện tất cả các vùng",
+        "desc": "Luôn hiển thị các vùng trên khung hình khi có đối tượng đi vào vùng đó."
+      },
+      "offset": {
+        "label": "Độ lệch chú thích",
+        "desc": "Dữ liệu này lấy từ luồng phát hiện (detect feed) của camera bạn, nhưng được hiển thị chồng lên hình ảnh từ luồng ghi hình (record feed). Hai luồng này thường không đồng bộ hoàn hảo với nhau. Do đó, khung bao (bounding box) và đoạn video có thể không khớp chính xác. Bạn có thể sử dụng cài đặt này để điều chỉnh thời gian hiển thị chú thích (annotation) lùi hoặc tiến để đồng bộ tốt hơn với video đã ghi.",
+        "millisecondsToOffset": "Số mili giây để điều chỉnh thời gian hiển thị chú thích phát hiện. <em>Mặc định: 0</em>",
+        "tips": "Giảm giá trị nếu quá trình phát lại video ở phía trước các hộp và điểm đường dẫn, đồng thời tăng giá trị nếu quá trình phát lại video ở phía sau chúng. Giá trị này có thể âm.",
+        "toast": {
+          "success": "Độ lệch chú thích cho {{camera}} đã được lưu vào tệp cấu hình."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Trang trình bày trước",
+      "next": "Trang trình bày tiếp theo"
+    }
   }
 }

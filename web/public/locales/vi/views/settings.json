@@ -7,7 +7,7 @@
     "notifications": "Cài đặt Thông báo - Frigate",
     "masksAndZones": "Trình chỉnh sửa Mặt nạ và Vùng - Frigate",
     "object": "Gỡ lỗi - Frigate",
-    "general": "Cài đặt Chung - Frigate",
+    "general": "Cài đặt giao diện – Frigate",
     "frigatePlus": "Cài đặt Frigate+ - Frigate",
     "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate",
     "cameraManagement": "Quản Lý Camera - Frigate",
@@ -252,8 +252,8 @@
       "point_other": "{{count}} điểm",
       "toast": {
         "success": {
-          "noName": "Mặt nạ đối tượng đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi.",
-          "title": "{{polygonName}} đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+          "noName": "Mặt nạ đối tượng đã được lưu.",
+          "title": "{{polygonName}} đã được lưu."
         }
       },
       "label": "Mặt nạ đối tượng",
@@ -296,11 +296,11 @@
         "desc": "Danh sách các đối tượng áp dụng cho vùng này."
       },
       "toast": {
-        "success": "Vùng ({{zoneName}}) đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+        "success": "Vùng ({{zoneName}}) đã được lưu."
       },
       "name": {
         "inputPlaceHolder": "Nhập tên…",
-        "tips": "Tên phải có ít nhất 2 ký tự và không được trùng với tên của camera hoặc một vùng khác.",
+        "tips": "Tên phải có ít nhất 2 ký tự, phải có ít nhất một chữ cái và không được là tên của camera hoặc vùng khác trên camera này.",
         "title": "Tên"
       },
       "edit": "Chỉnh sửa Vùng",
@@ -333,8 +333,8 @@
       "clickDrawPolygon": "Nhấp để vẽ một đa giác trên hình ảnh.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi.",
-          "noName": "Mặt nạ chuyển động đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+          "title": "{{polygonName}} đã được lưu.",
+          "noName": "Mặt nạ chuyển động đã được lưu."
         }
       }
     },
@@ -572,7 +572,15 @@
         "desc": "Theo mặc định, các cảnh báo gần đây trên bảng điều khiển Trực tiếp sẽ phát dưới dạng các video lặp lại nhỏ. Tắt tùy chọn này để chỉ hiển thị hình ảnh tĩnh của các cảnh báo gần đây trên thiết bị/trình duyệt này.",
         "label": "Phát video cảnh báo"
       },
-      "title": "Bảng điều khiển trực tiếp"
+      "title": "Bảng điều khiển trực tiếp",
+      "displayCameraNames": {
+        "label": "Luôn hiển thị tên camera",
+        "desc": "Luôn hiển thị tên camera trong một con chip trong bảng điều khiển xem trực tiếp nhiều camera."
+      },
+      "liveFallbackTimeout": {
+        "label": "Hết thời gian chờ dự phòng của người chơi trực tiếp",
+        "desc": "Khi luồng trực tiếp chất lượng cao của camera không khả dụng, tự động chuyển sang chế độ băng thông thấp sau số giây này. Mặc định: 3."
+      }
     },
     "recordingsViewer": {
       "defaultPlaybackRate": {
@@ -581,7 +589,7 @@
       },
       "title": "Trình xem Bản ghi"
     },
-    "title": "Cài đặt Chung"
+    "title": "Cài đặt giao diện"
   },
   "dialog": {
     "unsavedChanges": {
@@ -661,7 +669,10 @@
     "motionTuner": "Tinh chỉnh Chuyển động",
     "cameras": "Cài đặt Camera",
     "enrichments": "Làm giàu Dữ liệu",
-    "triggers": "Sự kiện kích hoạt"
+    "triggers": "Sự kiện kích hoạt",
+    "cameraManagement": "Quản lý",
+    "cameraReview": "Đánh giá",
+    "roles": "Vai trò"
   },
   "cameraSetting": {
     "camera": "Máy quay",
@@ -670,7 +681,7 @@
   "triggers": {
     "documentTitle": "Sự kiện kích hoạt",
     "management": {
-      "title": "Quản lý sự kiện kích hoạt",
+      "title": "Sự kiện kích hoạt",
       "desc": "Quản lý sự kiện kích hoạt cho {{camera}}. Sử dụng kiểu \"ảnh xem trước\" để kích hoạt dựa trên ảnh xem trước tương tự cho đối tượng cần theo dõi đã chọn, và kiểu \"mô tả\" để kích hoạt dựa trên những mô tả tương tự cho đoạn văn bản bạn đã chỉ định."
     },
     "addTrigger": "Thêm sự kiện kích hoạt",
@@ -696,17 +707,17 @@
         },
         "actions": {
           "title": "Các hành động",
-          "desc": "Theo mặc định, hệ thống đã luôn tự động ghi nhận lại mọi sự kiện. Bạn có thể chọn thêm một hành động khác để thực hiện khi sự kiện này xảy ra.",
+          "desc": "Theo mặc định, Frigate kích hoạt thông báo MQTT cho tất cả các trình kích hoạt. Nhãn phụ thêm tên kích hoạt vào nhãn đối tượng. Thuộc tính là siêu dữ liệu có thể tìm kiếm được lưu trữ riêng biệt trong siêu dữ liệu đối tượng được theo dõi.",
           "error": {
             "min": "Phải chọn ít nhất một hành động."
           }
         },
         "name": {
           "title": "Tên",
-          "placeholder": "Nhập tên sự kiện kích hoạt",
+          "placeholder": "Tên sự kiện kích hoạt",
           "error": {
-            "minLength": "Tên phải có độ dài ít nhất 2 ký tự.",
-            "invalidCharacters": "Tên chỉ có thể chứa ký tự, chữ số, gạch chân, và gạch nối.",
+            "minLength": "Trường phải dài ít nhất 2 ký tự.",
+            "invalidCharacters": "Trường chỉ có thể chứa các chữ cái, số, dấu gạch dưới và dấu gạch nối.",
             "alreadyExists": "Một sự kiện kích hoạt trùng tên đã tồn tại cho máy quay này."
           }
         },
@@ -718,7 +729,7 @@
           "title": "Nội dung",
           "imagePlaceholder": "Chọn một hình ảnh",
           "textPlaceholder": "Nhập nội dung văn bản",
-          "imageDesc": "Chọn một hình ảnh để kích hoạt hành động này khi một hình ảnh tương tự được phát hiện.",
+          "imageDesc": "Chỉ 100 hình thu nhỏ gần đây nhất được hiển thị. Nếu bạn không thể tìm thấy hình thu nhỏ mong muốn, vui lòng xem lại các đối tượng trước đó trong Khám phá và thiết lập trình kích hoạt từ menu ở đó.",
           "textDesc": "Nhập vẵn bản để kích hoạt hành động này khi một đối tượng theo dõi với mô tả tương tự được phát hiện.",
           "error": {
             "required": "Nội dung bắt buộc."

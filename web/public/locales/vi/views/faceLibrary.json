@@ -1,7 +1,7 @@
 {
   "selectItem": "Chọn mục {{item}}",
   "description": {
-    "addFace": "Hướng dẫn thêm bộ sưu tập mới vào Thư viện khuôn mặt.",
+    "addFace": "Thêm một bộ sưu tập mới vào Thư viện Khuôn Mặt bằng cách tải lên hình ảnh đầu tiên của bạn.",
     "invalidName": "Tên không hợp lệ. Tên chỉ được phép chứa chữ cái, số, khoảng trắng, dấu nháy đơn, dấu gạch dưới và dấu gạch ngang.",
     "placeholder": "Nhập tên cho bộ sưu tập này"
   },
@@ -38,7 +38,7 @@
     "success": {
       "uploadedImage": "Tải lên hình ảnh thành công.",
       "trainedFace": "Huấn luyện khuôn mặt thành công.",
-      "updatedFaceScore": "Cập nhật điểm khuôn mặt thành công.",
+      "updatedFaceScore": "Đã cập nhật thành công điểm khuôn mặt thành {{name}} ({{score}}).",
       "addFaceLibrary": "{{name}} đã được thêm thành công vào Thư viện Khuôn mặt!",
       "deletedFace_other": "Đã xóa thành công {{count}} khuôn mặt.",
       "deletedName_other": "{{count}} khuôn mặt đã được xóa thành công.",
@@ -76,15 +76,15 @@
   "trainFace": "Huấn luyện khuôn mặt",
   "nofaces": "Không có khuôn mặt nào",
   "createFaceLibrary": {
-    "nextSteps": "Để xây dựng một nền tảng vững chắc:<li>Sử dụng tab Huấn luyện để chọn và huấn luyện trên hình ảnh cho mỗi người được phát hiện.</li><li>Tập trung vào hình ảnh chụp thẳng để có kết quả tốt nhất; tránh huấn luyện các hình ảnh chụp khuôn mặt ở một góc.</li></ul>",
+    "nextSteps": "Để xây dựng một nền tảng vững chắc:<li>Sử dụng tab Nhận dạng gần đây để chọn và huấn luyện trên hình ảnh cho mỗi người được phát hiện.</li><li>Tập trung vào hình ảnh chụp thẳng để có kết quả tốt nhất; tránh huấn luyện các hình ảnh chụp khuôn mặt ở một góc.</li></ul>",
     "title": "Tạo bộ sưu tập",
     "desc": "Tạo một bộ sưu tập mới",
     "new": "Tạo khuôn mặt mới"
   },
   "train": {
-    "title": "Huấn luyện",
+    "title": "Nhận dạng gần đây",
     "empty": "Không có nỗ lực nhận dạng khuôn mặt nào gần đây",
-    "aria": "Chọn huấn luyện"
+    "aria": "Chọn các nhận dạng gần đây"
   },
   "selectFace": "Chọn khuôn mặt",
   "pixels": "{{area}}px",
