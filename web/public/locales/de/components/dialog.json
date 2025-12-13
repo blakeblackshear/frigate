@@ -66,7 +66,8 @@
         "failed": "Fehler beim Starten des Exports: {{error}}",
         "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt"
       },
-      "success": "Export erfolgreich gestartet. Die Datei befindet sich auf der Exportseite."
+      "success": "Export erfolgreich gestartet. Die Datei befindet sich auf der Exportseite.",
+      "view": "Ansicht"
     },
     "fromTimeline": {
       "saveExport": "Export speichern",

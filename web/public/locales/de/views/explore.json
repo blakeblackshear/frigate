@@ -18,7 +18,7 @@
           "updatedSublabel": "Unterkategorie erfolgreich aktualisiert.",
           "updatedLPR": "Nummernschild erfolgreich aktualisiert.",
           "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist.",
-          "audioTranscription": "Audio Transkription erfolgreich angefordert."
+          "audioTranscription": "Die Audio-Transkription wurde erfolgreich angefordert. Je nach Geschwindigkeit Ihres Frigate-Servers kann die Transkription einige Zeit in Anspruch nehmen."
         },
         "error": {
           "regenerate": "Der Aufruf von {{provider}} für eine neue Beschreibung ist fehlgeschlagen: {{errorMessage}}",
@@ -159,7 +159,8 @@
     "video": "Video",
     "object_lifecycle": "Objekt-Lebenszyklus",
     "snapshot": "Snapshot",
-    "thumbnail": "Vorschaubild"
+    "thumbnail": "Vorschaubild",
+    "tracking_details": "Nachverfolgungs-Details"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -206,6 +207,10 @@
     },
     "hideObjectDetails": {
       "label": "Objektpfad verbergen"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Bereinigte Momentaufnahme herunterladen",
+      "aria": "Bereinigte Momentaufnahme herunterladen"
     }
   },
   "dialog": {
@@ -249,13 +254,14 @@
         "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}",
         "other": "{{label}} erkannt als {{attribute}}"
       },
-      "gone": "{{label}} verließ",
+      "gone": "{{label}} hat verlassen",
       "heard": "{{label}} wurde gehört",
       "external": "{{label}} erkannt",
       "header": {
         "zones": "Zonen",
         "ratio": "Verhältnis",
-        "area": "Bereich"
+        "area": "Bereich",
+        "score": "Bewertung"
       }
     },
     "annotationSettings": {
@@ -270,7 +276,7 @@
         "millisecondsToOffset": "Millisekunden, um Erkennungs-Anmerkungen zu verschieben. <em>Standard: 0</em>",
         "tips": "Verringere den Wert, wenn die Videowiedergabe den Boxen und Wegpunkten voraus ist, und erhöhe den Wert, wenn die Videowiedergabe hinter ihnen zurückbleibt. Dieser Wert kann negativ sein.",
         "toast": {
-          "success": "Der Anmerkungs-Offset für {{camera}} wurde in der Konfigurationsdatei gespeichert. Starte Frigate neu, um Ihre Änderungen zu übernehmen."
+          "success": "Der Anmerkungs-Offset für {{camera}} wurde in der Konfigurationsdatei gespeichert."
         }
       }
     },
@@ -278,6 +284,10 @@
       "previous": "Vorherige Anzeige",
       "next": "Nächste Anzeige"
     },
-    "title": "Verfolgungsdetails"
+    "title": "Verfolgungsdetails",
+    "adjustAnnotationSettings": "Anmerkungseinstellungen anpassen",
+    "autoTrackingTips": "Die Positionen der Begrenzungsrahmen sind bei Kameras mit automatischer Verfolgung ungenau.",
+    "count": "{{first}} von {{second}}",
+    "trackedPoint": "Verfolgter Punkt"
   }
 }

@@ -1,7 +1,7 @@
 {
   "description": {
     "placeholder": "Gib einen Name für diese Kollektion ein",
-    "addFace": "Füge der Gesichtsbibliothek eine neue Sammlung hinzu, indem ein erstes Bild hochgeladen wird.",
+    "addFace": "Füge der Gesichtsbibliothek eine neue Sammlung hinzu, indem ein Bild hinzufügst.",
     "invalidName": "Ungültiger Name. Namen dürfen nur Buchstaben, Zahlen, Leerzeichen, Apostrophe, Unterstriche und Bindestriche enthalten."
   },
   "details": {
@@ -44,9 +44,10 @@
     "deleteFace": "Lösche Gesicht"
   },
   "train": {
-    "title": "Aktuelle Erkennungen",
+    "title": "Kürzliche Erkennungen",
     "aria": "Wähle aktuelle Erkennungen",
-    "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung"
+    "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung",
+    "titleShort": "frisch"
   },
   "deleteFaceLibrary": {
     "title": "Lösche Name",
@@ -64,7 +65,7 @@
       "deletedName_other": "{{count}} Gesichter wurden erfolgreich gelöscht.",
       "addFaceLibrary": "{{name}} wurde erfolgreich in die Gesichtsbibliothek aufgenommen!",
       "trainedFace": "Gesicht erfolgreich trainiert.",
-      "updatedFaceScore": "Gesichtsbewertung erfolgreich aktualisiert.",
+      "updatedFaceScore": "Gesichtsbewertung erfolgreich auf {{name}} ({{score}}) aktualisiert.",
       "renamedFace": "Gesicht erfolgreich in {{name}} umbenannt"
     },
     "error": {

@@ -48,10 +48,16 @@
     "noDataFound": "Keine Detaildaten zur Überprüfung",
     "settings": "Detailansicht Einstellungen",
     "alwaysExpandActive": {
-      "desc": "Immer die Objektdetails des aktiven Überprüfungselements erweitern, sofern verfügbar."
+      "desc": "Immer die Objektdetails vom aktivem Überprüfungselement erweitern, sofern verfügbar.",
+      "title": "Immer aktiv erweitern"
     }
   },
   "objectTrack": {
-    "trackedPoint": "Verfolgter Punkt"
-  }
+    "trackedPoint": "Verfolgter Punkt",
+    "clickToSeek": "Klicke, um zu dieser Zeit zu springen"
+  },
+  "normalActivity": "normal",
+  "needsReview": "benötigt Überprüfung",
+  "securityConcern": "Sicherheitsbedenken",
+  "select_all": "alle"
 }
