@@ -21,7 +21,7 @@
           "regenerate": "Od poskytovateľa {{provider}} bol vyžiadaný nový popis. V závislosti od rýchlosti vášho poskytovateľa môže jeho obnovenie chvíľu trvať.",
           "updatedSublabel": "Podštítok bol úspešne aktualizovaný.",
           "updatedLPR": "ŠPZ bola úspešne aktualizovaná.",
-          "audioTranscription": "Úspešne požiadané o prepis zvuku."
+          "audioTranscription": "Úspešne požiadané o prepis zvuku. V závislosti od rýchlosti vášho servera Frigate môže dokončenie prepisu trvať určitý čas."
         },
         "error": {
           "regenerate": "Nepodarilo sa zavolať od {{provider}} pre nový popis: {{errorMessage}}",
@@ -209,6 +209,10 @@
     "viewTrackingDetails": {
       "label": "Zobraziť podrobnosti sledovania",
       "aria": "Zobraziť podrobnosti o sledovaní"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Stiahnuť čistý snapshot",
+      "aria": "Stiahnuť čistý snapshot"
     }
   },
   "dialog": {
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Zóny",
         "ratio": "Pomer",
-        "area": "Oblasť"
+        "area": "Oblasť",
+        "score": "Skóre"
       }
     },
     "annotationSettings": {

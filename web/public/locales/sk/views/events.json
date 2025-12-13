@@ -55,5 +55,8 @@
     "clickToSeek": "Kliknutím prejdete na tento čas"
   },
   "zoomIn": "Priblížiť",
-  "zoomOut": "Oddialiť"
+  "zoomOut": "Oddialiť",
+  "normalActivity": "Narmalne",
+  "needsReview": "Potrebuje preakúmať",
+  "securityConcern": "Záujem o bezpečnosť"
 }
