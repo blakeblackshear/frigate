@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Models de classificació",
+  "documentTitle": "Models de classificació - Frigate",
   "button": {
     "deleteClassificationAttempts": "Suprimeix les imatges de classificació",
     "renameCategory": "Reanomena la classe",
@@ -152,7 +152,12 @@
       "generateSuccess": "Imatges de mostra generades amb èxit",
       "allImagesRequired_one": "Classifiqueu totes les imatges. Queda {{count}} imatge.",
       "allImagesRequired_many": "Classifiqueu totes les imatges. Queden {{count}} imatges.",
-      "allImagesRequired_other": "Classifiqueu totes les imatges. Queden {{count}} imatges."
+      "allImagesRequired_other": "Classifiqueu totes les imatges. Queden {{count}} imatges.",
+      "modelCreated": "El model s'ha creat correctament. Utilitzeu la vista Classificacions recents per a afegir imatges per als estats que falten i, a continuació, entrenar el model.",
+      "missingStatesWarning": {
+        "title": "Falten exemples d'estat",
+        "description": "Es recomana seleccionar exemples per a tots els estats per obtenir els millors resultats. Podeu continuar sense seleccionar tots els estats, però el model no serà entrenat fins que tots els estats tinguin imatges. Després de continuar, utilitzeu la vista Classificacions recents per classificar imatges per als estats que falten, i després entrenar el model."
+      }
     }
   },
   "deleteModel": {
@@ -180,5 +185,6 @@
     "noNewImages": "Sense noves imatges per entrenar. Classifica més imatges primer.",
     "modelNotReady": "El model no está preparat per entrenar",
     "noChanges": "No hi ha canvis al conjunt de dades des de l'última formació."
-  }
+  },
+  "none": "Cap"
 }

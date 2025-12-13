@@ -220,6 +220,10 @@
     "viewTrackingDetails": {
       "label": "Veure detalls de seguiment",
       "aria": "Mostra els detalls de seguiment"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Descarrega la instantània neta",
+      "aria": "Descarrega la instantània neta"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ràtio",
-        "area": "Àrea"
+        "area": "Àrea",
+        "score": "Puntuació"
       }
     },
     "annotationSettings": {
@@ -278,7 +283,7 @@
         "millisecondsToOffset": "Millisegons per l'òfset de detecció d'anotacions per. <em>Per defecte: 0</em>",
         "tips": "Reduïu el valor si la reproducció del vídeo es troba per davant dels quadres i els punts de ruta, i augmenteu-lo si es troba per darrere. Aquest valor pot ser negatiu.",
         "toast": {
-          "success": "L'Òfset d'anotació per a {{camera}} s'ha desat al fitxer de configuració. Reinicieu Frigate per aplicar els canvis."
+          "success": "El desplaçament de l'anotació per {{camera}} s'ha desat al fitxer de configuració."
         }
       }
     },

@@ -172,7 +172,7 @@
       "name": {
         "inputPlaceHolder": "Introduïu un nom…",
         "title": "Nom",
-        "tips": "El nom ha de tenir almenys 2 caràcters, ha de tenir almenys una lletra, i no ha de ser el nom d'una càmera o una altra zona."
+        "tips": "El nom ha de tenir almenys 2 caràcters, ha de tenir almenys una lletra, i no ha de ser el nom d'una càmera o una altra zona en aquesta càmera."
       },
       "label": "Zones",
       "desc": {
@@ -199,7 +199,7 @@
       },
       "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
       "toast": {
-        "success": "La zona {{zoneName}} ha estat desada. Reinicia Frigate per a aplicar els canvis."
+        "success": "S'ha desat la zona ({{zoneName}})."
       }
     },
     "filter": {
@@ -229,8 +229,8 @@
       "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} s'ha desat. Reinicia Frigate per a aplicar els canvis.",
-          "noName": "La màscara de moviment ha estat desada. Reinicia Frigate per aplicar els canvis."
+          "title": "{{polygonName}} s'ha desat.",
+          "noName": "La màscara de moviment ha estat desada."
         }
       }
     },
@@ -254,8 +254,8 @@
       "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} s'ha desat. Reinicia Frigate per a aplicar els canvis.",
-          "noName": "La màscara d'objectes ha estat desada. Reincia Frigate per a aplicar els canvis."
+          "title": "{{polygonName}} s'ha desat.",
+          "noName": "La màscara d'objectes ha estat desada."
         }
       },
       "context": "Les màscares de filtratge d’objectes s’utilitzen per descartar falsos positius d’un tipus d’objecte concret segons la seva ubicació."
@@ -527,7 +527,16 @@
           "notMatch": "Les contrasenyes no coincideixen",
           "match": "Les contrasenyes coincideixen",
           "placeholder": "Introdueix la contrasenya",
-          "title": "Contrasenya"
+          "title": "Contrasenya",
+          "show": "Mostra contrasenya",
+          "hide": "Amaga contrasenya",
+          "requirements": {
+            "title": "Requisits contrasenya:",
+            "length": "Com a mínim 8 carácters",
+            "uppercase": "Com a mínim una majúscula",
+            "digit": "Com a mínim un digit",
+            "special": "Com a mínim un carácter especial (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "Nova contrasenya",
@@ -537,14 +546,23 @@
           }
         },
         "usernameIsRequired": "El nom d'usuari és obligatori",
-        "passwordIsRequired": "La contrasenya és obligatoria"
+        "passwordIsRequired": "La contrasenya és obligatoria",
+        "currentPassword": {
+          "title": "Constrasenya actual",
+          "placeholder": "Entra l'actual contrasenya"
+        }
       },
       "passwordSetting": {
         "updatePassword": "Contrasenya actualitzada per {{username}}",
         "setPassword": "Estableix Contrasenya",
         "cannotBeEmpty": "La contrasenya no pot ser buida",
         "doNotMatch": "Les contrasenyes no coincideixen",
-        "desc": "Crea un nova contrasenya segura per protegir aquest compte."
+        "desc": "Crea un nova contrasenya segura per protegir aquest compte.",
+        "currentPasswordRequired": "L'actual contrasenya es requerida",
+        "incorrectCurrentPassword": "L'actual contrasenya es incorrecte",
+        "passwordVerificationFailed": "Falla en la verificació de la contrasenya",
+        "multiDeviceWarning": "Serà necesari loguejarte en qualsevol altre dispositiu en que estiguis loguejat en {{refresh_time}}.",
+        "multiDeviceAdmin": "També pots forçar a tots els usuaris a tornar a autenticar-se immediatament rotant el teu secret JWT."
       },
       "deleteUser": {
         "title": "Suprimir usuari",
@@ -1138,7 +1156,8 @@
         "audioCodecRequired": "Es requereix un flux d'àudio per admetre la detecció d'àudio.",
         "restreamingWarning": "Reduir les connexions a la càmera per al flux de registre pot augmentar lleugerament l'ús de la CPU.",
         "brands": {
-          "reolink-rtsp": "No és racomana utilitzar Reolink RSTP. Activeu HTTP a la configuració del microprogramari de la càmera i reinicieu l'assistent."
+          "reolink-rtsp": "No és racomana utilitzar Reolink RSTP. Activeu HTTP a la configuració del microprogramari de la càmera i reinicieu l'assistent.",
+          "reolink-http": "Els fluxos HTTP de reenllaç haurien d'utilitzar FFmpeg per a una millor compatibilitat. Habilita «Utilitza el mode de compatibilitat del flux» per a aquest flux."
         },
         "dahua": {
           "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Dahua / Amcrest / EmpireTech suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
