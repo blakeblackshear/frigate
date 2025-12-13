@@ -498,35 +498,38 @@ class Embeddings:
 
                     if needs_embedding_update:
                         existing_trigger.save()
+                    continue
                 else:
                     # Create new trigger
                     try:
-                        try:
-                            event: Event = Event.get(Event.id == trigger.data)
-                        except DoesNotExist:
-                            logger.warning(
-                                f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
+                        # For thumbnail triggers, validate the event exists
+                        if trigger.type == "thumbnail":
+                            try:
+                                event: Event = Event.get(Event.id == trigger.data)
+                            except DoesNotExist:
+                                logger.warning(
+                                    f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
+                                )
+                                continue
+
+                            # Skip the event if not an object
+                            if event.data.get("type") != "object":
+                                logger.warning(
+                                    f"Event ID {trigger.data} for trigger {trigger_name} is not a tracked object."
+                                )
+                                continue
+
+                            thumbnail = get_event_thumbnail_bytes(event)
+
+                            if not thumbnail:
+                                logger.warning(
+                                    f"Unable to retrieve thumbnail for event ID {trigger.data} for {trigger_name}."
+                                )
+                                continue
+
+                            self.write_trigger_thumbnail(
+                                camera.name, trigger.data, thumbnail
                             )
-                            continue
-
-                        # Skip the event if not an object
-                        if event.data.get("type") != "object":
-                            logger.warning(
-                                f"Event ID {trigger.data} for trigger {trigger_name} is not a tracked object."
-                            )
-                            continue
-
-                        thumbnail = get_event_thumbnail_bytes(event)
-
-                        if not thumbnail:
-                            logger.warning(
-                                f"Unable to retrieve thumbnail for event ID {trigger.data} for {trigger_name}."
-                            )
-                            continue
-
-                        self.write_trigger_thumbnail(
-                            camera.name, trigger.data, thumbnail
-                        )
 
                         # Calculate embedding for new trigger
                         embedding = self._calculate_trigger_embedding(
@@ -557,7 +560,11 @@ class Embeddings:
                     Trigger.camera == camera.name, Trigger.name.in_(triggers_to_remove)
                 ).execute()
                 for trigger_name in triggers_to_remove:
-                    self.remove_trigger_thumbnail(camera.name, trigger_name)
+                    # Only remove thumbnail files for thumbnail triggers
+                    if existing_triggers[trigger_name].type == "thumbnail":
+                        self.remove_trigger_thumbnail(
+                            camera.name, existing_triggers[trigger_name].data
+                        )
 
     def write_trigger_thumbnail(
         self, camera: str, event_id: str, thumbnail: bytes
