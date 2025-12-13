@@ -42,7 +42,12 @@
       "gpuUsage": "Mức sử dụng GPU",
       "gpuMemory": "Bộ nhớ GPU",
       "gpuEncoder": "Bộ mã hóa GPU",
-      "gpuDecoder": "Bộ giải mã GPU"
+      "gpuDecoder": "Bộ giải mã GPU",
+      "intelGpuWarning": {
+        "title": "Cảnh báo thống kê GPU Intel",
+        "message": "Không có số liệu thống kê GPU",
+        "description": "Đây là lỗi đã biết trong công cụ báo cáo thống kê GPU của Intel (intel_gpu_top), khi nó bị trục trặc và liên tục trả về mức sử dụng GPU là 0%, dù thực tế phần cứng tăng tốc và nhận diện đối tượng đang hoạt động đúng trên (i)GPU. Đây không phải lỗi của Frigate. Bạn có thể khởi động lại máy chủ để tạm thời khắc phục và xác nhận GPU vẫn hoạt động bình thường. Điều này không ảnh hưởng đến hiệu suất."
+      }
     },
     "otherProcesses": {
       "processCpuUsage": "Mức sử dụng CPU của Tiến trình",
@@ -153,10 +158,17 @@
       "face_recognition_speed": "Tốc độ Nhận dạng Khuôn mặt",
       "plate_recognition_speed": "Tốc độ Nhận dạng Biển số",
       "yolov9_plate_detection_speed": "Tốc độ Phát hiện Biển số YOLOv9",
-      "yolov9_plate_detection": "Phát hiện Biển số YOLOv9"
+      "yolov9_plate_detection": "Phát hiện Biển số YOLOv9",
+      "review_description": "Đánh giá mô tả",
+      "review_description_speed": "Đánh giá Mô tả Tốc độ",
+      "review_description_events_per_second": "Đánh giá mô tả",
+      "object_description": "Mô tả đối tượng",
+      "object_description_speed": "Đối tượng Mô tả Tốc độ",
+      "object_description_events_per_second": "Mô tả đối tượng"
     },
     "title": "Làm giàu Dữ liệu",
-    "infPerSecond": "Suy luận Mỗi Giây"
+    "infPerSecond": "Suy luận Mỗi Giây",
+    "averageInf": "Thời gian suy luận trung bình"
   },
   "title": "Hệ thống",
   "metrics": "Số liệu hệ thống",

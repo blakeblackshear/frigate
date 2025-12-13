@@ -17,6 +17,7 @@
   "tooltip": {
     "shareExport": "Chia sẻ bản xuất",
     "downloadVideo": "Tải video",
-    "editName": "Chỉnh sửa tên"
+    "editName": "Chỉnh sửa tên",
+    "deleteExport": "Xóa bản xuất"
   }
 }

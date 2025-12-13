@@ -37,5 +37,26 @@
   "markTheseItemsAsReviewed": "Đánh dấu các mục này là đã xem xét",
   "suspiciousActivity": "Hoạt động đáng ngờ",
   "threateningActivity": "Hoạt động đe dọa",
-  "zoomIn": "Phóng To"
+  "zoomIn": "Phóng To",
+  "zoomOut": "Thu nhỏ",
+  "detail": {
+    "label": "Chi tiết",
+    "noDataFound": "Không có dữ liệu chi tiết để xem xét",
+    "aria": "Chuyển đổi chế độ xem chi tiết",
+    "trackedObject_one": "{{count}} đối tượng",
+    "trackedObject_other": "{{count}} đối tượng",
+    "noObjectDetailData": "Không có dữ liệu chi tiết đối tượng nào khả dụng.",
+    "settings": "Cài đặt chế độ xem chi tiết",
+    "alwaysExpandActive": {
+      "title": "Luôn mở rộng mục đang hoạt động",
+      "desc": "Luôn mở rộng chi tiết đối tượng của mục đánh giá đang hoạt động khi có sẵn."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Điểm theo dõi",
+    "clickToSeek": "Nhấn để tua đến thời điểm này"
+  },
+  "normalActivity": "Bình thường",
+  "needsReview": "Cần xem xét",
+  "securityConcern": "Mối lo ngại về an ninh"
 }
