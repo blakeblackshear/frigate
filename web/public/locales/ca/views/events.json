@@ -55,5 +55,9 @@
     "trackedPoint": "Punt de seguiment"
   },
   "zoomIn": "Amplia",
-  "zoomOut": "Redueix"
+  "zoomOut": "Redueix",
+  "normalActivity": "Normal",
+  "needsReview": "Necessita revisió",
+  "securityConcern": "Preocupació per la seguretat",
+  "select_all": "Tots"
 }

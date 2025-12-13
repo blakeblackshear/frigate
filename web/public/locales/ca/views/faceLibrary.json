@@ -13,7 +13,8 @@
   "train": {
     "empty": "No hi ha intents recents de reconeixement de rostres",
     "title": "Reconeixements recents",
-    "aria": "Selecciona els reconeixements recents"
+    "aria": "Selecciona els reconeixements recents",
+    "titleShort": "Recent"
   },
   "description": {
     "addFace": "Afegiu una col·lecció nova a la biblioteca de cares pujant la vostra primera imatge.",
