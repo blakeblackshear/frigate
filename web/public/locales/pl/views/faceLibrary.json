@@ -3,7 +3,7 @@
   "description": {
     "addFace": "Dodaj nową kolekcję do biblioteki twarzy, przesyłając swoje pierwsze zdjęcie.",
     "placeholder": "Wprowadź nazwę tej kolekcji",
-    "invalidName": "Nieprawidłowa nazwa. Nazwy mogą zawierać tylko litery, cyfry, spacje, apostrofy, podkreślenia oraz myślniki."
+    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki."
   },
   "details": {
     "person": "Osoba",
@@ -63,7 +63,7 @@
       "uploadedImage": "Pomyślnie wgrano obraz.",
       "addFaceLibrary": "{{name}} został pomyślnie dodany do Biblioteki Twarzy!",
       "trainedFace": "Pomyślnie wytrenowano twarz.",
-      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy.",
+      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy do {{name}} {{score}}.",
       "renamedFace": "Pomyślnie zmieniono nazwę twarzy na {{name}}"
     },
     "error": {

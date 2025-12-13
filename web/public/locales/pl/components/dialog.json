@@ -70,7 +70,8 @@
         "failed": "Nie udało się rozpocząć eksportu: {{error}}",
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
         "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
-      }
+      },
+      "view": "Widok"
     },
     "fromTimeline": {
       "saveExport": "Zapisz Eksport",

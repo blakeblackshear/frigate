@@ -87,7 +87,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMMM yyyy",
       "24hour": "d MMMM yyyy"
-    }
+    },
+    "inProgress": "W trakcie",
+    "invalidStartTime": "Nieprawidłowy czas rozpoczęcia",
+    "invalidEndTime": "Nieprawidłowy czas zakończenia"
   },
   "unit": {
     "speed": {
@@ -97,10 +100,23 @@
     "length": {
       "feet": "stopy",
       "meters": "metry"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/godz.",
+      "mbph": "MB/godz.",
+      "gbph": "GB/godz."
     }
   },
   "label": {
-    "back": "Wróć"
+    "back": "Wróć",
+    "hide": "Ukryj {{item}}",
+    "show": "Pokaż {{item}}",
+    "ID": "ID",
+    "none": "Brak",
+    "all": "Wszystko"
   },
   "button": {
     "apply": "Zastosuj",
@@ -137,7 +153,8 @@
     "cameraAudio": "Dźwięk kamery",
     "off": "WYŁĄCZ",
     "edit": "Edytuj",
-    "copyCoordinates": "Kopiuj współrzędne"
+    "copyCoordinates": "Kopiuj współrzędne",
+    "continue": "Kontynuuj"
   },
   "menu": {
     "system": "System",
@@ -239,7 +256,8 @@
     "configurationEditor": "Edytor konfiguracji",
     "help": "Pomoc",
     "settings": "Ustawienia",
-    "export": "Eksportuj"
+    "export": "Eksportuj",
+    "classification": "Klasyfikacja"
   },
   "role": {
     "viewer": "Przeglądający",
@@ -283,5 +301,9 @@
   "readTheDocumentation": "Przeczytaj dokumentację",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} i {{1}}",
+    "many": "{{items}}, oraz {{last}}"
   }
 }
