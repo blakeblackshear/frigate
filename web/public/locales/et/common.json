@@ -1,0 +1,118 @@
+{
+  "time": {
+    "untilForTime": "Kuni {{time}}",
+    "today": "Täna",
+    "untilForRestart": "Kuni Frigate käivitub uuesti.",
+    "untilRestart": "Kuni uuesti käivitamiseni",
+    "ago": "{{timeAgo}} tagasi",
+    "justNow": "Hetk tagasi",
+    "yesterday": "Eile",
+    "last7": "Viimase 7 päeva jooksul",
+    "last14": "Viimase 14 päeva jooksul",
+    "last30": "Viimase 30 päeva jooksul",
+    "thisWeek": "Sel nädalal",
+    "lastWeek": "Eelmisel nädalal",
+    "thisMonth": "Sel kuul",
+    "lastMonth": "Eelmisel kuul",
+    "5minutes": "5 minutit",
+    "10minutes": "10 minutit",
+    "30minutes": "30 minutit",
+    "1hour": "1 tund",
+    "12hours": "12 tundi",
+    "24hours": "24 tundi",
+    "pm": "pl",
+    "am": "el",
+    "yr": "{{time}} a",
+    "year_one": "{{time}} aasta",
+    "year_other": "{{time}} aastat",
+    "mo": "{{time}} k",
+    "month_one": "{{time}} kuu",
+    "month_other": "{{time}} kuud",
+    "d": "{{time}} pv",
+    "day_one": "{{time}} päev",
+    "day_other": "{{time}} päeva",
+    "h": "{{time}} t",
+    "hour_one": "{{time}} tund",
+    "hour_other": "{{time}} tundi",
+    "m": "{{time}} min",
+    "minute_one": "{{time}} minut",
+    "minute_other": "{{time}} minutit",
+    "s": "{{time}} sek",
+    "second_one": "{{time}} sekund",
+    "second_other": "{{time}} sekundit"
+  },
+  "menu": {
+    "user": {
+      "setPassword": "Lisa salasõna"
+    },
+    "live": {
+      "allCameras": "Kõik kaamerad"
+    },
+    "settings": "Seadistused",
+    "language": {
+      "withSystem": {
+        "label": "Kasuta keele jaoks süsteemi seadistusi"
+      }
+    }
+  },
+  "unit": {
+    "speed": {
+      "mph": "ml/t",
+      "kph": "km/t"
+    },
+    "data": {
+      "kbps": "kB/sek",
+      "mbps": "MB/sek",
+      "gbps": "GB/sek",
+      "kbph": "kB/t",
+      "mbph": "MB/t",
+      "gbph": "GB/t"
+    }
+  },
+  "button": {
+    "apply": "Rakenda",
+    "reset": "Lähtesta",
+    "done": "Valmis",
+    "enabled": "Kasutusel",
+    "enable": "Võta kasutusele",
+    "disabled": "Pole kasutusel",
+    "disable": "Eemalda kasutuselt",
+    "save": "Salvesta",
+    "saving": "Salvestan…",
+    "cancel": "Katkesta",
+    "close": "Sulge",
+    "copy": "Kopeeri",
+    "back": "Tagasi",
+    "history": "Ajalugu",
+    "fullscreen": "Täisekraanivaade",
+    "exitFullscreen": "Välju täisekraanivaatest",
+    "pictureInPicture": "Pilt pildis vaade",
+    "twoWayTalk": "Kahepoolne kõneside",
+    "cameraAudio": "Kaamera heli",
+    "on": "SEES",
+    "off": "VÄLJAS",
+    "edit": "Muuda",
+    "copyCoordinates": "Kopeeri koordinaadid",
+    "delete": "Kustuta",
+    "yes": "Jah",
+    "no": "Ei",
+    "download": "Laadi alla",
+    "info": "Teave"
+  },
+  "label": {
+    "back": "Mine tagasi",
+    "hide": "Peida: {{item}}",
+    "show": "Näita: {{item}}",
+    "all": "Kõik",
+    "ID": "Tunnus",
+    "none": "Puudub"
+  },
+  "list": {
+    "two": "{{0}} ja {{1}}",
+    "many": "{{items}} ja {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Valikuline"
+  }
+}

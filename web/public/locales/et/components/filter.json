@@ -1,0 +1,57 @@
+{
+  "filter": "Filter",
+  "trackedObjectDelete": {
+    "toast": {
+      "error": "Jälgitavate objektide kustutamine ei õnnestunud: {{errorMessage}}",
+      "success": "Jälgitavate objektide kustutamine õnnestus."
+    }
+  },
+  "cameras": {
+    "all": {
+      "title": "Kõik kaamerad",
+      "short": "Kaamerad"
+    }
+  },
+  "labels": {
+    "all": {
+      "title": "Kõik sildid",
+      "short": "Sildid"
+    }
+  },
+  "subLabels": {
+    "all": "Kõik alamsildid"
+  },
+  "dates": {
+    "all": {
+      "title": "Kõik kuupäevad",
+      "short": "Kuupäevad"
+    }
+  },
+  "explore": {
+    "settings": {
+      "title": "Seadistused",
+      "defaultView": {
+        "title": "Vaikimisi vaade",
+        "summary": "Kokkuvõte",
+        "unfilteredGrid": "Filtreerimata ruudustik"
+      },
+      "gridColumns": {
+        "title": "Ruudustiku veerud",
+        "desc": "Vali ruudustikus kuvatavate veergude arv."
+      },
+      "searchSource": {
+        "options": {
+          "thumbnailImage": "Pisipilt",
+          "description": "Kirjeldus"
+        }
+      }
+    }
+  },
+  "logSettings": {
+    "loading": {
+      "title": "Laadin"
+    },
+    "disableLogStreaming": "Keela logi voogedastus",
+    "allLogs": "Kõik logid"
+  }
+}

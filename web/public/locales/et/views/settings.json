@@ -1,0 +1,139 @@
+{
+  "cameraWizard": {
+    "step1": {
+      "password": "Salasõna",
+      "passwordPlaceholder": "Valikuline",
+      "customUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht",
+      "connectionSettings": "Ühenduse seadistused"
+    },
+    "step3": {
+      "streamUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht"
+    }
+  },
+  "users": {
+    "updatePassword": "Muuda salasõna",
+    "toast": {
+      "success": {
+        "updatePassword": "Salasõna muutmine õnnestus."
+      },
+      "error": {
+        "setPasswordFailed": "Salasõna salvestamine ei õnnestunud: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "password": "Salasõna"
+    },
+    "dialog": {
+      "form": {
+        "password": {
+          "title": "Salasõna",
+          "placeholder": "Sisesta salasõna",
+          "confirm": {
+            "title": "Korda salasõna",
+            "placeholder": "Korda salasõna"
+          },
+          "strength": {
+            "title": "Salasõna tugevus: ",
+            "weak": "Nõrk",
+            "medium": "Keskmime",
+            "strong": "Tugev",
+            "veryStrong": "Väga tugev"
+          },
+          "match": "Salasõnad klapivad omavahel",
+          "notMatch": "Salasõnad ei klapi omavahel",
+          "show": "Näita salasõna",
+          "hide": "Peida salasõna",
+          "requirements": {
+            "title": "Salasõna reeglid:",
+            "length": "Vähemalt 8 tähemärki",
+            "uppercase": "Vähemalt üks suurtäht",
+            "digit": "Vähemalt üks number",
+            "special": "Vähemalt üks erimärk (!@#$%^&*(),.?\":{}|<>)"
+          }
+        },
+        "newPassword": {
+          "title": "Uus salasõna",
+          "placeholder": "Sisesta uus salasõna",
+          "confirm": {
+            "placeholder": "Sisesta uus salasõna uuesti"
+          }
+        },
+        "passwordIsRequired": "Salasõna on vajalik",
+        "currentPassword": {
+          "title": "Senine salasõna",
+          "placeholder": "Sisesta oma senine salasõna"
+        }
+      },
+      "createUser": {
+        "confirmPassword": "Palun kinnita oma uus salasõna"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Salasõna ei või jääda tühjaks",
+        "doNotMatch": "Salasõnad ei klapi omavahel",
+        "updatePassword": "Muuda kasutaja {{username}} salasõna",
+        "setPassword": "Sisesta salasõna",
+        "desc": "Selle kasutajakonto turvalisuse tagamiseks lisa tugev salasõna.",
+        "currentPasswordRequired": "Senine salasõna on vajalik",
+        "incorrectCurrentPassword": "Senine salasõna pole õige",
+        "passwordVerificationFailed": "Salasõna kontrollimine ei õnnestunud"
+      }
+    }
+  },
+  "debug": {
+    "boundingBoxes": {
+      "desc": "Näita jälgitavate objektide ümber märgiskaste"
+    }
+  },
+  "documentTitle": {
+    "default": "Seadistused - Frigate",
+    "authentication": "Autentimise seadistused - Frigate",
+    "cameraReview": "Kaamerate kordusvaatuste seadistused - Frigate",
+    "general": "Kasutajaliidese seadistused - Frigate",
+    "frigatePlus": "Frigate+ seadistused - Frigate",
+    "notifications": "Teavituste seadistused - Frigate"
+  },
+  "general": {
+    "title": "Kasutajaliidese seadistused",
+    "cameraGroupStreaming": {
+      "clearAll": "Kustuta kõik voogedastuse seadistused"
+    }
+  },
+  "cameraManagement": {
+    "backToSettings": "Tagasi kaameraseadistuste juurde"
+  },
+  "notification": {
+    "notificationSettings": {
+      "title": "Teavituste seadistused"
+    },
+    "globalSettings": {
+      "title": "Üldseadistused"
+    },
+    "deviceSpecific": "Seadmekohased seadistused",
+    "toast": {
+      "success": {
+        "settingSaved": "Teavituste seadistused on salvestatud."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ seadistused",
+    "unsavedChanges": "Frigate+ seadistuste muudatused on salvestamata",
+    "toast": {
+      "success": "Frigate+ seadistuste muudatused on salvestatud. Muudatuste kasutuselevõtmiseks käivita Frigate uuesti."
+    }
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} punkt",
+      "point_other": "{{count}} punkti"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} punkt",
+      "point_other": "{{count}} punkti"
+    },
+    "objectMasks": {
+      "point_one": "{{count}} punkt",
+      "point_other": "{{count}} punkti"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Laadi video alla",
+      "toast": {
+        "success": "Sinu ülevaatamisel video allalaadimine algas."
+      }
+    }
+  }
+}

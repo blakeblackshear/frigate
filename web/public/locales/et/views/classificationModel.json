@@ -1,0 +1,8 @@
+{
+  "toast": {
+    "success": {
+      "deletedModel_one": "{{count}} mudeli kustutamine õnnestus",
+      "deletedModel_other": "{{count}} mudeli kustutamine õnnestus"
+    }
+  }
+}

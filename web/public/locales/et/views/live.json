@@ -1,0 +1,14 @@
+{
+  "muteCameras": {
+    "enable": "Summuta kõik kaamerad",
+    "disable": "Lõpeta kõikide kaamerate summutamine"
+  },
+  "streamingSettings": "Voogedastuse seadistused",
+  "cameraSettings": {
+    "title": "Seadistused: {{camera}}",
+    "cameraEnabled": "Kaamera on kasutusel",
+    "objectDetection": "Objektide tuvastamine",
+    "audioDetection": "Heli tuvastus",
+    "transcription": "Heli üleskirjutus"
+  }
+}
