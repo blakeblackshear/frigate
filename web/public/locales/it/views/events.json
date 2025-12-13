@@ -56,5 +56,8 @@
     "clickToSeek": "Premi per cercare in questo momento"
   },
   "zoomIn": "Ingrandisci",
-  "zoomOut": "Rimpicciolisci"
+  "zoomOut": "Rimpicciolisci",
+  "normalActivity": "Normale",
+  "needsReview": "Necessita revisione",
+  "securityConcern": "Rischio per la sicurezza"
 }

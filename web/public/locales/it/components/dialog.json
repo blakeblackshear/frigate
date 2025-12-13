@@ -66,7 +66,8 @@
         "failed": "Impossibile avviare l'esportazione: {{error}}",
         "endTimeMustAfterStartTime": "L'ora di fine deve essere successiva all'ora di inizio",
         "noVaildTimeSelected": "Nessun intervallo di tempo valido selezionato"
-      }
+      },
+      "view": "Visualizzazione"
     },
     "fromTimeline": {
       "saveExport": "Salva esportazione",

@@ -152,7 +152,12 @@
       "generateSuccess": "Immagini campione generate correttamente",
       "allImagesRequired_one": "Classifica tutte le immagini. Rimane {{count}} immagine.",
       "allImagesRequired_many": "Classifica tutte le immagini. Rimangono {{count}} immagini.",
-      "allImagesRequired_other": "Classifica tutte le immagini. Rimangono {{count}} immagini."
+      "allImagesRequired_other": "Classifica tutte le immagini. Rimangono {{count}} immagini.",
+      "modelCreated": "Modello creato correttamente. Utilizza la vista Classificazioni recenti per aggiungere immagini per gli stati mancanti, quindi addestrare il modello.",
+      "missingStatesWarning": {
+        "title": "Esempi di stati mancanti",
+        "description": "Non hai selezionato esempi per tutti gli stati. Il modello non verrà addestrato finché tutti gli stati non avranno immagini. Dopo aver continuato, utilizza la vista Classificazioni recenti per classificare le immagini per gli stati mancanti, quindi addestra il modello."
+      }
     }
   },
   "deleteModel": {
