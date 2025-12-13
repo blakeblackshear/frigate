@@ -19,7 +19,8 @@
   "train": {
     "title": "Recente herkenningen",
     "aria": "Selecteer recente herkenningen",
-    "empty": "Er zijn geen recente pogingen tot gezichtsherkenning"
+    "empty": "Er zijn geen recente pogingen tot gezichtsherkenning",
+    "titleShort": "Recent"
   },
   "selectFace": "Selecteer gezicht",
   "toast": {

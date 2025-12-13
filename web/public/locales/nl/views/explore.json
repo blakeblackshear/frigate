@@ -207,6 +207,10 @@
     "viewTrackingDetails": {
       "label": "Bekijk trackinggegevens",
       "aria": "Toon de trackinggegevens"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Download schone snapshot",
+      "aria": "Download schone snapshot"
     }
   },
   "noTrackedObjects": "Geen gevolgde objecten gevonden",
@@ -261,7 +265,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Verhouding",
-        "area": "Gebied"
+        "area": "Gebied",
+        "score": "Score"
       }
     },
     "annotationSettings": {
@@ -276,7 +281,7 @@
         "millisecondsToOffset": "Aantal milliseconden om objectkader mee te verschuiven. <em>Standaard: 0</em>",
         "tips": "Verlaag de waarde als de videoweergave sneller is dan de objectkaders en hun trajectpunten, en verhoog de waarde als de videoweergave achterloopt. Deze waarde kan negatief zijn.",
         "toast": {
-          "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand. Herstart Frigate om je wijzigingen toe te passen."
+          "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand."
         }
       }
     },
