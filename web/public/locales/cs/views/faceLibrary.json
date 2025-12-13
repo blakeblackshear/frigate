@@ -36,7 +36,7 @@
     "desc": "Skutečně chcete vymazat kolekci {{name}}? Toto trvale vymaže všechny přiřazené obličeje."
   },
   "train": {
-    "title": "Trénovat",
+    "title": "Nedávná rozpoznání",
     "empty": "Nejsou zde žádné předchozí pokusy o rozpoznání obličeje",
     "aria": "Vybrat trénink"
   },
