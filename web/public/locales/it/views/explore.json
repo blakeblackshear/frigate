@@ -263,7 +263,8 @@
       "header": {
         "zones": "Zone",
         "ratio": "Rapporto",
-        "area": "Area"
+        "area": "Area",
+        "score": "Punteggio"
       }
     },
     "annotationSettings": {
