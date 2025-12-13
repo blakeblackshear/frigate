@@ -124,7 +124,7 @@
     "twoWayTalk": {
       "tips.documentation": "Leer la documentación ",
       "available": "La conversación bidireccional está disponible para esta transmisión",
-      "unavailable": "La conversación bidireccional está disponible para esta transmisión",
+      "unavailable": "La conversación bidireccional no está disponible para esta transmisión",
       "tips": "Tu dispositivo debe soportar la función y WebRTC debe estar configurado para la conversación bidireccional."
     },
     "lowBandwidth": {
