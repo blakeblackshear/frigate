@@ -60,7 +60,7 @@ rapidfuzz==3.12.*
 # HailoRT Wheels
 appdirs==1.4.*
 argcomplete==2.0.*
-contextlib2==0.6.*
+contextlib2==21.6.*
 distlib==0.3.*
 filelock==3.8.*
 future==0.18.*
