@@ -185,7 +185,7 @@
       },
       "label": "Mode sombre"
     },
-    "review": "Événements",
+    "review": "Activités",
     "explore": "Explorer",
     "export": "Exporter",
     "user": {
@@ -247,7 +247,7 @@
     "title": "Rôle",
     "viewer": "Observateur",
     "admin": "Administrateur",
-    "desc": "Les administrateurs ont un accès complet à toutes les fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, des événements, et à l'historique des enregistrements dans l'interface."
+    "desc": "Les administrateurs ont un accès complet à toutes les fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, des activités, et à l'historique des enregistrements dans l'interface."
   },
   "pagination": {
     "next": {
