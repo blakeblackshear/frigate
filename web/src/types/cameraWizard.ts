@@ -118,6 +118,7 @@ export type WizardFormData = {
   probeResult?: OnvifProbeResponse;
   probeCandidates?: string[]; // candidate URLs from probe
   candidateTests?: CandidateTestMap; // test results for candidates
+  hasBackchannel?: boolean; // true if camera supports backchannel audio
 };
 
 // API Response Types

@@ -237,7 +237,18 @@ export default function CameraWizardDialog({
                 const streamUrl = stream.useFfmpeg
                   ? `ffmpeg:${stream.url}`
                   : stream.url;
-                go2rtcStreams[streamName] = [streamUrl];
+
+                if (wizardData.hasBackchannel ?? false) {
+                  // Add two streams: one with #backchannel=0 and one without
+                  // in order to avoid taking control of the microphone during connections
+                  go2rtcStreams[streamName] = [
+                    `${streamUrl}#backchannel=0`,
+                    streamUrl,
+                  ];
+                } else {
+                  // Add single stream as normal
+                  go2rtcStreams[streamName] = [streamUrl];
+                }
               });
 
               if (Object.keys(go2rtcStreams).length > 0) {

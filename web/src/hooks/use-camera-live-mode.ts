@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
 import { LivePlayerMode } from "@/types/live";
 import useDeferredStreamMetadata from "./use-deferred-stream-metadata";
+import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
 
 export default function useCameraLiveMode(
   cameras: CameraConfig[],
@@ -83,16 +84,9 @@ export default function useCameraLiveMode(
       if (isRestreamed) {
         Object.values(camera.live.streams).forEach((streamName) => {
           const metadata = streamMetadata[streamName];
+          const audioFeatures = detectCameraAudioFeatures(metadata);
           newSupportsAudioOutputStates[streamName] = {
-            supportsAudio: metadata
-              ? metadata.producers.find(
-                  (prod) =>
-                    prod.medias &&
-                    prod.medias.find((media) =>
-                      media.includes("audio, recvonly"),
-                    ) !== undefined,
-                ) !== undefined
-              : false,
+            supportsAudio: audioFeatures.audioOutput,
             cameraName: camera.name,
           };
         });

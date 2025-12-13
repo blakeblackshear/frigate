@@ -34,6 +34,7 @@ import { LiveStreamMetadata } from "@/types/live";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -80,20 +81,10 @@ export function CameraStreamingDialog({
 
   const cameraMetadata = streamName ? streamMetadata?.[streamName] : undefined;
 
-  const supportsAudioOutput = useMemo(() => {
-    if (!cameraMetadata) {
-      return false;
-    }
-
-    return (
-      cameraMetadata.producers.find(
-        (prod) =>
-          prod.medias &&
-          prod.medias.find((media) => media.includes("audio, recvonly")) !=
-            undefined,
-      ) != undefined
-    );
-  }, [cameraMetadata]);
+  const { audioOutput: supportsAudioOutput } = useMemo(
+    () => detectCameraAudioFeatures(cameraMetadata),
+    [cameraMetadata],
+  );
 
   // handlers
 
