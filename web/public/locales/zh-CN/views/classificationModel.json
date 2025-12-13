@@ -1,5 +1,5 @@
 {
-  "documentTitle": "分类模型",
+  "documentTitle": "分类模型 - Frigate",
   "button": {
     "deleteClassificationAttempts": "删除分类图片",
     "renameCategory": "重命名类别",
@@ -56,7 +56,7 @@
   "train": {
     "title": "最近分类记录",
     "aria": "选择最近分类记录",
-    "titleShort": "最近"
+    "titleShort": "近期"
   },
   "categories": "类别",
   "createCategory": {
@@ -94,7 +94,7 @@
       "objectLabelPlaceholder": "请选择目标类型……",
       "classificationType": "分类方式",
       "classificationTypeTip": "了解分类方式",
-      "classificationTypeDesc": "子标签会为目标标签添加附加文本（例如：“人员：美团”）。属性是可搜索的元数据，独立存储在对象的元信息中。",
+      "classificationTypeDesc": "子标签会为目标标签添加附加文本（例如：“人员：美团”）。属性是可搜索的元数据，独立存储在目标的元信息中。",
       "classificationSubLabel": "子标签",
       "classificationAttribute": "属性",
       "classes": "类别",
@@ -144,7 +144,12 @@
         "classifyFailed": "图片分类失败：{{error}}"
       },
       "generateSuccess": "样本图片生成成功",
-      "allImagesRequired_other": "请对所有图片进行分类。还有 {{count}} 张图片需要分类。"
+      "allImagesRequired_other": "请对所有图片进行分类。还有 {{count}} 张图片需要分类。",
+      "modelCreated": "模型创建成功。请在“最近分类”页面为缺失的状态添加图片，然后训练模型。",
+      "missingStatesWarning": {
+        "title": "缺失状态示例",
+        "description": "建议为所有状态都选择示例图片以获得最佳效果。你也可以跳过当前为分类状态选择图片，但需要所有状态都有对应的图片，模型才能够进行训练。跳过后你可通过“最近分类”页面为缺失的状态分类添加图片，然后再训练模型。"
+      }
     }
   },
   "deleteModel": {
@@ -170,5 +175,6 @@
     "noNewImages": "没有新的图片可用于训练。请先对数据集中的更多图片进行分类。",
     "noChanges": "自上次训练以来，数据集未作任何更改。",
     "modelNotReady": "模型尚未准备好进行训练"
-  }
+  },
+  "none": "无标签"
 }

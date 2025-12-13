@@ -2,14 +2,14 @@
   "alerts": "警报",
   "detections": "检测",
   "motion": {
-    "label": "运动",
-    "only": "仅运动画面"
+    "label": "画面变动",
+    "only": "仅变动画面"
   },
   "allCameras": "所有摄像头",
   "empty": {
     "alert": "还没有“警报”类核查项",
     "detection": "还没有“检测”类核查项",
-    "motion": "还没有运动类数据"
+    "motion": "还没有画面变动类数据"
   },
   "timeline": "时间线",
   "timeline.aria": "选择时间线",
@@ -48,7 +48,7 @@
     "settings": "详细视图设置",
     "alwaysExpandActive": {
       "title": "始终展开当前项",
-      "desc": "在可用情况下，将始终展开当前核查项的对象详细信息。"
+      "desc": "在可用情况下，将始终展开当前核查项的目标详细信息。"
     }
   },
   "objectTrack": {
@@ -56,5 +56,9 @@
     "clickToSeek": "点击从该时间进行寻找"
   },
   "zoomIn": "放大",
-  "zoomOut": "缩小"
+  "zoomOut": "缩小",
+  "normalActivity": "正常",
+  "needsReview": "需要核查",
+  "securityConcern": "安全隐患",
+  "select_all": "所有"
 }

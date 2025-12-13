@@ -28,7 +28,8 @@
   "train": {
     "title": "近期识别记录",
     "aria": "选择近期识别记录",
-    "empty": "近期未检测到人脸识别操作"
+    "empty": "近期未检测到人脸识别操作",
+    "titleShort": "近期"
   },
   "selectItem": "选择 {{item}}",
   "selectFace": "选择人脸",

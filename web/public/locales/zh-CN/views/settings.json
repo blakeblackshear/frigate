@@ -5,7 +5,7 @@
     "camera": "摄像头设置 - Frigate",
     "classification": "分类设置 - Frigate",
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
-    "motionTuner": "运动调整器 - Frigate",
+    "motionTuner": "画面变动调整器 - Frigate",
     "object": "调试 - Frigate",
     "general": "页面设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
@@ -19,7 +19,7 @@
     "classification": "分类设置",
     "cameras": "摄像头设置",
     "masksAndZones": "遮罩/ 区域",
-    "motionTuner": "运动调整器",
+    "motionTuner": "画面变动调整器",
     "debug": "调试",
     "users": "用户",
     "notifications": "通知",
@@ -309,7 +309,7 @@
       "name": {
         "title": "区域名称",
         "inputPlaceHolder": "请输入名称…",
-        "tips": "名称至少包含两个字符，且不能和摄像头或其他区域同名。"
+        "tips": "名称至少包含两个字符，且不能和摄像头名或该摄像头下的其他区域同名。"
       },
       "inertia": {
         "title": "惯性",
@@ -344,33 +344,33 @@
         }
       },
       "toast": {
-        "success": "区域 ({{zoneName}}) 已保存。请重启 Frigate 以应用更改。"
+        "success": "区域 ({{zoneName}}) 已保存。"
       }
     },
     "motionMasks": {
-      "label": "运动遮罩",
-      "documentTitle": "编辑运动遮罩 - Frigate",
+      "label": "画面变动遮罩",
+      "documentTitle": "编辑画面变动遮罩 - Frigate",
       "desc": {
         "title": "画面变动遮罩用于防止触发不必要的画面变动检测。过度的设置遮罩将使目标更加难以被追踪。",
         "documentation": "文档"
       },
-      "add": "添加运动遮罩",
-      "edit": "编辑运动遮罩",
+      "add": "添加画面变动遮罩",
+      "edit": "编辑画面变动遮罩",
       "context": {
-        "title": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头画面显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
+        "title": "画面变动遮罩用于防止不需要的画面变动触发检测（例如：容易被风吹动的树枝、摄像头画面上显示的时间等）。画面变动遮罩应<strong>谨慎使用</strong>，过度的遮罩会导致追踪目标变得更加困难。",
         "documentation": "阅读文档"
       },
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "polygonAreaTooLarge": {
-        "title": "运动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的运动遮罩。",
+        "title": "画面变动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的画面变动遮罩。",
         "tips": "画面变动遮罩并不会使该区域无法检测到指定目标/物体，如有需要，你应该使用 区域 来限制检测的目标/物体类型。",
         "documentation": "阅读文档"
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-          "noName": "运动遮罩已保存。请重启 Frigate 以应用更改。"
+          "title": "{{polygonName}} 已保存。",
+          "noName": "画面变动遮罩已保存。"
         }
       }
     },
@@ -393,37 +393,37 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-          "noName": "目标遮罩已保存。请重启 Frigate 以应用更改。"
+          "title": "{{polygonName}} 已保存。",
+          "noName": "目标遮罩已保存。"
         }
       }
     },
     "restart_required": "需要重启（遮罩与区域已修改）",
-    "motionMaskLabel": "运动遮罩 {{number}}",
+    "motionMaskLabel": "画面变动遮罩 {{number}}",
     "objectMaskLabel": "目标/物体遮罩 {{number}}（{{label}}）"
   },
   "motionDetectionTuner": {
-    "title": "运动检测调整器",
+    "title": "画面变动检测调整器",
     "desc": {
       "title": "Frigate 将使用画面变化检测作为首个步骤，以确认一帧画面中是否有目标或物体需要使用目标检测。",
-      "documentation": "阅读有关运动检测的文档"
+      "documentation": "阅读有关画面变动检测的文档"
     },
     "Threshold": {
       "title": "阈值",
-      "desc": "阈值决定像素亮度高于多少时会被认为是运动。<em>默认值：30</em>"
+      "desc": "阈值决定像素亮度变化达到多少时会被认为是画面变动。<em>默认值：30</em>"
     },
     "contourArea": {
       "title": "轮廓面积",
-      "desc": "轮廓面积决定哪些变化的像素组符合运动条件。<em>默认值：10</em>"
+      "desc": "轮廓面积值用于判断哪些相连的像素变化区域可被认定为画面变动。<em>默认值：10</em>"
     },
     "improveContrast": {
       "title": "提高对比度",
       "desc": "提高较暗场景的对比度。<em>默认值：启用</em>"
     },
     "toast": {
-      "success": "运动设置已保存。"
+      "success": "画面变动设置已保存。"
     },
-    "unsavedChanges": "{{camera}} 的运动调整器设置未保存"
+    "unsavedChanges": "{{camera}} 的画面变动调整器设置未保存"
   },
   "debug": {
     "title": "调试",
@@ -449,32 +449,32 @@
       "desc": "显示已定义的区域图层"
     },
     "mask": {
-      "title": "运动遮罩",
-      "desc": "显示运动遮罩图层"
+      "title": "画面变动遮罩",
+      "desc": "显示画面变动遮罩图层"
     },
     "motion": {
-      "title": "运动区域框",
-      "desc": "在检测到运动的区域显示区域框",
-      "tips": "<p><strong>运动区域框</strong></p><br><p>将在当前检测到运动的区域内显示红色区域框。</p>"
+      "title": "画面变动区域框",
+      "desc": "在检测到画面变动的区域显示区域框",
+      "tips": "<p><strong>画面变动区域框</strong></p><br><p>将在当前检测到画面变动的区域内显示红色区域框。</p>"
     },
     "regions": {
       "title": "范围",
-      "desc": "显示发送到运动检测器感兴趣范围的框",
+      "desc": "显示发送给目标检测器感兴趣的区域框",
       "tips": "<p><strong>范围框</strong></p><br><p>将在帧中发送到目标检测器的感兴趣范围上叠加绿色框。</p>"
     },
     "objectShapeFilterDrawing": {
-      "title": "允许绘制“对象形状过滤器”",
+      "title": "允许绘制“目标形状过滤器”",
       "desc": "在图像上绘制矩形，以查看区域和比例详细信息",
-      "tips": "启用此选项，能够在摄像头图像上绘制矩形，将显示其区域和比例。然后，您可以使用这些值在配置中设置对象形状过滤器参数。",
+      "tips": "启用此选项，能够在摄像头画面上绘制矩形，将显示其区域和比例。你可以通过使用这些值在配置中设置目标形状过滤器的参数。",
       "document": "阅读文档 ",
       "score": "分数",
       "ratio": "比例",
       "area": "区域"
     },
     "paths": {
-      "title": "运动轨迹",
-      "desc": "显示被追踪目标的运动轨迹关键点",
-      "tips": "<p><strong>运动轨迹</strong></p><p>将使用线条和圆圈标示被追踪目标在其活动周期内移动的关键位置点。</p>"
+      "title": "行动轨迹",
+      "desc": "显示被追踪目标的行动轨迹关键点",
+      "tips": "<p><strong>行动轨迹</strong></p><p>将使用<strong>线条</strong>和<strong>点</strong>来标示被追踪目标在其活动周期内移动的关键位置点。</p>"
     },
     "audio": {
       "title": "音频",
@@ -538,7 +538,16 @@
             "veryStrong": "非常强"
           },
           "match": "密码匹配",
-          "notMatch": "密码不匹配"
+          "notMatch": "密码不匹配",
+          "show": "显示密码",
+          "hide": "隐藏密码",
+          "requirements": {
+            "title": "密码要求：",
+            "length": "至少8个字符",
+            "uppercase": "至少一个大写字母",
+            "digit": "至少一位数字",
+            "special": "至少一个特殊符号 (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "新密码",
@@ -548,7 +557,11 @@
           }
         },
         "usernameIsRequired": "用户名为必填项",
-        "passwordIsRequired": "必须输入密码"
+        "passwordIsRequired": "必须输入密码",
+        "currentPassword": {
+          "title": "当前密码",
+          "placeholder": "请输入当前密码"
+        }
       },
       "createUser": {
         "title": "创建新用户",
@@ -566,7 +579,12 @@
         "setPassword": "设置密码",
         "desc": "创建一个强密码来保护此账户。",
         "doNotMatch": "两次输入密码不匹配",
-        "cannotBeEmpty": "密码不能为空"
+        "cannotBeEmpty": "密码不能为空",
+        "currentPasswordRequired": "当前密码为必填",
+        "incorrectCurrentPassword": "当前密码错误",
+        "passwordVerificationFailed": "验证密码失败",
+        "multiDeviceWarning": "其他已登录的设备将需要在 {{refresh_time}} 内重新登录。",
+        "multiDeviceAdmin": "你也可以通过轮换你的 JWT 密钥，强制所有用户立即重新登录验证。"
       },
       "changeRole": {
         "title": "更改用户权限组",
@@ -749,7 +767,7 @@
     "documentTitle": "触发器",
     "management": {
       "title": "触发器",
-      "desc": "管理 {{camera}} 的触发器。您可以使用“缩略图”类型，基于与所选追踪对象相似的缩略图来触发；也可以使用“描述”类型，基于与您指定的文本相似的描述来触发。"
+      "desc": "管理 {{camera}} 的触发器。你可以使用“缩略图”类型，将通过与追踪目标相似的缩略图来触发；也可以使用“描述”类型，基于与你指定的文本相似的描述来触发（中文描述需要使用jina v2模型，对配置要求更高）。"
     },
     "addTrigger": "添加触发器",
     "table": {
@@ -811,7 +829,7 @@
           "imagePlaceholder": "选择图片",
           "textPlaceholder": "输入文字内容",
           "imageDesc": "仅显示最近的 100 张缩略图。如果找不到需要的图片，请前往“浏览”页面查看更早的目标，并从菜单中设置触发器。",
-          "textDesc": "输入文本，当检测到相似的追踪对象描述时触发此操作。",
+          "textDesc": "输入文本，当检测到相似的追踪目标描述时触发此操作。",
           "error": {
             "required": "内容为必填项。"
           }
@@ -826,7 +844,7 @@
         },
         "actions": {
           "title": "动作",
-          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。子标签会将触发器名称添加到对象标签中。属性是可搜索的元数据，独立存储在追踪对象的元数据中。",
+          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。子标签会将触发器名称添加到目标标签中。属性是可搜索的元数据，独立存储在追踪目标的元数据中。",
           "error": {
             "min": "必须至少选择一项动作。"
           }
@@ -1196,7 +1214,8 @@
         "audioCodecRequired": "要实现音频检测功能，必须要有音频流。",
         "restreamingWarning": "为录制流开启“减少与摄像头的连接数”可能会略微增加CPU使用率。",
         "brands": {
-          "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中启用 HTTP协议，并重新启动向导。"
+          "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中启用 HTTP协议，并重新启动向导。",
+          "reolink-http": "Reolink HTTP 视频流应该使用 FFmpeg 以获得更好的兼容性，为此视频流启用“使用流兼容模式”。"
         },
         "dahua": {
           "substreamWarning": "子码流1当前被锁定为低分辨率。多数大华、安讯士、EmpireTech品牌的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
