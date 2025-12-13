@@ -42,17 +42,22 @@
   "detail": {
     "label": "Detay",
     "aria": "Ayrıntı görünümünü aç/kapat",
-    "trackedObject_one": "Nesne",
-    "trackedObject_other": "nesneler",
+    "trackedObject_one": "{{count}} nesne",
+    "trackedObject_other": "{{count}} nesne",
     "noObjectDetailData": "Nesneye ait ayrıntılı veri bulunmuyor.",
     "settings": "Ayrıntılı Görünüm Ayarları",
     "alwaysExpandActive": {
       "title": "Etkin olanı her zaman genişlet",
       "desc": "Varsa, etkin inceleme öğesinin nesne ayrıntılarını daima göster."
-    }
+    },
+    "noDataFound": "İncelenecek ayrıntılı veri bulunmuyor"
   },
   "objectTrack": {
     "trackedPoint": "Takip edilen nokta",
     "clickToSeek": "Bu zamana gitmek için tıklayın"
-  }
+  },
+  "normalActivity": "Normal",
+  "needsReview": "İnceleme Gerekiyor",
+  "securityConcern": "Güvenlik endişesi",
+  "select_all": "Tümü"
 }

@@ -10,7 +10,7 @@
         "viewInExplore": "Keşfet'te Görüntüle"
       },
       "tips": {
-        "hasMissingObjects": "Eğer Frigate'in <em>{{objects}}</em> etiketine sahip nesneleri kaydetmesini istiyorsanız yapılandırmanızı buna göre ayarlayın.",
+        "hasMissingObjects": "Eğer Frigate'in <em>{{objects}}</em> etiketine sahip nesneleri kaydetmesini istiyorsanız yapılandırmanızı buna göre ayarlayın",
         "mismatch_one": "Tespit edilmiş olan bir nesne bu İncele öğesine dahil edildi. Bu nesne Alarm veya Tespit olarak derecelendirilemedi veya çoktan silindi/temizlendi.",
         "mismatch_other": "Tespit edilmiş olan {{count}} adet nesne bu İncele öğesine dahil edildi. Bu nesneler Alarm veya Tespit olarak derecelendirilemedi veya çoktan silindi/temizlendi."
       },
@@ -19,7 +19,7 @@
           "updatedSublabel": "Alt etiket başarıyla gücellendi.",
           "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcının hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir.",
           "updatedLPR": "Plaka başarıyla güncellendi.",
-          "audioTranscription": "Ses çözümlemesi başarıyla talep edildi."
+          "audioTranscription": "Ses dökümü başarıyla istendi. Frigate sunucunuzun hızına bağlı olarak döküm işlemi tamamlanması biraz zaman alabilir."
         },
         "error": {
           "updatedSublabelFailed": "Alt etiket güncellenemedi: {{errorMessage}}",
@@ -110,7 +110,8 @@
     "object_lifecycle": "nesne yaşam döngüsü",
     "snapshot": "fotoğraf",
     "video": "video",
-    "thumbnail": "küçük resim"
+    "thumbnail": "küçük resim",
+    "tracking_details": "izleme ayrıntıları"
   },
   "objectLifecycle": {
     "title": "Nesne Yaşam Döngüsü",
@@ -196,6 +197,20 @@
     "audioTranscription": {
       "label": "Çözümle",
       "aria": "Ses çözümlemesi iste"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Temiz anlık görüntüyü indir",
+      "aria": "Temiz anlık görüntüyü indir"
+    },
+    "viewTrackingDetails": {
+      "label": "İzleme ayrıntılarını görüntüle",
+      "aria": "Takip ayrıntılarını göster"
+    },
+    "showObjectDetails": {
+      "label": "Nesne yolunu göster"
+    },
+    "hideObjectDetails": {
+      "label": "Nesne yolunu gizle"
     }
   },
   "noTrackedObjects": "Takip Edilen Nesne Bulunamadı",
@@ -207,11 +222,13 @@
         "success": "Takip edilen nesne başarıyla silindi."
       }
     },
-    "tooltip": "Eşleşme: {{type}} (%{{confidence}})"
+    "tooltip": "Eşleşme: {{type}} (%{{confidence}})",
+    "previousTrackedObject": "Önceki izlenen nesne",
+    "nextTrackedObject": "Sonraki izlenen nesne"
   },
   "dialog": {
     "confirmDelete": {
-      "desc": "Bu takip edilen nesneyi silmek nesne fotoğrafını, ilişkili gömüyü ve ilişkili yaşam döngüsü kayıtlarını siler. Video kayıt görüntüleri geçmiş görünümünden <em>SİLİNMEYECEKTİR.</em> <br /><br />Devam etmek istediğinize emin misiniz?",
+      "desc": "Bu takip edilen nesneyi silmek anlık görüntüyü, kaydedilmiş gömü verilerini ve ilişkili yaşam döngüsü kayıtlarını siler. Geçmiş görünümündeki bu izlenen nesneye ait kayıtlı video görüntüleri <em>SİLİNMEYECEKTİR.</em> <br /><br />Devam etmek istediğinizden emin misiniz?",
       "title": "Silmeyi onayla"
     }
   },
@@ -244,8 +261,33 @@
       "external": "{{label}} tespit edildi",
       "header": {
         "zones": "Bölgeler",
-        "ratio": "Oran"
+        "ratio": "Oran",
+        "area": "Alan",
+        "score": "Skor"
       }
+    },
+    "annotationSettings": {
+      "title": "Etiketleme Ayarları",
+      "showAllZones": {
+        "title": "Tüm Bölgeleri Göster",
+        "desc": "Herhangi bir bölgeye nesne girdiğinde, o karede bölgeleri her zaman göster."
+      },
+      "offset": {
+        "label": "Etiket Kaydırma Değeri",
+        "desc": "Bu veriler kameranızın algılama akışından gelir ancak kayıt akışındaki görüntülerin üzerine bindirilir. İki akışın tamamen senkronize olması pek olası değildir. Bu nedenle sınır kutusu ile görüntü birebir hizalı olmayabilir. Bu ayarı kullanarak anotasyonları zamansal olarak ileri veya geri kaydırabilir ve kaydedilmiş görüntülerle daha iyi hizalayabilirsiniz.",
+        "millisecondsToOffset": "Algılama anotasyonlarının kaydırılacağı milisaniye değeri. <em>Varsayılan: 0</em>",
+        "tips": "Videonun oynatımı kutulardan ve yol noktalarından öndeyse değeri düşürün; geride kalıyorsa değeri artırın. Bu değer negatif olabilir.",
+        "toast": {
+          "success": "{{camera}} için anotasyon zaman kaydırması yapılandırma dosyasına kaydedildi."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Önceki slayt",
+      "next": "Sonraki slayt"
     }
+  },
+  "concerns": {
+    "label": "Endişeler"
   }
 }

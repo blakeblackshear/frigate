@@ -64,7 +64,8 @@
         "failed": "Dışa aktarım başlatılamadı: {{error}}",
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
         "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
-      }
+      },
+      "view": "Görüntüle"
     },
     "fromTimeline": {
       "saveExport": "Dışa Aktarımı Kaydet",
@@ -117,7 +118,8 @@
     "button": {
       "export": "Dışa Aktar",
       "markAsReviewed": "İncelendi olarak işaretle",
-      "deleteNow": "Şimdi Sil"
+      "deleteNow": "Şimdi Sil",
+      "markAsUnreviewed": "Gözden geçirilmedi olarak işaretle"
     }
   },
   "imagePicker": {
@@ -125,6 +127,7 @@
     "noImages": "Bu kamera için küçük resim bulunamadı",
     "search": {
       "placeholder": "Etiket/alt etiket kullanarak arama yapın..."
-    }
+    },
+    "unknownLabel": "Kaydedilen Tetikleme Görseli"
   }
 }
