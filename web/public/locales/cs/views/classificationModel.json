@@ -25,7 +25,10 @@
       "deletedModel_one": "Úspešne odstranený {{count}} model",
       "deletedModel_few": "Úspešne odstranené {{count}} modely",
       "deletedModel_other": "Úspěšne ostranených {{count}} modelov",
-      "deletedCategory": "Zmazať triedu"
+      "deletedCategory": "Zmazať triedu",
+      "categorizedImage": "Obrázek úspěšně klasifikován",
+      "trainedModel": "Úspěšně vytrénovaný model.",
+      "trainingModel": "Trénování modelu bylo úspěšně zahájeno."
     }
   }
 }
