@@ -1,0 +1,12 @@
+{
+  "export": "Ekspordi",
+  "calendar": "Kalender",
+  "filter": "Filter",
+  "filters": "Filtrid",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Ühtegi kehtivat ajavahemikku pole valitud",
+      "endTimeMustAfterStartTime": "Ajavahemiku lõpp peab olema peale algust"
+    }
+  }
+}

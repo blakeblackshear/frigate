@@ -1,0 +1,53 @@
+{
+  "group": {
+    "label": "Kaameragrupid",
+    "camera": {
+      "setting": {
+        "label": "Kaamerate voogedastuse seadistused",
+        "title": "Voogedastuse seadistused: {{cameraName}}",
+        "stream": "Voogedastus",
+        "placeholder": "Vali videovoog",
+        "streamMethod": {
+          "label": "Voogedastuse meetod",
+          "placeholder": "Vali voogedastuse meetod"
+        }
+      }
+    },
+    "add": "Lisa kaameragrupp",
+    "edit": "Muuda kaameragruppi",
+    "delete": {
+      "label": "Kustuta kaameragrupp",
+      "confirm": {
+        "title": "Kinnita kustutamine",
+        "desc": "Kas oled kindel, et soovid kustutada kaameragrupi: <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nimi",
+      "placeholder": "Sisesta nimi…",
+      "errorMessage": {
+        "mustLeastCharacters": "Kaameragrupi nimi peab olema vähemalt 2 tähemärki pikk.",
+        "exists": "Sellise nimega kaameragrupp on juba olemas.",
+        "nameMustNotPeriod": "Kaameragrupi nimes ei tohi olla tühikuid.",
+        "invalid": "Vigane kaameragrupi nimi."
+      }
+    },
+    "cameras": {
+      "label": "Kaamerad",
+      "desc": "Vali kaamerad selle grupi jaoks."
+    },
+    "icon": "Ikoon",
+    "success": "Kaameragrupp ({{name}}) on salvestatud."
+  },
+  "debug": {
+    "options": {
+      "label": "Seadistused",
+      "title": "Valikud",
+      "showOptions": "Näita valikuid",
+      "hideOptions": "Peida valikud"
+    },
+    "boundingBox": "Piirdekast",
+    "timestamp": "Ajatempel",
+    "zones": "Tsoonid"
+  }
+}

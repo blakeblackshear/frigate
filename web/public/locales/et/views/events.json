@@ -1,0 +1,31 @@
+{
+  "alerts": "Häired",
+  "allCameras": "Kõik kaamerad",
+  "detail": {
+    "settings": "Üksikasjaliku vaate seadistused"
+  },
+  "detections": "Tuvastamise tulemused",
+  "motion": {
+    "label": "Liikumine",
+    "only": "Vaid liikumine"
+  },
+  "empty": {
+    "alert": "Ülevaatamiseks ei leidu ühtegi häiret",
+    "detection": "Ülevaatamiseks ei leidu ühtegi tuvastamist",
+    "motion": "Liikumise andmeid ei leidu"
+  },
+  "select_all": "Kõik",
+  "camera": "Kaamera",
+  "detected": "tuvastatud",
+  "normalActivity": "Tavaline",
+  "needsReview": "Vajab ülevaatamist",
+  "securityConcern": "Võib olla turvaprobleem",
+  "timeline": "Ajajoon",
+  "timeline.aria": "Vali ajajoon",
+  "zoomIn": "Suumi sisse",
+  "zoomOut": "Suumi välja",
+  "events": {
+    "label": "Sündmused",
+    "aria": "Vali sündmused"
+  }
+}

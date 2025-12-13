@@ -1,0 +1,19 @@
+{
+  "trackedObjectsCount_one": "{{count}} jälgitav objekt ",
+  "trackedObjectsCount_other": "{{count}} jälgitavat objekti ",
+  "fetchingTrackedObjectsFailed": "Viga jälgitavate objektide laadimisel: {{errorMessage}}",
+  "noTrackedObjects": "Ühtegi jälgitavat objekti ei leidunud",
+  "itemMenu": {
+    "findSimilar": {
+      "aria": "Otsi sarnaseid jälgitavaid objekte"
+    }
+  },
+  "trackingDetails": {
+    "annotationSettings": {
+      "showAllZones": {
+        "title": "Näita kõiki tsoone",
+        "desc": "Kui objekt on sisenenud tsooni, siis alati näida tsooni märgistust."
+      }
+    }
+  }
+}
