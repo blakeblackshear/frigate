@@ -308,7 +308,7 @@
       "name": {
         "title": "Namn",
         "inputPlaceHolder": "Ange ett namn…",
-        "tips": "Namnet måste vara minst 2 tecken långt, måste innehålla minst en bokstav och får inte vara namnet på en kamera eller en annan zon."
+        "tips": "Namnet måste vara minst 2 tecken långt, måste innehålla minst en bokstav och får inte vara namnet på en kamera eller någon annan zon på den här kameran."
       },
       "inertia": {
         "title": "Momentum",
@@ -345,7 +345,7 @@
         }
       },
       "toast": {
-        "success": "Zon ({{zoneName}}) har sparats. Starta om Frigate för att tillämpa ändringarna."
+        "success": "Zonen ({{zoneName}}) har sparats."
       }
     },
     "motionMasks": {
@@ -369,8 +369,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} har sparats. Starta om Frigate för att tillämpa ändringarna.",
-          "noName": "Rörelsemasken har sparats. Starta om Frigate för att tillämpa ändringarna."
+          "title": "{{polygonName}} har sparats.",
+          "noName": "Rörelsemasken har sparats."
         }
       }
     },
@@ -394,8 +394,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} har sparats. Starta om Frigate för att tillämpa ändringarna.",
-          "noName": "Objektmasken har sparats. Starta om Frigate för att tillämpa ändringarna."
+          "title": "{{polygonName}} har sparats.",
+          "noName": "Objektmasken har sparats."
         }
       }
     }
@@ -535,6 +535,15 @@
           "confirm": {
             "title": "Bekräfta lösenord",
             "placeholder": "Bekräfta lösenord"
+          },
+          "show": "Visa lösenord",
+          "hide": "Dölj lösenord",
+          "requirements": {
+            "title": "Lösenordskrav:",
+            "length": "Minst 8 tecken",
+            "uppercase": "Minst en stor bokstav",
+            "digit": "Minst en siffra",
+            "special": "Minst ett specialtecken (!@#$%^&*(),.?\":{}|<>)"
           }
         },
         "newPassword": {
@@ -545,7 +554,11 @@
           }
         },
         "usernameIsRequired": "Användarnamn krävs",
-        "passwordIsRequired": "Lösenord krävs"
+        "passwordIsRequired": "Lösenord krävs",
+        "currentPassword": {
+          "title": "Nuvarande lösenord",
+          "placeholder": "Ange ditt nuvarande lösenord"
+        }
       },
       "createUser": {
         "title": "Skapa ny användare",
@@ -563,7 +576,12 @@
         "doNotMatch": "Lösenorden matchar inte",
         "updatePassword": "Uppdatera lösenord för {{username}}",
         "setPassword": "Ange lösenord",
-        "desc": "Skapa ett starkt lösenord för att säkra det här kontot."
+        "desc": "Skapa ett starkt lösenord för att säkra det här kontot.",
+        "currentPasswordRequired": "Nuvarande lösenord krävs",
+        "incorrectCurrentPassword": "Nuvarande lösenord är felaktigt",
+        "passwordVerificationFailed": "Misslyckades med att verifiera lösenordet",
+        "multiDeviceWarning": "Alla andra enheter där du är inloggad måste logga in igen inom {{refresh_time}}.",
+        "multiDeviceAdmin": "Du kan också tvinga alla användare att autentisera om sig omedelbart genom att rotera din JWT-hemlighet."
       },
       "changeRole": {
         "title": "Ändra användarroll",
@@ -602,7 +620,7 @@
     },
     "unregisterDevice": "Avregistrera enheten",
     "sendTestNotification": "Skicka testnotis",
-    "active": "Notifieringar aktiva",
+    "active": "Aviseringar är aktiva",
     "notificationUnavailable": {
       "title": "Meddelanden otillgängliga",
       "desc": "Webb push-meddelanden kräver en säker kontext (<code>https://…</code>). Detta är en begränsning i webbläsaren. Få säker åtkomst till Frigate för att använda meddelanden."
@@ -1128,7 +1146,8 @@
         "audioCodecRequired": "En ljudström krävs för att stödja ljuddetektering.",
         "restreamingWarning": "Att minska anslutningarna till kameran för inspelningsströmmen kan öka CPU-användningen något.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
+          "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden.",
+          "reolink-http": "Reolink HTTP-strömmar bör använda FFmpeg för bättre kompatibilitet. Aktivera \"Använd strömkompatibilitetsläge\" för den här strömmen."
         },
         "dahua": {
           "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Dahua/Amcrest/EmpireTech-kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."

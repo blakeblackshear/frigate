@@ -32,7 +32,8 @@
   "train": {
     "title": "Senaste Igenkänningar",
     "aria": "Välj senaste igenkänningar",
-    "empty": "Det finns inga ny försök till ansiktsigenkänning"
+    "empty": "Det finns inga ny försök till ansiktsigenkänning",
+    "titleShort": "Ny"
   },
   "uploadFaceImage": {
     "title": "Ladda upp ansiktsbild",

@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Klassificeringsmodeller",
+  "documentTitle": "Klassificeringsmodeller - Frigate",
   "button": {
     "deleteClassificationAttempts": "Ta bort klassificeringsbilder",
     "renameCategory": "Byt namn på klass",
@@ -59,7 +59,7 @@
   "train": {
     "title": "Nyligen tillagd klassificeringar",
     "aria": "Välj senaste klassificeringar",
-    "titleShort": "Nyligen"
+    "titleShort": "Ny"
   },
   "categories": "Klasser",
   "createCategory": {
@@ -148,7 +148,12 @@
       },
       "generateSuccess": "Exempelbilder har genererats",
       "allImagesRequired_one": "Vänligen klassificera alla bilder. {{count}} bild återstår.",
-      "allImagesRequired_other": "Vänligen klassificera alla bilder. {{count}} bilder återstår."
+      "allImagesRequired_other": "Vänligen klassificera alla bilder. {{count}} bilder återstår.",
+      "modelCreated": "Modellen har skapats. Använd vyn Senaste klassificeringar för att lägga till bilder för saknade tillstånd och träna sedan modellen.",
+      "missingStatesWarning": {
+        "title": "Exempel på saknade tillstånd",
+        "description": "Det rekommenderas att välja exempel för alla tillstånd för bästa resultat. Du kan fortsätta utan att välja alla tillstånd, men modellen kommer inte att tränas förrän alla tillstånd har bilder. När du har fortsatt använder du vyn Senaste klassificeringar för att klassificera bilder för de saknade tillstånden och tränar sedan modellen."
+      }
     }
   },
   "deleteModel": {
@@ -175,5 +180,6 @@
     "noNewImages": "Inga nya bilder att träna. Klassificera fler bilder i datasetet först.",
     "noChanges": "Inga ändringar i datamängden sedan senaste träningen.",
     "modelNotReady": "Modellen är inte redo för träning"
-  }
+  },
+  "none": "Ingen"
 }

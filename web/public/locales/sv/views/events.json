@@ -55,5 +55,9 @@
     "clickToSeek": "Klicka för att söka till den här tiden"
   },
   "zoomIn": "Zooma in",
-  "zoomOut": "Zooma ut"
+  "zoomOut": "Zooma ut",
+  "normalActivity": "Normal",
+  "needsReview": "Behöver granskas",
+  "securityConcern": "Säkerhetsproblem",
+  "select_all": "Alla"
 }
