@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Classificatiemodellen",
+  "documentTitle": "Classificatiemodellen - Frigate",
   "button": {
     "deleteClassificationAttempts": "Classificatieafbeeldingen verwijderen",
     "renameCategory": "Klasse hernoemen",
@@ -148,7 +148,12 @@
       },
       "generateSuccess": "Met succes gegenereerde voorbeeldafbeeldingen",
       "allImagesRequired_one": "Classificeer alle afbeeldingen. {{count}} afbeelding resterend.",
-      "allImagesRequired_other": "Classificeer alle afbeeldingen. {{count}} afbeeldingen resterend."
+      "allImagesRequired_other": "Classificeer alle afbeeldingen. {{count}} afbeeldingen resterend.",
+      "modelCreated": "Model succesvol aangemaakt. Gebruik de weergave Recente classificaties om afbeeldingen voor ontbrekende statussen toe te voegen en train vervolgens het model.",
+      "missingStatesWarning": {
+        "title": "Voorbeelden van ontbrekende staten",
+        "description": "Het wordt aanbevolen om voor alle staten voorbeelden te selecteren voor het beste resultaat. Je kunt doorgaan zonder alle staten te selecteren, maar het model wordt pas getraind zodra alle staten afbeeldingen hebben. Na het doorgaan kun je in de weergave ‘Recente Classificaties’ de ontbrekende staten van afbeeldingen voorzien, en daarna het model trainen."
+      }
     }
   },
   "deleteModel": {
@@ -175,5 +180,6 @@
     "noNewImages": "Geen nieuwe afbeeldingen om te trainen. Classificeer eerst meer afbeeldingen in de dataset.",
     "modelNotReady": "Model is niet klaar voor training",
     "noChanges": "Geen wijzigingen in de dataset sinds de laatste training."
-  }
+  },
+  "none": "Geen herkenning"
 }

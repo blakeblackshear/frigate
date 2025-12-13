@@ -65,7 +65,8 @@
         "noVaildTimeSelected": "Geen geldig tijdsbereik geselecteerd",
         "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn"
       },
-      "success": "Export is succesvol gestart. Bekijk het bestand op de exportpagina."
+      "success": "Export is succesvol gestart. Bekijk het bestand op de exportpagina.",
+      "view": "Weergeven"
     },
     "fromTimeline": {
       "saveExport": "Export opslaan",

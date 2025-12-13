@@ -55,5 +55,9 @@
     "clickToSeek": "Klik om naar deze tijd te zoeken"
   },
   "zoomIn": "Zoom in",
-  "zoomOut": "Zoom uit"
+  "zoomOut": "Zoom uit",
+  "normalActivity": "Normaal",
+  "needsReview": "Heeft een beoordeling nodig",
+  "securityConcern": "Beveiligingsprobleem",
+  "select_all": "Alle"
 }

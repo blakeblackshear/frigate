@@ -306,7 +306,7 @@
       "name": {
         "title": "Naam",
         "inputPlaceHolder": "Voer een naam in…",
-        "tips": "De naam moet minimaal 2 tekens lang zijn, minimaal één letter bevatten en mag niet gelijk zijn aan de naam van een camera of andere zone."
+        "tips": "De naam moet minimaal 2 tekens lang zijn, minimaal één letter bevatten en mag niet gelijk zijn aan de naam van een camera of andere zone op deze camera."
       },
       "inertia": {
         "title": "Traagheid",
@@ -345,7 +345,7 @@
       "add": "Zone toevoegen",
       "allObjects": "Alle objecten",
       "toast": {
-        "success": "Zone ({{zoneName}}) is opgeslagen. Start Frigate opnieuw om de wijzigingen toe te passen."
+        "success": "Zone ({{zoneName}}) is opgeslagen."
       }
     },
     "motionMasks": {
@@ -370,8 +370,8 @@
       "point_other": "{{count}} punten",
       "toast": {
         "success": {
-          "title": "{{polygonName}} is opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
-          "noName": "Bewegingsmasker is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."
+          "title": "{{polygonName}} is opgeslagen.",
+          "noName": "Bewegingsmasker is opgeslagen."
         }
       },
       "add": "Nieuw bewegingsmasker"
@@ -391,8 +391,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} is opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
-          "noName": "Objectmasker is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."
+          "title": "{{polygonName}} is opgeslagen.",
+          "noName": "Objectmasker is opgeslagen."
         }
       },
       "point_one": "{{count}} punt",
@@ -541,7 +541,16 @@
             "placeholder": "Wachtwoord bevestigen"
           },
           "placeholder": "Wachtwoord invoeren",
-          "notMatch": "Wachtwoorden komen niet overeen"
+          "notMatch": "Wachtwoorden komen niet overeen",
+          "show": "Wachtwoord weergeven",
+          "hide": "Wachtwoord verbergen",
+          "requirements": {
+            "title": "Wachtwoordvereisten:",
+            "length": "Minimaal 8 tekens",
+            "uppercase": "Minimaal één hoofdletter",
+            "digit": "Minimaal één cijfer",
+            "special": "Minimaal één speciaal teken (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "Nieuw wachtwoord",
@@ -551,7 +560,11 @@
           }
         },
         "usernameIsRequired": "Gebruikersnaam is vereist",
-        "passwordIsRequired": "Wachtwoord is vereist"
+        "passwordIsRequired": "Wachtwoord is vereist",
+        "currentPassword": {
+          "title": "Huidig wachtwoord",
+          "placeholder": "Voer uw huidige wachtwoord in"
+        }
       },
       "createUser": {
         "title": "Nieuwe gebruiker aanmaken",
@@ -582,7 +595,11 @@
         "updatePassword": "Wachtwoord bijwerken voor {{username}}",
         "desc": "Maak een sterk wachtwoord aan om dit account te beveiligen.",
         "cannotBeEmpty": "Het wachtwoord kan niet leeg zijn",
-        "doNotMatch": "Wachtwoorden komen niet overeen"
+        "doNotMatch": "Wachtwoorden komen niet overeen",
+        "currentPasswordRequired": "Huidig wachtwoord is vereist",
+        "incorrectCurrentPassword": "Het huidige wachtwoord is onjuist",
+        "passwordVerificationFailed": "Wachtwoord kan niet worden geverifieerd",
+        "multiDeviceWarning": "Op alle andere apparaten waarop u bent ingelogd, wordt u binnen {{refresh_time}} gevraagd opnieuw in te loggen. U kunt ook alle gebruikers direct opnieuw laten inloggen door uw JWT-secret te vernieuwen."
       }
     }
   },
