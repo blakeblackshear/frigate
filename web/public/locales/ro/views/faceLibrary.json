@@ -28,7 +28,8 @@
   "train": {
     "empty": "Nu există încercări recente de recunoaștere facială",
     "title": "Recunoașteri Recente",
-    "aria": "Selectează Recunoașteri Recente"
+    "aria": "Selectează Recunoașteri Recente",
+    "titleShort": "Recent"
   },
   "steps": {
     "description": {

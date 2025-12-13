@@ -212,6 +212,10 @@
     },
     "hideObjectDetails": {
       "label": "Ascunde traseul obiectului"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Descarcă un snapshot curat",
+      "aria": "Descarcă snapshot curat"
     }
   },
   "dialog": {
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Zone",
         "ratio": "Raport",
-        "area": "Aria"
+        "area": "Aria",
+        "score": "Scor"
       }
     },
     "annotationSettings": {
@@ -278,7 +283,7 @@
         "millisecondsToOffset": "Millisecunde pentru a decalca adnotările de detectare. <em>Implicit: 0</em>",
         "tips": "Reduceți valoarea dacă redarea video este înaintea casetelor și punctelor de traseu și creșteți valoarea dacă redarea video este în urma acestora. Această valoare poate fi negativă.",
         "toast": {
-          "success": "Decalajul de adnotare pentru {{camera}} a fost salvat în fișierul de configurare. Repornește Frigate pentru a aplica modificările."
+          "success": "Decalajul de adnotare pentru {{camera}} a fost salvat în fișierul de configurare."
         }
       }
     },
