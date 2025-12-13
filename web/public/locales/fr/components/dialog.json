@@ -65,7 +65,8 @@
         "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début.",
         "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide."
       },
-      "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations."
+      "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
+      "view": "Vue"
     },
     "select": "Sélectionner",
     "name": {
@@ -109,19 +110,19 @@
   "recording": {
     "confirmDelete": {
       "desc": {
-        "selected": "Êtes-vous sûr(e) de vouloir supprimer toutes les vidéos enregistrées associées à cet événement ? <br /><br />Maintenez la touche <em>Maj</em> enfoncée pour éviter cette boîte de dialogue à l'avenir."
+        "selected": "Êtes-vous sûr(e) de vouloir supprimer toutes les vidéos enregistrées associées à cette activité ? <br /><br />Maintenez la touche <em>Maj</em> enfoncée pour éviter cette boîte de dialogue à l'avenir."
       },
       "title": "Confirmer la suppression",
       "toast": {
-        "success": "Les vidéos associées aux événements sélectionnés ont été supprimées.",
+        "success": "Les vidéos associées aux activités sélectionnées ont été supprimées.",
         "error": "Échec de la suppression : {{error}}"
       }
     },
     "button": {
       "export": "Exporter",
-      "markAsReviewed": "Marquer comme vérifié",
+      "markAsReviewed": "Marquer comme traité",
       "deleteNow": "Supprimer maintenant",
-      "markAsUnreviewed": "Marquer comme non vérifié"
+      "markAsUnreviewed": "Marquer comme non traité"
     }
   },
   "imagePicker": {

@@ -7,8 +7,8 @@
   "alerts": "Alertes",
   "allCameras": "Toutes les caméras",
   "empty": {
-    "alert": "Il n'y a aucune alerte à examiner.",
-    "detection": "Il n'y a aucune détection à examiner.",
+    "alert": "Aucune alerte à traiter",
+    "detection": "Aucune détection à traiter",
     "motion": "Aucune donnée de mouvement trouvée"
   },
   "timeline": "Chronologie",
@@ -17,7 +17,7 @@
     "aria": "Sélectionner les événements",
     "noFoundForTimePeriod": "Aucun événement n'a été trouvé pour cette plage de temps."
   },
-  "documentTitle": "Événements - Frigate",
+  "documentTitle": "Activités - Frigate",
   "recordings": {
     "documentTitle": "Enregistrements - Frigate"
   },
@@ -25,13 +25,13 @@
     "last24Hours": "Dernières 24 heures"
   },
   "timeline.aria": "Sélectionner une chronologie",
-  "markAsReviewed": "Marquer comme vérifié",
+  "markAsReviewed": "Marquer comme traitê",
   "newReviewItems": {
-    "button": "Nouveaux événements à examiner",
-    "label": "Afficher les nouveaux événements"
+    "button": "Nouvelles activités à traiter",
+    "label": "Afficher les nouvelles activités"
   },
   "camera": "Caméra",
-  "markTheseItemsAsReviewed": "Marquer ces éléments comme vérifiés",
+  "markTheseItemsAsReviewed": "Marquer ces activités comme traitées",
   "selected": "{{count}} sélectionné(s)",
   "selected_other": "{{count}} sélectionné(s)",
   "selected_one": "{{count}} sélectionné(s)",
@@ -39,7 +39,7 @@
   "suspiciousActivity": "Activité suspecte",
   "threateningActivity": "Activité menaçante",
   "detail": {
-    "noDataFound": "Aucun détail à examiner",
+    "noDataFound": "Aucun détail à traiter",
     "aria": "Activer/désactiver la vue détaillée",
     "trackedObject_one": "{{count}} objet",
     "trackedObject_other": "{{count}} objets",
@@ -48,7 +48,7 @@
     "settings": "Paramètres de la vue Détail",
     "alwaysExpandActive": {
       "title": "Toujours développer l'élément actif",
-      "desc": "Toujours développer les détails de l'objet de l'événement actif si disponibles"
+      "desc": "Toujours développer les détails de l'objet pour l'activité en cours"
     }
   },
   "objectTrack": {
@@ -56,5 +56,9 @@
     "clickToSeek": "Cliquez pour atteindre ce moment."
   },
   "zoomIn": "Zoom avant",
-  "zoomOut": "Zoom arrière"
+  "zoomOut": "Zoom arrière",
+  "normalActivity": "Normal",
+  "needsReview": "À traiter",
+  "securityConcern": "Problème de sécurité",
+  "select_all": "Tous"
 }

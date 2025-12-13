@@ -163,7 +163,7 @@
   "lastRefreshed": "Dernier rafraichissement : ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur par FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} a une utilisation CPU de détection élevée ({{detectAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} : charge CPU détection élevée ({{detectAvg}}%)",
     "healthy": "Le système est sain",
     "reindexingEmbeddings": "Réindexation des embeddings ({{processed}} % terminée)",
     "cameraIsOffline": "{{camera}} est hors ligne",
@@ -186,9 +186,9 @@
       "face_recognition": "Reconnaissance faciale",
       "text_embedding": "Vitesse d'embedding de visage",
       "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9",
-      "review_description": "Description de la revue",
-      "review_description_speed": "Vitesse de la description de la revue",
-      "review_description_events_per_second": "Description de la revue",
+      "review_description": "Description de l'activité",
+      "review_description_speed": "Vitesse de description des activités",
+      "review_description_events_per_second": "Description de l'activité",
       "object_description": "Description de l'objet",
       "object_description_speed": "Vitesse de la description d'objet",
       "object_description_events_per_second": "Description de l'objet"

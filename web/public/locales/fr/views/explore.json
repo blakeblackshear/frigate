@@ -32,9 +32,9 @@
   "details": {
     "timestamp": "Horodatage",
     "item": {
-      "title": "Détails de l'événement",
+      "title": "Détails de l'activité",
       "button": {
-        "share": "Partager cet événement",
+        "share": "Partager cette activité",
         "viewInExplore": "Afficher dans Explorer"
       },
       "toast": {
@@ -52,12 +52,12 @@
         }
       },
       "tips": {
-        "mismatch_one": "{{count}} objet indisponible a été détecté et intégré dans cet événement. Cet objet n'a pas été qualifié comme une alerte ou une détection, ou a déjà été nettoyé / supprimé.",
-        "mismatch_many": "{{count}} objets indisponibles ont été détectés et intégrés dans cet événement. Ces objets n'ont pas été qualifiés comme une alerte ou une détection, ou ont déjà été nettoyés / supprimés.",
-        "mismatch_other": "{{count}} objets indisponibles ont été détectés et intégrés dans cet événement. Ces objets n'ont pas été qualifiés comme une alerte ou une détection, ou ont déjà été nettoyés / supprimés.",
+        "mismatch_one": "{{count}} objet indisponible a été détecté et intégré dans cette activité. Cet objet n'a pas été qualifié comme une alerte ou une détection, ou a déjà été nettoyé / supprimé.",
+        "mismatch_many": "{{count}} objets indisponibles ont été détectés et intégrés dans cette activité. Ces objets n'ont pas été qualifiés comme une alerte ou une détection, ou ont déjà été nettoyés / supprimés.",
+        "mismatch_other": "{{count}} objets indisponibles ont été détectés et intégrés dans cette activité. Ces objets n'ont pas été qualifiés comme une alerte ou une détection, ou ont déjà été nettoyés / supprimés.",
         "hasMissingObjects": "Ajustez votre configuration si vous souhaitez que Frigate enregistre les objets suivis pour les étiquettes suivantes : <em>{{objects}}</em>"
       },
-      "desc": "Détails de l'événement"
+      "desc": "Détails de l'activité"
     },
     "label": "Étiquette",
     "editSubLabel": {
@@ -208,6 +208,10 @@
     "viewTrackingDetails": {
       "label": "Voir les détails du suivi",
       "aria": "Afficher les détails du suivi"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Télécharger l'instantané vierge",
+      "aria": "Télécharger l'instantané vierge"
     }
   },
   "dialog": {
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ratio",
-        "area": "Surface"
+        "area": "Surface",
+        "score": "Score"
       }
     },
     "annotationSettings": {
@@ -272,7 +277,7 @@
         "millisecondsToOffset": "Millisecondes de décalage pour les annotations de détection. <em>Par défaut : 0</em>",
         "tips": "Diminuez la valeur si la lecture vidéo est en avance sur les cadres de détection et les points de tracé, et augmentez-la si la lecture vidéo est en retard sur ceux-ci. Cette valeur peut être négative.",
         "toast": {
-          "success": "Le décalage des annotations pour {{camera}} a été sauvegardé dans le fichier de configuration. Redémarrez Frigate pour appliquer vos modifications."
+          "success": "Le décalage des annotations pour {{camera}} a été sauvegardé dans le fichier de configuration."
         },
         "label": "Décalage d'annotation"
       },

@@ -28,7 +28,8 @@
   "train": {
     "title": "Reconnaissances récentes",
     "aria": "Sélectionnez des reconnaissances récentes.",
-    "empty": "Il n'y a pas de tentatives récentes de reconnaissance faciale."
+    "empty": "Il n'y a pas de tentatives récentes de reconnaissance faciale.",
+    "titleShort": "Récent"
   },
   "selectFace": "Sélectionner un visage",
   "button": {

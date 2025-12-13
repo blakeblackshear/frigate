@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Modèles de classification",
+  "documentTitle": "Modèles de classification - Frigate",
   "button": {
     "deleteClassificationAttempts": "Supprimer les images de classification",
     "renameCategory": "Renommer la classe",
@@ -152,7 +152,12 @@
       "generateSuccess": "Génération des images d'exemple réussie",
       "allImagesRequired_one": "Veuillez classifier toutes les images. {{count}} image restante.",
       "allImagesRequired_many": "Veuillez classifier toutes les images. {{count}} images restantes.",
-      "allImagesRequired_other": "Veuillez classifier toutes les images. {{count}} images restantes."
+      "allImagesRequired_other": "Veuillez classifier toutes les images. {{count}} images restantes.",
+      "modelCreated": "Modèle créé avec succès. Utilisez la vue Classifications récentes pour ajouter des images pour les états manquants, puis entraînez le modèle.",
+      "missingStatesWarning": {
+        "title": "Exemples d'états manquants",
+        "description": "Pour des résultats optimaux, il est recommandé de sélectionner des exemples pour tous les états. Vous pouvez continuer sans cette étape, mais le modèle ne sera entraîné que lorsque chaque état disposera d'images. Continuez, puis utilisez la vue Classifications récentes pour classer les images manquantes et lancer l'entraînement."
+      }
     }
   },
   "deleteModel": {
@@ -180,5 +185,6 @@
     "noNewImages": "Aucune nouvelle image pour l'entraînement. Veuillez d'abord classifier plus d'images dans le jeu de données.",
     "modelNotReady": "Le modèle n'est pas prêt pour l'entraînement.",
     "noChanges": "Aucune modification du jeu de données depuis le dernier entraînement"
-  }
+  },
+  "none": "Aucun"
 }

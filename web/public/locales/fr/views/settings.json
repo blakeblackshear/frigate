@@ -12,7 +12,7 @@
     "notifications": "Paramètres de notification - Frigate",
     "enrichments": "Paramètres d'enrichissements - Frigate",
     "cameraManagement": "Gestion des caméras - Frigate",
-    "cameraReview": "Paramètres des événements de caméra - Frigate"
+    "cameraReview": "Paramètres des activités caméra - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -28,7 +28,7 @@
     "triggers": "Déclencheurs",
     "roles": "Rôles",
     "cameraManagement": "Gestion",
-    "cameraReview": "Événements"
+    "cameraReview": "Activités"
   },
   "dialog": {
     "unsavedChanges": {
@@ -81,7 +81,7 @@
     "calendar": {
       "firstWeekday": {
         "label": "Premier jour de la semaine",
-        "desc": "Le jour du début de la semaine du calendrier des événements",
+        "desc": "Jour du début de la semaine du calendrier des activités",
         "sunday": "Dimanche",
         "monday": "Lundi"
       },
@@ -395,7 +395,7 @@
       "name": {
         "title": "Nom",
         "inputPlaceHolder": "Saisissez un nom.",
-        "tips": "Le nom doit comporter au moins 2 caractères, dont une lettre, et ne doit pas être le nom d'une caméra ou d'une autre zone."
+        "tips": "Le nom doit comporter au moins 2 caractères, dont une lettre, et ne doit pas être le nom d'une caméra ou d'une autre zone sur cette caméra."
       },
       "loiteringTime": {
         "desc": "Définit une durée minimale en secondes pendant laquelle l'objet doit rester dans la zone pour qu'elle s'active. <em>Par défaut : 0</em>",
@@ -429,7 +429,7 @@
         "title": "Inertie"
       },
       "toast": {
-        "success": "La zone ({{zoneName}}) a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
+        "success": "La zone ({{zoneName}}) a été enregistrée."
       },
       "objects": {
         "title": "Objets",
@@ -457,8 +457,8 @@
       "clickDrawPolygon": "Cliquer pour dessiner un polygone sur l'image.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} a été enregistré. Redémarrez Frigate pour appliquer les modifications.",
-          "noName": "Le masque de mouvement a été enregistré. Redémarrez Frigate pour appliquer les modifications."
+          "title": "{{polygonName}} a été enregistré.",
+          "noName": "Le masque de mouvement a été enregistré."
         }
       },
       "desc": {
@@ -482,8 +482,8 @@
       },
       "toast": {
         "success": {
-          "noName": "Le masque d'objet a été enregistré. Redémarrez Frigate pour appliquer les modifications.",
-          "title": "{{polygonName}} a été enregistré. Redémarrez Frigate pour appliquer les modifications."
+          "noName": "Le masque d'objet a été enregistré.",
+          "title": "{{polygonName}} a été enregistré."
         }
       },
       "point_one": "{{count}} point",
@@ -644,6 +644,15 @@
           "confirm": {
             "title": "Confirmer le mot de passe",
             "placeholder": "Confirmer le mot de passe"
+          },
+          "show": "Afficher le mot de passe",
+          "hide": "Masquer le mot de passe",
+          "requirements": {
+            "title": "Critères du mot de passe :",
+            "length": "Au moins 8 caractères",
+            "uppercase": "Au moins une lettre majuscule",
+            "digit": "Au moins un chiffre",
+            "special": "Au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>)"
           }
         },
         "newPassword": {
@@ -654,7 +663,11 @@
           }
         },
         "usernameIsRequired": "Nom d'utilisateur requis",
-        "passwordIsRequired": "Mot de passe requis"
+        "passwordIsRequired": "Mot de passe requis",
+        "currentPassword": {
+          "title": "Mot de passe actuel",
+          "placeholder": "Saisissez votre mot de passe actuel"
+        }
       },
       "deleteUser": {
         "title": "Supprimer un utilisateur",
@@ -666,7 +679,12 @@
         "setPassword": "Configurer un mot de passe",
         "desc": "Créez un mot de passe fort pour sécuriser ce compte.",
         "doNotMatch": "Les mots de passe ne correspondent pas",
-        "cannotBeEmpty": "Le mot de passe ne peut être vide"
+        "cannotBeEmpty": "Le mot de passe ne peut être vide",
+        "currentPasswordRequired": "Le mot de passe actuel est requis.",
+        "incorrectCurrentPassword": "Le mot de passe actuel est incorrect",
+        "passwordVerificationFailed": "Échec de la vérification du mot de passe",
+        "multiDeviceWarning": "Tout autre appareil connecté devra se reconnecter dans un délai de {{refresh_time}}.",
+        "multiDeviceAdmin": "Vous pouvez également forcer la ré-authentification immédiate de tous les utilisateurs en renouvelant votre clé de sécurité JWT."
       },
       "changeRole": {
         "title": "Changer le rôle de l'utilisateur",
@@ -676,7 +694,7 @@
           "admin": "Administrateur",
           "adminDesc": "Accès complet à l'ensemble des fonctionnalités.",
           "viewer": "Observateur",
-          "viewerDesc": "Limité aux tableaux de bord Direct, Événements, Explorer et Exports.",
+          "viewerDesc": "Limité aux tableaux de bord Direct, Activités, Explorer et Exports.",
           "customDesc": "Rôle personnalisé avec accès spécifique à la caméra"
         },
         "select": "Sélectionnez un rôle"
@@ -720,7 +738,7 @@
         },
         "label": "Taille du modèle"
       },
-      "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans vos événements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
+      "desc": "La recherche sémantique de Frigate permet de retrouver des objets suivis au sein de vos activités en utilisant l'image elle-même, une description personnalisée ou une description générée automatiquement."
     },
     "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissements",
     "faceRecognition": {
@@ -1204,7 +1222,8 @@
         "audioCodecRequired": "Un flux audio est requis pour prendre en charge la détection audio.",
         "restreamingWarning": "Réduire les connexions à la caméra pour le flux d'enregistrement peut légèrement augmenter l'utilisation du processeur.",
         "brands": {
-          "reolink-rtsp": "Le RTSP Reolink n'est pas recommandé. Activez HTTP dans les paramètres du micrologiciel de la caméra et redémarrez l'assistant."
+          "reolink-rtsp": "Le RTSP Reolink n'est pas recommandé. Activez HTTP dans les paramètres du micrologiciel de la caméra et redémarrez l'assistant.",
+          "reolink-http": "Les flux HTTP de Reolink devraient utiliser FFmpeg pour une meilleure compatibilité. Activez 'Utiliser le mode de compatibilité du flux' pour ce flux."
         },
         "dahua": {
           "substreamWarning": "Le sous-flux 1 est limité à une basse résolution. De nombreuses caméras Dahua / Amcrest / EmpireTech prennent en charge des sous-flux supplémentaires qui doivent être activés dans les paramètres de la caméra. Il est recommandé de vérifier et d'utiliser ces flux s'ils sont disponibles."
@@ -1256,24 +1275,24 @@
     }
   },
   "cameraReview": {
-    "title": "Paramètres des événements de la caméra",
+    "title": "Paramètres des activités caméra",
     "object_descriptions": {
       "title": "Descriptions d'objets par l'IA générative",
       "desc": "Active ou désactive temporairement les descriptions d'objets générées par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description par l'IA n'est générée pour les objets suivis sur cette caméra."
     },
     "review_descriptions": {
-      "title": "Descriptions des événements par l'IA générative",
-      "desc": "Active ou désactive temporairement les descriptions par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description par l'IA ne sera générée pour les événements de cette caméra."
+      "title": "Descriptions des activités par l'IA générative",
+      "desc": "Active ou désactive temporairement les descriptions par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description nouvelle n'est générée pour les activités sur cette caméra."
     },
     "review": {
-      "title": "Événements",
-      "desc": "Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu'au redémarrage de Frigate. Lorsque cette option est désactivée, aucun nouvel événement n'est généré. ",
+      "title": "Activités",
+      "desc": "Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n'est générée. ",
       "alerts": "Alertes ",
       "detections": "Détections "
     },
     "reviewClassification": {
-      "title": "Classification des événements",
-      "desc": "Frigate classe les événements en deux catégories : \"Alertes\" et \"Détections\". Par défaut, les objets de type <em>personne</em> et <em>voiture</em> sont considérés comme des \"Alertes\". Vous pouvez affiner cette classification en définissant des zones spécifiques pour chaque objet.",
+      "title": "Classification des activités",
+      "desc": "Frigate classe les activités en deux catégories : \"Alertes\" et \"Détections\". Par défaut, les objets de type <em>personne</em> et <em>voiture</em> sont considérés comme des \"Alertes\". Vous pouvez affiner cette classification en définissant des zones spécifiques pour chaque objet.",
       "noDefinedZones": "Aucune zone n'est définie pour cette caméra.",
       "objectAlertsTips": "Sur la caméra {{cameraName}}, tous les objets {{alertsLabels}} apparaîtront en tant qu'\"Alertes\".",
       "zoneObjectAlertsTips": "Sur la caméra {{cameraName}}, tous les objets {{alertsLabels}} détectés dans la zone {{zone}} apparaîtront en tant qu'\"Alertes\".",
@@ -1283,12 +1302,12 @@
         "notSelectDetections": "Sur la caméra {{cameraName}}, tous les objets {{detectionsLabels}} détectés dans la zone {{zone}} qui ne sont pas catégorisés comme \"Alertes\" apparaîtront en tant que \"Détections\", et ce, quelle que soit leur zone.",
         "regardlessOfZoneObjectDetectionsTips": "Sur la caméra {{cameraName}}, tous les objets {{detectionsLabels}} non catégorisés apparaîtront en tant que \"Détections\", peu importe leur zone."
       },
-      "unsavedChanges": "Paramètres de classification des événements non enregistrés pour {{camera}}",
+      "unsavedChanges": "Paramètres de classification des activités non enregistrés pour {{camera}}",
       "selectAlertsZones": "Sélectionnez les zones pour les alertes",
       "selectDetectionsZones": "Sélectionner les zones pour les détections",
       "limitDetections": "Limiter les détections à des zones spécifiques",
       "toast": {
-        "success": "La configuration de la classification des événements a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
+        "success": "La configuration de la classification des activités a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
       }
     }
   }
