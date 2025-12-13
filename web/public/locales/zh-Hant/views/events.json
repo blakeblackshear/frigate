@@ -38,5 +38,25 @@
   "suspiciousActivity": "可疑的活動",
   "threateningActivity": "有威脅性的活動",
   "zoomIn": "放大",
-  "zoomOut": "縮小"
+  "zoomOut": "縮小",
+  "detail": {
+    "label": "詳細資訊",
+    "noDataFound": "沒有可供檢視的詳細資訊",
+    "aria": "開關詳細資訊視圖",
+    "trackedObject_one": "{{count}} 個物件",
+    "trackedObject_other": "{{count}} 個物件",
+    "noObjectDetailData": "沒有可用物件細節。",
+    "settings": "細節視圖設定",
+    "alwaysExpandActive": {
+      "title": "總是展開",
+      "desc": "在可用時總是展開當前物件的詳細資訊。"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "追蹤點",
+    "clickToSeek": "點擊從此時間點尋找"
+  },
+  "normalActivity": "正常",
+  "needsReview": "待審核",
+  "securityConcern": "安全隱憂"
 }
