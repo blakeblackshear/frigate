@@ -88,7 +88,8 @@
         "failed": "Eroare la pornirea exportului: {{error}}",
         "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
         "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid"
-      }
+      },
+      "view": "Vizualizează"
     },
     "fromTimeline": {
       "saveExport": "Salvează exportul",

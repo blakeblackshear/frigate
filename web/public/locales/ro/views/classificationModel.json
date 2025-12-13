@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Modele de clasificare",
+  "documentTitle": "Modele de clasificare - Frigate",
   "button": {
     "deleteClassificationAttempts": "Șterge imaginile de clasificare",
     "renameCategory": "Redenumește clasa",
@@ -61,7 +61,7 @@
   },
   "train": {
     "title": "Clasificări recente",
-    "titleShort": "Recente",
+    "titleShort": "Recent",
     "aria": "Selectează clasificările recente"
   },
   "categories": "Clase",
@@ -152,7 +152,12 @@
       "generateSuccess": "Imaginile de exemplu au fost generate cu succes",
       "allImagesRequired_one": "Te rog să clasifici toate imaginile. {{count}} imagine rămasă.",
       "allImagesRequired_few": "Te rog să clasifici toate imaginile. {{count}} imagini rămase.",
-      "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase."
+      "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase.",
+      "modelCreated": "Modelul a fost creat cu succes. Folosește vizualizarea Clasificări recente pentru a adăuga imagini pentru stările lipsă, apoi antrenează modelul.",
+      "missingStatesWarning": {
+        "title": "Exemple de stări lipsă",
+        "description": "Este recomandat să alegi exemple pentru toate stările pentru rezultate optime. Poți continua fără a selecta toate stările, dar modelul nu va fi antrenat până când toate stările nu au imagini. După continuare, folosește vizualizarea Clasificări recente pentru a clasifica imagini pentru stările lipsă, apoi antrenează modelul."
+      }
     }
   },
   "deleteModel": {
@@ -180,5 +185,6 @@
     "noNewImages": "Nu există imagini noi pentru antrenare. Clasifică mai întâi mai multe imagini în setul de date.",
     "modelNotReady": "Modelul nu este pregătit pentru antrenare",
     "noChanges": "Nicio modificare a setului de date de la ultima antrenare."
-  }
+  },
+  "none": "Niciuna"
 }
