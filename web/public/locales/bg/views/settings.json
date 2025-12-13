@@ -12,5 +12,9 @@
       "point_one": "{{count}} точка",
       "point_other": "{{count}} точки"
     }
+  },
+  "documentTitle": {
+    "default": "Настройки - Фригейт",
+    "authentication": "Настройки за сигурността - Фругейт"
   }
 }
