@@ -137,7 +137,7 @@
     "forTime": "Pausa för: "
   },
   "stream": {
-    "title": "Ström (Swedish also use the word Stream)",
+    "title": "Ström",
     "audio": {
       "tips": {
         "title": "Ljud måste skickas ut från din kamera och konfigureras i go2rtc för den här strömmen.",

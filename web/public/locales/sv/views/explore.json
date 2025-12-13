@@ -208,6 +208,10 @@
     },
     "hideObjectDetails": {
       "label": "Dölj objektsökväg"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Ladda ner ren ögonblicksbild",
+      "aria": "Ladda ner ren ögonblicksbild"
     }
   },
   "dialog": {
@@ -261,7 +265,8 @@
       "header": {
         "zones": "Zoner",
         "ratio": "Förhållandet",
-        "area": "Område"
+        "area": "Område",
+        "score": "Resultat"
       }
     },
     "annotationSettings": {
@@ -276,7 +281,7 @@
         "millisecondsToOffset": "Millisekunder för att förskjuta detektera annoteringar med. <em>Standard: 0</em>",
         "tips": "TIPS: Föreställ dig ett händelseklipp med en person som går från vänster till höger. Om tidslinjens avgränsningsram konsekvent är till vänster om personen bör värdet minskas. På samma sätt, om en person går från vänster till höger och avgränsningsramen konsekvent är framför personen bör värdet ökas.",
         "toast": {
-          "success": "Annoteringsförskjutningen för {{camera}} har sparats i konfigurationsfilen. Starta om Frigate för att tillämpa dina ändringar."
+          "success": "Annoteringsförskjutningen för {{camera}} har sparats i konfigurationsfilen."
         }
       }
     },
