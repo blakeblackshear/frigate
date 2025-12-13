@@ -107,7 +107,7 @@ Fine-tune the LPR feature using these optional parameters at the global level of
 
 ### Normalization Rules
 
-- **`replace_rules`**: List of regex replacement rules to normalize detected plates. These rules are applied sequentially and are applied _before_ the `format` regex, if specified. Each rule must have a `pattern` (which can be a string or a regex, prepended by `r`) and `replacement` (a string, which also supports [backrefs](https://docs.python.org/3/library/re.html#re.sub) like `\1`). These rules are useful for dealing with common OCR issues like noise characters, separators, or confusions (e.g., 'O'→'0').
+- **`replace_rules`**: List of regex replacement rules to normalize detected plates. These rules are applied sequentially and are applied _before_ the `format` regex, if specified. Each rule must have a `pattern` (which can be a string or a regex) and `replacement` (a string, which also supports [backrefs](https://docs.python.org/3/library/re.html#re.sub) like `\1`). These rules are useful for dealing with common OCR issues like noise characters, separators, or confusions (e.g., 'O'→'0').
 
 These rules must be defined at the global level of your `lpr` config.
 
