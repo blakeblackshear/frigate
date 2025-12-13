@@ -1,6 +1,6 @@
 {
   "time": {
-    "untilForTime": "Indtil{{time}}",
+    "untilForTime": "Indtil {{time}}",
     "untilForRestart": "Indtil Frigate genstarter.",
     "untilRestart": "Indtil genstart",
     "ago": "{{timeAgo}} siden",

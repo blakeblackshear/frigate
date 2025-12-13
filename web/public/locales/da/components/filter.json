@@ -15,5 +15,36 @@
     },
     "count_one": "{{count}} Label",
     "label": "Etiketter"
+  },
+  "zones": {
+    "label": "Zoner",
+    "all": {
+      "title": "Alle zoner",
+      "short": "Zoner"
+    }
+  },
+  "more": "Flere filtre",
+  "sort": {
+    "label": "Sortér",
+    "dateAsc": "Dato (Stigende)",
+    "dateDesc": "Dato (Faldende)",
+    "speedAsc": "Anslået hastighed (Stigende)",
+    "speedDesc": "Anslået hastighed (Faldende)",
+    "relevance": "Relevans"
+  },
+  "dates": {
+    "selectPreset": "Vælg en forudindstilling…",
+    "all": {
+      "title": "Alle datoer",
+      "short": "Datoer"
+    }
+  },
+  "reset": {
+    "label": "Nulstille filtre til standardværdier"
+  },
+  "timeRange": "Tidsinterval",
+  "estimatedSpeed": "Anslået hastighed ({{unit}})",
+  "features": {
+    "hasVideoClip": "Har et videoklip"
   }
 }
