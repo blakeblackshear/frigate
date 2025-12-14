@@ -116,10 +116,10 @@ export default function Statusbar() {
           }
 
           return (
-            <Link key={gpuTitle} to="/system#general">
+            <Link key={name} to="/system#general">
               {" "}
               <div
-                key={gpuTitle}
+                key={name}
                 className="flex cursor-pointer items-center gap-2 text-sm hover:underline"
               >
                 <MdCircle
