@@ -60,11 +60,9 @@ Choose one or more cameras and draw a rectangle over the area of interest for ea
 
 ### Step 3: Assign Training Examples
 
-The system will automatically generate example images from your camera feeds. You'll be guided through each class one at a time to select which images represent that state.
+The system will automatically generate example images from your camera feeds. You'll be guided through each class one at a time to select which images represent that state. It's not strictly required to select all images you see. If a state is missing from the samples, you can train it from the Recent tab later.
 
-**Important**: All images must be assigned to a state before training can begin. This includes images that may not be optimal, such as when people temporarily block the view, sun glare is present, or other distractions occur. Assign these images to the state that is actually present (based on what you know the state to be), not based on the distraction. This training helps the model correctly identify the state even when such conditions occur during inference.
-
-Once all images are assigned, training will begin automatically.
+Once some images are assigned, training will begin automatically.
 
 ### Improving the Model
 
