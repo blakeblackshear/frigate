@@ -175,7 +175,7 @@ model:
   width: 320 # <--- should match the imgsize of the model, typically 320
   height: 320 # <--- should match the imgsize of the model, typically 320
   path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
-  labelmap_path: /labelmap/labels-coco-17.txt
+  labelmap_path: /config/labels-coco17.txt
 ```
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 17 objects.
