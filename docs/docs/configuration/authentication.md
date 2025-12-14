@@ -287,7 +287,7 @@ curl -i -X POST https://frigate_ip:8971/api/login \
   -d '{"user": "admin", "password": "your_password"}'
 ```
 
-::: note
+:::note
 
 You may need to include `-k` in the argument list in these steps (eg: `curl -k -i -X POST ...`) if your Frigate instance is using a self-signed certificate.
 
