@@ -273,11 +273,11 @@ To use role-based access control, you must connect to Frigate via the **authenti
 
 ## API Authentication Guide
 
-## Getting a Bearer Token
+### Getting a Bearer Token
 
 To use the Frigate API, you need to authenticate first. Follow these steps to obtain a Bearer token:
 
-### 1. Login
+#### 1. Login
 
 Make a POST request to `/login` with your credentials:
 
@@ -295,7 +295,7 @@ You may need to include `-k` in the argument list in these steps (eg: `curl -k -
 
 The response will contain a cookie with the JWT token.
 
-### 2. Using the Bearer Token
+#### 2. Using the Bearer Token
 
 Once you have the token, include it in the Authorization header for subsequent requests:
 
@@ -303,7 +303,7 @@ Once you have the token, include it in the Authorization header for subsequent r
 curl -H "Authorization: Bearer <your_token>" https://frigate_ip:8971/api/profile
 ```
 
-### 3. Token Lifecycle
+#### 3. Token Lifecycle
 
 - Tokens are valid for the configured session length
 - Tokens are automatically refreshed when you visit the `/auth` endpoint
