@@ -14,7 +14,11 @@ paths:
     get:
       tags:
         - Auth
-      summary: Auth
+      summary: Authenticate request
+      description: |-
+        Authenticates the current request based on proxy headers or JWT token.
+        Returns user role and permissions for camera access.
+        This endpoint verifies authentication credentials and manages JWT token refresh.
       operationId: auth_auth_get
       responses:
         "200":
@@ -22,11 +26,21 @@ paths:
           content:
             application/json:
               schema: {}
+        "202":
+          description: Authentication Accepted
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Authentication Failed
   /profile:
     get:
       tags:
         - Auth
-      summary: Profile
+      summary: Get user profile
+      description: |-
+        Returns the current authenticated user's profile including username, role, and allowed cameras.
+        This endpoint requires authentication and returns information about the user's permissions.
       operationId: profile_profile_get
       responses:
         "200":
@@ -34,11 +48,16 @@ paths:
           content:
             application/json:
               schema: {}
+        "401":
+          description: Unauthorized
   /logout:
     get:
       tags:
         - Auth
-      summary: Logout
+      summary: Logout user
+      description: |-
+        Logs out the current user by clearing the session cookie.
+        After logout, subsequent requests will require re-authentication.
       operationId: logout_logout_get
       responses:
         "200":
@@ -46,11 +65,22 @@ paths:
           content:
             application/json:
               schema: {}
+        "303":
+          description: See Other (redirects to login page)
   /login:
     post:
       tags:
         - Auth
-      summary: Login
+      summary: Login with credentials
+      description: |-
+        Authenticates a user with username and password.
+        Returns a JWT token as a secure HTTP-only cookie that can be used for subsequent API requests.
+        The JWT token can also be retrieved from the response and used as a Bearer token in the Authorization header.
+
+        Example using Bearer token:
+        ```
+        curl -H "Authorization: Bearer <token_value>" https://frigate_ip:8971/api/profile
+        ```
       operationId: login_login_post
       requestBody:
         required: true
@@ -64,6 +94,11 @@ paths:
           content:
             application/json:
               schema: {}
+        "401":
+          description: Login Failed - Invalid credentials
+          content:
+            application/json:
+              schema: {}
         "422":
           description: Validation Error
           content:
@@ -74,7 +109,10 @@ paths:
     get:
       tags:
         - Auth
-      summary: Get Users
+      summary: Get all users
+      description: |-
+        Returns a list of all users with their usernames and roles.
+        Requires admin role. Each user object contains the username and assigned role.
       operationId: get_users_users_get
       responses:
         "200":
@@ -82,10 +120,19 @@ paths:
           content:
             application/json:
               schema: {}
+        "403":
+          description: Forbidden - Admin role required
     post:
       tags:
         - Auth
-      summary: Create User
+      summary: Create new user
+      description: |-
+        Creates a new user with the specified username, password, and role.
+        Requires admin role. Password must meet strength requirements:
+        - Minimum 8 characters
+        - At least one uppercase letter
+        - At least one digit
+        - At least one special character (!@#$%^&*(),.?":{}\|<>)
       operationId: create_user_users_post
       requestBody:
         required: true
@@ -99,6 +146,13 @@ paths:
           content:
             application/json:
               schema: {}
+        "400":
+          description: Bad Request - Invalid username or role
+          content:
+            application/json:
+              schema: {}
+        "403":
+          description: Forbidden - Admin role required
         "422":
           description: Validation Error
           content:
@@ -109,7 +163,10 @@ paths:
     delete:
       tags:
         - Auth
-      summary: Delete User
+      summary: Delete user
+      description: |-
+        Deletes a user by username. The built-in admin user cannot be deleted.
+        Requires admin role. Returns success message or error if user not found.
       operationId: delete_user_users__username__delete
       parameters:
         - name: username
@@ -118,12 +175,15 @@ paths:
           schema:
             type: string
             title: Username
+            description: The username of the user to delete
       responses:
         "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
+        "403":
+          description: Forbidden - Cannot delete admin user or admin role required
         "422":
           description: Validation Error
           content:
@@ -134,7 +194,17 @@ paths:
     put:
       tags:
         - Auth
-      summary: Update Password
+      summary: Update user password
+      description: |-
+        Updates a user's password. Users can only change their own password unless they have admin role.
+        Requires the current password to verify identity for non-admin users.
+        Password must meet strength requirements:
+        - Minimum 8 characters
+        - At least one uppercase letter
+        - At least one digit
+        - At least one special character (!@#$%^&*(),.?":{}\|<>)
+
+        If user changes their own password, a new JWT cookie is automatically issued.
       operationId: update_password_users__username__password_put
       parameters:
         - name: username
@@ -143,6 +213,7 @@ paths:
           schema:
             type: string
             title: Username
+            description: The username of the user whose password to update
       requestBody:
         required: true
         content:
@@ -155,6 +226,14 @@ paths:
           content:
             application/json:
               schema: {}
+        "400":
+          description: Bad Request - Current password required or password doesn't meet requirements
+        "401":
+          description: Unauthorized - Current password is incorrect
+        "403":
+          description: Forbidden - Viewers can only update their own password
+        "404":
+          description: Not Found - User not found
         "422":
           description: Validation Error
           content:
@@ -165,7 +244,10 @@ paths:
     put:
       tags:
         - Auth
-      summary: Update Role
+      summary: Update user role
+      description: |-
+        Updates a user's role. The built-in admin user's role cannot be modified.
+        Requires admin role. Valid roles are defined in the configuration.
       operationId: update_role_users__username__role_put
       parameters:
         - name: username
@@ -174,6 +256,7 @@ paths:
           schema:
             type: string
             title: Username
+            description: The username of the user whose role to update
       requestBody:
         required: true
         content:
@@ -186,6 +269,10 @@ paths:
           content:
             application/json:
               schema: {}
+        "400":
+          description: Bad Request - Invalid role
+        "403":
+          description: Forbidden - Cannot modify admin user's role or admin role required
         "422":
           description: Validation Error
           content:

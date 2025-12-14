@@ -549,7 +549,12 @@ def resolve_role(
 
 
 # Endpoints
-@router.get("/auth", dependencies=[Depends(allow_public())])
+@router.get(
+    "/auth",
+    dependencies=[Depends(allow_public())],
+    summary="Authenticate request",
+    description="Authenticates the current request based on proxy headers or JWT token. Returns user role and permissions for camera access.",
+)
 def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     proxy_config: ProxyConfig = request.app.frigate_config.proxy
@@ -689,7 +694,12 @@ def auth(request: Request):
         return fail_response
 
 
-@router.get("/profile", dependencies=[Depends(allow_any_authenticated())])
+@router.get(
+    "/profile",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get user profile",
+    description="Returns the current authenticated user's profile including username, role, and allowed cameras.",
+)
 def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
     role = request.headers.get("remote-role", "viewer")
@@ -703,7 +713,12 @@ def profile(request: Request):
     )
 
 
-@router.get("/logout", dependencies=[Depends(allow_public())])
+@router.get(
+    "/logout",
+    dependencies=[Depends(allow_public())],
+    summary="Logout user",
+    description="Logs out the current user by clearing the session cookie.",
+)
 def logout(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     response = RedirectResponse("/login", status_code=303)
@@ -714,7 +729,12 @@ def logout(request: Request):
 limiter = Limiter(key_func=get_remote_addr)
 
 
-@router.post("/login", dependencies=[Depends(allow_public())])
+@router.post(
+    "/login",
+    dependencies=[Depends(allow_public())],
+    summary="Login with credentials",
+    description="Authenticates a user with username and password. Returns a JWT token as a secure HTTP-only cookie that can be used for subsequent API requests. The token can also be retrieved and used as a Bearer token in the Authorization header.",
+)
 @limiter.limit(limit_value=rateLimiter.get_limit)
 def login(request: Request, body: AppPostLoginBody):
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
@@ -752,7 +772,12 @@ def login(request: Request, body: AppPostLoginBody):
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
-@router.get("/users", dependencies=[Depends(require_role(["admin"]))])
+@router.get(
+    "/users",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get all users",
+    description="Returns a list of all users with their usernames and roles. Requires admin role.",
+)
 def get_users():
     exports = (
         User.select(User.username, User.role).order_by(User.username).dicts().iterator()
@@ -760,7 +785,12 @@ def get_users():
     return JSONResponse([e for e in exports])
 
 
-@router.post("/users", dependencies=[Depends(require_role(["admin"]))])
+@router.post(
+    "/users",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Create new user",
+    description="Creates a new user with the specified username, password, and role. Requires admin role. Password must meet strength requirements.",
+)
 def create_user(
     request: Request,
     body: AppPostUsersBody,
@@ -789,7 +819,12 @@ def create_user(
     return JSONResponse(content={"username": body.username})
 
 
-@router.delete("/users/{username}", dependencies=[Depends(require_role(["admin"]))])
+@router.delete(
+    "/users/{username}",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete user",
+    description="Deletes a user by username. The built-in admin user cannot be deleted. Requires admin role.",
+)
 def delete_user(request: Request, username: str):
     # Prevent deletion of the built-in admin user
     if username == "admin":
@@ -802,7 +837,10 @@ def delete_user(request: Request, username: str):
 
 
 @router.put(
-    "/users/{username}/password", dependencies=[Depends(allow_any_authenticated())]
+    "/users/{username}/password",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Update user password",
+    description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity. Password must meet strength requirements (minimum 8 characters, uppercase letter, digit, and special character).",
 )
 async def update_password(
     request: Request,
@@ -887,6 +925,8 @@ async def update_password(
 @router.put(
     "/users/{username}/role",
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Update user role",
+    description="Updates a user's role. The built-in admin user's role cannot be modified. Requires admin role.",
 )
 async def update_role(
     request: Request,
