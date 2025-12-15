@@ -438,7 +438,7 @@ export default function Settings() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-secondary p-3">
-        <Heading as="h3" className="mb-0">
+        <Heading as="h3" className="mb-0 min-h-9">
           {t("menu.settings", { ns: "common" })}
         </Heading>
         {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
