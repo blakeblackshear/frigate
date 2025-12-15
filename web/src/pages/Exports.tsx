@@ -327,7 +327,7 @@ function AllExportsView({
     <div className="w-full overflow-hidden">
       {filteredCases?.length || filteredExports.length ? (
         <div className="flex flex-col gap-4">
-          {cases?.length && (
+          {filteredCases?.length && (
             <div className="space-y-2">
               <Heading as="h4">{t("headings.cases")}</Heading>
               <div
@@ -352,31 +352,33 @@ function AllExportsView({
             </div>
           )}
 
-          <div className="space-y-4">
-            <Heading as="h4">{t("headings.uncategorizedExports")}</Heading>
-            <div
-              ref={contentRef}
-              className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            >
-              {exports.map((item) => (
-                <ExportCard
-                  key={item.name}
-                  className={
-                    search == "" || filteredExports.includes(item)
-                      ? ""
-                      : "hidden"
-                  }
-                  exportedRecording={item}
-                  onSelect={setSelected}
-                  onRename={renameClip}
-                  onDelete={({ file, exportName }) =>
-                    setDeleteClip({ file, exportName })
-                  }
-                  onAssignToCase={onAssignToCase}
-                />
-              ))}
+          {filteredExports.length && (
+            <div className="space-y-4">
+              <Heading as="h4">{t("headings.uncategorizedExports")}</Heading>
+              <div
+                ref={contentRef}
+                className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              >
+                {exports.map((item) => (
+                  <ExportCard
+                    key={item.name}
+                    className={
+                      search == "" || filteredExports.includes(item)
+                        ? ""
+                        : "hidden"
+                    }
+                    exportedRecording={item}
+                    onSelect={setSelected}
+                    onRename={renameClip}
+                    onDelete={({ file, exportName }) =>
+                      setDeleteClip({ file, exportName })
+                    }
+                    onAssignToCase={onAssignToCase}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       ) : (
         <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
