@@ -226,6 +226,31 @@ class CameraWatchdog(threading.Thread):
         self._stall_timestamps: deque[float] = deque()
         self._stall_active: bool = False
 
+        # Status caching to reduce message volume
+        self._last_detect_status: str | None = None
+        self._last_record_status: str | None = None
+        self._last_status_update_time: float = 0.0
+
+    def _send_detect_status(self, status: str, now: float) -> None:
+        """Send detect status only if changed or retry_interval has elapsed."""
+        if (
+            status != self._last_detect_status
+            or (now - self._last_status_update_time) >= self.sleeptime
+        ):
+            self.requestor.send_data(f"{self.config.name}/status/detect", status)
+            self._last_detect_status = status
+            self._last_status_update_time = now
+
+    def _send_record_status(self, status: str, now: float) -> None:
+        """Send record status only if changed or retry_interval has elapsed."""
+        if (
+            status != self._last_record_status
+            or (now - self._last_status_update_time) >= self.sleeptime
+        ):
+            self.requestor.send_data(f"{self.config.name}/status/record", status)
+            self._last_record_status = status
+            self._last_status_update_time = now
+
     def _update_enabled_state(self) -> bool:
         """Fetch the latest config and update enabled state."""
         self.config_subscriber.check_for_updates()
@@ -301,12 +326,9 @@ class CameraWatchdog(threading.Thread):
                     self.stop_all_ffmpeg()
 
                     # update camera status
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/detect", "disabled"
-                    )
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/record", "disabled"
-                    )
+                    now = datetime.now().timestamp()
+                    self._send_detect_status("disabled", now)
+                    self._send_record_status("disabled", now)
                 self.was_enabled = enabled
                 continue
 
@@ -350,7 +372,7 @@ class CameraWatchdog(threading.Thread):
             can_restart = time_since_last_restart >= self.sleeptime
 
             if not self.capture_thread.is_alive():
-                self.requestor.send_data(f"{self.config.name}/status/detect", "offline")
+                self._send_detect_status("offline", now)
                 self.camera_fps.value = 0
                 self.logger.error(
                     f"Ffmpeg process crashed unexpectedly for {self.config.name}."
@@ -362,9 +384,7 @@ class CameraWatchdog(threading.Thread):
                 self.fps_overflow_count += 1
 
                 if self.fps_overflow_count == 3:
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/detect", "offline"
-                    )
+                    self._send_detect_status("offline", now)
                     self.fps_overflow_count = 0
                     self.camera_fps.value = 0
                     self.logger.info(
@@ -374,7 +394,7 @@ class CameraWatchdog(threading.Thread):
                         self.reset_capture_thread(drain_output=False)
                         last_restart_time = now
             elif now - self.capture_thread.current_frame.value > 20:
-                self.requestor.send_data(f"{self.config.name}/status/detect", "offline")
+                self._send_detect_status("offline", now)
                 self.camera_fps.value = 0
                 self.logger.info(
                     f"No frames received from {self.config.name} in 20 seconds. Exiting ffmpeg..."
@@ -384,7 +404,7 @@ class CameraWatchdog(threading.Thread):
                     last_restart_time = now
             else:
                 # process is running normally
-                self.requestor.send_data(f"{self.config.name}/status/detect", "online")
+                self._send_detect_status("online", now)
                 self.fps_overflow_count = 0
 
             for p in self.ffmpeg_other_processes:
@@ -455,9 +475,7 @@ class CameraWatchdog(threading.Thread):
 
                         continue
                     else:
-                        self.requestor.send_data(
-                            f"{self.config.name}/status/record", "online"
-                        )
+                        self._send_record_status("online", now)
                         p["latest_segment_time"] = self.latest_cache_segment_time
 
                 if poll is None:
