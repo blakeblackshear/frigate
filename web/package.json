@@ -6,12 +6,12 @@
   "packageManager": "npm@10.8.2",
   "engineStrict": true,
   "engines": {
-    "node": "20.19.6",
-    "npm": "10.8.2"
+    "node": "v20.19.6",
+    "npm": "11.4.2"
   },
   "volta": {
     "node": "20.19.6",
-    "npm": "10.8.2"
+    "npm": "11.4.2"
   },
   "scripts": {
     "dev": "vite --host",
