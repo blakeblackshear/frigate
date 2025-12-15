@@ -299,7 +299,7 @@ function AllExportsView({
 
   const filteredCases = useMemo(() => {
     if (!search || !cases) {
-      return cases;
+      return cases || [];
     }
 
     return cases.filter(
@@ -327,14 +327,14 @@ function AllExportsView({
     <div className="w-full overflow-hidden">
       {filteredCases?.length || filteredExports.length ? (
         <div className="flex flex-col gap-4">
-          {filteredCases?.length && (
+          {filteredCases.length > 0 && (
             <div className="space-y-2">
               <Heading as="h4">{t("headings.cases")}</Heading>
               <div
                 ref={contentRef}
                 className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               >
-                {cases.map((item) => (
+                {cases?.map((item) => (
                   <CaseCard
                     key={item.name}
                     className={
@@ -352,7 +352,7 @@ function AllExportsView({
             </div>
           )}
 
-          {filteredExports.length && (
+          {filteredExports.length > 0 && (
             <div className="space-y-4">
               <Heading as="h4">{t("headings.uncategorizedExports")}</Heading>
               <div
