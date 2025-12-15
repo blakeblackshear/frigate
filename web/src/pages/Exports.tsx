@@ -333,7 +333,7 @@ function AllExportsView({
           {filteredCases.length > 0 && (
             <div className="space-y-2">
               <Heading as="h4">{t("headings.cases")}</Heading>
-              <div className="grid size-full gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {cases?.map((item) => (
                   <CaseCard
                     key={item.name}
@@ -357,7 +357,7 @@ function AllExportsView({
               <Heading as="h4">{t("headings.uncategorizedExports")}</Heading>
               <div
                 ref={contentRef}
-                className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                className="scrollbar-container grid gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               >
                 {exports.map((item) => (
                   <ExportCard
@@ -439,7 +439,7 @@ function CaseView({
       </div>
       <div
         ref={contentRef}
-        className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="scrollbar-container grid gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       >
         {exports?.map((item) => (
           <ExportCard
@@ -476,10 +476,12 @@ function CaseAssignmentDialog({
   const { t } = useTranslation(["views/exports"]);
   const caseOptions = useMemo(
     () => [
-      ...(cases ?? []).map((c) => ({
-        value: c.id,
-        label: c.name,
-      })),
+      ...(cases ?? [])
+        .map((c) => ({
+          value: c.id,
+          label: c.name,
+        }))
+        .sort((cA, cB) => cA.label.localeCompare(cB.label)),
       {
         value: "new",
         label: t("caseDialog.newCaseOption"),
