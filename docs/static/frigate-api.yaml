@@ -17,20 +17,25 @@ paths:
       summary: Authenticate request
       description: |-
         Authenticates the current request based on proxy headers or JWT token.
-        Returns user role and permissions for camera access.
         This endpoint verifies authentication credentials and manages JWT token refresh.
+        On success, no JSON body is returned; authentication state is communicated via response headers and cookies.
       operationId: auth_auth_get
       responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
         "202":
-          description: Authentication Accepted
-          content:
-            application/json:
-              schema: {}
+          description: Authentication Accepted (no response body, different headers depending on auth method)
+          headers:
+            remote-user:
+              description: Authenticated username or "anonymous" in proxy-only mode
+              schema:
+                type: string
+            remote-role:
+              description: Resolved role (e.g., admin, viewer, or custom)
+              schema:
+                type: string
+            Set-Cookie:
+              description: May include refreshed JWT cookie ("frigate-token") when applicable
+              schema:
+                type: string
         "401":
           description: Authentication Failed
   /profile:
