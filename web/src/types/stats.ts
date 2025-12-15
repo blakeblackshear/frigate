@@ -24,6 +24,10 @@ export type CameraStats = {
   pid: number;
   process_fps: number;
   skipped_fps: number;
+  connection_quality: "excellent" | "fair" | "poor" | "unusable";
+  expected_fps: number;
+  reconnects_last_hour: number;
+  stalls_last_hour: number;
 };
 
 export type CpuStats = {
