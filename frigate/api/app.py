@@ -37,6 +37,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
@@ -463,7 +464,15 @@ def config_set(request: Request, body: AppConfigSetBody):
 
 @router.get("/vainfo", dependencies=[Depends(allow_any_authenticated())])
 def vainfo():
-    vainfo = vainfo_hwaccel()
+    # Use LibvaGpuSelector to pick an appropriate libva device (if available)
+    selected_gpu = ""
+    try:
+        selected_gpu = _gpu_selector.get_gpu_arg(FFMPEG_HWACCEL_VAAPI, 0) or ""
+    except Exception:
+        selected_gpu = ""
+
+    # If selected_gpu is empty, pass None to vainfo_hwaccel to run plain `vainfo`.
+    vainfo = vainfo_hwaccel(device_name=selected_gpu or None)
     return JSONResponse(
         content={
             "return_code": vainfo.returncode,

@@ -591,12 +591,17 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
 
 def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     """Run vainfo."""
-    ffprobe_cmd = (
-        ["vainfo"]
-        if not device_name
-        else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
-    )
-    return sp.run(ffprobe_cmd, capture_output=True)
+    if not device_name:
+        cmd = ["vainfo"]
+    else:
+        if os.path.isabs(device_name) and device_name.startswith("/dev/dri/"):
+            device_path = device_name
+        else:
+            device_path = f"/dev/dri/{device_name}"
+
+        cmd = ["vainfo", "--display", "drm", "--device", device_path]
+
+    return sp.run(cmd, capture_output=True)
 
 
 def get_nvidia_driver_info() -> dict[str, Any]:
