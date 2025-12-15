@@ -19,8 +19,16 @@ from frigate.api.auth import (
     require_camera_access,
     require_role,
 )
+from frigate.api.defs.request.export_case_body import (
+    ExportCaseCreateBody,
+    ExportCaseUpdateBody,
+)
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.request.export_rename_body import ExportRenameBody
+from frigate.api.defs.response.export_case_response import (
+    ExportCaseModel,
+    ExportCasesResponse,
+)
 from frigate.api.defs.response.export_response import (
     ExportModel,
     ExportsResponse,
@@ -29,7 +37,7 @@ from frigate.api.defs.response.export_response import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.const import CLIPS_DIR, EXPORT_DIR
-from frigate.models import Export, Previews, Recordings
+from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.record.export import (
     PlaybackFactorEnum,
     PlaybackSourceEnum,
@@ -61,6 +69,110 @@ def get_exports(
         .iterator()
     )
     return JSONResponse(content=[e for e in exports])
+
+
+@router.get(
+    "/cases",
+    response_model=ExportCasesResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get export cases",
+    description="Gets all export cases from the database.",
+)
+def get_export_cases():
+    cases = (
+        ExportCase.select().order_by(ExportCase.created_at.desc()).dicts().iterator()
+    )
+    return JSONResponse(content=[c for c in cases])
+
+
+@router.post(
+    "/cases",
+    response_model=ExportCaseModel,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Create export case",
+    description="Creates a new export case.",
+)
+def create_export_case(body: ExportCaseCreateBody):
+    case = ExportCase.create(
+        id="".join(random.choices(string.ascii_lowercase + string.digits, k=12)),
+        name=body.name,
+        description=body.description,
+        created_at=Path().stat().st_mtime,
+        updated_at=Path().stat().st_mtime,
+    )
+    return JSONResponse(content=model_to_dict(case))
+
+
+@router.get(
+    "/cases/{case_id}",
+    response_model=ExportCaseModel,
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get a single export case",
+    description="Gets a specific export case by ID.",
+)
+def get_export_case(case_id: str):
+    try:
+        case = ExportCase.get(ExportCase.id == case_id)
+        return JSONResponse(content=model_to_dict(case))
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export case not found"},
+            status_code=404,
+        )
+
+
+@router.patch(
+    "/cases/{case_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Update export case",
+    description="Updates an existing export case.",
+)
+def update_export_case(case_id: str, body: ExportCaseUpdateBody):
+    try:
+        case = ExportCase.get(ExportCase.id == case_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export case not found"},
+            status_code=404,
+        )
+
+    if body.name is not None:
+        case.name = body.name
+    if body.description is not None:
+        case.description = body.description
+
+    case.save()
+
+    return JSONResponse(
+        content={"success": True, "message": "Successfully updated export case."}
+    )
+
+
+@router.delete(
+    "/cases/{case_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete export case",
+    description="""Deletes an export case.\n    Exports that reference this case will have their export_case set to null.\n    """,
+)
+def delete_export_case(case_id: str):
+    try:
+        case = ExportCase.get(ExportCase.id == case_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export case not found"},
+            status_code=404,
+        )
+
+    # Unassign exports from this case but keep the exports themselves
+    Export.update(export_case=None).where(Export.export_case == case).execute()
+
+    case.delete_instance()
+
+    return JSONResponse(
+        content={"success": True, "message": "Successfully deleted export case."}
+    )
 
 
 @router.post(
