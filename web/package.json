@@ -3,6 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "npm@10.8.2",
+  "engineStrict": true,
+  "engines": {
+    "node": "20.19.6",
+    "npm": "10.8.2"
+  },
+  "volta": {
+    "node": "20.19.6",
+    "npm": "10.8.2"
+  },
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build --base=/BASE_PATH/",
