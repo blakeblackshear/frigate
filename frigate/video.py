@@ -117,8 +117,6 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    # Stall detection moved to CameraWatchdog to avoid overhead here
-
     config_subscriber = CameraConfigUpdateSubscriber(
         None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
     )
