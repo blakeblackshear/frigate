@@ -866,6 +866,12 @@ function TrainGrid({
           };
         })
         .filter((data) => {
+          // Ignore images that don't match the expected format (event-camera-timestamp-state-score.webp)
+          // Expected format has 5 parts when split by "-", and score should be a valid number
+          if (data.score === undefined || isNaN(data.score) || !data.name) {
+            return false;
+          }
+
           if (!trainFilter) {
             return true;
           }
