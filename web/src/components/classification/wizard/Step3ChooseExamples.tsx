@@ -141,7 +141,37 @@ export default function Step3ChooseExamples({
       );
       await Promise.all(categorizePromises);
 
-      // Step 2.5: Create empty folders for classes that don't have any images
+      // Step 2.5: Delete any unselected images from train folder
+      // For state models, all images must be classified, so unselected images should be removed
+      // For object models, unselected images are assigned to "none" so they're already categorized
+      if (step1Data.modelType === "state") {
+        try {
+          // Fetch current train images to see what's left after categorization
+          const trainImagesResponse = await axios.get<string[]>(
+            `/classification/${step1Data.modelName}/train`,
+          );
+          const remainingTrainImages = trainImagesResponse.data || [];
+
+          const categorizedImageNames = new Set(Object.keys(classifications));
+          const unselectedImages = remainingTrainImages.filter(
+            (imageName) => !categorizedImageNames.has(imageName),
+          );
+
+          if (unselectedImages.length > 0) {
+            await axios.post(
+              `/classification/${step1Data.modelName}/train/delete`,
+              {
+                ids: unselectedImages,
+              },
+            );
+          }
+        } catch (error) {
+          // Silently fail - unselected images will remain but won't cause issues
+          // since the frontend filters out images that don't match expected format
+        }
+      }
+
+      // Step 2.6: Create empty folders for classes that don't have any images
       // This ensures all classes are available in the dataset view later
       const classesWithImages = new Set(
         Object.values(classifications).filter((c) => c && c !== "none"),
