@@ -497,17 +497,12 @@ function CaseAssignmentDialog({
         mutate();
         onClose();
       } catch (error: unknown) {
+        const apiError = error as {
+          response?: { data?: { message?: string; detail?: string } };
+        };
         const errorMessage =
-          (
-            error as {
-              response?: { data?: { message?: string; detail?: string } };
-            }
-          ).response?.data?.message ||
-          (
-            error as {
-              response?: { data?: { message?: string; detail?: string } };
-            }
-          ).response?.data?.detail ||
+          apiError.response?.data?.message ||
+          apiError.response?.data?.detail ||
           "Unknown error";
         toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
           position: "top-center",
@@ -538,17 +533,12 @@ function CaseAssignmentDialog({
         mutate();
         onClose();
       } catch (error: unknown) {
+        const apiError = error as {
+          response?: { data?: { message?: string; detail?: string } };
+        };
         const errorMessage =
-          (
-            error as {
-              response?: { data?: { message?: string; detail?: string } };
-            }
-          ).response?.data?.message ||
-          (
-            error as {
-              response?: { data?: { message?: string; detail?: string } };
-            }
-          ).response?.data?.detail ||
+          apiError.response?.data?.message ||
+          apiError.response?.data?.detail ||
           "Unknown error";
         toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
           position: "top-center",
