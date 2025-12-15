@@ -282,7 +282,10 @@ class CameraWatchdog(threading.Thread):
             self.start_all_ffmpeg()
 
         time.sleep(self.sleeptime)
-        while not self.stop_event.wait(self.sleeptime):
+        last_restart_time = datetime.now().timestamp()
+
+        # 1 second watchdog loop
+        while not self.stop_event.wait(1):
             enabled = self._update_enabled_state()
             if enabled != self.was_enabled:
                 if enabled:
@@ -342,13 +345,19 @@ class CameraWatchdog(threading.Thread):
 
             now = datetime.now().timestamp()
 
+            # Check if enough time has passed to allow ffmpeg restart (backoff pacing)
+            time_since_last_restart = now - last_restart_time
+            can_restart = time_since_last_restart >= self.sleeptime
+
             if not self.capture_thread.is_alive():
                 self.requestor.send_data(f"{self.config.name}/status/detect", "offline")
                 self.camera_fps.value = 0
                 self.logger.error(
                     f"Ffmpeg process crashed unexpectedly for {self.config.name}."
                 )
-                self.reset_capture_thread(terminate=False)
+                if can_restart:
+                    self.reset_capture_thread(terminate=False)
+                    last_restart_time = now
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
                 self.fps_overflow_count += 1
 
@@ -361,14 +370,18 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info(
                         f"{self.config.name} exceeded fps limit. Exiting ffmpeg..."
                     )
-                    self.reset_capture_thread(drain_output=False)
+                    if can_restart:
+                        self.reset_capture_thread(drain_output=False)
+                        last_restart_time = now
             elif now - self.capture_thread.current_frame.value > 20:
                 self.requestor.send_data(f"{self.config.name}/status/detect", "offline")
                 self.camera_fps.value = 0
                 self.logger.info(
                     f"No frames received from {self.config.name} in 20 seconds. Exiting ffmpeg..."
                 )
-                self.reset_capture_thread()
+                if can_restart:
+                    self.reset_capture_thread()
+                    last_restart_time = now
             else:
                 # process is running normally
                 self.requestor.send_data(f"{self.config.name}/status/detect", "online")
