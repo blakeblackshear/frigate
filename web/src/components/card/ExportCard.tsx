@@ -35,8 +35,6 @@ type CaseCardProps = {
   onSelect: () => void;
 };
 export function CaseCard({ className, exportCase, onSelect }: CaseCardProps) {
-  const { t } = useTranslation(["views/exports"]);
-
   return (
     <div
       className={cn(
@@ -59,6 +57,7 @@ type ExportCardProps = {
   onSelect: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
   onDelete: ({ file, exportName }: DeleteClipType) => void;
+  onAssignToCase?: (selected: Export) => void;
 };
 export function ExportCard({
   className,
@@ -66,6 +65,7 @@ export function ExportCard({
   onSelect,
   onRename,
   onDelete,
+  onAssignToCase,
 }: ExportCardProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
@@ -223,6 +223,18 @@ export function ExportCard({
                     {t("tooltip.downloadVideo")}
                   </a>
                 </DropdownMenuItem>
+                {isAdmin && onAssignToCase && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("tooltip.assignToCase")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAssignToCase(exportedRecording);
+                    }}
+                  >
+                    {t("tooltip.assignToCase")}
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && (
                   <DropdownMenuItem
                     className="cursor-pointer"

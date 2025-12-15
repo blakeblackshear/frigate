@@ -18,6 +18,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { DeleteClipType, Export, ExportCase } from "@/types/export";
+import OptionAndInputDialog from "@/components/overlay/dialog/OptionAndInputDialog";
 import axios from "axios";
 
 import {
@@ -97,6 +98,7 @@ function Exports() {
   // Modifying
 
   const [deleteClip, setDeleteClip] = useState<DeleteClipType | undefined>();
+  const [exportToAssign, setExportToAssign] = useState<Export | undefined>();
 
   const onHandleDelete = useCallback(() => {
     if (!deleteClip) {
@@ -146,9 +148,21 @@ function Exports() {
     [cases, selectedCaseId],
   );
 
+  const resetCaseDialog = useCallback(() => {
+    setExportToAssign(undefined);
+  }, []);
+
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">
       <Toaster closeButton={true} />
+
+      <CaseAssignmentDialog
+        exportToAssign={exportToAssign}
+        cases={cases}
+        selectedCaseId={selectedCaseId}
+        onClose={resetCaseDialog}
+        mutate={mutate}
+      />
 
       <AlertDialog
         open={deleteClip != undefined}
@@ -238,6 +252,7 @@ function Exports() {
           setSelected={setSelected}
           renameClip={onHandleRename}
           setDeleteClip={setDeleteClip}
+          onAssignToCase={setExportToAssign}
         />
       ) : (
         <AllExportsView
@@ -249,6 +264,7 @@ function Exports() {
           setSelected={setSelected}
           renameClip={onHandleRename}
           setDeleteClip={setDeleteClip}
+          onAssignToCase={setExportToAssign}
         />
       )}
     </div>
@@ -264,6 +280,7 @@ type AllExportsViewProps = {
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
   setDeleteClip: (d: DeleteClipType | undefined) => void;
+  onAssignToCase: (e: Export) => void;
 };
 function AllExportsView({
   contentRef,
@@ -274,6 +291,7 @@ function AllExportsView({
   setSelected,
   renameClip,
   setDeleteClip,
+  onAssignToCase,
 }: AllExportsViewProps) {
   const { t } = useTranslation(["views/exports"]);
 
@@ -354,6 +372,7 @@ function AllExportsView({
                   onDelete={({ file, exportName }) =>
                     setDeleteClip({ file, exportName })
                   }
+                  onAssignToCase={onAssignToCase}
                 />
               ))}
             </div>
@@ -377,6 +396,7 @@ type CaseViewProps = {
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
   setDeleteClip: (d: DeleteClipType | undefined) => void;
+  onAssignToCase: (e: Export) => void;
 };
 function CaseView({
   contentRef,
@@ -386,6 +406,7 @@ function CaseView({
   setSelected,
   renameClip,
   setDeleteClip,
+  onAssignToCase,
 }: CaseViewProps) {
   const filteredExports = useMemo<Export[]>(() => {
     const caseExports = (exports || []).filter(
@@ -418,7 +439,7 @@ function CaseView({
         ref={contentRef}
         className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       >
-        {exports.map((item) => (
+        {exports?.map((item) => (
           <ExportCard
             key={item.name}
             className={filteredExports.includes(item) ? "" : "hidden"}
@@ -428,10 +449,137 @@ function CaseView({
             onDelete={({ file, exportName }) =>
               setDeleteClip({ file, exportName })
             }
+            onAssignToCase={onAssignToCase}
           />
         ))}
       </div>
     </div>
+  );
+}
+
+type CaseAssignmentDialogProps = {
+  exportToAssign?: Export;
+  cases?: ExportCase[];
+  selectedCaseId?: string;
+  onClose: () => void;
+  mutate: () => void;
+};
+function CaseAssignmentDialog({
+  exportToAssign,
+  cases,
+  selectedCaseId,
+  onClose,
+  mutate,
+}: CaseAssignmentDialogProps) {
+  const { t } = useTranslation(["views/exports"]);
+  const caseOptions = useMemo(
+    () => [
+      ...(cases ?? []).map((c) => ({
+        value: c.id,
+        label: c.name,
+      })),
+      {
+        value: "new",
+        label: t("caseDialog.newCaseOption"),
+      },
+    ],
+    [cases, t],
+  );
+
+  const handleSave = useCallback(
+    async (caseId: string) => {
+      if (!exportToAssign) return;
+
+      try {
+        await axios.patch(`export/${exportToAssign.id}/case`, {
+          export_case_id: caseId,
+        });
+        mutate();
+        onClose();
+      } catch (error: unknown) {
+        const errorMessage =
+          (
+            error as {
+              response?: { data?: { message?: string; detail?: string } };
+            }
+          ).response?.data?.message ||
+          (
+            error as {
+              response?: { data?: { message?: string; detail?: string } };
+            }
+          ).response?.data?.detail ||
+          "Unknown error";
+        toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
+          position: "top-center",
+        });
+      }
+    },
+    [exportToAssign, mutate, onClose, t],
+  );
+
+  const handleCreateNew = useCallback(
+    async (name: string, description: string) => {
+      if (!exportToAssign) return;
+
+      try {
+        const createResp = await axios.post("cases", {
+          name,
+          description,
+        });
+
+        const newCaseId: string | undefined = createResp.data?.id;
+
+        if (newCaseId) {
+          await axios.patch(`export/${exportToAssign.id}/case`, {
+            export_case_id: newCaseId,
+          });
+        }
+
+        mutate();
+        onClose();
+      } catch (error: unknown) {
+        const errorMessage =
+          (
+            error as {
+              response?: { data?: { message?: string; detail?: string } };
+            }
+          ).response?.data?.message ||
+          (
+            error as {
+              response?: { data?: { message?: string; detail?: string } };
+            }
+          ).response?.data?.detail ||
+          "Unknown error";
+        toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
+          position: "top-center",
+        });
+      }
+    },
+    [exportToAssign, mutate, onClose, t],
+  );
+
+  if (!exportToAssign) {
+    return null;
+  }
+
+  return (
+    <OptionAndInputDialog
+      open={!!exportToAssign}
+      title={t("caseDialog.title")}
+      description={t("caseDialog.description")}
+      setOpen={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+      options={caseOptions}
+      nameLabel={t("caseDialog.nameLabel")}
+      descriptionLabel={t("caseDialog.descriptionLabel")}
+      initialValue={selectedCaseId}
+      newValueKey="new"
+      onSave={handleSave}
+      onCreateNew={handleCreateNew}
+    />
   );
 }
 
