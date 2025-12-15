@@ -119,6 +119,7 @@ class RecordingCleanup(threading.Thread):
                 Recordings.path,
                 Recordings.objects,
                 Recordings.motion,
+                Recordings.dBFS,
             )
             .where(
                 (Recordings.camera == config.name)
@@ -126,6 +127,7 @@ class RecordingCleanup(threading.Thread):
                     (
                         (Recordings.end_time < continuous_expire_date)
                         & (Recordings.motion == 0)
+                        & (Recordings.dBFS == 0)
                     )
                     | (Recordings.end_time < motion_expire_date)
                 )
@@ -185,6 +187,7 @@ class RecordingCleanup(threading.Thread):
                     mode == RetainModeEnum.motion
                     and recording.motion == 0
                     and recording.objects == 0
+                    and recording.dBFS == 0
                 )
                 or (mode == RetainModeEnum.active_objects and recording.objects == 0)
             ):
