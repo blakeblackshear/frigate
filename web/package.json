@@ -125,7 +125,6 @@
     "vite": "^6.2.0",
     "vitest": "^3.0.7"
   },
-  "packageManager": "npm@11.4.2",
   "engines": {
     "node": "^20.19.6",
     "npm": "11.4.2"
