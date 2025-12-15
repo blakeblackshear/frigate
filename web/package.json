@@ -4,9 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "packageManager": "npm@10.8.2",
-  "engineStrict": true,
   "engines": {
-    "node": "v20.19.6",
+    "node": "^20.19.6",
     "npm": "11.4.2"
   },
   "volta": {
