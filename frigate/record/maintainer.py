@@ -67,7 +67,7 @@ class SegmentInfo:
         if (
             not keep
             and retain_mode == RetainModeEnum.motion
-            and (self.motion_count > 0 or self.average_dBFS > 0)
+            and (self.motion_count > 0 or self.average_dBFS != 0)
         ):
             keep = True
 
