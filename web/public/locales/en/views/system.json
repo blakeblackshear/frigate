@@ -158,6 +158,17 @@
       "cameraDetectionsPerSecond": "{{camName}} detections per second",
       "cameraSkippedDetectionsPerSecond": "{{camName}} skipped detections per second"
     },
+    "connectionQuality": {
+      "title": "Connection Quality",
+      "excellent": "Excellent",
+      "fair": "Fair",
+      "poor": "Poor",
+      "unusable": "Unusable",
+      "fps": "FPS",
+      "expectedFps": "Expected FPS",
+      "reconnectsLastHour": "Reconnects (last hour)",
+      "stallsLastHour": "Stalls (last hour)"
+    },
     "toast": {
       "success": {
         "copyToClipboard": "Copied probe data to clipboard."

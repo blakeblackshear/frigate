@@ -3,6 +3,7 @@ import queue
 import subprocess as sp
 import threading
 import time
+from collections import deque
 from datetime import datetime, timedelta, timezone
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
@@ -117,6 +118,7 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
+
     config_subscriber = CameraConfigUpdateSubscriber(
         None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
     )
@@ -181,6 +183,9 @@ class CameraWatchdog(threading.Thread):
         camera_fps,
         skipped_fps,
         ffmpeg_pid,
+        stalls,
+        reconnects,
+        detection_frame,
         stop_event,
     ):
         threading.Thread.__init__(self)
@@ -201,6 +206,10 @@ class CameraWatchdog(threading.Thread):
         self.frame_index = 0
         self.stop_event = stop_event
         self.sleeptime = self.config.ffmpeg.retry_interval
+        self.reconnect_timestamps = deque()
+        self.stalls = stalls
+        self.reconnects = reconnects
+        self.detection_frame = detection_frame
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
             None,
@@ -215,6 +224,35 @@ class CameraWatchdog(threading.Thread):
         self.latest_invalid_segment_time: float = 0
         self.latest_cache_segment_time: float = 0
         self.record_enable_time: datetime | None = None
+
+        # Stall tracking (based on last processed frame)
+        self._stall_timestamps: deque[float] = deque()
+        self._stall_active: bool = False
+
+        # Status caching to reduce message volume
+        self._last_detect_status: str | None = None
+        self._last_record_status: str | None = None
+        self._last_status_update_time: float = 0.0
+
+    def _send_detect_status(self, status: str, now: float) -> None:
+        """Send detect status only if changed or retry_interval has elapsed."""
+        if (
+            status != self._last_detect_status
+            or (now - self._last_status_update_time) >= self.sleeptime
+        ):
+            self.requestor.send_data(f"{self.config.name}/status/detect", status)
+            self._last_detect_status = status
+            self._last_status_update_time = now
+
+    def _send_record_status(self, status: str, now: float) -> None:
+        """Send record status only if changed or retry_interval has elapsed."""
+        if (
+            status != self._last_record_status
+            or (now - self._last_status_update_time) >= self.sleeptime
+        ):
+            self.requestor.send_data(f"{self.config.name}/status/record", status)
+            self._last_record_status = status
+            self._last_status_update_time = now
 
     def _update_enabled_state(self) -> bool:
         """Fetch the latest config and update enabled state."""
@@ -242,6 +280,14 @@ class CameraWatchdog(threading.Thread):
                 else:
                     self.ffmpeg_detect_process.wait()
 
+        # Update reconnects
+        now = datetime.now().timestamp()
+        self.reconnect_timestamps.append(now)
+        while self.reconnect_timestamps and self.reconnect_timestamps[0] < now - 3600:
+            self.reconnect_timestamps.popleft()
+        if self.reconnects:
+            self.reconnects.value = len(self.reconnect_timestamps)
+
         # Wait for old capture thread to fully exit before starting a new one
         if self.capture_thread is not None and self.capture_thread.is_alive():
             self.logger.info("Waiting for capture thread to exit...")
@@ -267,7 +313,10 @@ class CameraWatchdog(threading.Thread):
                 self.record_enable_time = datetime.now().astimezone(timezone.utc)
 
         time.sleep(self.sleeptime)
-        while not self.stop_event.wait(self.sleeptime):
+        last_restart_time = datetime.now().timestamp()
+
+        # 1 second watchdog loop
+        while not self.stop_event.wait(1):
             enabled = self._update_enabled_state()
             if enabled != self.was_enabled:
                 if enabled:
@@ -285,12 +334,9 @@ class CameraWatchdog(threading.Thread):
                     self.record_enable_time = None
 
                     # update camera status
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/detect", "disabled"
-                    )
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/record", "disabled"
-                    )
+                    now = datetime.now().timestamp()
+                    self._send_detect_status("disabled", now)
+                    self._send_record_status("disabled", now)
                 self.was_enabled = enabled
                 continue
 
@@ -329,36 +375,44 @@ class CameraWatchdog(threading.Thread):
 
             now = datetime.now().timestamp()
 
+            # Check if enough time has passed to allow ffmpeg restart (backoff pacing)
+            time_since_last_restart = now - last_restart_time
+            can_restart = time_since_last_restart >= self.sleeptime
+
             if not self.capture_thread.is_alive():
-                self.requestor.send_data(f"{self.config.name}/status/detect", "offline")
+                self._send_detect_status("offline", now)
                 self.camera_fps.value = 0
                 self.logger.error(
                     f"Ffmpeg process crashed unexpectedly for {self.config.name}."
                 )
-                self.reset_capture_thread(terminate=False)
+                if can_restart:
+                    self.reset_capture_thread(terminate=False)
+                    last_restart_time = now
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
                 self.fps_overflow_count += 1
 
                 if self.fps_overflow_count == 3:
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/detect", "offline"
-                    )
+                    self._send_detect_status("offline", now)
                     self.fps_overflow_count = 0
                     self.camera_fps.value = 0
                     self.logger.info(
                         f"{self.config.name} exceeded fps limit. Exiting ffmpeg..."
                     )
-                    self.reset_capture_thread(drain_output=False)
+                    if can_restart:
+                        self.reset_capture_thread(drain_output=False)
+                        last_restart_time = now
             elif now - self.capture_thread.current_frame.value > 20:
-                self.requestor.send_data(f"{self.config.name}/status/detect", "offline")
+                self._send_detect_status("offline", now)
                 self.camera_fps.value = 0
                 self.logger.info(
                     f"No frames received from {self.config.name} in 20 seconds. Exiting ffmpeg..."
                 )
-                self.reset_capture_thread()
+                if can_restart:
+                    self.reset_capture_thread()
+                    last_restart_time = now
             else:
                 # process is running normally
-                self.requestor.send_data(f"{self.config.name}/status/detect", "online")
+                self._send_detect_status("online", now)
                 self.fps_overflow_count = 0
 
             for p in self.ffmpeg_other_processes:
@@ -441,9 +495,7 @@ class CameraWatchdog(threading.Thread):
 
                         continue
                     else:
-                        self.requestor.send_data(
-                            f"{self.config.name}/status/record", "online"
-                        )
+                        self._send_record_status("online", now)
                         p["latest_segment_time"] = self.latest_cache_segment_time
 
                 if poll is None:
@@ -458,6 +510,34 @@ class CameraWatchdog(threading.Thread):
                 p["process"] = start_or_restart_ffmpeg(
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
+
+            # Update stall metrics based on last processed frame timestamp
+            now = datetime.now().timestamp()
+            processed_ts = (
+                float(self.detection_frame.value) if self.detection_frame else 0.0
+            )
+            if processed_ts > 0:
+                delta = now - processed_ts
+                observed_fps = (
+                    self.camera_fps.value
+                    if self.camera_fps.value > 0
+                    else self.config.detect.fps
+                )
+                interval = 1.0 / max(observed_fps, 0.1)
+                stall_threshold = max(2.0 * interval, 2.0)
+
+                if delta > stall_threshold:
+                    if not self._stall_active:
+                        self._stall_timestamps.append(now)
+                        self._stall_active = True
+                else:
+                    self._stall_active = False
+
+                while self._stall_timestamps and self._stall_timestamps[0] < now - 3600:
+                    self._stall_timestamps.popleft()
+
+                if self.stalls:
+                    self.stalls.value = len(self._stall_timestamps)
 
         self.stop_all_ffmpeg()
         self.logpipe.close()
@@ -596,6 +676,9 @@ class CameraCapture(FrigateProcess):
             self.camera_metrics.camera_fps,
             self.camera_metrics.skipped_fps,
             self.camera_metrics.ffmpeg_pid,
+            self.camera_metrics.stalls_last_hour,
+            self.camera_metrics.reconnects_last_hour,
+            self.camera_metrics.detection_frame,
             self.stop_event,
         )
         camera_watchdog.start()

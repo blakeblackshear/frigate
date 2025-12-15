@@ -278,6 +278,32 @@ def stats_snapshot(
             if camera_stats.capture_process_pid.value
             else None
         )
+        # Calculate connection quality based on current state
+        # This is computed at stats-collection time so offline cameras
+        # correctly show as unusable rather than excellent
+        expected_fps = config.cameras[name].detect.fps
+        current_fps = camera_stats.camera_fps.value
+        reconnects = camera_stats.reconnects_last_hour.value
+        stalls = camera_stats.stalls_last_hour.value
+
+        if current_fps < 0.1:
+            quality_str = "unusable"
+        elif reconnects == 0 and current_fps >= 0.9 * expected_fps and stalls < 5:
+            quality_str = "excellent"
+        elif reconnects <= 2 and current_fps >= 0.6 * expected_fps:
+            quality_str = "fair"
+        elif reconnects > 10 or current_fps < 1.0 or stalls > 100:
+            quality_str = "unusable"
+        else:
+            quality_str = "poor"
+
+        connection_quality = {
+            "connection_quality": quality_str,
+            "expected_fps": expected_fps,
+            "reconnects_last_hour": reconnects,
+            "stalls_last_hour": stalls,
+        }
+
         stats["cameras"][name] = {
             "camera_fps": round(camera_stats.camera_fps.value, 2),
             "process_fps": round(camera_stats.process_fps.value, 2),
@@ -289,6 +315,7 @@ def stats_snapshot(
             "ffmpeg_pid": ffmpeg_pid,
             "audio_rms": round(camera_stats.audio_rms.value, 4),
             "audio_dBFS": round(camera_stats.audio_dBFS.value, 4),
+            **connection_quality,
         }
 
     stats["detectors"] = {}
