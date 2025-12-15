@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import ExportCard from "@/components/card/ExportCard";
+import { CaseCard, ExportCard } from "@/components/card/ExportCard";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
-import { DeleteClipType, Export } from "@/types/export";
+import { DeleteClipType, Export, ExportCase } from "@/types/export";
 import axios from "axios";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -29,18 +30,46 @@ import useSWR from "swr";
 
 function Exports() {
   const { t } = useTranslation(["views/exports"]);
-  const { data: exports, mutate } = useSWR<Export[]>("exports");
 
   useEffect(() => {
     document.title = t("documentTitle");
   }, [t]);
 
+  // Data
+
+  const { data: cases, mutate: updateCases } = useSWR<ExportCase[]>("cases");
+  const { data: rawExports, mutate: updateExports } =
+    useSWR<Export[]>("exports");
+
+  const exports = useMemo<Export[]>(
+    () => (rawExports ?? []).filter((e) => !e.export_case),
+    [rawExports],
+  );
+
+  const mutate = useCallback(() => {
+    updateExports();
+    updateCases();
+  }, [updateExports, updateCases]);
+
   // Search
 
   const [search, setSearch] = useState("");
 
-  const filteredExports = useMemo(() => {
-    if (!search || !exports) {
+  const filteredCases = useMemo(() => {
+    if (!search || !cases) {
+      return cases;
+    }
+
+    return cases.filter(
+      (caseItem) =>
+        caseItem.name.toLowerCase().includes(search.toLowerCase()) ||
+        (caseItem.description &&
+          caseItem.description.toLowerCase().includes(search.toLowerCase())),
+    );
+  }, [search, cases]);
+
+  const filteredExports = useMemo<Export[]>(() => {
+    if (!search) {
       return exports;
     }
 
@@ -187,7 +216,7 @@ function Exports() {
         </DialogContent>
       </Dialog>
 
-      {exports && (
+      {(exports?.length || cases?.length) && (
         <div className="flex w-full items-center justify-center p-2">
           <Input
             className="text-md w-full bg-muted md:w-1/3"
@@ -199,25 +228,55 @@ function Exports() {
       )}
 
       <div className="w-full overflow-hidden">
-        {exports && filteredExports && filteredExports.length > 0 ? (
-          <div
-            ref={contentRef}
-            className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          >
-            {Object.values(exports).map((item) => (
-              <ExportCard
-                key={item.name}
-                className={
-                  search == "" || filteredExports.includes(item) ? "" : "hidden"
-                }
-                exportedRecording={item}
-                onSelect={setSelected}
-                onRename={onHandleRename}
-                onDelete={({ file, exportName }) =>
-                  setDeleteClip({ file, exportName })
-                }
-              />
-            ))}
+        {filteredCases?.length || filteredExports.length ? (
+          <div className="flex flex-col gap-4">
+            {cases?.length && (
+              <div className="space-y-2">
+                <Heading as="h4">{t("headings.cases")}</Heading>
+                <div
+                  ref={contentRef}
+                  className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                >
+                  {cases.map((item) => (
+                    <CaseCard
+                      key={item.name}
+                      className={
+                        search == "" || filteredCases?.includes(item)
+                          ? ""
+                          : "hidden"
+                      }
+                      exportCase={item}
+                      onSelect={() => {}}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <Heading as="h4">{t("headings.uncategorizedExports")}</Heading>
+              <div
+                ref={contentRef}
+                className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              >
+                {exports.map((item) => (
+                  <ExportCard
+                    key={item.name}
+                    className={
+                      search == "" || filteredExports.includes(item)
+                        ? ""
+                        : "hidden"
+                    }
+                    exportedRecording={item}
+                    onSelect={setSelected}
+                    onRename={onHandleRename}
+                    onDelete={({ file, exportName }) =>
+                      setDeleteClip({ file, exportName })
+                    }
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">

@@ -2,6 +2,10 @@
   "documentTitle": "Export - Frigate",
   "search": "Search",
   "noExports": "No exports found",
+  "headings": {
+    "cases": "Cases",
+    "uncategorizedExports": "Uncategorized Exports"
+  },
   "deleteExport": "Delete Export",
   "deleteExport.desc": "Are you sure you want to delete {{exportName}}?",
   "editExport": {

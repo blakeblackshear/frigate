@@ -13,7 +13,7 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { DeleteClipType, Export } from "@/types/export";
+import { DeleteClipType, Export, ExportCase } from "@/types/export";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
@@ -27,22 +27,46 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { FaFolder } from "react-icons/fa";
 
-type ExportProps = {
+type CaseCardProps = {
+  className: string;
+  exportCase: ExportCase;
+  onSelect: () => void;
+};
+export function CaseCard({ className, exportCase, onSelect }: CaseCardProps) {
+  const { t } = useTranslation(["views/exports"]);
+
+  return (
+    <div
+      className={cn(
+        "relative flex aspect-video size-full cursor-pointer items-center justify-center rounded-lg bg-secondary md:rounded-2xl",
+        className,
+      )}
+      onClick={() => onSelect()}
+    >
+      <div className="absolute bottom-2 left-2 flex items-center justify-start gap-2">
+        <FaFolder />
+        <div className="capitalize">{exportCase.name}</div>
+      </div>
+    </div>
+  );
+}
+
+type ExportCardProps = {
   className: string;
   exportedRecording: Export;
   onSelect: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
   onDelete: ({ file, exportName }: DeleteClipType) => void;
 };
-
-export default function ExportCard({
+export function ExportCard({
   className,
   exportedRecording,
   onSelect,
   onRename,
   onDelete,
-}: ExportProps) {
+}: ExportCardProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
   const [loading, setLoading] = useState(
