@@ -286,7 +286,7 @@ def stats_snapshot(
         current_fps = camera_stats.camera_fps.value
         reconnects = camera_stats.reconnects_last_hour.value
         stalls = camera_stats.stalls_last_hour.value
-        
+
         if current_fps < 0.1:
             quality_str = "unusable"
         elif reconnects == 0 and current_fps >= 0.9 * expected_fps and stalls < 5:
@@ -297,14 +297,14 @@ def stats_snapshot(
             quality_str = "unusable"
         else:
             quality_str = "poor"
-        
+
         connection_quality = {
             "connection_quality": quality_str,
             "expected_fps": expected_fps,
             "reconnects_last_hour": reconnects,
             "stalls_last_hour": stalls,
         }
-        
+
         stats["cameras"][name] = {
             "camera_fps": round(camera_stats.camera_fps.value, 2),
             "process_fps": round(camera_stats.process_fps.value, 2),
