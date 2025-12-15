@@ -109,7 +109,6 @@ def capture_frames(
     fps: Value,
     skipped_fps: Value,
     current_frame: Value,
-    stalls: Value,
     stop_event: MpEvent,
 ) -> None:
     frame_size = frame_shape[0] * frame_shape[1]
@@ -118,10 +117,7 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    # Stall detection
-    stall_timestamps = deque()
-    last_frame_time = 0.0
-    stall_active = False
+    # Stall detection moved to CameraWatchdog to avoid overhead here
 
     config_subscriber = CameraConfigUpdateSubscriber(
         None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
@@ -164,32 +160,6 @@ def capture_frames(
 
             frame_rate.update()
 
-            # Update stall metrics
-            now = datetime.now().timestamp()
-
-            if last_frame_time > 0:
-                delta = now - last_frame_time
-                # Use observed fps when available; fall back to expected
-                observed_fps = fps.value if fps.value > 0 else config.detect.fps
-                # Compute a robust threshold: 2x frame interval, but at least 1s to ignore jitter
-                interval = 1.0 / max(observed_fps, 0.1)
-                stall_threshold = max(2.0 * interval, 2.0)
-
-                # Count a single stall per continuous gap exceeding threshold
-                if delta > stall_threshold:
-                    if not stall_active:
-                        stall_timestamps.append(now)
-                        stall_active = True
-                else:
-                    stall_active = False
-            last_frame_time = now
-
-            while stall_timestamps and stall_timestamps[0] < now - 3600:
-                stall_timestamps.popleft()
-
-            if stalls:
-                stalls.value = len(stall_timestamps)
-
             # don't lock the queue to check, just try since it should rarely be full
             try:
                 # add to the queue
@@ -215,6 +185,7 @@ class CameraWatchdog(threading.Thread):
         ffmpeg_pid,
         stalls,
         reconnects,
+        detection_frame,
         stop_event,
     ):
         threading.Thread.__init__(self)
@@ -238,6 +209,7 @@ class CameraWatchdog(threading.Thread):
         self.reconnect_timestamps = deque()
         self.stalls = stalls
         self.reconnects = reconnects
+        self.detection_frame = detection_frame
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
             None,
@@ -251,6 +223,10 @@ class CameraWatchdog(threading.Thread):
         self.latest_valid_segment_time: float = 0
         self.latest_invalid_segment_time: float = 0
         self.latest_cache_segment_time: float = 0
+
+        # Stall tracking (based on last processed frame)
+        self._stall_timestamps: deque[float] = deque()
+        self._stall_active: bool = False
 
     def _update_enabled_state(self) -> bool:
         """Fetch the latest config and update enabled state."""
@@ -486,6 +462,34 @@ class CameraWatchdog(threading.Thread):
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
 
+            # Update stall metrics based on last processed frame timestamp
+            now = datetime.now().timestamp()
+            processed_ts = (
+                float(self.detection_frame.value) if self.detection_frame else 0.0
+            )
+            if processed_ts > 0:
+                delta = now - processed_ts
+                observed_fps = (
+                    self.camera_fps.value
+                    if self.camera_fps.value > 0
+                    else self.config.detect.fps
+                )
+                interval = 1.0 / max(observed_fps, 0.1)
+                stall_threshold = max(2.0 * interval, 2.0)
+
+                if delta > stall_threshold:
+                    if not self._stall_active:
+                        self._stall_timestamps.append(now)
+                        self._stall_active = True
+                else:
+                    self._stall_active = False
+
+                while self._stall_timestamps and self._stall_timestamps[0] < now - 3600:
+                    self._stall_timestamps.popleft()
+
+                if self.stalls:
+                    self.stalls.value = len(self._stall_timestamps)
+
         self.stop_all_ffmpeg()
         self.logpipe.close()
         self.config_subscriber.stop()
@@ -508,7 +512,6 @@ class CameraWatchdog(threading.Thread):
             self.frame_queue,
             self.camera_fps,
             self.skipped_fps,
-            self.stalls,
             self.stop_event,
         )
         self.capture_thread.start()
@@ -562,7 +565,6 @@ class CameraCaptureRunner(threading.Thread):
         frame_queue: Queue,
         fps: Value,
         skipped_fps: Value,
-        stalls: Value,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
@@ -579,7 +581,6 @@ class CameraCaptureRunner(threading.Thread):
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = Value("d", 0.0)
         self.last_frame = 0
-        self.stalls = stalls
 
     def run(self):
         capture_frames(
@@ -593,7 +594,6 @@ class CameraCaptureRunner(threading.Thread):
             self.fps,
             self.skipped_fps,
             self.current_frame,
-            self.stalls,
             self.stop_event,
         )
 
@@ -629,6 +629,7 @@ class CameraCapture(FrigateProcess):
             self.camera_metrics.ffmpeg_pid,
             self.camera_metrics.stalls_last_hour,
             self.camera_metrics.reconnects_last_hour,
+            self.camera_metrics.detection_frame,
             self.stop_event,
         )
         camera_watchdog.start()
