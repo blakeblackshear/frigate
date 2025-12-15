@@ -2,6 +2,10 @@
   "documentTitle": "Export - Frigate",
   "search": "Search",
   "noExports": "No exports found",
+  "headings": {
+    "cases": "Cases",
+    "uncategorizedExports": "Uncategorized Exports"
+  },
   "deleteExport": "Delete Export",
   "deleteExport.desc": "Are you sure you want to delete {{exportName}}?",
   "editExport": {
@@ -13,11 +17,21 @@
     "shareExport": "Share export",
     "downloadVideo": "Download video",
     "editName": "Edit name",
-    "deleteExport": "Delete export"
+    "deleteExport": "Delete export",
+    "assignToCase": "Add to case"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Failed to rename export: {{errorMessage}}"
+      "renameExportFailed": "Failed to rename export: {{errorMessage}}",
+      "assignCaseFailed": "Failed to update case assignment: {{errorMessage}}"
     }
+  },
+  "caseDialog": {
+    "title": "Add to case",
+    "description": "Choose an existing case or create a new one.",
+    "selectLabel": "Case",
+    "newCaseOption": "Create new case",
+    "nameLabel": "Case name",
+    "descriptionLabel": "Description"
   }
 }
