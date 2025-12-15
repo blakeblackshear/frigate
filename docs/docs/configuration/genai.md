@@ -74,11 +74,11 @@ genai:
 
 ## Google Gemini
 
-Google Gemini has a free tier allowing [15 queries per minute](https://ai.google.dev/pricing) to the API, which is more than sufficient for standard Frigate usage.
+Google Gemini has a free tier allowing [20 queries per DAY](https://ai.google.dev/pricing) to the API, which is likely not sufficient for standard Frigate usage. 
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini).
+You must use a vision-capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini). Current recommendation is [gemini-2.5-flash-lite](https://ai.google.dev/gemini-api/docs/pricing#gemini-2.5-flash-lite), as it is low-cost and fast.
 
 ### Get API Key
 
@@ -96,7 +96,7 @@ genai:
   enabled: True
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-2.0-flash
+  model: gemini-2.5-flash-lite
 ```
 
 :::note
