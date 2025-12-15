@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 from pydantic.json_schema import SkipJsonSchema
@@ -18,3 +18,9 @@ class ExportRecordingsBody(BaseModel):
     )
     name: str = Field(title="Friendly name", default=None, max_length=256)
     image_path: Union[str, SkipJsonSchema[None]] = None
+    export_case_id: Optional[str] = Field(
+        default=None,
+        title="Export case ID",
+        max_length=30,
+        description="ID of the export case to assign this export to",
+    )

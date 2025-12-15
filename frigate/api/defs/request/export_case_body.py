@@ -23,3 +23,13 @@ class ExportCaseUpdateBody(BaseModel):
     description: Optional[str] = Field(
         default=None, description="Updated description of the export case"
     )
+
+
+class ExportCaseAssignBody(BaseModel):
+    """Request body for assigning or unassigning an export to a case."""
+
+    export_case_id: Optional[str] = Field(
+        default=None,
+        max_length=30,
+        description="Case ID to assign to the export, or null to unassign",
+    )
