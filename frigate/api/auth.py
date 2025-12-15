@@ -553,7 +553,32 @@ def resolve_role(
     "/auth",
     dependencies=[Depends(allow_public())],
     summary="Authenticate request",
-    description="Authenticates the current request based on proxy headers or JWT token. Returns user role and permissions for camera access.",
+    description=(
+        "Authenticates the current request based on proxy headers or JWT token. "
+        "This endpoint verifies authentication credentials and manages JWT token refresh. "
+        "On success, no JSON body is returned; authentication state is communicated via response headers and cookies."
+    ),
+    status_code=202,
+    responses={
+        202: {
+            "description": "Authentication Accepted (no response body)",
+            "headers": {
+                "remote-user": {
+                    "description": 'Authenticated username or "anonymous" in proxy-only mode',
+                    "schema": {"type": "string"},
+                },
+                "remote-role": {
+                    "description": "Resolved role (e.g., admin, viewer, or custom)",
+                    "schema": {"type": "string"},
+                },
+                "Set-Cookie": {
+                    "description": "May include refreshed JWT cookie when applicable",
+                    "schema": {"type": "string"},
+                },
+            },
+        },
+        401: {"description": "Authentication Failed"},
+    },
 )
 def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
@@ -698,7 +723,7 @@ def auth(request: Request):
     "/profile",
     dependencies=[Depends(allow_any_authenticated())],
     summary="Get user profile",
-    description="Returns the current authenticated user's profile including username, role, and allowed cameras.",
+    description="Returns the current authenticated user's profile including username, role, and allowed cameras. This endpoint requires authentication and returns information about the user's permissions.",
 )
 def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
@@ -717,7 +742,7 @@ def profile(request: Request):
     "/logout",
     dependencies=[Depends(allow_public())],
     summary="Logout user",
-    description="Logs out the current user by clearing the session cookie.",
+    description="Logs out the current user by clearing the session cookie. After logout, subsequent requests will require re-authentication.",
 )
 def logout(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
@@ -733,7 +758,7 @@ limiter = Limiter(key_func=get_remote_addr)
     "/login",
     dependencies=[Depends(allow_public())],
     summary="Login with credentials",
-    description="Authenticates a user with username and password. Returns a JWT token as a secure HTTP-only cookie that can be used for subsequent API requests. The token can also be retrieved and used as a Bearer token in the Authorization header.",
+    description='Authenticates a user with username and password. Returns a JWT token as a secure HTTP-only cookie that can be used for subsequent API requests. The JWT token can also be retrieved from the response and used as a Bearer token in the Authorization header.\n\nExample using Bearer token:\n```\ncurl -H "Authorization: Bearer <token_value>" https://frigate_ip:8971/api/profile\n```',
 )
 @limiter.limit(limit_value=rateLimiter.get_limit)
 def login(request: Request, body: AppPostLoginBody):
@@ -776,7 +801,7 @@ def login(request: Request, body: AppPostLoginBody):
     "/users",
     dependencies=[Depends(require_role(["admin"]))],
     summary="Get all users",
-    description="Returns a list of all users with their usernames and roles. Requires admin role.",
+    description="Returns a list of all users with their usernames and roles. Requires admin role. Each user object contains the username and assigned role.",
 )
 def get_users():
     exports = (
@@ -789,7 +814,7 @@ def get_users():
     "/users",
     dependencies=[Depends(require_role(["admin"]))],
     summary="Create new user",
-    description="Creates a new user with the specified username, password, and role. Requires admin role. Password must meet strength requirements.",
+    description='Creates a new user with the specified username, password, and role. Requires admin role. Password must meet strength requirements: minimum 8 characters, at least one uppercase letter, at least one digit, and at least one special character (!@#$%^&*(),.?":{} |<>).',
 )
 def create_user(
     request: Request,
@@ -823,7 +848,7 @@ def create_user(
     "/users/{username}",
     dependencies=[Depends(require_role(["admin"]))],
     summary="Delete user",
-    description="Deletes a user by username. The built-in admin user cannot be deleted. Requires admin role.",
+    description="Deletes a user by username. The built-in admin user cannot be deleted. Requires admin role. Returns success message or error if user not found.",
 )
 def delete_user(request: Request, username: str):
     # Prevent deletion of the built-in admin user
@@ -840,7 +865,7 @@ def delete_user(request: Request, username: str):
     "/users/{username}/password",
     dependencies=[Depends(allow_any_authenticated())],
     summary="Update user password",
-    description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity. Password must meet strength requirements (minimum 8 characters, uppercase letter, digit, and special character).",
+    description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity for non-admin users. Password must meet strength requirements: minimum 8 characters, at least one uppercase letter, at least one digit, and at least one special character (!@#$%^&*(),.?\":{} |<>). If user changes their own password, a new JWT cookie is automatically issued.",
 )
 async def update_password(
     request: Request,
@@ -926,7 +951,7 @@ async def update_password(
     "/users/{username}/role",
     dependencies=[Depends(require_role(["admin"]))],
     summary="Update user role",
-    description="Updates a user's role. The built-in admin user's role cannot be modified. Requires admin role.",
+    description="Updates a user's role. The built-in admin user's role cannot be modified. Requires admin role. Valid roles are defined in the configuration.",
 )
 async def update_role(
     request: Request,
