@@ -345,9 +345,9 @@ function ReviewGroup({
   }
 
   const reviewInfo = useMemo(() => {
-    const objectCount = fetchedEvents
-      ? fetchedEvents.length
-      : (review.data.objects ?? []).length;
+    const detectionsCount =
+      review.data?.detections?.length ?? (review.data?.objects ?? []).length;
+    const objectCount = fetchedEvents ? fetchedEvents.length : detectionsCount;
 
     return `${t("detail.trackedObject", { count: objectCount })}`;
   }, [review, t, fetchedEvents]);
