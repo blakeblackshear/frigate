@@ -893,13 +893,9 @@ async def update_password(
     except DoesNotExist:
         return JSONResponse(content={"message": "User not found"}, status_code=404)
 
-    # Require old_password when:
-    # 1. Non-admin user is changing another user's password (admin only action)
-    # 2. Any user is changing their own password
-    is_changing_own_password = current_username == username
-    is_non_admin = current_role != "admin"
-
-    if is_changing_own_password or is_non_admin:
+    # Require old_password when non-admin user is changing any password
+    # Admin users changing passwords do NOT need to provide the current password
+    if current_role != "admin":
         if not body.old_password:
             return JSONResponse(
                 content={"message": "Current password is required"},
