@@ -679,7 +679,7 @@
       "desc": "Manage this Frigate instance's user accounts."
     },
     "addUser": "Add User",
-    "updatePassword": "Update Password",
+    "updatePassword": "Reset Password",
     "toast": {
       "success": {
         "createUser": "User {{user}} created successfully",
@@ -700,7 +700,7 @@
       "role": "Role",
       "noUsers": "No users found.",
       "changeRole": "Change user role",
-      "password": "Password",
+      "password": "Reset Password",
       "deleteUser": "Delete user"
     },
     "dialog": {
