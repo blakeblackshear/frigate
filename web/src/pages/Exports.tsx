@@ -15,7 +15,8 @@ import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { useHistoryBack } from "@/hooks/use-history-back";
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { cn } from "@/lib/utils";
 import {
@@ -114,10 +115,17 @@ function Exports() {
   // Viewing
 
   const [selected, setSelected] = useState<Export>();
-  const [selectedCaseId, setSelectedCaseId] = useOverlayState<
-    string | undefined
-  >("caseId", undefined);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(
+    undefined,
+  );
   const [selectedAspect, setSelectedAspect] = useState(0.0);
+
+  // Handle browser back button to deselect case before navigating away
+  useHistoryBack({
+    enabled: true,
+    open: selectedCaseId !== undefined,
+    onClose: () => setSelectedCaseId(undefined),
+  });
 
   useSearchEffect("id", (id) => {
     if (!rawExports) {
