@@ -489,8 +489,8 @@ function CaseView({
   }, [selectedCase, exports, search]);
 
   return (
-    <div className="flex size-full flex-col gap-8">
-      <div className="flex flex-col gap-1">
+    <div className="flex size-full flex-col gap-8 overflow-hidden">
+      <div className="flex shrink-0 flex-col gap-1">
         <Heading className="capitalize" as="h2">
           {selectedCase.name}
         </Heading>
@@ -500,7 +500,7 @@ function CaseView({
       </div>
       <div
         ref={contentRef}
-        className="scrollbar-container grid gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="scrollbar-container grid min-h-0 flex-1 content-start gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       >
         {exports?.map((item) => (
           <ExportCard
