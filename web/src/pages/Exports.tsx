@@ -76,16 +76,10 @@ function Exports() {
         grouped[caseId] = [];
       }
 
-      if (exportFilter?.cameras?.length) {
-        if (exportFilter.cameras.includes(exp.camera)) {
-          grouped[caseId].push(exp);
-        }
-      } else {
-        grouped[caseId].push(exp);
-      }
+      grouped[caseId].push(exp);
     });
     return grouped;
-  }, [rawExports, exportFilter]);
+  }, [rawExports]);
 
   const filteredCases = useMemo<ExportCase[]>(() => {
     if (!cases) {
