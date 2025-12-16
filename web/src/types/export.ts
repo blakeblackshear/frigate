@@ -21,3 +21,13 @@ export type DeleteClipType = {
   file: string;
   exportName: string;
 };
+
+// filtering
+
+const EXPORT_FILTERS = ["cameras"] as const;
+export type ExportFilters = (typeof EXPORT_FILTERS)[number];
+export const DEFAULT_EXPORT_FILTERS: ExportFilters[] = ["cameras"];
+
+export type ExportFilter = {
+  cameras?: string[];
+};

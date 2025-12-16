@@ -29,7 +29,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isMobile } from "react-device-detect";
+import { isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 
 import { LuFolderX } from "react-icons/lu";
@@ -232,8 +232,13 @@ function Exports() {
         </DialogContent>
       </Dialog>
 
-      {(exports?.length || cases?.length) && (
-        <div className="flex w-full items-center justify-center p-2">
+      <div
+        className={cn(
+          "flex w-full flex-col items-start space-y-2 pr-2 md:mb-2 lg:relative lg:h-10 lg:flex-row lg:items-center lg:space-y-0",
+          isMobileOnly && "mb-2 h-auto flex-wrap gap-2 space-y-0",
+        )}
+      >
+        <div className="w-full">
           <Input
             className="text-md w-full bg-muted md:w-1/3"
             placeholder={t("search")}
@@ -241,7 +246,8 @@ function Exports() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-      )}
+        <div></div>
+      </div>
 
       {selectedCase ? (
         <CaseView
