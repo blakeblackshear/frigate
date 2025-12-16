@@ -146,6 +146,29 @@ class EmbeddingMaintainer(threading.Thread):
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
         self.genai_client = get_genai_client(config)
 
+        # Pre-import TensorFlow/tflite on main thread to avoid atexit registration issues
+        # when importing from worker threads later (e.g., during dynamic config updates)
+        if (
+            self.config.classification.bird.enabled
+            or len(self.config.classification.custom) > 0
+        ):
+            try:
+                from tflite_runtime.interpreter import Interpreter  # noqa: F401
+            except ModuleNotFoundError:
+                try:
+                    from tensorflow.lite.python.interpreter import (  # noqa: F401
+                        Interpreter,
+                    )
+
+                    logger.debug(
+                        "Pre-imported TensorFlow Interpreter on main thread for classification models"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to pre-import TensorFlow Interpreter: {e}. "
+                        "Classification models may fail to load if added dynamically."
+                    )
+
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
             lpr_model_runner = LicensePlateModelRunner(

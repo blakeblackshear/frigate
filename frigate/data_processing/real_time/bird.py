@@ -19,11 +19,6 @@ from frigate.util.object import calculate_region
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
 
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +30,7 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics)
-        self.interpreter: Interpreter = None
+        self.interpreter: Any | None = None
         self.sub_label_publisher = sub_label_publisher
         self.tensor_input_details: dict[str, Any] = None
         self.tensor_output_details: dict[str, Any] = None
@@ -82,6 +77,11 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
 
     @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
+        try:
+            from tflite_runtime.interpreter import Interpreter
+        except ModuleNotFoundError:
+            from tensorflow.lite.python.interpreter import Interpreter
+
         self.interpreter = Interpreter(
             model_path=os.path.join(MODEL_CACHE_DIR, "bird/bird.tflite"),
             num_threads=2,

@@ -29,11 +29,6 @@ from frigate.util.object import box_overlaps, calculate_region
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
 
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
 logger = logging.getLogger(__name__)
 
 MAX_OBJECT_CLASSIFICATIONS = 16
@@ -52,7 +47,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.requestor = requestor
         self.model_dir = os.path.join(MODEL_CACHE_DIR, self.model_config.name)
         self.train_dir = os.path.join(CLIPS_DIR, self.model_config.name, "train")
-        self.interpreter: Interpreter | None = None
+        self.interpreter: Any | None = None
         self.tensor_input_details: dict[str, Any] | None = None
         self.tensor_output_details: dict[str, Any] | None = None
         self.labelmap: dict[int, str] = {}
@@ -74,6 +69,11 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
     @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
+        try:
+            from tflite_runtime.interpreter import Interpreter
+        except ModuleNotFoundError:
+            from tensorflow.lite.python.interpreter import Interpreter
+
         model_path = os.path.join(self.model_dir, "model.tflite")
         labelmap_path = os.path.join(self.model_dir, "labelmap.txt")
 
@@ -345,7 +345,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.model_config = model_config
         self.model_dir = os.path.join(MODEL_CACHE_DIR, self.model_config.name)
         self.train_dir = os.path.join(CLIPS_DIR, self.model_config.name, "train")
-        self.interpreter: Interpreter | None = None
+        self.interpreter: Any | None = None
         self.sub_label_publisher = sub_label_publisher
         self.requestor = requestor
         self.tensor_input_details: dict[str, Any] | None = None
@@ -368,6 +368,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
     @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
+        try:
+            from tflite_runtime.interpreter import Interpreter
+        except ModuleNotFoundError:
+            from tensorflow.lite.python.interpreter import Interpreter
+
         model_path = os.path.join(self.model_dir, "model.tflite")
         labelmap_path = os.path.join(self.model_dir, "labelmap.txt")
 
