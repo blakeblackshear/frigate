@@ -94,3 +94,23 @@ When choosing which objects to classify, start with a small number of visually d
 - **Preprocessing**: Ensure examples reflect object crops similar to Frigate’s boxes; keep the subject centered.
 - **Labels**: Keep label names short and consistent; include a `none` class if you plan to ignore uncertain predictions for sub labels.
 - **Threshold**: Tune `threshold` per model to reduce false assignments. Start at `0.8` and adjust based on validation.
+
+## Debugging Classification Models
+
+To troubleshoot issues with object classification models, enable debug logging to see detailed information about classification attempts, scores, and consensus calculations.
+
+Enable debug logs for classification models by adding `frigate.data_processing.real_time.custom_classification: debug` to your `logger` configuration. These logs are verbose, so only keep this enabled when necessary. Restart Frigate after this change.
+
+```yaml
+logger:
+  default: info
+  logs:
+    frigate.data_processing.real_time.custom_classification: debug
+```
+
+The debug logs will show:
+
+- Classification probabilities for each attempt
+- Whether scores meet the threshold requirement
+- Consensus calculations and when assignments are made
+- Object classification history and weighted scores
