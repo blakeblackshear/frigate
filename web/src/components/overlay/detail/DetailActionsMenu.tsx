@@ -49,6 +49,29 @@ export default function DetailActionsMenu({
     search.data?.type === "audio" ? null : [`review/event/${search.id}`],
   );
 
+  // don't render menu at all if no options are available
+  const hasSemanticSearchOption =
+    config?.semantic_search.enabled &&
+    setSimilarity !== undefined &&
+    search.data?.type === "object";
+
+  const hasReviewItem = !!(reviewItem && reviewItem.id);
+
+  const hasAdminTriggerOption =
+    isAdmin &&
+    config?.semantic_search.enabled &&
+    search.data?.type === "object";
+
+  if (
+    !search.has_snapshot &&
+    !search.has_clip &&
+    !hasSemanticSearchOption &&
+    !hasReviewItem &&
+    !hasAdminTriggerOption
+  ) {
+    return null;
+  }
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger>
