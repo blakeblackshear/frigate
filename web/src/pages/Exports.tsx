@@ -16,8 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
+import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { cn } from "@/lib/utils";
-import { DeleteClipType, Export, ExportCase } from "@/types/export";
+import {
+  DeleteClipType,
+  Export,
+  ExportCase,
+  ExportFilter,
+} from "@/types/export";
 import OptionAndInputDialog from "@/components/overlay/dialog/OptionAndInputDialog";
 import axios from "axios";
 
@@ -37,6 +43,9 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import ExportFilterGroup from "@/components/filter/ExportFilterGroup";
 
+// always parse these as string arrays
+const EXPORT_FILTER_ARRAY_KEYS = ["cameras"];
+
 function Exports() {
   const { t } = useTranslation(["views/exports"]);
 
@@ -44,11 +53,19 @@ function Exports() {
     document.title = t("documentTitle");
   }, [t]);
 
+  // Filters
+
+  const [exportFilter, setExportFilter, exportSearchParams] =
+    useApiFilterArgs<ExportFilter>(EXPORT_FILTER_ARRAY_KEYS);
+
   // Data
 
   const { data: cases, mutate: updateCases } = useSWR<ExportCase[]>("cases");
-  const { data: rawExports, mutate: updateExports } =
-    useSWR<Export[]>("exports");
+  const { data: rawExports, mutate: updateExports } = useSWR<Export[]>(
+    exportSearchParams && Object.keys(exportSearchParams).length > 0
+      ? ["exports", exportSearchParams]
+      : "exports",
+  );
 
   const exports = useMemo<Export[]>(
     () => (rawExports ?? []).filter((e) => !e.export_case),
@@ -241,17 +258,17 @@ function Exports() {
       >
         <div className="w-full">
           <Input
-            className="text-md w-full bg-muted md:w-1/3"
+            className="text-md w-full bg-muted md:w-1/2"
             placeholder={t("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <ExportFilterGroup
-          filter={{}}
+          className="w-full justify-between md:justify-start lg:justify-end"
+          filter={exportFilter}
           filters={["cameras"]}
-          className=""
-          onUpdateFilter={() => {}}
+          onUpdateFilter={setExportFilter}
         />
       </div>
 
