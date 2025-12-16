@@ -35,6 +35,7 @@ import { useTranslation } from "react-i18next";
 import { LuFolderX } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
+import ExportFilterGroup from "@/components/filter/ExportFilterGroup";
 
 function Exports() {
   const { t } = useTranslation(["views/exports"]);
@@ -246,7 +247,12 @@ function Exports() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div></div>
+        <ExportFilterGroup
+          filter={{}}
+          filters={["cameras"]}
+          className=""
+          onUpdateFilter={() => {}}
+        />
       </div>
 
       {selectedCase ? (
