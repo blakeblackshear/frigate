@@ -62,7 +62,7 @@ router = APIRouter(tags=[Tags.export])
 def get_exports(
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
     export_case_id: Optional[str] = None,
-    camera: Optional[List[str]] = Query(default=None),
+    cameras: Optional[str] = Query(default="all"),
     start_date: Optional[float] = None,
     end_date: Optional[float] = None,
 ):
@@ -74,8 +74,9 @@ def get_exports(
         else:
             query = query.where(Export.export_case == export_case_id)
 
-    if camera:
-        filtered_cameras = [c for c in camera if c in allowed_cameras]
+    if cameras and cameras != "all":
+        requested = set(cameras.split(","))
+        filtered_cameras = list(requested.intersection(allowed_cameras))
         if not filtered_cameras:
             return JSONResponse(content=[])
         query = query.where(Export.camera << filtered_cameras)
