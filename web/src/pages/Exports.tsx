@@ -67,9 +67,39 @@ function Exports() {
       : "exports",
   );
 
+  const exportsByCase = useMemo<{ [caseId: string]: Export[] }>(() => {
+    const grouped: { [caseId: string]: Export[] } = {};
+    (rawExports ?? []).forEach((exp) => {
+      const caseId = exp.export_case || "none";
+      if (!grouped[caseId]) {
+        grouped[caseId] = [];
+      }
+
+      if (exportFilter?.cameras?.length) {
+        if (exportFilter.cameras.includes(exp.camera)) {
+          grouped[caseId].push(exp);
+        }
+      } else {
+        grouped[caseId].push(exp);
+      }
+    });
+    return grouped;
+  }, [rawExports, exportFilter]);
+
+  const filteredCases = useMemo<ExportCase[]>(() => {
+    if (!cases) {
+      return [];
+    }
+
+    return cases.filter((caseItem) => {
+      const caseExports = exportsByCase[caseItem.id];
+      return caseExports?.length;
+    });
+  }, [cases, exportsByCase]);
+
   const exports = useMemo<Export[]>(
-    () => (rawExports ?? []).filter((e) => !e.export_case),
-    [rawExports],
+    () => exportsByCase["none"] || [],
+    [exportsByCase],
   );
 
   const mutate = useCallback(() => {
@@ -90,20 +120,20 @@ function Exports() {
   const [selectedAspect, setSelectedAspect] = useState(0.0);
 
   useSearchEffect("id", (id) => {
-    if (!exports) {
+    if (!rawExports) {
       return false;
     }
 
-    setSelected(exports.find((exp) => exp.id == id));
+    setSelected(rawExports.find((exp) => exp.id == id));
     return true;
   });
 
   useSearchEffect("caseId", (caseId: string) => {
-    if (!cases) {
+    if (!filteredCases) {
       return false;
     }
 
-    const exists = cases.some((c) => c.id === caseId);
+    const exists = filteredCases.some((c) => c.id === caseId);
 
     if (!exists) {
       return false;
@@ -162,8 +192,8 @@ function Exports() {
   useKeyboardListener([], undefined, contentRef);
 
   const selectedCase = useMemo(
-    () => cases?.find((c) => c.id === selectedCaseId),
-    [cases, selectedCaseId],
+    () => filteredCases?.find((c) => c.id === selectedCaseId),
+    [filteredCases, selectedCaseId],
   );
 
   const resetCaseDialog = useCallback(() => {
@@ -276,7 +306,7 @@ function Exports() {
         <CaseView
           contentRef={contentRef}
           selectedCase={selectedCase}
-          exports={rawExports}
+          exports={exportsByCase[selectedCase.id] || []}
           search={search}
           setSelected={setSelected}
           renameClip={onHandleRename}
@@ -287,7 +317,7 @@ function Exports() {
         <AllExportsView
           contentRef={contentRef}
           search={search}
-          cases={cases}
+          cases={filteredCases}
           exports={exports}
           setSelectedCaseId={setSelectedCaseId}
           setSelected={setSelected}
