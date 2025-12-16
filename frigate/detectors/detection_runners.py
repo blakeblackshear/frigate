@@ -170,6 +170,7 @@ class CudaGraphRunner(BaseModelRunner):
 
         return model_type not in [
             ModelTypeEnum.yolonas.value,
+            ModelTypeEnum.dfine.value,
             EnrichmentModelTypeEnum.paddleocr.value,
             EnrichmentModelTypeEnum.jina_v1.value,
             EnrichmentModelTypeEnum.jina_v2.value,
