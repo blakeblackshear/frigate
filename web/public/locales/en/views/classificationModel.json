@@ -1,7 +1,9 @@
 {
   "documentTitle": "Classification Models - Frigate",
   "details": {
-    "scoreInfo": "Score represents the average classification confidence across all detections of this object."
+    "scoreInfo": "Score represents the average classification confidence across all detections of this object.",
+    "none": "None",
+    "unknown": "Unknown"
   },
   "button": {
     "deleteClassificationAttempts": "Delete Classification Images",
@@ -83,7 +85,6 @@
     "aria": "Select Recent Classifications"
   },
   "categories": "Classes",
-  "none": "None",
   "createCategory": {
     "new": "Create New Class"
   },

@@ -161,7 +161,11 @@ export const ClassificationCard = forwardRef<
           )}
         >
           <div className="smart-capitalize">
-            {data.name == "unknown" ? t("details.unknown") : data.name}
+            {data.name == "unknown"
+              ? t("details.unknown")
+              : data.name == "none"
+                ? t("details.none")
+                : data.name}
           </div>
           {data.score != undefined && (
             <div

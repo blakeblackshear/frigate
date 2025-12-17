@@ -170,7 +170,9 @@ export function ClassFilterContent({
                 <FilterSwitch
                   key={item}
                   label={
-                    item === "none" ? t("none") : item.replaceAll("_", " ")
+                    item === "none"
+                      ? t("details.none", { ns: "views/classificationModel" })
+                      : item.replaceAll("_", " ")
                   }
                   isChecked={classes?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
