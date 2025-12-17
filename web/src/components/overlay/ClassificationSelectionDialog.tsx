@@ -132,7 +132,7 @@ export default function ClassificationSelectionDialog({
                   onClick={() => onCategorizeImage(category)}
                 >
                   {category === "none"
-                    ? t("none")
+                    ? t("details.none")
                     : category.replaceAll("_", " ")}
                 </SelectorItem>
               ))}

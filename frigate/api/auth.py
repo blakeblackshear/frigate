@@ -143,17 +143,6 @@ def require_admin_by_default():
     return admin_checker
 
 
-def _is_authenticated(request: Request) -> bool:
-    """
-    Helper to determine if a request is from an authenticated user.
-
-    Returns True if the request has a valid authenticated user (not anonymous).
-    Port 5000 internal requests are considered anonymous despite having admin role.
-    """
-    username = request.headers.get("remote-user")
-    return username is not None and username != "anonymous"
-
-
 def allow_public():
     """
     Override dependency to allow unauthenticated access to an endpoint.
@@ -173,27 +162,24 @@ def allow_public():
 
 def allow_any_authenticated():
     """
-    Override dependency to allow any authenticated user (bypass admin requirement).
+    Override dependency to allow any request that passed through the /auth endpoint.
 
     Allows:
-    - Port 5000 internal requests (have admin role despite anonymous user)
-    - Any authenticated user with a real username (not "anonymous")
+    - Port 5000 internal requests (remote-user: "anonymous", remote-role: "admin")
+    - Authenticated users with JWT tokens (remote-user: username)
+    - Unauthenticated requests when auth is disabled (remote-user: "anonymous")
 
     Rejects:
-    - Port 8971 requests with anonymous user (auth disabled, no proxy auth)
+    - Requests with no remote-user header (did not pass through /auth endpoint)
 
     Example:
         @router.get("/authenticated-endpoint", dependencies=[Depends(allow_any_authenticated())])
     """
 
     async def auth_checker(request: Request):
-        # Port 5000 requests have admin role and should be allowed
-        role = request.headers.get("remote-role")
-        if role == "admin":
-            return
-
-        # Otherwise require a real authenticated user (not anonymous)
-        if not _is_authenticated(request):
+        # Ensure a remote-user has been set by the /auth endpoint
+        username = request.headers.get("remote-user")
+        if username is None:
             raise HTTPException(status_code=401, detail="Authentication required")
         return
 

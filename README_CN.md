@@ -4,13 +4,13 @@
 
 # Frigate NVR™ - 一个具有实时目标检测的本地 NVR
 
-[English](https://github.com/blakeblackshear/frigate) | \[简体中文\]
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 <a href="https://hosted.weblate.org/engage/frigate-nvr/-/zh_Hans/">
 <img src="https://hosted.weblate.org/widget/frigate-nvr/-/zh_Hans/svg-badge.svg" alt="翻译状态" />
 </a>
+
+[English](https://github.com/blakeblackshear/frigate) | \[简体中文\]
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 一个完整的本地网络视频录像机（NVR），专为[Home Assistant](https://www.home-assistant.io)设计，具备 AI 目标/物体检测功能。使用 OpenCV 和 TensorFlow 在本地为 IP 摄像头执行实时物体检测。
 
@@ -38,6 +38,7 @@
 ## 协议
 
 本项目采用 **MIT 许可证**授权。
+
 **代码部分**：本代码库中的源代码、配置文件和文档均遵循 [MIT 许可证](LICENSE)。您可以自由使用、修改和分发这些代码，但必须保留原始版权声明。
 
 **商标部分**：“Frigate”名称、“Frigate NVR”品牌以及 Frigate 的 Logo 为 **Frigate LLC 的商标**，**不在** MIT 许可证覆盖范围内。
