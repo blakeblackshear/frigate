@@ -72,7 +72,7 @@
   },
   "renameCategory": {
     "title": "Rename Class",
-    "desc": "Enter a new name for {{name}}. You will be required to retrain the model for the name change to take affect."
+    "desc": "Enter a new name for {{name}}. You will be required to retrain the model for the name change to take effect."
   },
   "description": {
     "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
