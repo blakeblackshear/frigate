@@ -654,5 +654,5 @@ def write_classification_attempt(
 
         if len(files) > max_files:
             os.unlink(os.path.join(folder, files[-1]))
-    except FileNotFoundError:
+    except (FileNotFoundError, OSError):
         pass
