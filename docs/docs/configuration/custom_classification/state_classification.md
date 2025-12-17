@@ -11,6 +11,8 @@ State classification models are lightweight and run very fast on CPU. Inference 
 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
 
+A CPU with AVX instructions is required for training and inference.
+
 ## Classes
 
 Classes are the different states an area on your camera can be in. Each class represents a distinct visual state that the model will learn to recognize.
