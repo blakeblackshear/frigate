@@ -251,6 +251,8 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             except Exception:
                 logger.warning("Failed to resize image for state classification")
                 return
+        else:
+            resized_frame = frame
 
         if self.interpreter is None:
             # When interpreter is None, always save (score is 0.0, which is < 1.0)
