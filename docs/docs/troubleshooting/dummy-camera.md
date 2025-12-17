@@ -1,4 +1,3 @@
-````markdown
 ---
 id: dummy-camera
 title: Troubleshooting Detection
