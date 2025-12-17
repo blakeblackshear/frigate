@@ -31,7 +31,6 @@ cameras:
     snapshots:
       enabled: false
 ```
-````
 
 - `-re -stream_loop -1` tells `ffmpeg` to play the file in realtime and loop indefinitely, which is useful for long debugging sessions.
 - `-fflags +genpts` helps generate presentation timestamps when they are missing in the file.
