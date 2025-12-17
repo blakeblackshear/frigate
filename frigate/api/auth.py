@@ -151,7 +151,7 @@ def _is_authenticated(request: Request) -> bool:
     Port 5000 internal requests are considered anonymous despite having admin role.
     """
     username = request.headers.get("remote-user")
-    return username is not None and username != "anonymous"
+    return username is not None
 
 
 def allow_public():
