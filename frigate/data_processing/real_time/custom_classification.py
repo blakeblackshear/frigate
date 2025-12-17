@@ -519,6 +519,13 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                 0.0,
                 max_files=save_attempts,
             )
+
+            # Still track history even when model doesn't exist to respect MAX_OBJECT_CLASSIFICATIONS
+            # Add an entry with "unknown" label so the history limit is enforced
+            if object_id not in self.classification_history:
+                self.classification_history[object_id] = []
+
+            self.classification_history[object_id].append(("unknown", 0.0, now))
             return
 
         input = np.expand_dims(resized_crop, axis=0)
