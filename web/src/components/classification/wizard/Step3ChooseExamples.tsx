@@ -186,15 +186,17 @@ export default function Step3ChooseExamples({
       await Promise.all(emptyFolderPromises);
 
       // Step 3: Determine if we should train
-      // For state models, we need ALL states to have examples
-      // For object models, we need at least 2 classes with images
+      // For state models, we need ALL states to have examples (at least 2 states)
+      // For object models, we need at least 1 class with images (the rest go to "none")
       const allStatesHaveExamplesForTraining =
         step1Data.modelType !== "state" ||
         step1Data.classes.every((className) =>
           classesWithImages.has(className),
         );
       const shouldTrain =
-        allStatesHaveExamplesForTraining && classesWithImages.size >= 2;
+        step1Data.modelType === "object"
+          ? classesWithImages.size >= 1
+          : allStatesHaveExamplesForTraining && classesWithImages.size >= 2;
 
       // Step 4: Kick off training only if we have enough classes with images
       if (shouldTrain) {
