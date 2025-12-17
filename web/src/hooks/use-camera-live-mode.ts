@@ -54,7 +54,7 @@ export default function useCameraLiveMode(
   }>({});
 
   useEffect(() => {
-    if (!cameras) return;
+    if (!cameras || cameras.length === 0) return;
 
     const mseSupported =
       "MediaSource" in window || "ManagedMediaSource" in window;
