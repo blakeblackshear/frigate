@@ -186,6 +186,9 @@ class JinaV1ImageEmbedding(BaseEmbedding):
                 download_func=self._download_model,
             )
             self.downloader.ensure_model_files()
+            # Avoid lazy loading in worker threads: block until downloads complete
+            # and load the model on the main thread during initialization.
+            self._load_model_and_utils()
         else:
             self.downloader = None
             ModelDownloader.mark_files_state(
