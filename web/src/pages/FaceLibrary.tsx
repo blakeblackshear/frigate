@@ -68,7 +68,10 @@ import {
   ClassificationCard,
   GroupedClassificationCard,
 } from "@/components/card/ClassificationCard";
-import { ClassificationItemData } from "@/types/classification";
+import {
+  ClassificationItemData,
+  ClassifiedEvent,
+} from "@/types/classification";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -922,10 +925,22 @@ function FaceAttemptGroup({
     [onRefresh, t],
   );
 
+  // Create ClassifiedEvent from Event (face recognition uses sub_label)
+  const classifiedEvent: ClassifiedEvent | undefined = useMemo(() => {
+    if (!event || !event.sub_label || event.sub_label === "none") {
+      return undefined;
+    }
+    return {
+      id: event.id,
+      label: event.sub_label,
+      score: event.data?.sub_label_score,
+    };
+  }, [event]);
+
   return (
     <GroupedClassificationCard
       group={group}
-      event={event}
+      classifiedEvent={classifiedEvent}
       threshold={threshold}
       selectedItems={selectedFaces}
       i18nLibrary="views/faceLibrary"

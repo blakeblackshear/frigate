@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import {
   ClassificationItemData,
   ClassificationThreshold,
+  ClassifiedEvent,
 } from "@/types/classification";
-import { Event } from "@/types/event";
 import { forwardRef, useMemo, useRef, useState } from "react";
 import { isDesktop, isIOS, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
@@ -190,7 +190,7 @@ export const ClassificationCard = forwardRef<
 
 type GroupedClassificationCardProps = {
   group: ClassificationItemData[];
-  event?: Event;
+  classifiedEvent?: ClassifiedEvent;
   threshold?: ClassificationThreshold;
   selectedItems: string[];
   i18nLibrary: string;
@@ -201,7 +201,7 @@ type GroupedClassificationCardProps = {
 };
 export function GroupedClassificationCard({
   group,
-  event,
+  classifiedEvent,
   threshold,
   selectedItems,
   i18nLibrary,
@@ -236,14 +236,15 @@ export function GroupedClassificationCard({
     const bestTyped: ClassificationItemData = best;
     return {
       ...bestTyped,
-      name: event
-        ? event.sub_label && event.sub_label !== "none"
-          ? event.sub_label
-          : t(noClassificationLabel)
-        : bestTyped.name,
-      score: event?.data?.sub_label_score,
+      name:
+        classifiedEvent?.label && classifiedEvent.label !== "none"
+          ? classifiedEvent.label
+          : classifiedEvent
+            ? t(noClassificationLabel)
+            : bestTyped.name,
+      score: classifiedEvent?.score,
     };
-  }, [group, event, noClassificationLabel, t]);
+  }, [group, classifiedEvent, noClassificationLabel, t]);
 
   const bestScoreStatus = useMemo(() => {
     if (!bestItem?.score || !threshold) {
@@ -329,36 +330,38 @@ export function GroupedClassificationCard({
                 )}
               >
                 <ContentTitle className="flex items-center gap-2 font-normal capitalize">
-                  {event?.sub_label && event.sub_label !== "none"
-                    ? event.sub_label
+                  {classifiedEvent?.label && classifiedEvent.label !== "none"
+                    ? classifiedEvent.label
                     : t(noClassificationLabel)}
-                  {event?.sub_label && event.sub_label !== "none" && (
-                    <div className="flex items-center gap-1">
-                      <div
-                        className={cn(
-                          "",
-                          bestScoreStatus == "match" && "text-success",
-                          bestScoreStatus == "potential" && "text-orange-400",
-                          bestScoreStatus == "unknown" && "text-danger",
-                        )}
-                      >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button
-                            className="focus:outline-none"
-                            aria-label={t("details.scoreInfo", {
-                              ns: i18nLibrary,
-                            })}
-                          >
-                            <LuInfo className="size-3" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 text-sm">
-                          {t("details.scoreInfo", { ns: i18nLibrary })}
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  )}
+                  {classifiedEvent?.label &&
+                    classifiedEvent.label !== "none" &&
+                    classifiedEvent.score !== undefined && (
+                      <div className="flex items-center gap-1">
+                        <div
+                          className={cn(
+                            "",
+                            bestScoreStatus == "match" && "text-success",
+                            bestScoreStatus == "potential" && "text-orange-400",
+                            bestScoreStatus == "unknown" && "text-danger",
+                          )}
+                        >{`${Math.round((classifiedEvent.score || 0) * 100)}%`}</div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              className="focus:outline-none"
+                              aria-label={t("details.scoreInfo", {
+                                ns: i18nLibrary,
+                              })}
+                            >
+                              <LuInfo className="size-3" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80 text-sm">
+                            {t("details.scoreInfo", { ns: i18nLibrary })}
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    )}
                 </ContentTitle>
                 <ContentDescription className={cn("", isMobile && "px-2")}>
                   {time && (
@@ -372,14 +375,14 @@ export function GroupedClassificationCard({
               </div>
               {isDesktop && (
                 <div className="flex flex-row justify-between">
-                  {event && (
+                  {classifiedEvent && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
                           className="cursor-pointer"
                           tabIndex={-1}
                           onClick={() => {
-                            navigate(`/explore?event_id=${event.id}`);
+                            navigate(`/explore?event_id=${classifiedEvent.id}`);
                           }}
                         >
                           <LuSearch className="size-4 text-secondary-foreground" />

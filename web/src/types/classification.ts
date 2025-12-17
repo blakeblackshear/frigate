@@ -21,6 +21,12 @@ export type ClassificationThreshold = {
   unknown: number;
 };
 
+export type ClassifiedEvent = {
+  id: string;
+  label?: string;
+  score?: number;
+};
+
 export type ClassificationDatasetResponse = {
   categories: {
     [id: string]: string[];
