@@ -35,6 +35,12 @@ For object classification:
   - Ideal when multiple attributes can coexist independently.
   - Example: Detecting if a `person` in a construction yard is wearing a helmet or not.
 
+:::note
+
+A tracked object can only have a single sub label. If you are using Face Recognition and you configure an object classification model for `person` using the sub label type, your sub label may not be assigned correctly as it depends on which enrichment completes its analysis first. Consider using the `attribute` type instead.
+
+:::
+
 ## Assignment Requirements
 
 Sub labels and attributes are only assigned when both conditions are met:
