@@ -399,7 +399,7 @@ export default function InputWithTags({
             newFilters.sort = value as SearchSortType;
             break;
           default:
-            // Handle array types (cameras, labels, subLabels, zones)
+            // Handle array types (cameras, labels, sub_labels, attributes, zones)
             if (!newFilters[type]) newFilters[type] = [];
             if (Array.isArray(newFilters[type])) {
               if (!(newFilters[type] as string[]).includes(value)) {
