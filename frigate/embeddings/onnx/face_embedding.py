@@ -8,7 +8,7 @@ import numpy as np
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.embeddings.types import EnrichmentModelTypeEnum
-from frigate.log import redirect_output_to_logger
+from frigate.log import suppress_stderr_during
 from frigate.util.downloader import ModelDownloader
 
 from ...config import FaceRecognitionConfig
@@ -57,17 +57,18 @@ class FaceNetEmbedding(BaseEmbedding):
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
 
-    @redirect_output_to_logger(logger, logging.DEBUG)
     def _load_model_and_utils(self):
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
 
-            self.runner = Interpreter(
-                model_path=os.path.join(MODEL_CACHE_DIR, "facedet/facenet.tflite"),
-                num_threads=2,
-            )
-            self.runner.allocate_tensors()
+            # Suppress TFLite delegate creation messages that bypass Python logging
+            with suppress_stderr_during("tflite_interpreter_init"):
+                self.runner = Interpreter(
+                    model_path=os.path.join(MODEL_CACHE_DIR, "facedet/facenet.tflite"),
+                    num_threads=2,
+                )
+                self.runner.allocate_tensors()
             self.tensor_input_details = self.runner.get_input_details()
             self.tensor_output_details = self.runner.get_output_details()
 

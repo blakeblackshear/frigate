@@ -34,7 +34,7 @@ from frigate.data_processing.real_time.audio_transcription import (
     AudioTranscriptionRealTimeProcessor,
 )
 from frigate.ffmpeg_presets import parse_preset_input
-from frigate.log import LogPipe, redirect_output_to_logger
+from frigate.log import LogPipe, suppress_stderr_during
 from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.process import FrigateProcess
@@ -367,17 +367,17 @@ class AudioEventMaintainer(threading.Thread):
 
 
 class AudioTfl:
-    @redirect_output_to_logger(logger, logging.DEBUG)
     def __init__(self, stop_event: threading.Event, num_threads=2):
         self.stop_event = stop_event
         self.num_threads = num_threads
         self.labels = load_labels("/audio-labelmap.txt", prefill=521)
-        self.interpreter = Interpreter(
-            model_path="/cpu_audio_model.tflite",
-            num_threads=self.num_threads,
-        )
-
-        self.interpreter.allocate_tensors()
+        # Suppress TFLite delegate creation messages that bypass Python logging
+        with suppress_stderr_during("tflite_interpreter_init"):
+            self.interpreter = Interpreter(
+                model_path="/cpu_audio_model.tflite",
+                num_threads=self.num_threads,
+            )
+            self.interpreter.allocate_tensors()
 
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()

@@ -5,7 +5,7 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.log import redirect_output_to_logger
+from frigate.log import suppress_stderr_during
 
 from ..detector_utils import tflite_detect_raw, tflite_init
 
@@ -28,12 +28,13 @@ class CpuDetectorConfig(BaseDetectorConfig):
 class CpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
-    @redirect_output_to_logger(logger, logging.DEBUG)
     def __init__(self, detector_config: CpuDetectorConfig):
-        interpreter = Interpreter(
-            model_path=detector_config.model.path,
-            num_threads=detector_config.num_threads or 3,
-        )
+        # Suppress TFLite delegate creation messages that bypass Python logging
+        with suppress_stderr_during("tflite_interpreter_init"):
+            interpreter = Interpreter(
+                model_path=detector_config.model.path,
+                num_threads=detector_config.num_threads or 3,
+            )
 
         tflite_init(self, interpreter)
 

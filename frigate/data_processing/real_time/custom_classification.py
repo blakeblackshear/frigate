@@ -21,7 +21,7 @@ from frigate.config.classification import (
     ObjectClassificationType,
 )
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
-from frigate.log import redirect_output_to_logger
+from frigate.log import suppress_stderr_during
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.object import box_overlaps, calculate_region
@@ -72,7 +72,6 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.last_run = datetime.datetime.now().timestamp()
         self.__build_detector()
 
-    @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
         try:
             from tflite_runtime.interpreter import Interpreter
@@ -89,11 +88,13 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             self.labelmap = {}
             return
 
-        self.interpreter = Interpreter(
-            model_path=model_path,
-            num_threads=2,
-        )
-        self.interpreter.allocate_tensors()
+        # Suppress TFLite delegate creation messages that bypass Python logging
+        with suppress_stderr_during("tflite_interpreter_init"):
+            self.interpreter = Interpreter(
+                model_path=model_path,
+                num_threads=2,
+            )
+            self.interpreter.allocate_tensors()
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
         self.labelmap = load_labels(labelmap_path, prefill=0)
@@ -377,7 +378,6 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
         self.__build_detector()
 
-    @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
         model_path = os.path.join(self.model_dir, "model.tflite")
         labelmap_path = os.path.join(self.model_dir, "labelmap.txt")
@@ -389,11 +389,13 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             self.labelmap = {}
             return
 
-        self.interpreter = Interpreter(
-            model_path=model_path,
-            num_threads=2,
-        )
-        self.interpreter.allocate_tensors()
+        # Suppress TFLite delegate creation messages that bypass Python logging
+        with suppress_stderr_during("tflite_interpreter_init"):
+            self.interpreter = Interpreter(
+                model_path=model_path,
+                num_threads=2,
+            )
+            self.interpreter.allocate_tensors()
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
         self.labelmap = load_labels(labelmap_path, prefill=0)
