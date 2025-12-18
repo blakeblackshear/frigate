@@ -616,6 +616,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /classification/attributes:
+    get:
+      tags:
+        - Classification
+      summary: Get custom classification attributes
+      description: |-
+        Returns custom classification attributes for a given object type.
+        Only includes models with classification_type set to 'attribute'.
+        By default returns a flat sorted list of all attribute labels.
+        If group_by_model is true, returns attributes grouped by model name.
+      operationId: get_custom_attributes_classification_attributes_get
+      parameters:
+        - name: object_type
+          in: query
+          schema:
+            type: string
+        - name: group_by_model
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Successful Response
+        "422":
+          description: Validation Error
   /classification/{name}/dataset:
     get:
       tags:
@@ -2912,6 +2938,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /events/{event_id}/attributes:
+    post:
+      tags:
+        - Events
+      summary: Set custom classification attributes
+      description: |-
+        Sets an event's custom classification attributes for all attribute-type
+        models that apply to the event's object type.
+            Returns a success message or an error if the event is not found.
+      operationId: set_attributes_events__event_id__attributes_post
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventsAttributesBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
   /events/{event_id}/description:
     post:
       tags:
@@ -4959,6 +5021,18 @@ components:
       required:
         - subLabel
       title: EventsSubLabelBody
+    EventsAttributesBody:
+      properties:
+        attributes:
+          type: object
+          title: Attributes
+          description: Object with model names as keys and attribute values
+          additionalProperties:
+            type: string
+      type: object
+      required:
+        - attributes
+      title: EventsAttributesBody
     ExportModel:
       properties:
         id:
