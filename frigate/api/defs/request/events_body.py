@@ -24,6 +24,13 @@ class EventsLPRBody(BaseModel):
     )
 
 
+class EventsAttributesBody(BaseModel):
+    attributes: List[str] = Field(
+        title="Selected classification attributes for the event",
+        default_factory=list,
+    )
+
+
 class EventsDescriptionBody(BaseModel):
     description: Union[str, None] = Field(title="The description of the event")
 

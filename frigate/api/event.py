@@ -37,6 +37,7 @@ from frigate.api.defs.query.regenerate_query_parameters import (
     RegenerateQueryParameters,
 )
 from frigate.api.defs.request.events_body import (
+    EventsAttributesBody,
     EventsCreateBody,
     EventsDeleteBody,
     EventsDescriptionBody,
@@ -55,6 +56,7 @@ from frigate.api.defs.response.event_response import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
+from frigate.config.classification import ObjectClassificationType
 from frigate.const import CLIPS_DIR, TRIGGER_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
@@ -1393,6 +1395,107 @@ async def set_plate(
         content={
             "success": True,
             "message": f"Event {event_id} license plate set to {new_plate if new_plate is not None else 'None'}",
+        },
+        status_code=200,
+    )
+
+
+@router.post(
+    "/events/{event_id}/attributes",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Set custom classification attributes",
+    description=(
+        "Sets an event's custom classification attributes for all attribute-type "
+        "models that apply to the event's object type."
+    ),
+)
+async def set_attributes(
+    request: Request,
+    event_id: str,
+    body: EventsAttributesBody,
+):
+    try:
+        event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
+    except DoesNotExist:
+        return JSONResponse(
+            content=({"success": False, "message": f"Event {event_id} not found."}),
+            status_code=404,
+        )
+
+    object_type = event.label
+    selected_attributes = set(body.attributes or [])
+    applied_updates: list[dict[str, str | float | None]] = []
+
+    for (
+        model_key,
+        model_config,
+    ) in request.app.frigate_config.classification.custom.items():
+        # Only apply to enabled attribute classifiers that target this object type
+        if (
+            not model_config.enabled
+            or not model_config.object_config
+            or model_config.object_config.classification_type
+            != ObjectClassificationType.attribute
+            or object_type not in (model_config.object_config.objects or [])
+        ):
+            continue
+
+        # Get available labels from dataset directory
+        dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(model_key), "dataset")
+        available_labels = set()
+
+        if os.path.exists(dataset_dir):
+            for category_name in os.listdir(dataset_dir):
+                category_dir = os.path.join(dataset_dir, category_name)
+                if os.path.isdir(category_dir):
+                    available_labels.add(category_name)
+
+        if not available_labels:
+            logger.warning(
+                "No dataset found for custom attribute model %s at %s",
+                model_key,
+                dataset_dir,
+            )
+            continue
+
+        # Find all selected attributes that apply to this model
+        model_name = model_config.name or model_key
+        matching_attrs = selected_attributes & available_labels
+
+        if matching_attrs:
+            # Publish updates for each selected attribute
+            for attr in matching_attrs:
+                request.app.event_metadata_updater.publish(
+                    (event_id, model_name, attr, 1.0),
+                    EventMetadataTypeEnum.attribute.value,
+                )
+                applied_updates.append(
+                    {"model": model_name, "label": attr, "score": 1.0}
+                )
+        else:
+            # Clear this model's attribute
+            request.app.event_metadata_updater.publish(
+                (event_id, model_name, None, None),
+                EventMetadataTypeEnum.attribute.value,
+            )
+            applied_updates.append({"model": model_name, "label": None, "score": None})
+
+    if len(applied_updates) == 0:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "No matching attributes found for this object type.",
+            },
+            status_code=400,
+        )
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Updated {len(applied_updates)} attribute(s)",
+            "applied": applied_updates,
         },
         status_code=200,
     )
