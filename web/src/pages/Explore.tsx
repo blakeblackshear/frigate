@@ -31,6 +31,7 @@ const SEARCH_FILTER_ARRAY_KEYS = [
   "cameras",
   "labels",
   "sub_labels",
+  "attributes",
   "recognized_license_plate",
   "zones",
 ];
@@ -122,6 +123,7 @@ export default function Explore() {
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
           sub_labels: searchSearchParams["sub_labels"],
+          attributes: searchSearchParams["attributes"],
           recognized_license_plate:
             searchSearchParams["recognized_license_plate"],
           zones: searchSearchParams["zones"],
@@ -158,6 +160,7 @@ export default function Explore() {
         cameras: searchSearchParams["cameras"],
         labels: searchSearchParams["labels"],
         sub_labels: searchSearchParams["sub_labels"],
+        attributes: searchSearchParams["attributes"],
         recognized_license_plate:
           searchSearchParams["recognized_license_plate"],
         zones: searchSearchParams["zones"],

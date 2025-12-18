@@ -143,6 +143,7 @@ export default function SearchView({
   }, [config, searchFilter, allowedCameras]);
 
   const { data: allSubLabels } = useSWR("sub_labels");
+  const { data: allAttributes } = useSWR("classification/attributes");
   const { data: allRecognizedLicensePlates } = useSWR(
     "recognized_license_plates",
   );
@@ -182,6 +183,7 @@ export default function SearchView({
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
       sub_labels: allSubLabels,
+      attributes: allAttributes,
       search_type: ["thumbnail", "description"] as SearchSource[],
       time_range:
         config?.ui.time_format == "24hour"
@@ -204,6 +206,7 @@ export default function SearchView({
       allLabels,
       allZones,
       allSubLabels,
+      allAttributes,
       allRecognizedLicensePlates,
       searchFilter,
       allowedCameras,
