@@ -19,7 +19,7 @@ from frigate.const import (
     PROCESS_PRIORITY_LOW,
     UPDATE_MODEL_STATE,
 )
-from frigate.log import redirect_output_to_logger
+from frigate.log import redirect_output_to_logger, suppress_stderr_during
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
@@ -250,15 +250,20 @@ class ClassificationTrainingProcess(FrigateProcess):
             logger.debug(f"Converting {self.model_name} to TFLite...")
 
             # convert model to tflite
-            converter = tf.lite.TFLiteConverter.from_keras_model(model)
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
-            converter.representative_dataset = (
-                self.__generate_representative_dataset_factory(dataset_dir)
-            )
-            converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-            converter.inference_input_type = tf.uint8
-            converter.inference_output_type = tf.uint8
-            tflite_model = converter.convert()
+            # Suppress stderr during conversion to avoid LLVM debug output
+            # (fully_quantize, inference_type, MLIR optimization messages, etc)
+            with suppress_stderr_during("tflite_conversion"):
+                converter = tf.lite.TFLiteConverter.from_keras_model(model)
+                converter.optimizations = [tf.lite.Optimize.DEFAULT]
+                converter.representative_dataset = (
+                    self.__generate_representative_dataset_factory(dataset_dir)
+                )
+                converter.target_spec.supported_ops = [
+                    tf.lite.OpsSet.TFLITE_BUILTINS_INT8
+                ]
+                converter.inference_input_type = tf.uint8
+                converter.inference_output_type = tf.uint8
+                tflite_model = converter.convert()
 
             # write model
             model_path = os.path.join(model_dir, "model.tflite")

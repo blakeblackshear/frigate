@@ -80,10 +80,15 @@ def apply_log_levels(default: str, log_levels: dict[str, LogLevel]) -> None:
     log_levels = {
         "absl": LogLevel.error,
         "httpx": LogLevel.error,
+        "h5py": LogLevel.error,
+        "keras": LogLevel.error,
         "matplotlib": LogLevel.error,
         "tensorflow": LogLevel.error,
+        "tensorflow.python": LogLevel.error,
         "werkzeug": LogLevel.error,
         "ws4py": LogLevel.error,
+        "PIL": LogLevel.warning,
+        "numba": LogLevel.warning,
         **log_levels,
     }
 
@@ -318,3 +323,31 @@ def suppress_os_output(func: Callable) -> Callable:
         return result
 
     return wrapper
+
+
+@contextmanager
+def suppress_stderr_during(operation_name: str) -> Generator[None, None, None]:
+    """
+    Context manager to suppress stderr output during a specific operation.
+
+    Useful for silencing LLVM debug output, CUDA messages, and other native
+    library logging that cannot be controlled via Python logging or environment
+    variables. Completely redirects file descriptor 2 (stderr) to /dev/null.
+
+    Usage:
+        with suppress_stderr_during("model_conversion"):
+            converter = tf.lite.TFLiteConverter.from_keras_model(model)
+            tflite_model = converter.convert()
+
+    Args:
+        operation_name: Name of the operation for debugging purposes
+    """
+    original_stderr_fd = os.dup(2)
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    try:
+        os.dup2(devnull, 2)
+        yield
+    finally:
+        os.dup2(original_stderr_fd, 2)
+        os.close(devnull)
+        os.close(original_stderr_fd)

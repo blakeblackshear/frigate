@@ -237,8 +237,18 @@ ENV PYTHONWARNINGS="ignore:::numpy.core.getlimits"
 # Set HailoRT to disable logging
 ENV HAILORT_LOGGER_PATH=NONE
 
-# TensorFlow error only
+# TensorFlow C++ logging suppression (must be set before import)
+# TF_CPP_MIN_LOG_LEVEL: 0=all, 1=INFO+, 2=WARNING+, 3=ERROR+ (we use 3 for errors only)
 ENV TF_CPP_MIN_LOG_LEVEL=3
+# Suppress verbose logging from TensorFlow C++ code
+ENV TF_CPP_MIN_VLOG_LEVEL=3
+# Disable oneDNN optimization messages ("optimized with oneDNN...")
+ENV TF_ENABLE_ONEDNN_OPTS=0
+# Suppress AutoGraph verbosity during conversion
+ENV AUTOGRAPH_VERBOSITY=0
+# Google Logging (GLOG) suppression for TensorFlow components
+ENV GLOG_minloglevel=3
+ENV GLOG_logtostderr=0
 
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
