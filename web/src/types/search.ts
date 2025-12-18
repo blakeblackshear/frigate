@@ -5,6 +5,7 @@ const SEARCH_FILTERS = [
   "general",
   "zone",
   "sub",
+  "attribute",
   "source",
   "sort",
 ] as const;
@@ -16,6 +17,7 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
   "general",
   "zone",
   "sub",
+  "attribute",
   "source",
   "sort",
 ];
@@ -71,6 +73,7 @@ export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  attributes?: string[];
   recognized_license_plate?: string[];
   zones?: string[];
   before?: number;
@@ -95,6 +98,7 @@ export type SearchQueryParams = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  attributes?: string[];
   recognized_license_plate?: string[];
   zones?: string[];
   before?: string;
