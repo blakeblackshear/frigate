@@ -1026,6 +1026,7 @@ function FaceGrid({
               filepath: `clips/faces/${pageToggle}/${image}`,
             }}
             selected={selectedFaces.includes(image)}
+            clickable={selectedFaces.length > 0}
             i18nLibrary="views/faceLibrary"
             onClick={(data, meta) => onClickFaces([data.filename], meta)}
           >
