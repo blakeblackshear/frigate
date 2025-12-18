@@ -355,8 +355,6 @@ def collect_state_classification_examples(
         cameras: Dict mapping camera names to normalized crop coordinates [x1, y1, x2, y2] (0-1)
     """
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
-    temp_dir = os.path.join(dataset_dir, "temp")
-    os.makedirs(temp_dir, exist_ok=True)
 
     # Step 1: Get review items for the cameras
     camera_names = list(cameras.keys())
@@ -370,6 +368,10 @@ def collect_state_classification_examples(
     if not review_items:
         logger.warning(f"No review items found for cameras: {camera_names}")
         return
+
+    # The temp directory is only created when there are review_items.
+    temp_dir = os.path.join(dataset_dir, "temp")
+    os.makedirs(temp_dir, exist_ok=True)
 
     # Step 2: Create balanced timestamp selection (100 samples)
     timestamps = _select_balanced_timestamps(review_items, target_count=100)
