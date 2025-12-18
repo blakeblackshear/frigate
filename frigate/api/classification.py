@@ -31,6 +31,7 @@ from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera import DetectConfig
+from frigate.config.classification import ObjectClassificationType
 from frigate.const import CLIPS_DIR, FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
@@ -620,6 +621,39 @@ def get_classification_dataset(name: str):
             "training_metadata": training_metadata,
         },
     )
+
+
+@router.get(
+    "/classification/attributes",
+    summary="Get all custom classification attributes",
+    description="""Returns a list of all unique attribute labels from custom classification models.
+    Only includes models with classification_type set to 'attribute'.
+    Optionally filter by object_type to only return attributes from models that apply to that object type.""",
+)
+def get_custom_attributes(request: Request, object_type: str = None):
+    custom_attribute_labels = set()
+    for name, model_config in request.app.frigate_config.classification.custom.items():
+        if (
+            model_config.object_config
+            and model_config.object_config.classification_type
+            == ObjectClassificationType.attribute
+        ):
+            # If object_type is specified, check if this model applies to that object type
+            if object_type is not None:
+                if (
+                    not hasattr(model_config.object_config, "objects")
+                    or object_type not in model_config.object_config.objects
+                ):
+                    continue
+
+            dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "dataset")
+            if os.path.exists(dataset_dir):
+                for category_name in os.listdir(dataset_dir):
+                    category_dir = os.path.join(dataset_dir, category_name)
+                    if os.path.isdir(category_dir):
+                        custom_attribute_labels.add(category_name)
+
+    return JSONResponse(content=sorted(list(custom_attribute_labels)))
 
 
 @router.get(
