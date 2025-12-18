@@ -139,6 +139,7 @@
         "nameOnlyNumbers": "Model name cannot contain only numbers",
         "classRequired": "At least 1 class is required",
         "classesUnique": "Class names must be unique",
+        "noneNotAllowed": "The class 'none' is not allowed",
         "stateRequiresTwoClasses": "State models require at least 2 classes",
         "objectLabelRequired": "Please select an object label",
         "objectTypeRequired": "Please select a classification type"

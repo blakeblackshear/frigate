@@ -94,7 +94,14 @@ export default function Step1NameAndDefine({
       objectLabel: z.string().optional(),
       objectType: z.enum(["sub_label", "attribute"]).optional(),
       classes: z
-        .array(z.string())
+        .array(
+          z
+            .string()
+            .refine(
+              (val) => val.trim().toLowerCase() !== "none",
+              t("wizard.step1.errors.noneNotAllowed"),
+            ),
+        )
         .min(1, t("wizard.step1.errors.classRequired"))
         .refine(
           (classes) => {
@@ -467,6 +474,7 @@ export default function Step1NameAndDefine({
                           )}
                         </div>
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
