@@ -136,6 +136,7 @@
       "label": "Score"
     },
     "recognizedLicensePlate": "Recognized License Plate",
+    "attributes": "Classification Attributes",
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
     "camera": "Camera",

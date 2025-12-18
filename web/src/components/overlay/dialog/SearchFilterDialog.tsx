@@ -65,7 +65,13 @@ export default function SearchFilterDialog({
   const { t } = useTranslation(["components/filter"]);
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
-  const { data: allAttributes } = useSWR("classification/attributes");
+  const hasCustomClassificationModels = useMemo(
+    () => Object.keys(config?.classification?.custom ?? {}).length > 0,
+    [config],
+  );
+  const { data: allAttributes } = useSWR(
+    hasCustomClassificationModels ? "classification/attributes" : null,
+  );
   const { data: allRecognizedLicensePlates } = useSWR<string[]>(
     "recognized_license_plates",
   );
@@ -92,9 +98,10 @@ export default function SearchFilterDialog({
         (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0 ||
-        (currentFilter.attributes?.length ?? 0) > 0 ||
+        (hasCustomClassificationModels &&
+          (currentFilter.attributes?.length ?? 0) > 0) ||
         (currentFilter.recognized_license_plate?.length ?? 0) > 0),
-    [currentFilter],
+    [currentFilter, hasCustomClassificationModels],
   );
 
   const trigger = (
@@ -135,13 +142,15 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
-      <AttributeFilterContent
-        allAttributes={allAttributes}
-        attributes={currentFilter.attributes}
-        setAttributes={(newAttributes) =>
-          setCurrentFilter({ ...currentFilter, attributes: newAttributes })
-        }
-      />
+      {hasCustomClassificationModels && (
+        <AttributeFilterContent
+          allAttributes={allAttributes}
+          attributes={currentFilter.attributes}
+          setAttributes={(newAttributes) =>
+            setCurrentFilter({ ...currentFilter, attributes: newAttributes })
+          }
+        />
+      )}
       <RecognizedLicensePlatesFilterContent
         allRecognizedLicensePlates={allRecognizedLicensePlates}
         recognizedLicensePlates={currentFilter.recognized_license_plate}
@@ -225,6 +234,7 @@ export default function SearchFilterDialog({
               max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
+              ...(hasCustomClassificationModels && { attributes: undefined }),
               recognized_license_plate: undefined,
             }));
           }}
@@ -1098,7 +1108,7 @@ export function RecognizedLicensePlatesFilterContent({
 }
 
 type AttributeFilterContentProps = {
-  allAttributes: string[];
+  allAttributes?: string[];
   attributes: string[] | undefined;
   setAttributes: (labels: string[] | undefined) => void;
 };

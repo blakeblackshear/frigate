@@ -143,7 +143,13 @@ export default function SearchView({
   }, [config, searchFilter, allowedCameras]);
 
   const { data: allSubLabels } = useSWR("sub_labels");
-  const { data: allAttributes } = useSWR("classification/attributes");
+  const hasCustomClassificationModels = useMemo(
+    () => Object.keys(config?.classification?.custom ?? {}).length > 0,
+    [config],
+  );
+  const { data: allAttributes } = useSWR(
+    hasCustomClassificationModels ? "classification/attributes" : null,
+  );
   const { data: allRecognizedLicensePlates } = useSWR(
     "recognized_license_plates",
   );
@@ -183,7 +189,7 @@ export default function SearchView({
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
       sub_labels: allSubLabels,
-      attributes: allAttributes,
+      ...(hasCustomClassificationModels && { attributes: allAttributes }),
       search_type: ["thumbnail", "description"] as SearchSource[],
       time_range:
         config?.ui.time_format == "24hour"
@@ -210,6 +216,7 @@ export default function SearchView({
       allRecognizedLicensePlates,
       searchFilter,
       allowedCameras,
+      hasCustomClassificationModels,
     ],
   );
 

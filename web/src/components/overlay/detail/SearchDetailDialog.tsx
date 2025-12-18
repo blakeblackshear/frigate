@@ -678,6 +678,15 @@ function ObjectDetailsTab({
   ]);
 
   const apiHost = useApiHost();
+  const hasCustomClassificationModels = useMemo(
+    () => Object.keys(config?.classification?.custom ?? {}).length > 0,
+    [config],
+  );
+  const { data: allowedAttributes } = useSWR<string[]>(
+    hasCustomClassificationModels && search
+      ? `classification/attributes?object_type=${encodeURIComponent(search.label)}`
+      : null,
+  );
 
   // mutation / revalidation
 
@@ -806,6 +815,24 @@ function ObjectDetailsTab({
       return undefined;
     }
   }, [search]);
+
+  const eventAttributes = useMemo(() => {
+    if (!search || !allowedAttributes || allowedAttributes.length === 0) {
+      return [];
+    }
+
+    const collected = new Set<string>();
+    const dataAny = search.data as Record<string, unknown>;
+
+    // Check top-level keys in data that match allowed attributes
+    allowedAttributes.forEach((attr) => {
+      if (dataAny[attr] !== undefined && dataAny[attr] !== null) {
+        collected.add(attr);
+      }
+    });
+
+    return Array.from(collected).sort((a, b) => a.localeCompare(b));
+  }, [search, allowedAttributes]);
 
   const isEventsKey = useCallback((key: unknown): boolean => {
     const candidate = Array.isArray(key) ? key[0] : key;
@@ -1293,6 +1320,15 @@ function ObjectDetailsTab({
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {eventAttributes.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">
+                {t("details.attributes")}
+              </div>
+              <div className="text-sm">{eventAttributes.join(", ")}</div>
             </div>
           )}
         </div>
