@@ -575,7 +575,7 @@ def auth(request: Request):
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
     if int(request.headers.get("x-server-port", default=0)) == 5000:
-        success_response.headers["remote-user"] = "anonymous"
+        success_response.headers["remote-user"] = "admin"
         success_response.headers["remote-role"] = "admin"
         return success_response
 
@@ -595,9 +595,9 @@ def auth(request: Request):
         # or use anonymous if none are specified
         user_header = proxy_config.header_map.user
         success_response.headers["remote-user"] = (
-            request.headers.get(user_header, default="anonymous")
+            request.headers.get(user_header, default="viewer")
             if user_header
-            else "anonymous"
+            else "viewer"
         )
 
         # parse header and resolve a valid role
@@ -712,7 +712,7 @@ def auth(request: Request):
     description="Returns the current authenticated user's profile including username, role, and allowed cameras. This endpoint requires authentication and returns information about the user's permissions.",
 )
 def profile(request: Request):
-    username = request.headers.get("remote-user", "anonymous")
+    username = request.headers.get("remote-user", "viewer")
     role = request.headers.get("remote-role", "viewer")
 
     all_camera_names = set(request.app.frigate_config.cameras.keys())
