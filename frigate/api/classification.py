@@ -625,33 +625,55 @@ def get_classification_dataset(name: str):
 
 @router.get(
     "/classification/attributes",
-    summary="Get all custom classification attributes",
-    description="""Returns a list of all unique attribute labels from custom classification models.
+    summary="Get custom classification attributes",
+    description="""Returns custom classification attributes for a given object type.
     Only includes models with classification_type set to 'attribute'.
-    Optionally filter by object_type to only return attributes from models that apply to that object type.""",
+    By default returns a flat sorted list of all attribute labels.
+    If group_by_model is true, returns attributes grouped by model name.""",
 )
-def get_custom_attributes(request: Request, object_type: str = None):
-    custom_attribute_labels = set()
-    for name, model_config in request.app.frigate_config.classification.custom.items():
+def get_custom_attributes(
+    request: Request, object_type: str = None, group_by_model: bool = False
+):
+    models_with_attributes = {}
+
+    for (
+        model_key,
+        model_config,
+    ) in request.app.frigate_config.classification.custom.items():
         if (
-            model_config.object_config
-            and model_config.object_config.classification_type
-            == ObjectClassificationType.attribute
+            not model_config.enabled
+            or not model_config.object_config
+            or model_config.object_config.classification_type
+            != ObjectClassificationType.attribute
         ):
-            # If object_type is specified, check if this model applies to that object type
-            if object_type is not None:
-                model_objects = getattr(model_config.object_config, "objects", []) or []
-                if object_type not in model_objects:
-                    continue
+            continue
 
-            dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "dataset")
-            if os.path.exists(dataset_dir):
-                for category_name in os.listdir(dataset_dir):
-                    category_dir = os.path.join(dataset_dir, category_name)
-                    if os.path.isdir(category_dir):
-                        custom_attribute_labels.add(category_name)
+        model_objects = getattr(model_config.object_config, "objects", []) or []
+        if object_type is not None and object_type not in model_objects:
+            continue
 
-    return JSONResponse(content=sorted(list(custom_attribute_labels)))
+        dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(model_key), "dataset")
+        if not os.path.exists(dataset_dir):
+            continue
+
+        attributes = []
+        for category_name in os.listdir(dataset_dir):
+            category_dir = os.path.join(dataset_dir, category_name)
+            if os.path.isdir(category_dir) and category_name != "none":
+                attributes.append(category_name)
+
+        if attributes:
+            model_name = model_config.name or model_key
+            models_with_attributes[model_name] = sorted(attributes)
+
+    if group_by_model:
+        return JSONResponse(content=models_with_attributes)
+    else:
+        # Flatten to a unique sorted list
+        all_attributes = set()
+        for attributes in models_with_attributes.values():
+            all_attributes.update(attributes)
+        return JSONResponse(content=sorted(list(all_attributes)))
 
 
 @router.get(
