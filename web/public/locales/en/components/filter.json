@@ -38,6 +38,10 @@
     "label": "Sub Labels",
     "all": "All Sub Labels"
   },
+  "attributes": {
+    "label": "Classification Attributes",
+    "all": "All Attributes"
+  },
   "score": "Score",
   "estimatedSpeed": "Estimated Speed ({{unit}})",
   "features": {
