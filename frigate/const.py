@@ -77,6 +77,9 @@ FFMPEG_HWACCEL_RKMPP = "preset-rkmpp"
 FFMPEG_HWACCEL_AMF = "preset-amd-amf"
 FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
+# RKNN constants
+SUPPORTED_RK_SOCS = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
+
 # Regex constants
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"

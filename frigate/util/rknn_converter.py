@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from frigate.const import SUPPORTED_RK_SOCS
 from frigate.util.file import FileLock
 
 logger = logging.getLogger(__name__)
@@ -68,7 +69,18 @@ def is_rknn_compatible(model_path: str, model_type: str | None = None) -> bool:
         True if the model is RKNN-compatible, False otherwise
     """
     soc = get_soc_type()
+
     if soc is None:
+        return False
+
+    # Check if the SoC is actually a supported RK device
+    # This prevents false positives on non-RK devices (e.g., macOS Docker)
+    # where /proc/device-tree/compatible might exist but contain non-RK content
+    if soc not in SUPPORTED_RK_SOCS:
+        logger.debug(
+            f"SoC '{soc}' is not a supported RK device for RKNN conversion. "
+            f"Supported SoCs: {SUPPORTED_RK_SOCS}"
+        )
         return False
 
     if not model_type:
