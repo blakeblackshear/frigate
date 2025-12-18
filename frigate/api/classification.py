@@ -640,10 +640,8 @@ def get_custom_attributes(request: Request, object_type: str = None):
         ):
             # If object_type is specified, check if this model applies to that object type
             if object_type is not None:
-                if (
-                    not hasattr(model_config.object_config, "objects")
-                    or object_type not in model_config.object_config.objects
-                ):
+                model_objects = getattr(model_config.object_config, "objects", []) or []
+                if object_type not in model_objects:
                     continue
 
             dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "dataset")
