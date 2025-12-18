@@ -99,6 +99,8 @@ def events(
     if sub_labels == "all" and sub_label != "all":
         sub_labels = sub_label
 
+    attributes = unquote(params.attributes)
+
     zone = params.zone
     zones = params.zones
 
@@ -186,6 +188,17 @@ def events(
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
         clauses.append((sub_label_clause))
+
+    if attributes != "all":
+        # Custom classification results are stored as data[model_name] = result_value
+        filtered_attributes = attributes.split(",")
+        attribute_clauses = []
+
+        for attr in filtered_attributes:
+            attribute_clauses.append(Event.data.cast("text") % f'*:"{attr}"*')
+
+        attribute_clause = reduce(operator.or_, attribute_clauses)
+        clauses.append(attribute_clause)
 
     if recognized_license_plate != "all":
         filtered_recognized_license_plates = recognized_license_plate.split(",")
@@ -492,6 +505,8 @@ def events_search(
     # Filters
     cameras = params.cameras
     labels = params.labels
+    sub_labels = params.sub_labels
+    attributes = params.attributes
     zones = params.zones
     after = params.after
     before = params.before
@@ -565,6 +580,38 @@ def events_search(
 
     if labels != "all":
         event_filters.append((Event.label << labels.split(",")))
+
+    if sub_labels != "all":
+        # use matching so joined sub labels are included
+        # for example a sub label 'bob' would get events
+        # with sub labels 'bob' and 'bob, john'
+        sub_label_clauses = []
+        filtered_sub_labels = sub_labels.split(",")
+
+        if "None" in filtered_sub_labels:
+            filtered_sub_labels.remove("None")
+            sub_label_clauses.append((Event.sub_label.is_null()))
+
+        for label in filtered_sub_labels:
+            sub_label_clauses.append(
+                (Event.sub_label.cast("text") == label)
+            )  # include exact matches
+
+            # include this label when part of a list
+            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
+            sub_label_clauses.append((Event.sub_label.cast("text") % f"*, {label}*"))
+
+        event_filters.append((reduce(operator.or_, sub_label_clauses)))
+
+    if attributes != "all":
+        # Custom classification results are stored as data[model_name] = result_value
+        filtered_attributes = attributes.split(",")
+        attribute_clauses = []
+
+        for attr in filtered_attributes:
+            attribute_clauses.append(Event.data.cast("text") % f'*:"{attr}"*')
+
+        event_filters.append(reduce(operator.or_, attribute_clauses))
 
     if zones != "all":
         zone_clauses = []
