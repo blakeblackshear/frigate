@@ -25,7 +25,7 @@ paths:
           description: Authentication Accepted (no response body, different headers depending on auth method)
           headers:
             remote-user:
-              description: Authenticated username or "anonymous" in proxy-only mode
+              description: Authenticated username or "viewer" in proxy-only mode
               schema:
                 type: string
             remote-role:

@@ -167,7 +167,7 @@ def allow_any_authenticated():
     Allows:
     - Port 5000 internal requests (remote-user: "anonymous", remote-role: "admin")
     - Authenticated users with JWT tokens (remote-user: username)
-    - Unauthenticated requests when auth is disabled (remote-user: "anonymous")
+    - Unauthenticated requests when auth is disabled (remote-user: "viewer")
 
     Rejects:
     - Requests with no remote-user header (did not pass through /auth endpoint)
@@ -550,7 +550,7 @@ def resolve_role(
             "description": "Authentication Accepted (no response body)",
             "headers": {
                 "remote-user": {
-                    "description": 'Authenticated username or "anonymous" in proxy-only mode',
+                    "description": 'Authenticated username or "viewer" in proxy-only mode',
                     "schema": {"type": "string"},
                 },
                 "remote-role": {
@@ -575,7 +575,7 @@ def auth(request: Request):
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
     if int(request.headers.get("x-server-port", default=0)) == 5000:
-        success_response.headers["remote-user"] = "admin"
+        success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
         return success_response
 
@@ -592,7 +592,7 @@ def auth(request: Request):
     # if auth is disabled, just apply the proxy header map and return success
     if not auth_config.enabled:
         # pass the user header value from the upstream proxy if a mapping is specified
-        # or use anonymous if none are specified
+        # or use viewer if none are specified
         user_header = proxy_config.header_map.user
         success_response.headers["remote-user"] = (
             request.headers.get(user_header, default="viewer")
