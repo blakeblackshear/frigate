@@ -40,6 +40,7 @@ type ClassificationCardProps = {
   data: ClassificationItemData;
   threshold?: ClassificationThreshold;
   selected: boolean;
+  clickable: boolean;
   i18nLibrary: string;
   showArea?: boolean;
   count?: number;
@@ -56,6 +57,7 @@ export const ClassificationCard = forwardRef<
     data,
     threshold,
     selected,
+    clickable,
     i18nLibrary,
     showArea = true,
     count,
@@ -101,11 +103,12 @@ export const ClassificationCard = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex size-full cursor-pointer flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        "relative flex size-full flex-col overflow-hidden rounded-lg outline outline-[3px]",
         className,
         selected
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
+        clickable && "cursor-pointer",
       )}
       onClick={(e) => {
         const isMeta = e.metaKey || e.ctrlKey;
@@ -289,6 +292,7 @@ export function GroupedClassificationCard({
         data={bestItem}
         threshold={threshold}
         selected={selectedItems.includes(bestItem.filename)}
+        clickable={true}
         i18nLibrary={i18nLibrary}
         count={group.length}
         onClick={(_, meta) => {
@@ -413,6 +417,7 @@ export function GroupedClassificationCard({
                     data={data}
                     threshold={threshold}
                     selected={false}
+                    clickable={false}
                     i18nLibrary={i18nLibrary}
                     onClick={() => {}}
                   >

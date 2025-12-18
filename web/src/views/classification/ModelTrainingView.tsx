@@ -804,6 +804,7 @@ function DatasetGrid({
               name: "",
             }}
             showArea={false}
+            clickable={selectedImages.length > 0}
             selected={selectedImages.includes(image)}
             i18nLibrary="views/classificationModel"
             onClick={(data, _) => onClickImages([data.filename], true)}
@@ -962,6 +963,7 @@ function StateTrainGrid({
             data={data}
             threshold={threshold}
             selected={selectedImages.includes(data.filename)}
+            clickable={selectedImages.length > 0}
             i18nLibrary="views/classificationModel"
             showArea={false}
             onClick={(data, meta) => onClickImages([data.filename], meta)}
