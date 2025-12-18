@@ -65,10 +65,15 @@ class FrigateProcess(BaseProcess):
         logging.basicConfig(handlers=[], force=True)
         logging.getLogger().addHandler(QueueHandler(self.__log_queue))
 
+        # Always apply base log level suppressions for noisy third-party libraries
+        # even if no specific logConfig is provided
         if logConfig:
             frigate.log.apply_log_levels(
                 logConfig.default.value.upper(), logConfig.logs
             )
+        else:
+            # Apply default INFO level with standard library suppressions
+            frigate.log.apply_log_levels("INFO", {})
 
         self._setup_memray()
 
