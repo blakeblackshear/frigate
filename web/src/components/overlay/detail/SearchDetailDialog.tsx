@@ -84,6 +84,7 @@ import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import AttributeSelectDialog from "@/components/overlay/dialog/AttributeSelectDialog";
 import { Trans, useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -297,6 +298,7 @@ type DialogContentComponentProps = {
   isPopoverOpen: boolean;
   setIsPopoverOpen: (open: boolean) => void;
   dialogContainer: HTMLDivElement | null;
+  setShowNavigationButtons: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function DialogContentComponent({
@@ -314,6 +316,7 @@ function DialogContentComponent({
   isPopoverOpen,
   setIsPopoverOpen,
   dialogContainer,
+  setShowNavigationButtons,
 }: DialogContentComponentProps) {
   if (page === "tracking_details") {
     return (
@@ -399,6 +402,7 @@ function DialogContentComponent({
               config={config}
               setSearch={setSearch}
               setInputFocused={setInputFocused}
+              setShowNavigationButtons={setShowNavigationButtons}
             />
           </div>
         </div>
@@ -415,6 +419,7 @@ function DialogContentComponent({
         config={config}
         setSearch={setSearch}
         setInputFocused={setInputFocused}
+        setShowNavigationButtons={setShowNavigationButtons}
       />
     </>
   );
@@ -459,6 +464,7 @@ export default function SearchDetailDialog({
 
   const [isOpen, setIsOpen] = useState(search != undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [showNavigationButtons, setShowNavigationButtons] = useState(false);
   const dialogContentRef = useRef<HTMLDivElement | null>(null);
   const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(
     null,
@@ -540,9 +546,9 @@ export default function SearchDetailDialog({
         onOpenChange={handleOpenChange}
         enableHistoryBack={true}
       >
-        {isDesktop && onPrevious && onNext && (
+        {isDesktop && onPrevious && onNext && showNavigationButtons && (
           <DialogPortal>
-            <div className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center">
+            <div className="pointer-events-none fixed inset-0 z-[51] flex items-center justify-center">
               <div
                 className={cn(
                   "relative flex items-center justify-between",
@@ -652,6 +658,7 @@ export default function SearchDetailDialog({
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             dialogContainer={dialogContainer}
+            setShowNavigationButtons={setShowNavigationButtons}
           />
         </Content>
       </Overlay>
@@ -664,12 +671,14 @@ type ObjectDetailsTabProps = {
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowNavigationButtons?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
   setInputFocused,
+  setShowNavigationButtons,
 }: ObjectDetailsTabProps) {
   const { t, i18n } = useTranslation([
     "views/explore",
@@ -682,9 +691,9 @@ function ObjectDetailsTab({
     () => Object.keys(config?.classification?.custom ?? {}).length > 0,
     [config],
   );
-  const { data: allowedAttributes } = useSWR<string[]>(
+  const { data: modelAttributes } = useSWR<Record<string, string[]>>(
     hasCustomClassificationModels && search
-      ? `classification/attributes?object_type=${encodeURIComponent(search.label)}`
+      ? `classification/attributes?object_type=${encodeURIComponent(search.label)}&group_by_model=true`
       : null,
   );
 
@@ -717,6 +726,7 @@ function ObjectDetailsTab({
   const [desc, setDesc] = useState(search?.data.description);
   const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
   const [isLPRDialogOpen, setIsLPRDialogOpen] = useState(false);
+  const [isAttributesDialogOpen, setIsAttributesDialogOpen] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const originalDescRef = useRef<string | null>(null);
 
@@ -730,6 +740,19 @@ function ObjectDetailsTab({
 
   // we have to make sure the current selected search item stays in sync
   useEffect(() => setDesc(search?.data.description ?? ""), [search]);
+
+  useEffect(() => setIsAttributesDialogOpen(false), [search?.id]);
+
+  useEffect(() => {
+    const anyDialogOpen =
+      isSubLabelDialogOpen || isLPRDialogOpen || isAttributesDialogOpen;
+    setShowNavigationButtons?.(!anyDialogOpen);
+  }, [
+    isSubLabelDialogOpen,
+    isLPRDialogOpen,
+    isAttributesDialogOpen,
+    setShowNavigationButtons,
+  ]);
 
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
@@ -816,23 +839,40 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
-  const eventAttributes = useMemo(() => {
-    if (!search || !allowedAttributes || allowedAttributes.length === 0) {
-      return [];
+  // Extract current attribute selections grouped by model
+  const selectedAttributesByModel = useMemo(() => {
+    if (!search || !modelAttributes) {
+      return {};
     }
 
-    const collected = new Set<string>();
     const dataAny = search.data as Record<string, unknown>;
+    const selections: Record<string, string | null> = {};
 
-    // Check top-level keys in data that match allowed attributes
-    allowedAttributes.forEach((attr) => {
-      if (dataAny[attr] !== undefined && dataAny[attr] !== null) {
-        collected.add(attr);
+    // Initialize all models with null
+    Object.keys(modelAttributes).forEach((modelName) => {
+      selections[modelName] = null;
+    });
+
+    // Find which attribute is selected for each model
+    Object.keys(modelAttributes).forEach((modelName) => {
+      const value = dataAny[modelName];
+      if (
+        typeof value === "string" &&
+        modelAttributes[modelName].includes(value)
+      ) {
+        selections[modelName] = value;
       }
     });
 
-    return Array.from(collected).sort((a, b) => a.localeCompare(b));
-  }, [search, allowedAttributes]);
+    return selections;
+  }, [search, modelAttributes]);
+
+  // Get flat list of selected attributes for display
+  const eventAttributes = useMemo(() => {
+    return Object.values(selectedAttributesByModel)
+      .filter((attr): attr is string => attr !== null)
+      .sort((a, b) => a.localeCompare(b));
+  }, [selectedAttributesByModel]);
 
   const isEventsKey = useCallback((key: unknown): boolean => {
     const candidate = Array.isArray(key) ? key[0] : key;
@@ -1073,6 +1113,74 @@ function ObjectDetailsTab({
         });
     },
     [search, apiHost, mutate, setSearch, t, mapSearchResults, isEventsKey],
+  );
+
+  const handleAttributesSave = useCallback(
+    (selectedAttributes: string[]) => {
+      if (!search) return;
+
+      axios
+        .post(`${apiHost}api/events/${search.id}/attributes`, {
+          attributes: selectedAttributes,
+        })
+        .then((response) => {
+          const applied = Array.isArray(response.data?.applied)
+            ? (response.data.applied as {
+                model?: string;
+                label?: string | null;
+                score?: number | null;
+              }[])
+            : [];
+
+          toast.success(t("details.item.toast.success.updatedAttributes"), {
+            position: "top-center",
+          });
+
+          const applyUpdatedAttributes = (event: SearchResult) => {
+            if (event.id !== search.id) return event;
+
+            const updatedData: Record<string, unknown> = { ...event.data };
+
+            applied.forEach(({ model, label, score }) => {
+              if (!model) return;
+              updatedData[model] = label ?? null;
+              updatedData[`${model}_score`] = score ?? null;
+            });
+
+            return { ...event, data: updatedData } as SearchResult;
+          };
+
+          mutate(
+            (key) => isEventsKey(key),
+            (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+              mapSearchResults(currentData, applyUpdatedAttributes),
+            {
+              optimisticData: true,
+              rollbackOnError: true,
+              revalidate: false,
+            },
+          );
+
+          setSearch(applyUpdatedAttributes(search));
+          setIsAttributesDialogOpen(false);
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+
+          toast.error(
+            t("details.item.toast.error.updatedAttributesFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+        });
+    },
+    [search, apiHost, mutate, t, mapSearchResults, isEventsKey, setSearch],
   );
 
   // speech transcription
@@ -1323,14 +1431,37 @@ function ObjectDetailsTab({
             </div>
           )}
 
-          {eventAttributes.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">
-                {t("details.attributes")}
+          {hasCustomClassificationModels &&
+            modelAttributes &&
+            Object.keys(modelAttributes).length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2 text-sm text-primary/40">
+                  {t("details.attributes")}
+                  {isAdmin && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <FaPencilAlt
+                            className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                            onClick={() => setIsAttributesDialogOpen(true)}
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("button.edit", { ns: "common" })}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  )}
+                </div>
+                <div className="text-sm">
+                  {eventAttributes.length > 0
+                    ? eventAttributes.join(", ")
+                    : t("label.none", { ns: "common" })}
+                </div>
               </div>
-              <div className="text-sm">{eventAttributes.join(", ")}</div>
-            </div>
-          )}
+            )}
         </div>
       </div>
 
@@ -1630,6 +1761,17 @@ function ObjectDetailsTab({
           onSave={handleLPRSave}
           defaultValue={search?.data.recognized_license_plate || ""}
           allowEmpty={true}
+        />
+        <AttributeSelectDialog
+          open={isAttributesDialogOpen}
+          setOpen={setIsAttributesDialogOpen}
+          title={t("details.editAttributes.title")}
+          description={t("details.editAttributes.desc", {
+            label: search.label,
+          })}
+          onSave={handleAttributesSave}
+          selectedAttributes={selectedAttributesByModel}
+          modelAttributes={modelAttributes ?? {}}
         />
       </div>
     </div>

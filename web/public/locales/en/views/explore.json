@@ -104,12 +104,14 @@
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
           "updatedSublabel": "Successfully updated sub label.",
           "updatedLPR": "Successfully updated license plate.",
+          "updatedAttributes": "Successfully updated attributes.",
           "audioTranscription": "Successfully requested audio transcription. Depending on the speed of your Frigate server, the transcription may take some time to complete."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
           "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}",
           "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}",
+          "updatedAttributesFailed": "Failed to update attributes: {{errorMessage}}",
           "audioTranscription": "Failed to request audio transcription: {{errorMessage}}"
         }
       }
@@ -124,6 +126,10 @@
       "title": "Edit license plate",
       "desc": "Enter a new license plate value for this {{label}}",
       "descNoLabel": "Enter a new license plate value for this tracked object"
+    },
+    "editAttributes": {
+      "title": "Edit attributes",
+      "desc": "Select classification attributes for this {{label}}"
     },
     "snapshotScore": {
       "label": "Snapshot Score"
