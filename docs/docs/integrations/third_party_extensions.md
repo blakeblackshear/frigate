@@ -38,3 +38,7 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 ## [Periscope](https://github.com/maksz42/periscope)
 
 [Periscope](https://github.com/maksz42/periscope) is a lightweight Android app that turns old devices into live viewers for Frigate. It works on Android 2.2 and above, including Android TV. It supports authentication and HTTPS.
+
+## [Scrypted - Frigate bridge plugin](https://github.com/apocaliss92/scrypted-frigate-bridge)
+
+[Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is an plugin that allows to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
