@@ -40,6 +40,7 @@ from frigate.util.classification import (
     collect_state_classification_examples,
     get_dataset_image_count,
     read_training_metadata,
+    write_training_metadata,
 )
 from frigate.util.file import get_event_snapshot
 
@@ -842,6 +843,12 @@ def rename_classification_category(
 
     try:
         os.rename(old_folder, new_folder)
+
+        # Mark dataset as ready to train by resetting training metadata
+        # This ensures the dataset is marked as changed after renaming
+        sanitized_name = sanitize_filename(name)
+        write_training_metadata(sanitized_name, 0)
+
         return JSONResponse(
             content=(
                 {
