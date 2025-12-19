@@ -45,6 +45,12 @@ export default function Step3ChooseExamples({
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentClassIndex, setCurrentClassIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
+  const [cacheKey, setCacheKey] = useState<number>(Date.now());
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+
+  const handleImageLoad = useCallback((imageName: string) => {
+    setLoadedImages((prev) => new Set(prev).add(imageName));
+  }, []);
 
   const { data: trainImages, mutate: refreshTrainImages } = useSWR<string[]>(
     hasGenerated ? `classification/${step1Data.modelName}/train` : null,
@@ -332,6 +338,8 @@ export default function Step3ChooseExamples({
       setHasGenerated(true);
       toast.success(t("wizard.step3.generateSuccess"));
 
+      // Update cache key to force image reload
+      setCacheKey(Date.now());
       await refreshTrainImages();
     } catch (error) {
       const axiosError = error as {
@@ -565,10 +573,16 @@ export default function Step3ChooseExamples({
                       )}
                       onClick={() => toggleImageSelection(imageName)}
                     >
+                      {!loadedImages.has(imageName) && (
+                        <div className="flex h-full items-center justify-center">
+                          <ActivityIndicator className="size-6" />
+                        </div>
+                      )}
                       <img
-                        src={`${baseUrl}clips/${step1Data.modelName}/train/${imageName}`}
+                        src={`${baseUrl}clips/${step1Data.modelName}/train/${imageName}?t=${cacheKey}`}
                         alt={`Example ${index + 1}`}
                         className="h-full w-full object-cover"
+                        onLoad={() => handleImageLoad(imageName)}
                       />
                     </div>
                   );
