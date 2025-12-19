@@ -131,8 +131,9 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
                 },
             )
 
-            # Embed the description
-            self.embeddings.embed_description(event_id, transcription)
+            # Embed the description if semantic search is enabled
+            if self.config.semantic_search.enabled:
+                self.embeddings.embed_description(event_id, transcription)
 
         except DoesNotExist:
             logger.debug("No recording found for audio transcription post-processing")
