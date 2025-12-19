@@ -4,7 +4,7 @@ import useSWR from "swr";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
@@ -47,8 +46,6 @@ export default function MotionTunerView({
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
   const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
@@ -119,7 +116,10 @@ export default function MotionTunerView({
     axios
       .put(
         `config/set?cameras.${selectedCamera}.motion.threshold=${motionSettings.threshold}&cameras.${selectedCamera}.motion.contour_area=${motionSettings.contour_area}&cameras.${selectedCamera}.motion.improve_contrast=${motionSettings.improve_contrast ? "True" : "False"}`,
-        { requires_restart: 0 },
+        {
+          requires_restart: 0,
+          update_topic: `config/cameras/${selectedCamera}/motion`,
+        },
       )
       .then((res) => {
         if (res.status === 200) {
@@ -164,23 +164,7 @@ export default function MotionTunerView({
   const onCancel = useCallback(() => {
     setMotionSettings(origMotionSettings);
     setChangedValue(false);
-    removeMessage("motion_tuner", `motion_tuner_${selectedCamera}`);
-  }, [origMotionSettings, removeMessage, selectedCamera]);
-
-  useEffect(() => {
-    if (changedValue) {
-      addMessage(
-        "motion_tuner",
-        t("motionDetectionTuner.unsavedChanges", { camera: selectedCamera }),
-        undefined,
-        `motion_tuner_${selectedCamera}`,
-      );
-    } else {
-      removeMessage("motion_tuner", `motion_tuner_${selectedCamera}`);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changedValue, selectedCamera]);
+  }, [origMotionSettings]);
 
   useEffect(() => {
     document.title = t("documentTitle.motionTuner");
