@@ -41,7 +41,7 @@ Frigate processes are named using a module-based naming scheme. Common module na
 You can also specify the full process name (including camera-specific identifiers) if you want to profile a specific camera:
 
 ```bash
-export FRIGATE_MEMRAY_MODULES="frigate.capture:front_door"
+FRIGATE_MEMRAY_MODULES=frigate.capture:front_door
 ```
 
 When you specify a module name (e.g., `frigate.capture`), all processes with that module prefix will be profiled. For example, `frigate.capture` will profile all camera capture processes.
