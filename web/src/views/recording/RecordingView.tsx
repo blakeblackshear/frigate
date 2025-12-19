@@ -309,7 +309,10 @@ export function RecordingView({
           currentTimeRange.after <= currentTime &&
           currentTimeRange.before >= currentTime
         ) {
-          mainControllerRef.current?.seekToTimestamp(currentTime, true);
+          mainControllerRef.current?.seekToTimestamp(
+            currentTime,
+            mainControllerRef.current.isPlaying(),
+          );
         } else {
           updateSelectedSegment(currentTime, true);
         }
