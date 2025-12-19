@@ -374,6 +374,9 @@ class LicensePlateProcessingMixin:
                             combined_plate = re.sub(
                                 pattern, replacement, combined_plate
                             )
+                            logger.debug(
+                                f"{camera}: Processing replace rule: '{pattern}' -> '{replacement}', result: '{combined_plate}'"
+                            )
                     except re.error as e:
                         logger.warning(
                             f"{camera}: Invalid regex in replace_rules '{pattern}': {e}"
@@ -381,7 +384,7 @@ class LicensePlateProcessingMixin:
 
             if combined_plate != original_combined:
                 logger.debug(
-                    f"{camera}: Rules applied: '{original_combined}' -> '{combined_plate}'"
+                    f"{camera}: All rules applied: '{original_combined}' -> '{combined_plate}'"
                 )
 
             # Compute the combined area for qualifying boxes
