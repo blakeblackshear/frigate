@@ -9,8 +9,20 @@ Frigate includes built-in memory profiling using [memray](https://bloomberg.gith
 
 Memory profiling is controlled via the `FRIGATE_MEMRAY_MODULES` environment variable. Set it to a comma-separated list of module names you want to profile:
 
+```yaml
+# docker-compose example
+services:
+  frigate:
+    ...
+    environment:
+      - FRIGATE_MEMRAY_MODULES=frigate.embeddings,frigate.capture
+```
+
 ```bash
-export FRIGATE_MEMRAY_MODULES="frigate.review_segment_manager,frigate.capture"
+# docker run example
+docker run -e FRIGATE_MEMRAY_MODULES="frigate.embeddings" \
+   ...
+   --name frigate <frigate_image>
 ```
 
 ### Module Names
@@ -24,6 +36,7 @@ Frigate processes are named using a module-based naming scheme. Common module na
 - `frigate.output` - Output processing
 - `frigate.audio_manager` - Audio processing
 - `frigate.embeddings` - Embeddings processing
+- `frigate.embeddings_manager` - Embeddings manager
 
 You can also specify the full process name (including camera-specific identifiers) if you want to profile a specific camera:
 
@@ -55,11 +68,20 @@ After a process exits normally, you'll find HTML reports in `/config/memray_repo
 
 If a process crashes or you want to generate a report from an existing binary file, you can manually create the HTML report:
 
+- Run `memray` inside the Frigate container:
+
 ```bash
-memray flamegraph /config/memray_reports/<module_name>.bin
+docker-compose exec frigate memray flamegraph /config/memray_reports/<module_name>.bin
+# or
+docker exec -it <container_name_or_id> memray flamegraph /config/memray_reports/<module_name>.bin
 ```
 
-This will generate an HTML file that you can open in your browser.
+- You can also copy the `.bin` file to the host and run `memray` locally if you have it installed:
+
+```bash
+docker cp <container_name_or_id>:/config/memray_reports/<module_name>.bin /tmp/
+memray flamegraph /tmp/<module_name>.bin
+```
 
 ## Understanding the Reports
 
@@ -109,21 +131,5 @@ The interactive HTML reports allow you to:
 - Ensure the process ran long enough to generate meaningful data
 - Check that memray is properly installed (included by default in Frigate)
 - Verify the process actually started and ran (check process logs)
-
-## Example Usage
-
-```bash
-# Enable profiling for review and capture modules
-export FRIGATE_MEMRAY_MODULES="frigate.review_segment_manager,frigate.capture"
-
-# Start Frigate
-# ... let it run for a while ...
-
-# Check for reports
-ls -lh /config/memray_reports/
-
-# If a process crashed, manually generate report
-memray flamegraph /config/memray_reports/frigate_capture_front_door.bin
-```
 
 For more information about memray and interpreting reports, see the [official memray documentation](https://bloomberg.github.io/memray/).
