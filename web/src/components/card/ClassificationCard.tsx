@@ -233,7 +233,7 @@ export function GroupedClassificationCard({
     });
 
     if (!best) {
-      return group.at(-1);
+      best = group.at(-1)!;
     }
 
     const bestTyped: ClassificationItemData = best;
