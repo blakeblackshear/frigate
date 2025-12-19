@@ -95,6 +95,8 @@ The system will automatically generate example images from detected objects matc
 
 When choosing which objects to classify, start with a small number of visually distinct classes and ensure your training samples match camera viewpoints and distances typical for those objects.
 
+If examples for some of your classes do not appear in the grid, you can continue configuring the model without them. New images will begin to appear in the Recent Classifications view. When your missing classes are seen, classify them from this view and retrain your model.
+
 ### Improving the Model
 
 - **Problem framing**: Keep classes visually distinct and relevant to the chosen object types.
