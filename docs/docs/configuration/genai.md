@@ -56,13 +56,17 @@ Parallel requests also come with some caveats. You will need to set `OLLAMA_NUM_
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). At the time of writing, this includes `llava`, `llava-llama3`, `llava-phi3`, and `moondream`. Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull llava:7b` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
+You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull llava:7b` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
 
 :::note
 
 You should have at least 8 GB of RAM available (or VRAM if running on GPU) to run the 7B models, 16 GB to run the 13B models, and 32 GB to run the 33B models.
 
 :::
+
+#### Ollama Cloud models
+
+Ollama also supports [cloud models](https://ollama.com/cloud), where your local Ollama instance handles requests from Frigate, but model inference is performed in the cloud. Set up Ollama locally, sign in with your Ollama account, and specify the cloud model name in your Frigate config. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).
 
 ### Configuration
 
