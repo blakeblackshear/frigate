@@ -487,11 +487,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       {scheme === colorScheme ? (
                         <>
                           <IoColorPalette className="mr-2 size-4 rotate-0 scale-100 transition-all" />
-                          {t(friendlyColorSchemeName(scheme))}
+                          {friendlyColorSchemeName(scheme, t)}
                         </>
                       ) : (
                         <span className="ml-6 mr-2">
-                          {t(friendlyColorSchemeName(scheme))}
+                          {friendlyColorSchemeName(scheme, t)}
                         </span>
                       )}
                     </MenuItem>

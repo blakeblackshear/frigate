@@ -21,10 +21,24 @@ export const colorSchemes: ColorScheme[] = [
 
 // Helper function to generate friendly color scheme names
 // eslint-disable-next-line react-refresh/only-export-components
-export const friendlyColorSchemeName = (className: string): string => {
-  const words = className.split("-").slice(1); // Exclude the first word (e.g., 'theme')
-  return "menu.theme." + words.join("");
+export const friendlyColorSchemeName = (
+  className: string,
+  t?: (key: string, options?: any) => string
+): string => {
+  const words = className.split("-").slice(1);
+  const key = "menu.theme." + words.join("");
+
+  if (!t) {
+    return key;
+  }
+
+  const fallback = words
+    .join(" ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return t(key, { defaultValue: fallback });
 };
+
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -96,6 +110,44 @@ export function ThemeProvider({
     //localStorage.removeItem(storageKey);
     //console.log(localStorage.getItem(storageKey));
     const root = window.document.documentElement;
+
+    if (!(window as any).__frigateThemesLoaded) {
+      (window as any).__frigateThemesLoaded = true;
+
+      fetch("/api/config/themes")
+        .then((res) => (res.ok ? res.json() : []))
+        .then((files: string[]) => {
+          files.forEach((file) => {
+            if (!file.endsWith(".css")) {
+              return;
+            }
+
+            const baseName = file.replace(/\.css$/, "");
+            const className = baseName.startsWith("theme-")
+              ? baseName
+              : `theme-${baseName}`;
+
+            if (!colorSchemes.includes(className as ColorScheme)) {
+              // runtime extension is intentional
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              colorSchemes.push(className);
+            }
+
+            if (
+              !document.querySelector(`link[data-theme="${className}"]`)
+            ) {
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.href = `/config/themes/${file}`;
+              link.dataset.theme = className;
+              document.head.appendChild(link);
+            }
+          });
+        })
+        .catch(() => {
+        });
+    }
 
     root.classList.remove("light", "dark", "system", ...colorSchemes);
 

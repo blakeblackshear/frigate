@@ -32,7 +32,11 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+<<<<<<< HEAD
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
+=======
+from frigate.const import THEMES_DIR
+>>>>>>> a3cdd1b1 (Add custom theme support)
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
@@ -183,6 +187,23 @@ def config(request: Request):
 
     return JSONResponse(content=config)
 
+@router.get("/config/themes")
+def config_themes():
+    themes_dir = THEMES_DIR
+
+    if not os.path.isdir(themes_dir):
+        return JSONResponse(content=[])
+
+    themes: list[str] = []
+    for name in sorted(os.listdir(themes_dir)):
+        if not name.lower().endswith(".css"):
+            continue
+
+        full_path = os.path.join(themes_dir, name)
+        if os.path.isfile(full_path):
+            themes.append(name)
+
+    return JSONResponse(content=themes)
 
 @router.get("/config/raw_paths", dependencies=[Depends(require_role(["admin"]))])
 def config_raw_paths(request: Request):
