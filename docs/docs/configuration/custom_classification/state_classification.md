@@ -48,6 +48,8 @@ classification:
             crop: [0, 180, 220, 400]
 ```
 
+An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For state classification models, the default is 100.
+
 ## Training the model
 
 Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of three steps:

@@ -33,9 +33,9 @@ For object classification:
   - Example: `cat` → `Leo`, `Charlie`, `None`.
 
 - **Attribute**:
-  - Added as metadata to the object (visible in /events): `<model_name>: <predicted_value>`.
+  - Added as metadata to the object, visible in the Tracked Object Details pane in Explore, `frigate/events` MQTT messages, and the HTTP API response as `<model_name>: <predicted_value>`.
   - Ideal when multiple attributes can coexist independently.
-  - Example: Detecting if a `person` in a construction yard is wearing a helmet or not.
+  - Example: Detecting if a `person` in a construction yard is wearing a helmet or not, and if they are wearing a yellow vest or not.
 
 :::note
 
@@ -81,6 +81,8 @@ classification:
         classification_type: sub_label # or: attribute
 ```
 
+An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For object classification models, the default is 200.
+
 ## Training the model
 
 Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of two steps:
@@ -88,6 +90,8 @@ Creating and training the model is done within the Frigate UI using the `Classif
 ### Step 1: Name and Define
 
 Enter a name for your model, select the object label to classify (e.g., `person`, `dog`, `car`), choose the classification type (sub label or attribute), and define your classes. Include a `none` class for objects that don't fit any specific category.
+
+For example: To classify your two cats, create a model named "Our Cats" and create two classes, "Charlie" and "Leo". Create a third class, "none", for other neighborhood cats that are not your own.
 
 ### Step 2: Assign Training Examples
 
