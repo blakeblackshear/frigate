@@ -46,7 +46,7 @@ def should_update_state(prev_event: Event, current_event: Event) -> bool:
     if prev_event["sub_label"] != current_event["sub_label"]:
         return True
 
-    if len(prev_event["current_zones"]) < len(current_event["current_zones"]):
+    if set(prev_event["current_zones"]) != set(current_event["current_zones"]):
         return True
 
     return False
