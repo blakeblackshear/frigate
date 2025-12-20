@@ -1444,7 +1444,7 @@ function FrigateCameraFeatures({
                         ns: "components/dialog",
                       })}
                     </div>
-                    <Popover>
+                    <Popover modal={true}>
                       <PopoverTrigger asChild>
                         <div className="cursor-pointer p-0">
                           <LuInfo className="size-4" />
@@ -1531,7 +1531,7 @@ function FrigateCameraFeatures({
                             <>
                               <LuX className="size-4 text-danger" />
                               <div>{t("stream.audio.unavailable")}</div>
-                              <Popover>
+                              <Popover modal={true}>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
                                     <LuInfo className="size-4" />
@@ -1575,7 +1575,7 @@ function FrigateCameraFeatures({
                             <>
                               <LuX className="size-4 text-danger" />
                               <div>{t("stream.twoWayTalk.unavailable")}</div>
-                              <Popover>
+                              <Popover modal={true}>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
                                     <LuInfo className="size-4" />
