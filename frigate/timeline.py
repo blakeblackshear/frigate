@@ -86,11 +86,11 @@ class TimelineProcessor(threading.Thread):
         event_data: dict[Any, Any],
     ) -> bool:
         """Handle object detection."""
-        save = False
         camera_config = self.config.cameras[camera]
         event_id = event_data["id"]
 
-        timeline_entry = {
+        # Base timeline entry data that all entries will share
+        base_entry = {
             Timeline.timestamp: event_data["frame_time"],
             Timeline.camera: camera,
             Timeline.source: "tracked_object",
@@ -123,40 +123,64 @@ class TimelineProcessor(threading.Thread):
                 e[Timeline.data]["sub_label"] = event_data["sub_label"]
 
         if event_type == EventStateEnum.start:
+            timeline_entry = base_entry.copy()
             timeline_entry[Timeline.class_type] = "visible"
-            save = True
+            self.insert_or_save(timeline_entry, prev_event_data, event_data)
         elif event_type == EventStateEnum.update:
+            # Check all conditions and create timeline entries for each change
+            entries_to_save = []
+
+            # Check for zone changes
+            prev_zones = set(prev_event_data["current_zones"])
+            current_zones = set(event_data["current_zones"])
+            zones_changed = prev_zones != current_zones
+
+            # Only save "entered_zone" events when the object is actually IN zones
             if (
-                len(prev_event_data["current_zones"]) < len(event_data["current_zones"])
+                zones_changed
                 and not event_data["stationary"]
+                and len(current_zones) > 0
             ):
-                timeline_entry[Timeline.class_type] = "entered_zone"
-                timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
-                save = True
-            elif prev_event_data["stationary"] != event_data["stationary"]:
-                timeline_entry[Timeline.class_type] = (
+                zone_entry = base_entry.copy()
+                zone_entry[Timeline.class_type] = "entered_zone"
+                zone_entry[Timeline.data] = base_entry[Timeline.data].copy()
+                zone_entry[Timeline.data]["zones"] = event_data["current_zones"]
+                entries_to_save.append(zone_entry)
+
+            # Check for stationary status change
+            if prev_event_data["stationary"] != event_data["stationary"]:
+                stationary_entry = base_entry.copy()
+                stationary_entry[Timeline.class_type] = (
                     "stationary" if event_data["stationary"] else "active"
                 )
-                save = True
-            elif prev_event_data["attributes"] == {} and event_data["attributes"] != {}:
-                timeline_entry[Timeline.class_type] = "attribute"
-                timeline_entry[Timeline.data]["attribute"] = list(
+                stationary_entry[Timeline.data] = base_entry[Timeline.data].copy()
+                entries_to_save.append(stationary_entry)
+
+            # Check for new attributes
+            if prev_event_data["attributes"] == {} and event_data["attributes"] != {}:
+                attribute_entry = base_entry.copy()
+                attribute_entry[Timeline.class_type] = "attribute"
+                attribute_entry[Timeline.data] = base_entry[Timeline.data].copy()
+                attribute_entry[Timeline.data]["attribute"] = list(
                     event_data["attributes"].keys()
                 )[0]
 
                 if len(event_data["current_attributes"]) > 0:
-                    timeline_entry[Timeline.data]["attribute_box"] = to_relative_box(
+                    attribute_entry[Timeline.data]["attribute_box"] = to_relative_box(
                         camera_config.detect.width,
                         camera_config.detect.height,
                         event_data["current_attributes"][0]["box"],
                     )
 
-                save = True
-        elif event_type == EventStateEnum.end:
-            timeline_entry[Timeline.class_type] = "gone"
-            save = True
+                entries_to_save.append(attribute_entry)
 
-        if save:
+            # Save all entries
+            for entry in entries_to_save:
+                self.insert_or_save(entry, prev_event_data, event_data)
+
+        elif event_type == EventStateEnum.end:
+            timeline_entry = base_entry.copy()
+            timeline_entry[Timeline.class_type] = "gone"
             self.insert_or_save(timeline_entry, prev_event_data, event_data)
 
     def handle_api_entry(
