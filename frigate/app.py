@@ -100,6 +100,10 @@ class FrigateApp:
             )
             if (
                 config.semantic_search.enabled
+                or any(
+                    c.objects.genai.enabled or c.review.genai.enabled
+                    for c in config.cameras.values()
+                )
                 or config.lpr.enabled
                 or config.face_recognition.enabled
                 or len(config.classification.custom) > 0
