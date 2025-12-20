@@ -599,9 +599,14 @@ export default function SearchDetailDialog({
         <Content
           ref={isDesktop ? dialogContentRef : undefined}
           className={cn(
-            "scrollbar-container overflow-y-auto",
-            isDesktop && "max-h-[95dvh] max-w-[85%] xl:max-w-[70%]",
-            isMobile && "flex h-full flex-col px-4",
+            isDesktop && [
+              "max-h-[95dvh] max-w-[85%] xl:max-w-[70%]",
+              pageToggle === "tracking_details"
+                ? "flex flex-col overflow-hidden"
+                : "scrollbar-container overflow-y-auto",
+            ],
+            isMobile &&
+              "scrollbar-container flex h-full flex-col overflow-y-auto px-4",
           )}
           onEscapeKeyDown={(event) => {
             if (isPopoverOpen) {
