@@ -88,11 +88,20 @@ export default function EnrichmentMetrics({
 
       Object.entries(stats.embeddings).forEach(([rawKey, stat]) => {
         const key = rawKey.replaceAll("_", " ");
-
         if (!(key in series)) {
+          const classificationIndex = rawKey.indexOf("_classification_");
+          const seriesName =
+            classificationIndex === -1
+              ? t("enrichments.embeddings." + rawKey)
+              : t(
+                  `enrichments.embeddings.${rawKey.substring(classificationIndex + 1)}`,
+                  {
+                    name: rawKey.substring(0, classificationIndex),
+                  },
+                );
           series[key] = {
             rawKey,
-            name: t("enrichments.embeddings." + rawKey),
+            name: seriesName,
             metrics: getThreshold(rawKey),
             data: [],
           };
@@ -133,8 +142,14 @@ export default function EnrichmentMetrics({
         isSpeed = false;
       }
 
+      let categoryName = "";
       // Get translated category name
-      const categoryName = t("enrichments.embeddings." + categoryKey);
+      if (categoryKey.endsWith("_classification")) {
+        const name = categoryKey.replace("_classification", "");
+        categoryName = t("enrichments.embeddings.classification", { name });
+      } else {
+        categoryName = t("enrichments.embeddings." + categoryKey);
+      }
 
       if (!(categoryKey in grouped)) {
         grouped[categoryKey] = {
