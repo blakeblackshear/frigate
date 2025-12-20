@@ -377,14 +377,14 @@ export function GroupedClassificationCard({
                   )}
                 </ContentDescription>
               </div>
-              <div
-                className={cn(
-                  "flex",
-                  isDesktop && "flex-row justify-between",
-                  isMobile && "absolute right-4 top-8",
-                )}
-              >
-                {classifiedEvent && (
+              {classifiedEvent && (
+                <div
+                  className={cn(
+                    "flex",
+                    isDesktop && "flex-row justify-between",
+                    isMobile && "absolute right-4 top-8",
+                  )}
+                >
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
@@ -405,8 +405,8 @@ export function GroupedClassificationCard({
                       </TooltipContent>
                     </TooltipPortal>
                   </Tooltip>
-                )}
-              </div>
+                </div>
+              )}
             </Header>
             <div
               className={cn(
