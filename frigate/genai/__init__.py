@@ -178,6 +178,7 @@ Each line represents a detection state, not necessarily unique individuals. Pare
         start_ts: float,
         end_ts: float,
         events: list[dict[str, Any]],
+        preferred_language: str | None,
         debug_save: bool,
     ) -> str | None:
         """Generate a summary of review item descriptions over a period of time."""
@@ -231,6 +232,9 @@ Guidelines:
         timeline_summary_prompt += "\n\nEvents:\n"
         for event in events:
             timeline_summary_prompt += f"\n{event}\n"
+
+        if preferred_language:
+            timeline_summary_prompt += f"\nProvide your answer in {preferred_language}"
 
         if debug_save:
             with open(

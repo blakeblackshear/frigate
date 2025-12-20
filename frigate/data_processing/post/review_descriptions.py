@@ -311,6 +311,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 start_ts,
                 end_ts,
                 events_with_context,
+                self.config.review.genai.preferred_language,
                 self.config.review.genai.debug_save_thumbnails,
             )
         else:
