@@ -23,7 +23,7 @@ export const colorSchemes: ColorScheme[] = [
 // eslint-disable-next-line react-refresh/only-export-components
 export const friendlyColorSchemeName = (
   className: string,
-  t?: (key: string, options?: any) => string
+  t?: (key: string, options?: any) => string,
 ): string => {
   const words = className.split("-").slice(1);
   const key = "menu.theme." + words.join("");
@@ -38,7 +38,6 @@ export const friendlyColorSchemeName = (
 
   return t(key, { defaultValue: fallback });
 };
-
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -134,9 +133,7 @@ export function ThemeProvider({
               colorSchemes.push(className);
             }
 
-            if (
-              !document.querySelector(`link[data-theme="${className}"]`)
-            ) {
+            if (!document.querySelector(`link[data-theme="${className}"]`)) {
               const link = document.createElement("link");
               link.rel = "stylesheet";
               link.href = `/config/themes/${file}`;
@@ -150,7 +147,6 @@ export function ThemeProvider({
     }
 
     root.classList.remove("light", "dark", "system", ...colorSchemes);
-
     root.classList.add(theme, colorScheme);
 
     if (systemTheme) {
