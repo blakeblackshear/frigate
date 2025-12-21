@@ -522,6 +522,8 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 elif isinstance(processor, ObjectDescriptionProcessor):
                     if not updated_db:
+                        # Still need to cleanup tracked events even if not processing
+                        processor.cleanup_event(event_id)
                         continue
 
                     processor.process_data(
