@@ -170,7 +170,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Frigate LLC`,
+      copyright: `Copyright © ${new Date().getFullYear()} Frigate, Inc.`,
     },
   },
   plugins: [

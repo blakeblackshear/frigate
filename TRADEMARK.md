@@ -6,7 +6,7 @@ This document outlines the policy regarding the use of the trademarks associated
 
 ## 1. Our Trademarks
 
-The following terms and visual assets are trademarks (the "Marks") of **Frigate LLC**:
+The following terms and visual assets are trademarks (the "Marks") of **Frigate, Inc.**:
 
 - **Frigate™**
 - **Frigate NVR™**
@@ -14,7 +14,7 @@ The following terms and visual assets are trademarks (the "Marks") of **Frigate 
 - **The Frigate Logo**
 
 **Note on Common Law Rights:**
-Frigate LLC asserts all common law rights in these Marks. The absence of a federal registration symbol (®) does not constitute a waiver of our intellectual property rights.
+Frigate, Inc. asserts all common law rights in these Marks. The absence of a federal registration symbol (®) does not constitute a waiver of our intellectual property rights.
 
 ## 2. Interaction with the MIT License
 
@@ -25,7 +25,7 @@ The software in this repository is licensed under the [MIT License](LICENSE).
 - The **Code** is free to use, modify, and distribute under the MIT terms.
 - The **Brand (Trademarks)** is **NOT** licensed under MIT.
 
-You may not use the Marks in any way that is not explicitly permitted by this policy or by written agreement with Frigate LLC.
+You may not use the Marks in any way that is not explicitly permitted by this policy or by written agreement with Frigate, Inc.
 
 ## 3. Acceptable Use
 
@@ -40,7 +40,7 @@ You may use the Marks without prior written permission in the following specific
 You may **NOT** use the Marks in the following ways:
 
 - **Commercial Products:** You may not use "Frigate" in the name of a commercial product, service, or app (e.g., selling an app named _"Frigate Viewer"_ is prohibited).
-- **Implying Affiliation:** You may not use the Marks in a way that suggests your project is official, sponsored by, or endorsed by Frigate LLC.
+- **Implying Affiliation:** You may not use the Marks in a way that suggests your project is official, sponsored by, or endorsed by Frigate, Inc.
 - **Confusing Forks:** If you fork this repository to create a derivative work, you **must** remove the Frigate logo and rename your project to avoid user confusion. You cannot distribute a modified version of the software under the name "Frigate".
 - **Domain Names:** You may not register domain names containing "Frigate" that are likely to confuse users (e.g., `frigate-official-support.com`).
 
