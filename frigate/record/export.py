@@ -228,7 +228,7 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.ffmpeg_path,
-                    self.config.ffmpeg.hwaccel_args,
+                    self.config.cameras[self.camera].record.export.hwaccel_args,
                     f"-an {ffmpeg_input}",
                     f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart",
                     EncodeTypeEnum.timelapse,
@@ -319,7 +319,7 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.ffmpeg_path,
-                    self.config.ffmpeg.hwaccel_args,
+                    self.config.cameras[self.camera].record.export.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
                     f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
                     EncodeTypeEnum.timelapse,

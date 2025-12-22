@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import Field
 
@@ -69,6 +69,9 @@ class RecordPreviewConfig(FrigateBaseModel):
 class RecordExportConfig(FrigateBaseModel):
     timelapse_args: str = Field(
         default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
+    )
+    hwaccel_args: Union[str, list[str]] = Field(
+        default="auto", title="Export-specific FFmpeg hardware acceleration arguments."
     )
 
 
