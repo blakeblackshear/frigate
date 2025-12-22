@@ -260,7 +260,7 @@ function MSEPlayer({
               // @ts-expect-error for typing
               value: codecs(MediaSource.isTypeSupported),
             },
-            3000,
+            (fallbackTimeout ?? 3) * 1000,
           ).catch(() => {
             if (wsRef.current) {
               onDisconnect();
@@ -290,7 +290,7 @@ function MSEPlayer({
               type: "mse",
               value: codecs(MediaSource.isTypeSupported),
             },
-            3000,
+            (fallbackTimeout ?? 3) * 1000,
           ).catch(() => {
             if (wsRef.current) {
               onDisconnect();
