@@ -549,7 +549,9 @@ class FrigateConfig(FrigateBaseModel):
             # This allows per-camera override for exports (e.g., when camera resolution
             # exceeds hardware encoder limits)
             if camera_config.record.export.hwaccel_args == "auto":
-                camera_config.record.export.hwaccel_args = camera_config.ffmpeg.hwaccel_args
+                camera_config.record.export.hwaccel_args = (
+                    camera_config.ffmpeg.hwaccel_args
+                )
 
             for input in camera_config.ffmpeg.inputs:
                 need_detect_dimensions = "detect" in input.roles and (
