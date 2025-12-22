@@ -141,6 +141,8 @@ record:
 
 When using `hwaccel_args`, hardware encoding is used for timelapse generation. By default, each camera inherits its export hwaccel settings from its own `ffmpeg.hwaccel_args`, which in turn inherits from the global setting. To override for a specific camera (e.g., when camera resolution exceeds hardware encoder limits), set `record.export.hwaccel_args` at the camera level. Using an unrecognized value or empty string will fall back to software encoding (libx264).
 
+:::tip
+
 The encoder determines its own behavior so the resulting file size may be undesirably large.
 To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
 
