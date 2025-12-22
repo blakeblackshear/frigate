@@ -245,6 +245,12 @@ To load a preview gif of a review item:
 https://HA_URL/api/frigate/notifications/<review-id>/review_preview.gif
 ```
 
+To load the thumbnail of a review item:
+
+```
+https://HA_URL/api/frigate/notifications/<review-id>/<camera>/review_thumbnail.webp
+```
+
 <a name="streams"></a>
 
 ## RTSP stream
