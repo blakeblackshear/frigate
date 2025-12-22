@@ -139,7 +139,7 @@ record:
 
 :::tip
 
-When using `hwaccel_args`, hardware encoding is used for timelapse generation. By default, each camera inherits its export hwaccel settings from its own `ffmpeg.hwaccel_args`, which in turn inherits from the global setting. To override for a specific camera (e.g., when camera resolution exceeds hardware encoder limits), set `record.export.hwaccel_args` at the camera level. Using an unrecognized value or empty string will fall back to software encoding (libx264).
+When using `hwaccel_args`, hardware encoding is used for timelapse generation. This setting can be overridden for a specific camera (e.g., when camera resolution exceeds hardware encoder limits); set `cameras.<camera>.record.export.hwaccel_args` with the appropriate settings. Using an unrecognized value or empty string will fall back to software encoding (libx264).
 
 :::tip
 
