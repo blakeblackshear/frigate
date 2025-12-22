@@ -22,6 +22,7 @@ from frigate.util.services import (
     get_bandwidth_stats,
     get_cpu_stats,
     get_fs_type,
+    get_hailo_temps,
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
@@ -90,7 +91,74 @@ def get_temperatures() -> dict[str, float]:
             if temp is not None:
                 temps[apex] = temp
 
+    # Get temperatures for Hailo devices
+    temps.update(get_hailo_temps())
+
     return temps
+
+
+def get_detector_temperature(
+    detector_type: str,
+    detector_index_by_type: dict[str, int],
+) -> Optional[float]:
+    """Get temperature for a specific detector based on its type."""
+    if detector_type == "edgetpu":
+        # Get temperatures for all attached Corals
+        base = "/sys/class/apex/"
+        if os.path.isdir(base):
+            apex_devices = sorted(os.listdir(base))
+            index = detector_index_by_type.get("edgetpu", 0)
+            if index < len(apex_devices):
+                apex_name = apex_devices[index]
+                temp = read_temperature(os.path.join(base, apex_name, "temp"))
+                if temp is not None:
+                    return temp
+    elif detector_type == "hailo8l":
+        # Get temperatures for Hailo devices
+        hailo_temps = get_hailo_temps()
+        if hailo_temps:
+            hailo_device_names = sorted(hailo_temps.keys())
+            index = detector_index_by_type.get("hailo8l", 0)
+            if index < len(hailo_device_names):
+                device_name = hailo_device_names[index]
+                return hailo_temps[device_name]
+
+    return None
+
+
+def get_detector_stats(
+    stats_tracking: StatsTrackingTypes,
+) -> dict[str, dict[str, Any]]:
+    """Get stats for all detectors, including temperatures based on detector type."""
+    detector_stats: dict[str, dict[str, Any]] = {}
+    detector_type_indices: dict[str, int] = {}
+
+    for name, detector in stats_tracking["detectors"].items():
+        pid = detector.detect_process.pid if detector.detect_process else None
+        detector_type = detector.detector_config.type
+
+        # Keep track of the index for each detector type to match temperatures correctly
+        current_index = detector_type_indices.get(detector_type, 0)
+        detector_type_indices[detector_type] = current_index + 1
+
+        detector_stat = {
+            "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),  # type: ignore[attr-defined]
+            # issue https://github.com/python/typeshed/issues/8799
+            # from mypy 0.981 onwards
+            "detection_start": detector.detection_start.value,  # type: ignore[attr-defined]
+            # issue https://github.com/python/typeshed/issues/8799
+            # from mypy 0.981 onwards
+            "pid": pid,
+        }
+
+        temp = get_detector_temperature(detector_type, {detector_type: current_index})
+
+        if temp is not None:
+            detector_stat["temperature"] = round(temp, 1)
+
+        detector_stats[name] = detector_stat
+
+    return detector_stats
 
 
 def get_processing_stats(
@@ -318,18 +386,7 @@ def stats_snapshot(
             **connection_quality,
         }
 
-    stats["detectors"] = {}
-    for name, detector in stats_tracking["detectors"].items():
-        pid = detector.detect_process.pid if detector.detect_process else None
-        stats["detectors"][name] = {
-            "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),  # type: ignore[attr-defined]
-            # issue https://github.com/python/typeshed/issues/8799
-            # from mypy 0.981 onwards
-            "detection_start": detector.detection_start.value,  # type: ignore[attr-defined]
-            # issue https://github.com/python/typeshed/issues/8799
-            # from mypy 0.981 onwards
-            "pid": pid,
-        }
+    stats["detectors"] = get_detector_stats(stats_tracking)
     stats["camera_fps"] = round(total_camera_fps, 2)
     stats["process_fps"] = round(total_process_fps, 2)
     stats["skipped_fps"] = round(total_skipped_fps, 2)
@@ -415,7 +472,6 @@ def stats_snapshot(
         "version": VERSION,
         "latest_version": stats_tracking["latest_frigate_version"],
         "storage": {},
-        "temperatures": get_temperatures(),
         "last_updated": int(time.time()),
     }
 

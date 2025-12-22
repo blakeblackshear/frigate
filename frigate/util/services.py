@@ -556,6 +556,53 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
     return results
 
 
+def get_hailo_temps() -> dict[str, float]:
+    """Get temperatures for Hailo devices."""
+    try:
+        from hailo_platform import Device
+    except ModuleNotFoundError:
+        return {}
+
+    temps = {}
+
+    try:
+        device_ids = Device.scan()
+        for i, device_id in enumerate(device_ids):
+            try:
+                with Device(device_id) as device:
+                    temp_info = device.control.get_chip_temperature()
+
+                    # Get board name and normalise it
+                    identity = device.control.identify()
+                    board_name = None
+                    for line in str(identity).split("\n"):
+                        if line.startswith("Board Name:"):
+                            board_name = (
+                                line.split(":", 1)[1].strip().lower().replace("-", "")
+                            )
+                            break
+
+                    if not board_name:
+                        board_name = f"hailo{i}"
+
+                    # Use indexed name if multiple devices, otherwise just the board name
+                    device_name = (
+                        f"{board_name}-{i}" if len(device_ids) > 1 else board_name
+                    )
+
+                    # ts1_temperature is also available, but appeared to be the same as ts0 in testing.
+                    temps[device_name] = round(temp_info.ts0_temperature, 1)
+            except Exception as e:
+                logger.debug(
+                    f"Failed to get temperature for Hailo device {device_id}: {e}"
+                )
+                continue
+    except Exception as e:
+        logger.debug(f"Failed to scan for Hailo devices: {e}")
+
+    return temps
+
+
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)

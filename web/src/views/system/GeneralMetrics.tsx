@@ -127,13 +127,6 @@ export default function GeneralMetrics({
       return undefined;
     }
 
-    if (
-      statsHistory.length > 0 &&
-      Object.keys(statsHistory[0].service.temperatures).length == 0
-    ) {
-      return undefined;
-    }
-
     const series: {
       [key: string]: { name: string; data: { x: number; y: number }[] };
     } = {};
@@ -143,22 +136,22 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.detectors).forEach(([key], cIdx) => {
-        if (!key.includes("coral")) {
+      Object.entries(stats.detectors).forEach(([key, detectorStats]) => {
+        if (detectorStats.temperature === undefined) {
           return;
         }
 
-        if (cIdx <= Object.keys(stats.service.temperatures).length) {
-          if (!(key in series)) {
-            series[key] = {
-              name: key,
-              data: [],
-            };
-          }
-
-          const temp = Object.values(stats.service.temperatures)[cIdx];
-          series[key].data.push({ x: statsIdx + 1, y: Math.round(temp) });
+        if (!(key in series)) {
+          series[key] = {
+            name: key,
+            data: [],
+          };
         }
+
+        series[key].data.push({
+          x: statsIdx + 1,
+          y: Math.round(detectorStats.temperature),
+        });
       });
     });
 
