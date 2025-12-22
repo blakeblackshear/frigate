@@ -54,7 +54,7 @@ export default function SetPasswordDialog({
     config?.auth?.refresh_time ?? undefined;
   const refreshTimeLabel = refreshSeconds
     ? formatSecondsToDuration(refreshSeconds)
-    : "30 minutes";
+    : t("time.30minutes", { ns: "common" });
 
   // visibility toggles for password fields
   const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
