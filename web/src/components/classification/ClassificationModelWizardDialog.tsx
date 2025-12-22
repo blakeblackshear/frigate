@@ -137,6 +137,11 @@ export default function ClassificationModelWizardDialog({
     onClose();
   };
 
+  const handleSuccessClose = () => {
+    dispatch({ type: "RESET" });
+    onClose();
+  };
+
   return (
     <Dialog
       open={open}
@@ -207,7 +212,7 @@ export default function ClassificationModelWizardDialog({
                 step1Data={wizardState.step1Data}
                 step2Data={wizardState.step2Data}
                 initialData={wizardState.step3Data}
-                onClose={onClose}
+                onClose={handleSuccessClose}
                 onBack={handleBack}
               />
             )}
