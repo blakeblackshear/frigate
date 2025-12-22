@@ -462,6 +462,8 @@ record:
     # The -r (framerate) dictates how smooth the output video is.
     # So the args would be -vf setpts=0.02*PTS -r 30 in that case.
     timelapse_args: "-vf setpts=0.04*PTS -r 30"
+    # Optional: Global override for hwaccel_args in an export context (default: camera-specific args)
+    hwaccel_args: auto
   # Optional: Recording Preview Settings
   preview:
     # Optional: Quality of recording preview (default: shown below).
