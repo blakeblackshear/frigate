@@ -13,6 +13,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import FilterSwitch from "./FilterSwitch";
 import { FaVideo } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 type CameraFilterButtonProps = {
   allCameras: string[];
@@ -34,6 +35,30 @@ export function CamerasFilterButton({
   const [open, setOpen] = useState(false);
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
     selectedCameras,
+  );
+  const allowedCameras = useAllowedCameras();
+
+  // Filter cameras to only include those the user has access to
+  const filteredCameras = useMemo(
+    () => allCameras.filter((camera) => allowedCameras.includes(camera)),
+    [allCameras, allowedCameras],
+  );
+
+  // Filter groups to only include those with at least one allowed camera
+  const filteredGroups = useMemo(
+    () =>
+      groups
+        .map(([name, config]) => {
+          const allowedGroupCameras = config.cameras.filter((camera) =>
+            allowedCameras.includes(camera),
+          );
+          return [name, { ...config, cameras: allowedGroupCameras }] as [
+            string,
+            CameraGroupConfig,
+          ];
+        })
+        .filter(([, config]) => config.cameras.length > 0),
+    [groups, allowedCameras],
   );
 
   const buttonText = useMemo(() => {
@@ -79,8 +104,8 @@ export function CamerasFilterButton({
   );
   const content = (
     <CamerasFilterContent
-      allCameras={allCameras}
-      groups={groups}
+      allCameras={filteredCameras}
+      groups={filteredGroups}
       currentCameras={currentCameras}
       mainCamera={mainCamera}
       setCurrentCameras={setCurrentCameras}
