@@ -37,6 +37,7 @@ export type DetectorStats = {
   detection_start: number;
   inference_speed: number;
   pid: number;
+  temperature?: number;
 };
 
 export type EmbeddingsStats = {
@@ -68,7 +69,6 @@ export type GpuInfo = "vainfo" | "nvinfo";
 export type ServiceStats = {
   last_updated: number;
   storage: { [path: string]: StorageStats };
-  temperatures: { [apex: string]: number };
   uptime: number;
   latest_version: string;
   version: string;
