@@ -18,6 +18,7 @@ import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -105,6 +106,7 @@ export function CalendarRangeFilterButton({
   const { t } = useTranslation(["components/filter"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const timezone = useTimezone(config);
+  const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
   const [open, setOpen] = useState(false);
 
   const selectedDate = useFormattedRange(
@@ -138,6 +140,7 @@ export function CalendarRangeFilterButton({
         initialDateTo={range?.to}
         timezone={timezone}
         showCompare={false}
+        weekStartsOn={weekStartsOn}
         onUpdate={(range) => {
           updateSelectedRange(range.range);
           setOpen(false);

@@ -35,6 +35,8 @@ export interface DateRangePickerProps {
   showCompare?: boolean;
   /** timezone */
   timezone?: string;
+  /** First day of the week: 0 = Sunday, 1 = Monday */
+  weekStartsOn?: number;
 }
 
 const getDateAdjustedForTimezone = (
@@ -91,6 +93,7 @@ export function DateRangePicker({
   onUpdate,
   onReset,
   showCompare = true,
+  weekStartsOn = 0,
 }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -150,7 +153,9 @@ export function DateRangePicker({
     if (!preset) throw new Error(`Unknown date range preset: ${presetName}`);
     const from = new TZDate(new Date(), timezone);
     const to = new TZDate(new Date(), timezone);
-    const first = from.getDate() - from.getDay();
+    const dayOfWeek = from.getDay();
+    const daysFromWeekStart = (dayOfWeek - weekStartsOn + 7) % 7;
+    const first = from.getDate() - daysFromWeekStart;
 
     switch (preset.name) {
       case "today":
@@ -184,8 +189,8 @@ export function DateRangePicker({
         to.setHours(23, 59, 59, 999);
         break;
       case "lastWeek":
-        from.setDate(from.getDate() - 7 - from.getDay());
-        to.setDate(to.getDate() - to.getDay() - 1);
+        from.setDate(first - 7);
+        to.setDate(first - 1);
         from.setHours(0, 0, 0, 0);
         to.setHours(23, 59, 59, 999);
         break;
