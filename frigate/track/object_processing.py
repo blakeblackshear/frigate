@@ -382,12 +382,12 @@ class TrackedObjectProcessor(threading.Thread):
             tracked_obj.obj_data["sub_label"] = (sub_label, score)
 
         if event:
-            event.sub_label = sub_label  # type: ignore[assignment]
+            event.sub_label = sub_label
             data = event.data
             if sub_label is None:
-                data["sub_label_score"] = None  # type: ignore[index]
+                data["sub_label_score"] = None
             elif score is not None:
-                data["sub_label_score"] = score  # type: ignore[index]
+                data["sub_label_score"] = score
             event.data = data
             event.save()
 
@@ -416,7 +416,7 @@ class TrackedObjectProcessor(threading.Thread):
                 objects_list = []
                 sub_labels = set()
                 events = Event.select(Event.id, Event.label, Event.sub_label).where(
-                    Event.id.in_(detection_ids)  # type: ignore[call-arg, misc]
+                    Event.id.in_(detection_ids)
                 )
                 for det_event in events:
                     if det_event.sub_label:
@@ -482,11 +482,11 @@ class TrackedObjectProcessor(threading.Thread):
 
         if event:
             data = event.data
-            data[field_name] = field_value  # type: ignore[index]
+            data[field_name] = field_value
             if field_value is None:
-                data[f"{field_name}_score"] = None  # type: ignore[index]
+                data[f"{field_name}_score"] = None
             elif score is not None:
-                data[f"{field_name}_score"] = score  # type: ignore[index]
+                data[f"{field_name}_score"] = score
             event.data = data
             event.save()
 

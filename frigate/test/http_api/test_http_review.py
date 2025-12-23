@@ -510,8 +510,12 @@ class TestHttpReview(BaseTestHttp):
         with AuthTestClient(self.app) as client:
             ids = ["123456.random", "654321.random"]
             for id in ids:
-                super().insert_mock_review_segment(id)
-                super().insert_mock_recording(id)
+                # Use the same timestamps for both review segment and recording
+                # to ensure they overlap so the delete endpoint can find the recording
+                start_time = datetime.now().timestamp()
+                end_time = start_time + 20
+                super().insert_mock_review_segment(id, start_time=start_time, end_time=end_time)
+                super().insert_mock_recording(id, start_time=start_time, end_time=end_time)
 
             review_ids_in_db_before = self._get_reviews(ids)
             recordings_ids_in_db_before = self._get_recordings(ids)
