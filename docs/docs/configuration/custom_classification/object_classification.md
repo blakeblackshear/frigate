@@ -89,9 +89,9 @@ Creating and training the model is done within the Frigate UI using the `Classif
 
 ### Step 1: Name and Define
 
-Enter a name for your model, select the object label to classify (e.g., `person`, `dog`, `car`), choose the classification type (sub label or attribute), and define your classes. Include a `none` class for objects that don't fit any specific category.
+Enter a name for your model, select the object label to classify (e.g., `person`, `dog`, `car`), choose the classification type (sub label or attribute), and define your classes. Frigate will automatically include a `none` class for objects that don't fit any specific category.
 
-For example: To classify your two cats, create a model named "Our Cats" and create two classes, "Charlie" and "Leo". Create a third class, "none", for other neighborhood cats that are not your own.
+For example: To classify your two cats, create a model named "Our Cats" and create two classes, "Charlie" and "Leo". A third class, "none", will be created automatically for other neighborhood cats that are not your own.
 
 ### Step 2: Assign Training Examples
 
