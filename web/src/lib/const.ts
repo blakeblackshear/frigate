@@ -23,5 +23,6 @@ export const supportedLanguageKeys = [
   "lt",
   "uk",
   "cs",
+  "sk",
   "hu",
 ];
