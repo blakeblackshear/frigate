@@ -2,7 +2,7 @@ default_target: local
 
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 VERSION = 0.17.0
-IMAGE_REPO ?= ghcr.io/blakeblackshear/frigate
+IMAGE_REPO ?= dhanushsridhar94/dienst-nvr
 GITHUB_REF_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 BOARDS= #Initialized empty
 
@@ -44,6 +44,8 @@ build: version amd64 arm64
 
 push: push-boards
 	docker buildx build --target=frigate --file docker/main/Dockerfile . \
+		--tag $(IMAGE_REPO):latest \
+		--tag $(IMAGE_REPO):$(VERSION)-$(COMMIT_HASH) \
 		--tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH) \
 		--platform linux/arm64/v8,linux/amd64 \
 		--push
