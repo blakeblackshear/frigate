@@ -203,7 +203,9 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
-        if any(c.review.genai.enabled_in_config for c in self.config.cameras.values()):
+        if self.genai_client is not None and any(
+            c.review.genai.enabled_in_config for c in self.config.cameras.values()
+        ):
             self.post_processors.append(
                 ReviewDescriptionProcessor(
                     self.config, self.requestor, self.metrics, self.genai_client
@@ -244,7 +246,9 @@ class EmbeddingMaintainer(threading.Thread):
             )
             self.post_processors.append(semantic_trigger_processor)
 
-        if any(c.objects.genai.enabled_in_config for c in self.config.cameras.values()):
+        if self.genai_client is not None and any(
+            c.objects.genai.enabled_in_config for c in self.config.cameras.values()
+        ):
             self.post_processors.append(
                 ObjectDescriptionProcessor(
                     self.config,
