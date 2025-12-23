@@ -9,7 +9,7 @@
     "unknown": "Unknown",
     "scoreInfo": "Score is a weighted average of all face scores, weighted by the size of the face in each image."
   },
-  "documentTitle": "Face Library - Frigate",
+  "documentTitle": "Face Library - Dienst",
   "uploadFaceImage": {
     "title": "Upload Face Image",
     "desc": "Upload an image to scan for faces and include for {{pageToggle}}"

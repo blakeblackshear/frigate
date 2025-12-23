@@ -113,15 +113,6 @@ function useHelpfulLinks(content: string | undefined) {
     }
 
     const links = [];
-    if (/Could not clear [\d.]* currently [\d.]*/.exec(content)) {
-      links.push({
-        link: getLocaleDocUrl(
-          "configuration/record#will-frigate-delete-old-recordings-if-my-storage-runs-out",
-        ),
-        text: "Frigate Automatic Storage Cleanup",
-      });
-    }
-
     if (/Did not detect hwaccel/.exec(content)) {
       links.push({
         link: getLocaleDocUrl("configuration/hardware_acceleration"),

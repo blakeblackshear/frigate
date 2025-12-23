@@ -1,6 +1,6 @@
 {
-  "name": "Frigate",
-  "short_name": "Frigate",
+  "name": "Dienst-NVR",
+  "short_name": "Dienst-NVR",
   "start_url": "/BASE_PATH/",
   "icons": [
     {
