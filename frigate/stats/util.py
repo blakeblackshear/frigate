@@ -42,10 +42,9 @@ def get_latest_version(config: FrigateConfig) -> str:
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
             timeout=10,
         )
+        response = request.json()
     except (RequestException, JSONDecodeError):
         return "unknown"
-
-    response = request.json()
 
     if request.ok and response and "tag_name" in response:
         return str(response.get("tag_name").replace("v", ""))
