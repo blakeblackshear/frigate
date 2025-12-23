@@ -17,7 +17,7 @@
     "face": "Kasvojen yksityiskohdat",
     "scoreInfo": "Alatunnisteen pistemäärä on kaikkien tunnistettujen kasvojen varmuustasojen painotettu keskiarvo, joten se voi poiketa tilannekuvassa näkyvästä pistemäärästä."
   },
-  "documentTitle": "Kasvokirjasto - Frigate",
+  "documentTitle": "Kasvokirjasto - DIENST",
   "deleteFaceAttempts": {
     "desc_one": "Oletko varma, että haluat poistaa {{count}} kasvon? Tätä toimintoa ei voi perua.",
     "desc_other": "Oletko varma, että haluat poistaa {{count}} kasvoa? Tätä toimintoa ei voi perua.",

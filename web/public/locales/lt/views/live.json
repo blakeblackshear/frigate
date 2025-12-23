@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Gyvai - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Tiesiogiai - Frigate",
+  "documentTitle": "Gyvai - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Tiesiogiai - DIENST",
   "lowBandwidthMode": "Mažo-pralaidumo Rėžimas",
   "cameraAudio": {
     "enable": "Įgalinti Kamerų Garsą",

@@ -10,7 +10,7 @@
       "savingError": "Problem att spara konfiguration"
     }
   },
-  "documentTitle": "Ändra konfiguration - Frigate",
+  "documentTitle": "Ändra konfiguration - DIENST",
   "configEditor": "Ändra konfiguration",
   "confirm": "Avsluta utan att spara?",
   "safeConfigEditor": "Konfigurationsredigeraren (felsäkert läge)",

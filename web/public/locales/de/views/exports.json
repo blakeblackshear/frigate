@@ -5,7 +5,7 @@
     "desc": "Gib einen neuen Namen für diesen Export an.",
     "saveExport": "Export speichern"
   },
-  "documentTitle": "Exportieren - Frigate",
+  "documentTitle": "Exportieren - DIENST",
   "deleteExport.desc": "Soll {{exportName}} wirklich gelöscht werden?",
   "search": "Suche",
   "noExports": "Keine Exporte gefunden",

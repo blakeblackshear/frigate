@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "camera": "Configurações da câmera - Frigate",
-    "classification": "Configurações de classificação - Frigate",
-    "masksAndZones": "Editor de máscara e zona - Frigate",
-    "motionTuner": "Ajuste de movimento - Frigate",
-    "object": "Depuração - Frigate",
-    "authentication": "Configurações de autenticação - Frigate",
-    "general": "Configurações gerais - Frigate",
-    "frigatePlus": "Configurações do Frigate+ - Frigate",
-    "default": "Configurações - Frigate",
-    "notifications": "Configuração de Notificações - Frigate",
-    "enrichments": "Configurações Avançadas - Frigate",
-    "cameraManagement": "Gerir Câmaras - Frigate",
-    "cameraReview": "Configurações de Revisão de Câmara - Frigate"
+    "camera": "Configurações da câmera - DIENST",
+    "classification": "Configurações de classificação - DIENST",
+    "masksAndZones": "Editor de máscara e zona - DIENST",
+    "motionTuner": "Ajuste de movimento - DIENST",
+    "object": "Depuração - DIENST",
+    "authentication": "Configurações de autenticação - DIENST",
+    "general": "Configurações gerais - DIENST",
+    "frigatePlus": "Configurações do Frigate+ - DIENST",
+    "default": "Configurações - DIENST",
+    "notifications": "Configuração de Notificações - DIENST",
+    "enrichments": "Configurações Avançadas - DIENST",
+    "cameraManagement": "Gerir Câmaras - DIENST",
+    "cameraReview": "Configurações de Revisão de Câmara - DIENST"
   },
   "menu": {
     "ui": "UI",
@@ -278,12 +278,12 @@
         }
       },
       "edit": "Editar Máscara de Movimento",
-      "documentTitle": "Editar Máscara de Movimento - Frigate",
+      "documentTitle": "Editar Máscara de Movimento - DIENST",
       "add": "Nova Máscara de Movimento"
     },
     "zones": {
       "label": "Zonas",
-      "documentTitle": "Editar Zona - Frigate",
+      "documentTitle": "Editar Zona - DIENST",
       "desc": {
         "documentation": "Documentação",
         "title": "As zonas permitem definir uma área específica do quadro para que você possa determinar se um objeto está ou não dentro de uma área particular."
@@ -413,7 +413,7 @@
       },
       "add": "Adicionar filtro para objecto",
       "edit": "Editar filtro de objecto",
-      "documentTitle": "Editar filtro de movimento - Frigate",
+      "documentTitle": "Editar filtro de movimento - DIENST",
       "toast": {
         "success": {
           "noName": "A máscara de objeto foi salva. Reinicie o Frigate para aplicar as alterações.",

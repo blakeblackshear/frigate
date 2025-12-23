@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "authentication": "Setări de autentificare - Frigate",
-    "camera": "Setări cameră - Frigate",
-    "default": "Setări - Frigate",
-    "classification": "Setări de clasificare - Frigate",
-    "masksAndZones": "Editor Zonă si Mască - Frigate",
-    "notifications": "Setări notificări - Frigate",
-    "motionTuner": "Ajustare mișcare - Frigate",
-    "object": "Depanare - Frigate",
-    "general": "Setări interfață - Frigate",
-    "frigatePlus": "Setări Frigate+ - Frigate",
-    "enrichments": "Setări de Îmbogățiri - Frigate",
-    "cameraManagement": "Gestionează Camerele - Frigate",
-    "cameraReview": "Setări Revizuire Cameră - Frigate"
+    "authentication": "Setări de autentificare - DIENST",
+    "camera": "Setări cameră - DIENST",
+    "default": "Setări - DIENST",
+    "classification": "Setări de clasificare - DIENST",
+    "masksAndZones": "Editor Zonă si Mască - DIENST",
+    "notifications": "Setări notificări - DIENST",
+    "motionTuner": "Ajustare mișcare - DIENST",
+    "object": "Depanare - DIENST",
+    "general": "Setări interfață - DIENST",
+    "frigatePlus": "Setări Frigate+ - DIENST",
+    "enrichments": "Setări de Îmbogățiri - DIENST",
+    "cameraManagement": "Gestionează Camerele - DIENST",
+    "cameraReview": "Setări Revizuire Cameră - DIENST"
   },
   "menu": {
     "ui": "Interfață utilizator",
@@ -274,7 +274,7 @@
         "title": "Prag de viteză ({{unit}})",
         "desc": "Specifică o viteză minimă pe care trebuie să o aibă obiectele pentru a fi considerate în această zonă."
       },
-      "documentTitle": "Editează zone - Frigate",
+      "documentTitle": "Editează zone - DIENST",
       "clickDrawPolygon": "Apasă pentru a desena un poligon pe imagine.",
       "toast": {
         "success": "Zona ({{zoneName}}) a fost salvată."
@@ -292,7 +292,7 @@
       "point_other": "{{count}} de puncte",
       "clickDrawPolygon": "Fă clic pentru a desena un poligon pe imagine.",
       "label": "Măști de mișcare",
-      "documentTitle": "Editează masca de mișcare - Frigate",
+      "documentTitle": "Editează masca de mișcare - DIENST",
       "desc": {
         "documentation": "Documentație",
         "title": "Măștile de mișcare sunt folosite pentru a preveni ca anumite tipuri de mișcare nedorită să declanșeze detecția. Mascare excesivă va îngreuna urmărirea obiectelor."
@@ -319,7 +319,7 @@
       "point_one": "{{count}} punct",
       "point_few": "{{count}} puncte",
       "point_other": "{{count}} de puncte",
-      "documentTitle": "Editează masca de obiecte - Frigate",
+      "documentTitle": "Editează masca de obiecte - DIENST",
       "add": "Adaugă mască de obiecte",
       "edit": "Editează masca de obiecte",
       "desc": {

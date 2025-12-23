@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Live - Dienst",
-  "documentTitle.withCamera": "{{camera}} - Live - Dienst",
+  "documentTitle": "Live - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Live - DIENST",
   "lowBandwidthMode": "Low-bandwidth Mode",
   "twoWayTalk": {
     "enable": "Enable Two Way Talk",

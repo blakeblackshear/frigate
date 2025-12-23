@@ -245,13 +245,13 @@
     "more": "Více stran"
   },
   "accessDenied": {
-    "documentTitle": "Přístup odepřen - Frigate",
+    "documentTitle": "Přístup odepřen - DIENST",
     "title": "Přístup odepřen",
     "desc": "Nemáte oprávnění zobrazit tuto stránku."
   },
   "notFound": {
     "desc": "Stránka nenalezena",
-    "documentTitle": "Nenalezeno - Frigate",
+    "documentTitle": "Nenalezeno - DIENST",
     "title": "404"
   },
   "toast": {

@@ -5,7 +5,7 @@
       "renameExportFailed": "שינוי שם הייצוא נכשל: {{errorMessage}}"
     }
   },
-  "documentTitle": "ייצוא - Frigate",
+  "documentTitle": "ייצוא - DIENST",
   "noExports": "לא נמצא יצוא",
   "deleteExport": "מחיקת ייצוא",
   "deleteExport.desc": "האם אתה בטוח שברצונך למחוק את {{exportName}}?",

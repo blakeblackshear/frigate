@@ -1,7 +1,7 @@
 {
   "restart": {
     "title": "האם אתה בטוח שברצונך להפעיל מחדש את Frigate?",
-    "button": "הפעלה מחדש - Frigate",
+    "button": "הפעלה מחדש - DIENST",
     "restarting": {
       "title": "Frigate מופעל מחדש כעת",
       "content": "דף זה ייטען מחדש בעוד {{countdown}} שניות.",

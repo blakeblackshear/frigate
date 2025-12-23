@@ -1,6 +1,6 @@
 {
-  "documentTitle": "ライブ - Frigate",
-  "documentTitle.withCamera": "{{camera}} - ライブ - Frigate",
+  "documentTitle": "ライブ - DIENST",
+  "documentTitle.withCamera": "{{camera}} - ライブ - DIENST",
   "lowBandwidthMode": "低帯域モード",
   "twoWayTalk": {
     "enable": "双方向通話を有効化",

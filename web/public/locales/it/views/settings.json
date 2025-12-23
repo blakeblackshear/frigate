@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "authentication": "Impostazioni di autenticazione - Frigate",
-    "default": "Impostazioni - Frigate",
-    "classification": "Impostazioni di classificazione - Frigate",
-    "camera": "Impostazioni telecamera - Frigate",
-    "masksAndZones": "Editor di maschere e zone - Frigate",
-    "motionTuner": "Regolatore di movimento - Frigate",
-    "object": "Correzioni - Frigate",
-    "general": "Impostazioni interfaccia - Frigate",
-    "frigatePlus": "Impostazioni Frigate+ - Frigate",
-    "notifications": "Impostazioni di notifiche - Frigate",
-    "enrichments": "Impostazioni di miglioramento - Frigate",
-    "cameraManagement": "Gestisci telecamere - Frigate",
-    "cameraReview": "Impostazioni revisione telecamera - Frigate"
+    "authentication": "Impostazioni di autenticazione - DIENST",
+    "default": "Impostazioni - DIENST",
+    "classification": "Impostazioni di classificazione - DIENST",
+    "camera": "Impostazioni telecamera - DIENST",
+    "masksAndZones": "Editor di maschere e zone - DIENST",
+    "motionTuner": "Regolatore di movimento - DIENST",
+    "object": "Correzioni - DIENST",
+    "general": "Impostazioni interfaccia - DIENST",
+    "frigatePlus": "Impostazioni Frigate+ - DIENST",
+    "notifications": "Impostazioni di notifiche - DIENST",
+    "enrichments": "Impostazioni di miglioramento - DIENST",
+    "cameraManagement": "Gestisci telecamere - DIENST",
+    "cameraReview": "Impostazioni revisione telecamera - DIENST"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -139,7 +139,7 @@
       "point_one": "{{count}} punto",
       "point_many": "{{count}} punti",
       "point_other": "{{count}} punti",
-      "documentTitle": "Modifica maschera movimento - Frigate",
+      "documentTitle": "Modifica maschera movimento - DIENST",
       "add": "Nuova maschera di movimento",
       "toast": {
         "success": {
@@ -246,7 +246,7 @@
       "point_many": "{{count}} punti",
       "point_other": "{{count}} punti",
       "label": "Zone",
-      "documentTitle": "Modifica zona - Frigate",
+      "documentTitle": "Modifica zona - DIENST",
       "inertia": {
         "title": "Inerzia",
         "desc": "Specifica quanti fotogrammi deve avere un oggetto in una zona prima di essere considerato nella zona. <em>Predefinito: 3</em>"
@@ -288,7 +288,7 @@
         }
       },
       "label": "Maschere di oggetti",
-      "documentTitle": "Modifica maschera oggetti - Frigate"
+      "documentTitle": "Modifica maschera oggetti - DIENST"
     },
     "restart_required": "Riavvio richiesto (maschere/zone modificate)",
     "motionMaskLabel": "Maschera di movimento {{number}}",

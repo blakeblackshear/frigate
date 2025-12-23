@@ -230,7 +230,7 @@
     "tracking_details": "chi tiết theo dõi"
   },
   "fetchingTrackedObjectsFailed": "Lỗi khi tìm nạp các đối tượng được theo dõi: {{errorMessage}}",
-  "documentTitle": "Khám phá - Frigate",
+  "documentTitle": "Khám phá - DIENST",
   "generativeAI": "AI Tạo sinh",
   "trackedObjectsCount_other": "{{count}} đối tượng được theo dõi ",
   "aiAnalysis": {

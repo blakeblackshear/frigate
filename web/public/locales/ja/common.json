@@ -255,12 +255,12 @@
     "more": "さらにページ"
   },
   "accessDenied": {
-    "documentTitle": "アクセス拒否 - Frigate",
+    "documentTitle": "アクセス拒否 - DIENST",
     "title": "アクセス拒否",
     "desc": "このページを表示する権限がありません。"
   },
   "notFound": {
-    "documentTitle": "ページが見つかりません - Frigate",
+    "documentTitle": "ページが見つかりません - DIENST",
     "title": "404",
     "desc": "ページが見つかりません"
   },

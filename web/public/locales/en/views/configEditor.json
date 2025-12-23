@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Config Editor - Dienst",
+  "documentTitle": "Config Editor - DIENST",
   "configEditor": "Config Editor",
   "safeConfigEditor": "Config Editor (Safe Mode)",
   "safeModeDescription": "Frigate is in safe mode due to a config validation error.",

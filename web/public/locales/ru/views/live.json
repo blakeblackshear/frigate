@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Прямой эфир - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Прямой эфир - Frigate",
+  "documentTitle": "Прямой эфир - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Прямой эфир - DIENST",
   "lowBandwidthMode": "Экономичный режим",
   "twoWayTalk": {
     "enable": "Включить двустороннюю связь",

@@ -231,7 +231,7 @@
   "accessDenied": {
     "title": "Åtkomst Förbjuden",
     "desc": "Du har inte rättigheter att visa den här sidan.",
-    "documentTitle": "Åtkomst Förbjuden - Frigate"
+    "documentTitle": "Åtkomst Förbjuden - DIENST"
   },
   "role": {
     "admin": "Admin",
@@ -240,7 +240,7 @@
     "title": "Roll"
   },
   "notFound": {
-    "documentTitle": "Hittades Inte - Frigate",
+    "documentTitle": "Hittades Inte - DIENST",
     "desc": "Sidan hittades inte",
     "title": "404"
   },

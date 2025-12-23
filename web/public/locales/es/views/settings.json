@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "masksAndZones": "Editor de máscaras y zonas - Frigate",
-    "object": "Depurar - Frigate",
-    "default": "Configuración - Frigate",
-    "authentication": "Configuración de autenticación - Frigate",
-    "camera": "Configuración de cámara - Frigate",
-    "motionTuner": "Ajuste de movimiento - Frigate",
-    "classification": "Configuración de clasificación - Frigate",
-    "general": "Configuración de Interfaz de Usuario - Frigate",
-    "frigatePlus": "Configuración de Frigate+ - Frigate",
-    "notifications": "Configuración de Notificaciones - Frigate",
-    "enrichments": "Configuración de Análisis Avanzado - Frigate",
-    "cameraManagement": "Administrar Cámaras - Frigate",
-    "cameraReview": "Revisar Configuración de Cámaras - Frigate"
+    "masksAndZones": "Editor de máscaras y zonas - DIENST",
+    "object": "Depurar - DIENST",
+    "default": "Configuración - DIENST",
+    "authentication": "Configuración de autenticación - DIENST",
+    "camera": "Configuración de cámara - DIENST",
+    "motionTuner": "Ajuste de movimiento - DIENST",
+    "classification": "Configuración de clasificación - DIENST",
+    "general": "Configuración de Interfaz de Usuario - DIENST",
+    "frigatePlus": "Configuración de Frigate+ - DIENST",
+    "notifications": "Configuración de Notificaciones - DIENST",
+    "enrichments": "Configuración de Análisis Avanzado - DIENST",
+    "cameraManagement": "Administrar Cámaras - DIENST",
+    "cameraReview": "Revisar Configuración de Cámaras - DIENST"
   },
   "menu": {
     "cameras": "Configuración de Cámara",
@@ -300,7 +300,7 @@
         "inputPlaceHolder": "Introduce un nombre…",
         "tips": "El nombre debe tener al menos 2 caracteres y no debe ser el nombre de una cámara ni de otra zona."
       },
-      "documentTitle": "Editar Zona - Frigate",
+      "documentTitle": "Editar Zona - DIENST",
       "clickDrawPolygon": "Haz clic para dibujar un polígono en la imagen.",
       "speedEstimation": {
         "desc": "Habilitar la estimación de velocidad para objetos en esta zona. La zona debe tener exactamente 4 puntos.",
@@ -364,14 +364,14 @@
           "title": "{{polygonName}} ha sido guardado. Reinicia Frigate para aplicar los cambios."
         }
       },
-      "documentTitle": "Editar Máscara de Movimiento - Frigate",
+      "documentTitle": "Editar Máscara de Movimiento - DIENST",
       "point_one": "{{count}} punto",
       "point_many": "{{count}} puntos",
       "point_other": "{{count}} puntos"
     },
     "objectMasks": {
       "label": "Máscaras de Objetos",
-      "documentTitle": "Editar Máscara de Objetos - Frigate",
+      "documentTitle": "Editar Máscara de Objetos - DIENST",
       "desc": {
         "documentation": "Documentación",
         "title": "Las máscaras de filtro de objetos se utilizan para descartar falsos positivos de un tipo de objeto específico según su ubicación."

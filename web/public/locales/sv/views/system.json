@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "storage": "Lagringsstatistik - Frigate",
-    "general": "Allmän statistik - Frigate",
-    "cameras": "Kamerastatistik - Frigate",
+    "storage": "Lagringsstatistik - DIENST",
+    "general": "Allmän statistik - DIENST",
+    "cameras": "Kamerastatistik - DIENST",
     "logs": {
-      "frigate": "Frigate-loggar - Frigate",
-      "go2rtc": "Go2RTC loggar - Frigate",
-      "nginx": "Nginx loggar - Frigate"
+      "frigate": "Frigate-loggar - DIENST",
+      "go2rtc": "Go2RTC loggar - DIENST",
+      "nginx": "Nginx loggar - DIENST"
     },
-    "enrichments": "Förbättringsstatistik - Frigate"
+    "enrichments": "Förbättringsstatistik - DIENST"
   },
   "logs": {
     "copy": {

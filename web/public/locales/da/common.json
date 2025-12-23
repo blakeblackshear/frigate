@@ -245,12 +245,12 @@
     "more": "Flere sider"
   },
   "accessDenied": {
-    "documentTitle": "Adgang forbudt - Frigate",
+    "documentTitle": "Adgang forbudt - DIENST",
     "title": "Adgang forbudt",
     "desc": "Du har ikke tiiladelse til at se denne side."
   },
   "notFound": {
-    "documentTitle": "Ikke fundet - Frigate",
+    "documentTitle": "Ikke fundet - DIENST",
     "title": "404",
     "desc": "Side ikke fundet"
   },

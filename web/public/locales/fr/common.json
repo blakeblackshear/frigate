@@ -263,14 +263,14 @@
   },
   "notFound": {
     "title": "404",
-    "documentTitle": "Non trouvé - Frigate",
+    "documentTitle": "Non trouvé - DIENST",
     "desc": "Page non trouvée"
   },
   "selectItem": "Sélectionner {{item}}",
   "readTheDocumentation": "Lire la documentation",
   "accessDenied": {
     "title": "Accès refusé",
-    "documentTitle": "Accès refusé - Frigate",
+    "documentTitle": "Accès refusé - DIENST",
     "desc": "Vous n'avez pas l'autorisation de consulter cette page."
   },
   "label": {

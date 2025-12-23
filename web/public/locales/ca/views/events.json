@@ -19,9 +19,9 @@
     "aria": "Seleccionar esdeveniments",
     "noFoundForTimePeriod": "No s'han trobat esdeveniments per aquest període de temps."
   },
-  "documentTitle": "Revisió - Frigate",
+  "documentTitle": "Revisió - DIENST",
   "recordings": {
-    "documentTitle": "Enregistraments - Frigate"
+    "documentTitle": "Enregistraments - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "Últimes 24 hores"

@@ -85,12 +85,12 @@
     }
   },
   "documentTitle": {
-    "default": "Seadistused - Frigate",
-    "authentication": "Autentimise seadistused - Frigate",
-    "cameraReview": "Kaamerate kordusvaatuste seadistused - Frigate",
-    "general": "Kasutajaliidese seadistused - Frigate",
-    "frigatePlus": "Frigate+ seadistused - Frigate",
-    "notifications": "Teavituste seadistused - Frigate"
+    "default": "Seadistused - DIENST",
+    "authentication": "Autentimise seadistused - DIENST",
+    "cameraReview": "Kaamerate kordusvaatuste seadistused - DIENST",
+    "general": "Kasutajaliidese seadistused - DIENST",
+    "frigatePlus": "Frigate+ seadistused - DIENST",
+    "notifications": "Teavituste seadistused - DIENST"
   },
   "general": {
     "title": "Kasutajaliidese seadistused",

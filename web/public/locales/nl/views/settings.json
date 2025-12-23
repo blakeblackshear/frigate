@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Instellingen - Frigate",
-    "camera": "Camera-instellingen - Frigate",
-    "authentication": "Authenticatie-instellingen - Frigate",
-    "motionTuner": "Motion Tuner - Frigate",
-    "classification": "Classificatie-instellingen - Frigate",
-    "masksAndZones": "Masker- en zone-editor - Frigate",
+    "default": "Instellingen - DIENST",
+    "camera": "Camera-instellingen - DIENST",
+    "authentication": "Authenticatie-instellingen - DIENST",
+    "motionTuner": "Motion Tuner - DIENST",
+    "classification": "Classificatie-instellingen - DIENST",
+    "masksAndZones": "Masker- en zone-editor - DIENST",
     "object": "Foutopsporing Frigate",
-    "general": "Gebruikersinterface-instellingen - Frigate",
-    "frigatePlus": "Frigate+ Instellingen - Frigate",
-    "notifications": "Meldingsinstellingen - Frigate",
-    "enrichments": "Verrijkingsinstellingen - Frigate",
-    "cameraManagement": "Camera's beheren - Frigate",
-    "cameraReview": "Camera Review Instellingen - Frigate"
+    "general": "Gebruikersinterface-instellingen - DIENST",
+    "frigatePlus": "Frigate+ Instellingen - DIENST",
+    "notifications": "Meldingsinstellingen - DIENST",
+    "enrichments": "Verrijkingsinstellingen - DIENST",
+    "cameraManagement": "Camera's beheren - DIENST",
+    "cameraReview": "Camera Review Instellingen - DIENST"
   },
   "menu": {
     "ui": "Gebruikersinterface",
@@ -296,7 +296,7 @@
       }
     },
     "zones": {
-      "documentTitle": "Bewerkingszone - Frigate",
+      "documentTitle": "Bewerkingszone - DIENST",
       "desc": {
         "title": "Zones stellen je in staat om een specifiek gedeelte van het beeld te definiëren, zodat je kunt bepalen of een object zich binnen dat gebied bevindt of niet.",
         "documentation": "Documentatie"
@@ -350,7 +350,7 @@
     },
     "motionMasks": {
       "label": "Bewegingsmasker",
-      "documentTitle": "Bewerken Bewegingsmasker - Frigate",
+      "documentTitle": "Bewerken Bewegingsmasker - DIENST",
       "desc": {
         "documentation": "Documentatie",
         "title": "Bewegingsmaskers worden gebruikt om te voorkomen dat ongewenste vormen van beweging een detectie activeren. Te veel maskeren maakt het moeilijker om objecten te volgen."
@@ -378,7 +378,7 @@
     },
     "objectMasks": {
       "label": "Objectmaskers",
-      "documentTitle": "Objectmasker bewerken - Frigate",
+      "documentTitle": "Objectmasker bewerken - DIENST",
       "desc": {
         "title": "Objectfiltermaskers worden gebruikt om valse positieven uit te filteren voor een bepaald objecttype op basis van locatie.",
         "documentation": "Documentatie"

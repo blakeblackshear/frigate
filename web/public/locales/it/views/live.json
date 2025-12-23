@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Dal vivo - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Dal vivo - Frigate",
+  "documentTitle": "Dal vivo - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Dal vivo - DIENST",
   "lowBandwidthMode": "Modalità a bassa larghezza di banda",
   "twoWayTalk": {
     "enable": "Abilita audio bidirezionale",

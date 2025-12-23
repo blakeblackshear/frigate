@@ -21,7 +21,7 @@
     "placeholder": "Introduïu un nom per a aquesta col·lecció",
     "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guions."
   },
-  "documentTitle": "Biblioteca de rostres - Frigate",
+  "documentTitle": "Biblioteca de rostres - DIENST",
   "uploadFaceImage": {
     "title": "Puja una imatge del rostre",
     "desc": "Carregar una imatge per escanejar els rostres i incloure per a {{pageToggle}}"

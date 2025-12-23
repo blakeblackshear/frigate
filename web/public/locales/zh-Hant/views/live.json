@@ -1,6 +1,6 @@
 {
-  "documentTitle": "即時畫面 - Frigate",
-  "documentTitle.withCamera": "{{camera}} - 即時畫面 - Frigate",
+  "documentTitle": "即時畫面 - DIENST",
+  "documentTitle.withCamera": "{{camera}} - 即時畫面 - DIENST",
   "lowBandwidthMode": "低流量模式",
   "twoWayTalk": {
     "enable": "啟用雙向通話",

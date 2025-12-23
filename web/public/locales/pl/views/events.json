@@ -19,9 +19,9 @@
     "aria": "Wybierz zdarzenia",
     "noFoundForTimePeriod": "Brak zdarzeń w tym okresie czasu."
   },
-  "documentTitle": "Przegląd - Frigate",
+  "documentTitle": "Przegląd - DIENST",
   "recordings": {
-    "documentTitle": "Nagrania - Frigate"
+    "documentTitle": "Nagrania - DIENST"
   },
   "markAsReviewed": "Oznacz jako przejrzane",
   "markTheseItemsAsReviewed": "Oznacz te elementy jako przejrzane",

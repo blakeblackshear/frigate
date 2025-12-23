@@ -3,7 +3,7 @@
   "copyConfig": "Скопировать конфигурацию",
   "saveAndRestart": "Сохранить и перезапустить",
   "saveOnly": "Только сохранить",
-  "documentTitle": "Редактор конфигурации - Frigate",
+  "documentTitle": "Редактор конфигурации - DIENST",
   "toast": {
     "success": {
       "copyToClipboard": "Конфигурация скопирована в буфер обмена."

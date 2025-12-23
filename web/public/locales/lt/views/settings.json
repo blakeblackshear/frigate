@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "default": "Nustatymai - Frigate",
-    "authentication": "Autentifikavimo Nustatymai - Frigate",
-    "camera": "Kameros Nustatymai - Frigate",
-    "object": "Debug - Frigate",
-    "general": "Bendrieji Nustatymai - Frigate",
-    "frigatePlus": "Frigate+ Nustatymai - Frigate",
-    "notifications": "Pranešimų Nustatymai - Frigate",
-    "motionTuner": "Judesio Derinimas - Frigate",
-    "enrichments": "Patobulinimų Nustatymai - Frigate",
-    "masksAndZones": "Maskavimo ir Zonų redaktorius - Frigate",
-    "cameraManagement": "Valdyti Kameras - Frigate",
-    "cameraReview": "Kameros Peržiūros Nustatymai - Frigate"
+    "default": "Nustatymai - DIENST",
+    "authentication": "Autentifikavimo Nustatymai - DIENST",
+    "camera": "Kameros Nustatymai - DIENST",
+    "object": "Debug - DIENST",
+    "general": "Bendrieji Nustatymai - DIENST",
+    "frigatePlus": "Frigate+ Nustatymai - DIENST",
+    "notifications": "Pranešimų Nustatymai - DIENST",
+    "motionTuner": "Judesio Derinimas - DIENST",
+    "enrichments": "Patobulinimų Nustatymai - DIENST",
+    "masksAndZones": "Maskavimo ir Zonų redaktorius - DIENST",
+    "cameraManagement": "Valdyti Kameras - DIENST",
+    "cameraReview": "Kameros Peržiūros Nustatymai - DIENST"
   },
   "menu": {
     "ui": "UI",
@@ -223,7 +223,7 @@
       "point_few": "{{count}} taškai",
       "point_other": "{{count}} taškų",
       "label": "Zonos",
-      "documentTitle": "Redaguoti Zonas - Frigate",
+      "documentTitle": "Redaguoti Zonas - DIENST",
       "desc": {
         "title": "Zonos leidžia apibrėžti specifinį kadro plotą tam, kad galėtumėte įvardinti ar objektas yra tam tikrame plote.",
         "documentation": "Dokumentacija"
@@ -287,7 +287,7 @@
         "title": "Judesio maskuoti dengia {{polygonArea}}% kameros ploto. Didelės judesio maskuotės nerekomenduojamos."
       },
       "label": "Judesio Maskuotė",
-      "documentTitle": "Redaguoti Judesio Maskuotę - Frigate",
+      "documentTitle": "Redaguoti Judesio Maskuotę - DIENST",
       "add": "Nauja Judesio Maskuotė",
       "edit": "Redaguoti Judesio Maskuotę",
       "clickDrawPolygon": "Spragtelti kad piešti poligoną ant atvaizdo.",
@@ -303,7 +303,7 @@
       "point_few": "{{count}} taškai",
       "point_other": "{{count}} taškų",
       "label": "Objekto Maskuotė",
-      "documentTitle": "Redaguoti Objekto Maskuotę - Frigate",
+      "documentTitle": "Redaguoti Objekto Maskuotę - DIENST",
       "desc": {
         "title": "Objektų filtravimo maskuotės naudojamos išfiltruoti klaidingus teigiamus rezultatus pagal vietą parinktam objekto tipui.",
         "documentation": "Dokumentacija"

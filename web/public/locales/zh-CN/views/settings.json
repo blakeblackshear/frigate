@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "设置 - Frigate",
-    "authentication": "身份验证设置 - Frigate",
-    "camera": "摄像头设置 - Frigate",
-    "classification": "分类设置 - Frigate",
-    "masksAndZones": "遮罩和区域编辑器 - Frigate",
-    "motionTuner": "画面变动调整器 - Frigate",
-    "object": "调试 - Frigate",
-    "general": "页面设置 - Frigate",
-    "frigatePlus": "Frigate+ 设置 - Frigate",
-    "notifications": "通知设置 - Frigate",
-    "enrichments": "增强功能设置 - Frigate",
-    "cameraManagement": "管理摄像头 - Frigate",
-    "cameraReview": "摄像头核查设置 - Frigate"
+    "default": "设置 - DIENST",
+    "authentication": "身份验证设置 - DIENST",
+    "camera": "摄像头设置 - DIENST",
+    "classification": "分类设置 - DIENST",
+    "masksAndZones": "遮罩和区域编辑器 - DIENST",
+    "motionTuner": "画面变动调整器 - DIENST",
+    "object": "调试 - DIENST",
+    "general": "页面设置 - DIENST",
+    "frigatePlus": "Frigate+ 设置 - DIENST",
+    "notifications": "通知设置 - DIENST",
+    "enrichments": "增强功能设置 - DIENST",
+    "cameraManagement": "管理摄像头 - DIENST",
+    "cameraReview": "摄像头核查设置 - DIENST"
   },
   "menu": {
     "ui": "界面设置",
@@ -297,7 +297,7 @@
     },
     "zones": {
       "label": "区域",
-      "documentTitle": "编辑区域 - Frigate",
+      "documentTitle": "编辑区域 - DIENST",
       "desc": {
         "title": "该功能允许你定义特定区域，以便你可以确定特定目标或物体是否在该区域内。",
         "documentation": "文档"
@@ -349,7 +349,7 @@
     },
     "motionMasks": {
       "label": "画面变动遮罩",
-      "documentTitle": "编辑画面变动遮罩 - Frigate",
+      "documentTitle": "编辑画面变动遮罩 - DIENST",
       "desc": {
         "title": "画面变动遮罩用于防止触发不必要的画面变动检测。过度的设置遮罩将使目标更加难以被追踪。",
         "documentation": "文档"
@@ -376,7 +376,7 @@
     },
     "objectMasks": {
       "label": "目标遮罩",
-      "documentTitle": "编辑目标遮罩 - Frigate",
+      "documentTitle": "编辑目标遮罩 - DIENST",
       "desc": {
         "title": "目标过滤器用于防止特定位置出现对某个目标/物体的误报。",
         "documentation": "文档"

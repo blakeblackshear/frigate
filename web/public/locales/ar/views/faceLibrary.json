@@ -13,7 +13,7 @@
     "face": "تفاصيل الوجه",
     "faceDesc": "تفاصيل الكائن المتتبع الذي أنشأ هذا الوجه"
   },
-  "documentTitle": "مكتبة الوجوه - Frigate",
+  "documentTitle": "مكتبة الوجوه - DIENST",
   "uploadFaceImage": {
     "title": "رفع صورة الوجه",
     "desc": "قم بتحميل صورة لمسح الوجوه وإدراجها في {{pageToggle}}"

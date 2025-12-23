@@ -286,12 +286,12 @@
     "desc": "Administratorji imajo poln dostop do vseh funkcij Frigate uporabniškega vmesnika. Gledalci so omejeni na gledanje kamer, zgodovine posnetkov in pregledovanje dogodkov."
   },
   "accessDenied": {
-    "documentTitle": "Dostop zavrnjen - Frigate",
+    "documentTitle": "Dostop zavrnjen - DIENST",
     "title": "Dostop Zavrnjen",
     "desc": "Nimate pravic za ogled te strani."
   },
   "notFound": {
-    "documentTitle": "Ni Najdeno - Frigate",
+    "documentTitle": "Ni Najdeno - DIENST",
     "title": "404",
     "desc": "Stran ni najdena"
   },

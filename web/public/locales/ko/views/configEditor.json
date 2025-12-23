@@ -1,5 +1,5 @@
 {
-  "documentTitle": "설정 편집기 - Frigate",
+  "documentTitle": "설정 편집기 - DIENST",
   "configEditor": "설정 편집기",
   "safeConfigEditor": "설정 편집기 (안전 모드)",
   "safeModeDescription": "설정 오류로 인해 Frigate가 안전 모드로 전환되었습니다.",

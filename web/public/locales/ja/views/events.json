@@ -19,9 +19,9 @@
     "aria": "イベントを選択",
     "noFoundForTimePeriod": "この期間のイベントは見つかりません。"
   },
-  "documentTitle": "レビュー - Frigate",
+  "documentTitle": "レビュー - DIENST",
   "recordings": {
-    "documentTitle": "録画 - Frigate"
+    "documentTitle": "録画 - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "直近24時間"

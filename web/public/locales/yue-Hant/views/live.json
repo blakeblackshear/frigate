@@ -1,5 +1,5 @@
 {
-  "documentTitle": "即時畫面 - Frigate",
+  "documentTitle": "即時畫面 - DIENST",
   "cameraAudio": {
     "disable": "停用鏡頭音訊",
     "enable": "啟用鏡頭音訊"
@@ -52,7 +52,7 @@
     "disable": "停用雙向通話"
   },
   "lowBandwidthMode": "低頻寬模式",
-  "documentTitle.withCamera": "{{camera}} - 即時畫面 - Frigate",
+  "documentTitle.withCamera": "{{camera}} - 即時畫面 - DIENST",
   "recording": {
     "disable": "停用錄影",
     "enable": "啟用錄影"

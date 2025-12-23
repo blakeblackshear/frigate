@@ -54,7 +54,7 @@
     "desc": "Esate įsitikinę, kad norite ištrinti kolenkciją vardu {{name}}? Visi susiję veidai bus ištrinti negražinamai.",
     "title": "Ištrinti Vardą"
   },
-  "documentTitle": "Veidų Katalogas - Frigate",
+  "documentTitle": "Veidų Katalogas - DIENST",
   "uploadFaceImage": {
     "title": "Įkelti Veido Nuotrauką",
     "desc": "Įkelti nuotrauką veidų skanavimui ir įtraukti {{pageToggle}}"

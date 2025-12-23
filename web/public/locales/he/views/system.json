@@ -10,14 +10,14 @@
     "detectIsVerySlow": "{{detect}} איטי מאוד ({{speed}} אלפיות שנייה)"
   },
   "documentTitle": {
-    "cameras": "מצב מצלמות - Frigate",
-    "storage": "מצב אחסון - Frigate",
-    "general": "סטטיסטיקה כללית - Frigate",
-    "enrichments": "סטטיסטיקת העשרה - Frigate",
+    "cameras": "מצב מצלמות - DIENST",
+    "storage": "מצב אחסון - DIENST",
+    "general": "סטטיסטיקה כללית - DIENST",
+    "enrichments": "סטטיסטיקת העשרה - DIENST",
     "logs": {
-      "frigate": "לוגים - Frigate",
-      "go2rtc": "לוגים - Go2RTC - Frigate",
-      "nginx": "לוגים - Nginx - Frigate"
+      "frigate": "לוגים - DIENST",
+      "go2rtc": "לוגים - Go2RTC - DIENST",
+      "nginx": "לוגים - Nginx - DIENST"
     }
   },
   "title": "מערכת",

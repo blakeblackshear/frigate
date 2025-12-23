@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "general": "Algemene Statistieken - Frigate",
+    "general": "Algemene Statistieken - DIENST",
     "logs": {
-      "nginx": "Nginx Logboeken - Frigate",
-      "go2rtc": "Go2RTC Logboeken - Frigate",
-      "frigate": "Frigate Logboek - Frigate"
+      "nginx": "Nginx Logboeken - DIENST",
+      "go2rtc": "Go2RTC Logboeken - DIENST",
+      "frigate": "Frigate Logboek - DIENST"
     },
-    "storage": "Opslag Statistieken - Frigate",
-    "cameras": "Camera Statistieken - Frigate",
-    "enrichments": "Verrijkings Statistieken - Frigate"
+    "storage": "Opslag Statistieken - DIENST",
+    "cameras": "Camera Statistieken - DIENST",
+    "enrichments": "Verrijkings Statistieken - DIENST"
   },
   "title": "Systeem",
   "metrics": "Systeemstatistieken",

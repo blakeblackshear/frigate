@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "cameras": "Kamerų Statistika - Frigate",
-    "storage": "Saugyklos Statistika - Frigate",
+    "cameras": "Kamerų Statistika - DIENST",
+    "storage": "Saugyklos Statistika - DIENST",
     "logs": {
-      "frigate": "Frigate Žurnalas - Frigate",
-      "go2rtc": "Go2RTC Žurnalas - Frigate",
-      "nginx": "Nginx Žurnalas - Frigate"
+      "frigate": "Frigate Žurnalas - DIENST",
+      "go2rtc": "Go2RTC Žurnalas - DIENST",
+      "nginx": "Nginx Žurnalas - DIENST"
     },
-    "general": "Bendroji Statistika - Frigate",
-    "enrichments": "Pagerinimų Statistika - Frigate"
+    "general": "Bendroji Statistika - DIENST",
+    "enrichments": "Pagerinimų Statistika - DIENST"
   },
   "title": "Sistema",
   "metrics": "Sistemos metrikos",

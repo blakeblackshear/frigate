@@ -1,13 +1,13 @@
 {
   "documentTitle": {
-    "cameras": "Cameras Stats - Dienst",
-    "storage": "Storage Stats - Dienst",
-    "general": "General Stats - Dienst",
-    "enrichments": "Enrichments Stats - Dienst",
+    "cameras": "Cameras Stats - DIENST",
+    "storage": "Storage Stats - DIENST",
+    "general": "General Stats - DIENST",
+    "enrichments": "Enrichments Stats - DIENST",
     "logs": {
-      "frigate": "Frigate Logs - Dienst",
-      "go2rtc": "Go2RTC Logs - Dienst",
-      "nginx": "Nginx Logs - Dienst"
+      "frigate": "Frigate Logs - DIENST",
+      "go2rtc": "Go2RTC Logs - DIENST",
+      "nginx": "Nginx Logs - DIENST"
     }
   },
   "title": "System",

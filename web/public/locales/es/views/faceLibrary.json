@@ -14,7 +14,7 @@
     "scoreInfo": "La puntuación de etiqueta secundaria es la puntuación ponderada de todas las confidencias de rostros reconocidos, por lo que puede diferir de la puntuación mostrada en la instantánea.",
     "unknown": "Desconocido"
   },
-  "documentTitle": "Biblioteca de Rostros - Frigate",
+  "documentTitle": "Biblioteca de Rostros - DIENST",
   "uploadFaceImage": {
     "title": "Subir imagen del rostro",
     "desc": "Sube una imagen para escanear rostros e incluirla en {{pageToggle}}"

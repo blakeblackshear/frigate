@@ -279,12 +279,12 @@
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",
-    "documentTitle": "Accesso vietato - Frigate",
+    "documentTitle": "Accesso vietato - DIENST",
     "title": "Accesso vietato"
   },
   "notFound": {
     "desc": "Pagina non trovata",
-    "documentTitle": "Non trovato - Frigate",
+    "documentTitle": "Non trovato - DIENST",
     "title": "404"
   },
   "toast": {

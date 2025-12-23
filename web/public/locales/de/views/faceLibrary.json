@@ -24,7 +24,7 @@
     "desc": "Erstelle eine neue Kollektion",
     "nextSteps": "Um eine solide Grundlage zu bilden: <li> Benutze den \"Aktuelle Erkennungen\" Tab, um Bilder für jede erkannte Person auszuwählen und zu trainieren.</li> <li>Konzentriere dich für gute Ergebnisse auf Frontalfotos; vermeide Bilder zu Trainingszwecken, bei denen Gesichter aus einem Winkel erfasst wurden.</li></ul>"
   },
-  "documentTitle": "Gesichtsbibliothek - Frigate",
+  "documentTitle": "Gesichtsbibliothek - DIENST",
   "selectItem": "Wähle {{item}}",
   "selectFace": "Wähle Gesicht",
   "imageEntry": {

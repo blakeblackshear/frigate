@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Paramètres - Frigate",
-    "authentication": "Paramètres d'authentification - Frigate",
-    "camera": "Paramètres des caméras - Frigate",
-    "classification": "Paramètres de classification - Frigate",
-    "motionTuner": "Réglage de la détection de mouvement - Frigate",
-    "general": "Paramètres de l'interface utilisateur - Frigate",
-    "masksAndZones": "Éditeur de masques et de zones - Frigate",
-    "object": "Débogage - Frigate",
-    "frigatePlus": "Paramètres Frigate+ - Frigate",
-    "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres d'enrichissements - Frigate",
-    "cameraManagement": "Gestion des caméras - Frigate",
-    "cameraReview": "Paramètres des activités caméra - Frigate"
+    "default": "Paramètres - DIENST",
+    "authentication": "Paramètres d'authentification - DIENST",
+    "camera": "Paramètres des caméras - DIENST",
+    "classification": "Paramètres de classification - DIENST",
+    "motionTuner": "Réglage de la détection de mouvement - DIENST",
+    "general": "Paramètres de l'interface utilisateur - DIENST",
+    "masksAndZones": "Éditeur de masques et de zones - DIENST",
+    "object": "Débogage - DIENST",
+    "frigatePlus": "Paramètres Frigate+ - DIENST",
+    "notifications": "Paramètres de notification - DIENST",
+    "enrichments": "Paramètres d'enrichissements - DIENST",
+    "cameraManagement": "Gestion des caméras - DIENST",
+    "cameraReview": "Paramètres des activités caméra - DIENST"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -385,7 +385,7 @@
       }
     },
     "zones": {
-      "documentTitle": "Modifier la zone - Frigate",
+      "documentTitle": "Modifier la zone - DIENST",
       "desc": {
         "title": "Les zones vous permettent de définir une zone spécifique de l'image afin de déterminer si un objet s'y trouve.",
         "documentation": "Documentation"
@@ -440,7 +440,7 @@
     },
     "motionMasks": {
       "label": "Masque de mouvement",
-      "documentTitle": "Modifier le masque de mouvement - Frigate",
+      "documentTitle": "Modifier le masque de mouvement - DIENST",
       "context": {
         "documentation": "Lire la documentation",
         "title": "Les masques de mouvement servent à empêcher les mouvements indésirables de déclencher la détection (par exemple : branches d'arbres, horodatage des caméras). Ils doivent être utilisés <em>avec parcimonie</em>, car un surmasquage complique le suivi des objets."
@@ -490,7 +490,7 @@
       "point_many": "{{count}} points",
       "point_other": "{{count}} points",
       "add": "Ajouter un masque d'objet",
-      "documentTitle": "Modifier le masque d'objet - Frigate",
+      "documentTitle": "Modifier le masque d'objet - DIENST",
       "context": "Les masques de filtrage d'objets sont utilisés pour filtrer les faux positifs pour un type d'objet donné en fonction de l'emplacement."
     },
     "filter": {

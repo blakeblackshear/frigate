@@ -735,6 +735,7 @@ class FrigateConfig(FrigateBaseModel):
     def load(cls, **kwargs):
         """Loads the Frigate config file, runs migrations, and creates the config object."""
         config_path = find_config_file()
+        logger.info(f"Using configuration file: {config_path}")
 
         # No configuration file found, create one.
         new_config = False

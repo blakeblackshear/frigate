@@ -21,9 +21,9 @@
   "selected_other": "{{count}} επελεγμένα",
   "camera": "Κάμερα",
   "detected": "ανιχνέυτηκε",
-  "documentTitle": "Προεσκόπιση - Frigate",
+  "documentTitle": "Προεσκόπιση - DIENST",
   "recordings": {
-    "documentTitle": "Καταγραφές - Frigate"
+    "documentTitle": "Καταγραφές - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "Τελευταίες 24 Ώρες"

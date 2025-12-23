@@ -268,12 +268,12 @@
     "more": "Daugiau puslapių"
   },
   "accessDenied": {
-    "documentTitle": "Priegai Nesuteikta - Frigate",
+    "documentTitle": "Priegai Nesuteikta - DIENST",
     "title": "Prieiga Nesuteikta",
     "desc": "Jūs neturite leidimo žiūrėti šį puslapį."
   },
   "notFound": {
-    "documentTitle": "Nerasta - Frigate",
+    "documentTitle": "Nerasta - DIENST",
     "title": "404",
     "desc": "Puslapis nerastas"
   },

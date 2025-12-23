@@ -14,7 +14,7 @@
     "label": "Olaylar"
   },
   "recordings": {
-    "documentTitle": "Kayıtlar - Frigate"
+    "documentTitle": "Kayıtlar - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "Son 24 Saat"
@@ -24,7 +24,7 @@
     "button": "Yeni İncelenecek Öğeler Var",
     "label": "Yeni inceleme öğelerini göster"
   },
-  "documentTitle": "İncele - Frigate",
+  "documentTitle": "İncele - DIENST",
   "motion": {
     "label": "Hareket",
     "only": "Yalnızca hareket"

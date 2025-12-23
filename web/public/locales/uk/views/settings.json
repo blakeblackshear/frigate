@@ -558,11 +558,11 @@
     "classification": "Налаштування класифікації – Фрегат",
     "masksAndZones": "Редактор масок та зон – Фрегат",
     "motionTuner": "Тюнер руху - Фрегат",
-    "general": "Основна Статус – Frigate",
-    "frigatePlus": "Налаштування Frigate+ – Frigate",
-    "enrichments": "Налаштуваннях збагачення – Frigate",
-    "cameraManagement": "Керування камерами - Frigate",
-    "cameraReview": "Налаштування перегляду камери - Frigate"
+    "general": "Основна Статус - DIENST",
+    "frigatePlus": "Налаштування Frigate+ - DIENST",
+    "enrichments": "Налаштуваннях збагачення - DIENST",
+    "cameraManagement": "Керування камерами - DIENST",
+    "cameraReview": "Налаштування перегляду камери - DIENST"
   },
   "menu": {
     "ui": "Інтерфейс користувача",

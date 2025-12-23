@@ -262,10 +262,10 @@
   "accessDenied": {
     "title": "הגישה נדחתה",
     "desc": "אין לך הרשאה לצפות בדף הזה.",
-    "documentTitle": "גישה נדחתה - Frigate"
+    "documentTitle": "גישה נדחתה - DIENST"
   },
   "notFound": {
-    "documentTitle": "לא נמצא - Frigate",
+    "documentTitle": "לא נמצא - DIENST",
     "title": "404",
     "desc": "דף לא נמצא"
   },

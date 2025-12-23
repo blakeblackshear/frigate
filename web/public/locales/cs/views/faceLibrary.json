@@ -45,7 +45,7 @@
     "placeholder": "Zadejte název pro tuto kolekci",
     "invalidName": "Neplatný název. Názvy mohou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a pomlčky."
   },
-  "documentTitle": "Knihovna obličejů - Frigate",
+  "documentTitle": "Knihovna obličejů - DIENST",
   "uploadFaceImage": {
     "title": "Nahrát obrázek obličeje",
     "desc": "Nahrajte obrázek pro skenování tváří a zahrňte jej pro {{pageToggle}}"

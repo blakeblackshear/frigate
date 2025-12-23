@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "default": "Nastavenia - Frigate",
+    "default": "Nastavenia - DIENST",
     "authentication": "Nastavenie autentifikácie- Frigate",
     "camera": "Nastavenia Kamier– Frigate",
-    "enrichments": "Nastavenia obohatenia – Frigate",
-    "masksAndZones": "Editor masky a zón - Frigate",
-    "motionTuner": "Ladič detekcie pohybu - Frigate",
-    "object": "Ladenie - Frigate",
-    "general": "UI nastavenia – Frigate",
-    "frigatePlus": "Nastavenia Frigate+ – Frigate",
-    "notifications": "Nastavenia upozornení – Frigate",
-    "cameraManagement": "Manažment kamier - Frigate",
-    "cameraReview": "Nastavenie kamier - Frigate"
+    "enrichments": "Nastavenia obohatenia - DIENST",
+    "masksAndZones": "Editor masky a zón - DIENST",
+    "motionTuner": "Ladič detekcie pohybu - DIENST",
+    "object": "Ladenie - DIENST",
+    "general": "UI nastavenia - DIENST",
+    "frigatePlus": "Nastavenia Frigate+ - DIENST",
+    "notifications": "Nastavenia upozornení - DIENST",
+    "cameraManagement": "Manažment kamier - DIENST",
+    "cameraReview": "Nastavenie kamier - DIENST"
   },
   "menu": {
     "ui": "Uživaťelské rozohranie",
@@ -291,7 +291,7 @@
     },
     "zones": {
       "label": "Zóny",
-      "documentTitle": "Upraviť Zónu - Frigate",
+      "documentTitle": "Upraviť Zónu - DIENST",
       "desc": {
         "title": "Zóny umožňujú definovať konkrétnu oblasť v zábere, vďaka čomu je možné určiť, či sa objekt nachádza v danej oblasti alebo nie.",
         "documentation": "Dokumentácia"
@@ -344,7 +344,7 @@
     },
     "motionMasks": {
       "label": "Maska Detekcia pohybu",
-      "documentTitle": "Editovať Masku Detekcia pohybu - Frigate",
+      "documentTitle": "Editovať Masku Detekcia pohybu - DIENST",
       "desc": {
         "title": "Masky detekcie pohybu slúžia na zabránenie nežiaducim typom pohybu v spustení detekcie. Príliš rozsiahle maskovanie však môže sťažiť sledovanie objektov.",
         "documentation": "Dokumentácia"
@@ -371,7 +371,7 @@
     },
     "objectMasks": {
       "label": "Masky Objektu",
-      "documentTitle": "Upraviť Masku Objektu - Frigate",
+      "documentTitle": "Upraviť Masku Objektu - DIENST",
       "desc": {
         "title": "Masky filtrovania objektov slúžia na odfiltrovanie falošných detekcií daného typu objektu na základe jeho umiestnenia.",
         "documentation": "Dokumentácia"

@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Настройки - Frigate",
-    "camera": "Настройки камеры - Frigate",
-    "masksAndZones": "Маски и Зоны - Frigate",
-    "motionTuner": "Детекции движения - Frigate",
-    "general": "Настройки интерфейса - Frigate",
-    "frigatePlus": "Настройки Frigate+ - Frigate",
-    "authentication": "Настройки аутентификации - Frigate",
-    "classification": "Настройки распознавания - Frigate",
-    "object": "Отладка - Frigate",
-    "notifications": "Настройки уведомлений - Frigate",
-    "enrichments": "Настройки обогащения - Frigate",
-    "cameraManagement": "Управление камерами - Frigate",
-    "cameraReview": "Настройки просмотра камеры - Frigate"
+    "default": "Настройки - DIENST",
+    "camera": "Настройки камеры - DIENST",
+    "masksAndZones": "Маски и Зоны - DIENST",
+    "motionTuner": "Детекции движения - DIENST",
+    "general": "Настройки интерфейса - DIENST",
+    "frigatePlus": "Настройки Frigate+ - DIENST",
+    "authentication": "Настройки аутентификации - DIENST",
+    "classification": "Настройки распознавания - DIENST",
+    "object": "Отладка - DIENST",
+    "notifications": "Настройки уведомлений - DIENST",
+    "enrichments": "Настройки обогащения - DIENST",
+    "cameraManagement": "Управление камерами - DIENST",
+    "cameraReview": "Настройки просмотра камеры - DIENST"
   },
   "menu": {
     "cameras": "Настройки камеры",
@@ -400,7 +400,7 @@
         "lineDDistance": "Длина линии D ({{unit}})"
       },
       "label": "Зоны",
-      "documentTitle": "Редактирование зоны - Frigate",
+      "documentTitle": "Редактирование зоны - DIENST",
       "desc": {
         "title": "Зоны позволяют определить конкретную область кадра, чтобы можно было определить, находится ли объект в заданной области.",
         "documentation": "Документация"
@@ -460,7 +460,7 @@
       "point_few": "{{count}} точки",
       "point_many": "{{count}} точек",
       "label": "Маска движения",
-      "documentTitle": "Редактирование маски движения - Frigate",
+      "documentTitle": "Редактирование маски движения - DIENST",
       "toast": {
         "success": {
           "title": "{{polygonName}} сохранена. Перезапустите Frigate для применения изменений.",
@@ -536,7 +536,7 @@
         "documentation": "Документация",
         "title": "Маски фильтра объектов используются для исключения ложных срабатываний определённого типа объектов в зависимости от местоположения."
       },
-      "documentTitle": "Редактирование маски объектов - Frigate",
+      "documentTitle": "Редактирование маски объектов - DIENST",
       "add": "Добавить маску объектов",
       "clickDrawPolygon": "Кликните, чтобы нарисовать полигон на изображении.",
       "edit": "Редактирование маски объектов",

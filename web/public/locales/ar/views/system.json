@@ -5,9 +5,9 @@
     "general": "إحصاءات عامة - فرايجيت",
     "enrichments": "إحصاء العمليات",
     "logs": {
-      "frigate": "سجلات Frigate - Frigate",
+      "frigate": "سجلات Frigate - DIENST",
       "go2rtc": "Go2RTC  سجلات  -  Frigate",
-      "nginx": "سجلات إنجنإكس - Frigate"
+      "nginx": "سجلات إنجنإكس - DIENST"
     }
   },
   "metrics": "مقاييس النظام",

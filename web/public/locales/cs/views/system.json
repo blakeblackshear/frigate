@@ -148,14 +148,14 @@
   },
   "lastRefreshed": "Poslední aktualizace: ",
   "documentTitle": {
-    "cameras": "Statistiky kamer – Frigate",
-    "storage": "Statistiky uložiště - Frigate",
-    "general": "Obecné statistiky - Frigate",
-    "enrichments": "Statistiky obohacení - Frigate",
+    "cameras": "Statistiky kamer - DIENST",
+    "storage": "Statistiky uložiště - DIENST",
+    "general": "Obecné statistiky - DIENST",
+    "enrichments": "Statistiky obohacení - DIENST",
     "logs": {
-      "frigate": "Protokoly Frigate - Frigate",
-      "go2rtc": "Protokoly Go2RTC - Frigate",
-      "nginx": "Protokoly Nginx - Frigate"
+      "frigate": "Protokoly Frigate - DIENST",
+      "go2rtc": "Protokoly Go2RTC - DIENST",
+      "nginx": "Protokoly Nginx - DIENST"
     }
   },
   "title": "Systém",

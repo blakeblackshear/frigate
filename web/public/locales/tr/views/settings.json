@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Ayarlar - Frigate",
-    "classification": "Sınıflandırma Ayarları - Frigate",
-    "camera": "Kamera Ayarları - Frigate",
-    "masksAndZones": "Maske ve Alan Düzenleyici - Frigate",
-    "authentication": "Kimlik Doğrulama Ayarları - Frigate",
-    "motionTuner": "Hareket Algılama Ayarları - Frigate",
-    "frigatePlus": "Frigate+ Ayarları - Frigate",
-    "object": "Hata Ayıklama - Frigate",
-    "general": "Kullanıcı Arayüzü Ayarları – Frigate",
-    "notifications": "Bildirim Ayarları - Frigate",
-    "enrichments": "Zenginleştirme Ayarları - Frigate",
-    "cameraManagement": "Kameraları Yönet - Frigate",
-    "cameraReview": "Kamera İnceleme Ayarları - Frigate"
+    "default": "Ayarlar - DIENST",
+    "classification": "Sınıflandırma Ayarları - DIENST",
+    "camera": "Kamera Ayarları - DIENST",
+    "masksAndZones": "Maske ve Alan Düzenleyici - DIENST",
+    "authentication": "Kimlik Doğrulama Ayarları - DIENST",
+    "motionTuner": "Hareket Algılama Ayarları - DIENST",
+    "frigatePlus": "Frigate+ Ayarları - DIENST",
+    "object": "Hata Ayıklama - DIENST",
+    "general": "Kullanıcı Arayüzü Ayarları - DIENST",
+    "notifications": "Bildirim Ayarları - DIENST",
+    "enrichments": "Zenginleştirme Ayarları - DIENST",
+    "cameraManagement": "Kameraları Yönet - DIENST",
+    "cameraReview": "Kamera İnceleme Ayarları - DIENST"
   },
   "menu": {
     "masksAndZones": "Maskeler / Alanlar",
@@ -296,7 +296,7 @@
     },
     "zones": {
       "label": "Alanlar",
-      "documentTitle": "Alanı Düzenle - Frigate",
+      "documentTitle": "Alanı Düzenle - DIENST",
       "desc": {
         "documentation": "Dökümantasyon",
         "title": "Alanlar, görüntüde belirli bir alanını tanımlamanıza olanak tanır. Böylece bir nesnenin belirli bir alanda olup olmadığını tespit edebilirsiniz."
@@ -373,7 +373,7 @@
       },
       "label": "Hareket Maskesi",
       "edit": "Hareket Maskesini Düzenle",
-      "documentTitle": "Hareket Maskesini Düzenle - Frigate"
+      "documentTitle": "Hareket Maskesini Düzenle - DIENST"
     },
     "objectMasks": {
       "desc": {
@@ -396,7 +396,7 @@
           "title": "{{polygonName}} kaydedildi."
         }
       },
-      "documentTitle": "Nesne Maskesini Düzenle - Frigate",
+      "documentTitle": "Nesne Maskesini Düzenle - DIENST",
       "label": "Nesne Maskeleri",
       "clickDrawPolygon": "Görüntü üzerinde bir çokgen çizmek için tıklayın."
     },

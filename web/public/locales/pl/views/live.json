@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Na żywo - Frigate",
-  "documentTitle.withCamera": "{{camera}}- Na żywo - Frigate",
+  "documentTitle": "Na żywo - DIENST",
+  "documentTitle.withCamera": "{{camera}}- Na żywo - DIENST",
   "lowBandwidthMode": "Tryb niskiej przepustowości",
   "twoWayTalk": {
     "enable": "Włącz komunikację dwukierunkową",

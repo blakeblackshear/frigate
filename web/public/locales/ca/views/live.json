@@ -42,8 +42,8 @@
       }
     }
   },
-  "documentTitle": "Directe - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Directe - Frigate",
+  "documentTitle": "Directe - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Directe - DIENST",
   "lowBandwidthMode": "Mode de baix ample de banda",
   "twoWayTalk": {
     "enable": "Activa la comunicació bidireccional",

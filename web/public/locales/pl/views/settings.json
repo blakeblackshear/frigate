@@ -84,19 +84,19 @@
     }
   },
   "documentTitle": {
-    "default": "Ustawienia - Frigate",
-    "camera": "Ustawienia Kamery - Frigate",
-    "masksAndZones": "Edytor Masek i Stref - Frigate",
-    "frigatePlus": "Ustawienia Frigate+ - Frigate",
-    "classification": "Ustawienia Klasyfikacji - Frigate",
-    "general": "Ustawienia Interfejsu - Frigate",
-    "authentication": "Ustawienia Uwierzytelniania - Frigate",
-    "motionTuner": "Konfigurator Ruchu - Frigate",
-    "object": "Debug - Frigate",
-    "notifications": "Ustawienia powiadomień - Frigate",
-    "enrichments": "Ustawienia wzbogacania - Frigate",
-    "cameraManagement": "Zarządzanie kamerami – Frigate",
-    "cameraReview": "Ustawienia przeglądu kamer - Frigate"
+    "default": "Ustawienia - DIENST",
+    "camera": "Ustawienia Kamery - DIENST",
+    "masksAndZones": "Edytor Masek i Stref - DIENST",
+    "frigatePlus": "Ustawienia Frigate+ - DIENST",
+    "classification": "Ustawienia Klasyfikacji - DIENST",
+    "general": "Ustawienia Interfejsu - DIENST",
+    "authentication": "Ustawienia Uwierzytelniania - DIENST",
+    "motionTuner": "Konfigurator Ruchu - DIENST",
+    "object": "Debug - DIENST",
+    "notifications": "Ustawienia powiadomień - DIENST",
+    "enrichments": "Ustawienia wzbogacania - DIENST",
+    "cameraManagement": "Zarządzanie kamerami - DIENST",
+    "cameraReview": "Ustawienia przeglądu kamer - DIENST"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",
@@ -287,7 +287,7 @@
     },
     "zones": {
       "label": "Strefy",
-      "documentTitle": "Edytuj Strefę - Frigate",
+      "documentTitle": "Edytuj Strefę - DIENST",
       "desc": {
         "title": "Strefy pozwalają na zdefiniowanie konkretnych obszarów kadru, dzięki czemu można sprawdzić, czy obiekt znajduje się w danym obszarze.",
         "documentation": "Dokumentacja"
@@ -348,7 +348,7 @@
       "point_few": "{{count}} punkty",
       "point_many": "{{count}} punktów",
       "clickDrawPolygon": "Kliknij aby narysować wielokąt na obrazie.",
-      "documentTitle": "Edytuj maskę ruchu - Frigate",
+      "documentTitle": "Edytuj maskę ruchu - DIENST",
       "add": "Nowa Maska Ruchu",
       "polygonAreaTooLarge": {
         "tips": "Maski ruchu nie zapobiegają wykrywaniu obiektów. Powinieneś użyć wymaganej strefy zamiast tego.",
@@ -384,7 +384,7 @@
       "point_few": "{{count}} punkty",
       "point_many": "{{count}} punktów",
       "label": "Maski Obiektów",
-      "documentTitle": "Edytuj Maskę Obiektu - Frigate",
+      "documentTitle": "Edytuj Maskę Obiektu - DIENST",
       "desc": {
         "title": "Maski filtrujące obiekty są używane do filtrowania fałszywych detekcji dla danego typu obiektu na podstawie lokalizacji.",
         "documentation": "Dokumentacja"

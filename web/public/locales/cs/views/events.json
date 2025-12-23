@@ -18,7 +18,7 @@
     "aria": "Zvolit události",
     "noFoundForTimePeriod": "Pro toto období nebyly nalezeny žádné události."
   },
-  "documentTitle": "Revize - Frigate",
+  "documentTitle": "Revize - DIENST",
   "camera": "Kamera",
   "calendarFilter": {
     "last24Hours": "Posledních 24 hodin"
@@ -30,7 +30,7 @@
     "button": "Nové položky na kontrolu"
   },
   "recordings": {
-    "documentTitle": "Záznamy - Frigate"
+    "documentTitle": "Záznamy - DIENST"
   },
   "detected": "Detekováno",
   "selected_one": "{{count}} vybráno",

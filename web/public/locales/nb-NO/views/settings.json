@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Innstillinger - Frigate",
-    "authentication": "Autentiseringsinnstillinger - Frigate",
-    "camera": "Kamerainnstillinger - Frigate",
-    "masksAndZones": "Maske- og soneeditor - Frigate",
-    "motionTuner": "Bevegelsesjustering - Frigate",
-    "object": "Test og feilsøk - Frigate",
-    "general": "Innstillinger for brukergrensesnitt - Frigate",
-    "classification": "Klassifiseringsinnstillinger - Frigate",
-    "frigatePlus": "Frigate+ innstillinger - Frigate",
-    "notifications": "Innstillinger for meldingsvarsler - Frigate",
-    "enrichments": "Innstillinger for utvidelser - Frigate",
-    "cameraManagement": "Administrer kameraer - Frigate",
-    "cameraReview": "Innstillinger for kamerainspeksjon - Frigate"
+    "default": "Innstillinger - DIENST",
+    "authentication": "Autentiseringsinnstillinger - DIENST",
+    "camera": "Kamerainnstillinger - DIENST",
+    "masksAndZones": "Maske- og soneeditor - DIENST",
+    "motionTuner": "Bevegelsesjustering - DIENST",
+    "object": "Test og feilsøk - DIENST",
+    "general": "Innstillinger for brukergrensesnitt - DIENST",
+    "classification": "Klassifiseringsinnstillinger - DIENST",
+    "frigatePlus": "Frigate+ innstillinger - DIENST",
+    "notifications": "Innstillinger for meldingsvarsler - DIENST",
+    "enrichments": "Innstillinger for utvidelser - DIENST",
+    "cameraManagement": "Administrer kameraer - DIENST",
+    "cameraReview": "Innstillinger for kamerainspeksjon - DIENST"
   },
   "menu": {
     "classification": "Klassifisering",
@@ -297,7 +297,7 @@
     },
     "zones": {
       "label": "Soner",
-      "documentTitle": "Rediger sone - Frigate",
+      "documentTitle": "Rediger sone - DIENST",
       "edit": "Rediger sone",
       "point_one": "{{count}} punkt",
       "point_other": "{{count}} punkter",
@@ -355,7 +355,7 @@
         "title": "Bevegelsesmasker brukes til å hindre uønsket type bevegelse fra å utløse deteksjon. For mye maskering kan gjøre det vanskeligere å spore objekter."
       },
       "add": "Ny bevegelsesmaske",
-      "documentTitle": "Rediger bevegelsesmaske - Frigate",
+      "documentTitle": "Rediger bevegelsesmaske - DIENST",
       "edit": "Rediger bevegelsesmaske",
       "context": {
         "title": "Bevegelsesmasker brukes til å hindre uønsket type bevegelse fra å utløse deteksjon (eksempel: tregrener, kameratidsstempler). Bevegelsesmasker bør brukes <em>svært sparsomt</em>. For mye maskering vil gjøre det vanskeligere å spore objekter.",
@@ -381,7 +381,7 @@
       "point_one": "{{count}} punkt",
       "point_other": "{{count}} punkter",
       "label": "Objektmasker",
-      "documentTitle": "Rediger objektmaske - Frigate",
+      "documentTitle": "Rediger objektmaske - DIENST",
       "desc": {
         "title": "Objektfiltermasker brukes for å filtrere ut falske positiver for en gitt objekttype basert på plassering.",
         "documentation": "Dokumentasjon"

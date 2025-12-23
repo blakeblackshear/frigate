@@ -37,9 +37,9 @@
     "trackedPoint": "Titik terlacak",
     "clickToSeek": "Klik untuk mencari waktu ini"
   },
-  "documentTitle": "Tinjauan - Frigate",
+  "documentTitle": "Tinjauan - DIENST",
   "recordings": {
-    "documentTitle": "Rekaman - Frigate"
+    "documentTitle": "Rekaman - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "24 Jam Terakhir"

@@ -280,12 +280,12 @@
     "more": "More pages"
   },
   "accessDenied": {
-    "documentTitle": "Access Denied - Dienst",
+    "documentTitle": "Access Denied - DIENST",
     "title": "Access Denied",
     "desc": "You don't have permission to view this page."
   },
   "notFound": {
-    "documentTitle": "Not Found - Dienst",
+    "documentTitle": "Not Found - DIENST",
     "title": "404",
     "desc": "Page not found"
   },

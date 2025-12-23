@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "storage": "Statistici Stocare - Frigate",
-    "cameras": "Statistici Camere - Frigate",
-    "general": "Statistici Generale - Frigate",
+    "storage": "Statistici Stocare - DIENST",
+    "cameras": "Statistici Camere - DIENST",
+    "general": "Statistici Generale - DIENST",
     "logs": {
-      "go2rtc": "Jurnal Go2RTC - Frigate",
-      "nginx": "Jurnal Nginx - Frigate",
-      "frigate": "Jurnal Frigate - Frigate"
+      "go2rtc": "Jurnal Go2RTC - DIENST",
+      "nginx": "Jurnal Nginx - DIENST",
+      "frigate": "Jurnal Frigate - DIENST"
     },
-    "enrichments": "Statistici îmbogățiri - Frigate"
+    "enrichments": "Statistici îmbogățiri - DIENST"
   },
   "general": {
     "hardwareInfo": {

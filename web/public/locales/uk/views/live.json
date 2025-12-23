@@ -105,8 +105,8 @@
       "label": "Редагувати групу камер"
     }
   },
-  "documentTitle": "Пряма трансляція - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Пряма трансляція - Frigate",
+  "documentTitle": "Пряма трансляція - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Пряма трансляція - DIENST",
   "lowBandwidthMode": "Економічний режим",
   "twoWayTalk": {
     "enable": "Увімкнути двосторонню розмову",

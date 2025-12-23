@@ -11,7 +11,7 @@
       "savingError": "Error al guardar la configuración"
     }
   },
-  "documentTitle": "Editor de Configuración - Frigate",
+  "documentTitle": "Editor de Configuración - DIENST",
   "confirm": "¿Salir sin guardar?",
   "safeConfigEditor": "Editor de Configuración (Modo Seguro)",
   "safeModeDescription": "Frigate esta en modo seguro debido a un error en la configuración."

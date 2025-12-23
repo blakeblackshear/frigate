@@ -281,10 +281,10 @@
   "accessDenied": {
     "title": "Acces refuzat",
     "desc": "Nu ai permisiunea să vizualizezi această pagină.",
-    "documentTitle": "Acces refuzat - Frigate"
+    "documentTitle": "Acces refuzat - DIENST"
   },
   "notFound": {
-    "documentTitle": "Nu a fost găsit - Frigate",
+    "documentTitle": "Nu a fost găsit - DIENST",
     "title": "404",
     "desc": "Pagină negăsită"
   },

@@ -57,7 +57,7 @@
     "label": "sivutus"
   },
   "accessDenied": {
-    "documentTitle": "Pääsy kielletty - Frigate",
+    "documentTitle": "Pääsy kielletty - DIENST",
     "title": "Pääsy kielletty",
     "desc": "Sinulla ei ole oikeuksia tarkastella tätä sivua."
   },
@@ -68,7 +68,7 @@
     "title": "Rooli"
   },
   "notFound": {
-    "documentTitle": "Ei löytynyt - Frigate",
+    "documentTitle": "Ei löytynyt - DIENST",
     "title": "404",
     "desc": "Sivua ei löytynyt"
   },

@@ -29,9 +29,9 @@
     "trackedPoint": "추적 포인트",
     "clickToSeek": "이 시점으로 이동"
   },
-  "documentTitle": "다시 보기 - Frigate",
+  "documentTitle": "다시 보기 - DIENST",
   "recordings": {
-    "documentTitle": "녹화 - Frigate"
+    "documentTitle": "녹화 - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "최근 24시간"

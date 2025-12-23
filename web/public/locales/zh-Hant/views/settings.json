@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "default": "設定 - Frigate",
-    "authentication": "認證設定 - Frigate",
-    "camera": "鏡頭設定 - Frigate",
-    "enrichments": "進階功能設定 - Frigate",
-    "general": "使用者介面設定 - Frigate",
-    "frigatePlus": "Frigate+ 設定 - Frigate",
-    "notifications": "通知設定 - Frigate",
-    "masksAndZones": "遮罩與區域編輯器 - Frigate",
-    "motionTuner": "移動偵測調教器 - Frigate",
-    "object": "除錯 - Frigate",
-    "cameraManagement": "管理鏡頭 - Frigate",
-    "cameraReview": "相機預覽設置 - Frigate"
+    "default": "設定 - DIENST",
+    "authentication": "認證設定 - DIENST",
+    "camera": "鏡頭設定 - DIENST",
+    "enrichments": "進階功能設定 - DIENST",
+    "general": "使用者介面設定 - DIENST",
+    "frigatePlus": "Frigate+ 設定 - DIENST",
+    "notifications": "通知設定 - DIENST",
+    "masksAndZones": "遮罩與區域編輯器 - DIENST",
+    "motionTuner": "移動偵測調教器 - DIENST",
+    "object": "除錯 - DIENST",
+    "cameraManagement": "管理鏡頭 - DIENST",
+    "cameraReview": "相機預覽設置 - DIENST"
   },
   "menu": {
     "ui": "使用者介面",

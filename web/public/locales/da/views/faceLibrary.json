@@ -11,7 +11,7 @@
     "unknown": "Ukendt",
     "scoreInfo": "Scoren er et vægtet gennemsnit af alle ansigtsscorer, vægtet efter ansigtets størrelse på hvert billede."
   },
-  "documentTitle": "Ansigtsbibliotek - Frigate",
+  "documentTitle": "Ansigtsbibliotek - DIENST",
   "uploadFaceImage": {
     "title": "Upload ansigtsbillede",
     "desc": "Upload et billede for at scanne efter ansigter og inkludere det for {{pageToggle}}"

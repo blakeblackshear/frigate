@@ -1,13 +1,13 @@
 {
   "documentTitle": {
-    "cameras": "Štatistiky kamier - Frigate",
-    "storage": "Štatistiky úložiska - Frigate",
-    "general": "Všeobecné štatistiky - Frigate",
-    "enrichments": "Štatistiky obohatenia - Frigate",
+    "cameras": "Štatistiky kamier - DIENST",
+    "storage": "Štatistiky úložiska - DIENST",
+    "general": "Všeobecné štatistiky - DIENST",
+    "enrichments": "Štatistiky obohatenia - DIENST",
     "logs": {
-      "frigate": "Protokoly Frigate - Frigate",
-      "go2rtc": "Protokoly Go2RTC - Frigate",
-      "nginx": "Protokoly Ngnix - Frigate"
+      "frigate": "Protokoly Frigate - DIENST",
+      "go2rtc": "Protokoly Go2RTC - DIENST",
+      "nginx": "Protokoly Ngnix - DIENST"
     }
   },
   "title": "System",

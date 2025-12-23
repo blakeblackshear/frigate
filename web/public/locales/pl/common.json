@@ -280,12 +280,12 @@
   "accessDenied": {
     "title": "Dostęp Zabroniony",
     "desc": "Nie masz uprawnień do wyświetlenia tej strony.",
-    "documentTitle": "Dostęp Zabroniony - Frigate"
+    "documentTitle": "Dostęp Zabroniony - DIENST"
   },
   "notFound": {
     "title": "404",
     "desc": "Strona nie znaleziona",
-    "documentTitle": "Nie Znaleziono - Frigate"
+    "documentTitle": "Nie Znaleziono - DIENST"
   },
   "selectItem": "Wybierz {{item}}",
   "toast": {

@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Directo - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Directo - Frigate",
+  "documentTitle": "Directo - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Directo - DIENST",
   "twoWayTalk": {
     "enable": "Habilitar conversación bidireccional",
     "disable": "Deshabilitar conversación bidireccional"

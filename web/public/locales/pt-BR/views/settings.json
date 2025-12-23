@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "default": "Configurações - Frigate",
-    "authentication": "Configurações de Autenticação - Frigate",
-    "camera": "Configurações de Câmera - Frigate",
-    "enrichments": "Configurações de Enriquecimento - Frigate",
-    "masksAndZones": "Editor de Máscara e Zona - Frigate",
-    "motionTuner": "Ajuste de Movimento - Frigate",
-    "object": "Debug - Frigate",
-    "general": "Configurações de Interface de Usuário - Frigate",
+    "default": "Configurações - DIENST",
+    "authentication": "Configurações de Autenticação - DIENST",
+    "camera": "Configurações de Câmera - DIENST",
+    "enrichments": "Configurações de Enriquecimento - DIENST",
+    "masksAndZones": "Editor de Máscara e Zona - DIENST",
+    "motionTuner": "Ajuste de Movimento - DIENST",
+    "object": "Debug - DIENST",
+    "general": "Configurações de Interface de Usuário - DIENST",
     "frigatePlus": "Frigate+ Configurações- Frigate",
-    "notifications": "Configurações de notificação - Frigate",
-    "cameraManagement": "Gerenciar Câmeras - Frigate",
-    "cameraReview": "Configurações de Revisão de Câmera - Frigate"
+    "notifications": "Configurações de notificação - DIENST",
+    "cameraManagement": "Gerenciar Câmeras - DIENST",
+    "cameraReview": "Configurações de Revisão de Câmera - DIENST"
   },
   "menu": {
     "ui": "UI",
@@ -289,7 +289,7 @@
     },
     "zones": {
       "label": "Zonas",
-      "documentTitle": "Editar Zona - Frigate",
+      "documentTitle": "Editar Zona - DIENST",
       "desc": {
         "title": "Zonas permitem que você defina uma área específica do quadro para que você possa determinar se um objeto está ou não em uma área em particular.",
         "documentation": "Documentação"
@@ -354,7 +354,7 @@
         }
       },
       "label": "Máscaras de Objeto",
-      "documentTitle": "Editar Máscara de Objeto - Frigate",
+      "documentTitle": "Editar Máscara de Objeto - DIENST",
       "desc": {
         "title": "Máscaras de filtro de objetos são usadas para filtrar falsos positivos para um determinado tipo de objeto baseado na localização.",
         "documentation": "Documentação"
@@ -369,7 +369,7 @@
     },
     "motionMasks": {
       "label": "Máscara de Movimento",
-      "documentTitle": "Editar Máscara de Movimento - Frigate",
+      "documentTitle": "Editar Máscara de Movimento - DIENST",
       "desc": {
         "title": "Máscaras de movimento são usadas para prevenir tipos de movimento de ativarem uma detecção. Excesso de mascaramento tornará mais difícil que objetos sejam rastreados.",
         "documentation": "Documentação"

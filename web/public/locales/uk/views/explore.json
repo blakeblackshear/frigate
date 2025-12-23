@@ -27,7 +27,7 @@
       }
     }
   },
-  "documentTitle": "Пошук подія - Frigate",
+  "documentTitle": "Пошук подія - DIENST",
   "searchResult": {
     "tooltip": "Збігається з {{type}} на рівні {{confidence}}%",
     "deleteTrackedObject": {

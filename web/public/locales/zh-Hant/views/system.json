@@ -1,13 +1,13 @@
 {
   "documentTitle": {
-    "cameras": "鏡頭統計 - Frigate",
-    "storage": "儲存裝置統計 - Frigate",
-    "general": "一般統計 - Frigate",
-    "enrichments": "進階功能統計 - Frigate",
+    "cameras": "鏡頭統計 - DIENST",
+    "storage": "儲存裝置統計 - DIENST",
+    "general": "一般統計 - DIENST",
+    "enrichments": "進階功能統計 - DIENST",
     "logs": {
-      "frigate": "Frigate 日誌 - Frigate",
-      "go2rtc": "Go2RTC 日誌 - Frigate",
-      "nginx": "Nginx 日誌 - Frigate"
+      "frigate": "Frigate 日誌 - DIENST",
+      "go2rtc": "Go2RTC 日誌 - DIENST",
+      "nginx": "Nginx 日誌 - DIENST"
     }
   },
   "title": "系統",

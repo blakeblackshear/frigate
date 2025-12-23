@@ -283,13 +283,13 @@
   "notFound": {
     "title": "404",
     "desc": "Seite nicht gefunden",
-    "documentTitle": "Nicht gefunden - Frigate"
+    "documentTitle": "Nicht gefunden - DIENST"
   },
   "selectItem": "Wähle {{item}}",
   "readTheDocumentation": "Dokumentation lesen",
   "accessDenied": {
     "desc": "Du hast keine Berechtigung diese Seite anzuzeigen.",
-    "documentTitle": "Zugang verweigert - Frigate",
+    "documentTitle": "Zugang verweigert - DIENST",
     "title": "Zugang verweigert"
   },
   "information": {

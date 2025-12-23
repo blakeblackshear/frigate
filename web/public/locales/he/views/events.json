@@ -18,9 +18,9 @@
     "aria": "בחירת אירועים",
     "noFoundForTimePeriod": "לא נמצאו אירועים עבור תקופת זמן זו."
   },
-  "documentTitle": "סקירה - Frigate",
+  "documentTitle": "סקירה - DIENST",
   "recordings": {
-    "documentTitle": "הקלטות - Frigate"
+    "documentTitle": "הקלטות - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "24 שעות אחרונות"

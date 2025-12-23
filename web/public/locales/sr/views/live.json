@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Uživo - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Uživo - Frigate",
+  "documentTitle": "Uživo - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Uživo - DIENST",
   "lowBandwidthMode": "Režim niskog propusnog opsega",
   "twoWayTalk": {
     "enable": "Omogući dvosmerni razgovor",

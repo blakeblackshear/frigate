@@ -279,11 +279,11 @@
   },
   "accessDenied": {
     "desc": "No teniu permís per veure aquesta pàgina.",
-    "documentTitle": "Accés Denegat - Frigate",
+    "documentTitle": "Accés Denegat - DIENST",
     "title": "Accés Denegat"
   },
   "notFound": {
-    "documentTitle": "No s'ha trobat - Frigate",
+    "documentTitle": "No s'ha trobat - DIENST",
     "title": "404",
     "desc": "Pàgina no trobada"
   },

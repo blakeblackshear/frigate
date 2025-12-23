@@ -17,9 +17,9 @@
     "aria": "Sélectionner les événements",
     "noFoundForTimePeriod": "Aucun événement n'a été trouvé pour cette plage de temps."
   },
-  "documentTitle": "Activités - Frigate",
+  "documentTitle": "Activités - DIENST",
   "recordings": {
-    "documentTitle": "Enregistrements - Frigate"
+    "documentTitle": "Enregistrements - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "Dernières 24 heures"

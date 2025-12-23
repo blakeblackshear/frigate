@@ -54,15 +54,15 @@
     }
   },
   "documentTitle": {
-    "cameras": "Kamerastatistiken – Frigate",
-    "storage": "Speicherstatistiken - Frigate",
-    "general": "Allgemeine Statistiken - Frigate",
+    "cameras": "Kamerastatistiken - DIENST",
+    "storage": "Speicherstatistiken - DIENST",
+    "general": "Allgemeine Statistiken - DIENST",
     "logs": {
-      "frigate": "Frigate Protokolle – Frigate",
-      "go2rtc": "Go2RTC Protokolle - Frigate",
-      "nginx": "Nginx Protokolle - Frigate"
+      "frigate": "Frigate Protokolle - DIENST",
+      "go2rtc": "Go2RTC Protokolle - DIENST",
+      "nginx": "Nginx Protokolle - DIENST"
     },
-    "enrichments": "Erweiterte Statistiken - Frigate"
+    "enrichments": "Erweiterte Statistiken - DIENST"
   },
   "title": "System",
   "logs": {

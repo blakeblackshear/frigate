@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "cameras": "Statistika kamer - Frigate",
-    "storage": "Statistika prostora - Frigate",
-    "general": "Statistika - Frigate",
+    "cameras": "Statistika kamer - DIENST",
+    "storage": "Statistika prostora - DIENST",
+    "general": "Statistika - DIENST",
     "logs": {
-      "frigate": "Frigate dnevniki - Frigate",
-      "go2rtc": "Go2RTC dnevniki - Frigate",
-      "nginx": "Nginx dnevniki - Frigate"
+      "frigate": "Frigate dnevniki - DIENST",
+      "go2rtc": "Go2RTC dnevniki - DIENST",
+      "nginx": "Nginx dnevniki - DIENST"
     },
-    "enrichments": "Statistika Obogatitev - Frigate"
+    "enrichments": "Statistika Obogatitev - DIENST"
   },
   "logs": {
     "download": {

@@ -69,7 +69,7 @@
   },
   "readTheDocs": "Leggi la documentazione",
   "selectFace": "Seleziona volto",
-  "documentTitle": "Libreria dei Volti - Frigate",
+  "documentTitle": "Libreria dei Volti - DIENST",
   "uploadFaceImage": {
     "desc": "Carica un'immagine per scansionare i volti e includerla in {{pageToggle}}",
     "title": "Carica l'immagine del volto"

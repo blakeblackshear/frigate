@@ -9,7 +9,7 @@
   "allCameras": "Tất cả Camera",
   "detected": "Đã phát hiện",
   "recordings": {
-    "documentTitle": "Bản ghi - Frigate"
+    "documentTitle": "Bản ghi - DIENST"
   },
   "events": {
     "aria": "Chọn sự kiện",
@@ -25,7 +25,7 @@
     "motion": "Không tìm thấy dữ liệu chuyển động"
   },
   "timeline": "Dòng thời gian",
-  "documentTitle": "Xem lại - Frigate",
+  "documentTitle": "Xem lại - DIENST",
   "calendarFilter": {
     "last24Hours": "24 giờ qua"
   },

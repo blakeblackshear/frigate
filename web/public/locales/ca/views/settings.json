@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "enrichments": "Parmàmetres complementaris - Frigate",
-    "motionTuner": "Ajust de moviment - Frigate",
-    "object": "Depurar - Frigate",
-    "default": "Paràmetres - Frigate",
-    "authentication": "Configuració d'autenticació - Frigate",
-    "camera": "Paràmetres de càmera - Frigate",
-    "masksAndZones": "Editor de màscares i zones - Frigate",
+    "enrichments": "Parmàmetres complementaris - DIENST",
+    "motionTuner": "Ajust de moviment - DIENST",
+    "object": "Depurar - DIENST",
+    "default": "Paràmetres - DIENST",
+    "authentication": "Configuració d'autenticació - DIENST",
+    "camera": "Paràmetres de càmera - DIENST",
+    "masksAndZones": "Editor de màscares i zones - DIENST",
     "general": "Configuració de la interfície d'usuari - Fragata",
-    "frigatePlus": "Paràmetres de Frigate+ - Frigate",
-    "notifications": "Paràmetres de notificació - Frigate",
-    "cameraManagement": "Gestionar càmeres - Frigate",
-    "cameraReview": "Configuració Revisió de Càmeres - Frigate"
+    "frigatePlus": "Paràmetres de Frigate+ - DIENST",
+    "notifications": "Paràmetres de notificació - DIENST",
+    "cameraManagement": "Gestionar càmeres - DIENST",
+    "cameraReview": "Configuració Revisió de Càmeres - DIENST"
   },
   "menu": {
     "ui": "Interfície d'usuari",
@@ -186,7 +186,7 @@
         "desc": "Estableix el temps mínim, en segons, que l'objecte ha d'estar dins la zona perquè s'activi. <em>Per defecte: 0</em>"
       },
       "allObjects": "Tots els objectes",
-      "documentTitle": "Edita zona - Frigate",
+      "documentTitle": "Edita zona - DIENST",
       "speedThreshold": {
         "title": "Llindar de velocitat ({{unit}})",
         "toast": {
@@ -225,7 +225,7 @@
       "label": "Màscara de moviment",
       "add": "Nova màscara de moviment",
       "edit": "Edita la màscara de moviment",
-      "documentTitle": "Editar la màscara de moviment - Frigate",
+      "documentTitle": "Editar la màscara de moviment - DIENST",
       "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
       "toast": {
         "success": {
@@ -235,7 +235,7 @@
       }
     },
     "objectMasks": {
-      "documentTitle": "Editar la màscara d'objecte - Frigate",
+      "documentTitle": "Editar la màscara d'objecte - DIENST",
       "label": "Màscares d'objecte",
       "edit": "Editar la màscara d'objecte",
       "point_one": "{{count}} punt",

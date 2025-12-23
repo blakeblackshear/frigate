@@ -98,14 +98,14 @@
     }
   },
   "documentTitle": {
-    "default": "ตั้งค่า - Frigate",
-    "authentication": "การตั้งค่าการตรวจสอบสิทธิ์ - Frigate",
-    "camera": "การตั้งค่ากล้อง - Frigate",
-    "classification": "การตั้งค่าการจำแนกประเภท - Frigate",
-    "masksAndZones": "ตัวแก้ไขแมสและโซน - Frigate",
-    "general": "การตั้งค่าทั่วไป - Frigate",
-    "frigatePlus": "การตั้งค่า Frigate+ - Frigate",
-    "notifications": "การตั้งค่าการแจ้งเตือน - Frigate"
+    "default": "ตั้งค่า - DIENST",
+    "authentication": "การตั้งค่าการตรวจสอบสิทธิ์ - DIENST",
+    "camera": "การตั้งค่ากล้อง - DIENST",
+    "classification": "การตั้งค่าการจำแนกประเภท - DIENST",
+    "masksAndZones": "ตัวแก้ไขแมสและโซน - DIENST",
+    "general": "การตั้งค่าทั่วไป - DIENST",
+    "frigatePlus": "การตั้งค่า Frigate+ - DIENST",
+    "notifications": "การตั้งค่าการแจ้งเตือน - DIENST"
   },
   "menu": {
     "notifications": "การแจ้งเตือน",

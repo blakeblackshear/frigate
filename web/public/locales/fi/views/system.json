@@ -23,14 +23,14 @@
     }
   },
   "documentTitle": {
-    "cameras": "Kameroiden tilastot - Frigate",
+    "cameras": "Kameroiden tilastot - DIENST",
     "storage": "Tallenteiden tilastot - Fgirage",
-    "general": "Yleiset tilastot - Frigate",
-    "enrichments": "Rikastetut tilastot - Frigate",
+    "general": "Yleiset tilastot - DIENST",
+    "enrichments": "Rikastetut tilastot - DIENST",
     "logs": {
-      "frigate": "Frigaten lokit - Frigate",
-      "go2rtc": "Go2RTC lokit - Frigate",
-      "nginx": "Nginx lokit - Frigate"
+      "frigate": "Frigaten lokit - DIENST",
+      "go2rtc": "Go2RTC lokit - DIENST",
+      "nginx": "Nginx lokit - DIENST"
     }
   },
   "title": "Järjestelmä",

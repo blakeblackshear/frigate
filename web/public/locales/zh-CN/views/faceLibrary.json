@@ -14,7 +14,7 @@
     "scoreInfo": "子标签分数是基于所有识别到的人脸置信度的加权评分，因此可能与快照中显示的分数有所不同。",
     "unknown": "未知"
   },
-  "documentTitle": "人脸库 - Frigate",
+  "documentTitle": "人脸库 - DIENST",
   "uploadFaceImage": {
     "title": "上传人脸图片",
     "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"

@@ -1,6 +1,6 @@
 {
   "documentTitle": "Frigate - Live",
-  "documentTitle.withCamera": "{{camera}} - Frigate - Live",
+  "documentTitle.withCamera": "{{camera}} - DIENST - Live",
   "lowBandwidthMode": "Mod Latime de Banda Limitata",
   "twoWayTalk": {
     "enable": "Activare dialog",

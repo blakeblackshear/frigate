@@ -227,12 +227,12 @@
     "label": "แบ่งหน้า"
   },
   "accessDenied": {
-    "documentTitle": "ไม่สามารถเข้าถึงได้ - Frigate",
+    "documentTitle": "ไม่สามารถเข้าถึงได้ - DIENST",
     "title": "ไม่สามารถเข้าถึงได้",
     "desc": "คุณไม่มีสิทธิ์ในการเข้าถึงหน้านี้"
   },
   "notFound": {
-    "documentTitle": "ไม่พบ - Frigate",
+    "documentTitle": "ไม่พบ - DIENST",
     "desc": "ไม่พบหน้านี้",
     "title": "๔๐๔"
   },

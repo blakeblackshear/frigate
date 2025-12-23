@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Einstellungen - Frigate",
-    "authentication": "Authentifizierungseinstellungen – Frigate",
-    "camera": "Kameraeinstellungen - Frigate",
-    "masksAndZones": "Masken- und Zoneneditor – Frigate",
-    "object": "Debug - Frigate",
-    "general": "UI-Einstellungen – Frigate",
-    "frigatePlus": "Frigate+ Einstellungen – Frigate",
-    "classification": "Klassifizierungseinstellungen – Frigate",
-    "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
+    "default": "Einstellungen - DIENST",
+    "authentication": "Authentifizierungseinstellungen - DIENST",
+    "camera": "Kameraeinstellungen - DIENST",
+    "masksAndZones": "Masken- und Zoneneditor - DIENST",
+    "object": "Debug - DIENST",
+    "general": "UI-Einstellungen - DIENST",
+    "frigatePlus": "Frigate+ Einstellungen - DIENST",
+    "classification": "Klassifizierungseinstellungen - DIENST",
+    "motionTuner": "Bewegungserkennungs-Optimierer - DIENST",
     "notifications": "Benachrichtigungseinstellungen",
-    "enrichments": "Erweiterte Statistiken - Frigate",
-    "cameraManagement": "Kameras verwalten - Frigate",
-    "cameraReview": "Kameraeinstellungen prüfen - Frigate"
+    "enrichments": "Erweiterte Statistiken - DIENST",
+    "cameraManagement": "Kameras verwalten - DIENST",
+    "cameraReview": "Kameraeinstellungen prüfen - DIENST"
   },
   "menu": {
     "ui": "Benutzeroberfläche",
@@ -315,7 +315,7 @@
         "lineCDistance": "Spur C Distanz ({{unit}})"
       },
       "label": "Zonen",
-      "documentTitle": "Zone bearbeiten - Frigate",
+      "documentTitle": "Zone bearbeiten - DIENST",
       "add": "Zone hinzufügen",
       "name": {
         "title": "Name",
@@ -353,7 +353,7 @@
         "documentation": "Dokumentation",
         "title": "Bewegungsmasken werden verwendet, um zu verhindern, dass unerwünschte Bewegungsarten eine Erkennung auslösen. Zu starkes Maskieren erschwert das Nachverfolgen von Objekten."
       },
-      "documentTitle": "Bewegungsmaske bearbeiten – Frigate",
+      "documentTitle": "Bewegungsmaske bearbeiten - DIENST",
       "context": {
         "documentation": "Lies die Dokumentation",
         "title": "Bewegungsmasken werden verwendet, um unerwünschte Bewegungen (z. B. Baumäste, Kamerazeitstempel) daran zu hindern, eine Erkennung auszulösen. Bewegungsmasken sollten <em>sehr sparsam</em> eingesetzt werden – zu starkes Maskieren erschwert das Nachverfolgen von Objekten."
@@ -379,7 +379,7 @@
     "restart_required": "Neustart erforderlich (Maske/Zone hat sich geändert)",
     "objectMasks": {
       "label": "Objektmasken",
-      "documentTitle": "Objektmaske bearbeiten – Frigate",
+      "documentTitle": "Objektmaske bearbeiten - DIENST",
       "toast": {
         "success": {
           "noName": "Objektmaske wurde gespeichert.",

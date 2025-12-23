@@ -17,9 +17,9 @@
     "noFoundForTimePeriod": "Keine Ereignisse für diesen Zeitraum gefunden.",
     "aria": "Wähle Ereignisse aus"
   },
-  "documentTitle": "Überprüfung - Frigate",
+  "documentTitle": "Überprüfung - DIENST",
   "recordings": {
-    "documentTitle": "Aufnahmen - Frigate"
+    "documentTitle": "Aufnahmen - DIENST"
   },
   "calendarFilter": {
     "last24Hours": "Letzte 24 Stunden"

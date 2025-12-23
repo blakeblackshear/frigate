@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Trực tiếp - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Trực tiếp - Frigate",
+  "documentTitle": "Trực tiếp - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Trực tiếp - DIENST",
   "lowBandwidthMode": "Chế độ băng thông thấp",
   "twoWayTalk": {
     "enable": "Bật đàm thoại hai chiều",

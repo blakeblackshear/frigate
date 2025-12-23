@@ -280,12 +280,12 @@
     "more": "Viac strán"
   },
   "accessDenied": {
-    "documentTitle": "Prístup odmietnutý - Frigate",
+    "documentTitle": "Prístup odmietnutý - DIENST",
     "title": "Prístup odmietnutý",
     "desc": "Nemáte oprávnenie zobraziť túto stránku."
   },
   "notFound": {
-    "documentTitle": "Nenájdené - Frigate",
+    "documentTitle": "Nenájdené - DIENST",
     "title": "404",
     "desc": "Stránka nenájdená"
   },

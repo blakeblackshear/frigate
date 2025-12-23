@@ -1,13 +1,13 @@
 {
   "documentTitle": {
-    "storage": "Statistiques de stockage - Frigate",
-    "cameras": "Statistiques des caméras - Frigate",
-    "general": "Statistiques générales - Frigate",
-    "enrichments": "Statistiques d'enrichissements - Frigate",
+    "storage": "Statistiques de stockage - DIENST",
+    "cameras": "Statistiques des caméras - DIENST",
+    "general": "Statistiques générales - DIENST",
+    "enrichments": "Statistiques d'enrichissements - DIENST",
     "logs": {
-      "frigate": "Journaux de Frigate - Frigate",
-      "nginx": "Journaux Nginx - Frigate",
-      "go2rtc": "Journaux Go2RTC - Frigate"
+      "frigate": "Journaux de Frigate - DIENST",
+      "nginx": "Journaux Nginx - DIENST",
+      "go2rtc": "Journaux Go2RTC - DIENST"
     }
   },
   "title": "Système",

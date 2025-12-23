@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Beoordelen - Frigate",
+  "documentTitle": "Beoordelen - DIENST",
   "camera": "Camera",
   "newReviewItems": {
     "button": "Nieuwe items om te beoordelen",
@@ -7,7 +7,7 @@
   },
   "timeline.aria": "Selecteer tijdlijn",
   "recordings": {
-    "documentTitle": "Opnamen - Frigate"
+    "documentTitle": "Opnamen - DIENST"
   },
   "timeline": "Tijdlijn",
   "empty": {

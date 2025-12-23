@@ -1,11 +1,11 @@
 {
   "documentTitle": {
-    "default": "Podešavanja - Frigate",
+    "default": "Podešavanja - DIENST",
     "authentication": "Podešavanja autentifikacije - Fregate",
-    "camera": "Podešavanje kamera - Frigate",
-    "enrichments": "Podešavanja obogaćivanja - Frigate",
-    "masksAndZones": "Uređivač maski i zona - Frigate",
-    "motionTuner": "Tjuner pokreta - Frigate",
-    "general": "Generalna podešavanja - Frigate"
+    "camera": "Podešavanje kamera - DIENST",
+    "enrichments": "Podešavanja obogaćivanja - DIENST",
+    "masksAndZones": "Uređivač maski i zona - DIENST",
+    "motionTuner": "Tjuner pokreta - DIENST",
+    "general": "Generalna podešavanja - DIENST"
   }
 }

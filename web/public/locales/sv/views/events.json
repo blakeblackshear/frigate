@@ -11,7 +11,7 @@
     "detection": "Det finns inga detekteringar att granska",
     "motion": "Ingen rörelsedata hittad"
   },
-  "documentTitle": "Granska - Frigate",
+  "documentTitle": "Granska - DIENST",
   "timeline": "Tidslinje",
   "events": {
     "noFoundForTimePeriod": "Inga hädelser hittade för denna tidsperiod.",
@@ -19,7 +19,7 @@
     "label": "Händelse"
   },
   "recordings": {
-    "documentTitle": "Inspelningar - Frigate"
+    "documentTitle": "Inspelningar - DIENST"
   },
   "newReviewItems": {
     "label": "Visa nya objekt att granska",

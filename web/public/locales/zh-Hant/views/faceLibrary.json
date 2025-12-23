@@ -13,7 +13,7 @@
     "face": "人臉詳細資料",
     "faceDesc": "組成此人臉的追蹤物件的詳細資料"
   },
-  "documentTitle": "人臉資料庫 - Frigate",
+  "documentTitle": "人臉資料庫 - DIENST",
   "uploadFaceImage": {
     "title": "上傳人臉圖片",
     "desc": "上傳圖片以掃描人臉並將其加入 {{pageToggle}}"

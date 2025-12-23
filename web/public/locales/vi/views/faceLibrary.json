@@ -88,7 +88,7 @@
   },
   "selectFace": "Chọn khuôn mặt",
   "pixels": "{{area}}px",
-  "documentTitle": "Thư viện Khuôn mặt - Frigate",
+  "documentTitle": "Thư viện Khuôn mặt - DIENST",
   "uploadFaceImage": {
     "title": "Tải lên hình ảnh khuôn mặt",
     "desc": "Tải lên một hình ảnh để quét khuôn mặt và bao gồm cho {{pageToggle}}"

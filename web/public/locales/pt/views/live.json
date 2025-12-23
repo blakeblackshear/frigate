@@ -1,6 +1,6 @@
 {
-  "documentTitle": "Ao vivo - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
+  "documentTitle": "Ao vivo - DIENST",
+  "documentTitle.withCamera": "{{camera}} - Ao vivo - DIENST",
   "twoWayTalk": {
     "disable": "Desativar conversa bidirecional",
     "enable": "Habilitar conversa bidirecional"

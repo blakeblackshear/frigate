@@ -1,18 +1,18 @@
 {
   "documentTitle": {
-    "default": "Beállítások - Frigate",
-    "authentication": "Hitelesítési beállítások - Frigate",
-    "camera": "Kamera beállítások - Frigate",
-    "classification": "Osztályozási beállítások - Frigate",
-    "masksAndZones": "Maszk és zónaszerkesztő - Frigate",
-    "object": "Hibakeresés - Frigate",
-    "general": "Áltlános Beállítások - Frigate",
-    "frigatePlus": "Frigate+ beállítások - Frigate",
-    "notifications": "Értesítések beállítása - Frigate",
-    "motionTuner": "Mozgás Hangoló - Frigate",
-    "enrichments": "Kiegészítés Beállítások - Frigate",
-    "cameraManagement": "Kamerák kezelése - Frigate",
-    "cameraReview": "Kamera beállítások áttekintése – Frigate"
+    "default": "Beállítások - DIENST",
+    "authentication": "Hitelesítési beállítások - DIENST",
+    "camera": "Kamera beállítások - DIENST",
+    "classification": "Osztályozási beállítások - DIENST",
+    "masksAndZones": "Maszk és zónaszerkesztő - DIENST",
+    "object": "Hibakeresés - DIENST",
+    "general": "Áltlános Beállítások - DIENST",
+    "frigatePlus": "Frigate+ beállítások - DIENST",
+    "notifications": "Értesítések beállítása - DIENST",
+    "motionTuner": "Mozgás Hangoló - DIENST",
+    "enrichments": "Kiegészítés Beállítások - DIENST",
+    "cameraManagement": "Kamerák kezelése - DIENST",
+    "cameraReview": "Kamera beállítások áttekintése - DIENST"
   },
   "menu": {
     "ui": "UI",
@@ -357,7 +357,7 @@
       },
       "edit": "Zóne Módosítása",
       "label": "Zónák",
-      "documentTitle": "Zóna Módosítása - Frigate",
+      "documentTitle": "Zóna Módosítása - DIENST",
       "name": {
         "title": "Név",
         "tips": "A névnek legalább 2 karakterből kell állnia és nem a kamera neve vagy egy másik zónáé.",
@@ -411,7 +411,7 @@
         "documentation": "Dokumentáció",
         "title": "Az objektumszűrő maszkokat arra használják, hogy hely alapján kiszűrjék a téves egyezéseket adott objektumtípus esetén."
       },
-      "documentTitle": "Tárgymaszk módosítása - Frigate",
+      "documentTitle": "Tárgymaszk módosítása - DIENST",
       "objects": {
         "title": "Tárgyak",
         "allObjectTypes": "Minden tárgytípus",
@@ -493,7 +493,7 @@
         "title": "A mozgásmaszk a kamera képkockájának {{polygonArea}}%-át fedi le. Nagy mozgásmaszkok használata nem ajánlott.",
         "tips": "A mozgásmaszkok nem akadályozzák meg az objektumok észlelését. Ehelyett ajánlott kötelező zónát használni."
       },
-      "documentTitle": "Mozgási Maszk Módosítása - Frigate",
+      "documentTitle": "Mozgási Maszk Módosítása - DIENST",
       "add": "Új Mozgási Maszk",
       "point_one": "{{count}} pont",
       "point_other": "{{count}} pont",

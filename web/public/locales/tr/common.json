@@ -235,7 +235,7 @@
     "all": "Tümü"
   },
   "notFound": {
-    "documentTitle": "Bulunamadı - Frigate",
+    "documentTitle": "Bulunamadı - DIENST",
     "desc": "Sayfa bulunamadı",
     "title": "404"
   },
@@ -272,7 +272,7 @@
   "accessDenied": {
     "title": "Erişim Reddedildi",
     "desc": "Bu sayfayı görüntüleme yetkiniz yok.",
-    "documentTitle": "Erişim Reddedildi - Frigate"
+    "documentTitle": "Erişim Reddedildi - DIENST"
   },
   "toast": {
     "copyUrlToClipboard": "URL panoya kopyalandı.",

@@ -15,7 +15,7 @@
     "subLabelScore": "Alt Etiket Puanı",
     "unknown": "Bilinmeyen"
   },
-  "documentTitle": "Yüz Kütüphanesi - Frigate",
+  "documentTitle": "Yüz Kütüphanesi - DIENST",
   "uploadFaceImage": {
     "title": "Yüz Resmi Yükle",
     "desc": "Yüzleri taramak ve {{pageToggle}} için dahil etmek üzere bir resim yükleyin"

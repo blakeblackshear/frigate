@@ -61,7 +61,7 @@
     "addFace": "Adicione uma nova coleção à Biblioteca Facial subindo a sua primeira imagem.",
     "invalidName": "Nome inválido. Nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífenes."
   },
-  "documentTitle": "Biblioteca de rostos - Frigate",
+  "documentTitle": "Biblioteca de rostos - DIENST",
   "uploadFaceImage": {
     "title": "Carregar imagem facial",
     "desc": "Envie uma imagem para escanear por faces e incluir em {{pageToggle}}"

@@ -19,9 +19,16 @@ DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
 def find_config_file() -> str:
     config_path = os.environ.get("CONFIG_FILE", DEFAULT_CONFIG_FILE)
+    
+    if os.environ.get("CONFIG_FILE"):
+        logger.info(f"CONFIG_FILE environment variable is set to: {config_path}")
+    else:
+        logger.info(f"CONFIG_FILE environment variable not set, using default: {config_path}")
 
     if not os.path.isfile(config_path):
+        original_path = config_path
         config_path = config_path.replace("yml", "yaml")
+        logger.info(f"Config file '{original_path}' not found, trying '{config_path}' instead")
 
     return config_path
 

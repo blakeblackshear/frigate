@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "default": "Nastavitve - Frigate",
-    "authentication": "Nastavitve preverjanja pristnosti - Frigate",
-    "camera": "Nastavitve kamere - Frigate",
-    "notifications": "Nastavitve obvestil - Frigate",
-    "masksAndZones": "Urejevalnik mask in območij - Frigate",
-    "object": "Odpravljanje napak - Frigate",
-    "general": "Splošne Nastavitve - Frigate",
-    "frigatePlus": "Frigate+ Nastavitve - Frigate",
-    "enrichments": "Nastavitve Obogatitev - Frigate",
-    "motionTuner": "Nastavitev gibanja - Frigate",
-    "cameraManagement": "Upravljaj kamere - Frigate",
-    "cameraReview": "Nastavitve pregleda kamer – Frigate"
+    "default": "Nastavitve - DIENST",
+    "authentication": "Nastavitve preverjanja pristnosti - DIENST",
+    "camera": "Nastavitve kamere - DIENST",
+    "notifications": "Nastavitve obvestil - DIENST",
+    "masksAndZones": "Urejevalnik mask in območij - DIENST",
+    "object": "Odpravljanje napak - DIENST",
+    "general": "Splošne Nastavitve - DIENST",
+    "frigatePlus": "Frigate+ Nastavitve - DIENST",
+    "enrichments": "Nastavitve Obogatitev - DIENST",
+    "motionTuner": "Nastavitev gibanja - DIENST",
+    "cameraManagement": "Upravljaj kamere - DIENST",
+    "cameraReview": "Nastavitve pregleda kamer - DIENST"
   },
   "menu": {
     "ui": "Uporabniški vmesnik",

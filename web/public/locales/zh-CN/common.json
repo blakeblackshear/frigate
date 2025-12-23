@@ -274,12 +274,12 @@
     "desc": "管理员可以完全访问Frigate界面上所有功能。成员则仅能查看摄像头、核查项和历史录像。"
   },
   "accessDenied": {
-    "documentTitle": "没有权限 - Frigate",
+    "documentTitle": "没有权限 - DIENST",
     "title": "没有权限",
     "desc": "您没有权限查看此页面。"
   },
   "notFound": {
-    "documentTitle": "没有找到页面 - Frigate",
+    "documentTitle": "没有找到页面 - DIENST",
     "title": "404",
     "desc": "页面未找到"
   },

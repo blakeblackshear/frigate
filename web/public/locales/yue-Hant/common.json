@@ -246,7 +246,7 @@
   },
   "accessDenied": {
     "title": "拒絕存取",
-    "documentTitle": "拒絕存取 - Frigate",
+    "documentTitle": "拒絕存取 - DIENST",
     "desc": "你無權查看此頁面。"
   },
   "selectItem": "選擇 {{item}}",
@@ -261,7 +261,7 @@
     "copyUrlToClipboard": "已複製 URL 到剪貼簿。"
   },
   "notFound": {
-    "documentTitle": "找不到頁面 - Frigate",
+    "documentTitle": "找不到頁面 - DIENST",
     "desc": "找不到頁面",
     "title": "404"
   },

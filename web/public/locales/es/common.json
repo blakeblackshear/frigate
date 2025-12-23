@@ -270,12 +270,12 @@
     "more": "Más páginas"
   },
   "accessDenied": {
-    "documentTitle": "Acceso denegado - Frigate",
+    "documentTitle": "Acceso denegado - DIENST",
     "desc": "No tienes permiso para ver esta página.",
     "title": "Acceso denegado"
   },
   "notFound": {
-    "documentTitle": "No se ha encontrado - Frigate",
+    "documentTitle": "No se ha encontrado - DIENST",
     "title": "404",
     "desc": "Página no encontrada"
   },

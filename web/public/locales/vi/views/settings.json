@@ -1,17 +1,17 @@
 {
   "documentTitle": {
-    "default": "Cài đặt - Frigate",
-    "authentication": "Cài đặt Xác thực - Frigate",
-    "camera": "Cài đặt Camera - Frigate",
-    "enrichments": "Cài đặt Làm giàu Dữ liệu - Frigate",
-    "notifications": "Cài đặt Thông báo - Frigate",
-    "masksAndZones": "Trình chỉnh sửa Mặt nạ và Vùng - Frigate",
-    "object": "Gỡ lỗi - Frigate",
-    "general": "Cài đặt giao diện – Frigate",
-    "frigatePlus": "Cài đặt Frigate+ - Frigate",
-    "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate",
-    "cameraManagement": "Quản Lý Camera - Frigate",
-    "cameraReview": "Cài Đặt Xem Lại Camera - Frigate"
+    "default": "Cài đặt - DIENST",
+    "authentication": "Cài đặt Xác thực - DIENST",
+    "camera": "Cài đặt Camera - DIENST",
+    "enrichments": "Cài đặt Làm giàu Dữ liệu - DIENST",
+    "notifications": "Cài đặt Thông báo - DIENST",
+    "masksAndZones": "Trình chỉnh sửa Mặt nạ và Vùng - DIENST",
+    "object": "Gỡ lỗi - DIENST",
+    "general": "Cài đặt giao diện - DIENST",
+    "frigatePlus": "Cài đặt Frigate+ - DIENST",
+    "motionTuner": "Bộ tinh chỉnh Chuyển động - DIENST",
+    "cameraManagement": "Quản Lý Camera - DIENST",
+    "cameraReview": "Cài Đặt Xem Lại Camera - DIENST"
   },
   "notification": {
     "toast": {
@@ -244,7 +244,7 @@
         "title": "Đối tượng",
         "desc": "Loại đối tượng áp dụng cho mặt nạ đối tượng này."
       },
-      "documentTitle": "Chỉnh sửa Mặt nạ đối tượng - Frigate",
+      "documentTitle": "Chỉnh sửa Mặt nạ đối tượng - DIENST",
       "desc": {
         "title": "Mặt nạ lọc đối tượng được sử dụng để lọc ra các kết quả dương tính giả cho một loại đối tượng nhất định dựa trên vị trí.",
         "documentation": "Tài liệu"
@@ -305,14 +305,14 @@
       },
       "edit": "Chỉnh sửa Vùng",
       "label": "Vùng",
-      "documentTitle": "Chỉnh sửa Vùng - Frigate",
+      "documentTitle": "Chỉnh sửa Vùng - DIENST",
       "inertia": {
         "title": "Quán tính",
         "desc": "Chỉ định số khung hình mà một đối tượng phải ở trong một vùng trước khi được coi là ở trong vùng. <em>Mặc định: 3</em>"
       }
     },
     "motionMasks": {
-      "documentTitle": "Chỉnh sửa Mặt nạ chuyển động - Frigate",
+      "documentTitle": "Chỉnh sửa Mặt nạ chuyển động - DIENST",
       "desc": {
         "documentation": "Tài liệu",
         "title": "Mặt nạ chuyển động được sử dụng để ngăn các loại chuyển động không mong muốn kích hoạt phát hiện. Việc che quá nhiều sẽ khiến việc theo dõi đối tượng trở nên khó khăn hơn."

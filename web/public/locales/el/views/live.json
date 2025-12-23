@@ -1,10 +1,10 @@
 {
-  "documentTitle": "Ζωντανά - Frigate",
+  "documentTitle": "Ζωντανά - DIENST",
   "twoWayTalk": {
     "enable": "Ενεργοποίηση αμφίδρομης επικοινωνίας",
     "disable": "Απενεργοποίηση αμφίδρομης επικοινωνίας"
   },
-  "documentTitle.withCamera": "{{camera}} - Ζωντανή μετάδοση - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Ζωντανή μετάδοση - DIENST",
   "lowBandwidthMode": "Λειτουργία χαμηλής ευρυζωνικότητας",
   "cameraAudio": {
     "enable": "Ενεργοποίηση ήχου Κάμερας",

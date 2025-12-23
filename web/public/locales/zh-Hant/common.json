@@ -264,12 +264,12 @@
     "more": "更多頁面"
   },
   "accessDenied": {
-    "documentTitle": "拒絕存取 - Frigate",
+    "documentTitle": "拒絕存取 - DIENST",
     "title": "拒絕存取",
     "desc": "你沒有瀏覽此頁面的權限。"
   },
   "notFound": {
-    "documentTitle": "找不到頁面 - Frigate",
+    "documentTitle": "找不到頁面 - DIENST",
     "title": "404",
     "desc": "找不到頁面"
   },

@@ -1,6 +1,6 @@
 {
   "selectItem": "Вибрати {{item}}",
-  "documentTitle": "Бібліотека обличчя - Frigate",
+  "documentTitle": "Бібліотека обличчя - DIENST",
   "readTheDocs": "Прочитати документацію",
   "deleteFaceLibrary": {
     "desc": "Ви впевнені, що хочете видалити колекцію {{name}}? Це назавжди видалить усі пов’язані з нею обличчя.",
