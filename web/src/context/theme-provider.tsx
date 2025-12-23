@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import useSWR from "swr";
 
 type Theme = "dark" | "light" | "system";
 type ColorScheme =
@@ -64,6 +71,9 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+const fetcher = (url: string) =>
+  fetch(url).then((res) => (res.ok ? res.json() : []));
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -105,48 +115,64 @@ export function ThemeProvider({
       : "light";
   }, [theme]);
 
+  const { data: customFiles } = useSWR<string[]>(
+    "/api/config/themes",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  const allColorSchemes = useMemo(() => {
+    const customSchemes =
+      customFiles
+        ?.filter((f) => /^[a-zA-Z0-9._-]+\.css$/.test(f))
+        .map((f) => {
+          const base = f.replace(/\.css$/, "");
+          return (base.startsWith("theme-")
+            ? base
+            : `theme-${base}`) as ColorScheme;
+        }) ?? [];
+
+    return [...colorSchemes, ...customSchemes];
+  }, [customFiles]);
+
+  const [themesReady, setThemesReady] = useState(false);
+
+  useEffect(() => {
+    if (!customFiles) {
+      setThemesReady(true);
+      return;
+    }
+
+    const links = customFiles
+      .filter((f) => /^[a-zA-Z0-9._-]+\.css$/.test(f))
+      .map((file) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = `/config/themes/${file}`;
+        document.head.appendChild(link);
+
+        return new Promise<void>((resolve) => {
+          link.onload = () => resolve();
+          link.onerror = () => resolve();
+        });
+      });
+
+    Promise.all(links).then(() => setThemesReady(true));
+  }, [customFiles]);
+
   useEffect(() => {
     //localStorage.removeItem(storageKey);
     //console.log(localStorage.getItem(storageKey));
-    const root = window.document.documentElement;
-
-    if (!(window as any).__frigateThemesLoaded) {
-      (window as any).__frigateThemesLoaded = true;
-
-      fetch("/api/config/themes")
-        .then((res) => (res.ok ? res.json() : []))
-        .then((files: string[]) => {
-          files.forEach((file) => {
-            if (!file.endsWith(".css")) {
-              return;
-            }
-
-            const baseName = file.replace(/\.css$/, "");
-            const className = baseName.startsWith("theme-")
-              ? baseName
-              : `theme-${baseName}`;
-
-            if (!colorSchemes.includes(className as ColorScheme)) {
-              // runtime extension is intentional
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              colorSchemes.push(className);
-            }
-
-            if (!document.querySelector(`link[data-theme="${className}"]`)) {
-              const link = document.createElement("link");
-              link.rel = "stylesheet";
-              link.href = `/config/themes/${file}`;
-              link.dataset.theme = className;
-              document.head.appendChild(link);
-            }
-          });
-        })
-        .catch(() => {
-        });
+    if (!themesReady) {
+      return;
     }
 
-    root.classList.remove("light", "dark", "system", ...colorSchemes);
+    const root = window.document.documentElement;
+
+    root.classList.remove("light", "dark", "system", ...allColorSchemes);
     root.classList.add(theme, colorScheme);
 
     if (systemTheme) {
@@ -155,7 +181,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
-  }, [theme, colorScheme, systemTheme]);
+  }, [theme, colorScheme, systemTheme, themesReady, allColorSchemes]);
 
   const value = {
     theme,

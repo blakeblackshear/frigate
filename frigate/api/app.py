@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 import os
+import re
 import traceback
 import urllib
 from datetime import datetime, timedelta
@@ -197,6 +198,9 @@ def config_themes():
     themes: list[str] = []
     for name in sorted(os.listdir(themes_dir)):
         if not name.lower().endswith(".css"):
+            continue
+
+        if not re.fullmatch(r"[a-zA-Z0-9._-]+\.css", name):
             continue
 
         full_path = os.path.join(themes_dir, name)
