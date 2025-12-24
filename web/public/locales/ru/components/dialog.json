@@ -70,7 +70,8 @@
         "failed": "Не удалось запустить экспорт: {{error}}",
         "noVaildTimeSelected": "Не выбран допустимый временной диапазон",
         "endTimeMustAfterStartTime": "Время окончания должно быть после времени начала"
-      }
+      },
+      "view": "Просмотр"
     },
     "fromTimeline": {
       "saveExport": "Сохранить экспорт",

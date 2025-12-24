@@ -41,8 +41,8 @@
   "detail": {
     "noDataFound": "Нет данных для просмотра",
     "aria": "Переключить подробный режим просмотра",
-    "trackedObject_one": "объект",
-    "trackedObject_other": "объекты",
+    "trackedObject_one": "{{count}} объект",
+    "trackedObject_other": "{{count}} объекта",
     "noObjectDetailData": "Данные о деталях объекта недоступны.",
     "label": "Деталь",
     "settings": "Настройки подробного просмотра",
@@ -56,5 +56,9 @@
     "clickToSeek": "Перейти к этому моменту"
   },
   "zoomIn": "Увеличить",
-  "zoomOut": "Отдалить"
+  "zoomOut": "Отдалить",
+  "select_all": "Всё",
+  "normalActivity": "Нормальный",
+  "needsReview": "Требуется ревью",
+  "securityConcern": "Вопрос безопасности"
 }

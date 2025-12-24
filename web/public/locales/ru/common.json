@@ -88,7 +88,9 @@
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyyy"
     },
-    "inProgress": "В процессе"
+    "inProgress": "В процессе",
+    "invalidStartTime": "Некорректное время начала",
+    "invalidEndTime": "Некорректное время окончания"
   },
   "selectItem": "Выбрать {{item}}",
   "button": {
@@ -126,7 +128,8 @@
     "unselect": "Снять выбор",
     "export": "Экспортировать",
     "deleteNow": "Удалить сейчас",
-    "next": "Следующий"
+    "next": "Следующий",
+    "continue": "Продолжить"
   },
   "label": {
     "back": "Вернуться",
