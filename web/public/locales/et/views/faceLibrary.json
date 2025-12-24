@@ -1,5 +1,34 @@
 {
   "button": {
     "uploadImage": "Laadi pilt üles"
+  },
+  "collections": "Kogumikud",
+  "description": {
+    "placeholder": "Sisesta nimi selle kogumiku jaoks",
+    "invalidName": "Vigane nimi. Nimed võivad sisaldada ainult tähti, numbreid, tühikuid, ülakomasid, alakriipse ja sidekriipse.",
+    "addFace": "Laadides üles oma esimese pildi saad lisada uue kogumiku Näoteeki."
+  },
+  "documentTitle": "Näoteek - Frigate",
+  "createFaceLibrary": {
+    "new": "Lisa uus nägu"
+  },
+  "deleteFaceLibrary": {
+    "title": "Kustuta nimi"
+  },
+  "toast": {
+    "error": {
+      "addFaceLibraryFailed": "Näo sidumine nimega ei õnnestunud: {{errorMessage}}"
+    },
+    "success": {
+      "addFaceLibrary": "Lisamine Näoteeki õnnestus: {{name}}!",
+      "deletedFace_one": "{{count}} näo kustutamine õnnestus.",
+      "deletedFace_other": "{{count}} näo kustutamine õnnestus.",
+      "deletedName_one": "{{count}} näo kustutamine õnnestus.",
+      "deletedName_other": "{{count}} näo kustutamine õnnestus."
+    }
+  },
+  "deleteFaceAttempts": {
+    "desc_one": "Kas oled kindel, et soovid kustutada {{count}} näo? Seda tegevust ei saa tagasi pöörata.",
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} nägu? Seda tegevust ei saa tagasi pöörata."
   }
 }

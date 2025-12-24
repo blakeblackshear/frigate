@@ -1,5 +1,12 @@
 {
   "documentTitle": {
-    "general": "Üldine statistika - Frigate"
+    "general": "Üldine statistika - Frigate",
+    "cameras": "Kaamerate statistika - Frigate",
+    "storage": "Andmeruumi statistika - Frigate"
+  },
+  "logs": {
+    "download": {
+      "label": "Laadi logid alla"
+    }
   }
 }

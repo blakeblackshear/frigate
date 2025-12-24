@@ -1,6 +1,122 @@
 {
   "restart": {
     "title": "Kas oled kindel, et soovid Frigate'i uuesti käivitada?",
-    "button": "Käivita uuesti"
+    "button": "Käivita uuesti",
+    "restarting": {
+      "title": "Frigate käivitub uuesti",
+      "content": "See leht laaditakse uuesti {{countdown}} sekundi pärast.",
+      "button": "Laadi uuesti kohe"
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Salvesta otsing",
+      "desc": "Sisesta nimi salvestatud otsingu jaoks.",
+      "placeholder": "Sisesta nimi oma otsingu jaoks",
+      "overwrite": "„{{searchName}}“ on juba olemas. Salvestamisel kirjutad olemasoleva väärtuse üle.",
+      "success": "„{{searchName}}“ otsing on salvestatud.",
+      "button": {
+        "save": {
+          "label": "Salvesta see otsing"
+        }
+      }
+    }
+  },
+  "explore": {
+    "video": {
+      "viewInHistory": "Vaata ajaloos"
+    },
+    "plus": {
+      "review": {
+        "state": {
+          "submitted": "Saadetud"
+        },
+        "question": {
+          "ask_a": "Kas see objekt on <code>{{label}}</code>?",
+          "ask_an": "Kas see objekt on <code>{{label}}</code>?",
+          "ask_full": "Kas see objekt on <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "Kinnita see silt Frigate+ teenuse jaoks"
+        }
+      },
+      "submitToPlus": {
+        "label": "Saada teenusesse Frigate+",
+        "desc": "Objektid asukohtades, mida sa tahad vältida, pole valepositiivsed. Kui sa neid sellistena saadad teenusele, siis see ainult ajab tehisaru mudeli sassi."
+      }
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Vali ajajoonelt",
+      "lastHour_one": "Viimase tunni jooksul",
+      "lastHour_other": "Viimase {{count}} tunni jooksul",
+      "custom": "Sinu valitud ajavahemik",
+      "start": {
+        "title": "Algusaeg",
+        "label": "Vali algusaeg"
+      },
+      "end": {
+        "title": "Lõpuaeg",
+        "label": "Vali lõpuaeg"
+      }
+    },
+    "name": {
+      "placeholder": "Sisesta ekspordifaili nimi"
+    },
+    "select": "Vali",
+    "export": "Ekspordi",
+    "selectOrExport": "Vali või ekspordi",
+    "toast": {
+      "success": "Eksportimise käivitamine õnnestus. Faili leiad eksportimise lehelt.",
+      "view": "Vaata",
+      "error": {
+        "failed": "Eksportimise käivitamine ei õnnestunud: {{error}}",
+        "endTimeMustAfterStartTime": "Ajavahemiku lõpp peab olema peale algust",
+        "noVaildTimeSelected": "Ühtegi kehtivat ajavahemikku pole valitud"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Salvesta eksporditud sisu",
+      "previewExport": "Eksporditud sisu eelvaade"
+    }
+  },
+  "streaming": {
+    "label": "Voogedastus",
+    "restreaming": {
+      "disabled": "Voogedastuse kordus pole selle kaamera puhul kasutatav.",
+      "desc": {
+        "title": "Kui tahad selle kaameraga kasutada täiendavaid otseeetri ja helivõimalusi, siis seadista go2rtc."
+      }
+    },
+    "debugView": "Veaotsinguvaade",
+    "showStats": {
+      "label": "Näita voogedastuse statistikat",
+      "desc": "Lülita see eelistus sisse, kui soovid kaamerapildi ülekattena näha voogedastuse statistikat."
+    }
+  },
+  "recording": {
+    "button": {
+      "export": "Ekspordi",
+      "markAsReviewed": "Märgi ülevaadatuks",
+      "markAsUnreviewed": "Märgi mitteülevaadatuks",
+      "deleteNow": "Kustuta kohe"
+    },
+    "confirmDelete": {
+      "title": "Kinnita kustutamine",
+      "desc": {
+        "selected": "Kas sa oled kindel et soovid selle kõik ülevaadatava objektiga seotud kirjed kustutada?<br /><br />Vajuta alla <em>Shift</em> klahv ja saad sellest vaatest tulevikus mööda minna."
+      },
+      "toast": {
+        "success": "Selle ülevaadatava objektiga seotud videosisu on kustutatud.",
+        "error": "Kustutamine ei õnnestunud: {{error}}"
+      }
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Vali jälgitava objekti pisipilt",
+    "unknownLabel": "Päästikpilt on salvestatud",
+    "search": {
+      "placeholder": "Otsi sildi või alamsildi alusel..."
+    },
+    "noImages": "Selle kaamera kohta ei leidu pisipilte"
   }
 }

@@ -8,10 +8,18 @@
     },
     "step3": {
       "streamUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht"
+    },
+    "steps": {
+      "probeOrSnapshot": "Võta proov või tee hetkvõte"
+    },
+    "step2": {
+      "testing": {
+        "fetchingSnapshot": "Laadin kaamera hetkvõtet alla..."
+      }
     }
   },
   "users": {
-    "updatePassword": "Muuda salasõna",
+    "updatePassword": "Lähtesta salasõna",
     "toast": {
       "success": {
         "updatePassword": "Salasõna muutmine õnnestus."
@@ -21,7 +29,7 @@
       }
     },
     "table": {
-      "password": "Salasõna"
+      "password": "Lähtesta salasõna"
     },
     "dialog": {
       "form": {
@@ -90,12 +98,21 @@
     "cameraReview": "Kaamerate kordusvaatuste seadistused - Frigate",
     "general": "Kasutajaliidese seadistused - Frigate",
     "frigatePlus": "Frigate+ seadistused - Frigate",
-    "notifications": "Teavituste seadistused - Frigate"
+    "notifications": "Teavituste seadistused - Frigate",
+    "cameraManagement": "Kaamerate haldus - Frigate",
+    "masksAndZones": "Maskide ja tsoonide haldus - Frigate",
+    "object": "Silumine ja veaotsing - Frigate"
   },
   "general": {
     "title": "Kasutajaliidese seadistused",
     "cameraGroupStreaming": {
       "clearAll": "Kustuta kõik voogedastuse seadistused"
+    },
+    "liveDashboard": {
+      "title": "Töölaud reaalajas",
+      "automaticLiveView": {
+        "label": "Automaatne otseülekande vaade"
+      }
     }
   },
   "cameraManagement": {
@@ -120,6 +137,14 @@
     "unsavedChanges": "Frigate+ seadistuste muudatused on salvestamata",
     "toast": {
       "success": "Frigate+ seadistuste muudatused on salvestatud. Muudatuste kasutuselevõtmiseks käivita Frigate uuesti."
+    },
+    "snapshotConfig": {
+      "title": "Hetkvõtte seadistused",
+      "table": {
+        "snapshots": "Hetkvõtted",
+        "cleanCopySnapshots": "<code>clean_copy</code> Hetkvõtted",
+        "camera": "Kaamera"
+      }
     }
   },
   "masksAndZones": {
@@ -135,5 +160,34 @@
       "point_one": "{{count}} punkt",
       "point_other": "{{count}} punkti"
     }
+  },
+  "roles": {
+    "toast": {
+      "success": {
+        "userRolesUpdated_one": "{{count}} selle rolliga kasutaja on nüüd määratud Vaatajaks, kellel on ligipääs kõikidele kaameratele.",
+        "userRolesUpdated_other": "{{count}} selle rolliga kasutajat on nüüd määratud Vaatajaks, kellel on ligipääs kõikidele kaameratele."
+      }
+    }
+  },
+  "menu": {
+    "ui": "Kasutajaliides",
+    "cameraManagement": "Haldus",
+    "masksAndZones": "Maskid ja tsoonid",
+    "triggers": "Päästikud",
+    "debug": "Silumine ja veaotsing",
+    "users": "Kasutajad",
+    "roles": "Rollid",
+    "notifications": "Teavitused",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Sul on salvestamata muudatusi.",
+      "desc": "Kas soovid muudatused enne jätkamist salvestada?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kaamera",
+    "noCamera": "Kaamerat pole"
   }
 }

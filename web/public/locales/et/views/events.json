@@ -2,7 +2,17 @@
   "alerts": "Häired",
   "allCameras": "Kõik kaamerad",
   "detail": {
-    "settings": "Üksikasjaliku vaate seadistused"
+    "settings": "Üksikasjaliku vaate seadistused",
+    "label": "Üksikasjad",
+    "noDataFound": "Ülevaatamiseks pole üksikasjalikke andmeid",
+    "aria": "Lülita üksikasjalik vaade sisse/välja",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objekti",
+    "noObjectDetailData": "Objekti üksikasjalikke andmeid pole saadaval.",
+    "alwaysExpandActive": {
+      "title": "Alati laienda aktiivse kirje andmeid",
+      "desc": "Kui vähegi saadaval, siis alati laienda aktiivse ülevaatamisel kirje andmeid."
+    }
   },
   "detections": "Tuvastamise tulemused",
   "motion": {
@@ -26,6 +36,26 @@
   "zoomOut": "Suumi välja",
   "events": {
     "label": "Sündmused",
-    "aria": "Vali sündmused"
+    "aria": "Vali sündmused",
+    "noFoundForTimePeriod": "Selle ajavahemiku kohta ei leidu sündmusi."
+  },
+  "selected_one": "{{count}} valitud",
+  "selected_other": "{{count}} valitud",
+  "markAsReviewed": "Märgi ülevaadatuks",
+  "markTheseItemsAsReviewed": "Märgi need kirjed ülevaadatuks",
+  "newReviewItems": {
+    "label": "Vaata uusi ülevaatamiseks mõeldud kirjeid",
+    "button": "Uued ülevaatamiseks mõeldud kirjed"
+  },
+  "documentTitle": "Ülevaatamine - Frigate",
+  "recordings": {
+    "documentTitle": "Salvestised - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Viimased 24 tundi"
+  },
+  "objectTrack": {
+    "clickToSeek": "Klõpsa siia ajapunkti kerimiseks",
+    "trackedPoint": "Jälgitav punkt"
   }
 }

@@ -6,6 +6,14 @@
   "itemMenu": {
     "findSimilar": {
       "aria": "Otsi sarnaseid jälgitavaid objekte"
+    },
+    "downloadSnapshot": {
+      "label": "Laadi hetkvõte alla",
+      "aria": "Laadi hetkvõte alla"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Laadi puhas hetkvõte alla",
+      "aria": "Laadi puhas hetkvõte alla"
     }
   },
   "trackingDetails": {
@@ -15,5 +23,34 @@
         "desc": "Kui objekt on sisenenud tsooni, siis alati näida tsooni märgistust."
       }
     }
+  },
+  "documentTitle": "Avasta - Frigate",
+  "generativeAI": "Generatiivne tehisaru",
+  "exploreMore": "Avasta rohkem {{label}}-tüüpi objekte",
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "step": {
+        "thumbnailsEmbedded": "Pisipildid on lõimitud: ",
+        "descriptionsEmbedded": "Kirjeldused on lõimitud: ",
+        "trackedObjectsProcessed": "Jälgitud objektid on töödeldud: "
+      }
+    }
+  },
+  "type": {
+    "details": "üksikasjad",
+    "thumbnail": "pisipilt",
+    "snapshot": "hetkvõte"
+  },
+  "details": {
+    "item": {
+      "tips": {
+        "mismatch_one": "Tuvastasin {{count}} võõra objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud.",
+        "mismatch_other": "Tuvastasin {{count}} võõrast objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud."
+      }
+    },
+    "snapshotScore": {
+      "label": "Hetkvõttete punktiskoor"
+    },
+    "regenerateFromSnapshot": "Loo uuesti hetkvõttest"
   }
 }

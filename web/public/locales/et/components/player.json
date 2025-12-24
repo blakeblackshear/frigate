@@ -1,3 +1,8 @@
 {
-  "noRecordingsFoundForThisTime": "Hetkel ei leidu ühtego salvestust"
+  "noRecordingsFoundForThisTime": "Hetkel ei leidu ühtego salvestust",
+  "noPreviewFound": "Eelvaadet ei leidu",
+  "noPreviewFoundFor": "{{cameraName}} kaamera eelvaadet ei leidu",
+  "submitFrigatePlus": {
+    "submit": "Saada"
+  }
 }

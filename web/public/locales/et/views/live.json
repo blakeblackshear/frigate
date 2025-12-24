@@ -9,6 +9,115 @@
     "cameraEnabled": "Kaamera on kasutusel",
     "objectDetection": "Objektide tuvastamine",
     "audioDetection": "Heli tuvastus",
-    "transcription": "Heli üleskirjutus"
+    "transcription": "Heli üleskirjutus",
+    "snapshots": "Hetkvõtted"
+  },
+  "documentTitle": "Otseülekanne - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Otseülekanne - Frigate",
+  "lowBandwidthMode": "Väikese ribalaiusega režiim",
+  "twoWayTalk": {
+    "enable": "Lülita kahepoolne kõneside sisse",
+    "disable": "Lülita kahepoolne kõneside välja"
+  },
+  "cameraAudio": {
+    "enable": "Lülita kaamera heli sisse",
+    "disable": "Lülita kaamera heli välja"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kaamerapildi joondamiseks keskele klõpsa kaadris",
+        "enable": "Kasuta klõpsamisega teisaldamist",
+        "disable": "Ära kasuta klõpsamisega teisaldamist"
+      },
+      "left": {
+        "label": "Pööra liigutatavat kaamerat vasakule"
+      },
+      "up": {
+        "label": "Pööra liigutatavat kaamerat üles"
+      },
+      "down": {
+        "label": "Pööra liigutatavat kaamerat alla"
+      },
+      "right": {
+        "label": "Pööra liigutatavat kaamerat paremale"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Suumi liigutatavat kaamerat sisse"
+      },
+      "out": {
+        "label": "Suumi liigutatavat kaamerat välja"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Fookusta liigutatavat kaamerat sisse"
+      },
+      "out": {
+        "label": "Fookusta liigutatavat kaamerat välja"
+      }
+    },
+    "presets": "Liigutatava kaamera eelseadistused",
+    "frame": {
+      "center": {
+        "label": "Klõpsa kaadrit liigutatava kaamera pildi sättimiseks keskele"
+      }
+    }
+  },
+  "camera": {
+    "enable": "Lülita kaamera sisse",
+    "disable": "Lülita kaamera välja"
+  },
+  "detect": {
+    "enable": "Lülita tuvastamine sisse",
+    "disable": "Lülita tuvastamine välja"
+  },
+  "recording": {
+    "enable": "Lülita salvestamine sisse",
+    "disable": "Lülita salvestamine välja"
+  },
+  "snapshots": {
+    "enable": "Lülita hetkvõtted sisse",
+    "disable": "Lülita hetkvõtted välja"
+  },
+  "streamStats": {
+    "enable": "Näita voogedastuse statistikat",
+    "disable": "Peida voogedastuse statistika"
+  },
+  "stream": {
+    "twoWayTalk": {
+      "available": "Kahepoolne kõneside on selle voogedastuse puhul saadaval",
+      "unavailable": "Kahepoolne kõneside pole selle voogedastuse puhul saadaval",
+      "tips": "Sinu seadme peab seda funktsionaalsust toetama ja WebRTC peab olema kahepoolse kõneside jaoks seadistatud."
+    }
+  },
+  "notifications": "Teavitused",
+  "audio": "Heli",
+  "snapshot": {
+    "takeSnapshot": "Laadi hetkvõte alla",
+    "noVideoSource": "Hetkvõtte tegemiseks pole saadaval ühtegi videoallikat.",
+    "captureFailed": "Hetkvõtte jäädvustamine ei õnnestunud.",
+    "downloadStarted": "Hetkvõtte allalaadimine algas."
+  },
+  "audioDetect": {
+    "enable": "Lülita helituvastus sisse",
+    "disable": "Lülita helituvastus välja"
+  },
+  "transcription": {
+    "enable": "Lülita reaalajas heli üleskirjutus sisse",
+    "disable": "Lülita reaalajas heli üleskirjutus välja"
+  },
+  "autotracking": {
+    "enable": "Lülita automaatne jälgimine sisse",
+    "disable": "Lülita automaatne jälgimine välja"
+  },
+  "manualRecording": {
+    "title": "Nõudmisel",
+    "playInBackground": {
+      "label": "Esita taustal",
+      "desc": "Kasuta seda valikut, kui tahad voogedastuse jätkumist ka siis, kui pildivaade on peidetud."
+    }
   }
 }

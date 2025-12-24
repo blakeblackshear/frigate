@@ -4,5 +4,33 @@
       "deletedModel_one": "{{count}} mudeli kustutamine õnnestus",
       "deletedModel_other": "{{count}} mudeli kustutamine õnnestus"
     }
+  },
+  "documentTitle": "Klassifitseerimise mudelid - Frigate",
+  "details": {
+    "scoreInfo": "Skoor näitab selle objekti kõigi tuvastuste keskmist klassifitseerimise usaldusväärsust."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Kustuta klassifitseerimispildid"
+  },
+  "description": {
+    "invalidName": "Vigane nimi. Nimed võivad sisaldada ainult tähti, numbreid, tühikuid, ülakomasid, alakriipse ja sidekriipse."
+  },
+  "deleteModel": {
+    "desc_one": "Kas oled kindel, et soovid kustutada {{count}} mudeli? Järgnevaga kustuvad jäädavalt kõik seotud andmed, sealhulgas pildid ja koolitusandmed. Seda tegevust ei saa tagasi pöörata.",
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} mudelit? Järgnevaga kustuvad jäädavalt kõik seotud andmed, sealhulgas pildid ja koolitusandmed. Seda tegevust ei saa tagasi pöörata."
+  },
+  "deleteDatasetImages": {
+    "desc_one": "Kas oled kindel, et soovid kustutada {{count}} pildi {{dataset}} andmekogust? Seda tegevust ei saa tagasi pöörata ja hiljem on vaja mudelit uuesti koolitada.",
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} pilti {{dataset}} andmekogust? Seda tegevust ei saa tagasi pöörata ja hiljem on vaja mudelit uuesti koolitada."
+  },
+  "deleteTrainImages": {
+    "desc_one": "Kas oled kindel, et soovid kustutada {{count}} pildi? Seda tegevust ei saa tagasi pöörata.",
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} pilti? Seda tegevust ei saa tagasi pöörata."
+  },
+  "wizard": {
+    "step3": {
+      "allImagesRequired_one": "Palun klassifitseeri kõik pildid. Jäänud on veel {{count}} pilt.",
+      "allImagesRequired_other": "Palun klassifitseeri kõik pildid. Jäänud on veel {{count}} pilti."
+    }
   }
 }

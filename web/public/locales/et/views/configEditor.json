@@ -1,1 +1,18 @@
-{}
+{
+  "toast": {
+    "error": {
+      "savingError": "Viga seadistuse salvestamisel"
+    },
+    "success": {
+      "copyToClipboard": "Seadistused on kopeeritud lõikelauale."
+    }
+  },
+  "documentTitle": "Seadistuste haldus - Frigate",
+  "safeConfigEditor": "Seadistuste haldus (ohutusrežiim)",
+  "configEditor": "Seadistuste haldus",
+  "safeModeDescription": "Seadistuste vea tõttu on Frigate hetkel ohutusrežiimis.",
+  "copyConfig": "Kopeeri seadistused",
+  "saveAndRestart": "Salvesta ja käivita uuesti",
+  "saveOnly": "Vaid salvesta",
+  "confirm": "Kas väljud ilma salvestamata?"
+}
