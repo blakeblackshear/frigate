@@ -190,7 +190,10 @@
       "review_description_events_per_second": "Descripció de la revisió",
       "object_description": "Descripció de l'objecte",
       "object_description_speed": "Velocitat de la descripció de l'objecte",
-      "object_description_events_per_second": "Descripció de l'objecte"
+      "object_description_events_per_second": "Descripció de l'objecte",
+      "classification": "{{name}} Classificació",
+      "classification_speed": "Velocitat de classificació de {{name}}",
+      "classification_events_per_second": "{{name}} Esdeveniments de classificació per segon"
     },
     "infPerSecond": "Inferències per segon",
     "averageInf": "Temps mitjà d'inferència"

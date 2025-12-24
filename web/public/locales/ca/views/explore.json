@@ -100,13 +100,15 @@
           "updatedSublabel": "Subetiqueta actualitzada amb èxit.",
           "updatedLPR": "Matrícula actualitzada amb èxit.",
           "regenerate": "El {{provider}} ha sol·licitat una nova descripció. En funció de la velocitat del vostre proveïdor, la nova descripció pot trigar un temps a regenerar-se.",
-          "audioTranscription": "S'ha sol·licitat correctament la transcripció d'àudio. Depenent de la velocitat del vostre servidor Frigate, la transcripció pot trigar una estona a completar-se."
+          "audioTranscription": "S'ha sol·licitat correctament la transcripció d'àudio. Depenent de la velocitat del vostre servidor Frigate, la transcripció pot trigar una estona a completar-se.",
+          "updatedAttributes": "Els atributs s'han actualitzat correctament."
         },
         "error": {
           "regenerate": "No s'ha pogut contactar amb {{provider}} per obtenir una nova descripció: {{errorMessage}}",
           "updatedSublabelFailed": "No s'ha pogut actualitzar la subetiqueta: {{errorMessage}}",
           "updatedLPRFailed": "No s'ha pogut actualitzar la matrícula: {{errorMessage}}",
-          "audioTranscription": "Error en demanar la transcripció d'audio {{errorMessage}}"
+          "audioTranscription": "Error en demanar la transcripció d'audio {{errorMessage}}",
+          "updatedAttributesFailed": "No s'han pogut actualitzar els atributs: {{errorMessage}}"
         }
       },
       "title": "Revisar detalls de l'element",
@@ -162,7 +164,12 @@
     },
     "score": {
       "label": "Puntuació"
-    }
+    },
+    "editAttributes": {
+      "title": "Edita els atributs",
+      "desc": "Seleccioneu els atributs de classificació per a aquesta {{label}}"
+    },
+    "attributes": "Atributs de classificació"
   },
   "searchResult": {
     "tooltip": "S'ha identificat {{type}} amb una confiança del {{confidence}}%",

@@ -54,7 +54,7 @@
   },
   "renameCategory": {
     "title": "Reanomena la classe",
-    "desc": "Introduïu un nom nou per {{name}}. Se us requerirà que torneu a entrenar el model per al canvi de nom a afectar."
+    "desc": "Introduïu un nom nou per {{name}}. Se us requerirà que torneu a entrenar el model per al canvi de nom afectar."
   },
   "description": {
     "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guions."
@@ -116,7 +116,8 @@
         "classesUnique": "Els noms de classe han de ser únics",
         "stateRequiresTwoClasses": "Els models d'estat requereixen almenys 2 classes",
         "objectLabelRequired": "Seleccioneu una etiqueta d'objecte",
-        "objectTypeRequired": "Seleccioneu un tipus de classificació"
+        "objectTypeRequired": "Seleccioneu un tipus de classificació",
+        "noneNotAllowed": "La classe 'none' no està permesa"
       },
       "states": "Estats"
     },
@@ -172,7 +173,9 @@
     "states": "Estats"
   },
   "details": {
-    "scoreInfo": "La puntuació representa la confiança mitjana de la classificació en totes les deteccions d'aquest objecte."
+    "scoreInfo": "La puntuació representa la confiança mitjana de la classificació en totes les deteccions d'aquest objecte.",
+    "none": "Cap",
+    "unknown": "Desconegut"
   },
   "edit": {
     "title": "Edita el model de classificació",

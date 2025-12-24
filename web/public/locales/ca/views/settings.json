@@ -484,7 +484,7 @@
   "users": {
     "table": {
       "username": "Usuari",
-      "password": "Contrasenya",
+      "password": "Restableix la contrasenya",
       "deleteUser": "Suprimir usuari",
       "noUsers": "No s'han trobat usuaris.",
       "changeRole": "Canviar la funció d’usuari",
@@ -595,7 +595,7 @@
       "title": "Gestió d'usuaris",
       "desc": "Gestioneu els comptes d'usuari d'aquesta instància de Frigate."
     },
-    "updatePassword": "Actualitzar contrasenya"
+    "updatePassword": "Restableix la contrasenya"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -696,7 +696,7 @@
       "title": "Classificació d'ocells",
       "desc": "La classificació d’ocells identifica ocells coneguts mitjançant un model TensorFlow quantitzat. Quan es reconeix un ocell conegut, el seu nom comú s’afegeix com a subetiqueta. Aquesta informació es mostra a la interfície d’usuari, als filtres i també a les notificacions."
     },
-    "title": "Parmàmetres complementaris",
+    "title": "Configuració dels enriquiments",
     "toast": {
       "error": "No s'han pogut guardar els canvis de configuració: {{errorMessage}}",
       "success": "Els paràmetres complementaris s'han desat. Reinicia Frigate per aplicar els canvis."
@@ -805,7 +805,7 @@
     "documentTitle": "Disparadors",
     "management": {
       "title": "Activadors",
-      "desc": "Gestionar els disparadors de {{camera}}. Usa les tipus de miniatures per disparar miniatures similars a l'objecte a seguir seleccionat, i el tipus de descripció per disparar en cas de descripcions similars a l'especificada."
+      "desc": "Gestionar els disparadors de {{camera}}. Usa els tipus de miniatures per disparar miniatures similars a l'objecte a seguir seleccionat, i el tipus de descripció per disparar en cas de descripcions similars a l'especificada."
     },
     "addTrigger": "Afegir disaprador",
     "semanticSearch": {
