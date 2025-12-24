@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Optional
 
-from httpx import TimeoutException
+from httpx import RemoteProtocolError, TimeoutException
 from ollama import Client as ApiClient
 from ollama import ResponseError
 
@@ -68,7 +68,12 @@ class OllamaClient(GenAIClient):
                 f"Ollama tokens used: eval_count={result.get('eval_count')}, prompt_eval_count={result.get('prompt_eval_count')}"
             )
             return result["response"].strip()
-        except (TimeoutException, ResponseError, ConnectionError) as e:
+        except (
+            TimeoutException,
+            ResponseError,
+            RemoteProtocolError,
+            ConnectionError,
+        ) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
 
