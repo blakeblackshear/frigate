@@ -132,5 +132,8 @@
     },
     "count_one": "{{count}} Klasa",
     "count_other": "{{count}} Klas(y)"
+  },
+  "attributes": {
+    "all": "Wszystkie atrybuty"
   }
 }

@@ -21,13 +21,15 @@
           "regenerate": "Zażądano nowego opisu od {{provider}}. W zależności od szybkości twojego dostawcy, wygenerowanie nowego opisu może zająć trochę czasu.",
           "updatedSublabel": "Pomyślnie zaktualizowano podetykietę.",
           "updatedLPR": "Pomyślnie zaktualizowano tablicę rejestracyjną.",
-          "audioTranscription": "Wysłano prośbę o audio transkrypcję."
+          "audioTranscription": "Wysłano prośbę o audio transkrypcję. W zależności od szybkości serwera Frigate, transkrypcja może potrwać trochę czasu.",
+          "updatedAttributes": "Atrybuty zostały pomyślnie zaktualizowane."
         },
         "error": {
           "regenerate": "Nie udało się wezwać {{provider}} dla nowego opisu: {{errorMessage}}",
           "updatedSublabelFailed": "Nie udało się zaktualizować podetykiety: {{errorMessage}}",
           "updatedLPRFailed": "Nie udało się zaktualizować tablicy rejestracyjnej: {{errorMessage}}",
-          "audioTranscription": "Nie udało się włączyć audio transkrypcji: {{errorMessage}}"
+          "audioTranscription": "Nie udało się włączyć audio transkrypcji: {{errorMessage}}",
+          "updatedAttributesFailed": "Nie udało się zaktualizować atrybutów: {{errorMessage}}"
         }
       }
     },

@@ -184,7 +184,10 @@
       "yolov9_plate_detection_speed": "Prędkość detekcji rejestracji samochodowych YOLOv9",
       "yolov9_plate_detection": "Detekcja rejestracji samochodowych YOLOv9",
       "text_embedding": "Osadzenie tekstu",
-      "face_recognition": "Rozpoznawanie twarzy"
+      "face_recognition": "Rozpoznawanie twarzy",
+      "classification_events_per_second": "{{name}} Klasyfikacja zdarzeń na sekundę",
+      "classification_speed": "{{name}} Szybkość klasyfikacji",
+      "classification": "{{name}} Klasyfikacja"
     }
   }
 }

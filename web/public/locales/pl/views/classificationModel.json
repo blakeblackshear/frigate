@@ -11,7 +11,9 @@
     "editModel": "Edytuj model"
   },
   "details": {
-    "scoreInfo": "Wynik przedstawia średnią pewność klasyfikacji wszystkich wykryć danego obiektu."
+    "scoreInfo": "Wynik przedstawia średnią pewność klasyfikacji wszystkich wykryć danego obiektu.",
+    "none": "Brak",
+    "unknown": "Nieznany"
   },
   "toast": {
     "success": {
@@ -114,6 +116,35 @@
     "steps": {
       "nameAndDefine": "Nazwij i zdefiniuj",
       "stateArea": "Obszar stanu"
+    },
+    "step1": {
+      "name": "Nazwa",
+      "type": "Typ",
+      "classes": "Klasy",
+      "errors": {
+        "noneNotAllowed": "Klasa „żadne” jest niedozwolona.",
+        "stateRequiresTwoClasses": "Modele stanowe wymagają co najmniej dwie klasy.",
+        "objectLabelRequired": "Proszę wybrać etykietę obiektu",
+        "objectTypeRequired": "Proszę wybrać typ klasyfikacji"
+      }
+    },
+    "step2": {
+      "description": "Wybierz kamery i określ obszar monitorowania dla każdej z nich. Model sklasyfikuje stan tych obszarów.",
+      "cameras": "Kamery",
+      "selectCamera": "Wybierz kamerę",
+      "noCameras": "Kliknij +, aby dodać kamery",
+      "selectCameraPrompt": "Wybierz kamerę z listy, aby zdefiniować jej obszar monitorowania."
+    },
+    "step3": {
+      "selectImagesPrompt": "Zaznacz wszystkie obrazy z: {{className}}",
+      "selectImagesDescription": "Kliknij na zdjęcia, aby je wybrać. Po zakończeniu zajęć kliknij „Kontynuuj”.",
+      "allImagesRequired_one": "Proszę sklasyfikować wszystkie obrazy. Pozostał {{count}} obraz.",
+      "allImagesRequired_few": "Proszę sklasyfikować wszystkie obrazy. Pozostały {{count}} obrazy.",
+      "allImagesRequired_many": "Proszę sklasyfikować wszystkie obrazy. Pozostało {{count}} obrazów.",
+      "generating": {
+        "title": "Generowanie przykładowych obrazów"
+      },
+      "trainingStarted": "Szkolenie rozpoczęło się pomyślnie"
     }
   }
 }
