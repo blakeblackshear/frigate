@@ -1,7 +1,9 @@
 {
   "documentTitle": "Klassifizierungsmodelle - Fregatte",
   "details": {
-    "scoreInfo": "Die Punktzahl gibt die durchschnittliche Konfidenz aller Erkennungen dieses Objekts wieder."
+    "scoreInfo": "Die Punktzahl gibt die durchschnittliche Konfidenz aller Erkennungen dieses Objekts wieder.",
+    "none": "Keiner",
+    "unknown": "Unbekannt"
   },
   "button": {
     "deleteClassificationAttempts": "Lösche klassifizierte Bilder",
@@ -17,7 +19,7 @@
     "trainingInProgress": "Modell wird gerade trainiert",
     "noNewImages": "Keine weiteren Bilder zum trainieren. Bitte klassifiziere weitere Bilder im Datensatz.",
     "noChanges": "Keine Veränderungen des Datensatzes seit dem letzten Training.",
-    "modelNotReady": "Modell ist nicht bereit zum Training"
+    "modelNotReady": "Modell ist nicht bereit für das Training"
   },
   "toast": {
     "success": {
@@ -130,7 +132,7 @@
       "classesTip": "Über Klassen lernen",
       "classesStateDesc": "Definieren Sie die verschiedenen Zustände, in denen sich Ihr Kamerabereich befinden kann. Beispiel: „offen” und „geschlossen” für ein Garagentor.",
       "classesObjectDesc": "Definieren Sie die verschiedenen Kategorien, in die erkannte Objekte klassifiziert werden sollen. Beispiel: „Lieferant“, „Bewohner“, „Fremder“ für die Klassifizierung von Personen.",
-      "classPlaceholder": "Eingabe Klassenbezeichnung...",
+      "classPlaceholder": "Klassenbezeichnung eingeben...",
       "errors": {
         "nameRequired": "Modellname ist erforderlich",
         "nameLength": "Der Modellname darf maximal 64 Zeichen lang sein",
@@ -139,7 +141,8 @@
         "classesUnique": "Klassenname muss eindeutig sein",
         "stateRequiresTwoClasses": "Gebietsmodelle erfordern mindestens zwei Klassen",
         "objectLabelRequired": "Bitte wähle eine Objektbeschriftung",
-        "objectTypeRequired": "Bitte wählen Sie einen Klassifizierungstyp aus"
+        "objectTypeRequired": "Bitte wählen Sie einen Klassifizierungstyp aus",
+        "noneNotAllowed": "Die Klasse „none“ ist nicht zulässig"
       }
     },
     "step2": {

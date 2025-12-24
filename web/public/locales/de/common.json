@@ -12,7 +12,7 @@
     "24hours": "24 Stunden",
     "month_one": "{{time}} Monat",
     "month_other": "{{time}} Monate",
-    "d": "{{time}} Tag",
+    "d": "{{time}} Tg.",
     "day_one": "{{time}} Tag",
     "day_other": "{{time}} Tage",
     "m": "{{time}} Min",
@@ -37,12 +37,12 @@
     "30minutes": "30 Minuten",
     "1hour": "1 Stunde",
     "lastWeek": "Letzte Woche",
-    "h": "{{time}} Stunde",
+    "h": "{{time}} Std.",
     "ago": "vor {{timeAgo}}",
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
-    "mo": "{{time}}Monat",
+    "mo": "{{time}} Mon.",
     "formattedTimestamp": {
       "12hour": "d. MMM, hh:mm:ss aaa",
       "24hour": "dd. MMM, hh:mm:ss aaa"
@@ -82,7 +82,7 @@
       "12hour": "d. MMM yyyy",
       "24hour": "d. MMM yyyy"
     },
-    "inProgress": "In Bearbeitung",
+    "inProgress": "Im Gange",
     "invalidStartTime": "Ungültige Startzeit",
     "invalidEndTime": "Ungültige Endzeit"
   },

@@ -18,13 +18,15 @@
           "updatedSublabel": "Unterkategorie erfolgreich aktualisiert.",
           "updatedLPR": "Nummernschild erfolgreich aktualisiert.",
           "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist.",
-          "audioTranscription": "Die Audio-Transkription wurde erfolgreich angefordert. Je nach Geschwindigkeit Ihres Frigate-Servers kann die Transkription einige Zeit in Anspruch nehmen."
+          "audioTranscription": "Die Audio-Transkription wurde erfolgreich angefordert. Je nach Geschwindigkeit Ihres Frigate-Servers kann die Transkription einige Zeit in Anspruch nehmen.",
+          "updatedAttributes": "Attribute erfolgreich aktualisiert."
         },
         "error": {
           "regenerate": "Der Aufruf von {{provider}} für eine neue Beschreibung ist fehlgeschlagen: {{errorMessage}}",
           "updatedSublabelFailed": "Untekategorie konnte nicht aktualisiert werden: {{errorMessage}}",
           "updatedLPRFailed": "Aktualisierung des Kennzeichens fehlgeschlagen: {{errorMessage}}",
-          "audioTranscription": "Die Anforderung der Audio Transkription ist fehlgeschlagen: {{errorMessage}}"
+          "audioTranscription": "Die Anforderung der Audio Transkription ist fehlgeschlagen: {{errorMessage}}",
+          "updatedAttributesFailed": "Attribute konnten nicht aktualisiert werden: {{errorMessage}}"
         }
       }
     },
@@ -72,7 +74,12 @@
     },
     "score": {
       "label": "Ergebnis"
-    }
+    },
+    "editAttributes": {
+      "title": "Attribute bearbeiten",
+      "desc": "Wählen Sie Klassifizierungsattribute für dieses {{label}} aus"
+    },
+    "attributes": "Klassifizierungsattribute"
   },
   "documentTitle": "Erkunde - Frigate",
   "generativeAI": "Generative KI",
@@ -254,7 +261,7 @@
         "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}",
         "other": "{{label}} erkannt als {{attribute}}"
       },
-      "gone": "{{label}} hat verlassen",
+      "gone": "{{label}} hat sich entfernt",
       "heard": "{{label}} wurde gehört",
       "external": "{{label}} erkannt",
       "header": {

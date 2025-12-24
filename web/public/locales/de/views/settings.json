@@ -5,7 +5,7 @@
     "camera": "Kameraeinstellungen - Frigate",
     "masksAndZones": "Masken- und Zoneneditor – Frigate",
     "object": "Debug - Frigate",
-    "general": "UI-Einstellungen – Frigate",
+    "general": "UI-Einstellungen - Frigate",
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
     "classification": "Klassifizierungseinstellungen – Frigate",
     "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
@@ -490,7 +490,7 @@
   },
   "users": {
     "addUser": "Benutzer hinzufügen",
-    "updatePassword": "Passwort aktualisieren",
+    "updatePassword": "Passwort zurücksetzen",
     "toast": {
       "success": {
         "deleteUser": "Benutzer {{user}} wurde erfolgreich gelöscht",
@@ -514,7 +514,7 @@
       "changeRole": "Benutzerrolle ändern",
       "deleteUser": "Benutzer löschen",
       "noUsers": "Keine Benutzer gefunden.",
-      "password": "Passwort",
+      "password": "Passwort zurücksetzen",
       "username": "Benutzername",
       "actions": "Aktionen",
       "role": "Rolle"
@@ -599,7 +599,8 @@
         "currentPasswordRequired": "Aktuelles Passwort wird benötigt",
         "incorrectCurrentPassword": "Aktuelles Passwort ist falsch",
         "passwordVerificationFailed": "Passwort konnte nicht überprüft werden",
-        "multiDeviceWarning": "Alle anderen Geräte, auf denen Sie angemeldet sind, müssen sich innerhalb von {{refresh_time}} erneut anmelden. Sie können auch alle Benutzer dazu zwingen, sich sofort erneut zu authentifizieren, indem Sie Ihr JWT-Geheimnis rotieren."
+        "multiDeviceWarning": "Alle anderen Geräte, auf denen Sie angemeldet sind, müssen sich innerhalb von {{refresh_time}} erneut anmelden.",
+        "multiDeviceAdmin": "Sie können auch alle Benutzer dazu zwingen, sich sofort erneut zu authentifizieren, indem Sie Ihr JWT-Geheimnis ändern."
       }
     }
   },
@@ -704,8 +705,8 @@
   },
   "enrichments": {
     "birdClassification": {
-      "title": "Vogel Klassifizierung",
-      "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten."
+      "title": "Vogelerkennung",
+      "desc": "Die Vogelerkennung identifiziert Vögelarten mithilfe eines quantisierten Tensorflowmodells. Wenn eine Vogelart erkannt wird, wird ihr Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten."
     },
     "title": "Anreicherungseinstellungen",
     "unsavedChanges": "Ungesicherte geänderte Verbesserungseinstellungen",
@@ -729,7 +730,7 @@
         "desc": "Die Größe des für die Einbettung der semantischen Suche verwendeten Modells.",
         "large": {
           "title": "groß",
-          "desc": "Bei der Verwendung von <em>groß</em> wird das gesamte Jina-Modell verwendet und automatisch auf der GPU ausgeführt, falls zutreffend."
+          "desc": "Bei der Verwendung von <em>groß</em> wird das gesamte Jina-Modell verwendet und automatisch auf der GPU ausgeführt, falls möglich."
         }
       },
       "title": "Semantische Suche",
@@ -738,7 +739,7 @@
     },
     "faceRecognition": {
       "title": "Gesichtserkennung",
-      "desc": "Die Gesichtserkennung ermöglicht es, Personen Namen zuzuweisen, und wenn ihr Gesicht erkannt wird, ordnet Frigate den Namen der Person als Untertitel zu. Diese Informationen sind in der Benutzeroberfläche, den Filtern und in den Benachrichtigungen enthalten.",
+      "desc": "Die Gesichtserkennung ermöglicht es, Personen Namen zuzuweisen. Wenn ein Gesicht erkannt wird, ordnet Frigate den Namen der Person als Untertitel zu. Diese Informationen sind in der Benutzeroberfläche, den Filtern und in den Benachrichtigungen enthalten.",
       "readTheDocumentation": "Lies die Dokumentation",
       "modelSize": {
         "label": "Modellgröße",
@@ -1095,7 +1096,7 @@
       }
     },
     "step3": {
-      "description": "Konfigurieren Sie Stream-Rollen und fügen Sie zusätzliche Streams für Ihre Kamera hinzu",
+      "description": "Konfigurieren Sie Stream-Rollen und fügen Sie zusätzliche Streams für Ihre Kamera hinzu.",
       "validationTitle": "Stream Validierung",
       "connectAllStreams": "Verbinde alle Streams",
       "reconnectionSuccess": "Wiederverbindung erfolgreich.",
@@ -1208,7 +1209,8 @@
         "audioCodecRequired": "Ein Audiostream ist erforderlich, um die Audioerkennung zu unterstützen.",
         "restreamingWarning": "Die Reduzierung der Verbindungen zur Kamera für den Aufzeichnungsstream kann zu einer geringfügigen Erhöhung der CPU-Auslastung führen.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Aktivieren Sie HTTP in den Firmware-Einstellungen der Kamera und starten Sie den Assistenten neu."
+          "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Aktivieren Sie HTTP in den Firmware-Einstellungen der Kamera und starten Sie den Assistenten neu.",
+          "reolink-http": "Für Reolink-HTTP-Streams sollten sie FFmpeg verwenden, um eine bessere Kompatibilität zu gewährleisten. Aktivieren Sie für diesen Stream die Option „Stream-Kompatibilitätsmodus verwenden“."
         },
         "dahua": {
           "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Kameras von Dahua / Amcrest / EmpireTech unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu überprüfen und zu nutzen, sofern sie verfügbar sind."
@@ -1224,7 +1226,7 @@
     "addCamera": "Neue Kamera hinzufügen",
     "editCamera": "Kamera bearbeiten:",
     "selectCamera": "Wähle eine Kamera",
-    "backToSettings": "Zurück zu Kamera-Einstellungen",
+    "backToSettings": "Zurück zu Kameraeinstellungen",
     "streams": {
       "title": "Kameras aktivieren / deaktivieren",
       "desc": "Deaktiviere eine Kamera vorübergehend, bis Frigate neu gestartet wird. Deaktivierung einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr verfügbar. <br /> <em>Hinweis: Dies deaktiviert nicht die go2rtc restreams.</em>"

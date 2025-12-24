@@ -178,7 +178,10 @@
       "review_description_events_per_second": "Bewertungsbeschreibung",
       "object_description": "Objekt Beschreibung",
       "object_description_speed": "Objektbeschreibung Geschwindigkeit",
-      "object_description_events_per_second": "Objektbeschreibung"
+      "object_description_events_per_second": "Objektbeschreibung",
+      "classification": "{{name}} Klassifizierung",
+      "classification_speed": "{{name}} Klassifizierungsgeschwindigkeit",
+      "classification_events_per_second": "{{name}} Klassifizierungsereignisse pro Sekunde"
     },
     "title": "Optimierungen",
     "infPerSecond": "Rückschlüsse pro Sekunde",

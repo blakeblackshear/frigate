@@ -44,7 +44,7 @@
     "deleteFace": "Lösche Gesicht"
   },
   "train": {
-    "title": "Kürzliche Erkennungen",
+    "title": "Neueste Erkennungen",
     "aria": "Wähle aktuelle Erkennungen",
     "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung",
     "titleShort": "frisch"
