@@ -22,6 +22,7 @@ import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { LuSearchX } from "react-icons/lu";
 
 type ExploreViewProps = {
   setSearchDetail: (search: SearchResult | undefined) => void;
@@ -83,6 +84,15 @@ export default function ExploreView({
   if (isLoading) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
+  if (eventsByLabel && Object.keys(eventsByLabel).length == 0 && !isLoading) {
+    return (
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+        <LuSearchX className="size-16" />
+        {t("noTrackedObjects")}
+      </div>
     );
   }
 
