@@ -26,7 +26,8 @@
       "max_speed": "最高速度",
       "recognized_license_plate": "识别的车牌",
       "has_clip": "包含片段",
-      "has_snapshot": "包含快照"
+      "has_snapshot": "包含快照",
+      "attributes": "属性"
     },
     "searchType": {
       "thumbnail": "缩略图",

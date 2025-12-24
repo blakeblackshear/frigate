@@ -1,7 +1,7 @@
 {
   "description": {
-    "addFace": "我们将引导你如何向人脸库中添加新的特征库。",
-    "placeholder": "请输入此特征库的名称",
+    "addFace": "我们将引导你如何向人脸库中添加新的合集。",
+    "placeholder": "请输入此合集的名称",
     "invalidName": "名称无效。名称只能包含字母、数字、空格、撇号、下划线和连字符。"
   },
   "details": {
@@ -23,7 +23,7 @@
     "title": "创建特征库",
     "desc": "创建一个新的特征库",
     "new": "新建人脸",
-    "nextSteps": "建议按以下步骤建立可靠的特征库：<li>使用<em>近期识别记录</em>选项卡为每个检测到的人员选择并训练图像</li><li>优先使用正脸图像以获得最佳效果，尽可能避免使用侧脸图像进行训练</li></ul>"
+    "nextSteps": "建议按以下步骤建立可靠的数据集：<li>使用<em>近期识别记录</em>选项卡为每个检测到的人员选择并训练图像</li><li>优先使用正脸图像以获得最佳效果，尽可能避免使用侧脸图像进行训练</li></ul>"
   },
   "train": {
     "title": "近期识别记录",
@@ -35,7 +35,7 @@
   "selectFace": "选择人脸",
   "deleteFaceLibrary": {
     "title": "删除名称",
-    "desc": "确定要删除特征库 {{name}} 吗？此操作将永久删除所有关联的人脸特征数据。"
+    "desc": "确定要删除数据集 {{name}} 吗？此操作将永久删除所有关联的人脸特征数据。"
   },
   "button": {
     "deleteFaceAttempts": "删除人脸",
@@ -70,7 +70,7 @@
       "uploadingImageFailed": "图片上传失败：{{errorMessage}}",
       "addFaceLibraryFailed": "人脸命名失败：{{errorMessage}}",
       "deleteFaceFailed": "删除失败：{{errorMessage}}",
-      "deleteNameFailed": "特征集删除失败：{{errorMessage}}",
+      "deleteNameFailed": "数据集删除失败：{{errorMessage}}",
       "trainFailed": "训练失败：{{errorMessage}}",
       "updateFaceScoreFailed": "更新人脸评分失败：{{errorMessage}}",
       "renameFaceFailed": "重命名人脸失败：{{errorMessage}}"
@@ -88,7 +88,7 @@
     "desc": "为 {{name}} 输入新的名称",
     "title": "重命名人脸"
   },
-  "collections": "特征库",
+  "collections": "合集",
   "deleteFaceAttempts": {
     "desc_other": "你确定要删除 {{count}} 张人脸数据吗？此操作不可撤销。",
     "title": "删除人脸"

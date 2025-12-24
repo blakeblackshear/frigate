@@ -118,7 +118,7 @@
     "title": "摄像头",
     "overview": "概览",
     "info": {
-      "cameraProbeInfo": "{{camera}} 的摄像头信息",
+      "cameraProbeInfo": "摄像头 {{camera}} 的信息",
       "streamDataFromFFPROBE": "流数据信息通过<code>ffprobe</code>获取。",
       "fetching": "正在获取摄像头数据",
       "stream": "视频流{{idx}}",
@@ -186,12 +186,15 @@
       "plate_recognition": "车牌识别",
       "yolov9_plate_detection_speed": "YOLOv9 车牌检测速度",
       "yolov9_plate_detection": "YOLOv9 车牌检测",
-      "review_description": "核查描述",
-      "review_description_speed": "核查描述速度",
-      "review_description_events_per_second": "核查描述",
+      "review_description": "核查总结",
+      "review_description_speed": "核查总结速度",
+      "review_description_events_per_second": "核查总结",
       "object_description": "目标描述",
       "object_description_speed": "目标描述速度",
-      "object_description_events_per_second": "目标描述"
+      "object_description_events_per_second": "目标描述",
+      "classification": "分类 {{name}}",
+      "classification_speed": "{{name}} 的分类速度",
+      "classification_events_per_second": "{{name}} 的每秒分类速度"
     },
     "averageInf": "平均推理时间"
   }

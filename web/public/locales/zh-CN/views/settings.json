@@ -5,7 +5,7 @@
     "camera": "摄像头设置 - Frigate",
     "classification": "分类设置 - Frigate",
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
-    "motionTuner": "画面变动调整器 - Frigate",
+    "motionTuner": "画面变动调整 - Frigate",
     "object": "调试 - Frigate",
     "general": "页面设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
@@ -19,7 +19,7 @@
     "classification": "分类设置",
     "cameras": "摄像头设置",
     "masksAndZones": "遮罩/ 区域",
-    "motionTuner": "画面变动调整器",
+    "motionTuner": "画面变动调整",
     "debug": "调试",
     "users": "用户",
     "notifications": "通知",
@@ -403,7 +403,7 @@
     "objectMaskLabel": "目标/物体遮罩 {{number}}（{{label}}）"
   },
   "motionDetectionTuner": {
-    "title": "画面变动检测调整器",
+    "title": "画面变动检测调整",
     "desc": {
       "title": "Frigate 将使用画面变化检测作为首个步骤，以确认一帧画面中是否有目标或物体需要使用目标检测。",
       "documentation": "阅读有关画面变动检测的文档"
@@ -414,7 +414,7 @@
     },
     "contourArea": {
       "title": "轮廓面积",
-      "desc": "轮廓面积值用于判断哪些相连的像素变化区域可被认定为画面变动。<em>默认值：10</em>"
+      "desc": "轮廓面积值用于判断产生了多大的变化区域可被认定为画面变动。<em>默认值：10</em>"
     },
     "improveContrast": {
       "title": "提高对比度",
@@ -423,7 +423,7 @@
     "toast": {
       "success": "画面变动设置已保存。"
     },
-    "unsavedChanges": "{{camera}} 的画面变动调整器设置未保存"
+    "unsavedChanges": "{{camera}} 的画面变动调整设置未保存"
   },
   "debug": {
     "title": "调试",
@@ -513,7 +513,7 @@
       "role": "权限组",
       "noUsers": "未找到用户。",
       "changeRole": "更改用户角色",
-      "password": "密码",
+      "password": "修改密码",
       "deleteUser": "删除用户"
     },
     "dialog": {
@@ -704,12 +704,12 @@
   "enrichments": {
     "title": "增强功能设置",
     "birdClassification": {
-      "desc": "鸟类分类通过量化的TensorFlow模型识别已知鸟类。当识别到已知鸟类时，其通用名称将作为子标签（sub_label）添加。此信息包含在用户界面、筛选器以及通知中。",
+      "desc": "鸟类分类通过量化的 TensorFlow 模型识别已知鸟类。当识别到已知鸟类时，其通用名称将作为子标签（sub_label）添加。此信息包含在用户界面、筛选器以及通知中。",
       "title": "鸟类分类"
     },
     "semanticSearch": {
       "reindexNow": {
-        "desc": "重建索引将为所有追踪目标重新生成特征向量信息。该过程将在后台进行，可能会使CPU满载，所需时间取决于追踪目标的数量。",
+        "desc": "重建索引将为所有追踪的目标重新生成特征向量信息。该过程将在后台进行，期间可能会使 CPU 满载，所需时间取决于追踪目标的数量。",
         "label": "立即重建索引",
         "confirmTitle": "确认重建索引",
         "confirmDesc": "确定要为所有追踪目标重建特征向量索引信息吗？此过程将在后台进行，但可能会导致CPU满载并耗费较长时间。您可以在 浏览 页面查看进度。",
@@ -723,15 +723,15 @@
         "desc": "用于语义搜索的语言模型大小。",
         "small": {
           "title": "小",
-          "desc": "将使用 <strong>小</strong>模型。该模型将使用少量的内存，在CPU上也能较快的运行，质量较好。"
+          "desc": "将使用 <strong>小</strong>模型。该模型使用的内存较少，在 CPU 上也能较快的运行，质量较好。"
         },
         "large": {
           "title": "大",
-          "desc": "将使用 <strong>大</strong>模型。该选项使用了完整的Jina模型，在合适的时候将自动使用GPU。"
+          "desc": "将使用 <strong>大</strong>模型。该选项使用了完整的 Jina 模型，条件允许的情况下将自动使用 GPU 运行。"
         }
       },
       "title": "分类搜索",
-      "desc": "Frigate中的语义搜索功能允许您通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找目标/物体。",
+      "desc": "Frigate 中的语义搜索功能将能够让你通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找目标/物体。",
       "readTheDocumentation": "阅读文档"
     },
     "licensePlateRecognition": {
@@ -748,11 +748,11 @@
         "desc": "用于人脸识别的模型大小。",
         "small": {
           "title": "小",
-          "desc": "将使用<strong>小</strong>模型。该选项采用FaceNet人脸特征提取模型，可在大多数CPU上高效运行。"
+          "desc": "将使用<strong>小</strong>模型。该选项采用 FaceNet 人脸特征提取模型，可在大多数 CPU 上高效运行。"
         },
         "large": {
           "title": "大",
-          "desc": "将使用<strong>大</strong>模型。该选项使用ArcFace人脸特征提取模型，在需要的时候自动使用GPU运行。"
+          "desc": "将使用<strong>大</strong>模型。该选项使用 ArcFace 人脸特征提取模型，条件允许的情况下将自动使用 GPU 运行。"
         }
       }
     },
@@ -767,7 +767,7 @@
     "documentTitle": "触发器",
     "management": {
       "title": "触发器",
-      "desc": "管理 {{camera}} 的触发器。你可以使用“缩略图”类型，将通过与追踪目标相似的缩略图来触发；也可以使用“描述”类型，基于与你指定的文本相似的描述来触发（中文描述需要使用jina v2模型，对配置要求更高）。"
+      "desc": "管理 {{camera}} 的触发器。你可以选择“缩略图”类型，将通过与追踪目标相似的缩略图来触发；也可以通过“描述”类型，与你描述的文本相似来触发（中文描述需要使用 jina v2模型，对配置要求更高）。"
     },
     "addTrigger": "添加触发器",
     "table": {
@@ -952,7 +952,7 @@
   },
   "cameraWizard": {
     "title": "添加摄像头",
-    "description": "请按照以下步骤添加摄像头至Frigate中。",
+    "description": "请按照以下步骤添加摄像头至 Frigate 中。",
     "steps": {
       "nameAndConnection": "名称与连接",
       "streamConfiguration": "视频流配置",
@@ -1020,7 +1020,7 @@
       "onvifPort": "ONVIF 端口",
       "probeMode": "探测摄像头",
       "manualMode": "手动选择",
-      "detectionMethodDescription": "如果支持 ONVIF 协议，将使用该协议探测摄像头，以自动获取摄像头视频流地址；若不支持，也可手动选择摄像头品牌来使用预设地址。如需输入自定义RTSP地址，请选择手动模式并选取\"其他\"选项。",
+      "detectionMethodDescription": "如果摄像头支持 ONVIF 协议，将使用该协议探测摄像头，以自动获取摄像头视频流地址；若不支持，也可手动选择摄像头品牌来使用预设地址。如需输入自定义RTSP地址，请选择“手动选择”并选择“其他”选项。",
       "onvifPortDescription": "对于支持ONVIF协议的摄像头，该端口通常为80或8080。",
       "useDigestAuth": "使用摘要认证",
       "useDigestAuthDescription": "为ONVIF协议启用HTTP摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的admin账户。"
@@ -1234,7 +1234,7 @@
     "backToSettings": "返回摄像头设置",
     "streams": {
       "title": "开启或关闭摄像头",
-      "desc": "将临时禁用摄像头直至Frigate重启。禁用摄像头将完全停止Frigate对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：此操作不会影响go2rtc的转流服务。</em>"
+      "desc": "将临时禁用摄像头，直至 Frigate 重启。禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：go2rtc 的转流服务不受影响。</em>"
     },
     "cameraConfig": {
       "add": "添加摄像头",
@@ -1273,31 +1273,31 @@
       "desc": "临时启用或禁用此摄像头的 生成式AI目标描述 功能。禁用后，系统将不再请求该摄像头追踪目标和物体的AI生成描述。"
     },
     "review_descriptions": {
-      "title": "生成式AI核查描述",
-      "desc": "临时启用或禁用此摄像头的 生成式AI核查描述 功能。禁用后，系统将不再请求该摄像头核查项目的AI生成描述。"
+      "title": "生成式 AI 核查总结",
+      "desc": "临时开关该摄像头的 生成式 AI 核查总结 功能。禁用后，系统将不再请求 AI 生成该摄像头核查项目的总结。"
     },
     "review": {
       "title": "核查",
-      "desc": "临时禁用/启用此摄像头的警报与检测功能，直至Frigate重启。禁用期间，系统将不再生成新的核查项目。 ",
+      "desc": "临时开关该摄像头的警报与检测项生成功能，直到 Frigate 重启后恢复。禁用期间，系统将不再生成新的核查项目。 ",
       "alerts": "警报 ",
       "detections": "检测 "
     },
     "reviewClassification": {
       "title": "核查分类",
-      "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的<strong>人</strong>、<strong>汽车</strong> 目标都将视为警报。你可以通过修改配置文件配置区域来细分。",
+      "desc": "Frigate 将核查项的严重程度分为“警报”和“检测”两个等级。默认情况下，所有的<strong>人</strong>、<strong>汽车</strong> 目标都将视为警报。你可以通过修改配置文件配置区域来细分。",
       "noDefinedZones": "此摄像头未设置任何监控区。",
       "objectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下都将显示为警报。",
-      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区内都将显示为警报。",
+      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区域内都将显示为警报。",
       "objectDetectionsTips": "所有在摄像头 {{cameraName}} 上，检测到的 {{detectionsLabels}} 目标或物体，无论它位于哪个区，都将显示为检测。",
       "zoneObjectDetectionsTips": {
-        "text": "所有在摄像头 {{cameraName}} 下的 {{zone}} 区内检测到未分类的 {{detectionsLabels}} 目标或物体，都将显示为检测。",
-        "notSelectDetections": "所有在摄像头 {{cameraName}}下的 {{zone}} 区内检测到的 {{detectionsLabels}} 目标或物体，如果它未归类为警报，无论它位于哪个区，都将显示为检测。",
+        "text": "所有在摄像头 {{cameraName}} 下的 {{zone}} 区域内检测到未分类的 {{detectionsLabels}} 目标或物体，都将显示为检测。",
+        "notSelectDetections": "所有在摄像头 {{cameraName}}下的 {{zone}} 区域内检测到的 {{detectionsLabels}} 目标或物体，如果它未归类为警报，无论它位于哪个区，都将显示为检测。",
         "regardlessOfZoneObjectDetectionsTips": "在摄像头 {{cameraName}} 上，所有未分类的 {{detectionsLabels}} 检测目标或物体，无论出现在哪个区域，都将显示为检测。"
       },
       "unsavedChanges": "摄像头 {{camera}} 的核查分类设置尚未保存",
       "selectAlertsZones": "选择警报区",
       "selectDetectionsZones": "选择检测区",
-      "limitDetections": "限制仅在特定区内进行检测",
+      "limitDetections": "限制仅在特定区域内进行检测",
       "toast": {
         "success": "核查分类设置已保存，重启后生效。"
       }

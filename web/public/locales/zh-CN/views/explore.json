@@ -104,13 +104,15 @@
           "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
           "updatedSublabel": "成功更新子标签。",
           "updatedLPR": "成功更新车牌。",
-          "audioTranscription": "成功请求音频转录。根据你运行 Frigate 的服务器速度，转录可能需要一些时间才能完成。"
+          "audioTranscription": "成功请求音频转录。根据你运行 Frigate 的服务器速度，转录可能需要一些时间才能完成。",
+          "updatedAttributes": "更新属性成功。"
         },
         "error": {
           "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
           "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}",
           "updatedLPRFailed": "更新车牌失败：{{errorMessage}}",
-          "audioTranscription": "请求音频转录失败：{{errorMessage}}"
+          "audioTranscription": "请求音频转录失败：{{errorMessage}}",
+          "updatedAttributesFailed": "更新属性失败：{{errorMessage}}"
         }
       }
     },
@@ -159,7 +161,12 @@
     },
     "score": {
       "label": "分值"
-    }
+    },
+    "editAttributes": {
+      "title": "编辑属性",
+      "desc": "为 {{label}} 选择分类属性"
+    },
+    "attributes": "分类属性"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -262,8 +269,8 @@
       "external": "已检测到 {{label}}",
       "header": {
         "zones": "区",
-        "ratio": "占比",
-        "area": "坐标区域",
+        "ratio": "比例",
+        "area": "大小",
         "score": "分数"
       }
     },

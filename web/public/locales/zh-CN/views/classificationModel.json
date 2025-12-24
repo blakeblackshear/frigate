@@ -110,7 +110,8 @@
         "classesUnique": "类别名称必须唯一",
         "stateRequiresTwoClasses": "状态模型至少需要两个类别",
         "objectLabelRequired": "请选择一个目标标签",
-        "objectTypeRequired": "请选择一个目标标签"
+        "objectTypeRequired": "请选择一个目标标签",
+        "noneNotAllowed": "不能创建“none”（无标签）类别"
       },
       "states": "状态"
     },
@@ -162,7 +163,9 @@
     "states": "状态"
   },
   "details": {
-    "scoreInfo": "得分表示该目标所有检测结果的平均分类置信度。"
+    "scoreInfo": "得分表示该目标所有检测结果的平均分类置信度。",
+    "none": "无分类",
+    "unknown": "未知"
   },
   "edit": {
     "title": "编辑分类模型",

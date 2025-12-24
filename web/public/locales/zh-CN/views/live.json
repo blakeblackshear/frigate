@@ -115,11 +115,11 @@
     "title": "视频流",
     "audio": {
       "tips": {
-        "title": "音频必须从摄像头输出并在 go2rtc 中配置为此视频流使用。",
+        "title": "必须要摄像头能够播放音频，以及需要 go2rtc 支持并配置。",
         "documentation": "阅读文档 "
       },
       "available": "此视频流支持音频",
-      "unavailable": "此视频流不支持音频"
+      "unavailable": "此视频流不支持音频传输"
     },
     "twoWayTalk": {
       "tips": "您的设备必须支持此功能，并且必须配置 WebRTC 以支持双向对讲。",

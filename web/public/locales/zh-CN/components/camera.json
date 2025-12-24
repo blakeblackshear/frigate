@@ -32,7 +32,7 @@
         "title": "{{cameraName}} 视频流设置",
         "desc": "更改此摄像头组仪表板的实时视频流选项。<em>这些设置特定于设备/浏览器。</em>",
         "audioIsAvailable": "此视频流支持音频",
-        "audioIsUnavailable": "此视频流不支持音频",
+        "audioIsUnavailable": "此视频流不支持音频传输",
         "audio": {
           "tips": {
             "title": "音频必须从您的摄像头输出并在 go2rtc 中配置此流。",
