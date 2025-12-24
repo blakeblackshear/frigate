@@ -42,5 +42,11 @@
     "noImageFound": "Δεν βρέθηκε εικόνα για αυτό το χρονικό σημείο."
   },
   "trackedObjectsCount_one": "{{count}} παρακολουθούμενο αντικείμενο ",
-  "trackedObjectsCount_other": "{{count}} παρακολουθούμενα αντικείμενα "
+  "trackedObjectsCount_other": "{{count}} παρακολουθούμενα αντικείμενα ",
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Λήψη βίντεο",
+      "aria": "Λήψη βίντεο"
+    }
+  }
 }

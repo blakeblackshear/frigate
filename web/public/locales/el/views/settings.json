@@ -7,9 +7,11 @@
     "masksAndZones": "Ρυθμίσεις Μασκών και Ζωνών - Frigate",
     "motionTuner": "Ρύθμιση Κίνησης - Frigate",
     "object": "Επίλυση σφαλμάτων - Frigate",
-    "general": "Γενικές ρυθμίσεις - Frigate",
+    "general": "Ρυθμίσεις UI - Frigate",
     "frigatePlus": "Ρυθμίσεις Frigate+ - Frigate",
-    "notifications": "Ρυθμίσεις Ειδοποιήσεων"
+    "notifications": "Ρυθμίσεις Ειδοποιήσεων",
+    "cameraManagement": "Διαχείριση καμερών - Frigate",
+    "cameraReview": "Ρυθμίσεις αξιολόγησης κάμερας - Frigate"
   },
   "masksAndZones": {
     "zones": {
