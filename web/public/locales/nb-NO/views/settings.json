@@ -495,7 +495,7 @@
       "desc": "Administrer brukerprofiler for denne Frigate-instansen."
     },
     "addUser": "Legg til bruker",
-    "updatePassword": "Oppdater passord",
+    "updatePassword": "Nullstill passord",
     "toast": {
       "success": {
         "deleteUser": "Bruker {{user}} ble slettet",
@@ -599,7 +599,7 @@
       "actions": "Handlinger",
       "role": "Rolle",
       "changeRole": "Endre brukerrolle",
-      "password": "Passord",
+      "password": "Nullstill passord",
       "deleteUser": "Slett bruker",
       "noUsers": "Ingen brukere funnet."
     }

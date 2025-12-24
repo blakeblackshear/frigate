@@ -111,7 +111,8 @@
         "classesUnique": "Klassenavn må være unike",
         "stateRequiresTwoClasses": "Tilstandsmodeller krever minst 2 klasser",
         "objectLabelRequired": "Velg en objektetikett",
-        "objectTypeRequired": "Velg en klassifiseringstype"
+        "objectTypeRequired": "Velg en klassifiseringstype",
+        "noneNotAllowed": "Klassen 'ingen' er ikke tillatt"
       },
       "states": "Tilstander"
     },
@@ -164,7 +165,9 @@
     "states": "Tilstander"
   },
   "details": {
-    "scoreInfo": "Score representerer gjennomsnittlig klassifiseringskonfidens på tvers av alle deteksjoner av dette objektet."
+    "scoreInfo": "Score representerer gjennomsnittlig klassifiseringskonfidens på tvers av alle deteksjoner av dette objektet.",
+    "none": "Ingen",
+    "unknown": "Ukjent"
   },
   "tooltip": {
     "trainingInProgress": "Modellen trenes nå",

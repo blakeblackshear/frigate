@@ -25,7 +25,8 @@
       "max_speed": "Maks. hastighet",
       "recognized_license_plate": "Gjenkjent kjennemerke",
       "has_clip": "Har videoklipp",
-      "has_snapshot": "Har stillbilde"
+      "has_snapshot": "Har stillbilde",
+      "attributes": "Attributter"
     },
     "searchType": {
       "thumbnail": "Miniatyrbilde",

@@ -90,13 +90,15 @@
           "updatedSublabel": "Underetikett ble oppdatert.",
           "updatedLPR": "Vellykket oppdatering av kjennemerke.",
           "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere.",
-          "audioTranscription": "Lydtranskripsjon ble forespurt. Avhengig av ytelsen på din Frigate server kan transkripsjonen ta noe tid å fullføre."
+          "audioTranscription": "Lydtranskripsjon ble forespurt. Avhengig av ytelsen på din Frigate server kan transkripsjonen ta noe tid å fullføre.",
+          "updatedAttributes": "Attributter ble oppdatert."
         },
         "error": {
           "regenerate": "Feil ved anrop til {{provider}} for en ny beskrivelse: {{errorMessage}}",
           "updatedLPRFailed": "Oppdatering av kjennemerke feilet: {{errorMessage}}",
           "updatedSublabelFailed": "Feil ved oppdatering av underetikett: {{errorMessage}}",
-          "audioTranscription": "Forespørsel om lydtranskripsjon feilet: {{errorMessage}}"
+          "audioTranscription": "Forespørsel om lydtranskripsjon feilet: {{errorMessage}}",
+          "updatedAttributesFailed": "Kunne ikke oppdatere attributter: {{errorMessage}}"
         }
       },
       "desc": "Detaljer for inspeksjonselement",
@@ -151,7 +153,12 @@
     },
     "score": {
       "label": "Score"
-    }
+    },
+    "editAttributes": {
+      "title": "Rediger attributter",
+      "desc": "Velg klassifiseringsattributter for denne {{label}}"
+    },
+    "attributes": "Klassifiseringsattributter"
   },
   "itemMenu": {
     "viewInHistory": {

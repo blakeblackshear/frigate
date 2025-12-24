@@ -176,7 +176,10 @@
       "object_description_events_per_second": "Objektbeskrivelse",
       "review_description": "Inspeksjonsbeskrivelse",
       "review_description_events_per_second": "Inspeksjonsbeskrivelse",
-      "review_description_speed": "Inspeksjonsbeskrivelse hastighet"
+      "review_description_speed": "Inspeksjonsbeskrivelse hastighet",
+      "classification": "{{name}} Klassifisering",
+      "classification_speed": "{{name}} klassifisering hastighet",
+      "classification_events_per_second": "{{name}} klassifiseringshendelser per sekund"
     },
     "title": "Utvidelser",
     "infPerSecond": "Inferenser per sekund",
