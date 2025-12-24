@@ -36,5 +36,28 @@
   "selected_other": "{{count}} 件選択",
   "detected": "検出",
   "suspiciousActivity": "不審なアクティビティ",
-  "threateningActivity": "脅威となるアクティビティ"
+  "threateningActivity": "脅威となるアクティビティ",
+  "zoomIn": "ズームイン",
+  "zoomOut": "ズームアウト",
+  "detail": {
+    "label": "詳細",
+    "noDataFound": "確認する詳細データはありません",
+    "aria": "詳細表示を切り替え",
+    "trackedObject_one": "{{count}} 件のオブジェクト",
+    "trackedObject_other": "{{count}} 件のオブジェクト",
+    "noObjectDetailData": "オブジェクトの詳細データがありません。",
+    "settings": "詳細表示設定",
+    "alwaysExpandActive": {
+      "title": "アクティブ項目を常に展開",
+      "desc": "利用可能な場合、アクティブなレビュー項目のオブジェクト詳細を常に展開する。"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "追跡ポイント",
+    "clickToSeek": "クリックしてこの時点に移動"
+  },
+  "select_all": "すべて",
+  "normalActivity": "通常",
+  "needsReview": "要確認",
+  "securityConcern": "セキュリティ上の懸念"
 }

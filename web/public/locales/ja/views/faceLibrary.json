@@ -2,7 +2,7 @@
   "description": {
     "placeholder": "このコレクションの名前を入力",
     "addFace": "最初の画像をアップロードして、フェイスライブラリに新しいコレクションを追加してください。",
-    "invalidName": "無効な名前です。名前に使用できるのは英数字、スペース、アポストロフィ、アンダースコア、ハイフンのみです。"
+    "invalidName": "無効な名前です。使用できるのは、英数字、空白、アポストロフィ、アンダースコア、ハイフンのみです。"
   },
   "details": {
     "person": "人物",
@@ -23,7 +23,7 @@
     "title": "コレクションを作成",
     "desc": "新しいコレクションを作成",
     "new": "新しい顔を作成",
-    "nextSteps": "強固な基盤を作るために:<li>［学習］タブで各人物に対して画像を選択し学習させてください。</li><li>最良の結果のため、正面を向いた画像に集中し、斜めからの顔画像は学習に使わないでください。</li></ul>"
+    "nextSteps": "強固な基盤を作るために:<li>［過去の学習］タブで各人物に対して画像を選択し学習させてください。</li><li>最良の結果のため、正面を向いた画像に集中し、斜めからの顔画像は学習に使わないでください。</li></ul>"
   },
   "selectItem": "{{item}} を選択",
   "steps": {
@@ -35,9 +35,10 @@
     }
   },
   "train": {
-    "title": "学習",
-    "aria": "学習を選択",
-    "empty": "最近の顔認識の試行はありません"
+    "title": "過去の学習",
+    "aria": "過去の学習を選択",
+    "empty": "最近の顔認識の試行はありません",
+    "titleShort": "Classifications,最近の分類結果を選択,,False,train.aria,,"
   },
   "selectFace": "顔を選択",
   "deleteFaceLibrary": {
@@ -80,7 +81,7 @@
       "deletedName_other": "{{count}} 件の顔を削除しました。",
       "renamedFace": "顔の名前を {{name}} に変更しました",
       "trainedFace": "顔の学習が完了しました。",
-      "updatedFaceScore": "顔のスコアを更新しました。"
+      "updatedFaceScore": "顔のスコアを {{name}} ({{score}})に更新しました。"
     },
     "error": {
       "uploadingImageFailed": "画像のアップロードに失敗しました: {{errorMessage}}",

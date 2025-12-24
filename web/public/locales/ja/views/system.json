@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "NPU 使用率",
-      "npuMemory": "NPU メモリ"
+      "npuMemory": "NPU メモリ",
+      "intelGpuWarning": {
+        "title": "Intel GPU 統計情報の警告",
+        "message": "GPU の統計情報を取得できません",
+        "description": "これは Intel の GPU 統計取得ツール（intel_gpu_top）における既知の不具合です。ハードウェアアクセラレーションやオブジェクト検出が (i)GPU 上で正しく動作している場合でも、GPU 使用率が 0% と繰り返し表示されることがあります。これは Frigate の不具合ではありません。ホストを再起動することで一時的に解消し、GPU が正常に動作していることを確認できます。本問題はパフォーマンスには影響しません。"
+      }
     },
     "otherProcesses": {
       "title": "その他のプロセス",
@@ -180,7 +185,17 @@
       "plate_recognition_speed": "ナンバープレート認識速度",
       "text_embedding_speed": "テキスト埋め込み速度",
       "yolov9_plate_detection_speed": "YOLOv9 ナンバープレート検出速度",
-      "yolov9_plate_detection": "YOLOv9 ナンバープレート検出"
-    }
+      "yolov9_plate_detection": "YOLOv9 ナンバープレート検出",
+      "review_description": "レビュー説明",
+      "review_description_speed": "レビュー説明の処理速度",
+      "review_description_events_per_second": "レビュー説明",
+      "object_description": "オブジェクト説明",
+      "object_description_speed": "オブジェクト説明の処理速度",
+      "object_description_events_per_second": "オブジェクト説明",
+      "classification": "{{name}} の分類",
+      "classification_speed": "{{name}} 分類の処理速度",
+      "classification_events_per_second": "{{name}} 分類の毎秒イベント数"
+    },
+    "averageInf": "平均推論時間"
   }
 }

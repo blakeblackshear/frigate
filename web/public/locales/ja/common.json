@@ -66,7 +66,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "処理中",
+    "invalidStartTime": "開始時刻が無効です",
+    "invalidEndTime": "終了時刻が無効です"
   },
   "readTheDocumentation": "ドキュメントを見る",
   "unit": {
@@ -88,7 +91,12 @@
     }
   },
   "label": {
-    "back": "戻る"
+    "back": "戻る",
+    "hide": "{{item}} を非表示",
+    "show": "{{item}} を表示",
+    "ID": "ID",
+    "none": "なし",
+    "all": "すべて"
   },
   "button": {
     "apply": "適用",
@@ -125,7 +133,8 @@
     "unselect": "選択解除",
     "export": "書き出し",
     "deleteNow": "今すぐ削除",
-    "next": "次へ"
+    "next": "次へ",
+    "continue": "続行"
   },
   "menu": {
     "system": "システム",
@@ -224,7 +233,8 @@
       "withSystem": {
         "label": "システム設定に従う"
       }
-    }
+    },
+    "classification": "分類"
   },
   "toast": {
     "copyUrlToClipboard": "URLをクリップボードにコピーしました。",
@@ -267,5 +277,14 @@
   "selectItem": "{{item}} を選択",
   "information": {
     "pixels": "{{area}}ピクセル"
+  },
+  "list": {
+    "two": "{{0}} と {{1}}",
+    "many": "{{items}}と {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "任意",
+    "internalID": "Frigate が設定で使用する内部 ID です"
   }
 }

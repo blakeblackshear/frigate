@@ -172,7 +172,11 @@
   "noCameras": {
     "title": "カメラが設定されていません",
     "buttonText": "カメラを追加",
-    "description": "開始するには、カメラを接続してください。"
+    "description": "開始するには、Frigateにカメラを接続してください。",
+    "restricted": {
+      "title": "利用可能なカメラがありません",
+      "description": "このグループ内のカメラを表示する権限がありません。"
+    }
   },
   "snapshot": {
     "takeSnapshot": "即時スナップショットをダウンロード",

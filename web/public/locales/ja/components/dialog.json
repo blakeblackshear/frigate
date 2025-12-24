@@ -51,12 +51,13 @@
     "export": "書き出し",
     "selectOrExport": "選択または書き出し",
     "toast": {
-      "success": "書き出しを開始しました。/exports フォルダでファイルを確認できます。",
+      "success": "書き出しを開始しました。出力ページでファイルを確認できます。",
       "error": {
         "failed": "書き出しの開始に失敗しました: {{error}}",
         "endTimeMustAfterStartTime": "終了時間は開始時間より後である必要があります",
         "noVaildTimeSelected": "有効な時間範囲が選択されていません"
-      }
+      },
+      "view": "表示"
     },
     "fromTimeline": {
       "saveExport": "書き出しを保存",
@@ -114,6 +115,7 @@
     "search": {
       "placeholder": "ラベルまたはサブラベルで検索…"
     },
-    "noImages": "このカメラのサムネイルは見つかりません"
+    "noImages": "このカメラのサムネイルは見つかりません",
+    "unknownLabel": "保存済みトリガー画像"
   }
 }

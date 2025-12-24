@@ -19,13 +19,15 @@
           "regenerate": "{{provider}} に新しい説明をリクエストしました。プロバイダの速度により再生成に時間がかかる場合があります。",
           "updatedSublabel": "サブラベルを更新しました。",
           "updatedLPR": "ナンバープレートを更新しました。",
-          "audioTranscription": "音声文字起こしをリクエストしました。"
+          "audioTranscription": "音声文字起こしのリクエストは正常に送信されました。Frigate サーバーの処理速度によっては、文字起こしの完了までにしばらく時間がかかる場合があります。",
+          "updatedAttributes": "属性が正常に更新されました。"
         },
         "error": {
           "regenerate": "{{provider}} への新しい説明の呼び出しに失敗しました: {{errorMessage}}",
           "updatedSublabelFailed": "サブラベルの更新に失敗しました: {{errorMessage}}",
           "updatedLPRFailed": "ナンバープレートの更新に失敗しました: {{errorMessage}}",
-          "audioTranscription": "音声文字起こしのリクエストに失敗しました: {{errorMessage}}"
+          "audioTranscription": "音声文字起こしのリクエストに失敗しました: {{errorMessage}}",
+          "updatedAttributesFailed": "属性の更新に失敗しました: {{errorMessage}}"
         }
       }
     },
@@ -73,7 +75,12 @@
     "tips": {
       "descriptionSaved": "説明を保存しました",
       "saveDescriptionFailed": "説明の更新に失敗しました: {{errorMessage}}"
-    }
+    },
+    "editAttributes": {
+      "title": "属性を編集",
+      "desc": "この {{label}} の分類属性を選択してください"
+    },
+    "attributes": "分類属性"
   },
   "exploreMore": "{{label}} のオブジェクトをさらに探索",
   "exploreIsUnavailable": {
@@ -108,7 +115,9 @@
     "details": "詳細",
     "snapshot": "スナップショット",
     "video": "動画",
-    "object_lifecycle": "オブジェクトのライフサイクル"
+    "object_lifecycle": "オブジェクトのライフサイクル",
+    "thumbnail": "サムネイル",
+    "tracking_details": "追跡詳細"
   },
   "objectLifecycle": {
     "title": "オブジェクトのライフサイクル",
@@ -193,12 +202,26 @@
     },
     "deleteTrackedObject": {
       "label": "この追跡オブジェクトを削除"
+    },
+    "downloadCleanSnapshot": {
+      "label": "クリーンなスナップショットをダウンロード",
+      "aria": "クリーンなスナップショットをダウンロード"
+    },
+    "viewTrackingDetails": {
+      "label": "追跡詳細を表示",
+      "aria": "追跡詳細を表示"
+    },
+    "showObjectDetails": {
+      "label": "オブジェクトの移動経路を表示"
+    },
+    "hideObjectDetails": {
+      "label": "オブジェクトの移動経路を非表示"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "削除の確認",
-      "desc": "この追跡オブジェクトを削除すると、スナップショット、保存された埋め込み、および関連するライフサイクル項目が削除されます。履歴ビューの録画映像は削除<em>されません</em>。<br /><br />続行してもよろしいですか？"
+      "desc": "この追跡オブジェクトを削除すると、スナップショット、保存された埋め込み、および関連する追跡詳細項目が削除されます。履歴ビューの録画映像は削除<em>されません</em>。<br /><br />続行してもよろしいですか？"
     }
   },
   "noTrackedObjects": "追跡オブジェクトは見つかりませんでした",
@@ -211,12 +234,63 @@
         "success": "追跡オブジェクトを削除しました。",
         "error": "追跡オブジェクトの削除に失敗しました: {{errorMessage}}"
       }
-    }
+    },
+    "previousTrackedObject": "前の追跡オブジェクト",
+    "nextTrackedObject": "次の追跡オブジェクト"
   },
   "aiAnalysis": {
     "title": "AI 解析"
   },
   "concerns": {
     "label": "懸念"
+  },
+  "trackingDetails": {
+    "title": "追跡詳細",
+    "noImageFound": "このタイムスタンプに対応する画像が見つかりません。",
+    "createObjectMask": "オブジェクトマスクを作成",
+    "adjustAnnotationSettings": "注釈設定を調整",
+    "scrollViewTips": "クリックして、このオブジェクトのライフサイクルにおける重要な瞬間を表示します。",
+    "autoTrackingTips": "自動追跡カメラでは、バウンディングボックスの位置が不正確になる場合があります。",
+    "count": "{{second}} 件中 {{first}} 件目",
+    "trackedPoint": "追跡ポイント",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} が検出されました",
+      "entered_zone": "{{label}} が {{zones}} に入りました",
+      "active": "{{label}} がアクティブになりました",
+      "stationary": "{{label}} が静止状態になりました",
+      "attribute": {
+        "faceOrLicense_plate": "{{label}} に {{attribute}} が検出されました",
+        "other": "{{label}} は {{attribute}} と認識されました"
+      },
+      "gone": "{{label}} が離脱しました",
+      "heard": "{{label}} の音が検出されました",
+      "external": "{{label}} が検出されました",
+      "header": {
+        "zones": "ゾーン",
+        "ratio": "比率",
+        "area": "面積",
+        "score": "スコア"
+      }
+    },
+    "annotationSettings": {
+      "title": "注釈設定",
+      "showAllZones": {
+        "title": "すべてのゾーンを表示",
+        "desc": "オブジェクトがゾーンに入ったフレームでは常にゾーンを表示します。"
+      },
+      "offset": {
+        "label": "注釈オフセット",
+        "millisecondsToOffset": "検出アノテーションをオフセットするミリ秒数です。<em>デフォルト: 0</em>",
+        "toast": {
+          "success": "{{camera}} のアノテーションオフセットが設定ファイルに保存されました。"
+        },
+        "desc": "このデータはカメラの detect ストリーム から取得されていますが、表示される画像自体は record ストリーム のものです。そのため、2 つのストリームが完全に同期している可能性は低く、バウンディングボックスと実際の映像が正確に一致しない場合があります。この設定を使用すると、注釈（アノテーション）を 時間的に前後へオフセット することができ、録画映像との位置合わせをより正確に行えます。",
+        "tips": "映像の再生がバウンディングボックスや軌跡ポイントより先行している場合は値を小さくし、遅れている場合は値を大きくしてください。この値は負の値も指定できます。"
+      }
+    },
+    "carousel": {
+      "previous": "前のスライド",
+      "next": "次のスライド"
+    }
   }
 }

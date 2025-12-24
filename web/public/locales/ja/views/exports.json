@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "書き出し名の変更に失敗しました: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "エクスポートを共有",
+    "downloadVideo": "動画をダウンロード",
+    "editName": "名前を編集",
+    "deleteExport": "エクスポートを削除"
   }
 }

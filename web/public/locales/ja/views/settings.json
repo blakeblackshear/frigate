@@ -7,7 +7,7 @@
     "masksAndZones": "マスク／ゾーンエディタ - Frigate",
     "motionTuner": "モーションチューナー - Frigate",
     "object": "デバッグ - Frigate",
-    "general": "一般設定 - Frigate",
+    "general": "UI設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
     "notifications": "通知設定 - Frigate",
     "cameraManagement": "カメラ設定 - Frigate",
@@ -39,7 +39,7 @@
     "noCamera": "カメラなし"
   },
   "general": {
-    "title": "一般設定",
+    "title": "UI設定",
     "liveDashboard": {
       "title": "ライブダッシュボード",
       "automaticLiveView": {
@@ -49,6 +49,14 @@
       "playAlertVideos": {
         "label": "アラート動画を再生",
         "desc": "既定では、ライブダッシュボードの最近のアラートは小さなループ動画として再生されます。無効にすると、最近のアラートはこのデバイス／ブラウザでは静止画像のみ表示されます。"
+      },
+      "displayCameraNames": {
+        "label": "常にカメラ名を表示",
+        "desc": "マルチカメラのライブビュー ダッシュボードで、カメラ名を常にチップ表示します。"
+      },
+      "liveFallbackTimeout": {
+        "label": "ライブプレイヤーのフォールバック タイムアウト",
+        "desc": "カメラの高画質ライブストリームが利用できない場合、指定した秒数後に低帯域モードへ切り替えます。デフォルト：3 秒"
       }
     },
     "storedLayouts": {
@@ -239,7 +247,8 @@
           "mustNotBeSameWithCamera": "ゾーン名はカメラ名と同一にできません。",
           "alreadyExists": "この名前のゾーンはこのカメラに既に存在します。",
           "mustNotContainPeriod": "ゾーン名にピリオドは使用できません。",
-          "hasIllegalCharacter": "ゾーン名に不正な文字が含まれています。"
+          "hasIllegalCharacter": "ゾーン名に不正な文字が含まれています。",
+          "mustHaveAtLeastOneLetter": "ゾーン名には少なくとも 1 文字が必要です。"
         }
       },
       "distance": {
@@ -296,7 +305,7 @@
       "name": {
         "title": "名称",
         "inputPlaceHolder": "名前を入力…",
-        "tips": "名前は2文字以上、かつカメラ名や他のゾーン名と重複しない必要があります。"
+        "tips": "名前は2文字以上で、少なくとも1文字のアルファベットを含み、このカメラ上の他のゾーン名やカメラ名と同一であってはなりません。"
       },
       "inertia": {
         "title": "慣性",
@@ -330,7 +339,7 @@
         }
       },
       "toast": {
-        "success": "ゾーン（{{zoneName}}）を保存しました。変更を適用するには Frigate を再起動してください。"
+        "success": "ゾーン（{{zoneName}}）を保存しました。"
       }
     },
     "motionMasks": {
@@ -353,8 +362,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} を保存しました。変更を適用するには Frigate を再起動してください。",
-          "noName": "モーションマスクを保存しました。変更を適用するには Frigate を再起動してください。"
+          "title": "{{polygonName}} を保存しました。",
+          "noName": "モーションマスクを保存しました。"
         }
       }
     },
@@ -377,8 +386,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} を保存しました。変更を適用するには Frigate を再起動してください。",
-          "noName": "オブジェクトマスクを保存しました。変更を適用するには Frigate を再起動してください。"
+          "title": "{{polygonName}} を保存しました。",
+          "noName": "オブジェクトマスクを保存しました。"
         }
       }
     }
@@ -472,7 +481,7 @@
       "desc": "この Frigate インスタンスのユーザーアカウントを管理します。"
     },
     "addUser": "ユーザーを追加",
-    "updatePassword": "パスワードを更新",
+    "updatePassword": "パスワードをリセット",
     "toast": {
       "success": {
         "createUser": "ユーザー {{user}} を作成しました",
@@ -493,7 +502,7 @@
       "role": "ロール",
       "noUsers": "ユーザーが見つかりません。",
       "changeRole": "ユーザーロールを変更",
-      "password": "パスワード",
+      "password": "パスワードをリセット",
       "deleteUser": "ユーザーを削除"
     },
     "dialog": {
@@ -518,7 +527,16 @@
             "veryStrong": "非常に強い"
           },
           "match": "パスワードが一致しています",
-          "notMatch": "パスワードが一致しません"
+          "notMatch": "パスワードが一致しません",
+          "show": "パスワードを表示",
+          "hide": "パスワードを非表示",
+          "requirements": {
+            "title": "パスワード要件：",
+            "length": "8 文字以上",
+            "uppercase": "大文字を 1 文字以上含める",
+            "digit": "数字を 1 文字以上含める",
+            "special": "少なくとも 1 つの特殊文字（!@#$%^&*(),.?”:{}|<>）が必要です"
+          }
         },
         "newPassword": {
           "title": "新しいパスワード",
@@ -528,7 +546,11 @@
           }
         },
         "usernameIsRequired": "ユーザー名は必須です",
-        "passwordIsRequired": "パスワードは必須です"
+        "passwordIsRequired": "パスワードは必須です",
+        "currentPassword": {
+          "title": "現在のパスワード",
+          "placeholder": "現在のパスワードを入力"
+        }
       },
       "createUser": {
         "title": "新規ユーザーを作成",
@@ -546,7 +568,12 @@
         "doNotMatch": "パスワードが一致しません",
         "updatePassword": "{{username}} のパスワードを更新",
         "setPassword": "パスワードを設定",
-        "desc": "強力なパスワードを作成して、このアカウントを保護してください。"
+        "desc": "強力なパスワードを作成して、このアカウントを保護してください。",
+        "currentPasswordRequired": "現在のパスワードは必須です",
+        "incorrectCurrentPassword": "現在のパスワードが正しくありません",
+        "passwordVerificationFailed": "パスワードの確認に失敗しました",
+        "multiDeviceWarning": "他のログイン中のデバイスは {{refresh_time}} 以内に再ログインが必要になります。",
+        "multiDeviceAdmin": "JWT シークレットをローテーションすることで、すべてのユーザーに即時再認証を強制することもできます。"
       },
       "changeRole": {
         "title": "ユーザーロールを変更",
@@ -722,7 +749,7 @@
   "triggers": {
     "documentTitle": "トリガー",
     "management": {
-      "title": "トリガー管理",
+      "title": "トリガー",
       "desc": "{{camera}} のトリガーを管理します。サムネイルタイプでは、選択した追跡オブジェクトに類似するサムネイルでトリガーし、説明タイプでは、指定したテキストに類似する説明でトリガーします。"
     },
     "addTrigger": "トリガーを追加",
@@ -743,7 +770,9 @@
     },
     "actions": {
       "alert": "アラートとしてマーク",
-      "notification": "通知を送信"
+      "notification": "通知を送信",
+      "sub_label": "サブラベルを追加",
+      "attribute": "属性を追加"
     },
     "dialog": {
       "createTrigger": {
@@ -763,23 +792,26 @@
           "title": "名称",
           "placeholder": "トリガー名を入力",
           "error": {
-            "minLength": "名称は2文字以上である必要があります。",
-            "invalidCharacters": "名称に使用できるのは英数字、アンダースコア、ハイフンのみです。",
+            "minLength": "この項目は2文字以上で入力してください。",
+            "invalidCharacters": "このフィールドに使用できるのは英数字、アンダースコア、ハイフンのみです。",
             "alreadyExists": "このカメラには同名のトリガーが既に存在します。"
-          }
+          },
+          "description": "このトリガーを識別するための一意の名前または説明を入力してください"
         },
         "enabled": {
           "description": "このトリガーを有効／無効にする"
         },
         "type": {
           "title": "タイプ",
-          "placeholder": "トリガータイプを選択"
+          "placeholder": "トリガータイプを選択",
+          "description": "類似した追跡オブジェクトの説明が検出されたときにトリガー",
+          "thumbnail": "類似した追跡オブジェクトのサムネイルが検出されたときにトリガー"
         },
         "content": {
           "title": "コンテンツ",
-          "imagePlaceholder": "画像を選択",
+          "imagePlaceholder": "サムネイルを選択",
           "textPlaceholder": "テキストを入力",
-          "imageDesc": "類似画像が検出されたときにこのアクションをトリガーするための画像を選択します。",
+          "imageDesc": "最新のサムネイル100件のみが表示されます。目的のサムネイルが見つからない場合は、探索で過去のオブジェクトを確認し、そこのメニューからトリガーを設定してください。",
           "textDesc": "類似する追跡オブジェクトの説明が検出されたときにこのアクションをトリガーするためのテキストを入力します。",
           "error": {
             "required": "コンテンツは必須です。"
@@ -790,11 +822,12 @@
           "error": {
             "min": "しきい値は 0 以上である必要があります",
             "max": "しきい値は 1 以下である必要があります"
-          }
+          },
+          "desc": "このトリガーの類似度しきい値を設定します。値が高いほど、より近い一致が必要になります。"
         },
         "actions": {
           "title": "アクション",
-          "desc": "既定では、すべてのトリガーに対して MQTT メッセージが送信されます。必要に応じて、トリガー時に実行する追加アクションを選択してください。",
+          "desc": "デフォルトでは、Frigate はすべてのトリガーに対して MQTT メッセージを送信します。サブラベルは、トリガー名をオブジェクトのラベルに追加します。属性（Attributes）は、追跡オブジェクトのメタデータとは別に保存される検索可能なメタデータです。",
           "error": {
             "min": "少なくとも1つのアクションを選択してください。"
           }
@@ -821,12 +854,29 @@
     "semanticSearch": {
       "desc": "トリガーを使用するにはセマンティック検索を有効にする必要があります。",
       "title": "セマンティック検索が無効です"
+    },
+    "wizard": {
+      "title": "トリガーを作成",
+      "step1": {
+        "description": "トリガーの基本設定を構成します。"
+      },
+      "step2": {
+        "description": "このアクションをトリガーする内容を設定します。"
+      },
+      "step3": {
+        "description": "このトリガーのしきい値とアクションを設定します。"
+      },
+      "steps": {
+        "nameAndType": "名前と種類",
+        "configureData": "データを設定",
+        "thresholdAndActions": "しきい値とアクション"
+      }
     }
   },
   "cameraWizard": {
     "step3": {
       "saveAndApply": "新しいカメラを保存",
-      "description": "保存前の最終検証と解析。保存する前に各ストリームを接続してください。",
+      "description": "カメラのストリームの役割を設定し、必要に応じてストリームを追加します。",
       "validationTitle": "ストリーム検証",
       "connectAllStreams": "すべてのストリームを接続",
       "reconnectionSuccess": "再接続に成功しました。",
@@ -862,6 +912,43 @@
         "dahua": {
           "substreamWarning": "サブストリーム1は低解像度に固定されています。多くの Dahua／Amcrest／EmpireTech 製カメラでは、追加のサブストリームが利用可能であり、カメラ本体の設定で有効化する必要があります。使用できる場合は、それらのストリームを確認して活用することを推奨します。"
         }
+      },
+      "streamsTitle": "カメラ ストリーム",
+      "addStream": "ストリームを追加",
+      "addAnotherStream": "別のストリームを追加",
+      "streamUrl": "ストリーム URL",
+      "streamUrlPlaceholder": "rtsp://ユーザー名:パスワード@ホスト:ポート/パス",
+      "selectStream": "ストリームを選択",
+      "searchCandidates": "候補を検索…",
+      "noStreamFound": "ストリームが見つかりません",
+      "url": "URL",
+      "resolution": "解像度",
+      "selectResolution": "解像度を選択",
+      "quality": "品質",
+      "selectQuality": "品質を選択",
+      "roleLabels": {
+        "detect": "オブジェクト検出",
+        "record": "録画",
+        "audio": "音声"
+      },
+      "testStream": "接続をテスト",
+      "testSuccess": "ストリーム テスト成功！",
+      "testFailed": "ストリーム テスト失敗",
+      "testFailedTitle": "テスト失敗",
+      "connected": "接続済み",
+      "notConnected": "未接続",
+      "featuresTitle": "機能",
+      "go2rtc": "カメラへの接続数を削減",
+      "detectRoleWarning": "続行するには、少なくとも 1 つのストリームに「検出」ロールが必要です。",
+      "rolesPopover": {
+        "title": "ストリーム ロール",
+        "detect": "オブジェクト検出用のメイン フィードです。",
+        "record": "設定に基づいて映像フィードのセグメントを保存します。",
+        "audio": "音声ベース検出用のフィードです。"
+      },
+      "featuresPopover": {
+        "title": "ストリーム機能",
+        "description": "go2rtc の再配信を使用してカメラへの接続数を削減します。"
       }
     },
     "title": "カメラを追加",
@@ -869,7 +956,8 @@
     "steps": {
       "nameAndConnection": "名称と接続",
       "streamConfiguration": "ストリーム設定",
-      "validationAndTesting": "検証とテスト"
+      "validationAndTesting": "検証とテスト",
+      "probeOrSnapshot": "プローブまたはスナップショット"
     },
     "save": {
       "success": "新しいカメラ {{cameraName}} を保存しました。",
@@ -886,7 +974,7 @@
       "testFailed": "ストリームテストに失敗しました: {{error}}"
     },
     "step1": {
-      "description": "カメラの詳細を入力し、接続テストを実行します。",
+      "description": "カメラの詳細を入力し、カメラを自動検出するか、メーカーを手動で選択してください。",
       "cameraName": "カメラ名",
       "cameraNamePlaceholder": "例: front_door または Back Yard Overview",
       "host": "ホスト／IP アドレス",
@@ -917,14 +1005,24 @@
         "nameExists": "このカメラ名は既に存在します",
         "brands": {
           "reolink-rtsp": "Reolink の RTSP は推奨されません。カメラ設定で http を有効にし、カメラウィザードを再起動することを推奨します。"
-        }
+        },
+        "customUrlRtspRequired": "カスタム URL は「rtsp://」で始まる必要があります。非 RTSP カメラ ストリームの場合は手動構成が必要です。"
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
-      }
+      },
+      "connectionSettings": "接続設定",
+      "detectionMethod": "ストリーム検出方法",
+      "onvifPort": "ONVIF ポート",
+      "probeMode": "カメラをプローブ",
+      "manualMode": "手動選択",
+      "useDigestAuth": "ダイジェスト認証を使用",
+      "useDigestAuthDescription": "ONVIF に HTTP ダイジェスト認証を使用します。一部のカメラでは、通常の管理者ユーザーではなく専用の ONVIF ユーザー名／パスワードが必要な場合があります。",
+      "detectionMethodDescription": "（対応している場合）ONVIF を使用してカメラを自動設定し、カメラのストリーム URL を検出するか、カメラのブランドを手動で選択して事前定義された URL を使用します。カスタム RTSP URL を入力する場合は、手動設定を選択し、「その他」を選んでください。",
+      "onvifPortDescription": "ONVIF に対応しているカメラの場合、通常は 80 または 8080 です。"
     },
     "step2": {
-      "description": "ストリームのロールを設定し、必要に応じて追加ストリームを登録します。",
+      "description": "選択した検出方法に応じて、カメラから利用可能なストリームを自動検出するか、手動で設定してください。",
       "streamsTitle": "カメラストリーム",
       "addStream": "ストリームを追加",
       "addAnotherStream": "ストリームをさらに追加",
@@ -943,8 +1041,8 @@
         "audio": "音声"
       },
       "testStream": "接続テスト",
-      "testSuccess": "ストリームテストに成功しました！",
-      "testFailed": "ストリームテストに失敗しました",
+      "testSuccess": "接続テストに成功しました！",
+      "testFailed": "接続テストに失敗しました。入力を確認し、もう一度実行してください。",
       "testFailedTitle": "テスト失敗",
       "connected": "接続済み",
       "notConnected": "未接続",
@@ -960,7 +1058,87 @@
       "featuresPopover": {
         "title": "ストリーム機能",
         "description": "go2rtc のリストリーミングを使用してカメラへの接続数を削減します。"
-      }
+      },
+      "streamDetails": "ストリームの詳細",
+      "probing": "カメラをプローブ中…",
+      "retry": "再試行",
+      "testing": {
+        "probingMetadata": "カメラのメタデータを取得中…",
+        "fetchingSnapshot": "カメラのスナップショットを取得中…"
+      },
+      "probeFailed": "カメラのプローブに失敗しました: {{error}}",
+      "probingDevice": "デバイスをプローブ中…",
+      "probeSuccessful": "プローブ成功",
+      "probeError": "プローブ エラー",
+      "probeNoSuccess": "プローブ失敗",
+      "deviceInfo": "デバイス情報",
+      "manufacturer": "メーカー",
+      "model": "モデル",
+      "firmware": "ファームウェア",
+      "profiles": "プロファイル",
+      "ptzSupport": "PTZ 対応",
+      "autotrackingSupport": "自動追跡対応",
+      "presets": "プリセット",
+      "rtspCandidates": "RTSP 候補",
+      "rtspCandidatesDescription": "カメラのプローブから以下の RTSP URL が見つかりました。接続をテストしてストリームのメタデータを確認してください。",
+      "candidateStreamTitle": "候補 {{number}}",
+      "useCandidate": "使用",
+      "uriCopy": "コピー",
+      "uriCopied": "URI をクリップボードにコピーしました",
+      "testConnection": "接続をテスト",
+      "toggleUriView": "クリックして URI の全表示を切り替え",
+      "errors": {
+        "hostRequired": "ホスト／IP アドレスは必須です"
+      },
+      "noRtspCandidates": "カメラから RTSP URL を取得できませんでした。認証情報が正しくないか、カメラが ONVIF に対応していない、または RTSP URL を取得する方法がサポートされていない可能性があります。RTSP URL を手動で入力してください。"
+    },
+    "step4": {
+      "description": "新しいカメラを保存する前の最終検証と分析です。保存前に各ストリームを接続してください。",
+      "validationTitle": "ストリーム検証",
+      "connectAllStreams": "すべてのストリームを接続",
+      "reconnectionSuccess": "再接続に成功しました。",
+      "reconnectionPartial": "一部のストリームで再接続に失敗しました。",
+      "streamUnavailable": "ストリームのプレビューを表示できません",
+      "reload": "再読み込み",
+      "connecting": "接続中…",
+      "streamTitle": "ストリーム {{number}}",
+      "valid": "有効",
+      "failed": "失敗",
+      "notTested": "未テスト",
+      "connectStream": "接続",
+      "connectingStream": "接続中",
+      "disconnectStream": "切断",
+      "estimatedBandwidth": "推定帯域幅",
+      "roles": "ロール",
+      "ffmpegModule": "ストリーム互換モードを使用",
+      "none": "なし",
+      "error": "エラー",
+      "streamValidated": "ストリーム {{number}} の検証に成功しました",
+      "streamValidationFailed": "ストリーム {{number}} の検証に失敗しました",
+      "saveAndApply": "新しいカメラを保存",
+      "saveError": "無効な設定です。設定を確認してください。",
+      "issues": {
+        "title": "ストリーム検証",
+        "videoCodecGood": "ビデオ コーデックは {{codec}} です。",
+        "audioCodecGood": "オーディオ コーデックは {{codec}} です。",
+        "resolutionHigh": "解像度 {{resolution}} はリソース使用量が増加する可能性があります。",
+        "resolutionLow": "解像度 {{resolution}} は小さなオブジェクトを確実に検出するには低すぎる可能性があります。",
+        "audioCodecRecordError": "録画で音声をサポートするには AAC オーディオ コーデックが必要です。",
+        "audioCodecRequired": "音声検出をサポートするには音声ストリームが必要です。",
+        "restreamingWarning": "録画用ストリームでカメラへの接続数を削減すると、CPU 使用率がわずかに増加する場合があります。",
+        "brands": {
+          "reolink-rtsp": "Reolink の RTSP は推奨されません。カメラのファームウェア設定で HTTP を有効にし、ウィザードを再起動してください。",
+          "reolink-http": "Reolink の HTTP ストリームは互換性向上のため FFmpeg を使用してください。このストリームで「ストリーム互換モードを使用」を有効にしてください。"
+        },
+        "dahua": {
+          "substreamWarning": "サブストリーム 1 は低解像度に固定されています。多くの Dahua / Amcrest / EmpireTech カメラは追加のサブストリームをサポートしており、カメラ設定で有効化する必要があります。利用可能であればそれらのストリームを使用することを推奨します。"
+        },
+        "hikvision": {
+          "substreamWarning": "サブストリーム 1 は低解像度に固定されています。多くの Hikvision カメラは追加のサブストリームをサポートしており、カメラ設定で有効化する必要があります。利用可能であればそれらのストリームを使用することを推奨します。"
+        },
+        "noAudioWarning": "このストリームでは音声が検出されていません。録画には音声が含まれません。"
+      },
+      "ffmpegModuleDescription": "何度か試してもストリームが読み込まれない場合は、このオプションを有効にしてください。有効にすると、Frigate は go2rtc と併用して ffmpeg モジュールを使用します。一部のカメラストリームでは、互換性が向上する場合があります。"
     }
   },
   "cameraManagement": {
