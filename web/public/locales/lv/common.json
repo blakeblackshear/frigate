@@ -1,1 +1,304 @@
-{}
+{
+  "time": {
+    "untilForTime": "Līdz {{time}}",
+    "today": "Šodien",
+    "yesterday": "Vakar",
+    "last7": "Pēdējās 7 dienas",
+    "last14": "Pēdējās 14 dienas",
+    "last30": "Pēdējās 30 dienas",
+    "thisWeek": "Šonedēļ",
+    "lastWeek": "Pagājušajā nedēļā",
+    "thisMonth": "Šomēnes",
+    "lastMonth": "Pagājušajā mēnesī",
+    "5minutes": "5 minūtes",
+    "10minutes": "10 minūtes",
+    "30minutes": "30 minūtes",
+    "1hour": "1 stunda",
+    "12hours": "12 stundas",
+    "24hours": "24 stundas",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}g",
+    "year_zero": "{{time}} gadi",
+    "year_one": "{{time}} gads",
+    "year_other": "{{time}} gadi",
+    "mo": "{{time}}mēn",
+    "month_zero": "{{time}}mēneši",
+    "month_one": "{{time}}mēnesis",
+    "month_other": "{{time}}mēneši",
+    "d": "{{time}}d",
+    "day_zero": "{{time}} dienas",
+    "day_one": "{{time}} diena",
+    "day_other": "{{time}} dienas",
+    "h": "{{time}}s",
+    "hour_zero": "{{time}}stundas",
+    "hour_one": "{{time}}stunda",
+    "hour_other": "{{time}}stundas",
+    "m": "{{time}}m",
+    "minute_zero": "{{time}} minutes",
+    "minute_one": "{{time}} minute",
+    "minute_other": "{{time}} minutes",
+    "s": "{{time}}sek",
+    "second_zero": "{{time}} sekundes",
+    "second_one": "{{time}} sekunde",
+    "second_other": "{{time}} sekundes",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "inProgress": "Izpilda",
+    "invalidStartTime": "Nederīgs sākuma laiks",
+    "invalidEndTime": "Nederīgs beigu laiks",
+    "untilForRestart": "Līdz Frigate pārstartējas.",
+    "untilRestart": "Līdz pārstartēšanai",
+    "ago": "{{timeAgo}} pirms",
+    "justNow": "Nupat"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mp/h",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "Pēda",
+      "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/stundā",
+      "mbph": "MB/stundā",
+      "gbph": "GB/stundā"
+    }
+  },
+  "label": {
+    "back": "Atgriezties",
+    "hide": "Paslēpt {{item}}",
+    "show": "Rādīt {{item}}",
+    "ID": "ID",
+    "none": "Nav",
+    "all": "Viss"
+  },
+  "list": {
+    "two": "{{0}} un {{1}}",
+    "many": "{{items}}, un {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Pēc izvēles",
+    "internalID": "Iekšējais frigates identifikators, ko izmanto konfigurācijā un datubāzē"
+  },
+  "button": {
+    "apply": "Apstiprināt",
+    "reset": "Atiestatīt",
+    "done": "Gatavs",
+    "enabled": "Ieslēgts",
+    "enable": "Ieslēgt",
+    "disabled": "Izslēgts",
+    "disable": "Izslēgt",
+    "save": "Saglabāt",
+    "saving": "Saglabā…",
+    "cancel": "Atcelt",
+    "close": "Aizvērt",
+    "copy": "Kopēt",
+    "back": "Atpakaļ",
+    "history": "Vēsture",
+    "fullscreen": "Pilnekrāna režīms",
+    "exitFullscreen": "Iziet no pilnekrāna režīma",
+    "pictureInPicture": "Attēls attēlā",
+    "twoWayTalk": "Divvirzienu saruna",
+    "cameraAudio": "Kameras Audio",
+    "on": "Iesl",
+    "off": "Izsl",
+    "edit": "Labot",
+    "copyCoordinates": "Kopēt koordinātas",
+    "delete": "Dzēst",
+    "yes": "Jā",
+    "no": "Nē",
+    "download": "Lejupielādēt",
+    "info": "Informācija",
+    "suspended": "Apturēts",
+    "unsuspended": "Atjaunot",
+    "play": "Atskaņot",
+    "unselect": "Noņemt izvēlēto",
+    "export": "Eksportēt",
+    "deleteNow": "Izdzēst tagad",
+    "next": "Nākamais",
+    "continue": "Turpināt"
+  },
+  "menu": {
+    "system": "Sistēma",
+    "systemMetrics": "Sistēmas rādītāji",
+    "configuration": "Konfigurācija",
+    "systemLogs": "Sistēmas žurnāli",
+    "settings": "Iestatījumi",
+    "configurationEditor": "Konfigurācijas redaktors",
+    "languages": "Valodas",
+    "language": {
+      "en": "English (angļu)",
+      "es": "Español (spāņu)",
+      "zhCN": "简体中文 (Vienkāršotā ķīniešu)",
+      "hi": "हिन्दी (hindi)",
+      "fr": "Français (Franču)",
+      "ar": "العربية (Arābu)",
+      "pt": "Português (Portugāļu)",
+      "ptBR": "Português brasileiro (Brazīlijas portugāļu)",
+      "ru": "Русский (Krievu)",
+      "de": "Deutsch (Vācu)",
+      "ja": "日本語 (Japāņu)",
+      "tr": "Türkçe (Turku)",
+      "it": "Italiano (Itāļu)",
+      "nl": "Nederlands (Nīderlandiešu)",
+      "sv": "Svenska (Zviedru)",
+      "cs": "Čeština (Čehu)",
+      "nb": "Norsk Bokmål (Norvēģu Bokmål)",
+      "ko": "한국어 (Korejiešu)",
+      "vi": "Tiếng Việt (Vjetnamiešu)",
+      "fa": "فارسی (Persiešu)",
+      "pl": "Polski (Poļu)",
+      "uk": "Українська (Ukraiņu)",
+      "he": "עברית (Ebreju)",
+      "el": "Ελληνικά (Grieķu)",
+      "ro": "Română (Rumāņu)",
+      "hu": "Magyar (Ungāru)",
+      "fi": "Suomi (Somu)",
+      "da": "Dansk (Dāņu)",
+      "sk": "Slovenčina (Slovāku)",
+      "yue": "粵語 (Kantonas)",
+      "th": "ไทย (Taju)",
+      "ca": "Català (Katalāņu)",
+      "sr": "Српски (Serbu)",
+      "sl": "Slovenščina (Slovēņu)",
+      "lt": "Lietuvių (Lietuviešu)",
+      "bg": "Български (Bulgāru)",
+      "gl": "Galego (Galisiešu)",
+      "id": "Bahasa Indonesia (Indonēziešu)",
+      "ur": "اردو (urdu)",
+      "withSystem": {
+        "label": "Izmantojiet sistēmas iestatījumus valodai"
+      }
+    },
+    "appearance": "Izskats",
+    "darkMode": {
+      "label": "Tumšais režīms",
+      "light": "Gaišs",
+      "dark": "Tumšs",
+      "withSystem": {
+        "label": "Izmantojiet sistēmas iestatījumus gaišajam vai tumšajam režīmam"
+      }
+    },
+    "withSystem": "Sistēma",
+    "theme": {
+      "label": "Tēma",
+      "blue": "Zila",
+      "green": "Zaļa",
+      "nord": "Ziemeļu",
+      "red": "Sarkana",
+      "highcontrast": "Augsta kontrasta",
+      "default": "Noklusējuma"
+    },
+    "help": "Palīdzība",
+    "documentation": {
+      "title": "Dokumentācija",
+      "label": "Frigates dokumentācija"
+    },
+    "restart": "Restartēt Frigate",
+    "live": {
+      "title": "Tiešraide",
+      "allCameras": "Visas kameras",
+      "cameras": {
+        "title": "Kameras",
+        "count_zero": "{{count}}kameras",
+        "count_one": "{{count}}kamera",
+        "count_other": "{{count}}kameras"
+      }
+    },
+    "review": "Pārskats",
+    "explore": "Meklēt notikumus",
+    "export": "Eksportēt",
+    "uiPlayground": "Interfeisa testēšanas vide",
+    "faceLibrary": "Seju bibliotēka",
+    "classification": "Atpazīšana",
+    "user": {
+      "title": "Lietotājs",
+      "account": "Konts",
+      "current": "Pašreizējais lietotājs: {{user}}",
+      "anonymous": "anonīms",
+      "logout": "Iziet",
+      "setPassword": "Izveidot paroli"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "Adrese nokopēta.",
+    "save": {
+      "title": "Saglabāt",
+      "error": {
+        "title": "Neizdevās saglabāt konfigurācijas izmaiņas: {{errorMessage}}",
+        "noMessage": "Neizdevās saglabāt konfigurācijas izmaiņas"
+      }
+    }
+  },
+  "role": {
+    "title": "Loma",
+    "admin": "Administrators",
+    "viewer": "Skatītājs",
+    "desc": "Administratoriem ir pilna piekļuve visām Frigate funkcijām. Skatītāji var skatīt tikai kameras, skatāmos elementus un arhivētos ierakstus."
+  },
+  "pagination": {
+    "label": "lappuse",
+    "previous": {
+      "title": "Iepriekšējais",
+      "label": "Pāriet uz iepriekšējo lapu"
+    },
+    "next": {
+      "title": "Nākamā",
+      "label": "Dodieties uz nākamo lapu"
+    },
+    "more": "Vairāk lapas"
+  },
+  "accessDenied": {
+    "documentTitle": "Piekļuve liegta - Frigate",
+    "title": "Piekļuve liegta",
+    "desc": "Jums nav atļaujas skatīt šo lapu."
+  },
+  "notFound": {
+    "documentTitle": "Nav atrasts - Frigate",
+    "title": "404",
+    "desc": "Lapa nav atrasta"
+  },
+  "selectItem": "Izvēlēties {{item}}",
+  "readTheDocumentation": "Laslīt dokumentāciju",
+  "information": {
+    "pixels": "{{area}}px"
+  }
+}

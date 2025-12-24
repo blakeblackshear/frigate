@@ -1,1 +1,29 @@
-{}
+{
+  "documentTitle": {
+    "cameras": "Kameru statistika - Frigate",
+    "storage": "Uzglabāšanas statistika - Frigate",
+    "general": "Vispārīgā statistika - Frigate",
+    "enrichments": "Bagātināšanas statistika - Frigate",
+    "logs": {
+      "frigate": "Frigate konfigurācija - Frigate",
+      "go2rtc": "Logi Go2RTC - Frigate",
+      "nginx": "Logi Nginx - Frigate"
+    }
+  },
+  "stats": {
+    "cameraIsOffline": "{{camera}} ir izslēgta",
+    "detectIsSlow": "{{detect}} ir lēns ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} ir ļoti lēns ({{speed}} ms)"
+  },
+  "enrichments": {
+    "infPerSecond": "Inferences sekundē",
+    "averageInf": "Vidējais inferences ilgums",
+    "embeddings": {
+      "face_recognition": "Seju atpazīšana",
+      "plate_recognition": "Numurzīmju atpazīšana",
+      "plate_recognition_speed": "Numurzīmju atpazīšanas ātrums",
+      "object_description": "Objekta apraksts",
+      "object_description_events_per_second": "Objekta apraksts"
+    }
+  }
+}

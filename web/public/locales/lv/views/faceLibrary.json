@@ -1,1 +1,93 @@
-{}
+{
+  "description": {
+    "addFace": "Pievienojiet savai seju bibliotēkai jaunu kolekciju, augšupielādējot savu pirmo attēlu.",
+    "placeholder": "Ievadi kolekcijas nosaukumu",
+    "invalidName": "Nederīgs nosaukums. Nosaukumi drīkst saturēt tikai burtus, ciparus, atstarpes, apostrofus, pasvītras un defises."
+  },
+  "details": {
+    "timestamp": "Laika zīmogs",
+    "unknown": "Nezināms",
+    "scoreInfo": "Rezultāts ir visu seju rezultāta vidējais, svērts pēc sejas izmēra katrā attēlā."
+  },
+  "documentTitle": "Seju bibliotēka - Frigate",
+  "uploadFaceImage": {
+    "title": "Augšupielādējiet sejas attēlu",
+    "desc": "Augšupielādējiet attēlu, lai skenētu sejas un iekļautu to lapā {{pageToggle}}"
+  },
+  "collections": "Kolekcijas",
+  "createFaceLibrary": {
+    "new": "Izveidojiet jaunu seju",
+    "nextSteps": "Lai izveidotu stabilu pamatu:<li>izmantojiet cilni “Nesenās atpazīšanas”, lai atlasītu un apmācītu attēlus katrai atpazītajai personai.</li><li>Lai iegūtu labākos rezultātus, koncentrējieties uz tiešiem attēliem; izvairieties no attēlu apmācības, kuros sejas ir attēlotas leņķī.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Ievadiet sejas nosaukumu",
+    "uploadFace": "Augšupielādējiet sejas attēlu",
+    "nextSteps": "Nākamie soļi",
+    "description": {
+      "uploadFace": "Augšupielādējiet lietotāja {{name}} attēlu, kurā redzama viņa seja no priekšpuses. Attēls nav jāapgriež, lai redzētu tikai viņa seju."
+    }
+  },
+  "train": {
+    "title": "Pēdējās atpazīšanas",
+    "titleShort": "Pēdējās",
+    "aria": "Atlasiet pēdējās atpazīšanas",
+    "empty": "Nav pēdējo sejas atpazīšanas mēģinājumu"
+  },
+  "deleteFaceLibrary": {
+    "title": "Dzēst Vārdu",
+    "desc": "Vai tiešām vēlaties dzēst kolekciju {{name}}? Tas neatgriezeniski dzēsīs visas saistītās sejas."
+  },
+  "deleteFaceAttempts": {
+    "title": "Dzēst sejas",
+    "desc_zero": "Vai tiešām vēlaties dzēst {{count}} sejas? Šo darbību nevar atsaukt.",
+    "desc_one": "Vai tiešām vēlaties dzēst {{count}} seju? Šo darbību nevar atsaukt.",
+    "desc_other": "Vai tiešām vēlaties dzēst {{count}} sejas? Šo darbību nevar atsaukt."
+  },
+  "renameFace": {
+    "title": "Pārdēvēt seju",
+    "desc": "Ievadiet jaunu vārdu priekš {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Dzēst sejas",
+    "addFace": "Pievienot seju",
+    "renameFace": "Pārdēvēt seju",
+    "deleteFace": "Dzēst seju",
+    "uploadImage": "Augšupielādēt attēlu",
+    "reprocessFace": "Atkārtoti apstrādāt seju"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Lūdzu, atlasiet attēla failu."
+    },
+    "dropActive": "Ievelciet attēlu šeit…",
+    "dropInstructions": "Velciet un nometiet vai ielīmējiet attēlu šeit vai noklikšķiniet, lai atlasītu",
+    "maxSize": "Max izmērs: {{size}} MB"
+  },
+  "nofaces": "Nav pieejama neviena seja",
+  "trainFaceAs": "Atcerieties seju kā:",
+  "trainFace": "Atcerieties seju",
+  "toast": {
+    "success": {
+      "uploadedImage": "Attēls veiksmīgi augšupielādēts.",
+      "addFaceLibrary": "{{name}} ir veiksmīgi pievienots seju bibliotēkai!",
+      "deletedFace_zero": "Veiksmīgi izdzēstas {{count}} sejas.",
+      "deletedFace_one": "Veiksmīgi izdzēsta {{count}} seja.",
+      "deletedFace_other": "Veiksmīgi izdzēstas {{count}} sejas.",
+      "deletedName_zero": "{{count}} sejas ir veiksmīgi izdzēstas.",
+      "deletedName_one": "{{count}} seja ir veiksmīgi izdzēsta.",
+      "deletedName_other": "{{count}} sejas ir veiksmīgi izdzēstas.",
+      "renamedFace": "Seja veiksmīgi pārdēvēta par {{name}}",
+      "trainedFace": "Seja ir veiksmīgi iegaumēta.",
+      "updatedFaceScore": "Sejas vērtējums ir veiksmīgi atjaunināts uz {{name}} ({{score}})."
+    },
+    "error": {
+      "uploadingImageFailed": "Neizdevās augšupielādēt attēlu: {{errorMessage}}",
+      "addFaceLibraryFailed": "Neizdevās iestatīt sejas vārdu: {{errorMessage}}",
+      "deleteFaceFailed": "Neizdevās dzēst: {{errorMessage}}",
+      "deleteNameFailed": "Neizdevās izdzēst vārdu: {{errorMessage}}",
+      "renameFaceFailed": "Neizdevās pārdēvēt seju: {{errorMessage}}",
+      "trainFailed": "Neizdevās atcerēties: {{errorMessage}}",
+      "updateFaceScoreFailed": "Neizdevās atjaunināt sejas vērtējumu: {{errorMessage}}"
+    }
+  }
+}

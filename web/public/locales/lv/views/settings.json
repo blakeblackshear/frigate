@@ -1,1 +1,28 @@
-{}
+{
+  "documentTitle": {
+    "default": "Iestatījumi - Frigate",
+    "authentication": "Autentifikācijas iestatījumi - Frigate",
+    "cameraManagement": "Pārvaldīt kameras - Frigate",
+    "cameraReview": "Kameras skata iestatījumi - Frigate",
+    "enrichments": "Bagātināšanas iestatījumi - Frigate",
+    "masksAndZones": "Masku un zonu rediģētājs - Frigate",
+    "motionTuner": "Kustības noteikšana - Frigate"
+  },
+  "cameraWizard": {
+    "step1": {
+      "cameraName": "Kameras nosaukums",
+      "cameraNamePlaceholder": "piem. ieejas_durvis vai Pagalma kopskats",
+      "username": "Lietotājvārds",
+      "password": "Parole",
+      "cameraBrand": "Kameras ražotājs",
+      "brandInformation": "Ražotāja informācija",
+      "onvifPortDescription": "Kamerām, kas atbalsta ONVIF, ports parasti ir 80 vai 8080.",
+      "errors": {
+        "nameRequired": "Nepieciešams kameras noaukums",
+        "nameLength": "Kameras nosaukums nedrīkst būt garāks par 64 simboliem",
+        "invalidCharacters": "Kameras nosaukumā ir neatļauti simboli",
+        "nameExists": "Kameras nosaukums jau pastāv"
+      }
+    }
+  }
+}

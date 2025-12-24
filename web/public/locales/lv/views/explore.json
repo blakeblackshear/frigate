@@ -1,1 +1,49 @@
-{}
+{
+  "documentTitle": "Notikumu meklēšana - Frigate",
+  "generativeAI": "Ģeneratīvs AI",
+  "exploreMore": "Paskatīt vairāk objektu{{label}}",
+  "details": {
+    "timestamp": "Laika zīmogs"
+  },
+  "exploreIsUnavailable": {
+    "title": "Notikumu meklēšana nav pieejama",
+    "embeddingsReindexing": {
+      "context": "Meklēšana būs pieejama pēc tam, kad būs pabeigta izsekoto objektu atkārtota indeksēšana.",
+      "startingUp": "Notiek palaišana…",
+      "estimatedTime": "Paredzamais atlikušais laiks:"
+    }
+  },
+  "itemMenu": {
+    "findSimilar": {
+      "label": "Atrast līdzīgus",
+      "aria": "Atrast līdzīgus izsekotos priekšmetus"
+    },
+    "submitToPlus": {
+      "label": "Iesniegt Frigate+",
+      "aria": "Iesniegt Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Atrast vēsturē"
+    },
+    "deleteTrackedObject": {
+      "label": "Dzēst šo izsekoto priekšmetu"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Apstiprināt dzēšanu"
+    }
+  },
+  "searchResult": {
+    "nextTrackedObject": "Nākamais izsekotais objekts",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Izsekotais objekts veiksmīgi izdzēsts.",
+        "error": "Neizdevās izdzēst izsekoto objektu: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "MI analīze"
+  }
+}
