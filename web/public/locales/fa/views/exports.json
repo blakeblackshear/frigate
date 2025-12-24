@@ -1,5 +1,6 @@
 {
   "search": "جستجو",
   "documentTitle": "گرفتن خروجی - فریگیت",
-  "noExports": "هیچ خروجی یافت نشد"
+  "noExports": "هیچ خروجی یافت نشد",
+  "deleteExport": "حذف خروجی"
 }

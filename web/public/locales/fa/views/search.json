@@ -1,5 +1,9 @@
 {
   "search": "جستجو",
   "savedSearches": "جستجوهای ذخیره شده",
-  "searchFor": "جستجو برای  {{inputValue}}"
+  "searchFor": "جستجو برای  {{inputValue}}",
+  "button": {
+    "clear": "پاک کردن جستجو",
+    "save": "ذخیره جستجو"
+  }
 }

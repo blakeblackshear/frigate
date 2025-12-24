@@ -1,5 +1,8 @@
 {
   "noRecordingsFoundForThisTime": "ویدیویی برای این زمان وجود ندارد",
   "noPreviewFound": "پیش‌نمایش پیدا نشد",
-  "noPreviewFoundFor": "هیچ پیش‌نمایشی برای  {{cameraName}} پیدا نشد"
+  "noPreviewFoundFor": "هیچ پیش‌نمایشی برای  {{cameraName}} پیدا نشد",
+  "submitFrigatePlus": {
+    "title": "این فریم به فریگیت+ ارسال شود؟"
+  }
 }

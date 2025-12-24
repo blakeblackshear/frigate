@@ -2,6 +2,7 @@
   "alerts": "هشدار‌ها",
   "detections": "تشخیص‌ها",
   "motion": {
-    "label": "حرکت"
+    "label": "حرکت",
+    "only": "فقط حرکتی"
   }
 }

@@ -2,6 +2,8 @@
   "time": {
     "untilForTime": "تا {{time}}",
     "untilForRestart": "تا زمانی که فریگیت دوباره شروع به کار کند.",
-    "untilRestart": "تا زمان ری‌استارت"
+    "untilRestart": "تا زمان ری‌استارت",
+    "ago": "{{timeAgo}} قبل",
+    "justNow": "هم اکنون"
   }
 }

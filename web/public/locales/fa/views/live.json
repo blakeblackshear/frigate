@@ -1,4 +1,11 @@
 {
   "documentTitle": "زنده - فریگیت",
-  "documentTitle.withCamera": "{{camera}} - زنده - فریگیت"
+  "documentTitle.withCamera": "{{camera}} - زنده - فریگیت",
+  "lowBandwidthMode": "حالت کاهش مصرف پهنای باند",
+  "twoWayTalk": {
+    "enable": "فعال سازی مکالمه دوطرفه"
+  },
+  "cameraAudio": {
+    "enable": "فعالسازی صدای دوربین"
+  }
 }

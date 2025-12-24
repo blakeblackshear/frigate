@@ -1,6 +1,10 @@
 {
   "filter": "فیلتر",
   "classes": {
-    "label": "کلاس‌ها"
+    "label": "کلاس‌ها",
+    "all": {
+      "title": "تمامی کلاس ها"
+    },
+    "count_one": "{{count}} کلاس"
   }
 }

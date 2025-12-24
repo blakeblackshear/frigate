@@ -1,4 +1,14 @@
 {
   "generativeAI": "هوش مصنوعی تولید کننده",
-  "documentTitle": "کاوش کردن - فرایگیت"
+  "documentTitle": "کاوش کردن - فرایگیت",
+  "exploreMore": "نمایش اشیا {{label}} بیشتر",
+  "details": {
+    "timestamp": "زمان دقیق"
+  },
+  "exploreIsUnavailable": {
+    "title": "نمایش کلی موجود نمی باشد",
+    "embeddingsReindexing": {
+      "startingUp": "درحال شروع…"
+    }
+  }
 }

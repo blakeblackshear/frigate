@@ -1,4 +1,7 @@
 {
   "documentTitle": "ویرایشگر کانفیگ - فریگیت",
-  "configEditor": "ویرایشگر کانفیگ"
+  "configEditor": "ویرایشگر کانفیگ",
+  "safeConfigEditor": "ویرایشگر تنظیمات (حالت امن)",
+  "safeModeDescription": "فریگیت به دلیل خطا در صحت سنجی پیکربندی، در حالت امن می باشد.",
+  "copyConfig": "کپی پیکربندی"
 }
