@@ -3,7 +3,7 @@
   "description": {
     "placeholder": "Bu koleksiyona bir isim verin",
     "addFace": "İlk görselinizi yükleyerek Yüz Kütüphanesi’ne yeni bir koleksiyon ekleyin.",
-    "invalidName": "Geçersiz ad. Ad yalnızca harfler, rakamlar, boşluklar, kesme işaretleri (’), alt çizgiler (_) ve tireler (-) içerebilir."
+    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir."
   },
   "details": {
     "person": "İnsan",
@@ -13,7 +13,7 @@
     "face": "Yüz Detayları",
     "scoreInfo": "Alt etiket skoru, tanınan tüm yüzlerin güvenilirlik değerlerinin ağırlıklı ortalamasından elde edilir, dolayısıyla fotoğraf üzerinde gösterilen skordan farklı olabilir.",
     "subLabelScore": "Alt Etiket Puanı",
-    "unknown": "Bilinmeyen"
+    "unknown": "Bilinmiyor"
   },
   "documentTitle": "Yüz Kütüphanesi - Frigate",
   "uploadFaceImage": {

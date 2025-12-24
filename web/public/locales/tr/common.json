@@ -231,7 +231,7 @@
     "hide": "{{item}} öğesini gizle",
     "show": "{{item}} öğesini göster",
     "ID": "ID",
-    "none": "Yok",
+    "none": "Hiçbiri",
     "all": "Tümü"
   },
   "notFound": {

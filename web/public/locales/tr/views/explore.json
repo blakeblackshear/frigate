@@ -19,13 +19,15 @@
           "updatedSublabel": "Alt etiket başarıyla gücellendi.",
           "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcının hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir.",
           "updatedLPR": "Plaka başarıyla güncellendi.",
-          "audioTranscription": "Ses dökümü başarıyla istendi. Frigate sunucunuzun hızına bağlı olarak döküm işlemi tamamlanması biraz zaman alabilir."
+          "audioTranscription": "Ses dökümü başarıyla istendi. Frigate sunucun­uzun hızına bağlı olarak döküm işlemi tamamlanması biraz zaman alabilir.",
+          "updatedAttributes": "Özellikler başarıyla güncellendi."
         },
         "error": {
           "updatedSublabelFailed": "Alt etiket güncellenemedi: {{errorMessage}}",
           "regenerate": "{{provider}} sağlayıcısından yeni açıklama talep edilemedi: {{errorMessage}}",
           "updatedLPRFailed": "Plaka güncellenemedi: {{errorMessage}}",
-          "audioTranscription": "Ses çözümlemesi talep edilemedi: {{errorMessage}}"
+          "audioTranscription": "Ses çözümlemesi talep edilemedi: {{errorMessage}}",
+          "updatedAttributesFailed": "Öznitelikler güncellenemedi: {{errorMessage}}"
         }
       }
     },
@@ -73,7 +75,12 @@
     },
     "score": {
       "label": "Skor"
-    }
+    },
+    "editAttributes": {
+      "title": "Özellikleri düzenle",
+      "desc": "Bu {{label}} için sınıflandırma özelliklerini seçin"
+    },
+    "attributes": "Sınıflandırma Özellikleri"
   },
   "generativeAI": "Üretken Yapay Zeka",
   "exploreIsUnavailable": {
@@ -203,7 +210,7 @@
       "aria": "Temiz anlık görüntüyü indir"
     },
     "viewTrackingDetails": {
-      "label": "İzleme ayrıntılarını görüntüle",
+      "label": "Takip ayrıntılarını görüntüle",
       "aria": "Takip ayrıntılarını göster"
     },
     "showObjectDetails": {
@@ -249,7 +256,7 @@
     "trackedPoint": "Takip edilen nokta",
     "lifecycleItemDesc": {
       "visible": "{{label}} tespit edildi",
-      "entered_zone": "{{label}} {{zones}} bölgesine girdi",
+      "entered_zone": "{{label}}, {{zones}} bölgesine girdi",
       "active": "{{label}} etkin hale geldi",
       "stationary": "{{label}} sabit hale geldi",
       "attribute": {
@@ -274,11 +281,11 @@
       },
       "offset": {
         "label": "Etiket Kaydırma Değeri",
-        "desc": "Bu veriler kameranızın algılama akışından gelir ancak kayıt akışındaki görüntülerin üzerine bindirilir. İki akışın tamamen senkronize olması pek olası değildir. Bu nedenle sınır kutusu ile görüntü birebir hizalı olmayabilir. Bu ayarı kullanarak anotasyonları zamansal olarak ileri veya geri kaydırabilir ve kaydedilmiş görüntülerle daha iyi hizalayabilirsiniz.",
-        "millisecondsToOffset": "Algılama anotasyonlarının kaydırılacağı milisaniye değeri. <em>Varsayılan: 0</em>",
+        "desc": "Bu veriler kameranızın algılama akışından gelir ancak kayıt akışındaki görüntülerin üzerine bindirilir. İki akış tamamen eşzamanlı olmayabilir, bu durum da sınır kutusu ile görüntünün hizasını kaydırabilir. Bu ayarı kullanarak zaman senkronunu ileri veya geri kaydırarak kayıt akışını ve etiketlemeleri hizalayabilirsiniz.",
+        "millisecondsToOffset": "Algılama etiketlemelerinin kaydırılacağı milisaniye değeri. <em>Varsayılan: 0</em>",
         "tips": "Videonun oynatımı kutulardan ve yol noktalarından öndeyse değeri düşürün; geride kalıyorsa değeri artırın. Bu değer negatif olabilir.",
         "toast": {
-          "success": "{{camera}} için anotasyon zaman kaydırması yapılandırma dosyasına kaydedildi."
+          "success": "{{camera}} için etiketleme zaman kaydırması yapılandırma dosyasına kaydedildi."
         }
       }
     },

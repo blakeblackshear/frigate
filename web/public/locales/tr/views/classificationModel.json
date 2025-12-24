@@ -1,7 +1,9 @@
 {
   "documentTitle": "Sınıflandırma Modelleri - Frigate",
   "details": {
-    "scoreInfo": "Skor, modelin nesneyi tespit ettiği tüm durumlar için ortalama güven düzeyini gösterir."
+    "scoreInfo": "Skor, modelin nesneyi tespit ettiği tüm durumlar için ortalama güven düzeyini gösterir.",
+    "none": "Hiçbiri",
+    "unknown": "Bilinmiyor"
   },
   "button": {
     "deleteClassificationAttempts": "Sınıflandırma Fotoğraflarını Sil",
@@ -27,7 +29,7 @@
     },
     "error": {
       "deleteImageFailed": "Silinemedi: {{errorMessage}}",
-      "deleteModelFailed": "Model silinirken hata oluştu: {{errorMessage}}",
+      "deleteModelFailed": "Model silinemedi: {{errorMessage}}",
       "categorizeFailed": "Görsel sınıflandırılamadı: {{errorMessage}}",
       "trainingFailed": "Model eğitimi başarısız oldu. Ayrıntılar için Frigate günlüklerini kontrol edin.",
       "deleteCategoryFailed": "Sınıf silinemedi: {{errorMessage}}",
@@ -60,10 +62,10 @@
   },
   "renameCategory": {
     "title": "Sınıfı Yeniden Adlandır",
-    "desc": "{{name}} için yeni bir ad girin. Ad değişikliğinin etkili olabilmesi için modeli yeniden eğitmeniz gerekecektir."
+    "desc": "{{name}} için yeni bir ad girin. Ad değişikliğinin geçerli olması için modeli yeniden eğitmeniz gerekecektir."
   },
   "description": {
-    "invalidName": "Geçersiz ad. Ad yalnızca harfler, rakamlar, boşluklar, kesme işaretleri (’), alt çizgiler (_) ve tireler (-) içerebilir."
+    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir."
   },
   "train": {
     "title": "Son Sınıflandırmalar",
@@ -107,14 +109,14 @@
   "wizard": {
     "title": "Yeni Sınıflandırma Oluştur",
     "steps": {
-      "nameAndDefine": "Adlandır ve Tanımla",
+      "nameAndDefine": "İsim ver ve Tanımla",
       "stateArea": "Durum Alanı",
       "chooseExamples": "Örnekleri Seç"
     },
     "step1": {
-      "description": "State modelleri, sabit kamera alanlarındaki değişiklikleri (ör. kapının açılması/kapanması) izler. Nesne modelleri ise algılanan nesnelere ek sınıflandırmalar ekler (ör. bilinen hayvanlar, kuryeler vb.).",
-      "name": "Ad",
-      "namePlaceholder": "Model adını girin...",
+      "description": "Durum modelleri, sabit kamera alanlarındaki değişiklikleri (ör. kapının açılması/kapanması) izler. Nesne modelleri ise algılanan nesnelere ek sınıflandırmalar ekler (ör. bilinen hayvanlar, kuryeler vb.).",
+      "name": "İsim",
+      "namePlaceholder": "Model ismi girin...",
       "type": "Tür",
       "typeState": "Durum",
       "typeObject": "Nesne",
@@ -122,24 +124,25 @@
       "objectLabelPlaceholder": "Nesne türünü seçin...",
       "classificationType": "Sınıflandırma Türü",
       "classificationTypeTip": "Sınıflandırma türleri hakkında bilgi edinin",
-      "classificationTypeDesc": "Alt etiketleri, nesne etiketine ek metin ekler (örneğin: “Person: UPS”). Öznitelikler (attributes) ise nesne meta verilerinde ayrı olarak saklanan ve aranabilir metadata bilgileridir.",
+      "classificationTypeDesc": "Alt etiketler, nesne etiketine ek olarak saklanır (örneğin: “Person: UPS”). Öznitelikler(attributes) ise nesne meta verilerinde saklanan aranabilir meta verilerdir.",
       "classificationSubLabel": "Alt Etiket",
       "classificationAttribute": "Özellik",
       "classes": "Sınıflar",
       "states": "Durumlar",
       "classesTip": "Sınıflar hakkında bilgi edinin",
       "classesStateDesc": "Kamera alanınızın içinde bulunabileceği farklı durumları tanımlayın. Örneğin: bir garaj kapısı için ‘açık’ ve ‘kapalı’.",
-      "classesObjectDesc": "Algılanan nesneleri sınıflandırmak için farklı kategorileri tanımlayın. Örneğin: Bir kişi sınıflandırması için ‘teslimat_görevlisi’, ‘sakin’, ‘yabancı’.",
-      "classPlaceholder": "Sınıf adını girin...",
+      "classesObjectDesc": "Algılanan nesneleri sınıflandırmak için farklı kategorileri tanımlayın. Örneğin: Bir kişi sınıflandırması için \"kurye\", \"bahçıvan\" veya \"yabancı\" olabilir.",
+      "classPlaceholder": "Sınıf ismi girin...",
       "errors": {
-        "nameRequired": "Model adı gerekli",
-        "nameLength": "Model adı 64 karakter veya daha az olmalıdır",
-        "nameOnlyNumbers": "Model adı yalnızca rakamlardan oluşamaz",
+        "nameRequired": "Model ismi gereklidir",
+        "nameLength": "Model ismi en fazla 64 karakter olmalıdır",
+        "nameOnlyNumbers": "Model ismi yalnızca rakamlardan oluşamaz",
         "classRequired": "En az 1 sınıf gereklidir",
-        "classesUnique": "Sınıf adları benzersiz olmalıdır",
+        "classesUnique": "Sınıf isimleri benzersiz olmalıdır",
         "stateRequiresTwoClasses": "Durum modelleri en az 2 sınıf gerektirir",
         "objectLabelRequired": "Lütfen bir nesne etiketi seçin",
-        "objectTypeRequired": "Lütfen bir sınıflandırma türü seçin"
+        "objectTypeRequired": "Lütfen bir sınıflandırma türü seçin",
+        "noneNotAllowed": "'none' sınıfına izin verilmiyor"
       }
     },
     "step2": {
@@ -152,11 +155,11 @@
     "step3": {
       "selectImagesPrompt": "{{className}} etiketli tüm görselleri seç",
       "selectImagesDescription": "Görselleri seçmek için üzerlerine tıklayın. Bu sınıfla işiniz bittiğinde Devam Et’e tıklayın.",
-      "allImagesRequired_one": "Lütfen tüm görselleri sınıflandırın. {{count}} görsel kaldı.",
+      "allImagesRequired_one": "Lütfen tüm görselleri sınıflandırın. Bir görsel kaldı.",
       "allImagesRequired_other": "Lütfen tüm görselleri sınıflandırın. {{count}} görsel kaldı.",
       "generating": {
         "title": "Örnek Görseller Oluşturuluyor",
-        "description": "Frigate kayıtlarınızdan temsilî görüntüler çekiliyor. Bu işlem biraz zaman alabilir…"
+        "description": "Frigate kayıtlarınızdan temsili görüntüler alınıyor. Bu işlem biraz zaman alabilir…"
       },
       "training": {
         "title": "Model Eğitiliyor",
@@ -177,7 +180,7 @@
       "generateSuccess": "Örnek görseller başarıyla oluşturuldu",
       "missingStatesWarning": {
         "title": "Eksik Durum Örnekleri",
-        "description": "En iyi sonuçlar için tavsiye edilir: Tüm durumlar (state) için örnekler seçin. Tüm durumlar için örnek seçmeden devam edebilirsiniz, ancak model, tüm durumlara ait görüntüler eklenene kadar eğitilmeyecektir. Devam ettikten sonra, eksik durumlar için görüntüleri sınıflandırmak ve ardından modeli eğitmek için Son Sınıflandırmalar (Recent Classifications) görünümünü kullanın."
+        "description": "En iyi sonuçlar için her bir durum için örnek görseller seçmeniz tavsiye edilir. Tüm durumlar için görsel seçmeden devam edebilirsiniz fakat tüm durumlar için görseller seçilmedikçe model eğitilemeyecektir. Son Sınıflandırmalar arayüzünü kullanarak görselleri sınıflandırmak üzere görüntüleyebilir, yeterince görsel seçildikten sonra da modeli eğitebilirsiniz."
       }
     }
   },

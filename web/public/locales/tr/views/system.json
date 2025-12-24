@@ -47,7 +47,7 @@
       "intelGpuWarning": {
         "title": "Intel GPU İstatistik Uyarısı",
         "message": "GPU istatistikleri kullanılamıyor",
-        "description": "Bu, Intel’in GPU istatistik raporlama araçlarında (intel_gpu_top) bilinen bir hatadır; araç çalışmayı bozarak, donanımsal hızlandırma ve nesne tespiti (i)GPU üzerinde doğru şekilde çalışıyor olsa bile, GPU kullanımını tekrar tekrar %0 olarak döndürür. Bu bir Frigate hatası değildir. Sorunu geçici olarak düzeltmek ve GPU’nun doğru çalıştığını doğrulamak için host sistemini yeniden başlatabilirsiniz. Bu durum performansı etkilemez."
+        "description": "Bu durum, donanımsal hızlandırma ve nesne tespiti (i)GPU üzerinde sorunsuz çalışıyor olsa bile, Intel’in GPU istatistik raporlama aracındaki (intel_gpu_top) bilinen bir hatadan ötürü GPU kullanımının %0 olarak bildirilmesinden kaynaklanmakta olup, Frigate hatası değildir. Sorunu geçici olarak düzeltmek ve (i)GPU’nun doğru çalıştığını doğrulamak için ana makineyi yeniden başlatabilirsiniz. Bu durum performansı etkilememektedir."
       }
     },
     "otherProcesses": {
@@ -165,7 +165,10 @@
       "review_description_events_per_second": "İnceleme Açıklaması",
       "object_description": "Nesne Açıklaması",
       "object_description_speed": "Nesne Açıklama Hızı",
-      "object_description_events_per_second": "Nesne Açıklaması"
+      "object_description_events_per_second": "Nesne Açıklaması",
+      "classification": "{{name}} Sınıflandırması",
+      "classification_speed": "{{name}} Sınıflandırma Hızı",
+      "classification_events_per_second": "{{name}} Saniyede Sınıflandırma Olayları"
     },
     "infPerSecond": "Saniye Başına Çıkarım",
     "title": "Zenginleştirmeler",

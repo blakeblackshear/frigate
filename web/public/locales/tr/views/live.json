@@ -54,7 +54,7 @@
     },
     "title": "Yayın",
     "debug": {
-      "picker": "Debug modunda akış seçimi kullanılamaz. Debug görünümü her zaman “detect” rolüne atanmış akışı kullanır."
+      "picker": "Hata ayıklama modunda akış seçimi kullanılamaz. Hata ayıklama görünümü her zaman tespit(detect) rolüne atanmış akışı kullanır."
     }
   },
   "cameraSettings": {
@@ -172,13 +172,13 @@
     "disable": "Canlı Ses Çözümlemeyi Kapat"
   },
   "snapshot": {
-    "takeSnapshot": "Anlık Ekran Görüntüsünü İndir",
+    "takeSnapshot": "Anlık görüntüyü indir",
     "noVideoSource": "Anlık görüntü için kullanılabilir bir video kaynağı bulunamadı.",
     "captureFailed": "Anlık görüntü yakalanamadı.",
     "downloadStarted": "Anlık görüntü indirme işlemi başlatıldı."
   },
   "noCameras": {
-    "title": "Hiç Kamera Yapılandırılmamış",
+    "title": "Yapılandırılmış Kamera Yok",
     "description": "Frigate’e bir kamera bağlayarak başlayın.",
     "buttonText": "Kamera Ekle",
     "restricted": {

@@ -1,10 +1,10 @@
 {
   "camera": "kamera",
-  "alerts": "Alarmlar",
+  "alerts": "Uyarılar",
   "detections": "Tespitler",
   "empty": {
     "detection": "İncelenecek tespit öğesi yok",
-    "alert": "İncelenecek alarm öğesi yok",
+    "alert": "İncelenecek uyarı öğesi yok",
     "motion": "Hareket verisi bulunamadı"
   },
   "timeline": "Zaman şeridi",
@@ -54,7 +54,7 @@
   },
   "objectTrack": {
     "trackedPoint": "Takip edilen nokta",
-    "clickToSeek": "Bu zamana gitmek için tıklayın"
+    "clickToSeek": "Bu zamana atlamak için tıklayın"
   },
   "normalActivity": "Normal",
   "needsReview": "İnceleme Gerekiyor",

@@ -26,7 +26,7 @@
     "cameras": "Kamera Ayarları",
     "enrichments": "Zenginleştirmeler",
     "triggers": "Tetikler",
-    "cameraManagement": "Yönet",
+    "cameraManagement": "Yönetim",
     "cameraReview": "İncele",
     "roles": "Roller"
   },
@@ -39,15 +39,15 @@
       },
       "playAlertVideos": {
         "label": "Alarm Videolarını Oynat",
-        "desc": "Varsayılan olarak canlı görüntü panelinde gösterilen son alarmlar ufak videolar olarak oynatılır. Bu tarayıcı/cihazda video yerine sabit resim göstermek için bu seçeneği kapatın."
+        "desc": "Varsayılan olarak canlı görüntü panelinde gösterilen son uyarılar ufak videolar olarak oynatılır. Bu tarayıcı/cihazda video yerine sabit resim göstermek için bu seçeneği kapatın."
       },
       "title": "Canlı Görüntü Paneli",
       "displayCameraNames": {
-        "label": "Kamera Adlarını Her Zaman Göster",
+        "label": "Kamera Adlarını Daima Göster",
         "desc": "Çok kameralı canlı izleme panelinde, kamera adlarını her zaman bir etiket içinde göster."
       },
       "liveFallbackTimeout": {
-        "label": "Canlı Oynatıcı Yedekleme Zaman Aşımı",
+        "label": "Canlı Oynatıcı Yedeğe Geçiş Zaman Aşımı",
         "desc": "Bir kameranın yüksek kaliteli canlı akışı kullanılamadığında, belirtilen saniye kadar sonra düşük bant genişliği moduna geç. Varsayılan: 3."
       }
     },
@@ -251,7 +251,7 @@
           "mustNotBeSameWithCamera": "Alan adı kamera adıyla aynı olmamalıdır.",
           "alreadyExists": "Bu kamera için bu ada sahip bir alan zaten mevcut.",
           "mustNotContainPeriod": "Alan adı nokta içermemelidir.",
-          "mustHaveAtLeastOneLetter": "Bölge adı en az bir harf içermelidir."
+          "mustHaveAtLeastOneLetter": "Bölge ismi en az bir harf içermelidir."
         }
       },
       "distance": {
@@ -307,7 +307,7 @@
       "name": {
         "inputPlaceHolder": "Bir isim girin…",
         "title": "İsim",
-        "tips": "Ad en az 2 karakter olmalı, en az bir harf içermeli ve bu kameradaki bir kamera adıyla veya başka bir bölge adıyla aynı olmamalıdır."
+        "tips": "İsim 2 karakter veya daha uzun olmalı, en az bir harf içermeli ve bu kameradaki bir kamera ismi veya başka bir bölge ismiyle çakışmamalıdır."
       },
       "inertia": {
         "title": "Eylemsizlik",
@@ -515,7 +515,7 @@
       "changeRole": "Kullanıcı rolünü değiştir",
       "deleteUser": "Kullanıcıyı sil",
       "role": "Rol",
-      "password": "Parola"
+      "password": "Parola Sıfırla"
     },
     "dialog": {
       "form": {
@@ -540,10 +540,10 @@
           },
           "notMatch": "Parolalar eşleşmiyor",
           "match": "Parolalar eşleşiyor",
-          "show": "Şifreyi göster",
-          "hide": "Şifreyi gizle",
+          "show": "Parolay⁸ göster",
+          "hide": "Parolayı gizle",
           "requirements": {
-            "title": "Şifre gereksinimleri:",
+            "title": "Parola gereksinimleri:",
             "length": "En az 8 karakter",
             "uppercase": "En az bir büyük harf",
             "digit": "En az bir rakam",
@@ -560,8 +560,8 @@
         "usernameIsRequired": "Kullanıcı adı gereklidir",
         "passwordIsRequired": "Parola gereklidir",
         "currentPassword": {
-          "title": "Mevcut Şifre",
-          "placeholder": "Mevcut şifrenizi girin"
+          "title": "Mevcut Parola",
+          "placeholder": "Mevcut parolanızı girin"
         }
       },
       "createUser": {
@@ -581,10 +581,11 @@
         "desc": "Bu hesabı güvenli hale getirmek güçlü bir parola belirleyin.",
         "cannotBeEmpty": "Parola boş olamaz",
         "doNotMatch": "Parolalar eşleşmiyor",
-        "currentPasswordRequired": "Mevcut şifre gerekli",
-        "incorrectCurrentPassword": "Mevcut şifre yanlış",
-        "passwordVerificationFailed": "Şifre doğrulanamadı",
-        "multiDeviceWarning": "Oturum açtığınız diğer tüm cihazlarda {{refresh_time}} içinde yeniden oturum açmanız gerekecektir. Ayrıca, JWT gizli anahtarınızı döndürerek tüm kullanıcıların hemen yeniden kimlik doğrulaması yapmasını da sağlayabilirsiniz."
+        "currentPasswordRequired": "Mevcut parola gereklidir",
+        "incorrectCurrentPassword": "Mevcut parola yanlış",
+        "passwordVerificationFailed": "Parola doğrulanamadı",
+        "multiDeviceWarning": "Oturum açtığınız diğer tüm cihazların {{refresh_time}} süresi içinde yeniden oturum açması gerekecektir.",
+        "multiDeviceAdmin": "JWT gizli anahtarınızı yenileyerek tüm kullanıcıları derhal yeniden doğrulama yapmaya zorlayabilirsiniz."
       },
       "changeRole": {
         "title": "Kullanıcı Rolünü Değiştir",
@@ -600,7 +601,7 @@
         "select": "Bir rol seçin"
       }
     },
-    "updatePassword": "Parola Belirle"
+    "updatePassword": "Parola Sıfırla"
   },
   "notification": {
     "title": "Bildirimler",
@@ -769,13 +770,13 @@
       "form": {
         "name": {
           "error": {
-            "invalidCharacters": "Alan yalnızca harf, rakam, alt çizgi ve tire içerebilir.",
-            "minLength": "Alan en az 2 karakter uzunluğunda olmalıdır.",
+            "invalidCharacters": "Girdi yalnızca harf, rakam, alt çizgi ve tire içerebilir.",
+            "minLength": "Girdi en az 2 karakter uzunluğunda olmalıdır.",
             "alreadyExists": "Bu kamerada aynı isimle bir tetik zaten mevcut."
           },
           "title": "İsim",
-          "placeholder": "Bu tetikleyiciye ad verin",
-          "description": "Bu tetikleyiciyi tanımlamak için benzersiz bir ad veya açıklama girin"
+          "placeholder": "Bu tetikleyiciye isim verin",
+          "description": "Bu tetikleyiciyi tanımlamak için benzersiz bir isim veya açıklama girin"
         },
         "enabled": {
           "description": "Bu tetiği açın veya kapatın"
@@ -806,7 +807,7 @@
         },
         "actions": {
           "title": "Eylemler",
-          "desc": "Varsayılan olarak, Frigate tüm tetikleyiciler için bir MQTT mesajı gönderir. Alt etiketler, tetikleyici adını nesne etiketine ekler. Nitelikler, izlenen nesne meta verilerinde ayrı olarak depolanan aranabilir meta verilerdir.",
+          "desc": "Varsayılan olarak, Frigate tüm tetikleyici isimlerini bir MQTT mesajı olarak gönderir. Alt etiketler, tetikleyici ismini nesne etiketine ekler. Nitelikler, izlenen nesne meta verilerinde ayrı olarak depolanan aranabilir meta verilerdir.",
           "error": {
             "min": "En az bir eylem seçilmelidir."
           }
@@ -880,7 +881,7 @@
         "description": "Bu tetikleyici için eşik değerini ve eylemleri yapılandırın."
       },
       "steps": {
-        "nameAndType": "Ad ve Tür",
+        "nameAndType": "İsim ve Tür",
         "configureData": "Verileri Yapılandır",
         "thresholdAndActions": "Eşik ve Eylemler"
       }
@@ -890,7 +891,7 @@
     "title": "Kamera Ekle",
     "description": "Aşağıdaki adımları izleyerek Frigate kurulumunuza yeni bir kamera ekleyin.",
     "steps": {
-      "nameAndConnection": "Ad & Bağlantı",
+      "nameAndConnection": "İsim & Bağlantı",
       "probeOrSnapshot": "Probe veya Anlık Görüntü",
       "streamConfiguration": "Akış Yapılandırması",
       "validationAndTesting": "Doğrulama ve Test"
@@ -911,13 +912,13 @@
     },
     "step1": {
       "description": "Kamera bilgilerinizi girin ve kamerayı taramayı (probe) ya da markayı manuel olarak seçmeyi tercih edin.",
-      "cameraName": "Kamera Adı",
-      "cameraNamePlaceholder": "ör. front_door veya Arka Bahçe Genel Görünümü",
-      "host": "Ana Makine / IP Adresi",
+      "cameraName": "Kamera İsmi",
+      "cameraNamePlaceholder": "örn. onkapi, veya Arka Bahçe Genel Görünümü",
+      "host": "Ana makine adı veya IP Adresi",
       "port": "Port",
       "username": "Kullanıcı adı",
       "usernamePlaceholder": "İsteğe bağlı",
-      "password": "Şifre",
+      "password": "Parola",
       "passwordPlaceholder": "İsteğe bağlı",
       "selectTransport": "İletişim protokolünü seçin",
       "cameraBrand": "Kamera Markası",
@@ -925,7 +926,7 @@
       "customUrl": "Özel Akış URL’si",
       "brandInformation": "Marka Bilgileri",
       "brandUrlFormat": "RTSP URL formatı şu şekilde olan kameralar için: {{exampleUrl}}",
-      "customUrlPlaceholder": "rtsp://kullanıcıadı:şifre@host:port/path",
+      "customUrlPlaceholder": "rtsp://kullanıcıadı:parola@host:port/path",
       "connectionSettings": "Bağlantı Ayarları",
       "detectionMethod": "Akış Algılama Yöntemi",
       "onvifPort": "ONVIF Portu",
@@ -935,19 +936,19 @@
       "onvifPortDescription": "ONVIF'i destekleyen kameralarda bu genellikle 80 veya 8080'dir.",
       "useDigestAuth": "Digest kimlik doğrulamasını kullan",
       "errors": {
-        "nameRequired": "Kamera adı gerekli",
-        "nameLength": "Kamera adı 64 karakter veya daha az olmalıdır",
-        "invalidCharacters": "Kamera adı geçersiz karakterler içeriyor",
-        "nameExists": "Kamera adı zaten mevcut",
+        "nameRequired": "Kamera ismi gereklidir",
+        "nameLength": "Kamera ismi en fazla 64 karakter olmalıdır",
+        "invalidCharacters": "Kamera ismi geçersiz karakterler içeriyor",
+        "nameExists": "Kamera ismi zaten mevcut",
         "customUrlRtspRequired": "Özel URL'ler \"rtsp://\" ile başlamalıdır. RTSP olmayan kamera akışları için manuel yapılandırma gereklidir.",
         "brandOrCustomUrlRequired": "Bir kamera markası seçip host/IP adresi girin ya da özel bir URL kullanmak için ‘Diğer’ seçeneğini tercih edin"
       },
-      "useDigestAuthDescription": "ONVIF için HTTP digest kimlik doğrulamasını kullanın. Bazı kameralar, standart yönetici kullanıcısı yerine özel bir ONVIF kullanıcı adı/şifresi gerektirebilir."
+      "useDigestAuthDescription": "ONVIF için HTTP digest kimlik doğrulamasını kullanın. Bazı kameralar, standart yönetici kullanıcısı yerine özel bir ONVIF kullanıcı adı/parola kullanılmasını gerektirebilir."
     },
     "step2": {
       "description": "Mevcut akışları bulmak için kamerayı tarayın veya seçtiğiniz algılama yöntemine göre manuel ayarları yapılandırın.",
       "testSuccess": "Bağlantı testi başarılı!",
-      "testFailed": "Bağlantı testi başarısız oldu. Lütfen tüm alanları kontrol edip tekrar deneyin.",
+      "testFailed": "Bağlantı testi başarısız oldu. Lütfen bilgileri kontrol edip tekrar deneyin.",
       "testFailedTitle": "Test Başarısız",
       "streamDetails": "Akış Ayrıntıları",
       "probing": "Kamera taranıyor...",
@@ -986,15 +987,15 @@
     },
     "step3": {
       "description": "Akış rollerini yapılandırın ve kameranız için ek akışlar ekleyin.",
-      "streamsTitle": "Kamera Yayınları",
-      "addStream": "Yayın Ekle",
-      "addAnotherStream": "Başka Bir Yayın Ekle",
-      "streamTitle": "Yayın {{number}}",
-      "streamUrl": "Yayın URL'si",
-      "streamUrlPlaceholder": "rtsp://kullanıcıadı:şifre@host:port/path",
-      "selectStream": "Bir yayın seçin",
+      "streamsTitle": "Kamera Akışları",
+      "addStream": "Akış Ekle",
+      "addAnotherStream": "Başka Bir Akış Ekle",
+      "streamTitle": "Akış {{number}}",
+      "streamUrl": "Akış URL'si",
+      "streamUrlPlaceholder": "rtsp://kullanıcıadı:parola@host:port/path",
+      "selectStream": "Bir akış seçin",
       "searchCandidates": "Yayınları arayın...",
-      "noStreamFound": "Yayın bulunamadı",
+      "noStreamFound": "Akış bulunamadı",
       "url": "URL",
       "resolution": "Çözünürlük",
       "selectResolution": "Çözünürlüğü seçin",
@@ -1014,10 +1015,10 @@
       "notConnected": "Bağlı Değil",
       "featuresTitle": "Özellikler",
       "go2rtc": "Kameraya olan bağlantıları azaltın",
-      "detectRoleWarning": "Devam edebilmek için en az bir akışın \"algılama\" rolüne sahip olması gerekir.",
+      "detectRoleWarning": "Devam edebilmek için en az bir akışın algılama (detect) rolüne sahip olması gerekir.",
       "rolesPopover": {
-        "title": "Yayın Rolleri",
-        "detect": "Nesne tespiti için ana besleme.",
+        "title": "Akış Rolleri",
+        "detect": "Nesne algılama için ana besleme.",
         "record": "Yapılandırma ayarlarına göre video akışının bölümlerini kaydeder.",
         "audio": "Ses tabanlı algılama için besleme."
       },
@@ -1035,25 +1036,25 @@
       "none": "Hiçbiri",
       "error": "Hata",
       "description": "Yeni kameranızı kaydetmeden önce son doğrulama ve analiz. Kaydetmeden önce her akışı bağlayın.",
-      "validationTitle": "Yayın Doğrulaması",
-      "connectAllStreams": "Tüm Yayınları Bağla",
+      "validationTitle": "Akış Doğrulaması",
+      "connectAllStreams": "Tüm Akışlara Bağlan",
       "reconnectionSuccess": "Yeniden bağlantı başarılı.",
-      "reconnectionPartial": "Bazı yayınlara yeniden bağlanılamadı.",
-      "streamUnavailable": "Yayın önizlemesi kullanılamıyor",
+      "reconnectionPartial": "Bazı Akışlara yeniden bağlanılamadı.",
+      "streamUnavailable": "Akış önizlemesi kullanılamıyor",
       "reload": "Yeniden yükle",
       "connecting": "Bağlanıyor...",
-      "streamTitle": "Yayın {{number}}",
+      "streamTitle": "Akış {{number}}",
       "valid": "Geçerli",
       "failed": "Başarısız",
       "notTested": "Test edilmedi",
       "connectStream": "Bağlan",
       "connectingStream": "Bağlanıyor",
-      "streamValidated": "{{number}} yayını başarıyla doğrulandı",
-      "streamValidationFailed": "Yayın {{number}} doğrulaması başarısız oldu",
+      "streamValidated": "{{number}} nolu akış başarıyla doğrulandı",
+      "streamValidationFailed": "{{number}} nolu akış doğrulanamadı",
       "saveAndApply": "Yeni Kamerayı Kaydet",
       "saveError": "Geçersiz yapılandırma. Lütfen ayarlarınızı kontrol edin.",
       "issues": {
-        "title": "Yayın Doğrulaması",
+        "title": "Akış Doğrulaması",
         "videoCodecGood": "Video kodeği {{codec}}.",
         "audioCodecGood": "Ses kodeği {{codec}}.",
         "resolutionHigh": "{{resolution}} çözünürlüğü kaynak kullanımının artmasına neden olabilir.",
@@ -1063,7 +1064,8 @@
         "audioCodecRequired": "Ses algılamayı desteklemek için bir ses akışı gereklidir.",
         "restreamingWarning": "Kayıt akışı için kameraya olan bağlantıları azaltmak CPU kullanımını bir miktar artırabilir.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP önerilmez. Kameranın donanım yazılımı ayarlarında HTTP'yi etkinleştirin ve sihirbazı yeniden başlatın."
+          "reolink-rtsp": "Reolink RTSP önerilmez. Kameranın ayarlarında HTTP'yi etkinleştirin ve sihirbazı baştan başlatın.",
+          "reolink-http": "Reolink HTTP akışları daha iyi uyumluluk için FFmpeg kullanmalıdır. Bu akış için 'Akış uyumluluk modunu kullan' seçeneğini etkinleştirin."
         },
         "dahua": {
           "substreamWarning": "Alt akış 1 düşük çözünürlüğe kilitlenmiştir. Birçok Dahua / Amcrest / EmpireTech kamera, kamera ayarlarında etkinleştirilmesi gereken ek alt akışları destekler. Mevcutsa, bu akışları kontrol edip kullanmanız önerilir."
@@ -1088,27 +1090,27 @@
       "add": "Kamera Ekle",
       "edit": "Kamerayı Düzenle",
       "description": "Yayınlar ve roller dahil olmak üzere kamera ayarlarını yapılandırın.",
-      "name": "Kamera Adı",
-      "nameRequired": "Kamera adı gerekli",
-      "nameLength": "Kamera adı 64 karakterden az olmalıdır.",
+      "name": "Kamera İsmi",
+      "nameRequired": "Kamera ismi gereklidir",
+      "nameLength": "Kamera ismi 64 karakterden az olmalıdır.",
       "namePlaceholder": "örneğin, ön_kapı veya Arka Bahçe Genel Bakışı",
-      "enabled": "Etkinleştirilmiş",
+      "enabled": "Etkin",
       "ffmpeg": {
-        "inputs": "Giriş Yayınları",
-        "path": "Yayın Yolu",
-        "pathRequired": "Yayın yolu gereklidir",
+        "inputs": "Giriş Akışları",
+        "path": "Akış Yolu",
+        "pathRequired": "Akış yolu gereklidir",
         "pathPlaceholder": "rtsp://...",
         "roles": "Roller",
         "rolesRequired": "En az bir rol gereklidir",
         "rolesUnique": "Her rol (ses, algılama, kayıt) yalnızca bir akışa atanabilir",
-        "addInput": "Giriş Yayını Ekle",
-        "removeInput": "Giriş Yayınını Kaldır",
-        "inputsRequired": "En az bir giriş yayını gereklidir"
+        "addInput": "Akış Ekle",
+        "removeInput": "Akış Kaldır",
+        "inputsRequired": "En az bir akış gereklidir"
       },
-      "go2rtcStreams": "go2rtc Yayınları",
-      "streamUrls": "Yayın URL'leri",
+      "go2rtcStreams": "go2rtc Akışları",
+      "streamUrls": "Akış URL'leri",
       "addUrl": "URL ekle",
-      "addGo2rtcStream": "go2rtc Yayını Ekle",
+      "addGo2rtcStream": "go2rtc Akışı Ekle",
       "toast": {
         "success": "Kamera {{cameraName}} başarıyla kaydedildi"
       }
@@ -1118,11 +1120,11 @@
     "title": "Kamera İnceleme Ayarları",
     "object_descriptions": {
       "title": "Üretken Yapay Zeka Nesne Açıklamaları",
-      "desc": "Bu kamera için Yapay Zeka Nesne Tanımlamalarını geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameradaki izlenen nesneler için Yapay Zeka tarafından oluşturulan tanımlar istenmeyecektir."
+      "desc": "Bu kamera için yapay zekadan nesne tanımlama taleplerini geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameradaki izlenen nesneler için yapay zekadan tanımlar istenmeyecektir."
     },
     "review_descriptions": {
       "title": "Üretken Yapay Zeka İnceleme Açıklamaları",
-      "desc": "Bu kamera için Yapay Zeka Üretici İnceleme açıklamalarını geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameradaki inceleme öğeleri için Yapay Zeka tarafından oluşturulan açıklamalar istenmeyecektir."
+      "desc": "Bu kamera için yapay zekadan incele öğelerini açıklama taleplerini geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameradaki inceleme öğeleri için yapay zekadan açıklama istenmeyecektir."
     },
     "review": {
       "title": "İncele",
@@ -1134,13 +1136,13 @@
       "title": "Sınıflandırmayı İncele",
       "desc": "Frigate, inceleme öğelerini Uyarılar ve Algılamalar olarak kategorilere ayırır. Varsayılan olarak, tüm <em>kişi</em> ve <em>araba</em> nesneleri Uyarı olarak kabul edilir. İnceleme öğelerinizin kategorilendirmesini, bunlar için gerekli bölgeleri yapılandırarak iyileştirebilirsiniz.",
       "noDefinedZones": "Bu kamera için herhangi bir bölge tanımlanmamıştır.",
-      "objectAlertsTips": "{{cameraName}} üzerindeki tüm {{alertsLabels}} nesneleri Uyarılar olarak gösterilecektir.",
-      "zoneObjectAlertsTips": "{{cameraName}} üzerinde, {{zone}} bölgesinde tespit edilen tüm {{alertsLabels}} nesneleri Uyarılar olarak gösterilecektir.",
-      "objectDetectionsTips": "{{cameraName}} üzerinde kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, hangi bölgede olursa olsun Tespitler olarak gösterilecektir.",
+      "objectAlertsTips": "{{cameraName}} üzerindeki tüm {{alertsLabels}} nesneleri Uyarı olarak gösterilecektir.",
+      "zoneObjectAlertsTips": "{{cameraName}} üzerinde, {{zone}} bölgesinde tespit edilen tüm {{alertsLabels}} nesneleri Uyarı olarak gösterilecektir.",
+      "objectDetectionsTips": "{{cameraName}} üzerinde kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, bölgeden bağımsız olarak Tespit olarak gösterilecektir.",
       "zoneObjectDetectionsTips": {
-        "text": "{{cameraName}} üzerindeki {{zone}} bölgesinde kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, Tespitler olarak gösterilecektir.",
-        "notSelectDetections": "{{cameraName}} üzerinde {{zone}} bölgesinde tespit edilen ve Uyarı olarak kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, hangi bölgede olurlarsa olsunlar Tespitler olarak gösterilecektir.",
-        "regardlessOfZoneObjectDetectionsTips": "{{cameraName}} üzerinde kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, bulundukları bölgeden bağımsız olarak Tespitler (Detections) olarak gösterilecektir."
+        "text": "{{cameraName}} üzerindeki {{zone}} bölgesinde kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, Tespit olarak gösterilecektir.",
+        "notSelectDetections": "{{cameraName}} üzerinde {{zone}} bölgesinde tespit edilen ve Uyarı olarak kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, bölgeden bağımsız olarak Tespitler olarak gösterilecektir.",
+        "regardlessOfZoneObjectDetectionsTips": "{{cameraName}} üzerinde kategorize edilmemiş tüm {{detectionsLabels}} nesneleri, bulundukları bölgeden bağımsız olarak Tespit olarak gösterilecektir."
       },
       "unsavedChanges": "{{camera}} için Kaydedilmemiş İnceleme Sınıflandırması ayarları",
       "selectAlertsZones": "Uyarılar için bölgeleri seçin",
@@ -1191,17 +1193,17 @@
       },
       "deleteRole": {
         "title": "Rolü Sil",
-        "desc": "Bu işlem geri alınamaz. Bu işlem, rolü kalıcı olarak silecek ve bu role sahip tüm kullanıcıları 'izleyici' rolüne atayacaktır. Bu rol, izleyiciye tüm kameralara erişim sağlayacaktır.",
+        "desc": "Bu işlem geri alınamaz. Bu işlem, rolü kalıcı olarak silecek ve bu role sahip tüm kullanıcıları varsayılan 'izleyici' rolüne atayarak kullanıcıların BÜTÜN kameralara erişim sağlamasına neden olacaktır.",
         "warn": "<strong>{{role}}</strong> rolünü silmek istediğinizden emin misiniz?",
         "deleting": "Siliniyor..."
       },
       "form": {
         "role": {
-          "title": "Rol Adı",
-          "placeholder": "Rol adını girin",
+          "title": "Rol İsmi",
+          "placeholder": "Rol ismini girin",
           "desc": "Sadece harf, rakam, nokta ve alt çizgi kullanılabilir.",
-          "roleIsRequired": "Rol adı gereklidir",
-          "roleOnlyInclude": "Rol adı yalnızca harf, sayı veya _ içerebilir",
+          "roleIsRequired": "Rol ismi gereklidir",
+          "roleOnlyInclude": "Rol ismi yalnızca harf, sayı veya alt çizgi (_) içerebilir",
           "roleExists": "Bu isimde bir rol zaten mevcut."
         },
         "cameras": {
