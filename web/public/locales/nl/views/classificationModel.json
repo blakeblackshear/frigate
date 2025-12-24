@@ -113,7 +113,8 @@
         "classesUnique": "Klassennamen moeten uniek zijn",
         "stateRequiresTwoClasses": "Statusmodellen vereisen minimaal 2 klassen",
         "objectLabelRequired": "Selecteer een objectlabel",
-        "objectTypeRequired": "Selecteer een classificatietype"
+        "objectTypeRequired": "Selecteer een classificatietype",
+        "noneNotAllowed": "De klasse 'none' is niet toegestaan"
       },
       "states": "Staten"
     },
@@ -167,7 +168,9 @@
     "states": "Staten"
   },
   "details": {
-    "scoreInfo": "Score geeft het gemiddelde classificatievertrouwen weer over alle detecties van dit object."
+    "scoreInfo": "Score geeft het gemiddelde classificatievertrouwen weer over alle detecties van dit object.",
+    "none": "Geen overeenkomst",
+    "unknown": "Onbekend"
   },
   "edit": {
     "title": "Classificatiemodel bewerken",
@@ -181,5 +184,5 @@
     "modelNotReady": "Model is niet klaar voor training",
     "noChanges": "Geen wijzigingen in de dataset sinds de laatste training."
   },
-  "none": "Geen herkenning"
+  "none": "Geen overeenkomst"
 }

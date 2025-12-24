@@ -105,13 +105,15 @@
           "regenerate": "Er is een nieuwe beschrijving aangevraagd bij {{provider}}. Afhankelijk van de snelheid van je provider kan het regenereren van de nieuwe beschrijving enige tijd duren.",
           "updatedSublabel": "Sublabel succesvol bijgewerkt.",
           "updatedLPR": "Kenteken succesvol bijgewerkt.",
-          "audioTranscription": "Audio-transcriptie succesvol aangevraagd. Afhankelijk van de snelheid van uw Frigate-server kan het even duren voordat de transcriptie voltooid is."
+          "audioTranscription": "Audio-transcriptie succesvol aangevraagd. Afhankelijk van de snelheid van uw Frigate-server kan het even duren voordat de transcriptie voltooid is.",
+          "updatedAttributes": "Attributen succesvol bijgewerkt."
         },
         "error": {
           "updatedSublabelFailed": "Het is niet gelukt om het sublabel bij te werken: {{errorMessage}}",
           "regenerate": "Het is niet gelukt om {{provider}} aan te roepen voor een nieuwe beschrijving: {{errorMessage}}",
           "updatedLPRFailed": "Kentekenplaat bijwerken mislukt: {{errorMessage}}",
-          "audioTranscription": "Audiotranscriptie aanvragen mislukt: {{errorMessage}}"
+          "audioTranscription": "Audiotranscriptie aanvragen mislukt: {{errorMessage}}",
+          "updatedAttributesFailed": "Attributen konden niet worden bijgewerkt: {{errorMessage}}"
         }
       }
     },
@@ -160,7 +162,12 @@
     },
     "score": {
       "label": "Score"
-    }
+    },
+    "editAttributes": {
+      "title": "Bewerk attributen",
+      "desc": "Selecteer classificatiekenmerken voor dit {{label}}"
+    },
+    "attributes": "Classificatie-kenmerken"
   },
   "itemMenu": {
     "downloadVideo": {

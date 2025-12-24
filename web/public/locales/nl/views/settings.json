@@ -495,7 +495,7 @@
       "title": "Gebruikersbeheer"
     },
     "addUser": "Gebruiker toevoegen",
-    "updatePassword": "Wachtwoord bijwerken",
+    "updatePassword": "Wachtwoord opnieuw instellen",
     "toast": {
       "success": {
         "createUser": "Gebruiker {{user}} succesvol aangemaakt",
@@ -515,7 +515,7 @@
       "role": "Rol",
       "noUsers": "Geen gebruikers gevonden.",
       "changeRole": "Gebruikersrol wijzigen",
-      "password": "Wachtwoord",
+      "password": "Wachtwoord opnieuw instellen",
       "deleteUser": "Verwijder gebruiker",
       "username": "Gebruikersnaam"
     },
@@ -599,7 +599,8 @@
         "currentPasswordRequired": "Huidig wachtwoord is vereist",
         "incorrectCurrentPassword": "Het huidige wachtwoord is onjuist",
         "passwordVerificationFailed": "Wachtwoord kan niet worden geverifieerd",
-        "multiDeviceWarning": "Op alle andere apparaten waarop u bent ingelogd, wordt u binnen {{refresh_time}} gevraagd opnieuw in te loggen. U kunt ook alle gebruikers direct opnieuw laten inloggen door uw JWT-secret te vernieuwen."
+        "multiDeviceWarning": "Op alle andere apparaten waarop u bent ingelogd, moet u binnen {{refresh_time}} opnieuw inloggen.",
+        "multiDeviceAdmin": "Je kunt ook alle gebruikers forceren zich onmiddellijk opnieuw te authenticeren door je JWT-geheim te roteren."
       }
     }
   },
@@ -1217,7 +1218,8 @@
         "audioCodecRequired": "Ter ondersteuning van audiodetectie is een audiostream vereist.",
         "restreamingWarning": "Als u het aantal verbindingen met de camera voor de opnamestream vermindert, kan het CPU-gebruik iets toenemen.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP wordt niet aanbevolen. Schakel HTTP in via de firmware-instellingen van de camera en start de wizard opnieuw."
+          "reolink-rtsp": "Reolink RTSP wordt niet aanbevolen. Schakel HTTP in via de firmware-instellingen van de camera en start de wizard opnieuw.",
+          "reolink-http": "Reolink HTTP-streams moeten FFmpeg gebruiken voor een betere compatibiliteit. Schakel ‘stream-compatibiliteitsmodus’ in voor deze stream."
         },
         "dahua": {
           "substreamWarning": "Substream 1 is beperkt tot een lage resolutie. Veel Dahua / Amcrest / EmpireTech camera’s ondersteunen extra substreams die in de instellingen van de camera ingeschakeld moeten worden. Het wordt aanbevolen deze streams te controleren en te gebruiken indien beschikbaar."

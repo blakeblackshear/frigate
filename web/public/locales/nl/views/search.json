@@ -26,7 +26,8 @@
       "search_type": "Zoektype",
       "zones": "Zones",
       "max_speed": "Max snelheid",
-      "after": "Na"
+      "after": "Na",
+      "attributes": "Kenmerken"
     },
     "toast": {
       "error": {
