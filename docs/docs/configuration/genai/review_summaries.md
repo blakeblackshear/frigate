@@ -16,12 +16,13 @@ Review summaries provide structured JSON responses that are saved for each revie
 ```
 - `title` (string): A concise, direct title that describes the purpose or overall action (e.g., "Person taking out trash", "Joe walking dog").
 - `scene` (string): A narrative description of what happens across the sequence from start to finish, including setting, detected objects, and their observable actions.
+- `shortSummary` (string): A brief 2-sentence summary of the scene, suitable for notifications. This is a condensed version of the scene description.
 - `confidence` (float): 0-1 confidence in the analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous.
 - `other_concerns` (list): List of user-defined concerns that may need additional investigation.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below.
 ```
 
-This will show in multiple places in the UI to give additional context about each activity, and allow viewing more details when extra attention is required. Frigate's built in notifications will also automatically show the title and description when the data is available.
+This will show in multiple places in the UI to give additional context about each activity, and allow viewing more details when extra attention is required. Frigate's built in notifications will automatically show the title and `shortSummary` when the data is available, while the full `scene` description is available in the UI for detailed review.
 
 ### Defining Typical Activity
 

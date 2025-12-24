@@ -388,7 +388,7 @@ class WebPushClient(Communicator):
             else:
                 title = base_title
 
-            message = payload["after"]["data"]["metadata"]["scene"]
+            message = payload["after"]["data"]["metadata"]["shortSummary"]
         else:
             zone_names = payload["after"]["data"]["zones"]
             formatted_zone_names = []

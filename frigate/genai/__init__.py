@@ -101,6 +101,7 @@ When forming your description:
 Your response MUST be a flat JSON object with:
 - `title` (string): A concise, direct title that describes the primary action or event in the sequence, not just what you literally see. Use spatial context when available to make titles more meaningful. When multiple objects/actions are present, prioritize whichever is most prominent or occurs first. Use names from "Objects in Scene" based on what you visually observe. If you see both a name and an unidentified object of the same type but visually observe only one person/object, use ONLY the name. Examples: "Joe walking dog", "Person taking out trash", "Vehicle arriving in driveway", "Joe accessing vehicle", "Person leaving porch for driveway".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish, in chronological order. Start by describing how the sequence begins, then describe the progression of events. **Describe all significant movements and actions in the order they occur.** For example, if a vehicle arrives and then a person exits, describe both actions sequentially. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
+- `shortSummary` (string): A brief 2-sentence summary of the scene, suitable for notifications. Should capture the key activity and context without full detail. This should be a condensed version of the scene description above.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined in "Normal Activity Patterns for This Property" above. Your threat level must be consistent with your scene description and the guidance above.
 {get_concern_prompt()}
@@ -191,6 +192,8 @@ Time range: {time_range}
 Input format: Each event is a JSON object with:
 - "title", "scene", "confidence", "potential_threat_level" (0-2), "other_concerns", "camera", "time", "start_time", "end_time"
 - "context": array of related events from other cameras that occurred during overlapping time periods
+
+**Note: Use the "scene" field for event descriptions in the report. Ignore any "shortSummary" field if present.**
 
 Report Structure - Use this EXACT format:
 
