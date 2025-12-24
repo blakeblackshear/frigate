@@ -26,6 +26,7 @@ from frigate.detectors.detector_config import (
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.process import FrigateProcess
+from frigate.debug_utils import save_debug_snapshot
 
 from .util import tensor_transform
 
@@ -169,6 +170,11 @@ class DetectorRunner(FrigateProcess):
             self.start_time.value = datetime.datetime.now().timestamp()
             detections = object_detector.detect_raw(input_frame)
             duration = datetime.datetime.now().timestamp() - self.start_time.value
+
+            # SAVE DEBUG SNAPSHOT
+            # TODO: make this configurable via env var
+            save_debug_snapshot(input_frame, detections, self.name, self.detector_config)
+            
             frame_manager.close(connection_id)
 
             if connection_id not in self.outputs:
