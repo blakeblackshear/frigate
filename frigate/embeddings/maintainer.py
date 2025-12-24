@@ -633,7 +633,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera, frame_name, _, _, motion_boxes, _ = data
 
-        if not camera or len(motion_boxes) == 0:
+        if not camera or len(motion_boxes) == 0 or camera not in self.config.cameras:
             return
 
         camera_config = self.config.cameras[camera]
