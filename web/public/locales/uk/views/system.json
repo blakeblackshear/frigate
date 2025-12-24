@@ -63,7 +63,10 @@
       "review_description_events_per_second": "Опис огляду",
       "object_description": "Опис об'єкта",
       "object_description_speed": "Опис об'єкта Швидкість",
-      "object_description_events_per_second": "Опис об'єкта"
+      "object_description_events_per_second": "Опис об'єкта",
+      "classification": "Класифікація {{name}}",
+      "classification_speed": "Швидкість класифікації {{name}}",
+      "classification_events_per_second": "{{name}} Подій класифікації за секунду"
     },
     "title": "Збагаченням",
     "infPerSecond": "Висновки за секунду",

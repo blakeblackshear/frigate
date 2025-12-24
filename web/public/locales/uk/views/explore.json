@@ -104,13 +104,15 @@
           "updatedLPR": "Номерний знак успішно оновлено.",
           "updatedSublabel": "Підмітку успішно оновлено.",
           "regenerate": "Новий опис було запрошено від {{provider}}. Залежно від швидкості вашого провайдера, його перегенерація може зайняти деякий час.",
-          "audioTranscription": "Запит на аудіотранскрипцію успішно надіслано. Залежно від швидкості вашого сервера Frigate, транскрипція може тривати деякий час."
+          "audioTranscription": "Запит на аудіотранскрипцію успішно надіслано. Залежно від швидкості вашого сервера Frigate, транскрипція може тривати деякий час.",
+          "updatedAttributes": "Атрибути успішно оновлено."
         },
         "error": {
           "regenerate": "Не вдалося звернутися до {{provider}} для отримання нового опису: {{errorMessage}}",
           "updatedSublabelFailed": "Не вдалося оновити підмітку: {{errorMessage}}",
           "updatedLPRFailed": "Не вдалося оновити номерний знак: {{errorMessage}}",
-          "audioTranscription": "Не вдалося надіслати запит на транскрипцію аудіо: {{errorMessage}}"
+          "audioTranscription": "Не вдалося надіслати запит на транскрипцію аудіо: {{errorMessage}}",
+          "updatedAttributesFailed": "Не вдалося оновити атрибути: {{errorMessage}}"
         }
       },
       "button": {
@@ -165,7 +167,12 @@
     "regenerateFromSnapshot": "Відновити зі знімка",
     "score": {
       "label": "Оцінка"
-    }
+    },
+    "editAttributes": {
+      "title": "Редагувати атрибути",
+      "desc": "Виберіть атрибути класифікації для цього {{label}}"
+    },
+    "attributes": "Атрибути класифікації"
   },
   "dialog": {
     "confirmDelete": {
