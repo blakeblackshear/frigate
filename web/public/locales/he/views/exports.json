@@ -13,5 +13,11 @@
     "title": "שנה שם ייצוא",
     "desc": "הכנס שם חדש עבור הייצוא הזה.",
     "saveExport": "שמירת ייצוא"
+  },
+  "tooltip": {
+    "shareExport": "שתף ייצוא",
+    "downloadVideo": "הורדת סרטון",
+    "editName": "עריכת שם",
+    "deleteExport": "מחיקת ייצוא"
   }
 }

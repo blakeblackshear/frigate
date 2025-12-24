@@ -78,7 +78,10 @@
       "12hour": "MMM d, yyyy"
     },
     "30minutes": "30 דקות",
-    "thisMonth": "החודש"
+    "thisMonth": "החודש",
+    "inProgress": "בתהליך",
+    "invalidStartTime": "זמן התחלה לא תקין",
+    "invalidEndTime": "זמן סיום לא תקין"
   },
   "unit": {
     "speed": {
@@ -88,10 +91,23 @@
     "length": {
       "feet": "רגל",
       "meters": "מטרים"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/hour",
+      "mbph": "MB/hour",
+      "gbph": "GB/hour"
     }
   },
   "label": {
-    "back": "אחורה"
+    "back": "אחורה",
+    "hide": "הסתר {{item}}",
+    "show": "הצג {{item}}",
+    "ID": "ID",
+    "none": "ללא",
+    "all": "הכל"
   },
   "button": {
     "apply": "החל",
@@ -128,7 +144,8 @@
     "on": "פעיל",
     "download": "הורדה",
     "info": "מידע",
-    "next": "הבא"
+    "next": "הבא",
+    "continue": "המשך"
   },
   "menu": {
     "system": "מערכת",
@@ -229,7 +246,8 @@
       "current": "משתמש מחובר: {{user}}",
       "setPassword": "קביעת סיסמה",
       "title": "משתמש"
-    }
+    },
+    "classification": "סיווג"
   },
   "toast": {
     "copyUrlToClipboard": "כתובת האתר המועתקת.",
@@ -270,5 +288,17 @@
     "desc": "דף לא נמצא"
   },
   "selectItem": "בחירה:{{item}}",
-  "readTheDocumentation": "קרא את התיעוד"
+  "readTheDocumentation": "קרא את התיעוד",
+  "list": {
+    "two": "{{0}} ו־{{1}}",
+    "many": "{{items}}, ו־{{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "אופציונלי",
+    "internalID": "המזהה הפנימי ש־Frigate משתמש בו בהגדרות ובמסד הנתונים"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

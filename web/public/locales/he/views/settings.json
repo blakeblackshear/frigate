@@ -46,7 +46,8 @@
           "mustBeAtLeastTwoCharacters": "שם האזור חייב להיות באורך של לפחות 2 תווים.",
           "mustNotBeSameWithCamera": "שם האזור לא חייב להיות זהה לשם המצלמה.",
           "mustNotContainPeriod": "שם האזור אינו יכול להכיל נקודות.",
-          "hasIllegalCharacter": "שם האזור מכיל תווים לא חוקיים."
+          "hasIllegalCharacter": "שם האזור מכיל תווים לא חוקיים.",
+          "mustHaveAtLeastOneLetter": "שם האזור חייב לכלול לפחות אות אחת."
         }
       },
       "distance": {
@@ -111,7 +112,7 @@
       "name": {
         "title": "שם",
         "inputPlaceHolder": "הזן שם…",
-        "tips": "השם חייב להיות באורך של לפחות 2 תווים ואינו יכול להיות שם של מצלמה או אזור אחר."
+        "tips": "השם חייב להכיל לפחות 2 תווים, לכלול לפחות אות אחת, ואסור שיהיה זהה לשם של מצלמה או של אזור אחר במצלמה זו."
       },
       "point_one": "נקודה {{count}}",
       "point_two": "נקודות {{count}}",
@@ -125,7 +126,7 @@
         "desc": "קובע את משך הזמן המינימלי בשניות שהאובייקט חייב להיות באזור כדי שיופעל. <em>ברירת מחדל: 0</em>"
       },
       "objects": {
-        "title": "אובייקט",
+        "title": "אובייקטים",
         "desc": "רשימת אובייקטים החלים על אזור זה."
       },
       "speedEstimation": {
@@ -148,7 +149,7 @@
         }
       },
       "toast": {
-        "success": "האזור ({{zoneName}}) נשמר. הפעל מחדש את Frigate כדי להחיל את השינויים."
+        "success": "האזור ({{zoneName}}) נשמר בהצלחה."
       },
       "allObjects": "כל האובייקטים"
     },
@@ -176,8 +177,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} נשמר. הפעל מחדש את Frigate כדי להחיל את השינויים.",
-          "noName": "מיסוך התנועה נשמר. הפעל מחדש את Frigate כדי להחיל את השינויים."
+          "title": "{{polygonName}} נשמר בהצלחה.",
+          "noName": "מסכת תנועה נשמרה בהצלחה."
         }
       }
     },
@@ -202,8 +203,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} נשמר. הפעל מחדש את Frigate כדי להחיל את השינויים.",
-          "noName": "מיסוך האובייקט נשמר. הפעל מחדש את Frigate כדי להחיל את השינויים."
+          "title": "{{polygonName}} נשמר בהצלחה.",
+          "noName": "מיסוך האובייקט נשמר."
         }
       }
     }
@@ -225,6 +226,14 @@
       "playAlertVideos": {
         "label": "ניגון סרטוני התראות",
         "desc": "כברירת מחדל, התראות אחרונות בדשבורד שידור חי מופעלות כסרטונים קצרים בלולאה. השבת אפשרות זו כדי להציג רק תמונה סטטית של התראות אחרונות במכשיר/דפדפן זה."
+      },
+      "displayCameraNames": {
+        "label": "תמיד להציג שם מצלמה",
+        "desc": "תמיד להציג את שמות המצלמות בצ’יפ בתצוגת הלייב מרובת המצלמות בדשבורד."
+      },
+      "liveFallbackTimeout": {
+        "label": "זמן המתנה למעבר לנגן חלופי בשידור חי",
+        "desc": "כאשר זרם השידור חי באיכות גבוהה של מצלמה אינו זמין, המערכת תעבור למצב רוחב־פס נמוך לאחר מספר השניות הזה. ברירת מחדל: 3."
       }
     },
     "cameraGroupStreaming": {
@@ -232,7 +241,7 @@
       "title": "הגדרות הזרמת קבוצת מצלמות",
       "clearAll": "נקה את כל הגדרות השידור"
     },
-    "title": "הגדרות כלליות",
+    "title": "הגדרות UI",
     "storedLayouts": {
       "title": "פריסות תצוגה שמורות",
       "desc": "ניתן לגרור/לשנות את גודל הפריסה של המצלמות בקבוצת מצלמות. המיקומים נשמרים באחסון המקומי של הדפדפן שלך.",
@@ -268,7 +277,7 @@
     "notifications": "הגדרת התראות - Frigate",
     "authentication": "הגדרות אימות - Frigate",
     "default": "הגדרות - Frigate",
-    "general": "הגדרות כלליות - Frigate",
+    "general": "הגדרות ממשק (UI) - Frigate",
     "cameraManagement": "ניהול מצלמות - Frigate",
     "cameraReview": "הגדרות סקירת מצלמה - Frigate"
   },
@@ -427,7 +436,20 @@
       "area": "אזור",
       "tips": "הפעל אפשרות זו כדי לצייר מלבן על תמונת המצלמה כדי להציג את השטח והיחס שלה. ניתן להשתמש בערכים אלה כדי להגדיר פרמטרים של מסנן צורת אובייקט בתצורה שלך."
     },
-    "desc": "תצוגת ניפוי שגיאות מציגה תצוגה בזמן אמת של אובייקטים במעקב והסטטיסטיקות שלהם. רשימת האובייקטים מציגה סיכום בהשהיית זמן של האובייקטים שזוהו."
+    "desc": "תצוגת ניפוי שגיאות מציגה תצוגה בזמן אמת של אובייקטים במעקב והסטטיסטיקות שלהם. רשימת האובייקטים מציגה סיכום בהשהיית זמן של האובייקטים שזוהו.",
+    "openCameraWebUI": "פתח את ממשק ה־Web של {{camera}}",
+    "audio": {
+      "title": "אודיו",
+      "noAudioDetections": "אין זיהויי אודיו",
+      "score": "ציון",
+      "currentRMS": "RMS נוכחי",
+      "currentdbFS": "dbFS נוכחי"
+    },
+    "paths": {
+      "title": "נתיבים",
+      "desc": "הצג נקודות משמעותיות במסלול התנועה של האובייקט במעקב",
+      "tips": "<p><strong>נתיבים</strong></p><br><p>קווים ועיגולים יציינו נקודות משמעותיות שבהן האובייקט במעקב נע במהלך מחזור חייו.</p>"
+    }
   },
   "users": {
     "title": "משתמשים",
@@ -436,7 +458,7 @@
       "desc": "נהל את חשבונות המשתמשים של מופע Frigate זה."
     },
     "addUser": "הוספת משתמש",
-    "updatePassword": "עדכון סיסמה",
+    "updatePassword": "איפוס סיסמה",
     "toast": {
       "success": {
         "createUser": "המשתמש {{user}} נוצר בהצלחה",
@@ -456,7 +478,7 @@
       "role": "הרשאות",
       "noUsers": "לא נמצאו משתמשים.",
       "changeRole": "שינוי הרשאות משתמש",
-      "password": "סיסמה",
+      "password": "איפוס סיסמה",
       "deleteUser": "מחיקת משתמש",
       "username": "שם משתמש"
     },
@@ -482,7 +504,16 @@
             "veryStrong": "מאוד חזק"
           },
           "match": "סיסמאות תואמות",
-          "notMatch": "הסיסמאות אינן תואמות."
+          "notMatch": "הסיסמאות אינן תואמות.",
+          "show": "הצג סיסמה",
+          "hide": "הסתר סיסמה",
+          "requirements": {
+            "title": "דרישות סיסמה:",
+            "length": "לפחות 8 תווים",
+            "uppercase": "לפחות אות גדולה אחת",
+            "digit": "לפחות ספרה אחת",
+            "special": "לפחות תו מיוחד אחד (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "סיסמה חדשה",
@@ -492,7 +523,11 @@
           }
         },
         "usernameIsRequired": "נדרש שם משתמש",
-        "passwordIsRequired": "נדרשת סיסמה"
+        "passwordIsRequired": "נדרשת סיסמה",
+        "currentPassword": {
+          "title": "סיסמה נוכחית",
+          "placeholder": "הזן את הסיסמה הנוכחית שלך"
+        }
       },
       "createUser": {
         "title": "יצירת משתמש חדש",
@@ -510,7 +545,12 @@
         "doNotMatch": "הסיסמאות אינן תואמות",
         "updatePassword": "עדכון סיסמה עבור {{username}}",
         "setPassword": "קבע סיסמה",
-        "desc": "צור סיסמה חזקה כדי לאבטח חשבון זה."
+        "desc": "צור סיסמה חזקה כדי לאבטח חשבון זה.",
+        "currentPasswordRequired": "נדרשת הסיסמה הנוכחית",
+        "incorrectCurrentPassword": "הסיסמה הנוכחית שגויה",
+        "passwordVerificationFailed": "נכשל באימות הסיסמה",
+        "multiDeviceWarning": "כל מכשיר אחר שבו אתה מחובר יידרש להתחבר מחדש בתוך {{refresh_time}}.",
+        "multiDeviceAdmin": "ניתן גם לאלץ את כל המשתמשים להתחבר מחדש באופן מיידי על־ידי החלפת מפתח ה־JWT שלך."
       },
       "changeRole": {
         "title": "שינוי הרשאות משתמש",
@@ -521,7 +561,8 @@
           "admin": "מנהל",
           "adminDesc": "גישה מלאה לכל התכונות.",
           "viewer": "צופה",
-          "viewerDesc": "מוגבל לדשבורד שידור חי, סקירה, גילוי וייצוא בלבד."
+          "viewerDesc": "מוגבל לדשבורד שידור חי, סקירה, גילוי וייצוא בלבד.",
+          "customDesc": "תפקיד מותאם אישית עם גישה למצלמות מסוימות."
         }
       }
     }
@@ -623,6 +664,455 @@
     "toast": {
       "success": "הגדרות Frigate+ נשמרו. הפעל מחדש את Frigate כדי להחיל את השינויים.",
       "error": "שמירת שינויי התצורה נכשלה: {{errorMessage}}"
+    }
+  },
+  "cameraWizard": {
+    "step1": {
+      "brandInformation": "פרטי יצרן",
+      "brandUrlFormat": "למצלמות עם פורמט כתובת RTSP כמו: {{exampleUrl}}",
+      "connectionSettings": "הגדרות חיבור",
+      "detectionMethod": "שיטת זיהוי זרם",
+      "onvifPort": "פורט ONVIF",
+      "probeMode": "בדיקת מצלמה",
+      "manualMode": "בחירה ידנית",
+      "detectionMethodDescription": "בדוק את המצלמה באמצעות ONVIF (אם נתמך) כדי למצוא את כתובות הזרמים שלה, או בחר ידנית את יצרן המצלמה כדי להשתמש בכתובות מוגדרות מראש.\nכדי להזין כתובת RTSP מותאמת אישית, בחר בשיטה ידנית ואז בחר \"אחר\".",
+      "onvifPortDescription": "במצלמות שתומכות ב-ONVIF, זה בדרך כלל 80 או 8080.",
+      "useDigestAuth": "שימוש באימות Digest",
+      "useDigestAuthDescription": "השתמש באימות HTTP Digest עבור ONVIF. בחלק מהמצלמות נדרש שם משתמש/סיסמה ייעודיים ל-ONVIF, ולא משתמש ה-Admin הרגיל.",
+      "errors": {
+        "brandOrCustomUrlRequired": "בחר יצרן מצלמה והזן Host/IP, או בחר “אחר” והזן כתובת מותאמת אישית",
+        "nameRequired": "שם המצלמה הוא שדה חובה",
+        "nameLength": "שם המצלמה חייב להיות באורך של עד 64 תווים",
+        "invalidCharacters": "שם המצלמה מכיל תווים לא חוקיים",
+        "nameExists": "שם המצלמה כבר קיים",
+        "customUrlRtspRequired": "כתובות מותאמות אישית חייבות להתחיל ב־\"rtsp://\". עבור זרמי מצלמה שאינם RTSP נדרשת הגדרה ידנית."
+      },
+      "description": "הזן את פרטי המצלמה ובחר אם לבצע בדיקה למצלמה או לבחור ידנית את היצרן.",
+      "cameraName": "שם מצלמה",
+      "cameraNamePlaceholder": "לדוגמה: front_door או סקירת החצר האחורית",
+      "host": "HOST / כתובת IP",
+      "port": "פורט",
+      "username": "שם משתמש",
+      "usernamePlaceholder": "אופציונלי",
+      "password": "סיסמה",
+      "passwordPlaceholder": "אופציונלי",
+      "selectTransport": "בחר פרוטוקול תעבורה",
+      "cameraBrand": "יצרן מצלמה",
+      "selectBrand": "בחר יצרן מצלמה עבור תבנית כתובת ה-URL",
+      "customUrl": "כתובת (URL) זרם מותאמת אישית",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path"
+    },
+    "step2": {
+      "description": "בדוק את המצלמה כדי לאתר זרמים זמינים, או הגדר ידנית את ההגדרות לפי שיטת הזיהוי שבחרת.",
+      "testSuccess": "בדיקת החיבור הצליחה!",
+      "testFailed": "בדיקת החיבור נכשלה. בדוק את הנתונים שהזנת ונסה שוב.",
+      "testFailedTitle": "הבדיקה נכשלה",
+      "streamDetails": "פרטי זרם",
+      "probing": "בודק מצלמה...",
+      "retry": "נסה שוב",
+      "testing": {
+        "probingMetadata": "בודק את נתוני המטא של המצלמה…",
+        "fetchingSnapshot": "שולף תמונת מצב מהמצלמה…"
+      },
+      "probeFailed": "בדיקת המצלמה נכשלה: {{error}}",
+      "probingDevice": "בודק את ההתקן…",
+      "probeSuccessful": "הבדיקה הצליחה",
+      "probeError": "בדיקה נכשלה",
+      "probeNoSuccess": "הבדיקה לא הצליחה",
+      "deviceInfo": "מידע על ההתקן",
+      "manufacturer": "יצרן",
+      "model": "דגם",
+      "firmware": "קושחה",
+      "profiles": "פרופילים",
+      "ptzSupport": "תמיכה ב-PTZ",
+      "autotrackingSupport": "תמיכה ב-Autotracking",
+      "presets": "פריסטים",
+      "rtspCandidates": "כתובות RTSP מוצעות",
+      "rtspCandidatesDescription": "כתובות ה־RTSP הבאות נמצאו בבדיקת המצלמה. בצע בדיקת חיבור כדי לצפות בנתוני הזרם (Metadata).",
+      "noRtspCandidates": "לא נמצאו כתובות RTSP מהמצלמה. ייתכן שפרטי ההתחברות שגויים, או שהמצלמה לא תומכת ב-ONVIF, או שהשיטה שבה השתמשנו לשליפת כתובות RTSP אינה נתמכת. חזור אחורה והזן את כתובת ה-RTSP ידנית.",
+      "candidateStreamTitle": "אפשרות {{number}}",
+      "useCandidate": "השתמש",
+      "uriCopy": "העתק",
+      "uriCopied": "הכתובת (URI) הועתקה ללוח",
+      "testConnection": "בדיקת חיבור",
+      "toggleUriView": "לחץ כדי להציג/להסתיר את הכתובת המלאה",
+      "connected": "מחובר",
+      "notConnected": "לא מחובר",
+      "errors": {
+        "hostRequired": "כתובת Host/IP היא שדה חובה"
+      }
+    },
+    "step3": {
+      "description": "הגדר תפקידי זרם (Roles) והוסף זרמים נוספים למצלמה שלך.",
+      "streamsTitle": "זרמי מצלמה",
+      "addStream": "הוסף זרם",
+      "addAnotherStream": "הוסף זרם נוסף",
+      "streamTitle": "זרם {{number}}",
+      "streamUrl": "כתובת הזרם (URL)",
+      "selectStream": "בחר זרם",
+      "searchCandidates": "חיפוש אפשרויות…",
+      "noStreamFound": "לא נמצא זרם",
+      "url": "URL",
+      "resolution": "רזולוציה",
+      "selectResolution": "בחר רזולוציה",
+      "quality": "איכות",
+      "selectQuality": "בחר איכות",
+      "roles": "תפקידים",
+      "roleLabels": {
+        "detect": "זיהוי אובייקטים",
+        "record": "הקלטה",
+        "audio": "קול (Audio)"
+      },
+      "testStream": "בדיקת חיבור",
+      "testSuccess": "בדיקת הזרם הצליחה!",
+      "testFailed": "בדיקת הזרם נכשלה",
+      "testFailedTitle": "הבדיקה נכשלה",
+      "connected": "מחובר",
+      "notConnected": "לא מחובר",
+      "featuresTitle": "תכונות",
+      "go2rtc": "הפחתת חיבורים למצלמה",
+      "detectRoleWarning": "כדי להמשיך, לפחות זרם אחד חייב להיות עם ייעוד \"detect\".",
+      "rolesPopover": {
+        "title": "ייעודי הזרם",
+        "detect": "הזרם הראשי לזיהוי אובייקטים.",
+        "record": "שומר קטעים מזרם הווידאו לפי הגדרות התצורה.",
+        "audio": "זרם לזיהוי מבוסס אודיו."
+      },
+      "featuresPopover": {
+        "title": "תכונות הזרם",
+        "description": "השתמש ב־go2rtc לריסטרים (Restream) כדי להפחית את מספר החיבורים למצלמה שלך."
+      },
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path"
+    },
+    "step4": {
+      "description": "אימות וניתוח סופיים לפני שמירת המצלמה החדשה. התחבר לכל זרם לפני השמירה.",
+      "validationTitle": "אימות הזרם",
+      "connectAllStreams": "התחברות לכל הזרמים",
+      "reconnectionSuccess": "חיבור מחדש הצליח.",
+      "reconnectionPartial": "חלק מהזרמים לא הצליחו להתחבר מחדש.",
+      "streamUnavailable": "תצוגה מקדימה של הזרם אינה זמינה",
+      "reload": "טעינה מחדש",
+      "connecting": "מתחבר...",
+      "streamTitle": "זרם {{number}}",
+      "valid": "תקין",
+      "failed": "נכשל",
+      "notTested": "לא נבדק",
+      "connectStream": "התחבר",
+      "connectingStream": "מתחבר",
+      "disconnectStream": "נתק",
+      "estimatedBandwidth": "רוחב־פס משוער",
+      "roles": "ייעודים",
+      "ffmpegModule": "שימוש במצב תאימות לזרם",
+      "ffmpegModuleDescription": "אם הזרם לא נטען אחרי כמה ניסיונות, נסה להפעיל את זה. כשהאפשרות פעילה, Frigate ישתמש במודול ffmpeg יחד עם go2rtc. זה עשוי לשפר תאימות עם זרמים של חלק מהמצלמות.",
+      "none": "ללא",
+      "error": "שגיאה",
+      "streamValidated": "הזרם {{number}} אומת בהצלחה",
+      "streamValidationFailed": "אימות הזרם {{number}} נכשל",
+      "saveAndApply": "שמירת מצלמה חדשה",
+      "saveError": "תצורה לא תקינה. בדוק את ההגדרות שלך.",
+      "issues": {
+        "title": "אימות הזרם",
+        "videoCodecGood": "קידוד הווידאו הוא {{codec}}.",
+        "audioCodecGood": "קידוד האודיו הוא {{codec}}.",
+        "resolutionHigh": "רזולוציה של {{resolution}} עשויה לגרום לשימוש מוגבר במשאבים.",
+        "resolutionLow": "רזולוציה של {{resolution}} עשויה להיות נמוכה מדי לזיהוי אמין של אובייקטים קטנים.",
+        "noAudioWarning": "לא זוהה אודיו בזרם הזה, ולכן ההקלטות יהיו ללא שמע.",
+        "audioCodecRecordError": "כדי לכלול אודיו בהקלטות נדרש קידוד שמע AAC.",
+        "audioCodecRequired": "כדי לאפשר זיהוי אודיו נדרש זרם שמע.",
+        "restreamingWarning": "הפחתת מספר החיבורים למצלמה עבור זרם ההקלטה (record) עשויה להעלות מעט את השימוש ב־CPU.",
+        "brands": {
+          "reolink-rtsp": "RTSP של Reolink לא מומלץ. הפעל HTTP בהגדרות הקושחה של המצלמה, ואז הפעל מחדש את אשף ההגדרה.",
+          "reolink-http": "בזרמי HTTP של Reolink מומלץ להשתמש ב־FFmpeg לתאימות טובה יותר. הפעל עבור הזרם הזה את האפשרות “שימוש במצב תאימות לזרם”."
+        },
+        "dahua": {
+          "substreamWarning": "זרם משנה 1 נעול לרזולוציה נמוכה. מצלמות רבות של Dahua / Amcrest / EmpireTech תומכות בזרמי משנה נוספים שצריך להפעיל בהגדרות המצלמה מומלץ לבדוק אם קיימים זרמי משנה כאלה ולהשתמש בהם במידה וזמינים."
+        },
+        "hikvision": {
+          "substreamWarning": "זרם משנה 1 נעול לרזולוציה נמוכה. מצלמות רבות של Hikvision תומכות בזרמי משנה נוספים שצריך להפעיל בהגדרות המצלמה. מומלץ לבדוק אם קיימים זרמי משנה כאלה ולהשתמש בהם, אם הם זמינים."
+        }
+      }
+    },
+    "title": "הוסף מצלמה",
+    "description": "בצע את השלבים הבאים כדי להוסיף מצלמה חדשה להתקנת ה־Frigate שלך.",
+    "steps": {
+      "nameAndConnection": "שם וחיבור",
+      "probeOrSnapshot": "בדיקה (Probe) או צילום תמונה (Snapshot)",
+      "streamConfiguration": "הגדרות זרם",
+      "validationAndTesting": "אימות ובדיקה"
+    },
+    "save": {
+      "success": "המצלמה החדשה {{cameraName}} נשמרה בהצלחה.",
+      "failure": "שגיאה בשמירת {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "רזולוציה",
+      "video": "וידיאו",
+      "audio": "אודיו",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "אנא ספק כתובת URL תקינה לזרם",
+      "testFailed": "בדיקת הזרם נכשלה: {{error}}"
+    }
+  },
+  "cameraManagement": {
+    "title": "ניהול מצלמות",
+    "addCamera": "הוספת מצלמה חדשה",
+    "editCamera": "עריכת מצלמה:",
+    "selectCamera": "בחירת מצלמה",
+    "backToSettings": "חזרה להגדרות מצלמה",
+    "streams": {
+      "title": "הפעלה / השבתה של מצלמות",
+      "desc": "השבת מצלמה זמנית עד ש־Frigate יופעל מחדש. השבתת מצלמה עוצרת לחלוטין את העיבוד של Frigate עבור זרמי המצלמה הזו. זיהוי, הקלטה וניפוי שגיאות לא יהיו זמינים.<br />\n<em>הערה: פעולה זו לא משביתה את ה־restreams של go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "הוספת מצלמה",
+      "edit": "עריכת מצלמה",
+      "description": "נהל את הגדרות המצלמה, כולל קלטי הזרמים והייעודים שלהם.",
+      "name": "שם מצלמה",
+      "nameRequired": "שם המצלמה הוא שדה חובה",
+      "nameLength": "שם המצלמה חייב להיות קצר מ־64 תווים.",
+      "namePlaceholder": "לדוגמה: front_door או תצוגת סקירה של החצר האחורית",
+      "enabled": "מופעל",
+      "ffmpeg": {
+        "inputs": "זרמי קלט",
+        "path": "נתיב זרם",
+        "pathRequired": "נתיב זרם הוא שדה חובה",
+        "roles": "ייעודים",
+        "rolesRequired": "נדרש לפחות ייעוד אחד",
+        "rolesUnique": "כל ייעוד (audio, detect, record) ניתן להקצות לזרם אחד בלבד",
+        "addInput": "הוסף זרם קלט",
+        "removeInput": "הסר זרם קלט",
+        "inputsRequired": "נדרש לפחות זרם קלט אחד",
+        "pathPlaceholder": "rtsp://..."
+      },
+      "go2rtcStreams": "זרמי go2rtc",
+      "streamUrls": "כתובות URL של הזרמים",
+      "addUrl": "הוסף URL",
+      "addGo2rtcStream": "הוסף זרם go2rtc",
+      "toast": {
+        "success": "המצלמה {{cameraName}} נשמרה בהצלחה"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "הגדרות סקירת מצלמה",
+    "object_descriptions": {
+      "title": "Generative AI תיאורי אובייקטים",
+      "desc": "הפעל/השבת זמנית תיאורי אובייקטים של Generative AI עבור מצלמה זו. כאשר האפשרות מושבתת, לא יתבקשו תיאורים שנוצרו ע״י AI עבור אובייקטים במעקב במצלמה זו."
+    },
+    "review_descriptions": {
+      "title": "תיאורי סקירה של Generative AI",
+      "desc": "הפעל/השבת זמנית תיאורי סקירה של Generative AI עבור מצלמה זו. כאשר האפשרות מושבתת, לא יתבקשו תיאורים שנוצרו ע״י AI עבור פריטי סקירה במצלמה זו."
+    },
+    "review": {
+      "title": "סקירה",
+      "desc": "הפעל/השבת זמנית התראות וזיהויים עבור מצלמה זו עד ש-Frigate יופעל מחדש. כאשר האפשרות מושבתת, לא ייווצרו פריטי סקירה חדשים. ",
+      "alerts": "התראות. ",
+      "detections": "זיהויים. "
+    },
+    "reviewClassification": {
+      "title": "סיווג סקירה",
+      "desc": "Frigate מסווג פריטי סקירה ל־התראות ול־זיהויים. כברירת מחדל, כל אובייקט מסוג <em>person</em> ו־<em>car</em> נחשב ל־התראה. ניתן לדייק את הסיווג של פריטי הסקירה שלך באמצעות הגדרת אזורים נדרשים עבורם.",
+      "noDefinedZones": "לא הוגדרו אזורים למצלמה זו.",
+      "objectAlertsTips": "כל האובייקטים מסוג {{alertsLabels}} ב־{{cameraName}} יוצגו כהתראות.",
+      "zoneObjectAlertsTips": "כל האובייקטים מסוג {{alertsLabels}} שזוהו בתוך {{zone}} ב־{{cameraName}} יוצגו כהתראות.",
+      "objectDetectionsTips": "כל האובייקטים מסוג {{detectionsLabels}} שלא סווגו ב־{{cameraName}} יוצגו כזיהויים, ללא קשר לאיזה אזור הם נמצאים בו.",
+      "zoneObjectDetectionsTips": {
+        "text": "כל האובייקטים מסוג {{detectionsLabels}} שלא סווגו בתוך {{zone}} ב־{{cameraName}} יוצגו כזיהויים.",
+        "notSelectDetections": "כל האובייקטים מסוג {{detectionsLabels}} שזוהו בתוך {{zone}} ב־{{cameraName}} ושאינם מסווגים כהתראות יוצגו כזיהויים, ללא קשר לאיזה אזור הם נמצאים בו.",
+        "regardlessOfZoneObjectDetectionsTips": "כל האובייקטים מסוג {{detectionsLabels}} שלא סווגו ב־{{cameraName}} יוצגו כזיהויים, ללא קשר לאיזה אזור הם נמצאים בו."
+      },
+      "unsavedChanges": "הגדרות סיווג סקירה שלא נשמרו עבור {{camera}}",
+      "selectAlertsZones": "בחר אזורים עבור התראות",
+      "selectDetectionsZones": "בחר אזורים עבור זיהויים",
+      "limitDetections": "הגבל זיהויים לאזורים מסוימים",
+      "toast": {
+        "success": "הגדרות סיווג הסקירה נשמרו. הפעל מחדש את Frigate כדי להחיל את השינויים."
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "ניהול תפקיד צופה",
+      "desc": "נהל תפקידי צופה מותאמים אישית ואת הרשאות הגישה שלהם למצלמות עבור מופע Frigate זה."
+    },
+    "addRole": "הוסף תפקיד",
+    "table": {
+      "role": "תפקיד",
+      "cameras": "מצלמות",
+      "actions": "פעולות",
+      "noRoles": "לא נמצאו תפקידים מותאמים אישית.",
+      "editCameras": "ערוך מצלמות",
+      "deleteRole": "מחק תפקיד"
+    },
+    "toast": {
+      "success": {
+        "createRole": "התפקיד {{role}} נוצר בהצלחה",
+        "updateCameras": "המצלמות עודכנו עבור התפקיד {{role}}",
+        "deleteRole": "התפקיד {{role}} נמחק בהצלחה",
+        "userRolesUpdated_one": "המשתמש {{count}} שהוקצה לתפקיד זה עודכן ל־צופה (viewer), שלו יש גישה לכל המצלמות.",
+        "userRolesUpdated_two": "{{count}} משתמשים שהוקצו לתפקיד זה עודכנו ל־צופה (viewer), שלו יש גישה לכל המצלמות.",
+        "userRolesUpdated_other": ""
+      },
+      "error": {
+        "createRoleFailed": "נכשל ביצירת התפקיד: {{errorMessage}}",
+        "updateCamerasFailed": "נכשל בעדכון המצלמות: {{errorMessage}}",
+        "deleteRoleFailed": "נכשל במחיקת התפקיד: {{errorMessage}}",
+        "userUpdateFailed": "נכשל בעדכון תפקידי המשתמשים: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "צור תפקיד חדש",
+        "desc": "הוסף תפקיד חדש והגדר הרשאות גישה למצלמות."
+      },
+      "editCameras": {
+        "title": "ערוך מצלמות לתפקיד",
+        "desc": "עדכן את גישת המצלמות עבור התפקיד <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "מחק תפקיד",
+        "desc": "לא ניתן לבטל פעולה זו. הפעולה תמחק לצמיתות את התפקיד ותעביר כל משתמש שהוקצה לתפקיד זה לתפקיד צופה (viewer), המעניק גישה לכל המצלמות.",
+        "warn": "האם אתה בטוח שברצונך למחוק את <strong>{{role}}</strong>?",
+        "deleting": "מוחק..."
+      },
+      "form": {
+        "role": {
+          "title": "שם תפקיד",
+          "placeholder": "הזן שם תפקיד",
+          "desc": "מותר להשתמש רק באותיות, מספרים, נקודות וקווים תחתונים.",
+          "roleIsRequired": "שם תפקיד הוא שדה חובה",
+          "roleOnlyInclude": "שם התפקיד יכול לכלול רק אותיות, מספרים, נקודות או קווים תחתונים",
+          "roleExists": "כבר קיים תפקיד בשם זה."
+        },
+        "cameras": {
+          "title": "מצלמות",
+          "desc": "בחר את המצלמות שלתפקיד זה יש גישה אליהן. נדרשת לפחות מצלמה אחת.",
+          "required": "חובה לבחור לפחות מצלמה אחת."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "documentTitle": "טריגרים",
+    "semanticSearch": {
+      "title": "חיפוש סמנטי מושבת",
+      "desc": "כדי להשתמש בטריגרים, יש להפעיל חיפוש סמנטי."
+    },
+    "management": {
+      "title": "טריגרים",
+      "desc": "נהל טריגרים עבור {{camera}}. השתמש בסוג תמונה ממוזערת (Thumbnail) כדי להפעיל טריגרים על תמונות ממוזערות דומות לאובייקט שבחרת למעקב, ובסוג תיאור (Description) כדי להפעיל טריגרים על תיאורים דומים לטקסט שתגדיר."
+    },
+    "addTrigger": "הוסף טריגר",
+    "table": {
+      "name": "שם",
+      "type": "סוג",
+      "content": "תוכן",
+      "threshold": "סף",
+      "actions": "פעולות",
+      "noTriggers": "לא הוגדרו טריגרים למצלמה זו.",
+      "edit": "עריכה",
+      "deleteTrigger": "מחק טריגר",
+      "lastTriggered": "הפעלה אחרונה"
+    },
+    "type": {
+      "thumbnail": "תמונה ממוזערת",
+      "description": "תיאור"
+    },
+    "actions": {
+      "notification": "שלח התראה",
+      "sub_label": "הוסף תווית משנה",
+      "attribute": "הוסף מאפיינים"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "צור טריגר",
+        "desc": "צור טריגר עבור המצלמה {{camera}}"
+      },
+      "editTrigger": {
+        "title": "ערוך טריגר",
+        "desc": "ערוך את ההגדרות עבור הטריגר במצלמה {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "מחק טריגר",
+        "desc": "האם אתה בטוח שברצונך למחוק את הטריגר <strong>{{triggerName}}</strong>? פעולה זו אינה ניתנת לביטול."
+      },
+      "form": {
+        "name": {
+          "title": "שם",
+          "placeholder": "תן שם לטריגר",
+          "description": "הזן שם או תיאור ייחודיים לזיהוי הטריגר הזה",
+          "error": {
+            "minLength": "השדה חייב להכיל לפחות 2 תווים.",
+            "invalidCharacters": "השדה יכול להכיל רק אותיות, מספרים, קווים תחתונים (_) ומקפים (-).",
+            "alreadyExists": "כבר קיים טריגר בשם זה עבור מצלמה זו."
+          }
+        },
+        "enabled": {
+          "description": "הפעל או השבת טריגר זה"
+        },
+        "type": {
+          "title": "סוג",
+          "placeholder": "בחר סוג טריגר",
+          "description": "הפעל טריגר כאשר מזוהה תיאור דומה של אובייקט במעקב",
+          "thumbnail": "הפעל טריגר כאשר מזוהה תמונה ממוזערת דומה של אובייקט במעקב"
+        },
+        "content": {
+          "title": "תוכן",
+          "imagePlaceholder": "בחר תמונה ממוזערת",
+          "textPlaceholder": "הזן תוכן טקסט",
+          "imageDesc": "מוצגות רק 100 התמונות הממוזערות האחרונות. אם אינך מוצא את התמונה הממוזערת הרצויה, אנא סקור אובייקטים מוקדמים יותר ב־Explore והגדר משם טריגר דרך התפריט.",
+          "textDesc": "הזן טקסט להפעלת פעולה זו כאשר מזוהה תיאור דומה של אובייקט במעקב.",
+          "error": {
+            "required": "נדרש תוכן."
+          }
+        },
+        "threshold": {
+          "title": "סף",
+          "desc": "הגדר את סף הדמיון עבור טריגר זה. סף גבוה יותר מחייב התאמה קרובה יותר כדי להפעיל את הטריגר.",
+          "error": {
+            "min": "הסף חייב להיות לפחות 0",
+            "max": "הסף חייב להיות לכל היותר 1"
+          }
+        },
+        "actions": {
+          "title": "פעולות",
+          "desc": "כברירת מחדל, Frigate שולח הודעת MQTT עבור כל הטריגרים. תוויות משנה (Sub Labels) מוסיפות את שם הטריגר לתווית האובייקט. מאפיינים (Attributes) הם מטא־נתונים הניתנים לחיפוש, הנשמרים בנפרד במטא־הנתונים של האובייקט במעקב.",
+          "error": {
+            "min": "חובה לבחור לפחות פעולה אחת."
+          }
+        }
+      }
+    },
+    "wizard": {
+      "title": "צור טריגר",
+      "step1": {
+        "description": "הגדר את ההגדרות הבסיסיות של הטריגר שלך."
+      },
+      "step2": {
+        "description": "הגדר את התוכן שיפעיל פעולה זו."
+      },
+      "step3": {
+        "description": "הגדר את הסף והפעולות עבור טריגר זה."
+      },
+      "steps": {
+        "nameAndType": "שם וסוג",
+        "configureData": "הגדר נתונים",
+        "thresholdAndActions": "סף ופעולות"
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "הטריגר {{name}} נוצר בהצלחה.",
+        "updateTrigger": "הטריגר {{name}} עודכן בהצלחה.",
+        "deleteTrigger": "הטריגר {{name}} נמחק בהצלחה."
+      },
+      "error": {
+        "createTriggerFailed": "נכשל ביצירת הטריגר: {{errorMessage}}",
+        "updateTriggerFailed": "נכשל בעדכון הטריגר: {{errorMessage}}",
+        "deleteTriggerFailed": "נכשל במחיקת הטריגר: {{errorMessage}}"
+      }
     }
   }
 }

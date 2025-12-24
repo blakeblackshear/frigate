@@ -4,7 +4,7 @@
   "searchFor": "חפש את{{inputValue}}",
   "button": {
     "clear": "ניקוי חיפוש",
-    "save": "שמירת החיפוש",
+    "save": "שמור חיפוש",
     "delete": "מחיקת חיפוש שמור",
     "filterInformation": "סינון מידע",
     "filterActive": "מסננים פעילים"
@@ -26,7 +26,8 @@
       "min_speed": "מהירות מינמאלית",
       "recognized_license_plate": "לוחית רישוי מוכרת",
       "has_clip": "קיים סרטון קליפ",
-      "has_snapshot": "לכידת תמונה קיימת"
+      "has_snapshot": "לכידת תמונה קיימת",
+      "attributes": "מאפיינים"
     },
     "searchType": {
       "thumbnail": "תמונה ממוזערת",

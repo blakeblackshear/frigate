@@ -38,12 +38,24 @@
   "detail": {
     "noDataFound": "אין נתונים מפורטים לבדיקה",
     "aria": "הפעלה/כיבוי תצוגת פרטים",
-    "trackedObject_one": "אובייקט במעקב",
-    "trackedObject_other": "אובייקטים במעקב",
-    "noObjectDetailData": "אין נתוני אובייקט זמינים."
+    "trackedObject_one": "אובייקט {{count}}",
+    "trackedObject_other": "{{count}} אובייקטים",
+    "noObjectDetailData": "אין נתוני אובייקט זמינים.",
+    "label": "פרטים",
+    "settings": "הגדרות תצוגת פרטים",
+    "alwaysExpandActive": {
+      "title": "תמיד להרחיב את הפעיל",
+      "desc": "כאשר אפשר, תמיד להציג בהרחבה את פרטי האובייקט של פריט הבדיקה הפעיל."
+    }
   },
   "objectTrack": {
     "trackedPoint": "נקודה במעקב",
     "clickToSeek": "לחץ כדי לחפש את הזמן הזה"
-  }
+  },
+  "zoomIn": "הגדל (זום פנימה)",
+  "zoomOut": "הקטן (זום החוצה)",
+  "select_all": "הכל",
+  "normalActivity": "רגיל",
+  "needsReview": "טעון בדיקה",
+  "securityConcern": "חשש אבטחה"
 }
