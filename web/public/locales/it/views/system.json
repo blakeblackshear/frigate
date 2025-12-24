@@ -105,7 +105,10 @@
       "review_description_events_per_second": "Descrizione della revisione",
       "object_description": "Descrizione dell'oggetto",
       "object_description_speed": "Velocità della descrizione dell'oggetto",
-      "object_description_events_per_second": "Descrizione dell'oggetto"
+      "object_description_events_per_second": "Descrizione dell'oggetto",
+      "classification": "Classificazione {{name}}",
+      "classification_speed": "Velocità di classificazione {{name}}",
+      "classification_events_per_second": "Eventi di classificazione {{name}} al secondo"
     },
     "title": "Miglioramenti",
     "infPerSecond": "Inferenze al secondo",

@@ -116,7 +116,8 @@
         "classesUnique": "I nomi delle classi devono essere univoci",
         "stateRequiresTwoClasses": "I modelli di stato richiedono almeno 2 classi",
         "objectLabelRequired": "Seleziona un'etichetta per l'oggetto",
-        "objectTypeRequired": "Seleziona un tipo di classificazione"
+        "objectTypeRequired": "Seleziona un tipo di classificazione",
+        "noneNotAllowed": "La classe 'nessuno' non è consentita"
       },
       "states": "Stati"
     },
@@ -156,7 +157,7 @@
       "modelCreated": "Modello creato correttamente. Utilizza la vista Classificazioni recenti per aggiungere immagini per gli stati mancanti, quindi addestrare il modello.",
       "missingStatesWarning": {
         "title": "Esempi di stati mancanti",
-        "description": "Non hai selezionato esempi per tutti gli stati. Il modello non verrà addestrato finché tutti gli stati non avranno immagini. Dopo aver continuato, utilizza la vista Classificazioni recenti per classificare le immagini per gli stati mancanti, quindi addestra il modello."
+        "description": "Per ottenere risultati ottimali, si consiglia di selezionare esempi per tutti gli stati. È possibile continuare senza selezionare tutti gli stati, ma il modello non verrà addestrato finché tutti gli stati non avranno immagini. Dopo aver continuato, utilizza la vista Classificazioni recenti per classificare le immagini per gli stati mancanti, quindi addestra il modello."
       }
     }
   },
@@ -172,7 +173,9 @@
     "states": "Stati"
   },
   "details": {
-    "scoreInfo": "Il punteggio rappresenta la confidenza media della classificazione in tutti i rilevamenti di questo oggetto."
+    "scoreInfo": "Il punteggio rappresenta la confidenza media della classificazione in tutti i rilevamenti di questo oggetto.",
+    "none": "Nessuno",
+    "unknown": "Sconosciuto"
   },
   "edit": {
     "title": "Modifica modello di classificazione",
@@ -185,5 +188,6 @@
     "modelNotReady": "Il modello non è pronto per l'addestramento",
     "noNewImages": "Nessuna nuova immagine da addestrare. Classifica prima più immagini nel database.",
     "noChanges": "Nessuna modifica al database dall'ultimo addestramento."
-  }
+  },
+  "none": "Nessuno"
 }

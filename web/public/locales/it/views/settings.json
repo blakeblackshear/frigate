@@ -143,8 +143,8 @@
       "add": "Nuova maschera di movimento",
       "toast": {
         "success": {
-          "title": "{{polygonName}} è stato salvato. Riavvia Frigate per applicare le modifiche.",
-          "noName": "La maschera di movimento è stata salvata. Riavvia Frigate per applicare le modifiche."
+          "title": "{{polygonName}} è stato salvato.",
+          "noName": "La maschera di movimento è stata salvata."
         }
       }
     },
@@ -239,7 +239,7 @@
       "name": {
         "inputPlaceHolder": "Inserisci un nome…",
         "title": "Nome",
-        "tips": "Il nome deve essere composto da almeno 2 caratteri, contenere almeno una lettera e non deve essere il nome di una telecamera o di un'altra zona."
+        "tips": "Il nome deve essere composto da almeno 2 caratteri, contenere almeno una lettera e non deve essere il nome di una telecamera o di un'altra zona di questa telecamera."
       },
       "clickDrawPolygon": "Fai clic per disegnare un poligono sull'immagine.",
       "point_one": "{{count}} punto",
@@ -261,7 +261,7 @@
       },
       "allObjects": "Tutti gli oggetti",
       "toast": {
-        "success": "La zona ({{zoneName}}) è stata salvata. Riavvia Frigate per applicare le modifiche."
+        "success": "La zona ({{zoneName}}) è stata salvata."
       }
     },
     "objectMasks": {
@@ -283,8 +283,8 @@
       },
       "toast": {
         "success": {
-          "noName": "La maschera oggetto è stata salvata. Riavvia Frigate per applicare le modifiche.",
-          "title": "{{polygonName}} è stato salvato. Riavvia Frigate per applicare le modifiche."
+          "noName": "La maschera oggetto è stata salvata.",
+          "title": "{{polygonName}} è stato salvato."
         }
       },
       "label": "Maschere di oggetti",
@@ -427,7 +427,16 @@
           "title": "Password",
           "placeholder": "Inserisci la password",
           "match": "Le password corrispondono",
-          "notMatch": "Le password non corrispondono"
+          "notMatch": "Le password non corrispondono",
+          "show": "Mostra password",
+          "hide": "Nascondi password",
+          "requirements": {
+            "title": "Requisiti password:",
+            "length": "Almeno 8 caratteri",
+            "uppercase": "Almeno una lettera maiuscola",
+            "digit": "Almeno una cifra",
+            "special": "Almeno un carattere speciale (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "Nuova password",
@@ -437,7 +446,11 @@
           }
         },
         "usernameIsRequired": "Il nome utente è obbligatorio",
-        "passwordIsRequired": "La password è obbligatoria"
+        "passwordIsRequired": "La password è obbligatoria",
+        "currentPassword": {
+          "title": "Password attuale",
+          "placeholder": "Inserisci la password attuale"
+        }
       },
       "createUser": {
         "desc": "Aggiungi un nuovo account utente e specifica un ruolo per l'accesso alle aree dell'interfaccia utente di Frigate.",
@@ -450,11 +463,16 @@
         "setPassword": "Imposta password",
         "desc": "Crea una password complessa per proteggere questo account.",
         "cannotBeEmpty": "La password non può essere vuota",
-        "doNotMatch": "Le password non corrispondono"
+        "doNotMatch": "Le password non corrispondono",
+        "currentPasswordRequired": "È richiesta la password attuale",
+        "incorrectCurrentPassword": "La password attuale è errata",
+        "passwordVerificationFailed": "Impossibile verificare la password",
+        "multiDeviceWarning": "Sarà necessario effettuare nuovamente l'accesso su qualsiasi altro dispositivo entro {{refresh_time}}.",
+        "multiDeviceAdmin": "Puoi anche forzare tutti gli utenti a riautenticarsi immediatamente ruotando il tuo segreto JWT."
       }
     },
     "table": {
-      "password": "Password",
+      "password": "Reimposta password",
       "username": "Nome utente",
       "actions": "Azioni",
       "role": "Ruolo",
@@ -482,7 +500,7 @@
       "desc": "Gestisci gli account utente di questa istanza Frigate."
     },
     "addUser": "Aggiungi utente",
-    "updatePassword": "Aggiorna password"
+    "updatePassword": "Reimposta password"
   },
   "general": {
     "liveDashboard": {
@@ -1240,7 +1258,8 @@
         "audioCodecRequired": "Per supportare il rilevamento audio è necessario un flusso audio.",
         "restreamingWarning": "Riducendo le connessioni alla telecamera per il flusso di registrazione l'utilizzo della CPU potrebbe aumentare leggermente.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata."
+          "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata.",
+          "reolink-http": "I flussi HTTP di Reolink dovrebbero utilizzare FFmpeg per una migliore compatibilità. Abilita \"Usa modalità compatibilità flusso\" per questo flusso."
         },
         "dahua": {
           "substreamWarning": "Il sottoflusso 1 è bloccato a bassa risoluzione. Molte telecamere Dahua/Amcrest/EmpireTech supportano sottoflussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."

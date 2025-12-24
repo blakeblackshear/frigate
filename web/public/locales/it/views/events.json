@@ -59,5 +59,6 @@
   "zoomOut": "Rimpicciolisci",
   "normalActivity": "Normale",
   "needsReview": "Necessita revisione",
-  "securityConcern": "Rischio per la sicurezza"
+  "securityConcern": "Rischio per la sicurezza",
+  "select_all": "Tutti"
 }

@@ -18,7 +18,8 @@
   "train": {
     "title": "Riconoscimenti recenti",
     "aria": "Seleziona i riconoscimenti recenti",
-    "empty": "Non ci sono recenti tentativi di riconoscimento facciale"
+    "empty": "Non ci sono recenti tentativi di riconoscimento facciale",
+    "titleShort": "Recente"
   },
   "button": {
     "addFace": "Aggiungi volto",

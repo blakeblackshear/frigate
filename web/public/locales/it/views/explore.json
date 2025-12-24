@@ -53,13 +53,15 @@
           "regenerate": "È stata richiesta una nuova descrizione a {{provider}}. A seconda della velocità del tuo provider, la rigenerazione della nuova descrizione potrebbe richiedere del tempo.",
           "updatedSublabel": "Sottoetichetta aggiornata correttamente.",
           "updatedLPR": "Targa aggiornata con successo.",
-          "audioTranscription": "Trascrizione audio richiesta con successo. A seconda della velocità del server Frigate, la trascrizione potrebbe richiedere del tempo."
+          "audioTranscription": "Trascrizione audio richiesta con successo. A seconda della velocità del server Frigate, la trascrizione potrebbe richiedere del tempo.",
+          "updatedAttributes": "Attributi aggiornati correttamente."
         },
         "error": {
           "regenerate": "Impossibile chiamare {{provider}} per una nuova descrizione: {{errorMessage}}",
           "updatedSublabelFailed": "Impossibile aggiornare la sottoetichetta: {{errorMessage}}",
           "updatedLPRFailed": "Impossibile aggiornare la targa: {{errorMessage}}",
-          "audioTranscription": "Impossibile richiedere la trascrizione audio: {{errorMessage}}"
+          "audioTranscription": "Impossibile richiedere la trascrizione audio: {{errorMessage}}",
+          "updatedAttributesFailed": "Impossibile aggiornare gli attributi: {{errorMessage}}"
         }
       }
     },
@@ -103,7 +105,12 @@
     },
     "score": {
       "label": "Punteggio"
-    }
+    },
+    "editAttributes": {
+      "title": "Modifica attributi",
+      "desc": "Seleziona gli attributi di classificazione per questa {{label}}"
+    },
+    "attributes": "Attributi di classificazione"
   },
   "objectLifecycle": {
     "annotationSettings": {
@@ -207,6 +214,10 @@
     "viewTrackingDetails": {
       "label": "Visualizza i dettagli di tracciamento",
       "aria": "Mostra i dettagli di tracciamento"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Scarica istantanea pulita",
+      "aria": "Scarica istantanea pulita"
     }
   },
   "dialog": {
@@ -279,7 +290,7 @@
         "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
         "tips": "Ridurre il valore se la riproduzione video è in anticipo rispetto ai riquadri e ai punti del percorso, e aumentarlo se la riproduzione video è in ritardo rispetto ad essi. Questo valore può essere negativo.",
         "toast": {
-          "success": "La differenza dell'annotazione per {{camera}} è stato salvato nel file di configurazione. Riavvia Frigate per applicare le modifiche."
+          "success": "La differenza dell'annotazione per {{camera}} è stato salvato nel file di configurazione."
         }
       }
     },
