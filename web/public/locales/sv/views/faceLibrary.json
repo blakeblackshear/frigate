@@ -5,7 +5,7 @@
     "face": "Ansiktsdetaljer",
     "timestamp": "tidsstämpel",
     "faceDesc": "Detaljer om det spårade objektet som genererade detta ansikte",
-    "unknown": "Okänt",
+    "unknown": "Okänd",
     "subLabelScore": "Underetikettpoäng",
     "scoreInfo": "Underetikettpoängen är den viktade poängen för alla igenkända ansiktskonfidenser, så detta kan skilja sig från poängen som visas på ögonblicksbilden."
   },

@@ -48,13 +48,15 @@
           "regenerate": "En ny beskrivning har begärts från {{provider}}. Beroende på din leverantörs hastighet kan det ta lite tid att generera den nya beskrivningen.",
           "updatedSublabel": "Underetiketten har uppdaterats.",
           "updatedLPR": "Nummerplåt har uppdaterats.",
-          "audioTranscription": "Ljudtranskription har begärts. Beroende på hastigheten på din Frigate-server kan transkriptionen ta lite tid att slutföra."
+          "audioTranscription": "Ljudtranskription har begärts. Beroende på hastigheten på din Frigate-server kan transkriptionen ta lite tid att slutföra.",
+          "updatedAttributes": "Attributen har uppdaterats."
         },
         "error": {
           "regenerate": "Kunde inte ringa {{provider}} för en ny beskrivning: {{errorMessage}}",
           "updatedSublabelFailed": "Misslyckades med att uppdatera underetiketten: {{errorMessage}}",
           "audioTranscription": "Misslyckades med att begära ljudtranskription: {{errorMessage}}",
-          "updatedLPRFailed": "Misslyckades med att uppdatera nummerplåten: {{errorMessage}}"
+          "updatedLPRFailed": "Misslyckades med att uppdatera nummerplåten: {{errorMessage}}",
+          "updatedAttributesFailed": "Misslyckades med att uppdatera attribut: {{errorMessage}}"
         }
       }
     },
@@ -102,7 +104,12 @@
     "tips": {
       "descriptionSaved": "Beskrivningen har sparats",
       "saveDescriptionFailed": "Misslyckades med att uppdatera beskrivningen: {{errorMessage}}"
-    }
+    },
+    "editAttributes": {
+      "title": "Redigera attribut",
+      "desc": "Välj klassificeringsattribut för denna {{label}}"
+    },
+    "attributes": "Klassificeringsattribut"
   },
   "exploreMore": "Utforska fler {{label}} objekt",
   "type": {

@@ -114,7 +114,8 @@
         "classesUnique": "Klassnamn måste vara unika",
         "stateRequiresTwoClasses": "Tillståndsmodeller kräver minst två klasser",
         "objectLabelRequired": "Välj en objektetikett",
-        "objectTypeRequired": "Vänligen välj en klassificeringstyp"
+        "objectTypeRequired": "Vänligen välj en klassificeringstyp",
+        "noneNotAllowed": "Klassen 'none' är inte tillåten"
       }
     },
     "step2": {
@@ -167,7 +168,9 @@
     "states": "Tillstånd"
   },
   "details": {
-    "scoreInfo": "Poängen representerar den genomsnittliga klassificeringssäkerheten för alla upptäckter av detta objekt."
+    "scoreInfo": "Poängen representerar den genomsnittliga klassificeringssäkerheten för alla upptäckter av detta objekt.",
+    "none": "Ingen",
+    "unknown": "Okänd"
   },
   "edit": {
     "title": "Redigera klassificeringsmodell",

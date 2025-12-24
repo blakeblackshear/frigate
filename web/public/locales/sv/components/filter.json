@@ -133,5 +133,9 @@
   },
   "zoneMask": {
     "filterBy": "Filtrera på zonmaskering"
+  },
+  "attributes": {
+    "label": "Klassificeringsattribut",
+    "all": "Alla attribut"
   }
 }

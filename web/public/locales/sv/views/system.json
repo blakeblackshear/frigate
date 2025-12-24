@@ -191,7 +191,10 @@
       "review_description_events_per_second": "Recensionsbeskrivning",
       "object_description": "Objekt beskrivning",
       "object_description_speed": "Objekt beskrivning hastighet",
-      "object_description_events_per_second": "Objekt beskrivning"
+      "object_description_events_per_second": "Objekt beskrivning",
+      "classification_events_per_second": "{{name}} Klassificering Händelser per sekund",
+      "classification": "{{name}} Klassificering",
+      "classification_speed": "{{name}} Klassificeringshastighet"
     },
     "averageInf": "Genomsnittlig inferenstid"
   }

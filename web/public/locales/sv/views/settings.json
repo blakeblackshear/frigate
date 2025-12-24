@@ -489,7 +489,7 @@
       "desc": "Hantera användarkonton för denna Frigate-instans."
     },
     "addUser": "Lägg till användare",
-    "updatePassword": "Uppdatera lösenord",
+    "updatePassword": "Återställ lösenord",
     "toast": {
       "success": {
         "createUser": "Användaren {{user}} har skapats",
@@ -510,7 +510,7 @@
       "role": "Roll",
       "noUsers": "Inga användare hittades.",
       "changeRole": "Ändra användarroll",
-      "password": "Lösenord",
+      "password": "Återställ Lösenord",
       "deleteUser": "Ta bort användare"
     },
     "dialog": {
