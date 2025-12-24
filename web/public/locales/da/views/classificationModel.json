@@ -1,7 +1,8 @@
 {
   "documentTitle": "Klassifikationsmodeller",
   "details": {
-    "scoreInfo": "Scoren repræsenterer den gennemsnitlige klassifikationssikkerhed på tværs af alle registreringer af dette objekt."
+    "scoreInfo": "Scoren repræsenterer den gennemsnitlige klassifikationssikkerhed på tværs af alle registreringer af dette objekt.",
+    "unknown": "Ukendt"
   },
   "description": {
     "invalidName": "Ugyldigt navn. Navne må kun indeholde bogstaver, tal, mellemrum, apostroffer, understregninger og bindestreger."
