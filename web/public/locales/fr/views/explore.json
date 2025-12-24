@@ -42,13 +42,15 @@
           "regenerate": "Une nouvelle description a été demandée à {{provider}}. Selon la vitesse de votre fournisseur, la régénération de la nouvelle description peut prendre un certain temps.",
           "updatedSublabel": "Sous-étiquette mise à jour avec succès",
           "updatedLPR": "Plaque d'immatriculation mise à jour avec succès",
-          "audioTranscription": "Transcription audio demandée avec succès. Selon la vitesse de votre serveur Frigate, la transcription peut prendre un certain temps."
+          "audioTranscription": "Transcription audio demandée avec succès. Selon la vitesse de votre serveur Frigate, la transcription peut prendre un certain temps.",
+          "updatedAttributes": "Attributs mis à jour avec succès"
         },
         "error": {
           "regenerate": "Échec de l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
           "updatedSublabelFailed": "Échec de la mise à jour de la sous-étiquette : {{errorMessage}}",
           "updatedLPRFailed": "Échec de la mise à jour de la plaque d'immatriculation : {{errorMessage}}",
-          "audioTranscription": "Échec de la demande de transcription audio : {{errorMessage}}"
+          "audioTranscription": "Échec de la demande de transcription audio : {{errorMessage}}",
+          "updatedAttributesFailed": "Échec de la mise à jour des attributs  : {{errorMessage}}"
         }
       },
       "tips": {
@@ -103,7 +105,12 @@
     },
     "score": {
       "label": "Score"
-    }
+    },
+    "editAttributes": {
+      "title": "Modifier les attributs",
+      "desc": "Sélectionnez les attributs de classification pour : {{label}}"
+    },
+    "attributes": "Attributs de classification"
   },
   "type": {
     "details": "détails",

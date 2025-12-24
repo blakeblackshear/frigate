@@ -191,7 +191,10 @@
       "review_description_events_per_second": "Description de l'activité",
       "object_description": "Description de l'objet",
       "object_description_speed": "Vitesse de la description d'objet",
-      "object_description_events_per_second": "Description de l'objet"
+      "object_description_events_per_second": "Description de l'objet",
+      "classification": "Classification {{name}}",
+      "classification_speed": "Vitesse de classification {{name}}",
+      "classification_events_per_second": "Événements de classification par seconde {{name}}"
     },
     "averageInf": "Temps d'inférence moyen"
   }

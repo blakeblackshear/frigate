@@ -598,7 +598,7 @@
       "desc": "Gérez les comptes utilisateurs de cette instance Frigate."
     },
     "addUser": "Ajouter un utilisateur",
-    "updatePassword": "Mettre à jour le mot de passe",
+    "updatePassword": "Réinitialiser le mot de passe",
     "toast": {
       "success": {
         "roleUpdated": "Rôle mis à jour pour {{user}}",
@@ -618,7 +618,7 @@
       "actions": "Actions",
       "noUsers": "Aucun utilisateur trouvé.",
       "changeRole": "Changer le rôle d'utilisateur",
-      "password": "Mot de passe",
+      "password": "Réinitialiser le mot de passe",
       "deleteUser": "Supprimer un utilisateur",
       "role": "Rôle"
     },

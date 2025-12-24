@@ -116,7 +116,8 @@
         "classesUnique": "Les noms de classe doivent être uniques.",
         "stateRequiresTwoClasses": "Les modèles d'état nécessitent au moins deux classes.",
         "objectLabelRequired": "Veuillez sélectionner une étiquette d'objet.",
-        "objectTypeRequired": "Veuillez sélectionner un type de classification."
+        "objectTypeRequired": "Veuillez sélectionner un type de classification.",
+        "noneNotAllowed": "La classe 'aucun' n'est pas autorisée."
       },
       "states": "États"
     },
@@ -172,7 +173,9 @@
     "states": "États"
   },
   "details": {
-    "scoreInfo": "Le score représente la moyenne de la confiance de classification pour toutes les détections de cet objet."
+    "scoreInfo": "Le score représente la moyenne de la confiance de classification pour toutes les détections de cet objet.",
+    "none": "Aucun",
+    "unknown": "Inconnu"
   },
   "edit": {
     "title": "Modifier le modèle de classification",

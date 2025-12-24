@@ -26,7 +26,8 @@
       "recognized_license_plate": "Plaque d'immatriculation reconnue",
       "has_clip": "Avec une séquence vidéo",
       "has_snapshot": "Avec un instantané",
-      "max_score": "Score maximum"
+      "max_score": "Score maximum",
+      "attributes": "Attributs"
     },
     "searchType": {
       "thumbnail": "Miniature",
