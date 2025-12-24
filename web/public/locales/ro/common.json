@@ -1,8 +1,8 @@
 {
   "time": {
     "untilForTime": "Până la {{time}}",
-    "untilForRestart": "Pana la repornirea Frigate.",
-    "untilRestart": "Pana la repornire",
+    "untilForRestart": "Până la repornirea Frigate.",
+    "untilRestart": "Până la repornire",
     "ago": "{{timeAgo}} în urmă",
     "justNow": "Acum",
     "today": "Astăzi",

@@ -132,5 +132,9 @@
     },
     "count_one": "{{count}} Clasă",
     "count_other": "{{count}} Clase"
+  },
+  "attributes": {
+    "label": "Atribute de clasificare",
+    "all": "Toate atributele"
   }
 }

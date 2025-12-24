@@ -26,7 +26,8 @@
       "max_speed": "Viteza maximă",
       "recognized_license_plate": "Număr de înmatriculare recunoscut",
       "has_clip": "Are videoclip",
-      "has_snapshot": "Are snapshot"
+      "has_snapshot": "Are snapshot",
+      "attributes": "Atribute"
     },
     "tips": {
       "desc": {

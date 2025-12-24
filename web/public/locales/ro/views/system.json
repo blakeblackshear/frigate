@@ -134,7 +134,10 @@
       "review_description_events_per_second": "Descriere Revizuire",
       "object_description": "Descriere Obiect",
       "object_description_speed": "Viteză Descriere Obiect",
-      "object_description_events_per_second": "Descriere Obiect"
+      "object_description_events_per_second": "Descriere Obiect",
+      "classification": "{{name}} Clasificare",
+      "classification_speed": "{{name}} Viteză de clasificare",
+      "classification_events_per_second": "{{name}} Evenimente de clasificare pe secundă"
     },
     "infPerSecond": "Inferențe pe secundă",
     "averageInf": "Timp Mediu de Inferență"

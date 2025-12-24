@@ -106,13 +106,15 @@
           "regenerate": "O nouă descriere a fost solicitată de la {{provider}}. În funcție de viteza furnizorului tău, regenerarea noii descrieri poate dura ceva timp.",
           "updatedSublabel": "Subeticheta a fost actualizată cu succes.",
           "updatedLPR": "Plăcuța de înmatriculare a fost actualizată cu succes.",
-          "audioTranscription": "Transcrierea audio a fost solicitată cu succes. În funcție de viteza serverului dumneavoastră Frigate, transcrierea poate dura ceva timp până la finalizare."
+          "audioTranscription": "Transcrierea audio a fost solicitată cu succes. În funcție de viteza serverului dumneavoastră Frigate, transcrierea poate dura ceva timp până la finalizare.",
+          "updatedAttributes": "Atributele au fost actualizate cu succes."
         },
         "error": {
           "updatedSublabelFailed": "Nu s-a putut actualiza sub-etichetarea: {{errorMessage}}",
           "updatedLPRFailed": "Plăcuța de înmatriculare nu a putut fi actualizată: {{errorMessage}}",
           "regenerate": "Eroare la apelarea {{provider}} pentru o nouă descriere: {{errorMessage}}",
-          "audioTranscription": "Solicitarea transcrierii audio a eșuat: {{errorMessage}}"
+          "audioTranscription": "Solicitarea transcrierii audio a eșuat: {{errorMessage}}",
+          "updatedAttributesFailed": "Actualizarea atributelor a eșuat: {{errorMessage}}"
         }
       }
     },
@@ -160,7 +162,12 @@
     "regenerateFromThumbnails": "Regenerează din miniaturi",
     "score": {
       "label": "Scor"
-    }
+    },
+    "editAttributes": {
+      "title": "Editează atribute",
+      "desc": "Selectează atributele de clasificare pentru acest {{label}}"
+    },
+    "attributes": "Atribute de clasificare"
   },
   "exploreMore": "Explorează mai multe obiecte cu {{label}}",
   "trackedObjectDetails": "Detalii despre obiectul urmărit",

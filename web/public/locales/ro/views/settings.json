@@ -548,7 +548,8 @@
         "currentPasswordRequired": "Parola curentă este obligatorie",
         "incorrectCurrentPassword": "Parola curentă incorectă",
         "passwordVerificationFailed": "Nu s-a putut verifica parola",
-        "multiDeviceWarning": "Oricare alte dispozitive unde ești autentificat vor fi nevoite să se relogheze în termen de {{refresh_time}}. De asemenea, poți forța toți utilizatorii să se re-autentifice imediat prin rotirea secretului JWT."
+        "multiDeviceWarning": "Orice alte dispozitive pe care ești autentificat vor trebui să se autentifice din nou în termen de {{refresh_time}}.",
+        "multiDeviceAdmin": "De asemenea, poți forța toți utilizatorii să se reautentifice imediat prin rotirea secretului tău JWT."
       }
     },
     "addUser": "Adaugă utilizator",
@@ -570,7 +571,7 @@
         "deleteUserFailed": "Ștergerea utilizatorului a eșuat: {{errorMessage}}"
       }
     },
-    "updatePassword": "Actualizează parola",
+    "updatePassword": "Resetează parola",
     "title": "Utilizatori",
     "table": {
       "username": "Nume utilizator",
@@ -579,7 +580,7 @@
       "noUsers": "Nu a fost găsit niciun utilizator.",
       "changeRole": "Schimbă rolul utilizatorului",
       "deleteUser": "Șterge utilizatorul",
-      "password": "Parolă"
+      "password": "Resetează parola"
     }
   },
   "notification": {
@@ -1157,7 +1158,8 @@
         "audioCodecRequired": "Este necesar un stream audio pentru a suporta detecția audio.",
         "restreamingWarning": "Reducerea conexiunilor la cameră pentru stream-ul de înregistrare poate crește ușor utilizarea procesorului (CPU).",
         "brands": {
-          "reolink-rtsp": "RTSP Reolink nu este recomandat. Activați HTTP în setările de firmware ale camerei și reporniți asistentul."
+          "reolink-rtsp": "RTSP Reolink nu este recomandat. Activați HTTP în setările de firmware ale camerei și reporniți asistentul.",
+          "reolink-http": "Stream-urile HTTP Reolink ar trebui să folosească FFmpeg pentru o compatibilitate mai bună. Activează 'Use stream compatibility mode' pentru acest stream."
         },
         "dahua": {
           "substreamWarning": "Substream-ul 1 este blocat la o rezoluție scăzută. Multe camere Dahua / Amcrest / EmpireTech suportă stream-uri secundare suplimentare care trebuie activate în setările camerei. Se recomandă să verificați și să utilizați aceste stream-uri dacă sunt disponibile."

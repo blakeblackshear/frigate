@@ -116,7 +116,8 @@
         "classesUnique": "Numele claselor trebuie să fie unice",
         "stateRequiresTwoClasses": "Modelele de stare necesită cel puțin 2 clase",
         "objectLabelRequired": "Vă rugăm să selectați o etichetă de obiect",
-        "objectTypeRequired": "Vă rugăm să selectați un tip de clasificare"
+        "objectTypeRequired": "Vă rugăm să selectați un tip de clasificare",
+        "noneNotAllowed": "Clasa 'niciuna' nu este permisă"
       },
       "states": "Stări"
     },
@@ -172,7 +173,9 @@
     "states": "Stări"
   },
   "details": {
-    "scoreInfo": "Scorul reprezintă încrederea medie a clasificării pentru toate detecțiile acestui obiect."
+    "scoreInfo": "Scorul reprezintă încrederea medie a clasificării pentru toate detecțiile acestui obiect.",
+    "none": "Niciuna",
+    "unknown": "Necunoscut"
   },
   "edit": {
     "title": "Editează modelul de clasificare",
