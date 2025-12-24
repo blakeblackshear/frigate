@@ -26,7 +26,8 @@
       "min_score": "Minimální Skóre",
       "recognized_license_plate": "Rozpoznaná SPZ",
       "has_clip": "Má Klip",
-      "has_snapshot": "Má Snímek"
+      "has_snapshot": "Má Snímek",
+      "attributes": "Atributy"
     },
     "tips": {
       "desc": {

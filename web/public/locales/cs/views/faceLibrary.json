@@ -38,7 +38,8 @@
   "train": {
     "title": "Nedávná rozpoznání",
     "empty": "Nejsou zde žádné předchozí pokusy o rozpoznání obličeje",
-    "aria": "Vybrat trénink"
+    "aria": "Vybrat poslední rozpoznávání",
+    "titleShort": "Nedávný"
   },
   "description": {
     "addFace": "Přidejte novou kolekci do Knihovny obličejů nahráním prvního obrázku.",
@@ -76,7 +77,7 @@
       "deletedName_one": "{{count}} obličej byl úspěšně odstraněn.",
       "deletedName_few": "{{count}} tváře byly úspěšně odstraněny.",
       "deletedName_other": "{{count}} tváře byly úspěšně odstraněny.",
-      "updatedFaceScore": "Úspěšně aktualizováno skóre obličeje.",
+      "updatedFaceScore": "Úspěšně aktualizováno skóre obličeje na {{name}} ({{score}}).",
       "addFaceLibrary": "{{name}} byl(a) úspěšně přidán(a) do Knihovny obličejů!"
     },
     "error": {

@@ -1,34 +1,47 @@
 {
-  "documentTitle": "Klasifikační modely",
+  "documentTitle": "Klasifikační modely - Frigate",
   "button": {
     "deleteClassificationAttempts": "Odstrániť Klasifikačné obrazy",
-    "renameCategory": "Premenovať triedu",
-    "deleteCategory": "Zmazať triedu",
-    "deleteImages": "Zmazať obrázok",
-    "trainModel": "Trenovací model",
-    "addClassification": "Pridať klasifikáciu",
-    "deleteModels": "Zmazať modeli",
-    "editModel": "Upraviť model"
+    "renameCategory": "Přejmenovat třídu",
+    "deleteCategory": "Smazat třídu",
+    "deleteImages": "Smazat obrázek",
+    "trainModel": "Trénovat model",
+    "addClassification": "Přidat klasifikaci",
+    "deleteModels": "Smazat modely",
+    "editModel": "Upravit model"
   },
   "details": {
-    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč detekciami tohoto objektu."
+    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč detekciami tohoto objektu.",
+    "none": "Nic",
+    "unknown": "Neznámý"
   },
   "tooltip": {
-    "trainingInProgress": "Model se práve trénuje",
-    "noNewImages": "Žiadne nové obrázky na trénovanie. Najskôr klasifikujte viac obrazkov v datasete.",
-    "noChanges": "Od posledného treningu nedošlo k žiadnym zmenám v datasete.",
-    "modelNotReady": "Model nieje pripravený na trénovanie."
+    "trainingInProgress": "Model se právě trénuje",
+    "noNewImages": "Žádné obrázky pro trénování. Nejdříve klasifikujte obrázky pro dataset.",
+    "noChanges": "Od posledního trénování nedošlo k žádné změně.",
+    "modelNotReady": "Model není připravený na trénování."
   },
   "toast": {
     "success": {
-      "deletedImage": "Zmazať obrazky",
-      "deletedModel_one": "Úspešne odstranený {{count}} model",
-      "deletedModel_few": "Úspešne odstranené {{count}} modely",
-      "deletedModel_other": "Úspěšne ostranených {{count}} modelov",
-      "deletedCategory": "Zmazať triedu",
+      "deletedImage": "Smazat obrázky",
+      "deletedModel_one": "Úspěšně odstraněný {{count}} model",
+      "deletedModel_few": "Úspěšně odstraněné {{count}} modely",
+      "deletedModel_other": "Úspěšně odstraněných {{count}} modelů",
+      "deletedCategory": "Smazat třídu",
       "categorizedImage": "Obrázek úspěšně klasifikován",
       "trainedModel": "Úspěšně vytrénovaný model.",
-      "trainingModel": "Trénování modelu bylo úspěšně zahájeno."
+      "trainingModel": "Trénování modelu bylo úspěšně zahájeno.",
+      "updatedModel": "Konfigurace modelu úspěšně aktualizována.",
+      "renamedCategory": "Třída úspěšně přejmenována na {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Chyba při mazání: {{errorMessage}}",
+      "deleteCategoryFailed": "Chyba při mazání třídy: {{errorMessage}}",
+      "deleteModelFailed": "Chyba při mazání modelu: {{errorMessage}}",
+      "categorizeFailed": "Chyba při mazání obrázku: {{errorMessage}}"
     }
+  },
+  "train": {
+    "titleShort": "Nedávný"
   }
 }

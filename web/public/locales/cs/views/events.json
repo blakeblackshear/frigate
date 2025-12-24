@@ -43,6 +43,7 @@
     "label": "Detail",
     "noDataFound": "Žádná detailní data k prohlédnutí",
     "aria": "Přepnout detailní zobrazení",
-    "trackedObject_other": "{{count}} objektů"
+    "trackedObject_other": "{{count}} objektů",
+    "trackedObject_one": "{{count}} objektů"
   }
 }
