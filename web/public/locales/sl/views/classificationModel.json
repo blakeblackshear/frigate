@@ -10,7 +10,8 @@
     "renameCategory": "Preimenuj razred",
     "deleteCategory": "Zbriši razred",
     "deleteImages": "Zbriši slike",
-    "trainModel": "Treniraj model"
+    "trainModel": "Treniraj model",
+    "deleteClassificationAttempts": "Izbriši klasifikacijske slike"
   },
   "toast": {
     "success": {
@@ -46,5 +47,9 @@
     "object": {
       "title": "Ni modelov za razvrščanje objektov"
     }
+  },
+  "documentTitle": "Klasifikacijski modeli - fregate",
+  "details": {
+    "scoreInfo": "Razultat predstavlja povprečno stopnjo sigurnosti čez vsa zaznavynja objekta."
   }
 }
