@@ -2,8 +2,8 @@
   "toast": {
     "success": {
       "deletedImage": "已刪除的圖片",
-      "deletedModel_other": "成功刪除 {{count}} 個模型",
-      "deletedCategory": "刪除分類",
+      "deletedModel_other": "已成功刪除 {{count}} 個模型",
+      "deletedCategory": "已刪除分類",
       "categorizedImage": "成功分類圖片",
       "trainedModel": "訓練模型成功。",
       "trainingModel": "已開始訓練模型。",
@@ -23,7 +23,9 @@
   },
   "documentTitle": "分類模型",
   "details": {
-    "scoreInfo": "分數表示該目標所有偵測結果的平均分類置信度。"
+    "scoreInfo": "分數表示該目標所有偵測結果的平均分類置信度。",
+    "none": "沒有",
+    "unknown": "未知"
   },
   "button": {
     "deleteClassificationAttempts": "刪除分類圖片",
@@ -81,5 +83,22 @@
   "categories": "類別",
   "createCategory": {
     "new": "建立新的類別"
+  },
+  "wizard": {
+    "step1": {
+      "objectLabel": "物件標籤",
+      "objectLabelPlaceholder": "請選擇物件類型...",
+      "classificationType": "分類類型",
+      "classificationTypeTip": "學習更多有關分類類型",
+      "description": "狀態模型監視固定攝像頭區域的變化（例如：開關門）。物件模型為檢測到的物件（例如：已知動物、送貨員等等）添加分類。",
+      "name": "名稱",
+      "namePlaceholder": "請輸入模型名稱...",
+      "type": "類別",
+      "typeState": "狀態",
+      "typeObject": "物件"
+    },
+    "steps": {
+      "chooseExamples": "選擇範本"
+    }
   }
 }

@@ -64,7 +64,7 @@
     },
     "formattedTimestampMonthDay": "M 月 d 日",
     "formattedTimestampFilename": {
-      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "12hour": "yy年MM月dd日 h時mm分ss秒",
       "24hour": "yy年MM月dd日 HH時mm分ss秒"
     },
     "inProgress": "處理中",
@@ -81,9 +81,9 @@
       "meters": "公尺"
     },
     "data": {
-      "kbps": "kB/秒",
-      "mbps": "MB/秒",
-      "gbps": "GB/秒",
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
       "kbph": "kB/小時",
       "mbph": "MB/小時",
       "gbph": "GB/小時"
@@ -276,13 +276,13 @@
   "selectItem": "選擇 {{item}}",
   "readTheDocumentation": "閱讀文件",
   "list": {
-    "two": "{{0}} 和 {{1}}",
-    "many": "{{items}}, 及 {{last}}",
+    "two": "{{0}}和{{1}}",
+    "many": "{{items}}和{{last}}",
     "separatorWithSpace": ", "
   },
   "field": {
     "optional": "可選的",
-    "internalID": "在Frigate 設定檔與資料庫使用的內部ID"
+    "internalID": "在Frigate 設定檔和資料庫使用的內部ID"
   },
   "information": {
     "pixels": "{{area}}px"
