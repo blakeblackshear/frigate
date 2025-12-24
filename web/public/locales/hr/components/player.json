@@ -1,3 +1,19 @@
 {
-  "noRecordingsFoundForThisTime": "Nisu pronađene snimke za ovo vrijeme"
+  "noRecordingsFoundForThisTime": "Nisu pronađene snimke za ovo vrijeme",
+  "submitFrigatePlus": {
+    "title": "Pošalji ovaj kadar u Frigate+?",
+    "submit": "Pošalji"
+  },
+  "cameraDisabled": "Kamera je onemogućena",
+  "stats": {
+    "streamType": {
+      "short": "Vrsta"
+    },
+    "latency": {
+      "value": "{{seconds}} sekundi",
+      "short": {
+        "value": "{{seconds}} sekundi"
+      }
+    }
+  }
 }

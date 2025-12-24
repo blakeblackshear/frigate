@@ -1,4 +1,18 @@
 {
   "documentTitle": "Izvoz - Frigate",
-  "search": "Pretraga"
+  "search": "Pretraga",
+  "deleteExport.desc": "Da li si siguran da želiš obrisati {{exportName}}?",
+  "editExport": {
+    "saveExport": "Spremi izvoz",
+    "title": "Preimenuj izvoz",
+    "desc": "Unesite novo ime ovog izvoza."
+  },
+  "tooltip": {
+    "shareExport": "Podijeli izvoz",
+    "downloadVideo": "Preuzmi video",
+    "editName": "Uredi ime",
+    "deleteExport": "Obriši izvoz"
+  },
+  "noExports": "Izvozi nisu pronađeni",
+  "deleteExport": "Obriši izvoz"
 }

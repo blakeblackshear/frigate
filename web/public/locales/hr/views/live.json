@@ -1,3 +1,46 @@
 {
-  "documentTitle": "Uživo - Frigate"
+  "documentTitle": "Uživo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Uživo - Frigate",
+  "twoWayTalk": {
+    "enable": "Omogući dvosmjerni razgovor",
+    "disable": "Onemogući dvosmjerni razgovor"
+  },
+  "cameraAudio": {
+    "enable": "Omogući zvuk kamere",
+    "disable": "Onemogući zvuk kamere"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klikni unutar kadra da centriraš kameru",
+        "enable": "Omogući pomicanje klikom",
+        "disable": "Onemogući pomicanje klikom"
+      },
+      "left": {
+        "label": "Pomakni PTZ kameru u lijevo"
+      },
+      "up": {
+        "label": "Pomakni PTZ kameru gore"
+      },
+      "down": {
+        "label": "Pomakni PTZ kameru dolje"
+      },
+      "right": {
+        "label": "Pomakni PTZ kameru u desno"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Približi PTZ kameru"
+      },
+      "out": {
+        "label": "Udalji PTZ kameru"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Izoštri fokus PTZ kamere"
+      }
+    }
+  }
 }

@@ -1,3 +1,24 @@
 {
-  "documentTitle": "Istražite - Frigate"
+  "documentTitle": "Istražite - Frigate",
+  "generativeAI": "Generativni AI",
+  "exploreIsUnavailable": {
+    "title": "Istraživanje je nedostupno",
+    "embeddingsReindexing": {
+      "startingUp": "Pokretanje…",
+      "finishingShortly": "Završava uskoro",
+      "estimatedTime": "Procjenjeno preostalo vrijeme:"
+    },
+    "downloadingModels": {
+      "setup": {
+        "textModel": "Tekstualni model"
+      }
+    }
+  },
+  "details": {
+    "timestamp": "Vremenska oznaka"
+  },
+  "trackedObjectDetails": "Detalji praćenog objekta",
+  "type": {
+    "details": "detalji"
+  }
 }

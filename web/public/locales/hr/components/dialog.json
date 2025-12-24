@@ -1,5 +1,47 @@
 {
   "restart": {
-    "title": "Jeste li sigurni da želite ponovno pokrenuti Frigate?"
+    "title": "Jeste li sigurni da želite ponovno pokrenuti Frigate?",
+    "button": "Ponovno pokreni",
+    "restarting": {
+      "title": "Frigate se ponovno pokreće",
+      "content": "Ova stranica će se osvježiti za {{countdown}} sekundi.",
+      "button": "Forsiraj ponovno pokretanje odmah"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Pošalji u Frigate+"
+      },
+      "review": {
+        "question": {
+          "label": "Potvrdi oznaku za Frigate Plus",
+          "ask_a": "Da li je ovaj objekt <code>{{label}}</code>?",
+          "ask_an": "Da li je ovaj objekt <code>{{label}}</code>?",
+          "ask_full": "Da li je ovaj objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Poslano"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Pogledaj u povijesti"
+    }
+  },
+  "export": {
+    "time": {
+      "lastHour_one": "Zadnji sat",
+      "lastHour_few": "Zadnja {{count}} sata",
+      "lastHour_other": "Zadnjih {{count}} sati",
+      "start": {
+        "title": "Vrijeme početka",
+        "label": "Odaberi vrijeme početka"
+      },
+      "end": {
+        "title": "Vrijeme kraja",
+        "label": "Odaberi vrijeme kraja"
+      }
+    }
   }
 }

@@ -1,4 +1,12 @@
 {
   "filter": "Filter",
-  "export": "Izvoz"
+  "export": "Izvoz",
+  "calendar": "Kalendar",
+  "filters": "Filteri",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "Vrijeme završetka mora biti nakon vremena početka",
+      "noValidTimeSelected": "Nije izabran ispravan vremenski raspon"
+    }
+  }
 }

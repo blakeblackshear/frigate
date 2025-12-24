@@ -1,5 +1,25 @@
 {
   "time": {
-    "untilForTime": "Do {{time}}"
+    "untilForTime": "Do {{time}}",
+    "untilForRestart": "Dok se Frigate ponovno pokrene.",
+    "untilRestart": "Do ponovnog pokretanja",
+    "justNow": "Upravo",
+    "today": "Danas",
+    "yesterday": "Jučer",
+    "last7": "Zadnjih 7 dana",
+    "last14": "Zadnjih 14 dana",
+    "last30": "Zadnjih 30 dana",
+    "thisWeek": "Ovaj tjedan",
+    "lastWeek": "Prošli tjedan",
+    "thisMonth": "Ovaj mjesec",
+    "lastMonth": "Prošli mjesec",
+    "5minutes": "5 minuta",
+    "10minutes": "10 minuta",
+    "30minutes": "30 minuta",
+    "1hour": "1 sat",
+    "12hours": "12 sati",
+    "24hours": "24 sata",
+    "pm": "pm",
+    "am": "am"
   }
 }

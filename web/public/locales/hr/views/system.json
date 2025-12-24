@@ -1,5 +1,25 @@
 {
   "documentTitle": {
-    "cameras": "Statistika kamera - Frigate"
+    "cameras": "Statistika kamera - Frigate",
+    "general": "Generalne statistike - Frigate",
+    "logs": {
+      "go2rtc": "Go2RTC dnevnik - Frigate",
+      "nginx": "Nginx dnevnik - Frigate",
+      "frigate": "Frigate logovi - Frigate"
+    },
+    "storage": "Statistika pohrane - Frigate",
+    "enrichments": "Statistika obogaćivanja - Frigate"
+  },
+  "title": "Sustav",
+  "logs": {
+    "download": {
+      "label": "Preuzmi dnevnik"
+    },
+    "type": {
+      "label": "Vrsta",
+      "timestamp": "Vremenska oznaka",
+      "tag": "Oznaka",
+      "message": "Poruka"
+    }
   }
 }

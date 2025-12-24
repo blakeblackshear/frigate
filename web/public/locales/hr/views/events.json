@@ -1,3 +1,26 @@
 {
-  "alerts": "Upozorenja"
+  "alerts": "Upozorenja",
+  "detections": "Detekcije",
+  "motion": {
+    "label": "Pokret",
+    "only": "Samo pokret"
+  },
+  "allCameras": "Sve kamere",
+  "empty": {
+    "alert": "Nema uzbuna za pregledati",
+    "detection": "Nema detekcija za pregled",
+    "motion": "Nema podataka o pokretu"
+  },
+  "timeline": "Vremenska linija",
+  "timeline.aria": "Odaberi vremensku liniju",
+  "zoomOut": "Udalji",
+  "events": {
+    "label": "Događaji",
+    "aria": "Odaberi događaje",
+    "noFoundForTimePeriod": "Nema pronađenih događaja za ovaj vremenski period."
+  },
+  "zoomIn": "Približi",
+  "detail": {
+    "label": "Detalji"
+  }
 }

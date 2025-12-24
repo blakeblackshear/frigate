@@ -1,5 +1,8 @@
 {
   "iconPicker": {
-    "selectIcon": "Odaberite ikonu"
+    "selectIcon": "Odaberite ikonu",
+    "search": {
+      "placeholder": "Traži ikonu…"
+    }
   }
 }

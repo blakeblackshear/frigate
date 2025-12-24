@@ -1,5 +1,20 @@
 {
   "documentTitle": {
-    "default": "Postavke - Frigate"
+    "default": "Postavke - Frigate",
+    "authentication": "Postavke autentikacije - Frigate",
+    "cameraManagement": "Upravljaj kamerama - Frigate",
+    "masksAndZones": "Uređivač maski i zona - Frigate",
+    "general": "Postavke sučelja - Frigate",
+    "frigatePlus": "Frigate+ postavke - Frigate",
+    "notifications": "Postavke notifikacija - Frigate",
+    "enrichments": "Postavke obogaćivanja - Frigate"
+  },
+  "menu": {
+    "ui": "Sučelje",
+    "cameraReview": "Pregled",
+    "enrichments": "Obogaćenja",
+    "masksAndZones": "Maske / Zone",
+    "triggers": "Okidači",
+    "users": "Korisnici"
   }
 }

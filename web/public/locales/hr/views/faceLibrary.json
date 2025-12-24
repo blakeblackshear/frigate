@@ -1,6 +1,7 @@
 {
   "description": {
-    "addFace": "Vodič za dodavanje nove kolekcije u Biblioteku lica."
+    "addFace": "Dodaj novu kolekcije u Biblioteku lica učitavanjem prve slike.",
+    "placeholder": "Unesi ime za ovu kolekciju"
   },
   "steps": {
     "faceName": "Unesi Ime Lica",
@@ -24,5 +25,17 @@
     "desc_one": "Jeste li sigurni da želite izbrisati {{count}} lice? Ova se radnja ne može poništiti.",
     "desc_few": "Jeste li sigurni da želite izbrisati {{count}} lica? Ova se radnja ne može poništiti.",
     "desc_other": "Jeste li sigurni da želite izbrisati {{count}} lica? Ova se radnja ne može poništiti."
+  },
+  "details": {
+    "timestamp": "Vremenska oznaka",
+    "unknown": "Nepoznato"
+  },
+  "documentTitle": "Biblioteka lica - Frigate",
+  "uploadFaceImage": {
+    "title": "Učitaj sliku lica"
+  },
+  "collections": "Kolekcije",
+  "createFaceLibrary": {
+    "new": "Stvori novo lice"
   }
 }

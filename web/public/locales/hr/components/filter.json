@@ -2,5 +2,29 @@
   "filter": "Filter",
   "classes": {
     "label": "Klase"
-  }
+  },
+  "labels": {
+    "label": "Oznake",
+    "all": {
+      "title": "Sve oznake",
+      "short": "Oznake"
+    },
+    "count_one": "{{count}} oznake",
+    "count_other": "{{count}} oznake"
+  },
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Sve zone",
+      "short": "Zone"
+    }
+  },
+  "dates": {
+    "selectPreset": "Odaberi predložak…",
+    "all": {
+      "title": "Svi datumi",
+      "short": "Datumi"
+    }
+  },
+  "more": "Više filtera"
 }

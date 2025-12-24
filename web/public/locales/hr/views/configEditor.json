@@ -1,3 +1,12 @@
 {
-  "documentTitle": "Uređivač konfiguracije - Frigate"
+  "documentTitle": "Uređivač konfiguracije - Frigate",
+  "copyConfig": "Kopiraj konfiguraciju",
+  "saveAndRestart": "Spremi i pokreni ponovno",
+  "saveOnly": "Samo spremi",
+  "confirm": "Izađi bez spremanja?",
+  "toast": {
+    "error": {
+      "savingError": "Greška pri spremanju konfiguracije"
+    }
+  }
 }

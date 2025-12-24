@@ -1,1 +1,22 @@
-{}
+{
+  "documentTitle": "Klasifikacijski modeli - Frigate",
+  "button": {
+    "deleteImages": "Obriši slike",
+    "trainModel": "Treniraj model",
+    "addClassification": "Dodaj klasifikaciju",
+    "deleteModels": "Obriši modele",
+    "editModel": "Uredi model"
+  },
+  "tooltip": {
+    "trainingInProgress": "Model se trenutno trenira",
+    "modelNotReady": "Model nije spreman za treniranje"
+  },
+  "details": {
+    "unknown": "Nepoznato"
+  },
+  "toast": {
+    "success": {
+      "deletedImage": "Obrisane slike"
+    }
+  }
+}

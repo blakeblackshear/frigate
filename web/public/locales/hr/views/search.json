@@ -1,3 +1,25 @@
 {
-  "search": "Pretraga"
+  "search": "Pretraga",
+  "savedSearches": "Spremljene pretrage",
+  "searchFor": "Pretraži {{inputValue}}",
+  "button": {
+    "clear": "Izbriši pretragu",
+    "save": "Spremi pretragu",
+    "delete": "Obriši spremljene pretrage",
+    "filterInformation": "Filtriraj informacije",
+    "filterActive": "Filteri aktivni"
+  },
+  "filter": {
+    "label": {
+      "cameras": "Kamere",
+      "labels": "Oznake",
+      "zones": "Zone",
+      "search_type": "Pretraži vrstu",
+      "time_range": "Vremenski raspon",
+      "attributes": "Atributi",
+      "before": "Prije",
+      "after": "Poslije",
+      "min_score": "Min ocjena"
+    }
+  }
 }

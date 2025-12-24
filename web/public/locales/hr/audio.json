@@ -1,3 +1,26 @@
 {
-  "speech": "Govor"
+  "speech": "Govor",
+  "babbling": "Brbljanje",
+  "bicycle": "Bicikl",
+  "yell": "Vikanje",
+  "car": "Automobil",
+  "bellow": "Ispod",
+  "motorcycle": "Motocikl",
+  "whispering": "Šaptanje",
+  "bus": "Autobus",
+  "laughter": "Smijeh",
+  "train": "Vlak",
+  "snicker": "Tenisica",
+  "boat": "Čamac",
+  "crying": "Plakanje",
+  "singing": "Pjevanje",
+  "choir": "Zbor",
+  "yodeling": "Jodlanje",
+  "mantra": "Mantra",
+  "bird": "Ptica",
+  "child_singing": "Dijete pjeva",
+  "cat": "Mačka",
+  "dog": "Pas",
+  "horse": "Konj",
+  "sheep": "Ovca"
 }

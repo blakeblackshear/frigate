@@ -1,3 +1,21 @@
 {
-  "person": "Osoba"
+  "person": "Osoba",
+  "bicycle": "Bicikl",
+  "car": "Automobil",
+  "motorcycle": "Motocikl",
+  "airplane": "Zrakoplov",
+  "bus": "Autobus",
+  "train": "Vlak",
+  "boat": "Čamac",
+  "traffic_light": "Semafor",
+  "fire_hydrant": "Hidrant",
+  "street_sign": "Prometni znak",
+  "stop_sign": "Znak stop",
+  "bench": "Klupa",
+  "bird": "Ptica",
+  "cat": "Mačka",
+  "dog": "Pas",
+  "horse": "Konj",
+  "sheep": "Ovca",
+  "cow": "Krava"
 }
