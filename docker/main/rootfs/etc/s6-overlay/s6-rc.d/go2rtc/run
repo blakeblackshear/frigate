@@ -55,7 +55,7 @@ function setup_homekit_config() {
 
     if [[ ! -f "${config_path}" ]]; then
         echo "[INFO] Creating empty HomeKit config file..."
-        echo '{}' > "${config_path}"
+        echo 'homekit: {}' > "${config_path}"
     fi
 
     # Convert YAML to JSON for jq processing
@@ -70,12 +70,14 @@ function setup_homekit_config() {
     jq '
         # Keep only the homekit section if it exists, otherwise empty object
         if has("homekit") then {homekit: .homekit} else {homekit: {}} end
-    ' "${temp_json}" > "${cleaned_json}" 2>/dev/null || echo '{"homekit": {}}' > "${cleaned_json}"
+    ' "${temp_json}" > "${cleaned_json}" 2>/dev/null || {
+        echo '{"homekit": {}}' > "${cleaned_json}"
+    }
 
     # Convert back to YAML and write to the config file
     yq eval -P "${cleaned_json}" > "${config_path}" 2>/dev/null || {
         echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
-        echo '{"homekit": {}}' > "${config_path}"
+        echo 'homekit: {}' > "${config_path}"
     }
 
     # Clean up temp files
