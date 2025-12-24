@@ -92,7 +92,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
         pixels_per_image = width * height
         tokens_per_image = pixels_per_image / 1250
-        prompt_tokens = 3500
+        prompt_tokens = 4000
         response_tokens = 300
         available_tokens = context_size - prompt_tokens - response_tokens
         max_frames = int(available_tokens / tokens_per_image)
