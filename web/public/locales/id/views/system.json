@@ -11,5 +11,10 @@
     }
   },
   "title": "Sistem",
-  "metrics": "Metrik sistem"
+  "metrics": "Metrik sistem",
+  "logs": {
+    "download": {
+      "label": "Unduh Log"
+    }
+  }
 }

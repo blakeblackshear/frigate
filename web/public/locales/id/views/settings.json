@@ -9,10 +9,40 @@
     "general": "Frigate - Pengaturan Umum",
     "object": "Debug - Frigate",
     "enrichments": "Frigate - Pengaturan Pengayaan",
-    "cameraManagement": "Pengaturan Kamera - Frigate"
+    "cameraManagement": "Pengaturan Kamera - Frigate",
+    "cameraReview": "Pengaturan Ulasan Kamera - Frigate",
+    "frigatePlus": "Pengaturan Frigate+ - Frigate"
   },
   "menu": {
-    "cameraManagement": "Pengaturan",
-    "notifications": "Notifikasi"
+    "cameraManagement": "Manajemen",
+    "notifications": "Notifikasi",
+    "ui": "Antarmuka Pengguna",
+    "enrichments": "Peningkatan",
+    "cameraReview": "Ulasan",
+    "motionTuner": "Pengatur Gerak",
+    "triggers": "Pemicu",
+    "users": "Pengguna",
+    "roles": "Peran",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Anda memiliki perubahan yang belum disimpan.",
+      "desc": "Apakah Anda ingin menyimpan perubahan Anda sebelum melanjutkan?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Tidak Ada Kamera"
+  },
+  "general": {
+    "title": "Pengaturan Antarmuka Pengguna",
+    "liveDashboard": {
+      "title": "Dashboard Langsung",
+      "automaticLiveView": {
+        "label": "Tampilan Langsung Otomatis",
+        "desc": "Secara otomatis beralih ke tampilan langsung kamera saat aktivitas terdeteksi. Menonaktifkan opsi ini menyebabkan gambar statis kamera di dasbor langsung hanya diperbarui sekali per menit."
+      }
+    }
   }
 }

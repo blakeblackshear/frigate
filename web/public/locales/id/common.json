@@ -9,7 +9,8 @@
     "untilForTime": "Hingga {{time}}",
     "last7": "7 hari terakhir",
     "last14": "14 hari terakhir",
-    "last30": "30 hari terakhir"
+    "last30": "30 hari terakhir",
+    "thisWeek": "Minggu Ini"
   },
   "readTheDocumentation": "Baca dokumentasi"
 }

@@ -9,5 +9,10 @@
     "filterInformation": "Saring Informasi",
     "filterActive": "Filter aktif"
   },
-  "trackedObjectId": "Tracked Object ID"
+  "trackedObjectId": "Tracked Object ID",
+  "filter": {
+    "label": {
+      "cameras": "Kamera"
+    }
+  }
 }

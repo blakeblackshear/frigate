@@ -1,1 +1,16 @@
-{}
+{
+  "documentTitle": "Klasifikasi Model - Frigate",
+  "details": {
+    "scoreInfo": "Skor tersebut mewakili rata-rata kepercayaan klasifikasi di seluruh deteksi objek ini."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Hapus Gambar Klasifikasi",
+    "renameCategory": "Ubah Nama Kelas",
+    "deleteCategory": "Hapus Kelas",
+    "deleteImages": "Hapus Gambar",
+    "trainModel": "Latih Model",
+    "addClassification": "Tambah Klasifikasi",
+    "deleteModels": "Hapus Model",
+    "editModel": "Ubah Model"
+  }
+}

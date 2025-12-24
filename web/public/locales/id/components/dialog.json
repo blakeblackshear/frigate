@@ -17,7 +17,9 @@
       "review": {
         "question": {
           "label": "Konfirmasi label ini untuk Frigate Plus",
-          "ask_a": "Apakah objek ini adalah sebuah<code>{{label}}</code>?"
+          "ask_a": "Apakah objek ini adalah sebuah<code>{{label}}</code>?",
+          "ask_an": "Apakah objek ini <code>{{label}}</code>?",
+          "ask_full": "Apakah ini object <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     }

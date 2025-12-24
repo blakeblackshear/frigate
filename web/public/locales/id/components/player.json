@@ -14,7 +14,8 @@
   "cameraDisabled": "Kamera dinonaktifkan",
   "stats": {
     "streamType": {
-      "title": "Tipe stream:"
+      "title": "Tipe stream:",
+      "short": "Jenis"
     }
   }
 }
