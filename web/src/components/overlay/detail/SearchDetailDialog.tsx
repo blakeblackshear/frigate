@@ -1604,7 +1604,8 @@ function ObjectDetailsTab({
 
             {config?.cameras[search?.camera].audio_transcription.enabled &&
               search?.label == "speech" &&
-              search?.end_time && (
+              search?.end_time &&
+              search?.has_clip && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
