@@ -86,7 +86,11 @@ class ObjectDescriptionProcessor(PostProcessorApi):
                 and data["id"] not in self.early_request_sent
             ):
                 if data["has_clip"] and data["has_snapshot"]:
-                    event: Event = Event.get(Event.id == data["id"])
+                    try:
+                        event: Event = Event.get(Event.id == data["id"])
+                    except DoesNotExist:
+                        logger.error(f"Event {data['id']} not found")
+                        return
 
                     if (
                         not camera_config.objects.genai.objects
