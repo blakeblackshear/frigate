@@ -356,7 +356,17 @@ export default function HlsVideoPlayer({
           loadedMetadata &&
           videoDimensions.width > 0 &&
           videoDimensions.height > 0 && (
-            <div className="absolute z-50 size-full">
+            <div
+              className={cn(
+                "absolute inset-0 z-50",
+                isDesktop
+                  ? "size-full"
+                  : "mx-auto flex items-center justify-center portrait:max-h-[50dvh]",
+              )}
+              style={{
+                aspectRatio: `${videoDimensions.width} / ${videoDimensions.height}`,
+              }}
+            >
               <ObjectTrackOverlay
                 key={`overlay-${currentTime}`}
                 camera={camera}
