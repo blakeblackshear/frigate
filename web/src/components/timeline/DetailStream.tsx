@@ -409,7 +409,14 @@ function ReviewGroup({
             <div className="flex flex-col gap-0.5">
               {review.data.metadata?.title && (
                 <div className="mb-1 flex min-w-0 items-center gap-1 text-sm text-primary-variant">
-                  <MdAutoAwesome className="size-3 shrink-0" />
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <MdAutoAwesome className="size-3 shrink-0" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {review.data.metadata.title}
+                    </TooltipContent>
+                  </Tooltip>
                   <span className="truncate">{review.data.metadata.title}</span>
                 </div>
               )}
