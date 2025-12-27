@@ -251,10 +251,29 @@ function GeneralFilterButton({
   updateLabelFilter,
 }: GeneralFilterButtonProps) {
   const { t } = useTranslation(["components/filter"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
   const [open, setOpen] = useState(false);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     selectedLabels,
   );
+
+  const allAudioListenLabels = useMemo<Set<string>>(() => {
+    if (!config) {
+      return new Set<string>();
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return labels;
+  }, [config]);
 
   const buttonText = useMemo(() => {
     if (isMobile) {
@@ -266,13 +285,17 @@ function GeneralFilterButton({
     }
 
     if (selectedLabels.length == 1) {
-      return getTranslatedLabel(selectedLabels[0]);
+      const label = selectedLabels[0];
+      return getTranslatedLabel(
+        label,
+        allAudioListenLabels.has(label) ? "audio" : "object",
+      );
     }
 
     return t("labels.count", {
       count: selectedLabels.length,
     });
-  }, [selectedLabels, t]);
+  }, [selectedLabels, allAudioListenLabels, t]);
 
   // ui
 
