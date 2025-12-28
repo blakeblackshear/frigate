@@ -79,6 +79,24 @@ i18n
     parseMissingKeyHandler: (key: string) => {
       const parts = key.split(".");
 
+      // eslint-disable-next-line no-console
+      console.warn(`Missing translation key: ${key}`);
+
+      if (parts[0] === "time" && parts[1]?.includes("formattedTimestamp")) {
+        // Extract the format type from the last part (12hour, 24hour)
+        const formatType = parts[parts.length - 1];
+
+        // Return actual date-fns format strings as fallbacks
+        const formatDefaults: Record<string, string> = {
+          "12hour": "h:mm aaa",
+          "24hour": "HH:mm",
+        };
+
+        if (formatDefaults[formatType]) {
+          return formatDefaults[formatType];
+        }
+      }
+
       // Handle special cases for objects and audio
       if (parts[0] === "object" || parts[0] === "audio") {
         return (
