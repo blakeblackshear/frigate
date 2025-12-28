@@ -5,11 +5,12 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
 )
+from frigate.detectors.detector_utils import apply_amd_compatibility_env_vars
+
 from frigate.util.model import (
     post_process_dfine,
     post_process_rfdetr,
@@ -33,8 +34,12 @@ class ONNXDetector(DetectionApi):
     def __init__(self, detector_config: ONNXDetectorConfig):
         super().__init__(detector_config)
 
+        apply_amd_compatibility_env_vars()
+
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
+
+        from frigate.detectors.detection_runners import get_optimized_runner
 
         self.runner = get_optimized_runner(
             path,
