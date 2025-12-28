@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 type Theme = "dark" | "light" | "system";
@@ -130,9 +124,9 @@ export function ThemeProvider({
         ?.filter((f) => /^[a-zA-Z0-9._-]+\.css$/.test(f))
         .map((f) => {
           const base = f.replace(/\.css$/, "");
-          return (base.startsWith("theme-")
-            ? base
-            : `theme-${base}`) as ColorScheme;
+          return (
+            base.startsWith("theme-") ? base : `theme-${base}`
+          ) as ColorScheme;
         }) ?? [];
 
     return [...colorSchemes, ...customSchemes];
