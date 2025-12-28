@@ -925,11 +925,11 @@ function FaceAttemptGroup({
     [onRefresh, t],
   );
 
-  // Create ClassifiedEvent from Event (face recognition uses sub_label)
   const classifiedEvent: ClassifiedEvent | undefined = useMemo(() => {
-    if (!event || !event.sub_label || event.sub_label === "none") {
+    if (!event) {
       return undefined;
     }
+
     return {
       id: event.id,
       label: event.sub_label,

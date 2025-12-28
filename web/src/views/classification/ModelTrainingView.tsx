@@ -1043,34 +1043,22 @@ function ObjectTrainGrid({
         return undefined;
       }
 
-      const classificationType = model.object_config.classification_type;
+      let label: string | undefined = undefined;
+      let score: number | undefined = undefined;
 
-      if (classificationType === "attribute") {
-        // For attribute type, look at event.data[model.name]
-        const attributeValue = event.data[model.name] as string | undefined;
-        const attributeScore = event.data[`${model.name}_score`] as
-          | number
-          | undefined;
-
-        if (attributeValue && attributeValue !== "none") {
-          return {
-            id: event.id,
-            label: attributeValue,
-            score: attributeScore,
-          };
-        }
+      if (model.object_config.classification_type === "attribute") {
+        label = event.data[model.name] as string | undefined;
+        score = event.data[`${model.name}_score`] as number | undefined;
       } else {
-        // For sub_label type, use event.sub_label
-        if (event.sub_label && event.sub_label !== "none") {
-          return {
-            id: event.id,
-            label: event.sub_label,
-            score: event.data?.sub_label_score,
-          };
-        }
+        label = event.sub_label;
+        score = event.data.sub_label_score;
       }
 
-      return undefined;
+      return {
+        id: event.id,
+        label: label,
+        score: score,
+      };
     },
     [model],
   );
