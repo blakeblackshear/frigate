@@ -21,7 +21,7 @@ from frigate.config.camera import CameraConfig
 from frigate.config.camera.review import GenAIReviewConfig, ImageSourceEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
-from frigate.genai import GenAIClient
+from frigate.genai import GenAIClient, GenAIManager
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import get_image_from_recording
@@ -41,7 +41,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         config: FrigateConfig,
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
-        client: GenAIClient,
+        client: GenAIManager,
     ):
         super().__init__(config, metrics, None)
         self.requestor = requestor
@@ -63,7 +63,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
         Capped at 20 frames.
         """
-        context_size = self.genai_client.get_context_size()
+        context_size = self.genai_client.get_context_size(camera)
         camera_config = self.config.cameras[camera]
 
         detect_width = camera_config.detect.width
@@ -484,7 +484,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 @staticmethod
 def run_analysis(
     requestor: InterProcessRequestor,
-    genai_client: GenAIClient,
+    genai_client: GenAIManager,
     review_inference_speed: InferenceSpeed,
     camera_config: CameraConfig,
     final_data: dict[str, str],

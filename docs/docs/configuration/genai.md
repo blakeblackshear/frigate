@@ -11,18 +11,24 @@ Requests for a description are sent off automatically to your AI provider at the
 
 Generative AI can be enabled for all cameras or only for specific cameras. If GenAI is disabled for a camera, you can still manually generate descriptions for events using the HTTP API. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
-To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
+To use Generative AI, you must define one or more providers at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
 ```yaml
 genai:
-  provider: gemini
-  api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-2.0-flash
+  - name: gemini
+    provider: gemini
+    api_key: "{FRIGATE_GEMINI_API_KEY}"
+    model: gemini-2.0-flash
+  - name: ollama
+    provider: ollama
+    base_url: http://localhost:11434
+    model: qwen3-vl:4b
 
 cameras:
   front_camera:
     genai:
       enabled: True # <- enable GenAI for your front camera
+      provider: gemini # <- specify which provider to use
       use_snapshot: True
       objects:
         - person
@@ -72,9 +78,9 @@ Ollama also supports [cloud models](https://ollama.com/cloud), where your local 
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: http://localhost:11434
-  model: qwen3-vl:4b
+  - provider: ollama
+    base_url: http://localhost:11434
+    model: qwen3-vl:4b
 ```
 
 ## Google Gemini
@@ -98,9 +104,9 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 
 ```yaml
 genai:
-  provider: gemini
-  api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-2.0-flash
+  - provider: gemini
+    api_key: "{FRIGATE_GEMINI_API_KEY}"
+    model: gemini-2.0-flash
 ```
 
 :::note
@@ -125,9 +131,9 @@ To start using OpenAI, you must first [create an API key](https://platform.opena
 
 ```yaml
 genai:
-  provider: openai
-  api_key: "{FRIGATE_OPENAI_API_KEY}"
-  model: gpt-4o
+  - provider: openai
+    api_key: "{FRIGATE_OPENAI_API_KEY}"
+    model: gpt-4o
 ```
 
 :::note
@@ -152,10 +158,10 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 
 ```yaml
 genai:
-  provider: azure_openai
-  base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
-  model: gpt-5-mini
-  api_key: "{FRIGATE_OPENAI_API_KEY}"
+  - provider: azure_openai
+    base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
+    model: gpt-5-mini
+    api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
 
 ## Usage and Best Practices
@@ -171,10 +177,11 @@ Frigate provides an [MQTT topic](/integrations/mqtt), `frigate/tracked_object_up
 If looking to get notifications earlier than when an object ceases to be tracked, an additional send trigger can be configured of `after_significant_updates`.
 
 ```yaml
-genai:
-  send_triggers:
-    tracked_object_end: true # default
-    after_significant_updates: 3 # how many updates to a tracked object before we should send an image
+objects:
+  genai:
+    send_triggers:
+      tracked_object_end: true # default
+      after_significant_updates: 3 # how many updates to a tracked object before we should send an image
 ```
 
 ## Custom Prompts

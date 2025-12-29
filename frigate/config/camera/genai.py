@@ -6,7 +6,7 @@ from pydantic import Field
 from ..base import FrigateBaseModel
 from ..env import EnvString
 
-__all__ = ["GenAIConfig", "GenAIProviderEnum"]
+__all__ = ["GenAIProviderConfig", "GenAIProviderEnum"]
 
 
 class GenAIProviderEnum(str, Enum):
@@ -16,9 +16,10 @@ class GenAIProviderEnum(str, Enum):
     ollama = "ollama"
 
 
-class GenAIConfig(FrigateBaseModel):
+class GenAIProviderConfig(FrigateBaseModel):
     """Primary GenAI Config to define GenAI Provider."""
 
+    name: str = Field(default="default", title="Provider Name")
     api_key: Optional[EnvString] = Field(default=None, title="Provider API key.")
     base_url: Optional[str] = Field(default=None, title="Provider base url.")
     model: str = Field(default="gpt-4o", title="GenAI model.")

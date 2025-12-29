@@ -7,7 +7,7 @@ title: Configuring Generative AI
 
 A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
-To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
+To use Generative AI, you must define one or more providers at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
 ## Ollama
 
@@ -58,13 +58,13 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: http://localhost:11434
-  model: minicpm-v:8b
-  provider_options:  # other Ollama client options can be defined
-    keep_alive: -1
-    options:
-        num_ctx: 8192  # make sure the context matches other services that are using ollama
+  - provider: ollama
+    base_url: http://localhost:11434
+    model: minicpm-v:8b
+    provider_options:  # other Ollama client options can be defined
+      keep_alive: -1
+      options:
+          num_ctx: 8192  # make sure the context matches other services that are using ollama
 ```
 
 ## Google Gemini
@@ -88,9 +88,9 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 
 ```yaml
 genai:
-  provider: gemini
-  api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-1.5-flash
+  - provider: gemini
+    api_key: "{FRIGATE_GEMINI_API_KEY}"
+    model: gemini-1.5-flash
 ```
 
 ## OpenAI
@@ -109,9 +109,9 @@ To start using OpenAI, you must first [create an API key](https://platform.opena
 
 ```yaml
 genai:
-  provider: openai
-  api_key: "{FRIGATE_OPENAI_API_KEY}"
-  model: gpt-4o
+  - provider: openai
+    api_key: "{FRIGATE_OPENAI_API_KEY}"
+    model: gpt-4o
 ```
 
 :::note
@@ -136,7 +136,7 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 
 ```yaml
 genai:
-  provider: azure_openai
-  base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
-  api_key: "{FRIGATE_OPENAI_API_KEY}"
+  - provider: azure_openai
+    base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
+    api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```

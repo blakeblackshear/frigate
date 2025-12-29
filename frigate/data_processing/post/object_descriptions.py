@@ -16,7 +16,7 @@ from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.types import PostProcessDataEnum
-from frigate.genai import GenAIClient
+from frigate.genai import GenAIClient, GenAIManager
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
@@ -41,7 +41,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embeddings: "Embeddings",
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
-        client: GenAIClient,
+        client: GenAIManager,
         semantic_trigger_processor: SemanticTriggerProcessor | None,
     ):
         super().__init__(config, metrics, None)

@@ -686,16 +686,16 @@ lpr:
 # the camera level to enhance privacy for indoor cameras.
 genai:
   # Required: Provider must be one of ollama, gemini, or openai
-  provider: ollama
-  # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
-  base_url: http://localhost::11434
-  # Required if gemini or openai
-  api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Required: The model to use with the provider.
-  model: gemini-1.5-flash
-  # Optional additional args to pass to the GenAI Provider (default: None)
-  provider_options:
-    keep_alive: -1
+  - provider: ollama
+    # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
+    base_url: http://localhost::11434
+    # Required if gemini or openai
+    api_key: "{FRIGATE_GENAI_API_KEY}"
+    # Required: The model to use with the provider.
+    model: gemini-1.5-flash
+    # Optional additional args to pass to the GenAI Provider (default: None)
+    provider_options:
+      keep_alive: -1
 
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level

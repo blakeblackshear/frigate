@@ -37,9 +37,9 @@ You are also able to define custom prompts in your configuration.
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: http://localhost:11434
-  model: llava
+  - provider: ollama
+    base_url: http://localhost:11434
+    model: llava
 
 objects:
     prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."

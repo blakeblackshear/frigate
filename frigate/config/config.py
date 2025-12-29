@@ -45,7 +45,7 @@ from .camera.audio import AudioConfig
 from .camera.birdseye import BirdseyeConfig
 from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
-from .camera.genai import GenAIConfig
+from .camera.genai import GenAIProviderConfig
 from .camera.motion import MotionConfig
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
@@ -348,9 +348,18 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     # GenAI config
-    genai: GenAIConfig = Field(
-        default_factory=GenAIConfig, title="Generative AI configuration."
+    genai: List[GenAIProviderConfig] = Field(
+        default_factory=list, title="Generative AI configuration."
     )
+
+    @field_validator("genai", mode="before")
+    @classmethod
+    def validate_genai(cls, v: Any):
+        if v is None:
+            return []
+        if isinstance(v, dict):
+            return [v]
+        return v
 
     # Camera config
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")

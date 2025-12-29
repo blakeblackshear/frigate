@@ -83,6 +83,7 @@ class GenAIReviewConfig(FrigateBaseModel):
         default=False,
         title="Enable GenAI descriptions for review items.",
     )
+    provider: Optional[str] = Field(default=None, title="GenAI provider name.")
     alerts: bool = Field(default=True, title="Enable GenAI for alerts.")
     detections: bool = Field(default=False, title="Enable GenAI for detections.")
     image_source: ImageSourceEnum = Field(

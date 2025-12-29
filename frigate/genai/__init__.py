@@ -1,4 +1,4 @@
-"""Generative AI module for Frigate."""
+"Generative AI module for Frigate."
 
 import datetime
 import importlib
@@ -9,7 +9,12 @@ from typing import Any, Optional
 
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
+from frigate.config import (
+    CameraConfig,
+    FrigateConfig,
+    GenAIProviderConfig,
+    GenAIProviderEnum,
+)
 from frigate.const import CLIPS_DIR
 from frigate.data_processing.post.types import ReviewMetadata
 from frigate.models import Event
@@ -32,8 +37,8 @@ def register_genai_provider(key: GenAIProviderEnum):
 class GenAIClient:
     """Generative AI client for Frigate."""
 
-    def __init__(self, genai_config: GenAIConfig, timeout: int = 120) -> None:
-        self.genai_config: GenAIConfig = genai_config
+    def __init__(self, genai_config: GenAIProviderConfig, timeout: int = 120) -> None:
+        self.genai_config: GenAIProviderConfig = genai_config
         self.timeout = timeout
         self.provider = self._init_provider()
 
@@ -293,18 +298,128 @@ Guidelines:
         return 4096
 
 
-def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
-    """Get the GenAI client."""
-    if not config.genai.provider:
+class GenAIManager:
+    """Manager for multiple GenAI clients."""
+
+    def __init__(self, config: FrigateConfig):
+        self.config = config
+        self.providers: dict[str, GenAIClient] = {}
+        load_providers()
+        self._init_providers()
+
+    def _init_providers(self):
+        for genai_config in self.config.genai:
+            if not genai_config.provider:
+                continue
+
+            provider_class = PROVIDERS.get(genai_config.provider)
+
+            if not provider_class:
+                logger.error(f"Provider {genai_config.provider} not found")
+                continue
+
+            if genai_config.name in self.providers:
+                logger.warning(
+                    f"Duplicate GenAI provider name '{genai_config.name}' found. Overwriting previous provider."
+                )
+
+            self.providers[genai_config.name] = provider_class(genai_config)
+
+    def _get_provider(self, name: str | None = None) -> GenAIClient | None:
+        if not self.providers:
+            return None
+
+        if name and name in self.providers:
+            return self.providers[name]
+
+        if name:
+            logger.error(
+                f"GenAI provider '{name}' not found in configuration. Falling back to default provider."
+            )
+
+        # Default to first provider
+        return next(iter(self.providers.values()))
+
+    def generate_review_description(
+        self,
+        review_data: dict[str, Any],
+        thumbnails: list[bytes],
+        concerns: list[str],
+        preferred_language: str | None,
+        debug_save: bool,
+        activity_context_prompt: str,
+    ) -> ReviewMetadata | None:
+        camera_name = review_data.get("camera")
+        provider_name = None
+        if camera_name:
+            camera_config = self.config.cameras.get(camera_name)
+            if camera_config:
+                provider_name = camera_config.review.genai.provider
+
+        client = self._get_provider(provider_name)
+
+        if not client:
+            return None
+
+        return client.generate_review_description(
+            review_data,
+            thumbnails,
+            concerns,
+            preferred_language,
+            debug_save,
+            activity_context_prompt,
+        )
+
+    def generate_review_summary(
+        self,
+        start_ts: float,
+        end_ts: float,
+        events: list[dict[str, Any]],
+        debug_save: bool,
+    ) -> str | None:
+        provider_name = self.config.review.genai.provider
+        client = self._get_provider(provider_name)
+
+        if not client:
+            return None
+
+        return client.generate_review_summary(start_ts, end_ts, events, debug_save)
+
+    def generate_object_description(
+        self,
+        camera_config: CameraConfig,
+        thumbnails: list[bytes],
+        event: Event,
+    ) -> Optional[str]:
+        provider_name = camera_config.objects.genai.provider
+        client = self._get_provider(provider_name)
+
+        if not client:
+            return None
+
+        return client.generate_object_description(camera_config, thumbnails, event)
+
+    def get_context_size(self, camera_name: str | None = None) -> int:
+        provider_name = None
+        if camera_name:
+            camera_config = self.config.cameras.get(camera_name)
+            if camera_config:
+                provider_name = camera_config.review.genai.provider
+
+        client = self._get_provider(provider_name)
+
+        if not client:
+            return 4096
+
+        return client.get_context_size()
+
+
+def get_genai_client(config: FrigateConfig) -> Optional[GenAIManager]:
+    """Get the GenAI manager."""
+    if not config.genai:
         return None
 
-    load_providers()
-    provider = PROVIDERS.get(config.genai.provider)
-    if provider:
-        return provider(config.genai)
-
-    return None
-
+    return GenAIManager(config)
 
 def load_providers():
     package_dir = os.path.dirname(__file__)
