@@ -280,7 +280,7 @@ Topic with current state of notifications. Published values are `ON` and `OFF`.
 
 ## Frigate Camera Topics
 
-### `frigate/<camera_name>/<role>/status`
+### `frigate/<camera_name>/status/<role>`
 
 Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`). Possible values are:
 
