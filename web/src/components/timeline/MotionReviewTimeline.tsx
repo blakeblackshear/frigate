@@ -111,7 +111,7 @@ export function MotionReviewTimeline({
 
   const getRecordingAvailability = useCallback(
     (time: number): boolean | undefined => {
-      if (!noRecordingRanges?.length) return undefined;
+      if (noRecordingRanges == undefined) return undefined;
 
       return !noRecordingRanges.some(
         (range) => time >= range.start_time && time < range.end_time,
