@@ -79,9 +79,6 @@ i18n
     parseMissingKeyHandler: (key: string) => {
       const parts = key.split(".");
 
-      // eslint-disable-next-line no-console
-      console.warn(`Missing translation key: ${key}`);
-
       if (parts[0] === "time" && parts[1]?.includes("formattedTimestamp")) {
         // Extract the format type from the last part (12hour, 24hour)
         const formatType = parts[parts.length - 1];
