@@ -100,7 +100,25 @@ export default function DetailStream({
     }
   }, [reviewItems, activeReviewId, effectiveTime]);
 
-  // Auto-scroll to current time
+  // Initial scroll to active review (runs immediately when user selects, not during playback)
+  useEffect(() => {
+    if (!scrollRef.current || !activeReviewId || userInteracting || isPlaying)
+      return;
+
+    const element = scrollRef.current.querySelector(
+      `[data-review-id="${activeReviewId}"]`,
+    ) as HTMLElement;
+
+    if (element) {
+      setProgrammaticScroll();
+      scrollIntoView(element, {
+        scrollMode: "if-needed",
+        behavior: "smooth",
+      });
+    }
+  }, [activeReviewId, setProgrammaticScroll, userInteracting, isPlaying]);
+
+  // Auto-scroll to current time during playback
   useEffect(() => {
     if (!scrollRef.current || userInteracting || !isPlaying) return;
     // Prefer the review whose range contains the effectiveTime. If none
