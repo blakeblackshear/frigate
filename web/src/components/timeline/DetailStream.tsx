@@ -31,6 +31,7 @@ import { PiSlidersHorizontalBold } from "react-icons/pi";
 import { MdAutoAwesome } from "react-icons/md";
 import { isPWA } from "@/utils/isPWA";
 import { isInIframe } from "@/utils/isIFrame";
+import { GenAISummaryDialog } from "../overlay/chip/GenAISummaryChip";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -438,7 +439,18 @@ function ReviewGroup({
                       {review.data.metadata.title}
                     </TooltipContent>
                   </Tooltip>
-                  <span className="truncate">{review.data.metadata.title}</span>
+                  <GenAISummaryDialog
+                    review={review}
+                    onOpen={(open) => {
+                      if (open) {
+                        onSeek(review.start_time, false);
+                      }
+                    }}
+                  >
+                    <span className="truncate hover:underline">
+                      {review.data.metadata.title}
+                    </span>
+                  </GenAISummaryDialog>
                 </div>
               )}
               <div className="flex flex-row items-center gap-1.5">

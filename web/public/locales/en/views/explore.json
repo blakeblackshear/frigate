@@ -166,6 +166,9 @@
     "tips": {
       "descriptionSaved": "Successfully saved description",
       "saveDescriptionFailed": "Failed to update the description: {{errorMessage}}"
+    },
+    "title": {
+      "label": "Title"
     }
   },
   "itemMenu": {

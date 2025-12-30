@@ -66,7 +66,10 @@ import {
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
-import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
+import {
+  GenAISummaryDialog,
+  GenAISummaryChip,
+} from "@/components/overlay/chip/GenAISummaryChip";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
 
@@ -739,7 +742,9 @@ export function RecordingView({
                   <GenAISummaryDialog
                     review={activeReviewItem}
                     onOpen={onAnalysisOpen}
-                  />
+                  >
+                    <GenAISummaryChip review={activeReviewItem} />
+                  </GenAISummaryDialog>
                 )}
 
                 <DynamicVideoPlayer
@@ -997,7 +1002,9 @@ function Timeline({
       )}
     >
       {isMobile && timelineType == "timeline" && (
-        <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen} />
+        <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen}>
+          <GenAISummaryChip review={activeReviewItem} />
+        </GenAISummaryDialog>
       )}
 
       {timelineType != "detail" && (

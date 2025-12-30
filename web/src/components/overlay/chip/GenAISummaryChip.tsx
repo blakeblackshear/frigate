@@ -6,16 +6,15 @@ import {
   ThreatLevel,
   THREAT_LEVEL_LABELS,
 } from "@/types/review";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { MdAutoAwesome } from "react-icons/md";
 
 type GenAISummaryChipProps = {
   review?: ReviewSegment;
-  onClick: () => void;
 };
-export function GenAISummaryChip({ review, onClick }: GenAISummaryChipProps) {
+export function GenAISummaryChip({ review }: GenAISummaryChipProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,6 @@ export function GenAISummaryChip({ review, onClick }: GenAISummaryChipProps) {
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
         isDesktop ? "bg-card" : "bg-secondary-foreground",
       )}
-      onClick={onClick}
     >
       <MdAutoAwesome className="shrink-0" />
       <span className="truncate">{review?.data.metadata?.title}</span>
@@ -40,10 +38,12 @@ export function GenAISummaryChip({ review, onClick }: GenAISummaryChipProps) {
 type GenAISummaryDialogProps = {
   review?: ReviewSegment;
   onOpen?: (open: boolean) => void;
+  children: React.ReactNode;
 };
 export function GenAISummaryDialog({
   review,
   onOpen,
+  children,
 }: GenAISummaryDialogProps) {
   const { t } = useTranslation(["views/explore"]);
 
@@ -104,7 +104,7 @@ export function GenAISummaryDialog({
   return (
     <Overlay open={open} onOpenChange={setOpen}>
       <Trigger asChild>
-        <GenAISummaryChip review={review} onClick={() => setOpen(true)} />
+        <div>{children}</div>
       </Trigger>
       <Content
         className={cn(
@@ -115,6 +115,10 @@ export function GenAISummaryDialog({
         )}
       >
         {t("aiAnalysis.title")}
+        <div className="text-sm text-primary/40">
+          {t("details.title.label")}
+        </div>
+        <div className="text-sm">{aiAnalysis.title}</div>
         <div className="text-sm text-primary/40">
           {t("details.description.label")}
         </div>
