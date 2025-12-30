@@ -309,10 +309,18 @@ export function RecordingView({
           currentTimeRange.after <= currentTime &&
           currentTimeRange.before >= currentTime
         ) {
-          mainControllerRef.current?.seekToTimestamp(
-            currentTime,
-            mainControllerRef.current.isPlaying(),
-          );
+          if (mainControllerRef.current != undefined) {
+            let shouldPlayback = true;
+
+            if (timelineType == "detail") {
+              shouldPlayback = mainControllerRef.current.isPlaying();
+            }
+
+            mainControllerRef.current.seekToTimestamp(
+              currentTime,
+              shouldPlayback,
+            );
+          }
         } else {
           updateSelectedSegment(currentTime, true);
         }
