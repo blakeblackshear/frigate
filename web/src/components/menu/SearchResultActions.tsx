@@ -195,7 +195,7 @@ export default function SearchResultActions({
         </ContextMenu>
       ) : (
         <>
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <BlurredIconButton aria-label={t("itemMenu.more.aria")}>
                 <FiMoreVertical className="size-5" />
