@@ -39,7 +39,7 @@ For object classification:
 
 :::note
 
-A tracked object can only have a single sub label. If you are using Triggers or Face Recognition and you configure an object classification model for `person` using the sub label type, your sub label may not be assigned correctly as it depends on which enrichment completes its analysis first. Consider using the `attribute` type instead.
+A tracked object can only have a single sub label. If you are using Triggers or Face Recognition and you configure an object classification model for `person` using the sub label type, your sub label may not be assigned correctly as it depends on which enrichment completes its analysis first. This could also occur with `car` objects that are assigned a sub label for a delivery carrier. Consider using the `attribute` type instead.
 
 :::
 
