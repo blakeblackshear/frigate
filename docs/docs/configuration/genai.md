@@ -48,15 +48,29 @@ Using Ollama on CPU is not recommended, high inference times make using Generati
 
 :::
 
-[Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It provides a nice API over [llama.cpp](https://github.com/ggerganov/llama.cpp). It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
+[Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
 
 Most of the 7b parameter 4-bit vision models will fit inside 8GB of VRAM. There is also a [Docker container](https://hub.docker.com/r/ollama/ollama) available.
 
 Parallel requests also come with some caveats. You will need to set `OLLAMA_NUM_PARALLEL=1` and choose a `OLLAMA_MAX_QUEUE` and `OLLAMA_MAX_LOADED_MODELS` values that are appropriate for your hardware and preferences. See the [Ollama documentation](https://docs.ollama.com/faq#how-does-ollama-handle-concurrent-requests).
 
+### Model Types: Instruct vs Thinking
+
+Most vision-language models are available as **instruct** models, which are fine-tuned to follow instructions and respond concisely to prompts. However, some models (such as certain Qwen-VL or minigpt variants) offer both **instruct** and **thinking** versions.
+
+- **Instruct models** are always recommended for use with Frigate. These models generate direct, relevant, actionable descriptions that best fit Frigate's object and event summary use case.
+- **Thinking models** are fine-tuned for more free-form, open-ended, and speculative outputs, which are typically not concise and may not provide the practical summaries Frigate expects. For this reason, Frigate does **not** recommend or support using thinking models.
+
+Some models are labeled as **hybrid** (capable of both thinking and instruct tasks). In these cases, Frigate will always use instruct-style prompts and specifically disables thinking-mode behaviors to ensure concise, useful responses.
+
+**Recommendation:**
+Always select the `-instruct` or documented instruct/tagged variant of any model you use in your Frigate configuration. If in doubt, refer to your model provider’s documentation or model library for guidance on the correct model variant to use.
+
+
+
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull llava:7b` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
+You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/search?c=vision). Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull qwen3-vl:2b-instruct` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
 
 :::note
 
