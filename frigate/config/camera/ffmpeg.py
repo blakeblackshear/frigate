@@ -41,6 +41,7 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
+    segment_time: int = Field(default=10, title="Segment length for recording stream.")
 
 
 class FfmpegConfig(FrigateBaseModel):

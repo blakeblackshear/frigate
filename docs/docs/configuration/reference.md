@@ -263,6 +263,8 @@ ffmpeg:
     detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: preset-record-generic
+    # Optional: Set segment length for recording stream. (default: shown below)
+    segment_time : 10
   # Optional: Time in seconds to wait before ffmpeg retries connecting to the camera. (default: shown below)
   # If set too low, frigate will retry a connection to the camera's stream too frequently, using up the limited streams some cameras can allow at once
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage

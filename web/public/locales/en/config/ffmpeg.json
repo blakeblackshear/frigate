@@ -21,6 +21,9 @@
         },
         "record": {
           "label": "Record role FFmpeg output arguments."
+        },
+        "segment_time": {
+          "label": "Segment length for recording stream."
         }
       }
     },

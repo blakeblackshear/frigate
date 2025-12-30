@@ -87,6 +87,7 @@ export interface CameraConfig {
       detect: string[];
       record: string;
       rtmp: string;
+      segment_time: number;
     };
     retry_interval: number;
   };
@@ -418,6 +419,7 @@ export interface FrigateConfig {
       detect: string[];
       record: string;
       rtmp: string;
+      segment_time: number;
     };
     retry_interval: number;
   };

@@ -128,6 +128,75 @@ class TestConfig(unittest.TestCase):
         }
         self.assertRaises(ValidationError, lambda: FrigateConfig(**config))
 
+    def test_default_segment_length(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.cameras["back"].ffmpeg.output_args.segment_time == 10
+
+    def test_inherit_segment_length(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "ffmpeg": {"output_args": {"segment_time": 15}},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.cameras["back"].ffmpeg.output_args.segment_time == 15
+
+    def test_override_segment_length(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "ffmpeg": {"output_args": {"segment_time": 15}},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ],
+                        "output_args": {"segment_time": 25}
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.cameras["back"].ffmpeg.output_args.segment_time == 25
+
     def test_inherit_tracked_objects(self):
         config = {
             "mqtt": {"host": "mqtt"},

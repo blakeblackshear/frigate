@@ -12,6 +12,8 @@ from frigate.const import (
     FFMPEG_HWACCEL_RKMPP,
     FFMPEG_HWACCEL_VAAPI,
     FFMPEG_HWACCEL_VULKAN,
+    FFMPEG_SEGMENT_TIME_PARAM,
+    FFMPEG_SEGMENT_TIME_VALUE,
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.util.services import vainfo_hwaccel
@@ -446,8 +448,8 @@ PRESETS_RECORD_OUTPUT = {
     "preset-record-generic": [
         "-f",
         "segment",
-        "-segment_time",
-        "10",
+        FFMPEG_SEGMENT_TIME_PARAM,
+        FFMPEG_SEGMENT_TIME_VALUE,
         "-segment_format",
         "mp4",
         "-reset_timestamps",
@@ -461,8 +463,8 @@ PRESETS_RECORD_OUTPUT = {
     "preset-record-generic-audio-aac": [
         "-f",
         "segment",
-        "-segment_time",
-        "10",
+        FFMPEG_SEGMENT_TIME_PARAM,
+        FFMPEG_SEGMENT_TIME_VALUE,
         "-segment_format",
         "mp4",
         "-reset_timestamps",
@@ -477,8 +479,8 @@ PRESETS_RECORD_OUTPUT = {
     "preset-record-generic-audio-copy": [
         "-f",
         "segment",
-        "-segment_time",
-        "10",
+        FFMPEG_SEGMENT_TIME_PARAM,
+        FFMPEG_SEGMENT_TIME_VALUE,
         "-segment_format",
         "mp4",
         "-reset_timestamps",
@@ -491,8 +493,8 @@ PRESETS_RECORD_OUTPUT = {
     "preset-record-mjpeg": [
         "-f",
         "segment",
-        "-segment_time",
-        "10",
+        FFMPEG_SEGMENT_TIME_PARAM,
+        FFMPEG_SEGMENT_TIME_VALUE,
         "-segment_format",
         "mp4",
         "-reset_timestamps",
@@ -506,8 +508,8 @@ PRESETS_RECORD_OUTPUT = {
     "preset-record-jpeg": [
         "-f",
         "segment",
-        "-segment_time",
-        "10",
+        FFMPEG_SEGMENT_TIME_PARAM,
+        FFMPEG_SEGMENT_TIME_VALUE,
         "-segment_format",
         "mp4",
         "-reset_timestamps",
@@ -521,8 +523,8 @@ PRESETS_RECORD_OUTPUT = {
     "preset-record-ubiquiti": [
         "-f",
         "segment",
-        "-segment_time",
-        "10",
+        FFMPEG_SEGMENT_TIME_PARAM,
+        FFMPEG_SEGMENT_TIME_VALUE,
         "-segment_format",
         "mp4",
         "-reset_timestamps",
@@ -539,7 +541,7 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
+def parse_preset_output_record(arg: Any, force_record_hvc1: bool, segment_time: int = -1) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -548,6 +550,11 @@ def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
 
     if not preset:
         return None
+
+    if 0 < segment_time <= 60 and FFMPEG_SEGMENT_TIME_PARAM in preset:
+        idx = preset.index(FFMPEG_SEGMENT_TIME_PARAM)
+        if idx + 1 < len(preset):
+            preset[idx + 1] = str(segment_time)
 
     if force_record_hvc1:
         # Apple only supports HEVC if it is hvc1 (vs. hev1)

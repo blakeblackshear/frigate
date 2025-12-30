@@ -214,6 +214,7 @@ class CameraConfig(FrigateBaseModel):
                 parse_preset_output_record(
                     self.ffmpeg.output_args.record,
                     self.ffmpeg.apple_compatibility,
+                    self.ffmpeg.output_args.segment_time,
                 )
                 or self.ffmpeg.output_args.record
             )
