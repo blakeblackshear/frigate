@@ -157,7 +157,7 @@ A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` 
 
 #### YOLOv9
 
-[YOLOv9](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite) models that are compiled for Tensorflow Lite and properly quantized are supported, but not included by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`. Note that the model may require a custom label file (eg. [use this 17 label file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) for the model linked above.)
+YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are supported, but not included by default. [Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes.
 
 <details>
   <summary>YOLOv9 Setup & Config</summary>
@@ -178,7 +178,7 @@ model:
   labelmap_path: /config/labels-coco17.txt
 ```
 
-Note that the labelmap uses a subset of the complete COCO label set that has only 17 objects.
+Note that due to hardware limitations of the Coral, the labelmap is a subset of the COCO labels and includes only 17 object classes.
 
 </details>
 
