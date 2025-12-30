@@ -800,21 +800,27 @@ function LifecycleItem({
               <div className="flex flex-col gap-1">
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
-                    {t("trackingDetails.lifecycleItemDesc.header.score")}
+                    {t("trackingDetails.lifecycleItemDesc.header.score", {
+                      ns: "views/explore",
+                    })}
                   </span>
                   <span className="font-medium text-foreground">{score}</span>
                 </div>
 
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
-                    {t("trackingDetails.lifecycleItemDesc.header.ratio")}
+                    {t("trackingDetails.lifecycleItemDesc.header.ratio", {
+                      ns: "views/explore",
+                    })}
                   </span>
                   <span className="font-medium text-foreground">{ratio}</span>
                 </div>
 
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
-                    {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
+                    {t("trackingDetails.lifecycleItemDesc.header.area", {
+                      ns: "views/explore",
+                    })}{" "}
                     {attributeAreaPx !== undefined &&
                       attributeAreaPct !== undefined && (
                         <span className="text-muted-foreground">
@@ -824,7 +830,7 @@ function LifecycleItem({
                   </span>
                   {areaPx !== undefined && areaPct !== undefined ? (
                     <span className="font-medium text-foreground">
-                      {areaPx} {t("pixels", { ns: "common" })}{" "}
+                      {areaPx} {t("information.pixels", { ns: "common" })}{" "}
                       <span className="text-secondary-foreground">·</span>{" "}
                       {areaPct}%
                     </span>
@@ -837,7 +843,9 @@ function LifecycleItem({
                   attributeAreaPct !== undefined && (
                     <div className="flex items-start gap-1">
                       <span className="text-muted-foreground">
-                        {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
+                        {t("trackingDetails.lifecycleItemDesc.header.area", {
+                          ns: "views/explore",
+                        })}{" "}
                         {attributeAreaPx !== undefined &&
                           attributeAreaPct !== undefined && (
                             <span className="text-muted-foreground">
@@ -846,7 +854,8 @@ function LifecycleItem({
                           )}
                       </span>
                       <span className="font-medium text-foreground">
-                        {attributeAreaPx} {t("pixels", { ns: "common" })}{" "}
+                        {attributeAreaPx}{" "}
+                        {t("information.pixels", { ns: "common" })}{" "}
                         <span className="text-secondary-foreground">·</span>{" "}
                         {attributeAreaPct}%
                       </span>
