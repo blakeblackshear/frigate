@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from frigate.const import MAX_PRE_CAPTURE
 from frigate.review.types import SeverityEnum
+from frigate.util.size import parse_size_to_mb
 
 from ..base import FrigateBaseModel
 
@@ -81,6 +82,10 @@ class RecordConfig(FrigateBaseModel):
         default=60,
         title="Number of minutes to wait between cleanup runs.",
     )
+    max_size: Union[float, str] = Field(
+        default=0,
+        title="Maximum size of recordings in MB or string format (e.g. 10GB).",
+    )
     continuous: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig,
         title="Continuous recording retention settings.",
@@ -103,6 +108,16 @@ class RecordConfig(FrigateBaseModel):
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Keep track of original state of recording."
     )
+
+    @field_validator("max_size", mode="before")
+    @classmethod
+    def parse_max_size(cls, v: Union[float, str], info: object) -> float:
+        if isinstance(v, str):
+            try:
+                return parse_size_to_mb(v)
+            except ValueError:
+                raise ValueError(f"Invalid size string: {v}")
+        return v
 
     @property
     def event_pre_capture(self) -> int:

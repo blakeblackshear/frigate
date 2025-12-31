@@ -31,3 +31,15 @@ class TestRecordRetention(unittest.TestCase):
         )
         assert not segment_info.should_discard_segment(RetainModeEnum.motion)
         assert segment_info.should_discard_segment(RetainModeEnum.active_objects)
+
+    def test_size_utility(self):
+        from frigate.util.size import parse_size_to_mb
+
+        assert parse_size_to_mb("10GB") == 10240
+        assert parse_size_to_mb("10MB") == 10
+        assert parse_size_to_mb("1024KB") == 1
+        assert parse_size_to_mb("1048576B") == 1
+        assert parse_size_to_mb("10") == 10
+
+        with self.assertRaises(ValueError):
+            parse_size_to_mb("invalid")

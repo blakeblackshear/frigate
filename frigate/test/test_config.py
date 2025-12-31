@@ -429,6 +429,29 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "-rtsp_transport" in frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
 
+    def test_record_max_size_validation(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "record": {"max_size": "10GB"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.record.max_size == 10000
+
     def test_ffmpeg_params_global(self):
         config = {
             "ffmpeg": {"input_args": "-re"},

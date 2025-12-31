@@ -510,6 +510,12 @@ record:
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
   expire_interval: 60
+  # Optional: Maximum size of recordings in MB or string format (e.g. 10GB). (default: shown below)
+  # This serves as a hard limit for the size of the recordings for this camera.
+  # If the total size of recordings exceeds this limit, the oldest recordings will be deleted
+  # until the total size is below the limit, regardless of retention settings.
+  # 0 means no limit.
+  max_size: 0
   # Optional: Two-way sync recordings database with disk on startup and once a day (default: shown below).
   sync_recordings: False
   # Optional: Continuous retention settings
