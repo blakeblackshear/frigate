@@ -738,8 +738,10 @@ export default function GeneralMetrics({
               className={cn(
                 "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
                 gpuTempSeries?.length && "md:grid-cols-3",
+                gpuEncSeries?.length && "md:grid-cols-4",
                 gpuEncSeries?.length &&
-                  (gpuTempSeries?.length ? "md:grid-cols-5" : "md:grid-cols-4"),
+                  gpuTempSeries?.length &&
+                  "lg:grid-cols-5",
               )}
             >
               {statsHistory[0]?.gpu_usages && (
