@@ -27,6 +27,10 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 - [Nvidia GPU](#nvidia-gpus): Frigate can utilize most modern Nvidia GPUs to accelerate video decoding.
 
+**Raspberry Pi 3/4**
+
+- [Raspberry Pi](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
+
 **Nvidia Jetson**
 
 - [Jetson](#nvidia-jetson): Frigate can utilize the media engine in Jetson hardware to accelerate video decoding.
