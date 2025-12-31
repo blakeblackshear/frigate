@@ -9,7 +9,11 @@
   "empty": {
     "alert": "There are no alerts to review",
     "detection": "There are no detections to review",
-    "motion": "No motion data found"
+    "motion": "No motion data found",
+    "recordingsDisabled": {
+      "title": "Recordings must be enabled",
+      "description": "Review items can only be created for a camera when recordings are enabled for that camera."
+    }
   },
   "timeline": "Timeline",
   "timeline.aria": "Select timeline",

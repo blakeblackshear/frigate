@@ -56,6 +56,8 @@ import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
+import { EmptyCard } from "@/components/card/EmptyCard";
+import { EmptyCardData } from "@/types/card";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -131,6 +133,24 @@ export default function EventView({
       };
     }
   }, [filter, showReviewed, reviewSummary]);
+
+  const emptyCardData: EmptyCardData = useMemo(() => {
+    if (
+      !config ||
+      Object.values(config.cameras).find(
+        (cam) => cam.record.enabled_in_config,
+      ) != undefined
+    ) {
+      return {
+        title: t("empty." + severity.replace(/_/g, " ")),
+      };
+    }
+
+    return {
+      title: t("empty.recordingsDisabled.title"),
+      description: t("empty.recordingsDisabled.description"),
+    };
+  }, [config, severity, t]);
 
   // review interaction
 
@@ -412,6 +432,7 @@ export default function EventView({
             timeRange={timeRange}
             startTime={startTime}
             loading={severity != severityToggle}
+            emptyCardData={emptyCardData}
             markItemAsReviewed={markItemAsReviewed}
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
@@ -430,6 +451,7 @@ export default function EventView({
             startTime={startTime}
             filter={filter}
             motionOnly={motionOnly}
+            emptyCardData={emptyCardData}
             onOpenRecording={onOpenRecording}
           />
         )}
@@ -455,6 +477,7 @@ type DetectionReviewProps = {
   timeRange: { before: number; after: number };
   startTime?: number;
   loading: boolean;
+  emptyCardData: EmptyCardData;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (
@@ -478,6 +501,7 @@ function DetectionReview({
   timeRange,
   startTime,
   loading,
+  emptyCardData,
   markItemAsReviewed,
   markAllItemsAsReviewed,
   onSelectReview,
@@ -737,10 +761,12 @@ function DetectionReview({
         )}
 
         {!loading && currentItems?.length === 0 && (
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <LuFolderCheck className="size-16" />
-            {t("empty." + severity.replace(/_/g, " "))}
-          </div>
+          <EmptyCard
+            className="y-translate-1/2 absolute left-[50%] top-[50%] -translate-x-1/2"
+            title={emptyCardData.title}
+            description={emptyCardData.description}
+            icon={<LuFolderCheck className="size-16" />}
+          />
         )}
 
         <div
@@ -875,6 +901,7 @@ type MotionReviewProps = {
   startTime?: number;
   filter?: ReviewFilter;
   motionOnly?: boolean;
+  emptyCardData: EmptyCardData;
   onOpenRecording: (data: RecordingStartingPoint) => void;
 };
 function MotionReview({
@@ -885,9 +912,9 @@ function MotionReview({
   startTime,
   filter,
   motionOnly = false,
+  emptyCardData,
   onOpenRecording,
 }: MotionReviewProps) {
-  const { t } = useTranslation(["views/events"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -1080,9 +1107,12 @@ function MotionReview({
 
   if (motionData?.length === 0) {
     return (
-      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-        <LuFolderX className="size-16" />
-        {t("empty.motion")}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <EmptyCard
+          title={emptyCardData.title}
+          description={emptyCardData.description}
+          icon={<LuFolderX className="size-16" />}
+        />
       </div>
     );
   }
