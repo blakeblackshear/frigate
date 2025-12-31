@@ -5,76 +5,29 @@ title: Video Decoding
 
 # Video Decoding
 
-It is highly recommended to use a GPU for hardware acceleration video decoding in Frigate. Some types of hardware acceleration are detected and used automatically, but you may need to update your configuration to enable hardware accelerated decoding in ffmpeg.
+It is highly recommended to use an integrated or discrete GPU for hardware acceleration video decoding in Frigate.
+
+Some types of hardware acceleration are detected and used automatically, but you may need to update your configuration to enable hardware accelerated decoding in ffmpeg. To verify that hardware acceleration is working:
+- Check the logs: A message will either say that hardware acceleration was automatically detected, or there will be a warning that no hardware acceleration was automatically detected
+- If hardware acceleration is specified in the config, verification can be done by ensuring the logs are free from errors. There is no CPU fallback for hardware acceleration.
 
 Depending on your system, these parameters may not be compatible. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
-
-## Raspberry Pi 3/4
-
-Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
-If you are using the HA Add-on, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
-
-```yaml
-# if you want to decode a h264 stream
-ffmpeg:
-  hwaccel_args: preset-rpi-64-h264
-
-# if you want to decode a h265 (hevc) stream
-ffmpeg:
-  hwaccel_args: preset-rpi-64-h265
-```
-
-:::note
-
-If running Frigate through Docker, you either need to run in privileged mode or
-map the `/dev/video*` devices to Frigate. With Docker Compose add:
-
-```yaml
-services:
-  frigate:
-    ...
-    devices:
-      - /dev/video11:/dev/video11
-```
-
-Or with `docker run`:
-
-```bash
-docker run -d \
-  --name frigate \
-  ...
-  --device /dev/video11 \
-  ghcr.io/blakeblackshear/frigate:stable
-```
-
-`/dev/video11` is the correct device (on Raspberry Pi 4B). You can check
-by running the following and looking for `H264`:
-
-```bash
-for d in /dev/video*; do
-  echo -e "---\n$d"
-  v4l2-ctl --list-formats-ext -d $d
-done
-```
-
-Or map in all the `/dev/video*` devices.
-
-:::
-
 ## Intel-based CPUs
+
+Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video decoding.
 
 :::info
 
 **Recommended hwaccel Preset**
 
-| CPU Generation | Intel Driver | Recommended Preset  | Notes                                |
-| -------------- | ------------ | ------------------- | ------------------------------------ |
-| gen1 - gen5    | i965         | preset-vaapi        | qsv is not supported                 |
-| gen6 - gen7    | iHD          | preset-vaapi        | qsv is not supported                 |
-| gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used |
-| gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                      |
-| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                      |
+| CPU Generation | Intel Driver | Recommended Preset  | Notes                                       |
+| -------------- | ------------ | ------------------- | ------------------------------------------- |
+| gen1 - gen5    | i965         | preset-vaapi        | qsv is not supported, may not support H.265 |
+| gen6 - gen7    | iHD          | preset-vaapi        | qsv is not supported                        |
+| gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used        |
+| gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                             |
+| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                             |
 
 :::
 
@@ -195,15 +148,17 @@ telemetry:
 
 If you are passing in a device path, make sure you've passed the device through to the container.
 
-## AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
+## AMD-based CPUs
 
-VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
+Frigate can utilize modern AMD integrated GPUs and AMD GPUs to accelerate video decoding using VAAPI.
 
 :::note
 
 You need to change the driver to `radeonsi` by adding the following environment variable `LIBVA_DRIVER_NAME=radeonsi` to your docker-compose file or [in the `config.yml` for HA Add-on users](advanced.md#environment_vars).
 
 :::
+
+VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
 ```yaml
 ffmpeg:
@@ -264,7 +219,7 @@ processes:
 
 :::note
 
-`nvidia-smi` may not show `ffmpeg` processes when run inside the container [due to docker limitations](https://github.com/NVIDIA/nvidia-docker/issues/179#issuecomment-645579458).
+`nvidia-smi` will not show `ffmpeg` processes when run inside the container [due to docker limitations](https://github.com/NVIDIA/nvidia-docker/issues/179#issuecomment-645579458).
 
 :::
 
@@ -299,6 +254,58 @@ processes:
 If you do not see these processes, check the `docker logs` for the container and look for decoding errors.
 
 These instructions were originally based on the [Jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux).
+
+## Raspberry Pi 3/4
+
+Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
+If you are using the HA Add-on, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
+
+```yaml
+# if you want to decode a h264 stream
+ffmpeg:
+  hwaccel_args: preset-rpi-64-h264
+
+# if you want to decode a h265 (hevc) stream
+ffmpeg:
+  hwaccel_args: preset-rpi-64-h265
+```
+
+:::note
+
+If running Frigate through Docker, you either need to run in privileged mode or
+map the `/dev/video*` devices to Frigate. With Docker Compose add:
+
+```yaml
+services:
+  frigate:
+    ...
+    devices:
+      - /dev/video11:/dev/video11
+```
+
+Or with `docker run`:
+
+```bash
+docker run -d \
+  --name frigate \
+  ...
+  --device /dev/video11 \
+  ghcr.io/blakeblackshear/frigate:stable
+```
+
+`/dev/video11` is the correct device (on Raspberry Pi 4B). You can check
+by running the following and looking for `H264`:
+
+```bash
+for d in /dev/video*; do
+  echo -e "---\n$d"
+  v4l2-ctl --list-formats-ext -d $d
+done
+```
+
+Or map in all the `/dev/video*` devices.
+
+:::
 
 # Community Supported
 
