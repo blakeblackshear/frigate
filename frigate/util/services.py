@@ -484,10 +484,13 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     return stats
 
 
-def try_get_info(f, h, default="N/A"):
+def try_get_info(f, h, default="N/A", sensor=None):
     try:
         if h:
-            v = f(h)
+            if sensor is not None:
+                v = f(h, sensor)
+            else:
+                v = f(h)
         else:
             v = f()
     except nvml.NVMLError_NotSupported:
@@ -516,6 +519,9 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
             util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
             enc = try_get_info(nvml.nvmlDeviceGetEncoderUtilization, handle)
             dec = try_get_info(nvml.nvmlDeviceGetDecoderUtilization, handle)
+            temp = try_get_info(
+                nvml.nvmlDeviceGetTemperature, handle, default=None, sensor=0
+            )
             pstate = try_get_info(nvml.nvmlDeviceGetPowerState, handle, default=None)
 
             if util != "N/A":
@@ -527,6 +533,11 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 gpu_mem_util = meminfo.used / meminfo.total * 100
             else:
                 gpu_mem_util = -1
+
+            if temp != "N/A" and temp is not None:
+                temp = float(temp)
+            else:
+                temp = None
 
             if enc != "N/A":
                 enc_util = enc[0]
@@ -545,6 +556,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 "enc": enc_util,
                 "dec": dec_util,
                 "pstate": pstate or "unknown",
+                "temp": temp,
             }
     except Exception:
         pass

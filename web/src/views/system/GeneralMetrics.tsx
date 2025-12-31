@@ -737,8 +737,9 @@ export default function GeneralMetrics({
             <div
               className={cn(
                 "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
-                gpuEncSeries?.length && "md:grid-cols-4",
                 gpuTempSeries?.length && "md:grid-cols-3",
+                gpuEncSeries?.length &&
+                  (gpuTempSeries?.length ? "md:grid-cols-5" : "md:grid-cols-4"),
               )}
             >
               {statsHistory[0]?.gpu_usages && (
