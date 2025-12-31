@@ -417,12 +417,12 @@ def get_openvino_npu_stats() -> Optional[dict[str, str]]:
         else:
             usage = 0.0
 
-        return {"npu": f"{round(usage, 2)}", "mem": "-"}
+        return {"npu": f"{round(usage, 2)}", "mem": "-%"}
     except (FileNotFoundError, PermissionError, ValueError):
         return None
 
 
-def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
+def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
     """Get GPU stats using rk."""
     try:
         with open("/sys/kernel/debug/rkrga/load", "r") as f:
@@ -440,7 +440,16 @@ def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
         return None
 
     average_load = f"{round(sum(load_values) / len(load_values), 2)}%"
-    return {"gpu": average_load, "mem": "-"}
+    stats: dict[str, str | float] = {"gpu": average_load, "mem": "-%"}
+
+    try:
+        with open("/sys/class/thermal/thermal_zone5/temp", "r") as f:
+            line = f.readline().strip()
+            stats["temp"] = round(int(line) / 1000, 1)
+    except (FileNotFoundError, OSError, ValueError):
+        pass
+
+    return stats
 
 
 def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
@@ -463,7 +472,16 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
 
     percentages = [int(load) for load in core_loads]
     mean = round(sum(percentages) / len(percentages), 2)
-    return {"npu": mean, "mem": "-"}
+    stats: dict[str, float | str] = {"npu": mean, "mem": "-%"}
+
+    try:
+        with open("/sys/class/thermal/thermal_zone6/temp", "r") as f:
+            line = f.readline().strip()
+            stats["temp"] = round(int(line) / 1000, 1)
+    except (FileNotFoundError, OSError, ValueError):
+        pass
+
+    return stats
 
 
 def try_get_info(f, h, default="N/A"):
