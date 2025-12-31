@@ -134,31 +134,13 @@ Now you should be able to start Frigate by running `docker compose up -d` from w
 
 This section assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/frigate/camera_setup). Pay particular attention to the section on choosing a detect resolution.
 
-### Step 1: Add a detect stream
+### Step 1: Start Frigate
 
-First we will add the detect stream for the camera:
+At this point you should be able to start Frigate and a basic config will be created automatically.
 
-```yaml
-mqtt:
-  enabled: False
+### Step 2: Add a camera
 
-cameras:
-  name_of_your_camera: # <------ Name the camera
-    enabled: True
-    ffmpeg:
-      inputs:
-        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
-          roles:
-            - detect
-```
-
-### Step 2: Start Frigate
-
-At this point you should be able to start Frigate and see the video feed in the UI.
-
-If you get an error image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections.
-
-FFmpeg arguments for other types of cameras can be found [here](../configuration/camera_specific.md).
+You can click the `Add Camera` button to use the camera setup wizard to get your first camera added into Frigate.
 
 ### Step 3: Configure hardware acceleration (recommended)
 
@@ -173,7 +155,7 @@ services:
   frigate:
     ...
     devices:
-      - /dev/dri/renderD128:/dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
+      - /dev/dri/renderD128:/dev/dri/renderD128 # for intel & amd hwaccel, needs to be updated for your hardware
     ...
 ```
 
