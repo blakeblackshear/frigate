@@ -31,11 +31,11 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 - [Raspberry Pi](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
 
-**Nvidia Jetson**
+**Nvidia Jetson** <CommunityBadge />
 
 - [Jetson](#nvidia-jetson): Frigate can utilize the media engine in Jetson hardware to accelerate video decoding.
 
-**Rockchip**
+**Rockchip** <CommunityBadge />
 
 - [RKNN](#rockchip-platform): Frigate can utilize the media engine in RockChip SOCs to accelerate video decoding.
 
@@ -184,11 +184,11 @@ If you are passing in a device path, make sure you've passed the device through 
 
 Frigate can utilize modern AMD integrated GPUs and AMD GPUs to accelerate video decoding using VAAPI.
 
-:::note
+### Configuring Radeon Driver
 
 You need to change the driver to `radeonsi` by adding the following environment variable `LIBVA_DRIVER_NAME=radeonsi` to your docker-compose file or [in the `config.yml` for HA Add-on users](advanced.md#environment_vars).
 
-:::
+### Via VAAPI
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
