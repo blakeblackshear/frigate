@@ -61,11 +61,13 @@ export type GpuStats = {
   enc?: string;
   dec?: string;
   pstate?: string;
+  temp?: number;
 };
 
 export type NpuStats = {
   npu: number;
   mem: string;
+  temp?: number;
 };
 
 export type GpuInfo = "vainfo" | "nvinfo";

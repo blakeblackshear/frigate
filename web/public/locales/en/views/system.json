@@ -51,6 +51,7 @@
       "gpuMemory": "GPU Memory",
       "gpuEncoder": "GPU Encoder",
       "gpuDecoder": "GPU Decoder",
+      "gpuTemperature": "GPU Temperature",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Vainfo Output",
@@ -77,6 +78,7 @@
       },
       "npuUsage": "NPU Usage",
       "npuMemory": "NPU Memory",
+      "npuTemperature": "NPU Temperature",
       "intelGpuWarning": {
         "title": "Intel GPU Stats Warning",
         "message": "GPU stats unavailable",
