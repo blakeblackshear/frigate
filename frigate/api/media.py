@@ -1935,7 +1935,7 @@ async def label_clip(request: Request, camera_name: str, label: str):
     try:
         event = event_query.get()
 
-        return await event_clip(request, event.id)
+        return await event_clip(request, event.id, 0)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
