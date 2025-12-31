@@ -21,6 +21,12 @@ This section guides you through setting up a server with Debian Bookworm and Doc
 
 There are many guides on how to install Debian Server, so this will be an abbreviated guide. Connect a temporary monitor and keyboard to your device so you can install a minimal server without a desktop environment.
 
+:::tip
+
+The latest version of Debian is no longer Debian 12 (Bookworm) but instead is now Trixie.  In some instances, by following these instructions you may have to update the source lists manually.  As (Trixie) handles formatting the list files differently it can be confusing when trying to follow this guide step by step.  See below for simple instructions to get you started should you be starting with Trixie for a new install.
+
+:::
+
 #### Prepare installation media
 
 1. Download the small installation image from the [Debian website](https://www.debian.org/distrib/netinst)
@@ -46,6 +52,39 @@ There are many guides on how to install Debian Server, so this will be an abbrev
       usermod -aG sudo blake
       ```
 1. Shutdown by running `poweroff`
+
+#### Install and setup Debian (Trixie) for remote access
+
+1. Ensure your device is connected to the network so updates and software options can be installed
+1. Choose the non-graphical install option if you don't have a mouse connected, but either install method works fine
+1. You will be prompted to set the root user password and create a user with a password
+1. Install the minimum software. Fewer dependencies result in less maintenance.
+   1. Uncheck "Debian desktop environment" and "GNOME"
+   1. Check "SSH server"
+   1. Keep "standard system utilities" checked
+2. After reboot, login as root at the command prompt
+   1. Navigate to the sources.list directory
+      ```bash
+      cd /etc/apt
+      nano sources.list
+      ```
+   1. Update the blank contents to the bare minimum for Trixe
+      ```bash
+      deb http://deb.debian.org/debian trixie main non-free-firmware
+      deb http://deb.debian.org/debian trixie-updates main non-free-firmware
+      deb-src http://deb.debian.org/debian trixie main non-free-firmware
+      deb-src http://deb.debian.org/debian trixie-updates main non-free-firmware
+      ```
+   1. Press CTRL+X and save to the same file name buffer
+   1. Install sudo
+      ```bash
+      apt update && apt install -y sudo
+      ```
+   1. Add the user you created to the sudo group (change `blake` to your own user)
+      ```bash
+      usermod -aG sudo blake
+      ```
+   1. Shutdown by running `poweroff`
 
 At this point, you can install the device in a permanent location. The remaining steps can be performed via SSH from another device. If you don't have an SSH client, you can install one of the options listed in the [Visual Studio Code documentation](https://code.visualstudio.com/docs/remote/troubleshooting#_installing-a-supported-ssh-client).
 
