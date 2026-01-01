@@ -3,6 +3,8 @@ id: hardware_acceleration_video
 title: Video Decoding
 ---
 
+import CommunityBadge from '@site/src/components/CommunityBadge';
+
 # Video Decoding
 
 It is highly recommended to use an integrated or discrete GPU for hardware acceleration video decoding in Frigate.
