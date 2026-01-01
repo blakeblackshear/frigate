@@ -11,7 +11,7 @@ Optimizing Frigate's performance is key to ensuring a responsive system and mini
 
 **Priority: Critical**
 
-Video decompression is one of the most CPU-intensive tasks in Frigate. While an AI accelerator handles object detection, it does not assist with decoding video streams, as described in the [getting started guide](../guides/getting_started). Hardware acceleration (hwaccel) offloads this work to your GPU or specialized video decode hardware, significantly reducing CPU usage and enabling you to support more cameras on the same hardware.
+Video decompression is one of the most CPU-intensive tasks in Frigate. While an AI accelerator handles object detection, it does not assist with decoding video streams, as described in the [getting started guide](../guides/getting_started.md). Hardware acceleration (hwaccel) offloads this work to your GPU or specialized video decode hardware, significantly reducing CPU usage and enabling you to support more cameras on the same hardware.
 
 ### Key Concepts
 
@@ -26,7 +26,7 @@ Video decompression is one of the most CPU-intensive tasks in Frigate. While an 
 
 ### Configuration
 
-Frigate provides preset configurations for common hardware acceleration scenarios. Set up `hwaccel_args` based on your hardware in your [configuration](../configuration/reference) as described in the [getting started guide](../guides/getting_started).
+Frigate provides preset configurations for common hardware acceleration scenarios. Set up `hwaccel_args` based on your hardware in your [configuration](../configuration/reference.md) as described in the [getting started guide](../guides/getting_started.md).
 
 ### Troubleshooting Hardware Acceleration
 
@@ -42,17 +42,17 @@ If hardware acceleration isn't working:
 
 **Priority: Critical**
 
-Choosing the right detector for your hardware is the single most important factor for detection performance. The detector is responsible for running the AI model that identifies objects in video frames. Different detector types have vastly different performance characteristics and hardware requirements, as detailed in the [detector documentation](../configuration/object_detectors).
+Choosing the right detector for your hardware is the single most important factor for detection performance. The detector is responsible for running the AI model that identifies objects in video frames. Different detector types have vastly different performance characteristics and hardware requirements, as detailed in the [detector documentation](../configuration/object_detectors.md).
 
 ### Understanding Detector Performance
 
-Frigate uses motion detection as a first-line check before running expensive object detection, as explained in the [motion detection documentation](../configuration/motion_detection). When motion is detected, Frigate creates a "region" (the green boxes in the debug viewer) and sends it to the detector. The detector's inference speed determines how many detections per second your system can handle.
+Frigate uses motion detection as a first-line check before running expensive object detection, as explained in the [motion detection documentation](../configuration/motion_detection.md). When motion is detected, Frigate creates a "region" (the green boxes in the debug viewer) and sends it to the detector. The detector's inference speed determines how many detections per second your system can handle.
 
 **Calculating Detector Capacity:** Your detector has a finite capacity measured in detections per second. With an inference speed of 10ms, your detector can handle approximately 100 detections per second (1000ms / 10ms = 100).If your cameras collectively require more than this capacity, you'll experience delays, missed detections, or the system will fall behind.
 
 ### Choosing the Right Detector
 
-Different detectors have vastly different performance characteristics, as shown in the [detector documentation](../configuration/object_detectors):
+Different detectors have vastly different performance characteristics, as shown in the [detector documentation](../configuration/object_detectors.md):
 
 **OpenVINO on Intel:**
 
@@ -107,7 +107,7 @@ detectors:
 
 ### Model Selection and Optimization
 
-The model you use significantly impacts detector performance. Frigate provides default models optimized for each detector type, but you can customize them as described in the [detector documentation](../configuration/object_detectors).
+The model you use significantly impacts detector performance. Frigate provides default models optimized for each detector type, but you can customize them as described in the [detector documentation](../configuration/object_detectors.md).
 
 **Model Size Trade-offs:**
 
@@ -118,24 +118,24 @@ The model you use significantly impacts detector performance. Frigate provides d
 
 **Priority: High**
 
-Properly configuring your camera streams is essential for optimal performance. Frigate supports multiple input streams per camera, allowing you to use different resolutions and frame rates for different purposes, as explained in the [camera documentation](../configuration/cameras).
+Properly configuring your camera streams is essential for optimal performance. Frigate supports multiple input streams per camera, allowing you to use different resolutions and frame rates for different purposes, as explained in the [camera documentation](../configuration/cameras.md).
 
 ### Detect Stream Resolution
 
-Your `detect` stream resolution should be just high enough to reliably identify the objects you care about, but no higher. Higher resolutions dramatically increase both CPU (decoding) and detector (inference) workload, as noted in the [getting started guide](../guides/getting_started) and [camera documentation](../configuration/cameras).
+Your `detect` stream resolution should be just high enough to reliably identify the objects you care about, but no higher. Higher resolutions dramatically increase both CPU (decoding) and detector (inference) workload, as noted in the [getting started guide](../guides/getting_started.md) and [camera documentation](../configuration/cameras.md).
 
 **Resolution Guidelines:**
 
-- **1280x720 (720p):** Recommended starting point for most installations in the [getting started guide](../guides/getting_started).
+- **1280x720 (720p):** Recommended starting point for most installations in the [getting started guide](../guides/getting_started.md).
 - **640x480 (VGA):** Suitable for close-range detection (doorways, small rooms)
 - **1920x1080 (1080p):** Only if detecting small objects at distance
 - **Avoid 4K for detection:** Rarely necessary and extremely resource-intensive
 
-**Important:** Frigate will try to automatically detect the stream resolution if not specified, but it is recommended to explicitly set it in the [getting started guide](../guides/getting_started) to ensure consistency and help with troubleshooting.
+**Important:** Frigate will try to automatically detect the stream resolution if not specified, but it is recommended to explicitly set it in the [getting started guide](../guides/getting_started.md) to ensure consistency and help with troubleshooting.
 
 ### Frame Rate Optimization
 
-A higher frame rate for detection increases CPU and detector load without always improving accuracy. Most motion happens over multiple frames, so 5 FPS is typically sufficient for reliable object detection, as described in the [configuration reference](../configuration/reference) and [motion detection documentation](../configuration/motion_detection).
+A higher frame rate for detection increases CPU and detector load without always improving accuracy. Most motion happens over multiple frames, so 5 FPS is typically sufficient for reliable object detection, as described in the [configuration reference](../configuration/reference.md) and [motion detection documentation](../configuration/motion_detection.md).
 
 **Recommended Configuration:**
 
@@ -146,17 +146,17 @@ detect:
 
 **Frame Rate Guidelines:**
 
-- **5 FPS:** Ideal for most use cases, recommended default in the [getting started guide](../guides/getting_started).
+- **5 FPS:** Ideal for most use cases, recommended default in the [getting started guide](../guides/getting_started.md).
 - **3-4 FPS:** Acceptable for stationary camera monitoring slow-moving objects
 - **10 FPS:** Rarely beneficial, significantly increases resource usage. Only recommended for users with dedicated LPR cameras where the plate crosses the full frame very quickly.
 - **Over 10 FPS**: Significantly increases resource usage for no benefit.
 - **Reduce at camera level:** If possible, configure your camera to output 5 FPS directly in firmware to save bandwidth and decoding cycles
 
-**Why 5 FPS works:** Frigate uses motion detection to decide when to run object detection. At 5 FPS, there's only 200ms between frames, which is fast enough to catch any significant motion while using 1/6th the resources of 30 FPS, as explained in the [motion detection documentation](../configuration/motion_detection).
+**Why 5 FPS works:** Frigate uses motion detection to decide when to run object detection. At 5 FPS, there's only 200ms between frames, which is fast enough to catch any significant motion while using 1/6th the resources of 30 FPS, as explained in the [motion detection documentation](../configuration/motion_detection.md).
 
 ### Separate Streams for Detect vs. Record
 
-One of the most impactful optimizations is using separate streams for detection and recording. This allows you to use a low-resolution sub-stream for efficient detection while recording high-quality footage from the main stream, as recommended in the [getting started guide](../guides/getting_started) and [camera documentation](../configuration/cameras).
+One of the most impactful optimizations is using separate streams for detection and recording. This allows you to use a low-resolution sub-stream for efficient detection while recording high-quality footage from the main stream, as recommended in the [getting started guide](../guides/getting_started.md) and [camera documentation](../configuration/cameras.md).
 
 **Benefits of separate streams:**
 
@@ -166,7 +166,7 @@ One of the most impactful optimizations is using separate streams for detection 
 - Maintains high-quality recordings for evidence
 - Allows independent optimization of each stream
 
-**Single Stream Configuration:** If you must use a single stream, Frigate will automatically assign the `detect` role, as described in the [camera documentation](../configuration/cameras).
+**Single Stream Configuration:** If you must use a single stream, Frigate will automatically assign the `detect` role, as described in the [camera documentation](../configuration/cameras.md).
 
 However, this is less efficient as the same high-resolution stream must be decoded for both purposes.
 
@@ -174,7 +174,7 @@ However, this is less efficient as the same high-resolution stream must be decod
 
 **Priority: High**
 
-Motion detection acts as the critical first-line gatekeeper for object detection in Frigate. It determines when and where to run expensive AI inference, as explained in the [motion detection documentation](../configuration/motion_detection). Properly tuned motion detection ensures your detector only analyzes relevant areas, dramatically improving system efficiency.
+Motion detection acts as the critical first-line gatekeeper for object detection in Frigate. It determines when and where to run expensive AI inference, as explained in the [motion detection documentation](../configuration/motion_detection.md). Properly tuned motion detection ensures your detector only analyzes relevant areas, dramatically improving system efficiency.
 
 ### Understanding Motion Detection's Role
 
@@ -189,7 +189,7 @@ Frigate uses motion detection to identify areas of the frame worth checking with
 
 ### Motion Masks
 
-Motion masks prevent specific areas from triggering object detection. This is one of the most impactful optimizations you can make, as described in the [mask documentation](../configuration/masks) and [motion detection documentation](../configuration/motion_detection).
+Motion masks prevent specific areas from triggering object detection. This is one of the most impactful optimizations you can make, as described in the [mask documentation](../configuration/masks.md) and [motion detection documentation](../configuration/motion_detection.md).
 
 **What to mask:**
 
@@ -204,7 +204,7 @@ Motion masks prevent specific areas from triggering object detection. This is on
 
 - Areas where you want to detect objects, even if you don't want alerts there
 - Paths objects might take to reach areas of interest
-- Transition zones between monitored areas, as noted in the [mask documentation](../configuration/masks).
+- Transition zones between monitored areas, as noted in the [mask documentation](../configuration/masks.md).
 
 **Critical distinction - Motion masks vs. Object filter masks:** Motion masks only prevent motion from triggering detection. They do NOT prevent objects from being detected if object detection was started due to motion in unmasked areas. If you want to filter out false positive detections in specific locations, use object filter masks instead (covered in Section 5).
 
@@ -214,7 +214,7 @@ Motion masks prevent specific areas from triggering object detection. This is on
 
 Frigate provides several parameters to fine-tune motion detection sensitivity. These work together to determine what constitutes "motion" worthy of triggering object detection.
 
-**threshold:** The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion, as described in the [configuration reference](../configuration/reference).
+**threshold:** The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion, as described in the [configuration reference](../configuration/reference.md).
 
 ```yaml
 motion:
@@ -403,9 +403,9 @@ objects:
 
 ### Object Filter Masks
 
-Object filter masks are different from motion masks. They filter out false positives for specific object types based on location, evaluated at the bottom center of the detected object's bounding box, as described in the [mask documentation](../configuration/masks).
+Object filter masks are different from motion masks. They filter out false positives for specific object types based on location, evaluated at the bottom center of the detected object's bounding box, as described in the [mask documentation](../configuration/masks.md).
 
-See the [mask documentation](../configuration/masks) and [configuration reference](../configuration/reference) for more details.
+See the [mask documentation](../configuration/masks.md) and [configuration reference](../configuration/reference.md) for more details.
 
 **Global object mask:** The mask under the `objects` section applies to all tracked object types and is combined with object-specific masks.
 
@@ -416,7 +416,7 @@ See the [mask documentation](../configuration/masks) and [configuration referenc
 - Remove false positives in fixed locations (like a tree base frequently detected as a person)
 - Prevent animals from being detected in areas they can't physically access
 
-**How it works:** The bottom center of the bounding box is evaluated against the mask. If it falls in a masked area, the detection is assumed to be a false positive and ignored, as explained in the [mask documentation](../configuration/masks).
+**How it works:** The bottom center of the bounding box is evaluated against the mask. If it falls in a masked area, the detection is assumed to be a false positive and ignored, as explained in the [mask documentation](../configuration/masks.md).
 
 **Creating object filter masks:** Use the same mask creator tool in the UI (Settings → Mask / zone editor), but select "Object mask" instead of "Motion mask."
 
@@ -1124,14 +1124,14 @@ Usually not the bottleneck, but needed if:
 
 **Optimization checklist before upgrading:**
 
-1. ✓ Hardware acceleration enabled? See the [hardware acceleration documentation](../configuration/hardware_acceleration_video).
-2. ✓ Detect resolution ≤720p? See the [getting started guide](../guides/getting_started).
+1. ✓ Hardware acceleration enabled? See the [hardware acceleration documentation](../configuration/hardware_acceleration_video.md).
+2. ✓ Detect resolution ≤720p? See the [getting started guide](../guides/getting_started.md).
 3. ✓ Detect FPS ≤5?
 4. ✓ Motion masks configured?
 5. ✓ Separate detect/record streams?
-6. ✓ Object filters tuned? See the [configuration reference](../configuration/reference).
+6. ✓ Object filters tuned? See the [configuration reference](../configuration/reference.md).
 7. ✓ Using efficient retention mode?
-8. ✓ Tmpfs cache configured? See the [getting started guide](../guides/getting_started).
+8. ✓ Tmpfs cache configured? See the [getting started guide](../guides/getting_started.md).
 
 If all optimizations applied and still insufficient, hardware upgrade is justified.
 
@@ -1197,7 +1197,7 @@ If all optimizations applied and still insufficient, hardware upgrade is justifi
 1. Check FFmpeg logs for specific errors
 2. Verify network stability to cameras
 3. Check storage space and I/O performance
-4. Review retry_interval setting in the [configuration reference](../configuration/reference).
+4. Review retry_interval setting in the [configuration reference](../configuration/reference.md).
 
 **Solutions:**
 
@@ -1218,7 +1218,7 @@ If all optimizations applied and still insufficient, hardware upgrade is justifi
 
 **Diagnostic steps:**
 
-1. Check configured shm_size in the [getting started guide](../guides/getting_started).
+1. Check configured shm_size in the [getting started guide](../guides/getting_started.md).
 2. Calculate actual requirements based on cameras
 3. Review system memory usage
 4. Check for memory leaks (increasing over time)
@@ -1259,9 +1259,9 @@ If all optimizations applied and still insufficient, hardware upgrade is justifi
 
 Optimizing Frigate performance requires a systematic approach across multiple areas. The highest-impact optimizations are:
 
-1. **Enable hardware acceleration for video decoding** in the [hardware acceleration documentation](../configuration/hardware_acceleration_video) - Reduces CPU usage by 50-80%
-2. **Use a dedicated detector** in the [detector documentation](../configuration/object_detectors) - 10-20× faster than CPU detection
-3. **Configure appropriate detect resolution and FPS** in the [getting started guide](../guides/getting_started) - Balance accuracy with resources
+1. **Enable hardware acceleration for video decoding** in the [hardware acceleration documentation](../configuration/hardware_acceleration_video.md) - Reduces CPU usage by 50-80%
+2. **Use a dedicated detector** in the [detector documentation](../configuration/object_detectors.md) - 10-20× faster than CPU detection
+3. **Configure appropriate detect resolution and FPS** in the [getting started guide](../guides/getting_started.md) - Balance accuracy with resources
 4. **Implement motion masks**- Reduce unnecessary detection cycles
 5. **Use separate detect and record streams**- Optimize each stream for its purpose
 
