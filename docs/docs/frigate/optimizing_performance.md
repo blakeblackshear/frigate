@@ -1147,7 +1147,7 @@ If all optimizations applied and still insufficient, hardware upgrade is justifi
 
 **Diagnostic steps:**
 
-1. Verify hwaccel actually working (check logs for errors) in the [hardware acceleration documentation](../configuration/hardware_acceleration_video).
+1. Verify hwaccel actually working (check logs for errors) in the [hardware acceleration documentation](../configuration/hardware_acceleration_video.md).
 2. Confirm GPU device accessible in container
 3. Check if using correct preset for your hardware
 4. Verify camera streams are compatible codec (H.264/H.265)
@@ -1178,11 +1178,11 @@ If all optimizations applied and still insufficient, hardware upgrade is justifi
 
 **Solutions:**
 
-- Add second detector instance as described in the [detector documentation](../configuration/object_detectors).
-- Reduce detect FPS from 5 to 3 in the [getting started guide](../guides/getting_started).
+- Add second detector instance as described in the [detector documentation](../configuration/object_detectors.md).
+- Reduce detect FPS from 5 to 3 in the [getting started guide](../guides/getting_started.md).
 - Add motion masks to reduce detection triggers
-- Increase object filter thresholds in the [configuration reference](../configuration/reference).
-- Consider upgrading detector hardware as described in the [detector documentation](../configuration/object_detectors).
+- Increase object filter thresholds in the [configuration reference](../configuration/reference.md).
+- Consider upgrading detector hardware as described in the [detector documentation](../configuration/object_detectors.md).
 
 ### Issue: Recording Gaps or Missing Footage
 
