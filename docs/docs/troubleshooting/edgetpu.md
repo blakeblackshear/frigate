@@ -1,6 +1,6 @@
 ---
 id: edgetpu
-title: Troubleshooting EdgeTPU
+title: EdgeTPU Errors
 ---
 
 ## USB Coral Not Detected

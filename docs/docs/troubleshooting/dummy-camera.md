@@ -1,6 +1,6 @@
 ---
 id: dummy-camera
-title: Troubleshooting Detection
+title: Analyzing Object Detection
 ---
 
 When investigating object detection or tracking problems, it can be helpful to replay an exported video as a temporary "dummy" camera. This lets you reproduce issues locally, iterate on configuration (detections, zones, enrichment settings), and capture logs and clips for analysis.

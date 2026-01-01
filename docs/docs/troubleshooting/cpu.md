@@ -1,6 +1,6 @@
 ---
 id: cpu
-title: Troubleshooting High CPU Usage
+title: High CPU Usage
 ---
 
 High CPU usage can impact Frigate's performance and responsiveness. This guide outlines the most effective configuration changes to help reduce CPU consumption and optimize resource usage.

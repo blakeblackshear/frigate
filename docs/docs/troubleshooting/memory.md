@@ -1,6 +1,6 @@
 ---
 id: memory
-title: Troubleshooting Memory Usage
+title: Memory Usage
 ---
 
 Frigate includes built-in memory profiling using [memray](https://bloomberg.github.io/memray/) to help diagnose memory issues. This feature allows you to profile specific Frigate modules to identify memory leaks, excessive allocations, or other memory-related problems.
