@@ -15,7 +15,7 @@ Video decoding is one of the most CPU-intensive tasks in Frigate. While an AI ac
 
 **Resolution & FPS Impact:** The decoding burden grows exponentially with resolution and frame rate. A 4K stream at 30 FPS requires roughly 4 times the processing power of a 1080p stream at the same frame rate, and doubling the frame rate doubles the decode workload. This is why hardware acceleration becomes critical when working with multiple high-resolution cameras.
 
-**Hardware Acceleration Benefits:** By using dedicated video decode hardware (Intel QuickSync, NVIDIA NVDEC, AMD VCE, or VA-API), you can:
+**Hardware Acceleration Benefits:** By using dedicated video decode hardware, you can:
 
 - Significantly reduce CPU usage per camera stream
 - Support 2-3x more cameras on the same hardware
