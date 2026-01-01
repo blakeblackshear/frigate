@@ -1108,8 +1108,8 @@ Usually not the bottleneck, but needed if:
 
 **Optimize first if:**
 
-- CPU usage <80% average
-- Detector usage <85%
+- CPU usage less than 80% average
+- Detector usage less than 85%
 - No skipped frames
 - Sufficient RAM available
 - Storage not full
