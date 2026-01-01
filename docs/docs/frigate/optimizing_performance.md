@@ -774,7 +774,7 @@ Network bandwidth impacts both camera-to-Frigate and Frigate-to-client connectio
 
 **MQTT traffic:**
 
-- Minimal, typically <1 Mbps even with many cameras
+- Minimal, typically less than 1 Mbps even with many cameras
 - Event notifications and state updates
 
 **API traffic:**
