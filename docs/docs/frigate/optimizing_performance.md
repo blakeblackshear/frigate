@@ -1254,7 +1254,6 @@ If all optimizations applied and still insufficient, hardware upgrade is justifi
 - Move database to SSD
 - Optimize go2rtc configuration
 - Reduce recording retention to shrink database
-- Use WebRTC instead of MSE for lower latency
 
 ## Conclusion
 
