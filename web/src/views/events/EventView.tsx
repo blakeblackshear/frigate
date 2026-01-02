@@ -762,8 +762,9 @@ function DetectionReview({
 
         {!loading && currentItems?.length === 0 && (
           <EmptyCard
-            className="y-translate-1/2 absolute left-[50%] top-[50%] -translate-x-1/2"
+            className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 items-center text-center"
             title={emptyCardData.title}
+            titleHeading={false}
             description={emptyCardData.description}
             icon={<LuFolderCheck className="size-16" />}
           />
