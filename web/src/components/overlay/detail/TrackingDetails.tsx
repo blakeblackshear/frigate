@@ -849,7 +849,11 @@ function LifecycleIconRow({
     () =>
       Array.isArray(item.data.attribute_box) &&
       item.data.attribute_box.length >= 4
-        ? (item.data.attribute_box[2] * item.data.attribute_box[3]).toFixed(4)
+        ? (
+            item.data.attribute_box[2] *
+            item.data.attribute_box[3] *
+            100
+          ).toFixed(2)
         : undefined,
     [item.data.attribute_box],
   );
@@ -857,7 +861,7 @@ function LifecycleIconRow({
   const areaPct = useMemo(
     () =>
       Array.isArray(item.data.box) && item.data.box.length >= 4
-        ? (item.data.box[2] * item.data.box[3]).toFixed(4)
+        ? (item.data.box[2] * item.data.box[3] * 100).toFixed(2)
         : undefined,
     [item.data.box],
   );
