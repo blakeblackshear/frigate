@@ -465,6 +465,7 @@ There are important limitations in HA OS to be aware of:
 
 - Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
+- Intel NPUs are not supported because HA OS does not include the NPU firmware.
 - Nvidia GPUs are not supported because addons do not support the nvidia runtime.
 
 :::
