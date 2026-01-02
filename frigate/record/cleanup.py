@@ -7,6 +7,7 @@ import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
+from typing import Optional
 
 from playhouse.sqlite_ext import SqliteExtDatabase
 
@@ -104,13 +105,28 @@ class RecordingCleanup(threading.Thread):
         self,
         continuous_expire_date: float,
         motion_expire_date: float,
+        window_expire_date: Optional[float],
         config: CameraConfig,
         reviews: ReviewSegment,
     ) -> None:
         """Delete recordings for existing camera based on retention config."""
-        # Get the timestamp for cutoff of retained days
+        # Build query condition for recordings to check
+        expire_condition = (Recordings.camera == config.name) & (
+            (
+                (Recordings.end_time < continuous_expire_date)
+                & (Recordings.motion == 0)
+                & (Recordings.dBFS == 0)
+            )
+            | (Recordings.end_time < motion_expire_date)
+        )
 
-        # Get recordings to check for expiration
+        # Include recordings past time-window cutoff for filtering
+        if window_expire_date is not None:
+            expire_condition = expire_condition | (
+                (Recordings.camera == config.name)
+                & (Recordings.end_time < window_expire_date)
+            )
+
         recordings: Recordings = (
             Recordings.select(
                 Recordings.id,
@@ -121,17 +137,7 @@ class RecordingCleanup(threading.Thread):
                 Recordings.motion,
                 Recordings.dBFS,
             )
-            .where(
-                (Recordings.camera == config.name)
-                & (
-                    (
-                        (Recordings.end_time < continuous_expire_date)
-                        & (Recordings.motion == 0)
-                        & (Recordings.dBFS == 0)
-                    )
-                    | (Recordings.end_time < motion_expire_date)
-                )
-            )
+            .where(expire_condition)
             .order_by(Recordings.start_time)
             .namedtuples()
             .iterator()
@@ -180,16 +186,35 @@ class RecordingCleanup(threading.Thread):
                 if review.end_time + post_capture < recording.start_time:
                     review_start = idx
 
+            # Check time-window retention for recordings without review overlap
+            within_window = False
+            motion_config = config.record.motion
+            if motion_config.hours and not keep:
+                recording_dt = datetime.datetime.fromtimestamp(recording.start_time)
+                now = datetime.datetime.now()
+                age_hours = (now - recording_dt).total_seconds() / 3600
+                if age_hours <= motion_config.always_retain:
+                    within_window = True
+                elif motion_config.is_in_retention_window(
+                    recording_dt.weekday(), recording_dt.hour, recording_dt.minute
+                ):
+                    within_window = True
+
             # Delete recordings outside of the retention window or based on the retention mode
             if (
-                not keep
+                (not keep and not within_window)
                 or (
-                    mode == RetainModeEnum.motion
+                    keep
+                    and mode == RetainModeEnum.motion
                     and recording.motion == 0
                     and recording.objects == 0
                     and recording.dBFS == 0
                 )
-                or (mode == RetainModeEnum.active_objects and recording.objects == 0)
+                or (
+                    keep
+                    and mode == RetainModeEnum.active_objects
+                    and recording.objects == 0
+                )
             ):
                 Path(recording.path).unlink(missing_ok=True)
                 deleted_recordings.add(recording.id)
@@ -271,10 +296,13 @@ class RecordingCleanup(threading.Thread):
         logger.debug("Start expire recordings.")
         logger.debug("Start deleted cameras.")
 
-        # Handle deleted cameras
-        expire_days = max(
-            self.config.record.continuous.days, self.config.record.motion.days
-        )
+        # Handle deleted cameras - use configured days or skip if unlimited
+        continuous_days = self.config.record.continuous.days
+        motion_days = self.config.record.motion.days
+        if continuous_days is None and motion_days is None:
+            expire_days = 0  # no day-based expiration configured
+        else:
+            expire_days = max(continuous_days or 0, motion_days or 0)
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
@@ -312,17 +340,33 @@ class RecordingCleanup(threading.Thread):
             now = datetime.datetime.now()
 
             self.expire_review_segments(config, now)
+
+            # Calculate expire dates - None means unlimited (use far future)
+            continuous_days = config.record.continuous.days
+            motion_days = config.record.motion.days
             continuous_expire_date = (
-                now - datetime.timedelta(days=config.record.continuous.days)
+                now
+                - datetime.timedelta(
+                    days=continuous_days if continuous_days is not None else 36500
+                )
             ).timestamp()
             motion_expire_date = (
                 now
                 - datetime.timedelta(
                     days=max(
-                        config.record.motion.days, config.record.continuous.days
-                    )  # can't keep motion for less than continuous
+                        motion_days if motion_days is not None else 36500,
+                        continuous_days if continuous_days is not None else 0,
+                    )
                 )
             ).timestamp()
+
+            # Calculate time-window cutoff if configured
+            motion_config = config.record.motion
+            window_expire_date = None
+            if motion_config.hours:
+                window_expire_date = (
+                    now - datetime.timedelta(hours=motion_config.always_retain)
+                ).timestamp()
 
             # Get all the reviews to check against
             reviews: ReviewSegment = (
@@ -342,7 +386,11 @@ class RecordingCleanup(threading.Thread):
             )
 
             self.expire_existing_camera_recordings(
-                continuous_expire_date, motion_expire_date, config, reviews
+                continuous_expire_date,
+                motion_expire_date,
+                window_expire_date,
+                config,
+                reviews,
             )
             logger.debug(f"End camera: {camera}.")
 

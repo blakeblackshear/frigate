@@ -1,7 +1,8 @@
+import re
 from enum import Enum
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from frigate.const import MAX_PRE_CAPTURE
 from frigate.review.types import SeverityEnum
@@ -21,9 +22,117 @@ __all__ = [
 
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 
+WEEKDAY_MAP = {
+    "mon": 0,
+    "monday": 0,
+    "tue": 1,
+    "tuesday": 1,
+    "wed": 2,
+    "wednesday": 2,
+    "thu": 3,
+    "thursday": 3,
+    "fri": 4,
+    "friday": 4,
+    "sat": 5,
+    "saturday": 5,
+    "sun": 6,
+    "sunday": 6,
+}
+
+TIME_WINDOW_PATTERN = re.compile(
+    r"^(?:([a-z]+)(?:-([a-z]+))?\s+)?(\d{2}):(\d{2})-(\d{2}):(\d{2})$", re.IGNORECASE
+)
+
+
+def _parse_time_window(entry: str) -> dict:
+    """Parse time window string into components."""
+    match = TIME_WINDOW_PATTERN.match(entry.strip())
+    if not match:
+        raise ValueError(
+            f"Invalid time window format: '{entry}'. "
+            "Use 'HH:MM-HH:MM' or 'mon-fri HH:MM-HH:MM'"
+        )
+
+    day_start, day_end, start_h, start_m, end_h, end_m = match.groups()
+
+    weekdays = None
+    if day_start:
+        start_day = day_start.lower()
+        if start_day not in WEEKDAY_MAP:
+            raise ValueError(f"Invalid weekday: '{day_start}'")
+        start_num = WEEKDAY_MAP[start_day]
+
+        if day_end:
+            end_day = day_end.lower()
+            if end_day not in WEEKDAY_MAP:
+                raise ValueError(f"Invalid weekday: '{day_end}'")
+            end_num = WEEKDAY_MAP[end_day]
+            if start_num <= end_num:
+                weekdays = list(range(start_num, end_num + 1))
+            else:
+                weekdays = list(range(start_num, 7)) + list(range(0, end_num + 1))
+        else:
+            weekdays = [start_num]
+
+    return {
+        "weekdays": weekdays,
+        "start": int(start_h) * 60 + int(start_m),
+        "end": int(end_h) * 60 + int(end_m),
+    }
+
+
+def _matches_time_window(
+    windows: list[dict], weekday: int, hour: int, minute: int
+) -> bool:
+    """Check if given time falls within any time window."""
+    time_val = hour * 60 + minute
+    for window in windows:
+        if window["weekdays"] is not None and weekday not in window["weekdays"]:
+            continue
+        start, end = window["start"], window["end"]
+        if start <= end:
+            if start <= time_val <= end:
+                return True
+        else:
+            # overnight range like 22:00-06:00
+            if time_val >= start or time_val <= end:
+                return True
+    return False
+
 
 class RecordRetainConfig(FrigateBaseModel):
-    days: float = Field(default=0, ge=0, title="Default retention period.")
+    days: Optional[float] = Field(
+        default=None,
+        ge=0,
+        title="Maximum retention period in days. None for unlimited, 0 for no retention.",
+    )
+    hours: Optional[list[str]] = Field(
+        default=None,
+        title="Time windows to retain recordings. Outside these windows, recordings are deleted after always_retain period.",
+    )
+    always_retain: float = Field(
+        default=24,
+        ge=0,
+        title="Hours to keep all recordings before applying time window filter.",
+    )
+
+    @field_validator("hours", mode="before")
+    @classmethod
+    def validate_hours(cls, v):
+        if v is None:
+            return None
+        if not isinstance(v, list):
+            raise ValueError("hours must be a list")
+        for entry in v:
+            _parse_time_window(entry)
+        return v
+
+    def is_in_retention_window(self, weekday: int, hour: int, minute: int = 0) -> bool:
+        """Check if recordings at this time should be retained."""
+        if not self.hours:
+            return True
+        windows = [_parse_time_window(s) for s in self.hours]
+        return _matches_time_window(windows, weekday, hour, minute)
 
 
 class RetainModeEnum(str, Enum):

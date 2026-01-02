@@ -517,13 +517,31 @@ record:
     # Optional: Number of days to retain recordings regardless of tracked objects or motion (default: shown below)
     # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
     #       if you only want to retain recordings of alerts and detections.
+    #       Set to null for unlimited retention.
     days: 0
+    # Optional: Time windows to retain recordings (default: not set, keep all times)
+    # After always_retain period, only recordings within these windows are kept.
+    # Format: "HH:MM-HH:MM" or "mon-fri HH:MM-HH:MM" or "sat HH:MM-HH:MM"
+    hours:
+      - "mon-fri 07:00-23:00"
+      - "sat-sun 10:00-18:00"
+    # Optional: Hours to retain all recordings before applying time window filter (default: shown below)
+    always_retain: 24
   # Optional: Motion retention settings
   motion:
     # Optional: Number of days to retain recordings regardless of tracked objects (default: shown below)
     # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
     #       if you only want to retain recordings of alerts and detections.
+    #       Set to null for unlimited retention.
     days: 0
+    # Optional: Time windows to retain recordings (default: not set, keep all times)
+    # After always_retain period, only recordings within these windows are kept.
+    # Format: "HH:MM-HH:MM" or "mon-fri HH:MM-HH:MM" or "sat HH:MM-HH:MM"
+    hours:
+      - "mon-fri 07:00-23:00"
+      - "sat-sun 10:00-18:00"
+    # Optional: Hours to retain all recordings before applying time window filter (default: shown below)
+    always_retain: 24
   # Optional: Recording Export Settings
   export:
     # Optional: Timelapse Output Args (default: shown below).

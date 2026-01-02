@@ -95,6 +95,29 @@ record:
 
 Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
 
+### Time-Window Based Retention
+
+Recordings can be filtered to only retain footage from specific time windows after an initial period.
+
+```yaml
+record:
+  enabled: True
+  motion:
+    days: 14
+    always_retain: 48
+    hours:
+      - "mon-fri 07:00-23:00"
+      - "sat-sun 10:00-18:00"
+```
+
+Supported formats for `hours`:
+- `"07:00-23:00"` - all days
+- `"mon-fri 07:00-18:00"` - day range
+- `"sat 10:00-16:00"` - single day
+- `"22:00-06:00"` - overnight
+
+Alerts and detections are always retained regardless of time windows.
+
 ### Object Recording
 
 The number of days to record review items can be specified for review items classified as alerts as well as tracked objects.
@@ -116,7 +139,9 @@ This configuration will retain recording segments that overlap with alerts and d
 
 ## Can I have "continuous" recordings, but only at certain times?
 
-Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
+Yes! You can use time-window based retention to keep recordings only from specific hours. See [Time-Window Based Retention](#time-window-based-retention) above.
+
+Alternatively, using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
 
 ## How do I export recordings?
 
