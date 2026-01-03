@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import List
 from urllib.parse import unquote
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi import Path as PathParam
-from fastapi.responses import JSONResponse, Request
+from fastapi.responses import JSONResponse
 from peewee import fn, operator
 
 from frigate.api.auth import (
