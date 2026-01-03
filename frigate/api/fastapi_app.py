@@ -22,6 +22,7 @@ from frigate.api import (
     media,
     notification,
     preview,
+    record,
     review,
 )
 from frigate.api.auth import get_jwt_secret, limiter, require_admin_by_default
@@ -128,6 +129,7 @@ def create_fastapi_app(
     app.include_router(export.router)
     app.include_router(event.router)
     app.include_router(media.router)
+    app.include_router(record.router)
     # App Properties
     app.frigate_config = frigate_config
     app.embeddings = embeddings

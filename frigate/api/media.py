@@ -8,9 +8,8 @@ import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
-from functools import reduce
 from pathlib import Path as FilePath
-from typing import Any, List
+from typing import Any
 from urllib.parse import unquote
 
 import cv2
@@ -19,12 +18,11 @@ import pytz
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
-from peewee import DoesNotExist, fn, operator
+from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
 from frigate.api.auth import (
     allow_any_authenticated,
-    get_allowed_cameras_for_filter,
     require_camera_access,
 )
 from frigate.api.defs.query.media_query_parameters import (
@@ -32,8 +30,6 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
-    MediaRecordingsAvailabilityQueryParams,
-    MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
 from frigate.camera.state import CameraState
@@ -44,13 +40,11 @@ from frigate.const import (
     INSTALL_DIR,
     MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
-    RECORD_DIR,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
-from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
@@ -395,333 +389,6 @@ async def submit_recording_snapshot_to_plus(
             },
             status_code=404,
         )
-
-
-@router.get("/recordings/storage", dependencies=[Depends(allow_any_authenticated())])
-def get_recordings_storage_usage(request: Request):
-    recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
-        "storage"
-    ][RECORD_DIR]
-
-    if not recording_stats:
-        return JSONResponse({})
-
-    total_mb = recording_stats["total"]
-
-    camera_usages: dict[str, dict] = (
-        request.app.storage_maintainer.calculate_camera_usages()
-    )
-
-    for camera_name in camera_usages.keys():
-        if camera_usages.get(camera_name, {}).get("usage"):
-            camera_usages[camera_name]["usage_percent"] = (
-                camera_usages.get(camera_name, {}).get("usage", 0) / total_mb
-            ) * 100
-
-    return JSONResponse(content=camera_usages)
-
-
-@router.get("/recordings/summary", dependencies=[Depends(allow_any_authenticated())])
-def all_recordings_summary(
-    request: Request,
-    params: MediaRecordingsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
-):
-    """Returns true/false by day indicating if recordings exist"""
-
-    cameras = params.cameras
-    if cameras != "all":
-        requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content={})
-        camera_list = list(filtered)
-    else:
-        camera_list = allowed_cameras
-
-    time_range_query = (
-        Recordings.select(
-            fn.MIN(Recordings.start_time).alias("min_time"),
-            fn.MAX(Recordings.start_time).alias("max_time"),
-        )
-        .where(Recordings.camera << camera_list)
-        .dicts()
-        .get()
-    )
-
-    min_time = time_range_query.get("min_time")
-    max_time = time_range_query.get("max_time")
-
-    if min_time is None or max_time is None:
-        return JSONResponse(content={})
-
-    dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
-
-    days: dict[str, bool] = {}
-
-    for period_start, period_end, period_offset in dst_periods:
-        hours_offset = int(period_offset / 60 / 60)
-        minutes_offset = int(period_offset / 60 - hours_offset * 60)
-        period_hour_modifier = f"{hours_offset} hour"
-        period_minute_modifier = f"{minutes_offset} minute"
-
-        period_query = (
-            Recordings.select(
-                fn.strftime(
-                    "%Y-%m-%d",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("day")
-            )
-            .where(
-                (Recordings.camera << camera_list)
-                & (Recordings.end_time >= period_start)
-                & (Recordings.start_time <= period_end)
-            )
-            .group_by(
-                fn.strftime(
-                    "%Y-%m-%d",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                )
-            )
-            .order_by(Recordings.start_time.desc())
-            .namedtuples()
-        )
-
-        for g in period_query:
-            days[g.day] = True
-
-    return JSONResponse(content=dict(sorted(days.items())))
-
-
-@router.get(
-    "/{camera_name}/recordings/summary", dependencies=[Depends(require_camera_access)]
-)
-async def recordings_summary(camera_name: str, timezone: str = "utc"):
-    """Returns hourly summary for recordings of given camera"""
-
-    time_range_query = (
-        Recordings.select(
-            fn.MIN(Recordings.start_time).alias("min_time"),
-            fn.MAX(Recordings.start_time).alias("max_time"),
-        )
-        .where(Recordings.camera == camera_name)
-        .dicts()
-        .get()
-    )
-
-    min_time = time_range_query.get("min_time")
-    max_time = time_range_query.get("max_time")
-
-    days: dict[str, dict] = {}
-
-    if min_time is None or max_time is None:
-        return JSONResponse(content=list(days.values()))
-
-    dst_periods = get_dst_transitions(timezone, min_time, max_time)
-
-    for period_start, period_end, period_offset in dst_periods:
-        hours_offset = int(period_offset / 60 / 60)
-        minutes_offset = int(period_offset / 60 - hours_offset * 60)
-        period_hour_modifier = f"{hours_offset} hour"
-        period_minute_modifier = f"{minutes_offset} minute"
-
-        recording_groups = (
-            Recordings.select(
-                fn.strftime(
-                    "%Y-%m-%d %H",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("hour"),
-                fn.SUM(Recordings.duration).alias("duration"),
-                fn.SUM(Recordings.motion).alias("motion"),
-                fn.SUM(Recordings.objects).alias("objects"),
-            )
-            .where(
-                (Recordings.camera == camera_name)
-                & (Recordings.end_time >= period_start)
-                & (Recordings.start_time <= period_end)
-            )
-            .group_by((Recordings.start_time + period_offset).cast("int") / 3600)
-            .order_by(Recordings.start_time.desc())
-            .namedtuples()
-        )
-
-        event_groups = (
-            Event.select(
-                fn.strftime(
-                    "%Y-%m-%d %H",
-                    fn.datetime(
-                        Event.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("hour"),
-                fn.COUNT(Event.id).alias("count"),
-            )
-            .where(Event.camera == camera_name, Event.has_clip)
-            .where(
-                (Event.start_time >= period_start) & (Event.start_time <= period_end)
-            )
-            .group_by((Event.start_time + period_offset).cast("int") / 3600)
-            .namedtuples()
-        )
-
-        event_map = {g.hour: g.count for g in event_groups}
-
-        for recording_group in recording_groups:
-            parts = recording_group.hour.split()
-            hour = parts[1]
-            day = parts[0]
-            events_count = event_map.get(recording_group.hour, 0)
-            hour_data = {
-                "hour": hour,
-                "events": events_count,
-                "motion": recording_group.motion,
-                "objects": recording_group.objects,
-                "duration": round(recording_group.duration),
-            }
-            if day in days:
-                # merge counts if already present (edge-case at DST boundary)
-                days[day]["events"] += events_count or 0
-                days[day]["hours"].append(hour_data)
-            else:
-                days[day] = {
-                    "events": events_count or 0,
-                    "hours": [hour_data],
-                    "day": day,
-                }
-
-    return JSONResponse(content=list(days.values()))
-
-
-@router.get("/{camera_name}/recordings", dependencies=[Depends(require_camera_access)])
-async def recordings(
-    camera_name: str,
-    after: float = (datetime.now() - timedelta(hours=1)).timestamp(),
-    before: float = datetime.now().timestamp(),
-):
-    """Return specific camera recordings between the given 'after'/'end' times. If not provided the last hour will be used"""
-    recordings = (
-        Recordings.select(
-            Recordings.id,
-            Recordings.start_time,
-            Recordings.end_time,
-            Recordings.segment_size,
-            Recordings.motion,
-            Recordings.objects,
-            Recordings.duration,
-        )
-        .where(
-            Recordings.camera == camera_name,
-            Recordings.end_time >= after,
-            Recordings.start_time <= before,
-        )
-        .order_by(Recordings.start_time)
-        .dicts()
-        .iterator()
-    )
-
-    return JSONResponse(content=list(recordings))
-
-
-@router.get(
-    "/recordings/unavailable",
-    response_model=list[dict],
-    dependencies=[Depends(allow_any_authenticated())],
-)
-async def no_recordings(
-    request: Request,
-    params: MediaRecordingsAvailabilityQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
-):
-    """Get time ranges with no recordings."""
-    cameras = params.cameras
-    if cameras != "all":
-        requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content=[])
-        cameras = ",".join(filtered)
-    else:
-        cameras = allowed_cameras
-
-    before = params.before or datetime.datetime.now().timestamp()
-    after = (
-        params.after
-        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
-    )
-    scale = params.scale
-
-    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-    else:
-        camera_list = allowed_cameras
-
-    # Get recording start times
-    data: list[Recordings] = (
-        Recordings.select(Recordings.start_time, Recordings.end_time)
-        .where(reduce(operator.and_, clauses))
-        .order_by(Recordings.start_time.asc())
-        .dicts()
-        .iterator()
-    )
-
-    # Convert recordings to list of (start, end) tuples
-    recordings = [(r["start_time"], r["end_time"]) for r in data]
-
-    # Iterate through time segments and check if each has any recording
-    no_recording_segments = []
-    current = after
-    current_gap_start = None
-
-    while current < before:
-        segment_end = min(current + scale, before)
-
-        # Check if this segment overlaps with any recording
-        has_recording = any(
-            rec_start < segment_end and rec_end > current
-            for rec_start, rec_end in recordings
-        )
-
-        if not has_recording:
-            # This segment has no recordings
-            if current_gap_start is None:
-                current_gap_start = current  # Start a new gap
-        else:
-            # This segment has recordings
-            if current_gap_start is not None:
-                # End the current gap and append it
-                no_recording_segments.append(
-                    {"start_time": int(current_gap_start), "end_time": int(current)}
-                )
-                current_gap_start = None
-
-        current = segment_end
-
-    # Append the last gap if it exists
-    if current_gap_start is not None:
-        no_recording_segments.append(
-            {"start_time": int(current_gap_start), "end_time": int(before)}
-        )
-
-    return JSONResponse(content=no_recording_segments)
 
 
 @router.get(
