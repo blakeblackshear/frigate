@@ -49,6 +49,10 @@
     "name": {
       "placeholder": "Name the Export"
     },
+    "case": {
+      "label": "Case",
+      "placeholder": "Select a case"
+    },
     "select": "Select",
     "export": "Export",
     "selectOrExport": "Select or Export",

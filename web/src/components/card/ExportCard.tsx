@@ -1,6 +1,6 @@
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Button } from "../ui/button";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { FiMoreVertical } from "react-icons/fi";
 import { Skeleton } from "../ui/skeleton";
@@ -32,18 +32,37 @@ import { FaFolder } from "react-icons/fa";
 type CaseCardProps = {
   className: string;
   exportCase: ExportCase;
+  exports: Export[];
   onSelect: () => void;
 };
-export function CaseCard({ className, exportCase, onSelect }: CaseCardProps) {
+export function CaseCard({
+  className,
+  exportCase,
+  exports,
+  onSelect,
+}: CaseCardProps) {
+  const firstExport = useMemo(
+    () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
+    [exports],
+  );
+
   return (
     <div
       className={cn(
-        "relative flex aspect-video size-full cursor-pointer items-center justify-center rounded-lg bg-secondary md:rounded-2xl",
+        "relative flex aspect-video size-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-secondary md:rounded-2xl",
         className,
       )}
       onClick={() => onSelect()}
     >
-      <div className="absolute bottom-2 left-2 flex items-center justify-start gap-2">
+      {firstExport && (
+        <img
+          className="absolute inset-0 size-full object-cover"
+          src={`${baseUrl}${firstExport.thumb_path.replace("/media/frigate/", "")}`}
+          alt=""
+        />
+      )}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute bottom-2 left-2 z-20 flex items-center justify-start gap-2 text-white">
         <FaFolder />
         <div className="capitalize">{exportCase.name}</div>
       </div>
