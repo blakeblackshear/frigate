@@ -321,6 +321,7 @@ function Exports() {
           search={search}
           cases={filteredCases}
           exports={exports}
+          exportsByCase={exportsByCase}
           setSelectedCaseId={setSelectedCaseId}
           setSelected={setSelected}
           renameClip={onHandleRename}
@@ -337,6 +338,7 @@ type AllExportsViewProps = {
   search: string;
   cases?: ExportCase[];
   exports: Export[];
+  exportsByCase: { [caseId: string]: Export[] };
   setSelectedCaseId: (id: string) => void;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
@@ -348,6 +350,7 @@ function AllExportsView({
   search,
   cases,
   exports,
+  exportsByCase,
   setSelectedCaseId,
   setSelected,
   renameClip,
@@ -404,6 +407,7 @@ function AllExportsView({
                         : "hidden"
                     }
                     exportCase={item}
+                    exports={exportsByCase[item.id] || []}
                     onSelect={() => {
                       setSelectedCaseId(item.id);
                     }}
