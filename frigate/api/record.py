@@ -18,10 +18,8 @@ from frigate.api.auth import (
     require_camera_access,
     require_role,
 )
-from frigate.api.defs.query.media_query_parameters import (
-    MediaRecordingsAvailabilityQueryParams,
-)
 from frigate.api.defs.query.recordings_query_parameters import (
+    MediaRecordingsAvailabilityQueryParams,
     MediaRecordingsSummaryQueryParams,
     RecordingsDeleteQueryParams,
 )
