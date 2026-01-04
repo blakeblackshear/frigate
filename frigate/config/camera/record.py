@@ -77,9 +77,6 @@ class RecordExportConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    sync_recordings: bool = Field(
-        default=False, title="Sync recordings with disk on startup and once a day."
-    )
     expire_interval: int = Field(
         default=60,
         title="Number of minutes to wait between cleanup runs.",

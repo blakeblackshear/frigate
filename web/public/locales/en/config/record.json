@@ -4,9 +4,6 @@
     "enabled": {
       "label": "Enable record on all cameras."
     },
-    "sync_recordings": {
-      "label": "Sync recordings with disk on startup and once a day."
-    },
     "expire_interval": {
       "label": "Number of minutes to wait between cleanup runs."
     },

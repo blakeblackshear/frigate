@@ -510,8 +510,6 @@ record:
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
   expire_interval: 60
-  # Optional: Two-way sync recordings database with disk on startup and once a day (default: shown below).
-  sync_recordings: False
   # Optional: Continuous retention settings
   continuous:
     # Optional: Number of days to retain recordings regardless of tracked objects or motion (default: shown below)

@@ -13,9 +13,8 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
-from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink
-from frigate.util.time import get_tomorrow_at_time
+from frigate.util.media import remove_empty_directories
 
 logger = logging.getLogger(__name__)
 
@@ -350,11 +349,6 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End expire recordings.")
 
     def run(self) -> None:
-        # on startup sync recordings with disk if enabled
-        if self.config.record.sync_recordings:
-            sync_recordings(limited=False)
-            next_sync = get_tomorrow_at_time(3)
-
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
             if self.stop_event.wait(60):
@@ -362,14 +356,6 @@ class RecordingCleanup(threading.Thread):
                 break
 
             self.clean_tmp_previews()
-
-            if (
-                self.config.record.sync_recordings
-                and datetime.datetime.now().astimezone(datetime.timezone.utc)
-                > next_sync
-            ):
-                sync_recordings(limited=True)
-                next_sync = get_tomorrow_at_time(3)
 
             if counter == 0:
                 self.clean_tmp_clips()

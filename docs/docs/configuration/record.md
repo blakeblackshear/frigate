@@ -141,6 +141,8 @@ record:
 
 When using `hwaccel_args`, hardware encoding is used for timelapse generation. This setting can be overridden for a specific camera (e.g., when camera resolution exceeds hardware encoder limits); set `cameras.<camera>.record.export.hwaccel_args` with the appropriate settings. Using an unrecognized value or empty string will fall back to software encoding (libx264).
 
+:::
+
 :::tip
 
 The encoder determines its own behavior so the resulting file size may be undesirably large.
@@ -152,19 +154,36 @@ To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (whe
 
 Apple devices running the Safari browser may fail to playback h.265 recordings. The [apple compatibility option](../configuration/camera_specific.md#h265-cameras-via-safari) should be used to ensure seamless playback on Apple devices.
 
-## Syncing Recordings With Disk
+## Syncing Media Files With Disk
 
-In some cases the recordings files may be deleted but Frigate will not know this has happened. Recordings sync can be enabled which will tell Frigate to check the file system and delete any db entries for files which don't exist.
+Media files (event snapshots, event thumbnails, review thumbnails, previews, exports, and recordings) can become orphaned when database entries are deleted but the corresponding files remain on disk.
 
-```yaml
-record:
-  sync_recordings: True
+This feature checks the file system for media files and removes any that are not referenced in the database.
+
+The API endpoint `POST /api/media/sync` can be used to trigger a media sync. The endpoint accepts a JSON request body to control the operation.
+
+Request body schema (JSON):
+
+```json
+{
+  "dry_run": true,
+  "media_types": ["all"],
+  "force": false
+}
 ```
 
-This feature is meant to fix variations in files, not completely delete entries in the database. If you delete all of your media, don't use `sync_recordings`, just stop Frigate, delete the `frigate.db` database, and restart.
+- `dry_run` (boolean): If `true` (default) the service will only report orphaned files without deleting them. Set to `false` to allow deletions.
+- `media_types` (array of strings): Which media types to sync. Use `"all"` to sync everything, or a list of one or more of:
+  - `event_snapshots`
+  - `event_thumbnails`
+  - `review_thumbnails`
+  - `previews`
+  - `exports`
+  - `recordings`
+- `force` (boolean): If `true` the safety threshold is bypassed and deletions proceed even if the operation would remove a large proportion of files. Use with extreme caution.
 
 :::warning
 
-The sync operation uses considerable CPU resources and in most cases is not needed, only enable when necessary.
+This operation uses considerable CPU resources and includes a safety threshold that aborts if more than 50% of files would be deleted. Only run when necessary. If you set `force: true` the safety threshold will be bypassed; do not use `force` unless you are certain the deletions are intended.
 
 :::

@@ -30,7 +30,7 @@ from frigate.api.auth import (
     require_role,
 )
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
-from frigate.api.defs.request.app_body import AppConfigSetBody
+from frigate.api.defs.request.app_body import AppConfigSetBody, MediaSyncBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
@@ -47,6 +47,7 @@ from frigate.util.builtin import (
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
+from frigate.util.media import sync_all_media
 from frigate.util.services import (
     get_nvidia_driver_info,
     process_logs,
@@ -605,6 +606,68 @@ def restart():
         ),
         status_code=200,
     )
+
+
+@router.post("/media/sync", dependencies=[Depends(require_role(["admin"]))])
+def sync_media(body: MediaSyncBody = Body(...)):
+    """Sync media files with database - remove orphaned files.
+
+    Syncs specified media types: event snapshots, event thumbnails, review thumbnails,
+    previews, exports, and/or recordings.
+
+    Args:
+        body: MediaSyncBody with dry_run flag and media_types list.
+              media_types can include: 'all', 'event_snapshots', 'event_thumbnails',
+              'review_thumbnails', 'previews', 'exports', 'recordings'
+
+    Returns:
+        JSON response with sync results for each requested media type.
+    """
+    try:
+        results = sync_all_media(
+            dry_run=body.dry_run, media_types=body.media_types, force=body.force
+        )
+
+        # Check if any operations were aborted or had errors
+        has_errors = False
+        for result_name in [
+            "event_snapshots",
+            "event_thumbnails",
+            "review_thumbnails",
+            "previews",
+            "exports",
+            "recordings",
+        ]:
+            result = getattr(results, result_name, None)
+            if result and (result.aborted or result.error):
+                has_errors = True
+                break
+
+        content = {
+            "success": not has_errors,
+            "dry_run": body.dry_run,
+            "media_types": body.media_types,
+            "results": results.to_dict(),
+        }
+
+        if has_errors:
+            content["message"] = (
+                "Some sync operations were aborted or had errors; check logs for details."
+            )
+
+        return JSONResponse(
+            content=content,
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"Error syncing media files: {e}")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Error syncing media files: {str(e)}",
+            },
+            status_code=500,
+        )
 
 
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])

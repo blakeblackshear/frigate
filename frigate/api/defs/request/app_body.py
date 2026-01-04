@@ -1,6 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AppConfigSetBody(BaseModel):
@@ -27,3 +27,16 @@ class AppPostLoginBody(BaseModel):
 
 class AppPutRoleBody(BaseModel):
     role: str
+
+
+class MediaSyncBody(BaseModel):
+    dry_run: bool = Field(
+        default=True, description="If True, only report orphans without deleting them"
+    )
+    media_types: List[str] = Field(
+        default=["all"],
+        description="Types of media to sync: 'all', 'event_snapshots', 'event_thumbnails', 'review_thumbnails', 'previews', 'exports', 'recordings'",
+    )
+    force: bool = Field(
+        default=False, description="If True, bypass safety threshold checks"
+    )
