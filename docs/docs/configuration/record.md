@@ -146,6 +146,8 @@ When using `hwaccel_args`, hardware encoding is used for timelapse generation. T
 The encoder determines its own behavior so the resulting file size may be undesirably large.
 To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
 
+:::
+
 ## Apple Compatibility with H.265 Streams
 
 Apple devices running the Safari browser may fail to playback h.265 recordings. The [apple compatibility option](../configuration/camera_specific.md#h265-cameras-via-safari) should be used to ensure seamless playback on Apple devices.
