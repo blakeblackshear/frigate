@@ -34,7 +34,6 @@ from frigate.config.camera.updater import (
 )
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
 from frigate.models import Event, Timeline
-from frigate.record.util import sync_all_media
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
@@ -43,6 +42,7 @@ from frigate.util.builtin import (
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
+from frigate.util.media import sync_all_media
 from frigate.util.services import (
     get_nvidia_driver_info,
     process_logs,
