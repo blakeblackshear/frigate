@@ -211,7 +211,7 @@ You are also able to define custom prompts in your configuration.
 genai:
   provider: ollama
   base_url: http://localhost:11434
-  model: llava
+  model: qwen3-vl:8b-instruct
 
 objects:
   prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."
