@@ -13,8 +13,8 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
-from frigate.record.util import remove_empty_directories
 from frigate.util.builtin import clear_and_unlink
+from frigate.util.media import remove_empty_directories
 
 logger = logging.getLogger(__name__)
 
