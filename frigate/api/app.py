@@ -33,8 +33,14 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
+from frigate.jobs.media_sync import (
+    get_current_media_sync_job,
+    get_media_sync_job_by_id,
+    start_media_sync_job,
+)
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
+from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
     clean_camera_user_pass,
     flatten_config_data,
@@ -42,7 +48,6 @@ from frigate.util.builtin import (
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
-from frigate.util.media import sync_all_media
 from frigate.util.services import (
     get_nvidia_driver_info,
     process_logs,
@@ -605,10 +610,11 @@ def restart():
 
 @router.post("/media/sync", dependencies=[Depends(require_role(["admin"]))])
 def sync_media(body: MediaSyncBody = Body(...)):
-    """Sync media files with database - remove orphaned files.
+    """Start async media sync job - remove orphaned files.
 
     Syncs specified media types: event snapshots, event thumbnails, review thumbnails,
-    previews, exports, and/or recordings.
+    previews, exports, and/or recordings. Job runs in background; use /media/sync/current
+    or /media/sync/status/{job_id} to check status.
 
     Args:
         body: MediaSyncBody with dry_run flag and media_types list.
@@ -616,53 +622,66 @@ def sync_media(body: MediaSyncBody = Body(...)):
               'review_thumbnails', 'previews', 'exports', 'recordings'
 
     Returns:
-        JSON response with sync results for each requested media type.
+        202 Accepted with job_id, or 409 Conflict if job already running.
     """
-    try:
-        results = sync_all_media(
-            dry_run=body.dry_run, media_types=body.media_types, force=body.force
-        )
+    job_id = start_media_sync_job(
+        dry_run=body.dry_run, media_types=body.media_types, force=body.force
+    )
 
-        # Check if any operations were aborted or had errors
-        has_errors = False
-        for result_name in [
-            "event_snapshots",
-            "event_thumbnails",
-            "review_thumbnails",
-            "previews",
-            "exports",
-            "recordings",
-        ]:
-            result = getattr(results, result_name, None)
-            if result and (result.aborted or result.error):
-                has_errors = True
-                break
-
-        content = {
-            "success": not has_errors,
-            "dry_run": body.dry_run,
-            "media_types": body.media_types,
-            "results": results.to_dict(),
-        }
-
-        if has_errors:
-            content["message"] = (
-                "Some sync operations were aborted or had errors; check logs for details."
-            )
-
-        return JSONResponse(
-            content=content,
-            status_code=200,
-        )
-    except Exception as e:
-        logger.error(f"Error syncing media files: {e}")
+    if job_id is None:
+        # A job is already running
+        current = get_current_media_sync_job()
         return JSONResponse(
             content={
-                "success": False,
-                "message": f"Error syncing media files: {str(e)}",
+                "error": "A media sync job is already running",
+                "current_job_id": current.id if current else None,
             },
-            status_code=500,
+            status_code=409,
         )
+
+    return JSONResponse(
+        content={
+            "job": {
+                "job_type": "media_sync",
+                "status": JobStatusTypesEnum.queued,
+                "id": job_id,
+            }
+        },
+        status_code=202,
+    )
+
+
+@router.get("/media/sync/current", dependencies=[Depends(require_role(["admin"]))])
+def get_media_sync_current():
+    """Get the current running media sync job, if any."""
+    job = get_current_media_sync_job()
+
+    if job is None:
+        return JSONResponse(content={"job": None}, status_code=200)
+
+    return JSONResponse(
+        content={"job": job.to_dict()},
+        status_code=200,
+    )
+
+
+@router.get(
+    "/media/sync/status/{job_id}", dependencies=[Depends(require_role(["admin"]))]
+)
+def get_media_sync_status(job_id: str):
+    """Get the status of a specific media sync job."""
+    job = get_media_sync_job_by_id(job_id)
+
+    if job is None:
+        return JSONResponse(
+            content={"error": "Job not found"},
+            status_code=404,
+        )
+
+    return JSONResponse(
+        content={"job": job.to_dict()},
+        status_code=200,
+    )
 
 
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
