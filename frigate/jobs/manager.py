@@ -4,10 +4,13 @@ import threading
 from typing import Optional
 
 from frigate.jobs.job import Job
+from frigate.types import JobStatusTypesEnum
 
 # Global state and locks for enforcing single concurrent job per job type
 _job_locks: dict[str, threading.Lock] = {}
 _current_jobs: dict[str, Optional[Job]] = {}
+# Keep completed jobs for retrieval, keyed by (job_type, job_id)
+_completed_jobs: dict[tuple[str, str], Job] = {}
 
 
 def _get_lock(job_type: str) -> threading.Lock:
@@ -21,6 +24,14 @@ def set_current_job(job: Job) -> None:
     """Set the current job for a given job type."""
     lock = _get_lock(job.job_type)
     with lock:
+        # Store the previous job if it was completed
+        old_job = _current_jobs.get(job.job_type)
+        if old_job and old_job.status in (
+            JobStatusTypesEnum.success,
+            JobStatusTypesEnum.failed,
+            JobStatusTypesEnum.cancelled,
+        ):
+            _completed_jobs[(job.job_type, old_job.id)] = old_job
         _current_jobs[job.job_type] = job
 
 
@@ -42,13 +53,15 @@ def get_current_job(job_type: str) -> Optional[Job]:
 
 
 def get_job_by_id(job_type: str, job_id: str) -> Optional[Job]:
-    """Get job by ID. Currently only tracks the current job per type."""
+    """Get job by ID. Checks current job first, then completed jobs."""
     lock = _get_lock(job_type)
     with lock:
+        # Check if it's the current job
         current = _current_jobs.get(job_type)
         if current and current.id == job_id:
             return current
-    return None
+        # Check if it's a completed job
+        return _completed_jobs.get((job_type, job_id))
 
 
 def job_is_running(job_type: str) -> bool:
