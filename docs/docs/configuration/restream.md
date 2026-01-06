@@ -185,9 +185,34 @@ In this configuration:
 - `front_door` stream is used by Frigate for viewing, recording, and detection. The `#backchannel=0` parameter prevents go2rtc from establishing the audio output backchannel, so it won't block two-way talk access.
 - `front_door_twoway` stream is used for two-way talk functionality. This stream can be used by Frigate's WebRTC viewer when two-way talk is enabled, or by other applications (like Home Assistant Advanced Camera Card) that need access to the camera's audio output channel.
 
+## Security: Restricted Stream Sources
+
+For security reasons, the `echo:`, `expr:`, and `exec:` stream sources are disabled by default in go2rtc. These sources allow arbitrary command execution and can pose security risks if misconfigured.
+
+If you attempt to use these sources in your configuration, the streams will be removed and an error message will be printed in the logs.
+
+To enable these sources, you must set the environment variable `GO2RTC_ALLOW_ARBITRARY_EXEC=true`. This can be done in your Docker Compose file or container environment:
+
+```yaml
+environment:
+  - GO2RTC_ALLOW_ARBITRARY_EXEC=true
+```
+
+:::warning
+
+Enabling arbitrary exec sources allows execution of arbitrary commands through go2rtc stream configurations. Only enable this if you understand the security implications and trust all sources of your configuration.
+
+:::
+
 ## Advanced Restream Configurations
 
 The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.10#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
+
+:::warning
+
+The `exec:`, `echo:`, and `expr:` sources are disabled by default for security. You must set `GO2RTC_ALLOW_ARBITRARY_EXEC=true` to use them. See [Security: Restricted Stream Sources](#security-restricted-stream-sources) for more information.
+
+:::
 
 NOTE: The output will need to be passed with two curly braces `{{output}}`
 
