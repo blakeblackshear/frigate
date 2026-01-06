@@ -22,6 +22,11 @@ sys.path.remove("/opt/frigate")
 
 yaml = YAML()
 
+# Check if arbitrary exec sources are allowed (defaults to False for security)
+ALLOW_ARBITRARY_EXEC = os.environ.get(
+    "GO2RTC_ALLOW_ARBITRARY_EXEC", "false"
+).lower() in ("true", "1", "yes")
+
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 # read docker secret files as env vars too
 if os.path.isdir("/run/secrets"):
@@ -109,14 +114,26 @@ if LIBAVFORMAT_VERSION_MAJOR < 59:
     elif go2rtc_config["ffmpeg"].get("rtsp") is None:
         go2rtc_config["ffmpeg"]["rtsp"] = rtsp_args
 
-for name in go2rtc_config.get("streams", {}):
+
+def is_restricted_source(stream_source: str) -> bool:
+    """Check if a stream source is restricted (echo, expr, or exec)."""
+    return stream_source.strip().startswith(("echo:", "expr:", "exec:"))
+
+
+for name in list(go2rtc_config.get("streams", {})):
     stream = go2rtc_config["streams"][name]
 
     if isinstance(stream, str):
         try:
-            go2rtc_config["streams"][name] = go2rtc_config["streams"][name].format(
-                **FRIGATE_ENV_VARS
-            )
+            formatted_stream = stream.format(**FRIGATE_ENV_VARS)
+            if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
+                print(
+                    f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
+                    f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
+                )
+                del go2rtc_config["streams"][name]
+                continue
+            go2rtc_config["streams"][name] = formatted_stream
         except KeyError as e:
             print(
                 "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
@@ -124,14 +141,32 @@ for name in go2rtc_config.get("streams", {}):
             sys.exit(e)
 
     elif isinstance(stream, list):
-        for i, stream in enumerate(stream):
+        filtered_streams = []
+        for i, stream_item in enumerate(stream):
             try:
-                go2rtc_config["streams"][name][i] = stream.format(**FRIGATE_ENV_VARS)
+                formatted_stream = stream_item.format(**FRIGATE_ENV_VARS)
+                if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
+                    print(
+                        f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "
+                        f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
+                    )
+                    continue
+
+                filtered_streams.append(formatted_stream)
             except KeyError as e:
                 print(
                     "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
                 )
                 sys.exit(e)
+
+        if filtered_streams:
+            go2rtc_config["streams"][name] = filtered_streams
+        else:
+            print(
+                f"[ERROR] Stream '{name}' was removed because all sources were restricted (echo/expr/exec). "
+                f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
+            )
+            del go2rtc_config["streams"][name]
 
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):

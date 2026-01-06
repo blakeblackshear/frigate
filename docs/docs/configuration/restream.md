@@ -154,9 +154,34 @@ go2rtc:
 
 See [this comment](https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
 
+## Security: Restricted Stream Sources
+
+For security reasons, the `echo:`, `expr:`, and `exec:` stream sources are disabled by default in go2rtc. These sources allow arbitrary command execution and can pose security risks if misconfigured.
+
+If you attempt to use these sources in your configuration, the streams will be removed and an error message will be printed in the logs.
+
+To enable these sources, you must set the environment variable `GO2RTC_ALLOW_ARBITRARY_EXEC=true`. This can be done in your Docker Compose file or container environment:
+
+```yaml
+environment:
+  - GO2RTC_ALLOW_ARBITRARY_EXEC=true
+```
+
+:::warning
+
+Enabling arbitrary exec sources allows execution of arbitrary commands through go2rtc stream configurations. Only enable this if you understand the security implications and trust all sources of your configuration.
+
+:::
+
 ## Advanced Restream Configurations
 
 The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.9#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
+
+:::warning
+
+The `exec:`, `echo:`, and `expr:` sources are disabled by default for security. You must set `GO2RTC_ALLOW_ARBITRARY_EXEC=true` to use them. See [Security: Restricted Stream Sources](#security-restricted-stream-sources) for more information.
+
+:::
 
 NOTE: The output will need to be passed with two curly braces `{{output}}`
 
