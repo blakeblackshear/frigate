@@ -158,9 +158,9 @@ Apple devices running the Safari browser may fail to playback h.265 recordings. 
 
 Media files (event snapshots, event thumbnails, review thumbnails, previews, exports, and recordings) can become orphaned when database entries are deleted but the corresponding files remain on disk.
 
-This feature checks the file system for media files and removes any that are not referenced in the database.
+Normal operation may leave small numbers of orphaned files until Frigate's scheduled cleanup, but crashes, configuration changes, or upgrades may cause more orphaned files that Frigate does not clean up. This feature checks the file system for media files and removes any that are not referenced in the database.
 
-The API endpoint `POST /api/media/sync` can be used to trigger a media sync. The endpoint accepts a JSON request body to control the operation.
+The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. The endpoint accepts a JSON request body to control the operation.
 
 Request body schema (JSON):
 
@@ -181,6 +181,8 @@ Request body schema (JSON):
   - `exports`
   - `recordings`
 - `force` (boolean): If `true` the safety threshold is bypassed and deletions proceed even if the operation would remove a large proportion of files. Use with extreme caution.
+
+When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
 
 :::warning
 
