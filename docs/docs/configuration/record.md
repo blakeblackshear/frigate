@@ -160,29 +160,7 @@ Media files (event snapshots, event thumbnails, review thumbnails, previews, exp
 
 Normal operation may leave small numbers of orphaned files until Frigate's scheduled cleanup, but crashes, configuration changes, or upgrades may cause more orphaned files that Frigate does not clean up. This feature checks the file system for media files and removes any that are not referenced in the database.
 
-The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. The endpoint accepts a JSON request body to control the operation.
-
-Request body schema (JSON):
-
-```json
-{
-  "dry_run": true,
-  "media_types": ["all"],
-  "force": false
-}
-```
-
-- `dry_run` (boolean): If `true` (default) the service will only report orphaned files without deleting them. Set to `false` to allow deletions.
-- `media_types` (array of strings): Which media types to sync. Use `"all"` to sync everything, or a list of one or more of:
-  - `event_snapshots`
-  - `event_thumbnails`
-  - `review_thumbnails`
-  - `previews`
-  - `exports`
-  - `recordings`
-- `force` (boolean): If `true` the safety threshold is bypassed and deletions proceed even if the operation would remove a large proportion of files. Use with extreme caution.
-
-When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
+The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
 
 :::warning
 
