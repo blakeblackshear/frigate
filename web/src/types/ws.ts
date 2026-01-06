@@ -126,3 +126,32 @@ export type TriggerStatus = {
   type: string;
   score: number;
 };
+
+export type MediaSyncStats = {
+  files_checked: number;
+  orphans_found: number;
+  orphans_deleted: number;
+  aborted: boolean;
+  error: string | null;
+};
+
+export type MediaSyncTotals = {
+  files_checked: number;
+  orphans_found: number;
+  orphans_deleted: number;
+};
+
+export type MediaSyncResults = {
+  [mediaType: string]: MediaSyncStats | MediaSyncTotals;
+  totals: MediaSyncTotals;
+};
+
+export type Job = {
+  id: string;
+  job_type: string;
+  status: string;
+  results?: MediaSyncResults;
+  start_time?: number;
+  end_time?: number;
+  error_message?: string;
+};
