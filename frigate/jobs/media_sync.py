@@ -48,7 +48,7 @@ class MediaSyncRunner(threading.Thread):
             self._broadcast_status()
 
             # Execute sync with provided parameters
-            logger.info(
+            logger.debug(
                 f"Starting media sync job {self.job.id}: "
                 f"media_types={self.job.media_types}, "
                 f"dry_run={self.job.dry_run}, "
@@ -66,7 +66,7 @@ class MediaSyncRunner(threading.Thread):
             self.job.status = JobStatusTypesEnum.success
             self.job.end_time = datetime.now().timestamp()
 
-            logger.info(f"Media sync job {self.job.id} completed successfully")
+            logger.debug(f"Media sync job {self.job.id} completed successfully")
             self._broadcast_status()
 
         except Exception as e:
@@ -115,7 +115,7 @@ def start_media_sync_job(
         force=force,
     )
 
-    logger.info(f"Creating new media sync job: {job.id}")
+    logger.debug(f"Creating new media sync job: {job.id}")
     set_current_job(job)
 
     # Start the background runner
