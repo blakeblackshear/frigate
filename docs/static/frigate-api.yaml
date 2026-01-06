@@ -331,6 +331,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /media/sync:
+    post:
+      tags:
+        - App
+      summary: Start media sync job
+      description: |-
+        Start an asynchronous media sync job to find and (optionally) remove orphaned media files.
+        Returns 202 with job details when queued, or 409 if a job is already running.
+      operationId: sync_media_media_sync_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+      responses:
+        "202":
+          description: Accepted - Job queued
+        "409":
+          description: Conflict - Job already running
+        "422":
+          description: Validation Error
+
+  /media/sync/current:
+    get:
+      tags:
+        - App
+      summary: Get current media sync job
+      description: |-
+        Retrieve the current running media sync job, if any. Returns the job details or null when no job is active.
+      operationId: get_media_sync_current_media_sync_current_get
+      responses:
+        "200":
+          description: Successful Response
+        "422":
+          description: Validation Error
+
+  /media/sync/status/{job_id}:
+    get:
+      tags:
+        - App
+      summary: Get media sync job status
+      description: |-
+        Get status and results for the specified media sync job id. Returns 200 with job details including results, or 404 if the job is not found.
+      operationId: get_media_sync_status_media_sync_status__job_id__get
+      parameters:
+        - name: job_id
+          in: path
+      responses:
+        "200":
+          description: Successful Response
+        "404":
+          description: Not Found - Job not found
+        "422":
+          description: Validation Error
   /faces/train/{name}/classify:
     post:
       tags:
