@@ -608,7 +608,13 @@ def restart():
     )
 
 
-@router.post("/media/sync", dependencies=[Depends(require_role(["admin"]))])
+@router.post(
+    "/media/sync",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Start media sync job",
+    description="""Start an asynchronous media sync job to find and (optionally) remove orphaned media files.
+    Returns 202 with job details when queued, or 409 if a job is already running.""",
+)
 def sync_media(body: MediaSyncBody = Body(...)):
     """Start async media sync job - remove orphaned files.
 
@@ -651,7 +657,13 @@ def sync_media(body: MediaSyncBody = Body(...)):
     )
 
 
-@router.get("/media/sync/current", dependencies=[Depends(require_role(["admin"]))])
+@router.get(
+    "/media/sync/current",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get current media sync job",
+    description="""Retrieve the current running media sync job, if any. Returns the job details
+    or null when no job is active.""",
+)
 def get_media_sync_current():
     """Get the current running media sync job, if any."""
     job = get_current_media_sync_job()
@@ -666,7 +678,11 @@ def get_media_sync_current():
 
 
 @router.get(
-    "/media/sync/status/{job_id}", dependencies=[Depends(require_role(["admin"]))]
+    "/media/sync/status/{job_id}",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get media sync job status",
+    description="""Get status and results for the specified media sync job id. Returns 200 with
+    job details including results, or 404 if the job is not found.""",
 )
 def get_media_sync_status(job_id: str):
     """Get the status of a specific media sync job."""
