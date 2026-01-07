@@ -67,7 +67,7 @@ Please see our [Trademark Policy](TRADEMARK.md) for details on acceptable use of
 ### Built-in mask and zone editor
 
 <div>
-<img width="800" alt="Multi-camera scrubbing" src="https://github.com/blakeblackshear/frigate/assets/569905/d7885fc3-bfe6-452f-b7d0-d957cb3e31f5">
+<img width="800" alt="Built-in mask and zone editor" src="https://github.com/blakeblackshear/frigate/assets/569905/d7885fc3-bfe6-452f-b7d0-d957cb3e31f5">
 </div>
 
 ## Translations

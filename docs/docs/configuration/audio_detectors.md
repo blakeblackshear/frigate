@@ -50,7 +50,7 @@ cameras:
 
 ### Configuring Minimum Volume
 
-The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widely between camera models so it is important to run tests to see what volume levels are. The Debug view in the Frigate UI has an Audio tab for cameras that have the `audio` role assigned where a graph and the current levels are is displayed. The `min_volume` parameter should be set to the minimum the `RMS` level required to run audio detection.
+The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that Frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widely between camera models so it is important to run tests to see what volume levels are. The Debug view in the Frigate UI has an Audio tab for cameras that have the `audio` role assigned where a graph and the current levels are is displayed. The `min_volume` parameter should be set to the minimum the `RMS` level required to run audio detection.
 
 :::tip
 
