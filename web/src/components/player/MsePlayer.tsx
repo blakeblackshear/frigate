@@ -80,6 +80,7 @@ function MSEPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTIDRef = useRef<number | null>(null);
+  const intentionalDisconnectRef = useRef<boolean>(false);
   const ondataRef = useRef<((data: ArrayBufferLike) => void) | null>(null);
   const onmessageRef = useRef<{
     [key: string]: (msg: { value: string; type: string }) => void;
@@ -152,8 +153,11 @@ function MSEPlayer({
   }, []);
 
   const onConnect = useCallback(() => {
-    if (!videoRef.current?.isConnected || !wsURL || wsRef.current) return false;
+    if (!videoRef.current?.isConnected || !wsURL || wsRef.current) {
+      return false;
+    }
 
+    intentionalDisconnectRef.current = false;
     setWsState(WebSocket.CONNECTING);
 
     setConnectTS(Date.now());
@@ -172,13 +176,44 @@ function MSEPlayer({
       setBufferTimeout(undefined);
     }
 
+    // Clear any pending reconnect attempts
+    if (reconnectTIDRef.current !== null) {
+      clearTimeout(reconnectTIDRef.current);
+      reconnectTIDRef.current = null;
+    }
+
     setIsPlaying(false);
 
     if (wsRef.current) {
-      setWsState(WebSocket.CLOSED);
-      wsRef.current.close();
+      const ws = wsRef.current;
       wsRef.current = null;
+      const currentReadyState = ws.readyState;
+
+      intentionalDisconnectRef.current = true;
+      setWsState(WebSocket.CLOSED);
+
+      // Remove event listeners to prevent them firing during close
+      try {
+        ws.removeEventListener("open", onOpen);
+        ws.removeEventListener("close", onClose);
+      } catch {
+        // Ignore errors removing listeners
+      }
+
+      // Only call close() if the socket is OPEN or CLOSING
+      // For CONNECTING or CLOSED sockets, just let it die
+      if (
+        currentReadyState === WebSocket.OPEN ||
+        currentReadyState === WebSocket.CLOSING
+      ) {
+        try {
+          ws.close();
+        } catch {
+          // Ignore close errors
+        }
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bufferTimeout]);
 
   const handlePause = useCallback(() => {
@@ -188,7 +223,14 @@ function MSEPlayer({
     }
   }, [isPlaying, playbackEnabled]);
 
-  const onOpen = () => {
+  const onOpen = useCallback(() => {
+    // If we were marked for intentional disconnect while connecting, close immediately
+    if (intentionalDisconnectRef.current) {
+      wsRef.current?.close();
+      wsRef.current = null;
+      return;
+    }
+
     setWsState(WebSocket.OPEN);
 
     wsRef.current?.addEventListener("message", (ev) => {
@@ -206,9 +248,16 @@ function MSEPlayer({
     onmessageRef.current = {};
 
     onMse();
-  };
+    // onMse is defined below and stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const reconnect = (timeout?: number) => {
+    // Don't reconnect if intentional disconnect was flagged
+    if (intentionalDisconnectRef.current) {
+      return;
+    }
+
     setWsState(WebSocket.CONNECTING);
     wsRef.current = null;
 
@@ -221,10 +270,19 @@ function MSEPlayer({
     }, delay);
   };
 
-  const onClose = () => {
+  const onClose = useCallback(() => {
+    // Don't reconnect if this was an intentional disconnect
+    if (intentionalDisconnectRef.current) {
+      // Reset the flag so future connects are allowed
+      intentionalDisconnectRef.current = false;
+      return;
+    }
+
     if (wsState === WebSocket.CLOSED) return;
     reconnect();
-  };
+    // reconnect is defined below and stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wsState]);
 
   const sendWithTimeout = (value: object, timeout: number) => {
     return new Promise<void>((resolve, reject) => {
@@ -232,17 +290,26 @@ function MSEPlayer({
         reject(new Error("Timeout waiting for response"));
       }, timeout);
 
-      send(value);
-
       // Override the onmessageRef handler for mse type to resolve the promise on response
       const originalHandler = onmessageRef.current["mse"];
       onmessageRef.current["mse"] = (msg) => {
         if (msg.type === "mse") {
           clearTimeout(timeoutId);
-          if (originalHandler) originalHandler(msg);
+
+          // Call original handler in try-catch so errors don't prevent promise resolution
+          if (originalHandler) {
+            try {
+              originalHandler(msg);
+            } catch (e) {
+              // Don't reject - we got the response, just let the error bubble
+            }
+          }
+
           resolve();
         }
       };
+
+      send(value);
     });
   };
 
