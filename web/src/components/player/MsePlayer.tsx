@@ -87,6 +87,8 @@ function MSEPlayer({
   }>({});
   const msRef = useRef<MediaSource | null>(null);
   const mseCodecRef = useRef<string | null>(null);
+  const mseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mseResponseReceivedRef = useRef<boolean>(false);
 
   const wsURL = useMemo(() => {
     return `${baseUrl.replace(/^http/, "ws")}live/mse/api/ws?src=${camera}`;
@@ -176,6 +178,12 @@ function MSEPlayer({
       setBufferTimeout(undefined);
     }
 
+    // Clear any pending MSE timeout
+    if (mseTimeoutRef.current !== null) {
+      clearTimeout(mseTimeoutRef.current);
+      mseTimeoutRef.current = null;
+    }
+
     // Clear any pending reconnect attempts
     if (reconnectTIDRef.current !== null) {
       clearTimeout(reconnectTIDRef.current);
@@ -247,6 +255,16 @@ function MSEPlayer({
     ondataRef.current = null;
     onmessageRef.current = {};
 
+    // Reset the MSE response flag for this new connection
+    mseResponseReceivedRef.current = false;
+
+    // Create a fresh MediaSource for this connection to avoid stale sourceopen events
+    // from previous connections interfering with this one
+    const MediaSourceConstructor =
+      "ManagedMediaSource" in window ? window.ManagedMediaSource : MediaSource;
+    // @ts-expect-error for typing
+    msRef.current = new MediaSourceConstructor();
+
     onMse();
     // onMse is defined below and stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -286,15 +304,48 @@ function MSEPlayer({
 
   const sendWithTimeout = (value: object, timeout: number) => {
     return new Promise<void>((resolve, reject) => {
+      // Don't start timeout if WS isn't connected - this can happen when
+      // sourceopen fires from a previous connection after we've already disconnected
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        // Reject so caller knows this didn't work
+        reject(new Error("WebSocket not connected"));
+        return;
+      }
+
+      // If we've already received an MSE response for this connection, don't start another timeout
+      if (mseResponseReceivedRef.current) {
+        resolve();
+        return;
+      }
+
+      // Clear any existing MSE timeout from a previous attempt
+      if (mseTimeoutRef.current !== null) {
+        clearTimeout(mseTimeoutRef.current);
+        mseTimeoutRef.current = null;
+      }
+
       const timeoutId = setTimeout(() => {
-        reject(new Error("Timeout waiting for response"));
+        // Only reject if we haven't received a response yet
+        if (!mseResponseReceivedRef.current) {
+          mseTimeoutRef.current = null;
+          reject(new Error("Timeout waiting for response"));
+        }
       }, timeout);
+
+      mseTimeoutRef.current = timeoutId;
 
       // Override the onmessageRef handler for mse type to resolve the promise on response
       const originalHandler = onmessageRef.current["mse"];
       onmessageRef.current["mse"] = (msg) => {
         if (msg.type === "mse") {
-          clearTimeout(timeoutId);
+          // Mark that we've received the response
+          mseResponseReceivedRef.current = true;
+
+          // Clear the timeout (use ref to clear the current one, not closure)
+          if (mseTimeoutRef.current !== null) {
+            clearTimeout(mseTimeoutRef.current);
+            mseTimeoutRef.current = null;
+          }
 
           // Call original handler in try-catch so errors don't prevent promise resolution
           if (originalHandler) {
@@ -359,13 +410,15 @@ function MSEPlayer({
             },
             (fallbackTimeout ?? 3) * 1000,
           ).catch(() => {
+            // Only report errors if we actually had a connection that failed
+            // If WS wasn't connected, this is a stale sourceopen event from a previous connection
             if (wsRef.current) {
               onDisconnect();
-            }
-            if (isIOS || isSafari) {
-              handleError("mse-decode", "Safari cannot open MediaSource.");
-            } else {
-              handleError("startup", "Error opening MediaSource.");
+              if (isIOS || isSafari) {
+                handleError("mse-decode", "Safari cannot open MediaSource.");
+              } else {
+                handleError("startup", "Error opening MediaSource.");
+              }
             }
           });
         },
@@ -598,13 +651,6 @@ function MSEPlayer({
     if (!playbackEnabled) {
       return;
     }
-
-    // iOS 17.1+ uses ManagedMediaSource
-    const MediaSourceConstructor =
-      "ManagedMediaSource" in window ? window.ManagedMediaSource : MediaSource;
-
-    // @ts-expect-error for typing
-    msRef.current = new MediaSourceConstructor();
 
     onConnect();
 
