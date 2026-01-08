@@ -855,7 +855,7 @@ export default function GeneralMetrics({
                 <ThresholdBarGraph
                   key={series.name}
                   graphId={`${series.name}-cpu`}
-                  name={series.name.replaceAll("_", " ")}
+                  name={t(`general.otherProcesses.series.${series.name}`)}
                   unit="%"
                   threshold={DetectorCpuThreshold}
                   updateTimes={updateTimes}

@@ -86,7 +86,14 @@
     "otherProcesses": {
       "title": "Other Processes",
       "processCpuUsage": "Process CPU Usage",
-      "processMemoryUsage": "Process Memory Usage"
+      "processMemoryUsage": "Process Memory Usage",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "recording",
+        "review_segment": "review segment",
+        "embeddings": "embeddings",
+        "audio_detector": "audio detector"
+      }
     }
   },
   "storage": {

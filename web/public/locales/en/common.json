@@ -101,7 +101,8 @@
     "show": "Show {{item}}",
     "ID": "ID",
     "none": "None",
-    "all": "All"
+    "all": "All",
+    "other": "Other"
   },
   "list": {
     "two": "{{0}} and {{1}}",
