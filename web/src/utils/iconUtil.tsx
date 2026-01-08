@@ -1,5 +1,6 @@
 import { IconName } from "@/components/icons/IconPicker";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { EventType } from "@/types/search";
 import { BsPersonWalking } from "react-icons/bs";
 import {
   FaAmazon,
@@ -32,6 +33,7 @@ import {
   GiRabbit,
   GiRaccoonHead,
   GiSailboat,
+  GiSoundWaves,
   GiSquirrel,
 } from "react-icons/gi";
 import { LuBox, LuLassoSelect, LuScanBarcode } from "react-icons/lu";
@@ -56,11 +58,15 @@ export function isValidIconName(value: string): value is IconName {
   return Object.keys(LuIcons).includes(value as IconName);
 }
 
-export function getIconForLabel(label: string, className?: string) {
+export function getIconForLabel(
+  label: string,
+  type: EventType = "object",
+  className?: string,
+) {
   if (label.endsWith("-verified")) {
-    return getVerifiedIcon(label, className);
+    return getVerifiedIcon(label, className, type);
   } else if (label.endsWith("-plate")) {
-    return getRecognizedPlateIcon(label, className);
+    return getRecognizedPlateIcon(label, className, type);
   }
 
   switch (label) {
@@ -152,27 +158,38 @@ export function getIconForLabel(label: string, className?: string) {
     case "usps":
       return <FaUsps key={label} className={className} />;
     default:
+      if (type === "audio") {
+        return <GiSoundWaves key={label} className={className} />;
+      }
       return <LuLassoSelect key={label} className={className} />;
   }
 }
 
-function getVerifiedIcon(label: string, className?: string) {
+function getVerifiedIcon(
+  label: string,
+  className?: string,
+  type: EventType = "object",
+) {
   const simpleLabel = label.substring(0, label.lastIndexOf("-"));
 
   return (
     <div key={label} className="flex items-center">
-      {getIconForLabel(simpleLabel, className)}
+      {getIconForLabel(simpleLabel, type, className)}
       <FaCheckCircle className="absolute size-2 translate-x-[80%] translate-y-3/4" />
     </div>
   );
 }
 
-function getRecognizedPlateIcon(label: string, className?: string) {
+function getRecognizedPlateIcon(
+  label: string,
+  className?: string,
+  type: EventType = "object",
+) {
   const simpleLabel = label.substring(0, label.lastIndexOf("-"));
 
   return (
     <div key={label} className="flex items-center">
-      {getIconForLabel(simpleLabel, className)}
+      {getIconForLabel(simpleLabel, type, className)}
       <LuScanBarcode className="absolute size-2.5 translate-x-[50%] translate-y-3/4" />
     </div>
   );

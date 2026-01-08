@@ -14,6 +14,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
+import { EventType } from "@/types/search";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
@@ -346,22 +347,29 @@ function ReviewGroup({
       : null,
   );
 
-  const rawIconLabels: string[] = [
+  const rawIconLabels: Array<{ label: string; type: EventType }> = [
     ...(fetchedEvents
-      ? fetchedEvents.map((e) =>
-          e.sub_label ? e.label + "-verified" : e.label,
-        )
-      : (review.data?.objects ?? [])),
-    ...(review.data?.audio ?? []),
+      ? fetchedEvents.map((e) => ({
+          label: e.sub_label ? e.label + "-verified" : e.label,
+          type: e.data.type,
+        }))
+      : (review.data?.objects ?? []).map((obj) => ({
+          label: obj,
+          type: "object" as EventType,
+        }))),
+    ...(review.data?.audio ?? []).map((audio) => ({
+      label: audio,
+      type: "audio" as EventType,
+    })),
   ];
 
   // limit to 5 icons
   const seen = new Set<string>();
-  const iconLabels: string[] = [];
-  for (const lbl of rawIconLabels) {
-    if (!seen.has(lbl)) {
-      seen.add(lbl);
-      iconLabels.push(lbl);
+  const iconLabels: Array<{ label: string; type: EventType }> = [];
+  for (const item of rawIconLabels) {
+    if (!seen.has(item.label)) {
+      seen.add(item.label);
+      iconLabels.push(item);
       if (iconLabels.length >= 5) break;
     }
   }
@@ -418,12 +426,12 @@ function ReviewGroup({
             <div className="flex flex-row gap-3">
               <div className="text-sm font-medium">{displayTime}</div>
               <div className="relative flex items-center gap-2 text-white">
-                {iconLabels.slice(0, 5).map((lbl, idx) => (
+                {iconLabels.slice(0, 5).map(({ label: lbl, type }, idx) => (
                   <div
                     key={`${lbl}-${idx}`}
                     className="rounded-full bg-muted-foreground p-1"
                   >
-                    {getIconForLabel(lbl, "size-3 text-white")}
+                    {getIconForLabel(lbl, type, "size-3 text-white")}
                   </div>
                 ))}
               </div>
@@ -516,7 +524,11 @@ function ReviewGroup({
                 >
                   <div className="ml-1.5 flex items-center gap-2 text-sm font-medium">
                     <div className="rounded-full bg-muted-foreground p-1">
-                      {getIconForLabel(audioLabel, "size-3 text-white")}
+                      {getIconForLabel(
+                        audioLabel,
+                        "audio",
+                        "size-3 text-white",
+                      )}
                     </div>
                     <span>{getTranslatedLabel(audioLabel, "audio")}</span>
                   </div>
@@ -618,6 +630,7 @@ function EventList({
             >
               {getIconForLabel(
                 event.sub_label ? event.label + "-verified" : event.label,
+                event.data.type,
                 "size-3 text-white",
               )}
             </div>

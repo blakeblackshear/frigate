@@ -358,7 +358,11 @@ export default function LivePlayer({
                         ]),
                       ]
                         .map((label) => {
-                          return getIconForLabel(label, "size-3 text-white");
+                          return getIconForLabel(
+                            label,
+                            "object",
+                            "size-3 text-white",
+                          );
                         })
                         .sort()}
                     </Chip>

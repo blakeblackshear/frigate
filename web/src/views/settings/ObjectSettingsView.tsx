@@ -406,7 +406,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                         : getColorForObjectName(obj.label),
                     }}
                   >
-                    {getIconForLabel(obj.label, "size-5 text-white")}
+                    {getIconForLabel(obj.label, "object", "size-5 text-white")}
                   </div>
                   <div className="ml-3 text-lg">
                     {getTranslatedLabel(obj.label)}
@@ -494,7 +494,7 @@ function AudioList({ cameraConfig, audioDetections }: AudioListProps) {
             <div className="flex flex-row items-center gap-3 pb-1">
               <div className="flex flex-1 flex-row items-center justify-start p-3 pl-1">
                 <div className="rounded-lg bg-selected p-2">
-                  {getIconForLabel(key, "size-5 text-white")}
+                  {getIconForLabel(key, "audio", "size-5 text-white")}
                 </div>
                 <div className="ml-3 text-lg">{getTranslatedLabel(key)}</div>
               </div>

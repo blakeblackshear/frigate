@@ -665,6 +665,7 @@ export function TrackingDetails({
                 >
                   {getIconForLabel(
                     event.sub_label ? event.label + "-verified" : event.label,
+                    event.data.type,
                     "size-4 text-white",
                   )}
                 </div>

@@ -181,7 +181,7 @@ export default function ReviewCard({
                     key={`${object}-${idx}`}
                     className="rounded-full bg-muted-foreground p-1"
                   >
-                    {getIconForLabel(object, "size-3 text-white")}
+                    {getIconForLabel(object, "object", "size-3 text-white")}
                   </div>
                 ))}
                 {event.data.audio.map((audio, idx) => (
@@ -189,7 +189,7 @@ export default function ReviewCard({
                     key={`${audio}-${idx}`}
                     className="rounded-full bg-muted-foreground p-1"
                   >
-                    {getIconForLabel(audio, "size-3 text-white")}
+                    {getIconForLabel(audio, "audio", "size-3 text-white")}
                   </div>
                 ))}
               </div>
