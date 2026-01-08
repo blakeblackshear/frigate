@@ -112,6 +112,17 @@ review:
       - animals in the garden
 ```
 
+### Preferred Language
+
+By default, review summaries are generated in English. You can configure Frigate to generate summaries in your preferred language by setting the `preferred_language` option:
+
+```yaml
+review:
+  genai:
+    enabled: true
+    preferred_language: Spanish
+```
+
 ## Review Reports
 
 Along with individual review item summaries, Generative AI provides the ability to request a report of a given time period. For example, you can get a daily report while on a vacation of any suspicious activity or other concerns that may require review.
