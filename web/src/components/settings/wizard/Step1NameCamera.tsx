@@ -417,7 +417,9 @@ export default function Step1NameCamera({
                       <SelectContent>
                         {CAMERA_BRANDS.map((brand) => (
                           <SelectItem key={brand.value} value={brand.value}>
-                            {brand.label}
+                            {brand.label.toLowerCase() === "other"
+                              ? t("label.other", { ns: "common" })
+                              : brand.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
