@@ -1,5 +1,5 @@
 import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
-import { Locale } from "date-fns/locale";
+import { enUS, Locale } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
 import i18n from "@/utils/i18n";
 export const longToDate = (long: number): Date => new Date(long * 1000);
@@ -293,9 +293,13 @@ export const getDurationFromTimestamps = (
 /**
  *
  * @param seconds - number of seconds to convert into hours, minutes and seconds
+ * @param locale - the date-fns locale to use for formatting
  * @returns string - formatted duration in hours, minutes and seconds
  */
-export const formatSecondsToDuration = (seconds: number): string => {
+export const formatSecondsToDuration = (
+  seconds: number,
+  locale?: Locale,
+): string => {
   if (isNaN(seconds) || seconds < 0) {
     return "Invalid duration";
   }
@@ -304,6 +308,7 @@ export const formatSecondsToDuration = (seconds: number): string => {
   return formatDuration(duration, {
     format: ["hours", "minutes", "seconds"],
     delimiter: ", ",
+    locale: locale ?? enUS,
   });
 };
 

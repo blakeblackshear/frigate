@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import useSWR from "swr";
 import { formatSecondsToDuration } from "@/utils/dateUtil";
+import { useDateLocale } from "@/hooks/use-date-locale";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -48,12 +49,13 @@ export default function SetPasswordDialog({
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
   const isAdmin = useIsAdmin();
+  const dateLocale = useDateLocale();
 
   const { data: config } = useSWR("config");
   const refreshSeconds: number | undefined =
     config?.auth?.refresh_time ?? undefined;
   const refreshTimeLabel = refreshSeconds
-    ? formatSecondsToDuration(refreshSeconds)
+    ? formatSecondsToDuration(refreshSeconds, dateLocale)
     : t("time.30minutes", { ns: "common" });
 
   // visibility toggles for password fields
