@@ -266,7 +266,7 @@ export function TrackingDetails({
 
   const label = event.sub_label
     ? event.sub_label
-    : getTranslatedLabel(event.label);
+    : getTranslatedLabel(event.label, event.data.type);
 
   const getZoneColor = useCallback(
     (zoneName: string) => {
@@ -998,7 +998,7 @@ function LifecycleIconRow({
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
-            {((isAdmin && config?.plus?.enabled) || item.data.box) && (
+            {isAdmin && config?.plus?.enabled && item.data.box && (
               <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                 <DropdownMenuTrigger>
                   <div className="rounded p-1 pr-2" role="button">

@@ -12,7 +12,10 @@ export function getLifecycleItemDescription(
 
   const label = lifecycleItem.data.sub_label
     ? capitalizeFirstLetter(rawLabel)
-    : getTranslatedLabel(rawLabel);
+    : getTranslatedLabel(
+        rawLabel,
+        lifecycleItem.class_type === "heard" ? "audio" : "object",
+      );
 
   switch (lifecycleItem.class_type) {
     case "visible":
