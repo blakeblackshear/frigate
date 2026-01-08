@@ -16,7 +16,6 @@ import {
 } from "@/types/live";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
@@ -26,6 +25,8 @@ import { LuVideoOff } from "react-icons/lu";
 import { Trans, useTranslation } from "react-i18next";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
+import { getTranslatedLabel } from "@/utils/i18n";
+import { formatList } from "@/utils/stringUtil";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -367,20 +368,22 @@ export default function LivePlayer({
               </div>
               <TooltipPortal>
                 <TooltipContent className="smart-capitalize">
-                  {[
-                    ...new Set([
-                      ...(objects || []).map(({ label, sub_label }) =>
-                        label.endsWith("verified")
-                          ? sub_label
-                          : label.replaceAll("_", " "),
-                      ),
-                    ]),
-                  ]
-                    .filter((label) => label?.includes("-verified") == false)
-                    .map((label) => capitalizeFirstLetter(label))
-                    .sort()
-                    .join(", ")
-                    .replaceAll("-verified", "")}
+                  {formatList(
+                    [
+                      ...new Set([
+                        ...(objects || []).map(({ label, sub_label }) =>
+                          label.endsWith("verified")
+                            ? sub_label
+                            : label.replaceAll("_", " "),
+                        ),
+                      ]),
+                    ]
+                      .filter((label) => label?.includes("-verified") == false)
+                      .map((label) =>
+                        getTranslatedLabel(label.replace("-verified", "")),
+                      )
+                      .sort(),
+                  )}
                 </TooltipContent>
               </TooltipPortal>
             </Tooltip>
