@@ -88,7 +88,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   // title
 
   useEffect(() => {
-    document.title = `${model.name} - ${t("documentTitle")}`;
+    document.title = `${model.name.toUpperCase()} - ${t("documentTitle")}`;
   }, [model.name, t]);
 
   // model state
