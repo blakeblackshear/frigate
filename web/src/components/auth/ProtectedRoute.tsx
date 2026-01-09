@@ -28,6 +28,14 @@ export default function ProtectedRoute({
     }
   }, [auth.isLoading, auth.isAuthenticated, auth.user]);
 
+  // Show loading indicator during redirect to prevent React from attempting to render
+  // lazy components, which would cause error #426 (suspension during synchronous navigation)
+  if (isRedirectingToLogin()) {
+    return (
+      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
   if (auth.isLoading) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />

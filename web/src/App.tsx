@@ -15,6 +15,7 @@ import { AuthProvider } from "@/context/auth-context";
 import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { isRedirectingToLogin } from "@/api/auth-redirect";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -57,6 +58,16 @@ function DefaultAppView() {
   const mainRouteRoles = config?.auth?.roles
     ? Object.keys(config.auth.roles)
     : undefined;
+
+  // Show loading indicator during redirect to prevent React from attempting to render
+  // lazy components, which would cause error #426 (suspension during synchronous navigation)
+  if (isRedirectingToLogin()) {
+    return (
+      <div className="size-full overflow-hidden">
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      </div>
+    );
+  }
 
   return (
     <div className="size-full overflow-hidden">
