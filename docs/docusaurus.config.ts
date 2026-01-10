@@ -169,6 +169,13 @@ const config: Config = {
             },
           ],
         },
+        {
+          items: [
+            {
+              html: '<div style="display:flex;justify-content:flex-end"><a href="https://www.netlify.com" target="_blank"><img src="https://www.netlify.com/assets/badges/netlify-badge-color-bg.svg" alt="Deploys by Netlify"/></a></div>',
+            },
+          ],
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Frigate, Inc.`,
     },
