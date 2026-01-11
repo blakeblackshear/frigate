@@ -96,16 +96,17 @@ class TestHttpApp(BaseTestHttp):
             assert len(events) == 0
 
     def test_get_event_list_limit(self):
+        now = datetime.now().timestamp()
         id = "123456.random"
         id2 = "54321.random"
 
         with AuthTestClient(self.app) as client:
-            super().insert_mock_event(id)
+            super().insert_mock_event(id, start_time=now + 1)
             events = client.get("/events").json()
             assert len(events) == 1
             assert events[0]["id"] == id
 
-            super().insert_mock_event(id2)
+            super().insert_mock_event(id2, start_time=now)
             events = client.get("/events").json()
             assert len(events) == 2
 
@@ -144,7 +145,7 @@ class TestHttpApp(BaseTestHttp):
             assert events[0]["id"] == id2
             assert events[1]["id"] == id
 
-            events = client.get("/events", params={"sort": "score_des"}).json()
+            events = client.get("/events", params={"sort": "score_desc"}).json()
             assert len(events) == 2
             assert events[0]["id"] == id
             assert events[1]["id"] == id2

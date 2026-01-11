@@ -144,6 +144,8 @@ async def review(
             (UserReviewStatus.has_been_reviewed == False)
             | (UserReviewStatus.has_been_reviewed.is_null())
         )
+    elif reviewed == 1:
+        review_query = review_query.where(UserReviewStatus.has_been_reviewed == True)
 
     # Apply ordering and limit
     review_query = (

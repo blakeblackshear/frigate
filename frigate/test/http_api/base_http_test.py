@@ -171,8 +171,8 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_event(
         self,
         id: str,
-        start_time: float = datetime.datetime.now().timestamp(),
-        end_time: float = datetime.datetime.now().timestamp() + 20,
+        start_time: float | None = None,
+        end_time: float | None = None,
         has_clip: bool = True,
         top_score: int = 100,
         score: int = 0,
@@ -180,6 +180,11 @@ class BaseTestHttp(unittest.TestCase):
         camera: str = "front_door",
     ) -> Event:
         """Inserts a basic event model with a given id."""
+        if start_time is None:
+            start_time = datetime.datetime.now().timestamp()
+        if end_time is None:
+            end_time = start_time + 20
+
         return Event.insert(
             id=id,
             label="Mock",
@@ -229,11 +234,16 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_recording(
         self,
         id: str,
-        start_time: float = datetime.datetime.now().timestamp(),
-        end_time: float = datetime.datetime.now().timestamp() + 20,
+        start_time: float | None = None,
+        end_time: float | None = None,
         motion: int = 0,
     ) -> Event:
         """Inserts a recording model with a given id."""
+        if start_time is None:
+            start_time = datetime.datetime.now().timestamp()
+        if end_time is None:
+            end_time = start_time + 20
+
         return Recordings.insert(
             id=id,
             path=id,

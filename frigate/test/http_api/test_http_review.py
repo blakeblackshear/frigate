@@ -196,6 +196,50 @@ class TestHttpReview(BaseTestHttp):
             assert len(response_json) == 1
             assert response_json[0]["id"] == id
 
+    def test_get_review_with_reviewed_filter_unreviewed(self):
+        """Test that reviewed=0 returns only unreviewed items."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id_unreviewed = "123456.unreviewed"
+            id_reviewed = "123456.reviewed"
+            super().insert_mock_review_segment(id_unreviewed, now, now + 2)
+            super().insert_mock_review_segment(id_reviewed, now, now + 2)
+            self._insert_user_review_status(id_reviewed, reviewed=True)
+
+            params = {
+                "reviewed": 0,
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 1
+            assert response_json[0]["id"] == id_unreviewed
+
+    def test_get_review_with_reviewed_filter_reviewed(self):
+        """Test that reviewed=1 returns only reviewed items."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id_unreviewed = "123456.unreviewed"
+            id_reviewed = "123456.reviewed"
+            super().insert_mock_review_segment(id_unreviewed, now, now + 2)
+            super().insert_mock_review_segment(id_reviewed, now, now + 2)
+            self._insert_user_review_status(id_reviewed, reviewed=True)
+
+            params = {
+                "reviewed": 1,
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 1
+            assert response_json[0]["id"] == id_reviewed
+
     ####################################################################################################################
     ###################################  GET /review/summary Endpoint   #################################################
     ####################################################################################################################
