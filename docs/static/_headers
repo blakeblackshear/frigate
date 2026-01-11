@@ -3,3 +3,6 @@ https://:project.pages.dev/*
 
 https://:version.:project.pages.dev/*
   X-Robots-Tag: noindex
+
+https://docs-dev.frigate.video/*
+  X-Robots-Tag: noindex
