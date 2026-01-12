@@ -342,7 +342,9 @@ export default function PreviewThumbnailPlayer({
                     default:
                       return (
                         THREAT_LEVEL_LABELS[threatLevel as ThreatLevel] ||
-                        "Unknown"
+                        t("details.unknown", {
+                          ns: "views/classificationModel",
+                        })
                       );
                   }
                 })()}
