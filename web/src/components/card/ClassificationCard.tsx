@@ -164,7 +164,7 @@ export const ClassificationCard = forwardRef<
           )}
         >
           <div className="break-all smart-capitalize">
-            {data.name == "unknown"
+            {data.name.toLowerCase() == "unknown"
               ? t("details.unknown")
               : data.name.toLowerCase() == "none"
                 ? t("details.none")
@@ -336,7 +336,7 @@ export function GroupedClassificationCard({
                 <ContentTitle className="flex items-center gap-2 font-normal capitalize">
                   {classifiedEvent?.label && classifiedEvent.label !== "none"
                     ? classifiedEvent.label
-                    : t(noClassificationLabel)}
+                    : t(noClassificationLabel, { ns: i18nLibrary })}
                   {classifiedEvent?.label &&
                     classifiedEvent.label !== "none" &&
                     classifiedEvent.score !== undefined && (
