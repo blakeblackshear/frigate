@@ -57,7 +57,7 @@ export function GenAISummaryDialog({
       !aiAnalysis ||
       (!aiAnalysis.potential_threat_level && !aiAnalysis.other_concerns)
     ) {
-      return "None";
+      return t("label.none", { ns: "common" });
     }
 
     let concerns = "";
@@ -74,7 +74,9 @@ export function GenAISummaryDialog({
           label = t("securityConcern", { ns: "views/events" });
           break;
         default:
-          label = THREAT_LEVEL_LABELS[threatLevel as ThreatLevel] || "Unknown";
+          label =
+            THREAT_LEVEL_LABELS[threatLevel as ThreatLevel] ||
+            t("details.unknown", { ns: "views/classificationModel" });
       }
       concerns = `• ${label}\n`;
     }
@@ -83,7 +85,7 @@ export function GenAISummaryDialog({
       concerns += `• ${c}\n`;
     });
 
-    return concerns || "None";
+    return concerns || t("label.none", { ns: "common" });
   }, [aiAnalysis, t]);
 
   // layout
