@@ -114,6 +114,7 @@ export default function LiveDashboardView({
     {
       limit: 10,
       severity: "alert",
+      reviewed: 0,
       cameras: alertCameras,
     },
   ]);
