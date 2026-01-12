@@ -22,9 +22,14 @@ class OpenAIClient(GenAIClient):
 
     def _init_provider(self):
         """Initialize the client."""
-        return OpenAI(
-            api_key=self.genai_config.api_key, **self.genai_config.provider_options
-        )
+        # Extract context_size from provider_options as it's not a valid OpenAI client parameter
+        # It will be used in get_context_size() instead
+        provider_opts = {
+            k: v
+            for k, v in self.genai_config.provider_options.items()
+            if k != "context_size"
+        }
+        return OpenAI(api_key=self.genai_config.api_key, **provider_opts)
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to OpenAI."""
@@ -71,6 +76,16 @@ class OpenAIClient(GenAIClient):
     def get_context_size(self) -> int:
         """Get the context window size for OpenAI."""
         if self.context_size is not None:
+            return self.context_size
+
+        # First check provider_options for manually specified context size
+        # This is necessary for llama.cpp and other OpenAI-compatible servers
+        # that don't expose the configured runtime context size in the API response
+        if "context_size" in self.genai_config.provider_options:
+            self.context_size = self.genai_config.provider_options["context_size"]
+            logger.debug(
+                f"Using context size {self.context_size} from provider_options for model {self.genai_config.model}"
+            )
             return self.context_size
 
         try:

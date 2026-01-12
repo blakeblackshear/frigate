@@ -41,12 +41,12 @@ If you are trying to use a single model for Frigate and HomeAssistant, it will n
 
 The following models are recommended:
 
-| Model             | Notes                                                                |
-| ----------------- | -------------------------------------------------------------------- |
-| `qwen3-vl`        | Strong visual and situational understanding, higher vram requirement |
-| `Intern3.5VL`     | Relatively fast with good vision comprehension                       |
-| `gemma3`          | Strong frame-to-frame understanding, slower inference times          |
-| `qwen2.5-vl`      | Fast but capable model with good vision comprehension                |
+| Model         | Notes                                                                |
+| ------------- | -------------------------------------------------------------------- |
+| `qwen3-vl`    | Strong visual and situational understanding, higher vram requirement |
+| `Intern3.5VL` | Relatively fast with good vision comprehension                       |
+| `gemma3`      | Strong frame-to-frame understanding, slower inference times          |
+| `qwen2.5-vl`  | Fast but capable model with good vision comprehension                |
 
 :::note
 
@@ -61,10 +61,10 @@ genai:
   provider: ollama
   base_url: http://localhost:11434
   model: minicpm-v:8b
-  provider_options:  # other Ollama client options can be defined
+  provider_options: # other Ollama client options can be defined
     keep_alive: -1
     options:
-        num_ctx: 8192  # make sure the context matches other services that are using ollama
+      num_ctx: 8192 # make sure the context matches other services that are using ollama
 ```
 
 ## Google Gemini
@@ -117,6 +117,23 @@ genai:
 :::note
 
 To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
+
+:::
+
+:::tip
+
+For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
+
+```yaml
+genai:
+  provider: openai
+  base_url: http://your-llama-server
+  model: your-model-name
+  provider_options:
+    context_size: 8192 # Specify the configured context size
+```
+
+This ensures Frigate uses the correct context window size when generating prompts.
 
 :::
 
