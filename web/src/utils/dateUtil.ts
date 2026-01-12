@@ -165,7 +165,7 @@ export const formatUnixTimestampToDateTime = (
       // Uppercase AM/PM for 12-hour formats
       if (date_format.includes("a") || date_format.includes("aaa")) {
         formatted = formatted.replace(/am|pm/gi, (match) =>
-          match.toUpperCase(),
+          i18n.t(`time.${match.toLowerCase()}`, { ns: "common" }).toUpperCase(),
         );
       }
       return formatted;
@@ -217,7 +217,7 @@ export const formatUnixTimestampToDateTime = (
       // Uppercase AM/PM in fallback
       if (options.hour12) {
         fallbackFormatted = fallbackFormatted.replace(/am|pm/gi, (match) =>
-          match.toUpperCase(),
+          i18n.t(`time.${match.toLowerCase()}`, { ns: "common" }).toUpperCase(),
         );
       }
       return fallbackFormatted;
