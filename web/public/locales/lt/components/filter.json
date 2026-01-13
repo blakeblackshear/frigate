@@ -132,5 +132,9 @@
     "selectPlatesFromList": "Pasirinkti vieną ar daugiau numerių iš sąrašo.",
     "selectAll": "Pasirinkti viską",
     "clearAll": "Išvalyti viską"
+  },
+  "attributes": {
+    "label": "Klasifikavimo Atributai",
+    "all": "Visi Atributai"
   }
 }

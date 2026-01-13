@@ -78,7 +78,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "Apdorojama",
+    "invalidStartTime": "Netinkamas pradžios laikas",
+    "invalidEndTime": "Netinkamas pabaigos laikas"
   },
   "unit": {
     "speed": {
@@ -99,7 +102,9 @@
     }
   },
   "label": {
-    "back": "Eiti atgal"
+    "back": "Eiti atgal",
+    "hide": "Slėpti {{item}}",
+    "show": "Rodyti {{item}}"
   },
   "button": {
     "apply": "Pritaikyti",

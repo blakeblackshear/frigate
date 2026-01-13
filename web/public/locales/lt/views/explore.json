@@ -49,7 +49,8 @@
           "regenerate": "Gauta nauja užklausa iš {{provider}} naujam aprašymui. Priklausomai nuo jūsų tiekėjo greičio, naują aprašymą sukurti gali užtrukti.",
           "updatedSublabel": "Sėkmingai atnaujinta sub etiketė.",
           "updatedLPR": "Sėkmingai atnaujinti registracijos numeriai.",
-          "audioTranscription": "Sėkmingai užklausta garso aprašymo."
+          "audioTranscription": "Sėkmingai užklausta garso aprašymo. Priklausomai nuo jūsų Frigate serverio pajėgumų, tai gali užtrukti.",
+          "updatedAttributes": "Atributai sekmingai užkelti."
         },
         "error": {
           "regenerate": "Nepavyko pakviesti {{provider}} naujam aprašymui: {{errorMessage}}",
@@ -158,7 +159,7 @@
   },
   "dialog": {
     "confirmDelete": {
-      "desc": "Trinant šį sekamą objektą taip pat bus pašalintos momentinės iškarpos, išsaugoti įterpiai, priskirti objekto gyvavimo ciklo įrašai. Šių sekamų objektų įrašyta filmuota medžiaga Istorijos vaizde ištrinta <em>NEBUS</em>.<br /><br />Ar esate įsitikinę, kad norite tęsti?",
+      "desc": "Trinant šį sekamą objektą taip pat bus pašalintos momentinės iškarpos, išsaugoti įterpiai ir kitos susios sekimo detalės. Šių sekamų objektų įrašyta filmuota medžiaga Istorijos vaizde ištrinta <em>NEBUS</em>.<br /><br />Ar esate įsitikinę, kad norite tęsti?",
       "title": "Patvirtinti Ištrynimą"
     }
   },
@@ -167,7 +168,9 @@
     "details": "detalės",
     "snapshot": "momentinės nuotraukos",
     "video": "vaizdas",
-    "object_lifecycle": "objekto gyvavimo ciklas"
+    "object_lifecycle": "objekto gyvavimo ciklas",
+    "thumbnail": "miniatiūra",
+    "tracking_details": "sekimo detalės"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -222,5 +225,54 @@
   },
   "concerns": {
     "label": "Rūpesčiai"
+  },
+  "trackingDetails": {
+    "title": "Sekimo Detalės",
+    "noImageFound": "Šiai miniatiūrai paveikslėlis nerastas.",
+    "createObjectMask": "Sukurti Objekto Maskavimą",
+    "adjustAnnotationSettings": "Patikslinti pastabų nustatymus",
+    "scrollViewTips": "Spustelkite pamatyti svarbius objekto gyvavimo momentus.",
+    "autoTrackingTips": "Apribojančio stačiakampio pozicijos nebus tikslios kameroms su autosekimu.",
+    "count": "{{first}} iš {{second}}",
+    "trackedPoint": "Sekamas Taškas",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} aptiktas",
+      "entered_zone": "{{label}} pateko į {{zones}}",
+      "active": "{{label}} tapo aktyvus",
+      "stationary": "{{label}} tapo statinis",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} aptiktas etiketei {{label}}",
+        "other": "{{label}} atpažintas kaip {{attribute}}"
+      },
+      "gone": "{{label}} kairė",
+      "heard": "{{label}} girdėta",
+      "external": "{{label}} aptikta",
+      "header": {
+        "zones": "Zonos",
+        "ratio": "Santykis",
+        "area": "Plotas",
+        "score": "Balas"
+      }
+    },
+    "annotationSettings": {
+      "title": "Anotacijų Nustatymai",
+      "showAllZones": {
+        "title": "Rodyti Visas Zonas",
+        "desc": "Visada rodyti zonas kadruose kur objektas patenka į zoną."
+      },
+      "offset": {
+        "label": "Anotacijų offset",
+        "desc": "Šie duomenys gaunami iš kameros aptikimo srauto, tačiau yra užkeliami ant atvaizdo sluoksnio iš įrašymo srauto. Tobulai synchronizuoti du srautai yra mažai tikėtini. Kaip rezultatas, apribojančio stačiakampio ir vaizdo medžiaga tobulai nesusilygiuos. Norėdami geriau sulygiuoti su įrašų medžiaga, jūs galite naudoti šį nustatymą srauto perslinkimui pirmyn arba atgal.",
+        "millisecondsToOffset": "Aptikimo anotacijų perslinkimas milisekundėmis. <em>Default: 0</em>",
+        "tips": "Sumažinkite reikšmę jei video įrašas yra pirmesnis nei kvadratai ar kelio taškai, ir padidinkite reikšmė jei video įrašas atsilieka. Ši reikšmė gali būti neigiama.",
+        "toast": {
+          "success": "Anotacijų perslinkimas kamerai {{camera}} išsaugotas konfiguracijoje."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Ankstesnė skaidrė",
+      "next": "Kita skaidrė"
+    }
   }
 }

@@ -71,12 +71,13 @@
     "export": "Eksportuoti",
     "selectOrExport": "Pasirinkti ar Eksportuoti",
     "toast": {
-      "success": "Sėkmingai pradėtas eksportavimas. Įrašą galima peržiūrėti /exports kataloge.",
+      "success": "Sėkmingai pradėtas eksportavimas. Peržiūrėti įrašą exports puslapyje.",
       "error": {
         "failed": "Nepavyko pradėti eksportavimo: {{error}}",
         "endTimeMustAfterStartTime": "Pabaigos Laikas privalo būti vėliau nei pradžios laikas",
         "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio"
-      }
+      },
+      "view": "Žiūrėti"
     }
   },
   "recording": {
@@ -116,6 +117,7 @@
     "search": {
       "placeholder": "Ieškoti pagal etiketę arba sub etiketę..."
     },
-    "noImages": "Šiai kamerai miniatiūrų nerasta"
+    "noImages": "Šiai kamerai miniatiūrų nerasta",
+    "unknownLabel": "Išsaugotas Trigerio Paveiksliukas"
   }
 }

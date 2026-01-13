@@ -32,7 +32,7 @@
       "addFaceLibrary": "{{name}} vardas buvo sėkmingai pridėtas į Veidų Katalogą!",
       "renamedFace": "Sėkmingai veidas pervadintas į {{name}}",
       "trainedFace": "Veidas apmokytas sėkmingai.",
-      "updatedFaceScore": "Veido balas atnaujintas sėkmingai."
+      "updatedFaceScore": "Veido balas atnaujintas sėkmingai į {{name}} {{score}}."
     },
     "error": {
       "uploadingImageFailed": "Nepavyko įkelti nuotraukos: {{errorMessage}}",
@@ -71,7 +71,8 @@
   "train": {
     "title": "Pastarieji Atpažinimai",
     "aria": "Pasirinkti pastaruosius atpažinimus",
-    "empty": "Pastaruoju metu nebuvo atliktas veidų atpažinimas"
+    "empty": "Pastaruoju metu nebuvo atliktas veidų atpažinimas",
+    "titleShort": "Paskutiniai"
   },
   "selectFace": "Pasirinkti Veidą",
   "renameFace": {

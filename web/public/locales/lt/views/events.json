@@ -22,7 +22,11 @@
   "empty": {
     "alert": "Nėra pranešimų peržiūrai",
     "detection": "Nėra aptikimų peržiūrai",
-    "motion": "Duomenų apie judesius nėra"
+    "motion": "Duomenų apie judesius nėra",
+    "recordingsDisabled": {
+      "title": "Įrašai privalo būti įjungti",
+      "description": "Peržiūros gali būti kuriamos tik tada kai kamerai yra aktyvuoti įrašymai."
+    }
   },
   "documentTitle": "Peržiūros - Frigate",
   "recordings": {
@@ -40,13 +44,24 @@
   "detail": {
     "noDataFound": "Peržiūrai informacijos nėra",
     "aria": "Perjungti į detalų vaizdą",
-    "trackedObject_one": "objektas",
-    "trackedObject_other": "objektai",
+    "trackedObject_one": "{{count}} objektas",
+    "trackedObject_other": "{{count}} objektai",
     "noObjectDetailData": "Nėra objekto detalių duomenų.",
-    "label": "Detalės"
+    "label": "Detalės",
+    "settings": "Vaizdo Nustatymai Detaliau",
+    "alwaysExpandActive": {
+      "title": "Visada išskleisti aktyvų",
+      "desc": "Aktyviai peržiūrimam įrašui visada išskleisti objekto detales jei jos yra."
+    }
   },
   "objectTrack": {
     "trackedPoint": "Susektas taškas",
     "clickToSeek": "Spustelkite perkelti į šį laiką"
-  }
+  },
+  "zoomIn": "Priartinti",
+  "zoomOut": "Patolinti",
+  "select_all": "Viską",
+  "normalActivity": "Normali veikla",
+  "needsReview": "Reikalinga peržiūra",
+  "securityConcern": "Saugumo rūpestis"
 }

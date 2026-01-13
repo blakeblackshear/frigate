@@ -1,11 +1,14 @@
 {
-  "documentTitle": "Klasifikavimo Modeliai",
+  "documentTitle": "Klasifikavimo Modeliai - Frigate",
   "button": {
     "deleteClassificationAttempts": "Trinti Klasisifikavimo Nuotraukas",
     "renameCategory": "Pervadinti Klasę",
     "deleteCategory": "Trinti Klasę",
     "deleteImages": "Trinti Nuotraukas",
-    "trainModel": "Treniruoti Modelį"
+    "trainModel": "Treniruoti Modelį",
+    "addClassification": "Pridėti Klasifikatorių",
+    "deleteModels": "Ištrinti Modelius",
+    "editModel": "Koreguoti Modelį"
   },
   "toast": {
     "success": {
@@ -13,41 +16,53 @@
       "deletedImage": "Ištrinti Nuotraukas",
       "categorizedImage": "Sekmingai Klasifikuotas Nuotrauka",
       "trainedModel": "Modelis sėkmingai apmokytas.",
-      "trainingModel": "Sėkmingai pradėtas modelio apmokymas."
+      "trainingModel": "Sėkmingai pradėtas modelio apmokymas.",
+      "deletedModel_one": "Sėkmingai ištrintas {{count}} modelis",
+      "deletedModel_few": "Sėkmingai ištrinti {{count}} modeliai",
+      "deletedModel_other": "Sėkmingai ištrinta {{count}} modelių",
+      "updatedModel": "Modelio nustatymai atnaujinti sėkmingai",
+      "renamedCategory": "Klasifikatorius sėkmingai pervadintas į {{name}}"
     },
     "error": {
       "deleteImageFailed": "Nepavyko ištrinti:{{errorMessage}}",
       "deleteCategoryFailed": "Nepavyko ištrinti klasės:{{errorMessage}}",
       "categorizeFailed": "Nepavyko kategorizuoti nuotraukos:{{errorMessage}}",
-      "trainingFailed": "Nepavyko pradėti modelio apmokymo:{{errorMessage}}"
+      "trainingFailed": "Modelio treniravimas nepavyko. Patikrinkite Frigate log'ų detales.",
+      "deleteModelFailed": "Nepavyko ištrinti modelio: {{errorMessage}}",
+      "trainingFailedToStart": "Nepavyko pradėti modelio treniravimo: {{errorMessage}}",
+      "updateModelFailed": "Nepavyko atnaujinti modelio: {{errorMessage}}",
+      "renameCategoryFailed": "Nepavyko pervadinti klasifikatoriaus: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Trinti Klasę",
-    "desc": "Esate įsitikinę, norite ištrinti klasę {{name}}? Tai negrįžtamai ištrins visas susijusias nuotraukas ir reikės iš naujo apmokinti modelį."
+    "desc": "Esate įsitikinę, norite ištrinti klasę {{name}}? Tai negrįžtamai ištrins visas susijusias nuotraukas ir reikės iš naujo apmokinti modelį.",
+    "minClassesTitle": "Negalima Ištrinti Klasifikatoriaus",
+    "minClassesDesc": "Klasifikavimo modelis turi turėti bent 2 klasifikatorius. Pridėkite dar vieną klasifikatoriu prieš ištrinant šį."
   },
   "deleteDatasetImages": {
     "title": "Ištrinti Imties Nuotraukas",
-    "desc_one": "Esate įsitikinę norite ištrinti {{count}} nautraukas iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį.",
-    "desc_few": "",
-    "desc_other": ""
+    "desc_one": "Esate įsitikinę norite ištrinti {{count}} nautrauką iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį.",
+    "desc_few": "Esate įsitikinę norite ištrinti {{count}} nautraukas iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį.",
+    "desc_other": "Esate įsitikinę norite ištrinti {{count}} nautraukų iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį."
   },
   "deleteTrainImages": {
     "title": "Ištrinti Apmokymo Nuotraukas",
-    "desc_one": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotraukas? Šis veiksmas negrįžtamas.",
-    "desc_few": "",
-    "desc_other": ""
+    "desc_one": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotrauką? Šis veiksmas negrįžtamas.",
+    "desc_few": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotraukas? Šis veiksmas negrįžtamas.",
+    "desc_other": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotraukų? Šis veiksmas negrįžtamas."
   },
   "renameCategory": {
     "title": "Pervadinti Klasę",
-    "desc": "Įveskite naują vardą vietoje {{name}}. Jums reikės iš naujo apmokinti modelį, kad vardas įsigaliotų."
+    "desc": "Įveskite naują vardą vietoje {{name}}. Jums reikės iš naujo apmokinti modelį, kad pavadinimas įsigaliotų."
   },
   "description": {
     "invalidName": "Netinkamas vardas. Vardas gali būti sudarytas tik iš raidžiū, skaičių, tarpų, apostrofų, pabraukimų ar brūkšnelių."
   },
   "train": {
     "title": "Pastarosios Klasifikacijos",
-    "aria": "Pasirinkti Pastarasias Klasifikacijas"
+    "aria": "Pasirinkti Pastarasias Klasifikacijas",
+    "titleShort": "Paskutiniai"
   },
   "categories": "Klasės",
   "createCategory": {
@@ -62,7 +77,49 @@
       "buttonText": "Sukurti Objekto Modelį"
     },
     "state": {
-      "title": "Nėra Būklės Klasifikavimo Modelių"
+      "title": "Nėra Būklės Klasifikavimo Modelių",
+      "description": "Sukurti individualų modelį sekti ir klasifikuoti būsenų pokyčius konkrečiuose kameros plotuose.",
+      "buttonText": "Sukurti Būsenos Modelį"
     }
+  },
+  "details": {
+    "scoreInfo": "Įvertinimas atspindi vidutinį klasivikavimo pasitikėjimą tarp visų šio objekto atpažinimų.",
+    "none": "Nėra",
+    "unknown": "Nežinoma"
+  },
+  "tooltip": {
+    "trainingInProgress": "Šiuo metu vyksta modelio apmokymas",
+    "noNewImages": "Nėra naujų paveikslėlių apmokymui. Pradžiai suklasifikuokite daugiau paveikslėlių duomenų rinkinyje.",
+    "noChanges": "Po paskutinio apmokymo duomenų rinkinyje pakeitimų nėra.",
+    "modelNotReady": "Modelis neparuoštas apmokymui"
+  },
+  "deleteModel": {
+    "title": "Ištrinti Klasifikavimo Modelį",
+    "single": "Ar įsitikinę kad norite trinti {{name}}? Tai negrįžtamai ištrins ir susijusius paveikslėlius bei apmokymo duomenis. Tai negali būti sugražinta.",
+    "desc_one": "Ar esate įsitikinę kad norite ištrinti {{count}} modelį? Tai negrįžtamai ištrins ir susijusius paveikslėlius bei apmokymo duomenis. Tai negali būti sugražinta.",
+    "desc_few": "Ar esate įsitikinę kad norite ištrinti {{count}} modelius? Tai negrįžtamai ištrins ir susijusius paveikslėlius bei apmokymo duomenis. Tai negali būti sugražinta.",
+    "desc_other": "Ar esate įsitikinę kad norite ištrinti {{count}} modelių? Tai negrįžtamai ištrins ir susijusius paveikslėlius bei apmokymo duomenis. Tai negali būti sugražinta."
+  },
+  "edit": {
+    "title": "Koreguoti Klasifikavimo Modelį",
+    "descriptionState": "Koreguoti klasifikatorius šiam būklės klasifikavimo modeliui. Pokyčiams reikės išnaujo apmokinti modelį.",
+    "descriptionObject": "Koreguoti objekto tipą ir klasifikavimo tipą šiam objektų klasifikavimo modeliui.",
+    "stateClassesInfo": "Pastaba: Keičiant statuso klasifikatorius privaloma iš naujo apmokinti modelį."
+  },
+  "wizard": {
+    "step3": {
+      "allImagesRequired_one": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėlis.",
+      "allImagesRequired_few": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėliai.",
+      "allImagesRequired_other": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėlių."
+    },
+    "title": "Sukurti Naują Klasifikavimą",
+    "steps": {
+      "nameAndDefine": "Pavadinimas ir Apibūdinimas",
+      "stateArea": "Būsenos Plotas"
+    }
+  },
+  "menu": {
+    "objects": "Objektai",
+    "states": "Būsenos"
   }
 }

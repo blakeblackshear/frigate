@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "NPU Naudojimas",
-      "npuMemory": "NPU Atmintis"
+      "npuMemory": "NPU Atmintis",
+      "intelGpuWarning": {
+        "title": "Intel GPU statistikų įspėjimas",
+        "message": "GPU statistika negalima",
+        "description": "Tai žinoma problema su Intel GPU statistikos raportavimo įrankiu (intel_gpu_top), kai jis stringa ir pakartotinai grąžina GPU vartojimas 0% net tais atvejais kai hardware acceleration ir objektų aptikimas taisiklingai veikia naudojant (i)GPU. Tai nėra Frigate klaida. Laikinai padeda įrenginio perkrovimas, kad įsitikinti teisingu GPU funkcionavimu. Tai neįtakoja spartos."
+      }
     },
     "otherProcesses": {
       "title": "Kiti Procesai",

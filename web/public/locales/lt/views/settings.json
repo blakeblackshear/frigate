@@ -4,7 +4,7 @@
     "authentication": "Autentifikavimo Nustatymai - Frigate",
     "camera": "Kameros Nustatymai - Frigate",
     "object": "Debug - Frigate",
-    "general": "Bendrieji Nustatymai - Frigate",
+    "general": "Vartotojo Sąsajos Nustatymai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
     "motionTuner": "Judesio Derinimas - Frigate",
@@ -39,7 +39,7 @@
     "noCamera": "Nėra Kameros"
   },
   "general": {
-    "title": "Bendri Nustatymai",
+    "title": "Vartotojo Sąsajos Nustatymai",
     "liveDashboard": {
       "title": "Tiesioginės Transliacijos Skydelis",
       "automaticLiveView": {
@@ -49,6 +49,14 @@
       "playAlertVideos": {
         "label": "Leist Įspejimų Vaizdus",
         "desc": "Pagal nutylėjimą, paskutinieji įspėjimai rodomį kaip maži cikliški vaizdo įrašai. Šią funkciją išjunkite jei norite matyti statinius įspėjimų paveiksliukus šiame įrenginyje/naršyklėje."
+      },
+      "displayCameraNames": {
+        "label": "Visada Rodyti Kamerų Pavadinimus",
+        "desc": "Keletos kamerų tiesioginės transliacijos tinklelyje visada rodyti kameros pavadinimą žymoje."
+      },
+      "liveFallbackTimeout": {
+        "label": "Transliacijos atstatymas neišlauktas",
+        "desc": "Kai kameros aukštos raiškos transliacija nepasiekiama, persijungti į žemos raiškos rėžimą po tiek tai sekundžių. Default: 3."
       }
     },
     "storedLayouts": {
@@ -234,7 +242,7 @@
       "name": {
         "title": "Pavadinimas",
         "inputPlaceHolder": "Įveskite pavadinimą …",
-        "tips": "Pavadinimas privalo būti bent 2 simboliai, privalo turėti bent vieną raidę ir negali būti toks pat kaip kita kamera ar zona."
+        "tips": "Pavadinimas privalo būti bent 2 simboliai, privalo turėti bent vieną raidę ir negali būti toks pat kaip kita kamera ar kita šios kameros zona."
       },
       "inertia": {
         "title": "Inercija",
@@ -268,7 +276,7 @@
         }
       },
       "toast": {
-        "success": "Zona ({{zoneName}}) buvo išsaugota. Perkrauti Frigate kad įgalinti pokyčius."
+        "success": "Zona ({{zoneName}}) buvo išsaugota."
       }
     },
     "motionMasks": {
@@ -293,8 +301,8 @@
       "clickDrawPolygon": "Spragtelti kad piešti poligoną ant atvaizdo.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} išsaugotas. Perkrauti Frigate, kad pritaikyti pokyčius.",
-          "noName": "Judesio Maskuotė buvo išsaugota. Perkrauti Frigate, kad pritaikyti pokyčius."
+          "title": "{{polygonName}} išsaugotas.",
+          "noName": "Judesio Maskuotė buvo išsaugota."
         }
       }
     },
@@ -319,8 +327,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} buvo išsaugotas. Perkrauti Frigate, kad pritaikyti pokyčius.",
-          "noName": "Objektų Maskuotė buvo išsaugota. Perkrauti Frigate, kad pritaikyti pokyčius."
+          "title": "{{polygonName}} buvo išsaugotas.",
+          "noName": "Objektų Maskuotė buvo išsaugota."
         }
       }
     },
@@ -428,10 +436,10 @@
     "objectList": "Objektų sąrašas",
     "noObjects": "Objektų nėra",
     "boundingBoxes": {
-      "title": "Apibrėžiančios dėžutės",
-      "desc": "Rodyti apibrėžiančias dėžutes aplink sekamus objektus",
+      "title": "Apribojantys stačiakampiai",
+      "desc": "Rodyti apribojančius stačiakampius aplink sekamus objektus",
       "colors": {
-        "label": "Objektus Apibrėžiančių Dėžučių Spalvos",
+        "label": "Objektus Apribojančių Stačiakampių Spalvos",
         "info": "<li>Pradžioje, skirtingos spalvos bus priskirtos kiekvienai objekto etiketei</li><li>Tamsiai mėlyna plona linija simbolizuoja, kad objektas esamu momentu dar nėra aptiktas</li><li>Pilka linija nurodo kad objektas yra aptiktas kaip nejudantis</li><li> Stora linija nurodo kad objektas yra automatiškai sekamas (kai įjungta)</li>"
       }
     },
@@ -544,7 +552,7 @@
       "desc": "Valdyti šios Frigate aplinkos vartotojų paskyras."
     },
     "addUser": "Pridėti Vartotoją",
-    "updatePassword": "Atnaujinti Slaptažodį",
+    "updatePassword": "Atkurti Slaptažodį",
     "toast": {
       "success": {
         "createUser": "Vartotojas {{user}} sėkmingai sukurtas",
@@ -565,7 +573,7 @@
       "role": "Rolė",
       "noUsers": "Vartotojų nerasta.",
       "changeRole": "Pakeisti vartotojo rolę",
-      "password": "Slaptažodis",
+      "password": "Atkurti Slaptažodį",
       "deleteUser": "Ištrinti vartotoją"
     }
   },
@@ -586,10 +594,10 @@
       "form": {
         "name": {
           "title": "Pavadinimas",
-          "placeholder": "Įvesti trigerio pavadinimą",
+          "placeholder": "Užvadinkite trigerį",
           "error": {
-            "minLength": "Pavadinimas turi būti bent dviejų simbolių ilgio.",
-            "invalidCharacters": "Pavadinime gali būti tik raidės, skaičiai, pabraukimai ir brūkšnelis.",
+            "minLength": "Laukelis turi būti bent dviejų simbolių ilgio.",
+            "invalidCharacters": "Laukelyje gali būti tik raidės, skaičiai, pabraukimai ir brūkšnelis.",
             "alreadyExists": "Trigeris su tokiu vardu jau yra šiai kamerai."
           }
         },
@@ -602,9 +610,9 @@
         },
         "content": {
           "title": "Turinys",
-          "imagePlaceholder": "Pasirinkti paveikslėlį",
+          "imagePlaceholder": "Parinkti miniatiūrą",
           "textPlaceholder": "Įvesti teksto turinį",
-          "imageDesc": "Pasirinkite paveikslėli kad inicijuotumėte veiksmą kai panašus vaizdas bus aptiktas.",
+          "imageDesc": "Rodoma tik 100 paskutinių miniatiūrų. Jei norimos miniatiūros nerandate, galite ieškoti senesnių įrašų per Paieškų meniu ir tenai kurti trigerį.",
           "textDesc": "Įveskite tekstą kad inicijuotumėte veiksmą kai panašus sekamo objekto aprašymas bus aptiktas.",
           "error": {
             "required": "Turinys privalomas."
@@ -619,7 +627,7 @@
         },
         "actions": {
           "title": "Veiksmai",
-          "desc": "Pagal nutylėjimą, Frigate sukuria MQTT žinutę visiem trigeriams. Pasirinkite kokius papildomus veiksmus atlikti kai trigeris suveiks.",
+          "desc": "Pagal nutylėjimą, Frigate sukuria MQTT žinutę visiem trigeriams. Subetiketės prideda trigerio pavadinimą prie objekto etiketės. Atributai, tai paieškai pasiekiami metaduomenys saugomi atskirai sekamų objektų metaduomenyse.",
           "error": {
             "min": "Bent vienas veiksmas privalo būti parinktas."
           }
@@ -633,7 +641,7 @@
     },
     "documentTitle": "Trigeriai",
     "management": {
-      "title": "Trigerių Valdymas",
+      "title": "Trigeriai",
       "desc": "Valdykite trigerius kamerai {{camera}}. Naudokite miniatiūros tipą, kad panašios miniatiūros būtų jūsų pasirinkto objekto trigeris, o aprašymo trigerį kad panašūs aprašymai būtų trigeris pagal jūsų parašytą tekstą."
     },
     "addTrigger": "Pridėti Trigerį",
@@ -782,9 +790,9 @@
     "toast": {
       "success": {
         "deleteRole": "Rolė {{role}} sėkmingai pašalinta",
-        "userRolesUpdated_one": "{{count}} šios rolės vartotojai buvo priskirti rolei 'žiūrovas', kuri turi prieigą prie visų kamerų.",
-        "userRolesUpdated_few": "",
-        "userRolesUpdated_other": "",
+        "userRolesUpdated_one": "{{count}} šios rolės vartotojas buvo priskirti rolei 'žiūrovas', kuri turi prieigą prie visų kamerų.",
+        "userRolesUpdated_few": "{{count}} šios rolės vartotojai buvo priskirti rolei 'žiūrovas', kuri turi prieigą prie visų kamerų.",
+        "userRolesUpdated_other": "{{count}} šios rolės vartotojų buvo priskirti rolei 'žiūrovas', kuri turi prieigą prie visų kamerų.",
         "createRole": "Rolė {{role}} sėkmingai sukurta",
         "updateCameras": "Atnaujintos kameros rolei {{role}}"
       },
@@ -854,7 +862,7 @@
       "testFailed": "Transliacijos testas nepavyko: {{error}}"
     },
     "step1": {
-      "description": "Įveskite savo kameros informaciją ir testuokite prisijungimą.",
+      "description": "Įveskite savo kameros informaciją ir pasirinkite \"probe\" kamerai arba rankiniu būdų pasirinkite gamintoją.",
       "cameraName": "Kameros Pavadinimas",
       "cameraNamePlaceholder": "pvz., priekines_durys arba Galinio Kiemo Vaizdas",
       "host": "Host/IP Adresas",
