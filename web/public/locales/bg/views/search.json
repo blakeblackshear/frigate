@@ -3,5 +3,6 @@
     "save": "Запазване на търсенето"
   },
   "search": "Търси",
-  "savedSearches": "Запазени търсения"
+  "savedSearches": "Запазени търсения",
+  "searchFor": "Търсене за {{inputValue}}"
 }

@@ -11,5 +11,8 @@
   },
   "allCameras": "Всички камери",
   "alerts": "Известия",
-  "detections": "Засичания"
+  "detections": "Засичания",
+  "motion": {
+    "label": "Движение"
+  }
 }
