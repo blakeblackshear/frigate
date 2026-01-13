@@ -548,6 +548,8 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
             with open("/sys/devices/platform/gpu.0/load", "r") as f:
                 gpuload = float(f.readline()) / 10
                 results["gpu"] = f"{gpuload}%"
+        else:
+            results["gpu"] = "-"
     except Exception:
         return None
 
