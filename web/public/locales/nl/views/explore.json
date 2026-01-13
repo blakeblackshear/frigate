@@ -167,7 +167,10 @@
       "title": "Bewerk attributen",
       "desc": "Selecteer classificatiekenmerken voor dit {{label}}"
     },
-    "attributes": "Classificatie-kenmerken"
+    "attributes": "Classificatie-kenmerken",
+    "title": {
+      "label": "Titel"
+    }
   },
   "itemMenu": {
     "downloadVideo": {

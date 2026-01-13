@@ -13,7 +13,11 @@
   "empty": {
     "alert": "Er zijn geen meldingen om te beoordelen",
     "detection": "Er zijn geen detecties om te beoordelen",
-    "motion": "Geen bewegingsgegevens gevonden"
+    "motion": "Geen bewegingsgegevens gevonden",
+    "recordingsDisabled": {
+      "title": "Opnames moeten zijn ingeschakeld",
+      "description": "Beoordelingsitems kunnen alleen voor een camera worden aangemaakt als opnames voor die camera zijn ingeschakeld."
+    }
   },
   "events": {
     "aria": "Selecteer activiteiten",

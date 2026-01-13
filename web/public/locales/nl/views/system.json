@@ -85,7 +85,14 @@
     "otherProcesses": {
       "processMemoryUsage": "Process Geheugen Gebruik",
       "processCpuUsage": "Process CPU-verbruik",
-      "title": "Verdere Processen"
+      "title": "Verdere Processen",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "opname",
+        "review_segment": "beoordelingssegment",
+        "embeddings": "inbeddingen",
+        "audio_detector": "Geluidsdetector"
+      }
     },
     "title": "Algemeen"
   },
@@ -192,7 +199,10 @@
       "review_description_events_per_second": "Beoordelingsbeschrijving",
       "object_description": "Objectbeschrijving",
       "object_description_speed": "Objectbeschrijvingssnelheid",
-      "object_description_events_per_second": "Objectbeschrijving"
+      "object_description_events_per_second": "Objectbeschrijving",
+      "classification": "{{name}} Classificatie",
+      "classification_speed": "{{name}} Classificatiesnelheid",
+      "classification_events_per_second": "{{name}} Classificatie gebeurtenissen per seconde"
     },
     "averageInf": "Gemiddelde inferentietijd"
   }

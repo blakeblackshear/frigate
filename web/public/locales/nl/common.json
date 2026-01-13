@@ -148,7 +148,8 @@
     "show": "Toon {{item}}",
     "ID": "ID",
     "none": "Geen",
-    "all": "Alle"
+    "all": "Alle",
+    "other": "Overige"
   },
   "menu": {
     "system": "Systeem",
