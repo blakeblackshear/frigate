@@ -84,7 +84,14 @@
     "otherProcesses": {
       "title": "Altri processi",
       "processCpuUsage": "Utilizzo CPU processo",
-      "processMemoryUsage": "Utilizzo memoria processo"
+      "processMemoryUsage": "Utilizzo memoria processo",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "registrazione",
+        "review_segment": "segmento di revisione",
+        "embeddings": "incorporamenti",
+        "audio_detector": "rilevatore audio"
+      }
     }
   },
   "enrichments": {

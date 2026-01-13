@@ -154,7 +154,8 @@
     "show": "Mostra {{item}}",
     "ID": "ID",
     "none": "Nessuna",
-    "all": "Tutte"
+    "all": "Tutte",
+    "other": "Altro"
   },
   "menu": {
     "configuration": "Configurazione",

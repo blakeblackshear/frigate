@@ -110,7 +110,10 @@
       "title": "Modifica attributi",
       "desc": "Seleziona gli attributi di classificazione per questa {{label}}"
     },
-    "attributes": "Attributi di classificazione"
+    "attributes": "Attributi di classificazione",
+    "title": {
+      "label": "Titolo"
+    }
   },
   "objectLifecycle": {
     "annotationSettings": {

@@ -8,7 +8,11 @@
   "empty": {
     "alert": "Non ci sono avvisi da rivedere",
     "detection": "Non ci sono rilevamenti da rivedere",
-    "motion": "Nessun dato di movimento trovato"
+    "motion": "Nessun dato di movimento trovato",
+    "recordingsDisabled": {
+      "description": "Gli elementi di revisione possono essere creati per una telecamera solo quando le registrazioni sono abilitate per quella telecamera.",
+      "title": "Le registrazioni devono essere abilitate"
+    }
   },
   "newReviewItems": {
     "label": "Visualizza i nuovi elementi da rivedere",
