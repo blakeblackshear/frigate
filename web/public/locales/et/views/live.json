@@ -91,6 +91,10 @@
       "available": "Kahepoolne kõneside on selle voogedastuse puhul saadaval",
       "unavailable": "Kahepoolne kõneside pole selle voogedastuse puhul saadaval",
       "tips": "Sinu seadme peab seda funktsionaalsust toetama ja WebRTC peab olema kahepoolse kõneside jaoks seadistatud."
+    },
+    "playInBackground": {
+      "label": "Esita taustal",
+      "tips": "Selle eelistusega saad määrata, et voogedastus jääb tööle ka siis, kui meesiaesitaja on suletud."
     }
   },
   "notifications": "Teavitused",
@@ -118,6 +122,13 @@
     "playInBackground": {
       "label": "Esita taustal",
       "desc": "Kasuta seda valikut, kui tahad voogedastuse jätkumist ka siis, kui pildivaade on peidetud."
+    }
+  },
+  "noCameras": {
+    "buttonText": "Lisa kaamera",
+    "restricted": {
+      "title": "Ühtegi kaamerat pole saadaval",
+      "description": "Sul pole õigust ühegi selle grupi kaamera vaatamiseks."
     }
   }
 }

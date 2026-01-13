@@ -240,7 +240,8 @@
     "show": "Näita: {{item}}",
     "all": "Kõik",
     "ID": "Tunnus",
-    "none": "Puudub"
+    "none": "Puudub",
+    "other": "Muu"
   },
   "list": {
     "two": "{{0}} ja {{1}}",

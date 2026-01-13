@@ -7,10 +7,18 @@
   },
   "documentTitle": "Klassifitseerimise mudelid - Frigate",
   "details": {
-    "scoreInfo": "Skoor näitab selle objekti kõigi tuvastuste keskmist klassifitseerimise usaldusväärsust."
+    "scoreInfo": "Skoor näitab selle objekti kõigi tuvastuste keskmist klassifitseerimise usaldusväärsust.",
+    "none": "Puudub",
+    "unknown": "Pole teada"
   },
   "button": {
-    "deleteClassificationAttempts": "Kustuta klassifitseerimispildid"
+    "deleteClassificationAttempts": "Kustuta klassifitseerimispildid",
+    "renameCategory": "Muuda klassi nimi",
+    "deleteCategory": "Kustuta klass",
+    "deleteImages": "Kustuta pildid",
+    "addClassification": "Lisa klassifikatsioon",
+    "deleteModels": "Kustuta mudelid",
+    "editModel": "Muuda mudelit"
   },
   "description": {
     "invalidName": "Vigane nimi. Nimed võivad sisaldada ainult tähti, numbreid, tühikuid, ülakomasid, alakriipse ja sidekriipse."
@@ -32,5 +40,8 @@
       "allImagesRequired_one": "Palun klassifitseeri kõik pildid. Jäänud on veel {{count}} pilt.",
       "allImagesRequired_other": "Palun klassifitseeri kõik pildid. Jäänud on veel {{count}} pilti."
     }
+  },
+  "tooltip": {
+    "trainingInProgress": "Mudel on parasjagu õppimas"
   }
 }

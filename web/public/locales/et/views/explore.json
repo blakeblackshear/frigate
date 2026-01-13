@@ -22,7 +22,19 @@
         "title": "Näita kõiki tsoone",
         "desc": "Kui objekt on sisenenud tsooni, siis alati näida tsooni märgistust."
       }
-    }
+    },
+    "lifecycleItemDesc": {
+      "attribute": {
+        "other": "{{label}} on tuvastatud kui {{attribute}}"
+      },
+      "stationary": "{{label}} jäi paigale",
+      "active": "{{label}} muutus aktiivseks",
+      "entered_zone": "{{label}} sisenes tsooni {{zones}}",
+      "visible": "{{label}} on tuvastatud"
+    },
+    "title": "Jälgimise üksikasjad",
+    "noImageFound": "Selle ajatempli kohta ei leidu pilti.",
+    "createObjectMask": "Loo objektimask"
   },
   "documentTitle": "Avasta - Frigate",
   "generativeAI": "Generatiivne tehisaru",
@@ -33,13 +45,18 @@
         "thumbnailsEmbedded": "Pisipildid on lõimitud: ",
         "descriptionsEmbedded": "Kirjeldused on lõimitud: ",
         "trackedObjectsProcessed": "Jälgitud objektid on töödeldud: "
-      }
+      },
+      "startingUp": "Käivitun…",
+      "estimatedTime": "Hinnanguliselt jäänud aega:",
+      "finishingShortly": "Lõpetan õige pea"
     }
   },
   "type": {
     "details": "üksikasjad",
     "thumbnail": "pisipilt",
-    "snapshot": "hetkvõte"
+    "snapshot": "hetkvõte",
+    "video": "video",
+    "tracking_details": "jälgimise üksikasjad"
   },
   "details": {
     "item": {
@@ -51,6 +68,7 @@
     "snapshotScore": {
       "label": "Hetkvõttete punktiskoor"
     },
-    "regenerateFromSnapshot": "Loo uuesti hetkvõttest"
+    "regenerateFromSnapshot": "Loo uuesti hetkvõttest",
+    "timestamp": "Ajatampel"
   }
 }

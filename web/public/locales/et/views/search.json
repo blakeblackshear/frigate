@@ -8,11 +8,16 @@
   "button": {
     "clear": "Tühjenda otsing",
     "save": "Salvesta otsing",
-    "delete": "Kustuta salvestatud otsing"
+    "delete": "Kustuta salvestatud otsing",
+    "filterInformation": "Filtri teave"
   },
   "filter": {
     "label": {
-      "has_snapshot": "Leidub hetkvõte"
+      "has_snapshot": "Leidub hetkvõte",
+      "cameras": "Kaamerad",
+      "labels": "Sildid",
+      "zones": "Tsoonid",
+      "sub_labels": "Alamsildid"
     }
   }
 }

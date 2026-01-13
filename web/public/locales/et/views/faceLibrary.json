@@ -30,5 +30,9 @@
   "deleteFaceAttempts": {
     "desc_one": "Kas oled kindel, et soovid kustutada {{count}} näo? Seda tegevust ei saa tagasi pöörata.",
     "desc_other": "Kas oled kindel, et soovid kustutada {{count}} nägu? Seda tegevust ei saa tagasi pöörata."
+  },
+  "details": {
+    "timestamp": "Ajatampel",
+    "unknown": "Pole teada"
   }
 }

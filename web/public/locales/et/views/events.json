@@ -22,7 +22,11 @@
   "empty": {
     "alert": "Ülevaatamiseks ei leidu ühtegi häiret",
     "detection": "Ülevaatamiseks ei leidu ühtegi tuvastamist",
-    "motion": "Liikumise andmeid ei leidu"
+    "motion": "Liikumise andmeid ei leidu",
+    "recordingsDisabled": {
+      "title": "Salvestamine peab olema sisse lülitatud",
+      "description": "Objekte saad määrata ülevaadatamiseks vaid siis, kui selle kaamera puhul on salvestamine lülitatud sisse."
+    }
   },
   "select_all": "Kõik",
   "camera": "Kaamera",
