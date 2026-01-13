@@ -198,16 +198,20 @@ def sync_recordings(
                 result.aborted = True
                 return result
 
-        if files_to_delete and not dry_run:
+        if dry_run:
             logger.info(
-                f"Deleting {len(files_to_delete)} recordings files with missing DB entries"
+                f"Recordings sync (dry run): Found {len(files_to_delete)} orphaned files"
             )
-            for file in files_to_delete:
-                try:
-                    os.unlink(file)
-                    result.orphans_deleted += 1
-                except OSError as e:
-                    logger.error(f"Failed to delete {file}: {e}")
+            return result
+
+        # Delete orphans
+        logger.info(f"Deleting {len(files_to_delete)} orphaned recordings files")
+        for file in files_to_delete:
+            try:
+                os.unlink(file)
+                result.orphans_deleted += 1
+            except OSError as e:
+                logger.error(f"Failed to delete {file}: {e}")
 
         logger.debug("End sync recordings.")
 
