@@ -9,7 +9,11 @@
   "empty": {
     "alert": "No hay alertas para revisar",
     "detection": "No hay detecciones para revisar",
-    "motion": "No se encontraron datos de movimiento"
+    "motion": "No se encontraron datos de movimiento",
+    "recordingsDisabled": {
+      "title": "Las grabaciones deben estar habilitadas",
+      "description": "Solo se pueden crear elementos de revisión para una cámara cuando las grabaciones están habilitadas para esa cámara."
+    }
   },
   "timeline": "Línea de tiempo",
   "timeline.aria": "Seleccionar línea de tiempo",
@@ -56,5 +60,9 @@
   "objectTrack": {
     "clickToSeek": "Clic para ir a este momento",
     "trackedPoint": "Puntro trazado"
-  }
+  },
+  "select_all": "Todas",
+  "normalActivity": "Normal",
+  "needsReview": "Necesita revisión",
+  "securityConcern": "Aviso de seguridad"
 }

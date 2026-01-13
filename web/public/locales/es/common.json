@@ -87,7 +87,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "MMM d, yyyy",
       "24hour": "MMM d, yyyy"
-    }
+    },
+    "inProgress": "En progreso",
+    "invalidStartTime": "Hora de inicio no válida",
+    "invalidEndTime": "Hora de finalización no válida"
   },
   "menu": {
     "settings": "Ajustes",
@@ -189,7 +192,8 @@
     "review": "Revisar",
     "explore": "Explorar",
     "uiPlayground": "Zona de pruebas de la interfaz de usuario",
-    "faceLibrary": "Biblioteca de rostros"
+    "faceLibrary": "Biblioteca de rostros",
+    "classification": "Clasificación"
   },
   "unit": {
     "speed": {
@@ -199,6 +203,14 @@
     "length": {
       "meters": "Metros",
       "feet": "Pies"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/hora",
+      "mbph": "MB/hora",
+      "gbph": "GB/hora"
     }
   },
   "button": {
@@ -236,7 +248,8 @@
     "enabled": "Habilitado",
     "saving": "Guardando…",
     "exitFullscreen": "Salir de pantalla completa",
-    "on": "ENCENDIDO"
+    "on": "ENCENDIDO",
+    "continue": "Continuar"
   },
   "toast": {
     "save": {
@@ -249,7 +262,12 @@
     "copyUrlToClipboard": "URL copiada al portapapeles."
   },
   "label": {
-    "back": "Volver atrás"
+    "back": "Volver atrás",
+    "hide": "Ocultar {{item}}",
+    "show": "Mostrar {{item}}",
+    "ID": "ID",
+    "none": "Ninguno",
+    "all": "Todas"
   },
   "role": {
     "title": "Rol",
@@ -283,5 +301,14 @@
   "readTheDocumentation": "Leer la documentación",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} y {{1}}",
+    "many": "{{items}}, y {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opcional",
+    "internalID": "La ID interna que usa Frigate en la configuración y en la base de datos"
   }
 }

@@ -50,7 +50,15 @@
         "label": "Reproducir vídeos de alertas",
         "desc": "De forma predeterminada, las alertas recientes en el panel en directo se reproducen como pequeños vídeos en bucle. Desactiva esta opción para mostrar solo una imagen estática de las alertas recientes en este dispositivo/navegador."
       },
-      "title": "Panel en directo"
+      "title": "Panel en directo",
+      "displayCameraNames": {
+        "label": "Siempre mostrar nombres de las Camaras",
+        "desc": "Siempre mostrar nombres de cámaras en la vista en vivo multi-cámara."
+      },
+      "liveFallbackTimeout": {
+        "label": "Tiempo de espera de respaldo del reproductor en vivo",
+        "desc": "Cuando la reproducción en vivo de alta calidad de la cámara no está disponible, se usará el modo de ancho de banda bajo después de este número de segundos. Por defecto: 3."
+      }
     },
     "cameraGroupStreaming": {
       "desc": "La configuración de transmisión de cada grupo de cámaras se guarda en el almacenamiento local de tu navegador.",
@@ -232,7 +240,8 @@
           "mustNotBeSameWithCamera": "El nombre de la zona no debe ser el mismo que el nombre de la cámara.",
           "hasIllegalCharacter": "El nombre de la zona contiene caracteres no permitidos.",
           "mustBeAtLeastTwoCharacters": "El nombre de la zona debe tener al menos 2 caracteres.",
-          "mustNotContainPeriod": "El nombre de la zona no debe contener puntos."
+          "mustNotContainPeriod": "El nombre de la zona no debe contener puntos.",
+          "mustHaveAtLeastOneLetter": "El nombre de la Zona debe contener al menos una letra."
         }
       },
       "distance": {
@@ -298,7 +307,7 @@
       "name": {
         "title": "Nombre",
         "inputPlaceHolder": "Introduce un nombre…",
-        "tips": "El nombre debe tener al menos 2 caracteres y no debe ser el nombre de una cámara ni de otra zona."
+        "tips": "El nombre debe tener al menos 2 caracteres, al menos 1 letra y no debe coincidir con el nombre de una cámara ni de otra zona."
       },
       "documentTitle": "Editar Zona - Frigate",
       "clickDrawPolygon": "Haz clic para dibujar un polígono en la imagen.",
@@ -326,7 +335,7 @@
       "point_other": "{{count}} puntos",
       "allObjects": "Todos los objetos",
       "toast": {
-        "success": "La zona ({{zoneName}}) ha sido guardada. Reinicia Frigate para aplicar los cambios."
+        "success": "La zona ({{zoneName}}) ha sido guardada."
       }
     },
     "toast": {
@@ -360,8 +369,8 @@
       },
       "toast": {
         "success": {
-          "noName": "La máscara de movimiento ha sido guardada. Reinicia Frigate para aplicar los cambios.",
-          "title": "{{polygonName}} ha sido guardado. Reinicia Frigate para aplicar los cambios."
+          "noName": "La máscara de movimiento ha sido guardada.",
+          "title": "{{polygonName}} ha sido guardado."
         }
       },
       "documentTitle": "Editar Máscara de Movimiento - Frigate",
@@ -386,8 +395,8 @@
       },
       "toast": {
         "success": {
-          "noName": "La máscara de objetos ha sido guardada. Reinicia Frigate para aplicar los cambios.",
-          "title": "{{polygonName}} ha sido guardado. Reinicia Frigate para aplicar los cambios."
+          "noName": "La máscara de objetos ha sido guardada.",
+          "title": "{{polygonName}} ha sido guardado."
         }
       },
       "point_one": "{{count}} punto",
@@ -509,7 +518,7 @@
       "role": "Rol",
       "noUsers": "No se encontraron usuarios.",
       "changeRole": "Cambiar el rol del usuario",
-      "password": "Contraseña",
+      "password": "Restablecer Contraseña",
       "deleteUser": "Eliminar usuario"
     },
     "dialog": {
@@ -534,7 +543,16 @@
             "veryStrong": "Muy fuerte"
           },
           "match": "Las contraseñas coinciden",
-          "notMatch": "Las contraseñas no coinciden"
+          "notMatch": "Las contraseñas no coinciden",
+          "show": "Mostrar contraseña",
+          "hide": "Ocultar contraseña",
+          "requirements": {
+            "title": "Requisitos de contraseña:",
+            "length": "Al menos 8 caracteres",
+            "uppercase": "Al menos una mayúscula",
+            "digit": "Al menos un número",
+            "special": "Al menos un caracter especial (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "Nueva contraseña",
@@ -544,14 +562,23 @@
           }
         },
         "usernameIsRequired": "Se requiere el nombre de usuario",
-        "passwordIsRequired": "Se requiere contraseña"
+        "passwordIsRequired": "Se requiere contraseña",
+        "currentPassword": {
+          "title": "Contraseña actual",
+          "placeholder": "Introduzca su contraseña actual"
+        }
       },
       "passwordSetting": {
         "updatePassword": "Actualizar contraseña para {{username}}",
         "setPassword": "Establecer contraseña",
         "desc": "Crear una contraseña fuerte para asegurar esta cuenta.",
         "cannotBeEmpty": "La contraseña no puede estar vacía",
-        "doNotMatch": "Las contraseñas no coinciden"
+        "doNotMatch": "Las contraseñas no coinciden",
+        "currentPasswordRequired": "Se requiere la contraseña actual",
+        "incorrectCurrentPassword": "La contraseña actual es incorrecta",
+        "passwordVerificationFailed": "Fallo al verificar la contraseña",
+        "multiDeviceWarning": "Cualquier otro dispositivo en el que haya iniciado sesión deberá iniciar sesión nuevamente con {{refresh_time}}.",
+        "multiDeviceAdmin": "También puede obligar a todos los usuarios a volver a autenticarse inmediatamente rotando su secreto JWT."
       },
       "createUser": {
         "desc": "Añadir una nueva cuenta de usuario y especificar un rol para el acceso a áreas de la interfaz de usuario de Frigate.",
@@ -578,7 +605,7 @@
         "desc": "Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario y eliminará todos los datos asociados."
       }
     },
-    "updatePassword": "Actualizar contraseña"
+    "updatePassword": "Restablecer contraseña"
   },
   "notification": {
     "title": "Notificaciones",
@@ -745,7 +772,7 @@
   "triggers": {
     "documentTitle": "Disparadores",
     "management": {
-      "title": "Gestión de disparadores",
+      "title": "Disparadores",
       "desc": "Gestionar disparadores para {{camera}}. Usa el tipo de miniatura para activar en miniaturas similares al objeto rastreado seleccionado, y el tipo de descripción para activar en descripciones similares al texto que especifiques."
     },
     "addTrigger": "Añadir Disparador",
@@ -766,7 +793,9 @@
     },
     "actions": {
       "alert": "Marcar como Alerta",
-      "notification": "Enviar Notificación"
+      "notification": "Enviar Notificación",
+      "sub_label": "Añadir una subetiqueta",
+      "attribute": "Añadir atributo"
     },
     "dialog": {
       "createTrigger": {
@@ -784,19 +813,22 @@
       "form": {
         "name": {
           "title": "Nombre",
-          "placeholder": "Entre nombre de disparador",
+          "placeholder": "Asigne nombre a este disparador",
           "error": {
-            "minLength": "El nombre debe tener al menos 2 caracteres.",
-            "invalidCharacters": "El nombre sólo puede contener letras, números, guiones bajos, y guiones.",
+            "minLength": "El campo debe tener al menos 2 caracteres.",
+            "invalidCharacters": "El campo sólo puede contener letras, números, guiones bajos, y guiones.",
             "alreadyExists": "Un disparador con este nombre ya existe para esta cámara."
-          }
+          },
+          "description": "Ingrese un nombre o descripción únicos para identificar este disparador"
         },
         "enabled": {
           "description": "Activa o desactiva este disparador"
         },
         "type": {
           "title": "Tipo",
-          "placeholder": "Seleccione tipo de disparador"
+          "placeholder": "Seleccione tipo de disparador",
+          "description": "Se dispara cuando se detecta una descripción de objeto rastreado similar",
+          "thumbnail": "Se dispara cuando se detecta una miniatura de un objeto rastreado similar"
         },
         "friendly_name": {
           "title": "Nombre amigable",
@@ -805,12 +837,12 @@
         },
         "content": {
           "title": "Contenido",
-          "imagePlaceholder": "Seleccione una imágen",
+          "imagePlaceholder": "Seleccione una imagen",
           "textPlaceholder": "Entre contenido de texto",
           "error": {
             "required": "El contenido es requrido."
           },
-          "imageDesc": "Seleccione una imágen para iniciar esta acción cuando una imágen similar es detectada.",
+          "imageDesc": "Solo se muestran las 100 miniaturas más recientes. Si no encuentra la miniatura que busca, revise los objetos anteriores en Explorar y configure un disparador desde el menú.",
           "textDesc": "Entre texto para iniciar esta acción cuando la descripción de un objecto seguido similar es detectado."
         },
         "threshold": {
@@ -818,14 +850,15 @@
           "error": {
             "min": "El umbral debe ser al menos 0",
             "max": "El umbral debe ser al menos 1"
-          }
+          },
+          "desc": "Establezca el umbral de similitud para este disparador. Un umbral más alto significa que se requiere una coincidencia más cercana para activar el disparador."
         },
         "actions": {
           "title": "Acciones",
           "error": {
             "min": "Al menos una acción debe ser seleccionada."
           },
-          "desc": "Por defecto, Frigate manda un mensaje MQTT por todos los disparadores. Seleccione una acción adicional que se realizará cuando este disparador se accione."
+          "desc": "Por defecto, Frigate manda un mensaje MQTT para todos los disparadores. Las subetiquetas añaden el nombre del disparador a la etiqueta del objeto. Los atributos son metadatos de búsqueda que se almacenan por separado en los metadatos del objeto rastreado."
         }
       }
     },
@@ -843,6 +876,23 @@
         "createTriggerFailed": "Fallo al crear el disparador: {{errorMessage}}",
         "updateTriggerFailed": "Fallo al actualizar el disparador: {{errorMessage}}",
         "deleteTriggerFailed": "Fallo al eliminar el disparador: {{errorMessage}}"
+      }
+    },
+    "wizard": {
+      "title": "Crear disparador",
+      "step1": {
+        "description": "Configure los ajustes básicos para su disparador."
+      },
+      "step2": {
+        "description": "Configure el contenido que activará esta acción."
+      },
+      "step3": {
+        "description": "Configure el umbral y las acciones para este disparador."
+      },
+      "steps": {
+        "nameAndType": "Nombre y tipo",
+        "configureData": "Configurar datos",
+        "thresholdAndActions": "Umbral y acciones"
       }
     }
   },
@@ -865,9 +915,9 @@
         "createRole": "Rol {{role}} creado exitosamente",
         "updateCameras": "Cámara actualizada para el rol {{role}}",
         "deleteRole": "Rol {{role}} eliminado exitosamente",
-        "userRolesUpdated_one": "{{count}} usuarios asignados a este rol han sido actualizados a 'visor', que tiene acceso a todas las cámaras.",
-        "userRolesUpdated_many": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} usuario asignado a este rol ha sido actualizado a 'revisor', que tiene acceso a todas las cámaras.",
+        "userRolesUpdated_many": "{{count}} usuarios asignados a este rol han sido actualizado a 'revisor', que tienen acceso a todas las cámaras.",
+        "userRolesUpdated_other": "{{count}} usuarios asignados a este rol han sido actualizado a 'revisor', que tienen acceso a todas las cámaras."
       },
       "error": {
         "createRoleFailed": "Creación de rol fallida: {{errorMessage}}",
@@ -905,6 +955,272 @@
           "desc": "Seleccione las cámaras a las que este rol tiene accceso. Al menos una cámara es requerida.",
           "required": "Al menos una cámara debe ser seleccionada."
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "step1": {
+      "errors": {
+        "nameRequired": "El nombre de la cámara es un campo obligatorio",
+        "nameLength": "El nombre de la cámara debe tener 64 caracteres o menos",
+        "invalidCharacters": "El nombre de la cámara contiene caracteres no válidos",
+        "nameExists": "El nombre de la cámara ya existe",
+        "customUrlRtspRequired": "Las URL personalizadas deben comenzar con \"rtsp://\". Se requiere configuración manual para transmisiones de cámara sin RTSP.",
+        "brandOrCustomUrlRequired": "Seleccione una marca de cámara con host/IP o elija \"Otro\" con una URL personalizada"
+      },
+      "description": "Ingrese los detalles de su cámara y elija probar la cámara o seleccionar manualmente la marca.",
+      "cameraName": "Nombre de la Cámara",
+      "cameraNamePlaceholder": "Ejempo: puerta_principal o Vista del Patio trasero",
+      "host": "Nombre Host / Dirección IP",
+      "port": "Puerto",
+      "username": "Nombre de usuario",
+      "usernamePlaceholder": "Opcional",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Opcional",
+      "selectTransport": "Seleccionar protocolo de transporte",
+      "cameraBrand": "Marca de la cámara",
+      "selectBrand": "Seleccione la marca de la cámara para la plantilla de URL",
+      "customUrl": "URL de transmisión personalizada",
+      "brandInformation": "Información de la Marca",
+      "brandUrlFormat": "Para cámaras con formato de URL RTSP como: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://usuario:contraseña@hostname:puerto/ruta",
+      "connectionSettings": "Ajustes de conexión",
+      "detectionMethod": "Método de detección de transmisión",
+      "onvifPort": "Puerto ONVIF",
+      "probeMode": "Cámara de sonda",
+      "manualMode": "Selección manual",
+      "detectionMethodDescription": "Pruebe la cámara con ONVIF (si es compatible) para encontrar las URL de transmisión o seleccione manualmente la marca de la cámara para usar las URL predefinidas. Para introducir una URL RTSP personalizada, elija el método manual y seleccione \"Otro\".",
+      "onvifPortDescription": "Para las cámaras compatibles con ONVIF, normalmente es 80 o 8080.",
+      "useDigestAuth": "Use autenticación digest",
+      "useDigestAuthDescription": "Utilice la autenticación HTTP digest para ONVIF. Algunas cámaras pueden requerir un nombre de usuario y contraseña ONVIF específicos en lugar del usuario administrador estándar."
+    },
+    "step2": {
+      "description": "Pruebe la cámara para detectar transmisiones disponibles o configure ajustes manuales según el método de detección seleccionado.",
+      "testSuccess": "Test de conexión satisfactorio!",
+      "testFailed": "Test de conexión fallido. Revise la informacion proporcionada e inténtelo de nuevo.",
+      "testFailedTitle": "Test fallido",
+      "streamDetails": "Detalles de la transmisión",
+      "probing": "Probando la cámara...",
+      "retry": "Re-intentar",
+      "testing": {
+        "probingMetadata": "Probando metadatos de la cámara...",
+        "fetchingSnapshot": "Obteniendo una instantánea de la cámara..."
+      },
+      "probeFailed": "No se pudo alcanzar la cámara: {{error}}",
+      "probingDevice": "Probando el dispositivo...",
+      "probeSuccessful": "Prueba satisfactoria",
+      "probeError": "Error durante la prueba",
+      "probeNoSuccess": "Prueba fallida",
+      "deviceInfo": "Información de Dispositivo",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "firmware": "Firmware",
+      "profiles": "Perfiles",
+      "ptzSupport": "Soporte PTZ",
+      "autotrackingSupport": "Soporte auto-seguimiento",
+      "presets": "Preestablecidos",
+      "rtspCandidates": "Candidatos RTSP",
+      "rtspCandidatesDescription": "Se encontraron las siguientes URL RTSP durante el sondeo de la cámara. Pruebe la conexión para ver los metadatos de la transmisión.",
+      "noRtspCandidates": "No se encontraron URL RTSP de la cámara. Es posible que sus credenciales sean incorrectas o que la cámara no sea compatible con ONVIF o el método utilizado para obtener las URL RTSP. Vuelva atrás e introduzca la URL RTSP manualmente.",
+      "candidateStreamTitle": "Candidato {{number}}",
+      "useCandidate": "Uso",
+      "uriCopy": "Copiar",
+      "uriCopied": "URI copiada al portapapeles",
+      "testConnection": "Probar conexión",
+      "toggleUriView": "Haga clic para alternar la vista completa de URI",
+      "connected": "Conectada",
+      "notConnected": "No conectada",
+      "errors": {
+        "hostRequired": "nombre host/dirección IP requeridos"
+      }
+    },
+    "step3": {
+      "description": "Configure los roles de transmisión y agregue transmisiones adicionales para su cámara.",
+      "streamsTitle": "Transmisiones de cámara",
+      "addStream": "Añadir ruta de transmisión",
+      "addAnotherStream": "Añadir otra ruta de transmisión",
+      "streamTitle": "Transmisión {{number}}",
+      "streamUrl": "URL de transmisión",
+      "streamUrlPlaceholder": "rtsp://usuario:contraseña@nombrehost:puerto/ruta",
+      "selectStream": "Seleccione una transmisión",
+      "searchCandidates": "Búsqueda de candidatos...",
+      "noStreamFound": "No se ha encontrado transmisión",
+      "url": "URL",
+      "resolution": "Resolución",
+      "selectResolution": "Seleccione resolución",
+      "quality": "Calidad",
+      "selectQuality": "Seleccione calidad",
+      "roles": "Roles",
+      "roleLabels": {
+        "detect": "Detección de objetos",
+        "record": "Grabando",
+        "audio": "Audio"
+      },
+      "testStream": "Pruebe la conexión",
+      "testSuccess": "Test de transmisión satisfactorio!",
+      "testFailed": "Test de transmisión fallido",
+      "testFailedTitle": "Prueba falló",
+      "connected": "Conectado",
+      "notConnected": "No conectado",
+      "featuresTitle": "Características",
+      "go2rtc": "Reduzca conexiones hacia la cámara",
+      "detectRoleWarning": "al menos una transmisión debe tener el roll de detección para continuar.",
+      "rolesPopover": {
+        "title": "Roles de transmisión",
+        "record": "Guarda segmentos de la transmisión de video según la configuración.",
+        "detect": "Hilo principal para detección de objetos.",
+        "audio": "Hilo para detección basada en audio."
+      },
+      "featuresPopover": {
+        "title": "Características de transmisión",
+        "description": "Utilice la retransmisión go2rtc para reducir las conexiones a su cámara."
+      }
+    },
+    "step4": {
+      "description": "Validación y análisis finales antes de guardar la nueva cámara. Conecte cada transmisión antes de guardar.",
+      "validationTitle": "Validacion de transmisión",
+      "connectAllStreams": "Conectar todas las transmisiones",
+      "reconnectionSuccess": "Reconexión satisfactoria.",
+      "reconnectionPartial": "Algunas transmisiones no pudieron reconectarse.",
+      "streamUnavailable": "Vista previa de transmisión no disponible",
+      "reload": "Recargar",
+      "connecting": "Conectando...",
+      "streamTitle": "Transmisión {{number}}",
+      "valid": "Válido",
+      "failed": "Falló",
+      "notTested": "No probado",
+      "connectStream": "Conectar",
+      "connectingStream": "Conectando",
+      "disconnectStream": "Desconectar",
+      "estimatedBandwidth": "Ancho de banda estimado",
+      "roles": "Roles",
+      "ffmpegModule": "Utilice el modo de compatibilidad de transmisión",
+      "ffmpegModuleDescription": "Si la transmisión no carga después de varios intentos, intenta activar esta opción. Al activarla, Frigate usará el módulo ffmpeg con go2rtc. Esto puede mejorar la compatibilidad con algunas transmisiones de cámara.",
+      "none": "Ninguna",
+      "error": "Error",
+      "streamValidated": "Transmisión {{number}} validada correctamente",
+      "streamValidationFailed": "Stream {{number}} falló la validación",
+      "saveAndApply": "Guardar nueva cámara",
+      "saveError": "Configuración inválida. Revise la configuración.",
+      "issues": {
+        "title": "Validación de transmisión",
+        "videoCodecGood": "El codec de video es {{codec}}.",
+        "audioCodecGood": "El codec de audio es {{codec}}.",
+        "resolutionHigh": "Una resolución de {{resolution}} puede provocar un mayor uso de recursos.",
+        "resolutionLow": "Una resolución de {{resolution}} puede ser demasiado baja para una detección confiable de objetos pequeños.",
+        "noAudioWarning": "No se detectó audio para esta transmisión, las grabaciones no tendrán audio.",
+        "audioCodecRecordError": "El códec de audio AAC es necesario para admitir audio en grabaciones.",
+        "audioCodecRequired": "Se requiere una transmisión de audio para admitir la detección de audio.",
+        "restreamingWarning": "Reducir las conexiones a la cámara para la transmisión de grabación puede aumentar ligeramente el uso de la CPU.",
+        "brands": {
+          "reolink-rtsp": "No se recomienda usar Reolink RTSP. Active HTTP en la configuración del firmware de la cámara y reinicie el asistente.",
+          "reolink-http": "Las transmisiones HTTP de Reolink deberían usar FFmpeg para una mejor compatibilidad. Active \"Usar modo de compatibilidad de transmisiones\" para esta transmisión."
+        },
+        "dahua": {
+          "substreamWarning": "La subtransmisión 1 está limitada a una resolución baja. Muchas cámaras Dahua/Amcrest/EmpireTech admiten subtransmisiones adicionales que deben habilitarse en la configuración de la cámara. Se recomienda comprobar y utilizar dichas transmisiones si están disponibles."
+        },
+        "hikvision": {
+          "substreamWarning": "La subtransmisión 1 está limitada a una resolución baja. Muchas cámaras Hikvision admiten subtransmisiones adicionales que deben habilitarse en la configuración de la cámara. Se recomienda comprobar y utilizar dichas transmisiones si están disponibles."
+        }
+      }
+    },
+    "title": "Añadir cámara",
+    "description": "Siga los siguientes pasos para agregar una nueva cámara a su instalación de Frigate.",
+    "steps": {
+      "nameAndConnection": "Nombre y conexión",
+      "probeOrSnapshot": "Sonda de prueba o hacer instantánea",
+      "streamConfiguration": "Configuración de transmisión",
+      "validationAndTesting": "Validación y pruebas"
+    },
+    "save": {
+      "success": "La nueva cámara {{cameraName}} se guardó correctamente.",
+      "failure": "Error al guardar {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolución",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Proporcione una URL de transmisión válida",
+      "testFailed": "Prueba de transmisión fallida: {{error}}"
+    }
+  },
+  "cameraManagement": {
+    "title": "Administrar cámaras",
+    "addCamera": "Añadir nueva cámara",
+    "editCamera": "Editar cámara:",
+    "selectCamera": "Seleccione una cámara",
+    "backToSettings": "Volver a configuración de la cámara",
+    "streams": {
+      "title": "Habilitar/deshabilitar cámaras",
+      "desc": "Desactiva temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de Frigate. La detección, la grabación y la depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Añadir cámara",
+      "edit": "Editar cámara",
+      "description": "Configure los ajustes de la cámara, incluidas las entradas de transmisión y los roles.",
+      "name": "Nombre de la cámara",
+      "nameRequired": "El nombre de la cámara es obligatorio",
+      "nameLength": "El nombre de la cámara debe ser inferior a 64 caracteres.",
+      "namePlaceholder": "Ejemplo: puerta_principal o Vista general de patio trasero",
+      "enabled": "Habilitada",
+      "ffmpeg": {
+        "inputs": "Transmisiones entrantes",
+        "path": "Ruta de transmisión",
+        "pathRequired": "La ruta de transmisión es requerida",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roles",
+        "rolesRequired": "Al menos un rol es requerido",
+        "rolesUnique": "Cada rol (audio, detección, grabación) puede únicamente asignarse a una transmisión",
+        "addInput": "Añadir transmision entrante",
+        "removeInput": "Elimine transmisión entrante",
+        "inputsRequired": "Se requiere al menos una transmisión entrante"
+      },
+      "go2rtcStreams": "Transmisiones go2rtc",
+      "streamUrls": "URLs de transmisión",
+      "addUrl": "Añadir URL",
+      "addGo2rtcStream": "Añadir transmisión go2rtc",
+      "toast": {
+        "success": "Cámara {{cameraName}} guardada correctamente"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Configuración de revisión de la cámara",
+    "object_descriptions": {
+      "title": "Descripciones de objetos de IA generativa",
+      "desc": "Habilite o deshabilite temporalmente las descripciones de objetos generadas por IA para esta cámara. Al deshabilitarlas, no se solicitarán descripciones generadas por IA para los objetos rastreados en esta cámara."
+    },
+    "review_descriptions": {
+      "title": "Revisión de descripciones de IA generativa",
+      "desc": "Habilita o deshabilita temporalmente las revisión de descripciones generadas por IA para esta cámara. Al deshabilitarlas, no se solicitarán descripciones generadas por IA para los elementos de revisión de esta cámara."
+    },
+    "review": {
+      "title": "Revisar",
+      "desc": "Habilite o deshabilite temporalmente las alertas y detecciones de esta cámara hasta que Frigate se reinicie. Al deshabilitarlas, no se generarán nuevas revisiones. ",
+      "alerts": "Alertas ",
+      "detections": "Detecciones "
+    },
+    "reviewClassification": {
+      "title": "Clasificación de la revisión",
+      "desc": "Frigate clasifica los elementos de revisión como Alertas y Detecciones. De forma predeterminada, todos los objetos de <em>persona</em> y <em>coche</em> se consideran Alertas. Puede refinar la categorización de sus elementos de revisión configurando las zonas requeridas para ellos.",
+      "noDefinedZones": "No hay Zonas definidas para esta cámara.",
+      "objectAlertsTips": "Todos los objetos {{alertsLabels}} en {{cameraName}} se mostrarán como alertas.",
+      "zoneObjectAlertsTips": "Todos los objetos {{alertsLabels}} detectados en {{zone}} en {{cameraName}} se mostrarán como alertas.",
+      "objectDetectionsTips": "Todos los objetos {{detectionsLabels}} no categorizados en {{cameraName}} se mostrarán como Detecciones independientemente de la zona en la que se encuentren.",
+      "zoneObjectDetectionsTips": {
+        "text": "Todos los objetos {{detectionsLabels}} no categorizados en {{zone}} en {{cameraName}} se mostrarán como Detecciones.",
+        "notSelectDetections": "Todos los objetos {{detectionsLabels}} detectados en {{zone}} en {{cameraName}} que no estén categorizados como Alertas se mostrarán como Detecciones independientemente de la zona en la que se encuentren.",
+        "regardlessOfZoneObjectDetectionsTips": "Todos los objetos {{detectionsLabels}} no categorizados en {{cameraName}} se mostrarán como Detecciones independientemente de la zona en la que se encuentren."
+      },
+      "unsavedChanges": "Configuración de clasificación de revisión no guardadas para {{camera}}",
+      "selectAlertsZones": "Seleccione Zonas para Alertas",
+      "selectDetectionsZones": "Seleccione Zonas para la Detección",
+      "limitDetections": "Limite la detección a zonas específicas",
+      "toast": {
+        "success": "Se ha guardado la configuración de la clasificación de revisión. Reinicie Frigate para aplicar los cambios."
       }
     }
   }

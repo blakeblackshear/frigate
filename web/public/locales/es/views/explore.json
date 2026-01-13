@@ -42,13 +42,15 @@
           "updatedSublabel": "Subetiqueta actualizada con éxito.",
           "regenerate": "Se ha solicitado una nueva descripción a {{provider}}. Dependiendo de la velocidad de tu proveedor, la nueva descripción puede tardar algún tiempo en regenerarse.",
           "updatedLPR": "Matrícula actualizada con éxito.",
-          "audioTranscription": "Transcripción de audio solicitada con éxito."
+          "audioTranscription": "Se solicitó correctamente la transcripción de audio. Dependiendo de la velocidad de su servidor Frigate, la transcripción puede tardar un tiempo.",
+          "updatedAttributes": "Atributos actualizados correctamente."
         },
         "error": {
           "regenerate": "No se pudo llamar a {{provider}} para una nueva descripción: {{errorMessage}}",
           "updatedSublabelFailed": "No se pudo actualizar la subetiqueta: {{errorMessage}}",
           "updatedLPRFailed": "No se pudo actualizar la matrícula: {{errorMessage}}",
-          "audioTranscription": "Transcripción de audio solicitada falló: {{errorMessage}}"
+          "audioTranscription": "Transcripción de audio solicitada falló: {{errorMessage}}",
+          "updatedAttributesFailed": "No se pudieron actualizar los atributos: {{errorMessage}}"
         }
       },
       "tips": {
@@ -102,6 +104,14 @@
     },
     "score": {
       "label": "Puntuación"
+    },
+    "editAttributes": {
+      "title": "Editar atributos",
+      "desc": "Seleccione atributos de clasificación para esta {{label}}"
+    },
+    "attributes": "Atributos de clasificación",
+    "title": {
+      "label": "Título"
     }
   },
   "documentTitle": "Explorar - Frigate",
@@ -198,12 +208,26 @@
     "addTrigger": {
       "label": "Añadir disparador",
       "aria": "Añadir disparador para el objeto seguido"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Descargue instantánea limpia",
+      "aria": "Descargue instantánea limpia"
+    },
+    "viewTrackingDetails": {
+      "label": "Ver detalles de seguimiento",
+      "aria": "Ver detalles de seguimiento"
+    },
+    "showObjectDetails": {
+      "label": "Mostrar la ruta del objeto"
+    },
+    "hideObjectDetails": {
+      "label": "Ocultar la ruta del objeto"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar eliminación",
-      "desc": "Eliminar este objeto rastreado elimina la captura de pantalla, cualquier incrustación guardada y cualquier entrada asociada al ciclo de vida del objeto. Las grabaciones de este objeto rastreado en la vista de Historial <em>NO</em> se eliminarán.<br /><br />¿Estás seguro de que quieres proceder?"
+      "desc": "Al eliminar este objeto rastreado, se eliminan la instantánea, las incrustaciones guardadas y las entradas de detalles de seguimiento asociadas. Las grabaciones de este objeto rastreado en la vista Historial <em>NO</em> se eliminarán.<br /><br />¿Seguro que desea continuar?"
     }
   },
   "noTrackedObjects": "No se encontraron objetos rastreados",
@@ -215,7 +239,9 @@
         "error": "No se pudo eliminar el objeto rastreado: {{errorMessage}}"
       }
     },
-    "tooltip": "Coincidencia con {{type}} al {{confidence}}%"
+    "tooltip": "Coincidencia con {{type}} al {{confidence}}%",
+    "previousTrackedObject": "Objeto rastreado previo",
+    "nextTrackedObject": "Objeto rastreado siguiente"
   },
   "trackedObjectsCount_one": "{{count}} objeto rastreado ",
   "trackedObjectsCount_many": "{{count}} objetos rastreados ",
@@ -235,7 +261,45 @@
     "scrollViewTips": "Haz clic para ver los momentos relevantes del ciclo de vida de este objeto.",
     "count": "{{first}} de {{second}}",
     "lifecycleItemDesc": {
-      "visible": "{{label}} detectado"
+      "visible": "{{label}} detectado",
+      "active": "{{label}} ha sido activado/a",
+      "stationary": "{{label}} se volvió estacionaria",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectado para {{label}}",
+        "other": "{{label}} reconocido como {{attribute}}"
+      },
+      "gone": "{{label}} ha salido",
+      "heard": "{{label}} escuchado/a",
+      "external": "{{label}} detectado",
+      "header": {
+        "zones": "Zonas",
+        "area": "Área",
+        "score": "Puntuación",
+        "ratio": "Ratio(proporción)"
+      },
+      "entered_zone": "{{label}} ha entrado en {{zones}}"
+    },
+    "trackedPoint": "Punto rastreado",
+    "annotationSettings": {
+      "title": "Configuración de anotaciones",
+      "showAllZones": {
+        "title": "Mostrar todas las Zonas",
+        "desc": "Mostrar siempre zonas en los marcos donde los objetos han entrado en una zona."
+      },
+      "offset": {
+        "label": "Desplazamiento de anotación",
+        "desc": "Estos datos provienen de la señal de detección de la cámara, pero se superponen a las imágenes de la señal de grabación. Es poco probable que ambas transmisiones estén perfectamente sincronizadas. Por lo tanto, el cuadro delimitador y el metraje no se alinearán perfectamente. Puede usar esta configuración para desplazar las anotaciones hacia adelante o hacia atrás en el tiempo para que se alineen mejor con el metraje grabado.",
+        "millisecondsToOffset": "Milisegundos para compensar la detección de anotaciones. <em>Predeterminado: 0</em>",
+        "tips": "Disminuya el valor si la reproducción de vídeo se produce antes de los cuadros y los puntos de ruta, y auméntelo si se produce después de ellos. Este valor puede ser negativo.",
+        "toast": {
+          "success": "El desplazamiento de anotación para {{camera}} se ha guardado en el archivo de configuración."
+        }
+      }
+    },
+    "autoTrackingTips": "Las posiciones del cuadro delimitador serán inexactas para las cámaras con seguimiento automático.",
+    "carousel": {
+      "previous": "Vista anterior",
+      "next": "Vista siguiente"
     }
   }
 }

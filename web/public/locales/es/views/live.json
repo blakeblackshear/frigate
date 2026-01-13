@@ -86,7 +86,7 @@
   },
   "manualRecording": {
     "title": "Bajo demanda",
-    "tips": "Iniciar un evento manual basado en la configuración de retención de grabaciones de esta cámara.",
+    "tips": "Descargar una instantánea o Iniciar un evento manual basado en la configuración de retención de grabaciones de esta cámara.",
     "playInBackground": {
       "label": "Reproducir en segundo plano",
       "desc": "Habilitar esta opción para continuar transmitiendo cuando el reproductor esté oculto."
@@ -173,7 +173,17 @@
   },
   "noCameras": {
     "title": "No hay cámaras configuradas",
-    "description": "Comienza conectando una cámara.",
-    "buttonText": "Añade Cámara"
+    "description": "Comienza conectando una cámara a Frigate.",
+    "buttonText": "Añade Cámara",
+    "restricted": {
+      "title": "No hay cámaras disponibles",
+      "description": "No tiene permiso para ver ninguna cámara en este grupo."
+    }
+  },
+  "snapshot": {
+    "takeSnapshot": "Descarga captura instantánea",
+    "noVideoSource": "No hay ninguna fuente de video disponible para la instantánea.",
+    "captureFailed": "Fallo al capturar la instantánea.",
+    "downloadStarted": "La descarga de la instantánea ha comenzado."
   }
 }

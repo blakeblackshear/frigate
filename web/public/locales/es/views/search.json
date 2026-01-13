@@ -26,7 +26,8 @@
       "max_speed": "Velocidad Máxima",
       "recognized_license_plate": "Matrícula Reconocida",
       "has_clip": "Tiene Clip",
-      "has_snapshot": "Tiene Instantánea"
+      "has_snapshot": "Tiene Instantánea",
+      "attributes": "Atributos"
     },
     "searchType": {
       "thumbnail": "Miniatura",

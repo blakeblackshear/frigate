@@ -1,7 +1,7 @@
 {
-  "documentTitle": "Modelos de Clasificación",
+  "documentTitle": "Modelos de Clasificación - Frigate",
   "button": {
-    "deleteClassificationAttempts": "Borrar Imágenes de Clasificación.",
+    "deleteClassificationAttempts": "Borrar Imágenes de Clasificación",
     "renameCategory": "Renombrar Clase",
     "deleteCategory": "Borrar Clase",
     "deleteImages": "Borrar Imágenes",
@@ -30,12 +30,15 @@
       "categorizeFailed": "Fallo al categorizar imagen: {{errorMessage}}",
       "trainingFailed": "El entrenamiento del modelo ha fallado. Revisa los registros de Frigate para más detalles.",
       "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}",
-      "trainingFailedToStart": "No se pudo iniciar el entrenamiento del modelo: {{errorMessage}}"
+      "trainingFailedToStart": "No se pudo iniciar el entrenamiento del modelo: {{errorMessage}}",
+      "renameCategoryFailed": "Falló el renombrado de la clase: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Borrar Clase",
-    "desc": "¿Esta seguro de que quiere borrar la clase {{name}}? Esto borrará permanentemente todas las imágenes asociadas y requerirá reentrenar el modelo."
+    "desc": "¿Esta seguro de que quiere borrar la clase {{name}}? Esto borrará permanentemente todas las imágenes asociadas y requerirá reentrenar el modelo.",
+    "minClassesTitle": "No se puede Borrar la Clase",
+    "minClassesDesc": "Un modelo de clasificación debe tener al menos 2 clases. Añade otra clase antes de borrar esta."
   },
   "deleteModel": {
     "title": "Borrar Modelo de Clasificación",
@@ -45,15 +48,145 @@
     "desc_other": "¿Estas seguro de que quiere borrar {{count}} modelos? Esto borrara permanentemente todos los datos asociados, incluyendo imágenes y datos de entrenamiento. Esta acción no puede ser desehecha."
   },
   "edit": {
-    "title": "Editar modelo de clasificación"
+    "title": "Editar modelo de clasificación",
+    "descriptionState": "Edita las clases para este modelo de clasificación de estados. Los cambios requerirán un reentrenamiento de modelo.",
+    "descriptionObject": "Edita el tipo de objeto y el tipo de clasificación para este modelo de clasificación de objetos.",
+    "stateClassesInfo": "Nota: El cambio de las clases de estado requiere reentrenar el modelo con las clases actualizadas."
   },
   "tooltip": {
     "noChanges": "No se han realizado cambios en el conjunto de datos desde el último entrenamiento.",
     "modelNotReady": "El modelo no está listo para el entrenamiento",
-    "trainingInProgress": "El modelo está entrenándose actualmente.",
+    "trainingInProgress": "El modelo está entrenándose actualmente",
     "noNewImages": "No hay imágenes nuevas para entrenar. Clasifica antes más imágenes del conjunto de datos."
   },
   "details": {
-    "scoreInfo": "La puntuación representa la confianza media de clasificación en todas las detecciones de este objeto."
+    "scoreInfo": "La puntuación representa la confianza media de clasificación en todas las detecciones de este objeto.",
+    "unknown": "Desconocido",
+    "none": "Nada"
+  },
+  "categorizeImage": "Clasificar Imagen",
+  "menu": {
+    "objects": "Objetos",
+    "states": "Estados"
+  },
+  "wizard": {
+    "steps": {
+      "chooseExamples": "Seleccionar Ejemplos",
+      "nameAndDefine": "Nombrar y definir",
+      "stateArea": "Área de estado"
+    },
+    "step1": {
+      "name": "Nombre",
+      "namePlaceholder": "Introducir nombre del modelo...",
+      "type": "Tipo",
+      "typeState": "Estado",
+      "typeObject": "Objeto",
+      "objectLabel": "Etiqueta de Objeto",
+      "objectLabelPlaceholder": "Seleccionar tipo de objeto...",
+      "classificationAttribute": "Atributo",
+      "classes": "Clases",
+      "states": "Estados",
+      "classPlaceholder": "Introducir nombre de la clase...",
+      "errors": {
+        "nameRequired": "Se requiere nombre del modelo",
+        "nameLength": "El nombre del modelo debe tener 64 caracteres o menos",
+        "nameOnlyNumbers": "El nombre del modelo no puede contener solo números",
+        "classRequired": "Al menos se requiere una clase",
+        "classesUnique": "Los nombres de clase deben ser únicos",
+        "noneNotAllowed": "La clase 'none' no esta permitida",
+        "stateRequiresTwoClasses": "Los modelos de estado requieren al menos 2 clases",
+        "objectLabelRequired": "Por favor seleccione una etiqueta de objeto",
+        "objectTypeRequired": "Por favor seleccione un tipo de clasificación"
+      },
+      "description": "Los modelos de estado monitorean las áreas fijas de la cámara para detectar cambios (p. ej., puerta abierta/cerrada). Los modelos de objetos clasifican los objetos detectados (p. ej., animales conocidos, repartidores, etc.).",
+      "classificationType": "Tipo de clasificación",
+      "classificationTypeTip": "Conozca más sobre los tipos de clasificación",
+      "classificationTypeDesc": "Las subetiquetas añaden texto adicional a la etiqueta del objeto (p. ej., «Persona: UPS»). Los atributos son metadatos que permiten búsquedas y se almacenan por separado en los metadatos del objeto.",
+      "classificationSubLabel": "Sub etiqueta",
+      "classesTip": "Aprenda más sobre clases",
+      "classesStateDesc": "Define los diferentes estados en los que puede estar el área de tu cámara. Por ejemplo: \"abierta\" y \"cerrada\" para una puerta de garaje.",
+      "classesObjectDesc": "Define las diferentes categorías para clasificar los objetos detectados. Por ejemplo: \"persona de reparto\", \"residente\" y \"desconocido\" para la clasificación de personas."
+    },
+    "step2": {
+      "description": "Seleccione las cámaras y defina el area a monitorizar por cada cámara. El modelo clasificará el estado de estas cámaras.",
+      "cameras": "Camaras",
+      "selectCamera": "Selecciones Cámara",
+      "noCameras": "Haga clic en + para añadir cámaras",
+      "selectCameraPrompt": "Seleccione una cámara de la lista para definir su área de monitorización"
+    },
+    "step3": {
+      "selectImagesPrompt": "Seleccione todas las imágenes de: {{className}}",
+      "selectImagesDescription": "Haga clic en las imágenes para seleccionarlas. Haga clic en Continuar cuando esté listo para esta clase.",
+      "generating": {
+        "title": "Generando Imágenes de Ejemplo",
+        "description": "Frigate está seleccionando imágenes representativas de sus grabaciones. Esto puede llevar un tiempo..."
+      },
+      "training": {
+        "title": "Modelo de Entrenamiento",
+        "description": "Tu modelo se está entrenando en segundo plano. Cierra este cuadro de diálogo y tu modelo comenzará a ejecutarse en cuanto finalice el entrenamiento."
+      },
+      "retryGenerate": "Reintentar Generación",
+      "noImages": "No se han generado imágenes de ejemplo",
+      "classifying": "Clasificando y Entrenando...",
+      "trainingStarted": "Entrenamiento iniciado con éxito",
+      "modelCreated": "Modelo creado con éxito. Use la vista de Clasificaciones Recientes para añadir imágenes para los estados que falten, después entrene el modelo.",
+      "errors": {
+        "noCameras": "No hay cámaras configuradas",
+        "noObjectLabel": "No se ha seleccionado etiqueta de objeto",
+        "generateFailed": "Falló la generación de ejemplos: {{error}}",
+        "generationFailed": "Generación fallida. Por favor pruebe otra vez.",
+        "classifyFailed": "Falló la clasificación de imágenes: {{error}}"
+      },
+      "generateSuccess": "Imágenes de ejemplo generadas correctamente",
+      "missingStatesWarning": {
+        "title": "Faltan Ejemplos de Estado",
+        "description": "Se recomienda seleccionar ejemplos para todos los estados para obtener mejores resultados. Puede continuar sin seleccionar todos los estados, pero el modelo no se entrenará hasta que todos los estados tengan imágenes. Después de continuar, use la vista \"Clasificaciones recientes\" para clasificar las imágenes de los estados faltantes y luego entrene el modelo."
+      },
+      "allImagesRequired_one": "Por favor clasifique todas las imágenes. Queda {{count}} imagen.",
+      "allImagesRequired_many": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes.",
+      "allImagesRequired_other": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes."
+    },
+    "title": "Crear nueva Clasificación"
+  },
+  "deleteDatasetImages": {
+    "title": "Borrar Conjunto de Imágenes",
+    "desc_one": "¿Está seguro de que quiere eliminar {{count}} imagen de {{dataset}}? Esta acción no puede ser deshecha y requerirá reentrenar el modelo.",
+    "desc_many": "¿Está seguro de que quiere eliminar {{count}} imágenes de {{dataset}}? Esta acción no puede ser deshecha y requerirá reentrenar el modelo.",
+    "desc_other": "¿Está seguro de que quiere eliminar {{count}} imágenes de {{dataset}}? Esta acción no puede ser deshecha y requerirá reentrenar el modelo."
+  },
+  "deleteTrainImages": {
+    "title": "Borrar Imágenes de Entrenamiento",
+    "desc_one": "¿Está seguro de que quiere eliminar {{count}} imagen? Esta acción no puede ser deshecha.",
+    "desc_many": "¿Está seguro de que quiere eliminar {{count}} imágenes? Esta acción no puede ser deshecha.",
+    "desc_other": "¿Está seguro de que quiere eliminar {{count}} imágenes? Esta acción no puede ser deshecha."
+  },
+  "renameCategory": {
+    "title": "Renombrar Clase",
+    "desc": "Introduzca un nuevo nombre para {{name}}. Se requerirá que reentrene el modelo para que el cambio de nombre tenga efecto."
+  },
+  "description": {
+    "invalidName": "Nombre incorrecto. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos, y guiones."
+  },
+  "train": {
+    "title": "Clasificaciones Recientes",
+    "titleShort": "Reciente",
+    "aria": "Seleccione Clasificaciones Recientes"
+  },
+  "categories": "Clases",
+  "createCategory": {
+    "new": "Crear Nueva Clase"
+  },
+  "categorizeImageAs": "Clasificar Imagen Como:",
+  "noModels": {
+    "object": {
+      "title": "No hay Modelos de Clasificación de Objetos",
+      "description": "Crear modelo a medida para clasificar los objetos detectados.",
+      "buttonText": "Crear Modelo de Objetos"
+    },
+    "state": {
+      "title": "No hay Modelos de Clasificación de Estados",
+      "description": "Cree un modelo personalizado para monitorear y clasificar los cambios de estado en áreas específicas de la cámara.",
+      "buttonText": "Crear modelo de estado"
+    }
   }
 }

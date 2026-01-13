@@ -2,7 +2,7 @@
   "description": {
     "addFace": "Agregar una nueva colección a la Biblioteca de Rostros subiendo tu primera imagen.",
     "placeholder": "Introduce un nombre para esta colección",
-    "invalidName": "Nombre inválido. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos y guiones."
+    "invalidName": "Nombre incorrecto. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos, y guiones."
   },
   "details": {
     "person": "Persona",
@@ -28,7 +28,8 @@
   "train": {
     "title": "Reconocimientos Recientes",
     "aria": "Seleccionar reconocimientos recientes",
-    "empty": "No hay intentos recientes de reconocimiento facial"
+    "empty": "No hay intentos recientes de reconocimiento facial",
+    "titleShort": "Reciente"
   },
   "selectItem": "Seleccionar {{item}}",
   "selectFace": "Seleccionar rostro",
@@ -59,10 +60,10 @@
       "deletedName_one": "{{count}} rostro ha sido eliminado con éxito.",
       "deletedName_many": "{{count}} rostros han sido eliminados con éxito.",
       "deletedName_other": "{{count}} rostros han sido eliminados con éxito.",
-      "updatedFaceScore": "Puntuación del rostro actualizada con éxito.",
-      "deletedFace_one": "{{count}} rostro eliminado con éxito",
-      "deletedFace_many": "{{count}} rostros eliminados con éxito",
-      "deletedFace_other": "{{count}} rostros eliminados con éxito",
+      "updatedFaceScore": "Puntuación del rostro actualizada con éxito a {{name}} ({{score}}).",
+      "deletedFace_one": "{{count}} rostro eliminado con éxito.",
+      "deletedFace_many": "{{count}} rostros eliminados con éxito.",
+      "deletedFace_other": "{{count}} rostros eliminados con éxito.",
       "uploadedImage": "Imagen subida con éxito.",
       "renamedFace": "Rostro renombrado con éxito a {{name}}"
     },

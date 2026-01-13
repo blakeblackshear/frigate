@@ -66,10 +66,11 @@
     "toast": {
       "error": {
         "failed": "No se pudo iniciar la exportación: {{error}}",
-        "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido.",
-        "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio."
+        "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido",
+        "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio"
       },
-      "success": "Exportación iniciada con éxito. Ver el archivo en la página exportaciones."
+      "success": "Exportación iniciada con éxito. Ver el archivo en la página exportaciones.",
+      "view": "Ver"
     },
     "fromTimeline": {
       "saveExport": "Guardar exportación",
@@ -129,6 +130,7 @@
     "search": {
       "placeholder": "Búsqueda por etiqueta o sub-etiqueta..."
     },
-    "noImages": "No se encontraron miniaturas para esta cámara"
+    "noImages": "No se encontraron miniaturas para esta cámara",
+    "unknownLabel": "Imagen de activación guardada"
   }
 }
