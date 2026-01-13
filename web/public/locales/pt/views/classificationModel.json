@@ -1,1 +1,50 @@
-{}
+{
+  "button": {
+    "trainModel": "Treinar Modelo",
+    "addClassification": "Adicionar Classificação",
+    "deleteModels": "Apagar Modelos",
+    "editModel": "Editar Modelo",
+    "deleteClassificationAttempts": "Excluir imagens de classificação",
+    "renameCategory": "Renomear Classe",
+    "deleteCategory": "Excluir Classe",
+    "deleteImages": "Excluir imagens"
+  },
+  "tooltip": {
+    "trainingInProgress": "Modelo está a ser treinado",
+    "noNewImages": "Não há novas imagens para treinar. Classifique mais imagens no dataset.",
+    "noChanges": "Nenhuma alteração foi feita no conjunto de dados desde o último treinamento.",
+    "modelNotReady": "O modelo não está pronto para treinamento"
+  },
+  "details": {
+    "scoreInfo": "A pontuação representa a confiança média da classificação em todas as detecções deste objeto.",
+    "none": "Nenhum",
+    "unknown": "Desconhecido"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Classe excluída",
+      "deletedImage": "Imagens excluídas",
+      "categorizedImage": "Imagem classificada com sucesso",
+      "trainedModel": "Modelo treinado com sucesso.",
+      "trainingModel": "Treinamento do modelo iniciado com sucesso.",
+      "updatedModel": "Configuração do modelo atualizada com sucesso",
+      "renamedCategory": "Classe renomeada com sucesso para {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Falha ao excluir: {{errorMessage}}",
+      "deleteCategoryFailed": "Falha ao excluir a classe: {{errorMessage}}",
+      "deleteModelFailed": "Falha ao excluir o modelo: {{errorMessage}}",
+      "categorizeFailed": "Falha ao categorizar a imagem: {{errorMessage}}",
+      "trainingFailed": "O treinamento do modelo falhou. Verifique os registros do Frigate para obter detalhes.",
+      "trainingFailedToStart": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
+      "updateModelFailed": "Falha ao atualizar o modelo: {{errorMessage}}",
+      "renameCategoryFailed": "Falha ao renomear a classe: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Excluir Classe",
+    "desc": "Tem certeza de que deseja excluir a classe {{name}}? Isso excluirá permanentemente todas as imagens associadas e exigirá o treinamento do modelo novamente.",
+    "minClassesTitle": "Não é possível excluir a classe",
+    "minClassesDesc": "Um modelo de classificação deve ter pelo menos duas classes. Adicione outra classe antes de excluir esta."
+  }
+}
