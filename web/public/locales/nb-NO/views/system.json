@@ -84,7 +84,14 @@
     "otherProcesses": {
       "title": "Andre prosesser",
       "processCpuUsage": "Prosessenes CPU-belastning",
-      "processMemoryUsage": "Prosessenes minnebruk"
+      "processMemoryUsage": "Prosessenes minnebruk",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "opptak",
+        "review_segment": "inspeksjonselementer",
+        "embeddings": "vektorrepresentasjoner",
+        "audio_detector": "lyddetektor"
+      }
     }
   },
   "storage": {

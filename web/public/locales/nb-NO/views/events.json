@@ -3,7 +3,11 @@
   "empty": {
     "alert": "Det er ingen varsler å inspisere",
     "detection": "Det er ingen deteksjoner å inspisere",
-    "motion": "Ingen bevegelsesdata funnet"
+    "motion": "Ingen bevegelsesdata funnet",
+    "recordingsDisabled": {
+      "title": "Opptak må være aktivert",
+      "description": "Inspeksjonselementer kan kun opprettes for et kamera når opptak er aktivert for det kameraet."
+    }
   },
   "timeline": "Tidslinje",
   "events": {

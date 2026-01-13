@@ -262,7 +262,8 @@
     "show": "Vis {{item}}",
     "ID": "ID",
     "none": "Ingen",
-    "all": "Alle"
+    "all": "Alle",
+    "other": "Andre"
   },
   "toast": {
     "copyUrlToClipboard": "Nettadresse kopiert til utklippstavlen.",

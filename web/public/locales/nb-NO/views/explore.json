@@ -158,7 +158,10 @@
       "title": "Rediger attributter",
       "desc": "Velg klassifiseringsattributter for denne {{label}}"
     },
-    "attributes": "Klassifiseringsattributter"
+    "attributes": "Klassifiseringsattributter",
+    "title": {
+      "label": "Tittel"
+    }
   },
   "itemMenu": {
     "viewInHistory": {
