@@ -60,7 +60,14 @@
     "otherProcesses": {
       "title": "Alte Procese",
       "processCpuUsage": "Utilizare CPU",
-      "processMemoryUsage": "Utilizare memorie"
+      "processMemoryUsage": "Utilizare memorie",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "înregistrare",
+        "review_segment": "segment de revizuire",
+        "embeddings": "înglobări",
+        "audio_detector": "detector audio"
+      }
     },
     "title": "General"
   },

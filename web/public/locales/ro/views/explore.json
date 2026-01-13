@@ -167,7 +167,10 @@
       "title": "Editează atribute",
       "desc": "Selectează atributele de clasificare pentru acest {{label}}"
     },
-    "attributes": "Atribute de clasificare"
+    "attributes": "Atribute de clasificare",
+    "title": {
+      "label": "Titlu"
+    }
   },
   "exploreMore": "Explorează mai multe obiecte cu {{label}}",
   "trackedObjectDetails": "Detalii despre obiectul urmărit",

@@ -8,7 +8,11 @@
   "empty": {
     "alert": "Nu sunt alerte de revizuit",
     "detection": "Nu sunt detecții de revizuit",
-    "motion": "Nu au fost găsite date despre mișcare"
+    "motion": "Nu au fost găsite date despre mișcare",
+    "recordingsDisabled": {
+      "title": "Înregistrările trebuie să fie activate",
+      "description": "Elementele de revizuire pot fi create doar pentru o cameră atunci când înregistrările sunt activate pentru acea cameră."
+    }
   },
   "timeline": "Cronologie",
   "timeline.aria": "Selectează cronologia",

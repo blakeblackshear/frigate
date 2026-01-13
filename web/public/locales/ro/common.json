@@ -247,7 +247,8 @@
     "show": "Afișează {{item}}",
     "ID": "ID",
     "none": "Niciuna",
-    "all": "Toate"
+    "all": "Toate",
+    "other": "Altele"
   },
   "selectItem": "Selectează {{item}}",
   "pagination": {
