@@ -9,7 +9,11 @@
   "empty": {
     "alert": "Det finns inga varningar att granska",
     "detection": "Det finns inga detekteringar att granska",
-    "motion": "Ingen rörelsedata hittad"
+    "motion": "Ingen rörelsedata hittad",
+    "recordingsDisabled": {
+      "title": "Inspelningar måste vara aktiverat",
+      "description": "Granskningsobjekt kan bara skapas för en kamera när inspelningar är aktiverat för den kameran."
+    }
   },
   "documentTitle": "Granska - Frigate",
   "timeline": "Tidslinje",

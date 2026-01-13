@@ -86,7 +86,14 @@
     "otherProcesses": {
       "title": "Övriga processer",
       "processCpuUsage": "Process CPU-användning",
-      "processMemoryUsage": "Processminnesanvändning"
+      "processMemoryUsage": "Processminnesanvändning",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "inspelning",
+        "review_segment": "granskningssegment",
+        "embeddings": "inbäddningar",
+        "audio_detector": "ljuddetektor"
+      }
     }
   },
   "storage": {

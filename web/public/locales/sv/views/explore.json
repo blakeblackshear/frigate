@@ -109,7 +109,10 @@
       "title": "Redigera attribut",
       "desc": "Välj klassificeringsattribut för denna {{label}}"
     },
-    "attributes": "Klassificeringsattribut"
+    "attributes": "Klassificeringsattribut",
+    "title": {
+      "label": "Titel"
+    }
   },
   "exploreMore": "Utforska fler {{label}} objekt",
   "type": {

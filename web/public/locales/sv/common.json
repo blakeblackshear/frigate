@@ -260,7 +260,8 @@
     "show": "Visa {{item}}",
     "ID": "ID",
     "none": "Ingen",
-    "all": "Alla"
+    "all": "Alla",
+    "other": "Annat"
   },
   "unit": {
     "speed": {
