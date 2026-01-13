@@ -97,7 +97,14 @@
     "otherProcesses": {
       "title": "תהליכים אחרים",
       "processCpuUsage": "ניצול CPU של התהליך",
-      "processMemoryUsage": "ניצול זיכרון של תהליך"
+      "processMemoryUsage": "ניצול זיכרון של תהליך",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "מקליט",
+        "review_segment": "קטע סקירה",
+        "embeddings": "הטמעות",
+        "audio_detector": "זיהוי שמע"
+      }
     }
   },
   "enrichments": {

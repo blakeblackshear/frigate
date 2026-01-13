@@ -107,7 +107,8 @@
     "show": "הצג {{item}}",
     "ID": "ID",
     "none": "ללא",
-    "all": "הכל"
+    "all": "הכל",
+    "other": "אחר"
   },
   "button": {
     "apply": "החל",

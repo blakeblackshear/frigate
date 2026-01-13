@@ -220,7 +220,10 @@
     "score": {
       "label": "ציון"
     },
-    "attributes": "מאפייני סיווג"
+    "attributes": "מאפייני סיווג",
+    "title": {
+      "label": "כותרת"
+    }
   },
   "dialog": {
     "confirmDelete": {
