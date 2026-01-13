@@ -1,18 +1,47 @@
 {
-  "documentTitle": "Osztályozási modellek",
+  "documentTitle": "Osztályozási modellek - Frigate",
   "button": {
     "deleteClassificationAttempts": "Osztályozási képek törlése",
     "deleteImages": "Képek törlése",
     "trainModel": "Modell betanítása",
     "deleteModels": "Modellek törlése",
-    "editModel": "Modell szerkesztése"
+    "editModel": "Modell szerkesztése",
+    "renameCategory": "Osztály átnevezése",
+    "deleteCategory": "Osztály törlése",
+    "addClassification": "Osztályozás hozzáadása"
   },
   "toast": {
     "success": {
       "deletedImage": "Törölt képek",
       "deletedModel_one": "Sikeresen törölt {{count}} modellt",
       "deletedModel_other": "",
-      "categorizedImage": "A kép sikeresen osztályozva"
+      "categorizedImage": "A kép sikeresen osztályozva",
+      "deletedCategory": "Osztály törlése"
+    },
+    "error": {
+      "deleteImageFailed": "Törlés sikertelen: {{errorMessage}}"
     }
+  },
+  "details": {
+    "none": "Nincs",
+    "unknown": "Ismeretlen",
+    "scoreInfo": "A pontszám az objektum összes észlelésében mért átlagos osztályozási megbízhatóságot jelöli."
+  },
+  "edit": {
+    "title": "Osztályozási modell szerkesztése"
+  },
+  "wizard": {
+    "step1": {
+      "name": "Név"
+    },
+    "step2": {
+      "cameras": "Kamerák"
+    }
+  },
+  "tooltip": {
+    "trainingInProgress": "A modell betanítás alatt van",
+    "noNewImages": "Nincsenek új képek a betanításhoz. Először osztályozzon több képet az adathalmazban.",
+    "noChanges": "Az adathalmazban nem történt változás az utolsó betanítás óta.",
+    "modelNotReady": "A modell nem áll készen a betanításra"
   }
 }

@@ -26,7 +26,8 @@
       "max_speed": "Maximális Sebesség",
       "recognized_license_plate": "Felismert Rendszám",
       "has_clip": "Van Klip",
-      "has_snapshot": "Van pillanatképe"
+      "has_snapshot": "Van pillanatképe",
+      "attributes": "Tulajdonságok"
     },
     "searchType": {
       "description": "Leírás",
