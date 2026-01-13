@@ -98,7 +98,6 @@ def sync_recordings(
                         {"id": recording.id, "path": recording.path}
                     )
 
-        result.files_checked += recordings_count
         result.orphans_found += len(recordings_to_delete)
         result.orphan_paths.extend(
             [
@@ -173,7 +172,7 @@ def sync_recordings(
                 for file in files
             }
 
-        result.files_checked += len(files_on_disk)
+        result.files_checked = len(files_on_disk)
 
         files_to_delete: list[str] = []
         for file in files_on_disk:
