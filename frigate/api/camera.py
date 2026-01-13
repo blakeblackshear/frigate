@@ -848,9 +848,10 @@ async def onvif_probe(
                             try:
                                 if isinstance(uri, str) and uri.startswith("rtsp://"):
                                     if username and password and "@" not in uri:
-                                        # Inject URL-encoded credentials and add only the
-                                        # authenticated version.
-                                        cred = f"{quote_plus(username)}:{quote_plus(password)}@"
+                                        # Inject raw credentials and add only the
+                                        # authenticated version. The credentials will be encoded
+                                        # later by ffprobe_stream or the config system.
+                                        cred = f"{username}:{password}@"
                                         injected = uri.replace(
                                             "rtsp://", f"rtsp://{cred}", 1
                                         )
@@ -903,9 +904,9 @@ async def onvif_probe(
                     "/cam/realmonitor?channel=1&subtype=0",
                     "/11",
                 ]
-                # Use URL-encoded credentials for pattern fallback URIs when provided
+                # Use raw credentials for pattern fallback URIs when provided
                 auth_str = (
-                    f"{quote_plus(username)}:{quote_plus(password)}@"
+                    f"{username}:{password}@"
                     if username and password
                     else ""
                 )
@@ -930,7 +931,7 @@ async def onvif_probe(
                         and uri.startswith("rtsp://")
                         and "@" not in uri
                     ):
-                        cred = f"{quote_plus(username)}:{quote_plus(password)}@"
+                        cred = f"{username}:{password}@"
                         cred_uri = uri.replace("rtsp://", f"rtsp://{cred}", 1)
                         if cred_uri not in to_test:
                             to_test.append(cred_uri)

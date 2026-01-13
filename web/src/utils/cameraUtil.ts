@@ -81,7 +81,8 @@ export async function detectReolinkCamera(
 export function maskUri(uri: string): string {
   try {
     // Handle RTSP URLs with user:pass@host format
-    const rtspMatch = uri.match(/rtsp:\/\/([^:]+):([^@]+)@(.+)/);
+    // Use greedy match for password to handle passwords with @
+    const rtspMatch = uri.match(/rtsp:\/\/([^:]+):(.+)@(.+)/);
     if (rtspMatch) {
       return `rtsp://${rtspMatch[1]}:${"*".repeat(4)}@${rtspMatch[3]}`;
     }
