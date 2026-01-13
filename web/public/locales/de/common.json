@@ -130,7 +130,8 @@
     "show": "Zeige {{item}}",
     "ID": "ID",
     "none": "Nichts",
-    "all": "Alle"
+    "all": "Alle",
+    "other": "andere"
   },
   "menu": {
     "configurationEditor": "Konfigurationseditor",

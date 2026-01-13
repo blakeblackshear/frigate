@@ -49,7 +49,7 @@
         "desc": "Standardmäßig werden die letzten Warnmeldungen auf dem Live-Dashboard als kurze Videoschleifen abgespielt. Deaktiviere diese Option, um nur ein statisches Bild der letzten Warnungen auf diesem Gerät/Browser anzuzeigen."
       },
       "automaticLiveView": {
-        "desc": "Wechsle automatisch zur Live Ansicht der Kamera, wenn einen Aktivität erkannt wurde. Wenn du diese Option deaktivierst, werden die statischen Kamerabilder auf der Liveübersicht nur einmal pro Minute aktualisiert.",
+        "desc": "Zeigt automatisch das Live-Bild einer Kamera an, wenn eine Aktivität erkannt wird. Ist diese Option deaktiviert, werden Kamerabilder im Live-Dashboard nur einmal pro Minute aktualisiert.",
         "label": "Automatische Live Ansicht"
       },
       "displayCameraNames": {

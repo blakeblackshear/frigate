@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Klassifizierungsmodelle - Fregatte",
+  "documentTitle": "Klassifikationsmodelle - Frigate",
   "details": {
     "scoreInfo": "Die Punktzahl gibt die durchschnittliche Konfidenz aller Erkennungen dieses Objekts wieder.",
     "none": "Keiner",
@@ -11,7 +11,7 @@
     "deleteCategory": "Klasse löschen",
     "deleteImages": "Bilder löschen",
     "trainModel": "Modell trainieren",
-    "addClassification": "Klassifizierung hinzufügen",
+    "addClassification": "Klassifikationsmodell hinzufügen",
     "deleteModels": "Modell löschen",
     "editModel": "Modell bearbeiten"
   },
@@ -58,7 +58,7 @@
   },
   "edit": {
     "title": "Klassifikationsmodell bearbeiten",
-    "descriptionState": "Bearbeite die Klassen für dieses Zustandsklassifikationsmodell. Änderungen erfordern erneutes Trainieren des Modells.",
+    "descriptionState": "Bearbeite die Klassen für dieses Zustandsklassifikationsmodell. Änderungen erfordern ein erneutes Trainieren des Modells.",
     "descriptionObject": "Bearbeite den Objekttyp und Klassifizierungstyp für dieses Objektklassifikationsmodell.",
     "stateClassesInfo": "Hinweis: Die Änderung der Statusklassen erfordert ein erneutes Trainieren des Modells mit den aktualisierten Klassen."
   },
@@ -97,49 +97,49 @@
   "noModels": {
     "object": {
       "title": "Keine Objektklassifikationsmodelle",
-      "description": "Erstelle ein benutzerdefiniertes Modell, um erkannte Objekte zu klassifizieren.",
-      "buttonText": "Objektmodell erstellen"
+      "description": "Erstelle ein benutzerdefiniertes Objektklassifikationsmodell, um erkannte Objekte zu klassifizieren.",
+      "buttonText": "Objektklassifikationsmodell erstellen"
     },
     "state": {
-      "title": "Keine Statusklassifizierungsmodelle",
-      "description": "Erstellen Sie ein benutzerdefiniertes Modell, um Zustandsänderungen in bestimmten Kamerabereichen zu überwachen und zu klassifizieren.",
-      "buttonText": "Zustandsmodell erstellen"
+      "title": "Keine Zustandsklassifikationsmodelle",
+      "description": "Erstellen Sie ein benutzerdefiniertes Zustandsklassifikationsmodell, um Zustandsänderungen in bestimmten Kamerabereichen zu überwachen und zu klassifizieren.",
+      "buttonText": "Zustandsklassifikationsmodell erstellen"
     }
   },
   "wizard": {
-    "title": "Neue Klassifizierung erstellen",
+    "title": "Neues Klassifikationsmodell erstellen",
     "steps": {
       "nameAndDefine": "Benennen und definieren",
-      "stateArea": "Gebiet",
+      "stateArea": "Überwachungsbereich",
       "chooseExamples": "Beispiel auswählen"
     },
     "step1": {
-      "description": "Zustandsmodelle überwachen feste Kamerabereiche auf Veränderungen (z. B. Tür offen/geschlossen). Objektmodelle fügen den erkannten Objekten Klassifizierungen hinzu (z. B. bekannte Tiere, Lieferanten usw.).",
+      "description": "Zustandsmodelle überwachen fest definierte Kamerabereiche auf Veränderungen (z. B. Tür offen/geschlossen). Objektmodelle klassifizieren erkannte Objekte genauer (z. B. in bekannte Tiere, Lieferanten usw.).",
       "name": "Name",
-      "namePlaceholder": "Eingeben Modell Name...",
+      "namePlaceholder": "Modellname eingeben ...",
       "type": "Typ",
       "typeState": "Zustand",
       "typeObject": "Objekt",
-      "objectLabel": "Objekt Bezeichnung",
+      "objectLabel": "Objektbezeichnung",
       "objectLabelPlaceholder": "Auswahl Objekt Typ...",
       "classificationType": "Klassifizierungstyp",
       "classificationTypeTip": "Etwas über Klassifizierungstyp lernen",
       "classificationTypeDesc": "Unterbezeichnungen fügen dem Objektnamen zusätzlichen Text hinzu (z. B. „Person: UPS“). Attribute sind durchsuchbare Metadaten, die separat in den Objektmetadaten gespeichert sind.",
       "classificationSubLabel": "Unterlabel",
-      "classificationAttribute": "Merkmal",
-      "classes": "Klasse",
-      "states": "Gebiet",
-      "classesTip": "Über Klassen lernen",
+      "classificationAttribute": "Attribut",
+      "classes": "Klassen",
+      "states": "Zustände",
+      "classesTip": "Mehr über Klassen erfahren",
       "classesStateDesc": "Definieren Sie die verschiedenen Zustände, in denen sich Ihr Kamerabereich befinden kann. Beispiel: „offen” und „geschlossen” für ein Garagentor.",
       "classesObjectDesc": "Definieren Sie die verschiedenen Kategorien, in die erkannte Objekte klassifiziert werden sollen. Beispiel: „Lieferant“, „Bewohner“, „Fremder“ für die Klassifizierung von Personen.",
       "classPlaceholder": "Klassenbezeichnung eingeben...",
       "errors": {
-        "nameRequired": "Modellname ist erforderlich",
+        "nameRequired": "Der Modellname ist erforderlich",
         "nameLength": "Der Modellname darf maximal 64 Zeichen lang sein",
         "nameOnlyNumbers": "Der Modellname darf nicht nur aus Zahlen bestehen",
         "classRequired": "Mindestens eine Klasse ist erforderlich",
-        "classesUnique": "Klassenname muss eindeutig sein",
-        "stateRequiresTwoClasses": "Gebietsmodelle erfordern mindestens zwei Klassen",
+        "classesUnique": "Der Klassenname muss eindeutig sein",
+        "stateRequiresTwoClasses": "Zustandsmodelle erfordern mindestens zwei Klassen",
         "objectLabelRequired": "Bitte wähle eine Objektbeschriftung",
         "objectTypeRequired": "Bitte wählen Sie einen Klassifizierungstyp aus",
         "noneNotAllowed": "Die Klasse „none“ ist nicht zulässig"
@@ -149,12 +149,12 @@
       "description": "Wählen Sie Kameras aus und legen Sie für jede Kamera den zu überwachenden Bereich fest. Das Modell klassifiziert den Zustand dieser Bereiche.",
       "cameras": "Kameras",
       "selectCamera": "Kamera auswählen",
-      "noCameras": "Klick + zum hinzufügen der Kameras",
+      "noCameras": "Klicke + zum Hinzufügen von Kameras",
       "selectCameraPrompt": "Wählen Sie eine Kamera aus der Liste aus, um ihren Überwachungsbereich festzulegen"
     },
     "step3": {
-      "selectImagesPrompt": "Wählen sie alle Bilder mit: {{className}}",
-      "selectImagesDescription": "Klicken Sie auf die Bilder, um sie auszuwählen. Klicken Sie auf „Weiter“, wenn Sie mit diesem Kurs fertig sind.",
+      "selectImagesPrompt": "Wählen Sie alle Bilder mit: {{className}}",
+      "selectImagesDescription": "Klicken Sie auf die Bilder, um sie auszuwählen. Klicken Sie auf „Weiter“, wenn Sie mit dieser Klasse fertig sind.",
       "allImagesRequired_one": "Bitte klassifizieren Sie alle Bilder. {{count}} Bild verbleibend.",
       "allImagesRequired_other": "Bitte klassifizieren Sie alle Bilder. {{count}} Bilder verbleiben.",
       "generating": {
@@ -162,7 +162,7 @@
         "description": "Frigate extrahiert repräsentative Bilder aus Ihren Aufnahmen. Dies kann einen Moment dauern..."
       },
       "training": {
-        "title": "Trainingsmodell",
+        "title": "Trainiere Modell",
         "description": "Ihr Modell wird im Hintergrund trainiert. Schließen Sie diesen Dialog, und Ihr Modell wird ausgeführt, sobald das Training abgeschlossen ist."
       },
       "retryGenerate": "Generierung wiederholen",
@@ -177,7 +177,7 @@
         "classifyFailed": "Bilder konnten nicht klassifiziert werden: {{error}}"
       },
       "generateSuccess": "Erfolgreich generierte Beispielbilder",
-      "modelCreated": "Modell erfolgreich erstellt. Verwenden Sie die Ansicht „Aktuelle Klassifizierungen“, um Bilder für fehlende Zustände hinzuzufügen, und trainieren Sie dann das Modell.",
+      "modelCreated": "Modell erfolgreich erstellt. Verwenden Sie die Ansicht „Aktuelle Klassifizierungen“, um Bilder für fehlende Zustände hinzuzufügen und trainieren Sie dann das Modell erneut.",
       "missingStatesWarning": {
         "title": "Beispiele für fehlende Zustände",
         "description": "Es wird empfohlen für alle Zustände Beispiele auszuwählen. Das Modell wird erst trainiert, wenn für alle Zustände Bilder vorhanden sind. Fahren Sie fort und verwenden Sie die Ansicht „Aktuelle Klassifizierungen“, um Bilder für die fehlenden Zustände zu klassifizieren. Trainieren Sie anschließend das Modell."

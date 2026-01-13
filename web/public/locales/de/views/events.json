@@ -8,7 +8,11 @@
   "empty": {
     "alert": "Es gibt keine zu prüfenden Alarme",
     "detection": "Es gibt keine zu prüfenden Erkennungen",
-    "motion": "Keine Bewegungsdaten gefunden"
+    "motion": "Keine Bewegungsdaten gefunden",
+    "recordingsDisabled": {
+      "title": "Aufzeichnungen müssen aktiviert sein",
+      "description": "Überprüfungselemente können nur für eine Kamera erstellt werden, wenn Aufzeichnungen für diese Kamera aktiviert sind."
+    }
   },
   "timeline": "Zeitleiste",
   "timeline.aria": "Zeitleiste auswählen",

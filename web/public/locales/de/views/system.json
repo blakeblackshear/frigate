@@ -50,7 +50,14 @@
     "otherProcesses": {
       "title": "Andere Prozesse",
       "processCpuUsage": "CPU Auslastung für Prozess",
-      "processMemoryUsage": "Prozessspeicherauslastung"
+      "processMemoryUsage": "Prozessspeicherauslastung",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "Aufnahme",
+        "audio_detector": "Geräuscherkennung",
+        "review_segment": "Überprüfungsteil",
+        "embeddings": "Einbettungen"
+      }
     }
   },
   "documentTitle": {

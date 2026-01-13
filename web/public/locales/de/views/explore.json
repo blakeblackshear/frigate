@@ -79,7 +79,10 @@
       "title": "Attribute bearbeiten",
       "desc": "Wählen Sie Klassifizierungsattribute für dieses {{label}} aus"
     },
-    "attributes": "Klassifizierungsattribute"
+    "attributes": "Klassifizierungsattribute",
+    "title": {
+      "label": "Titel"
+    }
   },
   "documentTitle": "Erkunde - Frigate",
   "generativeAI": "Generative KI",
