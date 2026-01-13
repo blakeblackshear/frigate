@@ -104,7 +104,8 @@
     "show": "显示 {{item}}",
     "ID": "ID",
     "none": "无",
-    "all": "所有"
+    "all": "所有",
+    "other": "其他"
   },
   "pagination": {
     "label": "分页",

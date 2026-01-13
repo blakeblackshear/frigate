@@ -405,7 +405,7 @@
   "motionDetectionTuner": {
     "title": "画面变动检测调整",
     "desc": {
-      "title": "Frigate 将使用画面变化检测作为首个步骤，以确认一帧画面中是否有目标或物体需要使用目标检测。",
+      "title": "Frigate 将首先使用画面变动检测来确认每一帧画面中是否有变动的区域，然后再对该区域使用目标检测。",
       "documentation": "阅读有关画面变动检测的文档"
     },
     "Threshold": {
@@ -735,7 +735,7 @@
       "readTheDocumentation": "阅读文档"
     },
     "licensePlateRecognition": {
-      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 recognized_license_plate 字段中，或将已知车牌对应的名称作为子标签添加到该车辆目标中。一般常用于读取驶入车道的车辆车牌或经过街道的车辆车牌。",
+      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 识别的车牌（recognized_license_plate）字段中，或将已知车牌对应的名称作为子标签添加到该车辆目标中。该功能常用于识别驶入车道的车辆车牌或经过街道的车辆车牌。",
       "title": "车牌识别",
       "readTheDocumentation": "阅读文档"
     },
@@ -1212,7 +1212,7 @@
         "noAudioWarning": "检测到该视频流无音频信号，录制视频将没有声音。",
         "audioCodecRecordError": "录制功能需要 AAC 音频编解码器以实现音频支持。",
         "audioCodecRequired": "要实现音频检测功能，必须要有音频流。",
-        "restreamingWarning": "为录制流开启“减少与摄像头的连接数”可能会略微增加CPU使用率。",
+        "restreamingWarning": "为录制流开启“减少与摄像头的连接数”可能会略微增加 CPU 使用率。",
         "brands": {
           "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中启用 HTTP协议，并重新启动向导。",
           "reolink-http": "Reolink HTTP 视频流应该使用 FFmpeg 以获得更好的兼容性，为此视频流启用“使用流兼容模式”。"
@@ -1286,8 +1286,8 @@
       "title": "核查分类",
       "desc": "Frigate 将核查项的严重程度分为“警报”和“检测”两个等级。默认情况下，所有的<strong>人</strong>、<strong>汽车</strong> 目标都将视为警报。你可以通过修改配置文件配置区域来细分。",
       "noDefinedZones": "此摄像头未设置任何监控区。",
-      "objectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下都将显示为警报。",
-      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区域内都将显示为警报。",
+      "objectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下都将视为警报。",
+      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区域内都将视为警报。",
       "objectDetectionsTips": "所有在摄像头 {{cameraName}} 上，检测到的 {{detectionsLabels}} 目标或物体，无论它位于哪个区，都将显示为检测。",
       "zoneObjectDetectionsTips": {
         "text": "所有在摄像头 {{cameraName}} 下的 {{zone}} 区域内检测到未分类的 {{detectionsLabels}} 目标或物体，都将显示为检测。",

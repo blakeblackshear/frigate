@@ -9,7 +9,11 @@
   "empty": {
     "alert": "还没有“警报”类核查项",
     "detection": "还没有“检测”类核查项",
-    "motion": "还没有画面变动类数据"
+    "motion": "还没有画面变动类数据",
+    "recordingsDisabled": {
+      "title": "必须要开启录制功能",
+      "description": "必须要摄像头启用录制功能时，才可为其创建回放项目。"
+    }
   },
   "timeline": "时间线",
   "timeline.aria": "选择时间线",

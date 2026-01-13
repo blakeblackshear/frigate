@@ -166,7 +166,10 @@
       "title": "编辑属性",
       "desc": "为 {{label}} 选择分类属性"
     },
-    "attributes": "分类属性"
+    "attributes": "分类属性",
+    "title": {
+      "label": "标题"
+    }
   },
   "itemMenu": {
     "downloadVideo": {
@@ -265,7 +268,7 @@
         "other": "{{label}} 被识别为 {{attribute}}"
       },
       "gone": "{{label}} 离开",
-      "heard": "{{label}} 被听到",
+      "heard": "听到 {{label}}",
       "external": "已检测到 {{label}}",
       "header": {
         "zones": "区",

@@ -40,17 +40,17 @@
     "detector": {
       "title": "检测器",
       "inferenceSpeed": "检测器推理速度",
-      "cpuUsage": "检测器CPU使用率",
+      "cpuUsage": "检测器 CPU 使用率",
       "memoryUsage": "检测器内存使用率",
       "temperature": "检测器温度",
-      "cpuUsageInformation": "用于准备输入和输出数据的 CPU 资源，这些数据是供检测模型使用或由检测模型产生的。该数值并不衡量推理过程中的 CPU 使用情况，即使使用了 GPU 或加速器也是如此。"
+      "cpuUsageInformation": "此处的 CPU 使用率，只统计在给检测模型准备输入数据和处理输出数据时用到的 CPU。它不统计模型推理本身的资源占用，即使推理是在 GPU 或其他检测器上进行的。"
     },
     "hardwareInfo": {
       "title": "硬件信息",
-      "gpuUsage": "GPU使用率",
-      "gpuMemory": "GPU显存",
-      "gpuEncoder": "GPU编码",
-      "gpuDecoder": "GPU解码",
+      "gpuUsage": "GPU 使用率",
+      "gpuMemory": "GPU 显存",
+      "gpuEncoder": "GPU 编码",
+      "gpuDecoder": "GPU 解码",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Vainfo 输出",
@@ -66,17 +66,17 @@
           "vbios": "VBios信息：{{vbios}}"
         },
         "closeInfo": {
-          "label": "关闭GPU信息"
+          "label": "关闭 GPU 信息"
         },
         "copyInfo": {
-          "label": "复制GPU信息"
+          "label": "复制 GPU 信息"
         },
         "toast": {
-          "success": "已复制GPU信息到剪贴板"
+          "success": "已复制 GPU 信息到剪贴板"
         }
       },
       "npuMemory": "NPU内存",
-      "npuUsage": "NPU使用率",
+      "npuUsage": "NPU 使用率",
       "intelGpuWarning": {
         "title": "Intel GPU 处于警告状态",
         "message": "GPU 状态不可用",
@@ -85,8 +85,15 @@
     },
     "otherProcesses": {
       "title": "其他进程",
-      "processCpuUsage": "主进程CPU使用率",
-      "processMemoryUsage": "主进程内存使用率"
+      "processCpuUsage": "主进程 CPU 使用率",
+      "processMemoryUsage": "主进程内存使用率",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "录制",
+        "review_segment": "核查片段",
+        "embeddings": "增强功能",
+        "audio_detector": "音频检测"
+      }
     }
   },
   "storage": {
