@@ -696,6 +696,9 @@ genai:
   # Optional additional args to pass to the GenAI Provider (default: None)
   provider_options:
     keep_alive: -1
+  # Optional: Options to pass during inference calls (default: {})
+  runtime_options:
+    temperature: 0.7
 
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
