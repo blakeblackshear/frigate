@@ -5,7 +5,11 @@
   "empty": {
     "detection": "İncelenecek tespit öğesi yok",
     "alert": "İncelenecek uyarı öğesi yok",
-    "motion": "Hareket verisi bulunamadı"
+    "motion": "Hareket verisi bulunamadı",
+    "recordingsDisabled": {
+      "title": "Kayıt özelliği etkinleştirilmelidir",
+      "description": "İnceleme öğeleri yalnızca bir kamera için kayıt özelliği etkinleştirildiğinde oluşturulabilir."
+    }
   },
   "timeline": "Zaman şeridi",
   "events": {

@@ -232,7 +232,8 @@
     "show": "{{item}} öğesini göster",
     "ID": "ID",
     "none": "Hiçbiri",
-    "all": "Tümü"
+    "all": "Tümü",
+    "other": "Diğer"
   },
   "notFound": {
     "documentTitle": "Bulunamadı - Frigate",

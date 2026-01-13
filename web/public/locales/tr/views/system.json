@@ -53,7 +53,14 @@
     "otherProcesses": {
       "title": "Diğer İşlemler",
       "processCpuUsage": "İşlem CPU Kullanımı",
-      "processMemoryUsage": "İşlem Bellek Kullanımı"
+      "processMemoryUsage": "İşlem Bellek Kullanımı",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "kayıt",
+        "embeddings": "gömülü vektörler",
+        "audio_detector": "ses detektörü",
+        "review_segment": "inceleme bölümü"
+      }
     },
     "detector": {
       "title": "Algılayıcılar",

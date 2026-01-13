@@ -80,7 +80,10 @@
       "title": "Özellikleri düzenle",
       "desc": "Bu {{label}} için sınıflandırma özelliklerini seçin"
     },
-    "attributes": "Sınıflandırma Özellikleri"
+    "attributes": "Sınıflandırma Özellikleri",
+    "title": {
+      "label": "Başlık"
+    }
   },
   "generativeAI": "Üretken Yapay Zeka",
   "exploreIsUnavailable": {
