@@ -5,7 +5,7 @@
     "renameCategory": "Zmień nazwę klasy",
     "deleteCategory": "Usuń klasyfikację",
     "deleteImages": "Usuń obrazy",
-    "trainModel": "Przeszkol model",
+    "trainModel": "Trenuj model",
     "addClassification": "Dodaj klasyfikację",
     "deleteModels": "Usuń modele",
     "editModel": "Edytuj model"
@@ -23,7 +23,7 @@
       "deletedModel_few": "Pomyślenie usunięto {{count}} modele",
       "deletedModel_many": "Pomyślenie usunięto {{count}} modeli",
       "categorizedImage": "Obraz pomyślnie sklasyfikowany",
-      "trainedModel": "Model pomyślnie wytrenowany",
+      "trainedModel": "Model pomyślnie wytrenowany.",
       "trainingModel": "Pomyślnie uruchomiono trenowanie modelu.",
       "updatedModel": "Pomyślnie zaktualizowane ustawienia modelu",
       "renamedCategory": "Pomyślnie zmieniono nazwę klasy na {{name}}"
@@ -79,7 +79,7 @@
   },
   "train": {
     "title": "Ostatnie Klasyfikacje",
-    "titleShort": "Najnowsze",
+    "titleShort": "Ostatnie",
     "aria": "Wybierz Najnowsze Klasyfikacje"
   },
   "createCategory": {
@@ -115,25 +115,47 @@
     "title": "Tworzenie nowej klasyfikacji",
     "steps": {
       "nameAndDefine": "Nazwij i zdefiniuj",
-      "stateArea": "Obszar stanu"
+      "stateArea": "Obszar stanu",
+      "chooseExamples": "Wybierz przykłady"
     },
     "step1": {
       "name": "Nazwa",
       "type": "Typ",
       "classes": "Klasy",
       "errors": {
-        "noneNotAllowed": "Klasa „żadne” jest niedozwolona.",
-        "stateRequiresTwoClasses": "Modele stanowe wymagają co najmniej dwie klasy.",
+        "noneNotAllowed": "Klasa 'żadne' jest niedozwolona",
+        "stateRequiresTwoClasses": "Modele stanowe wymagają co najmniej dwie klasy",
         "objectLabelRequired": "Proszę wybrać etykietę obiektu",
-        "objectTypeRequired": "Proszę wybrać typ klasyfikacji"
-      }
+        "objectTypeRequired": "Proszę wybrać typ klasyfikacji",
+        "nameRequired": "Nazwa modelu jest wymagana",
+        "nameLength": "Nazwa modelu może mieć 64 znaki lub mniej",
+        "nameOnlyNumbers": "Nazwa modelu nie może być ciągiem cyfr",
+        "classRequired": "Przynajmniej jedna klasa jest wymagana",
+        "classesUnique": "Nazwa klasy musi być unikalna"
+      },
+      "classPlaceholder": "Wpisz nazwę klasy...",
+      "classesObjectDesc": "Zdefiniuj różne kategorie, do których będą klasyfikowane wykryte obiekty. Na przykład: 'dostawca', 'mieszkaniec', 'nieznajomy' w przypadku klasyfikacji osób.",
+      "description": "Modele stanowe monitorują stałe obszary kamer pod kątem zmian (np. otwarte/zamknięte drzwi). Modele obiektów dodają klasyfikacje do wykrytych obiektów (np. znane zwierzęta, dostawcy itp.).",
+      "namePlaceholder": "Wprowadź nazwę modelu...",
+      "typeState": "Stan",
+      "typeObject": "Obiekt",
+      "objectLabel": "Etykieta obiektu",
+      "objectLabelPlaceholder": "Wybierz typ obiektu...",
+      "classificationType": "Rodzaj klasyfikacji",
+      "classificationTypeTip": "Dowiedz się więcej o typach klasyfikacji",
+      "classificationTypeDesc": "Podetykiety dodają dodatkowy tekst do etykiety obiektu (np. 'Osoba: UPS'). Atrybuty to metadane, które można przeszukiwać, przechowywane oddzielnie w metadanych obiektu.",
+      "classificationSubLabel": "Podetykieta",
+      "classificationAttribute": "Atrybut",
+      "states": "Stany",
+      "classesTip": "Dowiedz się więcej o klasach obiektów",
+      "classesStateDesc": "Zdefiniuj różne stany, w jakich może znajdować się obszar objęty zasięgiem kamery. Na przykład: 'otwarte' i 'zamknięte' dla bramy garażowej."
     },
     "step2": {
       "description": "Wybierz kamery i określ obszar monitorowania dla każdej z nich. Model sklasyfikuje stan tych obszarów.",
       "cameras": "Kamery",
       "selectCamera": "Wybierz kamerę",
       "noCameras": "Kliknij +, aby dodać kamery",
-      "selectCameraPrompt": "Wybierz kamerę z listy, aby zdefiniować jej obszar monitorowania."
+      "selectCameraPrompt": "Wybierz kamerę z listy, aby zdefiniować jej obszar monitorowania"
     },
     "step3": {
       "selectImagesPrompt": "Zaznacz wszystkie obrazy z: {{className}}",
@@ -142,9 +164,30 @@
       "allImagesRequired_few": "Proszę sklasyfikować wszystkie obrazy. Pozostały {{count}} obrazy.",
       "allImagesRequired_many": "Proszę sklasyfikować wszystkie obrazy. Pozostało {{count}} obrazów.",
       "generating": {
-        "title": "Generowanie przykładowych obrazów"
+        "title": "Generowanie przykładowych obrazów",
+        "description": "Frigate pobiera reprezentatywne obrazy z Twoich nagrań. Może to chwilę potrwać..."
       },
-      "trainingStarted": "Szkolenie rozpoczęło się pomyślnie"
+      "trainingStarted": "Szkolenie rozpoczęło się pomyślnie",
+      "training": {
+        "title": "Model treningowy",
+        "description": "Twój model jest szkolony w tle. Zamknij to okno dialogowe, a model zacznie działać zaraz po zakończeniu szkolenia."
+      },
+      "retryGenerate": "Ponowne generowanie",
+      "noImages": "Nie wygenerowano przykładowych obrazów",
+      "classifying": "Klasyfikacja i szkolenie...",
+      "modelCreated": "Model został pomyślnie utworzony. Użyj widoku Ostatnie klasyfikacje, aby dodać obrazy dla brakujących stanów, a następnie wytrenuj model.",
+      "errors": {
+        "noCameras": "Brak skonfigurowanych kamer",
+        "noObjectLabel": "Nie wybrano żadnej etykiety obiektu",
+        "generateFailed": "Nie udało się wygenerować przykładów: {{error}}",
+        "generationFailed": "Generowanie nie powiodło się. Spróbuj ponownie.",
+        "classifyFailed": "Nie udało się sklasyfikować obrazów: {{error}}"
+      },
+      "generateSuccess": "Pomyślnie wygenerowane przykładowe obrazy",
+      "missingStatesWarning": {
+        "title": "Przykłady brakujących stanów",
+        "description": "Aby uzyskać najlepsze wyniki, zaleca się wybranie przykładów dla wszystkich stanów. Można kontynuować bez wybierania wszystkich stanów, ale model nie zostanie wytrenowany, dopóki wszystkie stany nie będą miały obrazów. Po kontynuowaniu należy użyć widoku Ostatnie klasyfikacje, aby sklasyfikować obrazy dla brakujących stanów, a następnie wytrenować model."
+      }
     }
   }
 }

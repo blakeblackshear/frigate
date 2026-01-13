@@ -242,7 +242,8 @@
           "mustNotBeSameWithCamera": "Nazwa strefy nie może być taka sama jak nazwa kamery.",
           "alreadyExists": "Strefa z tą nazwą już istnieje dla tej kamery.",
           "hasIllegalCharacter": "Nazwa strefy zawiera niedozwolone znaki.",
-          "mustNotContainPeriod": "Nazwa strefy nie może zawierać kropki."
+          "mustNotContainPeriod": "Nazwa strefy nie może zawierać kropki.",
+          "mustHaveAtLeastOneLetter": "Nazwa strefy musi zawierać co najmniej jedną literę."
         }
       },
       "distance": {
@@ -298,7 +299,7 @@
       "name": {
         "title": "Nazwa",
         "inputPlaceHolder": "Wprowadź nazwę…",
-        "tips": "Nazwa musi mieć co najmniej 2 znaki i nie może być taka sama jak nazwa kamery lub innej strefy."
+        "tips": "Nazwa musi mieć co najmniej 1 znak i nie może być taka sama jak nazwa kamery lub innej strefy."
       },
       "objects": {
         "title": "Obiekty",
@@ -336,7 +337,7 @@
         "lineDDistance": "Odległość linii D ({{unit}})"
       },
       "toast": {
-        "success": "Strefa ({{zoneName}}) została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+        "success": "Strefa ({{zoneName}}) została zapisana."
       }
     },
     "motionMasks": {
@@ -357,8 +358,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} został zapisany. Uruchom ponownie Frigate, aby zastosować zmiany.",
-          "noName": "Maska Ruchu została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+          "title": "{{polygonName}} został zapisany.",
+          "noName": "Maska Ruchu została zapisana."
         }
       },
       "label": "Maska ruchu",
@@ -371,8 +372,8 @@
     "objectMasks": {
       "toast": {
         "success": {
-          "title": "{{polygonName}} został zapisany. Uruchom ponownie Frigate aby wprowadzić zmiany.",
-          "noName": "Maska Obiektu została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+          "title": "{{polygonName}} został zapisany.",
+          "noName": "Maska Obiektu została zapisana."
         }
       },
       "objects": {
@@ -491,7 +492,7 @@
   },
   "users": {
     "addUser": "Dodaj Użytkownika",
-    "updatePassword": "Aktualizuj Hasło",
+    "updatePassword": "Resetuj Hasło",
     "toast": {
       "success": {
         "createUser": "Użytkownik {{user}} został utworzony pomyślnie",
@@ -512,7 +513,7 @@
       "role": "Rola",
       "noUsers": "Nie znaleziono użytkowników.",
       "changeRole": "Zmień rolę użytkownika",
-      "password": "Hasło",
+      "password": "Resetuj hasło",
       "deleteUser": "Usuń użytkownika"
     },
     "dialog": {
@@ -537,7 +538,16 @@
           },
           "title": "Hasło",
           "placeholder": "Wprowadź hasło",
-          "notMatch": "Hasła nie pasują"
+          "notMatch": "Hasła nie pasują",
+          "show": "Pokaż hasło",
+          "hide": "Ukryj hasło",
+          "requirements": {
+            "title": "Wymagania hasła:",
+            "length": "Co najmniej 8 znaków",
+            "uppercase": "Co najmniej jedna duża litera",
+            "digit": "Co najmniej jedna cyfra",
+            "special": "Co najmniej jeden znak specjalny (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "placeholder": "Wprowadź nowe hasło",
@@ -547,7 +557,11 @@
           }
         },
         "usernameIsRequired": "Nazwa użytkownika jest wymagana",
-        "passwordIsRequired": "Hasło jest wymagane"
+        "passwordIsRequired": "Hasło jest wymagane",
+        "currentPassword": {
+          "title": "Aktualne hasło",
+          "placeholder": "Wprowadź aktualne hasło"
+        }
       },
       "changeRole": {
         "desc": "Aktualizuj uprawnienia dla <strong>{{username}}</strong>",
@@ -578,7 +592,12 @@
         "setPassword": "Ustaw hasło",
         "desc": "Utwórz silne hasło, aby zabezpieczyć to konto.",
         "cannotBeEmpty": "Hasło nie może być puste",
-        "doNotMatch": "Hasła nie pasują do siebie"
+        "doNotMatch": "Hasła nie pasują do siebie",
+        "currentPasswordRequired": "Wymagane jest aktualne hasło",
+        "incorrectCurrentPassword": "Aktualne hasło jest nieprawidłowe",
+        "passwordVerificationFailed": "Nie udało się zweryfikować hasła",
+        "multiDeviceWarning": "Wszystkie inne urządzenia, na których jesteś zalogowany, będą wymagały ponownego zalogowania się w ciągu {{refresh_time}}.",
+        "multiDeviceAdmin": "Możesz również wymusić natychmiastowe ponowne uwierzytelnienie wszystkich użytkowników poprzez zmianę sekretu JWT."
       }
     },
     "management": {
@@ -814,7 +833,7 @@
   "triggers": {
     "documentTitle": "Wyzwalacze",
     "management": {
-      "title": "Zarządzanie wyzwalaczami",
+      "title": "Wyzwalacze",
       "desc": "Zarządzaj wyzwalaczami dla kamery {{camera}}. Użyj typu miniatury, aby aktywować miniatury podobne do wybranego śledzonego obiektu, i typu opisu, aby aktywować opisy podobne do określonego tekstu."
     },
     "addTrigger": "Dodaj wyzwalacz",
@@ -835,7 +854,9 @@
     },
     "actions": {
       "alert": "Oznacz jako alarm",
-      "notification": "Wyślij powiadomienie"
+      "notification": "Wyślij powiadomienie",
+      "sub_label": "Dodaj podetykietę",
+      "attribute": "Dodaj atrybut"
     },
     "dialog": {
       "createTrigger": {
@@ -855,23 +876,26 @@
           "title": "Nazwa",
           "placeholder": "Wprowadź nazwę wyzwalacza",
           "error": {
-            "minLength": "Nazwa musi mieć co najmniej 2 znaki.",
-            "invalidCharacters": "Nazwa może zawierać jedynie litery, liczby, podkreślenie i myślniki.",
+            "minLength": "Pole musi mieć co najmniej 2 znaki.",
+            "invalidCharacters": "Pole może zawierać jedynie litery, liczby, podkreślenie i myślniki.",
             "alreadyExists": "Wyzwalacz o tej nazwie istnieje już dla tej kamery."
-          }
+          },
+          "description": "Wprowadź unikalną nazwę lub opis, aby zidentyfikować ten wyzwalacz"
         },
         "enabled": {
           "description": "Włącz lub wyłącz ten wyzwalacz"
         },
         "type": {
           "title": "Typ",
-          "placeholder": "Wybierz typ wyzwalacza"
+          "placeholder": "Wybierz typ wyzwalacza",
+          "description": "Uruchom, gdy wykryty zostanie podobny opis śledzonego obiektu",
+          "thumbnail": "Uruchom, gdy wykryta zostanie podobna miniatura śledzonego obiektu"
         },
         "content": {
           "title": "Zawartość",
-          "imagePlaceholder": "Wybierz obraz",
+          "imagePlaceholder": "Wybierz miniaturkę",
           "textPlaceholder": "Wprowadź treść",
-          "imageDesc": "Wybierz obraz, aby uruchomić tę akcję po wykryciu podobnego obrazu.",
+          "imageDesc": "Wyświetlane jest tylko 100 najnowszych miniatur. Jeśli nie możesz znaleźć żądanej miniatury, przejrzyj wcześniejsze obiekty w sekcji Eksploruj i skonfiguruj wyzwalacz z menu w tym miejscu.",
           "textDesc": "Wprowadź tekst, który spowoduje uruchomienie tej akcji po wykryciu podobnego opisu śledzonego obiektu.",
           "error": {
             "required": "Zawartość jest wymagana."
@@ -882,11 +906,12 @@
           "error": {
             "min": "Próg musi wynosić co najmniej 0",
             "max": "Próg nie może być większy niż 1"
-          }
+          },
+          "desc": "Ustaw próg podobieństwa dla tego wyzwalacza. Wyższy próg oznacza, że do uruchomienia wyzwalacza wymagane jest większe dopasowanie."
         },
         "actions": {
           "title": "Akcje",
-          "desc": "Domyślnie Frigate wysyła wiadomość MQTT dla wszystkich wyzwalaczy. Wybierz dodatkową akcję, która ma zostać wykonana po uruchomieniu tego wyzwalacza.",
+          "desc": "Domyślnie Frigate wysyła komunikat MQTT dla wszystkich wyzwalaczy. Podetykiety dodają nazwę wyzwalacza do etykiety obiektu. Atrybuty to metadane, które można przeszukiwać, przechowywane oddzielnie w metadanych śledzonego obiektu.",
           "error": {
             "min": "Musisz wybrać co najmniej jedną akcję."
           }
@@ -913,6 +938,23 @@
     "semanticSearch": {
       "title": "Wyszukiwanie semantyczne jest zablokowane",
       "desc": "Wyszukiwanie semantyczne musi być włączone, aby korzystać z triggerów."
+    },
+    "wizard": {
+      "title": "Utwórz wyzwalacz",
+      "step1": {
+        "description": "Skonfiguruj podstawowe ustawienia wyzwalacza."
+      },
+      "step2": {
+        "description": "Skonfiguruj treść, która uruchomi tę akcję."
+      },
+      "step3": {
+        "description": "Skonfiguruj próg i działania dla tego wyzwalacza."
+      },
+      "steps": {
+        "nameAndType": "Nazwa i typ",
+        "configureData": "Skonfiguruj dane",
+        "thresholdAndActions": "Próg i akcje"
+      }
     }
   },
   "cameraWizard": {
@@ -1002,7 +1044,15 @@
       "probeSuccessful": "Wykrywanie udane",
       "probeError": "Błąd wykrywania",
       "probeNoSuccess": "Niepowodzenie wykrywania",
-      "presets": "Ustawienia wstępne"
+      "presets": "Ustawienia wstępne",
+      "rtspCandidates": "Kandydaci RTSP",
+      "rtspCandidatesDescription": "W wyniku sprawdzania kamery znaleziono następujące adresy URL RTSP. Przetestuj połączenie, aby wyświetlić metadane strumienia.",
+      "noRtspCandidates": "Nie znaleziono adresów URL RTSP z kamery. Twoje dane uwierzytelniające mogą być nieprawidłowe lub kamera może nie obsługiwać protokołu ONVIF lub metody używanej do pobierania adresów URL RTSP. Wróć i wprowadź adres URL RTSP ręcznie.",
+      "candidateStreamTitle": "Kandydat {{number}}",
+      "useCandidate": "Użyj",
+      "toggleUriView": "Kliknij, aby przełączyć widok pełnego adresu URI",
+      "connected": "Połączony",
+      "notConnected": "Niepołączony"
     },
     "step3": {
       "streamTitle": "Strumień numer: {{number}}",
@@ -1032,11 +1082,19 @@
       "detectRoleWarning": "Przynajmniej jeden strumień musi mieć rolę \"detect\".",
       "rolesPopover": {
         "title": "Role strumienia",
-        "detect": "Główny strumień służący do wykrywania obiektów."
+        "detect": "Główny strumień służący do wykrywania obiektów.",
+        "record": "Zapisuje fragmenty strumienia wideo zgodnie z ustawieniami konfiguracyjnymi.",
+        "audio": "Kanał do wykrywania opartego na dźwięku."
       },
       "featuresPopover": {
-        "title": "Funkcje strumienia"
-      }
+        "title": "Funkcje strumienia",
+        "description": "Użyj funkcji ponownego przesyłania strumienia go2rtc, aby zmniejszyć liczbę połączeń z kamerą."
+      },
+      "description": "Skonfiguruj role strumieni i dodaj dodatkowe strumienie dla swojej kamery.",
+      "streamsTitle": "Strumienie kamery",
+      "addStream": "Dodaj strumień",
+      "addAnotherStream": "Dodaj kolejny strumień",
+      "searchCandidates": "Szukaj kandydatów..."
     },
     "step4": {
       "description": "Końcowa walidacja i analiza przed zapisaniem ustawień nowej kamery. Połącz się z każdym strumieniem przed zapisaniem.",
@@ -1053,7 +1111,7 @@
       "ffmpegModuleDescription": "Jeżeli po kilku próbach strumień nadal nie ładuje się, uruchom ten tryb. Gdy włączony jest ten tryb Frigate będzie używać modułu ffmpeg z go2rtc. Może to zapewnić lepszą kompatybilność z niektórymi typami strumieniów.",
       "none": "Brak",
       "error": "Błąd",
-      "streamValidated": "Strumień numer: {{number}} przeszedł test pozytywnie.",
+      "streamValidated": "Strumień numer: {{number}} przeszedł test pozytywnie",
       "streamValidationFailed": "Strumień numer: {{number}} test nieudany",
       "saveAndApply": "Zapisz nową kamerę",
       "saveError": "Nieprawidłowa konfiguracja. Sprawdź ustawienia.",
@@ -1065,11 +1123,26 @@
         "noAudioWarning": "Nie wykryto dźwięku dla tego strumienia, nagrania również nie będą zawierać dźwięku.",
         "audioCodecRecordError": "Kodek AAC jest wymagany aby uwzględnić dźwięk w nagraniach.",
         "audioCodecRequired": "Strumień audio jest wymagany aby umożliwić wykrywanie dźwięku.",
-        "restreamingWarning": "Ograniczenie ilości połączeń do strumienia nagrań może delikatnie zwiększyć użycie procesora",
+        "restreamingWarning": "Ograniczenie ilości połączeń do strumienia nagrań może delikatnie zwiększyć użycie procesora.",
         "brands": {
-          "reolink-rtsp": "Strumień RTSP dla kamer firmy Reolink nie jest rekomendowany. Uruchom strumień HTTP w oprogramowaniu kamery i uruchom kreator jeszcze raz."
+          "reolink-rtsp": "Strumień RTSP dla kamer firmy Reolink nie jest rekomendowany. Uruchom strumień HTTP w oprogramowaniu kamery i uruchom kreator jeszcze raz.",
+          "reolink-http": "Strumienie HTTP Reolink powinny korzystać z FFmpeg w celu zapewnienia lepszej kompatybilności. Włącz opcję 'Użyj trybu kompatybilności strumienia' dla tego strumienia."
+        },
+        "videoCodecGood": "Kodek wideo to {{codec}}.",
+        "dahua": {
+          "substreamWarning": "Podstrumień 1 jest zablokowany na niskiej rozdzielczości. Wiele kamer Dahua / Amcrest / EmpireTech obsługuje dodatkowe podstrumienie, które należy włączyć w ustawieniach kamery. Zaleca się sprawdzenie i wykorzystanie tych strumieni, jeśli są dostępne."
+        },
+        "hikvision": {
+          "substreamWarning": "Podstrumień 1 jest zablokowany na niskiej rozdzielczości. Wiele kamer Hikvision obsługuje dodatkowe podstrumienie, które należy włączyć w ustawieniach kamery. Zaleca się sprawdzenie i wykorzystanie tych strumieni, jeśli są dostępne."
         }
-      }
+      },
+      "connectAllStreams": "Podłącz wszystkie strumienie",
+      "reconnectionPartial": "Niektóre strumienie nie zostały ponownie połączone.",
+      "reload": "Przeładuj",
+      "failed": "Nie powiodło się",
+      "notTested": "Nietestowane",
+      "connectStream": "Połącz",
+      "ffmpegModule": "Użyj trybu zgodności strumienia"
     },
     "description": "Wykonaj poniższe kroki aby dodać nową kamerę do Frigate."
   },
@@ -1080,7 +1153,8 @@
     "selectCamera": "Wybierz kamerę",
     "backToSettings": "Powrót do ustawień kamery",
     "streams": {
-      "title": "Włącz / Wyłącz kamery"
+      "title": "Włącz / Wyłącz kamery",
+      "desc": "Tymczasowo wyłącz kamerę do momentu ponownego uruchomienia Frigate. Wyłączenie kamery całkowicie zatrzymuje przetwarzanie strumieni z tej kamery przez program Frigate. Funkcje detekcji, nagrywania i debugowania będą niedostępne. <br /><em>Uwaga: nie powoduje to wyłączenia strumieni go2rtc.</em>"
     },
     "cameraConfig": {
       "add": "Dodaj kamerę",
@@ -1115,7 +1189,9 @@
   "cameraReview": {
     "review": {
       "alerts": "Alerty ",
-      "detections": "Wykrycia "
+      "detections": "Wykrycia ",
+      "title": "Recenzja",
+      "desc": "Tymczasowo włącz/wyłącz alerty i wykrywania dla tej kamery do momentu ponownego uruchomienia programu Frigate. Po wyłączeniu nie będą generowane żadne nowe elementy do przeglądu. "
     },
     "reviewClassification": {
       "title": "Przegląd klasyfikacji",
@@ -1129,7 +1205,22 @@
       "unsavedChanges": "Niezapisane ustawienia klasyfikacji przeglądu dla kamery {{camera}}",
       "selectAlertsZones": "Wybierz strefę dla Alertów",
       "selectDetectionsZones": "Wybierz strefę dla Wykryć",
-      "limitDetections": "Ogranicz detekcje do konkretnych stref"
+      "limitDetections": "Ogranicz detekcje do konkretnych stref",
+      "desc": "Frigate dzieli elementy do przeglądu na alarmy i detekcje. Domyślnie wszystkie obiekty typu <em>osoba</em> i <em>samochód</em> są traktowane jako alerty. Możesz doprecyzować kategoryzację elementów do przeglądu, konfigurując dla nich wymagane strefy.",
+      "objectAlertsTips": "Wszystkie obiekty {{alertsLabels}} w {{cameraName}} będą wyświetlane jako alarmy.",
+      "zoneObjectAlertsTips": "Wszystkie obiekty {{alertsLabels}} wykryte w {{zone}} na {{cameraName}} zostaną wyświetlone jako alarmy.",
+      "toast": {
+        "success": "Konfiguracja klasyfikacji została zapisana. Uruchom ponownie program Frigate, aby zastosować zmiany."
+      }
+    },
+    "title": "Ustawienia przeglądu kamery",
+    "object_descriptions": {
+      "title": "Generatywne opisy obiektów AI",
+      "desc": "Tymczasowo włącz/wyłącz generatywne opisy obiektów AI dla tej kamery. Po wyłączeniu funkcja nie będzie generować opisów AI dla obiektów śledzonych przez tę kamerę."
+    },
+    "review_descriptions": {
+      "title": "Opisy generatywnej sztucznej inteligencji",
+      "desc": "Tymczasowo włącz/wyłącz generatywne opisy AI dla tej kamery. Po wyłączeniu opisy generowane przez AI nie będą wymagane dla elementów przeglądu w tej kamerze."
     }
   }
 }

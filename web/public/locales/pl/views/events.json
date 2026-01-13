@@ -10,7 +10,11 @@
   "empty": {
     "alert": "Brak alertów do przejrzenia",
     "detection": "Brak detekcji do przejrzenia",
-    "motion": "Nie znaleziono danych o ruchu"
+    "motion": "Nie znaleziono danych o ruchu",
+    "recordingsDisabled": {
+      "title": "Nagrywanie musi być włączone",
+      "description": "Elementy przeglądu można tworzyć dla kamery tylko wtedy, gdy dla tej kamery włączono nagrywanie."
+    }
   },
   "timeline": "Oś czasu",
   "timeline.aria": "Wybierz oś czasu",
@@ -57,5 +61,7 @@
     "clickToSeek": "Kliknij aby przewinąć do tego miejsca"
   },
   "needsReview": "Wymaga manualnego sprawdzenia",
-  "normalActivity": "Normalne"
+  "normalActivity": "Normalne",
+  "select_all": "Wszystko",
+  "securityConcern": "Kwestie bezpieczeństwa"
 }

@@ -45,7 +45,8 @@
       "npuMemory": "Pamięć NPU",
       "intelGpuWarning": {
         "message": "Statystyki układu graficznego niedostępne",
-        "description": "W narzędziach telemetrii i statystyki układów graficznych firmy Intel (intel_gpu_top) znajduje się znany błąd powodujący raportowanie użycia układu graficznego wynoszące 0%, nawet gdy akceleracja sprzętowa i wykrywanie obiektów działa prawidłowo korzystając ze zintegrowanego układu graficznego. To nie jest błąd oprogramowania Frigate. Restart hosta może chwilowo rozwiązać problem i pozwolić na weryfikację działania układu graficznego. Ten bład nie wpływa na wydajność systemu,"
+        "description": "W narzędziach telemetrii i statystyki układów graficznych firmy Intel (intel_gpu_top) znajduje się znany błąd powodujący raportowanie użycia układu graficznego wynoszące 0%, nawet gdy akceleracja sprzętowa i wykrywanie obiektów działa prawidłowo korzystając ze zintegrowanego układu graficznego. To nie jest błąd oprogramowania Frigate. Restart hosta może chwilowo rozwiązać problem i pozwolić na weryfikację działania układu graficznego. Ten bład nie wpływa na wydajność systemu.",
+        "title": "Ostrzeżenie dotyczące statystyk Intel GPU"
       }
     },
     "title": "Ogólne",
@@ -60,13 +61,20 @@
     "otherProcesses": {
       "title": "Inne procesy",
       "processCpuUsage": "Użycie CPU przez proces",
-      "processMemoryUsage": "Użycie pamięci przez proces"
+      "processMemoryUsage": "Użycie pamięci przez proces",
+      "series": {
+        "audio_detector": "detektor dźwięku",
+        "go2rtc": "go2rtc",
+        "recording": "nagranie",
+        "review_segment": "przejrzyj fragment",
+        "embeddings": "osadzone opisy"
+      }
     }
   },
   "cameras": {
     "info": {
       "stream": "Strumień {{idx}}",
-      "cameraProbeInfo": "{{camera}} Informacje o sondowaniu kamery",
+      "cameraProbeInfo": "{{camera}} Informacje o ustawieniach kamery",
       "streamDataFromFFPROBE": "Dane strumienia są pozyskiwane za pomocą <code>ffprobe</code>.",
       "video": "Wideo:",
       "codec": "Kodek:",
@@ -117,12 +125,12 @@
       },
       "title": "Magazyn kamery",
       "camera": "Kamera",
-      "storageUsed": "Wykorzystany magazyn",
+      "storageUsed": "Wykorzystana przestrzeń",
       "percentageOfTotalUsed": "Procent całości",
       "bandwidth": "Przepustowość",
       "unusedStorageInformation": "Informacja o niewykorzystanym magazynie"
     },
-    "title": "Magazyn",
+    "title": "Przestrzeń dyskowa",
     "overview": "Przegląd",
     "recordings": {
       "title": "Nagrania",
@@ -187,7 +195,14 @@
       "face_recognition": "Rozpoznawanie twarzy",
       "classification_events_per_second": "{{name}} Klasyfikacja zdarzeń na sekundę",
       "classification_speed": "{{name}} Szybkość klasyfikacji",
-      "classification": "{{name}} Klasyfikacja"
-    }
+      "classification": "{{name}} Klasyfikacja",
+      "review_description": "Opis recenzji",
+      "review_description_speed": "Szybkość opisu recenzji",
+      "review_description_events_per_second": "Opis recenzji",
+      "object_description": "Opis obiektu",
+      "object_description_speed": "Szybkość opisu obiektu",
+      "object_description_events_per_second": "Opis obiektu"
+    },
+    "averageInf": "Średni czas wnioskowania"
   }
 }

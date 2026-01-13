@@ -134,6 +134,7 @@
     "count_other": "{{count}} Klas(y)"
   },
   "attributes": {
-    "all": "Wszystkie atrybuty"
+    "all": "Wszystkie atrybuty",
+    "label": "Atrybuty klasyfikacji"
   }
 }

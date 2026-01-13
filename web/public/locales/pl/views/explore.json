@@ -77,6 +77,14 @@
     },
     "score": {
       "label": "Wynik"
+    },
+    "editAttributes": {
+      "title": "Edytuj atrybuty",
+      "desc": "Wybierz atrybuty klasyfikacji dla tego {{label}}"
+    },
+    "attributes": "Atrybuty klasyfikacji",
+    "title": {
+      "label": "Tytuł"
     }
   },
   "objectLifecycle": {
@@ -200,6 +208,20 @@
     "audioTranscription": {
       "label": "Rozpisz",
       "aria": "Poproś o audiotranskrypcję"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Pobierz czysty snapshot",
+      "aria": "Pobierz czysty snapshot"
+    },
+    "viewTrackingDetails": {
+      "label": "Wyświetl szczegóły śledzenia",
+      "aria": "Pokaż szczegóły śledzenia"
+    },
+    "showObjectDetails": {
+      "label": "Pokaż ścieżkę obiektu"
+    },
+    "hideObjectDetails": {
+      "label": "Ukryj ścieżkę obiektu"
     }
   },
   "trackedObjectsCount_one": "{{count}} śledzony obiekt ",
@@ -208,7 +230,7 @@
   "noTrackedObjects": "Nie znaleziono śledzonych obiektów",
   "dialog": {
     "confirmDelete": {
-      "desc": "Usunięcie tego śledzonego obiektu usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy cyklu życia obiektu. Nagrany materiał tego śledzonego obiektu w widoku Historii <em>NIE</em> zostanie usunięty.<br /><br />Czy na pewno chcesz kontynuować?",
+      "desc": "Usunięcie tego śledzonego obiektu usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy śledzenia obiektu. Nagrany materiał tego śledzonego obiektu w widoku Historii <em>NIE</em> zostanie usunięty.<br /><br />Czy na pewno chcesz kontynuować?",
       "title": "Potwierdź usunięcie"
     }
   },
@@ -220,7 +242,9 @@
         "error": "Nie udało się usunąć śledzonego obiektu: {{errorMessage}}"
       }
     },
-    "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%"
+    "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%",
+    "previousTrackedObject": "Poprzednio śledzony obiekt",
+    "nextTrackedObject": "Następny śledzony obiekt"
   },
   "exploreMore": "Odkryj więcej obiektów typu {{label}}",
   "aiAnalysis": {
@@ -251,16 +275,31 @@
       "header": {
         "zones": "Strefy",
         "area": "Powierzchnia",
-        "score": "Wynik"
-      }
+        "score": "Wynik",
+        "ratio": "Proporcje"
+      },
+      "heard": "{{label}} słyszałem"
     },
     "annotationSettings": {
       "title": "Ustawienia adnotacji",
       "showAllZones": {
         "title": "Pokaż wszystkie strefy",
         "desc": "Pokazuj linie stref w momencie wejścia obiektu w strefę."
+      },
+      "offset": {
+        "label": "Przesunięcie adnotacji",
+        "desc": "Dane te pochodzą z kanału wykrywania kamery, ale są nakładane na obrazy z kanału nagrywania. Jest mało prawdopodobne, aby oba strumienie były idealnie zsynchronizowane. W rezultacie ramka ograniczająca i materiał filmowy nie będą idealnie dopasowane. Można użyć tego ustawienia, aby przesunąć adnotacje do przodu lub do tyłu w czasie, aby lepiej dopasować je do nagranego materiału filmowego.",
+        "millisecondsToOffset": "Milisekundy, po których wykrywane są adnotacje. <em>Domyślnie: 0</em>",
+        "tips": "Zmniejsz wartość, jeśli odtwarzanie wideo wyprzedza pola i punkty ścieżki, i zwiększ wartość, jeśli odtwarzanie wideo pozostaje w tyle. Wartość ta może być ujemna.",
+        "toast": {
+          "success": "Przesunięcie adnotacji dla {{camera}} zostało zapisane w pliku konfiguracyjnym."
+        }
       }
     },
-    "trackedPoint": "Śledzony Punkt"
+    "trackedPoint": "Śledzony Punkt",
+    "carousel": {
+      "previous": "Poprzedni slajd",
+      "next": "Następny slajd"
+    }
   }
 }

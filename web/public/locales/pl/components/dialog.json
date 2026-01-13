@@ -130,6 +130,7 @@
     "search": {
       "placeholder": "Wyszukaj po etykiecie (label) lub etykiecie potomnej (sub label)..."
     },
-    "noImages": "Brak miniatur dla tej kamery"
+    "noImages": "Brak miniatur dla tej kamery",
+    "unknownLabel": "Zapisany obraz wyzwalacza"
   }
 }

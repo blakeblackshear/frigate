@@ -29,7 +29,8 @@
   "train": {
     "aria": "Wybierz ostatnio rozpoznane",
     "title": "Ostatnie rozpoznania",
-    "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy"
+    "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy",
+    "titleShort": "Ostatnie"
   },
   "selectFace": "Wybierz twarz",
   "deleteFaceLibrary": {

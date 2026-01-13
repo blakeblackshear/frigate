@@ -22,18 +22,18 @@
     "yesterday": "Wczoraj",
     "pm": "po południu",
     "am": "przed południem",
-    "yr": "{{time}}r.",
+    "yr": "{{time}}r",
     "year_one": "{{time}} rok",
     "year_few": "{{time}} lata",
     "year_many": "{{time}} lat",
-    "mo": "{{time}}m.",
-    "d": "{{time}}d.",
+    "mo": "{{time}}m",
+    "d": "{{time}}d",
     "day_one": "{{time}} dzień",
     "day_few": "{{time}} dni",
     "day_many": "{{time}} dni",
-    "h": "{{time}}godz.",
-    "m": "{{time}}min.",
-    "s": "{{time}}s.",
+    "h": "{{time}}godz",
+    "m": "{{time}}min",
+    "s": "{{time}}s",
     "month_one": "{{time}} miesiąc",
     "month_few": "{{time}} miesiące",
     "month_many": "{{time}} miesięcy",
@@ -105,9 +105,9 @@
       "kbps": "kB/s",
       "mbps": "MB/s",
       "gbps": "GB/s",
-      "kbph": "kB/godz.",
-      "mbph": "MB/godz.",
-      "gbph": "GB/godz."
+      "kbph": "kB/godz",
+      "mbph": "MB/godz",
+      "gbph": "GB/godz"
     }
   },
   "label": {
@@ -304,6 +304,11 @@
   },
   "list": {
     "two": "{{0}} i {{1}}",
-    "many": "{{items}}, oraz {{last}}"
+    "many": "{{items}}, oraz {{last}}",
+    "separatorWithSpace": "; "
+  },
+  "field": {
+    "optional": "Opcjonalny",
+    "internalID": "Wewnętrzny identyfikator używany przez Frigate w konfiguracji i bazie danych"
   }
 }
