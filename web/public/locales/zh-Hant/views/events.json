@@ -8,7 +8,11 @@
   "empty": {
     "motion": "未找到移動資料",
     "alert": "沒有警告需要審核",
-    "detection": "沒有偵測到的內容需要審核"
+    "detection": "沒有偵測到的內容需要審核",
+    "recordingsDisabled": {
+      "title": "必須啟用錄製功能",
+      "description": "僅當該攝影機啟用錄製功能時，才能為該攝影機建立審查項目。"
+    }
   },
   "timeline": "時間線",
   "timeline.aria": "選擇時間線",

@@ -81,7 +81,7 @@
   },
   "search": {
     "saveSearch": {
-      "label": "保存搜尋",
+      "label": "儲存搜尋",
       "desc": "替此保存的搜尋命名。",
       "placeholder": "請輸入搜尋的名稱",
       "overwrite": "{{searchName}} 已存在。保存將會覆蓋現有資料。",
@@ -116,6 +116,7 @@
     "unknownLabel": "已儲存觸發圖片",
     "search": {
       "placeholder": "以標籤或子標籤搜尋..."
-    }
+    },
+    "noImages": "未找到此攝影機的縮圖"
   }
 }

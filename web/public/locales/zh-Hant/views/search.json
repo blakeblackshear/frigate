@@ -26,7 +26,8 @@
       "recognized_license_plate": "已辨識的車牌",
       "has_clip": "包含片段",
       "has_snapshot": "包含截圖",
-      "time_range": "時間範圍"
+      "time_range": "時間範圍",
+      "attributes": "屬性"
     },
     "searchType": {
       "thumbnail": "截圖",

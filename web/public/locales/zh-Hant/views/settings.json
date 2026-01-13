@@ -134,5 +134,13 @@
       "selectTransport": "選擇協議",
       "cameraBrand": "相機品牌"
     }
+  },
+  "triggers": {
+    "toast": {
+      "error": {
+        "deleteTriggerFailed": "刪除觸發器失敗：{{errorMessage}}",
+        "updateTriggerFailed": "更新觸發器失敗：{{errorMessage}}"
+      }
+    }
   }
 }

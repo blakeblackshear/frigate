@@ -37,7 +37,8 @@
   "train": {
     "title": "最近的識別紀錄",
     "aria": "選擇最近的識別紀錄",
-    "empty": "最近沒有辨識人臉的操作"
+    "empty": "最近沒有辨識人臉的操作",
+    "titleShort": "最近"
   },
   "selectFace": "選擇人臉",
   "deleteFaceLibrary": {

@@ -121,7 +121,9 @@
     "loading": "讀取已辨識車牌中…",
     "placeholder": "輸入以搜尋車牌…",
     "noLicensePlatesFound": "未找到車牌。",
-    "selectPlatesFromList": "從列表中選擇一個或多個車牌。"
+    "selectPlatesFromList": "從列表中選擇一個或多個車牌。",
+    "selectAll": "全選",
+    "clearAll": "全部清除"
   },
   "classes": {
     "label": "類別",
@@ -130,5 +132,9 @@
     },
     "count_one": "{{count}} 個類別",
     "count_other": "{{count}} 個類別"
+  },
+  "attributes": {
+    "label": "分類屬性",
+    "all": "所有屬性"
   }
 }
