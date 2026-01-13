@@ -4,5 +4,62 @@
   "motion": {
     "label": "حرکت",
     "only": "فقط حرکتی"
-  }
+  },
+  "allCameras": "همه دوربین‌ها",
+  "empty": {
+    "alert": "هیچ هشداری برای بازبینی وجود ندارد",
+    "detection": "هیچ تشخیصی برای بازبینی وجود ندارد",
+    "motion": "هیچ داده‌ای از حرکت پیدا نشد",
+    "recordingsDisabled": {
+      "title": "ضبط‌ها بایستی فعال باشند",
+      "description": "موارد بازبینی برای یک دوربین تنها درصورتی امکان ساخت دارند که ضبط‌ها برای آن دورین فعال باشد."
+    }
+  },
+  "timeline": "خط زمانی",
+  "timeline.aria": "انتخاب خط زمانی",
+  "zoomIn": "بزرگ‌نمایی",
+  "zoomOut": "کوچک‌نمایی",
+  "events": {
+    "aria": "انتخاب رویدادها",
+    "noFoundForTimePeriod": "برای این بازهٔ زمانی هیچ رویدادی یافت نشد.",
+    "label": "رویدادها"
+  },
+  "recordings": {
+    "documentTitle": "ضبط‌ها - فریگیت"
+  },
+  "calendarFilter": {
+    "last24Hours": "۲۴ ساعت گذشته"
+  },
+  "markAsReviewed": "علامت‌گذاری به‌عنوان بازبینی‌شده",
+  "markTheseItemsAsReviewed": "این موارد را به‌عنوان بازبینی‌شده علامت‌گذاری کنید",
+  "newReviewItems": {
+    "label": "مشاهدهٔ موارد جدید برای بازبینی",
+    "button": "موارد جدید برای بازبینی"
+  },
+  "detail": {
+    "label": "جزئیات",
+    "noDataFound": "داده‌ای برای بازبینیِ جزئیات وجود ندارد",
+    "aria": "تغییر وضعیتِ نمای جزئیات",
+    "trackedObject_one": "{{count}} شیء",
+    "trackedObject_other": "{{count}} اشیاء",
+    "noObjectDetailData": "دادهٔ جزئیات شیء در دسترس نیست.",
+    "settings": "تنظیمات نمای جزئیات",
+    "alwaysExpandActive": {
+      "title": "همیشه فعال را باز کنید",
+      "desc": "در صورت امکان، همیشه جزئیات شیء مربوط به موردِ بازبینیِ فعال را باز کنید."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "نقطهٔ ردیابی‌شده",
+    "clickToSeek": "برای رفتن به این زمان کلیک کنید"
+  },
+  "documentTitle": "بازبینی - Frigate",
+  "selected_one": "{{count}} انتخاب شد",
+  "selected_other": "{{count}} انتخاب شدند",
+  "select_all": "همه",
+  "camera": "دوربین",
+  "detected": "گزینه‌هاشناسایی شد",
+  "normalActivity": "عادی",
+  "needsReview": "نیاز به بازبینی",
+  "securityConcern": "نگرانی امنیتی"
 }

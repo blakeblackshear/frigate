@@ -1,9 +1,73 @@
 {
-  "search": "جستجو",
+  "search": "یافتن",
   "savedSearches": "جستجوهای ذخیره شده",
-  "searchFor": "جستجو برای  {{inputValue}}",
+  "searchFor": "جستجو برای {{inputValue}}",
   "button": {
     "clear": "پاک کردن جستجو",
-    "save": "ذخیره جستجو"
+    "save": "ذخیره جست‌وجو",
+    "delete": "حذف جستجوی ذخیره‌شده",
+    "filterInformation": "اطلاعات فیلتر",
+    "filterActive": "فیلترها فعال‌اند"
+  },
+  "trackedObjectId": "شناسهٔ شیء ردیابی‌شده",
+  "filter": {
+    "label": {
+      "cameras": "دوربین‌ها",
+      "labels": "برچسب‌ها",
+      "sub_labels": "زیر‌برچسب‌ها",
+      "attributes": "صفت‌ها",
+      "search_type": "نوع جستجو",
+      "time_range": "بازهٔ زمانی",
+      "zones": "ناحیه‌ها",
+      "before": "قبل از",
+      "after": "بعد از",
+      "min_score": "حداقل امتیاز",
+      "max_score": "حداکثر امتیاز",
+      "min_speed": "حداقل سرعت",
+      "max_speed": "حداکثر سرعت",
+      "recognized_license_plate": "پلاک شناسایی‌شده",
+      "has_clip": "دارای کلیپ",
+      "has_snapshot": "دارای عکس فوری"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "تاریخ 'قبل از' باید بعد از تاریخ 'بعد از' باشد.",
+        "afterDatebeEarlierBefore": "تاریخ 'بعد از' باید قبل از تاریخ 'قبل از' باشد.",
+        "minScoreMustBeLessOrEqualMaxScore": "'min_score' باید کمتر یا مساوی 'max_score' باشد.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'max_score' باید بزرگ‌تر یا مساوی 'min_score' باشد.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'min_speed' باید کمتر یا مساوی 'max_speed' باشد.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'max_speed' باید بزرگ‌تر یا مساوی 'min_speed' باشد."
+      }
+    },
+    "searchType": {
+      "thumbnail": "پیش‌نمایش",
+      "description": "توضیحات"
+    },
+    "tips": {
+      "title": "نحوهٔ استفاده از فیلترهای متنی",
+      "desc": {
+        "text": "فیلترها به شما کمک می‌کنند نتایج جست‌وجوی خود را محدودتر کنید. در اینجا نحوهٔ استفاده از آن‌ها در فیلد ورودی آمده است:",
+        "step1": "نام کلید فیلتر را بنویسید و بعد از آن دونقطه بگذارید (مثلاً \"cameras:\").",
+        "step2": "از پیشنهادها یک مقدار را انتخاب کنید یا مقدار دلخواه خود را تایپ کنید.",
+        "step3": "برای استفاده از چند فیلتر، آن‌ها را یکی پس از دیگری با یک فاصله از هم اضافه کنید.",
+        "step4": "فیلترهای تاریخ (before: و after:) از قالب {{DateFormat}} استفاده می‌کنند.",
+        "step5": "فیلتر بازهٔ زمانی از قالب {{exampleTime}} استفاده می‌کند.",
+        "exampleLabel": "مثال:",
+        "step6": "فیلترها را با کلیک بر روی 'x' کنار آنها حذف کنید."
+      }
+    },
+    "header": {
+      "currentFilterType": "مقادیر فیلتر",
+      "noFilters": "فیلترها",
+      "activeFilters": "فیلترهای فعال"
+    }
+  },
+  "similaritySearch": {
+    "title": "جستجوی مشابهت",
+    "active": "جستجوی مشابهت فعال است",
+    "clear": "پاک کردن جستجوی مشابهت"
+  },
+  "placeholder": {
+    "search": "جستجو…"
   }
 }

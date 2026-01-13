@@ -5,7 +5,197 @@
     "general": "آمار عمومی - فریگیت",
     "enrichments": "آمار بهینه سازی - فریگیت",
     "logs": {
-      "frigate": "ثبت رخدادهای فریگیت - فریگیت"
+      "frigate": "ثبت رخدادهای فریگیت - فریگیت",
+      "go2rtc": "گزارش‌های Go2RTC - فریگیت",
+      "nginx": "گزارش‌های Nginx - فریگیت"
     }
-  }
+  },
+  "title": "سیستم",
+  "metrics": "شاخص‌های سیستم",
+  "logs": {
+    "download": {
+      "label": "دانلود گزارش‌ها"
+    },
+    "copy": {
+      "label": "کپی در کلیپ‌بورد",
+      "success": "گزارش‌ها در کلیپ‌بورد کپی شدند",
+      "error": "نمی‌توان گزارش‌ها را در کلیپ‌بورد کپی کرد"
+    },
+    "type": {
+      "label": "نوع",
+      "timestamp": "برچسب زمانی",
+      "tag": "تگ",
+      "message": "پیام"
+    },
+    "tips": "گزارش‌ها از سرور به‌صورت زنده در حال دریافت هستند",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "خطا در دریافت گزارش‌ها: {{errorMessage}}",
+        "whileStreamingLogs": "خطا هنگام پخش زندهٔ گزارش‌ها: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "hardwareInfo": {
+      "title": "اطلاعات سخت‌افزار",
+      "gpuUsage": "مصرف GPU",
+      "gpuMemory": "حافظهٔ GPU",
+      "gpuEncoder": "رمزگذار GPU",
+      "gpuDecoder": "رمزگشای GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "خروجی Vainfo",
+          "returnCode": "کد بازگشتی: {{code}}",
+          "processOutput": "خروجی فرایند:",
+          "processError": "خطای فرایند:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "خروجی Nvidia SMI",
+          "name": "ذخیرهٔ جست‌وجونام: {{name}}",
+          "driver": "درایور: {{driver}}",
+          "cudaComputerCapability": "قابلیت محاسباتی CUDA: {{cuda_compute}}",
+          "vbios": "اطلاعات VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "بستن اطلاعات GPU"
+        },
+        "copyInfo": {
+          "label": "کپی اطلاعات GPU"
+        },
+        "toast": {
+          "success": "اطلاعات GPU در کلیپ‌بورد کپی شد"
+        }
+      },
+      "npuUsage": "میزان استفاده از NPU",
+      "npuMemory": "حافظهٔ NPU",
+      "intelGpuWarning": {
+        "title": "هشدار آمار GPU اینتل",
+        "message": "آمار GPU در دسترس نیست",
+        "description": "این یک باگ شناخته‌شده در ابزارهای گزارش‌دهی آمار GPU اینتل (intel_gpu_top) است که باعث می‌شود از کار بیفتد و حتی در مواردی که شتاب‌دهی سخت‌افزاری و تشخیص شیء به‌درستی روی (i)GPU اجرا می‌شوند، به‌طور مکرر میزان استفادهٔ GPU را ۰٪ برگرداند. این مشکل مربوط به Frigate نیست. می‌توانید میزبان را ری‌استارت کنید تا موقتاً مشکل برطرف شود و تأیید کنید که GPU درست کار می‌کند. این موضوع روی عملکرد تأثیری ندارد."
+      }
+    },
+    "title": "عمومی",
+    "detector": {
+      "title": "آشکارسازها",
+      "inferenceSpeed": "سرعت استنتاج آشکارساز",
+      "temperature": "دمای آشکارساز",
+      "cpuUsage": "مصرف CPU آشکارساز",
+      "cpuUsageInformation": "CPU برای آماده‌سازی داده‌های ورودی و خروجی به/از مدل‌های تشخیص استفاده می‌شود. این مقدار مصرف استنتاج را اندازه‌گیری نمی‌کند، حتی اگر از GPU یا شتاب‌دهنده استفاده شود.",
+      "memoryUsage": "مصرف حافظهٔ آشکارساز"
+    },
+    "otherProcesses": {
+      "title": "فرایندهای دیگر",
+      "processCpuUsage": "میزان استفادهٔ CPU فرایند",
+      "processMemoryUsage": "میزان استفادهٔ حافظهٔ فرایند"
+    }
+  },
+  "storage": {
+    "recordings": {
+      "earliestRecording": "قدیمی‌ترین ضبط موجود:",
+      "title": "ضبط‌ها",
+      "tips": "این مقدار نشان‌دهندهٔ کل فضای ذخیره‌سازیِ استفاده‌شده توسط ضبط‌ها در پایگاه‌دادهٔ Frigate است. Frigate میزان استفاده از فضای ذخیره‌سازیِ همهٔ فایل‌های روی دیسک شما را ردیابی نمی‌کند."
+    },
+    "shm": {
+      "warning": "اندازهٔ فعلی SHM برابر {{total}}MB خیلی کوچک است. آن را دست‌کم به {{min_shm}}MB افزایش دهید.",
+      "title": "اختصاص SHM (حافظهٔ اشتراکی)"
+    },
+    "cameraStorage": {
+      "title": "ذخیره‌سازی دوربین",
+      "unusedStorageInformation": "اطلاعات فضای ذخیره‌سازیِ استفاده‌نشده",
+      "percentageOfTotalUsed": "درصد از کل",
+      "unused": {
+        "title": "استفاده‌نشده",
+        "tips": "اگر فایل‌های دیگری غیر از ضبط‌های Frigate روی دیسک شما ذخیره شده باشد، این مقدار ممکن است فضای آزادِ در دسترس برای Frigate را دقیق نشان ندهد. Frigate میزان استفاده از فضای ذخیره‌سازی خارج از ضبط‌های خودش را ردیابی نمی‌کند."
+      },
+      "camera": "دوربین",
+      "storageUsed": "ذخیره‌سازی",
+      "bandwidth": "پهنای باند"
+    },
+    "title": "ذخیره‌سازی",
+    "overview": "نمای کلی"
+  },
+  "cameras": {
+    "overview": "نمای کلی",
+    "info": {
+      "cameraProbeInfo": "اطلاعات پروب دوربین {{camera}}",
+      "fetching": "در حال دریافت داده‌های دوربین",
+      "video": "ویدئو:",
+      "fps": "FPS:",
+      "audio": "صدا:",
+      "aspectRatio": "نسبت تصویر",
+      "streamDataFromFFPROBE": "داده‌های جریان با <code>ffprobe</code> به‌دست می‌آید.",
+      "stream": "جریان {{idx}}",
+      "codec": "کدک:",
+      "resolution": "وضوح:",
+      "unknown": "نامشخص",
+      "error": "خطا: {{error}}",
+      "tips": {
+        "title": "اطلاعات بررسی دوربین"
+      }
+    },
+    "framesAndDetections": "فریم‌ها / تشخیص‌ها",
+    "label": {
+      "detect": "تشخیص",
+      "capture": "گرفتن",
+      "overallDetectionsPerSecond": "مجموع تشخیص‌ها در ثانیه",
+      "cameraCapture": "گرفتن {{camName}}",
+      "cameraDetectionsPerSecond": "تشخیص‌ها در ثانیهٔ {{camName}}",
+      "camera": "دوربین",
+      "skipped": "رد شد",
+      "ffmpeg": "FFmpeg",
+      "overallFramesPerSecond": "نرخ کلی فریم بر ثانیه",
+      "overallSkippedDetectionsPerSecond": "نرخ کلی تشخیص‌های ردشده بر ثانیه",
+      "cameraDetect": "تشخیص {{camName}}",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraFramesPerSecond": "{{camName}} فریم بر ثانیه",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} تشخیص‌های ردشده در ثانیه"
+    },
+    "toast": {
+      "error": {
+        "unableToProbeCamera": "پروبِ دوربین ناموفق بود: {{errorMessage}}"
+      },
+      "success": {
+        "copyToClipboard": "داده‌های بررسی در کلیپ‌بورد کپی شد."
+      }
+    },
+    "title": "دوربین‌ها"
+  },
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} استفادهٔ CPU بالایی برای FFmpeg دارد ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} استفادهٔ CPU بالایی برای تشخیص دارد ({{detectAvg}}%)",
+    "reindexingEmbeddings": "بازتولید نمایهٔ embeddingها ({{processed}}% تکمیل شده)",
+    "cameraIsOffline": "{{camera}} آفلاین است",
+    "detectIsVerySlow": "{{detect}} بسیار کند است ({{speed}} ms)",
+    "shmTooLow": "اختصاص /dev/shm ({{total}} MB) باید دست‌کم تا {{min}} MB افزایش یابد.",
+    "healthy": "سامانه سالم است",
+    "detectIsSlow": "{{detect}} کند است ( {{speed}} میلی‌ثانیه )"
+  },
+  "enrichments": {
+    "infPerSecond": "استنتاج‌ها در ثانیه",
+    "embeddings": {
+      "text_embedding": "امبدینگ متن",
+      "image_embedding_speed": "سرعت امبدینگ تصویر",
+      "plate_recognition_speed": "سرعت تشخیص پلاک",
+      "yolov9_plate_detection": "تشخیص پلاک YOLOv9",
+      "review_description_events_per_second": "توضیح بازبینی",
+      "object_description": "توضیح شیء",
+      "image_embedding": "امبدینگ تصویر",
+      "face_recognition": "شناسایی چهره",
+      "plate_recognition": "شناسایی پلاک",
+      "face_embedding_speed": "سرعت امبدینگ چهره",
+      "face_recognition_speed": "سرعت شناسایی چهره",
+      "text_embedding_speed": "سرعت امبدینگ متن",
+      "yolov9_plate_detection_speed": "سرعت تشخیص پلاک YOLOv9",
+      "review_description": "توضیحات بازبینی",
+      "review_description_speed": "سرعت توضیحات بازبینی",
+      "object_description_speed": "سرعت توضیحات شیء",
+      "object_description_events_per_second": "توضیحات شیء",
+      "classification": "طبقه‌بندی {{name}}",
+      "classification_speed": "سرعت طبقه‌بندی {{name}}",
+      "classification_events_per_second": "رویدادهای طبقه‌بندی {{name}} در ثانیه"
+    },
+    "title": "غنی‌سازی‌ها",
+    "averageInf": "میانگین زمان استنتاج"
+  },
+  "lastRefreshed": "آخرین به‌روزرسانی: · "
 }

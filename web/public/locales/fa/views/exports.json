@@ -1,6 +1,23 @@
 {
-  "search": "جستجو",
+  "search": "یافتن",
   "documentTitle": "گرفتن خروجی - فریگیت",
   "noExports": "هیچ خروجی یافت نشد",
-  "deleteExport": "حذف خروجی"
+  "deleteExport": "حذف خروجی",
+  "deleteExport.desc": "آیا مطمئن هستید که می‌خواهید {{exportName}} را حذف کنید؟",
+  "editExport": {
+    "title": "تغییر نام خروجی",
+    "desc": "یک نام جدید برای این خروجی وارد کنید.",
+    "saveExport": "ذخیرهٔ خروجی"
+  },
+  "tooltip": {
+    "shareExport": "اشتراک‌گذاری خروجی",
+    "downloadVideo": "دانلود ویدئو",
+    "editName": "ویرایش نام",
+    "deleteExport": "حذف خروجی"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "تغییر نام خروجی ناموفق بود: {{errorMessage}}"
+    }
+  }
 }

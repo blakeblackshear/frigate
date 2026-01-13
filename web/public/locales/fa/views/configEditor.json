@@ -3,5 +3,16 @@
   "configEditor": "ویرایشگر کانفیگ",
   "safeConfigEditor": "ویرایشگر تنظیمات (حالت امن)",
   "safeModeDescription": "فریگیت به دلیل خطا در صحت سنجی پیکربندی، در حالت امن می باشد.",
-  "copyConfig": "کپی پیکربندی"
+  "copyConfig": "کپی پیکربندی",
+  "saveAndRestart": "ذخیره و راه‌اندازی مجدد",
+  "saveOnly": "فقط ذخیره",
+  "confirm": "بدون ذخیره خارج می‌شوید؟",
+  "toast": {
+    "success": {
+      "copyToClipboard": "پیکربندی در کلیپ‌بورد کپی شد."
+    },
+    "error": {
+      "savingError": "خطا در ذخیره‌سازی پیکربندی"
+    }
+  }
 }

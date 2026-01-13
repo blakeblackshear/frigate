@@ -1,8 +1,51 @@
 {
   "noRecordingsFoundForThisTime": "ویدیویی برای این زمان وجود ندارد",
   "noPreviewFound": "پیش‌نمایش پیدا نشد",
-  "noPreviewFoundFor": "هیچ پیش‌نمایشی برای  {{cameraName}} پیدا نشد",
+  "noPreviewFoundFor": "هیچ پیش‌نمایشی برای {{cameraName}} پیدا نشد",
   "submitFrigatePlus": {
-    "title": "این فریم به فریگیت+ ارسال شود؟"
+    "title": "این فریم به فریگیت+ ارسال شود؟",
+    "submit": "ارسال"
+  },
+  "livePlayerRequiredIOSVersion": "برای این نوع پخش زنده، iOS 17.1 یا بالاتر لازم است.",
+  "streamOffline": {
+    "title": "جریان آفلاین",
+    "desc": "هیچ فریمی از جریان <code>detect</code> دوربین {{cameraName}} دریافت نشده است، گزارش‌های خطا را بررسی کنید"
+  },
+  "cameraDisabled": "دوربین غیرفعال است",
+  "stats": {
+    "streamType": {
+      "title": "نوع جریان:",
+      "short": "نوع"
+    },
+    "bandwidth": {
+      "title": "پهنای باند:",
+      "short": "پهنای باند"
+    },
+    "latency": {
+      "title": "تأخیر:",
+      "value": "{{seconds}} ثانیه‌ها",
+      "short": {
+        "title": "تأخیر",
+        "value": "{{seconds}} ثانیه"
+      }
+    },
+    "totalFrames": "مجموع فریم‌ها:",
+    "droppedFrames": {
+      "title": "فریم‌های از دست‌رفته:",
+      "short": {
+        "title": "از دست‌رفته",
+        "value": "{{droppedFrames}} فریم"
+      }
+    },
+    "decodedFrames": "فریم‌های رمزگشایی‌شده:",
+    "droppedFrameRate": "نرخ فریم‌های از دست‌رفته:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "فریم با موفقیت به Frigate+ ارسال شد"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "ارسال فریم به Frigate+ ناموفق بود"
+    }
   }
 }

@@ -1,6 +1,12 @@
 {
   "filter": "فیلتر",
-  "export": "گرفتن خروجی",
-  "calendar": "تفویم",
-  "filters": "فیلترها"
+  "export": "خروجی گرفتن",
+  "calendar": "تقویم",
+  "filters": "فیلترها",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "بازهٔ زمانی معتبری انتخاب نشده است",
+      "endTimeMustAfterStartTime": "زمان پایان باید بعد از زمان شروع باشد"
+    }
+  }
 }

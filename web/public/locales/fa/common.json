@@ -4,6 +4,294 @@
     "untilForRestart": "تا زمانی که فریگیت دوباره شروع به کار کند.",
     "untilRestart": "تا زمان ری‌استارت",
     "ago": "{{timeAgo}} قبل",
-    "justNow": "هم اکنون"
+    "justNow": "هم اکنون",
+    "today": "امروز",
+    "yesterday": "دیروز",
+    "last7": "۷ روز گذشته",
+    "last14": "۱۴ روز گذشته",
+    "last30": "۳۰ روز گذشته",
+    "thisWeek": "این هفته",
+    "lastWeek": "هفتهٔ گذشته",
+    "thisMonth": "این ماه",
+    "lastMonth": "ماه گذشته",
+    "5minutes": "۵ دقیقه",
+    "10minutes": "۱۰ دقیقه",
+    "day_one": "{{time}} روز",
+    "day_other": "{{time}} روز",
+    "h": "{{time}}س",
+    "hour_one": "{{time}} ساعت",
+    "hour_other": "{{time}} ساعت",
+    "m": "{{time}} دقیقه",
+    "minute_one": "{{time}} دقیقه",
+    "minute_other": "{{time}} دقیقه",
+    "s": "{{time}}ث",
+    "30minutes": "۳۰ دقیقه",
+    "1hour": "۱ ساعت",
+    "12hours": "۱۲ ساعت",
+    "24hours": "۲۴ ساعت",
+    "pm": "ب.ظ.",
+    "am": "ق.ظ.",
+    "yr": "{{time}} سال",
+    "year_one": "{{time}} سال",
+    "year_other": "{{time}} سال",
+    "mo": "{{time}} ماه",
+    "month_one": "{{time}} ماه",
+    "month_other": "{{time}} ماه",
+    "d": "{{time}} روز",
+    "second_one": "{{time}} ثانیه",
+    "second_other": "‏{{time}} ثانیه",
+    "formattedTimestamp": {
+      "12hour": "MMM d، h:mm:ss aaa",
+      "24hour": "MMM d، HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ssd MMM، HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "yyyy MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "inProgress": "در حال انجام",
+    "invalidStartTime": "زمان شروع نامعتبر است",
+    "invalidEndTime": "زمان پایان نامعتبر است"
+  },
+  "unit": {
+    "length": {
+      "feet": "فوت",
+      "meters": "متر"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "gbps": "GB/s",
+      "mbph": "مگابایت/ساعت",
+      "gbph": "گیگابایت/ساعت",
+      "mbps": "مگابایت/ثانیه",
+      "kbph": "کیلوبایت/ساعت"
+    },
+    "speed": {
+      "mph": "مایل/ساعت",
+      "kph": "کیلومتر/ساعت"
+    }
+  },
+  "label": {
+    "hide": "پنهان کردن {{item}}",
+    "ID": "شناسه",
+    "all": "همه",
+    "back": "برگشت به قبل",
+    "show": "نمایش {{item}}",
+    "none": "هیچ‌کدام"
+  },
+  "list": {
+    "many": "{{items}}، و {{last}}",
+    "two": "{{0}} و {{1}}",
+    "separatorWithSpace": ", · "
+  },
+  "field": {
+    "internalID": "شناسهٔ داخلی‌ای که Frigate در پیکربندی و پایگاه‌داده استفاده می‌کند",
+    "optional": "اختیاری"
+  },
+  "button": {
+    "apply": "اعمال",
+    "done": "انجام شد",
+    "enable": "فعال کردن",
+    "disabled": "غیرفعال",
+    "cancel": "لغو",
+    "close": "بستن",
+    "back": "بازگشت",
+    "fullscreen": "تمام‌صفحه",
+    "exitFullscreen": "خروج از حالت تمام‌صفحه",
+    "twoWayTalk": "مکالمهٔ دوطرفه",
+    "cameraAudio": "صدای دوربین",
+    "off": "خاموش",
+    "delete": "حذف",
+    "download": "دانلود",
+    "unsuspended": "برداشتن تعلیق",
+    "unselect": "لغو انتخاب",
+    "export": "خروجی گرفتن",
+    "next": "بعدی",
+    "reset": "بازنشانی",
+    "enabled": "فعال",
+    "disable": "غیرفعال کردن",
+    "save": "ذخیره",
+    "saving": "در حال ذخیره…",
+    "copy": "کپی",
+    "history": "تاریخچه",
+    "pictureInPicture": "تصویر در تصویر",
+    "copyCoordinates": "کپی مختصات",
+    "yes": "بله",
+    "no": "خیر",
+    "info": "اطلاعات",
+    "play": "پخش",
+    "deleteNow": "حذف فوری",
+    "continue": "ادامه",
+    "on": "روشن",
+    "edit": "ویرایش",
+    "suspended": "تعلیق‌شده"
+  },
+  "menu": {
+    "systemMetrics": "شاخص‌های سیستم",
+    "configuration": "پیکربندی",
+    "settings": "تنظیمات",
+    "language": {
+      "en": "انگلیسی (English)",
+      "hi": "هندی (Hindi)",
+      "fr": "فرانسوی (French)",
+      "ptBR": "پرتغالیِ برزیل (Brazilian Portuguese)",
+      "ru": "روسی (Russian)",
+      "es": "اسپانیایی (زبان اسپانیایی)",
+      "zhCN": "چینی ساده‌شده (چینی ساده)",
+      "ar": "عربی (زبان عربی)",
+      "pt": "پرتغالی (زبان پرتغالی)",
+      "de": "آلمانی (زبان آلمانی)",
+      "ja": "ژاپنی (زبان ژاپنی)",
+      "tr": "ترکی (زبان ترکی)",
+      "it": "ایتالیایی (زبان ایتالیایی)",
+      "nl": "هلندی (زبان هلندی)",
+      "sv": "سوئدی (زبان سوئدی)",
+      "cs": "چکی (زبان چکی)",
+      "nb": "بوکمل نروژیایی (بوکمل نروژی)",
+      "ko": "کره‌ای (زبان کره‌ای)",
+      "vi": "ویتنامی (زبان ویتنامی)",
+      "fa": "فارسی (زبان فارسی)",
+      "pl": "لهستانی (زبان لهستانی)",
+      "uk": "اوکراینی (زبان اوکراینی)",
+      "he": "عبری (زبان عبری)",
+      "el": "یونانی (زبان یونانی)",
+      "ro": "رومانیایی (زبان رومانیایی)",
+      "hu": "مجاری (زبان مجاری)",
+      "fi": "فنلاندی (زبان فنلاندی)",
+      "da": "دانمارکی (زبان دانمارکی)",
+      "sk": "اسلواکی (زبان اسلواکی)",
+      "yue": "کانتونی (زبان کانتونی)",
+      "th": "تایلندی (زبان تایلندی)",
+      "ca": "کاتالانی (زبان کاتالانی)",
+      "sr": "صربی (زبان صربی)",
+      "sl": "اسلوونیایی (زبان اسلوونیایی)",
+      "lt": "لیتوانیایی (زبان لیتوانیایی)",
+      "bg": "بلغاری (زبان بلغاری)",
+      "gl": "گالیسیایی (زبان گالیسیایی)",
+      "id": "اندونزیایی (زبان اندونزیایی)",
+      "ur": "اردو (زبان اردو)",
+      "withSystem": {
+        "label": "برای زبان از تنظیمات سامانه استفاده کنید"
+      }
+    },
+    "system": "سامانه",
+    "systemLogs": "لاگ‌های سامانه",
+    "configurationEditor": "ویرایشگر پیکربندی",
+    "languages": "زبان‌ها",
+    "appearance": "ظاهر",
+    "darkMode": {
+      "label": "حالت تاریک",
+      "light": "روشنایی",
+      "dark": "تاریک",
+      "withSystem": {
+        "label": "برای حالت روشن یا تاریک از تنظیمات سامانه استفاده کنید"
+      }
+    },
+    "withSystem": "سامانه",
+    "theme": {
+      "label": "پوسته",
+      "blue": "آبی",
+      "green": "سبز",
+      "nord": "نورد",
+      "red": "قرمز",
+      "highcontrast": "کنتراست بالا",
+      "default": "پیش‌فرض"
+    },
+    "help": "راهنما",
+    "documentation": {
+      "title": "مستندات",
+      "label": "مستندات Frigate"
+    },
+    "restart": "راه‌اندازی مجدد Frigate",
+    "live": {
+      "title": "زنده",
+      "allCameras": "همهٔ دوربین‌ها",
+      "cameras": {
+        "title": "دوربین‌ها",
+        "count_one": "{{count}} دوربین",
+        "count_other": "{{count}} دوربین"
+      }
+    },
+    "review": "بازبینی",
+    "explore": "کاوش",
+    "export": "خروجی گرفتن",
+    "uiPlayground": "محیط آزمایشی UI",
+    "faceLibrary": "کتابخانهٔ چهره",
+    "classification": "طبقه‌بندی",
+    "user": {
+      "title": "کاربر",
+      "account": "حساب کاربری",
+      "current": "کاربر فعلی: {{user}}",
+      "anonymous": "ناشناس",
+      "logout": "خروج",
+      "setPassword": "تنظیم گذرواژه"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "نشانی اینترنتی در کلیپ‌بورد کپی شد.",
+    "save": {
+      "title": "ذخیره",
+      "error": {
+        "title": "ذخیرهٔ تغییرات پیکربندی ناموفق بود: {{errorMessage}}",
+        "noMessage": "ذخیرهٔ تغییرات پیکربندی ناموفق بود"
+      }
+    }
+  },
+  "role": {
+    "title": "نقش",
+    "admin": "مدیر",
+    "viewer": "بیننده",
+    "desc": "مدیران به همهٔ ویژگی‌ها در رابط کاربری Frigate دسترسی کامل دارند. بیننده‌ها فقط می‌توانند دوربین‌ها، موارد بازبینی و ویدیوهای تاریخی را در رابط کاربری مشاهده کنند."
+  },
+  "pagination": {
+    "label": "صفحه‌بندی",
+    "previous": {
+      "title": "قبلی",
+      "label": "رفتن به صفحهٔ قبلی"
+    },
+    "next": {
+      "title": "بعدی",
+      "label": "رفتن به صفحهٔ بعدی"
+    },
+    "more": "صفحه‌های بیشتر"
+  },
+  "accessDenied": {
+    "documentTitle": "دسترسی ممنوع - Frigate",
+    "title": "دسترسی ممنوع",
+    "desc": "شما اجازهٔ مشاهدهٔ این صفحه را ندارید."
+  },
+  "notFound": {
+    "documentTitle": "یافت نشد - Frigate",
+    "title": "۴۰۴",
+    "desc": "صفحه پیدا نشد"
+  },
+  "selectItem": "انتخاب {{item}}",
+  "readTheDocumentation": "مستندات را بخوانید",
+  "information": {
+    "pixels": "{{area}}px"
   }
 }
