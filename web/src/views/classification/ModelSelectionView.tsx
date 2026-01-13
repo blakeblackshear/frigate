@@ -266,7 +266,10 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
       return undefined;
     }
 
-    const keys = Object.keys(dataset.categories).filter((key) => key != "none");
+    const keys = Object.keys(dataset.categories).filter(
+      (key) => key != "none" && key.toLowerCase() != "unknown",
+    );
+
     if (keys.length === 0) {
       return undefined;
     }
