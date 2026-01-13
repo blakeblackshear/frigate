@@ -905,11 +905,7 @@ async def onvif_probe(
                     "/11",
                 ]
                 # Use raw credentials for pattern fallback URIs when provided
-                auth_str = (
-                    f"{username}:{password}@"
-                    if username and password
-                    else ""
-                )
+                auth_str = f"{username}:{password}@" if username and password else ""
                 rtsp_port = 554
                 for path in common_paths:
                     uri = f"rtsp://{auth_str}{host}:{rtsp_port}{path}"
