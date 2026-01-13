@@ -49,6 +49,9 @@
       "playAlertVideos": {
         "label": "Reproduzir Alertas de Video",
         "desc": "Por padrão, alertas recentes no Painel em Tempo Real são reproduzidos como vídeos em loop. Desative essa opção para mostrar apenas a imagens estáticas de alertas recentes nesse dispositivo / navegador."
+      },
+      "displayCameraNames": {
+        "label": "Sempre mostrar os nomes das câmeras"
       }
     },
     "storedLayouts": {
