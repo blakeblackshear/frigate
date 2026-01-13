@@ -54,8 +54,8 @@ function setup_homekit_config() {
     local config_path="$1"
 
     if [[ ! -f "${config_path}" ]]; then
-        echo "[INFO] Creating empty HomeKit config file..."
-        echo 'homekit: {}' > "${config_path}"
+        echo "[INFO] Creating empty config file for HomeKit..."
+        echo '{}' > "${config_path}"
     fi
 
     # Convert YAML to JSON for jq processing
