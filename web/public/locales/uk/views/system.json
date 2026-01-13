@@ -115,7 +115,14 @@
     "otherProcesses": {
       "processMemoryUsage": "Використання пам'яті процесу",
       "processCpuUsage": "Використання процесора процесу",
-      "title": "Інші процеси"
+      "title": "Інші процеси",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "запис",
+        "review_segment": "сегмент огляду",
+        "embeddings": "вбудовування",
+        "audio_detector": "аудіодетектор"
+      }
     },
     "detector": {
       "temperature": "Температура детектора",
