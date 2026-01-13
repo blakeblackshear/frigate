@@ -7,7 +7,10 @@
     "general": "Postavke sučelja - Frigate",
     "frigatePlus": "Frigate+ postavke - Frigate",
     "notifications": "Postavke notifikacija - Frigate",
-    "enrichments": "Postavke obogaćivanja - Frigate"
+    "enrichments": "Postavke obogaćivanja - Frigate",
+    "cameraReview": "Postavke Pregleda Kamere - Frigate",
+    "motionTuner": "Uređivač pokreta - Frigate",
+    "object": "Debug - Frigate"
   },
   "menu": {
     "ui": "Sučelje",
@@ -15,6 +18,54 @@
     "enrichments": "Obogaćenja",
     "masksAndZones": "Maske / Zone",
     "triggers": "Okidači",
-    "users": "Korisnici"
+    "users": "Korisnici",
+    "cameraManagement": "Upravljanje",
+    "motionTuner": "Podešavač pokreta",
+    "debug": "Debug",
+    "roles": "Uloga",
+    "notifications": "Obavijesti",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Imaš nespremljene promjene.",
+      "desc": "Želiš li spremiti promjene prije nastavka?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Nema Kamere"
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} točka",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točaka"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} točka",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točaka"
+    },
+    "objectMasks": {
+      "point_one": "{{count}} točka",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točaka"
+    }
+  },
+  "roles": {
+    "toast": {
+      "success": {
+        "userRolesUpdated_one": "{{count}} korisnik dodijeljen ovoj ulozi ažuriran je na 'gledatelj', koji ima pristup svim kamerama.",
+        "userRolesUpdated_few": "{{count}} korisnika dodijeljena ovoj ulozi ažurirana su na 'gledatelj', koji imaju pristup svim kamerama.",
+        "userRolesUpdated_other": "{{count}} korisnika dodijeljena ovoj ulozi ažurirana su na 'gledatelj', koji imaju pristup svim kamerama."
+      }
+    }
+  },
+  "general": {
+    "title": "Postavke Korisničkog Sučelja",
+    "liveDashboard": {
+      "title": "Uživo Nadzorna Ploča"
+    }
   }
 }

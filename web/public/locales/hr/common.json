@@ -20,6 +20,286 @@
     "12hours": "12 sati",
     "24hours": "24 sata",
     "pm": "pm",
-    "am": "am"
+    "am": "am",
+    "ago": "prije {{timeAgo}}",
+    "yr": "{{time}}g.",
+    "year_one": "{{time}} godina",
+    "year_few": "{{time}} godine",
+    "year_other": "{{time}} godina",
+    "mo": "{{time}}mj.",
+    "month_one": "{{time}} mjesec",
+    "month_few": "{{time}} mjeseca",
+    "month_other": "{{time}} mjeseci",
+    "day_one": "{{time}} dan",
+    "day_few": "{{time}} dana",
+    "day_other": "{{time}} dana",
+    "h": "{{time}}h",
+    "hour_one": "{{time}} sat",
+    "hour_few": "{{time}} sata",
+    "hour_other": "{{time}} sati",
+    "minute_one": "{{time}} minuta",
+    "minute_few": "{{time}} minute",
+    "minute_other": "{{time}} minuta",
+    "second_one": "{{time}} sekunda",
+    "second_few": "{{time}} sekunde",
+    "second_other": "{{time}} sekundi",
+    "d": "{{time}}d",
+    "m": "{{time}}m",
+    "s": "{{time}}s",
+    "formattedTimestamp": {
+      "12hour": "d. MMM, h:mm:ss aaa",
+      "24hour": "d. MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d. MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d. MMM, yyyy",
+      "24hour": "d. MMM, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d. MMM yyyy, h:mm aaa",
+      "24hour": "d. MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d. MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "inProgress": "U tijeku",
+    "invalidStartTime": "Nevažeće vrijeme početka",
+    "invalidEndTime": "Nevažeće vrijeme završetka"
+  },
+  "menu": {
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} kamera",
+        "count_few": "{{count}} kamere",
+        "count_other": "{{count}} kamera",
+        "title": "Kamere"
+      },
+      "title": "Uživo",
+      "allCameras": "Sve Kamere"
+    },
+    "system": "Sustav",
+    "systemMetrics": "Metrike sustava",
+    "configuration": "Konfiguracija",
+    "systemLogs": "Zapisnici sustava",
+    "settings": "Postavke",
+    "configurationEditor": "Uređivač konfiguracije",
+    "languages": "Jezici",
+    "language": {
+      "en": "Engleski",
+      "es": "Španjolski",
+      "zhCN": "简体中文 (Pojednostavljeni Kineski)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Francuski",
+      "ar": "العربية (Arapski)",
+      "pt": "Portugalski",
+      "ptBR": "Brazilski Portugalski",
+      "ru": "Ruski",
+      "de": "Njemački",
+      "ja": "Japanski",
+      "tr": "Turski",
+      "it": "Talijanski",
+      "nl": "Nizozemski",
+      "sv": "Švedski",
+      "cs": "Češki",
+      "nb": "Norveški bokmål",
+      "ko": "Korejski",
+      "vi": "Vietnamski",
+      "fa": "Perzijski",
+      "pl": "Poljski",
+      "uk": "Ukrajinski",
+      "he": "Hebrejski",
+      "el": "Grčki",
+      "ro": "Rumunjski",
+      "hu": "Mađarski",
+      "fi": "Finski",
+      "da": "Danski",
+      "sk": "Slovački",
+      "yue": "Kantonščina",
+      "th": "Tajski",
+      "ca": "Katalonski",
+      "sr": "Srpski",
+      "sl": "Slovenski",
+      "lt": "Litvanski",
+      "bg": "Bulgarski",
+      "gl": "Galicijski",
+      "id": "Indonezijski",
+      "ur": "Urdu",
+      "withSystem": {
+        "label": "Koristi postavke sustava za jezik"
+      }
+    },
+    "appearance": "Izgled",
+    "darkMode": {
+      "label": "Tamni način",
+      "light": "Svijetla",
+      "dark": "Tamna",
+      "withSystem": {
+        "label": "Koristi postavke sustava za svijetli ili tamni način rada"
+      }
+    },
+    "withSystem": "Sustav",
+    "theme": {
+      "label": "Tema",
+      "blue": "Plava",
+      "green": "Zelena",
+      "nord": "Nord",
+      "red": "Crvena",
+      "highcontrast": "Visoki Kontrast",
+      "default": "Zadana"
+    },
+    "help": "Pomoć",
+    "documentation": {
+      "title": "Dokumentacija",
+      "label": "Frigate dokumentacija"
+    },
+    "restart": "Ponovno pokreni Frigate",
+    "review": "Pregled",
+    "explore": "Istraži",
+    "export": "Izvezi",
+    "uiPlayground": "Igralište korisničkog sučelja",
+    "faceLibrary": "Biblioteka Lica",
+    "classification": "Klasifikacija",
+    "user": {
+      "title": "Korisnik",
+      "account": "Račun",
+      "current": "Trenutni Korisnik: {{user}}",
+      "anonymous": "anonimno",
+      "logout": "Odjava",
+      "setPassword": "Postavi Lozinku"
+    }
+  },
+  "button": {
+    "save": "Spremi",
+    "apply": "Primjeni",
+    "reset": "Resetiraj",
+    "done": "Gotovo",
+    "enabled": "Omogućeno",
+    "enable": "Omogući",
+    "disabled": "Onemogućeno",
+    "disable": "Onemogući",
+    "saving": "Spremanje…",
+    "cancel": "Odustani",
+    "close": "Zatvori",
+    "copy": "Kopiraj",
+    "back": "Nazad",
+    "history": "Povijest",
+    "fullscreen": "Cijeli zaslon",
+    "exitFullscreen": "Izađi iz cijelog zaslona",
+    "pictureInPicture": "Slika u Slici",
+    "twoWayTalk": "Dvosmjerni razgovor",
+    "cameraAudio": "Kamera Zvuk",
+    "on": "UKLJUČENO",
+    "off": "ISKLJUČENO",
+    "edit": "Uredi",
+    "copyCoordinates": "Kopiraj koordinate",
+    "delete": "Izbriši",
+    "yes": "Da",
+    "no": "Ne",
+    "download": "Preuzmi",
+    "info": "Informacije",
+    "suspended": "Obustavljeno",
+    "unsuspended": "Ponovno aktiviraj",
+    "play": "Reproduciraj",
+    "unselect": "Odznači",
+    "export": "Izvezi",
+    "deleteNow": "Izbriši Sada",
+    "next": "Sljedeće",
+    "continue": "Nastavi"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "stopa",
+      "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/sat",
+      "mbph": "MB/sat",
+      "gbph": "GB/sat"
+    }
+  },
+  "label": {
+    "back": "Idi nazad",
+    "hide": "Sakrij {{item}}",
+    "show": "Prikaži {{item}}",
+    "ID": "ID",
+    "none": "Nema",
+    "all": "Sve",
+    "other": "Druge"
+  },
+  "list": {
+    "two": "{{0}} i {{1}}",
+    "many": "{{items}} i {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opcionalno",
+    "internalID": "Interni ID koji Frigate koristi u konfiguraciji i bazi podataka"
+  },
+  "toast": {
+    "copyUrlToClipboard": "Kopiran URL u međuspremnik.",
+    "save": {
+      "title": "Spremi",
+      "error": {
+        "title": "Neuspješno spremanje promjena konfiguracije: {{errorMessage}}",
+        "noMessage": "Neuspješno spremanje promjena konfiguracije"
+      }
+    }
+  },
+  "role": {
+    "title": "Uloge",
+    "admin": "Administrator",
+    "viewer": "Gledatelj",
+    "desc": "Administratori imaju potpuni pristup svim značajkama u Frigate korisnickom sučelju. Gledatelji su ograničeni na pregled kamera, pregled stavki i povijesnog snimka u korisničkom sučelju."
+  },
+  "pagination": {
+    "label": "paginacija",
+    "previous": {
+      "title": "Prethodno",
+      "label": "Idi na prethodnu stranicu"
+    },
+    "next": {
+      "title": "Sljedeće",
+      "label": "Idi na sljedeću stranicu"
+    },
+    "more": "Više stranica"
+  },
+  "accessDenied": {
+    "documentTitle": "Pristup Odbijen - Frigate",
+    "title": "Pristup Odbijen",
+    "desc": "Nemaš dopuštenje za pregled ove stranice."
+  },
+  "notFound": {
+    "documentTitle": "Nije Nađeno - Frigate",
+    "title": "404",
+    "desc": "Stranica nije pronađena"
+  },
+  "selectItem": "Odaberi {{item}}",
+  "readTheDocumentation": "Čitaj dokumentaciju",
+  "information": {
+    "pixels": "{{area}}px"
   }
 }

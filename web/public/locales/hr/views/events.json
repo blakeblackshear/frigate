@@ -2,14 +2,18 @@
   "alerts": "Upozorenja",
   "detections": "Detekcije",
   "motion": {
-    "label": "Pokret",
-    "only": "Samo pokret"
+    "label": "Kretnja",
+    "only": "Samo kretnje"
   },
   "allCameras": "Sve kamere",
   "empty": {
     "alert": "Nema uzbuna za pregledati",
     "detection": "Nema detekcija za pregled",
-    "motion": "Nema podataka o pokretu"
+    "motion": "Nema podataka o pokretu",
+    "recordingsDisabled": {
+      "title": "Snimanja moraju biti uključena",
+      "description": "Stavke za pregled mogu biti stvorene za kameru jedino kada su snimanja uključena za tu kameru."
+    }
   },
   "timeline": "Vremenska linija",
   "timeline.aria": "Odaberi vremensku liniju",
@@ -21,6 +25,41 @@
   },
   "zoomIn": "Približi",
   "detail": {
-    "label": "Detalji"
-  }
+    "label": "Detalji",
+    "noDataFound": "Nema detaljnih podataka za pregled",
+    "aria": "Uključi/isključi prikaz detalja",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objekta",
+    "noObjectDetailData": "Nema dostupnih detaljnih podataka o objektu.",
+    "settings": "Postavke detaljnog prikaza",
+    "alwaysExpandActive": {
+      "title": "Uvijek proširi aktivno",
+      "desc": "Uvijek proširite detalje objekta aktivnog pregledanog stavka kada su dostupni."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Praćena točka",
+    "clickToSeek": "Kliknite za pomicanje na ovo vrijeme"
+  },
+  "documentTitle": "Pregled - Frigate",
+  "recordings": {
+    "documentTitle": "Snimke - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Zadnja 24 sata"
+  },
+  "markAsReviewed": "Označi kao Pregledano",
+  "markTheseItemsAsReviewed": "Označi ove stavke kao pregledane",
+  "newReviewItems": {
+    "label": "Pogledaj nove stavke za pregled",
+    "button": "Nove stavke za pregled"
+  },
+  "selected_one": "{{count}} odabran",
+  "selected_other": "{{count}} odabrano",
+  "select_all": "Sve",
+  "camera": "Kamera",
+  "detected": "detektirano",
+  "normalActivity": "Normalno",
+  "needsReview": "Potreban pregled",
+  "securityConcern": "Sigurnosna zabrinutost"
 }

@@ -6,19 +6,54 @@
     "embeddingsReindexing": {
       "startingUp": "Pokretanje…",
       "finishingShortly": "Završava uskoro",
-      "estimatedTime": "Procjenjeno preostalo vrijeme:"
+      "estimatedTime": "Procjenjeno preostalo vrijeme:",
+      "context": "Istraživanje se može koristiti nakon što je završeno ponovno indeksiranje ugrađivanja praćenih objekata.",
+      "step": {
+        "thumbnailsEmbedded": "Ugrađene sličice: ",
+        "descriptionsEmbedded": "Ugrađeni opisi: ",
+        "trackedObjectsProcessed": "Procesirani praćeni objekti: "
+      }
     },
     "downloadingModels": {
       "setup": {
-        "textModel": "Tekstualni model"
-      }
+        "textModel": "Tekstualni model",
+        "visionModel": "Model za vid",
+        "visionModelFeatureExtractor": "Ekstraktor značajki modela vizije",
+        "textTokenizer": "Tokenizator teksta"
+      },
+      "context": "Frigate preuzima potrebne modele ugrađivanja (embeddings) kako bi podržao značajku semantičkog pretraživanja. To može potrajati nekoliko minuta, ovisno o brzini vaše mrežne veze.",
+      "tips": {
+        "context": "Možda ćete htjeti ponovno indeksirati ugrađivanja (embeddings) svojih praćenih objekata kada se modeli preuzmu."
+      },
+      "error": "Došlo je do pogreške. Provjerite Frigate logove."
     }
   },
   "details": {
-    "timestamp": "Vremenska oznaka"
+    "timestamp": "Vremenska oznaka",
+    "item": {
+      "tips": {
+        "mismatch_one": "{{count}} nedostupan objekt je otkriven i uključen u ovaj pregledni stavak. Ti objekti ili nisu kvalificirani kao upozorenje ili detekcija, ili su već uklonjeni/izbrisani.",
+        "mismatch_few": "{{count}} nedostupna objekta su otkrivena i uključena u ovaj pregledni stavak. Ti objekti ili nisu kvalificirani kao upozorenje ili detekcija, ili su već uklonjeni/izbrisani.",
+        "mismatch_other": "{{count}} nedostupnih objekata je otkriveno i uključeno u ovaj pregledni stavak. Ti objekti ili nisu kvalificirani kao upozorenje ili detekcija, ili su već uklonjeni/izbrisani."
+      }
+    }
   },
   "trackedObjectDetails": "Detalji praćenog objekta",
   "type": {
-    "details": "detalji"
-  }
+    "details": "detalji",
+    "snapshot": "snimka",
+    "thumbnail": "Sličica",
+    "video": "video",
+    "tracking_details": "detalji praćenja"
+  },
+  "exploreMore": "Istraži više {{label}} objekata",
+  "trackingDetails": {
+    "title": "Detalji Praćenja",
+    "noImageFound": "Slika nije nađena za ovaj vremenski zapis.",
+    "createObjectMask": "Napravi Masku Objekta",
+    "adjustAnnotationSettings": "Podesi postavke anotacije"
+  },
+  "trackedObjectsCount_one": "{{count}} praćeni objekt ",
+  "trackedObjectsCount_few": "{{count}} praćena objekta ",
+  "trackedObjectsCount_other": "{{count}} praćenih objekata "
 }

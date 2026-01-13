@@ -3,9 +3,9 @@
     "cameras": "Statistika kamera - Frigate",
     "general": "Generalne statistike - Frigate",
     "logs": {
-      "go2rtc": "Go2RTC dnevnik - Frigate",
-      "nginx": "Nginx dnevnik - Frigate",
-      "frigate": "Frigate logovi - Frigate"
+      "go2rtc": "Go2RTC Zapisnici- Frigate",
+      "nginx": "Nginx Zapisnici - Frigate",
+      "frigate": "Frigate Zapisnici - Frigate"
     },
     "storage": "Statistika pohrane - Frigate",
     "enrichments": "Statistika obogaćivanja - Frigate"
@@ -13,13 +13,52 @@
   "title": "Sustav",
   "logs": {
     "download": {
-      "label": "Preuzmi dnevnik"
+      "label": "Preuzmi Zapisnike"
     },
     "type": {
-      "label": "Vrsta",
+      "label": "Tip",
       "timestamp": "Vremenska oznaka",
       "tag": "Oznaka",
       "message": "Poruka"
+    },
+    "copy": {
+      "label": "Kopiraj u Međuspremnik",
+      "success": "Kopirani zapisnici u međuspremnik",
+      "error": "Nisam mogao kopirati zapisnike u međuspremnik"
+    },
+    "tips": "Zapisnici se prenose s poslužitelja",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Greška dohvaćanja zapisnika: {{errorMessage}}",
+        "whileStreamingLogs": "Pogreška tijekom prijenosa zapisnika: {{errorMessage}}"
+      }
+    }
+  },
+  "metrics": "Metrike sustava",
+  "general": {
+    "title": "Općenito",
+    "detector": {
+      "title": "Detektori",
+      "inferenceSpeed": "Brzina izvođenja detektora",
+      "temperature": "Temperatura Detektora",
+      "cpuUsage": "Detektorova iskorištenost CPU-a",
+      "cpuUsageInformation": "CPU korišten za pripremu ulaznih i izlaznih podataka za modele detekcije. Ova vrijednost ne mjeri korištenje tijekom izvođenja modela, čak ni ako se koristi GPU ili akcelerator.",
+      "memoryUsage": "Detektorova Iskorištenost Memorije"
+    },
+    "hardwareInfo": {
+      "title": "Informacije o hardveru",
+      "gpuUsage": "Iskorištenost GPU-a",
+      "gpuMemory": "GPU Memorija",
+      "gpuEncoder": "GPU Enkoder",
+      "gpuDecoder": "GPU Dekoder",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Ispis Vainfo",
+          "returnCode": "Povratni kod: {{code}}",
+          "processOutput": "Ispis procesa:",
+          "processError": "Greška procesa:"
+        }
+      }
     }
   }
 }

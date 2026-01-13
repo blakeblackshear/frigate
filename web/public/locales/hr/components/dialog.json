@@ -11,7 +11,8 @@
   "explore": {
     "plus": {
       "submitToPlus": {
-        "label": "Pošalji u Frigate+"
+        "label": "Pošalji u Frigate+",
+        "desc": "Objekti u lokacijama koje želiš izbjeći nisu lažno pozitivni. Slanjem njih kao lažno pozitivnih će zbuniti model."
       },
       "review": {
         "question": {
@@ -41,7 +42,82 @@
       "end": {
         "title": "Vrijeme kraja",
         "label": "Odaberi vrijeme kraja"
+      },
+      "fromTimeline": "Izaberi sa vremenske crte",
+      "custom": "Prilagođeno"
+    },
+    "name": {
+      "placeholder": "Imenuj Izvoz"
+    },
+    "select": "Odaberi",
+    "export": "Izvoz",
+    "selectOrExport": "Odaberi ili Izvezi",
+    "toast": {
+      "success": "Izvoz je uspješno pokrenut. Datoteku možete pregledati na stranici za izvoz.",
+      "view": "Prikaz",
+      "error": {
+        "failed": "Nije uspjelo pokretanje izvoza: {{error}}",
+        "endTimeMustAfterStartTime": "Vrijeme završetka mora biti nakon vremena početka",
+        "noVaildTimeSelected": "Nema odabranog valjanog vremenskog raspona"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Spremi Izvoz",
+      "previewExport": "Pregledaj Izvoz"
+    }
+  },
+  "streaming": {
+    "label": "Emitiraj",
+    "restreaming": {
+      "disabled": "Ponovno emitiranje nije omogućeno za ovu kameru.",
+      "desc": {
+        "title": "Postavi go2rtc za opcije dodatnog prikaza uživo i zvuk za ovu kameru."
+      }
+    },
+    "showStats": {
+      "label": "Pokaži statistike emitiranja",
+      "desc": "Omogući ovu opciju za prikaz statistike emitiranja kao proziran prozor na slici kamere."
+    },
+    "debugView": "Debug Prikaz"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Spremi Pretragu",
+      "desc": "Dodaj ime za ovu spremljenu pretragu.",
+      "placeholder": "Unesi ime za svoju pretragu",
+      "overwrite": "{{searchName}} već postoji. Spremanje će prepisati postojeću vrijednost.",
+      "success": "Pretraga ({{searchName}}) je spremljena.",
+      "button": {
+        "save": {
+          "label": "Spremi ovu pretragu"
+        }
       }
     }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Potvrdi Brisanje",
+      "desc": {
+        "selected": "Jeste li sigurni da želite izbrisati sav snimljen video povezan s ovom preglednom stavkom?<br /><br />Drži<em>Shift</em> tipku za zaobilaženje ove poruke u budućnosti."
+      },
+      "toast": {
+        "success": "Video snimke povezane s odabranim preglednim stavkama su uspješno izbrisane.",
+        "error": "Neuspješno brisanje: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Izvezi",
+      "markAsReviewed": "Označi kao pregledano",
+      "markAsUnreviewed": "Označi kao nepregledano",
+      "deleteNow": "Izbriši sada"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Odaberi sličicu praćenog objekta",
+    "unknownLabel": "Spremljena Slika Okinuća",
+    "search": {
+      "placeholder": "Traži prema oznaci ili podoznaci..."
+    },
+    "noImages": "Sličica nisu nađene za ovu kameru"
   }
 }

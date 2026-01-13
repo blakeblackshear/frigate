@@ -5,18 +5,68 @@
     "trainModel": "Treniraj model",
     "addClassification": "Dodaj klasifikaciju",
     "deleteModels": "Obriši modele",
-    "editModel": "Uredi model"
+    "editModel": "Uredi model",
+    "deleteClassificationAttempts": "Izbriši Klasifikacijske Slike",
+    "renameCategory": "Preimenuj klasu",
+    "deleteCategory": "Izbriši Klasu"
   },
   "tooltip": {
     "trainingInProgress": "Model se trenutno trenira",
-    "modelNotReady": "Model nije spreman za treniranje"
+    "modelNotReady": "Model nije spreman za treniranje",
+    "noNewImages": "Nema novih slika za treniranje. Prvo klasificirajte više slika u skupu podataka.",
+    "noChanges": "Nema promjena u skupu podataka od posljednjeg treniranja."
   },
   "details": {
-    "unknown": "Nepoznato"
+    "unknown": "Nepoznato",
+    "none": "Nijedan",
+    "scoreInfo": "Rezultat predstavlja prosječnu klasifikacijsku pouzdanost kroz sve detekcije ovog objekta."
   },
   "toast": {
     "success": {
-      "deletedImage": "Obrisane slike"
+      "deletedImage": "Obrisane slike",
+      "deletedCategory": "Izbrisana Klasa",
+      "deletedModel_one": "Uspješno izbrisan {{count}} model",
+      "deletedModel_few": "Uspješno izbrisana {{count}} modela",
+      "deletedModel_other": "Uspješno izbrisano {{count}} modela",
+      "categorizedImage": "Uspješno klasificirana slika",
+      "trainedModel": "Uspješno treniran model.",
+      "trainingModel": "Uspješno započeto treniranje modela.",
+      "updatedModel": "Uspješno ažurirana konfiguracija modela",
+      "renamedCategory": "Uspješno preimenovana klasa na {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Neuspješno brisanje: {{errorMessage}}",
+      "deleteCategoryFailed": "Neuspješno brisanje klase: {{errorMessage}}",
+      "deleteModelFailed": "Nije uspjelo brisanje modela: {{errorMessage}}",
+      "categorizeFailed": "Nije uspjelo kategoriziranje slike: {{errorMessage}}"
+    }
+  },
+  "description": {
+    "invalidName": "Nevaljano ime. Ime može samo uključivati slova, brojeve, razmake, navodnike, podcrte i crtice."
+  },
+  "train": {
+    "titleShort": "Nedavno"
+  },
+  "deleteModel": {
+    "desc_one": "Jeste li sigurni da želite izbrisati {{count}} model? Ovo će trajno izbrisati sve povezane podatke, uključujući slike i podatke za treniranje. Ova radnja se ne može poništiti.",
+    "desc_few": "Jeste li sigurni da želite izbrisati {{count}} modela? Ovo će trajno izbrisati sve povezane podatke, uključujući slike i podatke za treniranje. Ova radnja se ne može poništiti.",
+    "desc_other": "Jeste li sigurni da želite izbrisati {{count}} modela? Ovo će trajno izbrisati sve povezane podatke, uključujući slike i podatke za treniranje. Ova radnja se ne može poništiti."
+  },
+  "deleteDatasetImages": {
+    "desc_one": "Jeste li sigurni da želite izbrisati {{count}} sliku iz {{dataset}}? Ova radnja se ne može poništiti i zahtijevat će ponovno treniranje modela.",
+    "desc_few": "Jeste li sigurni da želite izbrisati {{count}} slike iz {{dataset}}? Ova radnja se ne može poništiti i zahtijevat će ponovno treniranje modela.",
+    "desc_other": "Jeste li sigurni da želite izbrisati {{count}} slika iz {{dataset}}? Ova radnja se ne može poništiti i zahtijevat će ponovno treniranje modela."
+  },
+  "deleteTrainImages": {
+    "desc_one": "Jeste li sigurni da želite izbrisati {{count}} sliku? Ova radnja se ne može poništiti.",
+    "desc_few": "Jeste li sigurni da želite izbrisati {{count}} slike? Ova radnja se ne može poništiti.",
+    "desc_other": "Jeste li sigurni da želite izbrisati {{count}} slika? Ova radnja se ne može poništiti."
+  },
+  "wizard": {
+    "step3": {
+      "allImagesRequired_one": "Molimo klasificirajte sve slike. Preostala je {{count}} slika.",
+      "allImagesRequired_few": "Molimo klasificirajte sve slike. Preostale su {{count}} slike.",
+      "allImagesRequired_other": "Molimo klasificirajte sve slike. Preostalo je {{count}} slika."
     }
   }
 }

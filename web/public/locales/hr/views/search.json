@@ -19,7 +19,55 @@
       "attributes": "Atributi",
       "before": "Prije",
       "after": "Poslije",
-      "min_score": "Min ocjena"
+      "min_score": "Min ocjena",
+      "sub_labels": "Podoznake",
+      "max_score": "Maksimalni rezultat",
+      "min_speed": "Minimalna Brzina",
+      "max_speed": "Maksimalna Brzina",
+      "recognized_license_plate": "Prepoznata Registarska Oznaka",
+      "has_clip": "Ima isječak",
+      "has_snapshot": "Ima Snimku"
+    },
+    "searchType": {
+      "thumbnail": "Sličica",
+      "description": "Opis"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Datum 'prije' mora biti kasniji od datuma 'poslije'.",
+        "afterDatebeEarlierBefore": "Datum 'poslije' mora biti raniji od datuma 'prije'.",
+        "minScoreMustBeLessOrEqualMaxScore": "Vrijednost 'min_score' mora biti manja ili jednaka vrijednosti 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Vrijednost 'max_score' mora biti veća ili jednaka vrijednosti 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Vrijednost 'min_speed' mora biti manja ili jednaka vrijednosti 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Vrijednost 'max_speed' mora biti veća ili jednaka vrijednosti 'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "Kako koristiti text filtere",
+      "desc": {
+        "text": "Filtri pomažu suziti rezultate pretraživanja. Evo kako ih koristiti u polju za unos:",
+        "step1": "Upišite naziv ključa filtra, a zatim dvotočku (npr. 'cameras:').",
+        "step2": "Odaberite vrijednost iz prijedloga ili unesite svoju.",
+        "step3": "Koristite više filtera tako da ih dodajete jedan za drugim s razmakom između.",
+        "step4": "Filteri po datumu (before: i after:) koriste format {{DateFormat}}.",
+        "step5": "Filter vremenskog raspona koristi format {{exampleTime}}.",
+        "step6": "Uklonite filtre klikom na 'x' pored njih.",
+        "exampleLabel": "Primjer:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Vrijednosti Filtra",
+      "noFilters": "Filteri",
+      "activeFilters": "Aktivni Filteri"
     }
+  },
+  "trackedObjectId": "ID Praćenog Objekta",
+  "similaritySearch": {
+    "title": "Pretraga po sličnosti",
+    "active": "Pretraživanje po sličnosti aktivno",
+    "clear": "Deaktiviraj pretraživanje po sličnosti"
+  },
+  "placeholder": {
+    "search": "Pretraži…"
   }
 }

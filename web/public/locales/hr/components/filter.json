@@ -1,7 +1,12 @@
 {
   "filter": "Filter",
   "classes": {
-    "label": "Klase"
+    "label": "Klase",
+    "all": {
+      "title": "Sve klase"
+    },
+    "count_one": "{{count}} Klasa",
+    "count_other": "{{count}} Klase"
   },
   "labels": {
     "label": "Oznake",
@@ -26,5 +31,110 @@
       "short": "Datumi"
     }
   },
-  "more": "Više filtera"
+  "more": "Više filtera",
+  "reset": {
+    "label": "Ponovno postavi filtere na zadane vrijednosti"
+  },
+  "timeRange": "Vremenski Raspon",
+  "subLabels": {
+    "label": "Podoznake",
+    "all": "Sve Podoznake"
+  },
+  "attributes": {
+    "label": "Klasifikacijski Atributi",
+    "all": "Svi Atributi"
+  },
+  "score": "Rezultat",
+  "estimatedSpeed": "Procijenjena Brzina ({{unit}})",
+  "features": {
+    "label": "Značajke",
+    "hasSnapshot": "Ima snimku",
+    "hasVideoClip": "Ima video isječak",
+    "submittedToFrigatePlus": {
+      "label": "Poslano na Frigate+",
+      "tips": "Prvo moraš filtrirati praćene objekte koji imaju snimku stanja.<br /><br />Praćeni objekti bez snimke stanja ne mogu se poslati Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Poredaj",
+    "dateAsc": "Datum (Uzlazno)",
+    "dateDesc": "Datum (Silazno)",
+    "scoreAsc": "Ocjena Objekta (Uzlazno)",
+    "scoreDesc": "Ocjena objekta (uzlazno)",
+    "speedAsc": "Procijenjena Brzina (Uzlazno)",
+    "speedDesc": "Procijenjena Brzina (Silazno)",
+    "relevance": "Značajnost"
+  },
+  "cameras": {
+    "label": "Filter Kamera",
+    "all": {
+      "title": "Sve Kamere",
+      "short": "Kamere"
+    }
+  },
+  "review": {
+    "showReviewed": "Prikaži Pregledano"
+  },
+  "motion": {
+    "showMotionOnly": "Prikaži Jedino Pokrete"
+  },
+  "explore": {
+    "settings": {
+      "title": "Postavke",
+      "defaultView": {
+        "title": "Zadani Prikaz",
+        "summary": "Sažetak",
+        "unfilteredGrid": "Nefiltrirana mreža",
+        "desc": "Kada filteri nisu odabrani, prikazan je sažetak najnovijih objekata po oznaci, ili je prikazana nefiltrirana mreža."
+      },
+      "gridColumns": {
+        "title": "Stupci Mreže",
+        "desc": "Odaberi broj stupaca u mrežnom prikazu."
+      },
+      "searchSource": {
+        "label": "Traži Izvor",
+        "desc": "Odaberi želiš li tražiti sličice ili opise tvojih praćenih objekata.",
+        "options": {
+          "thumbnailImage": "Sličica",
+          "description": "Opis"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Odaberi datum za filtriranje"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtriraj stupanj zapisnika",
+    "filterBySeverity": "Filtriraj zapisnike po ozbiljnosti",
+    "loading": {
+      "title": "Učitavanje",
+      "desc": "Kada je prozor zapisnika listan do dna, novi zapisi se prikazuju automatski nakon stvaranja."
+    },
+    "disableLogStreaming": "Onemogući prijenos zapisa uživo",
+    "allLogs": "Svi zapisi"
+  },
+  "trackedObjectDelete": {
+    "title": "Potvrdi Brisanje",
+    "desc": "Brisanjem ovih praćenih objekata ({{objectLength}}) uklanja se snimak, svi spremljeni ugradbeni elementi i svi povezani unosi životnog ciklusa objekta. Snimljeni materijali ovih praćenih objekata u prikazu povijesti <em>NEĆE</em> biti izbrisani.<br /><br />Jeste li sigurni da želite nastaviti?<br /><br />Držite tipku <em>Shift</em> da biste u budućnosti zaobišli ovaj dijalog.",
+    "toast": {
+      "success": "Praćeni objekti su uspješno izbrisani.",
+      "error": "Neuspješno brisanje praćenih objekata: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtritaj prema maski zone"
+  },
+  "recognizedLicensePlates": {
+    "title": "Prepoznate Registracijske Oznake",
+    "loadFailed": "Neuspješno učitavanje prepoznatih registracijskih oznaka.",
+    "loading": "Učitavanje prepoznatih registracijskih oznaka…",
+    "placeholder": "Upiši za traženje registracijskih oznaka…",
+    "noLicensePlatesFound": "Registracijske oznake nisu nađene.",
+    "selectPlatesFromList": "Odaberi jednu ili više registracijskih oznaka iz liste.",
+    "selectAll": "Odaberi sve",
+    "clearAll": "Očisti sve"
+  }
 }

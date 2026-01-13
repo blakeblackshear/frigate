@@ -7,13 +7,45 @@
   "cameraDisabled": "Kamera je onemogućena",
   "stats": {
     "streamType": {
-      "short": "Vrsta"
+      "short": "Vrsta",
+      "title": "Tip Streama:"
     },
     "latency": {
       "value": "{{seconds}} sekundi",
       "short": {
-        "value": "{{seconds}} sekundi"
+        "value": "{{seconds}} sekundi",
+        "title": "Kašnjenje"
+      },
+      "title": "Kašnjenje:"
+    },
+    "bandwidth": {
+      "title": "Mrežna propusnost:",
+      "short": "Mrežna propusnost"
+    },
+    "totalFrames": "Ukupni broj kadrova (slika):",
+    "droppedFrames": {
+      "title": "Izgubljeni kadrovi:",
+      "short": {
+        "title": "Izgubljeno",
+        "value": "{{droppedFrames}} kadrova"
       }
+    },
+    "decodedFrames": "Dekodirani kadrovi:",
+    "droppedFrameRate": "Stopa izgubljenih kadrova:"
+  },
+  "noPreviewFound": "Nije nađen pretpregled",
+  "noPreviewFoundFor": "Pretpregled nije nađen za {{cameraName}}",
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ili noviji je potreban za ovu vrstu uživog prijenosa.",
+  "streamOffline": {
+    "title": "Stream nije dostupan",
+    "desc": "Slike nisu primljene sa {{cameraName}} <code>detect</code> stream-a, provjeri logove"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Kadar je uspješno poslan u Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Neuspješno slanje kadra u Frigate+"
     }
   }
 }
