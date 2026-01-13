@@ -15,6 +15,9 @@
     },
     "provider_options": {
       "label": "GenAI Provider extra options."
+    },
+    "runtime_options": {
+      "label": "Options to pass during inference calls."
     }
   }
 }

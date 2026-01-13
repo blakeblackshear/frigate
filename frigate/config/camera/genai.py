@@ -26,3 +26,6 @@ class GenAIConfig(FrigateBaseModel):
     provider_options: dict[str, Any] = Field(
         default={}, title="GenAI Provider extra options."
     )
+    runtime_options: dict[str, Any] = Field(
+        default={}, title="Options to pass during inference calls."
+    )

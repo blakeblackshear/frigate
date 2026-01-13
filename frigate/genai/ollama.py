@@ -58,11 +58,15 @@ class OllamaClient(GenAIClient):
             )
             return None
         try:
+            ollama_options = {
+                **self.provider_options,
+                **self.genai_config.runtime_options,
+            }
             result = self.provider.generate(
                 self.genai_config.model,
                 prompt,
                 images=images if images else None,
-                **self.provider_options,
+                **ollama_options,
             )
             logger.debug(
                 f"Ollama tokens used: eval_count={result.get('eval_count')}, prompt_eval_count={result.get('prompt_eval_count')}"

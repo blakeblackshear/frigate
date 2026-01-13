@@ -35,10 +35,14 @@ class GeminiClient(GenAIClient):
             for img in images
         ] + [prompt]
         try:
+            # Merge runtime_options into generation_config if provided
+            generation_config_dict = {"candidate_count": 1}
+            generation_config_dict.update(self.genai_config.runtime_options)
+
             response = self.provider.generate_content(
                 data,
                 generation_config=genai.types.GenerationConfig(
-                    candidate_count=1,
+                    **generation_config_dict
                 ),
                 request_options=genai.types.RequestOptions(
                     timeout=self.timeout,

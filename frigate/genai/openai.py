@@ -61,6 +61,7 @@ class OpenAIClient(GenAIClient):
                     },
                 ],
                 timeout=self.timeout,
+                **self.genai_config.runtime_options,
             )
             if (
                 result is not None

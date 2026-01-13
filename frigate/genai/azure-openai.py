@@ -64,6 +64,7 @@ class OpenAIClient(GenAIClient):
                     },
                 ],
                 timeout=self.timeout,
+                **self.genai_config.runtime_options,
             )
         except Exception as e:
             logger.warning("Azure OpenAI returned an error: %s", str(e))
