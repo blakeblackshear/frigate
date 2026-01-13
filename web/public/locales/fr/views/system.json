@@ -86,7 +86,11 @@
     "otherProcesses": {
       "title": "Autres processus",
       "processCpuUsage": "Utilisation CPU du processus",
-      "processMemoryUsage": "Utilisation mémoire du processus"
+      "processMemoryUsage": "Utilisation mémoire du processus",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "enregistrement"
+      }
     }
   },
   "storage": {

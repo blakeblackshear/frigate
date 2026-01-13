@@ -110,7 +110,10 @@
       "title": "Modifier les attributs",
       "desc": "Sélectionnez les attributs de classification pour : {{label}}"
     },
-    "attributes": "Attributs de classification"
+    "attributes": "Attributs de classification",
+    "title": {
+      "label": "Titre"
+    }
   },
   "type": {
     "details": "détails",

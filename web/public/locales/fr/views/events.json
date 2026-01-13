@@ -9,7 +9,11 @@
   "empty": {
     "alert": "Aucune alerte à traiter",
     "detection": "Aucune détection à traiter",
-    "motion": "Aucune donnée de mouvement trouvée"
+    "motion": "Aucune donnée de mouvement trouvée",
+    "recordingsDisabled": {
+      "title": "Les enregistrements doivent être activés.",
+      "description": "Les activités ne peuvent être générées pour une caméra que si l'enregistrement est activé pour celle-ci."
+    }
   },
   "timeline": "Chronologie",
   "events": {
