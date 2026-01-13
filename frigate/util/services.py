@@ -540,9 +540,14 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
     try:
         results["mem"] = "-"  # no discrete gpu memory
 
-        with open("/sys/devices/gpu.0/load", "r") as f:
-            gpuload = float(f.readline()) / 10
-            results["gpu"] = f"{gpuload}%"
+        if os.path.exists("/sys/devices/gpu.0/load"):
+            with open("/sys/devices/gpu.0/load", "r") as f:
+                gpuload = float(f.readline()) / 10
+                results["gpu"] = f"{gpuload}%"
+        elif os.path.exists("/sys/devices/platform/gpu.0/load"):
+            with open("/sys/devices/platform/gpu.0/load", "r") as f:
+                gpuload = float(f.readline()) / 10
+                results["gpu"] = f"{gpuload}%"
     except Exception:
         return None
 
