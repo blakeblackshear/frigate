@@ -80,7 +80,10 @@
       "title": "属性を編集",
       "desc": "この {{label}} の分類属性を選択してください"
     },
-    "attributes": "分類属性"
+    "attributes": "分類属性",
+    "title": {
+      "label": "タイトル"
+    }
   },
   "exploreMore": "{{label}} のオブジェクトをさらに探索",
   "exploreIsUnavailable": {
