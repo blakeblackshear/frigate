@@ -227,7 +227,8 @@
     "show": "Mostra {{item}}",
     "ID": "ID",
     "none": "Cap",
-    "all": "Tots"
+    "all": "Tots",
+    "other": "Altres"
   },
   "button": {
     "apply": "Aplicar",

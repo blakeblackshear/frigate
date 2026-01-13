@@ -169,7 +169,10 @@
       "title": "Edita els atributs",
       "desc": "Seleccioneu els atributs de classificació per a aquesta {{label}}"
     },
-    "attributes": "Atributs de classificació"
+    "attributes": "Atributs de classificació",
+    "title": {
+      "label": "Títol"
+    }
   },
   "searchResult": {
     "tooltip": "S'ha identificat {{type}} amb una confiança del {{confidence}}%",

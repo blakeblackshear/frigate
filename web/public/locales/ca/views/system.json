@@ -86,7 +86,14 @@
     "otherProcesses": {
       "title": "Altres processos",
       "processMemoryUsage": "Ús de memòria de procés",
-      "processCpuUsage": "Ús de la CPU del procés"
+      "processCpuUsage": "Ús de la CPU del procés",
+      "series": {
+        "recording": "gravant",
+        "review_segment": "segment de revisió",
+        "embeddings": "incrustacions",
+        "audio_detector": "detector d'àudio",
+        "go2rtc": "go2rtc"
+      }
     }
   },
   "storage": {

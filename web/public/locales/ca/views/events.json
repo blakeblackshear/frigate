@@ -10,7 +10,11 @@
   "empty": {
     "alert": "Hi ha cap alerta per revisar",
     "detection": "Hi ha cap detecció per revisar",
-    "motion": "No s'haan trobat dades de moviment"
+    "motion": "No s'haan trobat dades de moviment",
+    "recordingsDisabled": {
+      "title": "S'han d'activar les gravacions",
+      "description": "Només es poden revisar temes quan s'han activat les gravacions de la càmera."
+    }
   },
   "timeline": "Línia de temps",
   "timeline.aria": "Seleccionar línia de temps",
