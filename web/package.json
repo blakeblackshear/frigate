@@ -47,6 +47,7 @@
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
     "embla-carousel-react": "^8.2.0",
+    "form-data": "^4.0.4",
     "framer-motion": "^11.5.4",
     "hls.js": "^1.5.20",
     "i18next": "^24.2.0",
