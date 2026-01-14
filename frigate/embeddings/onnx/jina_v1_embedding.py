@@ -2,6 +2,7 @@
 
 import logging
 import os
+import threading
 import warnings
 
 from transformers import AutoFeatureExtractor, AutoTokenizer
@@ -54,6 +55,7 @@ class JinaV1TextEmbedding(BaseEmbedding):
         self.tokenizer = None
         self.feature_extractor = None
         self.runner = None
+        self._lock = threading.Lock()
         files_names = list(self.download_urls.keys()) + [self.tokenizer_file]
 
         if not all(
@@ -134,17 +136,18 @@ class JinaV1TextEmbedding(BaseEmbedding):
             )
 
     def _preprocess_inputs(self, raw_inputs):
-        max_length = max(len(self.tokenizer.encode(text)) for text in raw_inputs)
-        return [
-            self.tokenizer(
-                text,
-                padding="max_length",
-                truncation=True,
-                max_length=max_length,
-                return_tensors="np",
-            )
-            for text in raw_inputs
-        ]
+        with self._lock:
+            max_length = max(len(self.tokenizer.encode(text)) for text in raw_inputs)
+            return [
+                self.tokenizer(
+                    text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=max_length,
+                    return_tensors="np",
+                )
+                for text in raw_inputs
+            ]
 
 
 class JinaV1ImageEmbedding(BaseEmbedding):
@@ -174,6 +177,7 @@ class JinaV1ImageEmbedding(BaseEmbedding):
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.feature_extractor = None
         self.runner: BaseModelRunner | None = None
+        self._lock = threading.Lock()
         files_names = list(self.download_urls.keys())
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names
@@ -216,8 +220,9 @@ class JinaV1ImageEmbedding(BaseEmbedding):
             )
 
     def _preprocess_inputs(self, raw_inputs):
-        processed_images = [self._process_image(img) for img in raw_inputs]
-        return [
-            self.feature_extractor(images=image, return_tensors="np")
-            for image in processed_images
-        ]
+        with self._lock:
+            processed_images = [self._process_image(img) for img in raw_inputs]
+            return [
+                self.feature_extractor(images=image, return_tensors="np")
+                for image in processed_images
+            ]
