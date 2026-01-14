@@ -69,15 +69,15 @@ function setup_homekit_config() {
     local cleaned_json="/tmp/cache/homekit_cleaned.json"
     jq '
         # Keep only the homekit section if it exists, otherwise empty object
-        if has("homekit") then {homekit: .homekit} else {homekit: {}} end
+        if has("homekit") then {homekit: .homekit} else {} end
     ' "${temp_json}" > "${cleaned_json}" 2>/dev/null || {
-        echo '{"homekit": {}}' > "${cleaned_json}"
+        echo '{}' > "${cleaned_json}"
     }
 
     # Convert back to YAML and write to the config file
     yq eval -P "${cleaned_json}" > "${config_path}" 2>/dev/null || {
         echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
-        echo 'homekit: {}' > "${config_path}"
+        echo '{}' > "${config_path}"
     }
 
     # Clean up temp files
