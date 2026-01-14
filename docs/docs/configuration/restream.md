@@ -7,7 +7,7 @@ title: Restream
 
 Frigate can restream your video feed as an RTSP feed for other applications such as Home Assistant to utilize it at `rtsp://<frigate_host>:8554/<camera_name>`. Port 8554 must be open. [This allows you to use a video feed for detection in Frigate and Home Assistant live view at the same time without having to make two separate connections to the camera](#reduce-connections-to-camera). The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
-Frigate uses [go2rtc](https://github.com/AlexxIT/go2rtc/tree/v1.9.10) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `go2rtc` in the config, see [go2rtc docs](https://github.com/AlexxIT/go2rtc/tree/v1.9.10#configuration) for more advanced configurations and features.
+Frigate uses [go2rtc](https://github.com/AlexxIT/go2rtc/tree/v1.9.13) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `go2rtc` in the config, see [go2rtc docs](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#configuration) for more advanced configurations and features.
 
 :::note
 
@@ -206,7 +206,7 @@ Enabling arbitrary exec sources allows execution of arbitrary commands through g
 
 ## Advanced Restream Configurations
 
-The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.10#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
+The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
 
 :::warning
 
