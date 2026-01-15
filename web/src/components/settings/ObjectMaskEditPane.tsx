@@ -90,19 +90,10 @@ export default function ObjectMaskEditPane({
 
     const count = polygons.filter((poly) => poly.type == "object_mask").length;
 
-    let objectType = "";
-    const objects = polygon?.objects[0];
-    if (objects === undefined) {
-      objectType = t("masksAndZones.zones.allObjects");
-    } else {
-      objectType = getTranslatedLabel(objects);
-    }
-
     return t("masksAndZones.objectMaskLabel", {
-      number: count + 1,
-      label: objectType,
+      number: count,
     });
-  }, [polygons, polygon, t]);
+  }, [polygons, t]);
 
   const defaultId = useMemo(() => {
     if (!polygons) {
@@ -111,7 +102,7 @@ export default function ObjectMaskEditPane({
 
     const count = polygons.filter((poly) => poly.type == "object_mask").length;
 
-    return `object_mask_${count + 1}`;
+    return `object_mask_${count}`;
   }, [polygons]);
 
   const formSchema = z.object({

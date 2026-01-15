@@ -85,7 +85,7 @@ export default function MotionMaskEditPane({
     const count = polygons.filter((poly) => poly.type == "motion_mask").length;
 
     return t("masksAndZones.motionMasks.defaultName", {
-      number: count + 1,
+      number: count,
     });
   }, [polygons, t]);
 
@@ -96,7 +96,7 @@ export default function MotionMaskEditPane({
 
     const count = polygons.filter((poly) => poly.type == "motion_mask").length;
 
-    return `motion_mask_${count + 1}`;
+    return `motion_mask_${count}`;
   }, [polygons]);
 
   const polygonArea = useMemo(() => {

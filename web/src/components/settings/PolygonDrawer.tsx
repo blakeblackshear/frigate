@@ -24,6 +24,7 @@ type PolygonDrawerProps = {
   isActive: boolean;
   isHovered: boolean;
   isFinished: boolean;
+  enabled?: boolean;
   color: number[];
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
@@ -39,6 +40,7 @@ export default function PolygonDrawer({
   isActive,
   isHovered,
   isFinished,
+  enabled = true,
   color,
   handlePointDragMove,
   handleGroupDragEnd,
@@ -52,6 +54,26 @@ export default function PolygonDrawer({
   const [minMaxY, setMinMaxY] = useState([0, 0]);
   const groupRef = useRef<Konva.Group>(null);
   const [cursor, setCursor] = useState("default");
+
+  const patternCanvas = useMemo(() => {
+    if (enabled) {
+      return undefined;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 10;
+    canvas.height = 10;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(10, 0);
+      ctx.lineTo(0, 10);
+      ctx.stroke();
+    }
+    return canvas as unknown as HTMLImageElement;
+  }, [enabled]);
 
   const handleMouseOverPoint = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
@@ -180,6 +202,15 @@ export default function PolygonDrawer({
             : setCursor("default")
         }
       />
+      {!enabled && isFinished && (
+        <Line
+          points={flattenedPoints}
+          closed={isFinished}
+          fillPriority="pattern"
+          fillPatternImage={patternCanvas}
+          listening={false}
+        />
+      )}
       {isFinished && isActive && (
         <Line
           name="unfilled-line"

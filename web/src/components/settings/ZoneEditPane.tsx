@@ -454,7 +454,7 @@ export default function ZoneEditPane({
         friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.friendly_name=${encodeURIComponent(friendly_name)}`;
       }
 
-      const enabledQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.enabled=${enabled}`;
+      const enabledQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.enabled=${enabled ? "True" : "False"}`;
 
       axios
         .put(

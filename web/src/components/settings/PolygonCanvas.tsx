@@ -321,6 +321,7 @@ export function PolygonCanvas({
                 isActive={index === activePolygonIndex}
                 isHovered={index === hoveredPolygonIndex}
                 isFinished={polygon.isFinished}
+                enabled={polygon.enabled}
                 color={polygon.color}
                 handlePointDragMove={handlePointDragMove}
                 handleGroupDragEnd={handleGroupDragEnd}
@@ -350,6 +351,7 @@ export function PolygonCanvas({
               isActive={true}
               isHovered={activePolygonIndex === hoveredPolygonIndex}
               isFinished={polygons[activePolygonIndex].isFinished}
+              enabled={polygons[activePolygonIndex].enabled}
               color={polygons[activePolygonIndex].color}
               handlePointDragMove={handlePointDragMove}
               handleGroupDragEnd={handleGroupDragEnd}

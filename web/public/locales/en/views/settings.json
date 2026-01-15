@@ -514,7 +514,7 @@
       }
     },
     "motionMaskLabel": "Motion Mask {{number}}",
-    "objectMaskLabel": "Object Mask {{number}} ({{label}})",
+    "objectMaskLabel": "Object Mask {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -636,6 +636,7 @@
       },
       "add": "New Motion Mask",
       "edit": "Edit Motion Mask",
+      "defaultName": "Motion Mask {{number}}",
       "context": {
         "title": "Motion masks are used to prevent unwanted types of motion from triggering detection (example: tree branches, camera timestamps). Motion masks should be used <em>very sparingly</em>, over-masking will make it more difficult for objects to be tracked."
       },

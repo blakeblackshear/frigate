@@ -169,6 +169,7 @@ export default function MasksAndZonesView({
         objects: [],
         camera: selectedCamera,
         color: polygonColor,
+        enabled: true,
       },
     ]);
   };
@@ -242,7 +243,7 @@ export default function MasksAndZonesView({
           distances:
             zoneData.distances?.map((distance) => parseFloat(distance)) ?? [],
           isFinished: true,
-          color: zoneData.enabled ? zoneData.color : [100, 100, 100],
+          color: zoneData.color,
         }),
       );
 
@@ -269,7 +270,7 @@ export default function MasksAndZonesView({
           ),
           distances: [],
           isFinished: true,
-          color: maskData.enabled ? [0, 0, 255] : [100, 100, 100],
+          color: [0, 0, 255],
         }),
       );
 
@@ -292,7 +293,7 @@ export default function MasksAndZonesView({
           ),
           distances: [],
           isFinished: true,
-          color: maskData.enabled ? [128, 128, 128] : [80, 80, 80],
+          color: [128, 128, 128],
         }),
       );
 
@@ -329,7 +330,7 @@ export default function MasksAndZonesView({
                 ),
                 distances: [],
                 isFinished: true,
-                color: maskData.enabled ? [128, 128, 128] : [80, 80, 80],
+                color: [128, 128, 128],
               };
               objectMaskIndex++;
               return [newMask];
