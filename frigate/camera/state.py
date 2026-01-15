@@ -197,6 +197,10 @@ class CameraState:
 
         if draw_options.get("zones"):
             for name, zone in self.camera_config.zones.items():
+                # skip disabled zones
+                if not zone.enabled:
+                    continue
+
                 thickness = (
                     8
                     if any(

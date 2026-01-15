@@ -188,6 +188,10 @@ class TrackedObject:
 
         # check each zone
         for name, zone in self.camera_config.zones.items():
+            # skip disabled zones
+            if not zone.enabled:
+                continue
+
             # if the zone is not for this object type, skip
             if len(zone.objects) > 0 and obj_data["label"] not in zone.objects:
                 continue
