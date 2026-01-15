@@ -106,7 +106,13 @@ export interface CameraConfig {
     frame_height: number;
     improve_contrast: boolean;
     lightning_threshold: number;
-    mask: string[];
+    mask: {
+      [maskId: string]: {
+        friendly_name?: string;
+        enabled: boolean;
+        coordinates: string;
+      };
+    };
     mqtt_off_delay: number;
     threshold: number;
   };
@@ -128,7 +134,13 @@ export interface CameraConfig {
   objects: {
     filters: {
       [objectName: string]: {
-        mask: string[] | null;
+        mask: {
+          [maskId: string]: {
+            friendly_name?: string;
+            enabled: boolean;
+            coordinates: string;
+          };
+        };
         max_area: number;
         max_ratio: number;
         min_area: number;
@@ -137,7 +149,13 @@ export interface CameraConfig {
         threshold: number;
       };
     };
-    mask: string;
+    mask: {
+      [maskId: string]: {
+        friendly_name?: string;
+        enabled: boolean;
+        coordinates: string;
+      };
+    };
     track: string[];
     genai: {
       enabled: boolean;

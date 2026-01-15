@@ -20,11 +20,7 @@ import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
 import { isDesktop, isMobile } from "react-device-detect";
-import {
-  flattenPoints,
-  parseCoordinates,
-  toRGBColorString,
-} from "@/utils/canvasUtil";
+import { toRGBColorString } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useCallback, useMemo, useState } from "react";
 import axios from "axios";
@@ -81,93 +77,6 @@ export default function PolygonItem({
       if (!polygon || !cameraConfig) {
         return;
       }
-      let url = "";
-      if (polygon.type == "zone") {
-        const { alertQueries, detectionQueries } = reviewQueries(
-          polygon.name,
-          false,
-          false,
-          polygon.camera,
-          cameraConfig?.review.alerts.required_zones || [],
-          cameraConfig?.review.detections.required_zones || [],
-        );
-        url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
-      }
-      if (polygon.type == "motion_mask") {
-        const filteredMask = (
-          Array.isArray(cameraConfig.motion.mask)
-            ? cameraConfig.motion.mask
-            : [cameraConfig.motion.mask]
-        ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-
-        url = filteredMask
-          .map((pointsArray) => {
-            const coordinates = flattenPoints(
-              parseCoordinates(pointsArray),
-            ).join(",");
-            return `cameras.${polygon?.camera}.motion.mask=${coordinates}&`;
-          })
-          .join("");
-
-        if (!url) {
-          // deleting last mask
-          url = `cameras.${polygon?.camera}.motion.mask&`;
-        }
-      }
-
-      if (polygon.type == "object_mask") {
-        let configObject;
-        let globalMask = false;
-
-        // global mask on camera for all objects
-        if (!polygon.objects.length) {
-          configObject = cameraConfig.objects.mask;
-          globalMask = true;
-        } else {
-          configObject = cameraConfig.objects.filters[polygon.objects[0]].mask;
-        }
-
-        if (!configObject) {
-          return;
-        }
-
-        const globalObjectMasksArray = Array.isArray(cameraConfig.objects.mask)
-          ? cameraConfig.objects.mask
-          : cameraConfig.objects.mask
-            ? [cameraConfig.objects.mask]
-            : [];
-
-        let filteredMask;
-        if (globalMask) {
-          filteredMask = (
-            Array.isArray(configObject) ? configObject : [configObject]
-          ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-        } else {
-          filteredMask = (
-            Array.isArray(configObject) ? configObject : [configObject]
-          )
-            .filter((mask) => !globalObjectMasksArray.includes(mask))
-            .filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-        }
-
-        url = filteredMask
-          .map((pointsArray) => {
-            const coordinates = flattenPoints(
-              parseCoordinates(pointsArray),
-            ).join(",");
-            return globalMask
-              ? `cameras.${polygon?.camera}.objects.mask=${coordinates}&`
-              : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask=${coordinates}&`;
-          })
-          .join("");
-
-        if (!url) {
-          // deleting last mask
-          url = globalMask
-            ? `cameras.${polygon?.camera}.objects.mask&`
-            : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask`;
-        }
-      }
 
       const updateTopicType =
         polygon.type === "zone"
@@ -180,8 +89,115 @@ export default function PolygonItem({
 
       setIsLoading(true);
 
+      if (polygon.type === "zone") {
+        // Zones use query string format
+        const { alertQueries, detectionQueries } = reviewQueries(
+          polygon.name,
+          false,
+          false,
+          polygon.camera,
+          cameraConfig?.review.alerts.required_zones || [],
+          cameraConfig?.review.detections.required_zones || [],
+        );
+        const url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
+
+        await axios
+          .put(`config/set?${url}`, {
+            requires_restart: 0,
+            update_topic: `config/cameras/${polygon.camera}/${updateTopicType}`,
+          })
+          .then((res) => {
+            if (res.status === 200) {
+              toast.success(
+                t("masksAndZones.form.polygonDrawing.delete.success", {
+                  name: polygon?.friendly_name ?? polygon?.name,
+                }),
+                { position: "top-center" },
+              );
+              updateConfig();
+            } else {
+              toast.error(
+                t("toast.save.error.title", {
+                  ns: "common",
+                  errorMessage: res.statusText,
+                }),
+                { position: "top-center" },
+              );
+            }
+          })
+          .catch((error) => {
+            const errorMessage =
+              error.response?.data?.message ||
+              error.response?.data?.detail ||
+              "Unknown error";
+            toast.error(
+              t("toast.save.error.title", { errorMessage, ns: "common" }),
+              { position: "top-center" },
+            );
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+        return;
+      }
+
+      // Motion masks and object masks use JSON body format
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let configUpdate: any = {};
+
+      if (polygon.type === "motion_mask") {
+        // Delete mask from motion.mask dict by setting it to undefined
+        configUpdate = {
+          cameras: {
+            [polygon.camera]: {
+              motion: {
+                mask: {
+                  [polygon.name]: null, // Setting to null will delete the key
+                },
+              },
+            },
+          },
+        };
+      }
+
+      if (polygon.type === "object_mask") {
+        // Determine if this is a global mask or object-specific mask
+        const isGlobalMask = !polygon.objects.length;
+
+        if (isGlobalMask) {
+          configUpdate = {
+            cameras: {
+              [polygon.camera]: {
+                objects: {
+                  mask: {
+                    [polygon.name]: null, // Setting to null will delete the key
+                  },
+                },
+              },
+            },
+          };
+        } else {
+          configUpdate = {
+            cameras: {
+              [polygon.camera]: {
+                objects: {
+                  filters: {
+                    [polygon.objects[0]]: {
+                      mask: {
+                        [polygon.name]: null, // Setting to null will delete the key
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          };
+        }
+      }
+
       await axios
-        .put(`config/set?${url}`, {
+        .put("config/set", {
+          config_data: configUpdate,
           requires_restart: 0,
           update_topic: `config/cameras/${polygon.camera}/${updateTopicType}`,
         })
@@ -191,9 +207,7 @@ export default function PolygonItem({
               t("masksAndZones.form.polygonDrawing.delete.success", {
                 name: polygon?.friendly_name ?? polygon?.name,
               }),
-              {
-                position: "top-center",
-              },
+              { position: "top-center" },
             );
             updateConfig();
           } else {
@@ -202,9 +216,7 @@ export default function PolygonItem({
                 ns: "common",
                 errorMessage: res.statusText,
               }),
-              {
-                position: "top-center",
-              },
+              { position: "top-center" },
             );
           }
         })
@@ -215,9 +227,7 @@ export default function PolygonItem({
             "Unknown error";
           toast.error(
             t("toast.save.error.title", { errorMessage, ns: "common" }),
-            {
-              position: "top-center",
-            },
+            { position: "top-center" },
           );
         })
         .finally(() => {
@@ -238,7 +248,9 @@ export default function PolygonItem({
 
       <div
         key={index}
-        className="transition-background my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100"
+        className={`transition-background my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100 ${
+          polygon.enabled === false ? "opacity-50" : ""
+        }`}
         data-index={index}
         onMouseEnter={() => setHoveredPolygonIndex(index)}
         onMouseLeave={() => setHoveredPolygonIndex(null)}
@@ -265,8 +277,11 @@ export default function PolygonItem({
               }}
             />
           )}
-          <p className="cursor-default">
+          <p
+            className={`cursor-default ${polygon.enabled === false ? "line-through" : ""}`}
+          >
             {polygon.friendly_name ?? polygon.name}
+            {polygon.enabled === false && " (disabled)"}
           </p>
         </div>
         <AlertDialog

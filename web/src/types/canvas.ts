@@ -12,6 +12,7 @@ export type Polygon = {
   isFinished: boolean;
   color: number[];
   friendly_name?: string;
+  enabled?: boolean;
 };
 
 export type ZoneFormValuesType = {
@@ -29,10 +30,17 @@ export type ZoneFormValuesType = {
   speed_threshold: number;
 };
 
+export type MotionMaskFormValuesType = {
+  name: string;
+  friendly_name: string;
+  enabled: boolean;
+  isFinished: boolean;
+};
+
 export type ObjectMaskFormValuesType = {
+  name: string;
+  friendly_name: string;
+  enabled: boolean;
   objects: string;
-  polygon: {
-    isFinished: boolean;
-    name: string;
-  };
+  isFinished: boolean;
 };
