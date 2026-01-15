@@ -18,6 +18,7 @@ export type Polygon = {
 export type ZoneFormValuesType = {
   name: string;
   friendly_name: string;
+  enabled: boolean;
   inertia: number;
   loitering_time: number;
   isFinished: boolean;

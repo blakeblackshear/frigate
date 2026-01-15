@@ -290,6 +290,7 @@ export interface CameraConfig {
     [zoneName: string]: {
       coordinates: string;
       distances: string[];
+      enabled: boolean;
       filters: Record<string, unknown>;
       inertia: number;
       loitering_time: number;

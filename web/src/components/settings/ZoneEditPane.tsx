@@ -178,6 +178,7 @@ export default function ZoneEditPane({
             message: t("masksAndZones.form.zoneName.error.alreadyExists"),
           },
         ),
+      enabled: z.boolean().default(true),
       inertia: z.coerce
         .number()
         .min(1, {
@@ -271,6 +272,13 @@ export default function ZoneEditPane({
     defaultValues: {
       name: polygon?.name ?? "",
       friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
+      enabled:
+        polygon?.camera &&
+        polygon?.name &&
+        config?.cameras[polygon.camera]?.zones[polygon.name]?.enabled !==
+          undefined
+          ? config?.cameras[polygon.camera]?.zones[polygon.name]?.enabled
+          : (polygon?.enabled ?? true),
       inertia:
         polygon?.camera &&
         polygon?.name &&
@@ -311,6 +319,7 @@ export default function ZoneEditPane({
       {
         name: zoneName,
         friendly_name,
+        enabled,
         inertia,
         loitering_time,
         objects: form_objects,
@@ -445,9 +454,11 @@ export default function ZoneEditPane({
         friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.friendly_name=${encodeURIComponent(friendly_name)}`;
       }
 
+      const enabledQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.enabled=${enabled}`;
+
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${enabledQuery}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
           {
             requires_restart: 0,
             update_topic: `config/cameras/${polygon.camera}/zones`,
@@ -580,6 +591,28 @@ export default function ZoneEditPane({
             nameLabel={t("masksAndZones.zones.name.title")}
             nameDescription={t("masksAndZones.zones.name.tips")}
             placeholderName={t("masksAndZones.zones.name.inputPlaceHolder")}
+          />
+          <FormField
+            control={form.control}
+            name="enabled"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between">
+                <div className="space-y-0.5">
+                  <FormLabel>
+                    {t("masksAndZones.zones.enabled.title")}
+                  </FormLabel>
+                  <FormDescription>
+                    {t("masksAndZones.zones.enabled.description")}
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
 
           <Separator className="my-2 flex bg-secondary" />

@@ -230,6 +230,7 @@ export default function MasksAndZonesView({
           camera: cameraConfig.name,
           name,
           friendly_name: zoneData.friendly_name,
+          enabled: zoneData.enabled,
           objects: zoneData.objects,
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),
@@ -241,7 +242,7 @@ export default function MasksAndZonesView({
           distances:
             zoneData.distances?.map((distance) => parseFloat(distance)) ?? [],
           isFinished: true,
-          color: zoneData.color,
+          color: zoneData.enabled ? zoneData.color : [100, 100, 100],
         }),
       );
 
