@@ -345,7 +345,15 @@ objects:
   # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
   # Checks based on the bottom center of the bounding box of the object.
   # NOTE: This mask is COMBINED with the object type specific mask below
-  mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
+  mask:
+    # Object filter mask name (required)
+    mask1:
+      # Optional: A friendly name for the mask
+      friendly_name: "Object filter mask area"
+      # Optional: Whether this mask is active (default: true)
+      enabled: true
+      # Required: Coordinates polygon for the mask
+      coordinates: "0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278"
   # Optional: filters to reduce false positives for specific object types
   filters:
     person:
@@ -365,7 +373,15 @@ objects:
       threshold: 0.7
       # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
       # Checks based on the bottom center of the bounding box of the object
-      mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
+      mask:
+        # Object filter mask name (required)
+        mask1:
+          # Optional: A friendly name for the mask
+          friendly_name: "Object filter mask area"
+          # Optional: Whether this mask is active (default: true)
+          enabled: true
+          # Required: Coordinates polygon for the mask
+          coordinates: "0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278"
   # Optional: Configuration for AI generated tracked object descriptions
   genai:
     # Optional: Enable AI object description generation (default: shown below)
@@ -489,7 +505,15 @@ motion:
   frame_height: 100
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
-  mask: 0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000
+  mask:
+    # Motion mask name (required)
+    mask1:
+      # Optional: A friendly name for the mask
+      friendly_name: "Motion mask area"
+      # Optional: Whether this mask is active (default: true)
+      enabled: true
+      # Required: Coordinates polygon for the mask
+      coordinates: "0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000"
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
@@ -866,6 +890,9 @@ cameras:
       front_steps:
         # Optional: A friendly name or descriptive text for the zones
         friendly_name: ""
+        # Optional: Whether this zone is active (default: shown below)
+        # Disabled zones are completely ignored at runtime - no object tracking or debug drawing
+        enabled: True
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428

@@ -240,7 +240,10 @@ cameras:
             - detect
     motion:
       mask:
-        - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
+        motion_area:
+          friendly_name: "Motion mask"
+          enabled: true
+          coordinates: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
 ```
 
 ### Step 6: Enable recordings
