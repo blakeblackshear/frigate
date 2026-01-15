@@ -638,6 +638,11 @@
       "point_one": "{{count}} point",
       "point_other": "{{count}} points",
       "clickDrawPolygon": "Click to draw a polygon on the image.",
+      "name": {
+        "title": "Name",
+        "description": "An optional friendly name for this motion mask.",
+        "placeholder": "Enter a name..."
+      },
       "polygonAreaTooLarge": {
         "title": "The motion mask is covering {{polygonArea}}% of the camera frame. Large motion masks are not recommended.",
         "tips": "Motion masks do not prevent objects from being detected. You should use a required zone instead."
@@ -662,6 +667,11 @@
       "point_one": "{{count}} point",
       "point_other": "{{count}} points",
       "clickDrawPolygon": "Click to draw a polygon on the image.",
+      "name": {
+        "title": "Name",
+        "description": "An optional friendly name for this object mask.",
+        "placeholder": "Enter a name..."
+      },
       "objects": {
         "title": "Objects",
         "desc": "The object type that applies to this object mask.",
@@ -672,6 +682,12 @@
           "title": "{{polygonName}} has been saved.",
           "noName": "Object Mask has been saved."
         }
+      }
+    },
+    "masks": {
+      "enabled": {
+        "title": "Enabled",
+        "description": "Whether this mask is active. Disabled masks are ignored at runtime."
       }
     }
   },
