@@ -588,6 +588,10 @@
         "inputPlaceHolder": "Enter a name…",
         "tips": "Name must be at least 2 characters, must have at least one letter, and must not be the name of a camera or another zone on this camera."
       },
+      "enabled": {
+        "title": "Enabled",
+        "description": "Whether this zone is active. Disabled zones are ignored at runtime."
+      },
       "inertia": {
         "title": "Inertia",
         "desc": "Specifies how many frames that an object must be in a zone before they are considered in the zone. <em>Default: 3</em>"
