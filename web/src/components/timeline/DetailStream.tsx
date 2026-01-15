@@ -887,7 +887,10 @@ function LifecycleItem({
                       </span>
                       <span className="font-medium text-foreground">
                         {attributeAreaPx}{" "}
-                        {t("information.pixels", { ns: "common" })}{" "}
+                        {t("information.pixels", {
+                          ns: "common",
+                          area: attributeAreaPx,
+                        })}{" "}
                         <span className="text-secondary-foreground">·</span>{" "}
                         {attributeAreaPct}%
                       </span>
