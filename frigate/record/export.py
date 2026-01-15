@@ -33,16 +33,12 @@ from frigate.util.time import is_current_hour
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
 
 
 def lower_priority():
     os.nice(PROCESS_PRIORITY_LOW)
-
-
-class PlaybackFactorEnum(str, Enum):
-    realtime = "realtime"
-    timelapse_25x = "timelapse_25x"
 
 
 class PlaybackSourceEnum(str, Enum):
@@ -62,9 +58,10 @@ class RecordingExporter(threading.Thread):
         image: Optional[str],
         start_time: int,
         end_time: int,
-        playback_factor: PlaybackFactorEnum,
         playback_source: PlaybackSourceEnum,
         export_case_id: Optional[str] = None,
+        ffmpeg_input_args: Optional[str] = None,
+        ffmpeg_output_args: Optional[str] = None,
     ) -> None:
         super().__init__()
         self.config = config
@@ -74,9 +71,10 @@ class RecordingExporter(threading.Thread):
         self.user_provided_image = image
         self.start_time = start_time
         self.end_time = end_time
-        self.playback_factor = playback_factor
         self.playback_source = playback_source
         self.export_case_id = export_case_id
+        self.ffmpeg_input_args = ffmpeg_input_args
+        self.ffmpeg_output_args = ffmpeg_output_args
 
         # ensure export thumb dir
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
@@ -220,19 +218,19 @@ class RecordingExporter(threading.Thread):
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 
-        if self.playback_factor == PlaybackFactorEnum.realtime:
-            ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart"
-            ).split(" ")
-        elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
+        if self.ffmpeg_input_args is not None and self.ffmpeg_output_args is not None:
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.ffmpeg_path,
                     self.config.cameras[self.camera].record.export.hwaccel_args,
-                    f"-an {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart",
+                    f"{self.ffmpeg_input_args} -an {ffmpeg_input}".strip(),
+                    f"{self.ffmpeg_output_args} -movflags +faststart".strip(),
                     EncodeTypeEnum.timelapse,
                 )
+            ).split(" ")
+        else:
+            ffmpeg_cmd = (
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart"
             ).split(" ")
 
         # add metadata
@@ -311,19 +309,19 @@ class RecordingExporter(threading.Thread):
             "-y -protocol_whitelist pipe,file,tcp -f concat -safe 0 -i /dev/stdin"
         )
 
-        if self.playback_factor == PlaybackFactorEnum.realtime:
-            ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
-            ).split(" ")
-        elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
+        if self.ffmpeg_input_args is not None and self.ffmpeg_output_args is not None:
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.ffmpeg_path,
                     self.config.cameras[self.camera].record.export.hwaccel_args,
-                    f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
+                    f"{self.ffmpeg_input_args} {TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}".strip(),
+                    f"{self.ffmpeg_output_args} -movflags +faststart {video_path}".strip(),
                     EncodeTypeEnum.timelapse,
                 )
+            ).split(" ")
+        else:
+            ffmpeg_cmd = (
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
             ).split(" ")
 
         # add metadata
