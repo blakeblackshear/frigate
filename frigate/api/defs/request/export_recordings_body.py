@@ -42,3 +42,8 @@ class ExportRecordingsCustomBody(BaseModel):
         title="FFmpeg output arguments",
         description="Custom FFmpeg output arguments. If not provided, defaults to timelapse output args.",
     )
+    cpu_fallback: bool = Field(
+        default=False,
+        title="CPU Fallback",
+        description="If true, retry export without hardware acceleration if the initial export fails.",
+    )

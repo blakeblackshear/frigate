@@ -484,6 +484,7 @@ def export_recording_custom(
     existing_image = sanitize_filepath(body.image_path) if body.image_path else None
     ffmpeg_input_args = body.ffmpeg_input_args
     ffmpeg_output_args = body.ffmpeg_output_args
+    cpu_fallback = body.cpu_fallback
 
     export_case_id = body.export_case_id
     if export_case_id is not None:
@@ -569,6 +570,7 @@ def export_recording_custom(
         export_case_id,
         ffmpeg_input_args,
         ffmpeg_output_args,
+        cpu_fallback,
     )
     exporter.start()
     return JSONResponse(
