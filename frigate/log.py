@@ -89,6 +89,7 @@ def apply_log_levels(default: str, log_levels: dict[str, LogLevel]) -> None:
         "ws4py": LogLevel.error,
         "PIL": LogLevel.warning,
         "numba": LogLevel.warning,
+        "google_genai.models": LogLevel.warning,
         **log_levels,
     }
 

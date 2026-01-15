@@ -3,8 +3,8 @@
 import logging
 from typing import Optional
 
-import google.generativeai as genai
-from google.api_core.exceptions import GoogleAPICallError
+from google import genai
+from google.genai import errors, types
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -16,44 +16,51 @@ logger = logging.getLogger(__name__)
 class GeminiClient(GenAIClient):
     """Generative AI client for Frigate using Gemini."""
 
-    provider: genai.GenerativeModel
+    provider: genai.Client
 
     def _init_provider(self):
         """Initialize the client."""
-        genai.configure(api_key=self.genai_config.api_key)
-        return genai.GenerativeModel(
-            self.genai_config.model, **self.genai_config.provider_options
+        # Merge provider_options into HttpOptions
+        http_options_dict = {
+            "api_version": "v1",
+            "timeout": int(self.timeout * 1000),  # requires milliseconds
+        }
+
+        if isinstance(self.genai_config.provider_options, dict):
+            http_options_dict.update(self.genai_config.provider_options)
+
+        return genai.Client(
+            api_key=self.genai_config.api_key,
+            http_options=types.HttpOptions(**http_options_dict),
         )
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Gemini."""
-        data = [
-            {
-                "mime_type": "image/jpeg",
-                "data": img,
-            }
-            for img in images
+        contents = [
+            types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
         ] + [prompt]
         try:
             # Merge runtime_options into generation_config if provided
             generation_config_dict = {"candidate_count": 1}
             generation_config_dict.update(self.genai_config.runtime_options)
 
-            response = self.provider.generate_content(
-                data,
-                generation_config=genai.types.GenerationConfig(
-                    **generation_config_dict
-                ),
-                request_options=genai.types.RequestOptions(
-                    timeout=self.timeout,
+            response = self.provider.models.generate_content(
+                model=self.genai_config.model,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    **generation_config_dict,
                 ),
             )
-        except GoogleAPICallError as e:
+        except errors.APIError as e:
             logger.warning("Gemini returned an error: %s", str(e))
             return None
+        except Exception as e:
+            logger.warning("An unexpected error occurred with Gemini: %s", str(e))
+            return None
+
         try:
             description = response.text.strip()
-        except ValueError:
+        except (ValueError, AttributeError):
             # No description was generated
             return None
         return description
