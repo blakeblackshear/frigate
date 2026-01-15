@@ -434,6 +434,55 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     return new_config
 
 
+def _convert_legacy_mask_to_dict(
+    mask: Optional[Union[str, list]], mask_type: str = "motion_mask", label: str = ""
+) -> dict[str, dict[str, Any]]:
+    """Convert legacy mask format (str or list[str]) to new dict format.
+
+    Args:
+        mask: Legacy mask format (string or list of strings)
+        mask_type: Type of mask for naming ("motion_mask" or "object_mask")
+        label: Optional label for object masks (e.g., "person")
+
+    Returns:
+        Dictionary with mask_id as key and mask config as value
+    """
+    if not mask:
+        return {}
+
+    result = {}
+
+    if isinstance(mask, str):
+        if mask:
+            mask_id = f"{mask_type}_1"
+            friendly_name = (
+                f"Object Mask 1 ({label})"
+                if label
+                else f"{mask_type.replace('_', ' ').title()} 1"
+            )
+            result[mask_id] = {
+                "friendly_name": friendly_name,
+                "enabled": True,
+                "coordinates": mask,
+            }
+    elif isinstance(mask, list):
+        for i, coords in enumerate(mask):
+            if coords:
+                mask_id = f"{mask_type}_{i + 1}"
+                friendly_name = (
+                    f"Object Mask {i + 1} ({label})"
+                    if label
+                    else f"{mask_type.replace('_', ' ').title()} {i + 1}"
+                )
+                result[mask_id] = {
+                    "friendly_name": friendly_name,
+                    "enabled": True,
+                    "coordinates": coords,
+                }
+
+    return result
+
+
 def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.18-0"""
     new_config = config.copy()
@@ -459,7 +508,35 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         if not new_config.get("record"):
             del new_config["record"]
 
-    # Remove deprecated sync_recordings and timelapse_args from camera-specific record configs
+    # Migrate global motion masks
+    global_motion = new_config.get("motion", {})
+    if global_motion and "mask" in global_motion:
+        mask = global_motion.get("mask")
+        if mask is not None and not isinstance(mask, dict):
+            new_config["motion"]["mask"] = _convert_legacy_mask_to_dict(
+                mask, "motion_mask"
+            )
+
+    # Migrate global object masks
+    global_objects = new_config.get("objects", {})
+    if global_objects and "mask" in global_objects:
+        mask = global_objects.get("mask")
+        if mask is not None and not isinstance(mask, dict):
+            new_config["objects"]["mask"] = _convert_legacy_mask_to_dict(
+                mask, "object_mask"
+            )
+
+    # Migrate global object filters masks
+    if global_objects and "filters" in global_objects:
+        for obj_name, filter_config in global_objects.get("filters", {}).items():
+            if isinstance(filter_config, dict) and "mask" in filter_config:
+                mask = filter_config.get("mask")
+                if mask is not None and not isinstance(mask, dict):
+                    new_config["objects"]["filters"][obj_name]["mask"] = (
+                        _convert_legacy_mask_to_dict(mask, "object_mask", obj_name)
+                    )
+
+    # Remove deprecated sync_recordings and migrate masks for camera-specific configs
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, Any]] = camera.copy()
 
@@ -477,6 +554,34 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
             # Remove record section if empty
             if not camera_config.get("record"):
                 del camera_config["record"]
+
+        # Migrate camera motion masks
+        camera_motion = camera_config.get("motion", {})
+        if camera_motion and "mask" in camera_motion:
+            mask = camera_motion.get("mask")
+            if mask is not None and not isinstance(mask, dict):
+                camera_config["motion"]["mask"] = _convert_legacy_mask_to_dict(
+                    mask, "motion_mask"
+                )
+
+        # Migrate camera global object masks
+        camera_objects = camera_config.get("objects", {})
+        if camera_objects and "mask" in camera_objects:
+            mask = camera_objects.get("mask")
+            if mask is not None and not isinstance(mask, dict):
+                camera_config["objects"]["mask"] = _convert_legacy_mask_to_dict(
+                    mask, "object_mask"
+                )
+
+        # Migrate camera object filter masks
+        if camera_objects and "filters" in camera_objects:
+            for obj_name, filter_config in camera_objects.get("filters", {}).items():
+                if isinstance(filter_config, dict) and "mask" in filter_config:
+                    mask = filter_config.get("mask")
+                    if mask is not None and not isinstance(mask, dict):
+                        camera_config["objects"]["filters"][obj_name]["mask"] = (
+                            _convert_legacy_mask_to_dict(mask, "object_mask", obj_name)
+                        )
 
         new_config["cameras"][name] = camera_config
 

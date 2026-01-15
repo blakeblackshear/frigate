@@ -1,8 +1,9 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import Field, field_serializer
 
 from ..base import FrigateBaseModel
+from .mask import MotionMaskConfig
 
 __all__ = ["MotionConfig"]
 
@@ -52,8 +53,8 @@ class MotionConfig(FrigateBaseModel):
         title="Frame height",
         description="Height in pixels to scale frames to when computing motion.",
     )
-    mask: Union[str, list[str]] = Field(
-        default="",
+    mask: dict[str, Optional[MotionMaskConfig]] = Field(
+        default_factory=dict,
         title="Mask coordinates",
         description="Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas.",
     )
@@ -67,11 +68,15 @@ class MotionConfig(FrigateBaseModel):
         title="Original motion state",
         description="Indicates whether motion detection was enabled in the original static configuration.",
     )
-    raw_mask: Union[str, list[str]] = ""
+    raw_mask: dict[str, Optional[MotionMaskConfig]] = Field(
+        default_factory=dict, exclude=True
+    )
 
     @field_serializer("mask", when_used="json")
     def serialize_mask(self, value: Any, info):
-        return self.raw_mask
+        if self.raw_mask:
+            return self.raw_mask
+        return value
 
     @field_serializer("raw_mask", when_used="json")
     def serialize_raw_mask(self, value: Any, info):

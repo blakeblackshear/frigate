@@ -3,6 +3,7 @@ from typing import Any, Optional, Union
 from pydantic import Field, PrivateAttr, field_serializer, field_validator
 
 from ..base import FrigateBaseModel
+from .mask import ObjectMaskConfig
 
 __all__ = ["ObjectConfig", "GenAIObjectConfig", "FilterConfig"]
 
@@ -41,16 +42,20 @@ class FilterConfig(FrigateBaseModel):
         title="Minimum confidence",
         description="Minimum single-frame detection confidence required for the object to be counted.",
     )
-    mask: Optional[Union[str, list[str]]] = Field(
-        default=None,
+    mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+        default_factory=dict,
         title="Filter mask",
         description="Polygon coordinates defining where this filter applies within the frame.",
     )
-    raw_mask: Union[str, list[str]] = ""
+    raw_mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+        default_factory=dict, exclude=True
+    )
 
     @field_serializer("mask", when_used="json")
     def serialize_mask(self, value: Any, info):
-        return self.raw_mask
+        if self.raw_mask:
+            return self.raw_mask
+        return value
 
     @field_serializer("raw_mask", when_used="json")
     def serialize_raw_mask(self, value: Any, info):
@@ -139,10 +144,13 @@ class ObjectConfig(FrigateBaseModel):
         title="Object filters",
         description="Filters applied to detected objects to reduce false positives (area, ratio, confidence).",
     )
-    mask: Union[str, list[str]] = Field(
-        default="",
+    mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+        default_factory=dict,
         title="Object mask",
         description="Mask polygon used to prevent object detection in specified areas.",
+    )
+    raw_mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+        default_factory=dict, exclude=True
     )
     genai: GenAIObjectConfig = Field(
         default_factory=GenAIObjectConfig,
@@ -166,3 +174,13 @@ class ObjectConfig(FrigateBaseModel):
             enabled_labels.update(camera.objects.track)
 
         self._all_objects = list(enabled_labels)
+
+    @field_serializer("mask", when_used="json")
+    def serialize_mask(self, value: Any, info):
+        if self.raw_mask:
+            return self.raw_mask
+        return value
+
+    @field_serializer("raw_mask", when_used="json")
+    def serialize_raw_mask(self, value: Any, info):
+        return None
