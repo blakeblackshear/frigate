@@ -442,6 +442,8 @@ def config_set(request: Request, body: AppConfigSetBody):
             updates = process_config_query_string(query_string)
         elif body.config_data:
             updates = flatten_config_data(body.config_data)
+            # Convert None values to empty strings for deletion (e.g., when deleting masks)
+            updates = {k: ("" if v is None else v) for k, v in updates.items()}
 
         if not updates:
             return JSONResponse(
