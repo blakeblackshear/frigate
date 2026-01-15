@@ -233,7 +233,7 @@ class ImprovedMotionDetector(MotionDetector):
 
     def update_mask(self) -> None:
         resized_mask = cv2.resize(
-            self.config.mask,
+            self.config.rasterized_mask,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
             interpolation=cv2.INTER_AREA,
         )

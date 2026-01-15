@@ -116,7 +116,9 @@ class PtzMotionEstimator:
                 mask[y1:y2, x1:x2] = 0
 
             # merge camera config motion mask with detections. Norfair function needs 0,1 mask
-            mask = np.bitwise_and(mask, self.camera_config.motion.mask).clip(max=1)
+            mask = np.bitwise_and(mask, self.camera_config.motion.rasterized_mask).clip(
+                max=1
+            )
 
             # Norfair estimator function needs color so it can convert it right back to gray
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGRA)
