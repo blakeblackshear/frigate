@@ -24,7 +24,10 @@ from frigate.api.defs.request.export_case_body import (
     ExportCaseCreateBody,
     ExportCaseUpdateBody,
 )
-from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
+from frigate.api.defs.request.export_recordings_body import (
+    ExportRecordingsBody,
+    ExportRecordingsCustomBody,
+)
 from frigate.api.defs.request.export_rename_body import ExportRenameBody
 from frigate.api.defs.response.export_case_response import (
     ExportCaseModel,
@@ -40,7 +43,7 @@ from frigate.api.defs.tags import Tags
 from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.record.export import (
-    PlaybackFactorEnum,
+    DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
     PlaybackSourceEnum,
     RecordingExporter,
 )
@@ -262,7 +265,6 @@ def export_recording(
             status_code=404,
         )
 
-    playback_factor = body.playback
     playback_source = body.source
     friendly_name = body.name
     existing_image = sanitize_filepath(body.image_path) if body.image_path else None
@@ -335,11 +337,6 @@ def export_recording(
         existing_image,
         int(start_time),
         int(end_time),
-        (
-            PlaybackFactorEnum[playback_factor]
-            if playback_factor in PlaybackFactorEnum.__members__.values()
-            else PlaybackFactorEnum.realtime
-        ),
         (
             PlaybackSourceEnum[playback_source]
             if playback_source in PlaybackSourceEnum.__members__.values()
@@ -450,6 +447,138 @@ async def export_delete(event_id: str, request: Request):
             {
                 "success": True,
                 "message": "Successfully deleted export.",
+            }
+        ),
+        status_code=200,
+    )
+
+
+@router.post(
+    "/export/custom/{camera_name}/start/{start_time}/end/{end_time}",
+    response_model=StartExportResponse,
+    dependencies=[Depends(require_camera_access)],
+    summary="Start custom recording export",
+    description="""Starts an export of a recording for the specified time range using custom FFmpeg arguments.
+    The export can be from recordings or preview footage. Returns the export ID if
+    successful, or an error message if the camera is invalid or no recordings/previews
+    are found for the time range. If ffmpeg_input_args and ffmpeg_output_args are not provided,
+    defaults to timelapse export settings.""",
+)
+def export_recording_custom(
+    request: Request,
+    camera_name: str,
+    start_time: float,
+    end_time: float,
+    body: ExportRecordingsCustomBody,
+):
+    if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
+        return JSONResponse(
+            content=(
+                {"success": False, "message": f"{camera_name} is not a valid camera."}
+            ),
+            status_code=404,
+        )
+
+    playback_source = body.source
+    friendly_name = body.name
+    existing_image = sanitize_filepath(body.image_path) if body.image_path else None
+    ffmpeg_input_args = body.ffmpeg_input_args
+    ffmpeg_output_args = body.ffmpeg_output_args
+    cpu_fallback = body.cpu_fallback
+
+    export_case_id = body.export_case_id
+    if export_case_id is not None:
+        try:
+            ExportCase.get(ExportCase.id == export_case_id)
+        except DoesNotExist:
+            return JSONResponse(
+                content={"success": False, "message": "Export case not found"},
+                status_code=404,
+            )
+
+    # Ensure that existing_image is a valid path
+    if existing_image and not existing_image.startswith(CLIPS_DIR):
+        return JSONResponse(
+            content=({"success": False, "message": "Invalid image path"}),
+            status_code=400,
+        )
+
+    if playback_source == "recordings":
+        recordings_count = (
+            Recordings.select()
+            .where(
+                Recordings.start_time.between(start_time, end_time)
+                | Recordings.end_time.between(start_time, end_time)
+                | (
+                    (start_time > Recordings.start_time)
+                    & (end_time < Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .count()
+        )
+
+        if recordings_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No recordings found for time range"}
+                ),
+                status_code=400,
+            )
+    else:
+        previews_count = (
+            Previews.select()
+            .where(
+                Previews.start_time.between(start_time, end_time)
+                | Previews.end_time.between(start_time, end_time)
+                | ((start_time > Previews.start_time) & (end_time < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .count()
+        )
+
+        if not is_current_hour(start_time) and previews_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No previews found for time range"}
+                ),
+                status_code=400,
+            )
+
+    export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
+
+    # Set default values if not provided (timelapse defaults)
+    if ffmpeg_input_args is None:
+        ffmpeg_input_args = ""
+
+    if ffmpeg_output_args is None:
+        ffmpeg_output_args = DEFAULT_TIME_LAPSE_FFMPEG_ARGS
+
+    exporter = RecordingExporter(
+        request.app.frigate_config,
+        export_id,
+        camera_name,
+        friendly_name,
+        existing_image,
+        int(start_time),
+        int(end_time),
+        (
+            PlaybackSourceEnum[playback_source]
+            if playback_source in PlaybackSourceEnum.__members__.values()
+            else PlaybackSourceEnum.recordings
+        ),
+        export_case_id,
+        ffmpeg_input_args,
+        ffmpeg_output_args,
+        cpu_fallback,
+    )
+    exporter.start()
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": "Starting export of recording.",
+                "export_id": export_id,
             }
         ),
         status_code=200,

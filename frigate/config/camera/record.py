@@ -19,8 +19,6 @@ __all__ = [
     "RetainModeEnum",
 ]
 
-DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
-
 
 class RecordRetainConfig(FrigateBaseModel):
     days: float = Field(default=0, ge=0, title="Default retention period.")
@@ -67,9 +65,6 @@ class RecordPreviewConfig(FrigateBaseModel):
 
 
 class RecordExportConfig(FrigateBaseModel):
-    timelapse_args: str = Field(
-        default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
-    )
     hwaccel_args: Union[str, list[str]] = Field(
         default="auto", title="Export-specific FFmpeg hardware acceleration arguments."
     )

@@ -442,12 +442,34 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     if new_config.get("record", {}).get("sync_recordings") is not None:
         del new_config["record"]["sync_recordings"]
 
-    # Remove deprecated sync_recordings from camera-specific record configs
+    # Remove deprecated timelapse_args from global record export config
+    if new_config.get("record", {}).get("export", {}).get("timelapse_args") is not None:
+        del new_config["record"]["export"]["timelapse_args"]
+        # Remove export section if empty
+        if not new_config.get("record", {}).get("export"):
+            del new_config["record"]["export"]
+        # Remove record section if empty
+        if not new_config.get("record"):
+            del new_config["record"]
+
+    # Remove deprecated sync_recordings and timelapse_args from camera-specific record configs
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, Any]] = camera.copy()
 
         if camera_config.get("record", {}).get("sync_recordings") is not None:
             del camera_config["record"]["sync_recordings"]
+
+        if (
+            camera_config.get("record", {}).get("export", {}).get("timelapse_args")
+            is not None
+        ):
+            del camera_config["record"]["export"]["timelapse_args"]
+            # Remove export section if empty
+            if not camera_config.get("record", {}).get("export"):
+                del camera_config["record"]["export"]
+            # Remove record section if empty
+            if not camera_config.get("record"):
+                del camera_config["record"]
 
         new_config["cameras"][name] = camera_config
 
