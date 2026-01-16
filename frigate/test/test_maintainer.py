@@ -1,38 +1,40 @@
-
 import unittest
 from unittest.mock import MagicMock, patch
 import sys
 import datetime
 
 # Mock complex imports before importing maintainer
-sys.modules['frigate.comms.inter_process'] = MagicMock()
-sys.modules['frigate.comms.detections_updater'] = MagicMock()
-sys.modules['frigate.comms.recordings_updater'] = MagicMock()
-sys.modules['frigate.config.camera.updater'] = MagicMock()
+sys.modules["frigate.comms.inter_process"] = MagicMock()
+sys.modules["frigate.comms.detections_updater"] = MagicMock()
+sys.modules["frigate.comms.recordings_updater"] = MagicMock()
+sys.modules["frigate.config.camera.updater"] = MagicMock()
 
 # Now import the class under test
 from frigate.record.maintainer import RecordingMaintainer
 from frigate.config import FrigateConfig
+
 
 class TestMaintainer(unittest.IsolatedAsyncioTestCase):
     async def test_move_files_survives_bad_filename(self):
         config = MagicMock(spec=FrigateConfig)
         config.cameras = {}
         stop_event = MagicMock()
-        
+
         maintainer = RecordingMaintainer(config, stop_event)
-        
+
         # We need to mock end_time_cache to avoid key errors if logic proceeds
         maintainer.end_time_cache = {}
 
         # Mock filesystem
         # One bad file, one good file
-        files = ['bad_filename.mp4', 'camera@20210101000000+0000.mp4']
-        
-        with patch('os.listdir', return_value=files):
-            with patch('os.path.isfile', return_value=True):
-                with patch('frigate.record.maintainer.psutil.process_iter', return_value=[]):
-                    with patch('frigate.record.maintainer.logger.warning') as warn:
+        files = ["bad_filename.mp4", "camera@20210101000000+0000.mp4"]
+
+        with patch("os.listdir", return_value=files):
+            with patch("os.path.isfile", return_value=True):
+                with patch(
+                    "frigate.record.maintainer.psutil.process_iter", return_value=[]
+                ):
+                    with patch("frigate.record.maintainer.logger.warning") as warn:
                         # Mock validate_and_move_segment to avoid further logic
                         maintainer.validate_and_move_segment = MagicMock()
 
@@ -61,5 +63,6 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                             f"Expected a single warning for bad filename, got {len(matching)}",
                         )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
