@@ -1,2 +1,3 @@
-Never write strings in the frontend directly, always write to and reference the relevant translations file.
-Always conform new and refactored code to the existing coding style in the project.
+- For Frigate NVR, never write strings in the frontend directly. Since the project uses `react-i18next`, use `t()` and write the English string in the relevant translations file in `web/public/locales/en`.
+- Always conform new and refactored code to the existing coding style in the project.
+- Always have a way to test your work and confirm your changes. When running backend tests, use `python3 -u -m unittest`.
