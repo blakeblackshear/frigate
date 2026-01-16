@@ -32,18 +32,34 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         with patch('os.listdir', return_value=files):
             with patch('os.path.isfile', return_value=True):
                 with patch('frigate.record.maintainer.psutil.process_iter', return_value=[]):
-                    # Mock validate_and_move_segment to avoid further logic
-                    maintainer.validate_and_move_segment = MagicMock()
-                    
-                    try:
-                        await maintainer.move_files()
-                    except ValueError as e:
-                        if "not enough values to unpack" in str(e):
-                            self.fail("move_files() crashed on bad filename!")
-                        raise e
-                    except Exception:
-                        # Ignore other errors (like DB connection) as we only care about the unpack crash
-                        pass
+                    with patch('frigate.record.maintainer.logger.warning') as warn:
+                        # Mock validate_and_move_segment to avoid further logic
+                        maintainer.validate_and_move_segment = MagicMock()
+
+                        try:
+                            await maintainer.move_files()
+                        except ValueError as e:
+                            if "not enough values to unpack" in str(e):
+                                self.fail("move_files() crashed on bad filename!")
+                            raise e
+                        except Exception:
+                            # Ignore other errors (like DB connection) as we only care about the unpack crash
+                            pass
+
+                        # The bad filename is encountered in multiple loops, but should only warn once.
+                        matching = [
+                            c
+                            for c in warn.call_args_list
+                            if c.args
+                            and isinstance(c.args[0], str)
+                            and "Skipping unexpected file in cache: bad_filename.mp4"
+                            in c.args[0]
+                        ]
+                        self.assertEqual(
+                            1,
+                            len(matching),
+                            f"Expected a single warning for bad filename, got {len(matching)}",
+                        )
 
 if __name__ == '__main__':
     unittest.main()
