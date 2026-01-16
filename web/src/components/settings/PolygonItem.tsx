@@ -33,6 +33,7 @@ import IconWrapper from "../ui/icon-wrapper";
 import { buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { cn } from "@/lib/utils";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -42,6 +43,10 @@ type PolygonItemProps = {
   setActivePolygonIndex: (index: number | undefined) => void;
   setEditPane: (type: PolygonType) => void;
   handleCopyCoordinates: (index: number) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  loadingPolygonIndex: number | undefined;
+  setLoadingPolygonIndex: (index: number | undefined) => void;
 };
 
 export default function PolygonItem({
@@ -52,12 +57,15 @@ export default function PolygonItem({
   setActivePolygonIndex,
   setEditPane,
   handleCopyCoordinates,
+  isLoading,
+  setIsLoading,
+  loadingPolygonIndex,
+  setLoadingPolygonIndex,
 }: PolygonItemProps) {
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -89,6 +97,7 @@ export default function PolygonItem({
               : polygon.type;
 
       setIsLoading(true);
+      setLoadingPolygonIndex(index);
 
       if (polygon.type === "zone") {
         // Zones use query string format
@@ -233,9 +242,17 @@ export default function PolygonItem({
         })
         .finally(() => {
           setIsLoading(false);
+          setLoadingPolygonIndex(undefined);
         });
     },
-    [updateConfig, cameraConfig, t],
+    [
+      updateConfig,
+      cameraConfig,
+      t,
+      setIsLoading,
+      index,
+      setLoadingPolygonIndex,
+    ],
   );
 
   const handleDelete = () => {
@@ -261,6 +278,7 @@ export default function PolygonItem({
               : polygon.type;
 
       setIsLoading(true);
+      setLoadingPolygonIndex(index);
 
       if (polygon.type === "zone") {
         // Zones use query string format
@@ -390,9 +408,18 @@ export default function PolygonItem({
         })
         .finally(() => {
           setIsLoading(false);
+          setLoadingPolygonIndex(undefined);
         });
     },
-    [updateConfig, cameraConfig, t, polygon],
+    [
+      updateConfig,
+      cameraConfig,
+      t,
+      polygon,
+      setIsLoading,
+      index,
+      setLoadingPolygonIndex,
+    ],
   );
 
   return (
@@ -420,7 +447,7 @@ export default function PolygonItem({
           }`}
         >
           {PolygonItemIcon &&
-            (isLoading ? (
+            (isLoading && loadingPolygonIndex === index ? (
               <div className="mr-2">
                 <ActivityIndicator className="size-5" />
               </div>
@@ -431,7 +458,7 @@ export default function PolygonItem({
                     type="button"
                     onClick={handleToggleEnabled}
                     disabled={isLoading}
-                    className="mr-2 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70"
+                    className="mr-2 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PolygonItemIcon
                       className="size-5"
@@ -509,6 +536,7 @@ export default function PolygonItem({
               <DropdownMenuContent>
                 <DropdownMenuItem
                   aria-label={t("button.edit", { ns: "common" })}
+                  disabled={isLoading}
                   onClick={() => {
                     setActivePolygonIndex(index);
                     setEditPane(polygon.type);
@@ -518,6 +546,7 @@ export default function PolygonItem({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   aria-label={t("button.copy", { ns: "common" })}
+                  disabled={isLoading}
                   onClick={() => handleCopyCoordinates(index)}
                 >
                   {t("button.copy", { ns: "common" })}
@@ -539,10 +568,17 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={LuPencil}
-                  className={`size-[15px] cursor-pointer ${hoveredPolygonIndex === index && "text-primary-variant"}`}
+                  disabled={isLoading}
+                  className={cn(
+                    "size-[15px] cursor-pointer",
+                    hoveredPolygonIndex === index && "text-primary-variant",
+                    isLoading && "cursor-not-allowed opacity-50",
+                  )}
                   onClick={() => {
-                    setActivePolygonIndex(index);
-                    setEditPane(polygon.type);
+                    if (!isLoading) {
+                      setActivePolygonIndex(index);
+                      setEditPane(polygon.type);
+                    }
                   }}
                 />
               </TooltipTrigger>
@@ -555,10 +591,16 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={LuCopy}
-                  className={`size-[15px] cursor-pointer ${
-                    hoveredPolygonIndex === index && "text-primary-variant"
-                  }`}
-                  onClick={() => handleCopyCoordinates(index)}
+                  className={cn(
+                    "size-[15px] cursor-pointer",
+                    hoveredPolygonIndex === index && "text-primary-variant",
+                    isLoading && "cursor-not-allowed opacity-50",
+                  )}
+                  onClick={() => {
+                    if (!isLoading) {
+                      handleCopyCoordinates(index);
+                    }
+                  }}
                 />
               </TooltipTrigger>
               <TooltipContent>
@@ -570,10 +612,13 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={HiTrash}
-                  className={`size-[15px] cursor-pointer ${
+                  disabled={isLoading}
+                  className={cn(
+                    "size-[15px] cursor-pointer",
                     hoveredPolygonIndex === index &&
-                    "fill-primary-variant text-primary-variant"
-                  }`}
+                      "fill-primary-variant text-primary-variant",
+                    isLoading && "cursor-not-allowed opacity-50",
+                  )}
                   onClick={() => !isLoading && setDeleteDialogOpen(true)}
                 />
               </TooltipTrigger>

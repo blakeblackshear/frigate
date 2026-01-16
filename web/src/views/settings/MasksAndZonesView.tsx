@@ -53,6 +53,9 @@ export default function MasksAndZonesView({
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingPolygonIndex, setLoadingPolygonIndex] = useState<
+    number | undefined
+  >(undefined);
   const [activePolygonIndex, setActivePolygonIndex] = useState<
     number | undefined
   >(undefined);
@@ -538,6 +541,10 @@ export default function MasksAndZonesView({
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
                             handleCopyCoordinates={handleCopyCoordinates}
+                            isLoading={isLoading}
+                            setIsLoading={setIsLoading}
+                            loadingPolygonIndex={loadingPolygonIndex}
+                            setLoadingPolygonIndex={setLoadingPolygonIndex}
                           />
                         ))}
                     </div>
@@ -608,6 +615,10 @@ export default function MasksAndZonesView({
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
                             handleCopyCoordinates={handleCopyCoordinates}
+                            isLoading={isLoading}
+                            setIsLoading={setIsLoading}
+                            loadingPolygonIndex={loadingPolygonIndex}
+                            setLoadingPolygonIndex={setLoadingPolygonIndex}
                           />
                         ))}
                     </div>
@@ -678,6 +689,10 @@ export default function MasksAndZonesView({
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
                             handleCopyCoordinates={handleCopyCoordinates}
+                            isLoading={isLoading}
+                            setIsLoading={setIsLoading}
+                            loadingPolygonIndex={loadingPolygonIndex}
+                            setLoadingPolygonIndex={setLoadingPolygonIndex}
                           />
                         ))}
                     </div>
