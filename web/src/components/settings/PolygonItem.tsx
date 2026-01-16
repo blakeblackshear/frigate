@@ -32,6 +32,7 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -242,6 +243,158 @@ export default function PolygonItem({
     saveToConfig(polygon);
   };
 
+  const handleToggleEnabled = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!polygon || !cameraConfig) {
+        return;
+      }
+
+      const newEnabledState = polygon.enabled === false;
+      const updateTopicType =
+        polygon.type === "zone"
+          ? "zones"
+          : polygon.type === "motion_mask"
+            ? "motion"
+            : polygon.type === "object_mask"
+              ? "objects"
+              : polygon.type;
+
+      setIsLoading(true);
+
+      if (polygon.type === "zone") {
+        // Zones use query string format
+        const url = `cameras.${polygon.camera}.zones.${polygon.name}.enabled=${newEnabledState ? "True" : "False"}`;
+
+        await axios
+          .put(`config/set?${url}`, {
+            requires_restart: 0,
+            update_topic: `config/cameras/${polygon.camera}/${updateTopicType}`,
+          })
+          .then((res) => {
+            if (res.status === 200) {
+              updateConfig();
+            } else {
+              toast.error(
+                t("toast.save.error.title", {
+                  ns: "common",
+                  errorMessage: res.statusText,
+                }),
+                { position: "top-center" },
+              );
+            }
+          })
+          .catch((error) => {
+            const errorMessage =
+              error.response?.data?.message ||
+              error.response?.data?.detail ||
+              "Unknown error";
+            toast.error(
+              t("toast.save.error.title", { errorMessage, ns: "common" }),
+              { position: "top-center" },
+            );
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+        return;
+      }
+
+      // Motion masks and object masks use JSON body format
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let configUpdate: any = {};
+
+      if (polygon.type === "motion_mask") {
+        configUpdate = {
+          cameras: {
+            [polygon.camera]: {
+              motion: {
+                mask: {
+                  [polygon.name]: {
+                    enabled: newEnabledState,
+                  },
+                },
+              },
+            },
+          },
+        };
+      }
+
+      if (polygon.type === "object_mask") {
+        // Determine if this is a global mask or object-specific mask
+        const isGlobalMask = !polygon.objects.length;
+
+        if (isGlobalMask) {
+          configUpdate = {
+            cameras: {
+              [polygon.camera]: {
+                objects: {
+                  mask: {
+                    [polygon.name]: {
+                      enabled: newEnabledState,
+                    },
+                  },
+                },
+              },
+            },
+          };
+        } else {
+          configUpdate = {
+            cameras: {
+              [polygon.camera]: {
+                objects: {
+                  filters: {
+                    [polygon.objects[0]]: {
+                      mask: {
+                        [polygon.name]: {
+                          enabled: newEnabledState,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          };
+        }
+      }
+
+      await axios
+        .put("config/set", {
+          config_data: configUpdate,
+          requires_restart: 0,
+          update_topic: `config/cameras/${polygon.camera}/${updateTopicType}`,
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            updateConfig();
+          } else {
+            toast.error(
+              t("toast.save.error.title", {
+                ns: "common",
+                errorMessage: res.statusText,
+              }),
+              { position: "top-center" },
+            );
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            { position: "top-center" },
+          );
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    [updateConfig, cameraConfig, t, polygon],
+  );
+
   return (
     <>
       <Toaster position="top-center" closeButton={true} />
@@ -266,15 +419,42 @@ export default function PolygonItem({
               : "text-primary-variant"
           }`}
         >
-          {PolygonItemIcon && (
-            <PolygonItemIcon
-              className="mr-2 size-5"
-              style={{
-                fill: toRGBColorString(polygon.color, true),
-                color: toRGBColorString(polygon.color, true),
-              }}
-            />
-          )}
+          {PolygonItemIcon &&
+            (isLoading ? (
+              <div className="mr-2">
+                <ActivityIndicator className="size-5" />
+              </div>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleToggleEnabled}
+                    disabled={isLoading}
+                    className="mr-2 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70"
+                  >
+                    <PolygonItemIcon
+                      className="size-5"
+                      style={{
+                        fill: toRGBColorString(
+                          polygon.color,
+                          polygon.enabled ?? true,
+                        ),
+                        color: toRGBColorString(
+                          polygon.color,
+                          polygon.enabled ?? true,
+                        ),
+                      }}
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {polygon.enabled === false
+                    ? t("button.enable", { ns: "common" })
+                    : t("button.disable", { ns: "common" })}
+                </TooltipContent>
+              </Tooltip>
+            ))}
           <p
             className={`cursor-default ${polygon.enabled === false ? "line-through" : ""}`}
           >
