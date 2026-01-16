@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -598,7 +599,7 @@ export default function TriggerView({
                                           date_style: "medium",
                                         },
                                       )
-                                    : "Never"}
+                                    : t("never", { ns: "common" })}
                                 </span>
                                 {trigger_status?.triggers[trigger.name]
                                   ?.triggering_event_id && (
@@ -663,7 +664,9 @@ export default function TriggerView({
                     <TableHeader className="sticky top-0 bg-muted/50">
                       <TableRow>
                         <TableHead className="w-4"></TableHead>
-                        <TableHead>{t("name", { ns: "common" })}</TableHead>
+                        <TableHead>
+                          {t("name", { ns: "triggers.table.name" })}
+                        </TableHead>
                         <TableHead>{t("triggers.table.type")}</TableHead>
                         <TableHead>
                           {t("triggers.table.lastTriggered")}
@@ -759,7 +762,7 @@ export default function TriggerView({
                                           date_style: "medium",
                                         },
                                       )
-                                    : "Never"}
+                                    : t("time.never", { ns: "common" })}
                                 </span>
                                 {trigger_status?.triggers[trigger.name]
                                   ?.triggering_event_id && (

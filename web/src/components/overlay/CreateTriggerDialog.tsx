@@ -268,7 +268,7 @@ export default function CreateTriggerDialog({
                 <FormItem className="flex flex-row items-center justify-between">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">
-                      {t("enabled", { ns: "common" })}
+                      {t("button.enabled", { ns: "common" })}
                     </FormLabel>
                     <div className="text-sm text-muted-foreground">
                       {t("triggers.dialog.form.enabled.description")}
@@ -394,7 +394,10 @@ export default function CreateTriggerDialog({
                   </FormLabel>
                   <div className="space-y-2">
                     {availableActions.map((action) => (
-                      <div key={action} className="flex items-center space-x-2">
+                      <label
+                        key={action}
+                        className="flex cursor-pointer items-center space-x-2"
+                      >
                         <FormControl>
                           <Checkbox
                             checked={form
@@ -416,10 +419,10 @@ export default function CreateTriggerDialog({
                             }}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-normal">
+                        <span className="text-sm font-normal">
                           {t(`triggers.actions.${action}`)}
-                        </FormLabel>
-                      </div>
+                        </span>
+                      </label>
                     ))}
                   </div>
                   <FormDescription>

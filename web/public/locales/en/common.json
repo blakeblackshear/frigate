@@ -3,6 +3,7 @@
     "untilForTime": "Until {{time}}",
     "untilForRestart": "Until Frigate restarts.",
     "untilRestart": "Until restart",
+    "never": "Never",
     "ago": "{{timeAgo}} ago",
     "justNow": "Just now",
     "today": "Today",
