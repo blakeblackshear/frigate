@@ -55,26 +55,6 @@ export default function PolygonDrawer({
   const groupRef = useRef<Konva.Group>(null);
   const [cursor, setCursor] = useState("default");
 
-  const patternCanvas = useMemo(() => {
-    if (enabled) {
-      return undefined;
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 10;
-    canvas.height = 10;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(10, 0);
-      ctx.lineTo(0, 10);
-      ctx.stroke();
-    }
-    return canvas as unknown as HTMLImageElement;
-  }, [enabled]);
-
   const handleMouseOverPoint = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
@@ -130,9 +110,15 @@ export default function PolygonDrawer({
 
   const colorString = useCallback(
     (darkened: boolean) => {
+      if (!enabled) {
+        // Slightly desaturate the color when disabled
+        const avg = (color[0] + color[1] + color[2]) / 3;
+        const desaturated = color.map((c) => Math.round(c * 0.4 + avg * 0.6));
+        return toRGBColorString(desaturated, darkened);
+      }
       return toRGBColorString(color, darkened);
     },
-    [color],
+    [color, enabled],
   );
 
   useEffect(() => {
@@ -184,9 +170,11 @@ export default function PolygonDrawer({
         points={flattenedPoints}
         stroke={colorString(true)}
         strokeWidth={3}
+        dash={enabled ? undefined : [10, 5]}
         hitStrokeWidth={12}
         closed={isFinished}
         fill={colorString(isActive || isHovered ? true : false)}
+        opacity={enabled ? 1 : 0.85}
         onMouseOver={() =>
           isActive
             ? isFinished
@@ -202,15 +190,6 @@ export default function PolygonDrawer({
             : setCursor("default")
         }
       />
-      {!enabled && isFinished && (
-        <Line
-          points={flattenedPoints}
-          closed={isFinished}
-          fillPriority="pattern"
-          fillPatternImage={patternCanvas}
-          listening={false}
-        />
-      )}
       {isFinished && isActive && (
         <Line
           name="unfilled-line"
