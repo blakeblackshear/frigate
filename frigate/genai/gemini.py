@@ -24,6 +24,14 @@ class GeminiClient(GenAIClient):
         http_options_dict = {
             "api_version": "v1",
             "timeout": int(self.timeout * 1000),  # requires milliseconds
+            "retry_options": types.HttpRetryOptions(
+                attempts=3,
+                initial_delay=1.0,
+                max_delay=60.0,
+                exp_base=2.0,
+                jitter=1.0,
+                http_status_codes=[429, 500, 502, 503, 504],
+            ),
         }
 
         if isinstance(self.genai_config.provider_options, dict):
