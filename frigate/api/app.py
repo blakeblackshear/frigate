@@ -19,6 +19,7 @@ from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from filelock import FileLock, Timeout
 from markupsafe import escape
 from peewee import SQL, fn, operator
 from pydantic import ValidationError
@@ -424,103 +425,123 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
 @router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
 def config_set(request: Request, body: AppConfigSetBody):
     config_file = find_config_file()
-
-    with open(config_file, "r") as f:
-        old_raw_config = f.read()
+    lock = FileLock(f"{config_file}.lock", timeout=5)
 
     try:
-        updates = {}
+        with lock:
+            with open(config_file, "r") as f:
+                old_raw_config = f.read()
 
-        # process query string parameters (takes precedence over body.config_data)
-        parsed_url = urllib.parse.urlparse(str(request.url))
-        query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
+            try:
+                updates = {}
 
-        # Filter out empty keys but keep blank values for non-empty keys
-        query_string = {k: v for k, v in query_string.items() if k}
+                # process query string parameters (takes precedence over body.config_data)
+                parsed_url = urllib.parse.urlparse(str(request.url))
+                query_string = urllib.parse.parse_qs(
+                    parsed_url.query, keep_blank_values=True
+                )
 
-        if query_string:
-            updates = process_config_query_string(query_string)
-        elif body.config_data:
-            updates = flatten_config_data(body.config_data)
-            # Convert None values to empty strings for deletion (e.g., when deleting masks)
-            updates = {k: ("" if v is None else v) for k, v in updates.items()}
+                # Filter out empty keys but keep blank values for non-empty keys
+                query_string = {k: v for k, v in query_string.items() if k}
 
-        if not updates:
-            return JSONResponse(
-                content=(
-                    {"success": False, "message": "No configuration data provided"}
-                ),
-                status_code=400,
-            )
+                if query_string:
+                    updates = process_config_query_string(query_string)
+                elif body.config_data:
+                    updates = flatten_config_data(body.config_data)
+                    # Convert None values to empty strings for deletion (e.g., when deleting masks)
+                    updates = {k: ("" if v is None else v) for k, v in updates.items()}
 
-        # apply all updates in a single operation
-        update_yaml_file_bulk(config_file, updates)
+                if not updates:
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": "No configuration data provided",
+                            }
+                        ),
+                        status_code=400,
+                    )
 
-        # validate the updated config
-        with open(config_file, "r") as f:
-            new_raw_config = f.read()
+                # apply all updates in a single operation
+                update_yaml_file_bulk(config_file, updates)
 
-        try:
-            config = FrigateConfig.parse(new_raw_config)
-        except Exception:
-            with open(config_file, "w") as f:
-                f.write(old_raw_config)
-                f.close()
-            logger.error(f"\nConfig Error:\n\n{str(traceback.format_exc())}")
+                # validate the updated config
+                with open(config_file, "r") as f:
+                    new_raw_config = f.read()
+
+                try:
+                    config = FrigateConfig.parse(new_raw_config)
+                except Exception:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                        f.close()
+                    logger.error(f"\nConfig Error:\n\n{str(traceback.format_exc())}")
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": "Error parsing config. Check logs for error message.",
+                            }
+                        ),
+                        status_code=400,
+                    )
+            except Exception as e:
+                logging.error(f"Error updating config: {e}")
+                return JSONResponse(
+                    content=({"success": False, "message": "Error updating config"}),
+                    status_code=500,
+                )
+
+            if body.requires_restart == 0 or body.update_topic:
+                old_config: FrigateConfig = request.app.frigate_config
+                request.app.frigate_config = config
+                request.app.genai_manager.update_config(config)
+
+                if body.update_topic:
+                    if body.update_topic.startswith("config/cameras/"):
+                        _, _, camera, field = body.update_topic.split("/")
+
+                        if field == "add":
+                            settings = config.cameras[camera]
+                        elif field == "remove":
+                            settings = old_config.cameras[camera]
+                        else:
+                            settings = config.get_nested_object(body.update_topic)
+
+                        request.app.config_publisher.publish_update(
+                            CameraConfigUpdateTopic(
+                                CameraConfigUpdateEnum[field], camera
+                            ),
+                            settings,
+                        )
+                    else:
+                        # Generic handling for global config updates
+                        settings = config.get_nested_object(body.update_topic)
+
+                        # Publish None for removal, actual config for add/update
+                        request.app.config_publisher.publisher.publish(
+                            body.update_topic, settings
+                        )
+
             return JSONResponse(
                 content=(
                     {
-                        "success": False,
-                        "message": "Error parsing config. Check logs for error message.",
+                        "success": True,
+                        "message": "Config successfully updated, restart to apply",
                     }
                 ),
-                status_code=400,
+                status_code=200,
             )
-    except Exception as e:
-        logging.error(f"Error updating config: {e}")
+    except Timeout:
         return JSONResponse(
-            content=({"success": False, "message": "Error updating config"}),
-            status_code=500,
+            content=(
+                {
+                    "success": False,
+                    "message": "Another process is currently updating the config. Please try again in a few seconds.",
+                }
+            ),
+            status_code=503,
         )
-
-    if body.requires_restart == 0 or body.update_topic:
-        old_config: FrigateConfig = request.app.frigate_config
-        request.app.frigate_config = config
-        request.app.genai_manager.update_config(config)
-
-        if body.update_topic:
-            if body.update_topic.startswith("config/cameras/"):
-                _, _, camera, field = body.update_topic.split("/")
-
-                if field == "add":
-                    settings = config.cameras[camera]
-                elif field == "remove":
-                    settings = old_config.cameras[camera]
-                else:
-                    settings = config.get_nested_object(body.update_topic)
-
-                request.app.config_publisher.publish_update(
-                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
-                    settings,
-                )
-            else:
-                # Generic handling for global config updates
-                settings = config.get_nested_object(body.update_topic)
-
-                # Publish None for removal, actual config for add/update
-                request.app.config_publisher.publisher.publish(
-                    body.update_topic, settings
-                )
-
-    return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Config successfully updated, restart to apply",
-            }
-        ),
-        status_code=200,
-    )
 
 
 @router.get("/vainfo", dependencies=[Depends(allow_any_authenticated())])
