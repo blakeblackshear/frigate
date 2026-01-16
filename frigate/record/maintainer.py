@@ -112,7 +112,12 @@ class RecordingMaintainer(threading.Thread):
         for cache in cache_files:
             cache_path = os.path.join(CACHE_DIR, cache)
             basename = os.path.splitext(cache)[0]
-            camera, date = basename.rsplit("@", maxsplit=1)
+            try:
+                camera, date = basename.rsplit("@", maxsplit=1)
+            except ValueError:
+                logger.warning(f"Skipping unexpected file in cache: {cache}")
+                continue
+
             start_time = datetime.datetime.strptime(
                 date, CACHE_SEGMENT_FORMAT
             ).astimezone(datetime.timezone.utc)
@@ -164,7 +169,11 @@ class RecordingMaintainer(threading.Thread):
 
             cache_path = os.path.join(CACHE_DIR, cache)
             basename = os.path.splitext(cache)[0]
-            camera, date = basename.rsplit("@", maxsplit=1)
+            try:
+                camera, date = basename.rsplit("@", maxsplit=1)
+            except ValueError:
+                logger.warning(f"Skipping unexpected file in cache: {cache}")
+                continue
 
             # important that start_time is utc because recordings are stored and compared in utc
             start_time = datetime.datetime.strptime(
