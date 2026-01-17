@@ -23,7 +23,12 @@ from markupsafe import escape
 from peewee import SQL, fn, operator
 from pydantic import ValidationError
 
-from frigate.api.auth import allow_any_authenticated, allow_public, require_role
+from frigate.api.auth import (
+    allow_any_authenticated,
+    allow_public,
+    get_allowed_cameras_for_filter,
+    require_role,
+)
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
@@ -687,13 +692,19 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 @router.get(
     "/recognized_license_plates", dependencies=[Depends(allow_any_authenticated())]
 )
-def get_recognized_license_plates(split_joined: Optional[int] = None):
+def get_recognized_license_plates(
+    split_joined: Optional[int] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         query = (
             Event.select(
                 SQL("json_extract(data, '$.recognized_license_plate') AS plate")
             )
-            .where(SQL("json_extract(data, '$.recognized_license_plate') IS NOT NULL"))
+            .where(
+                (SQL("json_extract(data, '$.recognized_license_plate') IS NOT NULL"))
+                & (Event.camera << allowed_cameras)
+            )
             .distinct()
         )
         recognized_license_plates = [row[0] for row in query.tuples()]
