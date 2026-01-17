@@ -662,6 +662,13 @@ class FrigateConfig(FrigateBaseModel):
             # generate zone contours
             if len(camera_config.zones) > 0:
                 for zone in camera_config.zones.values():
+                    if zone.filters:
+                        for object_name, filter_config in zone.filters.items():
+                            zone.filters[object_name] = RuntimeFilterConfig(
+                                frame_shape=camera_config.frame_shape,
+                                **filter_config.model_dump(exclude_unset=True),
+                            )
+
                     zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
