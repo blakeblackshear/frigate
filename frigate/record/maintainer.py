@@ -97,7 +97,7 @@ class RecordingMaintainer(threading.Thread):
         self.object_recordings_info: dict[str, list] = defaultdict(list)
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
-        self.unexpected_cache_files_seen: set[str] = set()
+        self.unexpected_cache_files_logged: bool = False
 
     async def move_files(self) -> None:
         cache_files = [
@@ -116,9 +116,9 @@ class RecordingMaintainer(threading.Thread):
             try:
                 camera, date = basename.rsplit("@", maxsplit=1)
             except ValueError:
-                if cache not in self.unexpected_cache_files_seen:
-                    logger.warning(f"Skipping unexpected file in cache: {cache}")
-                    self.unexpected_cache_files_seen.add(cache)
+                if not self.unexpected_cache_files_logged:
+                    logger.warning("Skipping unexpected files in cache")
+                    self.unexpected_cache_files_logged = True
                 continue
 
             start_time = datetime.datetime.strptime(
@@ -175,9 +175,9 @@ class RecordingMaintainer(threading.Thread):
             try:
                 camera, date = basename.rsplit("@", maxsplit=1)
             except ValueError:
-                if cache not in self.unexpected_cache_files_seen:
-                    logger.warning(f"Skipping unexpected file in cache: {cache}")
-                    self.unexpected_cache_files_seen.add(cache)
+                if not self.unexpected_cache_files_logged:
+                    logger.warning("Skipping unexpected files in cache")
+                    self.unexpected_cache_files_logged = True
                 continue
 
             # important that start_time is utc because recordings are stored and compared in utc

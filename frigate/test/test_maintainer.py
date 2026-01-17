@@ -1,7 +1,6 @@
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
-import sys
-import datetime
 
 # Mock complex imports before importing maintainer
 sys.modules["frigate.comms.inter_process"] = MagicMock()
@@ -10,8 +9,8 @@ sys.modules["frigate.comms.recordings_updater"] = MagicMock()
 sys.modules["frigate.config.camera.updater"] = MagicMock()
 
 # Now import the class under test
-from frigate.record.maintainer import RecordingMaintainer
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig  # noqa: E402
+from frigate.record.maintainer import RecordingMaintainer  # noqa: E402
 
 
 class TestMaintainer(unittest.IsolatedAsyncioTestCase):
@@ -54,13 +53,12 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                             for c in warn.call_args_list
                             if c.args
                             and isinstance(c.args[0], str)
-                            and "Skipping unexpected file in cache: bad_filename.mp4"
-                            in c.args[0]
+                            and "Skipping unexpected files in cache" in c.args[0]
                         ]
                         self.assertEqual(
                             1,
                             len(matching),
-                            f"Expected a single warning for bad filename, got {len(matching)}",
+                            f"Expected a single warning for unexpected files, got {len(matching)}",
                         )
 
 
