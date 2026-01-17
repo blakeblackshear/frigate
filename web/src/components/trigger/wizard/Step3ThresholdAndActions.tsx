@@ -200,9 +200,7 @@ export default function Step3ThresholdAndActions({
             {isLoading && <ActivityIndicator className="mr-2 size-5" />}
             {isLoading
               ? t("button.saving", { ns: "common" })
-              : t("triggers.dialog.form.save", {
-                  defaultValue: "Save Trigger",
-                })}
+              : t("button.save", { ns: "common" })}
           </Button>
         </div>
       </form>
