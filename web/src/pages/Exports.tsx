@@ -206,7 +206,7 @@ function Exports() {
           >
             {Object.values(exports).map((item) => (
               <ExportCard
-                key={item.name}
+                key={item.id}
                 className={
                   search == "" || filteredExports.includes(item) ? "" : "hidden"
                 }
