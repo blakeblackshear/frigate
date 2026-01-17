@@ -632,6 +632,49 @@ class TestConfig(unittest.TestCase):
         )
         assert frigate_config.cameras["back"].zones["test"].color != (0, 0, 0)
 
+    def test_zone_filter_area_percent_converts_to_pixels(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "record": {
+                "alerts": {
+                    "retain": {
+                        "days": 20,
+                    }
+                }
+            },
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "zones": {
+                        "notification": {
+                            "coordinates": "0.03,1,0.025,0,0.626,0,0.643,1",
+                            "objects": ["person"],
+                            "filters": {"person": {"min_area": 0.1}},
+                        }
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        expected_min_area = int(1080 * 1920 * 0.1)
+        assert (
+            frigate_config.cameras["back"]
+            .zones["notification"]
+            .filters["person"]
+            .min_area
+            == expected_min_area
+        )
+
     def test_zone_relative_matches_explicit(self):
         config = {
             "mqtt": {"host": "mqtt"},
