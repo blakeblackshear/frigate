@@ -1,9 +1,12 @@
 """Recordings Utilities."""
 
 import datetime
+import errno
 import logging
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Iterable
 
 from peewee import DatabaseError, chunked
 
@@ -47,20 +50,23 @@ class SyncResult:
         }
 
 
-def remove_empty_directories(directory: str) -> None:
-    # list all directories recursively and sort them by path,
-    # longest first
-    paths = sorted(
-        [x[0] for x in os.walk(directory)],
-        key=lambda p: len(str(p)),
-        reverse=True,
-    )
+def remove_empty_directories(paths: Iterable[Path]) -> None:
+    """
+    Remove directories if they exist and are empty.
+    Silently ignores non-existent and non-empty directories.
+    """
+    count = 0
     for path in paths:
-        # don't delete the parent
-        if path == directory:
+        try:
+            path.rmdir()
+        except FileNotFoundError:
             continue
-        if len(os.listdir(path)) == 0:
-            os.rmdir(path)
+        except OSError as e:
+            if e.errno == errno.ENOTEMPTY:
+                continue
+            raise
+        count += 1
+    logger.debug("Removed {count} empty directories")
 
 
 def sync_recordings(
