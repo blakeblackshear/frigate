@@ -13,7 +13,7 @@ import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { REVIEW_PADDING } from "@/types/review";
 import {
-  ASPECT_VERTICAL_LAYOUT,
+  ASPECT_PORTRAIT_LAYOUT,
   ASPECT_WIDE_LAYOUT,
   Recording,
 } from "@/types/record";
@@ -39,6 +39,7 @@ import { useApiHost } from "@/api";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { VideoResolutionType } from "@/types/live";
 
 type TrackingDetailsProps = {
   className?: string;
@@ -253,16 +254,25 @@ export function TrackingDetails({
 
   const [timelineSize] = useResizeObserver(timelineContainerRef);
 
+  const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
+
   const aspectRatio = useMemo(() => {
     if (!config) {
       return 16 / 9;
+    }
+
+    if (fullResolution.width && fullResolution.height) {
+      return fullResolution.width / fullResolution.height;
     }
 
     return (
       config.cameras[event.camera].detect.width /
       config.cameras[event.camera].detect.height
     );
-  }, [config, event]);
+  }, [config, event, fullResolution]);
 
   const label = event.sub_label
     ? event.sub_label
@@ -460,7 +470,7 @@ export function TrackingDetails({
       return "normal";
     } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
       return "wide";
-    } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
+    } else if (aspectRatio < ASPECT_PORTRAIT_LAYOUT) {
       return "tall";
     } else {
       return "normal";
@@ -556,6 +566,7 @@ export function TrackingDetails({
                 onSeekToTime={handleSeekToTime}
                 onUploadFrame={onUploadFrameToPlus}
                 onPlaying={() => setIsVideoLoading(false)}
+                setFullResolution={setFullResolution}
                 isDetailMode={true}
                 camera={event.camera}
                 currentTimeOverride={currentTime}
@@ -623,7 +634,7 @@ export function TrackingDetails({
       <div
         className={cn(
           isDesktop && "justify-start overflow-hidden",
-          aspectRatio > 1 && aspectRatio < 1.5
+          aspectRatio > 1 && aspectRatio < ASPECT_PORTRAIT_LAYOUT
             ? "lg:basis-3/5"
             : "lg:basis-2/5",
         )}
