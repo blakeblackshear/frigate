@@ -11,7 +11,7 @@ Cameras configured to output H.264 video and AAC audio will offer the most compa
 
 - **Stream Viewing**: This stream will be rebroadcast as is to Home Assistant for viewing with the stream component. Setting this resolution too high will use significant bandwidth when viewing streams in Home Assistant, and they may not load reliably over slower connections.
 
-::: tip
+:::tip
 
 For the best experience in Frigate's UI, configure your camera so that the detection and recording streams use the same aspect ratio. For example, if your main stream is 3840x2160 (16:9), set your substream to 640x360 (also 16:9) instead of 640x480 (4:3). While not strictly required, matching aspect ratios helps ensure seamless live stream display and preview/recordings playback.
 
