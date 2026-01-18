@@ -69,7 +69,7 @@ genai:
 
 ## llama.cpp
 
-[llama.cpp](https://github.com/ggerganov/llama.cpp) is a C++ implementation of LLaMA that provides a high-performance inference server. Using llama.cpp directly gives you access to all native llama.cpp options and parameters.
+[llama.cpp](https://github.com/ggml-org/llama.cpp) is a C++ implementation of LLaMA that provides a high-performance inference server. Using llama.cpp directly gives you access to all native llama.cpp options and parameters.
 
 :::warning
 
@@ -99,7 +99,7 @@ genai:
     seed: -1
 ```
 
-All llama.cpp native options can be passed through `provider_options`, including `temperature`, `top_k`, `top_p`, `min_p`, `repeat_penalty`, `repeat_last_n`, `seed`, `grammar`, and more. See the [llama.cpp server documentation](https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md) for a complete list of available parameters.
+All llama.cpp native options can be passed through `provider_options`, including `temperature`, `top_k`, `top_p`, `min_p`, `repeat_penalty`, `repeat_last_n`, `seed`, `grammar`, and more. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for a complete list of available parameters.
 
 ## Google Gemini
 
