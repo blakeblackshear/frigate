@@ -5,7 +5,7 @@ title: Configuring Generative AI
 
 ## Configuration
 
-A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
+A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 4 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
 To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
@@ -77,7 +77,45 @@ genai:
   provider: ollama
   base_url: http://localhost:11434
   model: qwen3-vl:4b
+  provider_options: # other Ollama client options can be defined
+    keep_alive: -1
+    options:
+      num_ctx: 8192 # make sure the context matches other services that are using ollama
 ```
+
+## llama.cpp
+
+[llama.cpp](https://github.com/ggml-org/llama.cpp) is a C++ implementation of LLaMA that provides a high-performance inference server. Using llama.cpp directly gives you access to all native llama.cpp options and parameters.
+
+:::warning
+
+Using llama.cpp on CPU is not recommended, high inference times make using Generative AI impractical.
+
+:::
+
+It is highly recommended to host the llama.cpp server on a machine with a discrete graphics card, or on an Apple silicon Mac for best performance.
+
+### Supported Models
+
+You must use a vision capable model with Frigate. The llama.cpp server supports various vision models in GGUF format.
+
+### Configuration
+
+```yaml
+genai:
+  provider: llamacpp
+  base_url: http://localhost:8080
+  model: your-model-name
+  provider_options:
+    temperature: 0.7
+    repeat_penalty: 1.05
+    top_p: 0.8
+    top_k: 40
+    min_p: 0.05
+    seed: -1
+```
+
+All llama.cpp native options can be passed through `provider_options`, including `temperature`, `top_k`, `top_p`, `min_p`, `repeat_penalty`, `repeat_last_n`, `seed`, `grammar`, and more. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for a complete list of available parameters.
 
 ## Google Gemini
 
