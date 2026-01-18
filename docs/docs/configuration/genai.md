@@ -66,8 +66,6 @@ Some models are labeled as **hybrid** (capable of both thinking and instruct tas
 **Recommendation:**
 Always select the `-instruct` or documented instruct/tagged variant of any model you use in your Frigate configuration. If in doubt, refer to your model provider’s documentation or model library for guidance on the correct model variant to use.
 
-
-
 ### Supported Models
 
 You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/search?c=vision). Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull qwen3-vl:2b-instruct` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
@@ -93,7 +91,7 @@ genai:
 
 ## Google Gemini
 
-Google Gemini has a free tier allowing [15 queries per minute](https://ai.google.dev/pricing) to the API, which is more than sufficient for standard Frigate usage.
+Google Gemini has a [free tier](https://ai.google.dev/pricing) for the API, however the limits may not be sufficient for standard Frigate usage. Choose a plan appropriate for your installation.
 
 ### Supported Models
 
@@ -114,7 +112,7 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 genai:
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-2.0-flash
+  model: gemini-2.5-flash
 ```
 
 :::note
