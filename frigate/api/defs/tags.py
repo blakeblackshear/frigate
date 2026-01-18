@@ -5,6 +5,7 @@ class Tags(Enum):
     app = "App"
     auth = "Auth"
     camera = "Camera"
+    chat = "Chat"
     events = "Events"
     export = "Export"
     classification = "Classification"
