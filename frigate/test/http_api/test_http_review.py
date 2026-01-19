@@ -240,6 +240,28 @@ class TestHttpReview(BaseTestHttp):
             assert len(response_json) == 1
             assert response_json[0]["id"] == id_reviewed
 
+    def test_get_review_with_no_reviewed_filter(self):
+        """Test that omitting 'reviewed' parameter returns both reviewed and unreviewed items."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id_unreviewed = "123456.unreviewed"
+            id_reviewed = "123456.reviewed"
+            super().insert_mock_review_segment(id_unreviewed, now, now + 2)
+            super().insert_mock_review_segment(id_reviewed, now, now + 2)
+            self._insert_user_review_status(id_reviewed, reviewed=True)
+
+            params = {
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 2
+            returned_ids = {item["id"] for item in response_json}
+            assert returned_ids == {id_unreviewed, id_reviewed}
+
     ####################################################################################################################
     ###################################  GET /review/summary Endpoint   #################################################
     ####################################################################################################################

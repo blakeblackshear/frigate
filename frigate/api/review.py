@@ -138,14 +138,15 @@ async def review(
         .where(reduce(operator.and_, clauses))
     )
 
-    # Filter unreviewed items without subquery
-    if reviewed == 0:
-        review_query = review_query.where(
-            (UserReviewStatus.has_been_reviewed == False)
-            | (UserReviewStatus.has_been_reviewed.is_null())
-        )
-    elif reviewed == 1:
-        review_query = review_query.where(UserReviewStatus.has_been_reviewed == True)
+    # Filter by reviewed status (None = all, 0 = unreviewed only, 1 = reviewed only)
+    if reviewed is not None:
+        if reviewed == 0:
+            review_query = review_query.where(
+                (UserReviewStatus.has_been_reviewed == False)
+                | (UserReviewStatus.has_been_reviewed.is_null())
+            )
+        elif reviewed == 1:
+            review_query = review_query.where(UserReviewStatus.has_been_reviewed == True)
 
     # Apply ordering and limit
     review_query = (
