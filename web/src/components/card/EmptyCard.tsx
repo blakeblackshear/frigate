@@ -35,7 +35,9 @@ export function EmptyCard({
       {icon}
       {TitleComponent}
       {description && (
-        <div className="mb-3 text-secondary-foreground">{description}</div>
+        <div className="mb-3 text-center text-secondary-foreground">
+          {description}
+        </div>
       )}
       {buttonText?.length && (
         <Button size="sm" variant="select">

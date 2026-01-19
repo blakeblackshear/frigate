@@ -447,7 +447,7 @@ export default function LiveDashboardView({
       )}
 
       {cameras.length == 0 && !includeBirdseye ? (
-        <NoCameraView />
+        <NoCameraView cameraGroup={cameraGroup} />
       ) : (
         <>
           {!fullscreen && events && events.length > 0 && (
@@ -666,28 +666,39 @@ export default function LiveDashboardView({
   );
 }
 
-function NoCameraView() {
+function NoCameraView({ cameraGroup }: { cameraGroup?: string }) {
   const { t } = useTranslation(["views/live"]);
   const { auth } = useContext(AuthContext);
   const isAdmin = useIsAdmin();
 
-  // Check if this is a restricted user with no cameras in this group
+  const isDefault = cameraGroup === "default";
   const isRestricted = !isAdmin && auth.isAuthenticated;
+
+  let type: "default" | "group" | "restricted";
+  if (isRestricted) {
+    type = "restricted";
+  } else if (isDefault) {
+    type = "default";
+  } else {
+    type = "group";
+  }
 
   return (
     <div className="flex size-full items-center justify-center">
       <EmptyCard
         icon={<BsFillCameraVideoOffFill className="size-8" />}
-        title={
-          isRestricted ? t("noCameras.restricted.title") : t("noCameras.title")
+        title={t(`noCameras.${type}.title`)}
+        description={t(`noCameras.${type}.description`)}
+        buttonText={
+          type !== "restricted" && isDefault
+            ? t(`noCameras.${type}.buttonText`)
+            : undefined
         }
-        description={
-          isRestricted
-            ? t("noCameras.restricted.description")
-            : t("noCameras.description")
+        link={
+          type !== "restricted" && isDefault
+            ? "/settings?page=cameraManagement"
+            : undefined
         }
-        buttonText={!isRestricted ? t("noCameras.buttonText") : undefined}
-        link={!isRestricted ? "/settings?page=cameraManagement" : undefined}
       />
     </div>
   );
