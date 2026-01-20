@@ -306,7 +306,7 @@ Always be accurate with time calculations based on the current date provided."""
     tool_iterations = 0
     max_iterations = body.max_tool_iterations
 
-    logger.info(
+    logger.debug(
         f"Starting chat completion with {len(conversation)} message(s), "
         f"{len(tools)} tool(s) available, max_iterations={max_iterations}"
     )
@@ -352,7 +352,7 @@ Always be accurate with time calculations based on the current date provided."""
 
             tool_calls = response.get("tool_calls")
             if not tool_calls:
-                logger.info(
+                logger.debug(
                     f"Chat completion finished with final answer (iterations: {tool_iterations})"
                 )
                 return JSONResponse(
@@ -369,7 +369,7 @@ Always be accurate with time calculations based on the current date provided."""
 
             # Execute tools
             tool_iterations += 1
-            logger.info(
+            logger.debug(
                 f"Tool calls detected (iteration {tool_iterations}/{max_iterations}): "
                 f"{len(tool_calls)} tool(s) to execute"
             )
@@ -380,7 +380,7 @@ Always be accurate with time calculations based on the current date provided."""
                 tool_args = tool_call["arguments"]
                 tool_call_id = tool_call["id"]
 
-                logger.info(
+                logger.debug(
                     f"Executing tool: {tool_name} (id: {tool_call_id}) with arguments: {json.dumps(tool_args, indent=2)}"
                 )
 
@@ -402,19 +402,19 @@ Always be accurate with time calculations based on the current date provided."""
                                 if result_count > 0
                                 else [],
                             }
-                        logger.info(
+                        logger.debug(
                             f"Tool {tool_name} (id: {tool_call_id}) completed successfully. "
                             f"Result: {json.dumps(result_summary, indent=2)}"
                         )
                     elif isinstance(tool_result, str):
                         result_content = tool_result
-                        logger.info(
+                        logger.debug(
                             f"Tool {tool_name} (id: {tool_call_id}) completed successfully. "
                             f"Result length: {len(result_content)} characters"
                         )
                     else:
                         result_content = str(tool_result)
-                        logger.info(
+                        logger.debug(
                             f"Tool {tool_name} (id: {tool_call_id}) completed successfully. "
                             f"Result type: {type(tool_result).__name__}"
                         )
@@ -441,16 +441,12 @@ Always be accurate with time calculations based on the current date provided."""
                             "content": error_content,
                         }
                     )
-                    logger.info(
+                    logger.debug(
                         f"Tool {tool_name} (id: {tool_call_id}) failed. Error result added to conversation."
                     )
 
             conversation.extend(tool_results)
-            logger.info(
-                f"Added {len(tool_results)} tool result(s) to conversation. "
-                f"Continuing with next LLM call..."
-            )
-            logger.info(
+            logger.debug(
                 f"Added {len(tool_results)} tool result(s) to conversation. "
                 f"Continuing with next LLM call..."
             )
