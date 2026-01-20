@@ -15,6 +15,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdatePublisher,
     CameraConfigUpdateTopic,
 )
+from frigate.config.config import RuntimeFilterConfig, RuntimeMotionConfig
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     EXPIRE_AUDIO_ACTIVITY,
@@ -84,6 +85,9 @@ class Dispatcher:
             "review_detections": self._on_detections_command,
             "object_descriptions": self._on_object_description_command,
             "review_descriptions": self._on_review_description_command,
+            "motion_mask": self._on_motion_mask_command,
+            "object_mask": self._on_object_mask_command,
+            "zone": self._on_zone_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_global_notification_command,
@@ -100,11 +104,20 @@ class Dispatcher:
         """Handle receiving of payload from communicators."""
 
         def handle_camera_command(
-            command_type: str, camera_name: str, command: str, payload: str
+            command_type: str,
+            camera_name: str,
+            command: str,
+            payload: str,
+            sub_command: str = None,
         ) -> None:
             try:
                 if command_type == "set":
-                    self._camera_settings_handlers[command](camera_name, payload)
+                    if sub_command:
+                        self._camera_settings_handlers[command](
+                            camera_name, sub_command, payload
+                        )
+                    else:
+                        self._camera_settings_handlers[command](camera_name, payload)
                 elif command_type == "ptz":
                     self._on_ptz_command(camera_name, payload)
             except KeyError:
@@ -314,6 +327,14 @@ class Dispatcher:
                     camera_name = parts[-3]
                     command = parts[-2]
                     handle_camera_command("set", camera_name, command, payload)
+                elif len(parts) == 4 and topic.endswith("set"):
+                    # example /cam_name/motion_mask/mask_name/set payload=ON|OFF
+                    camera_name = parts[-4]
+                    command = parts[-3]
+                    sub_command = parts[-2]
+                    handle_camera_command(
+                        "set", camera_name, command, payload, sub_command
+                    )
                 elif len(parts) == 2 and topic.endswith("set"):
                     command = parts[-2]
                     self._global_settings_handlers[command](payload)
@@ -858,3 +879,115 @@ class Dispatcher:
             genai_settings,
         )
         self.publish(f"{camera_name}/review_descriptions/state", payload, retain=True)
+
+    def _on_motion_mask_command(
+        self, camera_name: str, mask_name: str, payload: str
+    ) -> None:
+        """Callback for motion mask topic."""
+        if payload not in ["ON", "OFF"]:
+            logger.error(f"Invalid payload for motion mask {mask_name}: {payload}")
+            return
+
+        motion_settings = self.config.cameras[camera_name].motion
+
+        if mask_name not in motion_settings.mask:
+            logger.error(f"Unknown motion mask: {mask_name}")
+            return
+
+        mask = motion_settings.mask[mask_name]
+
+        if not mask:
+            logger.error(f"Motion mask {mask_name} is None")
+            return
+
+        mask.enabled = payload == "ON"
+
+        # Recreate RuntimeMotionConfig to update rasterized_mask
+        motion_settings = RuntimeMotionConfig(
+            frame_shape=self.config.cameras[camera_name].frame_shape,
+            **motion_settings.model_dump(exclude_unset=True),
+        )
+
+        # Update the dispatcher's own config
+        self.config.cameras[camera_name].motion = motion_settings
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
+        self.publish(
+            f"{camera_name}/motion_mask/{mask_name}/state", payload, retain=True
+        )
+
+    def _on_object_mask_command(
+        self, camera_name: str, mask_name: str, payload: str
+    ) -> None:
+        """Callback for object mask topic."""
+        if payload not in ["ON", "OFF"]:
+            logger.error(f"Invalid payload for object mask {mask_name}: {payload}")
+            return
+
+        object_settings = self.config.cameras[camera_name].objects
+
+        if mask_name not in object_settings.mask:
+            logger.error(f"Unknown object mask: {mask_name}")
+            return
+
+        mask = object_settings.mask[mask_name]
+
+        if not mask:
+            logger.error(f"Object mask {mask_name} is None")
+            return
+
+        mask.enabled = payload == "ON"
+
+        # Recreate RuntimeFilterConfig for each object filter to update rasterized_mask
+        for object_name, filter_config in object_settings.filters.items():
+            # Merge global object masks with per-object filter masks
+            merged_mask = dict(filter_config.mask)  # Copy filter-specific masks
+
+            # Add global object masks if they exist
+            if object_settings.mask:
+                for global_mask_id, global_mask_config in object_settings.mask.items():
+                    # Use a global prefix to avoid key collisions
+                    prefixed_id = f"global_{global_mask_id}"
+                    merged_mask[prefixed_id] = global_mask_config
+
+            object_settings.filters[object_name] = RuntimeFilterConfig(
+                frame_shape=self.config.cameras[camera_name].frame_shape,
+                mask=merged_mask,
+                **filter_config.model_dump(
+                    exclude_unset=True, exclude={"mask", "raw_mask"}
+                ),
+            )
+
+        # Update the dispatcher's own config
+        self.config.cameras[camera_name].objects = object_settings
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.objects, camera_name),
+            object_settings,
+        )
+        self.publish(
+            f"{camera_name}/object_mask/{mask_name}/state", payload, retain=True
+        )
+
+    def _on_zone_command(self, camera_name: str, zone_name: str, payload: str) -> None:
+        """Callback for zone topic."""
+        if payload not in ["ON", "OFF"]:
+            logger.error(f"Invalid payload for zone {zone_name}: {payload}")
+            return
+
+        camera_config = self.config.cameras[camera_name]
+
+        if zone_name not in camera_config.zones:
+            logger.error(f"Unknown zone: {zone_name}")
+            return
+
+        camera_config.zones[zone_name].enabled = payload == "ON"
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.zones, camera_name),
+            camera_config.zones,
+        )
+        self.publish(f"{camera_name}/zone/{zone_name}/state", payload, retain=True)

@@ -429,6 +429,30 @@ Topic to adjust motion contour area for a camera. Expected value is an integer.
 
 Topic with current motion contour area for a camera. Published value is an integer.
 
+### `frigate/<camera_name>/motion_mask/<mask_name>/set`
+
+Topic to turn a specific motion mask for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/motion_mask/<mask_name>/state`
+
+Topic with current state of a specific motion mask for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/object_mask/<mask_name>/set`
+
+Topic to turn a specific object mask for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/object_mask/<mask_name>/state`
+
+Topic with current state of a specific object mask for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/zone/<zone_name>/set`
+
+Topic to turn a specific zone for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/zone/<zone_name>/state`
+
+Topic with current state of a specific zone for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/review_status`
 
 Topic with current activity status of the camera. Possible values are `NONE`, `DETECTION`, or `ALERT`.

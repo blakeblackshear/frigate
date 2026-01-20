@@ -133,6 +133,29 @@ class MqttClient(Communicator):
                 retain=True,
             )
 
+            for mask_name, mask in camera.motion.mask.items():
+                if mask:
+                    self.publish(
+                        f"{camera_name}/motion_mask/{mask_name}/state",
+                        "ON" if mask.enabled else "OFF",
+                        retain=True,
+                    )
+
+            for mask_name, mask in camera.objects.mask.items():
+                if mask:
+                    self.publish(
+                        f"{camera_name}/object_mask/{mask_name}/state",
+                        "ON" if mask.enabled else "OFF",
+                        retain=True,
+                    )
+
+            for zone_name, zone in camera.zones.items():
+                self.publish(
+                    f"{camera_name}/zone/{zone_name}/state",
+                    "ON" if zone.enabled else "OFF",
+                    retain=True,
+                )
+
         if self.config.notifications.enabled_in_config:
             self.publish(
                 "notifications/state",
@@ -239,6 +262,24 @@ class MqttClient(Communicator):
             if self.config.cameras[name].onvif.host:
                 self.client.message_callback_add(
                     f"{self.mqtt_config.topic_prefix}/{name}/ptz",
+                    self.on_mqtt_command,
+                )
+
+            for mask_name in self.config.cameras[name].motion.mask.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/motion_mask/{mask_name}/set",
+                    self.on_mqtt_command,
+                )
+
+            for mask_name in self.config.cameras[name].objects.mask.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/object_mask/{mask_name}/set",
+                    self.on_mqtt_command,
+                )
+
+            for zone_name in self.config.cameras[name].zones.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/zone/{zone_name}/set",
                     self.on_mqtt_command,
                 )
 
