@@ -117,7 +117,17 @@ genai:
 
 :::note
 
-To use a different Gemini-compatible API endpoint, set the `GEMINI_BASE_URL` environment variable to your provider's API URL.
+To use a different Gemini-compatible API endpoint, set the `provider_options` with the `base_url` key to your provider's API URL. For example:
+
+```
+genai:
+  provider: gemini
+  ...
+  provider_options:
+    base_url: https://...
+```
+
+Other HTTP options are available, see the [python-genai documentation](https://github.com/googleapis/python-genai).
 
 :::
 
