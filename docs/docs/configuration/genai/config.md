@@ -17,11 +17,23 @@ Using Ollama on CPU is not recommended, high inference times make using Generati
 
 :::
 
-[Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It provides a nice API over [llama.cpp](https://github.com/ggerganov/llama.cpp). It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
+[Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
 
 Most of the 7b parameter 4-bit vision models will fit inside 8GB of VRAM. There is also a [Docker container](https://hub.docker.com/r/ollama/ollama) available.
 
-Parallel requests also come with some caveats. You will need to set `OLLAMA_NUM_PARALLEL=1` and choose a `OLLAMA_MAX_QUEUE` and `OLLAMA_MAX_LOADED_MODELS` values that are appropriate for your hardware and preferences. See the [Ollama documentation](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-does-ollama-handle-concurrent-requests).
+Parallel requests also come with some caveats. You will need to set `OLLAMA_NUM_PARALLEL=1` and choose a `OLLAMA_MAX_QUEUE` and `OLLAMA_MAX_LOADED_MODELS` values that are appropriate for your hardware and preferences. See the [Ollama documentation](https://docs.ollama.com/faq#how-does-ollama-handle-concurrent-requests).
+
+### Model Types: Instruct vs Thinking
+
+Most vision-language models are available as **instruct** models, which are fine-tuned to follow instructions and respond concisely to prompts. However, some models (such as certain Qwen-VL or minigpt variants) offer both **instruct** and **thinking** versions.
+
+- **Instruct models** are always recommended for use with Frigate. These models generate direct, relevant, actionable descriptions that best fit Frigate's object and event summary use case.
+- **Thinking models** are fine-tuned for more free-form, open-ended, and speculative outputs, which are typically not concise and may not provide the practical summaries Frigate expects. For this reason, Frigate does **not** recommend or support using thinking models.
+
+Some models are labeled as **hybrid** (capable of both thinking and instruct tasks). In these cases, Frigate will always use instruct-style prompts and specifically disables thinking-mode behaviors to ensure concise, useful responses.
+
+**Recommendation:**
+Always select the `-instruct` or documented instruct/tagged variant of any model you use in your Frigate configuration. If in doubt, refer to your model provider’s documentation or model library for guidance on the correct model variant to use.
 
 ### Supported Models
 
@@ -54,26 +66,26 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 
 :::
 
+#### Ollama Cloud models
+
+Ollama also supports [cloud models](https://ollama.com/cloud), where your local Ollama instance handles requests from Frigate, but model inference is performed in the cloud. Set up Ollama locally, sign in with your Ollama account, and specify the cloud model name in your Frigate config. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).
+
 ### Configuration
 
 ```yaml
 genai:
   provider: ollama
   base_url: http://localhost:11434
-  model: minicpm-v:8b
-  provider_options: # other Ollama client options can be defined
-    keep_alive: -1
-    options:
-      num_ctx: 8192 # make sure the context matches other services that are using ollama
+  model: qwen3-vl:4b
 ```
 
 ## Google Gemini
 
-Google Gemini has a free tier allowing [15 queries per minute](https://ai.google.dev/pricing) to the API, which is more than sufficient for standard Frigate usage.
+Google Gemini has a [free tier](https://ai.google.dev/pricing) for the API, however the limits may not be sufficient for standard Frigate usage. Choose a plan appropriate for your installation.
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini). At the time of writing, this includes `gemini-1.5-pro` and `gemini-1.5-flash`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini).
 
 ### Get API Key
 
@@ -90,8 +102,24 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 genai:
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-1.5-flash
+  model: gemini-2.5-flash
 ```
+
+:::note
+
+To use a different Gemini-compatible API endpoint, set the `provider_options` with the `base_url` key to your provider's API URL. For example:
+
+```
+genai:
+  provider: gemini
+  ...
+  provider_options:
+    base_url: https://...
+```
+
+Other HTTP options are available, see the [python-genai documentation](https://github.com/googleapis/python-genai).
+
+:::
 
 ## OpenAI
 
@@ -99,7 +127,7 @@ OpenAI does not have a free tier for their API. With the release of gpt-4o, pric
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models).
 
 ### Get API Key
 
@@ -143,17 +171,18 @@ Microsoft offers several vision models through Azure OpenAI. A subscription is r
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models).
 
 ### Create Resource and Get API Key
 
-To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key and resource URL, which must include the `api-version` parameter (see the example below). The model field is not required in your configuration as the model is part of the deployment name you chose when deploying the resource.
+To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key, model name, and resource URL, which must include the `api-version` parameter (see the example below).
 
 ### Configuration
 
 ```yaml
 genai:
   provider: azure_openai
-  base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
+  base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
+  model: gpt-5-mini
   api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
