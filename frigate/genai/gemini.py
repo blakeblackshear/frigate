@@ -139,7 +139,6 @@ class GeminiClient(GenAIClient):
                             )
                     contents.append({"role": "model", "parts": parts})
                 elif role == "tool":
-                    tool_call_id = msg.get("tool_call_id")
                     tool_name = msg.get("name", "")
                     tool_result = (
                         json.loads(content) if isinstance(content, str) else content
