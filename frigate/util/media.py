@@ -50,22 +50,36 @@ class SyncResult:
         }
 
 
-def remove_empty_directories(paths: Iterable[Path]) -> None:
+def remove_empty_directories(root: Path, paths: Iterable[Path]) -> None:
     """
     Remove directories if they exist and are empty.
     Silently ignores non-existent and non-empty directories.
+    Attempts to remove parent directories as well, stopping at the given root.
     """
     count = 0
-    for path in paths:
-        try:
-            path.rmdir()
-        except FileNotFoundError:
-            continue
-        except OSError as e:
-            if e.errno == errno.ENOTEMPTY:
+    while True:
+        parents = set()
+        for path in paths:
+            if path == root:
                 continue
-            raise
-        count += 1
+
+            try:
+                path.rmdir()
+                count += 1
+            except FileNotFoundError:
+                pass
+            except OSError as e:
+                if e.errno == errno.ENOTEMPTY:
+                    continue
+                raise
+
+            parents.add(path.parent)
+
+        if not parents:
+            break
+
+        paths = parents
+
     logger.debug("Removed {count} empty directories")
 
 

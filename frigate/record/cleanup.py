@@ -11,7 +11,7 @@ from pathlib import Path
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE
+from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.util.builtin import clear_and_unlink
 from frigate.util.media import remove_empty_directories
@@ -379,5 +379,5 @@ class RecordingCleanup(threading.Thread):
             if counter == 0:
                 self.clean_tmp_clips()
                 maybe_empty_dirs = self.expire_recordings()
-                remove_empty_directories(maybe_empty_dirs)
+                remove_empty_directories(Path(RECORD_DIR), maybe_empty_dirs)
                 self.truncate_wal()
