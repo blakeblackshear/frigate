@@ -386,11 +386,11 @@
     "title": "Camera Review Settings",
     "object_descriptions": {
       "title": "Generative AI Object Descriptions",
-      "desc": "Temporarily enable/disable Generative AI object descriptions for this camera. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."
+      "desc": "Temporarily enable/disable Generative AI object descriptions for this camera until Frigate restarts. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."
     },
     "review_descriptions": {
       "title": "Generative AI Review Descriptions",
-      "desc": "Temporarily enable/disable Generative AI review descriptions for this camera. When disabled, AI generated descriptions will not be requested for review items on this camera."
+      "desc": "Temporarily enable/disable Generative AI review descriptions for this camera until Frigate restarts. When disabled, AI generated descriptions will not be requested for review items on this camera."
     },
     "review": {
       "title": "Review",
