@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useState, useMemo, useEffect } from "react";
 import { LuTrash2, LuPlus } from "react-icons/lu";
@@ -26,6 +26,7 @@ import useSWR from "swr";
 import { processCameraName } from "@/utils/cameraUtil";
 import { Label } from "@/components/ui/label";
 import { ConfigSetBody } from "@/types/cameraWizard";
+import { Toaster } from "../ui/sonner";
 
 const RoleEnum = z.enum(["audio", "detect", "record"]);
 type Role = z.infer<typeof RoleEnum>;

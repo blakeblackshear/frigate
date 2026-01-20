@@ -1,7 +1,7 @@
 import Heading from "@/components/ui/heading";
 import { Label } from "@/components/ui/label";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { Separator } from "../../components/ui/separator";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { toast } from "sonner";

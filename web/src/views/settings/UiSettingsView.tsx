@@ -2,7 +2,7 @@ import Heading from "@/components/ui/heading";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useCallback, useContext, useEffect } from "react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Separator } from "../../components/ui/separator";
 import { Button } from "../../components/ui/button";
