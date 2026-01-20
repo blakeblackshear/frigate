@@ -22,7 +22,6 @@ class GeminiClient(GenAIClient):
         """Initialize the client."""
         # Merge provider_options into HttpOptions
         http_options_dict = {
-            "api_version": "v1",
             "timeout": int(self.timeout * 1000),  # requires milliseconds
             "retry_options": types.HttpRetryOptions(
                 attempts=3,
