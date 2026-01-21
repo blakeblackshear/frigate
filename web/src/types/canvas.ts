@@ -13,6 +13,7 @@ export type Polygon = {
   color: number[];
   friendly_name?: string;
   enabled?: boolean;
+  enabled_in_config?: boolean;
 };
 
 export type ZoneFormValuesType = {

@@ -110,6 +110,7 @@ export interface CameraConfig {
       [maskId: string]: {
         friendly_name?: string;
         enabled: boolean;
+        enabled_in_config?: boolean;
         coordinates: string;
       };
     };
@@ -138,6 +139,7 @@ export interface CameraConfig {
           [maskId: string]: {
             friendly_name?: string;
             enabled: boolean;
+            enabled_in_config?: boolean;
             coordinates: string;
           };
         };
@@ -153,6 +155,7 @@ export interface CameraConfig {
       [maskId: string]: {
         friendly_name?: string;
         enabled: boolean;
+        enabled_in_config?: boolean;
         coordinates: string;
       };
     };
@@ -291,6 +294,7 @@ export interface CameraConfig {
       coordinates: string;
       distances: string[];
       enabled: boolean;
+      enabled_in_config?: boolean;
       filters: Record<string, unknown>;
       inertia: number;
       loitering_time: number;

@@ -289,6 +289,10 @@ export default function PolygonItem({
   const handleToggleEnabled = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      // Prevent toggling if disabled in config
+      if (polygon.enabled_in_config === false) {
+        return;
+      }
       if (!polygon) {
         return;
       }
@@ -354,7 +358,7 @@ export default function PolygonItem({
                   <button
                     type="button"
                     onClick={handleToggleEnabled}
-                    disabled={isLoading}
+                    disabled={isLoading || polygon.enabled_in_config === false}
                     className="mr-2 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PolygonItemIcon
@@ -370,14 +374,22 @@ export default function PolygonItem({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {isPolygonEnabled
-                    ? t("button.disable", { ns: "common" })
-                    : t("button.enable", { ns: "common" })}
+                  {polygon.enabled_in_config === false
+                    ? t("masksAndZones.disabledInConfig", {
+                        ns: "views/settings",
+                      })
+                    : isPolygonEnabled
+                      ? t("button.disable", { ns: "common" })
+                      : t("button.enable", { ns: "common" })}
                 </TooltipContent>
               </Tooltip>
             ))}
           <p
-            className={`cursor-default ${!isPolygonEnabled ? "line-through" : ""}`}
+            className={cn(
+              "cursor-default",
+              !isPolygonEnabled && "opacity-60",
+              polygon.enabled_in_config === false && "line-through",
+            )}
           >
             {polygon.friendly_name ?? polygon.name}
             {!isPolygonEnabled && " (disabled)"}

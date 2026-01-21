@@ -235,6 +235,7 @@ export default function MasksAndZonesView({
           name,
           friendly_name: zoneData.friendly_name,
           enabled: zoneData.enabled,
+          enabled_in_config: zoneData.enabled_in_config,
           objects: zoneData.objects,
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),
@@ -263,6 +264,7 @@ export default function MasksAndZonesView({
           name: maskId,
           friendly_name: maskData.friendly_name,
           enabled: maskData.enabled,
+          enabled_in_config: maskData.enabled_in_config,
           objects: [],
           points: interpolatePoints(
             parseCoordinates(maskData.coordinates),
@@ -286,6 +288,7 @@ export default function MasksAndZonesView({
           name: maskId,
           friendly_name: maskData.friendly_name,
           enabled: maskData.enabled,
+          enabled_in_config: maskData.enabled_in_config,
           objects: [],
           points: interpolatePoints(
             parseCoordinates(maskData.coordinates),
@@ -322,6 +325,7 @@ export default function MasksAndZonesView({
                 name: maskId,
                 friendly_name: maskData.friendly_name,
                 enabled: maskData.enabled,
+                enabled_in_config: maskData.enabled_in_config,
                 objects: [objectName],
                 points: interpolatePoints(
                   parseCoordinates(maskData.coordinates),
