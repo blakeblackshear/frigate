@@ -300,7 +300,6 @@ export default function MasksAndZonesView({
         }),
       );
 
-      const globalObjectMaskIds = Object.keys(cameraConfig.objects.mask || {});
       let objectMaskIndex = globalObjectMasks.length;
 
       objectMasks = Object.entries(cameraConfig.objects.filters)
@@ -311,8 +310,8 @@ export default function MasksAndZonesView({
         .flatMap(([objectName, filterConfig]): Polygon[] => {
           return Object.entries(filterConfig.mask || {}).flatMap(
             ([maskId, maskData]) => {
-              // Skip if this mask is already included in global masks
-              if (globalObjectMaskIds.includes(maskId)) {
+              // Skip if this mask is a global mask (prefixed with "global_")
+              if (maskId.startsWith("global_")) {
                 return [];
               }
 
