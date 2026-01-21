@@ -900,6 +900,13 @@ class Dispatcher:
             logger.error(f"Motion mask {mask_name} is None")
             return
 
+        if payload == "ON":
+            if not mask.enabled_in_config:
+                logger.error(
+                    f"Motion mask {mask_name} must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
         mask.enabled = payload == "ON"
 
         # Recreate RuntimeMotionConfig to update rasterized_mask
@@ -934,6 +941,12 @@ class Dispatcher:
         if mask_name in object_settings.mask:
             mask = object_settings.mask[mask_name]
             if mask:
+                if payload == "ON":
+                    if not mask.enabled_in_config:
+                        logger.error(
+                            f"Object mask {mask_name} must be enabled in the config to be turned on via MQTT."
+                        )
+                        return
                 mask.enabled = payload == "ON"
                 mask_found = True
 
@@ -942,6 +955,12 @@ class Dispatcher:
             if mask_name in filter_config.mask:
                 mask = filter_config.mask[mask_name]
                 if mask:
+                    if payload == "ON":
+                        if not mask.enabled_in_config:
+                            logger.error(
+                                f"Object mask {mask_name} must be enabled in the config to be turned on via MQTT."
+                            )
+                            return
                     mask.enabled = payload == "ON"
                     mask_found = True
 
@@ -991,6 +1010,13 @@ class Dispatcher:
         if zone_name not in camera_config.zones:
             logger.error(f"Unknown zone: {zone_name}")
             return
+
+        if payload == "ON":
+            if not camera_config.zones[zone_name].enabled_in_config:
+                logger.error(
+                    f"Zone {zone_name} must be enabled in the config to be turned on via MQTT."
+                )
+                return
 
         camera_config.zones[zone_name].enabled = payload == "ON"
 

@@ -22,6 +22,9 @@ class ZoneConfig(BaseModel):
         default=True,
         title="Whether this zone is active. Disabled zones are ignored at runtime.",
     )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of zone."
+    )
     filters: dict[str, FilterConfig] = Field(
         default_factory=dict,
         title="Zone filters",

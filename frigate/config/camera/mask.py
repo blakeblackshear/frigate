@@ -25,6 +25,9 @@ class MotionMaskConfig(FrigateBaseModel):
         title="Coordinates polygon for the motion mask.",
     )
     raw_coordinates: Union[str, list[str]] = ""
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of motion mask."
+    )
 
     def get_formatted_name(self, mask_id: str) -> str:
         """Return the friendly name if set, otherwise return a formatted version of the mask ID."""
@@ -57,6 +60,9 @@ class ObjectMaskConfig(FrigateBaseModel):
         title="Coordinates polygon for the object mask.",
     )
     raw_coordinates: Union[str, list[str]] = ""
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of object mask."
+    )
 
     @field_serializer("coordinates", when_used="json")
     def serialize_coordinates(self, value: Any, info):

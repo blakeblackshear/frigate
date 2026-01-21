@@ -807,6 +807,7 @@ class FrigateConfig(FrigateBaseModel):
                             raw_coordinates=relative_coords
                             if relative_coords
                             else coords,
+                            enabled_in_config=mask_config.enabled,
                         )
                     else:
                         processed_global_masks[mask_id] = mask_config
@@ -815,6 +816,11 @@ class FrigateConfig(FrigateBaseModel):
 
             # Apply global object masks and convert masks to numpy array
             for object, filter in camera_config.objects.filters.items():
+                # Set enabled_in_config for per-object masks before processing
+                for mask_config in filter.mask.values():
+                    if mask_config:
+                        mask_config.enabled_in_config = mask_config.enabled
+
                 # Merge global object masks with per-object filter masks
                 merged_mask = dict(filter.mask)  # Copy filter-specific masks
 
@@ -834,6 +840,13 @@ class FrigateConfig(FrigateBaseModel):
                     ),
                 )
 
+            # Set enabled_in_config for motion masks to match config file state BEFORE creating RuntimeMotionConfig
+            if camera_config.motion:
+                camera_config.motion.enabled_in_config = camera_config.motion.enabled
+                for mask_config in camera_config.motion.mask.values():
+                    if mask_config:
+                        mask_config.enabled_in_config = mask_config.enabled
+
             # Convert motion configuration
             if camera_config.motion is None:
                 camera_config.motion = RuntimeMotionConfig(
@@ -844,7 +857,6 @@ class FrigateConfig(FrigateBaseModel):
                     frame_shape=camera_config.frame_shape,
                     **camera_config.motion.model_dump(exclude_unset=True),
                 )
-            camera_config.motion.enabled_in_config = camera_config.motion.enabled
 
             # generate zone contours
             if len(camera_config.zones) > 0:
@@ -857,6 +869,10 @@ class FrigateConfig(FrigateBaseModel):
                             )
 
                     zone.generate_contour(camera_config.frame_shape)
+
+                # Set enabled_in_config for zones to match config file state
+                for zone in camera_config.zones.values():
+                    zone.enabled_in_config = zone.enabled
 
             # Set live view stream if none is set
             if not camera_config.live.streams:
