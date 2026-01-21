@@ -929,17 +929,25 @@ class Dispatcher:
 
         object_settings = self.config.cameras[camera_name].objects
 
-        if mask_name not in object_settings.mask:
+        # Check if this is a global mask
+        mask_found = False
+        if mask_name in object_settings.mask:
+            mask = object_settings.mask[mask_name]
+            if mask:
+                mask.enabled = payload == "ON"
+                mask_found = True
+
+        # Check if this is a per-object filter mask
+        for object_name, filter_config in object_settings.filters.items():
+            if mask_name in filter_config.mask:
+                mask = filter_config.mask[mask_name]
+                if mask:
+                    mask.enabled = payload == "ON"
+                    mask_found = True
+
+        if not mask_found:
             logger.error(f"Unknown object mask: {mask_name}")
             return
-
-        mask = object_settings.mask[mask_name]
-
-        if not mask:
-            logger.error(f"Object mask {mask_name} is None")
-            return
-
-        mask.enabled = payload == "ON"
 
         # Recreate RuntimeFilterConfig for each object filter to update rasterized_mask
         for object_name, filter_config in object_settings.filters.items():
@@ -950,8 +958,8 @@ class Dispatcher:
             if object_settings.mask:
                 for global_mask_id, global_mask_config in object_settings.mask.items():
                     # Use a global prefix to avoid key collisions
-                    prefixed_id = f"global_{global_mask_id}"
-                    merged_mask[prefixed_id] = global_mask_config
+                    global_mask_id_prefixed = f"global_{global_mask_id}"
+                    merged_mask[global_mask_id_prefixed] = global_mask_config
 
             object_settings.filters[object_name] = RuntimeFilterConfig(
                 frame_shape=self.config.cameras[camera_name].frame_shape,
