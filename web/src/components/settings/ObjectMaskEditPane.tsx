@@ -377,7 +377,7 @@ export default function ObjectMaskEditPane({
                 control={form.control}
                 name="enabled"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between">
+                  <FormItem className="flex flex-row items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <FormLabel>
                         {t("masksAndZones.masks.enabled.title")}
