@@ -304,6 +304,57 @@ export function useReviewDescriptionState(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
+export function useMotionMaskState(
+  camera: string,
+  maskName: string,
+): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/motion_mask/${maskName}/state`,
+    `${camera}/motion_mask/${maskName}/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useObjectMaskState(
+  camera: string,
+  maskName: string,
+): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/object_mask/${maskName}/state`,
+    `${camera}/object_mask/${maskName}/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useZoneState(
+  camera: string,
+  zoneName: string,
+): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/zone/${zoneName}/state`,
+    `${camera}/zone/${zoneName}/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
 export function usePtzCommand(camera: string): {
   payload: string;
   send: (payload: string, retain?: boolean) => void;
