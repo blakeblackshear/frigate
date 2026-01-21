@@ -788,6 +788,31 @@ class FrigateConfig(FrigateBaseModel):
             for key in object_keys:
                 camera_config.objects.filters[key] = FilterConfig()
 
+            # Process global object masks to set raw_coordinates
+            if camera_config.objects.mask:
+                processed_global_masks = {}
+                for mask_id, mask_config in camera_config.objects.mask.items():
+                    if mask_config:
+                        coords = mask_config.coordinates
+                        relative_coords = get_relative_coordinates(
+                            coords, camera_config.frame_shape
+                        )
+                        # Create a new ObjectMaskConfig with raw_coordinates set
+                        from frigate.config.camera.mask import ObjectMaskConfig
+
+                        processed_global_masks[mask_id] = ObjectMaskConfig(
+                            friendly_name=mask_config.friendly_name,
+                            enabled=mask_config.enabled,
+                            coordinates=relative_coords if relative_coords else coords,
+                            raw_coordinates=relative_coords
+                            if relative_coords
+                            else coords,
+                        )
+                    else:
+                        processed_global_masks[mask_id] = mask_config
+                camera_config.objects.mask = processed_global_masks
+                camera_config.objects.raw_mask = processed_global_masks
+
             # Apply global object masks and convert masks to numpy array
             for object, filter in camera_config.objects.filters.items():
                 # Merge global object masks with per-object filter masks

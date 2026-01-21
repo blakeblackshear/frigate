@@ -34,7 +34,7 @@ class MotionMaskConfig(FrigateBaseModel):
 
     @field_serializer("coordinates", when_used="json")
     def serialize_coordinates(self, value: Any, info):
-        return self.raw_coordinates
+        return self.raw_coordinates if self.raw_coordinates else value
 
     @field_serializer("raw_coordinates", when_used="json")
     def serialize_raw_coordinates(self, value: Any, info):
@@ -58,16 +58,16 @@ class ObjectMaskConfig(FrigateBaseModel):
     )
     raw_coordinates: Union[str, list[str]] = ""
 
+    @field_serializer("coordinates", when_used="json")
+    def serialize_coordinates(self, value: Any, info):
+        return self.raw_coordinates if self.raw_coordinates else value
+
+    @field_serializer("raw_coordinates", when_used="json")
+    def serialize_raw_coordinates(self, value: Any, info):
+        return None
+
     def get_formatted_name(self, mask_id: str) -> str:
         """Return the friendly name if set, otherwise return a formatted version of the mask ID."""
         if self.friendly_name:
             return self.friendly_name
         return mask_id.replace("_", " ").title()
-
-    @field_serializer("coordinates", when_used="json")
-    def serialize_coordinates(self, value: Any, info):
-        return self.raw_coordinates
-
-    @field_serializer("raw_coordinates", when_used="json")
-    def serialize_raw_coordinates(self, value: Any, info):
-        return None
