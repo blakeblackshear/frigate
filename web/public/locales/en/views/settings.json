@@ -505,7 +505,7 @@
       "all": "All Masks and Zones"
     },
     "restart_required": "Restart required (masks/zones changed)",
-    "disabledInConfig": "This item is disabled in the configuration file",
+    "disabledInConfig": "Item is disabled in the config file",
     "toast": {
       "success": {
         "copyCoordinates": "Copied coordinates for {{polyName}} to clipboard."
@@ -591,7 +591,7 @@
       },
       "enabled": {
         "title": "Enabled",
-        "description": "Whether this zone is enabled. If disabled, it cannot be enabled by MQTT. Disabled zones are ignored at runtime."
+        "description": "Whether this zone is active and enabled in the config file. If disabled, it cannot be enabled by MQTT. Disabled zones are ignored at runtime."
       },
       "inertia": {
         "title": "Inertia",
@@ -693,7 +693,7 @@
     "masks": {
       "enabled": {
         "title": "Enabled",
-        "description": "Whether this mask is enabled. If disabled, it cannot be enabled by MQTT. Disabled masks are ignored at runtime."
+        "description": "Whether this mask is enabled in the config file. If disabled, it cannot be enabled by MQTT. Disabled masks are ignored at runtime."
       }
     }
   },
