@@ -37,6 +37,7 @@ import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import NameAndIdFields from "../input/NameAndIdFields";
 import { Switch } from "../ui/switch";
+import { useObjectMaskState } from "@/api/ws";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -76,6 +77,11 @@ export default function ObjectMaskEditPane({
       return null;
     }
   }, [polygons, activePolygonIndex]);
+
+  const { send: sendObjectMaskState } = useObjectMaskState(
+    polygon?.camera || "",
+    polygon?.name || "",
+  );
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -253,6 +259,8 @@ export default function ObjectMaskEditPane({
               },
             );
             updateConfig();
+            // Publish the enabled state through websocket
+            sendObjectMaskState(enabled ? "ON" : "OFF");
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -292,6 +300,7 @@ export default function ObjectMaskEditPane({
       setIsLoading,
       cameraConfig,
       t,
+      sendObjectMaskState,
     ],
   );
 

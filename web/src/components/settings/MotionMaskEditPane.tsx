@@ -30,6 +30,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import NameAndIdFields from "../input/NameAndIdFields";
 import { Switch } from "../ui/switch";
+import { useMotionMaskState } from "@/api/ws";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -70,6 +71,11 @@ export default function MotionMaskEditPane({
       return null;
     }
   }, [polygons, activePolygonIndex]);
+
+  const { send: sendMotionMaskState } = useMotionMaskState(
+    polygon?.camera || "",
+    polygon?.name || "",
+  );
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -232,6 +238,8 @@ export default function MotionMaskEditPane({
               },
             );
             updateConfig();
+            // Publish the enabled state through websocket
+            sendMotionMaskState(enabled ? "ON" : "OFF");
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -268,6 +276,7 @@ export default function MotionMaskEditPane({
       setIsLoading,
       cameraConfig,
       t,
+      sendMotionMaskState,
     ],
   );
 

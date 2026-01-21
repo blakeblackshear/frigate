@@ -35,6 +35,7 @@ import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
 import NameAndIdFields from "../input/NameAndIdFields";
+import { useZoneState } from "@/api/ws";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -87,6 +88,11 @@ export default function ZoneEditPane({
       return null;
     }
   }, [polygons, activePolygonIndex]);
+
+  const { send: sendZoneState } = useZoneState(
+    polygon?.camera || "",
+    polygon?.name || "",
+  );
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -475,6 +481,8 @@ export default function ZoneEditPane({
               },
             );
             updateConfig();
+            // Publish the enabled state through websocket
+            sendZoneState(enabled ? "ON" : "OFF");
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -515,6 +523,7 @@ export default function ZoneEditPane({
       setIsLoading,
       cameraConfig,
       t,
+      sendZoneState,
     ],
   );
 
