@@ -54,7 +54,7 @@
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
     "konva": "^9.3.18",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "lucide-react": "^0.477.0",
     "monaco-yaml": "^5.3.1",
     "next-themes": "^0.3.0",
