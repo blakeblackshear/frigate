@@ -57,6 +57,51 @@ def get_cache_image_name(camera: str, frame_time: float) -> str:
     )
 
 
+def get_most_recent_preview_frame(camera: str, before: float = None) -> str | None:
+    """Get the most recent preview frame for a camera."""
+    if not os.path.exists(PREVIEW_CACHE_DIR):
+        return None
+
+    try:
+        # files are named preview_{camera}-{timestamp}.webp
+        # we want the largest timestamp that is less than or equal to before
+        preview_files = [
+            f
+            for f in os.listdir(PREVIEW_CACHE_DIR)
+            if f.startswith(f"preview_{camera}-")
+            and f.endswith(f".{PREVIEW_FRAME_TYPE}")
+        ]
+
+        if not preview_files:
+            return None
+
+        # sort by timestamp in descending order
+        # filenames are like preview_front-1712345678.901234.webp
+        preview_files.sort(reverse=True)
+
+        if before is None:
+            return os.path.join(PREVIEW_CACHE_DIR, preview_files[0])
+
+        for file_name in preview_files:
+            try:
+                # Extract timestamp: preview_front-1712345678.901234.webp
+                # Split by dash and extension
+                timestamp_part = file_name.split("-")[-1].split(
+                    f".{PREVIEW_FRAME_TYPE}"
+                )[0]
+                timestamp = float(timestamp_part)
+
+                if timestamp <= before:
+                    return os.path.join(PREVIEW_CACHE_DIR, file_name)
+            except (ValueError, IndexError):
+                continue
+
+        return None
+    except Exception as e:
+        logger.error(f"Error searching for most recent preview frame: {e}")
+        return None
+
+
 class FFMpegConverter(threading.Thread):
     """Convert a list of still frames into a vfr mp4."""
 

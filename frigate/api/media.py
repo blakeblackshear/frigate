@@ -42,6 +42,7 @@ from frigate.const import (
     PREVIEW_FRAME_TYPE,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
+from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
@@ -125,7 +126,9 @@ async def camera_ptz_info(request: Request, camera_name: str):
 
 
 @router.get(
-    "/{camera_name}/latest.{extension}", dependencies=[Depends(require_camera_access)]
+    "/{camera_name}/latest.{extension}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns the latest frame from the specified camera in the requested format (jpg, png, webp). Falls back to preview frames if the camera is offline.",
 )
 async def latest_frame(
     request: Request,
@@ -159,20 +162,37 @@ async def latest_frame(
             or 10
         )
 
+        is_offline = False
         if frame is None or datetime.now().timestamp() > (
             frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
-            if request.app.camera_error_image is None:
-                error_image = glob.glob(
-                    os.path.join(INSTALL_DIR, "frigate/images/camera-error.jpg")
-                )
+            last_frame_time = frame_processor.get_current_frame_time(camera_name)
+            preview_path = get_most_recent_preview_frame(
+                camera_name, before=last_frame_time
+            )
 
-                if len(error_image) > 0:
-                    request.app.camera_error_image = cv2.imread(
-                        error_image[0], cv2.IMREAD_UNCHANGED
+            if preview_path:
+                logger.debug(f"Using most recent preview frame for {camera_name}")
+                frame = cv2.imread(preview_path, cv2.IMREAD_UNCHANGED)
+
+                if frame is not None:
+                    is_offline = True
+
+            if frame is None or not is_offline:
+                logger.debug(
+                    f"No live or preview frame available for {camera_name}. Using error image."
+                )
+                if request.app.camera_error_image is None:
+                    error_image = glob.glob(
+                        os.path.join(INSTALL_DIR, "frigate/images/camera-error.jpg")
                     )
 
-            frame = request.app.camera_error_image
+                    if len(error_image) > 0:
+                        request.app.camera_error_image = cv2.imread(
+                            error_image[0], cv2.IMREAD_UNCHANGED
+                        )
+
+                frame = request.app.camera_error_image
 
         height = int(params.height or str(frame.shape[0]))
         width = int(height * frame.shape[1] / frame.shape[0])
@@ -194,14 +214,18 @@ async def latest_frame(
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
+
+        headers = {
+            "Cache-Control": "no-store" if not params.store else "private, max-age=60",
+        }
+
+        if is_offline:
+            headers["X-Frigate-Offline"] = "true"
+
         return Response(
             content=img.tobytes(),
             media_type=extension.get_mime_type(),
-            headers={
-                "Cache-Control": "no-store"
-                if not params.store
-                else "private, max-age=60",
-            },
+            headers=headers,
         )
     elif (
         camera_name == "birdseye"
