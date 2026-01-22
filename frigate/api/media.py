@@ -126,7 +126,9 @@ async def camera_ptz_info(request: Request, camera_name: str):
 
 
 @router.get(
-    "/{camera_name}/latest.{extension}", dependencies=[Depends(require_camera_access)]
+    "/{camera_name}/latest.{extension}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns the latest frame from the specified camera in the requested format (jpg, png, webp). Falls back to preview frames if the camera is offline.",
 )
 async def latest_frame(
     request: Request,
