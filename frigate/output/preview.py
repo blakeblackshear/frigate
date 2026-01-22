@@ -8,13 +8,14 @@ import subprocess as sp
 import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import cv2
 import numpy as np
+from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import CameraConfig, RecordQualityEnum
+from frigate.config import CameraConfig, FfmpegConfig, RecordQualityEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW, PREVIEW_FRAME_TYPE
 from frigate.ffmpeg_presets import (
     FPS_VFR_PARAM,
@@ -23,7 +24,12 @@ from frigate.ffmpeg_presets import (
 )
 from frigate.models import Previews
 from frigate.track.object_processing import TrackedObject
-from frigate.util.image import copy_yuv_to_position, get_blank_yuv_frame, get_yuv_crop
+from frigate.util.image import (
+    copy_yuv_to_position,
+    get_blank_yuv_frame,
+    get_yuv_crop,
+    run_ffmpeg_snapshot,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +61,123 @@ def get_cache_image_name(camera: str, frame_time: float) -> str:
         CACHE_DIR,
         f"{FOLDER_PREVIEW_FRAMES}/preview_{camera}-{frame_time}.{PREVIEW_FRAME_TYPE}",
     )
+
+
+def get_most_recent_preview_frame(
+    camera: str, before: float = None, ffmpeg_config: Optional[FfmpegConfig] = None
+) -> str | None:
+    """Get the most recent preview frame for a camera.
+
+    First tries to find a cached preview webp frame. If none exists (e.g., they've been
+    cleaned up after preview video creation), attempts to extract the last frame from
+    the most recent preview video.
+
+    Args:
+        camera: Camera name
+        before: Optional timestamp to find frames before this time
+        ffmpeg_config: Optional ffmpeg configuration for extracting from video fallback
+
+    Returns:
+        Path to a preview frame image file, or None if not available
+    """
+    if not os.path.exists(PREVIEW_CACHE_DIR):
+        logger.debug(f"Preview cache directory does not exist: {PREVIEW_CACHE_DIR}")
+    else:
+        try:
+            # files are named preview_{camera}-{timestamp}.webp
+            # we want the largest timestamp that is less than or equal to before
+            preview_files = [
+                f
+                for f in os.listdir(PREVIEW_CACHE_DIR)
+                if f.startswith(f"preview_{camera}-")
+                and f.endswith(f".{PREVIEW_FRAME_TYPE}")
+            ]
+
+            if preview_files:
+                # sort by timestamp in descending order
+                # filenames are like preview_front-1712345678.901234.webp
+                preview_files.sort(reverse=True)
+
+                if before is None:
+                    return os.path.join(PREVIEW_CACHE_DIR, preview_files[0])
+
+                for file_name in preview_files:
+                    try:
+                        # Extract timestamp: preview_front-1712345678.901234.webp
+                        # Split by dash and extension
+                        timestamp_part = file_name.split("-")[-1].split(
+                            f".{PREVIEW_FRAME_TYPE}"
+                        )[0]
+                        timestamp = float(timestamp_part)
+
+                        if timestamp <= before:
+                            return os.path.join(PREVIEW_CACHE_DIR, file_name)
+                    except (ValueError, IndexError):
+                        continue
+        except Exception as e:
+            logger.error(f"Error searching for cached preview frames: {e}")
+
+    # If no cached frames exist and ffmpeg_config is provided, try extracting from preview video
+    if ffmpeg_config is not None:
+        try:
+            logger.debug(
+                f"No cached preview frames found for {camera}, attempting to extract from preview video"
+            )
+
+            query = Previews.select().where(Previews.camera == camera)
+
+            if before is not None:
+                query = query.where(Previews.end_time <= before)
+
+            preview = query.order_by(Previews.end_time.desc()).limit(1).get()
+
+            if preview and os.path.exists(preview.path):
+                logger.debug(
+                    f"Found preview video for {camera}: {preview.path} (duration: {preview.duration}s)"
+                )
+
+                # Extract the last frame from the video
+                # Use webp for consistency with cached frames
+                image_data, error_msg = run_ffmpeg_snapshot(
+                    ffmpeg_config,
+                    preview.path,
+                    codec="webp",
+                    seek_time=max(0, preview.duration - 0.1),  # Seek to near the end
+                    height=PREVIEW_HEIGHT,
+                    timeout=10,
+                )
+
+                if image_data:
+                    # Write to a temporary file in the cache directory
+                    # Use timestamp from the preview end time
+                    temp_frame_path = os.path.join(
+                        PREVIEW_CACHE_DIR,
+                        f"preview_{camera}-{preview.end_time}_from_video.{PREVIEW_FRAME_TYPE}",
+                    )
+
+                    with open(temp_frame_path, "wb") as f:
+                        f.write(image_data)
+
+                    logger.debug(
+                        f"Successfully extracted last frame from preview video to {temp_frame_path}"
+                    )
+                    return temp_frame_path
+                else:
+                    logger.warning(
+                        f"Failed to extract frame from preview video {preview.path}: {error_msg}"
+                    )
+            else:
+                if preview:
+                    logger.warning(f"Preview video path does not exist: {preview.path}")
+                else:
+                    logger.debug(f"No preview video found in database for {camera}")
+
+        except DoesNotExist:
+            logger.debug(f"No preview video found in database for {camera}")
+        except Exception as e:
+            logger.error(f"Error extracting frame from preview video: {e}")
+
+    return None
 
 
 class FFMpegConverter(threading.Thread):
