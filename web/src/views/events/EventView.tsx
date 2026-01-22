@@ -291,7 +291,7 @@ export default function EventView({
           size="sm"
           value={severityToggle}
           onValueChange={(value: ReviewSeverity) =>
-            // If the user clicks the same tab twice, clear filters as a handy shortcut
+            // don't allow the severity to be unselected
             setSeverityToggle(value || severityToggle)
           }
         >
