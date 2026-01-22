@@ -1,6 +1,6 @@
 import { FilterType } from "@/types/filter";
 import { useCallback, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 function getStringifiedArgs(filter: FilterType) {
   const search: { [key: string]: string } = {};
@@ -49,12 +49,49 @@ export default function useApiFilter<
 
 export function useApiFilterArgs<F extends FilterType>(
   arrayKeys: string[],
+  ignoredKeys?: string[],
 ): useApiFilterReturn<F> {
-  const [rawParams, setRawParams] = useSearchParams();
+  const [rawParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const setFilter = useCallback(
-    (newFilter: F) => setRawParams(getStringifiedArgs(newFilter)),
-    [setRawParams],
+    (newFilter: F) => {
+      const stringifiedFilter = getStringifiedArgs(newFilter);
+
+      // If ignoredKeys is provided, ignore params that aren't managed by this hook
+      let updated: URLSearchParams;
+      if (ignoredKeys) {
+        updated = new URLSearchParams();
+
+        // Keep params that aren't ignored by this hook
+        rawParams.forEach((value, key) => {
+          if (!ignoredKeys.includes(key)) {
+            updated.set(key, value);
+          }
+        });
+
+        // Add/update managed params from the new filter
+        Object.entries(stringifiedFilter).forEach(([key, value]) => {
+          updated.set(key, value);
+        });
+      } else {
+        // Original behavior: replace all params
+        updated = new URLSearchParams(stringifiedFilter);
+      }
+
+      // Use navigate to preserve the hash
+      const search = updated.toString();
+      navigate(
+        {
+          pathname: location.pathname,
+          search: search ? `?${search}` : "",
+          hash: location.hash,
+        },
+        { replace: true },
+      );
+    },
+    [rawParams, ignoredKeys, navigate, location.pathname, location.hash],
   );
 
   const filter = useMemo<F>(() => {

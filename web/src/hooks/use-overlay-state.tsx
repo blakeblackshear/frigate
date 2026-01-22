@@ -145,9 +145,13 @@ export function useHashState<S extends string>(): [
   const setHash = useCallback(
     (value: S | undefined) => {
       if (!value) {
-        navigate(location.pathname);
+        navigate(location.pathname + location.search, {
+          state: location.state,
+        });
       } else {
-        navigate(`${location.pathname}#${value}`, { state: location.state });
+        navigate(`${location.pathname}${location.search}#${value}`, {
+          state: location.state,
+        });
       }
     },
     // we know that these deps are correct

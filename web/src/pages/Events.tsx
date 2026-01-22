@@ -1,9 +1,12 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import useApiFilter from "@/hooks/use-api-filter";
+import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useTimezone } from "@/hooks/use-date-utils";
-import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
-import { useUserPersistence } from "@/hooks/use-user-persistence";
+import {
+  useHashState,
+  useOverlayState,
+  useSearchEffect,
+} from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
@@ -25,6 +28,7 @@ import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 
 export default function Events() {
@@ -37,14 +41,71 @@ export default function Events() {
 
   // recordings viewer
 
-  const [severity, setSeverity] = useOverlayState<ReviewSeverity>(
-    "severity",
-    "alert",
+  // showReviewed from URL params
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // severity from URL hash
+  const [hash, setHash] = useHashState<string>();
+
+  const severity = useMemo<ReviewSeverity>(() => {
+    if (hash === "motion") {
+      return "significant_motion";
+    } else if (hash === "detections") {
+      return "detection";
+    }
+    return "alert";
+  }, [hash]);
+
+  const setSeverity = useCallback(
+    (newSeverity: ReviewSeverity) => {
+      // Clicking the same tab again clears all filters (cameras, date, labels, zones, etc.)
+      // This provides users a quick way to reset their view
+      const isSameTab = newSeverity === severity;
+
+      let newHash: string;
+      if (newSeverity === "significant_motion") {
+        newHash = "motion";
+      } else if (newSeverity === "detection") {
+        newHash = "detections";
+      } else {
+        newHash = "alerts";
+      }
+
+      if (isSameTab) {
+        // Clear filters by navigating without search params
+        navigate(`${location.pathname}#${newHash}`, { state: location.state });
+      } else {
+        setHash(newHash);
+      }
+    },
+    [severity, setHash, navigate, location.pathname, location.state],
   );
 
-  const [showReviewed, setShowReviewed] = useUserPersistence(
-    "showReviewed",
-    false,
+  const showReviewed = useMemo(() => {
+    return searchParams.get("showReviewed") === "true";
+  }, [searchParams]);
+
+  const setShowReviewed = useCallback(
+    (show: boolean) => {
+      const updated = new URLSearchParams(searchParams);
+      if (show) {
+        updated.set("showReviewed", "true");
+      } else {
+        updated.delete("showReviewed");
+      }
+      const search = updated.toString();
+      navigate(
+        {
+          pathname: location.pathname,
+          search: search ? `?${search}` : "",
+          hash: location.hash,
+        },
+        { replace: true },
+      );
+    },
+    [searchParams, navigate, location.pathname, location.hash],
   );
 
   const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
@@ -104,31 +165,10 @@ export default function Events() {
   // review filter
 
   const [reviewFilter, setReviewFilter, reviewSearchParams] =
-    useApiFilter<ReviewFilter>();
-
-  useSearchEffect("cameras", (cameras: string) => {
-    setReviewFilter({
-      ...reviewFilter,
-      cameras: cameras.includes(",") ? cameras.split(",") : [cameras],
-    });
-    return true;
-  });
-
-  useSearchEffect("labels", (labels: string) => {
-    setReviewFilter({
-      ...reviewFilter,
-      labels: labels.includes(",") ? labels.split(",") : [labels],
-    });
-    return true;
-  });
-
-  useSearchEffect("zones", (zones: string) => {
-    setReviewFilter({
-      ...reviewFilter,
-      zones: zones.includes(",") ? zones.split(",") : [zones],
-    });
-    return true;
-  });
+    useApiFilterArgs<ReviewFilter>(
+      ["cameras", "labels", "zones"],
+      ["cameras", "labels", "zones", "before", "after", "showAll"],
+    );
 
   useSearchEffect("group", (reviewGroup) => {
     if (config && reviewGroup && reviewGroup != "default") {
