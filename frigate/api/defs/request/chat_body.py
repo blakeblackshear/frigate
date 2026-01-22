@@ -32,3 +32,10 @@ class ChatCompletionRequest(BaseModel):
         le=10,
         description="Maximum number of tool call iterations (default: 5)",
     )
+    include_live_image: Optional[str] = Field(
+        default=None,
+        description=(
+            "If set, the current live frame from this camera is attached to the first "
+            "user message as multimodal content. Use with get_live_context for detection info."
+        ),
+    )
