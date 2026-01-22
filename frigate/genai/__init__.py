@@ -69,7 +69,7 @@ class GenAIClient:
                 return "\n- (No objects detected)"
 
         context_prompt = f"""
-Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"]} security camera.
+Your task is to analyze a sequence of images taken in chronological order from a security camera.
 
 ## Normal Activity Patterns for This Property
 
@@ -108,7 +108,8 @@ Your response MUST be a flat JSON object with:
 
 ## Sequence Details
 
-- Frame 1 = earliest, Frame {len(thumbnails)} = latest
+- Camera: {review_data["camera"]}
+- Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest)
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
 - Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}
 

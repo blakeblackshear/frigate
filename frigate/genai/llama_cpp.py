@@ -216,7 +216,14 @@ class LlamaCppClient(GenAIClient):
                 "finish_reason": "error",
             }
         except requests.exceptions.RequestException as e:
-            logger.warning("llama.cpp returned an error: %s", str(e))
+            error_detail = str(e)
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    error_body = e.response.text
+                    error_detail = f"{str(e)} - Response: {error_body[:500]}"
+                except Exception:
+                    pass
+            logger.warning("llama.cpp returned an error: %s", error_detail)
             return {
                 "content": None,
                 "tool_calls": None,
