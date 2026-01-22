@@ -101,11 +101,12 @@ export function RecordingView({
   const [searchParams] = useSearchParams();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  // Navigate back while clearing the review id param to prevent
+  // Navigate back while clearing recording-specific params (id, tab) to prevent
   // useSearchEffect from re-opening the recording
   const handleBack = useCallback(() => {
     const updated = new URLSearchParams(searchParams);
     updated.delete("id");
+    updated.delete("tab");
     const search = updated.toString();
     navigate(
       {
@@ -163,9 +164,34 @@ export function RecordingView({
     false,
   );
 
-  const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
-    "timelineType",
-    recording?.timelineType ?? "timeline",
+  // Timeline type from URL search params for deep linking
+  const timelineType = useMemo<TimelineType>(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "events" || tabParam === "detail" || tabParam === "timeline") {
+      return tabParam;
+    }
+    return recording?.timelineType ?? "timeline";
+  }, [searchParams, recording?.timelineType]);
+
+  const setTimelineType = useCallback(
+    (type: TimelineType, replace: boolean = false) => {
+      const updated = new URLSearchParams(searchParams);
+      if (type === "timeline") {
+        updated.delete("tab"); // timeline is default, no need to include in URL
+      } else {
+        updated.set("tab", type);
+      }
+      const search = updated.toString();
+      navigate(
+        {
+          pathname: location.pathname,
+          search: search ? `?${search}` : "",
+          hash: location.hash,
+        },
+        { replace, state: location.state },
+      );
+    },
+    [searchParams, navigate, location.pathname, location.hash, location.state],
   );
 
   const chunkedTimeRange = useMemo(

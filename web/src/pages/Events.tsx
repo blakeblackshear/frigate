@@ -111,7 +111,7 @@ export default function Events() {
   const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
     "recording",
     undefined,
-    false,
+    true, // preserveSearch: keep URL params for deep linking
   );
 
   // Wrapper to update URL with review ID for deep linking when opening a recording.
@@ -145,6 +145,12 @@ export default function Events() {
     useState<TimelineType>("timeline");
 
   useSearchEffect("tab", (tab: string) => {
+    // Don't process or strip tab param when viewing a recording or deep linking
+    // to one - the tab param is used for RecordingView's Timeline/Events/Detail tabs
+    if (recording || searchParams.has("id")) {
+      return false;
+    }
+
     if (tab === "timeline" || tab === "events" || tab === "detail") {
       setNotificationTab(tab as TimelineType);
     }
