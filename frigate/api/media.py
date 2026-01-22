@@ -165,9 +165,8 @@ async def latest_frame(
             frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             last_frame_time = frame_processor.get_current_frame_time(camera_name)
-            config: FrigateConfig = request.app.frigate_config
             preview_path = get_most_recent_preview_frame(
-                camera_name, before=last_frame_time, ffmpeg_config=config.ffmpeg
+                camera_name, before=last_frame_time
             )
 
             if preview_path:
