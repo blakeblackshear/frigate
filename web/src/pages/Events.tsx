@@ -114,6 +114,33 @@ export default function Events() {
     false,
   );
 
+  // Wrapper to update URL with review ID for deep linking when opening a recording.
+  // This does a single atomic navigation to avoid creating multiple history entries
+  // which would cause issues with the back button.
+  const onOpenRecording = useCallback(
+    (recordingInfo: RecordingStartingPoint) => {
+      const updated = new URLSearchParams(searchParams);
+      if (recordingInfo.reviewId) {
+        updated.set("id", recordingInfo.reviewId);
+      }
+      const search = updated.toString();
+
+      // Single navigation that updates both URL params and location state
+      navigate(
+        {
+          pathname: location.pathname,
+          search: search ? `?${search}` : "",
+          hash: location.hash,
+        },
+        {
+          replace: true,
+          state: { ...location.state, recording: recordingInfo },
+        },
+      );
+    },
+    [searchParams, navigate, location.pathname, location.hash, location.state],
+  );
+
   const [notificationTab, setNotificationTab] =
     useState<TimelineType>("timeline");
 
@@ -125,6 +152,13 @@ export default function Events() {
   });
 
   useSearchEffect("id", (reviewId: string) => {
+    // If recording is already set (e.g., from clicking a review), don't re-fetch.
+    // Return false to keep the id param in the URL for deep linking.
+    if (recording) {
+      return false;
+    }
+
+    // Fresh deep link - fetch review data and open recording
     axios
       .get(`review/${reviewId}`)
       .then((resp) => {
@@ -142,6 +176,7 @@ export default function Events() {
               startTime,
               severity: resp.data.severity,
               timelineType: notificationTab,
+              reviewId,
             },
             true,
           );
@@ -149,7 +184,8 @@ export default function Events() {
       })
       .catch(() => {});
 
-    return true;
+    // Return false to keep the id param in the URL for deep linking
+    return false;
   });
 
   const [startTime, setStartTime] = useState<number>();
@@ -560,7 +596,7 @@ export default function Events() {
         setSeverity={setSeverity}
         markItemAsReviewed={markItemAsReviewed}
         markAllItemsAsReviewed={markAllItemsAsReviewed}
-        onOpenRecording={setRecording}
+        onOpenRecording={onOpenRecording}
         pullLatestData={reloadData}
         updateFilter={onUpdateFilter}
       />

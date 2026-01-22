@@ -168,6 +168,7 @@ export default function EventView({
           startTime: effectiveStartTime - REVIEW_PADDING,
           severity: review.severity,
           timelineType: detail ? "detail" : undefined,
+          reviewId: review.id,
         });
 
         review.has_been_reviewed = true;

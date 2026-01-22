@@ -35,7 +35,7 @@ import {
 } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import { TimeRange, TimelineType } from "@/types/timeline";
@@ -97,7 +97,25 @@ export function RecordingView({
   const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // Navigate back while clearing the review id param to prevent
+  // useSearchEffect from re-opening the recording
+  const handleBack = useCallback(() => {
+    const updated = new URLSearchParams(searchParams);
+    updated.delete("id");
+    const search = updated.toString();
+    navigate(
+      {
+        pathname: location.pathname,
+        search: search ? `?${search}` : "",
+        hash: location.hash,
+      },
+      { replace: true },
+    );
+  }, [searchParams, navigate, location.pathname, location.hash]);
 
   // recordings summary
 
@@ -541,7 +559,7 @@ export function RecordingView({
               className="flex items-center gap-2.5 rounded-lg"
               aria-label={t("label.back", { ns: "common" })}
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
             >
               <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
               {isDesktop && (

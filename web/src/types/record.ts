@@ -39,6 +39,8 @@ export type RecordingStartingPoint = {
   startTime: number;
   severity: ReviewSeverity;
   timelineType?: TimelineType;
+  // Optional review ID for deep linking to specific review segments
+  reviewId?: string;
 };
 
 export type RecordingPlayerError = "stalled" | "startup";
