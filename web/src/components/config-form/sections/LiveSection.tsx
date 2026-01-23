@@ -1,20 +1,17 @@
 // Live Section Component
 // Reusable for both global and camera-level live settings
 
-import { createConfigSection, type SectionConfig } from "./BaseSection";
-
-// Configuration for the live section
-export const liveSectionConfig: SectionConfig = {
-  fieldOrder: ["stream_name", "height", "quality"],
-  fieldGroups: {},
-  hiddenFields: ["enabled_in_config"],
-  advancedFields: ["quality"],
-};
+import { createConfigSection } from "./BaseSection";
 
 export const LiveSection = createConfigSection({
   sectionPath: "live",
-  translationKey: "configForm.live",
-  defaultConfig: liveSectionConfig,
+  i18nNamespace: "config/live",
+  defaultConfig: {
+    fieldOrder: ["stream_name", "height", "quality"],
+    fieldGroups: {},
+    hiddenFields: ["enabled_in_config"],
+    advancedFields: ["quality"],
+  },
 });
 
 export default LiveSection;

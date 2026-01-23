@@ -43,6 +43,8 @@ export interface ConfigFormProps {
   liveValidate?: boolean;
   /** Form context passed to all widgets */
   formContext?: Record<string, unknown>;
+  /** i18n namespace for field labels */
+  i18nNamespace?: string;
 }
 
 export function ConfigForm({
@@ -61,8 +63,9 @@ export function ConfigForm({
   className,
   liveValidate = false,
   formContext,
+  i18nNamespace,
 }: ConfigFormProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation([i18nNamespace || "common", "views/settings"]);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Determine which fields to hide based on advanced toggle
@@ -81,8 +84,16 @@ export function ConfigForm({
         fieldOrder,
         hiddenFields: effectiveHiddenFields,
         advancedFields: showAdvanced ? advancedFields : [],
+        i18nNamespace,
       }),
-    [schema, fieldOrder, effectiveHiddenFields, advancedFields, showAdvanced],
+    [
+      schema,
+      fieldOrder,
+      effectiveHiddenFields,
+      advancedFields,
+      showAdvanced,
+      i18nNamespace,
+    ],
   );
 
   // Merge generated uiSchema with custom overrides
@@ -116,6 +127,16 @@ export function ConfigForm({
 
   const hasAdvancedFields = advancedFields && advancedFields.length > 0;
 
+  // Extended form context with i18n info
+  const extendedFormContext = useMemo(
+    () => ({
+      ...formContext,
+      i18nNamespace,
+      t,
+    }),
+    [formContext, i18nNamespace, t],
+  );
+
   return (
     <div className={cn("config-form", className)}>
       {hasAdvancedFields && (
@@ -130,6 +151,7 @@ export function ConfigForm({
             className="cursor-pointer text-sm text-muted-foreground"
           >
             {t("configForm.showAdvanced", {
+              ns: "views/settings",
               defaultValue: "Show Advanced Settings",
             })}
           </Label>
@@ -146,7 +168,7 @@ export function ConfigForm({
         disabled={disabled}
         readonly={readonly}
         liveValidate={liveValidate}
-        formContext={formContext}
+        formContext={extendedFormContext}
         transformErrors={errorTransformer}
         {...frigateTheme}
       />

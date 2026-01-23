@@ -8,16 +8,13 @@ export {
   type CreateSectionOptions,
 } from "./BaseSection";
 
-export { DetectSection, detectSectionConfig } from "./DetectSection";
-export { RecordSection, recordSectionConfig } from "./RecordSection";
-export { SnapshotsSection, snapshotsSectionConfig } from "./SnapshotsSection";
-export { MotionSection, motionSectionConfig } from "./MotionSection";
-export { ObjectsSection, objectsSectionConfig } from "./ObjectsSection";
-export { ReviewSection, reviewSectionConfig } from "./ReviewSection";
-export { AudioSection, audioSectionConfig } from "./AudioSection";
-export {
-  NotificationsSection,
-  notificationsSectionConfig,
-} from "./NotificationsSection";
-export { LiveSection, liveSectionConfig } from "./LiveSection";
-export { TimestampSection, timestampSectionConfig } from "./TimestampSection";
+export { DetectSection } from "./DetectSection";
+export { RecordSection } from "./RecordSection";
+export { SnapshotsSection } from "./SnapshotsSection";
+export { MotionSection } from "./MotionSection";
+export { ObjectsSection } from "./ObjectsSection";
+export { ReviewSection } from "./ReviewSection";
+export { AudioSection } from "./AudioSection";
+export { NotificationsSection } from "./NotificationsSection";
+export { LiveSection } from "./LiveSection";
+export { TimestampSection } from "./TimestampSection";
