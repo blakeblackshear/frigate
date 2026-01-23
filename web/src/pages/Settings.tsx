@@ -37,6 +37,8 @@ import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
+import GlobalConfigView from "@/views/settings/GlobalConfigView";
+import CameraConfigView from "@/views/settings/CameraConfigView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
@@ -71,6 +73,8 @@ import {
 
 const allSettingsViews = [
   "ui",
+  "globalConfig",
+  "cameraConfig",
   "enrichments",
   "cameraManagement",
   "cameraReview",
@@ -89,11 +93,15 @@ type SettingsType = (typeof allSettingsViews)[number];
 const settingsGroups = [
   {
     label: "general",
-    items: [{ key: "ui", component: UiSettingsView }],
+    items: [
+      { key: "ui", component: UiSettingsView },
+      { key: "globalConfig", component: GlobalConfigView },
+    ],
   },
   {
     label: "cameras",
     items: [
+      { key: "cameraConfig", component: CameraConfigView },
       { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
@@ -130,6 +138,7 @@ const settingsGroups = [
 
 const CAMERA_SELECT_BUTTON_PAGES = [
   "debug",
+  "cameraConfig",
   "cameraReview",
   "masksAndZones",
   "motionTuner",

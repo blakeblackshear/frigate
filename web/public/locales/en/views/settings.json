@@ -9,11 +9,16 @@
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
     "general": "UI Settings - Frigate",
+    "globalConfig": "Global Configuration - Frigate",
+    "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
-    "notifications": "Notification Settings - Frigate"
+    "notifications": "Notification Settings - Frigate",
+    "maintenance": "Maintenance - Frigate"
   },
   "menu": {
     "ui": "UI",
+    "globalConfig": "Global Config",
+    "cameraConfig": "Camera Config",
     "enrichments": "Enrichments",
     "cameraManagement": "Management",
     "cameraReview": "Review",
@@ -24,7 +29,8 @@
     "users": "Users",
     "roles": "Roles",
     "notifications": "Notifications",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "maintenance": "Maintenance"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1115,5 +1121,155 @@
       "exports": "Exports",
       "recordings": "Recordings"
     }
+  },
+  "configForm": {
+    "showAdvanced": "Show Advanced Settings",
+    "tabs": {
+      "sharedDefaults": "Shared Defaults",
+      "system": "System",
+      "integrations": "Integrations"
+    },
+    "sections": {
+      "detect": "Detection",
+      "record": "Recording",
+      "snapshots": "Snapshots",
+      "motion": "Motion",
+      "objects": "Objects",
+      "review": "Review",
+      "audio": "Audio",
+      "notifications": "Notifications",
+      "live": "Live View",
+      "timestamp_style": "Timestamps",
+      "mqtt": "MQTT",
+      "database": "Database",
+      "telemetry": "Telemetry",
+      "auth": "Authentication",
+      "tls": "TLS",
+      "proxy": "Proxy",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "Detectors",
+      "model": "Model",
+      "semantic_search": "Semantic Search",
+      "genai": "GenAI",
+      "face_recognition": "Face Recognition",
+      "lpr": "License Plate Recognition",
+      "birdseye": "Birdseye"
+    },
+    "detect": {
+      "title": "Detection Settings",
+      "toast": {
+        "success": "Detection settings saved successfully",
+        "error": "Failed to save detection settings",
+        "resetSuccess": "Detection settings reset to global defaults",
+        "resetError": "Failed to reset detection settings"
+      }
+    },
+    "record": {
+      "title": "Recording Settings",
+      "toast": {
+        "success": "Recording settings saved successfully",
+        "error": "Failed to save recording settings",
+        "resetSuccess": "Recording settings reset to global defaults",
+        "resetError": "Failed to reset recording settings"
+      }
+    },
+    "snapshots": {
+      "title": "Snapshot Settings",
+      "toast": {
+        "success": "Snapshot settings saved successfully",
+        "error": "Failed to save snapshot settings",
+        "resetSuccess": "Snapshot settings reset to global defaults",
+        "resetError": "Failed to reset snapshot settings"
+      }
+    },
+    "motion": {
+      "title": "Motion Settings",
+      "toast": {
+        "success": "Motion settings saved successfully",
+        "error": "Failed to save motion settings",
+        "resetSuccess": "Motion settings reset to global defaults",
+        "resetError": "Failed to reset motion settings"
+      }
+    },
+    "objects": {
+      "title": "Object Settings",
+      "toast": {
+        "success": "Object settings saved successfully",
+        "error": "Failed to save object settings",
+        "resetSuccess": "Object settings reset to global defaults",
+        "resetError": "Failed to reset object settings"
+      }
+    },
+    "review": {
+      "title": "Review Settings",
+      "toast": {
+        "success": "Review settings saved successfully",
+        "error": "Failed to save review settings",
+        "resetSuccess": "Review settings reset to global defaults",
+        "resetError": "Failed to reset review settings"
+      }
+    },
+    "audio": {
+      "title": "Audio Settings",
+      "toast": {
+        "success": "Audio settings saved successfully",
+        "error": "Failed to save audio settings",
+        "resetSuccess": "Audio settings reset to global defaults",
+        "resetError": "Failed to reset audio settings"
+      }
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "toast": {
+        "success": "Notification settings saved successfully",
+        "error": "Failed to save notification settings",
+        "resetSuccess": "Notification settings reset to global defaults",
+        "resetError": "Failed to reset notification settings"
+      }
+    },
+    "live": {
+      "title": "Live View Settings",
+      "toast": {
+        "success": "Live view settings saved successfully",
+        "error": "Failed to save live view settings",
+        "resetSuccess": "Live view settings reset to global defaults",
+        "resetError": "Failed to reset live view settings"
+      }
+    },
+    "timestamp_style": {
+      "title": "Timestamp Settings",
+      "toast": {
+        "success": "Timestamp settings saved successfully",
+        "error": "Failed to save timestamp settings",
+        "resetSuccess": "Timestamp settings reset to global defaults",
+        "resetError": "Failed to reset timestamp settings"
+      }
+    }
+  },
+  "globalConfig": {
+    "title": "Global Configuration",
+    "description": "Configure global settings that apply to all cameras unless overridden.",
+    "toast": {
+      "success": "Global settings saved successfully",
+      "error": "Failed to save global settings",
+      "validationError": "Validation failed"
+    }
+  },
+  "cameraConfig": {
+    "title": "Camera Configuration",
+    "description": "Configure settings for individual cameras. Settings override global defaults.",
+    "overriddenBadge": "Overridden",
+    "resetToGlobal": "Reset to Global",
+    "toast": {
+      "success": "Camera settings saved successfully",
+      "error": "Failed to save camera settings"
+    }
+  },
+  "common": {
+    "overridden": "Overridden",
+    "resetToGlobal": "Reset to Global",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }
