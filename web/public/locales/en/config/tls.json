@@ -1,8 +1,6 @@
 {
   "label": "TLS configuration.",
-  "properties": {
-    "enabled": {
-      "label": "Enable TLS for port 8971"
-    }
+  "enabled": {
+    "label": "Enable TLS for port 8971"
   }
 }

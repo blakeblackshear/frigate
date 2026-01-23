@@ -1,23 +1,18 @@
 {
   "label": "Audio transcription config.",
-  "properties": {
-    "enabled": {
-      "label": "Enable audio transcription."
-    },
-    "language": {
-      "label": "Language abbreviation to use for audio event transcription/translation."
-    },
-    "device": {
-      "label": "The device used for license plate recognition."
-    },
-    "model_size": {
-      "label": "The size of the embeddings model used."
-    },
-    "enabled_in_config": {
-      "label": "Keep track of original state of camera."
-    },
-    "live_enabled": {
-      "label": "Enable live transcriptions."
-    }
+  "enabled": {
+    "label": "Enable audio transcription."
+  },
+  "language": {
+    "label": "Language abbreviation to use for audio event transcription/translation."
+  },
+  "device": {
+    "label": "The device used for audio transcription."
+  },
+  "model_size": {
+    "label": "The size of the embeddings model used."
+  },
+  "live_enabled": {
+    "label": "Enable live transcriptions."
   }
 }

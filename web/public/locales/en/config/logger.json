@@ -1,11 +1,9 @@
 {
   "label": "Logging configuration.",
-  "properties": {
-    "default": {
-      "label": "Default logging level."
-    },
-    "logs": {
-      "label": "Log level for specified processes."
-    }
+  "default": {
+    "label": "Default logging level."
+  },
+  "logs": {
+    "label": "Log level for specified processes."
   }
 }

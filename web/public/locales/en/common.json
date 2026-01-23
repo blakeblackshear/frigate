@@ -150,7 +150,10 @@
     "export": "Export",
     "deleteNow": "Delete Now",
     "next": "Next",
-    "continue": "Continue"
+    "continue": "Continue",
+    "modified": "Modified",
+    "overridden": "Overridden",
+    "resetToGlobal": "Reset to Global"
   },
   "menu": {
     "system": "System",

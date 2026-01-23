@@ -38,8 +38,8 @@ def process_model_fields(model: type[BaseModel]) -> Dict[str, Any]:
     """
     Recursively process a Pydantic model to extract translations.
 
-    Returns a nested dictionary structure matching the config schema,
-    with title and description for each field.
+    Returns a dictionary structure with nested fields directly under their
+    parent keys.
     """
     translations = {}
 
@@ -73,11 +73,11 @@ def process_model_fields(model: type[BaseModel]) -> Dict[str, Any]:
                     nested_translations = process_model_fields(value_type)
 
                     if nested_translations:
-                        field_translations["properties"] = nested_translations
+                        field_translations.update(nested_translations)
         elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
             nested_translations = process_model_fields(field_type)
             if nested_translations:
-                field_translations["properties"] = nested_translations
+                field_translations.update(nested_translations)
 
         if field_translations:
             translations[field_name] = field_translations
@@ -90,6 +90,8 @@ def generate_section_translation(
 ) -> Dict[str, Any]:
     """
     Generate translation structure for a top-level config section.
+    Returns a structure with label and description at root level,
+    and nested fields directly under their parent keys.
     """
     section_translations = get_field_translations(field_info)
     field_type = field_info.annotation
@@ -109,13 +111,13 @@ def generate_section_translation(
             if isinstance(value_type, type) and issubclass(value_type, BaseModel):
                 nested = process_model_fields(value_type)
                 if nested:
-                    section_translations["properties"] = nested
+                    section_translations.update(nested)
 
-    # If the field itself is a BaseModel, process it
+    # If the field itself is a BaseModel, process it and add nested translations
     elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
         nested = process_model_fields(field_type)
         if nested:
-            section_translations["properties"] = nested
+            section_translations.update(nested)
 
     return section_translations
 

@@ -1266,10 +1266,12 @@
       "error": "Failed to save camera settings"
     }
   },
-  "common": {
-    "overridden": "Overridden",
-    "resetToGlobal": "Reset to Global",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "toast": {
+    "success": "Settings saved successfully",
+    "error": "Failed to save settings",
+    "validationError": "Validation failed: {{message}}",
+    "resetSuccess": "Reset to global defaults",
+    "resetError": "Failed to reset settings"
+  },
+  "unsavedChanges": "You have unsaved changes"
 }

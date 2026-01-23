@@ -1,8 +1,6 @@
 {
   "label": "Database configuration.",
-  "properties": {
-    "path": {
-      "label": "Database path."
-    }
+  "path": {
+    "label": "Database path."
   }
 }
