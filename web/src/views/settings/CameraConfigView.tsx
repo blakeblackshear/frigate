@@ -1,27 +1,26 @@
 // Camera Configuration View
 // Per-camera configuration with tab navigation and override indicators
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, memo } from "react";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
-import {
-  DetectSection,
-  RecordSection,
-  SnapshotsSection,
-  MotionSection,
-  ObjectsSection,
-  ReviewSection,
-  AudioSection,
-  NotificationsSection,
-  LiveSection,
-  TimestampSection,
-} from "@/components/config-form/sections";
+import { DetectSection } from "@/components/config-form/sections/DetectSection";
+import { RecordSection } from "@/components/config-form/sections/RecordSection";
+import { SnapshotsSection } from "@/components/config-form/sections/SnapshotsSection";
+import { MotionSection } from "@/components/config-form/sections/MotionSection";
+import { ObjectsSection } from "@/components/config-form/sections/ObjectsSection";
+import { ReviewSection } from "@/components/config-form/sections/ReviewSection";
+import { AudioSection } from "@/components/config-form/sections/AudioSection";
+import { NotificationsSection } from "@/components/config-form/sections/NotificationsSection";
+import { LiveSection } from "@/components/config-form/sections/LiveSection";
+import { TimestampSection } from "@/components/config-form/sections/TimestampSection";
 import { useAllCameraOverrides } from "@/hooks/use-config-override";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import Heading from "@/components/ui/heading";
 import { cn } from "@/lib/utils";
 
 interface CameraConfigViewProps {
@@ -83,14 +82,14 @@ export default function CameraConfigView({
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
+    <div className="flex size-full flex-col">
+      <div className="mb-4">
+        <Heading as="h2">
           {t("configForm.camera.title", {
             defaultValue: "Camera Configuration",
           })}
-        </h2>
-        <p className="text-muted-foreground">
+        </Heading>
+        <p className="text-sm text-muted-foreground">
           {t("configForm.camera.description", {
             defaultValue:
               "Configure settings for individual cameras. Overridden settings are highlighted.",
@@ -103,7 +102,7 @@ export default function CameraConfigView({
         <Tabs
           value={selectedCamera}
           onValueChange={handleCameraChange}
-          className="w-full"
+          className="flex flex-1 flex-col"
         >
           <ScrollArea className="w-full">
             <TabsList className="inline-flex w-max">
@@ -134,7 +133,7 @@ export default function CameraConfigView({
           </ScrollArea>
 
           {cameras.map((camera) => (
-            <TabsContent key={camera} value={camera} className="mt-4">
+            <TabsContent key={camera} value={camera} className="mt-4 flex-1">
               <CameraConfigContent
                 cameraName={camera}
                 config={config}
@@ -166,13 +165,26 @@ interface CameraConfigContentProps {
   onSave: () => void;
 }
 
-function CameraConfigContent({
+const CameraConfigContent = memo(function CameraConfigContent({
   cameraName,
   config,
   overriddenSections,
   onSave,
 }: CameraConfigContentProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation([
+    "config/detect",
+    "config/record",
+    "config/snapshots",
+    "config/motion",
+    "config/objects",
+    "config/review",
+    "config/audio",
+    "config/notifications",
+    "config/live",
+    "config/timestamp_style",
+    "views/settings",
+    "common",
+  ]);
   const [activeSection, setActiveSection] = useState("detect");
 
   const cameraConfig = config.cameras?.[cameraName];
@@ -180,35 +192,73 @@ function CameraConfigContent({
   if (!cameraConfig) {
     return (
       <div className="text-muted-foreground">
-        {t("configForm.camera.notFound", { defaultValue: "Camera not found" })}
+        {t("configForm.camera.notFound", {
+          ns: "views/settings",
+          defaultValue: "Camera not found",
+        })}
       </div>
     );
   }
 
   const sections = [
-    { key: "detect", label: "Detect", component: DetectSection },
-    { key: "record", label: "Record", component: RecordSection },
-    { key: "snapshots", label: "Snapshots", component: SnapshotsSection },
-    { key: "motion", label: "Motion", component: MotionSection },
-    { key: "objects", label: "Objects", component: ObjectsSection },
-    { key: "review", label: "Review", component: ReviewSection },
-    { key: "audio", label: "Audio", component: AudioSection },
+    {
+      key: "detect",
+      i18nNamespace: "config/detect",
+      component: DetectSection,
+    },
+    {
+      key: "record",
+      i18nNamespace: "config/record",
+      component: RecordSection,
+    },
+    {
+      key: "snapshots",
+      i18nNamespace: "config/snapshots",
+      component: SnapshotsSection,
+    },
+    {
+      key: "motion",
+      i18nNamespace: "config/motion",
+      component: MotionSection,
+    },
+    {
+      key: "objects",
+      i18nNamespace: "config/objects",
+      component: ObjectsSection,
+    },
+    {
+      key: "review",
+      i18nNamespace: "config/review",
+      component: ReviewSection,
+    },
+    { key: "audio", i18nNamespace: "config/audio", component: AudioSection },
     {
       key: "notifications",
-      label: "Notifications",
+      i18nNamespace: "config/notifications",
       component: NotificationsSection,
     },
-    { key: "live", label: "Live", component: LiveSection },
-    { key: "timestamp_style", label: "Timestamp", component: TimestampSection },
+    { key: "live", i18nNamespace: "config/live", component: LiveSection },
+    {
+      key: "timestamp_style",
+      i18nNamespace: "config/timestamp_style",
+      component: TimestampSection,
+    },
   ];
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-1 gap-6 overflow-hidden">
       {/* Section Navigation */}
       <nav className="w-48 shrink-0">
         <ul className="space-y-1">
           {sections.map((section) => {
             const isOverridden = overriddenSections.includes(section.key);
+            const sectionLabel = t("label", {
+              ns: section.i18nNamespace,
+              defaultValue:
+                section.key.charAt(0).toUpperCase() +
+                section.key.slice(1).replace(/_/g, " "),
+            });
+
             return (
               <li key={section.key}>
                 <button
@@ -220,14 +270,13 @@ function CameraConfigContent({
                       : "hover:bg-muted",
                   )}
                 >
-                  <span>
-                    {t(`configForm.${section.key}.title`, {
-                      defaultValue: section.label,
-                    })}
-                  </span>
+                  <span>{sectionLabel}</span>
                   {isOverridden && (
                     <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                      {t("common.modified", { defaultValue: "Modified" })}
+                      {t("button.modified", {
+                        ns: "common",
+                        defaultValue: "Modified",
+                      })}
                     </Badge>
                   )}
                 </button>
@@ -238,28 +287,25 @@ function CameraConfigContent({
       </nav>
 
       {/* Section Content */}
-      <ScrollArea className="h-[calc(100vh-300px)] flex-1">
-        <div className="pr-4">
-          {sections.map((section) => {
-            const SectionComponent = section.component;
-            return (
-              <div
-                key={section.key}
-                className={cn(
-                  activeSection === section.key ? "block" : "hidden",
-                )}
-              >
-                <SectionComponent
-                  level="camera"
-                  cameraName={cameraName}
-                  showOverrideIndicator
-                  onSave={onSave}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
+      <div className="scrollbar-container flex-1 overflow-y-auto pr-4">
+        {sections.map((section) => {
+          const SectionComponent = section.component;
+          return (
+            <div
+              key={section.key}
+              className={cn(activeSection === section.key ? "block" : "hidden")}
+            >
+              <SectionComponent
+                level="camera"
+                cameraName={cameraName}
+                showOverrideIndicator
+                onSave={onSave}
+                showTitle={true}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
-}
+});

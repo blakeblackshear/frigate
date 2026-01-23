@@ -19,6 +19,8 @@ export interface UiSchemaOptions {
   widgetMappings?: Record<string, string>;
   /** Whether to include descriptions */
   includeDescriptions?: boolean;
+  /** i18n namespace for field labels (e.g., "config/detect") */
+  i18nNamespace?: string;
 }
 
 // Type guard for schema objects
