@@ -1,8 +1,9 @@
 // Field Template - wraps each form field with label and description
-import type { FieldTemplateProps } from "@rjsf/utils";
+import type { FieldTemplateProps, StrictRJSFSchema } from "@rjsf/utils";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { isNullableUnionSchema } from "../fields/nullableUtils";
 
 /**
  * Build the i18n translation key path for nested fields using the field path
@@ -46,6 +47,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
 
   // Boolean fields (switches) render label inline
   const isBoolean = schema.type === "boolean";
+
+  const isNullableUnion = isNullableUnionSchema(schema as StrictRJSFSchema);
 
   // Get translation path for this field
   const translationPath = buildTranslationPath(fieldPathId.path);
@@ -99,8 +102,9 @@ export function FieldTemplate(props: FieldTemplateProps) {
         isAdvanced && "border-l-2 border-muted pl-4",
         isBoolean && "flex items-center justify-between gap-4",
       )}
+      data-field-id={translationPath}
     >
-      {displayLabel && finalLabel && !isBoolean && (
+      {displayLabel && finalLabel && !isBoolean && !isNullableUnion && (
         <Label
           htmlFor={id}
           className={cn(
@@ -122,7 +126,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
                 {required && <span className="ml-1 text-destructive">*</span>}
               </Label>
             )}
-            {finalDescription && (
+            {finalDescription && !isNullableUnion && (
               <p className="max-w-md text-sm text-muted-foreground">
                 {String(finalDescription)}
               </p>
@@ -132,10 +136,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
         </div>
       ) : (
         <>
-          {finalDescription && (
-            <p className="text-sm text-muted-foreground">
-              {String(finalDescription)}
-            </p>
+          {finalDescription && !isNullableUnion && (
+            <p className="text-sm text-muted-foreground">{finalDescription}</p>
           )}
           {children}
         </>

@@ -2,24 +2,19 @@
 import type { StrictRJSFSchema } from "@rjsf/utils";
 
 /**
- * Checks if a schema is anyOf with exactly [PrimitiveType, null]
- * where the primitive has no additional constraints
+ * Checks if a schema is anyOf/oneOf with exactly [Type, null].
+ * This indicates a nullable field in Pydantic schemas.
  */
-export function isSimpleNullableField(schema: StrictRJSFSchema): boolean {
-  if (
-    !schema.anyOf ||
-    !Array.isArray(schema.anyOf) ||
-    schema.anyOf.length !== 2
-  ) {
+export function isNullableUnionSchema(schema: StrictRJSFSchema): boolean {
+  const union = schema.anyOf ?? schema.oneOf;
+  if (!union || !Array.isArray(union) || union.length !== 2) {
     return false;
   }
 
-  const items = schema.anyOf;
   let hasNull = false;
-  let simpleType: StrictRJSFSchema | null = null;
+  let nonNullCount = 0;
 
-  // eslint-disable-next-line no-restricted-syntax
-  for (const item of items) {
+  for (const item of union) {
     if (typeof item !== "object" || item === null) {
       return false;
     }
@@ -28,22 +23,19 @@ export function isSimpleNullableField(schema: StrictRJSFSchema): boolean {
 
     if (itemSchema.type === "null") {
       hasNull = true;
-    } else if (
-      itemSchema.type &&
-      !("$ref" in itemSchema) &&
-      !("additionalProperties" in itemSchema) &&
-      !("items" in itemSchema) &&
-      !("pattern" in itemSchema) &&
-      !("minimum" in itemSchema) &&
-      !("maximum" in itemSchema) &&
-      !("exclusiveMinimum" in itemSchema) &&
-      !("exclusiveMaximum" in itemSchema)
-    ) {
-      simpleType = itemSchema;
+    } else {
+      nonNullCount += 1;
     }
   }
 
-  return hasNull && simpleType !== null;
+  return hasNull && nonNullCount === 1;
+}
+
+/**
+ * Backwards-compatible alias for nullable fields
+ */
+export function isSimpleNullableField(schema: StrictRJSFSchema): boolean {
+  return isNullableUnionSchema(schema);
 }
 
 /**
@@ -52,12 +44,13 @@ export function isSimpleNullableField(schema: StrictRJSFSchema): boolean {
 export function getNonNullSchema(
   schema: StrictRJSFSchema,
 ): StrictRJSFSchema | null {
-  if (!schema.anyOf || !Array.isArray(schema.anyOf)) {
+  const union = schema.anyOf ?? schema.oneOf;
+  if (!union || !Array.isArray(union)) {
     return null;
   }
 
   return (
-    (schema.anyOf.find(
+    (union.find(
       (item) =>
         typeof item === "object" &&
         item !== null &&

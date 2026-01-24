@@ -4,6 +4,32 @@ import isEqual from "lodash/isEqual";
 import get from "lodash/get";
 import type { FrigateConfig } from "@/types/frigateConfig";
 
+const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
+
+function stripInternalFields(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(stripInternalFields);
+  }
+
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(obj)) {
+      if (INTERNAL_FIELD_SUFFIXES.some((suffix) => key.endsWith(suffix))) {
+        continue;
+      }
+      cleaned[key] = stripInternalFields(val);
+    }
+    return cleaned;
+  }
+
+  return value;
+}
+
+export function normalizeConfigValue(value: unknown): unknown {
+  return stripInternalFields(value);
+}
+
 export interface OverrideStatus {
   /** Whether the field is overridden from global */
   isOverridden: boolean;
@@ -98,15 +124,18 @@ export function useConfigOverride({
 
     const cameraValue = get(cameraConfig, sectionPath);
 
+    const normalizedGlobalValue = normalizeConfigValue(globalValue);
+    const normalizedCameraValue = normalizeConfigValue(cameraValue);
+
     // Check if the entire section is overridden
-    const isOverridden = !isEqual(globalValue, cameraValue);
+    const isOverridden = !isEqual(normalizedGlobalValue, normalizedCameraValue);
 
     /**
      * Get override status for a specific field within the section
      */
     const getFieldOverride = (fieldPath: string): OverrideStatus => {
-      const globalFieldValue = get(globalValue, fieldPath);
-      const cameraFieldValue = get(cameraValue, fieldPath);
+      const globalFieldValue = get(normalizedGlobalValue, fieldPath);
+      const cameraFieldValue = get(normalizedCameraValue, fieldPath);
 
       return {
         isOverridden: !isEqual(globalFieldValue, cameraFieldValue),
@@ -120,15 +149,15 @@ export function useConfigOverride({
      */
     const resetToGlobal = (fieldPath?: string) => {
       if (fieldPath) {
-        return get(globalValue, fieldPath);
+        return get(normalizedGlobalValue, fieldPath);
       }
-      return globalValue;
+      return normalizedGlobalValue;
     };
 
     return {
       isOverridden,
-      globalValue,
-      cameraValue,
+      globalValue: normalizedGlobalValue,
+      cameraValue: normalizedCameraValue,
       getFieldOverride,
       resetToGlobal,
     };
@@ -169,8 +198,8 @@ export function useAllCameraOverrides(
     ];
 
     for (const section of sectionsToCheck) {
-      const globalValue = get(config, section);
-      const cameraValue = get(cameraConfig, section);
+      const globalValue = normalizeConfigValue(get(config, section));
+      const cameraValue = normalizeConfigValue(get(cameraConfig, section));
 
       if (!isEqual(globalValue, cameraValue)) {
         overriddenSections.push(section);

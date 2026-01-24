@@ -6,7 +6,7 @@ import type {
   StrictRJSFSchema,
   FormContextType,
 } from "@rjsf/utils";
-import { isSimpleNullableField } from "../fields/nullableUtils";
+import { isNullableUnionSchema } from "../fields/nullableUtils";
 
 /**
  * Custom MultiSchemaFieldTemplate that:
@@ -23,7 +23,7 @@ export function MultiSchemaFieldTemplate<
   const { schema, selector, optionSchemaField } = props;
 
   // Check if this is a simple nullable field that should be handled specially
-  if (isSimpleNullableField(schema)) {
+  if (isNullableUnionSchema(schema)) {
     // For simple nullable fields, just render the field directly without the dropdown selector
     // This handles the case where empty input = null
     return <>{optionSchemaField}</>;
