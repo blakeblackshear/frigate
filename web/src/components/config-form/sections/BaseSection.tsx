@@ -7,7 +7,10 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ConfigForm } from "../ConfigForm";
-import { useConfigOverride } from "@/hooks/use-config-override";
+import {
+  useConfigOverride,
+  normalizeConfigValue,
+} from "@/hooks/use-config-override";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +23,15 @@ import {
 } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
 import get from "lodash/get";
+import unset from "lodash/unset";
+import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { applySchemaDefaults } from "@/lib/config-schema";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -119,7 +125,7 @@ export function createConfigSection({
     });
 
     // Get current form data
-    const formData = useMemo(() => {
+    const rawFormData = useMemo(() => {
       if (!config) return {};
 
       if (level === "camera" && cameraName) {
@@ -129,6 +135,36 @@ export function createConfigSection({
       return get(config, sectionPath) || {};
     }, [config, level, cameraName]);
 
+    const sanitizeSectionData = useCallback(
+      (data: Record<string, unknown>) => {
+        const normalized = normalizeConfigValue(data) as Record<
+          string,
+          unknown
+        >;
+        if (
+          !sectionConfig.hiddenFields ||
+          sectionConfig.hiddenFields.length === 0
+        ) {
+          return normalized;
+        }
+
+        const cleaned = cloneDeep(normalized);
+        sectionConfig.hiddenFields.forEach((path) => {
+          if (!path) return;
+          unset(cleaned, path);
+        });
+        return cleaned;
+      },
+      [sectionConfig.hiddenFields],
+    );
+
+    const formData = useMemo(() => {
+      const baseData = sectionSchema
+        ? applySchemaDefaults(sectionSchema, rawFormData)
+        : rawFormData;
+      return sanitizeSectionData(baseData);
+    }, [rawFormData, sectionSchema, sanitizeSectionData]);
+
     // Track if there are unsaved changes
     const hasChanges = useMemo(() => {
       if (!pendingData) return false;
@@ -136,9 +172,17 @@ export function createConfigSection({
     }, [formData, pendingData]);
 
     // Handle form data change
-    const handleChange = useCallback((data: Record<string, unknown>) => {
-      setPendingData(data);
-    }, []);
+    const handleChange = useCallback(
+      (data: Record<string, unknown>) => {
+        const sanitizedData = sanitizeSectionData(data);
+        if (isEqual(formData, sanitizedData)) {
+          setPendingData(null);
+          return;
+        }
+        setPendingData(sanitizedData);
+      },
+      [formData, sanitizeSectionData],
+    );
 
     // Handle save button click
     const handleSave = useCallback(async () => {
