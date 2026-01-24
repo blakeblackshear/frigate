@@ -184,8 +184,13 @@ class RecordingExporter(threading.Thread):
     def get_record_export_command(
         self, video_path: str, use_hwaccel: bool = True
     ) -> list[str]:
+        # handle case where internal port is a string with ip:port
+        internal_port = self.config.networking.listen.internal
+        if type(internal_port) is str:
+            internal_port = int(internal_port.split(":")[-1])
+
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
-            playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
+            playlist_lines = f"http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
             ffmpeg_input = (
                 f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_lines}"
             )
@@ -217,7 +222,7 @@ class RecordingExporter(threading.Thread):
             for page in range(1, num_pages + 1):
                 playlist = export_recordings.paginate(page, page_size)
                 playlist_lines.append(
-                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{float(playlist[0].start_time)}/end/{float(playlist[-1].end_time)}/index.m3u8'"
+                    f"file 'http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{float(playlist[0].start_time)}/end/{float(playlist[-1].end_time)}/index.m3u8'"
                 )
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"

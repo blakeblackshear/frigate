@@ -26,7 +26,7 @@ from frigate.api.defs.request.app_body import (
     AppPutRoleBody,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config import AuthConfig, ProxyConfig
+from frigate.config import AuthConfig, ProxyConfig, NetworkingConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
@@ -41,7 +41,7 @@ def require_admin_by_default():
     endpoints require admin access unless explicitly overridden with
     allow_public(), allow_any_authenticated(), or require_role().
 
-    Port 5000 (internal) always has admin role set by the /auth endpoint,
+    Internal port always has admin role set by the /auth endpoint,
     so this check passes automatically for internal requests.
 
     Certain paths are exempted from the global admin check because they must
@@ -130,7 +130,7 @@ def require_admin_by_default():
             pass
 
         # For all other paths, require admin role
-        # Port 5000 (internal) requests have admin role set automatically
+        # Internal port requests have admin role set automatically
         role = request.headers.get("remote-role")
         if role == "admin":
             return
@@ -148,7 +148,7 @@ def _is_authenticated(request: Request) -> bool:
     Helper to determine if a request is from an authenticated user.
 
     Returns True if the request has a valid authenticated user (not anonymous).
-    Port 5000 internal requests are considered anonymous despite having admin role.
+    Internal port requests are considered anonymous despite having admin role.
     """
     username = request.headers.get("remote-user")
     return username is not None and username != "anonymous"
@@ -176,18 +176,18 @@ def allow_any_authenticated():
     Override dependency to allow any authenticated user (bypass admin requirement).
 
     Allows:
-    - Port 5000 internal requests (have admin role despite anonymous user)
+    - Internal port requests (have admin role despite anonymous user)
     - Any authenticated user with a real username (not "anonymous")
 
     Rejects:
-    - Port 8971 requests with anonymous user (auth disabled, no proxy auth)
+    - External port requests with anonymous user (auth disabled, no proxy auth)
 
     Example:
         @router.get("/authenticated-endpoint", dependencies=[Depends(allow_any_authenticated())])
     """
 
     async def auth_checker(request: Request):
-        # Port 5000 requests have admin role and should be allowed
+        # Internal port requests have admin role and should be allowed
         role = request.headers.get("remote-role")
         if role == "admin":
             return
@@ -558,12 +558,18 @@ def resolve_role(
 def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     proxy_config: ProxyConfig = request.app.frigate_config.proxy
+    networking_config: NetworkingConfig = request.app.frigate_config.networking
 
     success_response = Response("", status_code=202)
 
+    # handle case where internal port is a string with ip:port
+    internal_port = networking_config.listen.internal
+    if type(internal_port) is str:
+        internal_port = int(internal_port.split(":")[-1])
+
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
-    if int(request.headers.get("x-server-port", default=0)) == 5000:
+    if int(request.headers.get("x-server-port", default=0)) == internal_port:
         success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
         return success_response
