@@ -168,6 +168,78 @@ export function createConfigSection({
       return sanitizeSectionData(baseData);
     }, [rawFormData, sectionSchema, sanitizeSectionData]);
 
+    const schemaDefaults = useMemo(() => {
+      if (!sectionSchema) {
+        return {};
+      }
+      return applySchemaDefaults(sectionSchema, {});
+    }, [sectionSchema]);
+
+    const buildOverrides = useCallback(
+      (
+        current: unknown,
+        base: unknown,
+        defaults: unknown,
+      ): unknown | undefined => {
+        if (current === null || current === undefined || current === "") {
+          return undefined;
+        }
+
+        if (Array.isArray(current)) {
+          if (
+            (base === undefined &&
+              defaults !== undefined &&
+              isEqual(current, defaults)) ||
+            isEqual(current, base)
+          ) {
+            return undefined;
+          }
+          return current;
+        }
+
+        if (typeof current === "object") {
+          const currentObj = current as Record<string, unknown>;
+          const baseObj =
+            base && typeof base === "object"
+              ? (base as Record<string, unknown>)
+              : undefined;
+          const defaultsObj =
+            defaults && typeof defaults === "object"
+              ? (defaults as Record<string, unknown>)
+              : undefined;
+
+          const result: Record<string, unknown> = {};
+          for (const [key, value] of Object.entries(currentObj)) {
+            const overrideValue = buildOverrides(
+              value,
+              baseObj ? baseObj[key] : undefined,
+              defaultsObj ? defaultsObj[key] : undefined,
+            );
+            if (overrideValue !== undefined) {
+              result[key] = overrideValue;
+            }
+          }
+
+          return Object.keys(result).length > 0 ? result : undefined;
+        }
+
+        if (
+          base === undefined &&
+          defaults !== undefined &&
+          isEqual(current, defaults)
+        ) {
+          return undefined;
+        }
+
+        if (isEqual(current, base)) {
+          return undefined;
+        }
+
+        return current;
+      },
+      [],
+    );
+
     // Track if there are unsaved changes
     const hasChanges = useMemo(() => {
       if (!pendingData) return false;
@@ -198,10 +270,18 @@ export function createConfigSection({
             ? `cameras.${cameraName}.${sectionPath}`
             : sectionPath;
 
+        const rawData = sanitizeSectionData(rawFormData);
+        const overrides = buildOverrides(pendingData, rawData, schemaDefaults);
+
+        if (!overrides || Object.keys(overrides).length === 0) {
+          setPendingData(null);
+          return;
+        }
+
         await axios.put("config/set", {
-          requires_restart: requiresRestart ? 1 : 0,
+          requires_restart: requiresRestart ? 0 : 1,
           config_data: {
-            [basePath]: pendingData,
+            [basePath]: overrides,
           },
         });
 
@@ -261,6 +341,10 @@ export function createConfigSection({
       t,
       refreshConfig,
       onSave,
+      rawFormData,
+      sanitizeSectionData,
+      buildOverrides,
+      schemaDefaults,
     ]);
 
     // Handle reset to global - removes camera-level override by deleting the section
@@ -272,7 +356,7 @@ export function createConfigSection({
 
         // Send empty string to delete the key from config (see update_yaml in backend)
         await axios.put("config/set", {
-          requires_restart: requiresRestart ? 1 : 0,
+          requires_restart: requiresRestart ? 0 : 1,
           config_data: {
             [basePath]: "",
           },

@@ -31,6 +31,128 @@ function isSchemaObject(
 }
 
 /**
+ * Normalizes nullable schemas by unwrapping anyOf/oneOf [Type, null] patterns.
+ *
+ * When Pydantic generates JSON Schema for optional fields (e.g., Optional[int]),
+ * it creates anyOf/oneOf unions like: [{ type: "integer", ... }, { type: "null" }]
+ *
+ * This causes RJSF to treat the field as a multi-schema field with a dropdown selector,
+ * which leads to the field disappearing when the value is cleared (becomes undefined/null).
+ *
+ * This function unwraps these simple nullable patterns to a single non-null schema,
+ * allowing fields to remain visible and functional even when empty.
+ *
+ * @example
+ * // Input: { anyOf: [{ type: "integer" }, { type: "null" }] }
+ * // Output: { type: "integer" }
+ *
+ * @example
+ * // Input: { oneOf: [{ type: "string" }, { type: "null" }] }
+ * // Output: { type: "string" }
+ */
+function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
+  if (!isSchemaObject(schema)) {
+    return schema;
+  }
+
+  const schemaObj = schema as Record<string, unknown>;
+
+  const anyOf = schemaObj.anyOf;
+  if (Array.isArray(anyOf)) {
+    const hasNull = anyOf.some(
+      (item) =>
+        isSchemaObject(item) &&
+        (item as Record<string, unknown>).type === "null",
+    );
+    const nonNull = anyOf.find(
+      (item) =>
+        isSchemaObject(item) &&
+        (item as Record<string, unknown>).type !== "null",
+    ) as RJSFSchema | undefined;
+
+    if (hasNull && nonNull && anyOf.length === 2) {
+      const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
+      return normalizeNullableSchema({ ...nonNull, ...rest } as RJSFSchema);
+    }
+
+    return {
+      ...schemaObj,
+      anyOf: anyOf
+        .filter(isSchemaObject)
+        .map((item) => normalizeNullableSchema(item as RJSFSchema)),
+    } as RJSFSchema;
+  }
+
+  const oneOf = schemaObj.oneOf;
+  if (Array.isArray(oneOf)) {
+    const hasNull = oneOf.some(
+      (item) =>
+        isSchemaObject(item) &&
+        (item as Record<string, unknown>).type === "null",
+    );
+    const nonNull = oneOf.find(
+      (item) =>
+        isSchemaObject(item) &&
+        (item as Record<string, unknown>).type !== "null",
+    ) as RJSFSchema | undefined;
+
+    if (hasNull && nonNull && oneOf.length === 2) {
+      const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
+      return normalizeNullableSchema({ ...nonNull, ...rest } as RJSFSchema);
+    }
+
+    return {
+      ...schemaObj,
+      oneOf: oneOf
+        .filter(isSchemaObject)
+        .map((item) => normalizeNullableSchema(item as RJSFSchema)),
+    } as RJSFSchema;
+  }
+
+  if (isSchemaObject(schemaObj.properties)) {
+    const normalizedProps: Record<string, RJSFSchema> = {};
+    for (const [key, prop] of Object.entries(
+      schemaObj.properties as Record<string, unknown>,
+    )) {
+      if (isSchemaObject(prop)) {
+        normalizedProps[key] = normalizeNullableSchema(prop as RJSFSchema);
+      }
+    }
+    return { ...schemaObj, properties: normalizedProps } as RJSFSchema;
+  }
+
+  if (schemaObj.items) {
+    if (Array.isArray(schemaObj.items)) {
+      return {
+        ...schemaObj,
+        items: schemaObj.items
+          .filter(isSchemaObject)
+          .map((item) => normalizeNullableSchema(item as RJSFSchema)),
+      } as RJSFSchema;
+    } else if (isSchemaObject(schemaObj.items)) {
+      return {
+        ...schemaObj,
+        items: normalizeNullableSchema(schemaObj.items as RJSFSchema),
+      } as RJSFSchema;
+    }
+  }
+
+  if (
+    schemaObj.additionalProperties &&
+    isSchemaObject(schemaObj.additionalProperties)
+  ) {
+    return {
+      ...schemaObj,
+      additionalProperties: normalizeNullableSchema(
+        schemaObj.additionalProperties as RJSFSchema,
+      ),
+    } as RJSFSchema;
+  }
+
+  return schema;
+}
+
+/**
  * Resolves $ref references in a JSON Schema
  * This converts Pydantic's $defs-based schema to inline schemas
  */
@@ -343,12 +465,13 @@ export function transformSchema(
 ): TransformedSchema {
   // Resolve all $ref references and clean the result
   const cleanSchema = resolveAndCleanSchema(rawSchema);
+  const normalizedSchema = normalizeNullableSchema(cleanSchema);
 
   // Generate uiSchema
-  const uiSchema = generateUiSchema(cleanSchema, options);
+  const uiSchema = generateUiSchema(normalizedSchema, options);
 
   return {
-    schema: cleanSchema,
+    schema: normalizedSchema,
     uiSchema,
   };
 }
@@ -431,7 +554,11 @@ export function applySchemaDefaults(
 
     const propSchema = prop as Record<string, unknown>;
 
-    if (result[key] === undefined && propSchema.default !== undefined) {
+    if (
+      result[key] === undefined &&
+      propSchema.default !== undefined &&
+      propSchema.default !== null
+    ) {
       result[key] = propSchema.default;
     } else if (
       propSchema.type === "object" &&

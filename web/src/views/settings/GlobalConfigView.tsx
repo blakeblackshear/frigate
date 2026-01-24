@@ -215,7 +215,6 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
     setIsSaving(true);
     try {
       await axios.put("config/set", {
-        requires_restart: 1,
         config_data: {
           [sectionKey]: pendingData,
         },

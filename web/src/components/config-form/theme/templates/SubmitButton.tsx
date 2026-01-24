@@ -8,6 +8,12 @@ export function SubmitButton(props: SubmitButtonProps) {
   const { uiSchema } = props;
   const { t } = useTranslation(["common"]);
 
+  const shouldHide = uiSchema?.["ui:submitButtonOptions"]?.norender === true;
+
+  if (shouldHide) {
+    return null;
+  }
+
   const submitText =
     (uiSchema?.["ui:options"]?.submitText as string) ||
     t("save", { ns: "common" });
