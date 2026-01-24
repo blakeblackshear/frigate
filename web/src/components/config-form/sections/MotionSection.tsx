@@ -20,14 +20,12 @@ export const MotionSection = createConfigSection({
       "mqtt_off_delay",
     ],
     fieldGroups: {
-      sensitivity: ["threshold", "lightning_threshold", "contour_area"],
+      sensitivity: ["threshold", "contour_area"],
       algorithm: ["improve_contrast", "delta_alpha", "frame_alpha"],
     },
-    hiddenFields: ["enabled_in_config"],
+    hiddenFields: ["enabled_in_config", "mask", "raw_mask"],
     advancedFields: [
       "lightning_threshold",
-      "improve_contrast",
-      "contour_area",
       "delta_alpha",
       "frame_alpha",
       "frame_height",

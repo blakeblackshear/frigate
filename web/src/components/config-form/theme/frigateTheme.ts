@@ -14,11 +14,13 @@ import { SwitchWidget } from "./widgets/SwitchWidget";
 import { SelectWidget } from "./widgets/SelectWidget";
 import { TextWidget } from "./widgets/TextWidget";
 import { PasswordWidget } from "./widgets/PasswordWidget";
-import { CheckboxWidget } from "./widgets/CheckboxWidget";
 import { RangeWidget } from "./widgets/RangeWidget";
 import { TagsWidget } from "./widgets/TagsWidget";
 import { ColorWidget } from "./widgets/ColorWidget";
 import { TextareaWidget } from "./widgets/TextareaWidget";
+import { SwitchesWidget } from "./widgets/SwitchesWidget";
+import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
+import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -45,7 +47,7 @@ export const frigateTheme: FrigateTheme = {
     TextWidget: TextWidget,
     PasswordWidget: PasswordWidget,
     SelectWidget: SelectWidget,
-    CheckboxWidget: CheckboxWidget,
+    CheckboxWidget: SwitchWidget,
     // Custom widgets
     switch: SwitchWidget,
     password: PasswordWidget,
@@ -54,6 +56,9 @@ export const frigateTheme: FrigateTheme = {
     tags: TagsWidget,
     color: ColorWidget,
     textarea: TextareaWidget,
+    switches: SwitchesWidget,
+    objectLabels: ObjectLabelSwitchesWidget,
+    zoneNames: ZoneSwitchesWidget,
   },
   templates: {
     ...defaultRegistry.templates,

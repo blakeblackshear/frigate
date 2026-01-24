@@ -1201,6 +1201,14 @@
         "resetError": "Failed to reset object settings"
       }
     },
+    "objectLabels": {
+      "summary": "Selected {{count}}",
+      "empty": "No object labels available"
+    },
+    "zoneNames": {
+      "summary": "Selected {{count}}",
+      "empty": "No zones available"
+    },
     "review": {
       "title": "Review Settings",
       "toast": {

@@ -414,7 +414,7 @@ export default function GlobalConfigView() {
                     <button
                       onClick={() => setActiveSection(section.key)}
                       className={cn(
-                        "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors",
+                        "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors",
                         activeSection === section.key
                           ? "bg-accent text-accent-foreground"
                           : "hover:bg-muted",

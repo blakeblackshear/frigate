@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ConfigForm } from "../ConfigForm";
+import type { UiSchema } from "@rjsf/utils";
 import {
   useConfigOverride,
   normalizeConfigValue,
@@ -42,6 +43,8 @@ export interface SectionConfig {
   hiddenFields?: string[];
   /** Fields to show in advanced section */
   advancedFields?: string[];
+  /** Additional uiSchema overrides */
+  uiSchema?: UiSchema;
 }
 
 export interface BaseSectionProps {
@@ -315,6 +318,7 @@ export function createConfigSection({
           fieldOrder={sectionConfig.fieldOrder}
           hiddenFields={sectionConfig.hiddenFields}
           advancedFields={sectionConfig.advancedFields}
+          uiSchema={sectionConfig.uiSchema}
           disabled={disabled || isSaving}
           readonly={readonly}
           showSubmit={false}
@@ -324,6 +328,12 @@ export function createConfigSection({
             cameraName,
             globalValue,
             cameraValue,
+            // For widgets that need access to full camera config (e.g., zone names)
+            fullCameraConfig:
+              level === "camera" && cameraName
+                ? config?.cameras?.[cameraName]
+                : undefined,
+            t,
           }}
         />
 

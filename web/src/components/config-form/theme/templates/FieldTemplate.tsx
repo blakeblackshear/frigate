@@ -49,6 +49,14 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const isBoolean = schema.type === "boolean";
 
   const isNullableUnion = isNullableUnionSchema(schema as StrictRJSFSchema);
+  const suppressMultiSchema =
+    (uiSchema?.["ui:options"] as Record<string, unknown> | undefined)
+      ?.suppressMultiSchema === true;
+
+  // Only suppress labels/descriptions if this is a multi-schema field (anyOf/oneOf) with suppressMultiSchema flag
+  // This prevents duplicate labels while still showing the inner field's label
+  const isMultiSchemaWrapper =
+    (schema.anyOf || schema.oneOf) && (suppressMultiSchema || isNullableUnion);
 
   // Get translation path for this field
   const translationPath = buildTranslationPath(fieldPathId.path);
@@ -104,7 +112,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
       )}
       data-field-id={translationPath}
     >
-      {displayLabel && finalLabel && !isBoolean && !isNullableUnion && (
+      {displayLabel && finalLabel && !isBoolean && !isMultiSchemaWrapper && (
         <Label
           htmlFor={id}
           className={cn(
@@ -126,9 +134,9 @@ export function FieldTemplate(props: FieldTemplateProps) {
                 {required && <span className="ml-1 text-destructive">*</span>}
               </Label>
             )}
-            {finalDescription && !isNullableUnion && (
+            {finalDescription && !isMultiSchemaWrapper && (
               <p className="max-w-md text-sm text-muted-foreground">
-                {String(finalDescription)}
+                {finalDescription}
               </p>
             )}
           </div>
@@ -136,7 +144,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
         </div>
       ) : (
         <>
-          {finalDescription && !isNullableUnion && (
+          {finalDescription && !isMultiSchemaWrapper && (
             <p className="text-sm text-muted-foreground">{finalDescription}</p>
           )}
           {children}
