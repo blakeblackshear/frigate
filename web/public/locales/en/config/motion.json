@@ -1,4 +1,48 @@
 {
   "label": "Global motion detection configuration",
-  "description": "Default motion detection settings applied to cameras unless overridden per-camera."
+  "description": "Default motion detection settings applied to cameras unless overridden per-camera.",
+  "enabled": {
+    "label": "Enable motion detection",
+    "description": "Enable or disable motion detection globally; per-camera settings can override this."
+  },
+  "threshold": {
+    "label": "Motion detection threshold (1-255)",
+    "description": "Pixel difference threshold used by the motion detector; higher values reduce sensitivity."
+  },
+  "lightning_threshold": {
+    "label": "Lightning detection threshold (0.3-1.0)",
+    "description": "Threshold to detect and ignore brief lighting spikes (lower is more sensitive)."
+  },
+  "improve_contrast": {
+    "label": "Improve contrast",
+    "description": "Apply contrast improvement to frames before motion analysis to help detection."
+  },
+  "contour_area": {
+    "label": "Contour area",
+    "description": "Minimum contour area in pixels required for a motion contour to be counted."
+  },
+  "delta_alpha": {
+    "label": "Delta Alpha",
+    "description": "Alpha blending factor used in frame differencing for motion calculation."
+  },
+  "frame_alpha": {
+    "label": "Frame Alpha",
+    "description": "Alpha value used when blending frames for motion preprocessing."
+  },
+  "frame_height": {
+    "label": "Frame Height",
+    "description": "Height in pixels to scale frames to when computing motion (useful for performance)."
+  },
+  "mask": {
+    "label": "Coordinates polygon for the motion mask.",
+    "description": "Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas."
+  },
+  "mqtt_off_delay": {
+    "label": "Delay for updating MQTT with no motion detected",
+    "description": "Seconds to wait after last motion before publishing an MQTT 'off' state."
+  },
+  "enabled_in_config": {
+    "label": "Keep track of original state of motion detection",
+    "description": "Indicates whether motion detection was enabled in the original static configuration."
+  }
 }
