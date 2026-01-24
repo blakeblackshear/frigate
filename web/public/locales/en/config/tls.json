@@ -1,6 +1,8 @@
 {
-  "label": "TLS configuration.",
+  "label": "TLS configuration",
+  "description": "TLS settings for Frigate's web endpoints (port 8971).",
   "enabled": {
-    "label": "Enable TLS for port 8971"
+    "label": "Enable TLS for port 8971",
+    "description": "Enable TLS for Frigate's web UI and API on the configured TLS port."
   }
 }

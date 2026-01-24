@@ -1,9 +1,12 @@
 {
-  "label": "Logging configuration.",
+  "label": "Logging configuration",
+  "description": "Controls default log verbosity and per-component log level overrides.",
   "default": {
-    "label": "Default logging level."
+    "label": "Default logging level",
+    "description": "Default global log verbosity (debug, info, warning, error)."
   },
   "logs": {
-    "label": "Log level for specified processes."
+    "label": "Log level for specified processes",
+    "description": "Per-component log level overrides to increase or decrease verbosity for specific modules."
   }
 }

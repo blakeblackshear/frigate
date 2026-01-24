@@ -1,18 +1,24 @@
 {
-  "label": "UI configuration.",
+  "label": "UI configuration",
+  "description": "User interface preferences such as timezone, time/date formatting, and units.",
   "timezone": {
-    "label": "Override UI timezone."
+    "label": "Override UI timezone",
+    "description": "Optional timezone to display across the UI (defaults to browser local time if unset)."
   },
   "time_format": {
-    "label": "Override UI time format."
+    "label": "Override UI time format",
+    "description": "Time format to use in the UI (browser, 12hour, or 24hour)."
   },
   "date_style": {
-    "label": "Override UI dateStyle."
+    "label": "Override UI dateStyle",
+    "description": "Date style to use in the UI (full, long, medium, short)."
   },
   "time_style": {
-    "label": "Override UI timeStyle."
+    "label": "Override UI timeStyle",
+    "description": "Time style to use in the UI (full, long, medium, short)."
   },
   "unit_system": {
-    "label": "The unit system to use for measurements."
+    "label": "The unit system to use for measurements",
+    "description": "Unit system for display (metric or imperial) used in the UI and MQTT."
   }
 }

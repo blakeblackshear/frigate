@@ -1,42 +1,56 @@
 {
-  "label": "MQTT configuration.",
+  "label": "MQTT configuration",
+  "description": "Settings for connecting and publishing telemetry, snapshots, and events to an MQTT broker.",
   "enabled": {
-    "label": "Enable MQTT Communication."
+    "label": "Enable MQTT Communication",
+    "description": "Enable or disable MQTT integration for state, events, and snapshots."
   },
   "host": {
-    "label": "MQTT Host"
+    "label": "MQTT Host",
+    "description": "Hostname or IP address of the MQTT broker."
   },
   "port": {
-    "label": "MQTT Port"
+    "label": "MQTT Port",
+    "description": "Port of the MQTT broker (usually 1883 for plain MQTT)."
   },
   "topic_prefix": {
-    "label": "MQTT Topic Prefix"
+    "label": "MQTT Topic Prefix",
+    "description": "MQTT topic prefix for all Frigate topics; must be unique if running multiple instances."
   },
   "client_id": {
-    "label": "MQTT Client ID"
+    "label": "MQTT Client ID",
+    "description": "Client identifier used when connecting to the MQTT broker; should be unique per instance."
   },
   "stats_interval": {
-    "label": "MQTT Camera Stats Interval"
+    "label": "MQTT Camera Stats Interval",
+    "description": "Interval in seconds for publishing system and camera stats to MQTT."
   },
   "user": {
-    "label": "MQTT Username"
+    "label": "MQTT Username",
+    "description": "Optional MQTT username; can be provided via environment variables or secrets."
   },
   "password": {
-    "label": "MQTT Password"
+    "label": "MQTT Password",
+    "description": "Optional MQTT password; can be provided via environment variables or secrets."
   },
   "tls_ca_certs": {
-    "label": "MQTT TLS CA Certificates"
+    "label": "MQTT TLS CA Certificates",
+    "description": "Path to CA certificate for TLS connections to the broker (for self-signed certs)."
   },
   "tls_client_cert": {
-    "label": "MQTT TLS Client Certificate"
+    "label": "MQTT TLS Client Certificate",
+    "description": "Client certificate path for TLS mutual authentication; do not set user/password when using client certs."
   },
   "tls_client_key": {
-    "label": "MQTT TLS Client Key"
+    "label": "MQTT TLS Client Key",
+    "description": "Private key path for the client certificate."
   },
   "tls_insecure": {
-    "label": "MQTT TLS Insecure"
+    "label": "MQTT TLS Insecure",
+    "description": "Allow insecure TLS connections by skipping hostname verification (not recommended)."
   },
   "qos": {
-    "label": "MQTT QoS"
+    "label": "MQTT QoS",
+    "description": "Quality of Service level for MQTT publishes/subscriptions (0, 1, or 2)."
   }
 }

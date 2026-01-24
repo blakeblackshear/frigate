@@ -1,45 +1,60 @@
 {
-  "label": "Global object tracking configuration.",
+  "label": "Object tracking",
+  "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
   "enabled": {
-    "label": "Detection Enabled."
+    "label": "Detection Enabled",
+    "description": "Enable or disable object detection for this camera. Detection must be enabled for object tracking to run."
   },
   "height": {
-    "label": "Height of the stream for the detect role."
+    "label": "Height of the stream for the detect role",
+    "description": "Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution."
   },
   "width": {
-    "label": "Width of the stream for the detect role."
+    "label": "Width of the stream for the detect role",
+    "description": "Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution."
   },
   "fps": {
-    "label": "Number of frames per second to process through detection."
+    "label": "Number of frames per second to process through detection",
+    "description": "Desired frames per second to run detection on; lower values reduce CPU usage (recommended ~5)."
   },
   "min_initialized": {
-    "label": "Minimum number of consecutive hits for an object to be initialized by the tracker."
+    "label": "Minimum number of consecutive hits for an object to be initialized by the tracker",
+    "description": "Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations."
   },
   "max_disappeared": {
-    "label": "Maximum number of frames the object can disappear before detection ends."
+    "label": "Maximum number of frames the object can disappear before detection ends",
+    "description": "Number of frames without a detection before a tracked object is considered gone."
   },
   "stationary": {
-    "label": "Stationary objects config.",
+    "label": "Stationary objects config",
+    "description": "Settings to detect and manage objects that remain stationary for a period of time.",
     "interval": {
-      "label": "Frame interval for checking stationary objects."
+      "label": "Frame interval for checking stationary objects",
+      "description": "How often (in frames) to run a detection check to confirm a stationary object."
     },
     "threshold": {
-      "label": "Number of frames without a position change for an object to be considered stationary"
+      "label": "Number of frames without a position change for an object to be considered stationary",
+      "description": "Number of frames with no position change required to mark an object as stationary."
     },
     "max_frames": {
-      "label": "Max frames for stationary objects.",
+      "label": "Max frames for stationary objects",
+      "description": "Limits how long stationary objects are tracked before being discarded (override defaults to control retention).",
       "default": {
-        "label": "Default max frames."
+        "label": "Default max frames",
+        "description": "Default maximum frames to track a stationary object before stopping."
       },
       "objects": {
-        "label": "Object specific max frames."
+        "label": "Object specific max frames",
+        "description": "Per-object overrides for maximum frames to track stationary objects."
       }
     },
     "classifier": {
-      "label": "Enable visual classifier for determing if objects with jittery bounding boxes are stationary."
+      "label": "Enable visual classifier for determing if objects with jittery bounding boxes are stationary",
+      "description": "Use a visual classifier to detect truly stationary objects even when bounding boxes jitter."
     }
   },
   "annotation_offset": {
-    "label": "Milliseconds to offset detect annotations by."
+    "label": "Milliseconds to offset detect annotations by",
+    "description": "Milliseconds to shift detect annotations to better align timeline bounding boxes with recordings; can be positive or negative."
   }
 }

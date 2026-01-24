@@ -1,12 +1,16 @@
 {
-  "label": "Detector hardware configuration.",
+  "label": "Detector hardware configuration",
+  "description": "Configuration for object detectors (CPU, EdgeTPU, GPU backends) and any detector-specific model settings.",
   "type": {
-    "label": "Detector Type"
+    "label": "Detector Type",
+    "description": "Type of detector to use for object detection (for example 'cpu', 'edgetpu', 'openvino')."
   },
   "model": {
-    "label": "Detector specific model configuration."
+    "label": "Detector specific model configuration",
+    "description": "Detector-specific model configuration options (path, input size, etc.)."
   },
   "model_path": {
-    "label": "Detector specific model path."
+    "label": "Detector specific model path",
+    "description": "File path to the detector model binary if required by the chosen detector."
   }
 }

@@ -1,72 +1,82 @@
 {
-  "label": "Global record configuration.",
+  "label": "Global record configuration",
+  "description": "Global recording and retention settings applied to cameras unless overridden per-camera.",
   "enabled": {
-    "label": "Enable record on all cameras."
+    "label": "Enable record on all cameras",
+    "description": "Enable or disable recording globally; individual cameras can override this."
   },
   "expire_interval": {
-    "label": "Number of minutes to wait between cleanup runs."
+    "label": "Number of minutes to wait between cleanup runs",
+    "description": "Minutes between cleanup passes that remove expired recording segments."
   },
   "continuous": {
-    "label": "Continuous recording retention settings.",
+    "label": "Continuous recording retention settings",
     "days": {
-      "label": "Default retention period."
+      "label": "Default retention period",
+      "description": "Days to retain continuous (always-on) recordings."
     }
   },
   "motion": {
-    "label": "Motion recording retention settings.",
+    "label": "Motion recording retention settings",
     "days": {
-      "label": "Default retention period."
+      "label": "Default retention period",
+      "description": "Days to retain recordings triggered by motion."
     }
   },
   "detections": {
-    "label": "Detection specific retention settings.",
+    "label": "Detection specific retention settings",
     "pre_capture": {
-      "label": "Seconds to retain before event starts."
+      "label": "Seconds to retain before event starts"
     },
     "post_capture": {
-      "label": "Seconds to retain after event ends."
+      "label": "Seconds to retain after event ends"
     },
     "retain": {
-      "label": "Event retention settings.",
+      "label": "Event retention settings",
       "days": {
-        "label": "Default retention period."
+        "label": "Default retention period"
       },
       "mode": {
-        "label": "Retain mode."
+        "label": "Retain mode"
       }
     }
   },
   "alerts": {
-    "label": "Alert specific retention settings.",
+    "label": "Alert specific retention settings",
     "pre_capture": {
-      "label": "Seconds to retain before event starts."
+      "label": "Seconds to retain before event starts"
     },
     "post_capture": {
-      "label": "Seconds to retain after event ends."
+      "label": "Seconds to retain after event ends"
     },
     "retain": {
-      "label": "Event retention settings.",
+      "label": "Event retention settings",
       "days": {
-        "label": "Default retention period."
+        "label": "Default retention period"
       },
       "mode": {
-        "label": "Retain mode."
+        "label": "Retain mode"
       }
     }
   },
   "export": {
     "label": "Recording Export Config",
+    "description": "Settings used when exporting recordings such as timelapse and hardware acceleration.",
     "hwaccel_args": {
-      "label": "Export-specific FFmpeg hardware acceleration arguments."
+      "label": "Export-specific FFmpeg hardware acceleration arguments",
+      "description": "Hardware acceleration args to use for export/transcode operations."
     }
   },
   "preview": {
     "label": "Recording Preview Config",
+    "description": "Settings controlling the quality of recording previews shown in the UI.",
     "quality": {
-      "label": "Quality of recording preview."
+      "label": "Quality of recording preview",
+      "description": "Preview quality level (very_low, low, medium, high, very_high)."
     }
   },
   "enabled_in_config": {
-    "label": "Keep track of original state of recording."
+    "label": "Keep track of original state of recording",
+    "description": "Indicates whether recording was enabled in the original static configuration."
   }
 }

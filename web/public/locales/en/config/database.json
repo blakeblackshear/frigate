@@ -1,6 +1,8 @@
 {
-  "label": "Database configuration.",
+  "label": "Database configuration",
+  "description": "Settings for the SQLite database used by Frigate to store events and metadata.",
   "path": {
-    "label": "Database path."
+    "label": "Database path",
+    "description": "Filesystem path where the Frigate SQLite database file will be stored."
   }
 }

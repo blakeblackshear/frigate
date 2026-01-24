@@ -1,36 +1,48 @@
 {
-  "label": "Birdseye configuration.",
+  "label": "Birdseye configuration",
+  "description": "Settings for the Birdseye composite view that composes multiple camera feeds into a single layout.",
   "enabled": {
-    "label": "Enable birdseye view."
+    "label": "Enable birdseye view",
+    "description": "Enable or disable the Birdseye view feature."
   },
   "mode": {
-    "label": "Tracking mode."
+    "label": "Tracking mode",
+    "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
   },
   "restream": {
-    "label": "Restream birdseye via RTSP."
+    "label": "Restream birdseye via RTSP",
+    "description": "Re-stream the Birdseye output as an RTSP feed; enabling this will keep Birdseye running continuously."
   },
   "width": {
-    "label": "Birdseye width."
+    "label": "Birdseye width",
+    "description": "Output width (pixels) of the composed Birdseye frame."
   },
   "height": {
-    "label": "Birdseye height."
+    "label": "Birdseye height",
+    "description": "Output height (pixels) of the composed Birdseye frame."
   },
   "quality": {
-    "label": "Encoding quality."
+    "label": "Encoding quality",
+    "description": "Encoding quality for the Birdseye mpeg1 feed (1 highest quality, 31 lowest)."
   },
   "inactivity_threshold": {
-    "label": "Birdseye Inactivity Threshold"
+    "label": "Birdseye Inactivity Threshold",
+    "description": "Seconds of inactivity after which a camera will stop being shown in Birdseye."
   },
   "layout": {
     "label": "Birdseye Layout Config",
+    "description": "Layout options for the Birdseye composition.",
     "scaling_factor": {
-      "label": "Birdseye Scaling Factor"
+      "label": "Birdseye Scaling Factor",
+      "description": "Scaling factor used by the layout calculator (range 1.0 to 5.0)."
     },
     "max_cameras": {
-      "label": "Max cameras"
+      "label": "Max cameras",
+      "description": "Maximum number of cameras to display at once in Birdseye; shows the most recent cameras."
     }
   },
   "idle_heartbeat_fps": {
-    "label": "Idle heartbeat FPS (0 disables, max 10)"
+    "label": "Idle heartbeat FPS (0 disables, max 10)",
+    "description": "Frames-per-second to resend the last composed Birdseye frame when idle; set to 0 to disable."
   }
 }

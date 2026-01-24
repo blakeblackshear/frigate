@@ -1,19 +1,24 @@
 {
-  "label": "Semantic search configuration.",
+  "label": "Semantic search configuration",
+  "description": "Settings for semantic search which builds and queries object embeddings to find similar items.",
   "enabled": {
-    "label": "Enable semantic search."
+    "label": "Enable semantic search",
+    "description": "Enable or disable the semantic search feature."
   },
   "reindex": {
-    "label": "Reindex all tracked objects on startup."
+    "label": "Reindex all tracked objects on startup",
+    "description": "Trigger a full reindex of historical tracked objects into the embeddings database."
   },
   "model": {
-    "label": "The CLIP model to use for semantic search."
+    "label": "The CLIP model to use for semantic search",
+    "description": "The embeddings model to use for semantic search (for example 'jinav1')."
   },
   "model_size": {
-    "label": "The size of the embeddings model used."
+    "label": "The size of the embeddings model used",
+    "description": "Select model size; 'small' runs on CPU and 'large' typically requires GPU."
   },
   "device": {
-    "label": "The device key to use for semantic search.",
+    "label": "The device key to use for semantic search",
     "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
   }
 }

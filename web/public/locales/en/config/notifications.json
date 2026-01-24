@@ -1,15 +1,20 @@
 {
-  "label": "Global notification configuration.",
+  "label": "Global notification configuration",
+  "description": "Global settings to enable and control notifications; can be overridden per-camera.",
   "enabled": {
-    "label": "Enable notifications"
+    "label": "Enable notifications",
+    "description": "Enable or disable notifications globally."
   },
   "email": {
-    "label": "Email required for push."
+    "label": "Email required for push",
+    "description": "Email address used for push notifications or required by certain notification providers."
   },
   "cooldown": {
-    "label": "Cooldown period for notifications (time in seconds)."
+    "label": "Cooldown period for notifications (time in seconds)",
+    "description": "Cooldown (seconds) between notifications to avoid spamming recipients."
   },
   "enabled_in_config": {
-    "label": "Keep track of original state of notifications."
+    "label": "Keep track of original state of notifications",
+    "description": "Indicates whether notifications were enabled in the original static configuration."
   }
 }

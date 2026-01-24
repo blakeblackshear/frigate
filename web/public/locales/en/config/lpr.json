@@ -1,43 +1,56 @@
 {
-  "label": "License Plate recognition config.",
+  "label": "License Plate recognition config",
+  "description": "Global license plate recognition settings including detection thresholds, formatting, and known plates.",
   "enabled": {
-    "label": "Enable license plate recognition."
+    "label": "Enable license plate recognition",
+    "description": "Enable or disable LPR globally; camera-level settings can override."
   },
   "model_size": {
-    "label": "The size of the embeddings model used."
+    "label": "The size of the embeddings model used",
+    "description": "Model size used for text detection/recognition; small runs on CPU, large on GPU."
   },
   "detection_threshold": {
-    "label": "License plate object confidence score required to begin running recognition."
+    "label": "License plate object confidence score required to begin running recognition",
+    "description": "Detection confidence threshold to begin running OCR on a suspected plate."
   },
   "min_area": {
-    "label": "Minimum area of license plate to begin running recognition."
+    "label": "Minimum area of license plate to begin running recognition",
+    "description": "Minimum plate area (pixels) required to attempt recognition."
   },
   "recognition_threshold": {
-    "label": "Recognition confidence score required to add the plate to the object as a sub label."
+    "label": "Recognition confidence score required to add the plate to the object as a sub label",
+    "description": "Confidence threshold required for recognized plate text to be attached as a sub-label."
   },
   "min_plate_length": {
-    "label": "Minimum number of characters a license plate must have to be added to the object as a sub label."
+    "label": "Minimum number of characters a license plate must have to be added to the object as a sub label",
+    "description": "Minimum number of characters a recognized plate must contain to be considered valid."
   },
   "format": {
-    "label": "Regular expression for the expected format of license plate."
+    "label": "Regular expression for the expected format of license plate",
+    "description": "Optional regex to validate recognized plate strings against an expected format."
   },
   "match_distance": {
-    "label": "Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate."
+    "label": "Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate",
+    "description": "Number of character mismatches allowed when comparing detected plates to known plates."
   },
   "known_plates": {
-    "label": "Known plates to track (strings or regular expressions)."
+    "label": "Known plates to track (strings or regular expressions)",
+    "description": "List of plates or regexes to specially track or alert on."
   },
   "enhancement": {
-    "label": "Amount of contrast adjustment and denoising to apply to license plate images before recognition."
+    "label": "Amount of contrast adjustment and denoising to apply to license plate images before recognition",
+    "description": "Enhancement level (0-10) to apply to plate crops prior to OCR; higher values may not always improve results."
   },
   "debug_save_plates": {
-    "label": "Save plates captured for LPR for debugging purposes."
+    "label": "Save plates captured for LPR for debugging purposes",
+    "description": "Save plate crop images for debugging LPR performance."
   },
   "device": {
-    "label": "The device key to use for LPR.",
+    "label": "The device key to use for LPR",
     "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
   },
   "replace_rules": {
-    "label": "List of regex replacement rules for normalizing detected plates. Each rule has 'pattern' and 'replacement'."
+    "label": "List of regex replacement rules for normalizing detected plates. Each rule has 'pattern' and 'replacement'",
+    "description": "Regex replacement rules used to normalize detected plate strings before matching."
   }
 }

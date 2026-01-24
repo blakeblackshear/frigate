@@ -1,48 +1,63 @@
 {
-  "label": "Object classification config.",
+  "label": "Object classification config",
+  "description": "Settings for classification models used to refine object labels or state classification.",
   "bird": {
-    "label": "Bird classification config.",
+    "label": "Bird classification config",
+    "description": "Settings specific to bird classification models.",
     "enabled": {
-      "label": "Enable bird classification."
+      "label": "Enable bird classification",
+      "description": "Enable or disable bird classification."
     },
     "threshold": {
-      "label": "Minimum classification score required to be considered a match."
+      "label": "Minimum classification score required to be considered a match",
+      "description": "Minimum classification score required to accept a bird classification."
     }
   },
   "custom": {
-    "label": "Custom Classification Model Configs.",
+    "label": "Custom Classification Model Configs",
+    "description": "Configuration for custom classification models used for objects or state detection.",
     "enabled": {
-      "label": "Enable running the model."
+      "label": "Enable running the model",
+      "description": "Enable or disable the custom classification model."
     },
     "name": {
-      "label": "Name of classification model."
+      "label": "Name of classification model",
+      "description": "Identifier for the custom classification model to use."
     },
     "threshold": {
-      "label": "Classification score threshold to change the state."
+      "label": "Classification score threshold to change the state",
+      "description": "Score threshold used to change the classification state."
     },
     "save_attempts": {
-      "label": "Number of classification attempts to save in the recent classifications tab. If not specified, defaults to 200 for object classification and 100 for state classification."
+      "label": "Number of classification attempts to save in the recent classifications tab. If not specified, defaults to 200 for object classification and 100 for state classification",
+      "description": "How many classification attempts to save for recent classifications UI."
     },
     "object_config": {
       "objects": {
-        "label": "Object types to classify."
+        "label": "Object types to classify",
+        "description": "List of object types to run object classification on."
       },
       "classification_type": {
-        "label": "Type of classification that is applied."
+        "label": "Type of classification that is applied",
+        "description": "Classification type applied: 'sub_label' (adds sub_label) or other supported types."
       }
     },
     "state_config": {
       "cameras": {
-        "label": "Cameras to run classification on.",
+        "label": "Cameras to run classification on",
+        "description": "Per-camera crop and settings for running state classification.",
         "crop": {
-          "label": "Crop of image frame on this camera to run classification on."
+          "label": "Crop of image frame on this camera to run classification on",
+          "description": "Crop coordinates to use for running classification on this camera."
         }
       },
       "motion": {
-        "label": "If classification should be run when motion is detected in the crop."
+        "label": "If classification should be run when motion is detected in the crop",
+        "description": "If true, run classification when motion is detected within the specified crop."
       },
       "interval": {
-        "label": "Interval to run classification on in seconds."
+        "label": "Interval to run classification on in seconds",
+        "description": "Interval (seconds) between periodic classification runs for state classification."
       }
     }
   }

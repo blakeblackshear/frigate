@@ -1,39 +1,48 @@
 {
-  "label": "Global snapshots configuration.",
+  "label": "Global snapshots configuration",
+  "description": "Global settings for saved JPEG snapshots of tracked objects; can be overridden per-camera.",
   "enabled": {
-    "label": "Snapshots enabled."
+    "label": "Snapshots enabled",
+    "description": "Enable or disable saving snapshots globally."
   },
   "clean_copy": {
-    "label": "Create a clean copy of the snapshot image."
+    "label": "Create a clean copy of the snapshot image",
+    "description": "Save an unannotated clean copy of snapshots in addition to annotated ones."
   },
   "timestamp": {
-    "label": "Add a timestamp overlay on the snapshot."
+    "label": "Add a timestamp overlay on the snapshot",
+    "description": "Overlay a timestamp on saved snapshots."
   },
   "bounding_box": {
-    "label": "Add a bounding box overlay on the snapshot."
+    "label": "Add a bounding box overlay on the snapshot",
+    "description": "Draw bounding boxes for tracked objects on saved snapshots."
   },
   "crop": {
-    "label": "Crop the snapshot to the detected object."
+    "label": "Crop the snapshot to the detected object",
+    "description": "Crop saved snapshots to the detected object's bounding box."
   },
   "required_zones": {
-    "label": "List of required zones to be entered in order to save a snapshot."
+    "label": "List of required zones to be entered in order to save a snapshot",
+    "description": "Zones an object must enter for a snapshot to be saved."
   },
   "height": {
-    "label": "Snapshot image height."
+    "label": "Snapshot image height",
+    "description": "Height (pixels) to resize saved snapshots to; leave empty to preserve original size."
   },
   "retain": {
-    "label": "Snapshot retention.",
+    "label": "Snapshot retention",
     "default": {
-      "label": "Default retention period."
+      "label": "Default retention period"
     },
     "mode": {
-      "label": "Retain mode."
+      "label": "Retain mode"
     },
     "objects": {
-      "label": "Object retention period."
+      "label": "Object retention period"
     }
   },
   "quality": {
-    "label": "Quality of the encoded jpeg (0-100)."
+    "label": "Quality of the encoded jpeg (0-100)",
+    "description": "JPEG encode quality for saved snapshots (0-100)."
   }
 }

@@ -1,3 +1,4 @@
 {
-  "label": "Global motion detection configuration."
+  "label": "Global motion detection configuration",
+  "description": "Default motion detection settings applied to cameras unless overridden per-camera."
 }

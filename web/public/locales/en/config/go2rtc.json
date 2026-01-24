@@ -1,3 +1,4 @@
 {
-  "label": "Global restream configuration."
+  "label": "Global restream configuration",
+  "description": "Settings for the integrated go2rtc restreaming service used for live stream relaying and translation."
 }

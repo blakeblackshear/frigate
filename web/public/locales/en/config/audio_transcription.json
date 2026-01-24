@@ -1,18 +1,24 @@
 {
-  "label": "Audio transcription config.",
+  "label": "Audio transcription config",
+  "description": "Settings for live and speech audio transcription used for events and live captions.",
   "enabled": {
-    "label": "Enable audio transcription."
+    "label": "Enable audio transcription",
+    "description": "Enable or disable automatic audio transcription globally."
   },
   "language": {
-    "label": "Language abbreviation to use for audio event transcription/translation."
+    "label": "Language abbreviation to use for audio event transcription/translation",
+    "description": "Language code used for transcription/translation (for example 'en' for English)."
   },
   "device": {
-    "label": "The device used for audio transcription."
+    "label": "The device used for audio transcription",
+    "description": "Device key (CPU/GPU) to run the transcription model on."
   },
   "model_size": {
-    "label": "The size of the embeddings model used."
+    "label": "The size of the embeddings model used",
+    "description": "Model size to use for transcription; smaller models run on CPU, larger models may need GPU."
   },
   "live_enabled": {
-    "label": "Enable live transcriptions."
+    "label": "Enable live transcriptions",
+    "description": "Enable streaming live transcription for audio as it is received."
   }
 }

@@ -1,33 +1,44 @@
 {
-  "label": "Detection model configuration.",
+  "label": "Detection model configuration",
+  "description": "Settings to configure a custom object detection model, its input shape, and labelmap overrides.",
   "path": {
-    "label": "Custom Object detection model path."
+    "label": "Custom Object detection model path",
+    "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
   },
   "labelmap_path": {
-    "label": "Label map for custom object detector."
+    "label": "Label map for custom object detector",
+    "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
   },
   "width": {
-    "label": "Object detection model input width."
+    "label": "Object detection model input width",
+    "description": "Width of the model input tensor in pixels."
   },
   "height": {
-    "label": "Object detection model input height."
+    "label": "Object detection model input height",
+    "description": "Height of the model input tensor in pixels."
   },
   "labelmap": {
-    "label": "Labelmap customization."
+    "label": "Labelmap customization",
+    "description": "Overrides or remapping entries to merge into the standard labelmap."
   },
   "attributes_map": {
-    "label": "Map of object labels to their attribute labels."
+    "label": "Map of object labels to their attribute labels",
+    "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
   },
   "input_tensor": {
-    "label": "Model Input Tensor Shape"
+    "label": "Model Input Tensor Shape",
+    "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
   },
   "input_pixel_format": {
-    "label": "Model Input Pixel Color Format"
+    "label": "Model Input Pixel Color Format",
+    "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
   },
   "input_dtype": {
-    "label": "Model Input D Type"
+    "label": "Model Input D Type",
+    "description": "Data type of the model input tensor (for example 'float32')."
   },
   "model_type": {
-    "label": "Object Detection Model Type"
+    "label": "Object Detection Model Type",
+    "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
   }
 }

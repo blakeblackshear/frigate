@@ -1,12 +1,16 @@
 {
   "label": "Camera group configuration",
+  "description": "Configuration for named camera groups used to organize cameras in the UI.",
   "cameras": {
-    "label": "List of cameras in this group."
+    "label": "List of cameras in this group",
+    "description": "Array of camera names included in this group."
   },
   "icon": {
-    "label": "Icon that represents camera group."
+    "label": "Icon that represents camera group",
+    "description": "Icon used to represent the camera group in the UI."
   },
   "order": {
-    "label": "Sort order for group."
+    "label": "Sort order for group",
+    "description": "Numeric order used to sort camera groups in the UI; larger numbers appear later."
   }
 }

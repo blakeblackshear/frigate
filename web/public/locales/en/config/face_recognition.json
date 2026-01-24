@@ -1,34 +1,44 @@
 {
-  "label": "Face recognition config.",
+  "label": "Face recognition config",
+  "description": "Global settings for face detection and recognition used across cameras unless overridden per-camera.",
   "enabled": {
-    "label": "Enable face recognition."
+    "label": "Enable face recognition",
+    "description": "Enable or disable face recognition globally."
   },
   "model_size": {
-    "label": "The size of the embeddings model used."
+    "label": "The size of the embeddings model used",
+    "description": "Model size to use for face embeddings (small/large); larger may require GPU."
   },
   "unknown_score": {
-    "label": "Minimum face distance score required to be marked as a potential match."
+    "label": "Minimum face distance score required to be marked as a potential match",
+    "description": "Distance threshold below which a face is considered a potential match (lower = stricter)."
   },
   "detection_threshold": {
-    "label": "Minimum face detection score required to be considered a face."
+    "label": "Minimum face detection score required to be considered a face",
+    "description": "Minimum detection confidence required to consider a face detection valid."
   },
   "recognition_threshold": {
-    "label": "Minimum face distance score required to be considered a match."
+    "label": "Minimum face distance score required to be considered a match",
+    "description": "Face embedding distance threshold to consider two faces a match."
   },
   "min_area": {
-    "label": "Min area of face box to consider running face recognition."
+    "label": "Min area of face box to consider running face recognition",
+    "description": "Minimum area (pixels) of a detected face box required to attempt recognition."
   },
   "min_faces": {
-    "label": "Min face recognitions for the sub label to be applied to the person object."
+    "label": "Min face recognitions for the sub label to be applied to the person object",
+    "description": "Minimum number of face recognitions required before applying a recognized sub-label to a person."
   },
   "save_attempts": {
-    "label": "Number of face attempts to save in the recent recognitions tab."
+    "label": "Number of face attempts to save in the recent recognitions tab",
+    "description": "Number of face recognition attempts to retain for recent recognition UI."
   },
   "blur_confidence_filter": {
-    "label": "Apply blur quality filter to face confidence."
+    "label": "Apply blur quality filter to face confidence",
+    "description": "Adjust confidence scores based on image blur to reduce false positives for poor quality faces."
   },
   "device": {
-    "label": "The device key to use for face recognition.",
+    "label": "The device key to use for face recognition",
     "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
   }
 }

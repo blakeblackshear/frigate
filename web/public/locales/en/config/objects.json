@@ -1,69 +1,92 @@
 {
-  "label": "Global object configuration.",
+  "label": "Global object configuration",
+  "description": "Global object tracking defaults including which labels to track and per-object filters.",
   "track": {
-    "label": "Objects to track."
+    "label": "Objects to track",
+    "description": "List of object labels to track globally; camera configs can override this."
   },
   "filters": {
-    "label": "Object filters.",
+    "label": "Object filters",
+    "description": "Filters applied to detected objects to reduce false positives (area, ratio, confidence).",
     "min_area": {
-      "label": "Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      "label": "Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)",
+      "description": "Minimum bounding box area (pixels or percentage) required for this object type."
     },
     "max_area": {
-      "label": "Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      "label": "Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)",
+      "description": "Maximum bounding box area (pixels or percentage) allowed for this object type."
     },
     "min_ratio": {
-      "label": "Minimum ratio of bounding box's width/height for object to be counted."
+      "label": "Minimum ratio of bounding box's width/height for object to be counted",
+      "description": "Minimum width/height ratio required for the bounding box to qualify."
     },
     "max_ratio": {
-      "label": "Maximum ratio of bounding box's width/height for object to be counted."
+      "label": "Maximum ratio of bounding box's width/height for object to be counted",
+      "description": "Maximum width/height ratio allowed for the bounding box to qualify."
     },
     "threshold": {
-      "label": "Average detection confidence threshold for object to be counted."
+      "label": "Average detection confidence threshold for object to be counted",
+      "description": "Average detection confidence threshold required for the object to be considered a true positive."
     },
     "min_score": {
-      "label": "Minimum detection confidence for object to be counted."
+      "label": "Minimum detection confidence for object to be counted",
+      "description": "Minimum single-frame detection confidence required for the object to be counted."
     },
     "mask": {
-      "label": "Detection area polygon mask for this filter configuration."
+      "label": "Detection area polygon mask for this filter configuration",
+      "description": "Polygon coordinates defining where this filter applies within the frame."
     }
   },
   "mask": {
-    "label": "Object mask."
+    "label": "Object mask",
+    "description": "Global mask polygon used to prevent object detection in specified areas."
   },
   "genai": {
-    "label": "Config for using genai to analyze objects.",
+    "label": "Config for using genai to analyze objects",
+    "description": "Global GenAI options for describing tracked objects and sending frames for generation.",
     "enabled": {
-      "label": "Enable GenAI for camera."
+      "label": "Enable GenAI for camera",
+      "description": "Enable GenAI generation of descriptions for tracked objects by default."
     },
     "use_snapshot": {
-      "label": "Use snapshots for generating descriptions."
+      "label": "Use snapshots for generating descriptions",
+      "description": "Use object snapshots instead of thumbnails for GenAI description generation."
     },
     "prompt": {
-      "label": "Default caption prompt."
+      "label": "Default caption prompt",
+      "description": "Default prompt template used when generating descriptions with GenAI."
     },
     "object_prompts": {
-      "label": "Object specific prompts."
+      "label": "Object specific prompts",
+      "description": "Per-object prompts to customize GenAI outputs for specific labels."
     },
     "objects": {
-      "label": "List of objects to run generative AI for."
+      "label": "List of objects to run generative AI for",
+      "description": "List of object labels to send to GenAI by default."
     },
     "required_zones": {
-      "label": "List of required zones to be entered in order to run generative AI."
+      "label": "List of required zones to be entered in order to run generative AI",
+      "description": "Zones that must be entered for objects to qualify for GenAI description generation."
     },
     "debug_save_thumbnails": {
-      "label": "Save thumbnails sent to generative AI for debugging purposes."
+      "label": "Save thumbnails sent to generative AI for debugging purposes",
+      "description": "Save thumbnails sent to GenAI for debugging and review."
     },
     "send_triggers": {
-      "label": "What triggers to use to send frames to generative AI for a tracked object.",
+      "label": "What triggers to use to send frames to generative AI for a tracked object",
+      "description": "Defines when frames should be sent to GenAI (on end, after updates, etc.).",
       "tracked_object_end": {
-        "label": "Send once the object is no longer tracked."
+        "label": "Send once the object is no longer tracked",
+        "description": "Send a request to GenAI when the tracked object ends."
       },
       "after_significant_updates": {
-        "label": "Send an early request to generative AI when X frames accumulated."
+        "label": "Send an early request to generative AI when X frames accumulated",
+        "description": "Send a request to GenAI after a specified number of significant updates for the tracked object."
       }
     },
     "enabled_in_config": {
-      "label": "Keep track of original state of generative AI."
+      "label": "Keep track of original state of generative AI",
+      "description": "Indicates whether GenAI was enabled in the original static config."
     }
   }
 }
