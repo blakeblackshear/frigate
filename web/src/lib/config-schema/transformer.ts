@@ -30,6 +30,14 @@ function isSchemaObject(
   return typeof schema === "object" && schema !== null;
 }
 
+function schemaHasType(schema: Record<string, unknown>, type: string): boolean {
+  const schemaType = schema.type;
+  if (Array.isArray(schemaType)) {
+    return schemaType.includes(type);
+  }
+  return schemaType === type;
+}
+
 /**
  * Normalizes nullable schemas by unwrapping anyOf/oneOf [Type, null] patterns.
  *
@@ -57,6 +65,15 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
 
   const schemaObj = schema as Record<string, unknown>;
 
+  if (
+    schemaObj.default === null &&
+    schemaObj.type &&
+    !Array.isArray(schemaObj.type) &&
+    schemaObj.type !== "null"
+  ) {
+    schemaObj.type = [schemaObj.type, "null"];
+  }
+
   const anyOf = schemaObj.anyOf;
   if (Array.isArray(anyOf)) {
     const hasNull = anyOf.some(
@@ -71,8 +88,20 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
     ) as RJSFSchema | undefined;
 
     if (hasNull && nonNull && anyOf.length === 2) {
+      const normalizedNonNull = normalizeNullableSchema(nonNull as RJSFSchema);
+      const normalizedNonNullObj = normalizedNonNull as Record<string, unknown>;
+      const nonNullType = normalizedNonNullObj.type;
+      const mergedType = Array.isArray(nonNullType)
+        ? Array.from(new Set([...nonNullType, "null"]))
+        : nonNullType
+          ? [nonNullType, "null"]
+          : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
-      return normalizeNullableSchema({ ...nonNull, ...rest } as RJSFSchema);
+      return {
+        ...rest,
+        ...normalizedNonNullObj,
+        type: mergedType,
+      } as RJSFSchema;
     }
 
     return {
@@ -97,8 +126,20 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
     ) as RJSFSchema | undefined;
 
     if (hasNull && nonNull && oneOf.length === 2) {
+      const normalizedNonNull = normalizeNullableSchema(nonNull as RJSFSchema);
+      const normalizedNonNullObj = normalizedNonNull as Record<string, unknown>;
+      const nonNullType = normalizedNonNullObj.type;
+      const mergedType = Array.isArray(nonNullType)
+        ? Array.from(new Set([...nonNullType, "null"]))
+        : nonNullType
+          ? [nonNullType, "null"]
+          : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
-      return normalizeNullableSchema({ ...nonNull, ...rest } as RJSFSchema);
+      return {
+        ...rest,
+        ...normalizedNonNullObj,
+        type: mergedType,
+      } as RJSFSchema;
     }
 
     return {
@@ -324,7 +365,7 @@ function getWidgetForField(
   // Color fields
   if (
     fieldName.toLowerCase().includes("color") &&
-    schemaObj.type === "object"
+    schemaHasType(schemaObj, "object")
   ) {
     return "color";
   }
@@ -335,13 +376,14 @@ function getWidgetForField(
   }
 
   // Boolean fields get switch widget
-  if (schemaObj.type === "boolean") {
+  if (schemaHasType(schemaObj, "boolean")) {
     return "switch";
   }
 
   // Number with range gets slider
   if (
-    (schemaObj.type === "number" || schemaObj.type === "integer") &&
+    (schemaHasType(schemaObj, "number") ||
+      schemaHasType(schemaObj, "integer")) &&
     schemaObj.minimum !== undefined &&
     schemaObj.maximum !== undefined
   ) {
@@ -350,7 +392,7 @@ function getWidgetForField(
 
   // Array of strings gets tags widget
   if (
-    schemaObj.type === "array" &&
+    schemaHasType(schemaObj, "array") &&
     isSchemaObject(schemaObj.items) &&
     (schemaObj.items as Record<string, unknown>).type === "string"
   ) {
@@ -426,7 +468,10 @@ function generateUiSchema(
     }
 
     // Handle nested objects recursively
-    if (fSchema.type === "object" && isSchemaObject(fSchema.properties)) {
+    if (
+      schemaHasType(fSchema, "object") &&
+      isSchemaObject(fSchema.properties)
+    ) {
       const nestedOptions: UiSchemaOptions = {
         hiddenFields: hiddenFields
           .filter((f) => f.startsWith(`${fieldName}.`))
@@ -561,7 +606,7 @@ export function applySchemaDefaults(
     ) {
       result[key] = propSchema.default;
     } else if (
-      propSchema.type === "object" &&
+      schemaHasType(propSchema, "object") &&
       isSchemaObject(propSchema.properties) &&
       result[key] !== undefined
     ) {

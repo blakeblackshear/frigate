@@ -16,6 +16,10 @@ export function TextareaWidget(props: WidgetProps) {
     options,
   } = props;
 
+  const isNullable = Array.isArray(schema.type)
+    ? schema.type.includes("null")
+    : false;
+
   return (
     <Textarea
       id={id}
@@ -24,7 +28,13 @@ export function TextareaWidget(props: WidgetProps) {
       placeholder={placeholder || (options.placeholder as string) || ""}
       rows={(options.rows as number) || 3}
       onChange={(e) =>
-        onChange(e.target.value === "" ? undefined : e.target.value)
+        onChange(
+          e.target.value === ""
+            ? isNullable
+              ? null
+              : undefined
+            : e.target.value,
+        )
       }
       onBlur={(e) => onBlur(id, e.target.value)}
       onFocus={(e) => onFocus(id, e.target.value)}

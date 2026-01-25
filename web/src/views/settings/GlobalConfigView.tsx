@@ -1,7 +1,7 @@
 // Global Configuration View
 // Main view for configuring global Frigate settings
 
-import { useMemo, useCallback, useState, useEffect, memo, useRef } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
@@ -386,7 +386,7 @@ interface GlobalConfigSectionProps {
   title: string;
 }
 
-const GlobalConfigSection = memo(function GlobalConfigSection({
+function GlobalConfigSection({
   sectionKey,
   schema,
   config,
@@ -546,7 +546,7 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
       </div>
     </div>
   );
-});
+}
 
 export default function GlobalConfigView() {
   const { t } = useTranslation([

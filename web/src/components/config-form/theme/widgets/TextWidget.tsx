@@ -16,6 +16,10 @@ export function TextWidget(props: WidgetProps) {
     options,
   } = props;
 
+  const isNullable = Array.isArray(schema.type)
+    ? schema.type.includes("null")
+    : false;
+
   return (
     <Input
       id={id}
@@ -24,7 +28,13 @@ export function TextWidget(props: WidgetProps) {
       disabled={disabled || readonly}
       placeholder={placeholder || (options.placeholder as string) || ""}
       onChange={(e) =>
-        onChange(e.target.value === "" ? undefined : e.target.value)
+        onChange(
+          e.target.value === ""
+            ? isNullable
+              ? null
+              : undefined
+            : e.target.value,
+        )
       }
       onBlur={(e) => onBlur(id, e.target.value)}
       onFocus={(e) => onFocus(id, e.target.value)}
