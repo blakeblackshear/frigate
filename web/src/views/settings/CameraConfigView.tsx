@@ -11,8 +11,17 @@ import { MotionSection } from "@/components/config-form/sections/MotionSection";
 import { ObjectsSection } from "@/components/config-form/sections/ObjectsSection";
 import { ReviewSection } from "@/components/config-form/sections/ReviewSection";
 import { AudioSection } from "@/components/config-form/sections/AudioSection";
+import { AudioTranscriptionSection } from "@/components/config-form/sections/AudioTranscriptionSection";
+import { BirdseyeSection } from "@/components/config-form/sections/BirdseyeSection";
+import { CameraMqttSection } from "@/components/config-form/sections/CameraMqttSection";
+import { CameraUiSection } from "@/components/config-form/sections/CameraUiSection";
+import { FaceRecognitionSection } from "@/components/config-form/sections/FaceRecognitionSection";
+import { FfmpegSection } from "@/components/config-form/sections/FfmpegSection";
+import { LprSection } from "@/components/config-form/sections/LprSection";
 import { NotificationsSection } from "@/components/config-form/sections/NotificationsSection";
+import { OnvifSection } from "@/components/config-form/sections/OnvifSection";
 import { LiveSection } from "@/components/config-form/sections/LiveSection";
+import { SemanticSearchSection } from "@/components/config-form/sections/SemanticSearchSection";
 import { TimestampSection } from "@/components/config-form/sections/TimestampSection";
 import { useAllCameraOverrides } from "@/hooks/use-config-override";
 import type { FrigateConfig } from "@/types/frigateConfig";
@@ -179,8 +188,17 @@ const CameraConfigContent = memo(function CameraConfigContent({
     "config/objects",
     "config/review",
     "config/audio",
+    "config/audio_transcription",
+    "config/birdseye",
+    "config/camera_mqtt",
+    "config/camera_ui",
+    "config/face_recognition",
+    "config/ffmpeg",
+    "config/lpr",
     "config/notifications",
+    "config/onvif",
     "config/live",
+    "config/semantic_search",
     "config/timestamp_style",
     "views/settings",
     "common",
@@ -200,11 +218,22 @@ const CameraConfigContent = memo(function CameraConfigContent({
     );
   }
 
-  const sections = [
+  const sections: Array<{
+    key: string;
+    i18nNamespace: string;
+    component: typeof DetectSection;
+    showOverrideIndicator?: boolean;
+  }> = [
     {
       key: "detect",
       i18nNamespace: "config/detect",
       component: DetectSection,
+    },
+    {
+      key: "ffmpeg",
+      i18nNamespace: "config/ffmpeg",
+      component: FfmpegSection,
+      showOverrideIndicator: true,
     },
     {
       key: "record",
@@ -233,11 +262,59 @@ const CameraConfigContent = memo(function CameraConfigContent({
     },
     { key: "audio", i18nNamespace: "config/audio", component: AudioSection },
     {
+      key: "audio_transcription",
+      i18nNamespace: "config/audio_transcription",
+      component: AudioTranscriptionSection,
+      showOverrideIndicator: true,
+    },
+    {
       key: "notifications",
       i18nNamespace: "config/notifications",
       component: NotificationsSection,
     },
     { key: "live", i18nNamespace: "config/live", component: LiveSection },
+    {
+      key: "birdseye",
+      i18nNamespace: "config/birdseye",
+      component: BirdseyeSection,
+      showOverrideIndicator: true,
+    },
+    {
+      key: "face_recognition",
+      i18nNamespace: "config/face_recognition",
+      component: FaceRecognitionSection,
+      showOverrideIndicator: true,
+    },
+    {
+      key: "lpr",
+      i18nNamespace: "config/lpr",
+      component: LprSection,
+      showOverrideIndicator: true,
+    },
+    {
+      key: "semantic_search",
+      i18nNamespace: "config/semantic_search",
+      component: SemanticSearchSection,
+      showOverrideIndicator: false,
+    },
+    {
+      key: "mqtt",
+      i18nNamespace: "config/camera_mqtt",
+      component: CameraMqttSection,
+      showOverrideIndicator: false,
+    },
+    {
+      key: "onvif",
+      i18nNamespace: "config/onvif",
+      component: OnvifSection,
+      showOverrideIndicator: false,
+    },
+    {
+      key: "ui",
+      i18nNamespace: "config/camera_ui",
+      component: CameraUiSection,
+      showOverrideIndicator: false,
+    },
     {
       key: "timestamp_style",
       i18nNamespace: "config/timestamp_style",
@@ -273,9 +350,9 @@ const CameraConfigContent = memo(function CameraConfigContent({
                   <span>{sectionLabel}</span>
                   {isOverridden && (
                     <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                      {t("button.modified", {
+                      {t("button.overridden", {
                         ns: "common",
-                        defaultValue: "Modified",
+                        defaultValue: "Overridden",
                       })}
                     </Badge>
                   )}
@@ -298,7 +375,7 @@ const CameraConfigContent = memo(function CameraConfigContent({
               <SectionComponent
                 level="camera"
                 cameraName={cameraName}
-                showOverrideIndicator
+                showOverrideIndicator={section.showOverrideIndicator !== false}
                 onSave={onSave}
                 showTitle={true}
               />

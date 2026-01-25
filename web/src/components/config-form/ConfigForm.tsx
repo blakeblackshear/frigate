@@ -16,11 +16,11 @@ export interface ConfigFormProps {
   /** JSON Schema for the form */
   schema: RJSFSchema;
   /** Current form data */
-  formData?: Record<string, unknown>;
+  formData?: unknown;
   /** Called when form data changes */
-  onChange?: (data: Record<string, unknown>) => void;
+  onChange?: (data: unknown) => void;
   /** Called when form is submitted */
-  onSubmit?: (data: Record<string, unknown>) => void;
+  onSubmit?: (data: unknown) => void;
   /** Called when form has errors on submit */
   onError?: (errors: unknown[]) => void;
   /** Additional uiSchema overrides */

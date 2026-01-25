@@ -1,7 +1,7 @@
 // Base Section Component for config form sections
 // Used as a foundation for reusable section components
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
@@ -43,6 +43,8 @@ export interface SectionConfig {
   hiddenFields?: string[];
   /** Fields to show in advanced section */
   advancedFields?: string[];
+  /** Fields to compare for override detection */
+  overrideFields?: string[];
   /** Additional uiSchema overrides */
   uiSchema?: UiSchema;
 }
@@ -98,6 +100,17 @@ export function createConfigSection({
     review: "review",
     audio: "audio",
     notifications: "notifications",
+    live: "live",
+    timestamp_style: "timestamp_style",
+    audio_transcription: "audio_transcription",
+    birdseye: "birdseye",
+    face_recognition: "face_recognition",
+    ffmpeg: "ffmpeg",
+    lpr: "lpr",
+    semantic_search: "semantic_search",
+    mqtt: "mqtt",
+    onvif: "onvif",
+    ui: "ui",
   };
 
   const ConfigSection = function ConfigSection({
@@ -120,6 +133,8 @@ export function createConfigSection({
       unknown
     > | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [formKey, setFormKey] = useState(0);
+    const isResettingRef = useRef(false);
 
     const updateTopic =
       level === "camera" && cameraName
@@ -143,6 +158,7 @@ export function createConfigSection({
       config,
       cameraName: level === "camera" ? cameraName : undefined,
       sectionPath,
+      compareFields: sectionConfig.overrideFields,
     });
 
     // Get current form data
@@ -192,6 +208,18 @@ export function createConfigSection({
       }
       return applySchemaDefaults(sectionSchema, {});
     }, [sectionSchema]);
+
+    // Clear pendingData whenever formData changes (e.g., from server refresh)
+    // This prevents RJSF's initial onChange call from being treated as a user edit
+    useEffect(() => {
+      setPendingData(null);
+    }, [formData]);
+
+    useEffect(() => {
+      if (isResettingRef.current) {
+        isResettingRef.current = false;
+      }
+    }, [formKey]);
 
     const buildOverrides = useCallback(
       (
@@ -266,8 +294,18 @@ export function createConfigSection({
 
     // Handle form data change
     const handleChange = useCallback(
-      (data: Record<string, unknown>) => {
-        const sanitizedData = sanitizeSectionData(data);
+      (data: unknown) => {
+        if (isResettingRef.current) {
+          setPendingData(null);
+          return;
+        }
+        if (!data || typeof data !== "object") {
+          setPendingData(null);
+          return;
+        }
+        const sanitizedData = sanitizeSectionData(
+          data as Record<string, unknown>,
+        );
         if (isEqual(formData, sanitizedData)) {
           setPendingData(null);
           return;
@@ -276,6 +314,12 @@ export function createConfigSection({
       },
       [formData, sanitizeSectionData],
     );
+
+    const handleReset = useCallback(() => {
+      isResettingRef.current = true;
+      setPendingData(null);
+      setFormKey((prev) => prev + 1);
+    }, []);
 
     // Handle save button click
     const handleSave = useCallback(async () => {
@@ -417,6 +461,7 @@ export function createConfigSection({
     const sectionContent = (
       <div className="space-y-6">
         <ConfigForm
+          key={formKey}
           schema={sectionSchema}
           formData={pendingData || formData}
           onChange={handleChange}
@@ -454,16 +499,28 @@ export function createConfigSection({
               </span>
             )}
           </div>
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving || disabled}
-            className="gap-2"
-          >
-            <LuSave className="h-4 w-4" />
-            {isSaving
-              ? t("saving", { ns: "common", defaultValue: "Saving..." })
-              : t("save", { ns: "common", defaultValue: "Save" })}
-          </Button>
+          <div className="flex items-center gap-2">
+            {hasChanges && (
+              <Button
+                onClick={handleReset}
+                variant="outline"
+                disabled={isSaving || disabled}
+                className="gap-2"
+              >
+                {t("reset", { ns: "common", defaultValue: "Reset" })}
+              </Button>
+            )}
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving || disabled}
+              className="gap-2"
+            >
+              <LuSave className="h-4 w-4" />
+              {isSaving
+                ? t("saving", { ns: "common", defaultValue: "Saving..." })
+                : t("save", { ns: "common", defaultValue: "Save" })}
+            </Button>
+          </div>
         </div>
       </div>
     );

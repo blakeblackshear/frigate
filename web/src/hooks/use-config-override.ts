@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import isEqual from "lodash/isEqual";
 import get from "lodash/get";
+import set from "lodash/set";
 import type { FrigateConfig } from "@/types/frigateConfig";
 
 const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
@@ -46,6 +47,24 @@ export interface UseConfigOverrideOptions {
   cameraName?: string;
   /** Config section path (e.g., "detect", "record.events") */
   sectionPath: string;
+  /** Optional list of field paths to compare for overrides */
+  compareFields?: string[];
+}
+
+function pickFields(value: unknown, fields: string[]): Record<string, unknown> {
+  if (!fields || fields.length === 0) {
+    return {};
+  }
+
+  const result: Record<string, unknown> = {};
+  fields.forEach((path) => {
+    if (!path) return;
+    const fieldValue = get(value as Record<string, unknown>, path);
+    if (fieldValue !== undefined) {
+      set(result, path, fieldValue);
+    }
+  });
+  return result;
 }
 
 /**
@@ -72,6 +91,7 @@ export function useConfigOverride({
   config,
   cameraName,
   sectionPath,
+  compareFields,
 }: UseConfigOverrideOptions) {
   return useMemo(() => {
     if (!config) {
@@ -127,8 +147,17 @@ export function useConfigOverride({
     const normalizedGlobalValue = normalizeConfigValue(globalValue);
     const normalizedCameraValue = normalizeConfigValue(cameraValue);
 
+    const comparisonGlobal = compareFields
+      ? pickFields(normalizedGlobalValue, compareFields)
+      : normalizedGlobalValue;
+    const comparisonCamera = compareFields
+      ? pickFields(normalizedCameraValue, compareFields)
+      : normalizedCameraValue;
+
     // Check if the entire section is overridden
-    const isOverridden = !isEqual(normalizedGlobalValue, normalizedCameraValue);
+    const isOverridden = compareFields
+      ? compareFields.length > 0 && !isEqual(comparisonGlobal, comparisonCamera)
+      : !isEqual(comparisonGlobal, comparisonCamera);
 
     /**
      * Get override status for a specific field within the section
@@ -161,7 +190,7 @@ export function useConfigOverride({
       getFieldOverride,
       resetToGlobal,
     };
-  }, [config, cameraName, sectionPath]);
+  }, [config, cameraName, sectionPath, compareFields]);
 }
 
 /**
@@ -184,25 +213,62 @@ export function useAllCameraOverrides(
     const overriddenSections: string[] = [];
 
     // Check each section that can be overridden
-    const sectionsToCheck = [
-      "detect",
-      "record",
-      "snapshots",
-      "motion",
-      "objects",
-      "review",
-      "audio",
-      "notifications",
-      "live",
-      "timestamp_style",
+    const sectionsToCheck: Array<{
+      key: string;
+      compareFields?: string[];
+    }> = [
+      { key: "detect" },
+      { key: "record" },
+      { key: "snapshots" },
+      { key: "motion" },
+      { key: "objects" },
+      { key: "review" },
+      { key: "audio" },
+      { key: "notifications" },
+      { key: "live" },
+      { key: "timestamp_style" },
+      {
+        key: "audio_transcription",
+        compareFields: ["enabled", "live_enabled"],
+      },
+      { key: "birdseye", compareFields: ["enabled", "mode"] },
+      { key: "face_recognition", compareFields: ["enabled", "min_area"] },
+      {
+        key: "ffmpeg",
+        compareFields: [
+          "path",
+          "global_args",
+          "hwaccel_args",
+          "input_args",
+          "output_args",
+          "retry_interval",
+          "apple_compatibility",
+          "gpu",
+        ],
+      },
+      {
+        key: "lpr",
+        compareFields: ["enabled", "min_area", "enhancement"],
+      },
     ];
 
-    for (const section of sectionsToCheck) {
-      const globalValue = normalizeConfigValue(get(config, section));
-      const cameraValue = normalizeConfigValue(get(cameraConfig, section));
+    for (const { key, compareFields } of sectionsToCheck) {
+      const globalValue = normalizeConfigValue(get(config, key));
+      const cameraValue = normalizeConfigValue(get(cameraConfig, key));
 
-      if (!isEqual(globalValue, cameraValue)) {
-        overriddenSections.push(section);
+      const comparisonGlobal = compareFields
+        ? pickFields(globalValue, compareFields)
+        : globalValue;
+      const comparisonCamera = compareFields
+        ? pickFields(cameraValue, compareFields)
+        : cameraValue;
+
+      if (
+        compareFields && compareFields.length === 0
+          ? false
+          : !isEqual(comparisonGlobal, comparisonCamera)
+      ) {
+        overriddenSections.push(key);
       }
     }
 

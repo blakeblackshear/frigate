@@ -1,0 +1,25 @@
+// Camera MQTT Section Component
+// Camera-specific MQTT image publishing settings
+
+import { createConfigSection } from "./BaseSection";
+
+export const CameraMqttSection = createConfigSection({
+  sectionPath: "mqtt",
+  i18nNamespace: "config/camera_mqtt",
+  defaultConfig: {
+    fieldOrder: [
+      "enabled",
+      "timestamp",
+      "bounding_box",
+      "crop",
+      "height",
+      "required_zones",
+      "quality",
+    ],
+    hiddenFields: [],
+    advancedFields: ["height", "quality"],
+    overrideFields: [],
+  },
+});
+
+export default CameraMqttSection;

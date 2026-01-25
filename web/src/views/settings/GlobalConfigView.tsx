@@ -79,6 +79,7 @@ const globalSectionConfigs: Record<
       "topic_prefix",
       "client_id",
       "stats_interval",
+      "qos",
       "tls_ca_certs",
       "tls_client_cert",
       "tls_client_key",
@@ -86,6 +87,7 @@ const globalSectionConfigs: Record<
     ],
     advancedFields: [
       "stats_interval",
+      "qos",
       "tls_ca_certs",
       "tls_client_cert",
       "tls_client_key",
@@ -102,15 +104,69 @@ const globalSectionConfigs: Record<
     fieldOrder: [
       "enabled",
       "reset_admin_password",
+      "cookie_name",
+      "cookie_secure",
+      "session_length",
+      "refresh_time",
       "native_oauth_url",
       "failed_login_rate_limit",
       "trusted_proxies",
+      "hash_iterations",
+      "roles",
+      "admin_first_time_login",
     ],
-    advancedFields: ["failed_login_rate_limit", "trusted_proxies"],
+    advancedFields: [
+      "cookie_name",
+      "cookie_secure",
+      "session_length",
+      "refresh_time",
+      "failed_login_rate_limit",
+      "trusted_proxies",
+      "hash_iterations",
+      "roles",
+      "admin_first_time_login",
+    ],
   },
   tls: {
     i18nNamespace: "config/tls",
     fieldOrder: ["enabled", "cert", "key"],
+    advancedFields: [],
+  },
+  networking: {
+    i18nNamespace: "config/networking",
+    fieldOrder: ["ipv6"],
+    advancedFields: [],
+  },
+  proxy: {
+    i18nNamespace: "config/proxy",
+    fieldOrder: [
+      "header_map",
+      "logout_url",
+      "auth_secret",
+      "default_role",
+      "separator",
+    ],
+    advancedFields: ["header_map", "auth_secret", "separator"],
+  },
+  ui: {
+    i18nNamespace: "config/ui",
+    fieldOrder: [
+      "timezone",
+      "time_format",
+      "date_style",
+      "time_style",
+      "unit_system",
+    ],
+    advancedFields: [],
+  },
+  logger: {
+    i18nNamespace: "config/logger",
+    fieldOrder: ["default", "logs"],
+    advancedFields: ["logs"],
+  },
+  environment_vars: {
+    i18nNamespace: "config/environment_vars",
+    fieldOrder: [],
     advancedFields: [],
   },
   telemetry: {
@@ -129,39 +185,191 @@ const globalSectionConfigs: Record<
       "mode",
       "layout",
       "inactivity_threshold",
+      "idle_heartbeat_fps",
     ],
     advancedFields: ["width", "height", "quality", "inactivity_threshold"],
   },
+  ffmpeg: {
+    i18nNamespace: "config/ffmpeg",
+    fieldOrder: [
+      "path",
+      "global_args",
+      "hwaccel_args",
+      "input_args",
+      "output_args",
+      "retry_interval",
+      "apple_compatibility",
+      "gpu",
+    ],
+    advancedFields: [
+      "global_args",
+      "hwaccel_args",
+      "input_args",
+      "output_args",
+      "retry_interval",
+      "apple_compatibility",
+      "gpu",
+    ],
+  },
+  detectors: {
+    i18nNamespace: "config/detectors",
+    fieldOrder: [],
+    advancedFields: [],
+  },
+  model: {
+    i18nNamespace: "config/model",
+    fieldOrder: [
+      "path",
+      "labelmap_path",
+      "width",
+      "height",
+      "input_pixel_format",
+      "input_tensor",
+      "input_dtype",
+      "model_type",
+      "labelmap",
+      "attributes_map",
+    ],
+    advancedFields: [
+      "labelmap",
+      "attributes_map",
+      "input_pixel_format",
+      "input_tensor",
+      "input_dtype",
+      "model_type",
+    ],
+  },
+  genai: {
+    i18nNamespace: "config/genai",
+    fieldOrder: [
+      "provider",
+      "api_key",
+      "base_url",
+      "model",
+      "provider_options",
+      "runtime_options",
+    ],
+    advancedFields: ["base_url", "provider_options", "runtime_options"],
+  },
+  classification: {
+    i18nNamespace: "config/classification",
+    fieldOrder: ["bird", "custom"],
+    advancedFields: [],
+  },
   semantic_search: {
     i18nNamespace: "config/semantic_search",
-    fieldOrder: ["enabled", "reindex", "model_size"],
-    advancedFields: ["reindex"],
+    fieldOrder: ["enabled", "reindex", "model", "model_size", "device"],
+    advancedFields: ["reindex", "device"],
+  },
+  audio_transcription: {
+    i18nNamespace: "config/audio_transcription",
+    fieldOrder: ["enabled", "language", "device", "model_size", "live_enabled"],
+    advancedFields: ["language", "device", "model_size"],
   },
   face_recognition: {
     i18nNamespace: "config/face_recognition",
-    fieldOrder: ["enabled", "threshold", "min_area", "model_size"],
-    advancedFields: ["threshold", "min_area"],
+    fieldOrder: [
+      "enabled",
+      "model_size",
+      "unknown_score",
+      "detection_threshold",
+      "recognition_threshold",
+      "min_area",
+      "min_faces",
+      "save_attempts",
+      "blur_confidence_filter",
+      "device",
+    ],
+    advancedFields: [
+      "unknown_score",
+      "detection_threshold",
+      "recognition_threshold",
+      "min_area",
+      "min_faces",
+      "save_attempts",
+      "blur_confidence_filter",
+      "device",
+    ],
   },
   lpr: {
     i18nNamespace: "config/lpr",
     fieldOrder: [
       "enabled",
-      "threshold",
-      "min_area",
-      "min_ratio",
-      "max_ratio",
       "model_size",
+      "detection_threshold",
+      "min_area",
+      "recognition_threshold",
+      "min_plate_length",
+      "format",
+      "match_distance",
+      "known_plates",
+      "enhancement",
+      "debug_save_plates",
+      "device",
+      "replace_rules",
     ],
-    advancedFields: ["threshold", "min_area", "min_ratio", "max_ratio"],
+    advancedFields: [
+      "detection_threshold",
+      "recognition_threshold",
+      "min_plate_length",
+      "format",
+      "match_distance",
+      "known_plates",
+      "enhancement",
+      "debug_save_plates",
+      "device",
+      "replace_rules",
+    ],
+  },
+  go2rtc: {
+    i18nNamespace: "config/go2rtc",
+    fieldOrder: [],
+    advancedFields: [],
+  },
+  camera_groups: {
+    i18nNamespace: "config/camera_groups",
+    fieldOrder: ["cameras", "icon", "order"],
+    advancedFields: [],
+  },
+  safe_mode: {
+    i18nNamespace: "config/safe_mode",
+    fieldOrder: [],
+    advancedFields: [],
+  },
+  version: {
+    i18nNamespace: "config/version",
+    fieldOrder: [],
+    advancedFields: [],
   },
 };
 
 // System sections (global only)
-const systemSections = ["database", "tls", "auth", "telemetry", "birdseye"];
+const systemSections = [
+  "database",
+  "tls",
+  "auth",
+  "networking",
+  "proxy",
+  "ui",
+  "logger",
+  "environment_vars",
+  "telemetry",
+  "birdseye",
+  "ffmpeg",
+  "detectors",
+  "model",
+  "classification",
+  "go2rtc",
+  "camera_groups",
+  "safe_mode",
+  "version",
+];
 
 // Integration sections (global only)
 const integrationSections = [
   "mqtt",
+  "audio_transcription",
+  "genai",
   "semantic_search",
   "face_recognition",
   "lpr",
@@ -186,18 +394,12 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
     "views/settings",
     "common",
   ]);
-  const [pendingData, setPendingData] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [pendingData, setPendingData] = useState<unknown | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const formData = useMemo((): Record<string, unknown> => {
-    if (!config) return {} as Record<string, unknown>;
-    const value = (config as unknown as Record<string, unknown>)[sectionKey];
-    return (
-      (value as Record<string, unknown>) || ({} as Record<string, unknown>)
-    );
+  const formData = useMemo((): unknown => {
+    if (!config) return {};
+    return (config as unknown as Record<string, unknown>)[sectionKey];
   }, [config, sectionKey]);
 
   const hasChanges = useMemo(() => {
@@ -205,7 +407,7 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
     return !isEqual(formData, pendingData);
   }, [formData, pendingData]);
 
-  const handleChange = useCallback((data: Record<string, unknown>) => {
+  const handleChange = useCallback((data: unknown) => {
     setPendingData(data);
   }, []);
 
@@ -300,14 +502,29 @@ export default function GlobalConfigView() {
     "config/live",
     "config/timestamp_style",
     "config/mqtt",
+    "config/audio_transcription",
     "config/database",
     "config/auth",
     "config/tls",
+    "config/networking",
+    "config/proxy",
+    "config/ui",
+    "config/logger",
+    "config/environment_vars",
     "config/telemetry",
     "config/birdseye",
+    "config/ffmpeg",
+    "config/detectors",
+    "config/model",
+    "config/genai",
+    "config/classification",
     "config/semantic_search",
     "config/face_recognition",
     "config/lpr",
+    "config/go2rtc",
+    "config/camera_groups",
+    "config/safe_mode",
+    "config/version",
     "common",
   ]);
   const [activeTab, setActiveTab] = useState("shared");
