@@ -9,6 +9,10 @@
     "label": "Tracking mode",
     "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
   },
+  "order": {
+    "label": "Position of the camera in the birdseye view",
+    "description": "Numeric position controlling the camera's ordering in the Birdseye layout."
+  },
   "restream": {
     "label": "Restream birdseye via RTSP",
     "description": "Re-stream the Birdseye output as an RTSP feed; enabling this will keep Birdseye running continuously."

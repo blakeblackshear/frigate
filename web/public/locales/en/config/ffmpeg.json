@@ -29,6 +29,30 @@
       "description": "Default output args for record role streams."
     }
   },
+  "inputs": {
+    "label": "Camera inputs",
+    "description": "List of input stream definitions (paths and roles) for this camera.",
+    "path": {
+      "label": "Camera input path",
+      "description": "Camera input stream URL or path."
+    },
+    "roles": {
+      "label": "Roles assigned to this input",
+      "description": "Roles for this input stream (for example: detect, record, audio)."
+    },
+    "global_args": {
+      "label": "FFmpeg global arguments",
+      "description": "Global FFmpeg arguments for this input stream."
+    },
+    "hwaccel_args": {
+      "label": "FFmpeg hardware acceleration arguments",
+      "description": "Hardware acceleration arguments for this input stream."
+    },
+    "input_args": {
+      "label": "FFmpeg input arguments",
+      "description": "Input arguments specific to this stream."
+    }
+  },
   "retry_interval": {
     "label": "Time in seconds to wait before FFmpeg retries connecting to the camera",
     "description": "Seconds to wait before attempting to reconnect a camera stream after failure."

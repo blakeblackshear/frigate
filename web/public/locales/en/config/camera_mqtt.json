@@ -1,0 +1,32 @@
+{
+  "label": "MQTT configuration",
+  "description": "Camera-specific MQTT image publishing settings.",
+  "enabled": {
+    "label": "Send image over MQTT",
+    "description": "Enable publishing image snapshots for objects to MQTT topics for this camera."
+  },
+  "timestamp": {
+    "label": "Add timestamp to MQTT image",
+    "description": "Overlay a timestamp on images published to MQTT."
+  },
+  "bounding_box": {
+    "label": "Add bounding box to MQTT image",
+    "description": "Draw bounding boxes on images published over MQTT."
+  },
+  "crop": {
+    "label": "Crop MQTT image to detected object",
+    "description": "Crop images published to MQTT to the detected object's bounding box."
+  },
+  "height": {
+    "label": "MQTT image height",
+    "description": "Height (pixels) to resize images published over MQTT."
+  },
+  "required_zones": {
+    "label": "List of required zones to be entered in order to send the image",
+    "description": "Zones that an object must enter for an MQTT image to be published."
+  },
+  "quality": {
+    "label": "Quality of the encoded jpeg (0-100)",
+    "description": "JPEG quality for images published to MQTT (0-100)."
+  }
+}

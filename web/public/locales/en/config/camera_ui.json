@@ -1,0 +1,12 @@
+{
+  "label": "Camera UI Modifications",
+  "description": "Display ordering and dashboard visibility for this camera in the UI.",
+  "order": {
+    "label": "Order of camera in UI",
+    "description": "Numeric order used to sort the camera in the UI; larger numbers appear later."
+  },
+  "dashboard": {
+    "label": "Show this camera in Frigate dashboard UI",
+    "description": "Toggle whether this camera is visible in the main dashboard."
+  }
+}
