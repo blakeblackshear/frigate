@@ -12,8 +12,10 @@ export const ReviewSection = createConfigSection({
     hiddenFields: [
       "enabled_in_config",
       "alerts.labels",
+      "alerts.enabled_in_config",
       "alerts.required_zones",
       "detections.labels",
+      "detections.enabled_in_config",
       "detections.required_zones",
     ],
     advancedFields: [],

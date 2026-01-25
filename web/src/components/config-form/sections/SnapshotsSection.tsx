@@ -20,6 +20,14 @@ export const SnapshotsSection = createConfigSection({
     },
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["quality", "retain"],
+    uiSchema: {
+      required_zones: {
+        "ui:widget": "zoneNames",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+    },
   },
 });
 

@@ -135,7 +135,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
               </Label>
             )}
             {finalDescription && !isMultiSchemaWrapper && (
-              <p className="max-w-md text-sm text-muted-foreground">
+              <p className="max-w-md text-xs text-muted-foreground">
                 {finalDescription}
               </p>
             )}
@@ -145,7 +145,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
       ) : (
         <>
           {finalDescription && !isMultiSchemaWrapper && (
-            <p className="text-sm text-muted-foreground">{finalDescription}</p>
+            <p className="text-xs text-muted-foreground">{finalDescription}</p>
           )}
           {children}
         </>
