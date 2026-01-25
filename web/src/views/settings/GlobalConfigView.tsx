@@ -1,7 +1,7 @@
 // Global Configuration View
 // Main view for configuring global Frigate settings
 
-import { useMemo, useCallback, useState, memo } from "react";
+import { useMemo, useCallback, useState, useEffect, memo, useRef } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import type { RJSFSchema } from "@rjsf/utils";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { extractSchemaSection } from "@/lib/config-schema";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import Heading from "@/components/ui/heading";
@@ -380,6 +381,7 @@ interface GlobalConfigSectionProps {
   schema: RJSFSchema | null;
   config: FrigateConfig | undefined;
   onSave: () => void;
+  title: string;
 }
 
 const GlobalConfigSection = memo(function GlobalConfigSection({
@@ -387,6 +389,7 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
   schema,
   config,
   onSave,
+  title,
 }: GlobalConfigSectionProps) {
   const sectionConfig = globalSectionConfigs[sectionKey];
   const { t } = useTranslation([
@@ -396,19 +399,52 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
   ]);
   const [pendingData, setPendingData] = useState<unknown | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [formKey, setFormKey] = useState(0);
+  const isResettingRef = useRef(false);
 
   const formData = useMemo((): unknown => {
     if (!config) return {};
     return (config as unknown as Record<string, unknown>)[sectionKey];
   }, [config, sectionKey]);
 
+  useEffect(() => {
+    setPendingData(null);
+  }, [formData]);
+
+  useEffect(() => {
+    if (isResettingRef.current) {
+      isResettingRef.current = false;
+    }
+  }, [formKey]);
+
   const hasChanges = useMemo(() => {
     if (!pendingData) return false;
     return !isEqual(formData, pendingData);
   }, [formData, pendingData]);
 
-  const handleChange = useCallback((data: unknown) => {
-    setPendingData(data);
+  const handleChange = useCallback(
+    (data: unknown) => {
+      if (isResettingRef.current) {
+        setPendingData(null);
+        return;
+      }
+      if (!data || typeof data !== "object") {
+        setPendingData(null);
+        return;
+      }
+      if (isEqual(formData, data)) {
+        setPendingData(null);
+        return;
+      }
+      setPendingData(data);
+    },
+    [formData],
+  );
+
+  const handleReset = useCallback(() => {
+    isResettingRef.current = true;
+    setPendingData(null);
+    setFormKey((prev) => prev + 1);
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -450,7 +486,16 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Heading as="h4">{title}</Heading>
+        {hasChanges && (
+          <Badge variant="outline" className="text-xs">
+            {t("modified", { ns: "common", defaultValue: "Modified" })}
+          </Badge>
+        )}
+      </div>
       <ConfigForm
+        key={formKey}
         schema={schema}
         formData={pendingData || formData}
         onChange={handleChange}
@@ -463,7 +508,7 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
       />
 
       <div className="flex items-center justify-between pt-2">
-        <div>
+        <div className="flex items-center gap-2">
           {hasChanges && (
             <span className="text-sm text-muted-foreground">
               {t("unsavedChanges", {
@@ -473,16 +518,28 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
             </span>
           )}
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges || isSaving}
-          className="gap-2"
-        >
-          <LuSave className="h-4 w-4" />
-          {isSaving
-            ? t("saving", { ns: "common", defaultValue: "Saving..." })
-            : t("save", { ns: "common", defaultValue: "Save" })}
-        </Button>
+        <div className="flex items-center gap-2">
+          {hasChanges && (
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              disabled={isSaving}
+              className="gap-2"
+            >
+              {t("reset", { ns: "common", defaultValue: "Reset" })}
+            </Button>
+          )}
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges || isSaving}
+            className="gap-2"
+          >
+            <LuSave className="h-4 w-4" />
+            {isSaving
+              ? t("saving", { ns: "common", defaultValue: "Saving..." })
+              : t("save", { ns: "common", defaultValue: "Save" })}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -679,57 +736,61 @@ export default function GlobalConfigView() {
 
             {activeTab === "system" && (
               <>
-                {systemSections.map((sectionKey) => (
-                  <div
-                    key={sectionKey}
-                    className={cn(
-                      activeSection === sectionKey ? "block" : "hidden",
-                    )}
-                  >
-                    <Heading as="h4" className="mb-4">
-                      {t("label", {
-                        ns: globalSectionConfigs[sectionKey].i18nNamespace,
-                        defaultValue:
-                          sectionKey.charAt(0).toUpperCase() +
-                          sectionKey.slice(1).replace(/_/g, " "),
-                      })}
-                    </Heading>
-                    <GlobalConfigSection
-                      sectionKey={sectionKey}
-                      schema={extractSchemaSection(schema, sectionKey)}
-                      config={config}
-                      onSave={handleSave}
-                    />
-                  </div>
-                ))}
+                {systemSections.map((sectionKey) => {
+                  const sectionTitle = t("label", {
+                    ns: globalSectionConfigs[sectionKey].i18nNamespace,
+                    defaultValue:
+                      sectionKey.charAt(0).toUpperCase() +
+                      sectionKey.slice(1).replace(/_/g, " "),
+                  });
+
+                  return (
+                    <div
+                      key={sectionKey}
+                      className={cn(
+                        activeSection === sectionKey ? "block" : "hidden",
+                      )}
+                    >
+                      <GlobalConfigSection
+                        sectionKey={sectionKey}
+                        schema={extractSchemaSection(schema, sectionKey)}
+                        config={config}
+                        onSave={handleSave}
+                        title={sectionTitle}
+                      />
+                    </div>
+                  );
+                })}
               </>
             )}
 
             {activeTab === "integrations" && (
               <>
-                {integrationSections.map((sectionKey) => (
-                  <div
-                    key={sectionKey}
-                    className={cn(
-                      activeSection === sectionKey ? "block" : "hidden",
-                    )}
-                  >
-                    <Heading as="h4" className="mb-4">
-                      {t("label", {
-                        ns: globalSectionConfigs[sectionKey].i18nNamespace,
-                        defaultValue:
-                          sectionKey.charAt(0).toUpperCase() +
-                          sectionKey.slice(1).replace(/_/g, " "),
-                      })}
-                    </Heading>
-                    <GlobalConfigSection
-                      sectionKey={sectionKey}
-                      schema={extractSchemaSection(schema, sectionKey)}
-                      config={config}
-                      onSave={handleSave}
-                    />
-                  </div>
-                ))}
+                {integrationSections.map((sectionKey) => {
+                  const sectionTitle = t("label", {
+                    ns: globalSectionConfigs[sectionKey].i18nNamespace,
+                    defaultValue:
+                      sectionKey.charAt(0).toUpperCase() +
+                      sectionKey.slice(1).replace(/_/g, " "),
+                  });
+
+                  return (
+                    <div
+                      key={sectionKey}
+                      className={cn(
+                        activeSection === sectionKey ? "block" : "hidden",
+                      )}
+                    >
+                      <GlobalConfigSection
+                        sectionKey={sectionKey}
+                        schema={extractSchemaSection(schema, sectionKey)}
+                        config={config}
+                        onSave={handleSave}
+                        title={sectionTitle}
+                      />
+                    </div>
+                  );
+                })}
               </>
             )}
           </div>
