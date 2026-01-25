@@ -89,6 +89,17 @@ export function createConfigSection({
   i18nNamespace,
   defaultConfig,
 }: CreateSectionOptions) {
+  const cameraUpdateTopicMap: Record<string, string> = {
+    detect: "detect",
+    record: "record",
+    snapshots: "snapshots",
+    motion: "motion",
+    objects: "objects",
+    review: "review",
+    audio: "audio",
+    notifications: "notifications",
+  };
+
   const ConfigSection = function ConfigSection({
     level,
     cameraName,
@@ -109,6 +120,13 @@ export function createConfigSection({
       unknown
     > | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    const updateTopic =
+      level === "camera" && cameraName
+        ? cameraUpdateTopicMap[sectionPath]
+          ? `config/cameras/${cameraName}/${cameraUpdateTopicMap[sectionPath]}`
+          : undefined
+        : `config/${sectionPath}`;
 
     // Default: show title for camera level (since it might be collapsible), hide for global
     const shouldShowTitle = showTitle ?? level === "camera";
@@ -280,6 +298,7 @@ export function createConfigSection({
 
         await axios.put("config/set", {
           requires_restart: requiresRestart ? 0 : 1,
+          update_topic: updateTopic,
           config_data: {
             [basePath]: overrides,
           },
@@ -345,6 +364,7 @@ export function createConfigSection({
       sanitizeSectionData,
       buildOverrides,
       schemaDefaults,
+      updateTopic,
     ]);
 
     // Handle reset to global - removes camera-level override by deleting the section
@@ -357,6 +377,7 @@ export function createConfigSection({
         // Send empty string to delete the key from config (see update_yaml in backend)
         await axios.put("config/set", {
           requires_restart: requiresRestart ? 0 : 1,
+          update_topic: updateTopic,
           config_data: {
             [basePath]: "",
           },
@@ -379,7 +400,7 @@ export function createConfigSection({
           }),
         );
       }
-    }, [level, cameraName, requiresRestart, t, refreshConfig]);
+    }, [level, cameraName, requiresRestart, t, refreshConfig, updateTopic]);
 
     if (!sectionSchema) {
       return null;
