@@ -66,6 +66,7 @@ const globalSectionConfigs: Record<
     fieldOrder?: string[];
     hiddenFields?: string[];
     advancedFields?: string[];
+    liveValidate?: boolean;
     i18nNamespace: string;
   }
 > = {
@@ -114,8 +115,8 @@ const globalSectionConfigs: Record<
       "trusted_proxies",
       "hash_iterations",
       "roles",
-      "admin_first_time_login",
     ],
+    hiddenFields: ["admin_first_time_login"],
     advancedFields: [
       "cookie_name",
       "cookie_secure",
@@ -148,6 +149,7 @@ const globalSectionConfigs: Record<
       "separator",
     ],
     advancedFields: ["header_map", "auth_secret", "separator"],
+    liveValidate: true,
   },
   ui: {
     i18nNamespace: "config/ui",
@@ -502,6 +504,7 @@ const GlobalConfigSection = memo(function GlobalConfigSection({
         fieldOrder={sectionConfig.fieldOrder}
         hiddenFields={sectionConfig.hiddenFields}
         advancedFields={sectionConfig.advancedFields}
+        liveValidate={sectionConfig.liveValidate}
         showSubmit={false}
         i18nNamespace={sectionConfig.i18nNamespace}
         disabled={isSaving}

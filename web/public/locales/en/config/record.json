@@ -1,6 +1,10 @@
 {
   "label": "Global record configuration",
   "description": "Global recording and retention settings applied to cameras unless overridden per-camera.",
+  "groups": {
+    "retention": "Retention",
+    "events": "Events"
+  },
   "enabled": {
     "label": "Enable record on all cameras",
     "description": "Enable or disable recording globally; individual cameras can override this."

@@ -1,6 +1,9 @@
 {
   "label": "Global snapshots configuration",
   "description": "Global settings for saved JPEG snapshots of tracked objects; can be overridden per-camera.",
+  "groups": {
+    "display": "Display"
+  },
   "enabled": {
     "label": "Snapshots enabled",
     "description": "Enable or disable saving snapshots globally."

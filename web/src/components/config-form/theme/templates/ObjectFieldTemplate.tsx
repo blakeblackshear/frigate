@@ -9,31 +9,111 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
-  const { title, description, properties } = props;
+  const { title, description, properties, uiSchema } = props;
+  const formContext = (props as Record<string, unknown>).formContext as
+    | Record<string, unknown>
+    | undefined;
 
   // Check if this is a root-level object
   const isRoot = !title;
   const [isOpen, setIsOpen] = useState(true);
 
+  const { t } = useTranslation([
+    (formContext?.i18nNamespace as string | undefined) || "common",
+  ]);
+
+  const groupDefinitions =
+    (uiSchema?.["ui:groups"] as Record<string, string[]> | undefined) || {};
+
+  const isHiddenProp = (prop: (typeof properties)[number]) =>
+    prop.content.props.uiSchema?.["ui:widget"] === "hidden";
+
+  const visibleProps = properties.filter((prop) => !isHiddenProp(prop));
+
   // Check for advanced section grouping
-  const advancedProps = properties.filter(
+  const advancedProps = visibleProps.filter(
     (p) => p.content.props.uiSchema?.["ui:options"]?.advanced === true,
   );
-  const regularProps = properties.filter(
+  const regularProps = visibleProps.filter(
     (p) => p.content.props.uiSchema?.["ui:options"]?.advanced !== true,
   );
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  const toTitle = (value: string) =>
+    value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const renderGroupedFields = (items: (typeof properties)[number][]) => {
+    if (!items.length) {
+      return null;
+    }
+
+    const grouped = new Set<string>();
+    const groups = Object.entries(groupDefinitions)
+      .map(([groupKey, fields]) => {
+        const ordered = fields
+          .map((field) => items.find((item) => item.name === field))
+          .filter(Boolean) as (typeof properties)[number][];
+
+        if (ordered.length === 0) {
+          return null;
+        }
+
+        ordered.forEach((item) => grouped.add(item.name));
+
+        const label = t(`groups.${groupKey}`, {
+          defaultValue: toTitle(groupKey),
+        });
+
+        return {
+          key: groupKey,
+          label,
+          items: ordered,
+        };
+      })
+      .filter(Boolean) as Array<{
+      key: string;
+      label: string;
+      items: (typeof properties)[number][];
+    }>;
+
+    const ungrouped = items.filter((item) => !grouped.has(item.name));
+
+    return (
+      <div className="space-y-6">
+        {groups.map((group) => (
+          <div key={group.key} className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground">
+              {group.label}
+            </div>
+            <div className="space-y-4">
+              {group.items.map((element) => (
+                <div key={element.name}>{element.content}</div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {ungrouped.length > 0 && (
+          <div className={cn("space-y-4", groups.length > 0 && "pt-2")}>
+            {ungrouped.map((element) => (
+              <div key={element.name}>{element.content}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Root level renders children directly
   if (isRoot) {
     return (
       <div className="space-y-6">
-        {regularProps.map((element) => (
-          <div key={element.name}>{element.content}</div>
-        ))}
+        {renderGroupedFields(regularProps)}
 
         {advancedProps.length > 0 && (
           <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -48,9 +128,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4 pt-2">
-              {advancedProps.map((element) => (
-                <div key={element.name}>{element.content}</div>
-              ))}
+              {renderGroupedFields(advancedProps)}
             </CollapsibleContent>
           </Collapsible>
         )}
@@ -83,9 +161,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
-            {regularProps.map((element) => (
-              <div key={element.name}>{element.content}</div>
-            ))}
+            {renderGroupedFields(regularProps)}
 
             {advancedProps.length > 0 && (
               <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -104,9 +180,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-4 pt-2">
-                  {advancedProps.map((element) => (
-                    <div key={element.name}>{element.content}</div>
-                  ))}
+                  {renderGroupedFields(advancedProps)}
                 </CollapsibleContent>
               </Collapsible>
             )}

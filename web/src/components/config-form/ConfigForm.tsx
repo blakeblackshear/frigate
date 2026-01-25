@@ -27,6 +27,8 @@ export interface ConfigFormProps {
   uiSchema?: UiSchema;
   /** Field ordering */
   fieldOrder?: string[];
+  /** Field groups for layout */
+  fieldGroups?: Record<string, string[]>;
   /** Fields to hide */
   hiddenFields?: string[];
   /** Fields marked as advanced (collapsed by default) */
@@ -55,6 +57,7 @@ export function ConfigForm({
   onError,
   uiSchema: customUiSchema,
   fieldOrder,
+  fieldGroups,
   hiddenFields,
   advancedFields,
   disabled = false,
@@ -100,12 +103,13 @@ export function ConfigForm({
   const finalUiSchema = useMemo(
     () => ({
       ...generatedUiSchema,
+      "ui:groups": fieldGroups,
       ...customUiSchema,
       "ui:submitButtonOptions": showSubmit
         ? { norender: false }
         : { norender: true },
     }),
-    [generatedUiSchema, customUiSchema, showSubmit],
+    [generatedUiSchema, customUiSchema, showSubmit, fieldGroups],
   );
 
   // Create error transformer for user-friendly error messages

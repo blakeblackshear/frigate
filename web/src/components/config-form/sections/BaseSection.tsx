@@ -45,6 +45,8 @@ export interface SectionConfig {
   advancedFields?: string[];
   /** Fields to compare for override detection */
   overrideFields?: string[];
+  /** Whether to enable live validation */
+  liveValidate?: boolean;
   /** Additional uiSchema overrides */
   uiSchema?: UiSchema;
 }
@@ -466,8 +468,10 @@ export function createConfigSection({
           formData={pendingData || formData}
           onChange={handleChange}
           fieldOrder={sectionConfig.fieldOrder}
+          fieldGroups={sectionConfig.fieldGroups}
           hiddenFields={sectionConfig.hiddenFields}
           advancedFields={sectionConfig.advancedFields}
+          liveValidate={sectionConfig.liveValidate}
           uiSchema={sectionConfig.uiSchema}
           disabled={disabled || isSaving}
           readonly={readonly}

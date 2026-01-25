@@ -1,6 +1,10 @@
 {
   "label": "Object tracking",
   "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
+  "groups": {
+    "resolution": "Resolution",
+    "tracking": "Tracking"
+  },
   "enabled": {
     "label": "Detection Enabled",
     "description": "Enable or disable object detection for this camera. Detection must be enabled for object tracking to run."
