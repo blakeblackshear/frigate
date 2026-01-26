@@ -6,11 +6,9 @@ import type { IChangeEvent } from "@rjsf/core";
 import { frigateTheme } from "./theme";
 import { transformSchema } from "@/lib/config-schema";
 import { createErrorTransformer } from "@/lib/config-schema/errorMessages";
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 export interface ConfigFormProps {
   /** JSON Schema for the form */
@@ -64,7 +62,7 @@ export function ConfigForm({
   readonly = false,
   showSubmit = true,
   className,
-  liveValidate = false,
+  liveValidate = true,
   formContext,
   i18nNamespace,
 }: ConfigFormProps) {
@@ -73,16 +71,11 @@ export function ConfigForm({
     "views/settings",
     "config/validation",
   ]);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Determine which fields to hide based on advanced toggle
   const effectiveHiddenFields = useMemo(() => {
-    if (showAdvanced || !advancedFields || advancedFields.length === 0) {
-      return hiddenFields;
-    }
-    // Hide advanced fields when toggle is off
-    return [...(hiddenFields || []), ...advancedFields];
-  }, [hiddenFields, advancedFields, showAdvanced]);
+    return hiddenFields;
+  }, [hiddenFields]);
 
   // Transform schema and generate uiSchema
   const { schema: transformedSchema, uiSchema: generatedUiSchema } = useMemo(
@@ -90,17 +83,10 @@ export function ConfigForm({
       transformSchema(schema, {
         fieldOrder,
         hiddenFields: effectiveHiddenFields,
-        advancedFields: showAdvanced ? advancedFields : [],
+        advancedFields: advancedFields,
         i18nNamespace,
       }),
-    [
-      schema,
-      fieldOrder,
-      effectiveHiddenFields,
-      advancedFields,
-      showAdvanced,
-      i18nNamespace,
-    ],
+    [schema, fieldOrder, effectiveHiddenFields, advancedFields, i18nNamespace],
   );
 
   // Merge generated uiSchema with custom overrides
@@ -133,8 +119,6 @@ export function ConfigForm({
     [onSubmit],
   );
 
-  const hasAdvancedFields = advancedFields && advancedFields.length > 0;
-
   // Extended form context with i18n info
   const extendedFormContext = useMemo(
     () => ({
@@ -147,24 +131,6 @@ export function ConfigForm({
 
   return (
     <div className={cn("config-form", className)}>
-      {hasAdvancedFields && (
-        <div className="mb-4 flex items-center justify-end gap-2">
-          <Switch
-            id="show-advanced"
-            checked={showAdvanced}
-            onCheckedChange={setShowAdvanced}
-          />
-          <Label
-            htmlFor="show-advanced"
-            className="cursor-pointer text-sm text-muted-foreground"
-          >
-            {t("configForm.showAdvanced", {
-              ns: "views/settings",
-              defaultValue: "Show Advanced Settings",
-            })}
-          </Label>
-        </div>
-      )}
       <Form
         schema={transformedSchema}
         uiSchema={finalUiSchema}
