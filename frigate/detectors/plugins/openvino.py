@@ -33,6 +33,7 @@ class OvDetector(DetectionApi):
         ModelTypeEnum.yolonas,
         ModelTypeEnum.yologeneric,
         ModelTypeEnum.yolox,
+        ModelTypeEnum.yolo26,
     ]
 
     def __init__(self, detector_config: OvDetectorConfig):
@@ -80,6 +81,27 @@ class OvDetector(DetectionApi):
             output_shape = model_outputs[0].get_shape()
             if output_shape[0] != 1 or output_shape[1] != 1 or output_shape[3] != 7:
                 logger.error(f"SSD model output doesn't match. Found {output_shape}.")
+                self.model_invalid = True
+
+        if self.ov_model_type == ModelTypeEnum.yolo26:
+            model_inputs = self.runner.compiled_model.inputs
+            model_outputs = self.runner.compiled_model.outputs
+
+            if len(model_inputs) != 1:
+                logger.error(
+                    f"Yolo26 models must only have 1 input. Found {len(model_inputs)}."
+                )
+                self.model_invalid = True
+            if len(model_outputs) != 1:
+                logger.error(
+                    f"Yolo26 models must be exported in flat format and only have 1 output. Found {len(model_outputs)}."
+                )
+                self.model_invalid = True
+            output_shape = model_outputs[0].partial_shape
+            if output_shape[-1] != 6:
+                logger.error(
+                    f"Yolo26 models must be exported in flat format. Model output doesn't match (1, N, 6). Found {output_shape}."
+                )
                 self.model_invalid = True
 
         if self.ov_model_type == ModelTypeEnum.yolonas:
@@ -192,6 +214,19 @@ class OvDetector(DetectionApi):
                     y_max / self.h,
                     x_max / self.w,
                 ]
+            return detections
+        elif self.ov_model_type == ModelTypeEnum.yolo26:
+            # Output shape (batch, predictions, [x_center, y_center, width, height, confidence_score, class_id])
+            predictions = outputs[0][0]
+
+            for i, prediction in enumerate(predictions):
+                if i == 20:
+                    break
+                (x, y, w, h, confidence, class_id) = prediction
+
+                if class_id < 0:
+                    continue
+                detections[i] = self.process_yolo(class_id, confidence, [x, y, w, h])
             return detections
         elif self.ov_model_type == ModelTypeEnum.yologeneric:
             return post_process_yolo(outputs, self.w, self.h)

@@ -42,6 +42,7 @@ class ModelTypeEnum(str, Enum):
     yolox = "yolox"
     yolonas = "yolonas"
     yologeneric = "yolo-generic"
+    yolo26 = "yolo26"
 
 
 class ModelConfig(BaseModel):
