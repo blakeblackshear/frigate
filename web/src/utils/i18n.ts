@@ -72,6 +72,7 @@ i18n
       "config/semantic_search",
       "config/face_recognition",
       "config/lpr",
+      "config/validation",
     ],
     defaultNS: "common",
 

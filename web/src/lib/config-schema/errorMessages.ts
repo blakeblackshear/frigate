@@ -2,7 +2,7 @@
 // Maps JSON Schema validation keywords to user-friendly messages
 
 import type { ErrorTransformer } from "@rjsf/utils";
-import type { TFunction } from "i18next";
+import type { i18n as I18n } from "i18next";
 
 export interface ErrorMessageMap {
   [keyword: string]: string | ((params: Record<string, unknown>) => string);
@@ -51,7 +51,9 @@ export const defaultErrorMessages: ErrorMessageMap = {
  * Creates an error transformer function for RJSF
  * Transforms technical JSON Schema errors into user-friendly messages
  */
-export function createErrorTransformer(t: TFunction): ErrorTransformer {
+export function createErrorTransformer(i18n: I18n): ErrorTransformer {
+  const t = i18n.t.bind(i18n);
+
   const getDefaultMessage = (
     errorType: string,
     params: Record<string, unknown>,
@@ -117,31 +119,22 @@ export function createErrorTransformer(t: TFunction): ErrorTransformer {
 
       let message: string | undefined;
 
-      const missingTranslation = "__missing_translation__";
-
       // Try field-specific validation message first
       if (fieldPath) {
         const fieldKey = `${fieldPath}.validation.${errorType}`;
-        const translated = t(fieldKey, {
-          ...normalizedParams,
-          ns: ["config"],
-          defaultValue: missingTranslation,
-        });
-        if (translated !== fieldKey && translated !== missingTranslation) {
-          message = translated;
+        if (i18n.exists(fieldKey)) {
+          message = t(fieldKey, normalizedParams);
         }
       }
 
       // Fall back to generic validation message
       if (!message) {
         const genericKey = errorType;
-        const translated = t(genericKey, {
-          ...normalizedParams,
-          ns: ["validation"],
-          defaultValue: missingTranslation,
-        });
-        if (translated !== genericKey && translated !== missingTranslation) {
-          message = translated;
+        if (i18n.exists(genericKey, { ns: "config/validation" })) {
+          message = t(genericKey, {
+            ...normalizedParams,
+            ns: ["config/validation"],
+          });
         }
       }
 

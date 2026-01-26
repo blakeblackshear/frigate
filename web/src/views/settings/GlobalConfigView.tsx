@@ -95,6 +95,7 @@ const globalSectionConfigs: Record<
       "tls_client_key",
       "tls_insecure",
     ],
+    liveValidate: true,
   },
   database: {
     i18nNamespace: "config/database",

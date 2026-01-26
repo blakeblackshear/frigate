@@ -68,10 +68,10 @@ export function ConfigForm({
   formContext,
   i18nNamespace,
 }: ConfigFormProps) {
-  const { t } = useTranslation([
+  const { t, i18n } = useTranslation([
     i18nNamespace || "common",
     "views/settings",
-    "validation",
+    "config/validation",
   ]);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -117,7 +117,7 @@ export function ConfigForm({
   );
 
   // Create error transformer for user-friendly error messages
-  const errorTransformer = useMemo(() => createErrorTransformer(t), [t]);
+  const errorTransformer = useMemo(() => createErrorTransformer(i18n), [i18n]);
 
   const handleChange = useCallback(
     (e: IChangeEvent) => {
