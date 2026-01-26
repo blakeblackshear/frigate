@@ -2,6 +2,7 @@
 // Maps JSON Schema validation keywords to user-friendly messages
 
 import type { ErrorTransformer } from "@rjsf/utils";
+import type { TFunction } from "i18next";
 
 export interface ErrorMessageMap {
   [keyword: string]: string | ((params: Record<string, unknown>) => string);
@@ -30,7 +31,13 @@ export const defaultErrorMessages: ErrorMessageMap = {
     };
     return formatLabels[format] || `Invalid ${format} format`;
   },
-  enum: "Must be one of the allowed values",
+  enum: (params) => {
+    const allowedValues = params.allowedValues as unknown;
+    if (Array.isArray(allowedValues)) {
+      return `Must be one of: ${allowedValues.join(", ")}`;
+    }
+    return "Must be one of the allowed values";
+  },
   const: "Value does not match expected constant",
   uniqueItems: "All items must be unique",
   minItems: (params) => `Must have at least ${params.limit} items`,
@@ -44,25 +51,107 @@ export const defaultErrorMessages: ErrorMessageMap = {
  * Creates an error transformer function for RJSF
  * Transforms technical JSON Schema errors into user-friendly messages
  */
-export function createErrorTransformer(
-  customMessages: ErrorMessageMap = {},
-): ErrorTransformer {
-  const messages = { ...defaultErrorMessages, ...customMessages };
+export function createErrorTransformer(t: TFunction): ErrorTransformer {
+  const getDefaultMessage = (
+    errorType: string,
+    params: Record<string, unknown>,
+  ): string | undefined => {
+    const template = defaultErrorMessages[errorType];
 
-  return (errors) => {
-    return errors.map((error) => {
-      const keyword = error.name || "";
-      const messageTemplate = messages[keyword];
+    if (!template) {
+      return undefined;
+    }
 
-      if (!messageTemplate) {
+    if (typeof template === "function") {
+      return template(params);
+    }
+
+    return template;
+  };
+
+  const normalizeParams = (
+    params: Record<string, unknown> | undefined,
+  ): Record<string, unknown> => {
+    if (!params) {
+      return {};
+    }
+
+    const allowedValues = params.allowedValues as unknown;
+
+    return {
+      ...params,
+      allowedValues: Array.isArray(allowedValues)
+        ? allowedValues.join(", ")
+        : allowedValues,
+    };
+  };
+
+  const getFieldPathFromProperty = (
+    property: string | undefined,
+    params: Record<string, unknown>,
+    errorType: string,
+  ): string => {
+    const basePath = (property || "").replace(/^\./, "").trim();
+    const missingProperty = params.missingProperty as string | undefined;
+
+    if (errorType === "required" && missingProperty) {
+      return basePath ? `${basePath}.${missingProperty}` : missingProperty;
+    }
+
+    return basePath;
+  };
+
+  return (errors) =>
+    errors.map((error) => {
+      const errorType = error.name || "";
+      if (!errorType) {
         return error;
       }
 
-      let message: string;
-      if (typeof messageTemplate === "function") {
-        message = messageTemplate(error.params || {});
-      } else {
-        message = messageTemplate;
+      const normalizedParams = normalizeParams(error.params);
+      const fieldPath = getFieldPathFromProperty(
+        error.property,
+        normalizedParams,
+        errorType,
+      );
+
+      let message: string | undefined;
+
+      const missingTranslation = "__missing_translation__";
+
+      // Try field-specific validation message first
+      if (fieldPath) {
+        const fieldKey = `${fieldPath}.validation.${errorType}`;
+        const translated = t(fieldKey, {
+          ...normalizedParams,
+          ns: ["config"],
+          defaultValue: missingTranslation,
+        });
+        if (translated !== fieldKey && translated !== missingTranslation) {
+          message = translated;
+        }
+      }
+
+      // Fall back to generic validation message
+      if (!message) {
+        const genericKey = errorType;
+        const translated = t(genericKey, {
+          ...normalizedParams,
+          ns: ["validation"],
+          defaultValue: missingTranslation,
+        });
+        if (translated !== genericKey && translated !== missingTranslation) {
+          message = translated;
+        }
+      }
+
+      // Fall back to English defaults
+      if (!message) {
+        message = getDefaultMessage(errorType, normalizedParams);
+      }
+
+      if (!message) {
+        return error;
       }
 
       return {
@@ -70,7 +159,6 @@ export function createErrorTransformer(
         message,
       };
     });
-  };
 }
 
 /**

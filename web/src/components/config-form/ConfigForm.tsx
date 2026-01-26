@@ -68,7 +68,11 @@ export function ConfigForm({
   formContext,
   i18nNamespace,
 }: ConfigFormProps) {
-  const { t } = useTranslation([i18nNamespace || "common", "views/settings"]);
+  const { t } = useTranslation([
+    i18nNamespace || "common",
+    "views/settings",
+    "validation",
+  ]);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Determine which fields to hide based on advanced toggle
@@ -113,7 +117,7 @@ export function ConfigForm({
   );
 
   // Create error transformer for user-friendly error messages
-  const errorTransformer = useMemo(() => createErrorTransformer(), []);
+  const errorTransformer = useMemo(() => createErrorTransformer(t), [t]);
 
   const handleChange = useCallback(
     (e: IChangeEvent) => {
