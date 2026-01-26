@@ -79,6 +79,12 @@ cameras:
 
 If the ONVIF connection is successful, PTZ controls will be available in the camera's WebUI.
 
+:::note
+
+Some cameras use a separate ONVIF/service account that is distinct from the device administrator credentials. If ONVIF authentication fails with the admin account, try creating or using an ONVIF/service user in the camera's firmware. Refer to your camera manufacturer's documentation for more.
+
+:::
+
 :::tip
 
 If your ONVIF camera does not require authentication credentials, you may still need to specify an empty string for `user` and `password`, eg: `user: ""` and `password: ""`.
@@ -95,7 +101,7 @@ The FeatureList on the [ONVIF Conformant Products Database](https://www.onvif.or
 
 | Brand or specific camera     | PTZ Controls | Autotracking | Notes                                                                                                                                                                                                                                                             |
 | ---------------------------- | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Amcrest                      |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                                                                                                                                   |
+| Amcrest                      |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                                                                                                                                    |
 | Amcrest ASH21                |      ✅      |      ❌      | ONVIF service port: 80                                                                                                                                                                                                                                            |
 | Amcrest IP4M-S2112EW-AI      |      ✅      |      ❌      | FOV relative movement not supported.                                                                                                                                                                                                                              |
 | Amcrest IP5M-1190EW          |      ✅      |      ❌      | ONVIF Port: 80. FOV relative movement not supported.                                                                                                                                                                                                              |

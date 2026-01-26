@@ -37,7 +37,7 @@ cameras:
 
 ## Steps
 
-1. Export or copy the clip you want to replay to the Frigate host (e.g., `/media/frigate/` or `debug/clips/`).
+1. Export or copy the clip you want to replay to the Frigate host (e.g., `/media/frigate/` or `debug/clips/`). Depending on what you are looking to debug, it is often helpful to add some "pre-capture" time (where the tracked object is not yet visible) to the clip when exporting.
 2. Add the temporary camera to `config/config.yml` (example above). Use a unique name such as `test` or `replay_camera` so it's easy to remove later.
    - If you're debugging a specific camera, copy the settings from that camera (frame rate, model/enrichment settings, zones, etc.) into the temporary camera so the replay closely matches the original environment. Leave `record` and `snapshots` disabled unless you are specifically debugging recording or snapshot behavior.
 3. Restart Frigate.

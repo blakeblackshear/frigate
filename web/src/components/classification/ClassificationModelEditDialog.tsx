@@ -141,16 +141,36 @@ export default function ClassificationModelEditDialog({
   });
 
   // Fetch dataset to get current classes for state models
-  const { data: dataset } = useSWR<ClassificationDatasetResponse>(
-    isStateModel ? `classification/${model.name}/dataset` : null,
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  const { data: dataset, mutate: mutateDataset } =
+    useSWR<ClassificationDatasetResponse>(
+      isStateModel && open ? `classification/${model.name}/dataset` : null,
+      { revalidateOnFocus: false },
+    );
+
+  useEffect(() => {
+    if (open) {
+      if (isObjectModel) {
+        form.reset({
+          objectLabel: model.object_config?.objects?.[0] || "",
+          objectType:
+            (model.object_config
+              ?.classification_type as ObjectClassificationType) || "sub_label",
+        } as ObjectFormData);
+      } else {
+        form.reset({
+          classes: [""],
+        } as StateFormData);
+      }
+
+      if (isStateModel) {
+        mutateDataset();
+      }
+    }
+  }, [open, isObjectModel, isStateModel, model, form, mutateDataset]);
 
   // Update form with classes from dataset when loaded
   useEffect(() => {
-    if (isStateModel && dataset?.categories) {
+    if (isStateModel && open && dataset?.categories) {
       const classes = Object.keys(dataset.categories).filter(
         (key) => key !== "none",
       );
@@ -161,7 +181,7 @@ export default function ClassificationModelEditDialog({
         );
       }
     }
-  }, [dataset, isStateModel, form]);
+  }, [dataset, isStateModel, open, form]);
 
   const watchedClasses = isStateModel
     ? (form as ReturnType<typeof useForm<StateFormData>>).watch("classes")

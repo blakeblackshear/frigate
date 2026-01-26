@@ -42,7 +42,7 @@ If the EQ13 is out of stock, the link below may take you to a suggested alternat
 | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------- |
 | Beelink EQ13 (<a href="https://amzn.to/4jn2qVr" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Can run object detection on several 1080p cameras with low-medium activity | Dual gigabit NICs for easy isolated camera network. |
 | Intel 1120p ([Amazon](https://www.amazon.com/Beelink-i3-1220P-Computer-Display-Gigabit/dp/B0DDCKT9YP)         | Can handle a large number of 1080p cameras with high activity              |                                                     |
-| Intel 125H  ([Amazon](https://www.amazon.com/MINISFORUM-Pro-125H-Barebone-Computer-HDMI2-1/dp/B0FH21FSZM)     | Can handle a significant number of 1080p cameras with high activity        | Includes NPU for more efficient detection in 0.17+  |
+| Intel 125H ([Amazon](https://www.amazon.com/MINISFORUM-Pro-125H-Barebone-Computer-HDMI2-1/dp/B0FH21FSZM)      | Can handle a significant number of 1080p cameras with high activity        | Includes NPU for more efficient detection in 0.17+  |
 
 ## Detectors
 
@@ -55,12 +55,10 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
-
   - [Supports many model architectures](../../configuration/object_detectors#configuration)
   - Runs best with tiny or small size models
 
 - [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
-
   - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
 
 - <CommunityBadge /> [MemryX](#memryx-mx3): The MX3 M.2 accelerator module is available in m.2 format allowing for a wide range of compatibility with devices.
@@ -89,7 +87,6 @@ Frigate supports multiple different detectors that work on different types of ha
 **Nvidia**
 
 - [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs to provide efficient object detection.
-
   - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx-supported-models)
   - Runs well with any size models including large
 
@@ -152,9 +149,7 @@ The OpenVINO detector type is able to run on:
 
 :::note
 
-Intel NPUs have seen [limited success in community deployments](https://github.com/blakeblackshear/frigate/discussions/13248#discussioncomment-12347357), although they remain officially unsupported.
-
-In testing, the NPU delivered performance that was only comparable to — or in some cases worse than — the integrated GPU.
+Intel B-series (Battlemage) GPUs are not officially supported with Frigate 0.17, though a user has [provided steps to rebuild the Frigate container](https://github.com/blakeblackshear/frigate/discussions/21257) with support for them.
 
 :::
 
@@ -172,7 +167,7 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel N100     | ~ 15 ms                    | s-320: 30 ms                                      | 320: ~ 25 ms              |                        | Can only run one detector instance |
 | Intel N150     | ~ 15 ms                    | t-320: 16 ms s-320: 24 ms                         |                           |                        |                                    |
 | Intel Iris XE  | ~ 10 ms                    | t-320: 6 ms t-640: 14 ms s-320: 8 ms s-640: 16 ms | 320: ~ 10 ms 640: ~ 20 ms | 320-n: 33 ms           |                                    |
-| Intel NPU      | ~ 6 ms                     | s-320: 11 ms                                      | 320: ~ 14 ms 640: ~ 34 ms | 320-n: 40 ms           |                                    |
+| Intel NPU      | ~ 6 ms                     | s-320: 11 ms s-640: 30 ms                         | 320: ~ 14 ms 640: ~ 34 ms | 320-n: 40 ms           |                                    |
 | Intel Arc A310 | ~ 5 ms                     | t-320: 7 ms t-640: 11 ms s-320: 8 ms s-640: 15 ms | 320: ~ 8 ms 640: ~ 14 ms  |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     |                                                   | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     |                                                   | 320: ~ 8 ms               |                        |                                    |

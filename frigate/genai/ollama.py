@@ -50,7 +50,9 @@ class OllamaClient(GenAIClient):
             logger.warning("Error initializing Ollama: %s", str(e))
             return None
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self, prompt: str, images: list[bytes], json_schema: Optional[dict] = None
+    ) -> Optional[str]:
         """Submit a request to Ollama"""
         if self.provider is None:
             logger.warning(
@@ -62,6 +64,10 @@ class OllamaClient(GenAIClient):
                 **self.provider_options,
                 **self.genai_config.runtime_options,
             }
+
+            if json_schema and "schema" in json_schema:
+                ollama_options["format"] = json_schema["schema"]
+
             result = self.provider.generate(
                 self.genai_config.model,
                 prompt,

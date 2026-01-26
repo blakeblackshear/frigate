@@ -125,10 +125,10 @@ review:
 
 ## Review Reports
 
-Along with individual review item summaries, Generative AI provides the ability to request a report of a given time period. For example, you can get a daily report while on a vacation of any suspicious activity or other concerns that may require review.
+Along with individual review item summaries, Generative AI can also produce a single report of review items from all cameras marked "suspicious" over a specified time period (for example, a daily summary of suspicious activity while you're on vacation).
 
 ### Requesting Reports Programmatically
 
-Review reports can be requested via the [API](/integrations/api#review-summarization) by sending a POST request to `/api/review/summarize/start/{start_ts}/end/{end_ts}` with Unix timestamps.
+Review reports can be requested via the [API](/integrations/api/generate-review-summary-review-summarize-start-start-ts-end-end-ts-post) by sending a POST request to `/api/review/summarize/start/{start_ts}/end/{end_ts}` with Unix timestamps.
 
 For Home Assistant users, there is a built-in service (`frigate.review_summarize`) that makes it easy to request review reports as part of automations or scripts. This allows you to automatically generate daily summaries, vacation reports, or custom time period reports based on your specific needs.

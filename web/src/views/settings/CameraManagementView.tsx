@@ -1,6 +1,6 @@
 import Heading from "@/components/ui/heading";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";

@@ -374,9 +374,13 @@ export default function Events() {
           reviewed: true,
         });
         reloadData();
+
+        if (reviewSearchParams["after"] != undefined) {
+          updateSegments();
+        }
       }
     },
-    [reloadData, updateSegments],
+    [reloadData, updateSegments, reviewSearchParams],
   );
 
   const markItemAsReviewed = useCallback(
