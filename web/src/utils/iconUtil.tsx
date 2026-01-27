@@ -173,9 +173,9 @@ function getVerifiedIcon(
   const simpleLabel = label.substring(0, label.lastIndexOf("-"));
 
   return (
-    <div key={label} className="flex items-center">
+    <div key={label} className="relative flex items-center">
       {getIconForLabel(simpleLabel, type, className)}
-      <FaCheckCircle className="absolute size-2 translate-x-[80%] translate-y-3/4" />
+      <FaCheckCircle className="absolute -bottom-0.5 -right-0.5 size-2" />
     </div>
   );
 }
@@ -188,9 +188,9 @@ function getRecognizedPlateIcon(
   const simpleLabel = label.substring(0, label.lastIndexOf("-"));
 
   return (
-    <div key={label} className="flex items-center">
+    <div key={label} className="relative inline-flex items-center">
       {getIconForLabel(simpleLabel, type, className)}
-      <LuScanBarcode className="absolute size-2.5 translate-x-[50%] translate-y-3/4" />
+      <LuScanBarcode className="absolute -bottom-0.5 -right-0.5 size-2" />
     </div>
   );
 }

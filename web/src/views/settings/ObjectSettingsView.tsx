@@ -391,7 +391,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
   );
 
   return (
-    <div className="scrollbar-container flex w-full flex-col overflow-y-auto">
+    <div className="scrollbar-container relative flex w-full flex-col overflow-y-auto">
       {objects && objects.length > 0 ? (
         objects.map((obj: ObjectType) => {
           return (
