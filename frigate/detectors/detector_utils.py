@@ -85,10 +85,18 @@ def apply_amd_compatibility_env_vars():
     logger.info(f"Setting AMD environment variables for {gfx_id} compatibility...")
 
     configs = {
-        ("gfx902", "gfx909", "gfx90c"): {
+        ("gfx902", "gfx909", "gfx90c", "gfx1035", "gfx1103"): {
             "HSA_ENABLE_SDMA": "0", # Disable System Direct Memory Access for APU compatibility
-            "HSA_OVERRIDE_GFX_VERSION": "9.0.0", # Force compatible GFX version
             "MIGRAPHX_DISABLE_MIOPEN_FUSION": "1", # Disable unsupported fusion optimization
+        },
+        ("gfx902", "gfx909", "gfx90c"): { # Vega
+            "HSA_OVERRIDE_GFX_VERSION": "9.0.0", # Force compatible GFX version
+        },
+        ("gfx1035"): { # 680M
+            "HSA_OVERRIDE_GFX_VERSION": "10.3.0", # Force compatible GFX version
+        },
+        ("gfx1103"): { # 780M
+            "HSA_OVERRIDE_GFX_VERSION": "11.0.0", # Force compatible GFX version
         }
     }
     for gfx_ids, vars in configs.items():
