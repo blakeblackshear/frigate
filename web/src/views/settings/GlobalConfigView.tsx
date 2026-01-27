@@ -62,6 +62,7 @@ const globalSectionConfigs: Record<
     advancedFields?: string[];
     liveValidate?: boolean;
     i18nNamespace: string;
+    uiSchema?: Record<string, unknown>;
   }
 > = {
   mqtt: {
@@ -122,6 +123,11 @@ const globalSectionConfigs: Record<
       "hash_iterations",
       "roles",
     ],
+    uiSchema: {
+      reset_admin_password: {
+        "ui:widget": "switch",
+      },
+    },
   },
   tls: {
     i18nNamespace: "config/tls",
@@ -207,6 +213,44 @@ const globalSectionConfigs: Record<
       "apple_compatibility",
       "gpu",
     ],
+    uiSchema: {
+      global_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      hwaccel_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      input_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      output_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+        detect: {
+          "ui:widget": "ArrayAsTextWidget",
+          "ui:options": {
+            suppressMultiSchema: true,
+          },
+        },
+        record: {
+          "ui:widget": "ArrayAsTextWidget",
+          "ui:options": {
+            suppressMultiSchema: true,
+          },
+        },
+      },
+    },
   },
   detectors: {
     i18nNamespace: "config/detectors",
@@ -247,10 +291,11 @@ const globalSectionConfigs: Record<
       "runtime_options",
     ],
     advancedFields: ["base_url", "provider_options", "runtime_options"],
+    hiddenFields: ["genai.enabled_in_config"],
   },
   classification: {
     i18nNamespace: "config/classification",
-    fieldOrder: ["bird", "custom"],
+    hiddenFields: ["custom"],
     advancedFields: [],
   },
   semantic_search: {
@@ -318,11 +363,6 @@ const globalSectionConfigs: Record<
       "replace_rules",
     ],
   },
-  go2rtc: {
-    i18nNamespace: "config/go2rtc",
-    fieldOrder: [],
-    advancedFields: [],
-  },
 };
 
 // System sections (global only)
@@ -341,7 +381,6 @@ const systemSections = [
   "detectors",
   "model",
   "classification",
-  "go2rtc",
 ];
 
 // Integration sections (global only)
@@ -481,6 +520,7 @@ function GlobalConfigSection({
         hiddenFields={sectionConfig.hiddenFields}
         advancedFields={sectionConfig.advancedFields}
         liveValidate={sectionConfig.liveValidate}
+        uiSchema={sectionConfig.uiSchema}
         showSubmit={false}
         i18nNamespace={sectionConfig.i18nNamespace}
         disabled={isSaving}

@@ -17,6 +17,7 @@ export const ReviewSection = createConfigSection({
       "detections.labels",
       "detections.enabled_in_config",
       "detections.required_zones",
+      "genai.enabled_in_config",
     ],
     advancedFields: [],
   },

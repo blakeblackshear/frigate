@@ -1123,6 +1123,14 @@
     }
   },
   "configForm": {
+    "global": {
+      "title": "Global Settings",
+      "description": "These settings apply to all cameras unless overridden in the camera-specific settings."
+    },
+    "camera": {
+      "title": "Camera Settings",
+      "description": "These settings apply only to this camera and override the global settings."
+    },
     "showAdvanced": "Show Advanced Settings",
     "tabs": {
       "sharedDefaults": "Shared Defaults",
