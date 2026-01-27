@@ -39,6 +39,7 @@
     "@radix-ui/react-toggle-group": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@rjsf/core": "^6.2.5",
+    "@rjsf/shadcn": "^6.2.5",
     "@rjsf/utils": "^6.2.5",
     "@rjsf/validator-ajv8": "^6.2.5",
     "apexcharts": "^3.52.0",

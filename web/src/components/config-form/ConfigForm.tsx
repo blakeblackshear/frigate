@@ -1,5 +1,5 @@
 // ConfigForm - Main RJSF form wrapper component
-import Form from "@rjsf/core";
+import Form from "@rjsf/shadcn";
 import validator from "@rjsf/validator-ajv8";
 import type { RJSFSchema, UiSchema } from "@rjsf/utils";
 import type { IChangeEvent } from "@rjsf/core";
