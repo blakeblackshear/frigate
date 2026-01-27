@@ -30,7 +30,7 @@ import { Card, CardContent } from "@/components/ui/card";
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const { t } = useTranslation(["components/auth", "common"]);
+  const { t } = useTranslation(["components/auth-form", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { login } = React.useContext(AuthContext);
