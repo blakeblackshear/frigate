@@ -1,5 +1,5 @@
 {
-  "label": "Review configuration",
+  "label": "Review",
   "description": "Settings that control alerts, detections, and GenAI review summaries used by the UI and storage.",
   "alerts": {
     "label": "Review alerts config",

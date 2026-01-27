@@ -1,5 +1,5 @@
 {
-  "label": "Detection model configuration",
+  "label": "Detection model",
   "description": "Settings to configure a custom object detection model, its input shape, and labelmap overrides.",
   "path": {
     "label": "Custom Object detection model path",

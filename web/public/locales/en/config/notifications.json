@@ -1,6 +1,6 @@
 {
-  "label": "Global notification configuration",
-  "description": "Global settings to enable and control notifications; can be overridden per-camera.",
+  "label": "Notifications",
+  "description": "Settings to enable and control notifications; can be overridden per-camera.",
   "enabled": {
     "label": "Enable notifications",
     "description": "Enable or disable notifications globally."

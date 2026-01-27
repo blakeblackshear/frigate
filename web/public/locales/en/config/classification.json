@@ -1,5 +1,5 @@
 {
-  "label": "Object classification config",
+  "label": "Object classification",
   "description": "Settings for classification models used to refine object labels or state classification.",
   "bird": {
     "label": "Bird classification config",
@@ -14,7 +14,7 @@
     }
   },
   "custom": {
-    "label": "Custom Classification Model Configs",
+    "label": "Custom Classification Models",
     "description": "Configuration for custom classification models used for objects or state detection.",
     "enabled": {
       "label": "Enable running the model",

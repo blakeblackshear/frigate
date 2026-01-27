@@ -1,6 +1,6 @@
 {
-  "label": "Global record configuration",
-  "description": "Global recording and retention settings applied to cameras unless overridden per-camera.",
+  "label": "Recording",
+  "description": "Recording and retention settings applied to cameras unless overridden per-camera.",
   "groups": {
     "retention": "Retention",
     "events": "Events"

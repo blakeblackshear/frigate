@@ -1,12 +1,12 @@
 {
-  "label": "Telemetry configuration",
+  "label": "Telemetry",
   "description": "System telemetry and stats options including GPU and network bandwidth monitoring.",
   "network_interfaces": {
     "label": "Enabled network interfaces for bandwidth calculation",
     "description": "List of network interface name prefixes to monitor for bandwidth statistics."
   },
   "stats": {
-    "label": "System Stats Configuration",
+    "label": "System Stats",
     "description": "Options to enable/disable collection of various system and GPU statistics.",
     "amd_gpu_stats": {
       "label": "Enable AMD GPU stats",

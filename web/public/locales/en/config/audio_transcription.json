@@ -1,5 +1,5 @@
 {
-  "label": "Audio transcription config",
+  "label": "Audio transcription",
   "description": "Settings for live and speech audio transcription used for events and live captions.",
   "enabled": {
     "label": "Enable audio transcription",

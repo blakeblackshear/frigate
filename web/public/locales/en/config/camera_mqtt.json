@@ -1,6 +1,6 @@
 {
-  "label": "MQTT configuration",
-  "description": "Camera-specific MQTT image publishing settings.",
+  "label": "MQTT",
+  "description": "MQTT image publishing settings.",
   "enabled": {
     "label": "Send image over MQTT",
     "description": "Enable publishing image snapshots for objects to MQTT topics for this camera."

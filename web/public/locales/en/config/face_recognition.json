@@ -1,5 +1,5 @@
 {
-  "label": "Face recognition config",
+  "label": "Face recognition",
   "description": "Global settings for face detection and recognition used across cameras unless overridden per-camera.",
   "enabled": {
     "label": "Enable face recognition",

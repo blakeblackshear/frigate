@@ -1,5 +1,5 @@
 {
-  "label": "Camera group configuration",
+  "label": "Camera groups",
   "description": "Configuration for named camera groups used to organize cameras in the UI.",
   "cameras": {
     "label": "List of cameras in this group",

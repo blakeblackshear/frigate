@@ -1,5 +1,5 @@
 {
-  "label": "Proxy configuration",
+  "label": "Proxy",
   "description": "Settings for integrating Frigate behind a reverse proxy that passes authenticated user headers.",
   "header_map": {
     "label": "Header mapping definitions for proxy user passing",

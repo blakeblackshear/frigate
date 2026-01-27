@@ -1,6 +1,6 @@
 {
-  "label": "Global Audio events configuration",
-  "description": "Global settings for audio-based event detection; camera-level settings can override these.",
+  "label": "Audio events",
+  "description": "settings for audio-based event detection; camera-level settings can override these.",
   "groups": {
     "detection": "Detection",
     "sensitivity": "Sensitivity"

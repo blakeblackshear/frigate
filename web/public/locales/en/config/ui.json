@@ -1,5 +1,5 @@
 {
-  "label": "UI configuration",
+  "label": "UI",
   "description": "User interface preferences such as timezone, time/date formatting, and units.",
   "timezone": {
     "label": "Override UI timezone",

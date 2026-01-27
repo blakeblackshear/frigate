@@ -1,5 +1,5 @@
 {
-  "label": "Semantic search configuration",
+  "label": "Semantic Search",
   "description": "Settings for semantic search which builds and queries object embeddings to find similar items.",
   "enabled": {
     "label": "Enable semantic search",

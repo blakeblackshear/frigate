@@ -1,6 +1,6 @@
 {
-  "label": "License Plate recognition config",
-  "description": "Global license plate recognition settings including detection thresholds, formatting, and known plates.",
+  "label": "License Plate Recognition",
+  "description": "License plate recognition settings including detection thresholds, formatting, and known plates.",
   "enabled": {
     "label": "Enable license plate recognition",
     "description": "Enable or disable LPR globally; camera-level settings can override."

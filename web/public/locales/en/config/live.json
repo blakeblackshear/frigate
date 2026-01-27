@@ -1,5 +1,5 @@
 {
-  "label": "Live playback settings",
+  "label": "Live playback",
   "description": "Settings used by the Web UI to control live stream selection, resolution and quality.",
   "streams": {
     "label": "Friendly names and restream names to use for live view",

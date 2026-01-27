@@ -1,5 +1,5 @@
 {
-  "label": "Camera Onvif Configuration",
+  "label": "ONVIF",
   "description": "ONVIF connection and PTZ autotracking settings for this camera.",
   "host": {
     "label": "Onvif Host",

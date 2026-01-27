@@ -1,6 +1,6 @@
 {
-  "label": "Global timestamp style configuration",
-  "description": "Global styling options for in-feed timestamps applied to recordings and snapshots.",
+  "label": "Timestamp style",
+  "description": "Styling options for in-feed timestamps applied to recordings and snapshots.",
   "groups": {
     "appearance": "Appearance"
   },

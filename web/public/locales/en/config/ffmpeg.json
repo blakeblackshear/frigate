@@ -1,21 +1,21 @@
 {
-  "label": "Global FFmpeg configuration",
-  "description": "Global FFmpeg settings including binary path, global args, hwaccel options, and per-role output args.",
+  "label": "FFmpeg",
+  "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
   "path": {
     "label": "FFmpeg path",
     "description": "Path to the FFmpeg binary to use globally or a version alias."
   },
   "global_args": {
-    "label": "Global FFmpeg arguments",
-    "description": "Global args passed to FFmpeg processes by default."
+    "label": "FFmpeg arguments",
+    "description": "args passed to FFmpeg processes by default."
   },
   "hwaccel_args": {
     "label": "FFmpeg hardware acceleration arguments",
-    "description": "Global hardware acceleration arguments for FFmpeg (auto or provider-specific)."
+    "description": "hardware acceleration arguments for FFmpeg (auto or provider-specific)."
   },
   "input_args": {
     "label": "FFmpeg input arguments",
-    "description": "Global input arguments applied to FFmpeg input streams by default."
+    "description": "input arguments applied to FFmpeg input streams by default."
   },
   "output_args": {
     "label": "FFmpeg output arguments per role",
@@ -41,8 +41,8 @@
       "description": "Roles for this input stream (for example: detect, record, audio)."
     },
     "global_args": {
-      "label": "FFmpeg global arguments",
-      "description": "Global FFmpeg arguments for this input stream."
+      "label": "FFmpeg arguments",
+      "description": "FFmpeg arguments for this input stream."
     },
     "hwaccel_args": {
       "label": "FFmpeg hardware acceleration arguments",

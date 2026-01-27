@@ -1,5 +1,5 @@
 {
-  "label": "Camera UI Modifications",
+  "label": "Camera UI",
   "description": "Display ordering and dashboard visibility for this camera in the UI.",
   "order": {
     "label": "Order of camera in UI",

@@ -1,6 +1,6 @@
 {
-  "label": "Global object configuration",
-  "description": "Global object tracking defaults including which labels to track and per-object filters.",
+  "label": "Objects",
+  "description": "Object tracking defaults including which labels to track and per-object filters.",
   "groups": {
     "tracking": "Tracking",
     "filtering": "Filtering"
@@ -43,11 +43,11 @@
   },
   "mask": {
     "label": "Object mask",
-    "description": "Global mask polygon used to prevent object detection in specified areas."
+    "description": "Mask polygon used to prevent object detection in specified areas."
   },
   "genai": {
     "label": "Config for using genai to analyze objects",
-    "description": "Global GenAI options for describing tracked objects and sending frames for generation.",
+    "description": "GenAI options for describing tracked objects and sending frames for generation.",
     "enabled": {
       "label": "Enable GenAI for camera",
       "description": "Enable GenAI generation of descriptions for tracked objects by default."

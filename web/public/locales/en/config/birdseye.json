@@ -1,5 +1,5 @@
 {
-  "label": "Birdseye configuration",
+  "label": "Birdseye",
   "description": "Settings for the Birdseye composite view that composes multiple camera feeds into a single layout.",
   "enabled": {
     "label": "Enable birdseye view",
@@ -34,7 +34,7 @@
     "description": "Seconds of inactivity after which a camera will stop being shown in Birdseye."
   },
   "layout": {
-    "label": "Birdseye Layout Config",
+    "label": "Birdseye Layout",
     "description": "Layout options for the Birdseye composition.",
     "scaling_factor": {
       "label": "Birdseye Scaling Factor",

@@ -1,5 +1,5 @@
 {
-  "label": "MQTT configuration",
+  "label": "MQTT",
   "description": "Settings for connecting and publishing telemetry, snapshots, and events to an MQTT broker.",
   "enabled": {
     "label": "Enable MQTT Communication",

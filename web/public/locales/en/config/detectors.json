@@ -1,5 +1,5 @@
 {
-  "label": "Detector hardware configuration",
+  "label": "Detector hardware",
   "description": "Configuration for object detectors (CPU, EdgeTPU, GPU backends) and any detector-specific model settings.",
   "type": {
     "label": "Detector Type",

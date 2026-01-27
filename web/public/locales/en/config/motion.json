@@ -1,5 +1,5 @@
 {
-  "label": "Global motion detection configuration",
+  "label": "Motion detection",
   "description": "Default motion detection settings applied to cameras unless overridden per-camera.",
   "groups": {
     "sensitivity": "Sensitivity",
