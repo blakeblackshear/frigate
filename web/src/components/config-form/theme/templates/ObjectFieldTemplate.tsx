@@ -13,13 +13,17 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
-  const { title, description, properties, uiSchema } = props;
+  const { title, description, properties, uiSchema, registry, schema } = props;
+  const { idSchema } = props as ObjectFieldTemplateProps & {
+    idSchema?: { $id?: string };
+  };
   const formContext = (props as Record<string, unknown>).formContext as
     | Record<string, unknown>
     | undefined;
 
   // Check if this is a root-level object
-  const isRoot = !title;
+  const isRoot = idSchema?.$id === "root" || registry?.rootSchema === schema;
+
   const [isOpen, setIsOpen] = useState(true);
 
   const { t } = useTranslation([
