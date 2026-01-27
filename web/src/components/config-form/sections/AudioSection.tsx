@@ -21,6 +21,11 @@ export const AudioSection = createConfigSection({
     },
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["min_volume", "max_not_heard", "num_threads"],
+    uiSchema: {
+      listen: {
+        "ui:widget": "audioLabels",
+      },
+    },
   },
 });
 

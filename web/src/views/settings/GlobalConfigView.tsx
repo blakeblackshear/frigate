@@ -14,7 +14,6 @@ import { MotionSection } from "@/components/config-form/sections/MotionSection";
 import { ObjectsSection } from "@/components/config-form/sections/ObjectsSection";
 import { ReviewSection } from "@/components/config-form/sections/ReviewSection";
 import { AudioSection } from "@/components/config-form/sections/AudioSection";
-import { NotificationsSection } from "@/components/config-form/sections/NotificationsSection";
 import { LiveSection } from "@/components/config-form/sections/LiveSection";
 import { TimestampSection } from "@/components/config-form/sections/TimestampSection";
 import type { RJSFSchema } from "@rjsf/utils";
@@ -46,11 +45,6 @@ const sharedSections = [
   },
   { key: "review", i18nNamespace: "config/review", component: ReviewSection },
   { key: "audio", i18nNamespace: "config/audio", component: AudioSection },
-  {
-    key: "notifications",
-    i18nNamespace: "config/notifications",
-    component: NotificationsSection,
-  },
   { key: "live", i18nNamespace: "config/live", component: LiveSection },
   {
     key: "timestamp_style",
@@ -127,7 +121,6 @@ const globalSectionConfigs: Record<
       "trusted_proxies",
       "hash_iterations",
       "roles",
-      "admin_first_time_login",
     ],
   },
   tls: {
@@ -330,21 +323,6 @@ const globalSectionConfigs: Record<
     fieldOrder: [],
     advancedFields: [],
   },
-  camera_groups: {
-    i18nNamespace: "config/camera_groups",
-    fieldOrder: ["cameras", "icon", "order"],
-    advancedFields: [],
-  },
-  safe_mode: {
-    i18nNamespace: "config/safe_mode",
-    fieldOrder: [],
-    advancedFields: [],
-  },
-  version: {
-    i18nNamespace: "config/version",
-    fieldOrder: [],
-    advancedFields: [],
-  },
 };
 
 // System sections (global only)
@@ -364,9 +342,6 @@ const systemSections = [
   "model",
   "classification",
   "go2rtc",
-  "camera_groups",
-  "safe_mode",
-  "version",
 ];
 
 // Integration sections (global only)

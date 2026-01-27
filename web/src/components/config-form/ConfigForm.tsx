@@ -60,7 +60,7 @@ export function ConfigForm({
   advancedFields,
   disabled = false,
   readonly = false,
-  showSubmit = true,
+  showSubmit = false,
   className,
   liveValidate = true,
   formContext,

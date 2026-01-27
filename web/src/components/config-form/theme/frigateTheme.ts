@@ -20,6 +20,7 @@ import { ColorWidget } from "./widgets/ColorWidget";
 import { TextareaWidget } from "./widgets/TextareaWidget";
 import { SwitchesWidget } from "./widgets/SwitchesWidget";
 import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
+import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
@@ -29,7 +30,6 @@ import { BaseInputTemplate } from "./templates/BaseInputTemplate";
 import { DescriptionFieldTemplate } from "./templates/DescriptionFieldTemplate";
 import { TitleFieldTemplate } from "./templates/TitleFieldTemplate";
 import { ErrorListTemplate } from "./templates/ErrorListTemplate";
-import { SubmitButton } from "./templates/SubmitButton";
 import { MultiSchemaFieldTemplate } from "./templates/MultiSchemaFieldTemplate";
 
 export interface FrigateTheme {
@@ -58,6 +58,7 @@ export const frigateTheme: FrigateTheme = {
     textarea: TextareaWidget,
     switches: SwitchesWidget,
     objectLabels: ObjectLabelSwitchesWidget,
+    audioLabels: AudioLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
   },
   templates: {
@@ -72,7 +73,6 @@ export const frigateTheme: FrigateTheme = {
     MultiSchemaFieldTemplate: MultiSchemaFieldTemplate,
     ButtonTemplates: {
       ...defaultRegistry.templates.ButtonTemplates,
-      SubmitButton: SubmitButton,
     },
   },
   fields: {

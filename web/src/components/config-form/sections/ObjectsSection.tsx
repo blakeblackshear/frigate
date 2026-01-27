@@ -12,7 +12,12 @@ export const ObjectsSection = createConfigSection({
       tracking: ["track", "alert", "detect"],
       filtering: ["filters"],
     },
-    hiddenFields: ["enabled_in_config", "mask", "raw_mask"],
+    hiddenFields: [
+      "enabled_in_config",
+      "mask",
+      "raw_mask",
+      "genai.enabled_in_config",
+    ],
     advancedFields: ["filters"],
     uiSchema: {
       track: {
@@ -33,6 +38,9 @@ export const ObjectsSection = createConfigSection({
           "ui:options": {
             suppressMultiSchema: true,
           },
+        },
+        enabled_in_config: {
+          "ui:widget": "hidden",
         },
       },
     },

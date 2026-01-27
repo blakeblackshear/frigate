@@ -21,7 +21,7 @@ export const RecordSection = createConfigSection({
       retention: ["continuous", "motion"],
       events: ["alerts", "detections"],
     },
-    hiddenFields: ["enabled_in_config"],
+    hiddenFields: ["enabled_in_config", "sync_recordings"],
     advancedFields: ["expire_interval", "preview", "export"],
   },
 });
