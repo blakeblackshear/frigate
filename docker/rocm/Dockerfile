@@ -58,8 +58,6 @@ RUN cd /opt/rocm-$ROCM/lib && cp -dpr \
     migraphx \
     # NOTE: Include rocRoller library (only ROCm 7.0+)
     librocroller*.so* \
-    # NOTE: Include libdnnl for migraphx CPU device type support
-    libdnnl*.so* \
     /opt/rocm-dist/opt/rocm-$ROCM/lib/
 
 # Copy ROCm HIP include (only ROCm 7.2+)
@@ -76,18 +74,6 @@ RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
 RUN printf "/opt/rocm/lib\n/opt/rocm/lib/migraphx/lib" | tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 RUN printf "/usr/lib/llvm-14/lib" | tee /opt/rocm-dist/etc/ld.so.conf.d/llvm.conf
 
-# Build migraphx python bindings for our python version
-# NOTE: AMDMIGraphX repo does not contain a tag for all ROCm versions, hence the fallback to lower patch versions
-WORKDIR /tmp/migraphx_py
-RUN apt install -qq -y --no-install-recommends g++ python3-dev python3-pybind11 cmake make
-COPY docker/rocm/CMakeLists.txt .
-RUN for i in 0 1 2; do \
-    VERSION=$(echo $ROCM | awk -F. -v d=$i '{OFS="."; $3-=d; print}') && \
-    wget https://raw.githubusercontent.com/ROCm/AMDMIGraphX/refs/tags/rocm-$VERSION/src/py/migraphx_py.cpp && break; \
-    done
-RUN cmake . -DCMAKE_INSTALL_PREFIX=/opt/rocm-dist/opt/rocm-$ROCM && \
-    make install
-
 #######################################################################
 FROM deps AS deps-prelim
 
@@ -97,8 +83,6 @@ RUN apt update && \
     apt install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers && \
     # Install C++ standard library headers for HIPRTC kernel compilation fallback
     apt install -qq -y libstdc++-12-dev libnuma1 && \
-    # Install libomp for migraphx CPU device type support
-    apt install -qq -y libomp-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/frigate

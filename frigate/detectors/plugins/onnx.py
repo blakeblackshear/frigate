@@ -39,6 +39,7 @@ class ONNXDetector(DetectionApi):
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
 
+        # Import get_optimized_runner AFTER setting AMD compatibility env vars
         from frigate.detectors.detection_runners import get_optimized_runner
 
         self.runner = get_optimized_runner(
