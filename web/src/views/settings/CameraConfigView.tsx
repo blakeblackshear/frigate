@@ -21,7 +21,6 @@ import { LprSection } from "@/components/config-form/sections/LprSection";
 import { NotificationsSection } from "@/components/config-form/sections/NotificationsSection";
 import { OnvifSection } from "@/components/config-form/sections/OnvifSection";
 import { LiveSection } from "@/components/config-form/sections/LiveSection";
-import { SemanticSearchSection } from "@/components/config-form/sections/SemanticSearchSection";
 import { TimestampSection } from "@/components/config-form/sections/TimestampSection";
 import { useAllCameraOverrides } from "@/hooks/use-config-override";
 import type { FrigateConfig } from "@/types/frigateConfig";
@@ -290,12 +289,6 @@ const CameraConfigContent = memo(function CameraConfigContent({
       i18nNamespace: "config/lpr",
       component: LprSection,
       showOverrideIndicator: true,
-    },
-    {
-      key: "semantic_search",
-      i18nNamespace: "config/semantic_search",
-      component: SemanticSearchSection,
-      showOverrideIndicator: false,
     },
     {
       key: "mqtt",

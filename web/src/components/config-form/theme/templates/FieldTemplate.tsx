@@ -106,7 +106,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   return (
     <div
       className={cn(
-        "space-y-2",
+        "space-y-1",
         isAdvanced && "border-l-2 border-muted pl-4",
         isBoolean && "flex items-center justify-between gap-4",
       )}
@@ -144,10 +144,10 @@ export function FieldTemplate(props: FieldTemplateProps) {
         </div>
       ) : (
         <>
+          {children}
           {finalDescription && !isMultiSchemaWrapper && !isObjectField && (
             <p className="text-xs text-muted-foreground">{finalDescription}</p>
           )}
-          {children}
         </>
       )}
 

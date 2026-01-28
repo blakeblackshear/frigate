@@ -12,6 +12,14 @@ import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
+/**
+ * Build the i18n translation key path for nested fields using the field path
+ * provided by RJSF. This avoids ambiguity with underscores in field names.
+ */
+function buildTranslationPath(path: Array<string | number>): string {
+  return path.filter((segment) => typeof segment === "string").join(".");
+}
+
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const { title, description, properties, uiSchema, registry, schema } = props;
   type FormContext = { i18nNamespace?: string };
@@ -45,13 +53,16 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const toTitle = (value: string) =>
     value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
-  // Get the property name from the field path (e.g., "alerts" from path)
+  // Get the full translation path from the field path
   const fieldPathId = (
     props as { fieldPathId?: { path?: (string | number)[] } }
   ).fieldPathId;
   let propertyName: string | undefined;
+  let translationPath: string | undefined;
   const path = fieldPathId?.path;
   if (path) {
+    translationPath = buildTranslationPath(path);
+    // Also get the last property name for fallback label generation
     for (let i = path.length - 1; i >= 0; i -= 1) {
       const segment = path[i];
       if (typeof segment === "string") {
@@ -65,8 +76,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const i18nNs = formContext?.i18nNamespace;
 
   let inferredLabel: string | undefined;
-  if (i18nNs && propertyName) {
-    const translated = t(`${propertyName}.label`, {
+  if (i18nNs && translationPath) {
+    const translated = t(`${translationPath}.label`, {
       ns: i18nNs,
       defaultValue: "",
     });
@@ -78,8 +89,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   inferredLabel = inferredLabel ?? fallbackLabel;
 
   let inferredDescription: string | undefined;
-  if (i18nNs && propertyName) {
-    const translated = t(`${propertyName}.description`, {
+  if (i18nNs && translationPath) {
+    const translated = t(`${translationPath}.description`, {
       ns: i18nNs,
       defaultValue: "",
     });
