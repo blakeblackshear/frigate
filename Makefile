@@ -1,7 +1,7 @@
 default_target: local
 
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
-VERSION = 0.16.3
+VERSION = 0.16.4
 IMAGE_REPO ?= ghcr.io/blakeblackshear/frigate
 GITHUB_REF_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 BOARDS= #Initialized empty
