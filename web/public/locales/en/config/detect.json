@@ -1,5 +1,5 @@
 {
-  "label": "Object tracking",
+  "label": "Object Detection",
   "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
   "groups": {
     "resolution": "Resolution",

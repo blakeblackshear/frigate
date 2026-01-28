@@ -6,9 +6,13 @@ import { useCallback } from "react";
 export function ArrayAsTextWidget(props: WidgetProps) {
   const { value, onChange, disabled, readonly, placeholder } = props;
 
-  // Convert array to space-separated string
-  const textValue =
-    Array.isArray(value) && value.length > 0 ? value.join(" ") : "";
+  // Convert array or string to text
+  let textValue = "";
+  if (typeof value === "string" && value.length > 0) {
+    textValue = value;
+  } else if (Array.isArray(value) && value.length > 0) {
+    textValue = value.join(" ");
+  }
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

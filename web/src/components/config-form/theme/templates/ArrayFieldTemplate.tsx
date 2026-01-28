@@ -33,7 +33,7 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
           <div
             key={element.key || index}
             className={cn(
-              "flex items-start gap-2",
+              "flex w-full items-start gap-2",
               !isSimpleType && "flex-col",
             )}
           >

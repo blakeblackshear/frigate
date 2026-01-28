@@ -38,6 +38,100 @@ export const FfmpegSection = createConfigSection({
       "apple_compatibility",
       "gpu",
     ],
+    uiSchema: {
+      global_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      hwaccel_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      input_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      output_args: {
+        "ui:widget": "ArrayAsTextWidget",
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+        detect: {
+          "ui:widget": "ArrayAsTextWidget",
+          "ui:options": {
+            suppressMultiSchema: true,
+          },
+        },
+        record: {
+          "ui:widget": "ArrayAsTextWidget",
+          "ui:options": {
+            suppressMultiSchema: true,
+          },
+        },
+        items: {
+          detect: {
+            "ui:widget": "ArrayAsTextWidget",
+            "ui:options": {
+              suppressMultiSchema: true,
+            },
+          },
+          record: {
+            "ui:widget": "ArrayAsTextWidget",
+            "ui:options": {
+              suppressMultiSchema: true,
+            },
+          },
+        },
+      },
+      inputs: {
+        items: {
+          global_args: {
+            "ui:widget": "ArrayAsTextWidget",
+            "ui:options": {
+              suppressMultiSchema: true,
+            },
+          },
+          hwaccel_args: {
+            "ui:widget": "ArrayAsTextWidget",
+            "ui:options": {
+              suppressMultiSchema: true,
+            },
+          },
+          input_args: {
+            "ui:widget": "ArrayAsTextWidget",
+            "ui:options": {
+              suppressMultiSchema: true,
+            },
+          },
+          output_args: {
+            "ui:widget": "ArrayAsTextWidget",
+            "ui:options": {
+              suppressMultiSchema: true,
+            },
+            items: {
+              detect: {
+                "ui:widget": "ArrayAsTextWidget",
+                "ui:options": {
+                  suppressMultiSchema: true,
+                },
+              },
+              record: {
+                "ui:widget": "ArrayAsTextWidget",
+                "ui:options": {
+                  suppressMultiSchema: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
 });
 

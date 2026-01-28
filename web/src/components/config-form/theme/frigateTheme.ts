@@ -8,7 +8,6 @@ import type {
   RegistryFieldsType,
   TemplatesType,
 } from "@rjsf/utils";
-import { getDefaultRegistry } from "@rjsf/core";
 
 import { SwitchWidget } from "./widgets/SwitchWidget";
 import { SelectWidget } from "./widgets/SelectWidget";
@@ -27,6 +26,7 @@ import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
 import { ArrayFieldTemplate } from "./templates/ArrayFieldTemplate";
+import { ArrayFieldItemTemplate } from "./templates/ArrayFieldItemTemplate";
 import { BaseInputTemplate } from "./templates/BaseInputTemplate";
 import { DescriptionFieldTemplate } from "./templates/DescriptionFieldTemplate";
 import { TitleFieldTemplate } from "./templates/TitleFieldTemplate";
@@ -39,11 +39,8 @@ export interface FrigateTheme {
   fields: RegistryFieldsType;
 }
 
-const defaultRegistry = getDefaultRegistry();
-
 export const frigateTheme: FrigateTheme = {
   widgets: {
-    ...defaultRegistry.widgets,
     // Override default widgets with shadcn/ui styled versions
     TextWidget: TextWidget,
     PasswordWidget: PasswordWidget,
@@ -64,20 +61,15 @@ export const frigateTheme: FrigateTheme = {
     zoneNames: ZoneSwitchesWidget,
   },
   templates: {
-    ...defaultRegistry.templates,
     FieldTemplate: FieldTemplate as React.ComponentType<FieldTemplateProps>,
     ObjectFieldTemplate: ObjectFieldTemplate,
     ArrayFieldTemplate: ArrayFieldTemplate,
+    ArrayFieldItemTemplate: ArrayFieldItemTemplate,
     BaseInputTemplate: BaseInputTemplate as React.ComponentType<WidgetProps>,
     DescriptionFieldTemplate: DescriptionFieldTemplate,
     TitleFieldTemplate: TitleFieldTemplate,
     ErrorListTemplate: ErrorListTemplate,
     MultiSchemaFieldTemplate: MultiSchemaFieldTemplate,
-    ButtonTemplates: {
-      ...defaultRegistry.templates.ButtonTemplates,
-    },
   },
-  fields: {
-    ...defaultRegistry.fields,
-  },
+  fields: {},
 };

@@ -325,7 +325,7 @@ const CameraConfigContent = memo(function CameraConfigContent({
   return (
     <div className="flex flex-1 gap-6 overflow-hidden">
       {/* Section Navigation */}
-      <nav className="w-48 shrink-0">
+      <nav className="w-64 shrink-0">
         <ul className="space-y-1">
           {sections.map((section) => {
             const isOverridden = overriddenSections.includes(section.key);
