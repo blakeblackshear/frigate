@@ -73,11 +73,19 @@ tls:
   # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
-# Optional: IPv6 configuration
+# Optional: Networking configuration
 networking:
   # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
   ipv6:
     enabled: False
+  # Optional: Override ports Frigate uses for listening (defaults: shown below)
+  # An IP address may also be provided to bind to a specific interface, e.g. ip:port
+  # NOTE: This setting is for advanced users and may break some integrations. The majority
+  #       of users should change ports in the docker compose file
+  #       or use the docker run `--publish` option to select a different port.
+  listen:
+    internal: 5000
+    external: 8971
 
 # Optional: Proxy configuration
 proxy:
