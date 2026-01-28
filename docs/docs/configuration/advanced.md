@@ -178,7 +178,7 @@ networking:
 
 :::warning
 
-This setting is for advanced users. For the majority of use cases it's recommended to use docker's `--publish` option instead, e.g. `-p 443:8971`. Changing Frigate's ports may break some integrations.
+This setting is for advanced users. For the majority of use cases it's recommended to change the `ports` section of your Docker compose file or use the Docker `run` `--publish` option instead, e.g. `-p 443:8971`. Changing Frigate's ports may break some integrations.
 
 :::
 

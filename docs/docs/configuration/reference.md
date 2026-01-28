@@ -81,7 +81,8 @@ networking:
   # Optional: Override ports Frigate uses for listening (defaults: shown below)
   # An IP address may also be provided to bind to a specific interface, e.g. ip:port
   # NOTE: This setting is for advanced users and may break some integrations. The majority
-  #       of users should use docker's `--publish` option to select a different port.
+  #       of users should change ports in the docker compose file
+  #       or use the docker run `--publish` option to select a different port.
   listen:
     internal: 5000
     external: 8971
