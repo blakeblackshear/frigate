@@ -34,14 +34,18 @@
   },
   "retain": {
     "label": "Snapshot retention",
+    "description": "Retention settings for saved snapshots including default days and per-object overrides.",
     "default": {
-      "label": "Default retention period"
+      "label": "Default retention period",
+      "description": "Default number of days to retain snapshots."
     },
     "mode": {
-      "label": "Retain mode"
+      "label": "Retain mode",
+      "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
     },
     "objects": {
-      "label": "Object retention period"
+      "label": "Object retention period",
+      "description": "Per-object overrides for snapshot retention days."
     }
   },
   "quality": {

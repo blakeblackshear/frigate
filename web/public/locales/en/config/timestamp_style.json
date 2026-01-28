@@ -14,6 +14,7 @@
   },
   "color": {
     "label": "Timestamp color",
+    "description": "RGB color values for the timestamp text (all values 0-255).",
     "red": {
       "label": "Red",
       "description": "Red component (0-255) for timestamp color."

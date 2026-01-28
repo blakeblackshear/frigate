@@ -49,6 +49,10 @@
     "label": "The device key to use for LPR",
     "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
   },
+  "expire_time": {
+    "label": "Expire plates not seen after number of seconds (for dedicated LPR cameras only)",
+    "description": "Time in seconds after which an unseen plate is expired from the tracker (for dedicated LPR cameras only)."
+  },
   "replace_rules": {
     "label": "List of regex replacement rules for normalizing detected plates. Each rule has 'pattern' and 'replacement'",
     "description": "Regex replacement rules used to normalize detected plate strings before matching."
