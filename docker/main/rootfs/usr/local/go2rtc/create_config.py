@@ -27,6 +27,17 @@ ALLOW_ARBITRARY_EXEC = os.environ.get(
     "GO2RTC_ALLOW_ARBITRARY_EXEC", "false"
 ).lower() in ("true", "1", "yes")
 
+# check for the add-on options file
+if not ALLOW_ARBITRARY_EXEC and os.path.isfile("/data/options.json"):
+    with open("/data/options.json") as f:
+        raw_options = f.read()
+    options = json.loads(raw_options)
+    addon_value = options.get("go2rtc_allow_arbitrary_exec", False)
+    if isinstance(addon_value, bool):
+        ALLOW_ARBITRARY_EXEC = addon_value
+    elif isinstance(addon_value, str):
+        ALLOW_ARBITRARY_EXEC = addon_value.lower() in ("true", "1", "yes")
+
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 # read docker secret files as env vars too
 if os.path.isdir("/run/secrets"):
