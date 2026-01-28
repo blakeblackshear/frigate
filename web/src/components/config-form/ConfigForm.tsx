@@ -8,7 +8,7 @@ import { transformSchema } from "@/lib/config-schema";
 import { createErrorTransformer } from "@/lib/config-schema/errorMessages";
 import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import { cn, mergeUiSchema } from "@/lib/utils";
 
 export interface ConfigFormProps {
   /** JSON Schema for the form */
@@ -90,17 +90,22 @@ export function ConfigForm({
   );
 
   // Merge generated uiSchema with custom overrides
-  const finalUiSchema = useMemo(
-    () => ({
-      ...generatedUiSchema,
-      "ui:groups": fieldGroups,
-      ...customUiSchema,
-      "ui:submitButtonOptions": showSubmit
-        ? { norender: false }
-        : { norender: true },
-    }),
-    [generatedUiSchema, customUiSchema, showSubmit, fieldGroups],
-  );
+  const finalUiSchema = useMemo(() => {
+    // Start with generated schema
+    const merged = mergeUiSchema(generatedUiSchema, customUiSchema);
+
+    // Add field groups
+    if (fieldGroups) {
+      merged["ui:groups"] = fieldGroups;
+    }
+
+    // Set submit button options
+    merged["ui:submitButtonOptions"] = showSubmit
+      ? { norender: false }
+      : { norender: true };
+
+    return merged;
+  }, [generatedUiSchema, customUiSchema, showSubmit, fieldGroups]);
 
   // Create error transformer for user-friendly error messages
   const errorTransformer = useMemo(() => createErrorTransformer(i18n), [i18n]);
