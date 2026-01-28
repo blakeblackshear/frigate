@@ -621,7 +621,7 @@ function LibrarySelector({
           <div className="flex justify-end gap-2">
             {Object.keys(dataset).length <= 2 ? (
               <Button variant="outline" onClick={() => setConfirmDelete(null)}>
-                {t("button.ok", { ns: "common" })}
+                {t("button.close", { ns: "common" })}
               </Button>
             ) : (
               <>

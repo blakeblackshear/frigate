@@ -168,8 +168,8 @@ export default function OnvifProbeResults({
                 </span>{" "}
                 <span className="text-primary-variant">
                   {probeResult.ptz_supported
-                    ? t("yes", { ns: "common" })
-                    : t("no", { ns: "common" })}
+                    ? t("button.yes", { ns: "common" })
+                    : t("button.no", { ns: "common" })}
                 </span>
               </div>
             )}
@@ -179,7 +179,7 @@ export default function OnvifProbeResults({
                   {t("cameraWizard.step2.autotrackingSupport")}:
                 </span>{" "}
                 <span className="text-primary-variant">
-                  {t("yes", { ns: "common" })}
+                  {t("button.yes", { ns: "common" })}
                 </span>
               </div>
             )}

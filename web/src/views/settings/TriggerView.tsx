@@ -599,7 +599,7 @@ export default function TriggerView({
                                           date_style: "medium",
                                         },
                                       )
-                                    : t("never", { ns: "common" })}
+                                    : t("time.never", { ns: "common" })}
                                 </span>
                                 {trigger_status?.triggers[trigger.name]
                                   ?.triggering_event_id && (
