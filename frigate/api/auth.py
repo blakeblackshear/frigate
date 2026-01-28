@@ -26,7 +26,7 @@ from frigate.api.defs.request.app_body import (
     AppPutRoleBody,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config import AuthConfig, ProxyConfig, NetworkingConfig
+from frigate.config import AuthConfig, NetworkingConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
