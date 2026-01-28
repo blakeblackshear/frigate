@@ -342,12 +342,19 @@ export function createConfigSection({
           return;
         }
 
-        await axios.put("config/set", {
-          requires_restart: requiresRestart ? 0 : 1,
+        // await axios.put("config/set", {
+        //   requires_restart: requiresRestart ? 0 : 1,
+        //   update_topic: updateTopic,
+        //   config_data: {
+        //     [basePath]: overrides,
+        //   },
+        // });
+
+        // log save to console for debugging
+        console.log("Saved config data:", {
+          [basePath]: overrides,
           update_topic: updateTopic,
-          config_data: {
-            [basePath]: overrides,
-          },
+          requires_restart: requiresRestart ? 0 : 1,
         });
 
         toast.success(
@@ -421,12 +428,18 @@ export function createConfigSection({
         const basePath = `cameras.${cameraName}.${sectionPath}`;
 
         // Send empty string to delete the key from config (see update_yaml in backend)
-        await axios.put("config/set", {
-          requires_restart: requiresRestart ? 0 : 1,
+        // await axios.put("config/set", {
+        //   requires_restart: requiresRestart ? 0 : 1,
+        //   update_topic: updateTopic,
+        //   config_data: {
+        //     [basePath]: "",
+        //   },
+        // });
+
+        // log reset to console for debugging
+        console.log("Reset to global config for path:", basePath, {
           update_topic: updateTopic,
-          config_data: {
-            [basePath]: "",
-          },
+          requires_restart: requiresRestart ? 0 : 1,
         });
 
         toast.success(
@@ -516,6 +529,7 @@ export function createConfigSection({
             )}
             <Button
               onClick={handleSave}
+              variant="select"
               disabled={!hasChanges || isSaving || disabled}
               className="gap-2"
             >

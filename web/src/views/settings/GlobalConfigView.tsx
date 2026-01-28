@@ -268,17 +268,14 @@ const globalSectionConfigs: Record<
       "input_tensor",
       "input_dtype",
       "model_type",
-      "labelmap",
-      "attributes_map",
     ],
     advancedFields: [
-      "labelmap",
-      "attributes_map",
       "input_pixel_format",
       "input_tensor",
       "input_dtype",
       "model_type",
     ],
+    hiddenFields: ["labelmap", "attributes_map"],
   },
   genai: {
     i18nNamespace: "config/genai",
@@ -469,12 +466,15 @@ function GlobalConfigSection({
 
     setIsSaving(true);
     try {
-      await axios.put("config/set", {
-        update_topic: `config/${sectionKey}`,
-        config_data: {
-          [sectionKey]: pendingData,
-        },
-      });
+      // await axios.put("config/set", {
+      //   update_topic: `config/${sectionKey}`,
+      //   config_data: {
+      //     [sectionKey]: pendingData,
+      //   },
+      // });
+
+      // log axios for debugging
+      console.log("Saved config section", sectionKey, pendingData);
 
       toast.success(
         t("toast.success", {
@@ -692,7 +692,7 @@ export default function GlobalConfigView() {
 
         <div className="mt-4 flex flex-1 gap-6 overflow-hidden">
           {/* Section Navigation */}
-          <nav className="w-48 shrink-0">
+          <nav className="w-64 shrink-0">
             <ul className="space-y-1">
               {currentSections.map((section) => {
                 const sectionLabel = t("label", {
