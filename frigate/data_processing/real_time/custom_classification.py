@@ -419,14 +419,19 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         """
         if object_id not in self.classification_history:
             self.classification_history[object_id] = []
+            logger.debug(f"Created new classification history for {object_id}")
 
         self.classification_history[object_id].append(
             (current_label, current_score, current_time)
         )
 
         history = self.classification_history[object_id]
+        logger.debug(
+            f"History for {object_id}: {len(history)} entries, latest=({current_label}, {current_score})"
+        )
 
         if len(history) < 3:
+            logger.debug(f"History for {object_id} has {len(history)} entries, need at least 3")
             return None, 0.0
 
         label_counts = {}
@@ -445,14 +450,25 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         best_count = label_counts[best_label]
 
         consensus_threshold = total_attempts * 0.6
+        logger.debug(
+            f"Consensus calc for {object_id}: label_counts={label_counts}, "
+            f"best_label={best_label}, best_count={best_count}, "
+            f"total={total_attempts}, threshold={consensus_threshold}"
+        )
+
         if best_count < consensus_threshold:
+            logger.debug(
+                f"No consensus for {object_id}: {best_count} < {consensus_threshold}"
+            )
             return None, 0.0
 
         avg_score = sum(label_scores[best_label]) / len(label_scores[best_label])
 
         if best_label == "none":
+            logger.debug(f"Filtering 'none' label for {object_id}")
             return None, 0.0
 
+        logger.debug(f"Consensus reached for {object_id}: {best_label} with avg_score={avg_score}")
         return best_label, avg_score
 
     def process_frame(self, obj_data, frame):
@@ -560,17 +576,30 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
 
         if score < self.model_config.threshold:
-            logger.debug(f"Score {score} is less than threshold.")
+            logger.debug(
+                f"{self.model_config.name}: Score {score} < threshold {self.model_config.threshold} for {object_id}, skipping"
+            )
             return
 
         sub_label = self.labelmap[best_id]
+
+        logger.debug(
+            f"{self.model_config.name}: Object {object_id} (label={obj_data['label']}) passed threshold with sub_label={sub_label}, score={score}"
+        )
 
         consensus_label, consensus_score = self.get_weighted_score(
             object_id, sub_label, score, now
         )
 
+        logger.debug(
+            f"{self.model_config.name}: get_weighted_score returned consensus_label={consensus_label}, consensus_score={consensus_score} for {object_id}"
+        )
+
         if consensus_label is not None:
             camera = obj_data["camera"]
+            logger.info(
+                f"{self.model_config.name}: Publishing sub_label={consensus_label} for {obj_data['label']} object {object_id} on {camera}"
+            )
 
             if (
                 self.model_config.object_config.classification_type
