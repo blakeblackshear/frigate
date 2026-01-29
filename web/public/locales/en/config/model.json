@@ -1,6 +1,6 @@
 {
   "label": "Detection model",
-  "description": "Settings to configure a custom object detection model, its input shape, and labelmap overrides.",
+  "description": "Settings to configure a custom object detection model and its input shape.",
   "path": {
     "label": "Custom Object detection model path",
     "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."

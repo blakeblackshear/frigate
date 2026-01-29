@@ -2,27 +2,23 @@
   "label": "Birdseye",
   "description": "Settings for the Birdseye composite view that composes multiple camera feeds into a single layout.",
   "enabled": {
-    "label": "Enable birdseye view",
+    "label": "Enable Birdseye",
     "description": "Enable or disable the Birdseye view feature."
   },
   "mode": {
     "label": "Tracking mode",
     "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
   },
-  "order": {
-    "label": "Position of the camera in the birdseye view",
-    "description": "Numeric position controlling the camera's ordering in the Birdseye layout."
-  },
   "restream": {
-    "label": "Restream birdseye via RTSP",
+    "label": "Restream RTSP",
     "description": "Re-stream the Birdseye output as an RTSP feed; enabling this will keep Birdseye running continuously."
   },
   "width": {
-    "label": "Birdseye width",
+    "label": "Width",
     "description": "Output width (pixels) of the composed Birdseye frame."
   },
   "height": {
-    "label": "Birdseye height",
+    "label": "Height",
     "description": "Output height (pixels) of the composed Birdseye frame."
   },
   "quality": {
@@ -30,14 +26,14 @@
     "description": "Encoding quality for the Birdseye mpeg1 feed (1 highest quality, 31 lowest)."
   },
   "inactivity_threshold": {
-    "label": "Birdseye Inactivity Threshold",
+    "label": "Inactivity threshold",
     "description": "Seconds of inactivity after which a camera will stop being shown in Birdseye."
   },
   "layout": {
-    "label": "Birdseye Layout",
+    "label": "Layout",
     "description": "Layout options for the Birdseye composition.",
     "scaling_factor": {
-      "label": "Birdseye Scaling Factor",
+      "label": "Scaling factor",
       "description": "Scaling factor used by the layout calculator (range 1.0 to 5.0)."
     },
     "max_cameras": {
@@ -46,7 +42,11 @@
     }
   },
   "idle_heartbeat_fps": {
-    "label": "Idle heartbeat FPS (0 disables, max 10)",
+    "label": "Idle heartbeat FPS",
     "description": "Frames-per-second to resend the last composed Birdseye frame when idle; set to 0 to disable."
+  },
+  "order": {
+    "label": "Position",
+    "description": "Numeric position controlling the camera's ordering in the Birdseye layout."
   }
 }

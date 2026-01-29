@@ -2,58 +2,58 @@
   "label": "Review",
   "description": "Settings that control alerts, detections, and GenAI review summaries used by the UI and storage.",
   "alerts": {
-    "label": "Review alerts config",
+    "label": "Alerts config",
     "description": "Settings for which tracked objects generate alerts and how alerts are retained.",
     "enabled": {
       "label": "Enable alerts",
       "description": "Enable or disable alert generation for this camera."
     },
     "labels": {
-      "label": "Labels to create alerts for",
+      "label": "Alert labels",
       "description": "List of object labels that qualify as alerts (for example: car, person)."
     },
     "required_zones": {
-      "label": "List of required zones to be entered in order to save the event as an alert",
+      "label": "Required zones",
       "description": "Zones that an object must enter to be considered an alert; leave empty to allow any zone."
     },
     "enabled_in_config": {
-      "label": "Keep track of original state of alerts",
+      "label": "Original alerts state",
       "description": "Tracks whether alerts were originally enabled in the static configuration."
     },
     "cutoff_time": {
-      "label": "Time to cutoff alerts after no alert-causing activity has occurred",
+      "label": "Alerts cutoff time",
       "description": "Seconds to wait after no alert-causing activity before cutting off an alert."
     }
   },
   "detections": {
-    "label": "Review detections config",
+    "label": "Detections config",
     "description": "Settings for creating detection events (non-alert) and how long to keep them.",
     "enabled": {
       "label": "Enable detections",
       "description": "Enable or disable detection events for this camera."
     },
     "labels": {
-      "label": "Labels to create detections for",
+      "label": "Detection labels",
       "description": "List of object labels that qualify as detection events."
     },
     "required_zones": {
-      "label": "List of required zones to be entered in order to save the event as a detection",
+      "label": "Required zones",
       "description": "Zones that an object must enter to be considered a detection; leave empty to allow any zone."
     },
     "cutoff_time": {
-      "label": "Time to cutoff detection after no detection-causing activity has occurred",
+      "label": "Detections cutoff time",
       "description": "Seconds to wait after no detection-causing activity before cutting off a detection."
     },
     "enabled_in_config": {
-      "label": "Keep track of original state of detections",
+      "label": "Original detections state",
       "description": "Tracks whether detections were originally enabled in the static configuration."
     }
   },
   "genai": {
-    "label": "Review description genai config",
+    "label": "GenAI config",
     "description": "Controls use of generative AI for producing descriptions and summaries of review items.",
     "enabled": {
-      "label": "Enable GenAI descriptions for review items",
+      "label": "Enable GenAI descriptions",
       "description": "Enable or disable GenAI-generated descriptions and summaries for review items."
     },
     "alerts": {
@@ -65,27 +65,27 @@
       "description": "Use GenAI to generate descriptions for detection items."
     },
     "image_source": {
-      "label": "Image source for review descriptions",
+      "label": "Review image source",
       "description": "Source of images sent to GenAI ('preview' or 'recordings'); 'recordings' uses higher quality frames but more tokens."
     },
     "additional_concerns": {
-      "label": "Additional concerns that GenAI should make note of on this camera",
+      "label": "Additional concerns",
       "description": "A list of additional concerns or notes the GenAI should consider when evaluating activity on this camera."
     },
     "debug_save_thumbnails": {
-      "label": "Save thumbnails sent to generative AI for debugging purposes",
+      "label": "Save thumbnails",
       "description": "Save thumbnails that are sent to the GenAI provider for debugging and review."
     },
     "enabled_in_config": {
-      "label": "Keep track of original state of generative AI",
+      "label": "Original GenAI state",
       "description": "Tracks whether GenAI review was originally enabled in the static configuration."
     },
     "preferred_language": {
-      "label": "Preferred language for GenAI Response",
+      "label": "Preferred language",
       "description": "Preferred language to request from the GenAI provider for generated responses."
     },
     "activity_context_prompt": {
-      "label": "Custom activity context prompt defining normal and suspicious activity patterns for this property",
+      "label": "Activity context prompt",
       "description": "Custom prompt describing what is and is not suspicious activity to provide context for GenAI summaries."
     }
   }

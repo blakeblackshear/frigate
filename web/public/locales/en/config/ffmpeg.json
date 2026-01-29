@@ -3,66 +3,66 @@
   "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
   "path": {
     "label": "FFmpeg path",
-    "description": "Path to the FFmpeg binary to use globally or a version alias."
+    "description": "Path to the FFmpeg binary to use globally or a version alias (\"5.0\" or \"7.0\")."
   },
   "global_args": {
-    "label": "FFmpeg arguments",
-    "description": "args passed to FFmpeg processes by default."
+    "label": "FFmpeg global args",
+    "description": "Global args passed to FFmpeg processes by default."
   },
   "hwaccel_args": {
-    "label": "FFmpeg hardware acceleration arguments",
-    "description": "hardware acceleration arguments for FFmpeg (auto or provider-specific)."
+    "label": "Hardware acceleration args",
+    "description": "Hardware acceleration arguments for FFmpeg (auto or provider-specific)."
   },
   "input_args": {
-    "label": "FFmpeg input arguments",
-    "description": "input arguments applied to FFmpeg input streams by default."
+    "label": "Input args",
+    "description": "Input arguments applied to FFmpeg input streams by default."
   },
   "output_args": {
-    "label": "FFmpeg output arguments per role",
+    "label": "Output args",
     "description": "Default output args used for different FFmpeg roles such as detect and record.",
     "detect": {
-      "label": "Detect role FFmpeg output arguments",
+      "label": "Detect output args",
       "description": "Default output args for detect role streams."
     },
     "record": {
-      "label": "Record role FFmpeg output arguments",
+      "label": "Record output args",
       "description": "Default output args for record role streams."
     }
+  },
+  "retry_interval": {
+    "label": "FFmpeg retry time",
+    "description": "Seconds to wait before attempting to reconnect a camera stream after failure. Default is 10."
+  },
+  "apple_compatibility": {
+    "label": "Apple compatibility",
+    "description": "Enable HEVC tagging for better Apple player compatibility when recording H.265."
+  },
+  "gpu": {
+    "label": "GPU index",
+    "description": "Default GPU index used for hardware acceleration if available."
   },
   "inputs": {
     "label": "Camera inputs",
     "description": "List of input stream definitions (paths and roles) for this camera.",
     "path": {
-      "label": "Camera input path",
+      "label": "Input path",
       "description": "Camera input stream URL or path."
     },
     "roles": {
-      "label": "Roles assigned to this input",
+      "label": "Input roles",
       "description": "Roles for this input stream (for example: detect, record, audio)."
     },
     "global_args": {
-      "label": "FFmpeg arguments",
+      "label": "FFmpeg args",
       "description": "FFmpeg arguments for this input stream."
     },
     "hwaccel_args": {
-      "label": "FFmpeg hardware acceleration arguments",
+      "label": "Hardware acceleration args",
       "description": "Hardware acceleration arguments for this input stream."
     },
     "input_args": {
-      "label": "FFmpeg input arguments",
+      "label": "Input args",
       "description": "Input arguments specific to this stream."
     }
-  },
-  "retry_interval": {
-    "label": "Time in seconds to wait before FFmpeg retries connecting to the camera",
-    "description": "Seconds to wait before attempting to reconnect a camera stream after failure."
-  },
-  "apple_compatibility": {
-    "label": "Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players",
-    "description": "Enable HEVC tagging for better Apple player compatibility when recording H.265."
-  },
-  "gpu": {
-    "label": "GPU index to use for hardware acceleration",
-    "description": "Default GPU index used for hardware acceleration if available."
   }
 }

@@ -1,46 +1,52 @@
 {
   "label": "Semantic Search",
-  "description": "Settings for semantic search which builds and queries object embeddings to find similar items.",
+  "description": "Settings for Semantic Search which builds and queries object embeddings to find similar items.",
   "enabled": {
     "label": "Enable semantic search",
     "description": "Enable or disable the semantic search feature."
   },
   "reindex": {
-    "label": "Reindex all tracked objects on startup",
+    "label": "Reindex on startup",
     "description": "Trigger a full reindex of historical tracked objects into the embeddings database."
   },
   "model": {
-    "label": "The CLIP model to use for semantic search",
+    "label": "Semantic search model",
     "description": "The embeddings model to use for semantic search (for example 'jinav1')."
   },
   "model_size": {
-    "label": "The size of the embeddings model used",
+    "label": "Model size",
     "description": "Select model size; 'small' runs on CPU and 'large' typically requires GPU."
   },
   "device": {
-    "label": "The device key to use for semantic search",
+    "label": "Device",
     "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
   },
   "triggers": {
-    "label": "Trigger actions on tracked objects that match existing thumbnails or descriptions",
+    "label": "Triggers",
     "description": "Actions and matching criteria for camera-specific semantic search triggers.",
     "friendly_name": {
-      "label": "Trigger friendly name used in the Frigate UI"
+      "label": "Friendly name",
+      "description": "Optional friendly name displayed in the UI for this trigger."
     },
     "enabled": {
-      "label": "Enable this trigger"
+      "label": "Enable this trigger",
+      "description": "Enable or disable this semantic search trigger."
     },
     "type": {
-      "label": "Type of trigger"
+      "label": "Trigger type",
+      "description": "Type of trigger: 'thumbnail' (match against image) or 'description' (match against text)."
     },
     "data": {
-      "label": "Trigger content (text phrase or image ID)"
+      "label": "Trigger content",
+      "description": "Text phrase or thumbnail ID to match against tracked objects."
     },
     "threshold": {
-      "label": "Confidence score required to run the trigger"
+      "label": "Trigger threshold",
+      "description": "Minimum similarity score (0-1) required to activate this trigger."
     },
     "actions": {
-      "label": "Actions to perform when trigger is matched"
+      "label": "Trigger actions",
+      "description": "List of actions to execute when trigger matches (notification, sub_label, attribute)."
     }
   }
 }

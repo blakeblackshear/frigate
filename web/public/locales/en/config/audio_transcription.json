@@ -6,19 +6,19 @@
     "description": "Enable or disable automatic audio transcription globally."
   },
   "language": {
-    "label": "Language abbreviation to use for audio event transcription/translation",
+    "label": "Transcription language",
     "description": "Language code used for transcription/translation (for example 'en' for English)."
   },
   "device": {
-    "label": "The device used for audio transcription",
+    "label": "Transcription device",
     "description": "Device key (CPU/GPU) to run the transcription model on."
   },
   "model_size": {
-    "label": "The size of the embeddings model used",
-    "description": "Model size to use for transcription; smaller models run on CPU, larger models may need GPU."
+    "label": "Model size",
+    "description": "Model size to use for transcription; the small model runs on CPU, large model requires a GPU."
   },
   "live_enabled": {
-    "label": "Enable live transcriptions",
+    "label": "Live transcription",
     "description": "Enable streaming live transcription for audio as it is received."
   }
 }

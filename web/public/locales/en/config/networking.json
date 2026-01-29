@@ -2,10 +2,10 @@
   "label": "Networking",
   "description": "Network-related settings such as IPv6 enablement for Frigate endpoints.",
   "ipv6": {
-    "label": "IPv6 IPv6 settings",
+    "label": "IPv6 settings",
     "description": "IPv6-specific settings for Frigate network services.",
     "enabled": {
-      "label": "Enable IPv6 for port 5000 and/or 8971",
+      "label": "Enable IPv6",
       "description": "Enable IPv6 support for Frigate services (API and UI) where applicable."
     },
     "listen": {

@@ -6,15 +6,15 @@
     "description": "Enable or disable notifications globally."
   },
   "email": {
-    "label": "Email required for push",
+    "label": "Notification email",
     "description": "Email address used for push notifications or required by certain notification providers."
   },
   "cooldown": {
-    "label": "Cooldown period for notifications (time in seconds)",
+    "label": "Cooldown period",
     "description": "Cooldown (seconds) between notifications to avoid spamming recipients."
   },
   "enabled_in_config": {
-    "label": "Keep track of original state of notifications",
+    "label": "Original notifications state",
     "description": "Indicates whether notifications were enabled in the original static configuration."
   }
 }

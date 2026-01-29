@@ -1,20 +1,20 @@
 {
   "label": "Audio events",
-  "description": "settings for audio-based event detection; camera-level settings can override these.",
+  "description": "Settings for audio-based event detection; can be overridden per-camera.",
   "enabled": {
-    "label": "Enable audio events",
-    "description": "Enable or disable audio event detection globally. Can be overridden per camera."
+    "label": "Enable audio",
+    "description": "Enable or disable audio event detection; can be overridden per-camera."
   },
   "max_not_heard": {
-    "label": "Seconds of not hearing the type of audio to end the event",
+    "label": "End timeout",
     "description": "Amount of seconds without the configured audio type before the audio event is ended."
   },
   "min_volume": {
-    "label": "Min volume required to run audio detection",
+    "label": "Minimum volume",
     "description": "Minimum RMS volume threshold required to run audio detection; lower values increase sensitivity (e.g., 200 high, 500 medium, 1000 low)."
   },
   "listen": {
-    "label": "Audio to listen for",
+    "label": "Listen types",
     "description": "List of audio event types to detect (for example: bark, fire_alarm, scream, speech, yell)."
   },
   "filters": {
@@ -22,11 +22,11 @@
     "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives."
   },
   "enabled_in_config": {
-    "label": "Keep track of original state of audio detection",
+    "label": "Original audio state",
     "description": "Indicates whether audio detection was originally enabled in the static config file."
   },
   "num_threads": {
-    "label": "Number of detection threads",
+    "label": "Detection threads",
     "description": "Number of threads to use for audio detection processing."
   }
 }

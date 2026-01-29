@@ -2,35 +2,35 @@
   "label": "Proxy",
   "description": "Settings for integrating Frigate behind a reverse proxy that passes authenticated user headers.",
   "header_map": {
-    "label": "Header mapping definitions for proxy user passing",
+    "label": "Header mapping",
     "description": "Map incoming proxy headers to Frigate user and role fields for proxy-based auth.",
     "user": {
-      "label": "Header name from upstream proxy to identify user",
+      "label": "User header",
       "description": "Header containing the authenticated username provided by the upstream proxy."
     },
     "role": {
-      "label": "Header name from upstream proxy to identify user role",
+      "label": "Role header",
       "description": "Header containing the authenticated user's role or groups from the upstream proxy."
     },
     "role_map": {
-      "label": "Mapping of Frigate roles to upstream group values. ",
+      "label": "Role mapping",
       "description": "Map upstream group values to Frigate roles (for example map admin groups to the admin role)."
     }
   },
   "logout_url": {
-    "label": "Redirect url for logging out with proxy",
+    "label": "Logout URL",
     "description": "URL to redirect users to when logging out via the proxy."
   },
   "auth_secret": {
-    "label": "Secret value for proxy authentication",
+    "label": "Proxy secret",
     "description": "Optional secret checked against the X-Proxy-Secret header to verify trusted proxies."
   },
   "default_role": {
-    "label": "Default role for proxy users",
+    "label": "Default role",
     "description": "Default role assigned to proxy-authenticated users when no role mapping applies (admin or viewer)."
   },
   "separator": {
-    "label": "The character used to separate values in a mapped header",
-    "description": "Character used to split multiple values provided in proxy headers (for example a comma)."
+    "label": "Separator character",
+    "description": "Character used to split multiple values provided in proxy headers."
   }
 }

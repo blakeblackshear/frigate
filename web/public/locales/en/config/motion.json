@@ -6,12 +6,12 @@
     "description": "Enable or disable motion detection globally; per-camera settings can override this."
   },
   "threshold": {
-    "label": "Motion detection threshold (1-255)",
-    "description": "Pixel difference threshold used by the motion detector; higher values reduce sensitivity."
+    "label": "Motion threshold",
+    "description": "Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255)."
   },
   "lightning_threshold": {
-    "label": "Lightning detection threshold (0.3-1.0)",
-    "description": "Threshold to detect and ignore brief lighting spikes (lower is more sensitive)."
+    "label": "Lightning threshold",
+    "description": "Threshold to detect and ignore brief lighting spikes (lower is more sensitive, values between 0.3 and 1.0)."
   },
   "improve_contrast": {
     "label": "Improve contrast",
@@ -22,27 +22,30 @@
     "description": "Minimum contour area in pixels required for a motion contour to be counted."
   },
   "delta_alpha": {
-    "label": "Delta Alpha",
+    "label": "Delta alpha",
     "description": "Alpha blending factor used in frame differencing for motion calculation."
   },
   "frame_alpha": {
-    "label": "Frame Alpha",
+    "label": "Frame alpha",
     "description": "Alpha value used when blending frames for motion preprocessing."
   },
   "frame_height": {
-    "label": "Frame Height",
+    "label": "Frame height",
     "description": "Height in pixels to scale frames to when computing motion (useful for performance)."
   },
   "mask": {
-    "label": "Coordinates polygon for the motion mask.",
+    "label": "Mask coordinates",
     "description": "Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas."
   },
   "mqtt_off_delay": {
-    "label": "Delay for updating MQTT with no motion detected",
+    "label": "MQTT off delay",
     "description": "Seconds to wait after last motion before publishing an MQTT 'off' state."
   },
   "enabled_in_config": {
-    "label": "Keep track of original state of motion detection",
+    "label": "Original motion state",
     "description": "Indicates whether motion detection was enabled in the original static configuration."
+  },
+  "raw_mask": {
+    "label": "Raw Mask"
   }
 }

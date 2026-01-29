@@ -2,99 +2,95 @@
   "label": "Recording",
   "description": "Recording and retention settings applied to cameras unless overridden per-camera.",
   "enabled": {
-    "label": "Enable record on all cameras",
+    "label": "Enable recording",
     "description": "Enable or disable recording globally; individual cameras can override this."
   },
   "expire_interval": {
-    "label": "Number of minutes to wait between cleanup runs",
+    "label": "Record cleanup interval",
     "description": "Minutes between cleanup passes that remove expired recording segments."
   },
   "continuous": {
-    "label": "Continuous recording retention settings",
+    "label": "Continuous retention",
     "description": "Number of days to retain recordings regardless of tracked objects or motion. Set to 0 if you only want to retain recordings of alerts and detections.",
     "days": {
-      "label": "Default retention period",
-      "description": "Days to retain continuous (always-on) recordings."
+      "label": "Retention days",
+      "description": "Days to retain recordings."
     }
   },
   "motion": {
-    "label": "Motion recording retention settings",
+    "label": "Motion retention",
     "description": "Number of days to retain recordings triggered by motion regardless of tracked objects. Set to 0 if you only want to retain recordings of alerts and detections.",
     "days": {
-      "label": "Default retention period",
-      "description": "Days to retain recordings triggered by motion."
+      "label": "Retention days",
+      "description": "Days to retain recordings."
     }
   },
   "detections": {
-    "label": "Detection specific retention settings",
+    "label": "Detection retention",
     "description": "Recording retention settings for detection events including pre/post capture durations.",
     "pre_capture": {
-      "label": "Seconds to retain before event starts",
+      "label": "Pre-capture seconds",
       "description": "Number of seconds before the detection event to include in the recording."
     },
     "post_capture": {
-      "label": "Seconds to retain after event ends",
+      "label": "Post-capture seconds",
       "description": "Number of seconds after the detection event to include in the recording."
     },
     "retain": {
-      "label": "Event retention settings",
+      "label": "Event retention",
       "description": "Retention settings for recordings of detection events.",
       "days": {
-        "label": "Default retention period",
+        "label": "Retention days",
         "description": "Number of days to retain recordings of detection events."
       },
       "mode": {
-        "label": "Retain mode",
+        "label": "Retention mode",
         "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
       }
     }
   },
   "alerts": {
-    "label": "Alert specific retention settings",
+    "label": "Alert retention",
     "description": "Recording retention settings for alert events including pre/post capture durations.",
     "pre_capture": {
-      "label": "Seconds to retain before event starts",
-      "description": "Number of seconds before the alert event to include in the recording."
+      "label": "Pre-capture seconds",
+      "description": "Number of seconds before the detection event to include in the recording."
     },
     "post_capture": {
-      "label": "Seconds to retain after event ends",
-      "description": "Number of seconds after the alert event to include in the recording."
+      "label": "Post-capture seconds",
+      "description": "Number of seconds after the detection event to include in the recording."
     },
     "retain": {
-      "label": "Event retention settings",
-      "description": "Retention settings for recordings of alert events.",
+      "label": "Event retention",
+      "description": "Retention settings for recordings of detection events.",
       "days": {
-        "label": "Default retention period",
-        "description": "Number of days to retain recordings of alert events."
+        "label": "Retention days",
+        "description": "Number of days to retain recordings of detection events."
       },
       "mode": {
-        "label": "Retain mode",
+        "label": "Retention mode",
         "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
       }
     }
   },
   "export": {
-    "label": "Recording Export Config",
+    "label": "Export config",
     "description": "Settings used when exporting recordings such as timelapse and hardware acceleration.",
-    "timelapse_args": {
-      "label": "Timelapse output arguments",
-      "description": "FFmpeg arguments for timelapse exports. Default args fit 24 hours of recording into 1 hour playback (-vf setpts=0.04*PTS -r 30)."
-    },
     "hwaccel_args": {
-      "label": "Export-specific FFmpeg hardware acceleration arguments",
+      "label": "Export hwaccel args",
       "description": "Hardware acceleration args to use for export/transcode operations."
     }
   },
   "preview": {
-    "label": "Recording Preview Config",
+    "label": "Preview config",
     "description": "Settings controlling the quality of recording previews shown in the UI.",
     "quality": {
-      "label": "Quality of recording preview",
+      "label": "Preview quality",
       "description": "Preview quality level (very_low, low, medium, high, very_high)."
     }
   },
   "enabled_in_config": {
-    "label": "Keep track of original state of recording",
+    "label": "Original recording state",
     "description": "Indicates whether recording was enabled in the original static configuration."
   }
 }

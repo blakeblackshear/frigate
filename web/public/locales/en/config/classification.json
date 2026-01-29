@@ -5,11 +5,11 @@
     "label": "Bird classification config",
     "description": "Settings specific to bird classification models.",
     "enabled": {
-      "label": "Enable bird classification",
+      "label": "Bird classification",
       "description": "Enable or disable bird classification."
     },
     "threshold": {
-      "label": "Minimum classification score required to be considered a match",
+      "label": "Minimum score",
       "description": "Minimum classification score required to accept a bird classification."
     }
   },
@@ -17,46 +17,46 @@
     "label": "Custom Classification Models",
     "description": "Configuration for custom classification models used for objects or state detection.",
     "enabled": {
-      "label": "Enable running the model",
+      "label": "Enable model",
       "description": "Enable or disable the custom classification model."
     },
     "name": {
-      "label": "Name of classification model",
+      "label": "Model name",
       "description": "Identifier for the custom classification model to use."
     },
     "threshold": {
-      "label": "Classification score threshold to change the state",
+      "label": "Score threshold",
       "description": "Score threshold used to change the classification state."
     },
     "save_attempts": {
-      "label": "Number of classification attempts to save in the recent classifications tab. If not specified, defaults to 200 for object classification and 100 for state classification",
+      "label": "Saved attempts",
       "description": "How many classification attempts to save for recent classifications UI."
     },
     "object_config": {
       "objects": {
-        "label": "Object types to classify",
+        "label": "Classify objects",
         "description": "List of object types to run object classification on."
       },
       "classification_type": {
-        "label": "Type of classification that is applied",
+        "label": "Classification type",
         "description": "Classification type applied: 'sub_label' (adds sub_label) or other supported types."
       }
     },
     "state_config": {
       "cameras": {
-        "label": "Cameras to run classification on",
+        "label": "Classification cameras",
         "description": "Per-camera crop and settings for running state classification.",
         "crop": {
-          "label": "Crop of image frame on this camera to run classification on",
+          "label": "Classification crop",
           "description": "Crop coordinates to use for running classification on this camera."
         }
       },
       "motion": {
-        "label": "If classification should be run when motion is detected in the crop",
+        "label": "Run on motion",
         "description": "If true, run classification when motion is detected within the specified crop."
       },
       "interval": {
-        "label": "Interval to run classification on in seconds",
+        "label": "Classification interval",
         "description": "Interval (seconds) between periodic classification runs for state classification."
       }
     }
