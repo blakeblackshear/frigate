@@ -19,6 +19,11 @@ export const CameraMqttSection = createConfigSection({
     hiddenFields: [],
     advancedFields: ["height", "quality"],
     overrideFields: [],
+    uiSchema: {
+      required_zones: {
+        "ui:widget": "zoneNames",
+      },
+    },
   },
 });
 

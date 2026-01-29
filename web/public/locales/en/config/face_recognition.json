@@ -30,7 +30,7 @@
     "description": "Minimum number of face recognitions required before applying a recognized sub-label to a person."
   },
   "save_attempts": {
-    "label": "Saved attempts",
+    "label": "Save attempts",
     "description": "Number of face recognition attempts to retain for recent recognition UI."
   },
   "blur_confidence_filter": {

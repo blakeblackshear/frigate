@@ -13,12 +13,25 @@ export const OnvifSection = createConfigSection({
       "user",
       "password",
       "tls_insecure",
-      "autotracking",
       "ignore_time_mismatch",
+      "autotracking",
     ],
-    hiddenFields: ["autotracking.enabled_in_config"],
-    advancedFields: ["tls_insecure", "autotracking", "ignore_time_mismatch"],
+    hiddenFields: [
+      "autotracking.enabled_in_config",
+      "autotracking.movement_weights",
+    ],
+    advancedFields: ["tls_insecure", "ignore_time_mismatch"],
     overrideFields: [],
+    uiSchema: {
+      autotracking: {
+        required_zones: {
+          "ui:widget": "zoneNames",
+        },
+        track: {
+          "ui:widget": "objectLabels",
+        },
+      },
+    },
   },
 });
 

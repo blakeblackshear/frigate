@@ -119,7 +119,7 @@ class OnvifConfig(FrigateBaseModel):
     )
     autotracking: PtzAutotrackConfig = Field(
         default_factory=PtzAutotrackConfig,
-        title="PTZ config",
+        title="Autotracking",
         description="Automatically track moving objects and keep them centered in the frame using PTZ camera movements.",
     )
     ignore_time_mismatch: bool = Field(

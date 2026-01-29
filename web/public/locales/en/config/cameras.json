@@ -786,7 +786,7 @@
       "description": "Skip TLS verification and disable digest auth for ONVIF (unsafe; use in safe networks only)."
     },
     "autotracking": {
-      "label": "PTZ config",
+      "label": "Autotracking",
       "description": "Automatically track moving objects and keep them centered in the frame using PTZ camera movements.",
       "enabled": {
         "label": "Enable Autotracking",

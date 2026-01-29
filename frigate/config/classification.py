@@ -141,7 +141,7 @@ class CustomClassificationConfig(FrigateBaseModel):
     )
     save_attempts: int | None = Field(
         default=None,
-        title="Saved attempts",
+        title="Save attempts",
         description="How many classification attempts to save for recent classifications UI.",
         ge=0,
     )
@@ -283,7 +283,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
     save_attempts: int = Field(
         default=200,
         ge=0,
-        title="Saved attempts",
+        title="Save attempts",
         description="Number of face recognition attempts to retain for recent recognition UI.",
     )
     blur_confidence_filter: bool = Field(

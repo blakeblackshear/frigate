@@ -7,12 +7,12 @@ export const TimestampSection = createConfigSection({
   sectionPath: "timestamp_style",
   i18nNamespace: "config/timestamp_style",
   defaultConfig: {
-    fieldOrder: ["position", "format", "color", "thickness", "effect"],
+    fieldOrder: ["position", "format", "color", "thickness"],
     fieldGroups: {
-      appearance: ["color", "thickness", "effect"],
+      appearance: ["color", "thickness"],
     },
     hiddenFields: ["enabled_in_config"],
-    advancedFields: ["thickness", "effect"],
+    advancedFields: [],
   },
 });
 

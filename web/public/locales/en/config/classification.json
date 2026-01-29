@@ -29,7 +29,7 @@
       "description": "Score threshold used to change the classification state."
     },
     "save_attempts": {
-      "label": "Saved attempts",
+      "label": "Save attempts",
       "description": "How many classification attempts to save for recent classifications UI."
     },
     "object_config": {
