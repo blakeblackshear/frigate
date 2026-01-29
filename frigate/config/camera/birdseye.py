@@ -30,7 +30,7 @@ class BirdseyeModeEnum(str, Enum):
 class BirdseyeLayoutConfig(FrigateBaseModel):
     scaling_factor: float = Field(
         default=2.0,
-        title="Birdseye scaling factor",
+        title="Scaling factor",
         description="Scaling factor used by the layout calculator (range 1.0 to 5.0).",
         ge=1.0,
         le=5.0,
@@ -45,7 +45,7 @@ class BirdseyeLayoutConfig(FrigateBaseModel):
 class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=True,
-        title="Enable birdseye view",
+        title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
     mode: BirdseyeModeEnum = Field(
@@ -56,17 +56,17 @@ class BirdseyeConfig(FrigateBaseModel):
 
     restream: bool = Field(
         default=False,
-        title="Restream birdseye via RTSP",
+        title="Restream RTSP",
         description="Re-stream the Birdseye output as an RTSP feed; enabling this will keep Birdseye running continuously.",
     )
     width: int = Field(
         default=1280,
-        title="Birdseye width",
+        title="Width",
         description="Output width (pixels) of the composed Birdseye frame.",
     )
     height: int = Field(
         default=720,
-        title="Birdseye height",
+        title="Height",
         description="Output height (pixels) of the composed Birdseye frame.",
     )
     quality: int = Field(
@@ -78,20 +78,20 @@ class BirdseyeConfig(FrigateBaseModel):
     )
     inactivity_threshold: int = Field(
         default=30,
-        title="Birdseye Inactivity Threshold",
+        title="Inactivity threshold",
         description="Seconds of inactivity after which a camera will stop being shown in Birdseye.",
         gt=0,
     )
     layout: BirdseyeLayoutConfig = Field(
         default_factory=BirdseyeLayoutConfig,
-        title="Birdseye Layout",
+        title="Layout",
         description="Layout options for the Birdseye composition.",
     )
     idle_heartbeat_fps: float = Field(
         default=0.0,
         ge=0.0,
         le=10.0,
-        title="Idle heartbeat FPS (0 disables, max 10)",
+        title="Idle heartbeat FPS",
         description="Frames-per-second to resend the last composed Birdseye frame when idle; set to 0 to disable.",
     )
 
@@ -100,7 +100,7 @@ class BirdseyeConfig(FrigateBaseModel):
 class BirdseyeCameraConfig(BaseModel):
     enabled: bool = Field(
         default=True,
-        title="Enable birdseye view",
+        title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
     mode: BirdseyeModeEnum = Field(
@@ -111,6 +111,6 @@ class BirdseyeCameraConfig(BaseModel):
 
     order: int = Field(
         default=0,
-        title="Position of the camera in the birdseye view",
+        title="Position",
         description="Numeric position controlling the camera's ordering in the Birdseye layout.",
     )

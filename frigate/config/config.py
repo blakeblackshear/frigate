@@ -306,14 +306,14 @@ class FrigateConfig(FrigateBaseModel):
     )
     safe_mode: bool = Field(
         default=False,
-        title="If Frigate should be started in safe mode",
+        title="Safe mode",
         description="When enabled, start Frigate in safe mode with reduced features for troubleshooting.",
     )
 
     # Fields that install global state should be defined first, so that their validators run first.
     environment_vars: EnvVars = Field(
         default_factory=dict,
-        title="Frigate environment variables",
+        title="Environment variables",
         description="Key/value pairs of environment variables to set for the Frigate process.",
     )
     logger: LoggerConfig = Field(

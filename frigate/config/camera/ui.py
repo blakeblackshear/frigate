@@ -13,11 +13,11 @@ class CameraUiConfig(FrigateBaseModel):
 
     order: int = Field(
         default=0,
-        title="Order of camera in UI",
+        title="UI order",
         description="Numeric order used to sort the camera in the UI; larger numbers appear later.",
     )
     dashboard: bool = Field(
         default=True,
-        title="Show this camera in Frigate dashboard UI",
+        title="Show in dashboard",
         description="Toggle whether this camera is visible in the main dashboard.",
     )

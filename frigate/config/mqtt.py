@@ -14,7 +14,7 @@ __all__ = ["MqttConfig"]
 class MqttConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=True,
-        title="Enable MQTT communication",
+        title="Enable MQTT",
         description="Enable or disable MQTT integration for state, events, and snapshots.",
     )
     host: str = Field(
@@ -29,18 +29,18 @@ class MqttConfig(FrigateBaseModel):
     )
     topic_prefix: str = Field(
         default="frigate",
-        title="MQTT topic prefix",
+        title="Topic prefix",
         description="MQTT topic prefix for all Frigate topics; must be unique if running multiple instances.",
     )
     client_id: str = Field(
         default="frigate",
-        title="MQTT client ID",
+        title="Client ID",
         description="Client identifier used when connecting to the MQTT broker; should be unique per instance.",
     )
     stats_interval: int = Field(
         default=60,
         ge=FREQUENCY_STATS_POINTS,
-        title="MQTT camera stats interval",
+        title="Stats interval",
         description="Interval in seconds for publishing system and camera stats to MQTT.",
     )
     user: Optional[EnvString] = Field(
@@ -56,22 +56,22 @@ class MqttConfig(FrigateBaseModel):
     )
     tls_ca_certs: Optional[str] = Field(
         default=None,
-        title="MQTT TLS CA certificates",
+        title="TLS CA certs",
         description="Path to CA certificate for TLS connections to the broker (for self-signed certs).",
     )
     tls_client_cert: Optional[str] = Field(
         default=None,
-        title="MQTT TLS client certificate",
+        title="Client cert",
         description="Client certificate path for TLS mutual authentication; do not set user/password when using client certs.",
     )
     tls_client_key: Optional[str] = Field(
         default=None,
-        title="MQTT TLS client key",
+        title="Client key",
         description="Private key path for the client certificate.",
     )
     tls_insecure: Optional[bool] = Field(
         default=None,
-        title="MQTT TLS insecure",
+        title="TLS insecure",
         description="Allow insecure TLS connections by skipping hostname verification (not recommended).",
     )
     qos: int = Field(

@@ -15,17 +15,17 @@ class NotificationConfig(FrigateBaseModel):
     )
     email: Optional[str] = Field(
         default=None,
-        title="Email required for push",
+        title="Notification email",
         description="Email address used for push notifications or required by certain notification providers.",
     )
     cooldown: int = Field(
         default=0,
         ge=0,
-        title="Cooldown period for notifications (time in seconds)",
+        title="Cooldown period",
         description="Cooldown (seconds) between notifications to avoid spamming recipients.",
     )
     enabled_in_config: Optional[bool] = Field(
         default=None,
-        title="Keep track of original state of notifications",
+        title="Original notifications state",
         description="Indicates whether notifications were enabled in the original static configuration.",
     )

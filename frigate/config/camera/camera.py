@@ -52,14 +52,14 @@ class CameraTypeEnum(str, Enum):
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(
         None,
-        title="Camera Name",
+        title="Camera name",
         description="Camera name is required",
         pattern=REGEX_CAMERA_NAME,
     )
 
     friendly_name: Optional[str] = Field(
         None,
-        title="Camera friendly name used in the Frigate UI",
+        title="Friendly name",
         description="Camera friendly name used in the Frigate UI",
     )
 
@@ -151,7 +151,7 @@ class CameraConfig(FrigateBaseModel):
     # Options without global fallback
     best_image_timeout: int = Field(
         default=60,
-        title="How long to wait for the image with the highest confidence score.",
+        title="Best image timeout",
         description="How long to wait for the image with the highest confidence score.",
     )
     mqtt: CameraMqttConfig = Field(
@@ -171,7 +171,7 @@ class CameraConfig(FrigateBaseModel):
     )
     type: CameraTypeEnum = Field(
         default=CameraTypeEnum.generic,
-        title="Camera Type",
+        title="Camera type",
         description="Camera Type",
     )
     ui: CameraUiConfig = Field(
@@ -181,7 +181,7 @@ class CameraConfig(FrigateBaseModel):
     )
     webui_url: Optional[str] = Field(
         None,
-        title="URL to visit the camera directly from system page",
+        title="Camera URL",
         description="URL to visit the camera directly from system page",
     )
     zones: dict[str, ZoneConfig] = Field(
@@ -191,7 +191,7 @@ class CameraConfig(FrigateBaseModel):
     )
     enabled_in_config: Optional[bool] = Field(
         default=None,
-        title="Keep track of original state of camera.",
+        title="Original camera state",
         description="Keep track of original state of camera.",
     )
 

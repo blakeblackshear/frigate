@@ -15,14 +15,14 @@ class MotionConfig(FrigateBaseModel):
     )
     threshold: int = Field(
         default=30,
-        title="Motion detection threshold (1-255)",
+        title="Motion threshold",
         description="Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255).",
         ge=1,
         le=255,
     )
     lightning_threshold: float = Field(
         default=0.8,
-        title="Lightning detection threshold (0.3-1.0)",
+        title="Lightning threshold",
         description="Threshold to detect and ignore brief lighting spikes (lower is more sensitive, values between 0.3 and 1.0).",
         ge=0.3,
         le=1.0,
@@ -39,32 +39,32 @@ class MotionConfig(FrigateBaseModel):
     )
     delta_alpha: float = Field(
         default=0.2,
-        title="Delta Alpha",
+        title="Delta alpha",
         description="Alpha blending factor used in frame differencing for motion calculation.",
     )
     frame_alpha: float = Field(
         default=0.01,
-        title="Frame Alpha",
+        title="Frame alpha",
         description="Alpha value used when blending frames for motion preprocessing.",
     )
     frame_height: Optional[int] = Field(
         default=100,
-        title="Frame Height",
+        title="Frame height",
         description="Height in pixels to scale frames to when computing motion (useful for performance).",
     )
     mask: Union[str, list[str]] = Field(
         default="",
-        title="Coordinates polygon for the motion mask.",
+        title="Mask coordinates",
         description="Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas.",
     )
     mqtt_off_delay: int = Field(
         default=30,
-        title="Delay for updating MQTT with no motion detected",
+        title="MQTT off delay",
         description="Seconds to wait after last motion before publishing an MQTT 'off' state.",
     )
     enabled_in_config: Optional[bool] = Field(
         default=None,
-        title="Keep track of original state of motion detection",
+        title="Original motion state",
         description="Indicates whether motion detection was enabled in the original static configuration.",
     )
     raw_mask: Union[str, list[str]] = ""

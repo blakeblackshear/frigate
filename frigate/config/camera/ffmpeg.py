@@ -35,12 +35,12 @@ DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
 class FfmpegOutputArgsConfig(FrigateBaseModel):
     detect: Union[str, list[str]] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Detect role FFmpeg output arguments",
+        title="Detect output args",
         description="Default output args for detect role streams.",
     )
     record: Union[str, list[str]] = Field(
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Record role FFmpeg output arguments",
+        title="Record output args",
         description="Default output args for record role streams.",
     )
 
@@ -53,38 +53,38 @@ class FfmpegConfig(FrigateBaseModel):
     )
     global_args: Union[str, list[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT,
-        title="FFmpeg arguments",
+        title="FFmpeg global args",
         description="Global args passed to FFmpeg processes by default.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
         default="auto",
-        title="FFmpeg hardware acceleration arguments",
+        title="Hardware acceleration args",
         description="Hardware acceleration arguments for FFmpeg (auto or provider-specific).",
     )
     input_args: Union[str, list[str]] = Field(
         default=FFMPEG_INPUT_ARGS_DEFAULT,
-        title="FFmpeg input arguments",
+        title="Input args",
         description="Input arguments applied to FFmpeg input streams by default.",
     )
     output_args: FfmpegOutputArgsConfig = Field(
         default_factory=FfmpegOutputArgsConfig,
-        title="FFmpeg output arguments per role",
+        title="Output args",
         description="Default output args used for different FFmpeg roles such as detect and record.",
     )
     retry_interval: float = Field(
         default=10.0,
-        title="Time in seconds to wait before FFmpeg retries connecting to the camera",
+        title="FFmpeg retry time",
         description="Seconds to wait before attempting to reconnect a camera stream after failure. Default is 10.",
         gt=0.0,
     )
     apple_compatibility: bool = Field(
         default=False,
-        title="Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players",
+        title="Apple compatibility",
         description="Enable HEVC tagging for better Apple player compatibility when recording H.265.",
     )
     gpu: int = Field(
         default=0,
-        title="GPU index to use for hardware acceleration",
+        title="GPU index",
         description="Default GPU index used for hardware acceleration if available.",
     )
 
@@ -115,26 +115,26 @@ class CameraRoleEnum(str, Enum):
 
 class CameraInput(FrigateBaseModel):
     path: EnvString = Field(
-        title="Camera input path",
+        title="Input path",
         description="Camera input stream URL or path.",
     )
     roles: list[CameraRoleEnum] = Field(
-        title="Roles assigned to this input",
+        title="Input roles",
         description="Roles for this input stream (for example: detect, record, audio).",
     )
     global_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="FFmpeg arguments",
+        title="FFmpeg args",
         description="FFmpeg arguments for this input stream.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="FFmpeg hardware acceleration arguments",
+        title="Hardware acceleration args",
         description="Hardware acceleration arguments for this input stream.",
     )
     input_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="FFmpeg input arguments",
+        title="Input args",
         description="Input arguments specific to this stream.",
     )
 

@@ -11,17 +11,17 @@ __all__ = ["SnapshotsConfig", "RetainConfig"]
 class RetainConfig(FrigateBaseModel):
     default: float = Field(
         default=10,
-        title="Default retention period",
+        title="Default retention",
         description="Default number of days to retain snapshots.",
     )
     mode: RetainModeEnum = Field(
         default=RetainModeEnum.motion,
-        title="Retain mode",
+        title="Retention mode",
         description="Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects).",
     )
     objects: dict[str, float] = Field(
         default_factory=dict,
-        title="Object retention period",
+        title="Object retention",
         description="Per-object overrides for snapshot retention days.",
     )
 
@@ -34,32 +34,32 @@ class SnapshotsConfig(FrigateBaseModel):
     )
     clean_copy: bool = Field(
         default=True,
-        title="Create a clean copy of the snapshot image",
+        title="Save clean copy",
         description="Save an unannotated clean copy of snapshots in addition to annotated ones.",
     )
     timestamp: bool = Field(
         default=False,
-        title="Add a timestamp overlay on the snapshot",
+        title="Timestamp overlay",
         description="Overlay a timestamp on saved snapshots.",
     )
     bounding_box: bool = Field(
         default=True,
-        title="Add a bounding box overlay on the snapshot",
+        title="Bounding box overlay",
         description="Draw bounding boxes for tracked objects on saved snapshots.",
     )
     crop: bool = Field(
         default=False,
-        title="Crop the snapshot to the detected object",
+        title="Crop snapshot",
         description="Crop saved snapshots to the detected object's bounding box.",
     )
     required_zones: list[str] = Field(
         default_factory=list,
-        title="List of required zones to be entered in order to save a snapshot",
+        title="Required zones",
         description="Zones an object must enter for a snapshot to be saved.",
     )
     height: Optional[int] = Field(
         default=None,
-        title="Snapshot image height",
+        title="Snapshot height",
         description="Height (pixels) to resize saved snapshots to; leave empty to preserve original size.",
     )
     retain: RetainConfig = Field(
@@ -69,7 +69,7 @@ class SnapshotsConfig(FrigateBaseModel):
     )
     quality: int = Field(
         default=70,
-        title="Quality of the encoded jpeg (0-100)",
+        title="JPEG quality",
         description="JPEG encode quality for saved snapshots (0-100).",
         ge=0,
         le=100,

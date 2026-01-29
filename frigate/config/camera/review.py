@@ -29,23 +29,23 @@ class AlertsConfig(FrigateBaseModel):
 
     labels: list[str] = Field(
         default=DEFAULT_ALERT_OBJECTS,
-        title="Labels to create alerts for",
+        title="Alert labels",
         description="List of object labels that qualify as alerts (for example: car, person).",
     )
     required_zones: Union[str, list[str]] = Field(
         default_factory=list,
-        title="List of required zones to be entered in order to save the event as an alert",
+        title="Required zones",
         description="Zones that an object must enter to be considered an alert; leave empty to allow any zone.",
     )
 
     enabled_in_config: Optional[bool] = Field(
         default=None,
-        title="Keep track of original state of alerts",
+        title="Original alerts state",
         description="Tracks whether alerts were originally enabled in the static configuration.",
     )
     cutoff_time: int = Field(
         default=40,
-        title="Time to cutoff alerts after no alert-causing activity has occurred",
+        title="Alerts cutoff time",
         description="Seconds to wait after no alert-causing activity before cutting off an alert.",
     )
 
@@ -69,23 +69,23 @@ class DetectionsConfig(FrigateBaseModel):
 
     labels: Optional[list[str]] = Field(
         default=None,
-        title="Labels to create detections for",
+        title="Detection labels",
         description="List of object labels that qualify as detection events.",
     )
     required_zones: Union[str, list[str]] = Field(
         default_factory=list,
-        title="List of required zones to be entered in order to save the event as a detection",
+        title="Required zones",
         description="Zones that an object must enter to be considered a detection; leave empty to allow any zone.",
     )
     cutoff_time: int = Field(
         default=30,
-        title="Time to cutoff detection after no detection-causing activity has occurred",
+        title="Detections cutoff time",
         description="Seconds to wait after no detection-causing activity before cutting off a detection.",
     )
 
     enabled_in_config: Optional[bool] = Field(
         default=None,
-        title="Keep track of original state of detections",
+        title="Original detections state",
         description="Tracks whether detections were originally enabled in the static configuration.",
     )
 
@@ -101,7 +101,7 @@ class DetectionsConfig(FrigateBaseModel):
 class GenAIReviewConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
-        title="Enable GenAI descriptions for review items",
+        title="Enable GenAI descriptions",
         description="Enable or disable GenAI-generated descriptions and summaries for review items.",
     )
     alerts: bool = Field(
@@ -116,26 +116,26 @@ class GenAIReviewConfig(FrigateBaseModel):
     )
     image_source: ImageSourceEnum = Field(
         default=ImageSourceEnum.preview,
-        title="Image source for review descriptions",
+        title="Review image source",
         description="Source of images sent to GenAI ('preview' or 'recordings'); 'recordings' uses higher quality frames but more tokens.",
     )
     additional_concerns: list[str] = Field(
         default=[],
-        title="Additional concerns that GenAI should make note of on this camera",
+        title="Additional concerns",
         description="A list of additional concerns or notes the GenAI should consider when evaluating activity on this camera.",
     )
     debug_save_thumbnails: bool = Field(
         default=False,
-        title="Save thumbnails sent to generative AI for debugging purposes",
+        title="Save thumbnails",
         description="Save thumbnails that are sent to the GenAI provider for debugging and review.",
     )
     enabled_in_config: Optional[bool] = Field(
         default=None,
-        title="Keep track of original state of generative AI",
+        title="Original GenAI state",
         description="Tracks whether GenAI review was originally enabled in the static configuration.",
     )
     preferred_language: str | None = Field(
-        title="Preferred language for GenAI Response",
+        title="Preferred language",
         description="Preferred language to request from the GenAI provider for generated responses.",
         default=None,
     )
@@ -174,7 +174,7 @@ Evaluate in this order:
 3. **Escalate to Level 2 if:** Weapons, break-in tools, forced entry in progress, violence, or active property damage visible (escalates from Level 0 or 1)
 
 The mere presence of an unidentified person in private areas during late night hours is inherently suspicious and warrants human review, regardless of what activity they appear to be doing or how brief the sequence is.""",
-        title="Custom activity context prompt defining normal and suspicious activity patterns for this property",
+        title="Activity context prompt",
         description="Custom prompt describing what is and is not suspicious activity to provide context for GenAI summaries.",
     )
 
@@ -182,16 +182,16 @@ The mere presence of an unidentified person in private areas during late night h
 class ReviewConfig(FrigateBaseModel):
     alerts: AlertsConfig = Field(
         default_factory=AlertsConfig,
-        title="Review alerts config",
+        title="Alerts config",
         description="Settings for which tracked objects generate alerts and how alerts are retained.",
     )
     detections: DetectionsConfig = Field(
         default_factory=DetectionsConfig,
-        title="Review detections config",
+        title="Detections config",
         description="Settings for creating detection events (non-alert) and how long to keep them.",
     )
     genai: GenAIReviewConfig = Field(
         default_factory=GenAIReviewConfig,
-        title="Review description genai config",
+        title="GenAI config",
         description="Controls use of generative AI for producing descriptions and summaries of review items.",
     )
