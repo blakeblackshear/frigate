@@ -188,7 +188,7 @@ go2rtc:
     # example for connectin to a Reolink camera that supports two way talk
     your_reolink_camera_twt:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
-      - "rtsp://username:password@reolink_ip/Preview_01_sub"
+      - "rtsp://username:password@reolink_ip/Preview_01_main"
     your_reolink_camera_twt_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
       - "rtsp://username:password@reolink_ip/Preview_01_sub"
