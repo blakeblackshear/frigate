@@ -69,12 +69,12 @@ class DetectConfig(FrigateBaseModel):
     )
     min_initialized: Optional[int] = Field(
         default=None,
-        title="Min initialization hits",
+        title="Minimum initialization frames",
         description="Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2.",
     )
     max_disappeared: Optional[int] = Field(
         default=None,
-        title="Max disappeared frames",
+        title="Maximum disappeared frames",
         description="Number of frames without a detection before a tracked object is considered gone.",
     )
     stationary: StationaryConfig = Field(

@@ -7,7 +7,7 @@ export const ReviewSection = createConfigSection({
   sectionPath: "review",
   i18nNamespace: "config/review",
   defaultConfig: {
-    fieldOrder: ["alerts", "detections"],
+    fieldOrder: ["alerts", "detections", "genai"],
     fieldGroups: {},
     hiddenFields: [
       "enabled_in_config",
@@ -20,6 +20,16 @@ export const ReviewSection = createConfigSection({
       "genai.enabled_in_config",
     ],
     advancedFields: [],
+    uiSchema: {
+      genai: {
+        additional_concerns: {
+          "ui:widget": "textarea",
+        },
+        activity_context_prompt: {
+          "ui:widget": "textarea",
+        },
+      },
+    },
   },
 });
 

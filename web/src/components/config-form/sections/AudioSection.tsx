@@ -16,7 +16,7 @@ export const AudioSection = createConfigSection({
       "num_threads",
     ],
     fieldGroups: {
-      detection: ["listen", "filters"],
+      detection: ["enabled", "listen", "filters"],
       sensitivity: ["min_volume", "max_not_heard"],
     },
     hiddenFields: ["enabled_in_config"],

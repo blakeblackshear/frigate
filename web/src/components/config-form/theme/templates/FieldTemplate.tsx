@@ -46,7 +46,9 @@ export function FieldTemplate(props: FieldTemplateProps) {
 
   // Determine field characteristics
   const isAdvanced = uiOptions.advanced === true;
-  const isBoolean = schema.type === "boolean";
+  const isBoolean =
+    schema.type === "boolean" ||
+    (Array.isArray(schema.type) && schema.type.includes("boolean"));
   const isObjectField = schema.type === "object";
   const isNullableUnion = isNullableUnionSchema(schema as StrictRJSFSchema);
   const suppressMultiSchema =
@@ -135,7 +137,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
               </Label>
             )}
             {finalDescription && !isMultiSchemaWrapper && (
-              <p className="max-w-md text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {finalDescription}
               </p>
             )}

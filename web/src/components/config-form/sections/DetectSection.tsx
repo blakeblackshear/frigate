@@ -18,7 +18,7 @@ export const DetectSection = createConfigSection({
       "stationary",
     ],
     fieldGroups: {
-      resolution: ["width", "height"],
+      resolution: ["enabled", "width", "height"],
       tracking: ["min_initialized", "max_disappeared"],
     },
     hiddenFields: ["enabled_in_config"],

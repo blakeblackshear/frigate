@@ -18,7 +18,7 @@ export const RecordSection = createConfigSection({
       "export",
     ],
     fieldGroups: {
-      retention: ["continuous", "motion"],
+      retention: ["enabled", "continuous", "motion"],
       events: ["alerts", "detections"],
     },
     hiddenFields: ["enabled_in_config", "sync_recordings"],

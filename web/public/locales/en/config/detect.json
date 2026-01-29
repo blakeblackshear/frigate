@@ -18,11 +18,11 @@
     "description": "Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects)."
   },
   "min_initialized": {
-    "label": "Min initialization hits",
+    "label": "Minimum initialization frames",
     "description": "Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2."
   },
   "max_disappeared": {
-    "label": "Max disappeared frames",
+    "label": "Maximum disappeared frames",
     "description": "Number of frames without a detection before a tracked object is considered gone."
   },
   "stationary": {

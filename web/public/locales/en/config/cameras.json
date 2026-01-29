@@ -17,7 +17,7 @@
     "label": "Audio events",
     "description": "Settings for audio-based event detection; can be overridden per-camera.",
     "enabled": {
-      "label": "Enable audio",
+      "label": "Enable audio detection",
       "description": "Enable or disable audio event detection; can be overridden per-camera."
     },
     "max_not_heard": {
@@ -96,11 +96,11 @@
       "description": "Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects)."
     },
     "min_initialized": {
-      "label": "Min initialization hits",
+      "label": "Minimum initialization frames",
       "description": "Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2."
     },
     "max_disappeared": {
-      "label": "Max disappeared frames",
+      "label": "Maximum disappeared frames",
       "description": "Number of frames without a detection before a tracked object is considered gone."
     },
     "stationary": {
@@ -203,8 +203,8 @@
         "description": "Roles for this input stream (for example: detect, record, audio)."
       },
       "global_args": {
-        "label": "FFmpeg args",
-        "description": "FFmpeg arguments for this input stream."
+        "label": "FFmpeg global args",
+        "description": "FFmpeg global arguments for this input stream."
       },
       "hwaccel_args": {
         "label": "Hardware acceleration args",

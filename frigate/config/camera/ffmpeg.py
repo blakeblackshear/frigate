@@ -124,8 +124,8 @@ class CameraInput(FrigateBaseModel):
     )
     global_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="FFmpeg args",
-        description="FFmpeg arguments for this input stream.",
+        title="FFmpeg global args",
+        description="FFmpeg global arguments for this input stream.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
         default_factory=list,

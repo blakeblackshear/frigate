@@ -16,7 +16,7 @@ export const SnapshotsSection = createConfigSection({
       "retain",
     ],
     fieldGroups: {
-      display: ["bounding_box", "crop", "quality", "timestamp"],
+      display: ["enabled", "bounding_box", "crop", "quality", "timestamp"],
     },
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["quality", "retain"],

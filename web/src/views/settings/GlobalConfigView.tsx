@@ -175,7 +175,7 @@ const globalSectionConfigs: Record<
   telemetry: {
     i18nNamespace: "config/telemetry",
     fieldOrder: ["network_interfaces", "stats", "version_check"],
-    advancedFields: ["stats"],
+    advancedFields: [],
   },
   birdseye: {
     i18nNamespace: "config/birdseye",

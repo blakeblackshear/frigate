@@ -2,7 +2,7 @@
   "label": "Audio events",
   "description": "Settings for audio-based event detection; can be overridden per-camera.",
   "enabled": {
-    "label": "Enable audio",
+    "label": "Enable audio detection",
     "description": "Enable or disable audio event detection; can be overridden per-camera."
   },
   "max_not_heard": {

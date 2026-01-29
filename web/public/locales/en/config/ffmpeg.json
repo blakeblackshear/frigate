@@ -53,8 +53,8 @@
       "description": "Roles for this input stream (for example: detect, record, audio)."
     },
     "global_args": {
-      "label": "FFmpeg args",
-      "description": "FFmpeg arguments for this input stream."
+      "label": "FFmpeg global args",
+      "description": "FFmpeg global arguments for this input stream."
     },
     "hwaccel_args": {
       "label": "Hardware acceleration args",
