@@ -12,7 +12,7 @@ import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { baseUrl } from "@/api/baseUrl";
 import { VideoPreview } from "../preview/ScrubbablePreview";
 import { useApiHost } from "@/api";
-import { isSafari } from "react-device-detect";
+import { isDesktop, isSafari } from "react-device-detect";
 import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
@@ -87,6 +87,7 @@ export function AnimatedEventCard({
   }, [visibilityListener]);
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // interaction
 
@@ -133,27 +134,31 @@ export function AnimatedEventCard({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="group relative h-24 flex-shrink-0 overflow-hidden rounded md:rounded-lg 4k:h-32"
+          className="relative h-24 flex-shrink-0 overflow-hidden rounded md:rounded-lg 4k:h-32"
           style={{
             aspectRatio: alertVideos ? aspectRatio : undefined,
           }}
+          onMouseEnter={isDesktop ? () => setIsHovered(true) : undefined}
+          onMouseLeave={isDesktop ? () => setIsHovered(false) : undefined}
         >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="pointer-events-none absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
-                size="xs"
-                aria-label={t("markAsReviewed")}
-                onClick={async () => {
-                  await axios.post(`reviews/viewed`, { ids: [event.id] });
-                  updateEvents();
-                }}
-              >
-                <FaCircleCheck className="size-3 text-white" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t("markAsReviewed")}</TooltipContent>
-          </Tooltip>
+          {isHovered && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  size="xs"
+                  aria-label={t("markAsReviewed")}
+                  onClick={async () => {
+                    await axios.post(`reviews/viewed`, { ids: [event.id] });
+                    updateEvents();
+                  }}
+                >
+                  <FaCircleCheck className="size-3 text-white" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("markAsReviewed")}</TooltipContent>
+            </Tooltip>
+          )}
           {previews != undefined && alertVideosLoaded && (
             <div
               className="size-full cursor-pointer"

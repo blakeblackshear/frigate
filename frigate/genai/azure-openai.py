@@ -41,46 +41,29 @@ class OpenAIClient(GenAIClient):
             azure_endpoint=azure_endpoint,
         )
 
-    def _send(
-        self, prompt: str, images: list[bytes], json_schema: Optional[dict] = None
-    ) -> Optional[str]:
+    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Azure OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
-
-        request_params = {
-            "model": self.genai_config.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [{"type": "text", "text": prompt}]
-                    + [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{image}",
-                                "detail": "low",
-                            },
-                        }
-                        for image in encoded_images
-                    ],
-                },
-            ],
-            "timeout": self.timeout,
-        }
-
-        if json_schema:
-            request_params["response_format"] = {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": json_schema.get("name", "response"),
-                    "schema": json_schema.get("schema", {}),
-                    "strict": json_schema.get("strict", True),
-                },
-            }
-
         try:
             result = self.provider.chat.completions.create(
-                **request_params,
+                model=self.genai_config.model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [{"type": "text", "text": prompt}]
+                        + [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{image}",
+                                    "detail": "low",
+                                },
+                            }
+                            for image in encoded_images
+                        ],
+                    },
+                ],
+                timeout=self.timeout,
                 **self.genai_config.runtime_options,
             )
         except Exception as e:

@@ -41,9 +41,7 @@ class GeminiClient(GenAIClient):
             http_options=types.HttpOptions(**http_options_dict),
         )
 
-    def _send(
-        self, prompt: str, images: list[bytes], json_schema: Optional[dict] = None
-    ) -> Optional[str]:
+    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Gemini."""
         contents = [
             types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
@@ -52,12 +50,6 @@ class GeminiClient(GenAIClient):
             # Merge runtime_options into generation_config if provided
             generation_config_dict = {"candidate_count": 1}
             generation_config_dict.update(self.genai_config.runtime_options)
-
-            if json_schema and "schema" in json_schema:
-                generation_config_dict["response_mime_type"] = "application/json"
-                generation_config_dict["response_schema"] = types.Schema(
-                    json_schema=json_schema["schema"]
-                )
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,

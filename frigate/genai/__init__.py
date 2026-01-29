@@ -140,12 +140,7 @@ Each line represents a detection state, not necessarily unique individuals. Pare
             ) as f:
                 f.write(context_prompt)
 
-        json_schema = {
-            "name": "review_metadata",
-            "schema": ReviewMetadata.model_json_schema(),
-            "strict": True,
-        }
-        response = self._send(context_prompt, thumbnails, json_schema=json_schema)
+        response = self._send(context_prompt, thumbnails)
 
         if debug_save and response:
             with open(
@@ -157,8 +152,6 @@ Each line represents a detection state, not necessarily unique individuals. Pare
                 f.write(response)
 
         if response:
-            # With JSON schema, response should already be valid JSON
-            # But keep regex cleanup as fallback for providers without schema support
             clean_json = re.sub(
                 r"\n?```$", "", re.sub(r"^```[a-zA-Z0-9]*\n?", "", response)
             )
@@ -291,16 +284,8 @@ Guidelines:
         """Initialize the client."""
         return None
 
-    def _send(
-        self, prompt: str, images: list[bytes], json_schema: Optional[dict] = None
-    ) -> Optional[str]:
-        """Submit a request to the provider.
-
-        Args:
-            prompt: The text prompt to send
-            images: List of image bytes to include
-            json_schema: Optional JSON schema for structured output (provider-specific support)
-        """
+    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+        """Submit a request to the provider."""
         return None
 
     def get_context_size(self) -> int:

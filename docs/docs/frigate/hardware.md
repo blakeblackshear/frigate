@@ -167,7 +167,7 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel N100     | ~ 15 ms                    | s-320: 30 ms                                      | 320: ~ 25 ms              |                        | Can only run one detector instance |
 | Intel N150     | ~ 15 ms                    | t-320: 16 ms s-320: 24 ms                         |                           |                        |                                    |
 | Intel Iris XE  | ~ 10 ms                    | t-320: 6 ms t-640: 14 ms s-320: 8 ms s-640: 16 ms | 320: ~ 10 ms 640: ~ 20 ms | 320-n: 33 ms           |                                    |
-| Intel NPU      | ~ 6 ms                     | s-320: 11 ms s-640: 30 ms                         | 320: ~ 14 ms 640: ~ 34 ms | 320-n: 40 ms           |                                    |
+| Intel NPU      | ~ 6 ms                     | s-320: 11 ms                                      | 320: ~ 14 ms 640: ~ 34 ms | 320-n: 40 ms           |                                    |
 | Intel Arc A310 | ~ 5 ms                     | t-320: 7 ms t-640: 11 ms s-320: 8 ms s-640: 15 ms | 320: ~ 8 ms 640: ~ 14 ms  |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     |                                                   | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     |                                                   | 320: ~ 8 ms               |                        |                                    |
