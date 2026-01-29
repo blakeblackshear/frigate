@@ -8,15 +8,23 @@ __all__ = ["IPv6Config", "ListenConfig", "NetworkingConfig"]
 
 
 class IPv6Config(FrigateBaseModel):
-    enabled: bool = Field(default=False, title="Enable IPv6 for port 5000 and/or 8971")
+    enabled: bool = Field(
+        default=False,
+        title="Enable IPv6 for port 5000 and/or 8971",
+        description="Enable IPv6 support for Frigate services (API and UI) where applicable.",
+    )
 
 
 class ListenConfig(FrigateBaseModel):
     internal: Union[int, str] = Field(
-        default=5000, title="Internal listening port for Frigate"
+        default=5000,
+        title="Internal port",
+        description="Internal listening port for Frigate (default 5000).",
     )
     external: Union[int, str] = Field(
-        default=8971, title="External listening port for Frigate"
+        default=8971,
+        title="External port",
+        description="External listening port for Frigate (default 8971).",
     )
 
 
