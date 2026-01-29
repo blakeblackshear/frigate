@@ -302,7 +302,7 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable face recognition",
-        description="Enable or disable face recognition globally.",
+        description="Enable or disable face recognition.",
     )
     min_area: int = Field(
         default=750,
@@ -397,7 +397,7 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable LPR",
-        description="Enable or disable LPR globally; camera-level settings can override.",
+        description="Enable or disable LPR on this camera.",
     )
     expire_time: int = Field(
         default=3,
