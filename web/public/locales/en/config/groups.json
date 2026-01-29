@@ -1,0 +1,28 @@
+{
+  "audio": {
+    "detection": "Detection",
+    "sensitivity": "Sensitivity"
+  },
+  "timestamp_style": {
+    "appearance": "Appearance"
+  },
+  "motion": {
+    "sensitivity": "Sensitivity",
+    "algorithm": "Algorithm"
+  },
+  "snapshots": {
+    "display": "Display"
+  },
+  "detect": {
+    "resolution": "Resolution",
+    "tracking": "Tracking"
+  },
+  "objects": {
+    "tracking": "Tracking",
+    "filtering": "Filtering"
+  },
+  "record": {
+    "retention": "Retention",
+    "events": "Events"
+  }
+}

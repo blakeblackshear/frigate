@@ -73,6 +73,7 @@ i18n
       "config/face_recognition",
       "config/lpr",
       "config/validation",
+      "config/groups",
     ],
     defaultNS: "common",
 

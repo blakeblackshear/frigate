@@ -1,9 +1,6 @@
 {
   "label": "Timestamp style",
   "description": "Styling options for in-feed timestamps applied to recordings and snapshots.",
-  "groups": {
-    "appearance": "Appearance"
-  },
   "position": {
     "label": "Timestamp position",
     "description": "Position of the timestamp on the image (tl/tr/bl/br)."

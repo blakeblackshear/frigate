@@ -30,7 +30,18 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   const [isOpen, setIsOpen] = useState(true);
 
-  const { t } = useTranslation([formContext?.i18nNamespace || "common"]);
+  const { t } = useTranslation([
+    formContext?.i18nNamespace || "common",
+    "config/groups",
+  ]);
+
+  // Extract domain from i18nNamespace (e.g., "config/audio" -> "audio")
+  const getDomainFromNamespace = (ns?: string): string => {
+    if (!ns || !ns.startsWith("config/")) return "";
+    return ns.replace("config/", "");
+  };
+
+  const domain = getDomainFromNamespace(formContext?.i18nNamespace);
 
   const groupDefinitions =
     (uiSchema?.["ui:groups"] as Record<string, string[]> | undefined) || {};
@@ -120,9 +131,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
         ordered.forEach((item) => grouped.add(item.name));
 
-        const label = t(`groups.${groupKey}`, {
-          defaultValue: toTitle(groupKey),
-        });
+        const label = domain
+          ? t(`${domain}.${groupKey}`, {
+              ns: "config/groups",
+              defaultValue: toTitle(groupKey),
+            })
+          : t(`groups.${groupKey}`, {
+              defaultValue: toTitle(groupKey),
+            });
 
         return {
           key: groupKey,

@@ -1,10 +1,6 @@
 {
   "label": "Motion detection",
   "description": "Default motion detection settings applied to cameras unless overridden per-camera.",
-  "groups": {
-    "sensitivity": "Sensitivity",
-    "algorithm": "Algorithm"
-  },
   "enabled": {
     "label": "Enable motion detection",
     "description": "Enable or disable motion detection globally; per-camera settings can override this."

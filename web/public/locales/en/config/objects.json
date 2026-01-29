@@ -1,10 +1,6 @@
 {
   "label": "Objects",
   "description": "Object tracking defaults including which labels to track and per-object filters.",
-  "groups": {
-    "tracking": "Tracking",
-    "filtering": "Filtering"
-  },
   "track": {
     "label": "Objects to track",
     "description": "List of object labels to track globally; camera configs can override this."
