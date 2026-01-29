@@ -431,7 +431,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
 
         if len(history) < 3:
-            logger.debug(f"History for {object_id} has {len(history)} entries, need at least 3")
+            logger.debug(
+                f"History for {object_id} has {len(history)} entries, need at least 3"
+            )
             return None, 0.0
 
         label_counts = {}
@@ -468,7 +470,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             logger.debug(f"Filtering 'none' label for {object_id}")
             return None, 0.0
 
-        logger.debug(f"Consensus reached for {object_id}: {best_label} with avg_score={avg_score}")
+        logger.debug(
+            f"Consensus reached for {object_id}: {best_label} with avg_score={avg_score}"
+        )
         return best_label, avg_score
 
     def process_frame(self, obj_data, frame):
