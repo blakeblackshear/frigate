@@ -4,13 +4,46 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { isNullableUnionSchema } from "../fields/nullableUtils";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 /**
  * Build the i18n translation key path for nested fields using the field path
- * provided by RJSF. This avoids ambiguity with underscores in field names.
+ * provided by RJSF. This avoids ambiguity with underscores in field names and
+ * skips dynamic filter labels for per-object filter fields.
  */
 function buildTranslationPath(path: Array<string | number>): string {
-  return path.filter((segment) => typeof segment === "string").join(".");
+  const segments = path.filter(
+    (segment): segment is string => typeof segment === "string",
+  );
+
+  const filtersIndex = segments.indexOf("filters");
+  if (filtersIndex !== -1 && segments.length > filtersIndex + 2) {
+    const normalized = [
+      ...segments.slice(0, filtersIndex + 1),
+      ...segments.slice(filtersIndex + 2),
+    ];
+    return normalized.join(".");
+  }
+
+  return segments.join(".");
+}
+
+function getFilterObjectLabel(pathSegments: string[]): string | undefined {
+  const filtersIndex = pathSegments.indexOf("filters");
+  if (filtersIndex === -1 || pathSegments.length <= filtersIndex + 1) {
+    return undefined;
+  }
+  const objectLabel = pathSegments[filtersIndex + 1];
+  return typeof objectLabel === "string" && objectLabel.length > 0
+    ? objectLabel
+    : undefined;
+}
+
+function humanizeKey(value: string): string {
+  return value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 export function FieldTemplate(props: FieldTemplateProps) {
@@ -35,7 +68,10 @@ export function FieldTemplate(props: FieldTemplateProps) {
     | Record<string, unknown>
     | undefined;
   const i18nNamespace = formContext?.i18nNamespace as string | undefined;
-  const { t } = useTranslation([i18nNamespace || "common"]);
+  const { t, i18n } = useTranslation([
+    i18nNamespace || "common",
+    "views/settings",
+  ]);
 
   if (hidden) {
     return <div className="hidden">{children}</div>;
@@ -61,7 +97,14 @@ export function FieldTemplate(props: FieldTemplateProps) {
     (schema.anyOf || schema.oneOf) && (suppressMultiSchema || isNullableUnion);
 
   // Get translation path for this field
-  const translationPath = buildTranslationPath(fieldPathId.path);
+  const pathSegments = fieldPathId.path.filter(
+    (segment): segment is string => typeof segment === "string",
+  );
+  const translationPath = buildTranslationPath(pathSegments);
+  const filterObjectLabel = getFilterObjectLabel(pathSegments);
+  const translatedFilterObjectLabel = filterObjectLabel
+    ? getTranslatedLabel(filterObjectLabel, "object")
+    : undefined;
 
   // Use schema title/description as primary source (from JSON Schema)
   const schemaTitle = (schema as Record<string, unknown>).title as
@@ -75,29 +118,80 @@ export function FieldTemplate(props: FieldTemplateProps) {
   let finalLabel = label;
   if (i18nNamespace && translationPath) {
     const translationKey = `${translationPath}.label`;
-    const translatedLabel = t(translationKey, {
-      ns: i18nNamespace,
-      defaultValue: "",
-    });
-    // Only use translation if it's not the key itself (which means translation exists)
-    if (translatedLabel && translatedLabel !== translationKey) {
-      finalLabel = translatedLabel;
+    if (i18n.exists(translationKey, { ns: i18nNamespace })) {
+      finalLabel = t(translationKey, { ns: i18nNamespace });
     } else if (schemaTitle) {
       finalLabel = schemaTitle;
+    } else if (translatedFilterObjectLabel) {
+      const filtersIndex = pathSegments.indexOf("filters");
+      const isFilterObjectField =
+        filtersIndex > -1 && pathSegments.length === filtersIndex + 2;
+
+      if (isFilterObjectField) {
+        finalLabel = translatedFilterObjectLabel;
+      } else {
+        // Try to get translated field label, fall back to humanized
+        const fieldName = pathSegments[pathSegments.length - 1] || "";
+        let fieldLabel = schemaTitle;
+        if (!fieldLabel) {
+          const fieldTranslationKey = `${fieldName}.label`;
+          if (
+            i18nNamespace &&
+            i18n.exists(fieldTranslationKey, { ns: i18nNamespace })
+          ) {
+            fieldLabel = t(fieldTranslationKey, { ns: i18nNamespace });
+          } else {
+            fieldLabel = humanizeKey(fieldName);
+          }
+        }
+        if (fieldLabel) {
+          finalLabel = t("configForm.filters.objectFieldLabel", {
+            ns: "views/settings",
+            field: fieldLabel,
+            label: translatedFilterObjectLabel,
+          });
+        }
+      }
     }
   } else if (schemaTitle) {
     finalLabel = schemaTitle;
+  } else if (translatedFilterObjectLabel) {
+    const filtersIndex = pathSegments.indexOf("filters");
+    const isFilterObjectField =
+      filtersIndex > -1 && pathSegments.length === filtersIndex + 2;
+    if (isFilterObjectField) {
+      finalLabel = translatedFilterObjectLabel;
+    } else {
+      // Try to get translated field label, fall back to humanized
+      const fieldName = pathSegments[pathSegments.length - 1] || "";
+      let fieldLabel = schemaTitle;
+      if (!fieldLabel) {
+        const fieldTranslationKey = `${fieldName}.label`;
+        if (
+          i18nNamespace &&
+          i18n.exists(fieldTranslationKey, { ns: i18nNamespace })
+        ) {
+          fieldLabel = t(fieldTranslationKey, { ns: i18nNamespace });
+        } else {
+          fieldLabel = humanizeKey(fieldName);
+        }
+      }
+      if (fieldLabel) {
+        finalLabel = t("configForm.filters.objectFieldLabel", {
+          ns: "views/settings",
+          field: fieldLabel,
+          label: translatedFilterObjectLabel,
+        });
+      }
+    }
   }
 
   // Try to get translated description, falling back to schema description
   let finalDescription = description || "";
   if (i18nNamespace && translationPath) {
-    const translatedDesc = t(`${translationPath}.description`, {
-      ns: i18nNamespace,
-      defaultValue: "",
-    });
-    if (translatedDesc && translatedDesc !== `${translationPath}.description`) {
-      finalDescription = translatedDesc;
+    const descriptionKey = `${translationPath}.description`;
+    if (i18n.exists(descriptionKey, { ns: i18nNamespace })) {
+      finalDescription = t(descriptionKey, { ns: i18nNamespace });
     } else if (schemaDescription) {
       finalDescription = schemaDescription;
     }
@@ -114,18 +208,22 @@ export function FieldTemplate(props: FieldTemplateProps) {
       )}
       data-field-id={translationPath}
     >
-      {displayLabel && finalLabel && !isBoolean && !isMultiSchemaWrapper && (
-        <Label
-          htmlFor={id}
-          className={cn(
-            "text-sm font-medium",
-            errors && errors.props?.errors?.length > 0 && "text-destructive",
-          )}
-        >
-          {finalLabel}
-          {required && <span className="ml-1 text-destructive">*</span>}
-        </Label>
-      )}
+      {displayLabel &&
+        finalLabel &&
+        !isBoolean &&
+        !isMultiSchemaWrapper &&
+        !isObjectField && (
+          <Label
+            htmlFor={id}
+            className={cn(
+              "text-sm font-medium",
+              errors && errors.props?.errors?.length > 0 && "text-destructive",
+            )}
+          >
+            {finalLabel}
+            {required && <span className="ml-1 text-destructive">*</span>}
+          </Label>
+        )}
 
       {isBoolean ? (
         <div className="flex w-full items-center justify-between gap-4">

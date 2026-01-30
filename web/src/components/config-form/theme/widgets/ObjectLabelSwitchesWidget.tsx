@@ -3,8 +3,45 @@ import type { WidgetProps } from "@rjsf/utils";
 import { SwitchesWidget } from "./SwitchesWidget";
 import type { FormContext } from "./SwitchesWidget";
 import { getTranslatedLabel } from "@/utils/i18n";
+import type { FrigateConfig } from "@/types/frigateConfig";
 
+// Collect labelmap values (human-readable labels) from a labelmap object.
+function collectLabelmapLabels(labelmap: unknown, labels: Set<string>) {
+  if (!labelmap || typeof labelmap !== "object") {
+    return;
+  }
+
+  Object.values(labelmap as Record<string, unknown>).forEach((value) => {
+    if (typeof value === "string" && value.trim().length > 0) {
+      labels.add(value);
+    }
+  });
+}
+
+// Read labelmap labels from the global model and detector models.
+function getLabelmapLabels(context: FormContext): string[] {
+  const labels = new Set<string>();
+  const fullConfig = context.fullConfig as FrigateConfig | undefined;
+
+  if (fullConfig?.model) {
+    collectLabelmapLabels(fullConfig.model.labelmap, labels);
+  }
+
+  if (fullConfig?.detectors) {
+    // detectors is a map of detector configs; each may include a model labelmap.
+    Object.values(fullConfig.detectors).forEach((detector) => {
+      if (detector?.model?.labelmap) {
+        collectLabelmapLabels(detector.model.labelmap, labels);
+      }
+    });
+  }
+
+  return [...labels];
+}
+
+// Build the list of labels for switches (labelmap + configured track list).
 function getObjectLabels(context: FormContext): string[] {
+  const labelmapLabels = getLabelmapLabels(context);
   let cameraLabels: string[] = [];
   let globalLabels: string[] = [];
 
@@ -26,7 +63,8 @@ function getObjectLabels(context: FormContext): string[] {
   }
 
   const sourceLabels = cameraLabels.length > 0 ? cameraLabels : globalLabels;
-  return [...sourceLabels].sort();
+  const combinedLabels = new Set<string>([...labelmapLabels, ...sourceLabels]);
+  return [...combinedLabels].sort();
 }
 
 function getObjectLabelDisplayName(label: string): string {

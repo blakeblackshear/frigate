@@ -10,6 +10,126 @@ import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { cn, mergeUiSchema } from "@/lib/utils";
 
+// Runtime guard for object-like schema fragments
+const isSchemaObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+// Detects path-style uiSchema keys (e.g., "filters.*.mask")
+const isPathKey = (key: string) => key.includes(".") || key.includes("*");
+
+type UiSchemaPathOverride = {
+  path: string[];
+  value: UiSchema;
+};
+
+// Split uiSchema into normal keys vs path-based overrides
+const splitUiSchemaOverrides = (
+  uiSchema?: UiSchema,
+): { baseUiSchema?: UiSchema; pathOverrides: UiSchemaPathOverride[] } => {
+  if (!uiSchema) {
+    return { baseUiSchema: undefined, pathOverrides: [] };
+  }
+
+  const baseUiSchema: UiSchema = {};
+  const pathOverrides: UiSchemaPathOverride[] = [];
+
+  Object.entries(uiSchema).forEach(([key, value]) => {
+    if (isPathKey(key)) {
+      pathOverrides.push({
+        path: key.split("."),
+        value: value as UiSchema,
+      });
+    } else {
+      baseUiSchema[key] = value as UiSchema;
+    }
+  });
+
+  return { baseUiSchema, pathOverrides };
+};
+
+// Apply wildcard path overrides to uiSchema using the schema structure
+const applyUiSchemaPathOverrides = (
+  uiSchema: UiSchema,
+  schema: RJSFSchema,
+  overrides: UiSchemaPathOverride[],
+): UiSchema => {
+  if (overrides.length === 0) {
+    return uiSchema;
+  }
+
+  // Recursively apply a path override; supports "*" to match any property.
+  const applyOverride = (
+    targetUi: UiSchema,
+    targetSchema: RJSFSchema,
+    path: string[],
+    value: UiSchema,
+  ) => {
+    if (path.length === 0) {
+      Object.assign(targetUi, mergeUiSchema(targetUi, value));
+      return;
+    }
+
+    const [segment, ...rest] = path;
+    const schemaObj = targetSchema as Record<string, unknown>;
+
+    if (segment === "*") {
+      if (isSchemaObject(schemaObj.properties)) {
+        Object.entries(schemaObj.properties as Record<string, unknown>).forEach(
+          ([propertyName, propertySchema]) => {
+            if (!isSchemaObject(propertySchema)) {
+              return;
+            }
+            const existing =
+              (targetUi[propertyName] as UiSchema | undefined) || {};
+            targetUi[propertyName] = { ...existing };
+            applyOverride(
+              targetUi[propertyName] as UiSchema,
+              propertySchema as RJSFSchema,
+              rest,
+              value,
+            );
+          },
+        );
+      } else if (isSchemaObject(schemaObj.additionalProperties)) {
+        // For dict schemas, apply override to additionalProperties
+        const existing =
+          (targetUi.additionalProperties as UiSchema | undefined) || {};
+        targetUi.additionalProperties = { ...existing };
+        applyOverride(
+          targetUi.additionalProperties as UiSchema,
+          schemaObj.additionalProperties as RJSFSchema,
+          rest,
+          value,
+        );
+      }
+      return;
+    }
+
+    if (isSchemaObject(schemaObj.properties)) {
+      const propertySchema = (schemaObj.properties as Record<string, unknown>)[
+        segment
+      ];
+      if (isSchemaObject(propertySchema)) {
+        const existing = (targetUi[segment] as UiSchema | undefined) || {};
+        targetUi[segment] = { ...existing };
+        applyOverride(
+          targetUi[segment] as UiSchema,
+          propertySchema as RJSFSchema,
+          rest,
+          value,
+        );
+      }
+    }
+  };
+
+  const updated = { ...uiSchema };
+  overrides.forEach(({ path, value }) => {
+    applyOverride(updated, schema, path, value);
+  });
+
+  return updated;
+};
+
 export interface ConfigFormProps {
   /** JSON Schema for the form */
   schema: RJSFSchema;
@@ -89,10 +209,20 @@ export function ConfigForm({
     [schema, fieldOrder, effectiveHiddenFields, advancedFields, i18nNamespace],
   );
 
+  const { baseUiSchema, pathOverrides } = useMemo(
+    () => splitUiSchemaOverrides(customUiSchema),
+    [customUiSchema],
+  );
+
   // Merge generated uiSchema with custom overrides
   const finalUiSchema = useMemo(() => {
     // Start with generated schema
-    const merged = mergeUiSchema(generatedUiSchema, customUiSchema);
+    const expandedUiSchema = applyUiSchemaPathOverrides(
+      generatedUiSchema,
+      transformedSchema,
+      pathOverrides,
+    );
+    const merged = mergeUiSchema(expandedUiSchema, baseUiSchema);
 
     // Add field groups
     if (fieldGroups) {
@@ -105,7 +235,14 @@ export function ConfigForm({
       : { norender: true };
 
     return merged;
-  }, [generatedUiSchema, customUiSchema, showSubmit, fieldGroups]);
+  }, [
+    generatedUiSchema,
+    transformedSchema,
+    pathOverrides,
+    baseUiSchema,
+    showSubmit,
+    fieldGroups,
+  ]);
 
   // Create error transformer for user-friendly error messages
   const errorTransformer = useMemo(() => createErrorTransformer(i18n), [i18n]);

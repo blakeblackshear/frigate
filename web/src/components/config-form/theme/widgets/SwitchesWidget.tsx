@@ -9,11 +9,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 
 type FormContext = {
   cameraValue?: Record<string, unknown>;
   globalValue?: Record<string, unknown>;
-  fullCameraConfig?: Record<string, unknown>;
+  fullCameraConfig?: CameraConfig;
+  fullConfig?: FrigateConfig;
   t?: (key: string, options?: Record<string, unknown>) => string;
 };
 

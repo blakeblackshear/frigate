@@ -11,13 +11,39 @@ import { useState } from "react";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 /**
  * Build the i18n translation key path for nested fields using the field path
- * provided by RJSF. This avoids ambiguity with underscores in field names.
+ * provided by RJSF. This avoids ambiguity with underscores in field names and
+ * skips dynamic filter labels for per-object filter fields.
  */
 function buildTranslationPath(path: Array<string | number>): string {
-  return path.filter((segment) => typeof segment === "string").join(".");
+  const segments = path.filter(
+    (segment): segment is string => typeof segment === "string",
+  );
+
+  const filtersIndex = segments.indexOf("filters");
+  if (filtersIndex !== -1 && segments.length > filtersIndex + 2) {
+    const normalized = [
+      ...segments.slice(0, filtersIndex + 1),
+      ...segments.slice(filtersIndex + 2),
+    ];
+    return normalized.join(".");
+  }
+
+  return segments.join(".");
+}
+
+function getFilterObjectLabel(
+  pathSegments: Array<string | number>,
+): string | undefined {
+  const index = pathSegments.indexOf("filters");
+  if (index === -1 || pathSegments.length <= index + 1) {
+    return undefined;
+  }
+  const label = pathSegments[index + 1];
+  return typeof label === "string" && label.length > 0 ? label : undefined;
 }
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
@@ -30,7 +56,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   const [isOpen, setIsOpen] = useState(true);
 
-  const { t } = useTranslation([
+  const { t, i18n } = useTranslation([
     formContext?.i18nNamespace || "common",
     "config/groups",
   ]);
@@ -71,6 +97,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   let propertyName: string | undefined;
   let translationPath: string | undefined;
   const path = fieldPathId?.path;
+  const filterObjectLabel = path ? getFilterObjectLabel(path) : undefined;
+  const translatedFilterLabel = filterObjectLabel
+    ? getTranslatedLabel(filterObjectLabel, "object")
+    : undefined;
   if (path) {
     translationPath = buildTranslationPath(path);
     // Also get the last property name for fallback label generation
@@ -88,11 +118,13 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredLabel: string | undefined;
   if (i18nNs && translationPath) {
-    const translated = t(`${translationPath}.label`, {
-      ns: i18nNs,
-      defaultValue: "",
-    });
-    inferredLabel = translated || undefined;
+    const labelKey = `${translationPath}.label`;
+    if (i18n.exists(labelKey, { ns: i18nNs })) {
+      inferredLabel = t(labelKey, { ns: i18nNs });
+    }
+  }
+  if (!inferredLabel && translatedFilterLabel) {
+    inferredLabel = translatedFilterLabel;
   }
   const schemaTitle = schema?.title;
   const fallbackLabel =
@@ -101,11 +133,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredDescription: string | undefined;
   if (i18nNs && translationPath) {
-    const translated = t(`${translationPath}.description`, {
-      ns: i18nNs,
-      defaultValue: "",
-    });
-    inferredDescription = translated || undefined;
+    const descriptionKey = `${translationPath}.description`;
+    if (i18n.exists(descriptionKey, { ns: i18nNs })) {
+      inferredDescription = t(descriptionKey, { ns: i18nNs });
+    }
   }
   const schemaDescription = schema?.description;
   const fallbackDescription =

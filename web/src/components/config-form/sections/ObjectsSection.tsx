@@ -17,9 +17,21 @@ export const ObjectsSection = createConfigSection({
       "mask",
       "raw_mask",
       "genai.enabled_in_config",
+      "filters.*.mask",
+      "filters.*.raw_mask",
     ],
     advancedFields: ["filters"],
     uiSchema: {
+      "filters.*.min_area": {
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
+      "filters.*.max_area": {
+        "ui:options": {
+          suppressMultiSchema: true,
+        },
+      },
       track: {
         "ui:widget": "objectLabels",
         "ui:options": {

@@ -408,6 +408,7 @@ function getWidgetForField(
 function generateUiSchema(
   schema: RJSFSchema,
   options: UiSchemaOptions = {},
+  currentPath: string[] = [],
 ): UiSchema {
   const uiSchema: UiSchema = {};
   const {
@@ -417,6 +418,24 @@ function generateUiSchema(
     widgetMappings = {},
     includeDescriptions = true,
   } = options;
+
+  // Pre-split patterns for wildcard matching ("*") on nested paths
+  const hiddenFieldPatterns = hiddenFields.map((field) => field.split("."));
+  const advancedFieldPatterns = advancedFields.map((field) => field.split("."));
+
+  // Match a concrete path to a wildcard pattern of equal length
+  const matchesPathPattern = (path: string[], pattern: string[]) => {
+    if (path.length !== pattern.length) {
+      return false;
+    }
+
+    return pattern.every((segment, index) => {
+      if (segment === "*") {
+        return true;
+      }
+      return segment === path[index];
+    });
+  };
 
   const schemaObj = schema as Record<string, unknown>;
 
@@ -437,8 +456,15 @@ function generateUiSchema(
     const fSchema = fieldSchema as Record<string, unknown>;
     const fieldUiSchema: UiSchema = {};
 
+    // Track full path to support wildcard-based rules
+    const fieldPath = [...currentPath, fieldName];
+
     // Hidden fields
-    if (hiddenFields.includes(fieldName)) {
+    if (
+      hiddenFieldPatterns.some((pattern) =>
+        matchesPathPattern(fieldPath, pattern),
+      )
+    ) {
       fieldUiSchema["ui:widget"] = "hidden";
       uiSchema[fieldName] = fieldUiSchema;
       continue;
@@ -460,7 +486,11 @@ function generateUiSchema(
     }
 
     // Advanced fields - mark for collapsible
-    if (advancedFields.includes(fieldName)) {
+    if (
+      advancedFieldPatterns.some((pattern) =>
+        matchesPathPattern(fieldPath, pattern),
+      )
+    ) {
       fieldUiSchema["ui:options"] = {
         ...((fieldUiSchema["ui:options"] as object) || {}),
         advanced: true,
@@ -468,28 +498,25 @@ function generateUiSchema(
     }
 
     // Handle nested objects recursively
-    if (
-      schemaHasType(fSchema, "object") &&
-      isSchemaObject(fSchema.properties)
-    ) {
-      const nestedOptions: UiSchemaOptions = {
-        hiddenFields: hiddenFields
-          .filter((f) => f.startsWith(`${fieldName}.`))
-          .map((f) => f.replace(`${fieldName}.`, "")),
-        advancedFields: advancedFields
-          .filter((f) => f.startsWith(`${fieldName}.`))
-          .map((f) => f.replace(`${fieldName}.`, "")),
-        widgetMappings: Object.fromEntries(
-          Object.entries(widgetMappings)
-            .filter(([k]) => k.startsWith(`${fieldName}.`))
-            .map(([k, v]) => [k.replace(`${fieldName}.`, ""), v]),
-        ),
-        includeDescriptions,
-      };
-      Object.assign(
-        fieldUiSchema,
-        generateUiSchema(fieldSchema as RJSFSchema, nestedOptions),
-      );
+    if (schemaHasType(fSchema, "object")) {
+      if (isSchemaObject(fSchema.properties)) {
+        Object.assign(
+          fieldUiSchema,
+          generateUiSchema(fieldSchema as RJSFSchema, options, fieldPath),
+        );
+      }
+
+      if (isSchemaObject(fSchema.additionalProperties)) {
+        // For dict-like schemas (additionalProperties), use "*" for path matching
+        const additionalSchema = generateUiSchema(
+          fSchema.additionalProperties as RJSFSchema,
+          options,
+          [...fieldPath, "*"],
+        );
+        if (Object.keys(additionalSchema).length > 0) {
+          fieldUiSchema.additionalProperties = additionalSchema;
+        }
+      }
     }
 
     if (Object.keys(fieldUiSchema).length > 0) {

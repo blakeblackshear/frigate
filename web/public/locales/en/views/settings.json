@@ -1213,6 +1213,9 @@
       "summary": "Selected {{count}}",
       "empty": "No object labels available"
     },
+    "filters": {
+      "objectFieldLabel": "{{field}} for {{label}}"
+    },
     "zoneNames": {
       "summary": "Selected {{count}}",
       "empty": "No zones available"

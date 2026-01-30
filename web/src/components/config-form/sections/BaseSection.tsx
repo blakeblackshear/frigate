@@ -500,6 +500,7 @@ export function createConfigSection({
               level === "camera" && cameraName
                 ? config?.cameras?.[cameraName]
                 : undefined,
+            fullConfig: config,
             t,
           }}
         />
