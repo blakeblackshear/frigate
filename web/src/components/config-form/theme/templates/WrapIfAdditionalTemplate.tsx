@@ -1,0 +1,99 @@
+import {
+  ADDITIONAL_PROPERTY_FLAG,
+  FormContextType,
+  RJSFSchema,
+  StrictRJSFSchema,
+  WrapIfAdditionalTemplateProps,
+} from "@rjsf/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { LuTrash2 } from "react-icons/lu";
+
+export function WrapIfAdditionalTemplate<
+  T = unknown,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = FormContextType,
+>(props: WrapIfAdditionalTemplateProps<T, S, F>) {
+  const {
+    classNames,
+    style,
+    children,
+    disabled,
+    id,
+    label,
+    displayLabel,
+    onRemoveProperty,
+    onKeyRenameBlur,
+    readonly,
+    required,
+    schema,
+  } = props;
+
+  const { t } = useTranslation(["views/settings"]);
+
+  const additional = ADDITIONAL_PROPERTY_FLAG in schema;
+
+  if (!additional) {
+    return (
+      <div className={classNames} style={style}>
+        {children}
+      </div>
+    );
+  }
+
+  const keyId = `${id}-key`;
+  const keyLabel = t("configForm.additionalProperties.keyLabel", {
+    ns: "views/settings",
+  });
+  const valueLabel = t("configForm.additionalProperties.valueLabel", {
+    ns: "views/settings",
+  });
+  const keyPlaceholder = t("configForm.additionalProperties.keyPlaceholder", {
+    ns: "views/settings",
+  });
+  const removeLabel = t("configForm.additionalProperties.remove", {
+    ns: "views/settings",
+  });
+
+  return (
+    <div
+      className={cn("grid grid-cols-12 items-start gap-2", classNames)}
+      style={style}
+    >
+      <div className="col-span-12 space-y-2 md:col-span-5">
+        {displayLabel && <Label htmlFor={keyId}>{keyLabel}</Label>}
+        <Input
+          id={keyId}
+          name={keyId}
+          required={required}
+          defaultValue={label}
+          placeholder={keyPlaceholder}
+          disabled={disabled || readonly}
+          onBlur={!readonly ? onKeyRenameBlur : undefined}
+        />
+      </div>
+      <div className="col-span-12 space-y-2 md:col-span-6">
+        {displayLabel && <Label htmlFor={id}>{valueLabel}</Label>}
+        <div className="min-w-0">{children}</div>
+      </div>
+      <div className="col-span-12 flex items-center md:col-span-1 md:justify-end">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemoveProperty}
+          disabled={disabled || readonly}
+          aria-label={removeLabel}
+          title={removeLabel}
+        >
+          <LuTrash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default WrapIfAdditionalTemplate;

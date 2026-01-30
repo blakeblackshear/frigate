@@ -1,5 +1,10 @@
 // Field Template - wraps each form field with label and description
 import type { FieldTemplateProps, StrictRJSFSchema } from "@rjsf/utils";
+import {
+  getTemplate,
+  getUiOptions,
+  ADDITIONAL_PROPERTY_FLAG,
+} from "@rjsf/utils";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -51,6 +56,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
     id,
     label,
     children,
+    classNames,
+    style,
     errors,
     help,
     description,
@@ -61,6 +68,13 @@ export function FieldTemplate(props: FieldTemplateProps) {
     uiSchema,
     registry,
     fieldPathId,
+    onKeyRename,
+    onKeyRenameBlur,
+    onRemoveProperty,
+    rawDescription,
+    rawErrors,
+    disabled,
+    readonly,
   } = props;
 
   // Get i18n namespace from form context (passed through registry)
@@ -78,15 +92,16 @@ export function FieldTemplate(props: FieldTemplateProps) {
   }
 
   // Get UI options
-  const uiOptions = uiSchema?.["ui:options"] || {};
+  const uiOptionsFromSchema = uiSchema?.["ui:options"] || {};
 
   // Determine field characteristics
-  const isAdvanced = uiOptions.advanced === true;
+  const isAdvanced = uiOptionsFromSchema.advanced === true;
   const isBoolean =
     schema.type === "boolean" ||
     (Array.isArray(schema.type) && schema.type.includes("boolean"));
   const isObjectField = schema.type === "object";
   const isNullableUnion = isNullableUnionSchema(schema as StrictRJSFSchema);
+  const isAdditionalProperty = ADDITIONAL_PROPERTY_FLAG in schema;
   const suppressMultiSchema =
     (uiSchema?.["ui:options"] as Record<string, unknown> | undefined)
       ?.suppressMultiSchema === true;
@@ -199,60 +214,92 @@ export function FieldTemplate(props: FieldTemplateProps) {
     finalDescription = schemaDescription;
   }
 
-  return (
-    <div
-      className={cn(
-        "space-y-1",
-        isAdvanced && "border-l-2 border-muted pl-4",
-        isBoolean && "flex items-center justify-between gap-4",
-      )}
-      data-field-id={translationPath}
-    >
-      {displayLabel &&
-        finalLabel &&
-        !isBoolean &&
-        !isMultiSchemaWrapper &&
-        !isObjectField && (
-          <Label
-            htmlFor={id}
-            className={cn(
-              "text-sm font-medium",
-              errors && errors.props?.errors?.length > 0 && "text-destructive",
-            )}
-          >
-            {finalLabel}
-            {required && <span className="ml-1 text-destructive">*</span>}
-          </Label>
-        )}
+  const uiOptions = getUiOptions(uiSchema);
+  const WrapIfAdditionalTemplate = getTemplate(
+    "WrapIfAdditionalTemplate",
+    registry,
+    uiOptions,
+  );
 
-      {isBoolean ? (
-        <div className="flex w-full items-center justify-between gap-4">
-          <div className="space-y-0.5">
-            {displayLabel && finalLabel && (
-              <Label htmlFor={id} className="text-sm font-medium">
-                {finalLabel}
-                {required && <span className="ml-1 text-destructive">*</span>}
-              </Label>
-            )}
-            {finalDescription && !isMultiSchemaWrapper && (
+  return (
+    <WrapIfAdditionalTemplate
+      classNames={classNames}
+      style={style}
+      disabled={disabled}
+      id={id}
+      label={label}
+      displayLabel={displayLabel}
+      onKeyRename={onKeyRename}
+      onKeyRenameBlur={onKeyRenameBlur}
+      onRemoveProperty={onRemoveProperty}
+      rawDescription={rawDescription}
+      readonly={readonly}
+      required={required}
+      schema={schema}
+      uiSchema={uiSchema}
+      registry={registry}
+      rawErrors={rawErrors}
+      hideError={false}
+    >
+      <div
+        className={cn(
+          "space-y-1",
+          isAdvanced && "border-l-2 border-muted pl-4",
+          isBoolean && "flex items-center justify-between gap-4",
+        )}
+        data-field-id={translationPath}
+      >
+        {displayLabel &&
+          finalLabel &&
+          !isBoolean &&
+          !isMultiSchemaWrapper &&
+          !isObjectField &&
+          !isAdditionalProperty && (
+            <Label
+              htmlFor={id}
+              className={cn(
+                "text-sm font-medium",
+                errors &&
+                  errors.props?.errors?.length > 0 &&
+                  "text-destructive",
+              )}
+            >
+              {finalLabel}
+              {required && <span className="ml-1 text-destructive">*</span>}
+            </Label>
+          )}
+
+        {isBoolean ? (
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              {displayLabel && finalLabel && (
+                <Label htmlFor={id} className="text-sm font-medium">
+                  {finalLabel}
+                  {required && <span className="ml-1 text-destructive">*</span>}
+                </Label>
+              )}
+              {finalDescription && !isMultiSchemaWrapper && (
+                <p className="text-xs text-muted-foreground">
+                  {finalDescription}
+                </p>
+              )}
+            </div>
+            {children}
+          </div>
+        ) : (
+          <>
+            {children}
+            {finalDescription && !isMultiSchemaWrapper && !isObjectField && (
               <p className="text-xs text-muted-foreground">
                 {finalDescription}
               </p>
             )}
-          </div>
-          {children}
-        </div>
-      ) : (
-        <>
-          {children}
-          {finalDescription && !isMultiSchemaWrapper && !isObjectField && (
-            <p className="text-xs text-muted-foreground">{finalDescription}</p>
-          )}
-        </>
-      )}
+          </>
+        )}
 
-      {errors}
-      {help}
-    </div>
+        {errors}
+        {help}
+      </div>
+    </WrapIfAdditionalTemplate>
   );
 }

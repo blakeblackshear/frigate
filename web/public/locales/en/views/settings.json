@@ -1137,6 +1137,12 @@
       "system": "System",
       "integrations": "Integrations"
     },
+    "additionalProperties": {
+      "keyLabel": "Key",
+      "valueLabel": "Value",
+      "keyPlaceholder": "New key",
+      "remove": "Remove"
+    },
     "sections": {
       "detect": "Detection",
       "record": "Recording",

@@ -1,4 +1,5 @@
 // Object Field Template - renders nested object fields with i18n support
+import { canExpand } from "@rjsf/utils";
 import type { ObjectFieldTemplateProps } from "@rjsf/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { LuChevronDown, LuChevronRight } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -47,7 +48,18 @@ function getFilterObjectLabel(
 }
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
-  const { title, description, properties, uiSchema, registry, schema } = props;
+  const {
+    title,
+    description,
+    properties,
+    uiSchema,
+    registry,
+    schema,
+    onAddProperty,
+    formData,
+    disabled,
+    readonly,
+  } = props;
   type FormContext = { i18nNamespace?: string };
   const formContext = registry?.formContext as FormContext | undefined;
 
@@ -59,6 +71,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const { t, i18n } = useTranslation([
     formContext?.i18nNamespace || "common",
     "config/groups",
+    "common",
   ]);
 
   // Extract domain from i18nNamespace (e.g., "config/audio" -> "audio")
@@ -211,11 +224,35 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     );
   };
 
+  const renderAddButton = () => {
+    const canAdd =
+      Boolean(onAddProperty) && canExpand(schema, uiSchema, formData);
+
+    if (!canAdd) {
+      return null;
+    }
+
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={onAddProperty}
+        disabled={disabled || readonly}
+        className="gap-2"
+      >
+        <LuPlus className="h-4 w-4" />
+        {t("add", { ns: "common", defaultValue: "Add" })}
+      </Button>
+    );
+  };
+
   // Root level renders children directly
   if (isRoot) {
     return (
       <div className="space-y-6">
         {renderGroupedFields(regularProps)}
+        {renderAddButton()}
 
         {advancedProps.length > 0 && (
           <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -264,6 +301,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
             {renderGroupedFields(regularProps)}
+            {renderAddButton()}
 
             {advancedProps.length > 0 && (
               <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>

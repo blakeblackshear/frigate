@@ -32,6 +32,7 @@ import { DescriptionFieldTemplate } from "./templates/DescriptionFieldTemplate";
 import { TitleFieldTemplate } from "./templates/TitleFieldTemplate";
 import { ErrorListTemplate } from "./templates/ErrorListTemplate";
 import { MultiSchemaFieldTemplate } from "./templates/MultiSchemaFieldTemplate";
+import { WrapIfAdditionalTemplate } from "./templates/WrapIfAdditionalTemplate";
 
 export interface FrigateTheme {
   widgets: RegistryWidgetsType;
@@ -70,6 +71,7 @@ export const frigateTheme: FrigateTheme = {
     TitleFieldTemplate: TitleFieldTemplate,
     ErrorListTemplate: ErrorListTemplate,
     MultiSchemaFieldTemplate: MultiSchemaFieldTemplate,
+    WrapIfAdditionalTemplate: WrapIfAdditionalTemplate,
   },
   fields: {},
 };
