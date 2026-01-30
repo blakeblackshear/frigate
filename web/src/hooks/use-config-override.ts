@@ -3,23 +3,25 @@ import { useMemo } from "react";
 import isEqual from "lodash/isEqual";
 import get from "lodash/get";
 import set from "lodash/set";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { JsonObject, JsonValue } from "@/types/configForm";
+import { isJsonObject } from "@/lib/utils";
 
 const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
 
-function stripInternalFields(value: unknown): unknown {
+function stripInternalFields(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {
     return value.map(stripInternalFields);
   }
 
-  if (value && typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-    const cleaned: Record<string, unknown> = {};
+  if (isJsonObject(value)) {
+    const obj = value;
+    const cleaned: JsonObject = {};
     for (const [key, val] of Object.entries(obj)) {
       if (INTERNAL_FIELD_SUFFIXES.some((suffix) => key.endsWith(suffix))) {
         continue;
       }
-      cleaned[key] = stripInternalFields(val);
+      cleaned[key] = stripInternalFields(val as JsonValue);
     }
     return cleaned;
   }
@@ -27,8 +29,8 @@ function stripInternalFields(value: unknown): unknown {
   return value;
 }
 
-export function normalizeConfigValue(value: unknown): unknown {
-  return stripInternalFields(value);
+export function normalizeConfigValue(value: unknown): JsonValue {
+  return stripInternalFields(value as JsonValue);
 }
 
 export interface OverrideStatus {
@@ -51,15 +53,15 @@ export interface UseConfigOverrideOptions {
   compareFields?: string[];
 }
 
-function pickFields(value: unknown, fields: string[]): Record<string, unknown> {
+function pickFields(value: unknown, fields: string[]): JsonObject {
   if (!fields || fields.length === 0) {
     return {};
   }
 
-  const result: Record<string, unknown> = {};
+  const result: JsonObject = {};
   fields.forEach((path) => {
     if (!path) return;
-    const fieldValue = get(value as Record<string, unknown>, path);
+    const fieldValue = get(value as JsonObject, path);
     if (fieldValue !== undefined) {
       set(result, path, fieldValue);
     }

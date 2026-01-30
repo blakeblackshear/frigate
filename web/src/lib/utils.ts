@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { UiSchema } from "@rjsf/utils";
+import { UiSchema } from "@rjsf/utils";
+import { JsonObject } from "@/types/configForm";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,4 +47,11 @@ export function mergeUiSchema(
   }
 
   return result;
+}
+
+/**
+ * Type guard to check if a value is a JsonObject (non-array object)
+ */
+export function isJsonObject(value: unknown): value is JsonObject {
+  return !!value && typeof value === "object" && !Array.isArray(value);
 }

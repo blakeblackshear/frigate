@@ -33,6 +33,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { applySchemaDefaults } from "@/lib/config-schema";
+import { isJsonObject } from "@/lib/utils";
+import { ConfigSectionData, JsonObject, JsonValue } from "@/types/configForm";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -130,10 +132,9 @@ export function createConfigSection({
   }: BaseSectionProps) {
     const { t } = useTranslation([i18nNamespace, "views/settings", "common"]);
     const [isOpen, setIsOpen] = useState(!defaultCollapsed);
-    const [pendingData, setPendingData] = useState<Record<
-      string,
-      unknown
-    > | null>(null);
+    const [pendingData, setPendingData] = useState<ConfigSectionData | null>(
+      null,
+    );
     const [isSaving, setIsSaving] = useState(false);
     const [formKey, setFormKey] = useState(0);
     const isResettingRef = useRef(false);
@@ -175,11 +176,8 @@ export function createConfigSection({
     }, [config, level, cameraName]);
 
     const sanitizeSectionData = useCallback(
-      (data: Record<string, unknown>) => {
-        const normalized = normalizeConfigValue(data) as Record<
-          string,
-          unknown
-        >;
+      (data: ConfigSectionData) => {
+        const normalized = normalizeConfigValue(data) as ConfigSectionData;
         if (
           !sectionConfig.hiddenFields ||
           sectionConfig.hiddenFields.length === 0
@@ -187,7 +185,7 @@ export function createConfigSection({
           return normalized;
         }
 
-        const cleaned = cloneDeep(normalized);
+        const cleaned = cloneDeep(normalized) as ConfigSectionData;
         sectionConfig.hiddenFields.forEach((path) => {
           if (!path) return;
           unset(cleaned, path);
@@ -245,18 +243,12 @@ export function createConfigSection({
           return current;
         }
 
-        if (typeof current === "object") {
-          const currentObj = current as Record<string, unknown>;
-          const baseObj =
-            base && typeof base === "object"
-              ? (base as Record<string, unknown>)
-              : undefined;
-          const defaultsObj =
-            defaults && typeof defaults === "object"
-              ? (defaults as Record<string, unknown>)
-              : undefined;
+        if (isJsonObject(current)) {
+          const currentObj = current;
+          const baseObj = isJsonObject(base) ? base : undefined;
+          const defaultsObj = isJsonObject(defaults) ? defaults : undefined;
 
-          const result: Record<string, unknown> = {};
+          const result: JsonObject = {};
           for (const [key, value] of Object.entries(currentObj)) {
             const overrideValue = buildOverrides(
               value,
@@ -264,7 +256,7 @@ export function createConfigSection({
               defaultsObj ? defaultsObj[key] : undefined,
             );
             if (overrideValue !== undefined) {
-              result[key] = overrideValue;
+              result[key] = overrideValue as JsonValue;
             }
           }
 
@@ -305,9 +297,7 @@ export function createConfigSection({
           setPendingData(null);
           return;
         }
-        const sanitizedData = sanitizeSectionData(
-          data as Record<string, unknown>,
-        );
+        const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
         if (isEqual(formData, sanitizedData)) {
           setPendingData(null);
           return;

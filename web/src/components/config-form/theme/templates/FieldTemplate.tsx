@@ -1,5 +1,5 @@
 // Field Template - wraps each form field with label and description
-import type { FieldTemplateProps, StrictRJSFSchema } from "@rjsf/utils";
+import { FieldTemplateProps, StrictRJSFSchema, UiSchema } from "@rjsf/utils";
 import {
   getTemplate,
   getUiOptions,
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { isNullableUnionSchema } from "../fields/nullableUtils";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { ConfigFormContext } from "@/types/configForm";
 
 /**
  * Build the i18n translation key path for nested fields using the field path
@@ -78,9 +79,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   } = props;
 
   // Get i18n namespace from form context (passed through registry)
-  const formContext = registry?.formContext as
-    | Record<string, unknown>
-    | undefined;
+  const formContext = registry?.formContext as ConfigFormContext | undefined;
   const i18nNamespace = formContext?.i18nNamespace as string | undefined;
   const { t, i18n } = useTranslation([
     i18nNamespace || "common",
@@ -103,7 +102,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const isNullableUnion = isNullableUnionSchema(schema as StrictRJSFSchema);
   const isAdditionalProperty = ADDITIONAL_PROPERTY_FLAG in schema;
   const suppressMultiSchema =
-    (uiSchema?.["ui:options"] as Record<string, unknown> | undefined)
+    (uiSchema?.["ui:options"] as UiSchema["ui:options"] | undefined)
       ?.suppressMultiSchema === true;
 
   // Only suppress labels/descriptions if this is a multi-schema field (anyOf/oneOf) with suppressMultiSchema flag
@@ -122,12 +121,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
     : undefined;
 
   // Use schema title/description as primary source (from JSON Schema)
-  const schemaTitle = (schema as Record<string, unknown>).title as
-    | string
-    | undefined;
-  const schemaDescription = (schema as Record<string, unknown>).description as
-    | string
-    | undefined;
+  const schemaTitle = schema.title;
+  const schemaDescription = schema.description;
 
   // Try to get translated label, falling back to schema title, then RJSF label
   let finalLabel = label;

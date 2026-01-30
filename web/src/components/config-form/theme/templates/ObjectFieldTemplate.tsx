@@ -13,6 +13,7 @@ import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { ConfigFormContext } from "@/types/configForm";
 
 /**
  * Build the i18n translation key path for nested fields using the field path
@@ -60,8 +61,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     disabled,
     readonly,
   } = props;
-  type FormContext = { i18nNamespace?: string };
-  const formContext = registry?.formContext as FormContext | undefined;
+  const formContext = registry?.formContext as ConfigFormContext | undefined;
 
   // Check if this is a root-level object
   const isRoot = registry?.rootSchema === schema;

@@ -1,9 +1,10 @@
 // Object Label Switches Widget - For selecting objects via switches
-import type { WidgetProps } from "@rjsf/utils";
+import { WidgetProps } from "@rjsf/utils";
 import { SwitchesWidget } from "./SwitchesWidget";
-import type { FormContext } from "./SwitchesWidget";
+import { FormContext } from "./SwitchesWidget";
 import { getTranslatedLabel } from "@/utils/i18n";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { JsonObject } from "@/types/configForm";
 
 // Collect labelmap values (human-readable labels) from a labelmap object.
 function collectLabelmapLabels(labelmap: unknown, labels: Set<string>) {
@@ -11,7 +12,7 @@ function collectLabelmapLabels(labelmap: unknown, labels: Set<string>) {
     return;
   }
 
-  Object.values(labelmap as Record<string, unknown>).forEach((value) => {
+  Object.values(labelmap as JsonObject).forEach((value) => {
     if (typeof value === "string" && value.trim().length > 0) {
       labels.add(value);
     }
@@ -47,18 +48,30 @@ function getObjectLabels(context: FormContext): string[] {
 
   if (context) {
     // context.cameraValue and context.globalValue should be the entire objects section
-    const trackValue = context.cameraValue?.track;
-    if (Array.isArray(trackValue)) {
-      cameraLabels = trackValue.filter(
-        (item): item is string => typeof item === "string",
-      );
+    if (
+      context.cameraValue &&
+      typeof context.cameraValue === "object" &&
+      !Array.isArray(context.cameraValue)
+    ) {
+      const trackValue = (context.cameraValue as JsonObject).track;
+      if (Array.isArray(trackValue)) {
+        cameraLabels = trackValue.filter(
+          (item): item is string => typeof item === "string",
+        );
+      }
     }
 
-    const globalTrackValue = context.globalValue?.track;
-    if (Array.isArray(globalTrackValue)) {
-      globalLabels = globalTrackValue.filter(
-        (item): item is string => typeof item === "string",
-      );
+    if (
+      context.globalValue &&
+      typeof context.globalValue === "object" &&
+      !Array.isArray(context.globalValue)
+    ) {
+      const globalTrackValue = (context.globalValue as JsonObject).track;
+      if (Array.isArray(globalTrackValue)) {
+        globalLabels = globalTrackValue.filter(
+          (item): item is string => typeof item === "string",
+        );
+      }
     }
   }
 

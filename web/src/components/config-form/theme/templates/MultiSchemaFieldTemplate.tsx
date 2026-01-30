@@ -1,10 +1,11 @@
 // Custom MultiSchemaFieldTemplate to handle anyOf [Type, null] fields
 // Renders simple nullable types as single inputs instead of dropdowns
 
-import type {
+import {
   MultiSchemaFieldTemplateProps,
   StrictRJSFSchema,
   FormContextType,
+  UiSchema,
 } from "@rjsf/utils";
 import { isNullableUnionSchema } from "../fields/nullableUtils";
 
@@ -23,7 +24,7 @@ export function MultiSchemaFieldTemplate<
   const { schema, selector, optionSchemaField, uiSchema } = props;
 
   const uiOptions = uiSchema?.["ui:options"] as
-    | Record<string, unknown>
+    | UiSchema["ui:options"]
     | undefined;
   const suppressMultiSchema = uiOptions?.suppressMultiSchema === true;
 

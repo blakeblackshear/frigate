@@ -1,5 +1,5 @@
 // Generic Switches Widget - Reusable component for selecting from any list of entities
-import type { WidgetProps } from "@rjsf/utils";
+import { WidgetProps } from "@rjsf/utils";
 import { useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,14 @@ import {
 } from "@/components/ui/collapsible";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import { ConfigFormContext } from "@/types/configForm";
 
-type FormContext = {
-  cameraValue?: Record<string, unknown>;
-  globalValue?: Record<string, unknown>;
+type FormContext = Pick<
+  ConfigFormContext,
+  "cameraValue" | "globalValue" | "fullCameraConfig" | "fullConfig" | "t"
+> & {
   fullCameraConfig?: CameraConfig;
   fullConfig?: FrigateConfig;
-  t?: (key: string, options?: Record<string, unknown>) => string;
 };
 
 export type { FormContext };

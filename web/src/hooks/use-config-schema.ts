@@ -3,11 +3,22 @@
 
 import { useMemo } from "react";
 import useSWR from "swr";
-import type { RJSFSchema } from "@rjsf/utils";
+import { RJSFSchema } from "@rjsf/utils";
 import { resolveAndCleanSchema } from "@/lib/config-schema";
 
 // Cache for resolved section schemas - keyed by schema reference + section key
 const sectionSchemaCache = new WeakMap<RJSFSchema, Map<string, RJSFSchema>>();
+
+type SchemaWithDefinitions = RJSFSchema & {
+  $defs?: Record<string, RJSFSchema>;
+  definitions?: Record<string, RJSFSchema>;
+  properties?: Record<string, RJSFSchema>;
+};
+
+const getSchemaDefinitions = (schema: RJSFSchema): Record<string, RJSFSchema> =>
+  (schema as SchemaWithDefinitions).$defs ||
+  (schema as SchemaWithDefinitions).definitions ||
+  {};
 
 /**
  * Extracts and resolves a section schema from the full config schema
@@ -32,50 +43,43 @@ function extractSectionSchema(
     return schemaCache.get(cacheKey)!;
   }
 
-  const schemaObj = schema as Record<string, unknown>;
-  const defs = (schemaObj.$defs || schemaObj.definitions || {}) as Record<
-    string,
-    unknown
-  >;
+  const defs = getSchemaDefinitions(schema);
+  const schemaObj = schema as SchemaWithDefinitions;
 
-  let sectionDef: Record<string, unknown> | null = null;
+  let sectionDef: RJSFSchema | null = null;
 
   // For camera level, get section from CameraConfig in $defs
   if (level === "camera") {
-    const cameraConfigDef = defs.CameraConfig as
-      | Record<string, unknown>
-      | undefined;
+    const cameraConfigDef = defs.CameraConfig;
     if (cameraConfigDef?.properties) {
-      const props = cameraConfigDef.properties as Record<string, unknown>;
+      const props = cameraConfigDef.properties;
       const sectionProp = props[sectionPath];
 
       if (sectionProp && typeof sectionProp === "object") {
-        const refProp = sectionProp as Record<string, unknown>;
-        if (refProp.$ref && typeof refProp.$ref === "string") {
-          const refPath = (refProp.$ref as string)
+        if ("$ref" in sectionProp && typeof sectionProp.$ref === "string") {
+          const refPath = sectionProp.$ref
             .replace(/^#\/\$defs\//, "")
             .replace(/^#\/definitions\//, "");
-          sectionDef = defs[refPath] as Record<string, unknown>;
+          sectionDef = defs[refPath] || null;
         } else {
-          sectionDef = sectionProp as Record<string, unknown>;
+          sectionDef = sectionProp;
         }
       }
     }
   } else {
     // For global level, get from root properties
     if (schemaObj.properties) {
-      const props = schemaObj.properties as Record<string, unknown>;
+      const props = schemaObj.properties;
       const sectionProp = props[sectionPath];
 
       if (sectionProp && typeof sectionProp === "object") {
-        const refProp = sectionProp as Record<string, unknown>;
-        if (refProp.$ref && typeof refProp.$ref === "string") {
-          const refPath = (refProp.$ref as string)
+        if ("$ref" in sectionProp && typeof sectionProp.$ref === "string") {
+          const refPath = sectionProp.$ref
             .replace(/^#\/\$defs\//, "")
             .replace(/^#\/definitions\//, "");
-          sectionDef = defs[refPath] as Record<string, unknown>;
+          sectionDef = defs[refPath] || null;
         } else {
-          sectionDef = sectionProp as Record<string, unknown>;
+          sectionDef = sectionProp;
         }
       }
     }
@@ -84,10 +88,10 @@ function extractSectionSchema(
   if (!sectionDef) return null;
 
   // Include $defs for nested references and resolve them
-  const schemaWithDefs = {
+  const schemaWithDefs: RJSFSchema = {
     ...sectionDef,
     $defs: defs,
-  } as RJSFSchema;
+  };
 
   // Resolve all references and strip $defs from result
   const resolved = resolveAndCleanSchema(schemaWithDefs);

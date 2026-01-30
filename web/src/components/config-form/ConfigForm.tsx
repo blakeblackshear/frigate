@@ -9,10 +9,32 @@ import { createErrorTransformer } from "@/lib/config-schema/errorMessages";
 import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { cn, mergeUiSchema } from "@/lib/utils";
+import type { ConfigFormContext } from "@/types/configForm";
 
-// Runtime guard for object-like schema fragments
-const isSchemaObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+type SchemaWithProperties = RJSFSchema & {
+  properties: Record<string, RJSFSchema>;
+};
+
+type SchemaWithAdditionalProperties = RJSFSchema & {
+  additionalProperties: RJSFSchema;
+};
+
+// Runtime guards for schema fragments
+const hasSchemaProperties = (
+  schema: RJSFSchema,
+): schema is SchemaWithProperties =>
+  typeof schema === "object" &&
+  schema !== null &&
+  typeof schema.properties === "object" &&
+  schema.properties !== null;
+
+const hasSchemaAdditionalProperties = (
+  schema: RJSFSchema,
+): schema is SchemaWithAdditionalProperties =>
+  typeof schema === "object" &&
+  schema !== null &&
+  typeof schema.additionalProperties === "object" &&
+  schema.additionalProperties !== null;
 
 // Detects path-style uiSchema keys (e.g., "filters.*.mask")
 const isPathKey = (key: string) => key.includes(".") || key.includes("*");
@@ -70,34 +92,31 @@ const applyUiSchemaPathOverrides = (
     }
 
     const [segment, ...rest] = path;
-    const schemaObj = targetSchema as Record<string, unknown>;
+    const schemaObj = targetSchema;
 
     if (segment === "*") {
-      if (isSchemaObject(schemaObj.properties)) {
-        Object.entries(schemaObj.properties as Record<string, unknown>).forEach(
+      if (hasSchemaProperties(schemaObj)) {
+        Object.entries(schemaObj.properties).forEach(
           ([propertyName, propertySchema]) => {
-            if (!isSchemaObject(propertySchema)) {
-              return;
-            }
             const existing =
               (targetUi[propertyName] as UiSchema | undefined) || {};
             targetUi[propertyName] = { ...existing };
             applyOverride(
               targetUi[propertyName] as UiSchema,
-              propertySchema as RJSFSchema,
+              propertySchema,
               rest,
               value,
             );
           },
         );
-      } else if (isSchemaObject(schemaObj.additionalProperties)) {
+      } else if (hasSchemaAdditionalProperties(schemaObj)) {
         // For dict schemas, apply override to additionalProperties
         const existing =
           (targetUi.additionalProperties as UiSchema | undefined) || {};
         targetUi.additionalProperties = { ...existing };
         applyOverride(
           targetUi.additionalProperties as UiSchema,
-          schemaObj.additionalProperties as RJSFSchema,
+          schemaObj.additionalProperties,
           rest,
           value,
         );
@@ -105,16 +124,14 @@ const applyUiSchemaPathOverrides = (
       return;
     }
 
-    if (isSchemaObject(schemaObj.properties)) {
-      const propertySchema = (schemaObj.properties as Record<string, unknown>)[
-        segment
-      ];
-      if (isSchemaObject(propertySchema)) {
+    if (hasSchemaProperties(schemaObj)) {
+      const propertySchema = schemaObj.properties[segment];
+      if (propertySchema) {
         const existing = (targetUi[segment] as UiSchema | undefined) || {};
         targetUi[segment] = { ...existing };
         applyOverride(
           targetUi[segment] as UiSchema,
-          propertySchema as RJSFSchema,
+          propertySchema,
           rest,
           value,
         );
@@ -162,7 +179,7 @@ export interface ConfigFormProps {
   /** Live validation mode */
   liveValidate?: boolean;
   /** Form context passed to all widgets */
-  formContext?: Record<string, unknown>;
+  formContext?: ConfigFormContext;
   /** i18n namespace for field labels */
   i18nNamespace?: string;
 }
