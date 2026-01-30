@@ -633,7 +633,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera, frame_name, _, _, motion_boxes, _ = data
 
-        if not camera or len(motion_boxes) == 0 or camera not in self.config.cameras:
+        if not camera or camera not in self.config.cameras:
             return
 
         camera_config = self.config.cameras[camera]
@@ -660,8 +660,10 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         for processor in self.realtime_processors:
-            if dedicated_lpr_enabled and isinstance(
-                processor, LicensePlateRealTimeProcessor
+            if (
+                dedicated_lpr_enabled
+                and len(motion_boxes) > 0
+                and isinstance(processor, LicensePlateRealTimeProcessor)
             ):
                 processor.process_frame(camera, yuv_frame, True)
 
