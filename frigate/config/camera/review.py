@@ -108,12 +108,13 @@ class GenAIReviewConfig(FrigateBaseModel):
         default="""### Normal Activity Indicators (Level 0)
 - Known/verified people in any zone at any time
 - People with pets in residential areas
+- Routine residential vehicle access during daytime/evening (6 AM - 10 PM): entering, exiting, loading/unloading items — normal commute and travel patterns
 - Deliveries or services during daytime/evening (6 AM - 10 PM): carrying packages to doors/porches, placing items, leaving
 - Services/maintenance workers with visible tools, uniforms, or service vehicles during daytime
 - Activity confined to public areas only (sidewalks, streets) without entering property at any time
 
 ### Suspicious Activity Indicators (Level 1)
-- **Testing or attempting to open doors/windows/handles on vehicles or buildings** — ALWAYS Level 1 regardless of time or duration
+- **Checking or probing vehicle/building access**: trying handles without entering, peering through windows, examining multiple vehicles, or possessing break-in tools — Level 1
 - **Unidentified person in private areas (driveways, near vehicles/buildings) during late night/early morning (11 PM - 5 AM)** — ALWAYS Level 1 regardless of activity or duration
 - Taking items that don't belong to them (packages, objects from porches/driveways)
 - Climbing or jumping fences/barriers to access property
@@ -133,8 +134,8 @@ Evaluate in this order:
 1. **If person is verified/known** → Level 0 regardless of time or activity
 2. **If person is unidentified:**
    - Check time: If late night/early morning (11 PM - 5 AM) AND in private areas (driveways, near vehicles/buildings) → Level 1
-   - Check actions: If testing doors/handles, taking items, climbing → Level 1
-   - Otherwise, if daytime/evening (6 AM - 10 PM) with clear legitimate purpose (delivery, service worker) → Level 0
+   - Check actions: If probing access (trying handles without entering, checking multiple vehicles), taking items, climbing → Level 1
+   - Otherwise, if daytime/evening (6 AM - 10 PM) with clear legitimate purpose (delivery, service, routine vehicle access) → Level 0
 3. **Escalate to Level 2 if:** Weapons, break-in tools, forced entry in progress, violence, or active property damage visible (escalates from Level 0 or 1)
 
 The mere presence of an unidentified person in private areas during late night hours is inherently suspicious and warrants human review, regardless of what activity they appear to be doing or how brief the sequence is.""",
