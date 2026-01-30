@@ -381,6 +381,7 @@ Start with ["Why isn't my license plate being detected and recognized?"](#why-is
      ```yaml
      lpr:
        enabled: true
+       device: CPU
        debug_save_plates: true
      ```
 
