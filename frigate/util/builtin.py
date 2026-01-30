@@ -129,7 +129,7 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
     return arg if isinstance(arg, list) else shlex.split(arg)
 
 
-def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
+def load_labels(path: Optional[str], encoding="utf-8", prefill=91, indexed: bool | None = None):
     """Loads labels from file (with or without index numbers).
     Args:
       path: path to label file.
@@ -146,11 +146,12 @@ def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
         if not lines:
             return {}
 
-        if lines[0].split(" ", maxsplit=1)[0].isdigit():
+        if indexed != False and lines[0].split(" ", maxsplit=1)[0].isdigit():
             pairs = [line.split(" ", maxsplit=1) for line in lines]
             labels.update({int(index): label.strip() for index, label in pairs})
         else:
             labels.update({index: line.strip() for index, line in enumerate(lines)})
+
         return labels
 
 

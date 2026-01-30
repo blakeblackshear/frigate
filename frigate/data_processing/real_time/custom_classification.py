@@ -97,7 +97,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             self.interpreter.allocate_tensors()
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
-        self.labelmap = load_labels(labelmap_path, prefill=0)
+        self.labelmap = load_labels(labelmap_path, prefill=0, indexed=False)
         self.classifications_per_second.start()
 
     def __update_metrics(self, duration: float) -> None:
@@ -398,7 +398,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             self.interpreter.allocate_tensors()
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
-        self.labelmap = load_labels(labelmap_path, prefill=0)
+        self.labelmap = load_labels(labelmap_path, prefill=0, indexed=False)
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()
