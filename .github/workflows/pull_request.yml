@@ -95,6 +95,7 @@ jobs:
 
   python_tests:
     runs-on: ubuntu-latest
+    needs: devcontainer
     name: Python Tests
     steps:
       - name: Check out code
