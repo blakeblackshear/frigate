@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 MOCK_MODULES = [
-    # "cv2",
+    "cv2",
     # "numpy",
     "zmq",
     "peewee",
@@ -22,8 +22,10 @@ MOCK_MODULES = [
     "tensorflow.lite.python",
     "tensorflow.lite.python.interpreter",
 ]
-
 ORIGINAL_MODULES = {mod: sys.modules[mod] for mod in MOCK_MODULES if mod in sys.modules}
+
+WIDTH = 720
+HEIGHT = 1280
 
 
 class TestCustomObjectClassificationZones(unittest.TestCase):
@@ -213,14 +215,24 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         pydantic_mock.BaseModel = type("BaseModel", (), {})
         pydantic_mock.Field = MagicMock(return_value=None)
         pydantic_mock.ConfigDict = MagicMock(return_value={})
+        # Create a better mock for cv2 to handle calculations
+        cv2_mock = MagicMock()
+        def cvtColor(frame, color):
+            return self.np.zeros((WIDTH, HEIGHT, 3), dtype=self.np.uint8)
+        def resize(frame, size):
+            return self.np.zeros((*size, 3), dtype=self.np.uint8)
+        cv2_mock.cvtColor = cvtColor
+        cv2_mock.resize = resize
 
         for mod in MOCK_MODULES:
             sys.modules[mod] = MagicMock()
         sys.modules["pydantic"] = pydantic_mock
+        sys.modules["cv2"] = cv2_mock
 
         # Import numpy after it's been mocked
         import numpy as np
-
+        import cv2
+        
         self.np = np
 
         try:
@@ -288,7 +300,7 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         ]
 
         # Create frame
-        frame = self.np.zeros((720, 1280, 3), dtype=self.np.uint8)
+        frame = self.np.zeros((WIDTH, HEIGHT, 3), dtype=self.np.uint8)
 
         # Mock TFLite
         processor.interpreter = MagicMock()

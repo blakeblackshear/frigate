@@ -72,30 +72,8 @@ jobs:
         run: |
           ruff check frigate migrations docker *.py
 
-  devcontainer:
-    runs-on: ubuntu-latest
-    name: Build devcontainer
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pre-build devcontainer image
-        uses: devcontainers/ci@v0.3
-        with:
-          imageName: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
-          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
-          push: always
-
   python_tests:
     runs-on: ubuntu-latest
-    needs: devcontainer
     name: Python Tests
     steps:
       - name: Check out code
@@ -108,15 +86,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pre-Run mypy in devcontainer
+      - name: Build devcontainer image and run checks
         uses: devcontainers/ci@v0.3
         with:
+          imageName: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
           cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
-          push: never
-          runCmd: python3 -u -m mypy --config-file frigate/mypy.ini frigate
-      - name: Pre-Run mypy in devcontainer
-        uses: devcontainers/ci@v0.3
-        with:
-          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
-          push: never
-          runCmd: python3 -u -m unittest
+          push: always
+          runCmd: |-
+            python3 -u -m mypy --config-file frigate/mypy.ini frigate &&
+            python3 -u -m unittest
