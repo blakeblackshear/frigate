@@ -26,7 +26,7 @@ MOCK_MODULES = [
     "tensorflow.lite.python.interpreter",
 ]
 
-ORIGINAL_MODULES = {mod: sys.modules[mod] for mod in MOCK_MODULES}}
+ORIGINAL_MODULES = {mod: sys.modules[mod] for mod in MOCK_MODULES}
 
 
 class TestCustomObjectClassificationZones(unittest.TestCase):
