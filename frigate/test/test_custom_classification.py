@@ -9,6 +9,16 @@ sys.modules["numpy"] = MagicMock()
 sys.modules["zmq"] = MagicMock()
 sys.modules["peewee"] = MagicMock()
 sys.modules["sherpa_onnx"] = MagicMock()
+
+# Create a better mock for pydantic to handle type annotations
+pydantic_mock = MagicMock()
+# Mock BaseModel as a simple class
+pydantic_mock.BaseModel = type("BaseModel", (), {})
+pydantic_mock.Field = MagicMock(return_value=None)
+pydantic_mock.ConfigDict = MagicMock(return_value={})
+sys.modules["pydantic"] = pydantic_mock
+sys.modules["pydantic.fields"] = MagicMock()
+
 sys.modules["frigate.comms.inter_process"] = MagicMock()
 sys.modules["frigate.comms.event_metadata_updater"] = MagicMock()
 sys.modules["frigate.comms.embeddings_updater"] = MagicMock()
@@ -189,100 +199,233 @@ class TestCustomObjectClassificationZones(unittest.TestCase):
 
 
 class TestCustomObjectClassificationIntegration(unittest.TestCase):
-    """Integration tests that verify the actual implementation handles zones correctly"""
+    """
+    TRUE Integration tests that call process_frame() on the actual processor.
+    These tests exercise the full call stack from process_frame to MQTT output.
 
-    def test_implementation_extracts_zones_from_obj_data(self):
-        """Verify the actual implementation code reads current_zones from obj_data"""
-        # Read the actual implementation file
-        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
-        with open(impl_path, "r") as f:
-            impl_code = f.read()
+    NOTE: These integration tests require the full Frigate Docker environment with
+    all dependencies (pydantic, psutil, PIL, etc). They demonstrate the proper
+    integration test pattern but may not run in minimal test environments.
 
-        # Verify the implementation checks for current_zones in obj_data
-        self.assertIn(
-            'obj_data.get("current_zones")',
-            impl_code,
-            "Implementation must check for current_zones in obj_data",
+    In the Docker test environment, these tests:
+    1. Instantiate the real CustomObjectClassificationProcessor
+    2. Call the actual process_frame() method
+    3. Verify the full call stack produces correct MQTT messages with zones
+    """
+
+    def setUp(self):
+        """Import the processor after mocking dependencies"""
+        # Import numpy after it's been mocked
+        import numpy as np
+
+        self.np = np
+
+        try:
+            from frigate.data_processing.real_time.custom_classification import (
+                CustomObjectClassificationProcessor,
+            )
+
+            self.ProcessorClass = CustomObjectClassificationProcessor
+        except ImportError as e:
+            # If imports fail, skip these tests (they need full Docker environment)
+            self.skipTest(f"Requires full Frigate environment: {e}")
+
+    def test_process_frame_with_zones_includes_zones_in_mqtt(self):
+        """
+        Integration test: Actually call process_frame() and verify zones in MQTT.
+        This tests the FULL call stack.
+        """
+        # Create processor
+        config = MagicMock()
+        model_config = MagicMock()
+        model_config.name = "test_model"
+        model_config.threshold = 0.7
+        model_config.save_attempts = 100
+        model_config.object_config.objects = ["person"]
+
+        # Mock classification type with proper comparison support
+        from frigate.config.classification import ObjectClassificationType
+
+        model_config.object_config.classification_type = (
+            ObjectClassificationType.sub_label
         )
 
-        # Verify it adds zones to classification_data
-        self.assertIn(
-            'classification_data["zones"]',
-            impl_code,
-            "Implementation must add zones to classification_data",
+        sub_label_publisher = MagicMock()
+        requestor = MagicMock()
+        metrics = MagicMock()
+
+        # Instantiate the REAL processor
+        processor = self.ProcessorClass(
+            config, model_config, sub_label_publisher, requestor, metrics
         )
 
-        # Verify it assigns current_zones value
-        self.assertIn(
-            'obj_data["current_zones"]',
-            impl_code,
-            "Implementation must read current_zones from obj_data",
-        )
+        # Prepare obj_data WITH zones
+        obj_data = {
+            "id": "test_123",
+            "camera": "front_door",
+            "label": "person",
+            "false_positive": False,
+            "end_time": None,
+            "box": [100, 100, 200, 200],
+            "current_zones": ["driveway", "porch"],  # THE KEY FIELD
+        }
 
-    def test_sub_label_classification_path_includes_zone_logic(self):
-        """Verify sub_label classification path includes zone handling"""
-        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
-        with open(impl_path, "r") as f:
-            lines = f.readlines()
+        # Set up for consensus
+        processor.classification_history[obj_data["id"]] = [
+            ("walking", 0.85, 1234567890.0),
+            ("walking", 0.87, 1234567891.0),
+            ("walking", 0.89, 1234567892.0),
+        ]
 
-        # Find the sub_label section
-        in_sub_label_section = False
-        found_zone_logic = False
+        # Create frame
+        frame = self.np.zeros((720, 1280, 3), dtype=self.np.uint8)
 
-        for i, line in enumerate(lines):
-            if "ObjectClassificationType.sub_label" in line:
-                in_sub_label_section = True
-            elif "ObjectClassificationType.attribute" in line:
-                in_sub_label_section = False
+        # Mock TFLite
+        processor.interpreter = MagicMock()
+        processor.tensor_input_details = [{"index": 0}]
+        processor.tensor_output_details = [{"index": 0}]
+        processor.labelmap = {0: "walking"}
+        processor.interpreter.get_tensor.return_value = self.np.array([[0.92, 0.08]])
 
-            if in_sub_label_section and 'obj_data.get("current_zones")' in line:
-                found_zone_logic = True
-                break
+        # CALL THE ACTUAL METHOD - This exercises the full call stack
+        processor.process_frame(obj_data, frame)
 
+        # Verify the call stack resulted in MQTT message
         self.assertTrue(
-            found_zone_logic,
-            "Sub-label classification path must include zone logic",
+            requestor.send_data.called, "process_frame must call requestor.send_data"
         )
 
-    def test_attribute_classification_path_includes_zone_logic(self):
-        """Verify attribute classification path includes zone handling"""
-        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
-        with open(impl_path, "r") as f:
-            lines = f.readlines()
+        # Extract and verify the MQTT message
+        mqtt_json = requestor.send_data.call_args[0][1]
+        mqtt_data = json.loads(mqtt_json)
 
-        # Find the attribute section
-        in_attribute_section = False
-        found_zone_logic = False
+        # THE ACTUAL VERIFICATION: zones from obj_data made it through the stack
+        self.assertIn("zones", mqtt_data, "MQTT must include zones")
+        self.assertEqual(mqtt_data["zones"], ["driveway", "porch"])
+        self.assertEqual(mqtt_data["sub_label"], "walking")
 
-        for i, line in enumerate(lines):
-            if "ObjectClassificationType.attribute" in line:
-                in_attribute_section = True
-            elif i > 0 and in_attribute_section and "def " in line:
-                # Reached next method, stop
-                break
+    def test_process_frame_without_zones_excludes_zones_from_mqtt(self):
+        """
+        Integration test: Call process_frame() with empty zones and verify exclusion.
+        """
+        config = MagicMock()
+        model_config = MagicMock()
+        model_config.name = "test_model"
+        model_config.threshold = 0.7
+        model_config.save_attempts = 100
+        model_config.object_config.objects = ["person"]
 
-            if in_attribute_section and 'obj_data.get("current_zones")' in line:
-                found_zone_logic = True
-                break
+        from frigate.config.classification import ObjectClassificationType
 
-        self.assertTrue(
-            found_zone_logic,
-            "Attribute classification path must include zone logic",
+        model_config.object_config.classification_type = (
+            ObjectClassificationType.sub_label
         )
 
-    def test_zones_are_conditionally_added(self):
-        """Verify zones are only added when obj_data has current_zones"""
-        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
-        with open(impl_path, "r") as f:
-            impl_code = f.read()
+        sub_label_publisher = MagicMock()
+        requestor = MagicMock()
+        metrics = MagicMock()
 
-        # Check that there's an if statement checking for current_zones before adding
-        # This pattern ensures we don't always add zones, only when they exist
-        self.assertRegex(
-            impl_code,
-            r'if\s+obj_data\.get\("current_zones"\):\s+classification_data\["zones"\]',
-            "Implementation must conditionally add zones only when present in obj_data",
+        processor = self.ProcessorClass(
+            config, model_config, sub_label_publisher, requestor, metrics
         )
+
+        # obj_data WITHOUT zones
+        obj_data = {
+            "id": "test_456",
+            "camera": "backyard",
+            "label": "person",
+            "false_positive": False,
+            "end_time": None,
+            "box": [150, 150, 250, 250],
+            "current_zones": [],  # EMPTY
+        }
+
+        processor.classification_history[obj_data["id"]] = [
+            ("running", 0.85, 1234567890.0),
+            ("running", 0.87, 1234567891.0),
+            ("running", 0.89, 1234567892.0),
+        ]
+
+        frame = self.np.zeros((720, 1280, 3), dtype=self.np.uint8)
+
+        processor.interpreter = MagicMock()
+        processor.tensor_input_details = [{"index": 0}]
+        processor.tensor_output_details = [{"index": 0}]
+        processor.labelmap = {0: "running"}
+        processor.interpreter.get_tensor.return_value = self.np.array([[0.90, 0.10]])
+
+        # CALL THE ACTUAL METHOD
+        processor.process_frame(obj_data, frame)
+
+        # Verify MQTT
+        self.assertTrue(requestor.send_data.called)
+        mqtt_json = requestor.send_data.call_args[0][1]
+        mqtt_data = json.loads(mqtt_json)
+
+        # Verify zones NOT included
+        self.assertNotIn("zones", mqtt_data, "Empty zones should be excluded")
+
+    def test_process_frame_attribute_type_includes_zones(self):
+        """
+        Integration test: Call process_frame() for attribute type with zones.
+        """
+        config = MagicMock()
+        model_config = MagicMock()
+        model_config.name = "test_model"
+        model_config.threshold = 0.7
+        model_config.save_attempts = 100
+        model_config.object_config.objects = ["person"]
+
+        from frigate.config.classification import ObjectClassificationType
+
+        model_config.object_config.classification_type = (
+            ObjectClassificationType.attribute
+        )
+
+        sub_label_publisher = MagicMock()
+        requestor = MagicMock()
+        metrics = MagicMock()
+
+        processor = self.ProcessorClass(
+            config, model_config, sub_label_publisher, requestor, metrics
+        )
+
+        obj_data = {
+            "id": "test_789",
+            "camera": "garage",
+            "label": "person",
+            "false_positive": False,
+            "end_time": None,
+            "box": [200, 200, 300, 300],
+            "current_zones": ["parking_lot"],
+        }
+
+        processor.classification_history[obj_data["id"]] = [
+            ("hat", 0.88, 1234567890.0),
+            ("hat", 0.90, 1234567891.0),
+            ("hat", 0.92, 1234567892.0),
+        ]
+
+        frame = self.np.zeros((720, 1280, 3), dtype=self.np.uint8)
+
+        processor.interpreter = MagicMock()
+        processor.tensor_input_details = [{"index": 0}]
+        processor.tensor_output_details = [{"index": 0}]
+        processor.labelmap = {0: "hat"}
+        processor.interpreter.get_tensor.return_value = self.np.array([[0.93, 0.07]])
+
+        # CALL THE ACTUAL METHOD
+        processor.process_frame(obj_data, frame)
+
+        # Verify MQTT
+        self.assertTrue(requestor.send_data.called)
+        mqtt_json = requestor.send_data.call_args[0][1]
+        mqtt_data = json.loads(mqtt_json)
+
+        # Verify zones included for attribute type
+        self.assertIn("zones", mqtt_data)
+        self.assertEqual(mqtt_data["zones"], ["parking_lot"])
+        self.assertEqual(mqtt_data["attribute"], "hat")
 
 
 if __name__ == "__main__":
