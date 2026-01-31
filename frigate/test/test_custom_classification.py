@@ -5,9 +5,9 @@ from unittest.mock import MagicMock, patch
 
 MOCK_MODULES = [
     "frigate.data_processing.real_time.custom_classification.cv2",
-    "frigate.data_processing.real_time.custom-classification.load_labels",
-    "frigate.data_processing.real_time.custom-classification.write_classification_attempt",
-    "frigate.data_processing.real_time.custom-classification.log",
+    "frigate.data_processing.real_time.custom_classification.load_labels",
+    "frigate.data_processing.real_time.custom_classification.write_classification_attempt",
+    "frigate.data_processing.real_time.custom_classification.log",
 ]
 AUTO_SPEC_MOCK_MODULES = [
     "frigate.data_processing.real_time.custom_classification.Interpreter",
@@ -201,6 +201,7 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
 
     def setUp(self):
         """Import the processor after mocking dependencies"""
+
         def cvtColor(frame, color):
             return self.np.zeros((WIDTH, HEIGHT, 3), dtype=self.np.uint8)
 
@@ -219,7 +220,9 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
             self.addCleanup(patcher.stop)
             patcher.return_value = MagicMock()
 
-        mock_cv2 = self.patchers["frigate.data_processing.real_time.custom_classification.cv2"]
+        mock_cv2 = self.patchers[
+            "frigate.data_processing.real_time.custom_classification.cv2"
+        ]
 
         import numpy as np
 
