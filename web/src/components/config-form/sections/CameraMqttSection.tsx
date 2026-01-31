@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const CameraMqttSection = createConfigSection({
   sectionPath: "mqtt",
-  i18nNamespace: "config/camera_mqtt",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "enabled",

@@ -21,7 +21,8 @@ export function DescriptionFieldTemplate(props: DescriptionFieldProps) {
 
   let resolvedDescription = description;
 
-  if (isCameraLevel && sectionI18nPrefix && effectiveNamespace) {
+  // Support nested keys for both camera-level and consolidated global namespace
+  if (sectionI18nPrefix && effectiveNamespace) {
     const descriptionKey = `${sectionI18nPrefix}.description`;
     if (i18n.exists(descriptionKey, { ns: effectiveNamespace })) {
       resolvedDescription = t(descriptionKey, { ns: effectiveNamespace });

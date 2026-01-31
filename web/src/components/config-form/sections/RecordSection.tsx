@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const RecordSection = createConfigSection({
   sectionPath: "record",
-  i18nNamespace: "config/record",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "enabled",

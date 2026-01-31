@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const ReviewSection = createConfigSection({
   sectionPath: "review",
-  i18nNamespace: "config/review",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["alerts", "detections", "genai"],
     fieldGroups: {},

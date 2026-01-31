@@ -180,29 +180,12 @@ const CameraConfigContent = memo(function CameraConfigContent({
   onSave,
 }: CameraConfigContentProps) {
   const { t } = useTranslation([
-    "config/detect",
-    "config/record",
-    "config/snapshots",
-    "config/motion",
-    "config/objects",
-    "config/review",
-    "config/audio",
     "config/cameras",
-    "config/audio_transcription",
-    "config/birdseye",
-    "config/camera_mqtt",
-    "config/camera_ui",
-    "config/face_recognition",
-    "config/ffmpeg",
-    "config/lpr",
-    "config/notifications",
-    "config/onvif",
-    "config/live",
-    "config/semantic_search",
-    "config/timestamp_style",
+    "config/cameras",
     "views/settings",
     "common",
   ]);
+
   const [activeSection, setActiveSection] = useState("detect");
 
   const cameraConfig = config.cameras?.[cameraName];
@@ -226,92 +209,92 @@ const CameraConfigContent = memo(function CameraConfigContent({
   }> = [
     {
       key: "detect",
-      i18nNamespace: "config/detect",
+      i18nNamespace: "config/cameras",
       component: DetectSection,
     },
     {
       key: "ffmpeg",
-      i18nNamespace: "config/ffmpeg",
+      i18nNamespace: "config/cameras",
       component: FfmpegSection,
       showOverrideIndicator: true,
     },
     {
       key: "record",
-      i18nNamespace: "config/record",
+      i18nNamespace: "config/cameras",
       component: RecordSection,
     },
     {
       key: "snapshots",
-      i18nNamespace: "config/snapshots",
+      i18nNamespace: "config/cameras",
       component: SnapshotsSection,
     },
     {
       key: "motion",
-      i18nNamespace: "config/motion",
+      i18nNamespace: "config/cameras",
       component: MotionSection,
     },
     {
       key: "objects",
-      i18nNamespace: "config/objects",
+      i18nNamespace: "config/cameras",
       component: ObjectsSection,
     },
     {
       key: "review",
-      i18nNamespace: "config/review",
+      i18nNamespace: "config/cameras",
       component: ReviewSection,
     },
-    { key: "audio", i18nNamespace: "config/audio", component: AudioSection },
+    { key: "audio", i18nNamespace: "config/cameras", component: AudioSection },
     {
       key: "audio_transcription",
-      i18nNamespace: "config/audio_transcription",
+      i18nNamespace: "config/cameras",
       component: AudioTranscriptionSection,
       showOverrideIndicator: true,
     },
     {
       key: "notifications",
-      i18nNamespace: "config/notifications",
+      i18nNamespace: "config/cameras",
       component: NotificationsSection,
     },
-    { key: "live", i18nNamespace: "config/live", component: LiveSection },
+    { key: "live", i18nNamespace: "config/cameras", component: LiveSection },
     {
       key: "birdseye",
-      i18nNamespace: "config/birdseye",
+      i18nNamespace: "config/cameras",
       component: BirdseyeSection,
       showOverrideIndicator: true,
     },
     {
       key: "face_recognition",
-      i18nNamespace: "config/face_recognition",
+      i18nNamespace: "config/cameras",
       component: FaceRecognitionSection,
       showOverrideIndicator: true,
     },
     {
       key: "lpr",
-      i18nNamespace: "config/lpr",
+      i18nNamespace: "config/cameras",
       component: LprSection,
       showOverrideIndicator: true,
     },
     {
       key: "mqtt",
-      i18nNamespace: "config/camera_mqtt",
+      i18nNamespace: "config/cameras",
       component: CameraMqttSection,
       showOverrideIndicator: false,
     },
     {
       key: "onvif",
-      i18nNamespace: "config/onvif",
+      i18nNamespace: "config/cameras",
       component: OnvifSection,
       showOverrideIndicator: false,
     },
     {
       key: "ui",
-      i18nNamespace: "config/camera_ui",
+      i18nNamespace: "config/cameras",
       component: CameraUiSection,
       showOverrideIndicator: false,
     },
     {
       key: "timestamp_style",
-      i18nNamespace: "config/timestamp_style",
+      i18nNamespace: "config/cameras",
       component: TimestampSection,
     },
   ];
@@ -326,12 +309,10 @@ const CameraConfigContent = memo(function CameraConfigContent({
             const defaultSectionLabel =
               section.key.charAt(0).toUpperCase() +
               section.key.slice(1).replace(/_/g, " ");
+
             const sectionLabel = t(`${section.key}.label`, {
               ns: "config/cameras",
-              defaultValue: t("label", {
-                ns: section.i18nNamespace,
-                defaultValue: defaultSectionLabel,
-              }),
+              defaultValue: defaultSectionLabel,
             });
 
             return (

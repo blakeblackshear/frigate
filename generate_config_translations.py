@@ -209,6 +209,8 @@ def main():
     config_fields = FrigateConfig.model_fields
     logger.info(f"Found {len(config_fields)} top-level config sections")
 
+    global_translations = {}
+
     for field_name, field_info in config_fields.items():
         if field_name.startswith("_"):
             continue
@@ -351,12 +353,10 @@ def main():
                     f"Could not add camera-level fields for {field_name}: {e}"
                 )
 
-        output_file = output_dir / f"{field_name}.json"
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(section_data, f, indent=2, ensure_ascii=False)
-            f.write("\n")  # Add trailing newline
+        # Add to global translations instead of writing separate files
+        global_translations[field_name] = section_data
 
-        logger.info(f"Generated: {output_file}")
+        logger.info(f"Added section to global translations: {field_name}")
 
     # Handle camera-level configs that aren't top-level FrigateConfig fields
     # These are defined as fields in CameraConfig, so we extract title/description from there
@@ -403,14 +403,70 @@ def main():
             }
             section_data.update(nested_without_root)
 
-            output_file = output_dir / f"{config_name}.json"
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(section_data, f, indent=2, ensure_ascii=False)
-                f.write("\n")  # Add trailing newline
-
-            logger.info(f"Generated: {output_file}")
+            # Add camera-level section into global translations (do not write separate file)
+            global_translations[config_name] = section_data
+            logger.info(
+                f"Added camera-level section to global translations: {config_name}"
+            )
         except Exception as e:
             logger.error(f"Failed to generate {config_name}: {e}")
+
+    # Remove top-level 'cameras' field if present so it remains a separate file
+    if "cameras" in global_translations:
+        logger.info(
+            "Removing top-level 'cameras' from global translations to keep it as a separate cameras.json"
+        )
+        del global_translations["cameras"]
+
+    # Write consolidated global.json with per-section keys
+    global_file = output_dir / "global.json"
+    with open(global_file, "w", encoding="utf-8") as f:
+        json.dump(global_translations, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+    logger.info(f"Generated consolidated translations: {global_file}")
+
+    if not global_translations:
+        logger.warning("No global translations were generated!")
+    else:
+        logger.info(f"Global contains {len(global_translations)} sections")
+
+    # Generate cameras.json from CameraConfig schema
+    cameras_file = output_dir / "cameras.json"
+    logger.info(f"Generating cameras.json: {cameras_file}")
+    try:
+        if "camera_config_schema" in locals():
+            camera_schema = camera_config_schema
+        else:
+            from frigate.config.camera.camera import CameraConfig
+
+            camera_schema = CameraConfig.model_json_schema()
+
+        camera_translations = extract_translations_from_schema(camera_schema)
+
+        # Change descriptions to use 'for this camera' for fields that are global
+        def sanitize_camera_descriptions(obj):
+            if isinstance(obj, dict):
+                for k, v in list(obj.items()):
+                    if k == "description" and isinstance(v, str):
+                        obj[k] = v.replace(
+                            "for all cameras; can be overridden per-camera",
+                            "for this camera",
+                        )
+                    else:
+                        sanitize_camera_descriptions(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    sanitize_camera_descriptions(item)
+
+        sanitize_camera_descriptions(camera_translations)
+
+        with open(cameras_file, "w", encoding="utf-8") as f:
+            json.dump(camera_translations, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        logger.info(f"Generated cameras.json: {cameras_file}")
+    except Exception as e:
+        logger.error(f"Failed to generate cameras.json: {e}")
 
     logger.info("Translation generation complete!")
 

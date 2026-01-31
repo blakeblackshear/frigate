@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const SemanticSearchSection = createConfigSection({
   sectionPath: "semantic_search",
-  i18nNamespace: "config/semantic_search",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["triggers"],
     hiddenFields: [],

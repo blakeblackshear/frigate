@@ -1,6 +1,5 @@
 {
-  "label": "Cameras",
-  "description": "Cameras",
+  "label": "CameraConfig",
   "name": {
     "label": "Camera name",
     "description": "Camera name is required"
@@ -153,7 +152,7 @@
     "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
     "path": {
       "label": "FFmpeg path",
-      "description": "Path to the FFmpeg binary to use for this camera or a version alias (\"5.0\" or \"7.0\")."
+      "description": "Path to the FFmpeg binary to use or a version alias (\"5.0\" or \"7.0\")."
     },
     "global_args": {
       "label": "FFmpeg global args",

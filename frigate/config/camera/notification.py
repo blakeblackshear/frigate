@@ -11,7 +11,7 @@ class NotificationConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable notifications",
-        description="Enable or disable notifications; can be overridden per-camera.",
+        description="Enable or disable notifications for all cameras; can be overridden per-camera.",
     )
     email: Optional[str] = Field(
         default=None,

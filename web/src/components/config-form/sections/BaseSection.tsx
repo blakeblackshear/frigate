@@ -460,31 +460,26 @@ export function createConfigSection({
       return null;
     }
 
-    // Get section title from config namespace. For camera-level sections we
-    // prefer the `config/cameras` namespace where keys are nested under the
-    // section name (e.g., `audio.label`). Fall back to provided i18nNamespace.
+    // Get section title from config namespace
     const defaultTitle =
       sectionPath.charAt(0).toUpperCase() +
       sectionPath.slice(1).replace(/_/g, " ");
-    const title =
-      level === "camera"
-        ? t(`${sectionPath}.label`, {
-            ns: "config/cameras",
-            defaultValue: defaultTitle,
-          })
-        : t("label", {
-            ns: i18nNamespace,
-            defaultValue: defaultTitle,
-          });
 
-    const sectionDescription =
-      level === "camera"
-        ? i18n.exists(`${sectionPath}.description`, { ns: "config/cameras" })
-          ? t(`${sectionPath}.description`, { ns: "config/cameras" })
-          : undefined
-        : i18n.exists("description", { ns: i18nNamespace })
-          ? t("description", { ns: i18nNamespace })
-          : undefined;
+    // For camera-level sections, keys live under `config/cameras` and are
+    // nested under the section name (e.g., `audio.label`). For global-level
+    // sections, keys are nested under the section name in `config/global`.
+    const configNamespace =
+      level === "camera" ? "config/cameras" : "config/global";
+    const title = t(`${sectionPath}.label`, {
+      ns: configNamespace,
+      defaultValue: defaultTitle,
+    });
+
+    const sectionDescription = i18n.exists(`${sectionPath}.description`, {
+      ns: configNamespace,
+    })
+      ? t(`${sectionPath}.description`, { ns: configNamespace })
+      : undefined;
 
     const sectionContent = (
       <div className="space-y-6">
@@ -502,7 +497,7 @@ export function createConfigSection({
           disabled={disabled || isSaving}
           readonly={readonly}
           showSubmit={false}
-          i18nNamespace={i18nNamespace}
+          i18nNamespace={configNamespace}
           formContext={{
             level,
             cameraName,
@@ -516,7 +511,10 @@ export function createConfigSection({
             fullConfig: config,
             // When rendering camera-level sections, provide the section path so
             // field templates can look up keys under the `config/cameras` namespace
-            sectionI18nPrefix: level === "camera" ? sectionPath : undefined,
+            // When using a consolidated global namespace, keys are nested
+            // under the section name (e.g., `audio.label`) so provide the
+            // section prefix to templates so they can attempt `${section}.${field}` lookups.
+            sectionI18nPrefix: sectionPath,
             t,
           }}
         />

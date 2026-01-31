@@ -98,7 +98,7 @@ class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable recording",
-        description="Enable or disable recording; can be overridden per-camera.",
+        description="Enable or disable recording for all cameras; can be overridden per-camera.",
     )
     expire_interval: int = Field(
         default=60,

@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const MotionSection = createConfigSection({
   sectionPath: "motion",
-  i18nNamespace: "config/motion",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "enabled",

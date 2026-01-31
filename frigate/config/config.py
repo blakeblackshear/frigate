@@ -346,7 +346,7 @@ class FrigateConfig(FrigateBaseModel):
     notifications: NotificationConfig = Field(
         default_factory=NotificationConfig,
         title="Notifications",
-        description="Settings to enable and control notifications; can be overridden per-camera.",
+        description="Settings to enable and control notifications for all cameras; can be overridden per-camera.",
     )
     networking: NetworkingConfig = Field(
         default_factory=NetworkingConfig,
@@ -398,7 +398,7 @@ class FrigateConfig(FrigateBaseModel):
     audio: AudioConfig = Field(
         default_factory=AudioConfig,
         title="Audio events",
-        description="Settings for audio-based event detection; can be overridden per-camera.",
+        description="Settings for audio-based event detection for all cameras; can be overridden per-camera.",
     )
     birdseye: BirdseyeConfig = Field(
         default_factory=BirdseyeConfig,
@@ -443,7 +443,7 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig,
         title="Snapshots",
-        description="Settings for saved JPEG snapshots of tracked objects; can be overridden per-camera.",
+        description="Settings for saved JPEG snapshots of tracked objects for all cameras; can be overridden per-camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
@@ -470,7 +470,7 @@ class FrigateConfig(FrigateBaseModel):
     face_recognition: FaceRecognitionConfig = Field(
         default_factory=FaceRecognitionConfig,
         title="Face recognition",
-        description="Settings for face detection and recognition; can be overridden per-camera.",
+        description="Settings for face detection and recognition for all cameras; can be overridden per-camera.",
     )
     lpr: LicensePlateRecognitionConfig = Field(
         default_factory=LicensePlateRecognitionConfig,

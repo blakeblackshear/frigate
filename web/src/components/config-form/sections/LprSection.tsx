@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const LprSection = createConfigSection({
   sectionPath: "lpr",
-  i18nNamespace: "config/lpr",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["enabled", "expire_time", "min_area", "enhancement"],
     hiddenFields: [],

@@ -30,25 +30,25 @@ import { cn } from "@/lib/utils";
 
 // Shared sections that can be overridden at camera level
 const sharedSections = [
-  { key: "detect", i18nNamespace: "config/detect", component: DetectSection },
-  { key: "record", i18nNamespace: "config/record", component: RecordSection },
+  { key: "detect", i18nNamespace: "config/global", component: DetectSection },
+  { key: "record", i18nNamespace: "config/global", component: RecordSection },
   {
     key: "snapshots",
-    i18nNamespace: "config/snapshots",
+    i18nNamespace: "config/global",
     component: SnapshotsSection,
   },
-  { key: "motion", i18nNamespace: "config/motion", component: MotionSection },
+  { key: "motion", i18nNamespace: "config/global", component: MotionSection },
   {
     key: "objects",
-    i18nNamespace: "config/objects",
+    i18nNamespace: "config/global",
     component: ObjectsSection,
   },
-  { key: "review", i18nNamespace: "config/review", component: ReviewSection },
-  { key: "audio", i18nNamespace: "config/audio", component: AudioSection },
-  { key: "live", i18nNamespace: "config/live", component: LiveSection },
+  { key: "review", i18nNamespace: "config/global", component: ReviewSection },
+  { key: "audio", i18nNamespace: "config/global", component: AudioSection },
+  { key: "live", i18nNamespace: "config/global", component: LiveSection },
   {
     key: "timestamp_style",
-    i18nNamespace: "config/timestamp_style",
+    i18nNamespace: "config/global",
     component: TimestampSection,
   },
 ];
@@ -66,7 +66,7 @@ const globalSectionConfigs: Record<
   }
 > = {
   mqtt: {
-    i18nNamespace: "config/mqtt",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "enabled",
       "host",
@@ -93,12 +93,12 @@ const globalSectionConfigs: Record<
     liveValidate: true,
   },
   database: {
-    i18nNamespace: "config/database",
+    i18nNamespace: "config/global",
     fieldOrder: ["path"],
     advancedFields: [],
   },
   auth: {
-    i18nNamespace: "config/auth",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "enabled",
       "reset_admin_password",
@@ -130,17 +130,17 @@ const globalSectionConfigs: Record<
     },
   },
   tls: {
-    i18nNamespace: "config/tls",
+    i18nNamespace: "config/global",
     fieldOrder: ["enabled", "cert", "key"],
     advancedFields: [],
   },
   networking: {
-    i18nNamespace: "config/networking",
+    i18nNamespace: "config/global",
     fieldOrder: ["ipv6"],
     advancedFields: [],
   },
   proxy: {
-    i18nNamespace: "config/proxy",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "header_map",
       "logout_url",
@@ -152,7 +152,7 @@ const globalSectionConfigs: Record<
     liveValidate: true,
   },
   ui: {
-    i18nNamespace: "config/ui",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "timezone",
       "time_format",
@@ -163,22 +163,22 @@ const globalSectionConfigs: Record<
     advancedFields: [],
   },
   logger: {
-    i18nNamespace: "config/logger",
+    i18nNamespace: "config/global",
     fieldOrder: ["default", "logs"],
     advancedFields: ["logs"],
   },
   environment_vars: {
-    i18nNamespace: "config/environment_vars",
+    i18nNamespace: "config/global",
     fieldOrder: [],
     advancedFields: [],
   },
   telemetry: {
-    i18nNamespace: "config/telemetry",
+    i18nNamespace: "config/global",
     fieldOrder: ["network_interfaces", "stats", "version_check"],
     advancedFields: [],
   },
   birdseye: {
-    i18nNamespace: "config/birdseye",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "enabled",
       "restream",
@@ -193,7 +193,7 @@ const globalSectionConfigs: Record<
     advancedFields: ["width", "height", "quality", "inactivity_threshold"],
   },
   ffmpeg: {
-    i18nNamespace: "config/ffmpeg",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "path",
       "global_args",
@@ -253,12 +253,12 @@ const globalSectionConfigs: Record<
     },
   },
   detectors: {
-    i18nNamespace: "config/detectors",
+    i18nNamespace: "config/global",
     fieldOrder: [],
     advancedFields: [],
   },
   model: {
-    i18nNamespace: "config/model",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "path",
       "labelmap_path",
@@ -278,7 +278,7 @@ const globalSectionConfigs: Record<
     hiddenFields: ["labelmap", "attributes_map"],
   },
   genai: {
-    i18nNamespace: "config/genai",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "provider",
       "api_key",
@@ -291,22 +291,22 @@ const globalSectionConfigs: Record<
     hiddenFields: ["genai.enabled_in_config"],
   },
   classification: {
-    i18nNamespace: "config/classification",
+    i18nNamespace: "config/global",
     hiddenFields: ["custom"],
     advancedFields: [],
   },
   semantic_search: {
-    i18nNamespace: "config/semantic_search",
+    i18nNamespace: "config/global",
     fieldOrder: ["enabled", "reindex", "model", "model_size", "device"],
     advancedFields: ["reindex", "device"],
   },
   audio_transcription: {
-    i18nNamespace: "config/audio_transcription",
+    i18nNamespace: "config/global",
     fieldOrder: ["enabled", "language", "device", "model_size", "live_enabled"],
     advancedFields: ["language", "device", "model_size"],
   },
   face_recognition: {
-    i18nNamespace: "config/face_recognition",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "enabled",
       "model_size",
@@ -331,7 +331,7 @@ const globalSectionConfigs: Record<
     ],
   },
   lpr: {
-    i18nNamespace: "config/lpr",
+    i18nNamespace: "config/global",
     fieldOrder: [
       "enabled",
       "model_size",
@@ -522,7 +522,8 @@ function GlobalConfigSection({
         liveValidate={sectionConfig.liveValidate}
         uiSchema={sectionConfig.uiSchema}
         showSubmit={false}
-        i18nNamespace={sectionConfig.i18nNamespace}
+        formContext={{ sectionI18nPrefix: sectionKey }}
+        i18nNamespace="config/global"
         disabled={isSaving}
       />
 
@@ -565,44 +566,7 @@ function GlobalConfigSection({
 }
 
 export default function GlobalConfigView() {
-  const { t } = useTranslation([
-    "views/settings",
-    "config/detect",
-    "config/record",
-    "config/snapshots",
-    "config/motion",
-    "config/objects",
-    "config/review",
-    "config/audio",
-    "config/notifications",
-    "config/live",
-    "config/timestamp_style",
-    "config/mqtt",
-    "config/audio_transcription",
-    "config/database",
-    "config/auth",
-    "config/tls",
-    "config/networking",
-    "config/proxy",
-    "config/ui",
-    "config/logger",
-    "config/environment_vars",
-    "config/telemetry",
-    "config/birdseye",
-    "config/ffmpeg",
-    "config/detectors",
-    "config/model",
-    "config/genai",
-    "config/classification",
-    "config/semantic_search",
-    "config/face_recognition",
-    "config/lpr",
-    "config/go2rtc",
-    "config/camera_groups",
-    "config/safe_mode",
-    "config/version",
-    "common",
-  ]);
+  const { t } = useTranslation(["views/settings", "config/global", "common"]);
   const [activeTab, setActiveTab] = useState("shared");
   const [activeSection, setActiveSection] = useState("detect");
 
@@ -695,11 +659,12 @@ export default function GlobalConfigView() {
           <nav className="w-64 shrink-0">
             <ul className="space-y-1">
               {currentSections.map((section) => {
-                const sectionLabel = t("label", {
-                  ns: section.i18nNamespace,
-                  defaultValue:
-                    section.key.charAt(0).toUpperCase() +
-                    section.key.slice(1).replace(/_/g, " "),
+                const defaultLabel =
+                  section.key.charAt(0).toUpperCase() +
+                  section.key.slice(1).replace(/_/g, " ");
+                const sectionLabel = t(`${section.key}.label`, {
+                  ns: "config/global",
+                  defaultValue: defaultLabel,
                 });
 
                 return (
@@ -735,8 +700,8 @@ export default function GlobalConfigView() {
                       )}
                     >
                       <Heading as="h4" className="mb-4">
-                        {t("label", {
-                          ns: section.i18nNamespace,
+                        {t(`${section.key}.label`, {
+                          ns: "config/global",
                           defaultValue:
                             section.key.charAt(0).toUpperCase() +
                             section.key.slice(1).replace(/_/g, " "),
@@ -756,12 +721,21 @@ export default function GlobalConfigView() {
             {activeTab === "system" && (
               <>
                 {systemSections.map((sectionKey) => {
-                  const sectionTitle = t("label", {
-                    ns: globalSectionConfigs[sectionKey].i18nNamespace,
-                    defaultValue:
-                      sectionKey.charAt(0).toUpperCase() +
-                      sectionKey.slice(1).replace(/_/g, " "),
-                  });
+                  const ns = globalSectionConfigs[sectionKey].i18nNamespace;
+                  const sectionTitle =
+                    ns === "config/global"
+                      ? t(`${sectionKey}.label`, {
+                          ns: "config/global",
+                          defaultValue:
+                            sectionKey.charAt(0).toUpperCase() +
+                            sectionKey.slice(1).replace(/_/g, " "),
+                        })
+                      : t("label", {
+                          ns,
+                          defaultValue:
+                            sectionKey.charAt(0).toUpperCase() +
+                            sectionKey.slice(1).replace(/_/g, " "),
+                        });
 
                   return (
                     <div
@@ -786,12 +760,21 @@ export default function GlobalConfigView() {
             {activeTab === "integrations" && (
               <>
                 {integrationSections.map((sectionKey) => {
-                  const sectionTitle = t("label", {
-                    ns: globalSectionConfigs[sectionKey].i18nNamespace,
-                    defaultValue:
-                      sectionKey.charAt(0).toUpperCase() +
-                      sectionKey.slice(1).replace(/_/g, " "),
-                  });
+                  const ns = globalSectionConfigs[sectionKey].i18nNamespace;
+                  const sectionTitle =
+                    ns === "config/global"
+                      ? t(`${sectionKey}.label`, {
+                          ns: "config/global",
+                          defaultValue:
+                            sectionKey.charAt(0).toUpperCase() +
+                            sectionKey.slice(1).replace(/_/g, " "),
+                        })
+                      : t("label", {
+                          ns,
+                          defaultValue:
+                            sectionKey.charAt(0).toUpperCase() +
+                            sectionKey.slice(1).replace(/_/g, " "),
+                        });
 
                   return (
                     <div

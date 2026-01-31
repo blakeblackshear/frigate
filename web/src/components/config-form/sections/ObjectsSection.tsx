@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const ObjectsSection = createConfigSection({
   sectionPath: "objects",
-  i18nNamespace: "config/objects",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["track", "alert", "detect", "filters"],
     fieldGroups: {

@@ -5,7 +5,7 @@ import { createConfigSection } from "./BaseSection";
 
 export const DetectSection = createConfigSection({
   sectionPath: "detect",
-  i18nNamespace: "config/detect",
+  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "enabled",

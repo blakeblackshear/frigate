@@ -26,7 +26,7 @@ class AudioConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable audio detection",
-        description="Enable or disable audio event detection; can be overridden per-camera.",
+        description="Enable or disable audio event detection for all cameras; can be overridden per-camera.",
     )
     max_not_heard: int = Field(
         default=30,

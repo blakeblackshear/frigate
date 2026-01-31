@@ -199,7 +199,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
         const label = domain
           ? t(`${domain}.${groupKey}`, {
-              ns: "config/groups",
+              ns: "config/global",
               defaultValue: toTitle(groupKey),
             })
           : t(`groups.${groupKey}`, {
