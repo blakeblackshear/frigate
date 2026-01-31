@@ -1,6 +1,27 @@
 import json
+import sys
 import unittest
 from unittest.mock import MagicMock
+
+# Mock all external dependencies before any imports
+sys.modules["cv2"] = MagicMock()
+sys.modules["numpy"] = MagicMock()
+sys.modules["zmq"] = MagicMock()
+sys.modules["peewee"] = MagicMock()
+sys.modules["sherpa_onnx"] = MagicMock()
+sys.modules["frigate.comms.inter_process"] = MagicMock()
+sys.modules["frigate.comms.event_metadata_updater"] = MagicMock()
+sys.modules["frigate.comms.embeddings_updater"] = MagicMock()
+sys.modules["frigate.log"] = MagicMock()
+sys.modules["frigate.const"] = MagicMock()
+sys.modules["frigate.util.builtin"] = MagicMock()
+sys.modules["frigate.util.object"] = MagicMock()
+sys.modules["tflite_runtime"] = MagicMock()
+sys.modules["tflite_runtime.interpreter"] = MagicMock()
+sys.modules["tensorflow"] = MagicMock()
+sys.modules["tensorflow.lite"] = MagicMock()
+sys.modules["tensorflow.lite.python"] = MagicMock()
+sys.modules["tensorflow.lite.python.interpreter"] = MagicMock()
 
 
 class TestCustomObjectClassificationZones(unittest.TestCase):
@@ -168,179 +189,100 @@ class TestCustomObjectClassificationZones(unittest.TestCase):
 
 
 class TestCustomObjectClassificationIntegration(unittest.TestCase):
-    """Integration tests verifying obj_data structure includes current_zones field"""
+    """Integration tests that verify the actual implementation handles zones correctly"""
 
-    def test_tracked_object_dict_includes_current_zones(self):
-        """Verify that tracked object to_dict() includes current_zones field"""
-        # This test verifies the data structure that flows to CustomObjectClassificationProcessor
-        # Simulates what tracked_object.to_dict() returns
-        simulated_obj_data = {
-            "id": "integration_test_123.456-xyz",
-            "camera": "front_door",
-            "label": "person",
-            "false_positive": False,
-            "end_time": None,
-            "box": [100, 150, 300, 400],
-            "area": 50000,
-            "score": 0.92,
-            "current_zones": [
-                "driveway",
-                "front_porch",
-            ],  # Critical field we're testing
-            "entered_zones": ["driveway", "front_porch", "sidewalk"],
-            "has_clip": False,
-            "has_snapshot": True,
-            "region": [0, 0, 1280, 720],
-            "active": True,
-            "stationary": False,
-        }
+    def test_implementation_extracts_zones_from_obj_data(self):
+        """Verify the actual implementation code reads current_zones from obj_data"""
+        # Read the actual implementation file
+        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
+        with open(impl_path, "r") as f:
+            impl_code = f.read()
 
-        # Verify the structure contains current_zones
+        # Verify the implementation checks for current_zones in obj_data
         self.assertIn(
-            "current_zones",
-            simulated_obj_data,
-            "obj_data must include current_zones field",
-        )
-        self.assertIsInstance(
-            simulated_obj_data["current_zones"],
-            list,
-            "current_zones must be a list",
+            'obj_data.get("current_zones")',
+            impl_code,
+            "Implementation must check for current_zones in obj_data",
         )
 
-    def test_obj_data_with_zones_produces_correct_mqtt_message(self):
-        """Integration test: Verify obj_data with zones produces MQTT message with zones"""
-        # Simulate the processing logic from CustomObjectClassificationProcessor
-        obj_data = {
-            "id": "integration_456.789-abc",
-            "camera": "garage",
-            "label": "person",
-            "current_zones": ["garage_interior", "entrance"],
-            "box": [120, 180, 320, 450],
-            "false_positive": False,
-            "end_time": None,
-        }
+        # Verify it adds zones to classification_data
+        self.assertIn(
+            'classification_data["zones"]',
+            impl_code,
+            "Implementation must add zones to classification_data",
+        )
 
-        # Simulate what the processor does when building classification data
-        classification_data = {
-            "type": "classification",
-            "id": obj_data["id"],
-            "camera": obj_data["camera"],
-            "timestamp": 1234567890.0,
-            "model": "test_classifier",
-            "sub_label": "delivery_person",
-            "score": 0.89,
-        }
+        # Verify it assigns current_zones value
+        self.assertIn(
+            'obj_data["current_zones"]',
+            impl_code,
+            "Implementation must read current_zones from obj_data",
+        )
 
-        # This is the key logic from custom_classification.py that we're verifying
-        if obj_data.get("current_zones"):
-            classification_data["zones"] = obj_data["current_zones"]
+    def test_sub_label_classification_path_includes_zone_logic(self):
+        """Verify sub_label classification path includes zone handling"""
+        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
+        with open(impl_path, "r") as f:
+            lines = f.readlines()
 
-        # Verify zones are included
-        self.assertIn("zones", classification_data)
-        self.assertEqual(classification_data["zones"], ["garage_interior", "entrance"])
+        # Find the sub_label section
+        in_sub_label_section = False
+        found_zone_logic = False
 
-    def test_obj_data_without_zones_excludes_zones_from_mqtt(self):
-        """Integration test: Verify obj_data without zones excludes zones from MQTT"""
-        obj_data = {
-            "id": "integration_789.012-def",
-            "camera": "backyard",
-            "label": "person",
-            "current_zones": [],  # Empty zones
-            "box": [50, 75, 200, 300],
-            "false_positive": False,
-            "end_time": None,
-        }
+        for i, line in enumerate(lines):
+            if "ObjectClassificationType.sub_label" in line:
+                in_sub_label_section = True
+            elif "ObjectClassificationType.attribute" in line:
+                in_sub_label_section = False
 
-        # Simulate classification data building
-        classification_data = {
-            "type": "classification",
-            "id": obj_data["id"],
-            "camera": obj_data["camera"],
-            "timestamp": 1234567890.0,
-            "model": "test_classifier",
-            "attribute": "running",
-            "score": 0.85,
-        }
+            if in_sub_label_section and 'obj_data.get("current_zones")' in line:
+                found_zone_logic = True
+                break
 
-        # Key logic: only add zones if current_zones is non-empty
-        if obj_data.get("current_zones"):
-            classification_data["zones"] = obj_data["current_zones"]
+        self.assertTrue(
+            found_zone_logic,
+            "Sub-label classification path must include zone logic",
+        )
 
-        # Verify zones are NOT included when empty
-        self.assertNotIn("zones", classification_data)
+    def test_attribute_classification_path_includes_zone_logic(self):
+        """Verify attribute classification path includes zone handling"""
+        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
+        with open(impl_path, "r") as f:
+            lines = f.readlines()
 
-    def test_obj_data_structure_compatibility(self):
-        """Verify obj_data structure is compatible with processor expectations"""
-        # Create obj_data matching the structure from tracked_object.to_dict()
-        obj_data = {
-            "id": "test_123.456-ghi",
-            "camera": "front_door",
-            "label": "person",
-            "false_positive": False,
-            "end_time": None,
-            "box": [100, 100, 200, 200],
-            "area": 10000,
-            "score": 0.90,
-            # Key fields for zone tracking
-            "current_zones": ["entry_zone"],
-            "entered_zones": ["entry_zone", "walkway"],
-            # Other fields from tracked_object
-            "region": [0, 0, 640, 480],
-            "active": True,
-            "stationary": False,
-            "motionless_count": 0,
-            "position_changes": 5,
-            "has_clip": False,
-            "has_snapshot": True,
-        }
+        # Find the attribute section
+        in_attribute_section = False
+        found_zone_logic = False
 
-        # Verify all expected fields are present
-        required_fields = ["id", "camera", "label", "current_zones", "box"]
-        for field in required_fields:
-            self.assertIn(
-                field,
-                obj_data,
-                f"obj_data must include required field: {field}",
-            )
+        for i, line in enumerate(lines):
+            if "ObjectClassificationType.attribute" in line:
+                in_attribute_section = True
+            elif i > 0 and in_attribute_section and "def " in line:
+                # Reached next method, stop
+                break
 
-        # Verify current_zones can be used in conditional
-        if obj_data.get("current_zones"):
-            zones = obj_data["current_zones"]
-            self.assertIsInstance(zones, list)
-            self.assertGreater(len(zones), 0)
+            if in_attribute_section and 'obj_data.get("current_zones")' in line:
+                found_zone_logic = True
+                break
 
-    def test_multiple_zones_in_mqtt_message(self):
-        """Integration test: Verify multiple zones are correctly passed through"""
-        obj_data = {
-            "id": "multi_zone_test_999.888-jkl",
-            "camera": "outdoor",
-            "label": "car",
-            "current_zones": ["driveway", "street", "parking_area"],  # Multiple zones
-            "box": [200, 200, 400, 400],
-            "false_positive": False,
-            "end_time": None,
-        }
+        self.assertTrue(
+            found_zone_logic,
+            "Attribute classification path must include zone logic",
+        )
 
-        # Build MQTT message
-        mqtt_data = {
-            "type": "classification",
-            "id": obj_data["id"],
-            "camera": obj_data["camera"],
-            "timestamp": 1234567890.0,
-            "model": "vehicle_classifier",
-            "sub_label": "sedan",
-            "score": 0.93,
-        }
+    def test_zones_are_conditionally_added(self):
+        """Verify zones are only added when obj_data has current_zones"""
+        impl_path = "/home/runner/work/frigate/frigate/frigate/data_processing/real_time/custom_classification.py"
+        with open(impl_path, "r") as f:
+            impl_code = f.read()
 
-        if obj_data.get("current_zones"):
-            mqtt_data["zones"] = obj_data["current_zones"]
-
-        # Verify all zones are included
-        self.assertIn("zones", mqtt_data)
-        self.assertEqual(len(mqtt_data["zones"]), 3)
-        self.assertIn("driveway", mqtt_data["zones"])
-        self.assertIn("street", mqtt_data["zones"])
-        self.assertIn("parking_area", mqtt_data["zones"])
+        # Check that there's an if statement checking for current_zones before adding
+        # This pattern ensures we don't always add zones, only when they exist
+        self.assertRegex(
+            impl_code,
+            r'if\s+obj_data\.get\("current_zones"\):\s+classification_data\["zones"\]',
+            "Implementation must conditionally add zones only when present in obj_data",
+        )
 
 
 if __name__ == "__main__":
