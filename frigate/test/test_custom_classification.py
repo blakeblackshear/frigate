@@ -7,7 +7,7 @@ MOCK_MODULES = [
     "frigate.data_processing.real_time.custom_classification.cv2",
     "frigate.data_processing.real_time.custom_classification.load_labels",
     "frigate.data_processing.real_time.custom_classification.write_classification_attempt",
-    "frigate.data_processing.real_time.custom_classification.log",
+    "frigate.data_processing.real_time.custom_classification.suppress_stderr_during",
 ]
 AUTO_SPEC_MOCK_MODULES = [
     "frigate.data_processing.real_time.custom_classification.Interpreter",
@@ -239,13 +239,6 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         except ImportError as e:
             # If imports fail, skip these tests (they need full Docker environment)
             self.skipTest(f"Requires full Frigate environment: {e}")
-
-    def tearDown(self):
-        for mod in MOCK_MODULES:
-            if mod in ORIGINAL_MODULES:
-                sys.modules[mod] = mod
-            else:
-                del sys.modules[mod]
 
     def test_process_frame_with_zones_includes_zones_in_mqtt(self):
         """
