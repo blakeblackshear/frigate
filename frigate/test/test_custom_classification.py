@@ -216,7 +216,6 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         sys.modules["tensorflow.lite.python"] = MagicMock()
         sys.modules["tensorflow.lite.python.interpreter"] = MagicMock()
 
-
         # Import numpy after it's been mocked
         import numpy as np
 
