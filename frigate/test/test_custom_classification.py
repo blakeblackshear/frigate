@@ -19,6 +19,14 @@ WIDTH = 720
 HEIGHT = 1280
 
 
+class Contains:
+    def __init__(self, needle):
+        self.needle = needle
+
+    def __eq__(self, other):
+        return self.needle in other
+
+
 class TestCustomObjectClassificationZones(unittest.TestCase):
     """Test that zone information is correctly added to custom classification MQTT messages"""
 
@@ -307,6 +315,9 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         # Extract and verify the MQTT message
         mqtt_json = requestor.send_data.call_args[0][1]
         mqtt_data = json.loads(mqtt_json)
+        import logging
+        logger = logging.getLogger("TestCustomObjectClassificationIntegration")
+        logger.warning("send_data called with: ", mqtt_data)
 
         # THE ACTUAL VERIFICATION: zones from obj_data made it through the stack
         self.assertIn("zones", mqtt_data, "MQTT must include zones")
