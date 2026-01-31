@@ -2,32 +2,11 @@
 // Reusable for both global and camera-level detect settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const DetectSection = createConfigSection({
   sectionPath: "detect",
-  defaultConfig: {
-    fieldOrder: [
-      "enabled",
-      "fps",
-      "width",
-      "height",
-      "min_initialized",
-      "max_disappeared",
-      "annotation_offset",
-      "stationary",
-    ],
-    fieldGroups: {
-      resolution: ["enabled", "width", "height"],
-      tracking: ["min_initialized", "max_disappeared"],
-    },
-    hiddenFields: ["enabled_in_config"],
-    advancedFields: [
-      "min_initialized",
-      "max_disappeared",
-      "annotation_offset",
-      "stationary",
-    ],
-  },
+  defaultConfig: getSectionConfig("detect", "camera"),
 });
 
 export default DetectSection;

@@ -2,15 +2,11 @@
 // Camera-level LPR settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const LprSection = createConfigSection({
   sectionPath: "lpr",
-  defaultConfig: {
-    fieldOrder: ["enabled", "expire_time", "min_area", "enhancement"],
-    hiddenFields: [],
-    advancedFields: ["expire_time", "min_area", "enhancement"],
-    overrideFields: ["enabled", "min_area", "enhancement"],
-  },
+  defaultConfig: getSectionConfig("lpr", "camera"),
 });
 
 export default LprSection;

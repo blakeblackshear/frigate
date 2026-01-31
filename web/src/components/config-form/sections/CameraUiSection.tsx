@@ -2,15 +2,11 @@
 // Camera UI display settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const CameraUiSection = createConfigSection({
   sectionPath: "ui",
-  defaultConfig: {
-    fieldOrder: ["dashboard", "order"],
-    hiddenFields: [],
-    advancedFields: [],
-    overrideFields: [],
-  },
+  defaultConfig: getSectionConfig("ui", "camera"),
 });
 
 export default CameraUiSection;

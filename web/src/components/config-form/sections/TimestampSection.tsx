@@ -2,14 +2,11 @@
 // Reusable for both global and camera-level timestamp_style settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const TimestampSection = createConfigSection({
   sectionPath: "timestamp_style",
-  defaultConfig: {
-    fieldOrder: ["position", "format", "color", "thickness"],
-    hiddenFields: ["effect", "enabled_in_config"],
-    advancedFields: [],
-  },
+  defaultConfig: getSectionConfig("timestamp_style", "camera"),
 });
 
 export default TimestampSection;

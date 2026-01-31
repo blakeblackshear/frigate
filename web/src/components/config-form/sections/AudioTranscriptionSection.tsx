@@ -2,15 +2,11 @@
 // Global and camera-level audio transcription settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const AudioTranscriptionSection = createConfigSection({
   sectionPath: "audio_transcription",
-  defaultConfig: {
-    fieldOrder: ["enabled", "language", "device", "model_size", "live_enabled"],
-    hiddenFields: ["enabled_in_config"],
-    advancedFields: ["language", "device", "model_size"],
-    overrideFields: ["enabled", "live_enabled"],
-  },
+  defaultConfig: getSectionConfig("audio_transcription", "camera"),
 });
 
 export default AudioTranscriptionSection;

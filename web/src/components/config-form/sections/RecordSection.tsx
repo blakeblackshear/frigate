@@ -2,27 +2,11 @@
 // Reusable for both global and camera-level record settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const RecordSection = createConfigSection({
   sectionPath: "record",
-  defaultConfig: {
-    fieldOrder: [
-      "enabled",
-      "expire_interval",
-      "continuous",
-      "motion",
-      "alerts",
-      "detections",
-      "preview",
-      "export",
-    ],
-    fieldGroups: {
-      retention: ["enabled", "continuous", "motion"],
-      events: ["alerts", "detections"],
-    },
-    hiddenFields: ["enabled_in_config", "sync_recordings"],
-    advancedFields: ["expire_interval", "preview", "export"],
-  },
+  defaultConfig: getSectionConfig("record", "camera"),
 });
 
 export default RecordSection;

@@ -39,6 +39,7 @@ import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
 import GlobalConfigView from "@/views/settings/GlobalConfigView";
 import CameraConfigView from "@/views/settings/CameraConfigView";
+import { createSingleSectionPage } from "@/views/settings/SingleSectionPage";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
@@ -65,6 +66,10 @@ import Heading from "@/components/ui/heading";
 import { LuChevronRight } from "react-icons/lu";
 import Logo from "@/components/Logo";
 import {
+  CameraMqttSection,
+  MqttSection,
+} from "@/components/config-form/sections";
+import {
   MobilePage,
   MobilePageContent,
   MobilePageHeader,
@@ -74,7 +79,9 @@ import {
 const allSettingsViews = [
   "ui",
   "globalConfig",
+  "mqtt",
   "cameraConfig",
+  "cameraMqtt",
   "enrichments",
   "cameraManagement",
   "cameraReview",
@@ -90,18 +97,33 @@ const allSettingsViews = [
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
+const MqttSettingsPage = createSingleSectionPage({
+  sectionKey: "mqtt",
+  level: "global",
+  SectionComponent: MqttSection,
+});
+
+const CameraMqttSettingsPage = createSingleSectionPage({
+  sectionKey: "mqtt",
+  level: "camera",
+  SectionComponent: CameraMqttSection,
+  showOverrideIndicator: false,
+});
+
 const settingsGroups = [
   {
     label: "general",
     items: [
       { key: "ui", component: UiSettingsView },
       { key: "globalConfig", component: GlobalConfigView },
+      { key: "mqtt", component: MqttSettingsPage },
     ],
   },
   {
     label: "cameras",
     items: [
       { key: "cameraConfig", component: CameraConfigView },
+      { key: "cameraMqtt", component: CameraMqttSettingsPage },
       { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
@@ -139,6 +161,7 @@ const settingsGroups = [
 const CAMERA_SELECT_BUTTON_PAGES = [
   "debug",
   "cameraConfig",
+  "cameraMqtt",
   "cameraReview",
   "masksAndZones",
   "motionTuner",

@@ -18,7 +18,9 @@
   "menu": {
     "ui": "UI",
     "globalConfig": "Global Config",
+    "mqtt": "MQTT",
     "cameraConfig": "Camera Config",
+    "cameraMqtt": "Camera MQTT",
     "enrichments": "Enrichments",
     "cameraManagement": "Management",
     "cameraReview": "Review",

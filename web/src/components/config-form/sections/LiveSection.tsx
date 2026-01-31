@@ -2,15 +2,11 @@
 // Reusable for both global and camera-level live settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const LiveSection = createConfigSection({
   sectionPath: "live",
-  defaultConfig: {
-    fieldOrder: ["stream_name", "height", "quality"],
-    fieldGroups: {},
-    hiddenFields: ["enabled_in_config"],
-    advancedFields: ["quality"],
-  },
+  defaultConfig: getSectionConfig("live", "camera"),
 });
 
 export default LiveSection;

@@ -2,34 +2,11 @@
 // Reusable for both global and camera-level review settings
 
 import { createConfigSection } from "./BaseSection";
+import { getSectionConfig } from "../sectionConfigs";
 
 export const ReviewSection = createConfigSection({
   sectionPath: "review",
-  defaultConfig: {
-    fieldOrder: ["alerts", "detections", "genai"],
-    fieldGroups: {},
-    hiddenFields: [
-      "enabled_in_config",
-      "alerts.labels",
-      "alerts.enabled_in_config",
-      "alerts.required_zones",
-      "detections.labels",
-      "detections.enabled_in_config",
-      "detections.required_zones",
-      "genai.enabled_in_config",
-    ],
-    advancedFields: [],
-    uiSchema: {
-      genai: {
-        additional_concerns: {
-          "ui:widget": "textarea",
-        },
-        activity_context_prompt: {
-          "ui:widget": "textarea",
-        },
-      },
-    },
-  },
+  defaultConfig: getSectionConfig("review", "camera"),
 });
 
 export default ReviewSection;
