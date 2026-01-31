@@ -69,14 +69,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   const isCameraLevel = formContext?.level === "camera";
-  const effectiveNamespace = isCameraLevel
-    ? "config/cameras"
-    : formContext?.i18nNamespace;
+  const effectiveNamespace = isCameraLevel ? "config/cameras" : "config/global";
   const sectionI18nPrefix = formContext?.sectionI18nPrefix;
 
   const { t, i18n } = useTranslation([
-    effectiveNamespace || formContext?.i18nNamespace || "common",
-    formContext?.i18nNamespace || "common",
+    effectiveNamespace,
     "config/groups",
     "common",
   ]);

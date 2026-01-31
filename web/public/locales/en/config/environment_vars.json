@@ -1,4 +1,0 @@
-{
-  "label": "Environment variables",
-  "description": "Key/value pairs of environment variables to set for the Frigate process."
-}

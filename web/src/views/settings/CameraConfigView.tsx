@@ -203,98 +203,81 @@ const CameraConfigContent = memo(function CameraConfigContent({
 
   const sections: Array<{
     key: string;
-    i18nNamespace: string;
     component: typeof DetectSection;
     showOverrideIndicator?: boolean;
   }> = [
     {
       key: "detect",
-      i18nNamespace: "config/cameras",
       component: DetectSection,
     },
     {
       key: "ffmpeg",
-      i18nNamespace: "config/cameras",
       component: FfmpegSection,
       showOverrideIndicator: true,
     },
     {
       key: "record",
-      i18nNamespace: "config/cameras",
       component: RecordSection,
     },
     {
       key: "snapshots",
-      i18nNamespace: "config/cameras",
       component: SnapshotsSection,
     },
     {
       key: "motion",
-      i18nNamespace: "config/cameras",
       component: MotionSection,
     },
     {
       key: "objects",
-      i18nNamespace: "config/cameras",
       component: ObjectsSection,
     },
     {
       key: "review",
-      i18nNamespace: "config/cameras",
       component: ReviewSection,
     },
-    { key: "audio", i18nNamespace: "config/cameras", component: AudioSection },
+    { key: "audio", component: AudioSection },
     {
       key: "audio_transcription",
-      i18nNamespace: "config/cameras",
       component: AudioTranscriptionSection,
       showOverrideIndicator: true,
     },
     {
       key: "notifications",
-      i18nNamespace: "config/cameras",
       component: NotificationsSection,
     },
-    { key: "live", i18nNamespace: "config/cameras", component: LiveSection },
+    { key: "live", component: LiveSection },
     {
       key: "birdseye",
-      i18nNamespace: "config/cameras",
       component: BirdseyeSection,
       showOverrideIndicator: true,
     },
     {
       key: "face_recognition",
-      i18nNamespace: "config/cameras",
       component: FaceRecognitionSection,
       showOverrideIndicator: true,
     },
     {
       key: "lpr",
-      i18nNamespace: "config/cameras",
       component: LprSection,
       showOverrideIndicator: true,
     },
     {
       key: "mqtt",
-      i18nNamespace: "config/cameras",
       component: CameraMqttSection,
       showOverrideIndicator: false,
     },
     {
       key: "onvif",
-      i18nNamespace: "config/cameras",
       component: OnvifSection,
       showOverrideIndicator: false,
     },
     {
       key: "ui",
-      i18nNamespace: "config/cameras",
       component: CameraUiSection,
       showOverrideIndicator: false,
     },
     {
       key: "timestamp_style",
-      i18nNamespace: "config/cameras",
       component: TimestampSection,
     },
   ];

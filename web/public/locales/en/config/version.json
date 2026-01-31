@@ -1,4 +1,0 @@
-{
-  "label": "Current config version",
-  "description": "Numeric or string version of the active configuration to help detect migrations or format changes."
-}

@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const NotificationsSection = createConfigSection({
   sectionPath: "notifications",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["enabled", "email"],
     fieldGroups: {},

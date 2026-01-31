@@ -11,13 +11,9 @@ export function DescriptionFieldTemplate(props: DescriptionFieldProps) {
 
   const isCameraLevel = formContext?.level === "camera";
   const sectionI18nPrefix = formContext?.sectionI18nPrefix;
-  const i18nNamespace = formContext?.i18nNamespace;
-  const effectiveNamespace = isCameraLevel ? "config/cameras" : i18nNamespace;
+  const effectiveNamespace = isCameraLevel ? "config/cameras" : "config/global";
 
-  const { t, i18n } = useTranslation([
-    effectiveNamespace || i18nNamespace || "common",
-    i18nNamespace || "common",
-  ]);
+  const { t, i18n } = useTranslation([effectiveNamespace, "common"]);
 
   let resolvedDescription = description;
 

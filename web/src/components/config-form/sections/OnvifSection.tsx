@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const OnvifSection = createConfigSection({
   sectionPath: "onvif",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "host",

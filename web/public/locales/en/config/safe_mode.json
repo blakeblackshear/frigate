@@ -1,4 +1,0 @@
-{
-  "label": "Safe mode",
-  "description": "When enabled, start Frigate in safe mode with reduced features for troubleshooting."
-}

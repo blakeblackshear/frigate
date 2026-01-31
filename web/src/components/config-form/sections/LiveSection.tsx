@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const LiveSection = createConfigSection({
   sectionPath: "live",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["stream_name", "height", "quality"],
     fieldGroups: {},

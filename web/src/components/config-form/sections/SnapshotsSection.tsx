@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const SnapshotsSection = createConfigSection({
   sectionPath: "snapshots",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "enabled",

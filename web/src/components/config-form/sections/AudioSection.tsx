@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const AudioSection = createConfigSection({
   sectionPath: "audio",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "enabled",

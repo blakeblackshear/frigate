@@ -52,10 +52,8 @@ i18n
       "views/system",
       "views/exports",
       "views/explore",
-      // Config namespaces: single consolidated global file + camera-level keys
       "config/global",
       "config/cameras",
-      // keep these for backwards compatibility with explicit ns usage
       "config/validation",
       "config/groups",
     ],

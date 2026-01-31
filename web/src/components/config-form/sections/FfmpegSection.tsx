@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const FfmpegSection = createConfigSection({
   sectionPath: "ffmpeg",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: [
       "inputs",

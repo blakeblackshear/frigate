@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const FaceRecognitionSection = createConfigSection({
   sectionPath: "face_recognition",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["enabled", "min_area"],
     hiddenFields: [],

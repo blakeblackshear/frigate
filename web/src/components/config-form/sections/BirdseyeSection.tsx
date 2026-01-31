@@ -5,7 +5,6 @@ import { createConfigSection } from "./BaseSection";
 
 export const BirdseyeSection = createConfigSection({
   sectionPath: "birdseye",
-  i18nNamespace: "config/global",
   defaultConfig: {
     fieldOrder: ["enabled", "mode", "order"],
     hiddenFields: [],

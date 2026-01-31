@@ -81,8 +81,6 @@ export interface BaseSectionProps {
 export interface CreateSectionOptions {
   /** The config path for this section (e.g., "detect", "record") */
   sectionPath: string;
-  /** i18n namespace for this section (e.g., "config/detect") */
-  i18nNamespace: string;
   /** Default section configuration */
   defaultConfig: SectionConfig;
 }
@@ -92,7 +90,6 @@ export interface CreateSectionOptions {
  */
 export function createConfigSection({
   sectionPath,
-  i18nNamespace,
   defaultConfig,
 }: CreateSectionOptions) {
   const cameraUpdateTopicMap: Record<string, string> = {
@@ -131,7 +128,7 @@ export function createConfigSection({
     showTitle,
   }: BaseSectionProps) {
     const { t, i18n } = useTranslation([
-      i18nNamespace,
+      level === "camera" ? "config/cameras" : "config/global",
       "config/cameras",
       "views/settings",
       "common",
