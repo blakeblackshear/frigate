@@ -20,5 +20,6 @@ export type ConfigFormContext = {
   fullCameraConfig?: CameraConfig;
   fullConfig?: FrigateConfig;
   i18nNamespace?: string;
+  sectionI18nPrefix?: string;
   t?: (key: string, options?: Record<string, unknown>) => string;
 };

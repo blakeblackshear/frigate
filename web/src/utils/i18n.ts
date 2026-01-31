@@ -53,6 +53,7 @@ i18n
       "views/exports",
       "views/explore",
       // Config section translations
+      "config/cameras",
       "config/detect",
       "config/record",
       "config/snapshots",

@@ -11,7 +11,7 @@ class MotionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=True,
         title="Enable motion detection",
-        description="Enable or disable motion detection globally; per-camera settings can override this.",
+        description="Enable or disable motion detection; can be overridden per-camera.",
     )
     threshold: int = Field(
         default=30,

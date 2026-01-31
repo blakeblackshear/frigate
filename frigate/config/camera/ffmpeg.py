@@ -49,7 +49,7 @@ class FfmpegConfig(FrigateBaseModel):
     path: str = Field(
         default="default",
         title="FFmpeg path",
-        description='Path to the FFmpeg binary to use globally or a version alias ("5.0" or "7.0").',
+        description='Path to the FFmpeg binary to use or a version alias ("5.0" or "7.0").',
     )
     global_args: Union[str, list[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT,

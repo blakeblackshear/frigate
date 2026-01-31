@@ -81,7 +81,13 @@ export function FieldTemplate(props: FieldTemplateProps) {
   // Get i18n namespace from form context (passed through registry)
   const formContext = registry?.formContext as ConfigFormContext | undefined;
   const i18nNamespace = formContext?.i18nNamespace as string | undefined;
+  const sectionI18nPrefix = formContext?.sectionI18nPrefix as
+    | string
+    | undefined;
+  const isCameraLevel = formContext?.level === "camera";
+  const effectiveNamespace = isCameraLevel ? "config/cameras" : i18nNamespace;
   const { t, i18n } = useTranslation([
+    effectiveNamespace || i18nNamespace || "common",
     i18nNamespace || "common",
     "views/settings",
   ]);
@@ -126,10 +132,21 @@ export function FieldTemplate(props: FieldTemplateProps) {
 
   // Try to get translated label, falling back to schema title, then RJSF label
   let finalLabel = label;
-  if (i18nNamespace && translationPath) {
+  if (effectiveNamespace && translationPath) {
+    // Prefer camera-scoped translations when a section prefix is provided
+    const prefixedTranslationKey =
+      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
+        ? `${sectionI18nPrefix}.${translationPath}.label`
+        : undefined;
     const translationKey = `${translationPath}.label`;
-    if (i18n.exists(translationKey, { ns: i18nNamespace })) {
-      finalLabel = t(translationKey, { ns: i18nNamespace });
+
+    if (
+      prefixedTranslationKey &&
+      i18n.exists(prefixedTranslationKey, { ns: effectiveNamespace })
+    ) {
+      finalLabel = t(prefixedTranslationKey, { ns: effectiveNamespace });
+    } else if (i18n.exists(translationKey, { ns: effectiveNamespace })) {
+      finalLabel = t(translationKey, { ns: effectiveNamespace });
     } else if (schemaTitle) {
       finalLabel = schemaTitle;
     } else if (translatedFilterObjectLabel) {
@@ -145,11 +162,25 @@ export function FieldTemplate(props: FieldTemplateProps) {
         let fieldLabel = schemaTitle;
         if (!fieldLabel) {
           const fieldTranslationKey = `${fieldName}.label`;
+          const prefixedFieldTranslationKey =
+            sectionI18nPrefix &&
+            !fieldTranslationKey.startsWith(`${sectionI18nPrefix}.`)
+              ? `${sectionI18nPrefix}.${fieldTranslationKey}`
+              : undefined;
+
           if (
-            i18nNamespace &&
-            i18n.exists(fieldTranslationKey, { ns: i18nNamespace })
+            prefixedFieldTranslationKey &&
+            effectiveNamespace &&
+            i18n.exists(prefixedFieldTranslationKey, { ns: effectiveNamespace })
           ) {
-            fieldLabel = t(fieldTranslationKey, { ns: i18nNamespace });
+            fieldLabel = t(prefixedFieldTranslationKey, {
+              ns: effectiveNamespace,
+            });
+          } else if (
+            effectiveNamespace &&
+            i18n.exists(fieldTranslationKey, { ns: effectiveNamespace })
+          ) {
+            fieldLabel = t(fieldTranslationKey, { ns: effectiveNamespace });
           } else {
             fieldLabel = humanizeKey(fieldName);
           }
@@ -177,11 +208,25 @@ export function FieldTemplate(props: FieldTemplateProps) {
       let fieldLabel = schemaTitle;
       if (!fieldLabel) {
         const fieldTranslationKey = `${fieldName}.label`;
+        const prefixedFieldTranslationKey =
+          sectionI18nPrefix &&
+          !fieldTranslationKey.startsWith(`${sectionI18nPrefix}.`)
+            ? `${sectionI18nPrefix}.${fieldTranslationKey}`
+            : undefined;
+
         if (
-          i18nNamespace &&
-          i18n.exists(fieldTranslationKey, { ns: i18nNamespace })
+          prefixedFieldTranslationKey &&
+          effectiveNamespace &&
+          i18n.exists(prefixedFieldTranslationKey, { ns: effectiveNamespace })
         ) {
-          fieldLabel = t(fieldTranslationKey, { ns: i18nNamespace });
+          fieldLabel = t(prefixedFieldTranslationKey, {
+            ns: effectiveNamespace,
+          });
+        } else if (
+          effectiveNamespace &&
+          i18n.exists(fieldTranslationKey, { ns: effectiveNamespace })
+        ) {
+          fieldLabel = t(fieldTranslationKey, { ns: effectiveNamespace });
         } else {
           fieldLabel = humanizeKey(fieldName);
         }
@@ -198,10 +243,19 @@ export function FieldTemplate(props: FieldTemplateProps) {
 
   // Try to get translated description, falling back to schema description
   let finalDescription = description || "";
-  if (i18nNamespace && translationPath) {
+  if (effectiveNamespace && translationPath) {
+    const prefixedDescriptionKey =
+      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
+        ? `${sectionI18nPrefix}.${translationPath}.description`
+        : undefined;
     const descriptionKey = `${translationPath}.description`;
-    if (i18n.exists(descriptionKey, { ns: i18nNamespace })) {
-      finalDescription = t(descriptionKey, { ns: i18nNamespace });
+    if (
+      prefixedDescriptionKey &&
+      i18n.exists(prefixedDescriptionKey, { ns: effectiveNamespace })
+    ) {
+      finalDescription = t(prefixedDescriptionKey, { ns: effectiveNamespace });
+    } else if (i18n.exists(descriptionKey, { ns: effectiveNamespace })) {
+      finalDescription = t(descriptionKey, { ns: effectiveNamespace });
     } else if (schemaDescription) {
       finalDescription = schemaDescription;
     }

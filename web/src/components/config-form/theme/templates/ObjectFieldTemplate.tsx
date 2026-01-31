@@ -68,7 +68,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   const [isOpen, setIsOpen] = useState(true);
 
+  const isCameraLevel = formContext?.level === "camera";
+  const effectiveNamespace = isCameraLevel
+    ? "config/cameras"
+    : formContext?.i18nNamespace;
+  const sectionI18nPrefix = formContext?.sectionI18nPrefix;
+
   const { t, i18n } = useTranslation([
+    effectiveNamespace || formContext?.i18nNamespace || "common",
     formContext?.i18nNamespace || "common",
     "config/groups",
     "common",
@@ -127,12 +134,18 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   }
 
   // Try i18n translation, fall back to schema or original values
-  const i18nNs = formContext?.i18nNamespace;
+  const i18nNs = effectiveNamespace;
 
   let inferredLabel: string | undefined;
   if (i18nNs && translationPath) {
+    const prefixedLabelKey =
+      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
+        ? `${sectionI18nPrefix}.${translationPath}.label`
+        : undefined;
     const labelKey = `${translationPath}.label`;
-    if (i18n.exists(labelKey, { ns: i18nNs })) {
+    if (prefixedLabelKey && i18n.exists(prefixedLabelKey, { ns: i18nNs })) {
+      inferredLabel = t(prefixedLabelKey, { ns: i18nNs });
+    } else if (i18n.exists(labelKey, { ns: i18nNs })) {
       inferredLabel = t(labelKey, { ns: i18nNs });
     }
   }
@@ -146,8 +159,17 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredDescription: string | undefined;
   if (i18nNs && translationPath) {
+    const prefixedDescriptionKey =
+      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
+        ? `${sectionI18nPrefix}.${translationPath}.description`
+        : undefined;
     const descriptionKey = `${translationPath}.description`;
-    if (i18n.exists(descriptionKey, { ns: i18nNs })) {
+    if (
+      prefixedDescriptionKey &&
+      i18n.exists(prefixedDescriptionKey, { ns: i18nNs })
+    ) {
+      inferredDescription = t(prefixedDescriptionKey, { ns: i18nNs });
+    } else if (i18n.exists(descriptionKey, { ns: i18nNs })) {
       inferredDescription = t(descriptionKey, { ns: i18nNs });
     }
   }

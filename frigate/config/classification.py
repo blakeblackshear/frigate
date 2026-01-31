@@ -46,7 +46,7 @@ class AudioTranscriptionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable audio transcription",
-        description="Enable or disable automatic audio transcription globally.",
+        description="Enable or disable automatic audio transcription; can be overridden per-camera.",
     )
     language: str = Field(
         default="en",
@@ -240,7 +240,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable face recognition",
-        description="Enable or disable face recognition globally.",
+        description="Enable or disable face recognition; can be overridden per-camera.",
     )
     model_size: str = Field(
         default="small",
@@ -322,12 +322,12 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable LPR",
-        description="Enable or disable LPR globally; camera-level settings can override.",
+        description="Enable or disable license plate recognition; can be overridden per-camera.",
     )
     model_size: str = Field(
         default="small",
         title="Model size",
-        description="Model size used for text detection/recognition; small runs on CPU, large on GPU.",
+        description="Model size used for text detection/recognition. Most users should use 'small'.",
     )
     detection_threshold: float = Field(
         default=0.7,

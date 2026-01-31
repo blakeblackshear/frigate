@@ -132,7 +132,7 @@ class ObjectConfig(FrigateBaseModel):
     track: list[str] = Field(
         default=DEFAULT_TRACKED_OBJECTS,
         title="Objects to track",
-        description="List of object labels to track globally; camera configs can override this.",
+        description="List of object labels to track; can be overridden per-camera.",
     )
     filters: dict[str, FilterConfig] = Field(
         default_factory=dict,

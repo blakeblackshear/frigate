@@ -130,7 +130,12 @@ export function createConfigSection({
     defaultCollapsed = false,
     showTitle,
   }: BaseSectionProps) {
-    const { t } = useTranslation([i18nNamespace, "views/settings", "common"]);
+    const { t, i18n } = useTranslation([
+      i18nNamespace,
+      "config/cameras",
+      "views/settings",
+      "common",
+    ]);
     const [isOpen, setIsOpen] = useState(!defaultCollapsed);
     const [pendingData, setPendingData] = useState<ConfigSectionData | null>(
       null,
@@ -455,13 +460,31 @@ export function createConfigSection({
       return null;
     }
 
-    // Get section title from config namespace
-    const title = t("label", {
-      ns: i18nNamespace,
-      defaultValue:
-        sectionPath.charAt(0).toUpperCase() +
-        sectionPath.slice(1).replace(/_/g, " "),
-    });
+    // Get section title from config namespace. For camera-level sections we
+    // prefer the `config/cameras` namespace where keys are nested under the
+    // section name (e.g., `audio.label`). Fall back to provided i18nNamespace.
+    const defaultTitle =
+      sectionPath.charAt(0).toUpperCase() +
+      sectionPath.slice(1).replace(/_/g, " ");
+    const title =
+      level === "camera"
+        ? t(`${sectionPath}.label`, {
+            ns: "config/cameras",
+            defaultValue: defaultTitle,
+          })
+        : t("label", {
+            ns: i18nNamespace,
+            defaultValue: defaultTitle,
+          });
+
+    const sectionDescription =
+      level === "camera"
+        ? i18n.exists(`${sectionPath}.description`, { ns: "config/cameras" })
+          ? t(`${sectionPath}.description`, { ns: "config/cameras" })
+          : undefined
+        : i18n.exists("description", { ns: i18nNamespace })
+          ? t("description", { ns: i18nNamespace })
+          : undefined;
 
     const sectionContent = (
       <div className="space-y-6">
@@ -491,6 +514,9 @@ export function createConfigSection({
                 ? config?.cameras?.[cameraName]
                 : undefined,
             fullConfig: config,
+            // When rendering camera-level sections, provide the section path so
+            // field templates can look up keys under the `config/cameras` namespace
+            sectionI18nPrefix: level === "camera" ? sectionPath : undefined,
             t,
           }}
         />
@@ -597,21 +623,30 @@ export function createConfigSection({
     return (
       <div className="space-y-3">
         {shouldShowTitle && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Heading as="h4">{title}</Heading>
-              {showOverrideIndicator && level === "camera" && isOverridden && (
-                <Badge variant="secondary" className="text-xs">
-                  {t("overridden", {
-                    ns: "common",
-                    defaultValue: "Overridden",
-                  })}
-                </Badge>
-              )}
-              {hasChanges && (
-                <Badge variant="outline" className="text-xs">
-                  {t("modified", { ns: "common", defaultValue: "Modified" })}
-                </Badge>
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-3">
+                <Heading as="h4">{title}</Heading>
+                {showOverrideIndicator &&
+                  level === "camera" &&
+                  isOverridden && (
+                    <Badge variant="secondary" className="text-xs">
+                      {t("overridden", {
+                        ns: "common",
+                        defaultValue: "Overridden",
+                      })}
+                    </Badge>
+                  )}
+                {hasChanges && (
+                  <Badge variant="outline" className="text-xs">
+                    {t("modified", { ns: "common", defaultValue: "Modified" })}
+                  </Badge>
+                )}
+              </div>
+              {sectionDescription && (
+                <p className="text-sm text-muted-foreground">
+                  {sectionDescription}
+                </p>
               )}
             </div>
             {level === "camera" && isOverridden && (

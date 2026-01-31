@@ -15,10 +15,10 @@
   },
   "audio": {
     "label": "Audio events",
-    "description": "Settings for audio-based event detection; can be overridden per-camera.",
+    "description": "Settings for audio-based event detection for this camera.",
     "enabled": {
       "label": "Enable audio detection",
-      "description": "Enable or disable audio event detection; can be overridden per-camera."
+      "description": "Enable or disable audio event detection for this camera."
     },
     "max_not_heard": {
       "label": "End timeout",
@@ -138,7 +138,7 @@
   },
   "face_recognition": {
     "label": "Face recognition",
-    "description": "Settings for face detection and recognition; can be overridden per-camera.",
+    "description": "Settings for face detection and recognition for this camera.",
     "enabled": {
       "label": "Enable face recognition",
       "description": "Enable or disable face recognition."
@@ -153,7 +153,7 @@
     "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
     "path": {
       "label": "FFmpeg path",
-      "description": "Path to the FFmpeg binary to use globally or a version alias (\"5.0\" or \"7.0\")."
+      "description": "Path to the FFmpeg binary to use for this camera or a version alias (\"5.0\" or \"7.0\")."
     },
     "global_args": {
       "label": "FFmpeg global args",
@@ -254,10 +254,10 @@
   },
   "motion": {
     "label": "Motion detection",
-    "description": "Default motion detection settings; can be overridden per-camera.",
+    "description": "Default motion detection settings for this camera.",
     "enabled": {
       "label": "Enable motion detection",
-      "description": "Enable or disable motion detection globally; per-camera settings can override this."
+      "description": "Enable or disable motion detection for this camera."
     },
     "threshold": {
       "label": "Motion threshold",
@@ -308,7 +308,7 @@
     "description": "Object tracking defaults including which labels to track and per-object filters.",
     "track": {
       "label": "Objects to track",
-      "description": "List of object labels to track globally; camera configs can override this."
+      "description": "List of object labels to track for this camera."
     },
     "filters": {
       "label": "Object filters",
@@ -400,10 +400,10 @@
   },
   "record": {
     "label": "Recording",
-    "description": "Recording and retention settings; can be overridden per-camera.",
+    "description": "Recording and retention settings for this camera.",
     "enabled": {
       "label": "Enable recording",
-      "description": "Enable or disable recording globally; individual cameras can override this."
+      "description": "Enable or disable recording for this camera."
     },
     "expire_interval": {
       "label": "Record cleanup interval",
@@ -496,7 +496,7 @@
   },
   "review": {
     "label": "Review",
-    "description": "Settings that control alerts, detections, and GenAI review summaries used by the UI and storage; can be overridden per-camera.",
+    "description": "Settings that control alerts, detections, and GenAI review summaries used by the UI and storage for this camera.",
     "alerts": {
       "label": "Alerts config",
       "description": "Settings for which tracked objects generate alerts and how alerts are retained.",
@@ -620,10 +620,10 @@
   },
   "snapshots": {
     "label": "Snapshots",
-    "description": "Settings for saved JPEG snapshots of tracked objects; can be overridden per-camera.",
+    "description": "Settings for saved JPEG snapshots of tracked objects for this camera.",
     "enabled": {
       "label": "Snapshots enabled",
-      "description": "Enable or disable saving snapshots globally."
+      "description": "Enable or disable saving snapshots for this camera."
     },
     "clean_copy": {
       "label": "Save clean copy",
@@ -744,10 +744,10 @@
   },
   "notifications": {
     "label": "Notifications",
-    "description": "Settings to enable and control notifications; can be overridden per-camera.",
+    "description": "Settings to enable and control notifications for this camera.",
     "enabled": {
       "label": "Enable notifications",
-      "description": "Enable or disable notifications globally."
+      "description": "Enable or disable notifications for this camera."
     },
     "email": {
       "label": "Notification email",

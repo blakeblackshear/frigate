@@ -76,7 +76,7 @@ class CameraConfig(FrigateBaseModel):
     audio: AudioConfig = Field(
         default_factory=AudioConfig,
         title="Audio events",
-        description="Settings for audio-based event detection; can be overridden per-camera.",
+        description="Settings for audio-based event detection for this camera.",
     )
     audio_transcription: CameraAudioTranscriptionConfig = Field(
         default_factory=CameraAudioTranscriptionConfig,
@@ -96,7 +96,7 @@ class CameraConfig(FrigateBaseModel):
     face_recognition: CameraFaceRecognitionConfig = Field(
         default_factory=CameraFaceRecognitionConfig,
         title="Face recognition",
-        description="Settings for face detection and recognition; can be overridden per-camera.",
+        description="Settings for face detection and recognition for this camera.",
     )
     ffmpeg: CameraFfmpegConfig = Field(
         title="FFmpeg",
@@ -115,7 +115,7 @@ class CameraConfig(FrigateBaseModel):
     motion: MotionConfig = Field(
         None,
         title="Motion detection",
-        description="Default motion detection settings; can be overridden per-camera.",
+        description="Default motion detection settings for this camera.",
     )
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig,
@@ -125,12 +125,12 @@ class CameraConfig(FrigateBaseModel):
     record: RecordConfig = Field(
         default_factory=RecordConfig,
         title="Recording",
-        description="Recording and retention settings; can be overridden per-camera.",
+        description="Recording and retention settings for this camera.",
     )
     review: ReviewConfig = Field(
         default_factory=ReviewConfig,
         title="Review",
-        description="Settings that control alerts, detections, and GenAI review summaries used by the UI and storage; can be overridden per-camera.",
+        description="Settings that control alerts, detections, and GenAI review summaries used by the UI and storage for this camera.",
     )
     semantic_search: CameraSemanticSearchConfig = Field(
         default_factory=CameraSemanticSearchConfig,
@@ -140,7 +140,7 @@ class CameraConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig,
         title="Snapshots",
-        description="Settings for saved JPEG snapshots of tracked objects; can be overridden per-camera.",
+        description="Settings for saved JPEG snapshots of tracked objects for this camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
@@ -162,7 +162,7 @@ class CameraConfig(FrigateBaseModel):
     notifications: NotificationConfig = Field(
         default_factory=NotificationConfig,
         title="Notifications",
-        description="Settings to enable and control notifications; can be overridden per-camera.",
+        description="Settings to enable and control notifications for this camera.",
     )
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig,

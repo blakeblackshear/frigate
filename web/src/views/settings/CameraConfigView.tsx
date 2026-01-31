@@ -187,6 +187,7 @@ const CameraConfigContent = memo(function CameraConfigContent({
     "config/objects",
     "config/review",
     "config/audio",
+    "config/cameras",
     "config/audio_transcription",
     "config/birdseye",
     "config/camera_mqtt",
@@ -322,11 +323,15 @@ const CameraConfigContent = memo(function CameraConfigContent({
         <ul className="space-y-1">
           {sections.map((section) => {
             const isOverridden = overriddenSections.includes(section.key);
-            const sectionLabel = t("label", {
-              ns: section.i18nNamespace,
-              defaultValue:
-                section.key.charAt(0).toUpperCase() +
-                section.key.slice(1).replace(/_/g, " "),
+            const defaultSectionLabel =
+              section.key.charAt(0).toUpperCase() +
+              section.key.slice(1).replace(/_/g, " ");
+            const sectionLabel = t(`${section.key}.label`, {
+              ns: "config/cameras",
+              defaultValue: t("label", {
+                ns: section.i18nNamespace,
+                defaultValue: defaultSectionLabel,
+              }),
             });
 
             return (
