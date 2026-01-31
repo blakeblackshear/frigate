@@ -32,11 +32,17 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Shield, User } from "lucide-react";
-import { LuCheck, LuX } from "react-icons/lu";
+import { LuCheck, LuX, LuEye, LuEyeOff } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { isDesktop, isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
+import {
+  calculatePasswordStrength,
+  getPasswordRequirements,
+  getPasswordStrengthLabel,
+  getPasswordStrengthColor,
+} from "@/utils/passwordUtil";
 import {
   MobilePage,
   MobilePageContent,
@@ -59,6 +65,10 @@ export default function CreateUserDialog({
   const { data: config } = useSWR<FrigateConfig>("config");
   const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPasswordVisible, setShowPasswordVisible] =
+    useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   const roles = useMemo(() => {
     const existingRoles = config ? Object.keys(config.auth?.roles || {}) : [];
@@ -73,7 +83,15 @@ export default function CreateUserDialog({
         .regex(/^[A-Za-z0-9._]+$/, {
           message: t("users.dialog.createUser.usernameOnlyInclude"),
         }),
-      password: z.string().min(1, t("users.dialog.form.passwordIsRequired")),
+      password: z
+        .string()
+        .min(8, t("users.dialog.form.password.requirements.length"))
+        .regex(/[A-Z]/, t("users.dialog.form.password.requirements.uppercase"))
+        .regex(/\d/, t("users.dialog.form.password.requirements.digit"))
+        .regex(
+          /[!@#$%^&*(),.?":{}|<>]/,
+          t("users.dialog.form.password.requirements.special"),
+        ),
       confirmPassword: z
         .string()
         .min(1, t("users.dialog.createUser.confirmPassword")),
@@ -108,13 +126,27 @@ export default function CreateUserDialog({
   const passwordsMatch = password === confirmPassword;
   const showMatchIndicator = password && confirmPassword;
 
+  // Password strength calculation
+  const passwordStrength = useMemo(
+    () => calculatePasswordStrength(password),
+    [password],
+  );
+
+  const requirements = useMemo(
+    () => getPasswordRequirements(password),
+    [password],
+  );
+
   useEffect(() => {
     if (!show) {
       form.reset({
         user: "",
         password: "",
+        confirmPassword: "",
         role: "viewer",
       });
+      setShowPasswordVisible(false);
+      setShowConfirmPassword(false);
     }
   }, [show, form]);
 
@@ -122,8 +154,11 @@ export default function CreateUserDialog({
     form.reset({
       user: "",
       password: "",
+      confirmPassword: "",
       role: "viewer",
     });
+    setShowPasswordVisible(false);
+    setShowConfirmPassword(false);
     onCancel();
   };
 
@@ -184,13 +219,142 @@ export default function CreateUserDialog({
                     {t("users.dialog.form.password.title")}
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder={t("users.dialog.form.password.placeholder")}
-                      type="password"
-                      className="h-10"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder={t(
+                          "users.dialog.form.password.placeholder",
+                        )}
+                        type={showPasswordVisible ? "text" : "password"}
+                        className="h-10 pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        tabIndex={-1}
+                        aria-label={
+                          showPasswordVisible
+                            ? t("users.dialog.form.password.hide", {
+                                ns: "views/settings",
+                              })
+                            : t("users.dialog.form.password.show", {
+                                ns: "views/settings",
+                              })
+                        }
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() =>
+                          setShowPasswordVisible(!showPasswordVisible)
+                        }
+                      >
+                        {showPasswordVisible ? (
+                          <LuEyeOff className="size-4" />
+                        ) : (
+                          <LuEye className="size-4" />
+                        )}
+                      </Button>
+                    </div>
                   </FormControl>
+
+                  {password && (
+                    <div className="mt-2 space-y-2">
+                      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-secondary-foreground">
+                        <div
+                          className={`${getPasswordStrengthColor(
+                            password,
+                          )} transition-all duration-300`}
+                          style={{ width: `${(passwordStrength / 4) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("users.dialog.form.password.strength.title")}
+                        <span className="font-medium">
+                          {getPasswordStrengthLabel(password, t)}
+                        </span>
+                      </p>
+
+                      <div className="space-y-1 rounded-md bg-muted/50 p-2">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("users.dialog.form.password.requirements.title")}
+                        </p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2 text-xs">
+                            {requirements.length ? (
+                              <LuCheck className="size-3.5 text-green-500" />
+                            ) : (
+                              <LuX className="size-3.5 text-red-500" />
+                            )}
+                            <span
+                              className={
+                                requirements.length
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }
+                            >
+                              {t(
+                                "users.dialog.form.password.requirements.length",
+                              )}
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2 text-xs">
+                            {requirements.uppercase ? (
+                              <LuCheck className="size-3.5 text-green-500" />
+                            ) : (
+                              <LuX className="size-3.5 text-red-500" />
+                            )}
+                            <span
+                              className={
+                                requirements.uppercase
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }
+                            >
+                              {t(
+                                "users.dialog.form.password.requirements.uppercase",
+                              )}
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2 text-xs">
+                            {requirements.digit ? (
+                              <LuCheck className="size-3.5 text-green-500" />
+                            ) : (
+                              <LuX className="size-3.5 text-red-500" />
+                            )}
+                            <span
+                              className={
+                                requirements.digit
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }
+                            >
+                              {t(
+                                "users.dialog.form.password.requirements.digit",
+                              )}
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2 text-xs">
+                            {requirements.special ? (
+                              <LuCheck className="size-3.5 text-green-500" />
+                            ) : (
+                              <LuX className="size-3.5 text-red-500" />
+                            )}
+                            <span
+                              className={
+                                requirements.special
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }
+                            >
+                              {t(
+                                "users.dialog.form.password.requirements.special",
+                              )}
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -204,14 +368,41 @@ export default function CreateUserDialog({
                     {t("users.dialog.form.password.confirm.title")}
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder={t(
-                        "users.dialog.form.password.confirm.placeholder",
-                      )}
-                      type="password"
-                      className="h-10"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder={t(
+                          "users.dialog.form.password.confirm.placeholder",
+                        )}
+                        type={showConfirmPassword ? "text" : "password"}
+                        className="h-10 pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        tabIndex={-1}
+                        aria-label={
+                          showConfirmPassword
+                            ? t("users.dialog.form.password.hide", {
+                                ns: "views/settings",
+                              })
+                            : t("users.dialog.form.password.show", {
+                                ns: "views/settings",
+                              })
+                        }
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <LuEyeOff className="size-4" />
+                        ) : (
+                          <LuEye className="size-4" />
+                        )}
+                      </Button>
+                    </div>
                   </FormControl>
                   {showMatchIndicator && (
                     <div className="mt-1 flex items-center gap-1.5 text-xs">

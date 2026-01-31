@@ -28,6 +28,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import {
+  calculatePasswordStrength,
+  getPasswordRequirements,
+  getPasswordStrengthLabel,
+  getPasswordStrengthColor,
+} from "@/utils/passwordUtil";
 
 type SetPasswordProps = {
   show: boolean;
@@ -125,25 +131,13 @@ export default function SetPasswordDialog({
   const confirmPassword = form.watch("confirmPassword");
 
   // Password strength calculation
-  const passwordStrength = useMemo(() => {
-    if (!password) return 0;
-
-    let strength = 0;
-    if (password.length >= 8) strength += 1;
-    if (/\d/.test(password)) strength += 1;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-
-    return strength;
-  }, [password]);
+  const passwordStrength = useMemo(
+    () => calculatePasswordStrength(password),
+    [password],
+  );
 
   const requirements = useMemo(
-    () => ({
-      length: password?.length >= 8,
-      uppercase: /[A-Z]/.test(password || ""),
-      digit: /\d/.test(password || ""),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password || ""),
-    }),
+    () => getPasswordRequirements(password),
     [password],
   );
 
@@ -194,25 +188,6 @@ export default function SetPasswordDialog({
           ).oldPassword
         : undefined;
     onSave(values.password, oldPassword);
-  };
-
-  const getStrengthLabel = () => {
-    if (!password) return "";
-    if (passwordStrength <= 1)
-      return t("users.dialog.form.password.strength.weak");
-    if (passwordStrength === 2)
-      return t("users.dialog.form.password.strength.medium");
-    if (passwordStrength === 3)
-      return t("users.dialog.form.password.strength.strong");
-    return t("users.dialog.form.password.strength.veryStrong");
-  };
-
-  const getStrengthColor = () => {
-    if (!password) return "bg-gray-200";
-    if (passwordStrength <= 1) return "bg-red-500";
-    if (passwordStrength === 2) return "bg-yellow-500";
-    if (passwordStrength === 3) return "bg-green-500";
-    return "bg-green-600";
   };
 
   return (
@@ -367,14 +342,16 @@ export default function SetPasswordDialog({
                     <div className="mt-2 space-y-2">
                       <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-secondary-foreground">
                         <div
-                          className={`${getStrengthColor()} transition-all duration-300`}
+                          className={`${getPasswordStrengthColor(
+                            password,
+                          )} transition-all duration-300`}
                           style={{ width: `${(passwordStrength / 4) * 100}%` }}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {t("users.dialog.form.password.strength.title")}
                         <span className="font-medium">
-                          {getStrengthLabel()}
+                          {getPasswordStrengthLabel(password, t)}
                         </span>
                       </p>
 
