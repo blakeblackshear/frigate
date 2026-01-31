@@ -51,17 +51,17 @@ class AudioTranscriptionConfig(FrigateBaseModel):
     language: str = Field(
         default="en",
         title="Transcription language",
-        description="Language code used for transcription/translation (for example 'en' for English).",
+        description="Language code used for transcription/translation (for example 'en' for English). See https://whisper-api.com/docs/languages/ for supported language codes.",
     )
     device: Optional[EnrichmentsDeviceEnum] = Field(
         default=EnrichmentsDeviceEnum.CPU,
         title="Transcription device",
-        description="Device key (CPU/GPU) to run the transcription model on.",
+        description="Device key (CPU/GPU) to run the transcription model on. Only NVIDIA CUDA GPUs are currently supported for transcription.",
     )
     model_size: str = Field(
         default="small",
         title="Model size",
-        description="Model size to use for transcription; the small model runs on CPU, large model requires a GPU.",
+        description="Model size to use for offline audio event transcription.",
     )
     live_enabled: Optional[bool] = Field(
         default=False,

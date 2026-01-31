@@ -353,17 +353,17 @@ const systemSections = [
   "ffmpeg",
   "detectors",
   "model",
-  "classification",
 ];
 
 // Integration sections (global only)
 const integrationSections = [
   "mqtt",
-  "audio_transcription",
-  "genai",
   "semantic_search",
+  "genai",
   "face_recognition",
   "lpr",
+  "classification",
+  "audio_transcription",
 ];
 
 interface GlobalConfigSectionProps {
@@ -382,7 +382,11 @@ function GlobalConfigSection({
   title,
 }: GlobalConfigSectionProps) {
   const sectionConfig = globalSectionConfigs[sectionKey];
-  const { t } = useTranslation(["config/global", "views/settings", "common"]);
+  const { t, i18n } = useTranslation([
+    "config/global",
+    "views/settings",
+    "common",
+  ]);
   const [pendingData, setPendingData] = useState<unknown | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [formKey, setFormKey] = useState(0);
@@ -538,7 +542,11 @@ function GlobalConfigSection({
 }
 
 export default function GlobalConfigView() {
-  const { t } = useTranslation(["views/settings", "config/global", "common"]);
+  const { t, i18n } = useTranslation([
+    "views/settings",
+    "config/global",
+    "common",
+  ]);
   const [activeTab, setActiveTab] = useState("shared");
   const [activeSection, setActiveSection] = useState("detect");
 
@@ -669,7 +677,7 @@ export default function GlobalConfigView() {
                         activeSection === section.key ? "block" : "hidden",
                       )}
                     >
-                      <Heading as="h4" className="mb-4">
+                      <Heading as="h4" className="mb-1">
                         {t(`${section.key}.label`, {
                           ns: "config/global",
                           defaultValue:
@@ -677,6 +685,16 @@ export default function GlobalConfigView() {
                             section.key.slice(1).replace(/_/g, " "),
                         })}
                       </Heading>
+                      {i18n.exists(`${section.key}.description`, {
+                        ns: "config/global",
+                      }) && (
+                        <p className="mb-4 text-sm text-muted-foreground">
+                          {t(`${section.key}.description`, {
+                            ns: "config/global",
+                          })}
+                        </p>
+                      )}
+
                       <SectionComponent
                         level="global"
                         onSave={handleSave}

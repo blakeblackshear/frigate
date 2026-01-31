@@ -223,6 +223,12 @@ export function createConfigSection({
       }
     }, [formKey]);
 
+    // Build a minimal overrides payload by comparing `current` against `base`
+    // (existing config) and `defaults` (schema defaults).
+    // - Returns `undefined` for null/empty values or when `current` equals `base`
+    //   (or equals `defaults` when `base` is undefined).
+    // - For objects, recurses and returns an object containing only keys that
+    //   are overridden; returns `undefined` if no keys are overridden.
     const buildOverrides = useCallback(
       (
         current: unknown,
