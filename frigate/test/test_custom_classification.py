@@ -4,8 +4,8 @@ import unittest
 from unittest.mock import MagicMock
 
 MOCK_MODULES = [
-    "cv2",
-    "numpy",
+    # "cv2",
+    # "numpy",
     "zmq",
     "peewee",
     "sherpa_onnx",
