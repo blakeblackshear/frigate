@@ -613,19 +613,20 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                     (object_id, consensus_label, consensus_score),
                     EventMetadataTypeEnum.sub_label,
                 )
+                classification_data = {
+                    "type": TrackedObjectUpdateTypesEnum.classification,
+                    "id": object_id,
+                    "camera": camera,
+                    "timestamp": now,
+                    "model": self.model_config.name,
+                    "sub_label": consensus_label,
+                    "score": consensus_score,
+                }
+                if obj_data.get("current_zones"):
+                    classification_data["zones"] = obj_data["current_zones"]
                 self.requestor.send_data(
                     "tracked_object_update",
-                    json.dumps(
-                        {
-                            "type": TrackedObjectUpdateTypesEnum.classification,
-                            "id": object_id,
-                            "camera": camera,
-                            "timestamp": now,
-                            "model": self.model_config.name,
-                            "sub_label": consensus_label,
-                            "score": consensus_score,
-                        }
-                    ),
+                    json.dumps(classification_data),
                 )
             elif (
                 self.model_config.object_config.classification_type
@@ -640,19 +641,20 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                     ),
                     EventMetadataTypeEnum.attribute.value,
                 )
+                classification_data = {
+                    "type": TrackedObjectUpdateTypesEnum.classification,
+                    "id": object_id,
+                    "camera": camera,
+                    "timestamp": now,
+                    "model": self.model_config.name,
+                    "attribute": consensus_label,
+                    "score": consensus_score,
+                }
+                if obj_data.get("current_zones"):
+                    classification_data["zones"] = obj_data["current_zones"]
                 self.requestor.send_data(
                     "tracked_object_update",
-                    json.dumps(
-                        {
-                            "type": TrackedObjectUpdateTypesEnum.classification,
-                            "id": object_id,
-                            "camera": camera,
-                            "timestamp": now,
-                            "model": self.model_config.name,
-                            "attribute": consensus_label,
-                            "score": consensus_score,
-                        }
-                    ),
+                    json.dumps(classification_data),
                 )
 
     def handle_request(self, topic, request_data):

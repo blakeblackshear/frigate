@@ -173,7 +173,8 @@ Message published when [object classification](/configuration/custom_classificat
   "timestamp": 1607123958.748393,
   "model": "person_classifier",
   "sub_label": "delivery_person",
-  "score": 0.87
+  "score": 0.87,
+  "zones": ["front_yard", "driveway"]
 }
 ```
 
@@ -187,9 +188,14 @@ Message published when [object classification](/configuration/custom_classificat
   "timestamp": 1607123958.748393,
   "model": "helmet_detector",
   "attribute": "yes",
-  "score": 0.92
+  "score": 0.92,
+  "zones": ["front_yard"]
 }
 ```
+
+:::note
+The `zones` field is only included if the tracked object is currently in one or more zones.
+:::
 
 ### `frigate/reviews`
 
