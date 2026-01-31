@@ -317,7 +317,7 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         mqtt_data = json.loads(mqtt_json)
         import logging
         logger = logging.getLogger("TestCustomObjectClassificationIntegration")
-        logger.warning("send_data called with: ", mqtt_data)
+        logger.warning(f"send_data called with: {mqtt_data} {mqtt_json}")
 
         # THE ACTUAL VERIFICATION: zones from obj_data made it through the stack
         self.assertIn("zones", mqtt_data, "MQTT must include zones")
