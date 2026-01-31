@@ -238,7 +238,7 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
 
     def tearDown(self):
         for mod in MOCK_MODULES:
-            sys.modules[mod] = ORIGINAL_MODULES[mode]
+            sys.modules[mod] = ORIGINAL_MODULES[mod]
 
     def test_process_frame_with_zones_includes_zones_in_mqtt(self):
         """
