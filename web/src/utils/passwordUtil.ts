@@ -11,10 +11,7 @@ export const calculatePasswordStrength = (password: string): number => {
 };
 
 export const getPasswordRequirements = (password: string) => ({
-  length: password?.length >= 8,
-  uppercase: /[A-Z]/.test(password || ""),
-  digit: /\d/.test(password || ""),
-  special: /[!@#$%^&*(),.?":{}|<>]/.test(password || ""),
+  length: password?.length >= 12,
 });
 
 export const getPasswordStrengthLabel = (
@@ -24,9 +21,7 @@ export const getPasswordStrengthLabel = (
   const strength = calculatePasswordStrength(password);
 
   if (!password) return "";
-  if (strength <= 1) return t("users.dialog.form.password.strength.weak");
-  if (strength === 2) return t("users.dialog.form.password.strength.medium");
-  if (strength === 3) return t("users.dialog.form.password.strength.strong");
+  if (strength < 1) return t("users.dialog.form.password.strength.weak");
   return t("users.dialog.form.password.strength.veryStrong");
 };
 
@@ -34,8 +29,6 @@ export const getPasswordStrengthColor = (password: string): string => {
   const strength = calculatePasswordStrength(password);
 
   if (!password) return "bg-gray-200";
-  if (strength <= 1) return "bg-red-500";
-  if (strength === 2) return "bg-yellow-500";
-  if (strength === 3) return "bg-green-500";
-  return "bg-green-600";
+  if (strength === 0) return "bg-red-500";
+  return "bg-green-500";
 };

@@ -350,21 +350,15 @@ def validate_password_strength(password: str) -> tuple[bool, Optional[str]]:
     Validate password strength.
 
     Returns a tuple of (is_valid, error_message).
+
+    Longer passwords are harder to crack than shorter complex ones.
+    https://pages.nist.gov/800-63-3/sp800-63b.html
     """
     if not password:
         return False, "Password cannot be empty"
 
-    if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
-
-    if not any(c.isupper() for c in password):
-        return False, "Password must contain at least one uppercase letter"
-
-    if not any(c.isdigit() for c in password):
-        return False, "Password must contain at least one digit"
-
-    if not any(c in '!@#$%^&*(),.?":{}|<>' for c in password):
-        return False, "Password must contain at least one special character"
+    if len(password) < 12:
+        return False, "Password must be at least 12 characters long"
 
     return True, None
 
@@ -800,7 +794,7 @@ def get_users():
     "/users",
     dependencies=[Depends(require_role(["admin"]))],
     summary="Create new user",
-    description='Creates a new user with the specified username, password, and role. Requires admin role. Password must meet strength requirements: minimum 8 characters, at least one uppercase letter, at least one digit, and at least one special character (!@#$%^&*(),.?":{} |<>).',
+    description="Creates a new user with the specified username, password, and role. Requires admin role. Password must be at least 12 characters long.",
 )
 def create_user(
     request: Request,
@@ -817,6 +811,15 @@ def create_user(
             content={"message": f"Role must be one of: {', '.join(config_roles)}"},
             status_code=400,
         )
+
+    # Validate password strength
+    is_valid, error_message = validate_password_strength(body.password)
+    if not is_valid:
+        return JSONResponse(
+            content={"message": error_message},
+            status_code=400,
+        )
+
     role = body.role or "viewer"
     password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
     User.insert(
@@ -851,7 +854,7 @@ def delete_user(request: Request, username: str):
     "/users/{username}/password",
     dependencies=[Depends(allow_any_authenticated())],
     summary="Update user password",
-    description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity for non-admin users. Password must meet strength requirements: minimum 8 characters, at least one uppercase letter, at least one digit, and at least one special character (!@#$%^&*(),.?\":{} |<>). If user changes their own password, a new JWT cookie is automatically issued.",
+    description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity for non-admin users. Password must be at least 12 characters long. If user changes their own password, a new JWT cookie is automatically issued.",
 )
 async def update_password(
     request: Request,

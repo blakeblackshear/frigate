@@ -76,13 +76,7 @@ export default function SetPasswordDialog({
     const baseSchema = {
       password: z
         .string()
-        .min(8, t("users.dialog.form.password.requirements.length"))
-        .regex(/[A-Z]/, t("users.dialog.form.password.requirements.uppercase"))
-        .regex(/\d/, t("users.dialog.form.password.requirements.digit"))
-        .regex(
-          /[!@#$%^&*(),.?":{}|<>]/,
-          t("users.dialog.form.password.requirements.special"),
-        ),
+        .min(12, t("users.dialog.form.password.requirements.length")),
       confirmPassword: z.string(),
     };
 
@@ -345,7 +339,7 @@ export default function SetPasswordDialog({
                           className={`${getPasswordStrengthColor(
                             password,
                           )} transition-all duration-300`}
-                          style={{ width: `${(passwordStrength / 4) * 100}%` }}
+                          style={{ width: `${passwordStrength * 100}%` }}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
@@ -375,60 +369,6 @@ export default function SetPasswordDialog({
                             >
                               {t(
                                 "users.dialog.form.password.requirements.length",
-                              )}
-                            </span>
-                          </li>
-                          <li className="flex items-center gap-2 text-xs">
-                            {requirements.uppercase ? (
-                              <LuCheck className="size-3.5 text-green-500" />
-                            ) : (
-                              <LuX className="size-3.5 text-red-500" />
-                            )}
-                            <span
-                              className={
-                                requirements.uppercase
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }
-                            >
-                              {t(
-                                "users.dialog.form.password.requirements.uppercase",
-                              )}
-                            </span>
-                          </li>
-                          <li className="flex items-center gap-2 text-xs">
-                            {requirements.digit ? (
-                              <LuCheck className="size-3.5 text-green-500" />
-                            ) : (
-                              <LuX className="size-3.5 text-red-500" />
-                            )}
-                            <span
-                              className={
-                                requirements.digit
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }
-                            >
-                              {t(
-                                "users.dialog.form.password.requirements.digit",
-                              )}
-                            </span>
-                          </li>
-                          <li className="flex items-center gap-2 text-xs">
-                            {requirements.special ? (
-                              <LuCheck className="size-3.5 text-green-500" />
-                            ) : (
-                              <LuX className="size-3.5 text-red-500" />
-                            )}
-                            <span
-                              className={
-                                requirements.special
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }
-                            >
-                              {t(
-                                "users.dialog.form.password.requirements.special",
                               )}
                             </span>
                           </li>
