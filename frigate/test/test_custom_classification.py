@@ -26,7 +26,12 @@ MOCK_MODULES = [
     "tensorflow.lite.python.interpreter",
 ]
 
-ORIGINAL_MODULES = {mod: sys.modules[mod] for mod in MOCK_MODULES}
+ORIGINAL_MODULES = {
+    mod: sys.modules[mod]
+    for mod 
+    in MOCK_MODULES
+    if mod in sys.modules
+}
 
 
 class TestCustomObjectClassificationZones(unittest.TestCase):
@@ -238,7 +243,10 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
 
     def tearDown(self):
         for mod in MOCK_MODULES:
-            sys.modules[mod] = ORIGINAL_MODULES[mod]
+            if mod in ORIGINAL_MODULES:
+                sys.modules[mod] = mod
+            else:
+                del sys.modules[mod]
 
     def test_process_frame_with_zones_includes_zones_in_mqtt(self):
         """
