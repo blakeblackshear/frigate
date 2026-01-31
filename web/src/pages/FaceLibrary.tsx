@@ -560,6 +560,8 @@ function LibrarySelector({
         defaultValue={renameFace || ""}
         regexPattern={/^[\p{L}\p{N}\s'_-]{1,50}$/u}
         regexErrorMessage={t("description.invalidName")}
+        forbiddenPattern={/#/}
+        forbiddenErrorMessage={t("description.nameCannotContainHash")}
       />
 
       <DropdownMenu modal={false}>

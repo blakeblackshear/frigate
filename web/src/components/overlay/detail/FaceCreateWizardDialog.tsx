@@ -128,6 +128,8 @@ export default function CreateFaceWizardDialog({
             }}
             regexPattern={/^[\p{L}\p{N}\s'_-]{1,50}$/u}
             regexErrorMessage={t("description.invalidName")}
+            forbiddenPattern={/#/}
+            forbiddenErrorMessage={t("description.nameCannotContainHash")}
           >
             <div className="flex justify-end py-2">
               <Button variant="select" type="submit">

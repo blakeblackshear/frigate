@@ -20,6 +20,8 @@ type TextEntryProps = {
   children?: React.ReactNode;
   regexPattern?: RegExp;
   regexErrorMessage?: string;
+  forbiddenPattern?: RegExp;
+  forbiddenErrorMessage?: string;
 };
 
 export default function TextEntry({
@@ -30,11 +32,16 @@ export default function TextEntry({
   children,
   regexPattern,
   regexErrorMessage = "Input does not match the required format",
+  forbiddenPattern,
+  forbiddenErrorMessage = "Input contains invalid characters",
 }: TextEntryProps) {
   const formSchema = z.object({
     text: z
       .string()
       .optional()
+      .refine((val) => !val || !forbiddenPattern?.test(val), {
+        message: forbiddenErrorMessage,
+      })
       .refine(
         (val) => {
           if (!allowEmpty && !val) return false;

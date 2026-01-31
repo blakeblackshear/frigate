@@ -22,6 +22,8 @@ type TextEntryDialogProps = {
   allowEmpty?: boolean;
   regexPattern?: RegExp;
   regexErrorMessage?: string;
+  forbiddenPattern?: RegExp;
+  forbiddenErrorMessage?: string;
 };
 
 export default function TextEntryDialog({
@@ -34,6 +36,8 @@ export default function TextEntryDialog({
   allowEmpty = false,
   regexPattern,
   regexErrorMessage,
+  forbiddenPattern,
+  forbiddenErrorMessage,
 }: TextEntryDialogProps) {
   const { t } = useTranslation("common");
 
@@ -50,6 +54,8 @@ export default function TextEntryDialog({
           onSave={onSave}
           regexPattern={regexPattern}
           regexErrorMessage={regexErrorMessage}
+          forbiddenPattern={forbiddenPattern}
+          forbiddenErrorMessage={forbiddenErrorMessage}
         >
           <DialogFooter className={cn("pt-4", isMobile && "gap-2")}>
             <Button type="button" onClick={() => setOpen(false)}>
