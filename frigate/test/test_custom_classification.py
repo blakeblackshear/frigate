@@ -3,36 +3,6 @@ import sys
 import unittest
 from unittest.mock import MagicMock
 
-# Mock all external dependencies before any imports
-sys.modules["cv2"] = MagicMock()
-sys.modules["numpy"] = MagicMock()
-sys.modules["zmq"] = MagicMock()
-sys.modules["peewee"] = MagicMock()
-sys.modules["sherpa_onnx"] = MagicMock()
-
-# Create a better mock for pydantic to handle type annotations
-pydantic_mock = MagicMock()
-# Mock BaseModel as a simple class
-pydantic_mock.BaseModel = type("BaseModel", (), {})
-pydantic_mock.Field = MagicMock(return_value=None)
-pydantic_mock.ConfigDict = MagicMock(return_value={})
-sys.modules["pydantic"] = pydantic_mock
-sys.modules["pydantic.fields"] = MagicMock()
-
-sys.modules["frigate.comms.inter_process"] = MagicMock()
-sys.modules["frigate.comms.event_metadata_updater"] = MagicMock()
-sys.modules["frigate.comms.embeddings_updater"] = MagicMock()
-sys.modules["frigate.log"] = MagicMock()
-sys.modules["frigate.const"] = MagicMock()
-sys.modules["frigate.util.builtin"] = MagicMock()
-sys.modules["frigate.util.object"] = MagicMock()
-sys.modules["tflite_runtime"] = MagicMock()
-sys.modules["tflite_runtime.interpreter"] = MagicMock()
-sys.modules["tensorflow"] = MagicMock()
-sys.modules["tensorflow.lite"] = MagicMock()
-sys.modules["tensorflow.lite.python"] = MagicMock()
-sys.modules["tensorflow.lite.python.interpreter"] = MagicMock()
-
 
 class TestCustomObjectClassificationZones(unittest.TestCase):
     """Test that zone information is correctly added to custom classification MQTT messages"""
@@ -215,6 +185,38 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
 
     def setUp(self):
         """Import the processor after mocking dependencies"""
+        self.original_modules = sys.modules
+        # Mock all external dependencies before any imports
+        sys.modules["cv2"] = MagicMock()
+        sys.modules["numpy"] = MagicMock()
+        sys.modules["zmq"] = MagicMock()
+        sys.modules["peewee"] = MagicMock()
+        sys.modules["sherpa_onnx"] = MagicMock()
+
+        # Create a better mock for pydantic to handle type annotations
+        pydantic_mock = MagicMock()
+        # Mock BaseModel as a simple class
+        pydantic_mock.BaseModel = type("BaseModel", (), {})
+        pydantic_mock.Field = MagicMock(return_value=None)
+        pydantic_mock.ConfigDict = MagicMock(return_value={})
+        sys.modules["pydantic"] = pydantic_mock
+        sys.modules["pydantic.fields"] = MagicMock()
+
+        sys.modules["frigate.comms.inter_process"] = MagicMock()
+        sys.modules["frigate.comms.event_metadata_updater"] = MagicMock()
+        sys.modules["frigate.comms.embeddings_updater"] = MagicMock()
+        sys.modules["frigate.log"] = MagicMock()
+        sys.modules["frigate.const"] = MagicMock()
+        sys.modules["frigate.util.builtin"] = MagicMock()
+        sys.modules["frigate.util.object"] = MagicMock()
+        sys.modules["tflite_runtime"] = MagicMock()
+        sys.modules["tflite_runtime.interpreter"] = MagicMock()
+        sys.modules["tensorflow"] = MagicMock()
+        sys.modules["tensorflow.lite"] = MagicMock()
+        sys.modules["tensorflow.lite.python"] = MagicMock()
+        sys.modules["tensorflow.lite.python.interpreter"] = MagicMock()
+
+
         # Import numpy after it's been mocked
         import numpy as np
 
@@ -229,6 +231,9 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
         except ImportError as e:
             # If imports fail, skip these tests (they need full Docker environment)
             self.skipTest(f"Requires full Frigate environment: {e}")
+
+    def tearDown(self):
+        sys.modules = self.original_modules
 
     def test_process_frame_with_zones_includes_zones_in_mqtt(self):
         """
