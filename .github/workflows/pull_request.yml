@@ -89,8 +89,8 @@ jobs:
       - name: Pre-build devcontainer image
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}:latest
-          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}:latest
+          imageName: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
+          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
           push: always
 
   python_tests:
@@ -111,12 +111,12 @@ jobs:
       - name: Pre-Run mypy in devcontainer
         uses: devcontainers/ci@v0.3
         with:
-          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}:latest
+          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
           push: never
           runCmd: python3 -u -m mypy --config-file frigate/mypy.ini frigate
       - name: Pre-Run mypy in devcontainer
         uses: devcontainers/ci@v0.3
         with:
-          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}:latest
+          cacheFrom: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
           push: never
           runCmd: python3 -u -m unittest
