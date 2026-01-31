@@ -1,5 +1,4 @@
 import json
-import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -9,7 +8,7 @@ MOCK_MODULES = [
     "frigate.data_processing.real_time.custom_classification.write_classification_attempt",
     "frigate.data_processing.real_time.custom_classification.suppress_stderr_during",
 ]
-AUTO_SPEC_MOCK_MODULES = [
+MOCK_CLASSES = [
     "frigate.data_processing.real_time.custom_classification.Interpreter",
     "frigate.data_processing.real_time.custom_classification.InferenceSpeed",
     "frigate.data_processing.real_time.custom_classification.InterProcessRequestor",
@@ -214,9 +213,9 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
             self.patchers[mod] = patcher
             self.addCleanup(patcher.stop)
 
-        for mod in AUTO_SPEC_MOCK_MODULES:
-            patcher = patch(mod, autospec=True).start()
-            self.patchers[mod] = patcher
+        for mod in MOCK_CLASSES:
+            patcher = patch(mod).start()
+            self.patchers[mod] = patcher.start()
             self.addCleanup(patcher.stop)
             patcher.return_value = MagicMock()
 
