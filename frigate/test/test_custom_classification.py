@@ -1,28 +1,20 @@
 import json
 import sys
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 MOCK_MODULES = [
-    "cv2",
-    # "numpy",
-    "zmq",
-    "peewee",
-    "sherpa_onnx",
-    "pydantic",
-    "pydantic.fields",
-    "frigate.comms.inter_process",
-    "frigate.comms.event_metadata_updater",
-    "frigate.comms.embeddings_updater",
-    "frigate.log",
-    "tflite_runtime",
-    "tflite_runtime.interpreter",
-    "tensorflow",
-    "tensorflow.lite",
-    "tensorflow.lite.python",
-    "tensorflow.lite.python.interpreter",
+    "frigate.data_processing.real_time.custom_classification.cv2",
+    "frigate.data_processing.real_time.custom-classification.load_labels",
+    "frigate.data_processing.real_time.custom-classification.write_classification_attempt",
+    "frigate.data_processing.real_time.custom-classification.log",
 ]
-ORIGINAL_MODULES = {mod: sys.modules[mod] for mod in MOCK_MODULES if mod in sys.modules}
+AUTO_SPEC_MOCK_MODULES = [
+    "frigate.data_processing.real_time.custom_classification.Interpreter",
+    "frigate.data_processing.real_time.custom_classification.InferenceSpeed",
+    "frigate.data_processing.real_time.custom_classification.InterProcessRequestor",
+    "frigate.data_processing.real_time.custom_classification.EventMetadataPublisher",
+]
 
 WIDTH = 720
 HEIGHT = 1280
@@ -209,31 +201,31 @@ class TestCustomObjectClassificationIntegration(unittest.TestCase):
 
     def setUp(self):
         """Import the processor after mocking dependencies"""
-        # Create a better mock for pydantic to handle type annotations
-        pydantic_mock = MagicMock()
-        # Mock BaseModel as a simple class
-        pydantic_mock.BaseModel = type("BaseModel", (), {})
-        pydantic_mock.Field = MagicMock(return_value=None)
-        pydantic_mock.ConfigDict = MagicMock(return_value={})
-        # Create a better mock for cv2 to handle calculations
-        cv2_mock = MagicMock()
         def cvtColor(frame, color):
             return self.np.zeros((WIDTH, HEIGHT, 3), dtype=self.np.uint8)
+
         def resize(frame, size):
-            return self.np.zeros((*size, 3), dtype=self.np.uint8)
-        cv2_mock.cvtColor = cvtColor
-        cv2_mock.resize = resize
+            return self.np.zeros((*size[0:1], 3), dtype=self.np.uint8)
 
+        self.patchers = {}
         for mod in MOCK_MODULES:
-            sys.modules[mod] = MagicMock()
-        sys.modules["pydantic"] = pydantic_mock
-        sys.modules["cv2"] = cv2_mock
+            patcher = patch(mod).start()
+            self.patchers[mod] = patcher
+            self.addCleanup(patcher.stop)
 
-        # Import numpy after it's been mocked
+        for mod in AUTO_SPEC_MOCK_MODULES:
+            patcher = patch(mod, autospec=True).start()
+            self.patchers[mod] = patcher
+            self.addCleanup(patcher.stop)
+            patcher.return_value = MagicMock()
+
+        mock_cv2 = self.patchers["frigate.data_processing.real_time.custom_classification.cv2"]
+
         import numpy as np
-        import cv2
-        
+
         self.np = np
+        mock_cv2.cvtColor.side_effect = cvtColor
+        mock_cv2.resize.side_effect = resize
 
         try:
             from frigate.data_processing.real_time.custom_classification import (
