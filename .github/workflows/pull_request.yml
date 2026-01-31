@@ -73,7 +73,7 @@ jobs:
           ruff check frigate migrations docker *.py
 
   devcontainer:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     name: Build devcontainer
     steps:
       - name: Check out code
