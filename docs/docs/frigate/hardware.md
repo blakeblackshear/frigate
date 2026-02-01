@@ -273,6 +273,7 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 - RK3568
 - RK3576
 - RK3588
+- RK3588S
 
 | Name           | YOLOv9 Inference Time | YOLO-NAS Inference Time     | YOLOx Inference Time    |
 | -------------- | --------------------- | --------------------------- | ----------------------- |

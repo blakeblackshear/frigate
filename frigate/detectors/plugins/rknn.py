@@ -91,6 +91,9 @@ class Rknn(DetectionApi):
 
     def parse_model_input(self, model_path, soc):
         model_props = {}
+        
+        # Map rk3588s to rk3588 for model compatibility
+        model_soc = "rk3588" if soc == "rk3588s" else soc
 
         # find out if user provides his own model
         # user provided models should be a path and contain a "/"
@@ -148,7 +151,7 @@ class Rknn(DetectionApi):
                     model_props["model_type"] = model_type
 
             if model_matched:
-                model_props["filename"] = model_path + f"-{soc}-v2.3.2-2.rknn"
+                model_props["filename"] = model_path + f"-{model_soc}-v2.3.2-2.rknn"
 
                 model_props["path"] = model_cache_dir + model_props["filename"]
 

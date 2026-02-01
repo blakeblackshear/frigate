@@ -1352,7 +1352,7 @@ To convert a onnx model to the rknn format using the [rknn-toolkit2](https://git
 This is an example configuration file that you need to adjust to your specific onnx model:
 
 ```yaml
-soc: ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
+soc: ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588", "rk3588s"]
 quantization: false
 
 output_name: "{input_basename}"

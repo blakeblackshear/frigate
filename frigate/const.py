@@ -78,7 +78,7 @@ FFMPEG_HWACCEL_AMF = "preset-amd-amf"
 FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
 # RKNN constants
-SUPPORTED_RK_SOCS = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
+SUPPORTED_RK_SOCS = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588", "rk3588s"]
 
 # Regex constants
 
