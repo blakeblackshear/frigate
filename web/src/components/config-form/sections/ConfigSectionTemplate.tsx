@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createConfigSection } from "./BaseSection";
 import type { BaseSectionProps, SectionConfig } from "./BaseSection";
-import { getSectionConfig } from "@/components/config-form/sectionConfigsUtils";
+import { getSectionConfig } from "@/utils/sectionConfigsUtils";
 
 export type ConfigSectionTemplateProps = BaseSectionProps & {
   sectionKey: string;

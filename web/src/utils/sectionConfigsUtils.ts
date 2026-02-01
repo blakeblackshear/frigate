@@ -1,6 +1,6 @@
 import mergeWith from "lodash/mergeWith";
-import type { SectionConfig } from "./sections/BaseSection";
-import { sectionConfigs } from "./sectionConfigs";
+import type { SectionConfig } from "../components/config-form/sections/BaseSection";
+import { sectionConfigs } from "../components/config-form/sectionConfigs";
 
 const mergeSectionConfig = (
   base: SectionConfig | undefined,
