@@ -66,10 +66,6 @@ import Heading from "@/components/ui/heading";
 import { LuChevronRight } from "react-icons/lu";
 import Logo from "@/components/Logo";
 import {
-  CameraMqttSection,
-  MqttSection,
-} from "@/components/config-form/sections";
-import {
   MobilePage,
   MobilePageContent,
   MobilePageHeader,
@@ -100,13 +96,11 @@ type SettingsType = (typeof allSettingsViews)[number];
 const MqttSettingsPage = createSingleSectionPage({
   sectionKey: "mqtt",
   level: "global",
-  SectionComponent: MqttSection,
 });
 
 const CameraMqttSettingsPage = createSingleSectionPage({
   sectionKey: "mqtt",
   level: "camera",
-  SectionComponent: CameraMqttSection,
   showOverrideIndicator: false,
 });
 

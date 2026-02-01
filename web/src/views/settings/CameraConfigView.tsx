@@ -4,24 +4,7 @@
 import { useMemo, useCallback, useState, memo } from "react";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
-import { DetectSection } from "@/components/config-form/sections/DetectSection";
-import { RecordSection } from "@/components/config-form/sections/RecordSection";
-import { SnapshotsSection } from "@/components/config-form/sections/SnapshotsSection";
-import { MotionSection } from "@/components/config-form/sections/MotionSection";
-import { ObjectsSection } from "@/components/config-form/sections/ObjectsSection";
-import { ReviewSection } from "@/components/config-form/sections/ReviewSection";
-import { AudioSection } from "@/components/config-form/sections/AudioSection";
-import { AudioTranscriptionSection } from "@/components/config-form/sections/AudioTranscriptionSection";
-import { BirdseyeSection } from "@/components/config-form/sections/BirdseyeSection";
-import { CameraMqttSection } from "@/components/config-form/sections/CameraMqttSection";
-import { CameraUiSection } from "@/components/config-form/sections/CameraUiSection";
-import { FaceRecognitionSection } from "@/components/config-form/sections/FaceRecognitionSection";
-import { FfmpegSection } from "@/components/config-form/sections/FfmpegSection";
-import { LprSection } from "@/components/config-form/sections/LprSection";
-import { NotificationsSection } from "@/components/config-form/sections/NotificationsSection";
-import { OnvifSection } from "@/components/config-form/sections/OnvifSection";
-import { LiveSection } from "@/components/config-form/sections/LiveSection";
-import { TimestampSection } from "@/components/config-form/sections/TimestampSection";
+import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { useAllCameraOverrides } from "@/hooks/use-config-override";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -203,83 +186,26 @@ const CameraConfigContent = memo(function CameraConfigContent({
 
   const sections: Array<{
     key: string;
-    component: typeof DetectSection;
     showOverrideIndicator?: boolean;
   }> = [
-    {
-      key: "detect",
-      component: DetectSection,
-    },
-    {
-      key: "ffmpeg",
-      component: FfmpegSection,
-      showOverrideIndicator: true,
-    },
-    {
-      key: "record",
-      component: RecordSection,
-    },
-    {
-      key: "snapshots",
-      component: SnapshotsSection,
-    },
-    {
-      key: "motion",
-      component: MotionSection,
-    },
-    {
-      key: "objects",
-      component: ObjectsSection,
-    },
-    {
-      key: "review",
-      component: ReviewSection,
-    },
-    { key: "audio", component: AudioSection },
-    {
-      key: "audio_transcription",
-      component: AudioTranscriptionSection,
-      showOverrideIndicator: true,
-    },
-    {
-      key: "notifications",
-      component: NotificationsSection,
-    },
-    { key: "live", component: LiveSection },
-    {
-      key: "birdseye",
-      component: BirdseyeSection,
-      showOverrideIndicator: true,
-    },
-    {
-      key: "face_recognition",
-      component: FaceRecognitionSection,
-      showOverrideIndicator: true,
-    },
-    {
-      key: "lpr",
-      component: LprSection,
-      showOverrideIndicator: true,
-    },
-    {
-      key: "mqtt",
-      component: CameraMqttSection,
-      showOverrideIndicator: false,
-    },
-    {
-      key: "onvif",
-      component: OnvifSection,
-      showOverrideIndicator: false,
-    },
-    {
-      key: "ui",
-      component: CameraUiSection,
-      showOverrideIndicator: false,
-    },
-    {
-      key: "timestamp_style",
-      component: TimestampSection,
-    },
+    { key: "detect" },
+    { key: "ffmpeg", showOverrideIndicator: true },
+    { key: "record" },
+    { key: "snapshots" },
+    { key: "motion" },
+    { key: "objects" },
+    { key: "review" },
+    { key: "audio" },
+    { key: "audio_transcription", showOverrideIndicator: true },
+    { key: "notifications" },
+    { key: "live" },
+    { key: "birdseye", showOverrideIndicator: true },
+    { key: "face_recognition", showOverrideIndicator: true },
+    { key: "lpr", showOverrideIndicator: true },
+    { key: "mqtt", showOverrideIndicator: false },
+    { key: "onvif", showOverrideIndicator: false },
+    { key: "ui", showOverrideIndicator: false },
+    { key: "timestamp_style" },
   ];
 
   return (
@@ -327,23 +253,21 @@ const CameraConfigContent = memo(function CameraConfigContent({
 
       {/* Section Content */}
       <div className="scrollbar-container flex-1 overflow-y-auto pr-4">
-        {sections.map((section) => {
-          const SectionComponent = section.component;
-          return (
-            <div
-              key={section.key}
-              className={cn(activeSection === section.key ? "block" : "hidden")}
-            >
-              <SectionComponent
-                level="camera"
-                cameraName={cameraName}
-                showOverrideIndicator={section.showOverrideIndicator !== false}
-                onSave={onSave}
-                showTitle={true}
-              />
-            </div>
-          );
-        })}
+        {sections.map((section) => (
+          <div
+            key={section.key}
+            className={cn(activeSection === section.key ? "block" : "hidden")}
+          >
+            <ConfigSectionTemplate
+              sectionKey={section.key}
+              level="camera"
+              cameraName={cameraName}
+              showOverrideIndicator={section.showOverrideIndicator !== false}
+              onSave={onSave}
+              showTitle={true}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

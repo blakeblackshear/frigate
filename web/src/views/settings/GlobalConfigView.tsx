@@ -4,81 +4,51 @@
 import { useMemo, useCallback, useState } from "react";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
-import { DetectSection } from "@/components/config-form/sections/DetectSection";
-import { RecordSection } from "@/components/config-form/sections/RecordSection";
-import { SnapshotsSection } from "@/components/config-form/sections/SnapshotsSection";
-import { MotionSection } from "@/components/config-form/sections/MotionSection";
-import { ObjectsSection } from "@/components/config-form/sections/ObjectsSection";
-import { ReviewSection } from "@/components/config-form/sections/ReviewSection";
-import { AudioSection } from "@/components/config-form/sections/AudioSection";
-import { AudioTranscriptionSection } from "@/components/config-form/sections/AudioTranscriptionSection";
-import { AuthSection } from "@/components/config-form/sections/AuthSection";
-import { BirdseyeSection } from "@/components/config-form/sections/BirdseyeSection";
-import { ClassificationSection } from "@/components/config-form/sections/ClassificationSection";
-import { DatabaseSection } from "@/components/config-form/sections/DatabaseSection";
-import { DetectorsSection } from "@/components/config-form/sections/DetectorsSection";
-import { EnvironmentVarsSection } from "@/components/config-form/sections/EnvironmentVarsSection";
-import { FaceRecognitionSection } from "@/components/config-form/sections/FaceRecognitionSection";
-import { FfmpegSection } from "@/components/config-form/sections/FfmpegSection";
-import { GenaiSection } from "@/components/config-form/sections/GenaiSection";
-import { LiveSection } from "@/components/config-form/sections/LiveSection";
-import { LoggerSection } from "@/components/config-form/sections/LoggerSection";
-import { LprSection } from "@/components/config-form/sections/LprSection";
-import { ModelSection } from "@/components/config-form/sections/ModelSection";
-import { MqttSection } from "@/components/config-form/sections/MqttSection";
-import { NetworkingSection } from "@/components/config-form/sections/NetworkingSection";
-import { ProxySection } from "@/components/config-form/sections/ProxySection";
-import { SemanticSearchSection } from "@/components/config-form/sections/SemanticSearchSection";
-import { TimestampSection } from "@/components/config-form/sections/TimestampSection";
-import { TelemetrySection } from "@/components/config-form/sections/TelemetrySection";
-import { TlsSection } from "@/components/config-form/sections/TlsSection";
-import { UiSection } from "@/components/config-form/sections/UiSection";
+import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import Heading from "@/components/ui/heading";
 import { cn } from "@/lib/utils";
-import { getSectionConfig } from "@/components/config-form/sectionConfigs";
-
 // Shared sections that can be overridden at camera level
 const sharedSections = [
-  { key: "detect", component: DetectSection },
-  { key: "record", component: RecordSection },
-  { key: "snapshots", component: SnapshotsSection },
-  { key: "motion", component: MotionSection },
-  { key: "objects", component: ObjectsSection },
-  { key: "review", component: ReviewSection },
-  { key: "audio", component: AudioSection },
-  { key: "live", component: LiveSection },
-  { key: "timestamp_style", component: TimestampSection },
+  { key: "detect" },
+  { key: "record" },
+  { key: "snapshots" },
+  { key: "motion" },
+  { key: "objects" },
+  { key: "review" },
+  { key: "audio" },
+  { key: "live" },
+  { key: "timestamp_style" },
 ];
 
 // System sections (global only)
 const systemSections = [
-  { key: "database", component: DatabaseSection },
-  { key: "tls", component: TlsSection },
-  { key: "auth", component: AuthSection },
-  { key: "networking", component: NetworkingSection },
-  { key: "proxy", component: ProxySection },
-  { key: "ui", component: UiSection },
-  { key: "logger", component: LoggerSection },
-  { key: "environment_vars", component: EnvironmentVarsSection },
-  { key: "telemetry", component: TelemetrySection },
-  { key: "birdseye", component: BirdseyeSection },
-  { key: "ffmpeg", component: FfmpegSection },
-  { key: "detectors", component: DetectorsSection },
-  { key: "model", component: ModelSection },
+  { key: "database" },
+  { key: "tls" },
+  { key: "auth" },
+  { key: "networking" },
+  { key: "proxy" },
+  { key: "ui" },
+  { key: "logger" },
+  { key: "environment_vars" },
+  { key: "telemetry" },
+  { key: "birdseye" },
+  { key: "ffmpeg" },
+  { key: "detectors" },
+  { key: "model" },
 ];
 
 // Integration sections (global only)
 const integrationSections = [
-  { key: "mqtt", component: MqttSection },
-  { key: "semantic_search", component: SemanticSearchSection },
-  { key: "genai", component: GenaiSection },
-  { key: "face_recognition", component: FaceRecognitionSection },
-  { key: "lpr", component: LprSection },
-  { key: "classification", component: ClassificationSection },
-  { key: "audio_transcription", component: AudioTranscriptionSection },
+  { key: "mqtt" },
+  { key: "semantic_search" },
+  { key: "genai" },
+  { key: "face_recognition" },
+  { key: "lpr" },
+  { key: "classification" },
+  { key: "audio_transcription" },
 ];
 
 export default function GlobalConfigView() {
@@ -201,24 +171,21 @@ export default function GlobalConfigView() {
 
           {/* Section Content */}
           <div className="scrollbar-container flex-1 overflow-y-auto pr-4">
-            {currentSections.map((section) => {
-              const SectionComponent = section.component;
-              return (
-                <div
-                  key={section.key}
-                  className={cn(
-                    activeSection === section.key ? "block" : "hidden",
-                  )}
-                >
-                  <SectionComponent
-                    level="global"
-                    onSave={handleSave}
-                    showTitle={true}
-                    sectionConfig={getSectionConfig(section.key, "global")}
-                  />
-                </div>
-              );
-            })}
+            {currentSections.map((section) => (
+              <div
+                key={section.key}
+                className={cn(
+                  activeSection === section.key ? "block" : "hidden",
+                )}
+              >
+                <ConfigSectionTemplate
+                  sectionKey={section.key}
+                  level="global"
+                  onSave={handleSave}
+                  showTitle={true}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </Tabs>

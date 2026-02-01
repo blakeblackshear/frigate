@@ -1,9 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Heading from "@/components/ui/heading";
-import type {
-  BaseSectionProps,
-  SectionConfig,
-} from "@/components/config-form/sections";
+import type { SectionConfig } from "@/components/config-form/sections";
+import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 
 export type SettingsPageProps = {
@@ -15,7 +13,6 @@ export type SettingsPageProps = {
 export type SingleSectionPageOptions = {
   sectionKey: string;
   level: "global" | "camera";
-  SectionComponent: React.ComponentType<BaseSectionProps>;
   sectionConfig?: SectionConfig;
   requiresRestart?: boolean;
   showOverrideIndicator?: boolean;
@@ -24,7 +21,6 @@ export type SingleSectionPageOptions = {
 export function createSingleSectionPage({
   sectionKey,
   level,
-  SectionComponent,
   sectionConfig,
   requiresRestart,
   showOverrideIndicator = true,
@@ -63,7 +59,8 @@ export function createSingleSectionPage({
             </p>
           )}
         </div>
-        <SectionComponent
+        <ConfigSectionTemplate
+          sectionKey={sectionKey}
           level={level}
           cameraName={level === "camera" ? selectedCamera : undefined}
           showOverrideIndicator={showOverrideIndicator}
