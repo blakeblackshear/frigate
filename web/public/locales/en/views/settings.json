@@ -1173,49 +1173,19 @@
       "birdseye": "Birdseye"
     },
     "detect": {
-      "title": "Detection Settings",
-      "toast": {
-        "success": "Detection settings saved successfully",
-        "error": "Failed to save detection settings",
-        "resetSuccess": "Detection settings reset to global defaults",
-        "resetError": "Failed to reset detection settings"
-      }
+      "title": "Detection Settings"
     },
     "record": {
-      "title": "Recording Settings",
-      "toast": {
-        "success": "Recording settings saved successfully",
-        "error": "Failed to save recording settings",
-        "resetSuccess": "Recording settings reset to global defaults",
-        "resetError": "Failed to reset recording settings"
-      }
+      "title": "Recording Settings"
     },
     "snapshots": {
-      "title": "Snapshot Settings",
-      "toast": {
-        "success": "Snapshot settings saved successfully",
-        "error": "Failed to save snapshot settings",
-        "resetSuccess": "Snapshot settings reset to global defaults",
-        "resetError": "Failed to reset snapshot settings"
-      }
+      "title": "Snapshot Settings"
     },
     "motion": {
-      "title": "Motion Settings",
-      "toast": {
-        "success": "Motion settings saved successfully",
-        "error": "Failed to save motion settings",
-        "resetSuccess": "Motion settings reset to global defaults",
-        "resetError": "Failed to reset motion settings"
-      }
+      "title": "Motion Settings"
     },
     "objects": {
-      "title": "Object Settings",
-      "toast": {
-        "success": "Object settings saved successfully",
-        "error": "Failed to save object settings",
-        "resetSuccess": "Object settings reset to global defaults",
-        "resetError": "Failed to reset object settings"
-      }
+      "title": "Object Settings"
     },
     "objectLabels": {
       "summary": "Selected {{count}}",
@@ -1229,49 +1199,19 @@
       "empty": "No zones available"
     },
     "review": {
-      "title": "Review Settings",
-      "toast": {
-        "success": "Review settings saved successfully",
-        "error": "Failed to save review settings",
-        "resetSuccess": "Review settings reset to global defaults",
-        "resetError": "Failed to reset review settings"
-      }
+      "title": "Review Settings"
     },
     "audio": {
-      "title": "Audio Settings",
-      "toast": {
-        "success": "Audio settings saved successfully",
-        "error": "Failed to save audio settings",
-        "resetSuccess": "Audio settings reset to global defaults",
-        "resetError": "Failed to reset audio settings"
-      }
+      "title": "Audio Settings"
     },
     "notifications": {
-      "title": "Notification Settings",
-      "toast": {
-        "success": "Notification settings saved successfully",
-        "error": "Failed to save notification settings",
-        "resetSuccess": "Notification settings reset to global defaults",
-        "resetError": "Failed to reset notification settings"
-      }
+      "title": "Notification Settings"
     },
     "live": {
-      "title": "Live View Settings",
-      "toast": {
-        "success": "Live view settings saved successfully",
-        "error": "Failed to save live view settings",
-        "resetSuccess": "Live view settings reset to global defaults",
-        "resetError": "Failed to reset live view settings"
-      }
+      "title": "Live View Settings"
     },
     "timestamp_style": {
-      "title": "Timestamp Settings",
-      "toast": {
-        "success": "Timestamp settings saved successfully",
-        "error": "Failed to save timestamp settings",
-        "resetSuccess": "Timestamp settings reset to global defaults",
-        "resetError": "Failed to reset timestamp settings"
-      }
+      "title": "Timestamp Settings"
     }
   },
   "globalConfig": {
