@@ -52,7 +52,7 @@ export function createSingleSectionPage({
     return (
       <div className="flex size-full flex-col pr-2">
         <div className="mb-4">
-          <Heading as="h2">
+          <Heading as="h3">
             {t(`${sectionKey}.label`, { ns: sectionNamespace })}
           </Heading>
           {i18n.exists(`${sectionKey}.description`, {

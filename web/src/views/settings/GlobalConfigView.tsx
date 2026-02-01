@@ -82,11 +82,7 @@ const integrationSections = [
 ];
 
 export default function GlobalConfigView() {
-  const { t, i18n } = useTranslation([
-    "views/settings",
-    "config/global",
-    "common",
-  ]);
+  const { t } = useTranslation(["views/settings", "config/global", "common"]);
   const defaultSharedSection = sharedSections[0]?.key ?? "";
   const defaultSystemSection = systemSections[0]?.key ?? "";
   const defaultIntegrationSection = integrationSections[0]?.key ?? "";
@@ -214,28 +210,10 @@ export default function GlobalConfigView() {
                     activeSection === section.key ? "block" : "hidden",
                   )}
                 >
-                  <Heading as="h4" className="mb-1">
-                    {t(`${section.key}.label`, {
-                      ns: "config/global",
-                      defaultValue:
-                        section.key.charAt(0).toUpperCase() +
-                        section.key.slice(1).replace(/_/g, " "),
-                    })}
-                  </Heading>
-                  {i18n.exists(`${section.key}.description`, {
-                    ns: "config/global",
-                  }) && (
-                    <p className="mb-4 text-sm text-muted-foreground">
-                      {t(`${section.key}.description`, {
-                        ns: "config/global",
-                      })}
-                    </p>
-                  )}
-
                   <SectionComponent
                     level="global"
                     onSave={handleSave}
-                    showTitle={false}
+                    showTitle={true}
                     sectionConfig={getSectionConfig(section.key, "global")}
                   />
                 </div>
