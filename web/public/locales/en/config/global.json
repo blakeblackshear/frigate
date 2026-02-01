@@ -888,7 +888,7 @@
       "description": "Settings for which tracked objects generate alerts and how alerts are retained.",
       "enabled": {
         "label": "Enable alerts",
-        "description": "Enable or disable alert generation for this camera."
+        "description": "Enable or disable alert generation for all cameras; can be overridden per-camera."
       },
       "labels": {
         "label": "Alert labels",
@@ -912,7 +912,7 @@
       "description": "Settings for creating detection events (non-alert) and how long to keep them.",
       "enabled": {
         "label": "Enable detections",
-        "description": "Enable or disable detection events for this camera."
+        "description": "Enable or disable detection events for all cameras; can be overridden per-camera."
       },
       "labels": {
         "label": "Detection labels",

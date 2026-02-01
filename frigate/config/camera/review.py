@@ -24,7 +24,7 @@ class AlertsConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=True,
         title="Enable alerts",
-        description="Enable or disable alert generation for this camera.",
+        description="Enable or disable alert generation for all cameras; can be overridden per-camera.",
     )
 
     labels: list[str] = Field(
@@ -64,7 +64,7 @@ class DetectionsConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=True,
         title="Enable detections",
-        description="Enable or disable detection events for this camera.",
+        description="Enable or disable detection events for all cameras; can be overridden per-camera.",
     )
 
     labels: Optional[list[str]] = Field(
