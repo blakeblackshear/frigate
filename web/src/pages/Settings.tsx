@@ -17,7 +17,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
@@ -39,12 +45,14 @@ import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
 import {
   SingleSectionPage,
   type SettingsPageProps,
+  type SectionStatus,
 } from "@/views/settings/SingleSectionPage";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
+import { useAllCameraOverrides } from "@/hooks/use-config-override";
 import TriggerView from "@/views/settings/TriggerView";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import {
@@ -420,6 +428,45 @@ const CAMERA_SELECT_BUTTON_PAGES = [
 
 const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 
+// keys for camera sections
+const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
+  detect: "cameraDetect",
+  ffmpeg: "cameraFfmpeg",
+  record: "cameraRecording",
+  snapshots: "cameraSnapshots",
+  motion: "cameraMotion",
+  objects: "cameraObjects",
+  review: "cameraConfigReview",
+  audio: "cameraAudioEvents",
+  audio_transcription: "cameraAudioTranscription",
+  notifications: "cameraNotifications",
+  live: "cameraLivePlayback",
+  birdseye: "cameraBirdseye",
+  face_recognition: "cameraFaceRecognition",
+  lpr: "cameraLpr",
+  mqtt: "cameraMqttConfig",
+  onvif: "cameraOnvif",
+  ui: "cameraUi",
+  timestamp_style: "cameraTimestampStyle",
+};
+
+// keys for global sections
+const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
+  detect: "globalDetect",
+  record: "globalRecording",
+  snapshots: "globalSnapshots",
+  motion: "globalMotion",
+  objects: "globalObjects",
+  review: "globalReview",
+  audio: "globalAudioEvents",
+  live: "globalLivePlayback",
+  timestamp_style: "globalTimestampStyle",
+};
+
+const CAMERA_SECTION_KEYS = new Set<SettingsType>(
+  Object.values(CAMERA_SECTION_MAPPING),
+);
+
 const getCurrentComponent = (page: SettingsType) => {
   for (const group of settingsGroups) {
     for (const item of group.items) {
@@ -436,11 +483,13 @@ function MobileMenuItem({
   onSelect,
   onClose,
   className,
+  label,
 }: {
   item: { key: string };
   onSelect: (key: string) => void;
   onClose?: () => void;
   className?: string;
+  label?: ReactNode;
 }) {
   const { t } = useTranslation(["views/settings"]);
 
@@ -455,7 +504,11 @@ function MobileMenuItem({
         onClose?.();
       }}
     >
-      <div className="smart-capitalize">{t("menu." + item.key)}</div>
+      <div className="w-full">
+        {label ?? (
+          <div className="smart-capitalize">{t("menu." + item.key)}</div>
+        )}
+      </div>
       <LuChevronRight className="size-4" />
     </div>
   );
@@ -466,6 +519,9 @@ export default function Settings() {
   const [page, setPage] = useState<SettingsType>("profileSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [contentMobileOpen, setContentMobileOpen] = useState(false);
+  const [sectionStatusByKey, setSectionStatusByKey] = useState<
+    Partial<Record<SettingsType, SectionStatus>>
+  >({});
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -496,6 +552,9 @@ export default function Settings() {
   }, [config]);
 
   const [selectedCamera, setSelectedCamera] = useState<string>("");
+
+  // Get all camera overrides for the selected camera
+  const cameraOverrides = useAllCameraOverrides(config, selectedCamera);
 
   const { payload: allCameraStates } = useInitialCameraState(
     cameras.length > 0 ? cameras[0].name : "",
@@ -589,6 +648,81 @@ export default function Settings() {
     }
   }, [t, contentMobileOpen]);
 
+  const handleSectionStatusChange = useCallback(
+    (sectionKey: string, level: "global" | "camera", status: SectionStatus) => {
+      // Map section keys to menu keys based on level
+      let menuKey: string;
+      if (level === "camera") {
+        menuKey = CAMERA_SECTION_MAPPING[sectionKey] || sectionKey;
+      } else {
+        menuKey = GLOBAL_SECTION_MAPPING[sectionKey] || sectionKey;
+      }
+
+      setSectionStatusByKey((prev) => ({
+        ...prev,
+        [menuKey]: status,
+      }));
+    },
+    [],
+  );
+
+  // Initialize override status for all camera sections
+  useEffect(() => {
+    if (!selectedCamera || !cameraOverrides) return;
+
+    const overrideMap: Partial<Record<SettingsType, SectionStatus>> = {};
+
+    // Set override status for all camera sections using the shared mapping
+    Object.entries(CAMERA_SECTION_MAPPING).forEach(
+      ([sectionKey, settingsKey]) => {
+        const isOverridden = cameraOverrides.includes(sectionKey);
+        overrideMap[settingsKey] = {
+          hasChanges: false,
+          isOverridden,
+        };
+      },
+    );
+
+    setSectionStatusByKey((prev) => {
+      // Merge but preserve hasChanges from previous state
+      const merged = { ...prev };
+      Object.entries(overrideMap).forEach(([key, status]) => {
+        merged[key as SettingsType] = {
+          hasChanges: prev[key as SettingsType]?.hasChanges || false,
+          isOverridden: status.isOverridden,
+        };
+      });
+      return merged;
+    });
+  }, [selectedCamera, cameraOverrides]);
+
+  const renderMenuItemLabel = useCallback(
+    (key: SettingsType) => {
+      const status = sectionStatusByKey[key];
+      const showOverrideDot =
+        CAMERA_SECTION_KEYS.has(key) && status?.isOverridden;
+      // const showUnsavedDot = status?.hasChanges;
+      const showUnsavedDot = false; // Disable unsaved changes indicator for now
+
+      return (
+        <div className="flex w-full items-center justify-between pr-4 md:pr-0">
+          <div className="smart-capitalize">{t("menu." + key)}</div>
+          {(showOverrideDot || showUnsavedDot) && (
+            <div className="ml-2 flex items-center gap-2">
+              {showOverrideDot && (
+                <span className="inline-block size-2 rounded-full bg-selected" />
+              )}
+              {showUnsavedDot && (
+                <span className="inline-block size-2 rounded-full bg-danger" />
+              )}
+            </div>
+          )}
+        </div>
+      );
+    },
+    [sectionStatusByKey, t],
+  );
+
   if (isMobile) {
     return (
       <>
@@ -625,6 +759,7 @@ export default function Settings() {
                         key={item.key}
                         item={item}
                         className={cn(filteredItems.length == 1 && "pl-2")}
+                        label={renderMenuItemLabel(item.key as SettingsType)}
                         onSelect={(key) => {
                           if (
                             !isAdmin &&
@@ -688,6 +823,7 @@ export default function Settings() {
                     selectedCamera={selectedCamera}
                     setUnsavedChanges={setUnsavedChanges}
                     selectedZoneMask={filterZoneMask}
+                    onSectionStatusChange={handleSectionStatusChange}
                   />
                 );
               })()}
@@ -779,9 +915,9 @@ export default function Settings() {
                               }
                             }}
                           >
-                            <div className="smart-capitalize">
-                              {t("menu." + filteredItems[0].key)}
-                            </div>
+                            {renderMenuItemLabel(
+                              filteredItems[0].key as SettingsType,
+                            )}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       </SidebarMenu>
@@ -819,8 +955,10 @@ export default function Settings() {
                                   }
                                 }}
                               >
-                                <div className="w-full cursor-pointer smart-capitalize">
-                                  {t("menu." + item.key)}
+                                <div className="w-full cursor-pointer">
+                                  {renderMenuItemLabel(
+                                    item.key as SettingsType,
+                                  )}
                                 </div>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -844,6 +982,7 @@ export default function Settings() {
                   selectedCamera={selectedCamera}
                   setUnsavedChanges={setUnsavedChanges}
                   selectedZoneMask={filterZoneMask}
+                  onSectionStatusChange={handleSectionStatusChange}
                 />
               );
             })()}

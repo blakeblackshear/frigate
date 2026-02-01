@@ -87,6 +87,11 @@ export interface BaseSectionProps {
   defaultCollapsed?: boolean;
   /** Whether to show the section title (default: false for global, true for camera) */
   showTitle?: boolean;
+  /** Callback when section status changes */
+  onStatusChange?: (status: {
+    hasChanges: boolean;
+    isOverridden: boolean;
+  }) => void;
 }
 
 export interface CreateSectionOptions {
@@ -134,6 +139,7 @@ export function ConfigSection({
   collapsible = false,
   defaultCollapsed = false,
   showTitle,
+  onStatusChange,
 }: ConfigSectionProps) {
   const { t, i18n } = useTranslation([
     level === "camera" ? "config/cameras" : "config/global",
@@ -301,6 +307,10 @@ export function ConfigSection({
     return !isEqual(formData, pendingData);
   }, [formData, pendingData]);
 
+  useEffect(() => {
+    onStatusChange?.({ hasChanges, isOverridden });
+  }, [hasChanges, isOverridden, onStatusChange]);
+
   // Handle form data change
   const handleChange = useCallback(
     (data: unknown) => {
@@ -346,14 +356,15 @@ export function ConfigSection({
         return;
       }
 
-      // await axios.put("config/set", {
-      //   requires_restart: requiresRestart ? 0 : 1,
-      //   update_topic: updateTopic,
-      //   config_data: {
-      //     [basePath]: overrides,
-      //   },
-      // });
+      await axios.put("config/sett", {
+        requires_restart: requiresRestart ? 0 : 1,
+        update_topic: updateTopic,
+        config_data: {
+          [basePath]: overrides,
+        },
+      });
       // log save to console for debugging
+      // eslint-disable-next-line no-console
       console.log("Saved config data:", {
         [basePath]: overrides,
         update_topic: updateTopic,
@@ -432,17 +443,20 @@ export function ConfigSection({
       const basePath =
         level === "camera" && cameraName
           ? `cameras.${cameraName}.${sectionPath}`
-          : sectionPath; // const configData = level === "global" ? schemaDefaults : "";
+          : sectionPath;
 
-      // await axios.put("config/set", {
-      //   requires_restart: requiresRestart ? 0 : 1,
-      //   update_topic: updateTopic,
-      //   config_data: {
-      //     [basePath]: configData,
-      //   },
-      // });
+      const configData = level === "global" ? schemaDefaults : "";
+
+      await axios.put("config/sett", {
+        requires_restart: requiresRestart ? 0 : 1,
+        update_topic: updateTopic,
+        config_data: {
+          [basePath]: configData,
+        },
+      });
 
       // log reset to console for debugging
+      // eslint-disable-next-line no-console
       console.log(
         level === "global"
           ? "Reset to defaults for path:"
@@ -474,6 +488,7 @@ export function ConfigSection({
       );
     }
   }, [
+    schemaDefaults,
     sectionPath,
     level,
     cameraName,
