@@ -2,10 +2,11 @@
 // Reusable components for both global and camera-level settings
 
 export {
-  createConfigSection,
+  ConfigSection,
   type BaseSectionProps,
   type SectionConfig,
   type CreateSectionOptions,
+  type ConfigSectionProps,
 } from "./BaseSection";
 export {
   ConfigSectionTemplate,

@@ -39,7 +39,10 @@ import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
 import GlobalConfigView from "@/views/settings/GlobalConfigView";
 import CameraConfigView from "@/views/settings/CameraConfigView";
-import { createSingleSectionPage } from "@/views/settings/SingleSectionPage";
+import {
+  SingleSectionPage,
+  type SettingsPageProps,
+} from "@/views/settings/SingleSectionPage";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
@@ -93,16 +96,18 @@ const allSettingsViews = [
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
-const MqttSettingsPage = createSingleSectionPage({
-  sectionKey: "mqtt",
-  level: "global",
-});
+const MqttSettingsPage = (props: SettingsPageProps) => (
+  <SingleSectionPage sectionKey="mqtt" level="global" {...props} />
+);
 
-const CameraMqttSettingsPage = createSingleSectionPage({
-  sectionKey: "mqtt",
-  level: "camera",
-  showOverrideIndicator: false,
-});
+const CameraMqttSettingsPage = (props: SettingsPageProps) => (
+  <SingleSectionPage
+    sectionKey="mqtt"
+    level="camera"
+    showOverrideIndicator={false}
+    {...props}
+  />
+);
 
 const settingsGroups = [
   {

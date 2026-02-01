@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { createConfigSection } from "./BaseSection";
+import { ConfigSection } from "./BaseSection";
 import type { BaseSectionProps, SectionConfig } from "./BaseSection";
 import { getSectionConfig } from "@/utils/sectionConfigsUtils";
 
@@ -19,17 +19,10 @@ export function ConfigSectionTemplate({
     [sectionKey, level],
   );
 
-  const SectionComponent = useMemo(
-    () =>
-      createConfigSection({
-        sectionPath: sectionKey,
-        defaultConfig,
-      }),
-    [sectionKey, defaultConfig],
-  );
-
   return (
-    <SectionComponent
+    <ConfigSection
+      sectionPath={sectionKey}
+      defaultConfig={defaultConfig}
       level={level}
       sectionConfig={sectionConfig ?? defaultConfig}
       {...rest}
