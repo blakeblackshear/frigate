@@ -24,6 +24,9 @@ const snapshots: SectionConfigOverrides = {
       },
     },
   },
+  global: {
+    hiddenFields: ["enabled_in_config", "required_zones"],
+  },
 };
 
 export default snapshots;

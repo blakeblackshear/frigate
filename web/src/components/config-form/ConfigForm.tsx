@@ -251,6 +251,21 @@ export function ConfigForm({
       ? { norender: false }
       : { norender: true };
 
+    // Ensure hiddenFields take precedence over any custom uiSchema overrides
+    // Build path-based overrides for hidden fields and apply them after merging
+    if (hiddenFields && hiddenFields.length > 0) {
+      const hiddenOverrides = hiddenFields.map((field) => ({
+        path: field.split("."),
+        value: { "ui:widget": "hidden" } as UiSchema,
+      }));
+
+      return applyUiSchemaPathOverrides(
+        merged,
+        transformedSchema,
+        hiddenOverrides,
+      );
+    }
+
     return merged;
   }, [
     generatedUiSchema,
@@ -259,6 +274,7 @@ export function ConfigForm({
     baseUiSchema,
     showSubmit,
     fieldGroups,
+    hiddenFields,
   ]);
 
   // Create error transformer for user-friendly error messages
