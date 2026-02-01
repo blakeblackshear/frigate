@@ -4,72 +4,12 @@
 import type { ErrorTransformer } from "@rjsf/utils";
 import type { i18n as I18n } from "i18next";
 
-export interface ErrorMessageMap {
-  [keyword: string]: string | ((params: Record<string, unknown>) => string);
-}
-
-// Default error messages for common validation keywords
-export const defaultErrorMessages: ErrorMessageMap = {
-  required: "This field is required",
-  type: (params) => {
-    const expectedType = params.type as string;
-    return `Expected ${expectedType} value`;
-  },
-  minimum: (params) => `Must be at least ${params.limit}`,
-  maximum: (params) => `Must be at most ${params.limit}`,
-  minLength: (params) => `Must be at least ${params.limit} characters`,
-  maxLength: (params) => `Must be at most ${params.limit} characters`,
-  pattern: "Invalid format",
-  format: (params) => {
-    const format = params.format as string;
-    const formatLabels: Record<string, string> = {
-      email: "Invalid email address",
-      uri: "Invalid URL",
-      "date-time": "Invalid date/time format",
-      ipv4: "Invalid IP address",
-      ipv6: "Invalid IPv6 address",
-    };
-    return formatLabels[format] || `Invalid ${format} format`;
-  },
-  enum: (params) => {
-    const allowedValues = params.allowedValues as unknown;
-    if (Array.isArray(allowedValues)) {
-      return `Must be one of: ${allowedValues.join(", ")}`;
-    }
-    return "Must be one of the allowed values";
-  },
-  const: "Value does not match expected constant",
-  uniqueItems: "All items must be unique",
-  minItems: (params) => `Must have at least ${params.limit} items`,
-  maxItems: (params) => `Must have at most ${params.limit} items`,
-  additionalProperties: "Unknown property is not allowed",
-  oneOf: "Must match exactly one of the allowed schemas",
-  anyOf: "Must match at least one of the allowed schemas",
-};
-
 /**
  * Creates an error transformer function for RJSF
  * Transforms technical JSON Schema errors into user-friendly messages
  */
 export function createErrorTransformer(i18n: I18n): ErrorTransformer {
   const t = i18n.t.bind(i18n);
-
-  const getDefaultMessage = (
-    errorType: string,
-    params: Record<string, unknown>,
-  ): string | undefined => {
-    const template = defaultErrorMessages[errorType];
-
-    if (!template) {
-      return undefined;
-    }
-
-    if (typeof template === "function") {
-      return template(params);
-    }
-
-    return template;
-  };
 
   const normalizeParams = (
     params: Record<string, unknown> | undefined,
@@ -136,11 +76,6 @@ export function createErrorTransformer(i18n: I18n): ErrorTransformer {
             ns: ["config/validation"],
           });
         }
-      }
-
-      // Fall back to English defaults
-      if (!message) {
-        message = getDefaultMessage(errorType, normalizedParams);
       }
 
       if (!message) {

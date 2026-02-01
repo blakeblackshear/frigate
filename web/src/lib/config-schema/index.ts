@@ -14,6 +14,4 @@ export {
   createErrorTransformer,
   transformPydanticErrors,
   extractFieldPath,
-  defaultErrorMessages,
 } from "./errorMessages";
-export type { ErrorMessageMap } from "./errorMessages";
