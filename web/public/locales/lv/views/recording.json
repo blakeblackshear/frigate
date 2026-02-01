@@ -1,0 +1,12 @@
+{
+  "export": "Eksportēt",
+  "filter": "Filtrs",
+  "calendar": "Kalendārs",
+  "filters": "Filtri",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Atlasīts nederīgs laika diapazons",
+      "endTimeMustAfterStartTime": "Beigu laikam jābūt pēc sākuma laika"
+    }
+  }
+}

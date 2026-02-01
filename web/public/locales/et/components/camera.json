@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Kaameragrupid",
+    "camera": {
+      "setting": {
+        "label": "Kaamerate voogedastuse seadistused",
+        "title": "Voogedastuse seadistused: {{cameraName}}",
+        "stream": "Voogedastus",
+        "placeholder": "Vali videovoog",
+        "streamMethod": {
+          "label": "Voogedastuse meetod",
+          "placeholder": "Vali voogedastuse meetod",
+          "method": {
+            "noStreaming": {
+              "label": "Voogedastust pole",
+              "desc": "Kaamerapildid uuenevad kord minutis ja voogedastust pole."
+            },
+            "smartStreaming": {
+              "label": "Nutikas voogedastus (soovituslik)",
+              "desc": "Nutika voogedastuse puhul ilma igasuguse tuvastatava tegevuseta kaamerapildid uuenevad kord minutis ja voogedastust pole. Sellega säästad ribalaiud ja kuid ressursse. Tegevuse tuvastamisel käivitub tavapärane voogedastus."
+            },
+            "continuousStreaming": {
+              "label": "Pidev voogedastus",
+              "desc": {
+                "title": "Kaamera voogedastus toimub töölauavaates pidevalt, seda ka siis, kui seal pole mingit tegevust tuvastatud.",
+                "warning": "Pidev voogedastus võib põhjustada suurt andmeedastuse mahutu ja tekitada jõudlusprobleeme. Kasuta seda võimalust ettevaatlikult."
+              }
+            }
+          }
+        },
+        "audioIsAvailable": "Selle voogedastuse puhul on saadaval ka heliriba",
+        "audioIsUnavailable": "Selle voogedastuse puhul pole heliriba saadaval",
+        "compatibilityMode": {
+          "label": "Ühilduvusrežiim",
+          "desc": "Kasuta seda võimalust vaid olukorras, kus kaamera voogedastuses paistab visuaalseid vigu ja pidi paremas ääres on diagonaalne joon."
+        },
+        "desc": "Muuda selle kaamergrupi voogedastuse valikuid töölauavaates.<em>Need seadistused on seadme- ja veebibrauserikohased.</em>",
+        "audio": {
+          "tips": {
+            "title": "See kaamera peab oskama heli jäädvustada ja edastada ja go2rtc kontekstis seadistatud selle voogedastuse jaoks."
+          }
+        }
+      },
+      "birdseye": "Vaade linnulennult"
+    },
+    "add": "Lisa kaameragrupp",
+    "edit": "Muuda kaameragruppi",
+    "delete": {
+      "label": "Kustuta kaameragrupp",
+      "confirm": {
+        "title": "Kinnita kustutamine",
+        "desc": "Kas oled kindel, et soovid kustutada kaameragrupi: <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nimi",
+      "placeholder": "Sisesta nimi…",
+      "errorMessage": {
+        "mustLeastCharacters": "Kaameragrupi nimi peab olema vähemalt 2 tähemärki pikk.",
+        "exists": "Sellise nimega kaameragrupp on juba olemas.",
+        "nameMustNotPeriod": "Kaameragrupi nimes ei tohi olla tühikuid.",
+        "invalid": "Vigane kaameragrupi nimi."
+      }
+    },
+    "cameras": {
+      "label": "Kaamerad",
+      "desc": "Vali kaamerad selle grupi jaoks."
+    },
+    "icon": "Ikoon",
+    "success": "Kaameragrupp ({{name}}) on salvestatud."
+  },
+  "debug": {
+    "options": {
+      "label": "Seadistused",
+      "title": "Valikud",
+      "showOptions": "Näita valikuid",
+      "hideOptions": "Peida valikud"
+    },
+    "boundingBox": "Piirdekast",
+    "timestamp": "Ajatempel",
+    "zones": "Tsoonid",
+    "mask": "Mask",
+    "motion": "Liikumine",
+    "regions": "Alad"
+  }
+}

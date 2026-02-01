@@ -33,7 +33,9 @@
     "details": "Details",
     "video": "video",
     "snapshot": "snapshot",
-    "object_lifecycle": "objectlevenscyclus"
+    "object_lifecycle": "objectlevenscyclus",
+    "thumbnail": "thumbnail",
+    "tracking_details": "trackinggegevens"
   },
   "objectLifecycle": {
     "createObjectMask": "Objectmasker maken",
@@ -103,13 +105,15 @@
           "regenerate": "Er is een nieuwe beschrijving aangevraagd bij {{provider}}. Afhankelijk van de snelheid van je provider kan het regenereren van de nieuwe beschrijving enige tijd duren.",
           "updatedSublabel": "Sublabel succesvol bijgewerkt.",
           "updatedLPR": "Kenteken succesvol bijgewerkt.",
-          "audioTranscription": "Audiotranscriptie succesvol aangevraagd."
+          "audioTranscription": "Audio-transcriptie succesvol aangevraagd. Afhankelijk van de snelheid van uw Frigate-server kan het even duren voordat de transcriptie voltooid is.",
+          "updatedAttributes": "Attributen succesvol bijgewerkt."
         },
         "error": {
           "updatedSublabelFailed": "Het is niet gelukt om het sublabel bij te werken: {{errorMessage}}",
           "regenerate": "Het is niet gelukt om {{provider}} aan te roepen voor een nieuwe beschrijving: {{errorMessage}}",
           "updatedLPRFailed": "Kentekenplaat bijwerken mislukt: {{errorMessage}}",
-          "audioTranscription": "Audiotranscriptie aanvragen mislukt: {{errorMessage}}"
+          "audioTranscription": "Audiotranscriptie aanvragen mislukt: {{errorMessage}}",
+          "updatedAttributesFailed": "Attributen konden niet worden bijgewerkt: {{errorMessage}}"
         }
       }
     },
@@ -154,10 +158,18 @@
     },
     "recognizedLicensePlate": "Erkende kentekenplaat",
     "snapshotScore": {
-      "label": "Snapshot scoren"
+      "label": "Snapshot score"
     },
     "score": {
       "label": "Score"
+    },
+    "editAttributes": {
+      "title": "Bewerk attributen",
+      "desc": "Selecteer classificatiekenmerken voor dit {{label}}"
+    },
+    "attributes": "Classificatie-kenmerken",
+    "title": {
+      "label": "Titel"
     }
   },
   "itemMenu": {
@@ -195,6 +207,20 @@
     "audioTranscription": {
       "label": "Transcriberen",
       "aria": "Audiotranscriptie aanvragen"
+    },
+    "showObjectDetails": {
+      "label": "Objectpad weergeven"
+    },
+    "hideObjectDetails": {
+      "label": "Verberg objectpad"
+    },
+    "viewTrackingDetails": {
+      "label": "Bekijk trackinggegevens",
+      "aria": "Toon de trackinggegevens"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Download schone snapshot",
+      "aria": "Download schone snapshot"
     }
   },
   "noTrackedObjects": "Geen gevolgde objecten gevonden",
@@ -207,12 +233,14 @@
         "error": "Verwijderen van gevolgd object mislukt: {{errorMessage}}"
       }
     },
-    "tooltip": "{{type}} komt voor {{confidence}}% overeen met de zoekopdracht"
+    "tooltip": "{{type}} komt voor {{confidence}}% overeen met de zoekopdracht",
+    "previousTrackedObject": "Vorig gevolgd object",
+    "nextTrackedObject": "Volgende gevolgde object"
   },
   "dialog": {
     "confirmDelete": {
       "title": "Bevestig Verwijderen",
-      "desc": "Het verwijderen van dit gevolgde object verwijdert de snapshot, alle opgeslagen embeddings en eventuele bijbehorende levenscyclusgegevens van het object. Opgenomen videobeelden van dit object in de Geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?"
+      "desc": "Het verwijderen van dit gevolgde object verwijdert de snapshot, alle opgeslagen embeddings en eventuele bijbehorende trackinggegevens van het object. Opgenomen videobeelden van dit object in de Geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?"
     }
   },
   "fetchingTrackedObjectsFailed": "Fout bij het ophalen van gevolgde objecten: {{errorMessage}}",
@@ -222,5 +250,54 @@
   },
   "concerns": {
     "label": "Zorgen"
+  },
+  "trackingDetails": {
+    "title": "Trackinggegevens",
+    "noImageFound": "Er is geen afbeelding beschikbaar voor dit tijdstip.",
+    "createObjectMask": "Objectmasker maken",
+    "adjustAnnotationSettings": "Annotatie-instellingen aanpassen",
+    "scrollViewTips": "Klik om de belangrijke momenten uit de levenscyclus van dit object te bekijken.",
+    "autoTrackingTips": "Als u een automatische objectvolgende camera gebruikt, zal het objectkader onnauwkeurig zijn.",
+    "count": "{{first}} van {{second}}",
+    "trackedPoint": "Volgpunt",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} gedetecteerd",
+      "entered_zone": "{{label}} in zone {{zones}}",
+      "active": "{{label}} Werd actief",
+      "stationary": "{{label}} werd stationair",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} Gedetecteerd voor {{label}}",
+        "other": "{{label}} Herkend als {{attribute}}"
+      },
+      "gone": "{{label}} vertrok",
+      "heard": "{{label}} gehoord",
+      "external": "{{label}} gedetecteerd",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Verhouding",
+        "area": "Gebied",
+        "score": "Score"
+      }
+    },
+    "annotationSettings": {
+      "title": "Annotatie-instellingen",
+      "showAllZones": {
+        "title": "Toon alle zones",
+        "desc": "Toon altijd zones op frames waar objecten een zone zijn binnengegaan."
+      },
+      "offset": {
+        "label": "Annotatie-afwijking",
+        "desc": "Deze gegevens zijn afkomstig van de detectiestream van je camera, maar worden weergegeven op beelden uit de opnamestream. Het is onwaarschijnlijk dat deze twee streams perfect gesynchroniseerd zijn. Hierdoor zullen het objectkader en het beeld niet exact op elkaar aansluiten. Met deze instelling kun je de annotaties vooruit of achteruit in de tijd verschuiven om ze beter uit te lijnen met het opgenomen beeldmateriaal.",
+        "millisecondsToOffset": "Aantal milliseconden om objectkader mee te verschuiven. <em>Standaard: 0</em>",
+        "tips": "Verlaag de waarde als de videoweergave sneller is dan de objectkaders en hun trajectpunten, en verhoog de waarde als de videoweergave achterloopt. Deze waarde kan negatief zijn.",
+        "toast": {
+          "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Vorige dia",
+      "next": "Volgende dia"
+    }
   }
 }

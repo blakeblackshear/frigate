@@ -1,11 +1,15 @@
 {
   "camera": "kamera",
-  "alerts": "Alarmlar",
+  "alerts": "Uyarılar",
   "detections": "Tespitler",
   "empty": {
     "detection": "İncelenecek tespit öğesi yok",
-    "alert": "İncelenecek alarm öğesi yok",
-    "motion": "Hareket verisi bulunamadı"
+    "alert": "İncelenecek uyarı öğesi yok",
+    "motion": "Hareket verisi bulunamadı",
+    "recordingsDisabled": {
+      "title": "Kayıt özelliği etkinleştirilmelidir",
+      "description": "İnceleme öğeleri yalnızca bir kamera için kayıt özelliği etkinleştirildiğinde oluşturulabilir."
+    }
   },
   "timeline": "Zaman şeridi",
   "events": {
@@ -36,5 +40,28 @@
   "selected_other": "{{count}} seçildi",
   "detected": "algılandı",
   "suspiciousActivity": "Şüpheli Etkinlik",
-  "threateningActivity": "Tehlikeli Etkinlik"
+  "threateningActivity": "Tehlikeli Etkinlik",
+  "zoomIn": "Büyüt",
+  "zoomOut": "Küçült",
+  "detail": {
+    "label": "Detay",
+    "aria": "Ayrıntı görünümünü aç/kapat",
+    "trackedObject_one": "{{count}} nesne",
+    "trackedObject_other": "{{count}} nesne",
+    "noObjectDetailData": "Nesneye ait ayrıntılı veri bulunmuyor.",
+    "settings": "Ayrıntılı Görünüm Ayarları",
+    "alwaysExpandActive": {
+      "title": "Etkin olanı her zaman genişlet",
+      "desc": "Varsa, etkin inceleme öğesinin nesne ayrıntılarını daima göster."
+    },
+    "noDataFound": "İncelenecek ayrıntılı veri bulunmuyor"
+  },
+  "objectTrack": {
+    "trackedPoint": "Takip edilen nokta",
+    "clickToSeek": "Bu zamana atlamak için tıklayın"
+  },
+  "normalActivity": "Normal",
+  "needsReview": "İnceleme Gerekiyor",
+  "securityConcern": "Güvenlik endişesi",
+  "select_all": "Tümü"
 }

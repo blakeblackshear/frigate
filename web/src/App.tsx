@@ -14,6 +14,8 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AuthProvider } from "@/context/auth-context";
 import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { isRedirectingToLogin } from "@/api/auth-redirect";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -50,6 +52,23 @@ function DefaultAppView() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  // Compute required roles for main routes, ensuring we have config first
+  // to prevent race condition where custom roles are temporarily unavailable
+  const mainRouteRoles = config?.auth?.roles
+    ? Object.keys(config.auth.roles)
+    : undefined;
+
+  // Show loading indicator during redirect to prevent React from attempting to render
+  // lazy components, which would cause error #426 (suspension during synchronous navigation)
+  if (isRedirectingToLogin()) {
+    return (
+      <div className="size-full overflow-hidden">
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      </div>
+    );
+  }
+
   return (
     <div className="size-full overflow-hidden">
       {isDesktop && <Sidebar />}
@@ -68,13 +87,11 @@ function DefaultAppView() {
           <Routes>
             <Route
               element={
-                <ProtectedRoute
-                  requiredRoles={
-                    config?.auth.roles
-                      ? Object.keys(config.auth.roles)
-                      : ["admin", "viewer"]
-                  }
-                />
+                mainRouteRoles ? (
+                  <ProtectedRoute requiredRoles={mainRouteRoles} />
+                ) : (
+                  <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                )
               }
             >
               <Route index element={<Live />} />

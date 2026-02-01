@@ -1,0 +1,183 @@
+{
+  "documentTitle": "分类模型 - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "删除分类图片",
+    "renameCategory": "重命名类别",
+    "deleteCategory": "删除类别",
+    "deleteImages": "删除图片",
+    "trainModel": "训练模型",
+    "addClassification": "添加分类",
+    "deleteModels": "删除模型",
+    "editModel": "编辑模型"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "删除类别",
+      "deletedImage": "删除图片",
+      "categorizedImage": "成功分类图片",
+      "trainedModel": "训练模型成功。",
+      "trainingModel": "已开始训练模型。",
+      "deletedModel_other": "已删除 {{count}} 个模型",
+      "updatedModel": "已更新模型配置",
+      "renamedCategory": "成功修改类别名称为 {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "删除失败：{{errorMessage}}",
+      "deleteCategoryFailed": "删除类别失败：{{errorMessage}}",
+      "categorizeFailed": "图片分类失败：{{errorMessage}}",
+      "trainingFailed": "训练模型失败，请查看 Frigate 日志获取详情。",
+      "deleteModelFailed": "删除模型失败：{{errorMessage}}",
+      "updateModelFailed": "更新模型失败：{{errorMessage}}",
+      "trainingFailedToStart": "开始训练模型失败：{{errorMessage}}",
+      "renameCategoryFailed": "修改类别名称失败：{{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "删除类别",
+    "desc": "确定要删除类别 {{name}} 吗？此操作将永久删除所有关联的图片，并需要重新训练模型。",
+    "minClassesTitle": "无法删除此类别",
+    "minClassesDesc": "分类模型必须至少有2个类别。你需要先添加一个新的类别，然后再删除当前这个类别。"
+  },
+  "deleteDatasetImages": {
+    "title": "删除图片数据集",
+    "desc": "确定要从 {{dataset}} 中删除 {{count}} 张图片吗？此操作无法撤销，并将需要重新训练模型。"
+  },
+  "deleteTrainImages": {
+    "title": "删除训练的图片",
+    "desc": "确定要删除 {{count}} 张图片吗？此操作无法撤销。"
+  },
+  "renameCategory": {
+    "title": "重命名类别",
+    "desc": "请输入 {{name}} 的新名称。名称变更后需要重新训练模型。"
+  },
+  "description": {
+    "invalidName": "名称无效。名称只能包含字母、数字、空格、撇号、下划线和连字符。"
+  },
+  "train": {
+    "title": "最近分类记录",
+    "aria": "选择最近分类记录",
+    "titleShort": "近期"
+  },
+  "categories": "类别",
+  "createCategory": {
+    "new": "创建新类别"
+  },
+  "categorizeImageAs": "图片分类为：",
+  "categorizeImage": "图片分类",
+  "noModels": {
+    "object": {
+      "title": "未创建目标/物体分类模型",
+      "description": "创建自定义模型以分类检测到的目标。",
+      "buttonText": "创建目标/物体模型"
+    },
+    "state": {
+      "title": "尚未创建状态分类模型",
+      "description": "创建自定义模型以监控并分类摄像头特定区域的状态变化。",
+      "buttonText": "创建状态模型"
+    }
+  },
+  "wizard": {
+    "title": "创建新分类",
+    "steps": {
+      "nameAndDefine": "名称与定义",
+      "stateArea": "状态区域",
+      "chooseExamples": "选择范例"
+    },
+    "step1": {
+      "description": "状态模型用于监控摄像头固定区域的状态变化（例如门是否开启或关闭）。目标/物体模型用于为检测到的目标添加分类标签（例如区分宠物、快递员等）。",
+      "name": "名称",
+      "namePlaceholder": "请输入模型名称……",
+      "type": "类型",
+      "typeState": "状态",
+      "typeObject": "目标/物体",
+      "objectLabel": "目标/物体标签",
+      "objectLabelPlaceholder": "请选择目标类型……",
+      "classificationType": "分类方式",
+      "classificationTypeTip": "了解分类方式",
+      "classificationTypeDesc": "子标签会为目标标签添加附加文本（例如：“人员：美团”）。属性是可搜索的元数据，独立存储在目标的元信息中。",
+      "classificationSubLabel": "子标签",
+      "classificationAttribute": "属性",
+      "classes": "类别",
+      "classesTip": "了解类别",
+      "classesStateDesc": "定义摄像头区域内可能出现的不同状态。例如：车库门的“开启”和“关闭”。",
+      "classesObjectDesc": "定义用于分类检测目标的不同类别。例如：人员分类中的“快递员”、“居民”、“陌生人”。",
+      "classPlaceholder": "请输入分类名称……",
+      "errors": {
+        "nameRequired": "模型名称为必填项",
+        "nameLength": "模型名称长度不能超过 64 个字符",
+        "nameOnlyNumbers": "模型名称不能仅包含数字",
+        "classRequired": "至少需要一个类别",
+        "classesUnique": "类别名称必须唯一",
+        "stateRequiresTwoClasses": "状态模型至少需要两个类别",
+        "objectLabelRequired": "请选择一个目标标签",
+        "objectTypeRequired": "请选择一个目标标签",
+        "noneNotAllowed": "不能创建“none”（无标签）类别"
+      },
+      "states": "状态"
+    },
+    "step2": {
+      "description": "选择摄像头，并为摄像头定义要监控的区域。模型将对这些区域的状态进行分类。",
+      "cameras": "摄像头",
+      "selectCamera": "选择摄像头",
+      "noCameras": "点击 + 符号添加摄像头",
+      "selectCameraPrompt": "从列表中选择一个摄像头以定义其检测区域"
+    },
+    "step3": {
+      "selectImagesPrompt": "选择所有属于 {{className}} 的图片",
+      "selectImagesDescription": "点击图像进行选择，完成该类别后点击“继续”。",
+      "generating": {
+        "title": "正在生成样本图片",
+        "description": "Frigate 正在从录像中提取代表性图片。这可能需要一些时间……"
+      },
+      "training": {
+        "title": "正在训练模型",
+        "description": "系统正在后台训练模型。你可以关闭此对话框，训练完成后模型将自动开始运行。"
+      },
+      "retryGenerate": "重新生成",
+      "noImages": "未生成样本图像",
+      "classifying": "正在分类与训练……",
+      "trainingStarted": "已开始模型训练",
+      "errors": {
+        "noCameras": "未配置摄像头",
+        "noObjectLabel": "未选择目标标签",
+        "generateFailed": "示例生成失败：{{error}}",
+        "generationFailed": "生成失败，请重试。",
+        "classifyFailed": "图片分类失败：{{error}}"
+      },
+      "generateSuccess": "样本图片生成成功",
+      "allImagesRequired_other": "请对所有图片进行分类。还有 {{count}} 张图片需要分类。",
+      "modelCreated": "模型创建成功。请在“最近分类”页面为缺失的状态添加图片，然后训练模型。",
+      "missingStatesWarning": {
+        "title": "缺失状态示例",
+        "description": "建议为所有状态都选择示例图片以获得最佳效果。你也可以跳过当前为分类状态选择图片，但需要所有状态都有对应的图片，模型才能够进行训练。跳过后你可通过“最近分类”页面为缺失的状态分类添加图片，然后再训练模型。"
+      }
+    }
+  },
+  "deleteModel": {
+    "title": "删除分类模型",
+    "single": "你确定要删除 {{name}} 吗？此操作将永久删除所有相关数据，包括图片和训练数据，且无法撤销。",
+    "desc": "你确定要删除 {{count}} 个模型吗？此操作将永久删除所有相关数据，包括图片和训练数据，且无法撤销。"
+  },
+  "menu": {
+    "objects": "目标",
+    "states": "状态"
+  },
+  "details": {
+    "scoreInfo": "得分表示该目标所有检测结果的平均分类置信度。",
+    "none": "无分类",
+    "unknown": "未知"
+  },
+  "edit": {
+    "title": "编辑分类模型",
+    "descriptionState": "编辑此状态分类模型的类别；更改后需要重新训练模型。",
+    "descriptionObject": "编辑此目标分类模型的目标类型和分类类型。",
+    "stateClassesInfo": "注意：更改状态类别后需使用更新后的类别重新训练模型。"
+  },
+  "tooltip": {
+    "trainingInProgress": "模型正在训练中",
+    "noNewImages": "没有新的图片可用于训练。请先对数据集中的更多图片进行分类。",
+    "noChanges": "自上次训练以来，数据集未作任何更改。",
+    "modelNotReady": "模型尚未准备好进行训练"
+  },
+  "none": "无标签"
+}

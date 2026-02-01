@@ -1,0 +1,193 @@
+{
+  "documentTitle": "Modèles de classification - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "Supprimer les images de classification",
+    "renameCategory": "Renommer la classe",
+    "deleteCategory": "Supprimer la classe",
+    "deleteImages": "Supprimer les images",
+    "trainModel": "Entraîner le modèle",
+    "addClassification": "Ajouter une classification",
+    "deleteModels": "Supprimer les modèles",
+    "editModel": "Modifier le modèle"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Classe supprimée",
+      "deletedImage": "Images supprimées",
+      "categorizedImage": "Image classifiée avec succès",
+      "trainedModel": "Modèle entraîné avec succès.",
+      "trainingModel": "L'entraînement du modèle a démarré avec succès.",
+      "deletedModel_one": "{{count}} modèle supprimé avec succès",
+      "deletedModel_many": "{{count}} modèles supprimés avec succès",
+      "deletedModel_other": "{{count}} modèles supprimés avec succès",
+      "updatedModel": "Configuration du modèle mise à jour avec succès",
+      "renamedCategory": "Classe renommée en {{name}} avec succès"
+    },
+    "error": {
+      "deleteImageFailed": "Échec de la suppression : {{errorMessage}}",
+      "deleteCategoryFailed": "Échec de la suppression de la classe : {{errorMessage}}",
+      "categorizeFailed": "Échec de la catégorisation de l'image : {{errorMessage}}",
+      "trainingFailed": "L'entraînement du modèle a échoué. Consultez les journaux de Frigate pour plus de détails.",
+      "deleteModelFailed": "Impossible de supprimer le modèle : {{errorMessage}}",
+      "updateModelFailed": "Impossible de mettre à jour le modèle : {{errorMessage}}",
+      "renameCategoryFailed": "Impossible de renommer la classe : {{errorMessage}}",
+      "trainingFailedToStart": "Impossible de démarrer l'entraînement du modèle : {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Supprimer la classe",
+    "desc": "Êtes-vous sûr de vouloir supprimer la classe {{name}} ? Cette action supprimera définitivement toutes les images associées et nécessitera un réentraînement du modèle.",
+    "minClassesTitle": "Impossible de supprimer la classe",
+    "minClassesDesc": "Un modèle de classification doit avoir au moins 2 classes. Ajoutez une autre classe avant de supprimer celle-ci."
+  },
+  "deleteDatasetImages": {
+    "title": "Supprimer les images du jeu de données",
+    "desc_one": "Êtes-vous sûr de vouloir supprimer {{count}} image du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle.",
+    "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} images du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle.",
+    "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} images du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle."
+  },
+  "deleteTrainImages": {
+    "title": "Supprimer les images d'entraînement",
+    "desc_one": "Êtes-vous sûr de vouloir supprimer {{count}} image ? Cette action est irréversible.",
+    "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} images ? Cette action est irréversible.",
+    "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} images ? Cette action est irréversible."
+  },
+  "renameCategory": {
+    "title": "Renommer la classe",
+    "desc": "Saisissez un nouveau nom pour {{name}}. Vous devrez réentraîner le modèle pour que le changement de nom prenne effet."
+  },
+  "description": {
+    "invalidName": "Nom invalide. Les noms ne peuvent contenir que des lettres, des chiffres, des espaces, des apostrophes, des traits de soulignement et des tirets."
+  },
+  "train": {
+    "title": "Classifications récentes",
+    "aria": "Sélectionner des classifications récentes",
+    "titleShort": "Récent"
+  },
+  "categories": "Classes",
+  "createCategory": {
+    "new": "Créer une nouvelle classe"
+  },
+  "categorizeImageAs": "Classifier comme :",
+  "categorizeImage": "Classifier l'image",
+  "noModels": {
+    "object": {
+      "title": "Aucun modèle de classification d'objets",
+      "description": "Créer un modèle personnalisé pour classifier les objets détectés",
+      "buttonText": "Créer un modèle d'objets"
+    },
+    "state": {
+      "title": "Aucun modèle de classification d'états",
+      "description": "Créer un modèle personnalisé pour surveiller et classifier les changements d'état dans des zones de caméra spécifiques",
+      "buttonText": "Créer un modèle d'états"
+    }
+  },
+  "wizard": {
+    "title": "Créer une nouvelle classification",
+    "steps": {
+      "nameAndDefine": "Nom et définition",
+      "stateArea": "Zone d'état",
+      "chooseExamples": "Choisir des exemples"
+    },
+    "step1": {
+      "description": "Les modèles d'état surveillent des zones de caméra fixes pour détecter des changements (par ex., porte ouverte/fermée). Les modèles d'objets ajoutent des classifications aux objets détectés (par ex., animaux connus, livreurs, etc.).",
+      "name": "Nom",
+      "namePlaceholder": "Saisissez un nom de modèle.",
+      "type": "Type",
+      "typeState": "État",
+      "typeObject": "Objet",
+      "objectLabel": "Étiquette d'objet",
+      "objectLabelPlaceholder": "Sélectionnez un type d'objet.",
+      "classificationType": "Type de classification",
+      "classificationTypeTip": "En savoir plus sur les types de classification",
+      "classificationTypeDesc": "Les sous-étiquettes ajoutent du texte supplémentaire à l'étiquette d'objet (par ex., « Personne : UPS »). Les attributs sont des métadonnées recherchables stockées séparément dans les métadonnées de l'objet.",
+      "classificationSubLabel": "Sous-étiquette",
+      "classificationAttribute": "Attribut",
+      "classes": "Classes",
+      "classesTip": "En savoir plus sur les classes",
+      "classesStateDesc": "Définissez les différents états que votre zone de caméra peut avoir. Par exemple : « ouvert » et « fermé » pour une porte de garage.",
+      "classesObjectDesc": "Définissez les différentes catégories pour classifier les objets détectés. Par exemple : « livreur », « résident », « inconnu » pour la classification des personnes.",
+      "classPlaceholder": "Saisissez le nom de la classe.",
+      "errors": {
+        "nameRequired": "Le nom du modèle est requis.",
+        "nameLength": "Le nom du modèle ne doit pas dépasser 64 caractères.",
+        "nameOnlyNumbers": "Le nom du modèle ne peut pas contenir uniquement des chiffres.",
+        "classRequired": "Au moins une classe est requise.",
+        "classesUnique": "Les noms de classe doivent être uniques.",
+        "stateRequiresTwoClasses": "Les modèles d'état nécessitent au moins deux classes.",
+        "objectLabelRequired": "Veuillez sélectionner une étiquette d'objet.",
+        "objectTypeRequired": "Veuillez sélectionner un type de classification.",
+        "noneNotAllowed": "La classe 'aucun' n'est pas autorisée."
+      },
+      "states": "États"
+    },
+    "step2": {
+      "description": "Sélectionnez les caméras et définissez la zone à surveiller pour chaque caméra. Le modèle classifiera l'état de ces zones.",
+      "cameras": "Caméras",
+      "selectCamera": "Sélectionner une caméra",
+      "noCameras": "Cliquez sur + pour ajouter des caméras.",
+      "selectCameraPrompt": "Sélectionnez une caméra dans la liste pour définir sa zone de surveillance."
+    },
+    "step3": {
+      "selectImagesPrompt": "Sélectionner toutes les images contenant : {{className}}",
+      "selectImagesDescription": "Cliquez sur les images pour les sélectionner. Cliquez sur Continuer lorsque vous avez terminé avec cette classe.",
+      "generating": {
+        "title": "Génération d'images d'exemple en cours",
+        "description": "Frigate récupère des images représentatives à partir de vos enregistrements. Cela peut prendre un moment..."
+      },
+      "training": {
+        "title": "Entraînement du modèle",
+        "description": "Votre modèle est en cours d'entraînement en arrière-plan. Fermez cette boîte de dialogue. Votre modèle se lancera dès que l'entraînement sera terminé."
+      },
+      "retryGenerate": "Réessayer la génération",
+      "noImages": "Aucune image d'exemple générée",
+      "classifying": "Classification et entraînement en cours...",
+      "trainingStarted": "Entraînement démarré avec succès",
+      "errors": {
+        "noCameras": "Aucune caméra n'est configurée.",
+        "noObjectLabel": "Aucune étiquette d'objet sélectionnée",
+        "generateFailed": "Échec de la génération des exemples : {{error}}",
+        "generationFailed": "Échec de la génération. Veuillez réessayer.",
+        "classifyFailed": "Échec de la classification des images : {{error}}"
+      },
+      "generateSuccess": "Génération des images d'exemple réussie",
+      "allImagesRequired_one": "Veuillez classifier toutes les images. {{count}} image restante.",
+      "allImagesRequired_many": "Veuillez classifier toutes les images. {{count}} images restantes.",
+      "allImagesRequired_other": "Veuillez classifier toutes les images. {{count}} images restantes.",
+      "modelCreated": "Modèle créé avec succès. Utilisez la vue Classifications récentes pour ajouter des images pour les états manquants, puis entraînez le modèle.",
+      "missingStatesWarning": {
+        "title": "Exemples d'états manquants",
+        "description": "Pour des résultats optimaux, il est recommandé de sélectionner des exemples pour tous les états. Vous pouvez continuer sans cette étape, mais le modèle ne sera entraîné que lorsque chaque état disposera d'images. Continuez, puis utilisez la vue Classifications récentes pour classer les images manquantes et lancer l'entraînement."
+      }
+    }
+  },
+  "deleteModel": {
+    "title": "Supprimer le modèle de classification",
+    "single": "Voulez-vous vraiment supprimer {{name}} ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
+    "desc_one": "Voulez-vous vraiment supprimer {{count}} modèle ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
+    "desc_many": "Voulez-vous vraiment supprimer {{count}} modèles ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
+    "desc_other": "Voulez-vous vraiment supprimer {{count}} modèles ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible."
+  },
+  "menu": {
+    "objects": "Objets",
+    "states": "États"
+  },
+  "details": {
+    "scoreInfo": "Le score représente la moyenne de la confiance de classification pour toutes les détections de cet objet.",
+    "none": "Aucun",
+    "unknown": "Inconnu"
+  },
+  "edit": {
+    "title": "Modifier le modèle de classification",
+    "descriptionState": "Modifier les classes pour ce modèle de classification d'état. Les modifications nécessiteront un réentraînement du modèle.",
+    "descriptionObject": "Modifier le type d'objet et le type de classification pour ce modèle de classification d'objet",
+    "stateClassesInfo": "Note : La modification des classes d'état nécessite un réentraînement du modèle avec les classes mises à jour."
+  },
+  "tooltip": {
+    "trainingInProgress": "Modèle en cours d'entraînement",
+    "noNewImages": "Aucune nouvelle image pour l'entraînement. Veuillez d'abord classifier plus d'images dans le jeu de données.",
+    "modelNotReady": "Le modèle n'est pas prêt pour l'entraînement.",
+    "noChanges": "Aucune modification du jeu de données depuis le dernier entraînement"
+  },
+  "none": "Aucun"
+}

@@ -1,0 +1,193 @@
+{
+  "documentTitle": "Modele de clasificare - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "Șterge imaginile de clasificare",
+    "renameCategory": "Redenumește clasa",
+    "deleteCategory": "Șterge clasa",
+    "deleteImages": "Șterge imaginile",
+    "trainModel": "Antrenează modelul",
+    "addClassification": "Adaugă clasificare",
+    "deleteModels": "Șterge modelele",
+    "editModel": "Editează modelul"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Clasă ștearsă",
+      "deletedImage": "Imagini șterse",
+      "categorizedImage": "Imagine clasificată cu succes",
+      "trainedModel": "Model antrenat cu succes.",
+      "trainingModel": "Antrenamentul modelului a fost pornit cu succes.",
+      "deletedModel_one": "{{count}} model șters cu succes",
+      "deletedModel_few": "{{count}} modele șterse cu succes",
+      "deletedModel_other": "{{count}} modele șterse cu succes",
+      "updatedModel": "Configurația modelului a fost actualizată cu succes",
+      "renamedCategory": "Clasa a fost redenumită cu succes în {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Ștergerea a eșuat: {{errorMessage}}",
+      "deleteCategoryFailed": "Ștergerea clasei a eșuat: {{errorMessage}}",
+      "categorizeFailed": "Categorisirea imaginii a eșuat: {{errorMessage}}",
+      "trainingFailed": "Antrenarea modelului a eșuat. Verifică jurnalele Frigate pentru detalii.",
+      "deleteModelFailed": "Ștergerea modelului a eșuat: {{errorMessage}}",
+      "updateModelFailed": "Actualizarea modelului a eșuat: {{errorMessage}}",
+      "renameCategoryFailed": "Redenumirea clasei a eșuat: {{errorMessage}}",
+      "trainingFailedToStart": "Nu s-a putut porni antrenarea modelului: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Șterge clasa",
+    "desc": "Sigur doriți să ștergeți clasa {{name}}? Aceasta va șterge permanent toate imaginile asociate și va necesita reantrenarea modelului.",
+    "minClassesTitle": "Nu se poate șterge clasa",
+    "minClassesDesc": "Un model de clasificare trebuie să aibă cel puțin 2 clase. Adaugă o altă clasă înainte de a o șterge pe aceasta."
+  },
+  "deleteDatasetImages": {
+    "title": "Șterge imaginile setului de date",
+    "desc_one": "Sigur doriți să ștergeți {{count}} imagine din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului.",
+    "desc_few": "Sigur doriți să ștergeți {{count}} imagini din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului.",
+    "desc_other": "Sigur doriți să ștergeți {{count}} de imagini din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului."
+  },
+  "deleteTrainImages": {
+    "title": "Șterge imaginile de antrenament",
+    "desc_one": "Sigur doriți să ștergeți {{count}} imagine? Această acțiune nu poate fi anulată.",
+    "desc_few": "Sigur doriți să ștergeți {{count}} imagini? Această acțiune nu poate fi anulată.",
+    "desc_other": "Sigur doriți să ștergeți {{count}} de imagini? Această acțiune nu poate fi anulată."
+  },
+  "renameCategory": {
+    "title": "Redenumește clasa",
+    "desc": "Introduceți un nume nou pentru {{name}}. Va trebui să reantrenați modelul pentru ca modificarea numelui să aibă efect."
+  },
+  "description": {
+    "invalidName": "Nume invalid. Numele pot include doar litere, cifre, spații, apostrofuri, underscore-uri și liniuțe."
+  },
+  "train": {
+    "title": "Clasificări recente",
+    "titleShort": "Recent",
+    "aria": "Selectează clasificările recente"
+  },
+  "categories": "Clase",
+  "createCategory": {
+    "new": "Creează clasă nouă"
+  },
+  "categorizeImageAs": "Clasifică imaginea ca:",
+  "categorizeImage": "Clasifică imaginea",
+  "noModels": {
+    "object": {
+      "title": "Nu există modele de clasificare a obiectelor",
+      "description": "Creează un model personalizat pentru a clasifica obiectele detectate.",
+      "buttonText": "Creează model de obiect"
+    },
+    "state": {
+      "title": "Nu există modele de clasificare a stării",
+      "description": "Creează un model personalizat pentru a monitoriza și clasifica schimbările de stare în anumite zone ale camerei.",
+      "buttonText": "Creează model de stare"
+    }
+  },
+  "wizard": {
+    "title": "Creează clasificare nouă",
+    "steps": {
+      "nameAndDefine": "Numire și definire",
+      "stateArea": "Zona de stare",
+      "chooseExamples": "Alege exemple"
+    },
+    "step1": {
+      "description": "Modelele de stare monitorizează zone fixe ale camerei pentru schimbări (de exemplu, ușă deschisă/închisă). Modelele de obiect adaugă clasificări obiectelor detectate (de exemplu, animale cunoscute, curieri etc.).",
+      "name": "Nume",
+      "namePlaceholder": "Introduceți numele modelului...",
+      "type": "Tip",
+      "typeState": "Stare",
+      "typeObject": "Obiect",
+      "objectLabel": "Etichetă obiect",
+      "objectLabelPlaceholder": "Selectează tipul obiectului...",
+      "classificationType": "Tip de clasificare",
+      "classificationTypeTip": "Află despre tipurile de clasificare",
+      "classificationTypeDesc": "Subetichetele adaugă text suplimentar la eticheta obiectului (de exemplu, 'Persoană: UPS'). Atributele sunt metadate căutabile, stocate separat în metadatele obiectului.",
+      "classificationSubLabel": "Subeticheta",
+      "classificationAttribute": "Atribut",
+      "classes": "Clase",
+      "classesTip": "Află despre clase",
+      "classesStateDesc": "Definește diferitele stări în care poate fi zona camerei tale. De exemplu: 'deschis' și 'închis' pentru o ușă de garaj.",
+      "classesObjectDesc": "Definește diferitele categorii în care să fie clasificate obiectele detectate. De exemplu: 'curier', 'rezident', 'necunoscut' pentru clasificarea persoanelor.",
+      "classPlaceholder": "Introduceți numele clasei...",
+      "errors": {
+        "nameRequired": "Numele modelului este obligatoriu",
+        "nameLength": "Numele modelului trebuie să aibă 64 de caractere sau mai puțin",
+        "nameOnlyNumbers": "Numele modelului nu poate conține doar cifre",
+        "classRequired": "Este necesară cel puțin 1 clasă",
+        "classesUnique": "Numele claselor trebuie să fie unice",
+        "stateRequiresTwoClasses": "Modelele de stare necesită cel puțin 2 clase",
+        "objectLabelRequired": "Vă rugăm să selectați o etichetă de obiect",
+        "objectTypeRequired": "Vă rugăm să selectați un tip de clasificare",
+        "noneNotAllowed": "Clasa 'niciuna' nu este permisă"
+      },
+      "states": "Stări"
+    },
+    "step2": {
+      "description": "Selectați camerele și definiți zona de monitorizat pentru fiecare cameră. Modelul va clasifica starea acestor zone.",
+      "cameras": "Camere",
+      "selectCamera": "Selectează camera",
+      "noCameras": "Apasă pe + pentru a adăuga camere",
+      "selectCameraPrompt": "Selectați o cameră din listă pentru a defini aria sa de monitorizare"
+    },
+    "step3": {
+      "selectImagesPrompt": "Selectați toate imaginile cu: {{className}}﻿",
+      "selectImagesDescription": "Apăsați pe imagini pentru a le selecta. Apăsați pe Continuare când ați terminat cu această clasă.",
+      "generating": {
+        "title": "Generare imagini de exemplu",
+        "description": "Frigate preia imagini reprezentative din înregistrările tale. Aceasta poate dura câteva momente..."
+      },
+      "training": {
+        "title": "Antrenare model",
+        "description": "Modelul tău este antrenat în fundal. Închide această fereastră și modelul va începe să ruleze imediat ce antrenamentul este finalizat."
+      },
+      "retryGenerate": "Reîncearcă generarea",
+      "noImages": "Nu s-au generat imagini de exemplu",
+      "classifying": "Clasificare și antrenare...",
+      "trainingStarted": "Antrenamentul a început cu succes",
+      "errors": {
+        "noCameras": "Nu există camere configurate",
+        "noObjectLabel": "Nu a fost selectată nicio etichetă de obiect",
+        "generateFailed": "Generarea exemplelor a eșuat: {{error}}",
+        "generationFailed": "Generarea a eșuat. Vă rugăm să încercați din nou.",
+        "classifyFailed": "Clasificarea imaginilor a eșuat: {{error}}"
+      },
+      "generateSuccess": "Imaginile de exemplu au fost generate cu succes",
+      "allImagesRequired_one": "Te rog să clasifici toate imaginile. {{count}} imagine rămasă.",
+      "allImagesRequired_few": "Te rog să clasifici toate imaginile. {{count}} imagini rămase.",
+      "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase.",
+      "modelCreated": "Modelul a fost creat cu succes. Folosește vizualizarea Clasificări recente pentru a adăuga imagini pentru stările lipsă, apoi antrenează modelul.",
+      "missingStatesWarning": {
+        "title": "Exemple de stări lipsă",
+        "description": "Este recomandat să alegi exemple pentru toate stările pentru rezultate optime. Poți continua fără a selecta toate stările, dar modelul nu va fi antrenat până când toate stările nu au imagini. După continuare, folosește vizualizarea Clasificări recente pentru a clasifica imagini pentru stările lipsă, apoi antrenează modelul."
+      }
+    }
+  },
+  "deleteModel": {
+    "title": "Șterge modelul de clasificare",
+    "single": "Sigur doriți să ștergeți {{name}}? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată.",
+    "desc_one": "Sigur doriți să ștergeți {{count}} model? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată.",
+    "desc_few": "Sigur doriți să ștergeți {{count}} modele? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată.",
+    "desc_other": "Sigur doriți să ștergeți {{count}} de modele? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată."
+  },
+  "menu": {
+    "objects": "Obiecte",
+    "states": "Stări"
+  },
+  "details": {
+    "scoreInfo": "Scorul reprezintă încrederea medie a clasificării pentru toate detecțiile acestui obiect.",
+    "none": "Niciuna",
+    "unknown": "Necunoscut"
+  },
+  "edit": {
+    "title": "Editează modelul de clasificare",
+    "descriptionState": "Editează clasele pentru acest model de clasificare a stării. Modificările vor necesita reantrenarea modelului.",
+    "descriptionObject": "Editează tipul de obiect și tipul de clasificare pentru acest model de clasificare a obiectelor.",
+    "stateClassesInfo": "Notă: Modificarea claselor de stare necesită reantrenarea modelului cu clasele actualizate."
+  },
+  "tooltip": {
+    "trainingInProgress": "Modelul este în curs de antrenare",
+    "noNewImages": "Nu există imagini noi pentru antrenare. Clasifică mai întâi mai multe imagini în setul de date.",
+    "modelNotReady": "Modelul nu este pregătit pentru antrenare",
+    "noChanges": "Nicio modificare a setului de date de la ultima antrenare."
+  },
+  "none": "Niciuna"
+}

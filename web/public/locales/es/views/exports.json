@@ -13,5 +13,11 @@
       "renameExportFailed": "No se pudo renombrar la exportación: {{errorMessage}}"
     }
   },
-  "deleteExport.desc": "¿Estás seguro de que quieres eliminar {{exportName}}?"
+  "deleteExport.desc": "¿Estás seguro de que quieres eliminar {{exportName}}?",
+  "tooltip": {
+    "shareExport": "Compartir exportación",
+    "downloadVideo": "Descargar video",
+    "editName": "Editar nombre",
+    "deleteExport": "Eliminar exportación"
+  }
 }

@@ -20,7 +20,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
+import { useRef } from "react";
 
 type PlatformAwareDialogProps = {
   trigger: JSX.Element;
@@ -42,8 +44,8 @@ export default function PlatformAwareDialog({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden px-4">
-          {content}
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          <div className={contentClassName}>{content}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -79,6 +81,8 @@ export function PlatformAwareSheet({
   open,
   onOpenChange,
 }: PlatformAwareSheetProps) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
   if (isMobile) {
     return (
       <MobilePage open={open} onOpenChange={onOpenChange}>
@@ -86,14 +90,22 @@ export function PlatformAwareSheet({
           {trigger}
         </MobilePageTrigger>
         <MobilePagePortal>
-          <MobilePageContent className="h-full overflow-hidden">
+          <MobilePageContent
+            className="flex h-full flex-col"
+            scrollerRef={scrollerRef}
+          >
             <MobilePageHeader
               className="mx-2"
               onClose={() => onOpenChange(false)}
             >
               <MobilePageTitle>{title}</MobilePageTitle>
             </MobilePageHeader>
-            <div className={contentClassName}>{content}</div>
+            <div
+              ref={scrollerRef}
+              className={cn("flex-1 overflow-y-auto", contentClassName)}
+            >
+              {content}
+            </div>
           </MobilePageContent>
         </MobilePagePortal>
       </MobilePage>
@@ -101,7 +113,12 @@ export function PlatformAwareSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
+    <Sheet
+      open={open}
+      onOpenChange={onOpenChange}
+      modal={false}
+      enableHistoryBack
+    >
       <SheetTrigger asChild className={triggerClassName}>
         {trigger}
       </SheetTrigger>

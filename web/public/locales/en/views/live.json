@@ -73,6 +73,12 @@
     "enable": "Enable Snapshots",
     "disable": "Disable Snapshots"
   },
+  "snapshot": {
+    "takeSnapshot": "Download instant snapshot",
+    "noVideoSource": "No video source available for snapshot.",
+    "captureFailed": "Failed to capture snapshot.",
+    "downloadStarted": "Snapshot download started."
+  },
   "audioDetect": {
     "enable": "Enable Audio Detect",
     "disable": "Disable Audio Detect"
@@ -90,8 +96,8 @@
     "disable": "Hide Stream Stats"
   },
   "manualRecording": {
-    "title": "On-Demand Recording",
-    "tips": "Start a manual event based on this camera's recording retention settings.",
+    "title": "On-Demand",
+    "tips": "Download an instant snapshot or start a manual event based on this camera's recording retention settings.",
     "playInBackground": {
       "label": "Play in background",
       "desc": "Enable this option to continue streaming when the player is hidden."
@@ -159,8 +165,7 @@
       "all": "All",
       "motion": "Motion",
       "active_objects": "Active Objects"
-    },
-    "notAllTips": "Your {{source}} recording retention configuration is set to <code>mode: {{effectiveRetainMode}}</code>, so this on-demand recording will only keep segments with {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Edit Layout",
@@ -170,8 +175,22 @@
     "exitEdit": "Exit Editing"
   },
   "noCameras": {
-    "title": "No Cameras Set Up",
-    "description": "Get started by connecting a camera.",
-    "buttonText": "Add Camera"
+    "title": "No Cameras Configured",
+    "description": "Get started by connecting a camera to Frigate.",
+    "buttonText": "Add Camera",
+    "restricted": {
+      "title": "No Cameras Available",
+      "description": "You don't have permission to view any cameras in this group."
+    },
+    "default": {
+      "title": "No Cameras Configured",
+      "description": "Get started by connecting a camera to Frigate.",
+      "buttonText": "Add Camera"
+    },
+    "group": {
+      "title": "No Cameras in Group",
+      "description": "This camera group has no assigned or enabled cameras.",
+      "buttonText": "Manage Groups"
+    }
   }
 }

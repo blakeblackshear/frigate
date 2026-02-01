@@ -3,6 +3,7 @@ import { SWRConfig } from "swr";
 import { WsProvider } from "./ws";
 import axios from "axios";
 import { ReactNode } from "react";
+import { isRedirectingToLogin, setRedirectingToLogin } from "./auth-redirect";
 
 axios.defaults.baseURL = `${baseUrl}api/`;
 
@@ -31,7 +32,8 @@ export function ApiProvider({ children, options }: ApiProviderType) {
           ) {
             // redirect to the login page if not already there
             const loginPage = error.response.headers.get("location") ?? "login";
-            if (window.location.href !== loginPage) {
+            if (window.location.href !== loginPage && !isRedirectingToLogin()) {
+              setRedirectingToLogin(true);
               window.location.href = loginPage;
             }
           }

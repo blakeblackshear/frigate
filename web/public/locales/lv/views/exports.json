@@ -1,0 +1,23 @@
+{
+  "documentTitle": "Eksportēt - Frigate",
+  "search": "Meklēt",
+  "noExports": "Eksporti nav atrasti",
+  "deleteExport": "Dzēst eksportu",
+  "deleteExport.desc": "Vai esi pārliecināts, ka vēlies izdzēst{{exportName}}?",
+  "editExport": {
+    "title": "Pārdēvēt eksportu",
+    "desc": "Ievadiet jaunu nosaukumu šim eksportam.",
+    "saveExport": "Saglabāt eksportu"
+  },
+  "tooltip": {
+    "shareExport": "Kopīgot eksportu",
+    "downloadVideo": "Lejupielādēt video",
+    "editName": "Rediģēt nosaukumu",
+    "deleteExport": "Eksporta dzēšana"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Neizdevās pārdēvēt eksporta failu: {{errorMessage}}"
+    }
+  }
+}

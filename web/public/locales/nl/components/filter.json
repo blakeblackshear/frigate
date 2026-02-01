@@ -133,5 +133,9 @@
     },
     "count_one": "{{count}} klasse",
     "count_other": "{{count}} Klassen"
+  },
+  "attributes": {
+    "label": "Classificatie-kenmerken",
+    "all": "Alle attributen"
   }
 }

@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Tiešraide - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Tiešraide - Frigate",
+  "lowBandwidthMode": "Eko režīms",
+  "twoWayTalk": {
+    "enable": "Iespējot divvirzienu saziņu",
+    "disable": "Izslēgt divvirzienu sarunu"
+  },
+  "cameraAudio": {
+    "enable": "Iespējot kameras audio",
+    "disable": "Izslēgt kameras audio"
+  }
+}

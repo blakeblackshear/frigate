@@ -139,9 +139,11 @@ class OutputProcess(FrigateProcess):
             if CameraConfigUpdateEnum.add in updates:
                 for camera in updates["add"]:
                     jsmpeg_cameras[camera] = JsmpegCamera(
-                        cam_config, self.stop_event, websocket_server
+                        self.config.cameras[camera], self.stop_event, websocket_server
                     )
-                    preview_recorders[camera] = PreviewRecorder(cam_config)
+                    preview_recorders[camera] = PreviewRecorder(
+                        self.config.cameras[camera]
+                    )
                     preview_write_times[camera] = 0
 
                     if (

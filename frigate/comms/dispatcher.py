@@ -23,6 +23,7 @@ from frigate.const import (
     NOTIFICATION_TEST,
     REQUEST_REGION_GRID,
     UPDATE_AUDIO_ACTIVITY,
+    UPDATE_AUDIO_TRANSCRIPTION_STATE,
     UPDATE_BIRDSEYE_LAYOUT,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
@@ -61,6 +62,7 @@ class Dispatcher:
         self.model_state: dict[str, ModelStatusTypesEnum] = {}
         self.embeddings_reindex: dict[str, Any] = {}
         self.birdseye_layout: dict[str, Any] = {}
+        self.audio_transcription_state: str = "idle"
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
             "audio_transcription": self._on_audio_transcription_command,
@@ -178,6 +180,19 @@ class Dispatcher:
         def handle_model_state() -> None:
             self.publish("model_state", json.dumps(self.model_state.copy()))
 
+        def handle_update_audio_transcription_state() -> None:
+            if payload:
+                self.audio_transcription_state = payload
+                self.publish(
+                    "audio_transcription_state",
+                    json.dumps(self.audio_transcription_state),
+                )
+
+        def handle_audio_transcription_state() -> None:
+            self.publish(
+                "audio_transcription_state", json.dumps(self.audio_transcription_state)
+            )
+
         def handle_update_embeddings_reindex_progress() -> None:
             self.embeddings_reindex = payload
             self.publish(
@@ -264,10 +279,12 @@ class Dispatcher:
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
             UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,
+            UPDATE_AUDIO_TRANSCRIPTION_STATE: handle_update_audio_transcription_state,
             NOTIFICATION_TEST: handle_notification_test,
             "restart": handle_restart,
             "embeddingsReindexProgress": handle_embeddings_reindex_progress,
             "modelState": handle_model_state,
+            "audioTranscriptionState": handle_audio_transcription_state,
             "birdseyeLayout": handle_birdseye_layout,
             "onConnect": handle_on_connect,
         }
@@ -590,23 +607,27 @@ class Dispatcher:
         )
         self.publish(f"{camera_name}/snapshots/state", payload, retain=True)
 
-    def _on_ptz_command(self, camera_name: str, payload: str) -> None:
+    def _on_ptz_command(self, camera_name: str, payload: str | bytes) -> None:
         """Callback for ptz topic."""
         try:
-            if "preset" in payload.lower():
+            preset: str = (
+                payload.decode("utf-8") if isinstance(payload, bytes) else payload
+            ).lower()
+
+            if "preset" in preset:
                 command = OnvifCommandEnum.preset
-                param = payload.lower()[payload.index("_") + 1 :]
-            elif "move_relative" in payload.lower():
+                param = preset[preset.index("_") + 1 :]
+            elif "move_relative" in preset:
                 command = OnvifCommandEnum.move_relative
-                param = payload.lower()[payload.index("_") + 1 :]
+                param = preset[preset.index("_") + 1 :]
             else:
-                command = OnvifCommandEnum[payload.lower()]
+                command = OnvifCommandEnum[preset]
                 param = ""
 
             self.onvif.handle_command(camera_name, command, param)
             logger.info(f"Setting ptz command to {command} for {camera_name}")
         except KeyError as k:
-            logger.error(f"Invalid PTZ command {payload}: {k}")
+            logger.error(f"Invalid PTZ command {preset}: {k}")
 
     def _on_birdseye_command(self, camera_name: str, payload: str) -> None:
         """Callback for birdseye topic."""

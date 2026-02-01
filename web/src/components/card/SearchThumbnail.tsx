@@ -133,7 +133,11 @@ export default function SearchThumbnail({
                     className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
                     onClick={() => onClick(searchResult, false, true)}
                   >
-                    {getIconForLabel(objectLabel, "size-3 text-white")}
+                    {getIconForLabel(
+                      objectLabel,
+                      searchResult.data.type,
+                      "size-3 text-white",
+                    )}
                     {Math.floor(
                       (searchResult.data.score ??
                         searchResult.data.top_score ??
@@ -150,7 +154,9 @@ export default function SearchThumbnail({
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) => getTranslatedLabel(text))
+                  .map((text) =>
+                    getTranslatedLabel(text, searchResult.data.type),
+                  )
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}

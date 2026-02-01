@@ -42,19 +42,27 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
   const logoutUrl = config?.proxy?.logout_url || `${baseUrl}api/logout`;
 
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
   const Content = isDesktop ? DropdownMenuContent : DrawerContent;
   const MenuItem = isDesktop ? DropdownMenuItem : DrawerClose;
 
-  const handlePasswordSave = async (password: string) => {
+  const handlePasswordSave = async (password: string, oldPassword?: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
+    setIsPasswordLoading(true);
     axios
-      .put(`users/${profile.username}/password`, { password })
+      .put(`users/${profile.username}/password`, {
+        password,
+        old_password: oldPassword,
+      })
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
+          setPasswordError(null);
+          setIsPasswordLoading(false);
           toast.success(t("users.toast.success.updatePassword"), {
             position: "top-center",
           });
@@ -65,14 +73,10 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(
-          t("users.toast.error.setPasswordFailed", {
-            errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
+
+        // Keep dialog open and show error
+        setPasswordError(errorMessage);
+        setIsPasswordLoading(false);
       });
   };
 
@@ -154,8 +158,13 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       <SetPasswordDialog
         show={passwordDialogOpen}
         onSave={handlePasswordSave}
-        onCancel={() => setPasswordDialogOpen(false)}
+        onCancel={() => {
+          setPasswordDialogOpen(false);
+          setPasswordError(null);
+        }}
+        initialError={passwordError}
         username={profile?.username}
+        isLoading={isPasswordLoading}
       />
     </Container>
   );

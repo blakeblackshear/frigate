@@ -33,8 +33,54 @@
         "title": "{{cameraName}} Streaming Postavke",
         "desc": "Promijenite opcije streamanja uživo za nadzornu ploču ove grupe kamera. <em>Ove postavke su specifične za uređaj/preglednik.</em>",
         "audioIsAvailable": "Za ovaj prijenos dostupan je zvuk",
-        "audioIsUnavailable": "Za ovaj prijenos zvuk nije dostupan"
+        "audioIsUnavailable": "Za ovaj prijenos zvuk nije dostupan",
+        "audio": {
+          "tips": {
+            "title": "Audio mora dolaziti s vaše kamere i biti konfiguriran u go2rtc za ovaj prijenos."
+          }
+        },
+        "stream": "Prijenos",
+        "placeholder": "Izaberi prijenos",
+        "streamMethod": {
+          "label": "Metoda Prijenosa",
+          "placeholder": "Odaberi metodu prijenosa",
+          "method": {
+            "noStreaming": {
+              "label": "Nema Prijenosa",
+              "desc": "Slike s kamere bit će ažurirane samo jednom u minuti, a prijenos uživo neće biti dostupan."
+            },
+            "smartStreaming": {
+              "desc": "Pametno emitiranje ažurirat će sliku vaše kamere jednom u minuti kada nema prepoznatljive aktivnosti kako bi uštedjelo propusnost i resurse. Kada se detektira aktivnost, slika će se besprijekorno prebaciti na prijenos uživo.",
+              "label": "Pametno Emitiranje (preporučeno)"
+            },
+            "continuousStreaming": {
+              "label": "Kontinuirano Emitiranje",
+              "desc": {
+                "title": "Slika kamere uvijek će biti prijenos uživo kada je vidljiva na nadzornoj ploči, čak i ako nije detektirana nikakva aktivnost.",
+                "warning": "Neprekidno emitiranje može uzrokovati visok unos propusnosti i probleme s izvedbom. Koristite s oprezom."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Način kompatibilnosti",
+          "desc": "Omogućite ovu opciju samo ako vaš prijenos uživo s kamere prikazuje artefakte boje i ima dijagonalnu liniju na desnoj strani slike."
+        }
       }
     }
+  },
+  "debug": {
+    "options": {
+      "label": "Postavke",
+      "title": "Opcije",
+      "showOptions": "Pokaži Opcije",
+      "hideOptions": "Sakrij Opcije"
+    },
+    "boundingBox": "Granični okvir",
+    "timestamp": "Vremenska oznaka",
+    "zones": "Zone",
+    "mask": "Maska",
+    "motion": "Kretnja",
+    "regions": "Regije"
   }
 }

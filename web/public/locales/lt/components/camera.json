@@ -77,7 +77,7 @@
       "showOptions": "Rodyti Pasirinkimus",
       "hideOptions": "Slėpti Pasirinkimus"
     },
-    "boundingBox": "Ribojantis Kvadratas",
+    "boundingBox": "Apribojantis Stačiakampis",
     "timestamp": "Laiko žymė",
     "zones": "Zonos",
     "mask": "Maskuotė",

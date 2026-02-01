@@ -12,7 +12,7 @@
     "plus": {
       "submitToPlus": {
         "label": "提交至 Frigate+",
-        "desc": "您希望避开的地点中的物体不应被视为误报。若将其作为误报提交，可能会导致AI模型容易混淆相关物体的识别。"
+        "desc": "你不希望检测指定地点中的目标或物体不应被视为误报。若将其作为误报提交，可能会导致 AI 模型容易混淆相关目标或物体的识别。"
       },
       "review": {
         "true": {
@@ -59,12 +59,13 @@
     "export": "导出",
     "selectOrExport": "选择或导出",
     "toast": {
-      "success": "导出成功。进入 /exports 目录查看文件。",
+      "success": "导出成功。进入 导出 页面查看文件。",
       "error": {
         "failed": "导出失败：{{error}}",
         "endTimeMustAfterStartTime": "结束时间必须在开始时间之后",
         "noVaildTimeSelected": "未选择有效的时间范围"
-      }
+      },
+      "view": "查看"
     },
     "fromTimeline": {
       "saveExport": "保存导出",
@@ -114,7 +115,8 @@
     "button": {
       "export": "导出",
       "markAsReviewed": "标记为已核查",
-      "deleteNow": "立即删除"
+      "deleteNow": "立即删除",
+      "markAsUnreviewed": "标记为未核查"
     }
   },
   "imagePicker": {
@@ -122,6 +124,7 @@
     "search": {
       "placeholder": "通过标签或子标签搜索……"
     },
-    "noImages": "未在此摄像头找到缩略图"
+    "noImages": "未在此摄像头找到缩略图",
+    "unknownLabel": "已保存触发的图片"
   }
 }

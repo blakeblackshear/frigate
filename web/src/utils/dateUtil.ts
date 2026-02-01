@@ -1,6 +1,7 @@
 import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
-import { Locale } from "date-fns/locale";
+import { enUS, Locale } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
+import i18n from "@/utils/i18n";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -164,7 +165,7 @@ export const formatUnixTimestampToDateTime = (
       // Uppercase AM/PM for 12-hour formats
       if (date_format.includes("a") || date_format.includes("aaa")) {
         formatted = formatted.replace(/am|pm/gi, (match) =>
-          match.toUpperCase(),
+          i18n.t(`time.${match.toLowerCase()}`, { ns: "common" }).toUpperCase(),
         );
       }
       return formatted;
@@ -216,7 +217,7 @@ export const formatUnixTimestampToDateTime = (
       // Uppercase AM/PM in fallback
       if (options.hour12) {
         fallbackFormatted = fallbackFormatted.replace(/am|pm/gi, (match) =>
-          match.toUpperCase(),
+          i18n.t(`time.${match.toLowerCase()}`, { ns: "common" }).toUpperCase(),
         );
       }
       return fallbackFormatted;
@@ -234,28 +235,57 @@ export const formatUnixTimestampToDateTime = (
  * If end time is not provided, it returns 'In Progress'
  * @param start_time: number - Unix timestamp for start time
  * @param end_time: number|null - Unix timestamp for end time
+ * @param abbreviated: boolean - Whether to use abbreviated forms (h, m, s) instead of full words
  * @returns string - duration or 'In Progress' if end time is not provided
  */
 export const getDurationFromTimestamps = (
   start_time: number,
   end_time: number | null,
+  abbreviated: boolean = false,
 ): string => {
   if (isNaN(start_time)) {
-    return "Invalid start time";
+    return i18n.t("time.invalidStartTime", { ns: "common" });
   }
-  let duration = "In Progress";
+  let duration = i18n.t("time.inProgress", { ns: "common" });
   if (end_time !== null) {
     if (isNaN(end_time)) {
-      return "Invalid end time";
+      return i18n.t("time.invalidEndTime", { ns: "common" });
     }
     const start = fromUnixTime(start_time);
     const end = fromUnixTime(end_time);
-    duration = formatDuration(intervalToDuration({ start, end }), {
-      format: ["hours", "minutes", "seconds"],
-    })
-      .replace("hours", "h")
-      .replace("minutes", "m")
-      .replace("seconds", "s");
+    const durationObj = intervalToDuration({ start, end });
+
+    // Build duration string using i18n keys or abbreviations
+    const parts: string[] = [];
+    if (durationObj.hours) {
+      const count = durationObj.hours;
+      if (abbreviated) {
+        parts.push(`${count}h`);
+      } else {
+        const key = count === 1 ? "hour_one" : "hour_other";
+        parts.push(i18n.t(`time.${key}`, { time: count, ns: "common" }));
+      }
+    }
+    if (durationObj.minutes) {
+      const count = durationObj.minutes;
+      if (abbreviated) {
+        parts.push(`${count}m`);
+      } else {
+        const key = count === 1 ? "minute_one" : "minute_other";
+        parts.push(i18n.t(`time.${key}`, { time: count, ns: "common" }));
+      }
+    }
+    if (durationObj.seconds) {
+      const count = durationObj.seconds;
+      if (abbreviated) {
+        parts.push(`${count}s`);
+      } else {
+        const key = count === 1 ? "second_one" : "second_other";
+        parts.push(i18n.t(`time.${key}`, { time: count, ns: "common" }));
+      }
+    }
+
+    duration = parts.join(" ");
   }
   return duration;
 };
@@ -263,9 +293,13 @@ export const getDurationFromTimestamps = (
 /**
  *
  * @param seconds - number of seconds to convert into hours, minutes and seconds
+ * @param locale - the date-fns locale to use for formatting
  * @returns string - formatted duration in hours, minutes and seconds
  */
-export const formatSecondsToDuration = (seconds: number): string => {
+export const formatSecondsToDuration = (
+  seconds: number,
+  locale?: Locale,
+): string => {
   if (isNaN(seconds) || seconds < 0) {
     return "Invalid duration";
   }
@@ -274,6 +308,7 @@ export const formatSecondsToDuration = (seconds: number): string => {
   return formatDuration(duration, {
     format: ["hours", "minutes", "seconds"],
     delimiter: ", ",
+    locale: locale ?? enUS,
   });
 };
 

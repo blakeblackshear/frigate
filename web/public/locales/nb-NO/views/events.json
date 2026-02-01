@@ -3,7 +3,11 @@
   "empty": {
     "alert": "Det er ingen varsler å inspisere",
     "detection": "Det er ingen deteksjoner å inspisere",
-    "motion": "Ingen bevegelsesdata funnet"
+    "motion": "Ingen bevegelsesdata funnet",
+    "recordingsDisabled": {
+      "title": "Opptak må være aktivert",
+      "description": "Inspeksjonselementer kan kun opprettes for et kamera når opptak er aktivert for det kameraet."
+    }
   },
   "timeline": "Tidslinje",
   "events": {
@@ -23,7 +27,7 @@
   },
   "allCameras": "Alle kameraer",
   "timeline.aria": "Velg tidslinje",
-  "documentTitle": "Inspiser - Frigate",
+  "documentTitle": "Inspeksjon - Frigate",
   "recordings": {
     "documentTitle": "Opptak - Frigate"
   },
@@ -36,5 +40,28 @@
   "selected_other": "{{count}} valgt",
   "detected": "detektert",
   "suspiciousActivity": "Mistenkelig aktivitet",
-  "threateningActivity": "Truende aktivitet"
+  "threateningActivity": "Truende aktivitet",
+  "detail": {
+    "noDataFound": "Ingen detaljer å inspisere",
+    "aria": "Vis/skjul detaljvisning",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objekter",
+    "noObjectDetailData": "Ingen detaljdata for objektet tilgjengelig.",
+    "label": "Detalj",
+    "settings": "Detaljvisning – innstillinger",
+    "alwaysExpandActive": {
+      "desc": "Utvid alltid objektdetaljene for det aktive gjennomgangselementet når tilgjengelig.",
+      "title": "Utvid alltid for aktive"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Sporingspunkt",
+    "clickToSeek": "Klikk for å gå til dette tidspunktet"
+  },
+  "zoomIn": "Zoom inn",
+  "zoomOut": "Zoom ut",
+  "normalActivity": "Normal",
+  "needsReview": "Trenger inspeksjon",
+  "securityConcern": "Sikkerhetsrisiko",
+  "select_all": "Alle"
 }

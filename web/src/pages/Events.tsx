@@ -3,7 +3,7 @@ import useApiFilter from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
@@ -15,6 +15,7 @@ import {
   ReviewSummary,
   SegmentedReviewData,
 } from "@/types/review";
+import { TimelineType } from "@/types/timeline";
 import {
   getBeginningOfDayTimestamp,
   getEndOfDayTimestamp,
@@ -41,13 +42,26 @@ export default function Events() {
     "alert",
   );
 
-  const [showReviewed, setShowReviewed] = usePersistence("showReviewed", false);
+  const [showReviewed, setShowReviewed] = useUserPersistence(
+    "showReviewed",
+    false,
+  );
 
   const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
     "recording",
     undefined,
     false,
   );
+
+  const [notificationTab, setNotificationTab] =
+    useState<TimelineType>("timeline");
+
+  useSearchEffect("tab", (tab: string) => {
+    if (tab === "timeline" || tab === "events" || tab === "detail") {
+      setNotificationTab(tab as TimelineType);
+    }
+    return true;
+  });
 
   useSearchEffect("id", (reviewId: string) => {
     axios
@@ -66,6 +80,7 @@ export default function Events() {
               camera: resp.data.camera,
               startTime,
               severity: resp.data.severity,
+              timelineType: notificationTab,
             },
             true,
           );
@@ -190,7 +205,7 @@ export default function Events() {
       cameras: reviewSearchParams["cameras"],
       labels: reviewSearchParams["labels"],
       zones: reviewSearchParams["zones"],
-      reviewed: 1,
+      reviewed: null, // We want both reviewed and unreviewed items as we filter in the UI
       before: reviewSearchParams["before"] || last24Hours.before,
       after: reviewSearchParams["after"] || last24Hours.after,
     };
@@ -356,16 +371,24 @@ export default function Events() {
       if (itemsToMarkReviewed.length > 0) {
         await axios.post(`reviews/viewed`, {
           ids: itemsToMarkReviewed,
+          reviewed: true,
         });
         reloadData();
+
+        if (reviewSearchParams["after"] != undefined) {
+          updateSegments();
+        }
       }
     },
-    [reloadData, updateSegments],
+    [reloadData, updateSegments, reviewSearchParams],
   );
 
   const markItemAsReviewed = useCallback(
     async (review: ReviewSegment) => {
-      const resp = await axios.post(`reviews/viewed`, { ids: [review.id] });
+      const resp = await axios.post(`reviews/viewed`, {
+        ids: [review.id],
+        reviewed: true,
+      });
 
       if (resp.status == 200) {
         updateSegments(
@@ -480,6 +503,7 @@ export default function Events() {
           timeRange={selectedTimeRange}
           filter={reviewFilter}
           updateFilter={onUpdateFilter}
+          refreshData={reloadData}
         />
       );
     }

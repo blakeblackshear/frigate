@@ -15,7 +15,7 @@
     },
     "maxSize": "Tamanho máximo: {{size}}MB",
     "dropActive": "Solte a imagem aqui…",
-    "dropInstructions": "Arraste e solte uma imagem aqui, ou clique para selecionar"
+    "dropInstructions": "Arraste e solte ou cole uma imagem aqui ou clique para selecionar"
   },
   "deleteFaceLibrary": {
     "title": "Apagar Nome",
@@ -33,7 +33,7 @@
     "new": "Criar Novo Rosto",
     "title": "Criar Coleção",
     "desc": "Criar uma nova coleção",
-    "nextSteps": "Para construir uma base forte:<li> Use a aba Teinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li> Foque em imagens retas para melhores resultados; evite treinar imagens que capturam rostos em um ângulo.</li></ul>"
+    "nextSteps": "Para construir uma base forte:<li> Use a aba Reconhecimentos Recentes para selecionar e treinar em imagens para cada pessoa detectada.</li><li> Foque em imagens retas para melhores resultados; evite treinar imagens que capturam rostos em um ângulo.</li></ul>"
   },
   "deleteFaceAttempts": {
     "title": "Apagar Rostos",
@@ -45,7 +45,7 @@
     "title": "Renomear Rosto",
     "desc": "Entre com o novo nome para {{name}}"
   },
-  "nofaces": "Sem rostos disponíveis",
+  "nofaces": "Nenhum rosto disponível",
   "pixels": "{{area}}px",
   "readTheDocs": "Leia a documentação",
   "steps": {
@@ -58,7 +58,7 @@
   },
   "description": {
     "placeholder": "Informe um nome para esta coleção",
-    "addFace": "Passo a Passo para adicionar uma nova coleção a Biblioteca Facial.",
+    "addFace": "Adicione uma nova coleção à Biblioteca Facial subindo a sua primeira imagem.",
     "invalidName": "Nome inválido. Nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífenes."
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
@@ -68,8 +68,8 @@
   },
   "collections": "Coleções",
   "train": {
-    "title": "Treinar",
-    "aria": "Selecionar treinar",
+    "title": "Reconhecimentos Recentes",
+    "aria": "Selecionar reconhecimentos recentes",
     "empty": "Não há tentativas recentes de reconhecimento facial"
   },
   "selectFace": "Selecionar Rosto",

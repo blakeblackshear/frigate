@@ -28,6 +28,7 @@ from frigate.util.builtin import (
     get_ffmpeg_arg_list,
 )
 from frigate.util.config import (
+    CURRENT_CONFIG_VERSION,
     StreamInfoRetriever,
     convert_area_to_pixels,
     find_config_file,
@@ -76,11 +77,12 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
-DEFAULT_CONFIG = """
+DEFAULT_CONFIG = f"""
 mqtt:
   enabled: False
 
-cameras: {}  # No cameras defined, UI wizard should be used
+cameras: {{}}  # No cameras defined, UI wizard should be used
+version: {CURRENT_CONFIG_VERSION}
 """
 
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
@@ -660,6 +662,13 @@ class FrigateConfig(FrigateBaseModel):
             # generate zone contours
             if len(camera_config.zones) > 0:
                 for zone in camera_config.zones.values():
+                    if zone.filters:
+                        for object_name, filter_config in zone.filters.items():
+                            zone.filters[object_name] = RuntimeFilterConfig(
+                                frame_shape=camera_config.frame_shape,
+                                **filter_config.model_dump(exclude_unset=True),
+                            )
+
                     zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
@@ -753,8 +762,7 @@ class FrigateConfig(FrigateBaseModel):
             if new_config and f.tell() == 0:
                 f.write(DEFAULT_CONFIG)
                 logger.info(
-                    "Created default config file, see the getting started docs \
-                    for configuration https://docs.frigate.video/guides/getting_started"
+                    "Created default config file, see the getting started docs for configuration: https://docs.frigate.video/guides/getting_started"
                 )
 
             f.seek(0)
@@ -792,6 +800,10 @@ class FrigateConfig(FrigateBaseModel):
             # copy over auth and proxy config in case auth needs to be enforced
             safe_config["auth"] = config.get("auth", {})
             safe_config["proxy"] = config.get("proxy", {})
+
+            # copy over database config for auth and so a new db is not created
+            safe_config["database"] = config.get("database", {})
+
             return cls.parse_object(safe_config, **context)
 
         # Validate and return the config dict.

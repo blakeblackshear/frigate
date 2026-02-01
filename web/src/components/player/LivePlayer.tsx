@@ -16,7 +16,6 @@ import {
 } from "@/types/live";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
@@ -25,6 +24,9 @@ import { PlayerStats } from "./PlayerStats";
 import { LuVideoOff } from "react-icons/lu";
 import { Trans, useTranslation } from "react-i18next";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
+import { getTranslatedLabel } from "@/utils/i18n";
+import { formatList } from "@/utils/stringUtil";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -34,6 +36,7 @@ type LivePlayerProps = {
   streamName: string;
   preferredLiveMode: LivePlayerMode;
   showStillWithoutActivity?: boolean;
+  alwaysShowCameraName?: boolean;
   useWebGL: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
@@ -58,6 +61,7 @@ export default function LivePlayer({
   streamName,
   preferredLiveMode,
   showStillWithoutActivity = true,
+  alwaysShowCameraName = false,
   useWebGL = false,
   windowVisible = true,
   playAudio = false,
@@ -328,10 +332,10 @@ export default function LivePlayer({
     >
       {cameraEnabled &&
         ((showStillWithoutActivity && !liveReady) || liveReady) && (
-          <>
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
-          </>
+          <ImageShadowOverlay
+            upperClassName="md:rounded-2xl"
+            lowerClassName="md:rounded-2xl"
+          />
         )}
       {player}
       {cameraEnabled &&
@@ -355,7 +359,11 @@ export default function LivePlayer({
                         ]),
                       ]
                         .map((label) => {
-                          return getIconForLabel(label, "size-3 text-white");
+                          return getIconForLabel(
+                            label,
+                            "object",
+                            "size-3 text-white",
+                          );
                         })
                         .sort()}
                     </Chip>
@@ -364,20 +372,22 @@ export default function LivePlayer({
               </div>
               <TooltipPortal>
                 <TooltipContent className="smart-capitalize">
-                  {[
-                    ...new Set([
-                      ...(objects || []).map(({ label, sub_label }) =>
-                        label.endsWith("verified")
-                          ? sub_label
-                          : label.replaceAll("_", " "),
-                      ),
-                    ]),
-                  ]
-                    .filter((label) => label?.includes("-verified") == false)
-                    .map((label) => capitalizeFirstLetter(label))
-                    .sort()
-                    .join(", ")
-                    .replaceAll("-verified", "")}
+                  {formatList(
+                    [
+                      ...new Set([
+                        ...(objects || []).map(({ label, sub_label }) =>
+                          label.endsWith("verified")
+                            ? sub_label
+                            : label.replaceAll("_", " "),
+                        ),
+                      ]),
+                    ]
+                      .filter((label) => label?.includes("-verified") == false)
+                      .map((label) =>
+                        getTranslatedLabel(label.replace("-verified", "")),
+                      )
+                      .sort(),
+                  )}
                 </TooltipContent>
               </TooltipPortal>
             </Tooltip>
@@ -435,20 +445,22 @@ export default function LivePlayer({
         </div>
       )}
 
-      <div className="absolute right-2 top-2">
-        {autoLive &&
-          !offline &&
-          activeMotion &&
-          ((showStillWithoutActivity && !liveReady) || liveReady) && (
-            <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
-          )}
-        {((offline && showStillWithoutActivity) || !cameraEnabled) && (
+      <div className="absolute right-2 top-2 flex items-center gap-3">
+        {(alwaysShowCameraName ||
+          (offline && showStillWithoutActivity) ||
+          !cameraEnabled) && (
           <Chip
             className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
           >
             {cameraName}
           </Chip>
         )}
+        {autoLive &&
+          !offline &&
+          activeMotion &&
+          ((showStillWithoutActivity && !liveReady) || liveReady) && (
+            <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
+          )}
       </div>
       {showStats && (
         <PlayerStats stats={stats} minimal={cameraRef !== undefined} />

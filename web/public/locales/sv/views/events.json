@@ -9,7 +9,11 @@
   "empty": {
     "alert": "Det finns inga varningar att granska",
     "detection": "Det finns inga detekteringar att granska",
-    "motion": "Ingen rörelsedata hittad"
+    "motion": "Ingen rörelsedata hittad",
+    "recordingsDisabled": {
+      "title": "Inspelningar måste vara aktiverat",
+      "description": "Granskningsobjekt kan bara skapas för en kamera när inspelningar är aktiverat för den kameran."
+    }
   },
   "documentTitle": "Granska - Frigate",
   "timeline": "Tidslinje",
@@ -36,5 +40,28 @@
   "selected_one": "{{count}} valda",
   "selected_other": "{{count}} valda",
   "suspiciousActivity": "Misstänkt aktivitet",
-  "threateningActivity": "Hotande aktivitet"
+  "threateningActivity": "Hotande aktivitet",
+  "detail": {
+    "noDataFound": "Inga detaljerade data att granska",
+    "aria": "Växla detaljvy",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objekt",
+    "noObjectDetailData": "Inga objektdetaljdata tillgängliga.",
+    "label": "Detalj",
+    "settings": "Detaljvy inställningar",
+    "alwaysExpandActive": {
+      "title": "Expandera alltid aktivt",
+      "desc": "Expandera alltid objektinformationen för det aktiva granskningsobjektet när den är tillgänglig."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Spårad punkt",
+    "clickToSeek": "Klicka för att söka till den här tiden"
+  },
+  "zoomIn": "Zooma in",
+  "zoomOut": "Zooma ut",
+  "normalActivity": "Normal",
+  "needsReview": "Behöver granskas",
+  "securityConcern": "Säkerhetsproblem",
+  "select_all": "Alla"
 }

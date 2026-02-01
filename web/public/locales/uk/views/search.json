@@ -34,7 +34,8 @@
       "max_speed": "Максимальна швидкість",
       "recognized_license_plate": "Розпізнаний номерний знак",
       "has_clip": "Має клiп",
-      "has_snapshot": "Має знiмок"
+      "has_snapshot": "Має знiмок",
+      "attributes": "Атрибути"
     },
     "searchType": {
       "thumbnail": "Мініатюра",

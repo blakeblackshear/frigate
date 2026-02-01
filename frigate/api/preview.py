@@ -5,10 +5,14 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import pytz
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
-from frigate.api.auth import require_camera_access
+from frigate.api.auth import (
+    allow_any_authenticated,
+    get_allowed_cameras_for_filter,
+    require_camera_access,
+)
 from frigate.api.defs.response.preview_response import (
     PreviewFramesResponse,
     PreviewsResponse,
@@ -26,19 +30,32 @@ router = APIRouter(tags=[Tags.preview])
 @router.get(
     "/preview/{camera_name}/start/{start_ts}/end/{end_ts}",
     response_model=PreviewsResponse,
-    dependencies=[Depends(require_camera_access)],
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get preview clips for time range",
     description="""Gets all preview clips for a specified camera and time range.
     Returns a list of preview video clips that overlap with the requested time period,
     ordered by start time. Use camera_name='all' to get previews from all cameras.
     Returns an error if no previews are found.""",
 )
-def preview_ts(camera_name: str, start_ts: float, end_ts: float):
+def preview_ts(
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get all mp4 previews relevant for time period."""
     if camera_name != "all":
-        camera_clause = Previews.camera == camera_name
+        if camera_name not in allowed_cameras:
+            raise HTTPException(status_code=403, detail="Access denied for camera")
+        camera_list = [camera_name]
     else:
-        camera_clause = True
+        camera_list = allowed_cameras
+
+    if not camera_list:
+        return JSONResponse(
+            content={"success": False, "message": "No previews found."},
+            status_code=404,
+        )
 
     previews = (
         Previews.select(
@@ -53,7 +70,7 @@ def preview_ts(camera_name: str, start_ts: float, end_ts: float):
             | Previews.end_time.between(start_ts, end_ts)
             | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
         )
-        .where(camera_clause)
+        .where(Previews.camera << camera_list)
         .order_by(Previews.start_time.asc())
         .dicts()
         .iterator()
@@ -88,14 +105,21 @@ def preview_ts(camera_name: str, start_ts: float, end_ts: float):
 @router.get(
     "/preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
     response_model=PreviewsResponse,
-    dependencies=[Depends(require_camera_access)],
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get preview clips for specific hour",
     description="""Gets all preview clips for a specific hour in a given timezone.
     Converts the provided date/time from the specified timezone to UTC and retrieves
     all preview clips for that hour. Use camera_name='all' to get previews from all cameras.
     The tz_name should be a timezone like 'America/New_York' (use commas instead of slashes).""",
 )
-def preview_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
+def preview_hour(
+    year_month: str,
+    day: int,
+    hour: int,
+    camera_name: str,
+    tz_name: str,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get all mp4 previews relevant for time period given the timezone"""
     parts = year_month.split("-")
     start_date = (
@@ -106,7 +130,7 @@ def preview_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
 
-    return preview_ts(camera_name, start_ts, end_ts)
+    return preview_ts(camera_name, start_ts, end_ts, allowed_cameras)
 
 
 @router.get(

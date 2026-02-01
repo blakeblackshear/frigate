@@ -1,9 +1,9 @@
 {
   "selectItem": "Wybierz {{item}}",
   "description": {
-    "addFace": "Poznaj proces dodawania nowej kolekcji do biblioteki twarzy.",
+    "addFace": "Dodaj nową kolekcję do biblioteki twarzy, przesyłając swoje pierwsze zdjęcie.",
     "placeholder": "Wprowadź nazwę tej kolekcji",
-    "invalidName": "Nieprawidłowa nazwa. Nazwy mogą zawierać tylko litery, cyfry, spacje, apostrofy, podkreślenia oraz myślniki."
+    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki."
   },
   "details": {
     "person": "Osoba",
@@ -24,12 +24,13 @@
     "title": "Utwórz kolekcję",
     "desc": "Utwórz nową kolekcję",
     "new": "Utwórz nową twarz",
-    "nextSteps": "Aby zbudować solidną podstawę: <li>Użyj zakładki Trenuj, aby wybrać i trenować na obrazach dla każdej wykrytej osoby.</li><li>Skup się na zdjęciach twarzy na wprost dla najlepszych wyników; unikaj trenowania na zdjęciach, które pokazują twarze pod kątem.</li></ul>"
+    "nextSteps": "Aby zbudować solidną podstawę: <li>Użyj zakładki Ostatnie rozpoznania, aby wybrać i trenować na obrazach dla każdej wykrytej osoby.</li><li>Skup się na zdjęciach twarzy na wprost dla najlepszych wyników; unikaj trenowania na zdjęciach, które pokazują twarze pod kątem.</li></ul>"
   },
   "train": {
-    "aria": "Wybierz trenowanie",
-    "title": "Trenuj",
-    "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy"
+    "aria": "Wybierz ostatnio rozpoznane",
+    "title": "Ostatnie rozpoznania",
+    "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy",
+    "titleShort": "Ostatnie"
   },
   "selectFace": "Wybierz twarz",
   "deleteFaceLibrary": {
@@ -63,7 +64,7 @@
       "uploadedImage": "Pomyślnie wgrano obraz.",
       "addFaceLibrary": "{{name}} został pomyślnie dodany do Biblioteki Twarzy!",
       "trainedFace": "Pomyślnie wytrenowano twarz.",
-      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy.",
+      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy do {{name}} {{score}}.",
       "renamedFace": "Pomyślnie zmieniono nazwę twarzy na {{name}}"
     },
     "error": {

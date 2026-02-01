@@ -8,9 +8,11 @@
     "masksAndZones": "Editor masky a zón - Frigate",
     "motionTuner": "Ladění detekce pohybu - Frigate",
     "object": "Ladění - Frigate",
-    "general": "Obecné nastavení - Frigate",
+    "general": "Nastavení rozhraní - Frigate",
     "frigatePlus": "Frigate+ nastavení - Frigate",
-    "enrichments": "Nastavení obohacení - Frigate"
+    "enrichments": "Nastavení obohacení - Frigate",
+    "cameraManagement": "Správa kamer - Frigate",
+    "cameraReview": "Nastavení kontroly kamery - Frigate"
   },
   "frigatePlus": {
     "toast": {
@@ -304,7 +306,10 @@
     "notifications": "Notifikace",
     "frigateplus": "Frigate+",
     "enrichments": "Obohacení",
-    "triggers": "Spouštěče"
+    "triggers": "Spouštěče",
+    "cameraManagement": "Správa",
+    "cameraReview": "Kontrola",
+    "roles": "Role"
   },
   "dialog": {
     "unsavedChanges": {
@@ -845,7 +850,9 @@
         "createRole": "Role {{role}} byla úspěšně vytvořena",
         "updateCameras": "Kamery byly aktualizovány pro roli {{role}}",
         "deleteRole": "Role {{role}} byla úspěšně smazána",
-        "userRolesUpdated": "{{count}} uživatel(ů) přiřazených k této roli bylo aktualizováno na „Divák“, který má přístup ke všem kamerám."
+        "userRolesUpdated_one": "{{count}} uživatel(ů) přiřazených k této roli bylo aktualizováno na „Divák“, který má přístup ke všem kamerám.",
+        "userRolesUpdated_few": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Nepodařilo se vytvořit roli: {{errorMessage}}",

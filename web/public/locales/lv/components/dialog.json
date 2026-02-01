@@ -1,0 +1,123 @@
+{
+  "restart": {
+    "title": "Vai esi pārliecināts, ka vēlies pārstartēt Frigati?",
+    "button": "Pārstartēt",
+    "restarting": {
+      "title": "Frigate tiek pārstartēta",
+      "content": "Šī lapa tiks atkārtoti ielādēta pēc {{countdown}} sekundēm.",
+      "button": "Atjaunot tagad"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Sūtīt uz Frigate+",
+        "desc": "Objekti vietās, no kurām vēlaties izvairīties, nav kļūdaini pozitīvi. To iesniegšana kā kļūdaini pozitīvi radīs modelim neskaidrības."
+      },
+      "review": {
+        "question": {
+          "label": "Apstipriniet šo tagu pakalpojumam Frigate Plus",
+          "ask_a": "Vai šis objekts<code>{{label}}</code>?",
+          "ask_an": "Vai šis objekts ir<code>{{label}}</code>?",
+          "ask_full": "Vai šis objekts<code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Iesniegts"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Skatīt vēsturē"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Izvēlieties no laika skalas",
+      "lastHour_zero": "Pēdējās stundas",
+      "lastHour_one": "Pēdējās{{count}}stundas",
+      "lastHour_other": "Pēdējās {{count}} stundas",
+      "custom": "Pielāgots",
+      "start": {
+        "title": "Sākuma laiks",
+        "label": "Izvēlieties Sākuma laiks"
+      },
+      "end": {
+        "title": "Beigu laiks",
+        "label": "Atlasiet Beigu laiks"
+      }
+    },
+    "name": {
+      "placeholder": "Ievadiet eksporta nosaukumu"
+    },
+    "select": "Izvēlieties",
+    "export": "Eksportēt",
+    "selectOrExport": "Atlasīt vai Eksportēt",
+    "toast": {
+      "success": "Eksportēšana veiksmīgi sākta. Skatiet failu eksportēšanas lapā.",
+      "view": "Skatīt",
+      "error": {
+        "failed": "Neizdevās sākt eksportēšanu: {{error}}",
+        "endTimeMustAfterStartTime": "Beigu laikam ir jābūt pēc sākuma laika",
+        "noVaildTimeSelected": "Nav izvēlēts derīgs laika diapazons"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Saglabāt Eksportu",
+      "previewExport": "Priekšskatīt Eksportu"
+    }
+  },
+  "streaming": {
+    "label": "Straume",
+    "restreaming": {
+      "disabled": "Šai kamerai nav iespējota atkārtota straumēšana.",
+      "desc": {
+        "title": "Konfigurējiet go2rtc, lai šai kamerai varētu piekļūt papildu tiešraides skatīšanās un audio opcijām."
+      }
+    },
+    "showStats": {
+      "label": "Rādīt straumes statistiku",
+      "desc": "Iespējojiet šo opciju, lai straumes statistika tiktu rādīta kā pārklājums kameras attēlam."
+    },
+    "debugView": "Atkļūdošanas režīms"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Saglabāt meklēšanu",
+      "desc": "Norādiet šīs saglabātās meklēšanas nosaukumu.",
+      "placeholder": "Ievadiet meklēšanas nosaukumu",
+      "overwrite": "{{searchName}} jau pastāv. Saglabājot, esošā vērtība tiks pārrakstīta.",
+      "success": "Meklēšanas ({{searchName}}) ir saglabāts.",
+      "button": {
+        "save": {
+          "label": "Saglabāt šo meklēšanu"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Apstipriniet dzēšanu",
+      "desc": {
+        "selected": "Vai tiešām vēlaties dzēst visus ierakstītos video, kas saistīti ar šo pārskata vienumu?<br /><br />Turiet nospiestu taustiņu <em>Shift</em>, lai turpmāk apietu šo dialoglodziņu."
+      },
+      "toast": {
+        "success": "Ar atlasītajiem pārskata vienumiem saistītais videoieraksts ir veiksmīgi izdzēsts.",
+        "error": "Neizdevās dzēst: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Eksportēt",
+      "markAsReviewed": "Atzīmēt kā skatītu",
+      "markAsUnreviewed": "Atzīmēt kā neskatītu",
+      "deleteNow": "Dzēst tūlīt"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Izsekojamā objekta sīktēla atlasīšana",
+    "unknownLabel": "Saglabāts sprūda attēls",
+    "search": {
+      "placeholder": "Meklēt pēc etiķetes vai apakšetiķetes..."
+    },
+    "noImages": "Šai kamerai nav atrasti sīktēli"
+  }
+}

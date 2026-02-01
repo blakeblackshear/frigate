@@ -11,6 +11,12 @@ Cameras configured to output H.264 video and AAC audio will offer the most compa
 
 - **Stream Viewing**: This stream will be rebroadcast as is to Home Assistant for viewing with the stream component. Setting this resolution too high will use significant bandwidth when viewing streams in Home Assistant, and they may not load reliably over slower connections.
 
+:::tip
+
+For the best experience in Frigate's UI, configure your camera so that the detection and recording streams use the same aspect ratio. For example, if your main stream is 3840x2160 (16:9), set your substream to 640x360 (also 16:9) instead of 640x480 (4:3). While not strictly required, matching aspect ratios helps ensure seamless live stream display and preview/recordings playback.
+
+:::
+
 ### Choosing a detect resolution
 
 The ideal resolution for detection is one where the objects you want to detect fit inside the dimensions of the model used by Frigate (320x320). Frigate does not pass the entire camera frame to object detection. It will crop an area of motion from the full frame and look in that portion of the frame. If the area being inspected is larger than 320x320, Frigate must resize it before running object detection. Higher resolutions do not improve the detection accuracy because the additional detail is lost in the resize. Below you can see a reference for how large a 320x320 area is against common resolutions.

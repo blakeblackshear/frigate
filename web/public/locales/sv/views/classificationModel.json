@@ -1,0 +1,188 @@
+{
+  "documentTitle": "Klassificeringsmodeller - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "Ta bort klassificeringsbilder",
+    "renameCategory": "Byt namn på klass",
+    "deleteCategory": "Ta bort klass",
+    "deleteImages": "Ta bort bilder",
+    "trainModel": "Träna modellen",
+    "addClassification": "Lägg till klassificering",
+    "deleteModels": "Ta bort modeller",
+    "editModel": "Redigera modell"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Borttagen klass",
+      "deletedImage": "Raderade bilder",
+      "categorizedImage": "Lyckades klassificera bilden",
+      "trainedModel": "Modellen har tränats.",
+      "trainingModel": "Modellträning har startat.",
+      "deletedModel_one": "{{count}} modell har raderats",
+      "deletedModel_other": "{{count}} modeller har raderats",
+      "updatedModel": "Uppdaterade modellkonfiguration",
+      "renamedCategory": "Klassen har bytt namn till {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Misslyckades med att ta bort: {{errorMessage}}",
+      "deleteCategoryFailed": "Misslyckades med att ta bort klassen: {{errorMessage}}",
+      "categorizeFailed": "Misslyckades med att kategorisera bilden: {{errorMessage}}",
+      "trainingFailed": "Modellträningen misslyckades. Kontrollera Frigate loggarna för mer information.",
+      "deleteModelFailed": "Misslyckades med att ta bort modellen: {{errorMessage}}",
+      "updateModelFailed": "Misslyckades med att uppdatera modell: {{errorMessage}}",
+      "trainingFailedToStart": "Misslyckades med att starta modellträning: {{errorMessage}}",
+      "renameCategoryFailed": "Misslyckades med att byta namn på klassen: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Ta bort klass",
+    "desc": "Är du säker på att du vill ta bort klassen {{name}}? Detta kommer att ta bort alla associerade bilder permanent och kräva att modellen tränas om.",
+    "minClassesTitle": "Kan inte ta bort klassen",
+    "minClassesDesc": "En klassificeringsmodell måste ha minst två klasser. Lägg till ytterligare en klass innan du tar bort den här."
+  },
+  "deleteDatasetImages": {
+    "title": "Ta bort datamängdsbilder",
+    "desc_one": "Är du säker på att du vill ta bort {{count}} bild från {{dataset}}? Den här åtgärden kan inte ångras och kräver att modellen tränas om.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} bilder från {{dataset}}? Den här åtgärden kan inte ångras och kräver att modellen tränas om."
+  },
+  "deleteTrainImages": {
+    "title": "Ta bort tränade bilder",
+    "desc_one": "Är du säker på att du vill ta bort {{count}} bild? Den här åtgärden kan inte ångras.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} bilder? Den här åtgärden kan inte ångras."
+  },
+  "renameCategory": {
+    "title": "Byt namn på klass",
+    "desc": "Ange ett nytt namn för {{name}}. Du måste träna om modellen för att namnändringen ska träda i kraft."
+  },
+  "description": {
+    "invalidName": "Ogiltigt namn. Namn får endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck."
+  },
+  "train": {
+    "title": "Nyligen tillagd klassificeringar",
+    "aria": "Välj senaste klassificeringar",
+    "titleShort": "Ny"
+  },
+  "categories": "Klasser",
+  "createCategory": {
+    "new": "Skapa ny klass"
+  },
+  "categorizeImageAs": "Klassificera bilden som:",
+  "categorizeImage": "Klassificera bild",
+  "noModels": {
+    "object": {
+      "title": "Inga objektklassificeringsmodeller",
+      "description": "Skapa en anpassad modell för att klassificera detekterade objekt.",
+      "buttonText": "Skapa objektmodell"
+    },
+    "state": {
+      "title": "Inga tillstånd klassificeringsmodeller",
+      "description": "Skapa en anpassad modell för att övervaka och klassificera tillståndsförändringar i specifika kameraområden.",
+      "buttonText": "Skapa en tillståndsmodell"
+    }
+  },
+  "wizard": {
+    "title": "Skapa ny klassificering",
+    "steps": {
+      "nameAndDefine": "Namnge och definiera",
+      "stateArea": "Stat område",
+      "chooseExamples": "Välj exempel"
+    },
+    "step1": {
+      "description": "Tillståndsmodeller övervakar fasta kameraområden för förändringar (t.ex. dörr öppen/stängd). Objektmodeller lägger till klassificeringar till detekterade objekt (t.ex. kända djur, leveranspersoner etc.).",
+      "name": "Namn",
+      "namePlaceholder": "Ange modellnamn...",
+      "type": "Typ",
+      "typeState": "Tillståndet",
+      "typeObject": "Objekt",
+      "objectLabel": "Objektetikett",
+      "objectLabelPlaceholder": "Välj objekttyp...",
+      "classificationType": "Klassificeringstyp",
+      "classificationTypeTip": "Lär dig mer om klassificeringstyper",
+      "classificationTypeDesc": "Underetiketter lägger till ytterligare text till objektetiketten (t.ex. 'Person: UPS'). Attribut är sökbara metadata som lagras separat i objektmetadata.",
+      "classificationSubLabel": "Underetikett",
+      "classificationAttribute": "Attribut",
+      "classes": "Klasser",
+      "states": "Tillstånd",
+      "classesTip": "Lär dig mer om klasser",
+      "classesStateDesc": "Definiera de olika tillstånd som ditt kameraområde kan vara i. Till exempel: \"öppen\" och \"stängd\" för en garageport.",
+      "classesObjectDesc": "Definiera de olika kategorierna som detekterade objekt ska klassificeras i. Till exempel: 'leveransperson', 'boende', 'främling' för personklassificering.",
+      "classPlaceholder": "Ange klassnamn...",
+      "errors": {
+        "nameRequired": "Modellnamn krävs",
+        "nameLength": "Modellnamnet måste vara högst 64 tecken långt",
+        "nameOnlyNumbers": "Modellnamnet får inte bara innehålla siffror",
+        "classRequired": "Minst 1 klass krävs",
+        "classesUnique": "Klassnamn måste vara unika",
+        "stateRequiresTwoClasses": "Tillståndsmodeller kräver minst två klasser",
+        "objectLabelRequired": "Välj en objektetikett",
+        "objectTypeRequired": "Vänligen välj en klassificeringstyp",
+        "noneNotAllowed": "Klassen 'none' är inte tillåten"
+      }
+    },
+    "step2": {
+      "description": "Välj kameror och definiera området som ska övervakas för varje kamera. Modellen kommer att klassificera tillståndet för dessa områden.",
+      "cameras": "Kameror",
+      "selectCamera": "Välj kamera",
+      "noCameras": "Klicka på + för att lägga till kameror",
+      "selectCameraPrompt": "Välj en kamera från listan för att definiera dess övervakningsområde"
+    },
+    "step3": {
+      "selectImagesPrompt": "Markera alla bilder med: {{className}}",
+      "selectImagesDescription": "Klicka på bilderna för att välja dem. Klicka på Fortsätt när du är klar med den här klass.",
+      "generating": {
+        "title": "Generera exempelbilder",
+        "description": "Frigate hämtar representativa bilder från dina inspelningar. Det kan ta en stund..."
+      },
+      "training": {
+        "title": "Träningsmodell",
+        "description": "Din modell tränas i bakgrunden. Stäng den här dialogrutan så börjar modellen köras så snart träningen är klar."
+      },
+      "retryGenerate": "Försök att generera igen",
+      "noImages": "Inga exempelbilder genererade",
+      "classifying": "Klassificering & Träning...",
+      "trainingStarted": "Träningen har börjat",
+      "errors": {
+        "noCameras": "Inga kameror konfigurerade",
+        "noObjectLabel": "Ingen objektetikett vald",
+        "generateFailed": "Misslyckades med att generera exempel: {{error}}",
+        "generationFailed": "Genereringen misslyckades. Försök igen.",
+        "classifyFailed": "Misslyckades med att klassificera bilder: {{error}}"
+      },
+      "generateSuccess": "Exempelbilder har genererats",
+      "allImagesRequired_one": "Vänligen klassificera alla bilder. {{count}} bild återstår.",
+      "allImagesRequired_other": "Vänligen klassificera alla bilder. {{count}} bilder återstår.",
+      "modelCreated": "Modellen har skapats. Använd vyn Senaste klassificeringar för att lägga till bilder för saknade tillstånd och träna sedan modellen.",
+      "missingStatesWarning": {
+        "title": "Exempel på saknade tillstånd",
+        "description": "Det rekommenderas att välja exempel för alla tillstånd för bästa resultat. Du kan fortsätta utan att välja alla tillstånd, men modellen kommer inte att tränas förrän alla tillstånd har bilder. När du har fortsatt använder du vyn Senaste klassificeringar för att klassificera bilder för de saknade tillstånden och tränar sedan modellen."
+      }
+    }
+  },
+  "deleteModel": {
+    "title": "Ta bort klassificeringsmodell",
+    "single": "Är du säker på att du vill ta bort {{name}}? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras.",
+    "desc_one": "Är du säker på att du vill ta bort {{count}} modell? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} modeller? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras."
+  },
+  "menu": {
+    "objects": "Objekt",
+    "states": "Tillstånd"
+  },
+  "details": {
+    "scoreInfo": "Poängen representerar den genomsnittliga klassificeringssäkerheten för alla upptäckter av detta objekt.",
+    "none": "Ingen",
+    "unknown": "Okänd"
+  },
+  "edit": {
+    "title": "Redigera klassificeringsmodell",
+    "descriptionState": "Redigera klasserna för denna tillståndsklassificeringsmodell. Ändringar kräver omträning av modellen.",
+    "descriptionObject": "Redigera objekttyp och klassificeringstyp för denna objektklassificeringsmodell.",
+    "stateClassesInfo": "Observera: För att ändra tillståndsklasser måste modellen omtränas med de uppdaterade klasserna."
+  },
+  "tooltip": {
+    "trainingInProgress": "Modellen tränar för närvarande",
+    "noNewImages": "Inga nya bilder att träna. Klassificera fler bilder i datasetet först.",
+    "noChanges": "Inga ändringar i datamängden sedan senaste träningen.",
+    "modelNotReady": "Modellen är inte redo för träning"
+  },
+  "none": "Ingen"
+}

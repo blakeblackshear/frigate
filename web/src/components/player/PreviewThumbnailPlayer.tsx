@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
-import { ReviewSegment } from "@/types/review";
+import {
+  ReviewSegment,
+  ThreatLevel,
+  THREAT_LEVEL_LABELS,
+} from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
@@ -16,7 +20,6 @@ import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { TimeRange } from "@/types/timeline";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
@@ -24,6 +27,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useTranslation } from "react-i18next";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { MdOutlinePersonSearch } from "react-icons/md";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -44,7 +48,7 @@ export default function PreviewThumbnailPlayer({
   onClick,
   onTimeUpdate,
 }: PreviewPlayerProps) {
-  const { t } = useTranslation(["components/player"]);
+  const { t } = useTranslation(["components/player", "views/events"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -258,10 +262,18 @@ export default function PreviewThumbnailPlayer({
                         onClick={() => onClick(review, false, true)}
                       >
                         {review.data.objects.sort().map((object) => {
-                          return getIconForLabel(object, "size-3 text-white");
+                          return getIconForLabel(
+                            object,
+                            "object",
+                            "size-3 text-white",
+                          );
                         })}
                         {review.data.audio.map((audio) => {
-                          return getIconForLabel(audio, "size-3 text-white");
+                          return getIconForLabel(
+                            audio,
+                            "audio",
+                            "size-3 text-white",
+                          );
                         })}
                       </Chip>
                     </>
@@ -270,20 +282,22 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="smart-capitalize">
-              {[
-                ...new Set([
-                  ...(review.data.objects || []),
-                  ...(review.data.sub_labels || []),
-                  ...(review.data.audio || []),
-                ]),
-              ]
-                .filter(
-                  (item) => item !== undefined && !item.includes("-verified"),
-                )
-                .map((text) => capitalizeFirstLetter(text))
-                .sort()
-                .join(", ")
-                .replaceAll("-verified", "")}
+              {review.data.metadata
+                ? review.data.metadata.title
+                : [
+                    ...new Set([
+                      ...(review.data.objects || []),
+                      ...(review.data.sub_labels || []),
+                      ...(review.data.audio || []),
+                    ]),
+                  ]
+                    .filter(
+                      (item) =>
+                        item !== undefined && !item.includes("-verified"),
+                    )
+                    .map((text) => getTranslatedLabel(text))
+                    .sort()
+                    .join(", ")}
             </TooltipContent>
           </Tooltip>
           {!!(
@@ -317,11 +331,23 @@ export default function PreviewThumbnailPlayer({
                 </TooltipTrigger>
               </div>
               <TooltipContent className="smart-capitalize">
-                {review.data.metadata.potential_threat_level == 1 ? (
-                  <>{t("suspiciousActivity", { ns: "views/events" })}</>
-                ) : (
-                  <>{t("threateningActivity", { ns: "views/events" })}</>
-                )}
+                {(() => {
+                  const threatLevel =
+                    review.data.metadata.potential_threat_level ?? 0;
+                  switch (threatLevel) {
+                    case ThreatLevel.NEEDS_REVIEW:
+                      return t("needsReview", { ns: "views/events" });
+                    case ThreatLevel.SECURITY_CONCERN:
+                      return t("securityConcern", { ns: "views/events" });
+                    default:
+                      return (
+                        THREAT_LEVEL_LABELS[threatLevel as ThreatLevel] ||
+                        t("details.unknown", {
+                          ns: "views/classificationModel",
+                        })
+                      );
+                  }
+                })()}
               </TooltipContent>
             </Tooltip>
           )}

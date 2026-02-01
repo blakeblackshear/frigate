@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Hetkel ei leidu ühtegi salvestust",
+  "noPreviewFound": "Eelvaadet ei leidu",
+  "noPreviewFoundFor": "{{cameraName}} kaamera eelvaadet ei leidu",
+  "submitFrigatePlus": {
+    "submit": "Saada",
+    "title": "Kas saadad selle kaadri Frigate+ teenusesse?"
+  },
+  "cameraDisabled": "Kaamera on kasutuselt eemaldatud",
+  "stats": {
+    "streamType": {
+      "title": "Voogedastuse tüüp:",
+      "short": "Tüüp"
+    },
+    "bandwidth": {
+      "title": "Ribalaius:",
+      "short": "Ribalaius"
+    },
+    "latency": {
+      "title": "Latentsus:",
+      "value": "{{seconds}} sekundit",
+      "short": {
+        "title": "Latentsus",
+        "value": "{{seconds}} sek"
+      }
+    },
+    "totalFrames": "Kaadreid kokku:",
+    "droppedFrames": {
+      "title": "Vahelejäänud kaadreid:",
+      "short": {
+        "title": "Vahelejäänud",
+        "value": "{{droppedFrames}} kaadrit"
+      }
+    },
+    "decodedFrames": "Dekodeeritud kaadreid:",
+    "droppedFrameRate": "Vahelejäänud kaadrite sagedus:"
+  },
+  "livePlayerRequiredIOSVersion": "Selle voogedastuse tüübi jaoks on vajalik iOS-i versioon 17.1 või uuem.",
+  "streamOffline": {
+    "title": "Voogedastus ei toimi",
+    "desc": "„{{cameraName}}“ <code>detect</code>-tüüpi voogedastusest pole tulnud ühtegi kaadrit. Täpsemat teavet leiad vealogidest"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Kaadri saatmine Frigate+ teenusesse õnnestus"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Kaadri saatmine Frigate+ teenusesse ei õnnestunud"
+    }
+  }
+}

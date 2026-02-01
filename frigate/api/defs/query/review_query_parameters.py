@@ -10,7 +10,7 @@ class ReviewQueryParams(BaseModel):
     cameras: str = "all"
     labels: str = "all"
     zones: str = "all"
-    reviewed: int = 0
+    reviewed: Union[int, SkipJsonSchema[None]] = None
     limit: Union[int, SkipJsonSchema[None]] = None
     severity: Union[SeverityEnum, SkipJsonSchema[None]] = None
     before: Union[float, SkipJsonSchema[None]] = None

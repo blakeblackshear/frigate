@@ -51,12 +51,13 @@
     "export": "匯出",
     "selectOrExport": "選擇或匯出",
     "toast": {
-      "success": "成功開始匯出。請至 /exports 資料夾查看匯出資料。",
+      "success": "成功開始匯出。至 /exports 頁查看匯出資料。",
       "error": {
         "failed": "匯出失敗：{{error}}",
         "endTimeMustAfterStartTime": "結束時間必須要在開始時間之後",
         "noVaildTimeSelected": "沒有選取有效的時間範圍"
-      }
+      },
+      "view": "查看"
     },
     "fromTimeline": {
       "saveExport": "保存匯出資料",
@@ -80,7 +81,7 @@
   },
   "search": {
     "saveSearch": {
-      "label": "保存搜尋",
+      "label": "儲存搜尋",
       "desc": "替此保存的搜尋命名。",
       "placeholder": "請輸入搜尋的名稱",
       "overwrite": "{{searchName}} 已存在。保存將會覆蓋現有資料。",
@@ -106,7 +107,16 @@
     "button": {
       "export": "匯出",
       "markAsReviewed": "標記為已審核",
-      "deleteNow": "立即刪除"
+      "deleteNow": "立即刪除",
+      "markAsUnreviewed": "標記為未審核"
     }
+  },
+  "imagePicker": {
+    "selectImage": "選取追蹤物件預覽圖",
+    "unknownLabel": "已儲存觸發圖片",
+    "search": {
+      "placeholder": "以標籤或子標籤搜尋..."
+    },
+    "noImages": "未找到此攝影機的縮圖"
   }
 }

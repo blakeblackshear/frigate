@@ -22,6 +22,7 @@ autotrack
 autotracked
 autotracker
 autotracking
+backchannel
 balena
 Beelink
 BGRA
@@ -191,6 +192,7 @@ ONVIF
 openai
 opencv
 openvino
+overfitting
 OWASP
 paddleocr
 paho

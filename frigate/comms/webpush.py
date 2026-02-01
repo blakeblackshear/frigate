@@ -21,7 +21,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.const import CONFIG_DIR
+from frigate.const import BASE_DIR, CONFIG_DIR
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
@@ -371,14 +371,39 @@ class WebPushClient(Communicator):
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
+        image = f"{payload['after']['thumb_path'].replace(BASE_DIR, '')}"
         ended = state == "end" or state == "genai"
 
         if state == "genai" and payload["after"]["data"]["metadata"]:
-            title = payload["after"]["data"]["metadata"]["title"]
-            message = payload["after"]["data"]["metadata"]["scene"]
+            base_title = payload["after"]["data"]["metadata"]["title"]
+            threat_level = payload["after"]["data"]["metadata"].get(
+                "potential_threat_level", 0
+            )
+
+            # Add prefix for threat levels 1 and 2
+            if threat_level == 1:
+                title = f"Needs Review: {base_title}"
+            elif threat_level == 2:
+                title = f"Security Concern: {base_title}"
+            else:
+                title = base_title
+
+            message = payload["after"]["data"]["metadata"]["shortSummary"]
         else:
-            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
+            zone_names = payload["after"]["data"]["zones"]
+            formatted_zone_names = []
+
+            for zone_name in zone_names:
+                if zone_name in self.config.cameras[camera].zones:
+                    formatted_zone_names.append(
+                        self.config.cameras[camera]
+                        .zones[zone_name]
+                        .get_formatted_name(zone_name)
+                    )
+                else:
+                    formatted_zone_names.append(titlecase(zone_name.replace("_", " ")))
+
+            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {', '.join(formatted_zone_names)}"
             message = f"Detected on {camera_name}"
 
         if ended:

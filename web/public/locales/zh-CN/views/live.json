@@ -87,7 +87,7 @@
   },
   "manualRecording": {
     "title": "按需录制",
-    "tips": "根据此摄像头的录制保留设置，手动启动事件。",
+    "tips": "根据此摄像头的录像存储设置，可以下载即时快照或手动触发事件记录。",
     "playInBackground": {
       "label": "后台播放",
       "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
@@ -115,11 +115,11 @@
     "title": "视频流",
     "audio": {
       "tips": {
-        "title": "音频必须从摄像头输出并在 go2rtc 中配置为此视频流使用。",
+        "title": "必须要摄像头能够播放音频，以及需要 go2rtc 支持并配置。",
         "documentation": "阅读文档 "
       },
       "available": "此视频流支持音频",
-      "unavailable": "此视频流不支持音频"
+      "unavailable": "此视频流不支持音频传输"
     },
     "twoWayTalk": {
       "tips": "您的设备必须支持此功能，并且必须配置 WebRTC 以支持双向对讲。",
@@ -134,16 +134,19 @@
     "playInBackground": {
       "label": "后台播放",
       "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+    },
+    "debug": {
+      "picker": "调试模式下无法切换视频流。调试将始终使用检测（detect）功能的视频流。"
     }
   },
   "cameraSettings": {
     "title": "{{camera}} 设置",
     "cameraEnabled": "摄像头已启用",
-    "objectDetection": "对象检测",
+    "objectDetection": "目标检测",
     "recording": "录制",
     "snapshots": "快照",
     "audioDetection": "音频检测",
-    "autotracking": "自动跟踪",
+    "autotracking": "自动追踪",
     "transcription": "音频转录"
   },
   "history": {
@@ -152,8 +155,8 @@
   "effectiveRetainMode": {
     "modes": {
       "all": "全部",
-      "motion": "运动",
-      "active_objects": "活动对象"
+      "motion": "画面变动",
+      "active_objects": "活动目标"
     },
     "notAllTips": "您的 {{source}} 录制保留配置设置为 <code>mode: {{effectiveRetainMode}}</code>，因此此按需录制将仅保留包含 {{effectiveRetainModeName}} 的片段。"
   },
@@ -167,5 +170,20 @@
   "transcription": {
     "enable": "启用实时音频转录",
     "disable": "关闭实时音频转录"
+  },
+  "noCameras": {
+    "title": "未设置摄像头",
+    "description": "准备开始连接摄像头至 Frigate 。",
+    "buttonText": "添加摄像头",
+    "restricted": {
+      "title": "无可用摄像头",
+      "description": "你没有权限查看此分组中的任何摄像头。"
+    }
+  },
+  "snapshot": {
+    "takeSnapshot": "下载即时快照",
+    "noVideoSource": "当前无可用于快照的视频源。",
+    "captureFailed": "捕获快照失败。",
+    "downloadStarted": "快照下载已开始。"
   }
 }

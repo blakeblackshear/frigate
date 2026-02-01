@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "24hour": "d. MMM, yyyy",
       "12hour": "d. MMM, yyyy"
-    }
+    },
+    "inProgress": "Pågår",
+    "invalidStartTime": "Ugyldig starttid",
+    "invalidEndTime": "Ugyldig sluttid"
   },
   "button": {
     "copy": "Kopier",
@@ -118,7 +121,8 @@
     "unselect": "Fjern valg",
     "export": "Eksporter",
     "deleteNow": "Slett nå",
-    "next": "Neste"
+    "next": "Neste",
+    "continue": "Fortsett"
   },
   "menu": {
     "help": "Hjelp",
@@ -139,7 +143,7 @@
     "review": "Inspiser",
     "explore": "Utforsk",
     "export": "Eksporter",
-    "uiPlayground": "UI Sandkasse",
+    "uiPlayground": "UI-Sandkasse",
     "faceLibrary": "Ansiktsbibliotek",
     "user": {
       "title": "Bruker",
@@ -219,7 +223,8 @@
       "contrast": "Høy kontrast",
       "default": "Standard",
       "highcontrast": "Høy kontrast"
-    }
+    },
+    "classification": "Klassifisering"
   },
   "pagination": {
     "next": {
@@ -241,10 +246,24 @@
     "length": {
       "meters": "meter",
       "feet": "fot"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/time",
+      "mbph": "MB/time",
+      "gbph": "GB/time"
     }
   },
   "label": {
-    "back": "Gå tilbake"
+    "back": "Gå tilbake",
+    "hide": "Skjul {{item}}",
+    "show": "Vis {{item}}",
+    "ID": "ID",
+    "none": "Ingen",
+    "all": "Alle",
+    "other": "Andre"
   },
   "toast": {
     "copyUrlToClipboard": "Nettadresse kopiert til utklippstavlen.",
@@ -273,5 +292,17 @@
     "desc": "Siden ble ikke funnet"
   },
   "selectItem": "Velg {{item}}",
-  "readTheDocumentation": "Se dokumentasjonen"
+  "readTheDocumentation": "Se dokumentasjonen",
+  "information": {
+    "pixels": "{{area}}piklser"
+  },
+  "field": {
+    "internalID": "Den interne ID-en som Frigate bruker i konfigurasjonen og databasen",
+    "optional": "Valgfritt"
+  },
+  "list": {
+    "two": "{{0}} og {{1}}",
+    "many": "{{items}}, og {{last}}",
+    "separatorWithSpace": ", "
+  }
 }

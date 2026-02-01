@@ -9,6 +9,7 @@ import os
 import queue
 import subprocess as sp
 import threading
+import time
 import traceback
 from typing import Any, Optional
 
@@ -791,6 +792,10 @@ class Birdseye:
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
+        self.idle_fps: float = self.config.birdseye.idle_heartbeat_fps
+        self._idle_interval: Optional[float] = (
+            (1.0 / self.idle_fps) if self.idle_fps > 0 else None
+        )
 
         if config.birdseye.restream:
             self.birdseye_buffer = self.frame_manager.create(
@@ -848,6 +853,15 @@ class Birdseye:
             if frame_layout_changed:
                 coordinates = self.birdseye_manager.get_camera_coordinates()
                 self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
+        if self._idle_interval:
+            now = time.monotonic()
+            is_idle = len(self.birdseye_manager.camera_layout) == 0
+            if (
+                is_idle
+                and (now - self.birdseye_manager.last_output_time)
+                >= self._idle_interval
+            ):
+                self.__send_new_frame()
 
     def stop(self) -> None:
         self.converter.join()

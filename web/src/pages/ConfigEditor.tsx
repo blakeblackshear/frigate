@@ -49,6 +49,7 @@ function ConfigEditor() {
 
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const { send: sendRestart } = useRestart();
+  const initialValidationRef = useRef(false);
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions): Promise<void> => {
@@ -170,6 +171,33 @@ function ConfigEditor() {
       schemaConfiguredRef.current = false;
     };
   }, [rawConfig, apiHost, systemTheme, theme, onHandleSaveConfig]);
+
+  // when in safe mode, attempt to validate the existing (invalid) config immediately
+  // so that the user sees the validation errors without needing to press save
+  useEffect(() => {
+    if (
+      config?.safe_mode &&
+      rawConfig &&
+      !initialValidationRef.current &&
+      !error
+    ) {
+      initialValidationRef.current = true;
+      axios
+        .post(`config/save?save_option=saveonly`, rawConfig, {
+          headers: { "Content-Type": "text/plain" },
+        })
+        .then(() => {
+          // if this succeeds while in safe mode, we won't force any UI change
+        })
+        .catch((e: AxiosError<ApiErrorResponse>) => {
+          const errorMessage =
+            e.response?.data?.message ||
+            e.response?.data?.detail ||
+            "Unknown error";
+          setError(errorMessage);
+        });
+    }
+  }, [config?.safe_mode, rawConfig, error]);
 
   // monitoring state
 

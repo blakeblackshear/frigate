@@ -4,14 +4,14 @@
   "exploreIsUnavailable": {
     "title": "浏览功能不可用",
     "embeddingsReindexing": {
-      "context": "完成跟踪目标嵌入重新索引后，才可以使用 浏览 功能。",
+      "context": "完成追踪目标嵌入重新索引后，才可以使用 浏览 功能。",
       "startingUp": "启动中…",
       "estimatedTime": "预计剩余时间：",
       "finishingShortly": "即将完成",
       "step": {
         "thumbnailsEmbedded": "缩略图嵌入：",
         "descriptionsEmbedded": "描述嵌入：",
-        "trackedObjectsProcessed": "跟踪目标已处理： "
+        "trackedObjectsProcessed": "追踪目标已处理： "
       }
     },
     "downloadingModels": {
@@ -23,7 +23,7 @@
         "textTokenizer": "文本分词器"
       },
       "tips": {
-        "context": "模型下载完成后，您可能需要重新索引跟踪目标的嵌入。",
+        "context": "模型下载完成后，您可能需要重新索引追踪目标的嵌入。",
         "documentation": "阅读文档"
       },
       "error": "发生错误。请检查Frigate日志。"
@@ -34,7 +34,9 @@
     "details": "详情",
     "snapshot": "快照",
     "video": "视频",
-    "object_lifecycle": "目标全周期"
+    "object_lifecycle": "目标全周期",
+    "thumbnail": "缩略图",
+    "tracking_details": "追踪详情"
   },
   "objectLifecycle": {
     "title": "目标全周期",
@@ -95,20 +97,22 @@
       },
       "tips": {
         "mismatch_other": "检测到 {{count}} 个不可用的目标，并已包含在此核查项中。这些目标可能未达到警报或检测标准，或者已被清理/删除。",
-        "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪目标，请调整您的配置：<em>{{objects}}</em>"
+        "hasMissingObjects": "如果希望 Frigate 保存 <em>{{objects}}</em> 标签的追踪目标，请调整您的配置"
       },
       "toast": {
         "success": {
           "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
           "updatedSublabel": "成功更新子标签。",
           "updatedLPR": "成功更新车牌。",
-          "audioTranscription": "成功请求音频转录。"
+          "audioTranscription": "成功请求音频转录。根据你运行 Frigate 的服务器速度，转录可能需要一些时间才能完成。",
+          "updatedAttributes": "更新属性成功。"
         },
         "error": {
           "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
           "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}",
           "updatedLPRFailed": "更新车牌失败：{{errorMessage}}",
-          "audioTranscription": "请求音频转录失败：{{errorMessage}}"
+          "audioTranscription": "请求音频转录失败：{{errorMessage}}",
+          "updatedAttributesFailed": "更新属性失败：{{errorMessage}}"
         }
       }
     },
@@ -116,7 +120,7 @@
     "editSubLabel": {
       "title": "编辑子标签",
       "desc": "为 {{label}} 输入新的子标签",
-      "descNoLabel": "为此跟踪目标输入新的子标签"
+      "descNoLabel": "为该追踪目标输入新的子标签"
     },
     "topScore": {
       "label": "最高得分",
@@ -157,6 +161,14 @@
     },
     "score": {
       "label": "分值"
+    },
+    "editAttributes": {
+      "title": "编辑属性",
+      "desc": "为 {{label}} 选择分类属性"
+    },
+    "attributes": "分类属性",
+    "title": {
+      "label": "标题"
     }
   },
   "itemMenu": {
@@ -194,12 +206,26 @@
     "audioTranscription": {
       "label": "转录",
       "aria": "请求音频转录"
+    },
+    "showObjectDetails": {
+      "label": "显示目标轨迹"
+    },
+    "hideObjectDetails": {
+      "label": "隐藏目标轨迹"
+    },
+    "viewTrackingDetails": {
+      "label": "查看追踪详情",
+      "aria": "显示追踪详情"
+    },
+    "downloadCleanSnapshot": {
+      "label": "下载干净快照",
+      "aria": "下载干净快照"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "确认删除",
-      "desc": "删除此追踪目标后将移除快照、所有已保存的嵌入向量数据以及任何相关的目标全周期条目，但在 历史 页面中跟踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
+      "desc": "删除此追踪目标后，将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中追踪目标的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
     }
   },
   "noTrackedObjects": "未找到追踪目标",
@@ -212,10 +238,64 @@
         "error": "删除追踪目标失败：{{errorMessage}}"
       }
     },
-    "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
+    "tooltip": "与 {{type}} 匹配度为 {{confidence}}%",
+    "previousTrackedObject": "上一个追踪目标",
+    "nextTrackedObject": "下一个追踪目标"
   },
   "exploreMore": "浏览更多的 {{label}}",
   "aiAnalysis": {
     "title": "AI分析"
+  },
+  "concerns": {
+    "label": "风险等级"
+  },
+  "trackingDetails": {
+    "title": "追踪细节",
+    "noImageFound": "在该时间内没找到图片。",
+    "createObjectMask": "创建目标遮罩",
+    "adjustAnnotationSettings": "调整注释设置",
+    "scrollViewTips": "点击以查看该目标全周期中的关键时刻。",
+    "autoTrackingTips": "自动追踪摄像头的边框定位可能不准确。",
+    "count": "{{first}} / {{second}}",
+    "trackedPoint": "追踪点",
+    "lifecycleItemDesc": {
+      "visible": "已检测到 {{label}}",
+      "entered_zone": "{{label}} 进入 {{zones}}",
+      "active": "{{label}} 正在活动",
+      "stationary": "{{label}} 变为静止",
+      "attribute": {
+        "faceOrLicense_plate": "检测到 {{label}} 的 {{attribute}} 属性",
+        "other": "{{label}} 被识别为 {{attribute}}"
+      },
+      "gone": "{{label}} 离开",
+      "heard": "听到 {{label}}",
+      "external": "已检测到 {{label}}",
+      "header": {
+        "zones": "区",
+        "ratio": "比例",
+        "area": "大小",
+        "score": "分数"
+      }
+    },
+    "annotationSettings": {
+      "title": "标记设置",
+      "showAllZones": {
+        "title": "显示所有区",
+        "desc": "在目标进入区域的帧中始终显示区域框。"
+      },
+      "offset": {
+        "label": "标记偏移量",
+        "desc": "此数据来自摄像头的检测视频流，但叠加在录制视频流的画面上。两个视频流可能不会完全同步，因此边框与画面可能无法完全对齐。可以使用此设置将标记在时间轴上向前或向后偏移，以更好地与录制画面对齐。",
+        "millisecondsToOffset": "用于偏移检测标记的毫秒数。<em> 默认值：0</em>",
+        "tips": "提示：假设有一段人从左向右走的事件录制，如果事件时间轴中的边框始终在人的左侧（即后方），则应该减小偏移值；反之，如果边框始终领先于人物，则应增大偏移值。",
+        "toast": {
+          "success": "{{camera}} 的标记偏移量已保存。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "上一张图",
+      "next": "下一张图"
+    }
   }
 }

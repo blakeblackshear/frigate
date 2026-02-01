@@ -19,6 +19,7 @@ import {
   ReviewSeverity,
   ReviewSummary,
   SegmentedReviewData,
+  ZoomLevel,
 } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
 import axios from "axios";
@@ -53,10 +54,10 @@ import { cn } from "@/lib/utils";
 import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
-
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
+import { EmptyCard } from "@/components/card/EmptyCard";
+import { EmptyCardData } from "@/types/card";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -133,13 +134,31 @@ export default function EventView({
     }
   }, [filter, showReviewed, reviewSummary]);
 
+  const emptyCardData: EmptyCardData = useMemo(() => {
+    if (
+      !config ||
+      Object.values(config.cameras).find(
+        (cam) => cam.record.enabled_in_config,
+      ) != undefined
+    ) {
+      return {
+        title: t("empty." + severity.replace(/_/g, " ")),
+      };
+    }
+
+    return {
+      title: t("empty.recordingsDisabled.title"),
+      description: t("empty.recordingsDisabled.description"),
+    };
+  }, [config, severity, t]);
+
   // review interaction
 
-  const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
+  const [selectedReviews, setSelectedReviews] = useState<ReviewSegment[]>([]);
   const onSelectReview = useCallback(
-    (review: ReviewSegment, ctrl: boolean) => {
+    (review: ReviewSegment, ctrl: boolean, detail: boolean) => {
       if (selectedReviews.length > 0 || ctrl) {
-        const index = selectedReviews.indexOf(review.id);
+        const index = selectedReviews.findIndex((r) => r.id === review.id);
 
         if (index != -1) {
           if (selectedReviews.length == 1) {
@@ -153,21 +172,35 @@ export default function EventView({
           }
         } else {
           const copy = [...selectedReviews];
-          copy.push(review.id);
+          copy.push(review);
           setSelectedReviews(copy);
         }
       } else {
+        // If a specific date is selected in the calendar and it's after the event start,
+        // use the selected date instead of the event start time
+        const effectiveStartTime =
+          timeRange.after > review.start_time
+            ? timeRange.after
+            : review.start_time;
+
         onOpenRecording({
           camera: review.camera,
-          startTime: review.start_time - REVIEW_PADDING,
+          startTime: effectiveStartTime - REVIEW_PADDING,
           severity: review.severity,
+          timelineType: detail ? "detail" : undefined,
         });
 
         review.has_been_reviewed = true;
         markItemAsReviewed(review);
       }
     },
-    [selectedReviews, setSelectedReviews, onOpenRecording, markItemAsReviewed],
+    [
+      selectedReviews,
+      setSelectedReviews,
+      onOpenRecording,
+      markItemAsReviewed,
+      timeRange.after,
+    ],
   );
   const onSelectAllReviews = useCallback(() => {
     if (!currentReviewItems || currentReviewItems.length == 0) {
@@ -175,7 +208,7 @@ export default function EventView({
     }
 
     if (selectedReviews.length < currentReviewItems.length) {
-      setSelectedReviews(currentReviewItems.map((seg) => seg.id));
+      setSelectedReviews(currentReviewItems);
     } else {
       setSelectedReviews([]);
     }
@@ -204,6 +237,13 @@ export default function EventView({
               t("export.toast.success", { ns: "components/dialog" }),
               {
                 position: "top-center",
+                action: (
+                  <a href="/export" target="_blank" rel="noopener noreferrer">
+                    <Button>
+                      {t("export.toast.view", { ns: "components/dialog" })}
+                    </Button>
+                  </a>
+                ),
               },
             );
           }
@@ -392,6 +432,7 @@ export default function EventView({
             timeRange={timeRange}
             startTime={startTime}
             loading={severity != severityToggle}
+            emptyCardData={emptyCardData}
             markItemAsReviewed={markItemAsReviewed}
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
@@ -410,6 +451,7 @@ export default function EventView({
             startTime={startTime}
             filter={filter}
             motionOnly={motionOnly}
+            emptyCardData={emptyCardData}
             onOpenRecording={onOpenRecording}
           />
         )}
@@ -429,17 +471,22 @@ type DetectionReviewProps = {
   currentItems: ReviewSegment[] | null;
   itemsToReview?: number;
   relevantPreviews?: Preview[];
-  selectedReviews: string[];
+  selectedReviews: ReviewSegment[];
   severity: ReviewSeverity;
   filter?: ReviewFilter;
   timeRange: { before: number; after: number };
   startTime?: number;
   loading: boolean;
+  emptyCardData: EmptyCardData;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
-  onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
+  onSelectReview: (
+    review: ReviewSegment,
+    ctrl: boolean,
+    detail: boolean,
+  ) => void;
   onSelectAllReviews: () => void;
-  setSelectedReviews: (reviewIds: string[]) => void;
+  setSelectedReviews: (reviews: ReviewSegment[]) => void;
   pullLatestData: () => void;
 };
 function DetectionReview({
@@ -454,6 +501,7 @@ function DetectionReview({
   timeRange,
   startTime,
   loading,
+  emptyCardData,
   markItemAsReviewed,
   markAllItemsAsReviewed,
   onSelectReview,
@@ -464,10 +512,6 @@ function DetectionReview({
   const { t } = useTranslation(["views/events"]);
 
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
-
-  // detail
-
-  const [reviewDetail, setReviewDetail] = useState<ReviewSegment>();
 
   // preview
 
@@ -499,7 +543,7 @@ function DetectionReview({
     timestampSpread: 15,
   });
 
-  const possibleZoomLevels = useMemo(
+  const possibleZoomLevels: ZoomLevel[] = useMemo(
     () => [
       { segmentDuration: 60, timestampSpread: 15 },
       { segmentDuration: 30, timestampSpread: 5 },
@@ -513,6 +557,14 @@ function DetectionReview({
       setZoomSettings(possibleZoomLevels[newZoomLevel]);
     },
     [possibleZoomLevels],
+  );
+
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
   );
 
   const { isZooming, zoomDirection } = useTimelineZoom({
@@ -667,7 +719,7 @@ function DetectionReview({
         case "r":
           if (selectedReviews.length > 0 && !modifiers.repeat) {
             currentItems?.forEach((item) => {
-              if (selectedReviews.includes(item.id)) {
+              if (selectedReviews.some((r) => r.id === item.id)) {
                 item.has_been_reviewed = true;
                 markItemAsReviewed(item);
               }
@@ -688,8 +740,6 @@ function DetectionReview({
 
   return (
     <>
-      <ReviewDetailDialog review={reviewDetail} setReview={setReviewDetail} />
-
       <div
         ref={contentRef}
         className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4"
@@ -711,10 +761,13 @@ function DetectionReview({
         )}
 
         {!loading && currentItems?.length === 0 && (
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <LuFolderCheck className="size-16" />
-            {t("empty." + severity.replace(/_/g, " "))}
-          </div>
+          <EmptyCard
+            className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 items-center text-center"
+            title={emptyCardData.title}
+            titleHeading={false}
+            description={emptyCardData.description}
+            icon={<LuFolderCheck className="size-16" />}
+          />
         )}
 
         <div
@@ -723,7 +776,7 @@ function DetectionReview({
         >
           {!loading && currentItems
             ? currentItems.map((value) => {
-                const selected = selectedReviews.includes(value.id);
+                const selected = selectedReviews.some((r) => r.id === value.id);
 
                 return (
                   <div
@@ -749,11 +802,7 @@ function DetectionReview({
                           ctrl: boolean,
                           detail: boolean,
                         ) => {
-                          if (detail) {
-                            setReviewDetail(review);
-                          } else {
-                            onSelectReview(review, ctrl);
-                          }
+                          onSelectReview(review, ctrl, detail);
                         }}
                       />
                     </div>
@@ -779,7 +828,7 @@ function DetectionReview({
             (itemsToReview ?? 0) > 0 && (
               <div className="col-span-full flex items-center justify-center">
                 <Button
-                  className="text-white"
+                  className="text-balance text-white"
                   aria-label={t("markTheseItemsAsReviewed")}
                   variant="select"
                   onClick={() => {
@@ -794,7 +843,7 @@ function DetectionReview({
         </div>
       </div>
       <div className="flex w-[65px] flex-row md:w-[110px]">
-        <div className="no-scrollbar w-[55px] md:w-[100px]">
+        <div className="no-scrollbar relative w-[55px] md:w-[100px]">
           {loading ? (
             <Skeleton className="size-full" />
           ) : (
@@ -816,6 +865,8 @@ function DetectionReview({
               dense={isMobile}
               isZooming={isZooming}
               zoomDirection={zoomDirection}
+              possibleZoomLevels={possibleZoomLevels}
+              currentZoomLevel={currentZoomLevel}
             />
           )}
         </div>
@@ -851,6 +902,7 @@ type MotionReviewProps = {
   startTime?: number;
   filter?: ReviewFilter;
   motionOnly?: boolean;
+  emptyCardData: EmptyCardData;
   onOpenRecording: (data: RecordingStartingPoint) => void;
 };
 function MotionReview({
@@ -861,9 +913,9 @@ function MotionReview({
   startTime,
   filter,
   motionOnly = false,
+  emptyCardData,
   onOpenRecording,
 }: MotionReviewProps) {
-  const { t } = useTranslation(["views/events"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -890,11 +942,20 @@ function MotionReview({
 
   // motion data
 
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration,
+    },
+  );
+
+  const alignedAfter = alignStartDateToTimeline(timeRange.after);
+  const alignedBefore = alignEndDateToTimeline(timeRange.before);
+
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
-      before: timeRange.before,
-      after: timeRange.after,
+      before: alignedBefore,
+      after: alignedAfter,
       scale: segmentDuration / 2,
       cameras: filter?.cameras?.join(",") ?? null,
     },
@@ -1001,10 +1062,6 @@ function MotionReview({
     }
   }, [playing, playbackRate, nextTimestamp, setPlaying, timeRange]);
 
-  const { alignStartDateToTimeline } = useTimelineUtils({
-    segmentDuration,
-  });
-
   const getDetectionType = useCallback(
     (cameraName: string) => {
       if (motionOnly) {
@@ -1051,9 +1108,12 @@ function MotionReview({
 
   if (motionData?.length === 0) {
     return (
-      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-        <LuFolderX className="size-16" />
-        {t("empty.motion")}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <EmptyCard
+          title={emptyCardData.title}
+          description={emptyCardData.description}
+          icon={<LuFolderX className="size-16" />}
+        />
       </div>
     );
   }
@@ -1154,6 +1214,7 @@ function MotionReview({
             dense={isMobileOnly}
             isZooming={false}
             zoomDirection={null}
+            alwaysShowMotionLine={true}
           />
         ) : (
           <Skeleton className="size-full" />

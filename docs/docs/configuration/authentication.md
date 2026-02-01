@@ -270,3 +270,42 @@ To use role-based access control, you must connect to Frigate via the **authenti
 1. Log in as an **admin** user via port `8971`.
 2. Navigate to **Settings > Users**.
 3. Edit a user’s role by selecting **admin** or **viewer**.
+
+## API Authentication Guide
+
+### Getting a Bearer Token
+
+To use the Frigate API, you need to authenticate first. Follow these steps to obtain a Bearer token:
+
+#### 1. Login
+
+Make a POST request to `/login` with your credentials:
+
+```bash
+curl -i -X POST https://frigate_ip:8971/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"user": "admin", "password": "your_password"}'
+```
+
+:::note
+
+You may need to include `-k` in the argument list in these steps (eg: `curl -k -i -X POST ...`) if your Frigate instance is using a self-signed certificate.
+
+:::
+
+The response will contain a cookie with the JWT token.
+
+#### 2. Using the Bearer Token
+
+Once you have the token, include it in the Authorization header for subsequent requests:
+
+```bash
+curl -H "Authorization: Bearer <your_token>" https://frigate_ip:8971/api/profile
+```
+
+#### 3. Token Lifecycle
+
+- Tokens are valid for the configured session length
+- Tokens are automatically refreshed when you visit the `/auth` endpoint
+- Tokens are invalidated when the user's password is changed
+- Use `/logout` to clear your session cookie

@@ -136,6 +136,7 @@ class CameraMaintainer(threading.Thread):
             self.ptz_metrics[name],
             self.region_grids[name],
             self.stop_event,
+            self.config.logger,
         )
         self.camera_processes[config.name] = camera_process
         camera_process.start()
@@ -156,7 +157,11 @@ class CameraMaintainer(threading.Thread):
             self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
 
         capture_process = CameraCapture(
-            config, count, self.camera_metrics[name], self.stop_event
+            config,
+            count,
+            self.camera_metrics[name],
+            self.stop_event,
+            self.config.logger,
         )
         capture_process.daemon = True
         self.capture_processes[name] = capture_process

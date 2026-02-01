@@ -1,0 +1,74 @@
+{
+  "trackedObjectsCount_one": "{{count}} jälgitav objekt ",
+  "trackedObjectsCount_other": "{{count}} jälgitavat objekti ",
+  "fetchingTrackedObjectsFailed": "Viga jälgitavate objektide laadimisel: {{errorMessage}}",
+  "noTrackedObjects": "Ühtegi jälgitavat objekti ei leidunud",
+  "itemMenu": {
+    "findSimilar": {
+      "aria": "Otsi sarnaseid jälgitavaid objekte"
+    },
+    "downloadSnapshot": {
+      "label": "Laadi hetkvõte alla",
+      "aria": "Laadi hetkvõte alla"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Laadi puhas hetkvõte alla",
+      "aria": "Laadi puhas hetkvõte alla"
+    }
+  },
+  "trackingDetails": {
+    "annotationSettings": {
+      "showAllZones": {
+        "title": "Näita kõiki tsoone",
+        "desc": "Kui objekt on sisenenud tsooni, siis alati näida tsooni märgistust."
+      }
+    },
+    "lifecycleItemDesc": {
+      "attribute": {
+        "other": "{{label}} on tuvastatud kui {{attribute}}"
+      },
+      "stationary": "{{label}} jäi paigale",
+      "active": "{{label}} muutus aktiivseks",
+      "entered_zone": "{{label}} sisenes tsooni {{zones}}",
+      "visible": "{{label}} on tuvastatud"
+    },
+    "title": "Jälgimise üksikasjad",
+    "noImageFound": "Selle ajatempli kohta ei leidu pilti.",
+    "createObjectMask": "Loo objektimask"
+  },
+  "documentTitle": "Avasta - Frigate",
+  "generativeAI": "Generatiivne tehisaru",
+  "exploreMore": "Avasta rohkem {{label}}-tüüpi objekte",
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "step": {
+        "thumbnailsEmbedded": "Pisipildid on lõimitud: ",
+        "descriptionsEmbedded": "Kirjeldused on lõimitud: ",
+        "trackedObjectsProcessed": "Jälgitud objektid on töödeldud: "
+      },
+      "startingUp": "Käivitun…",
+      "estimatedTime": "Hinnanguliselt jäänud aega:",
+      "finishingShortly": "Lõpetan õige pea"
+    }
+  },
+  "type": {
+    "details": "üksikasjad",
+    "thumbnail": "pisipilt",
+    "snapshot": "hetkvõte",
+    "video": "video",
+    "tracking_details": "jälgimise üksikasjad"
+  },
+  "details": {
+    "item": {
+      "tips": {
+        "mismatch_one": "Tuvastasin {{count}} võõra objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud.",
+        "mismatch_other": "Tuvastasin {{count}} võõrast objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud."
+      }
+    },
+    "snapshotScore": {
+      "label": "Hetkvõttete punktiskoor"
+    },
+    "regenerateFromSnapshot": "Loo uuesti hetkvõttest",
+    "timestamp": "Ajatampel"
+  }
+}

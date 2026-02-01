@@ -262,7 +262,7 @@ class FaceNetRecognizer(FaceRecognizer):
                 score = confidence
                 label = name
 
-        return label, round(score - blur_reduction, 2)
+        return label, max(0, round(score - blur_reduction, 2))
 
 
 class ArcFaceRecognizer(FaceRecognizer):
@@ -370,4 +370,4 @@ class ArcFaceRecognizer(FaceRecognizer):
                 score = confidence
                 label = name
 
-        return label, round(score - blur_reduction, 2)
+        return label, max(0, round(score - blur_reduction, 2))

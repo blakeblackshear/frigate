@@ -13,5 +13,11 @@
       "renameExportFailed": "Dışa aktarım adlandırılamadı: {{errorMessage}}"
     }
   },
-  "noExports": "Dışa aktarım bulunamadı"
+  "noExports": "Dışa aktarım bulunamadı",
+  "tooltip": {
+    "shareExport": "Dışa aktarmayı paylaş",
+    "downloadVideo": "Videoyu İndir",
+    "editName": "İsmi Düzenle",
+    "deleteExport": "Dışa Aktarmayı Sil"
+  }
 }

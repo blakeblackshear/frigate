@@ -40,16 +40,17 @@
     "detector": {
       "title": "检测器",
       "inferenceSpeed": "检测器推理速度",
-      "cpuUsage": "检测器CPU使用率",
+      "cpuUsage": "检测器 CPU 使用率",
       "memoryUsage": "检测器内存使用率",
-      "temperature": "检测器温度"
+      "temperature": "检测器温度",
+      "cpuUsageInformation": "此处的 CPU 使用率，只统计在给检测模型准备输入数据和处理输出数据时用到的 CPU。它不统计模型推理本身的资源占用，即使推理是在 GPU 或其他检测器上进行的。"
     },
     "hardwareInfo": {
       "title": "硬件信息",
-      "gpuUsage": "GPU使用率",
-      "gpuMemory": "GPU显存",
-      "gpuEncoder": "GPU编码",
-      "gpuDecoder": "GPU解码",
+      "gpuUsage": "GPU 使用率",
+      "gpuMemory": "GPU 显存",
+      "gpuEncoder": "GPU 编码",
+      "gpuDecoder": "GPU 解码",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Vainfo 输出",
@@ -65,22 +66,34 @@
           "vbios": "VBios信息：{{vbios}}"
         },
         "closeInfo": {
-          "label": "关闭GPU信息"
+          "label": "关闭 GPU 信息"
         },
         "copyInfo": {
-          "label": "复制GPU信息"
+          "label": "复制 GPU 信息"
         },
         "toast": {
-          "success": "已复制GPU信息到剪贴板"
+          "success": "已复制 GPU 信息到剪贴板"
         }
       },
       "npuMemory": "NPU内存",
-      "npuUsage": "NPU使用率"
+      "npuUsage": "NPU 使用率",
+      "intelGpuWarning": {
+        "title": "Intel GPU 处于警告状态",
+        "message": "GPU 状态不可用",
+        "description": "这是 Intel 的 GPU 状态报告工具（intel_gpu_top）的已知问题：该工具会失效并反复返回 GPU 使用率为 0%，即使在硬件加速和目标检测已在 (i)GPU 上正常运行的情况下也是如此，这并不是 Frigate 的 bug。你可以通过重启主机来临时修复该问题，并确认 GPU 正常工作。该问题并不会影响性能。"
+      }
     },
     "otherProcesses": {
       "title": "其他进程",
-      "processCpuUsage": "主进程CPU使用率",
-      "processMemoryUsage": "主进程内存使用率"
+      "processCpuUsage": "主进程 CPU 使用率",
+      "processMemoryUsage": "主进程内存使用率",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "录制",
+        "review_segment": "核查片段",
+        "embeddings": "增强功能",
+        "audio_detector": "音频检测"
+      }
     }
   },
   "storage": {
@@ -112,7 +125,7 @@
     "title": "摄像头",
     "overview": "概览",
     "info": {
-      "cameraProbeInfo": "{{camera}} 的摄像头信息",
+      "cameraProbeInfo": "摄像头 {{camera}} 的信息",
       "streamDataFromFFPROBE": "流数据信息通过<code>ffprobe</code>获取。",
       "fetching": "正在获取摄像头数据",
       "stream": "视频流{{idx}}",
@@ -162,7 +175,8 @@
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）",
     "detectIsSlow": "{{detect}} 运行缓慢（{{speed}}毫秒）",
     "detectIsVerySlow": "{{detect}} 运行非常缓慢（{{speed}}毫秒）",
-    "cameraIsOffline": "{{camera}} 已离线"
+    "cameraIsOffline": "{{camera}} 已离线",
+    "shmTooLow": "/dev/shm 的分配空间过低（当前 {{total}} MB），应至少增加到 {{min}} MB。"
   },
   "enrichments": {
     "title": "增强功能",
@@ -178,7 +192,17 @@
       "face_recognition": "人脸特征提取",
       "plate_recognition": "车牌识别",
       "yolov9_plate_detection_speed": "YOLOv9 车牌检测速度",
-      "yolov9_plate_detection": "YOLOv9 车牌检测"
-    }
+      "yolov9_plate_detection": "YOLOv9 车牌检测",
+      "review_description": "核查总结",
+      "review_description_speed": "核查总结速度",
+      "review_description_events_per_second": "核查总结",
+      "object_description": "目标描述",
+      "object_description_speed": "目标描述速度",
+      "object_description_events_per_second": "目标描述",
+      "classification": "分类 {{name}}",
+      "classification_speed": "{{name}} 的分类速度",
+      "classification_events_per_second": "{{name}} 的每秒分类速度"
+    },
+    "averageInf": "平均推理时间"
   }
 }

@@ -44,11 +44,16 @@ self.addEventListener("notificationclick", (event) => {
     switch (event.action ?? "default") {
       case "markReviewed":
         if (event.notification.data) {
-          fetch("/api/reviews/viewed", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": 1 },
-            body: JSON.stringify({ ids: [event.notification.data.id] }),
-          });
+          event.waitUntil(
+            fetch("/api/reviews/viewed", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": 1,
+              },
+              body: JSON.stringify({ ids: [event.notification.data.id] }),
+            }), // eslint-disable-line comma-dangle
+          );
         }
         break;
       default:
@@ -58,7 +63,7 @@ self.addEventListener("notificationclick", (event) => {
           // eslint-disable-next-line no-undef
           if (clients.openWindow) {
             // eslint-disable-next-line no-undef
-            return clients.openWindow(url);
+            event.waitUntil(clients.openWindow(url));
           }
         }
     }

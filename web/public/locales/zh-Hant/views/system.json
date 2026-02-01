@@ -2,8 +2,8 @@
   "documentTitle": {
     "cameras": "鏡頭統計 - Frigate",
     "storage": "儲存裝置統計 - Frigate",
-    "general": "統計總覽 - Frigate",
-    "enrichments": "進階統計 - Frigate",
+    "general": "一般統計 - Frigate",
+    "enrichments": "進階功能統計 - Frigate",
     "logs": {
       "frigate": "Frigate 日誌 - Frigate",
       "go2rtc": "Go2RTC 日誌 - Frigate",
@@ -76,12 +76,24 @@
         }
       },
       "npuUsage": "NPU 使用率",
-      "npuMemory": "NPU 記憶體"
+      "npuMemory": "NPU 記憶體",
+      "intelGpuWarning": {
+        "title": "Intel GPU 狀態警告",
+        "message": "GPU 狀態資訊不可用",
+        "description": "這是一個在Intel GPU 狀態回報工具 (intel_gpu_top) 中已知的 Bug，該工具會故障並重複的回報 GPU占用率為 0%，甚至在硬體加速與物件偵測在 (i)GPU上正確運作時也是如此。這不是 Frigate 的 Bug。您可以透過重新啟動主機來暫時修復此問題以確認 GPU 運作正常。這不會影響效能。"
+      }
     },
     "otherProcesses": {
       "title": "其他行程",
       "processCpuUsage": "行程 CPU 使用率",
-      "processMemoryUsage": "行程記憶體使用量"
+      "processMemoryUsage": "行程記憶體使用量",
+      "series": {
+        "recording": "记录",
+        "review_segment": "评论部分",
+        "embeddings": "嵌入",
+        "audio_detector": "音訊偵測器",
+        "go2rtc": "go2rtc"
+      }
     }
   },
   "storage": {
@@ -103,6 +115,10 @@
         "title": "未使用",
         "tips": "在磁碟中有除了 Frigate 錄影內容以外的檔案時，此數值可能無法正確反應可用的空間。Frigate 不會追蹤錄影資料以外的檔案的儲存空間用量。"
       }
+    },
+    "shm": {
+      "title": "SHM（共享記憶體）配置",
+      "warning": "目前的 SHM 大小為 {{total}}MB，過小。請將其增加至至少 {{min_shm}}MB。"
     }
   },
   "cameras": {
@@ -159,7 +175,8 @@
     "reindexingEmbeddings": "正在重新替嵌入資料建立索引（已完成 {{processed}}%）",
     "cameraIsOffline": "{{camera}} 已離線",
     "detectIsSlow": "{{detect}} 偵測速度較慢（{{speed}} 毫秒）",
-    "detectIsVerySlow": "{{detect}} 偵測速度緩慢（{{speed}} 毫秒）"
+    "detectIsVerySlow": "{{detect}} 偵測速度緩慢（{{speed}} 毫秒）",
+    "shmTooLow": "/dev/shm 配置（{{total}} MB）應增加至至少{{min}} MB。"
   },
   "enrichments": {
     "title": "進階功能",
@@ -175,7 +192,17 @@
       "plate_recognition_speed": "車牌辨識速度",
       "text_embedding_speed": "文字提取速度",
       "yolov9_plate_detection_speed": "YOLOv9 車牌偵測速度",
-      "yolov9_plate_detection": "YOLOv9 車牌辨識"
-    }
+      "yolov9_plate_detection": "YOLOv9 車牌辨識",
+      "review_description": "審查說明",
+      "review_description_speed": "審查描述速度",
+      "review_description_events_per_second": "審查說明",
+      "object_description": "物件說明",
+      "object_description_speed": "物件說明速度",
+      "object_description_events_per_second": "物件說明",
+      "classification": "{{name}} 分類",
+      "classification_speed": "{{name}}分類速度",
+      "classification_events_per_second": "{{name}} 分類每秒事件數"
+    },
+    "averageInf": "平均推論時間"
   }
 }

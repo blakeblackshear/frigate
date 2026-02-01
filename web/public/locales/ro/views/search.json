@@ -26,14 +26,15 @@
       "max_speed": "Viteza maximă",
       "recognized_license_plate": "Număr de înmatriculare recunoscut",
       "has_clip": "Are videoclip",
-      "has_snapshot": "Are snapshot"
+      "has_snapshot": "Are snapshot",
+      "attributes": "Atribute"
     },
     "tips": {
       "desc": {
         "step1": "Tastează un nume de filtru urmat de două puncte (ex. „camere:” ).",
         "step3": "Folosește mai multe filtre adăugându-le unul după altul, separate prin spațiu.",
         "step4": "Filtrele de dată (înainte: și după:) folosesc formatul {{DateFormat}}.",
-        "step6": "Elimină filtrele făcând clic pe „X”-ul de lângă ele.",
+        "step6": "Elimină filtrele apăsând pe „X”-ul de lângă ele.",
         "exampleLabel": "Exemplu:",
         "step5": "Filtrul pentru intervalul de timp folosește formatul {{exampleTime}}.",
         "step2": "Selectează o valoare din sugestii sau tastează propria valoare.",

@@ -129,8 +129,27 @@ const sidebars: SidebarsConfig = {
     Troubleshooting: [
       "troubleshooting/faqs",
       "troubleshooting/recordings",
-      "troubleshooting/gpu",
-      "troubleshooting/edgetpu",
+      "troubleshooting/dummy-camera",
+      {
+        type: "category",
+        label: "Troubleshooting Hardware",
+        link: {
+          type: "generated-index",
+          title: "Troubleshooting Hardware",
+          description: "Troubleshooting Problems with Hardware",
+        },
+        items: ["troubleshooting/gpu", "troubleshooting/edgetpu"],
+      },
+      {
+        type: "category",
+        label: "Troubleshooting Resource Usage",
+        link: {
+          type: "generated-index",
+          title: "Troubleshooting Resource Usage",
+          description: "Troubleshooting issues with resource usage",
+        },
+        items: ["troubleshooting/cpu", "troubleshooting/memory"],
+      },
     ],
     Development: [
       "development/contributing",

@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Optional
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
 from joserfc.jwk import OctKey
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -15,6 +15,7 @@ from starlette_context.plugins import Plugin
 from frigate.api import app as main_app
 from frigate.api import (
     auth,
+    camera,
     classification,
     event,
     export,
@@ -23,7 +24,7 @@ from frigate.api import (
     preview,
     review,
 )
-from frigate.api.auth import get_jwt_secret, limiter
+from frigate.api.auth import get_jwt_secret, limiter, require_admin_by_default
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
 )
@@ -61,11 +62,15 @@ def create_fastapi_app(
     stats_emitter: StatsEmitter,
     event_metadata_updater: EventMetadataPublisher,
     config_publisher: CameraConfigUpdatePublisher,
+    enforce_default_admin: bool = True,
 ):
     logger.info("Starting FastAPI app")
     app = FastAPI(
         debug=False,
         swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
+        dependencies=[Depends(require_admin_by_default())]
+        if enforce_default_admin
+        else [],
     )
 
     # update the request_address with the x-forwarded-for header from nginx
@@ -114,6 +119,7 @@ def create_fastapi_app(
     # Routes
     # Order of include_router matters: https://fastapi.tiangolo.com/tutorial/path-params/#order-matters
     app.include_router(auth.router)
+    app.include_router(camera.router)
     app.include_router(classification.router)
     app.include_router(review.router)
     app.include_router(main_app.router)

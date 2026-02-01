@@ -65,7 +65,7 @@
     "showReviewed": "显示已核查的项目"
   },
   "motion": {
-    "showMotionOnly": "仅显示运动"
+    "showMotionOnly": "仅显示画面变动"
   },
   "explore": {
     "settings": {
@@ -122,7 +122,9 @@
     "loading": "正在加载识别的车牌…",
     "placeholder": "输入以搜索车牌…",
     "noLicensePlatesFound": "未找到车牌。",
-    "selectPlatesFromList": "从列表中选择一个或多个车牌。"
+    "selectPlatesFromList": "从列表中选择一个或多个车牌。",
+    "selectAll": "选择所有",
+    "clearAll": "清除所有"
   },
   "classes": {
     "label": "分类",
@@ -131,5 +133,9 @@
     },
     "count_one": "{{count}} 个分类",
     "count_other": "{{count}} 个分类"
+  },
+  "attributes": {
+    "label": "分类属性",
+    "all": "所有属性"
   }
 }

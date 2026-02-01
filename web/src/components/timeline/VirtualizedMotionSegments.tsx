@@ -25,6 +25,7 @@ type VirtualizedMotionSegmentsProps = {
   motionOnly: boolean;
   getMotionSegmentValue: (timestamp: number) => number;
   getRecordingAvailability: (timestamp: number) => boolean | undefined;
+  alwaysShowMotionLine: boolean;
 };
 
 export interface VirtualizedMotionSegmentsRef {
@@ -57,6 +58,7 @@ export const VirtualizedMotionSegments = forwardRef<
       motionOnly,
       getMotionSegmentValue,
       getRecordingAvailability,
+      alwaysShowMotionLine,
     },
     ref,
   ) => {
@@ -158,6 +160,20 @@ export const VirtualizedMotionSegments = forwardRef<
 
         const hasRecording = getRecordingAvailability(segmentTime);
 
+        // Check if previous and next segments have recordings
+        // This is important because in motionOnly mode, the segments array is filtered
+        const prevSegmentTime = segmentTime + segmentDuration;
+        const nextSegmentTime = segmentTime - segmentDuration;
+
+        const prevHasRecording = getRecordingAvailability(prevSegmentTime);
+        const nextHasRecording = getRecordingAvailability(nextSegmentTime);
+
+        // Check if prev/next segments have no recording available
+        // Note: We only check hasRecording, not motion values, because segments can have
+        // recordings available but no motion (eg, start of a recording before motion begins)
+        const prevIsNoRecording = prevHasRecording === false;
+        const nextIsNoRecording = nextHasRecording === false;
+
         if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
           return null; // Skip rendering this segment in motion only mode
         }
@@ -177,6 +193,8 @@ export const VirtualizedMotionSegments = forwardRef<
               firstHalfMotionValue={firstHalfMotionValue}
               secondHalfMotionValue={secondHalfMotionValue}
               hasRecording={hasRecording}
+              prevIsNoRecording={prevIsNoRecording}
+              nextIsNoRecording={nextIsNoRecording}
               segmentDuration={segmentDuration}
               segmentTime={segmentTime}
               timestampSpread={timestampSpread}
@@ -187,6 +205,7 @@ export const VirtualizedMotionSegments = forwardRef<
               setHandlebarTime={setHandlebarTime}
               scrollToSegment={scrollToSegment}
               dense={dense}
+              alwaysShowMotionLine={alwaysShowMotionLine}
             />
           </div>
         );
@@ -205,6 +224,7 @@ export const VirtualizedMotionSegments = forwardRef<
         dense,
         timestampSpread,
         visibleRange.start,
+        alwaysShowMotionLine,
       ],
     );
 

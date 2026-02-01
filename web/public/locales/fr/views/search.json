@@ -1,7 +1,7 @@
 {
   "savedSearches": "Recherches enregistrées",
   "search": "Rechercher",
-  "searchFor": "Chercher {{inputValue}}",
+  "searchFor": "Rechercher {{inputValue}}",
   "button": {
     "clear": "Effacer la recherche",
     "filterInformation": "Filtrer les informations",
@@ -13,20 +13,21 @@
   "filter": {
     "label": {
       "zones": "Zones",
-      "sub_labels": "Sous-libellés",
+      "sub_labels": "Sous-étiquettes",
       "search_type": "Type de recherche",
-      "time_range": "Plage de temps",
-      "labels": "Libellés",
+      "time_range": "Plage horaire",
+      "labels": "Étiquettes",
       "cameras": "Caméras",
       "after": "Après",
       "before": "Avant",
-      "min_speed": "Vitesse minimum",
-      "max_speed": "Vitesse maximum",
+      "min_speed": "Vitesse minimale",
+      "max_speed": "Vitesse maximale",
       "min_score": "Score minimum",
-      "recognized_license_plate": "Plaques d'immatriculation reconnues",
-      "has_clip": "Contient un clip",
-      "has_snapshot": "Contient un instantané",
-      "max_score": "Score maximum"
+      "recognized_license_plate": "Plaque d'immatriculation reconnue",
+      "has_clip": "Avec une séquence vidéo",
+      "has_snapshot": "Avec un instantané",
+      "max_score": "Score maximum",
+      "attributes": "Attributs"
     },
     "searchType": {
       "thumbnail": "Miniature",
@@ -34,11 +35,11 @@
     },
     "toast": {
       "error": {
-        "beforeDateBeLaterAfter": "La date de début « avant » doit être postérieure à la date « après ».",
+        "beforeDateBeLaterAfter": "La date « avant » doit être postérieure à la date « après ».",
         "afterDatebeEarlierBefore": "La date « après » doit être antérieure à la date « avant ».",
         "minScoreMustBeLessOrEqualMaxScore": "Le « min_score » doit être inférieur ou égal au « max_score ».",
         "maxScoreMustBeGreaterOrEqualMinScore": "Le « max_score » doit être supérieur ou égal au « min_score ».",
-        "minSpeedMustBeLessOrEqualMaxSpeed": "La « vitesse_min » doit être inférieure ou égale à la « vitesse_max ».",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "La vitesse minimale doit être inférieure ou égale à la vitesse maximale.",
         "maxSpeedMustBeGreaterOrEqualMinSpeed": "La « vitesse maximale » doit être supérieure ou égale à la « vitesse minimale »."
       }
     },
@@ -54,11 +55,11 @@
         "example": "Exemple: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Saisissez un nom de filtre suivi de deux points (par exemple, «cameras:»).</li><li>Sélectionnez une valeur parmi les suggestions ou saisissez la vôtre.</li><li>Utilisez plusieurs filtres en les ajoutant les uns après les autres, en laissant un espace entre eux.</li><li>Les filtres de date (avant: et après:) utilisent le format <em>{{DateFormat}}</em>.</li><li>Le filtre de plage horaire utilise le format <em>{{exampleTime}}</em>.</li><li>Supprimez les filtres en cliquant sur le «x» à côté d'eux.</li></ul>",
         "step1": "Saisissez un nom de clé de filtre suivi de deux points (par exemple, \"cameras:\").",
-        "step2": "Sélectionnez une valeur pour la suggestion ou saisissez la vôtre.",
+        "step2": "Sélectionnez une valeur parmi les suggestions ou saisissez la vôtre.",
         "step3": "Utilisez plusieurs filtres en les ajoutant les uns après les autres avec un espace entre eux.",
         "step5": "Le filtre de plage horaire utilise le format {{exampleTime}}.",
-        "step6": "Supprimez les filtres en cliquant sur le ' x' à côté d'eux.",
-        "step4": "Filtres de dates (avant : et après :) utilisez le format {{DateFormat}}.",
+        "step6": "Supprimez les filtres en cliquant sur le \"x\" à côté d'eux.",
+        "step4": "Les filtres de dates (avant : et après :) utilisent le format {{DateFormat}}.",
         "exampleLabel": "Exemple :"
       }
     }

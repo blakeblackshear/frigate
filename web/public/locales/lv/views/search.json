@@ -1,0 +1,73 @@
+{
+  "search": "Meklēt",
+  "savedSearches": "Saglabātie meklējumi",
+  "searchFor": "Meklēt {{inputValue}}",
+  "button": {
+    "clear": "Notīrīt meklēšanu",
+    "save": "Saglabāt meklēto",
+    "delete": "Izdzēst saglabāto meklējumu",
+    "filterInformation": "Filtra informācija",
+    "filterActive": "Filtri aktīvi"
+  },
+  "trackedObjectId": "Izsekojamā objekta ID",
+  "filter": {
+    "label": {
+      "cameras": "Kameras",
+      "labels": "Etiķetes",
+      "zones": "Zonas",
+      "sub_labels": "Papildu etiķetes",
+      "attributes": "Atribūti",
+      "search_type": "Meklēšanas veids",
+      "time_range": "Laika diapazons",
+      "before": "Pirms",
+      "after": "Pēc",
+      "min_score": "Minimālais rezultāts",
+      "max_score": "Maksimālais rezultāts",
+      "min_speed": "Minimālais ātrums",
+      "max_speed": "Maksimālais ātrums",
+      "recognized_license_plate": "Atpazīta numura zīme",
+      "has_clip": "Ir klips",
+      "has_snapshot": "Ir momentuzņēmums"
+    },
+    "searchType": {
+      "thumbnail": "Sīktēls",
+      "description": "Apraksts"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "'Pirms' datumam jābūt vēlākam par 'pēc' datumu.",
+        "afterDatebeEarlierBefore": "Datumam 'pēc' ir jābūt agrākam par datumu 'pirms'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'Min_score' vērtībai ir jābūt mazākai vai vienādai ar 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Vērtībai 'max_score' ir jābūt lielākai vai vienādai ar 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'Min_speed' ir jābūt mazākam vai vienādam ar 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Vērtībai 'max_speed' ir jābūt lielākai vai vienādai ar 'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "Kā lietot teksta filtrus",
+      "desc": {
+        "text": "Filtri palīdz sašaurināt meklēšanas rezultātus. Lūk, kā tos izmantot ievades laukā:",
+        "step1": "Ierakstiet filtra atslēgas nosaukumu, kam seko kols (piemēram, \"kameras:\").",
+        "step2": "Atlasiet vērtību no ieteikumiem vai ierakstiet savu.",
+        "step3": "Izmantojiet vairākus filtrus, pievienojot tos vienu pēc otra ar atstarpi starp tiem.",
+        "step4": "Datuma filtri (pirms: un pēc:) izmanto formātu {{DateFormat}}.",
+        "step5": "Laika diapazona filtrs izmanto formātu {{exampleTime}}.",
+        "step6": "Noņemiet filtrus, noklikšķinot uz 'x' blakus tiem.",
+        "exampleLabel": "Piemērs:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Filtrēt vērtības",
+      "noFilters": "Filtri",
+      "activeFilters": "Aktīvie filtri"
+    }
+  },
+  "similaritySearch": {
+    "title": "Līdzības meklēšana",
+    "active": "Aktīva līdzības meklēšana",
+    "clear": "Notīrīt līdzības meklēšanu"
+  },
+  "placeholder": {
+    "search": "Meklēt…"
+  }
+}

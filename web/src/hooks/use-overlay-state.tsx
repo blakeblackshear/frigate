@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useContext, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { usePersistence } from "./use-persistence";
+import { useUserPersistence } from "./use-user-persistence";
+import { AuthContext } from "@/context/auth-context";
 
 export function useOverlayState<S>(
   key: string,
@@ -70,6 +72,60 @@ export function usePersistedOverlayState<S extends string>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [key, currentLocationState, navigate],
   );
+
+  return [
+    overlayStateValue ?? persistedValue ?? defaultValue,
+    setOverlayStateValue,
+    loaded,
+    deletePersistedValue,
+  ];
+}
+
+/**
+ * Like usePersistedOverlayState, but namespaces the persistence key by username.
+ * This ensures different users on the same browser don't share state.
+ * Automatically migrates data from legacy (non-namespaced) keys on first use.
+ */
+export function useUserPersistedOverlayState<S extends string>(
+  key: string,
+  defaultValue: S | undefined = undefined,
+): [
+  S | undefined,
+  (value: S | undefined, replace?: boolean) => void,
+  boolean,
+  () => void,
+] {
+  const { auth } = useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentLocationState = useMemo(() => location.state, [location]);
+
+  // currently selected value from URL state
+  const overlayStateValue = useMemo<S | undefined>(
+    () => location.state && location.state[key],
+    [location, key],
+  );
+
+  // saved value from previous session (user-namespaced with migration)
+  const [persistedValue, setPersistedValue, loaded, deletePersistedValue] =
+    useUserPersistence<S>(key, overlayStateValue);
+
+  const setOverlayStateValue = useCallback(
+    (value: S | undefined, replace: boolean = false) => {
+      setPersistedValue(value);
+      const newLocationState = { ...currentLocationState };
+      newLocationState[key] = value;
+      navigate(location.pathname, { state: newLocationState, replace });
+    },
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [key, currentLocationState, navigate, setPersistedValue],
+  );
+
+  // Don't return a value until auth has finished loading
+  if (auth.isLoading) {
+    return [undefined, setOverlayStateValue, false, deletePersistedValue];
+  }
 
   return [
     overlayStateValue ?? persistedValue ?? defaultValue,

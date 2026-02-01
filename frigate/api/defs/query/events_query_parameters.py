@@ -12,6 +12,7 @@ class EventsQueryParams(BaseModel):
     labels: Optional[str] = "all"
     sub_label: Optional[str] = "all"
     sub_labels: Optional[str] = "all"
+    attributes: Optional[str] = "all"
     zone: Optional[str] = "all"
     zones: Optional[str] = "all"
     limit: Optional[int] = 100
@@ -58,6 +59,8 @@ class EventsSearchQueryParams(BaseModel):
     limit: Optional[int] = 50
     cameras: Optional[str] = "all"
     labels: Optional[str] = "all"
+    sub_labels: Optional[str] = "all"
+    attributes: Optional[str] = "all"
     zones: Optional[str] = "all"
     after: Optional[float] = None
     before: Optional[float] = None

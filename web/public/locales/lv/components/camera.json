@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Kameru grupas",
+    "add": "Pievienot kameru grupu",
+    "edit": "Rediģēt kameru grupu",
+    "delete": {
+      "label": "Dzēst kameru grupu",
+      "confirm": {
+        "title": "Apstiprināt dzēšanu",
+        "desc": "Vai esi pārliecināts, ka vēlies izdzēst kameru grupu <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nosaukums",
+      "placeholder": "Ievadiet vārdu…",
+      "errorMessage": {
+        "mustLeastCharacters": "Kameru grupas nosaukumam jāsastāv no vismaz 2 rakstzīmēm.",
+        "exists": "Kameru grupas nosaukums jau pastāv.",
+        "nameMustNotPeriod": "Kameru grupas nosaukumā nedrīkst būt punkts.",
+        "invalid": "Nederīgs kameru grupas nosaukums."
+      }
+    },
+    "cameras": {
+      "label": "Kameras",
+      "desc": "Atlasiet kameras šai grupai."
+    },
+    "icon": "Ikona",
+    "success": "Kameru grupa ({{name}}) ir saglabāta.",
+    "camera": {
+      "birdseye": "Birds-eye",
+      "setting": {
+        "label": "Kameras straumēšanas iestatījumi",
+        "title": "Straumēšanas iestatījumi{{cameraName}}",
+        "desc": "Mainiet šīs kameru grupas paneļa tiešraides straumes iestatījumus. <em>Šie iestatījumi ir atkarīgi no ierīces/pārlūkprogrammas.</em>",
+        "audioIsAvailable": "Šai straumei ir pieejams audio",
+        "audioIsUnavailable": "Šai straumei nav pieejams audio.",
+        "audio": {
+          "tips": {
+            "title": "Šai straumei audio ir jāizvada no kameras un tas ir jākonfigurē go2rtc."
+          }
+        },
+        "stream": "Straume",
+        "placeholder": "Izvēlieties straumi",
+        "streamMethod": {
+          "label": "Straumēšanas metode",
+          "placeholder": "Izvēlieties straumēšanas metodi",
+          "method": {
+            "noStreaming": {
+              "label": "Nav straumēšanas",
+              "desc": "Kameru attēli tiks atjaunināti tikai reizi minūtē, bez tiešraides straumēšanas."
+            },
+            "smartStreaming": {
+              "label": "Viedā straumēšana (ieteicams)",
+              "desc": "Viedā straumēšana atjauninās kameras attēlu reizi minūtē, ja netiks konstatēta aktivitāte, lai taupītu joslas platumu un resursus. Kad tiks konstatēta aktivitāte, attēls nemanāmi pārslēdzas uz tiešraides straumēšanu."
+            },
+            "continuousStreaming": {
+              "label": "Nepārtraukta straumēšana",
+              "desc": {
+                "title": "Kameras attēls vienmēr būs tiešraidē, kad tas būs redzams informācijas panelī, pat ja netiks konstatēta nekāda aktivitāte.",
+                "warning": "Nepārtraukta straumēšana var izraisīt lielu joslas platuma izmantošanu un veiktspējas problēmas. Izmantojiet to piesardzīgi."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Saderības režīms",
+          "desc": "Iespējojiet šo opciju tikai tad, ja kameras tiešraides straumē tiek rādīti krāsu artefakti un attēla labajā pusē ir diagonāla līnija."
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Iestatījumi",
+      "title": "Iespējas",
+      "showOptions": "Rādīt Iespējas",
+      "hideOptions": "Paslēpt Iespējas"
+    },
+    "boundingBox": "Ierobežojošs rāmis",
+    "timestamp": "Laika zīmogs",
+    "zones": "Zonas",
+    "mask": "Maska",
+    "motion": "Kustība",
+    "regions": "Reģioni"
+  }
+}

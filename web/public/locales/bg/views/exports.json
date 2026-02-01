@@ -1,1 +1,23 @@
-{}
+{
+  "documentTitle": "Експорт - Frigate",
+  "search": "Търси",
+  "noExports": "Няма намерени експорти",
+  "deleteExport": "Изтрий експорт",
+  "deleteExport.desc": "Сигурни ли сте, че искате да изтриете {{exportName}}?",
+  "editExport": {
+    "title": "Преименувай експорт",
+    "desc": "Въведете ново име за този експорт.",
+    "saveExport": "Запази експорт"
+  },
+  "tooltip": {
+    "shareExport": "Сподели експорт",
+    "downloadVideo": "Свали видео",
+    "editName": "Редактирай име",
+    "deleteExport": "Изтрий експорт"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Неуспешно преименуване на експорт: {{errorMessage}}"
+    }
+  }
+}

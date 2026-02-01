@@ -12,20 +12,21 @@
   "filter": {
     "label": {
       "cameras": "Kameraer",
-      "labels": "Merkelapper",
+      "labels": "Etiketter",
       "search_type": "Søketype",
       "after": "Etter",
-      "min_score": "Min. poengsum",
-      "max_score": "Maks. poengsum",
+      "min_score": "Min. score",
+      "max_score": "Maks. score",
       "min_speed": "Min. hastighet",
       "zones": "Soner",
-      "sub_labels": "Under-merkelapper",
+      "sub_labels": "Underetiketter",
       "time_range": "Tidsintervall",
       "before": "Før",
       "max_speed": "Maks. hastighet",
       "recognized_license_plate": "Gjenkjent kjennemerke",
       "has_clip": "Har videoklipp",
-      "has_snapshot": "Har øyeblikksbilde"
+      "has_snapshot": "Har stillbilde",
+      "attributes": "Attributter"
     },
     "searchType": {
       "thumbnail": "Miniatyrbilde",
@@ -36,8 +37,8 @@
         "minSpeedMustBeLessOrEqualMaxSpeed": "Minimum hastighet 'min_speed' må være mindre enn eller lik maksimum hastighet 'max_speed'.",
         "beforeDateBeLaterAfter": "Før-datoen 'before' må være senere enn etter-datoen 'after'.",
         "afterDatebeEarlierBefore": "Etter-datoen 'after' må være tidligere enn før-datoen 'before'.",
-        "minScoreMustBeLessOrEqualMaxScore": "Minimum poengsum 'min_score' må være mindre enn eller lik maksimum poengsum 'max_score'.",
-        "maxScoreMustBeGreaterOrEqualMinScore": "Maksimum poengsum 'max_score' må være større enn eller lik minimum poengsum 'min_score'.",
+        "minScoreMustBeLessOrEqualMaxScore": "Minimum score 'min_score' må være mindre enn eller lik maksimum score 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Maksimum score 'max_score' må være større enn eller lik minimum score 'min_score'.",
         "maxSpeedMustBeGreaterOrEqualMinSpeed": "Maksimum hastighet 'max_speed' må være større enn eller lik minimum hastighet 'min_speed'."
       }
     },

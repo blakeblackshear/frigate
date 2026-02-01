@@ -16,12 +16,12 @@ jobs:
     name: Web - Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@master
+      - uses: actions/setup-node@v6
         with:
-          node-version: 16.x
+          node-version: 20.x
       - run: npm install
         working-directory: ./web
       - name: Lint
@@ -32,10 +32,10 @@ jobs:
     name: Web - Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@master
+      - uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - run: npm install
@@ -52,7 +52,7 @@ jobs:
     name: Python Checks
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
@@ -75,10 +75,10 @@ jobs:
     name: Python Tests
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@master
+      - uses: actions/setup-node@v6
         with:
           node-version: 20.x
       - name: Install devcontainer cli

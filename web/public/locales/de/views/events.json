@@ -8,7 +8,11 @@
   "empty": {
     "alert": "Es gibt keine zu prüfenden Alarme",
     "detection": "Es gibt keine zu prüfenden Erkennungen",
-    "motion": "Keine Bewegungsdaten gefunden"
+    "motion": "Keine Bewegungsdaten gefunden",
+    "recordingsDisabled": {
+      "title": "Aufzeichnungen müssen aktiviert sein",
+      "description": "Überprüfungselemente können nur für eine Kamera erstellt werden, wenn Aufzeichnungen für diese Kamera aktiviert sind."
+    }
   },
   "timeline": "Zeitleiste",
   "timeline.aria": "Zeitleiste auswählen",
@@ -36,5 +40,28 @@
   "selected_other": "{{count}} ausgewählt",
   "detected": "erkannt",
   "suspiciousActivity": "Verdächtige Aktivität",
-  "threateningActivity": "Bedrohliche Aktivität"
+  "threateningActivity": "Bedrohliche Aktivität",
+  "zoomIn": "Hereinzoomen",
+  "zoomOut": "Herauszoomen",
+  "detail": {
+    "label": "Detail",
+    "aria": "Detailansicht umschalten",
+    "trackedObject_one": "{{count}} Objekt",
+    "trackedObject_other": "{{count}} Objekte",
+    "noObjectDetailData": "Keine detaillierten Daten des Objekt verfügbar.",
+    "noDataFound": "Keine Detaildaten zur Überprüfung",
+    "settings": "Detailansicht Einstellungen",
+    "alwaysExpandActive": {
+      "desc": "Immer die Objektdetails vom aktivem Überprüfungselement erweitern, sofern verfügbar.",
+      "title": "Immer aktiv erweitern"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Verfolgter Punkt",
+    "clickToSeek": "Klicke, um zu dieser Zeit zu springen"
+  },
+  "normalActivity": "normal",
+  "needsReview": "benötigt Überprüfung",
+  "securityConcern": "Sicherheitsbedenken",
+  "select_all": "alle"
 }

@@ -6,11 +6,13 @@
     "masksAndZones": "Maske- og soneeditor - Frigate",
     "motionTuner": "Bevegelsesjustering - Frigate",
     "object": "Test og feilsøk - Frigate",
-    "general": "Generelle innstillinger - Frigate",
+    "general": "Innstillinger for brukergrensesnitt - Frigate",
     "classification": "Klassifiseringsinnstillinger - Frigate",
     "frigatePlus": "Frigate+ innstillinger - Frigate",
-    "notifications": "Meldingsvarsler Innstillinger - Frigate",
-    "enrichments": "Utvidelser Innstillinger - Frigate"
+    "notifications": "Innstillinger for meldingsvarsler - Frigate",
+    "enrichments": "Innstillinger for utvidelser - Frigate",
+    "cameraManagement": "Administrer kameraer - Frigate",
+    "cameraReview": "Innstillinger for kamerainspeksjon - Frigate"
   },
   "menu": {
     "classification": "Klassifisering",
@@ -23,7 +25,10 @@
     "ui": "Brukergrensesnitt",
     "notifications": "Meldingsvarsler",
     "enrichments": "Utvidelser",
-    "triggers": "Utløsere"
+    "triggers": "Utløsere",
+    "cameraManagement": "Administrasjon",
+    "cameraReview": "Inspeksjon",
+    "roles": "Roller"
   },
   "dialog": {
     "unsavedChanges": {
@@ -45,6 +50,14 @@
       "automaticLiveView": {
         "label": "Automatisk direktevisning",
         "desc": "Bytt automatisk til et kameras direktevisning når aktivitet oppdages. Deaktivering av dette valget gjør at statiske kamerabilder i Direkte-dashbord kun oppdateres én gang i minuttet."
+      },
+      "displayCameraNames": {
+        "label": "Vis alltid kameranavn",
+        "desc": "Vis alltid kameranavnene i en merkelapp i dashbordet for direktevisning med flere kameraer."
+      },
+      "liveFallbackTimeout": {
+        "label": "Tidsavbrudd for reserveløsning for direkteavspiller",
+        "desc": "Når et kameras direktestrøm med høy kvalitet er utilgjengelig, bytt til lav båndbreddemodus etter dette antallet sekunder. Standard: 3."
       }
     },
     "storedLayouts": {
@@ -78,7 +91,7 @@
         "clearStreamingSettingsFailed": "Kunne ikke fjerne strømmingsinnstillinger: {{errorMessage}}"
       }
     },
-    "title": "Generelle innstillinger",
+    "title": "Innstillinger for brukergrensesnitt",
     "cameraGroupStreaming": {
       "title": "Strømmingsinnstillinger for kameragrupper",
       "desc": "Strømmingsinnstillingene lagres lokalt i nettleseren.",
@@ -238,7 +251,8 @@
           "alreadyExists": "En sone med dette navnet finnes allerede for dette kameraet.",
           "mustBeAtLeastTwoCharacters": "Sonenavnet må være minst 2 tegn langt.",
           "mustNotContainPeriod": "Sonenavnet kan ikke inneholde punktum.",
-          "hasIllegalCharacter": "Sonenavnet inneholder ugyldige tegn."
+          "hasIllegalCharacter": "Sonenavnet inneholder ugyldige tegn.",
+          "mustHaveAtLeastOneLetter": "Sonenavnet må inneholde minst én bokstav."
         }
       },
       "distance": {
@@ -300,7 +314,7 @@
       "name": {
         "title": "Navn",
         "inputPlaceHolder": "Skriv inn et navn…",
-        "tips": "Navnet må være minst 2 tegn langt og må ikke være det samme som et kamera- eller sone-navn."
+        "tips": "Navnet må være minst 2 tegn langt, inneholde minst én bokstav, og må ikke være det samme som et kamera- eller sone-navn for dette kameraet."
       },
       "loiteringTime": {
         "title": "Oppholdstid",
@@ -331,7 +345,7 @@
         }
       },
       "toast": {
-        "success": "Sone ({{zoneName}}) er lagret. Start Frigate på nytt for å bruke endringer."
+        "success": "Sone ({{zoneName}}) er lagret."
       }
     },
     "motionMasks": {
@@ -357,8 +371,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å aktivere endringene.",
-          "noName": "Bevegelsesmasken er lagret. Start Frigate på nytt for å aktivere endringene."
+          "title": "{{polygonName}} er lagret.",
+          "noName": "Bevegelsesmasken er lagret."
         }
       }
     },
@@ -382,8 +396,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å aktivere endringene.",
-          "noName": "Objektmasken er lagret. Start Frigate på nytt for å aktivere endringene."
+          "title": "{{polygonName}} er lagret.",
+          "noName": "Objektmasken er lagret."
         }
       }
     },
@@ -419,7 +433,7 @@
     "objectList": "Objektliste",
     "noObjects": "Ingen objekter",
     "boundingBoxes": {
-      "title": "Omsluttende bokser",
+      "title": "Avgrensningsbokser",
       "desc": "Vis omsluttende bokser rundt sporede objekter",
       "colors": {
         "label": "Farge på omsluttende bokser for objekt",
@@ -446,8 +460,8 @@
     },
     "objectShapeFilterDrawing": {
       "document": "Se dokumentasjonen ",
-      "score": "Poengsum",
-      "ratio": "Forhold",
+      "score": "Score",
+      "ratio": "Sideforhold",
       "area": "Areal",
       "title": "Tegning av objektformfilter",
       "desc": "Tegn et rektangel på bildet for å vise areal- og størrelsesforhold",
@@ -464,7 +478,7 @@
     "audio": {
       "title": "Lyd",
       "noAudioDetections": "Ingen lyddeteksjoner",
-      "score": "poengsum",
+      "score": "score",
       "currentRMS": "Nåværende RMS",
       "currentdbFS": "Nåværende dbFS"
     },
@@ -481,7 +495,7 @@
       "desc": "Administrer brukerprofiler for denne Frigate-instansen."
     },
     "addUser": "Legg til bruker",
-    "updatePassword": "Oppdater passord",
+    "updatePassword": "Nullstill passord",
     "toast": {
       "success": {
         "deleteUser": "Bruker {{user}} ble slettet",
@@ -518,7 +532,16 @@
             "strong": "Sterkt"
           },
           "match": "Passordene samsvarer",
-          "notMatch": "Passordene samsvarer ikke"
+          "notMatch": "Passordene samsvarer ikke",
+          "show": "Vis passord",
+          "hide": "Skjul passord",
+          "requirements": {
+            "title": "Passordkrav:",
+            "length": "Minst 8 tegn",
+            "uppercase": "Minst en stor bokstav",
+            "digit": "Minst ett tall",
+            "special": "Minst ett spesialtegn (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "Nytt passord",
@@ -528,7 +551,11 @@
           }
         },
         "usernameIsRequired": "Brukernavn er påkrevd",
-        "passwordIsRequired": "Passord er påkrevd"
+        "passwordIsRequired": "Passord er påkrevd",
+        "currentPassword": {
+          "title": "Nåværende passord",
+          "placeholder": "Skriv inn nåværende passord"
+        }
       },
       "changeRole": {
         "desc": "Oppdater tillatelser for <strong>{{username}}</strong>",
@@ -559,7 +586,12 @@
         "setPassword": "Angi passord",
         "desc": "Opprett et sterkt passord for å sikre denne kontoen.",
         "cannotBeEmpty": "Passordet kan ikke være tomt",
-        "doNotMatch": "Passordene samsvarer ikke"
+        "doNotMatch": "Passordene samsvarer ikke",
+        "currentPasswordRequired": "Nåværende passord er påkrevd",
+        "incorrectCurrentPassword": "Nåværende passord er feil",
+        "passwordVerificationFailed": "Kunne ikke verifisere passord",
+        "multiDeviceWarning": "Andre enheter du er logget inn på vil kreve ny innlogging innen {{refresh_time}}.",
+        "multiDeviceAdmin": "Du kan også tvinge alle brukere til å logge inn på nytt umiddelbart ved å rotere JWT-hemmeligheten din."
       }
     },
     "table": {
@@ -567,7 +599,7 @@
       "actions": "Handlinger",
       "role": "Rolle",
       "changeRole": "Endre brukerrolle",
-      "password": "Passord",
+      "password": "Nullstill passord",
       "deleteUser": "Slett bruker",
       "noUsers": "Ingen brukere funnet."
     }
@@ -655,15 +687,15 @@
     },
     "title": "Frigate+ Innstillinger",
     "snapshotConfig": {
-      "title": "Konfigurasjon av øyeblikksbilde",
-      "desc": "Innsending til Frigate+ krever at både øyeblikksbilder og <code>clean_copy</code>-øyeblikksbilder er aktivert i konfigurasjonen din.",
+      "title": "Konfigurasjon av stillbilde",
+      "desc": "Innsending til Frigate+ krever at både stillbilder og <code>clean_copy</code>-stillbilder er aktivert i konfigurasjonen din.",
       "documentation": "Se dokumentasjonen",
       "table": {
         "camera": "Kamera",
-        "snapshots": "Øyeblikksbilder",
-        "cleanCopySnapshots": "<code>clean_copy</code>-øyeblikksbilder"
+        "snapshots": "Stillbilder",
+        "cleanCopySnapshots": "<code>clean_copy</code>-stillbilder"
       },
-      "cleanCopyWarning": "Noen kameraer har øyeblikksbilder aktivert, men ren kopi er deaktivert. Du må aktivere <code>clean_copy</code> i øyeblikksbilde-konfigurasjonen for å kunne sende bilder fra disse kameraene til Frigate+."
+      "cleanCopyWarning": "Noen kameraer har stillbilder aktivert, men ren kopi er deaktivert. Du må aktivere <code>clean_copy</code> i stillbilde-konfigurasjonen for å kunne sende bilder fra disse kameraene til Frigate+."
     },
     "toast": {
       "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å aktivere endringene.",
@@ -675,12 +707,12 @@
   "enrichments": {
     "title": "Innstillinger for utvidelser",
     "licensePlateRecognition": {
-      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en under-merkelapp på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
+      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en underetikett på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
       "title": "Kjennemerke gjenkjenning",
       "readTheDocumentation": "Se dokumentasjonen"
     },
     "birdClassification": {
-      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en underetikett. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
       "title": "Klassifisering av fugler"
     },
     "semanticSearch": {
@@ -724,7 +756,7 @@
         }
       },
       "title": "Ansiktsgjenkjenning",
-      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en underetikett. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
       "readTheDocumentation": "Se dokumentasjonen"
     },
     "unsavedChanges": "Ulagrede endringer i innstillinger for utvidelser",
@@ -737,10 +769,10 @@
   "triggers": {
     "documentTitle": "Utløsere",
     "management": {
-      "title": "Utløserhåndtering",
+      "title": "Utløser",
       "desc": "Administrer utløsere for {{camera}}. Bruk miniatyrbilde-type for å utløse på lignende miniatyrbilder som det sporede objektet du har valgt, og beskrivelsestype for å utløse på lignende beskrivelser basert på teksten du spesifiserer."
     },
-    "addTrigger": "Legg til utløs­er",
+    "addTrigger": "Legg til utløser",
     "table": {
       "name": "Navn",
       "type": "Type",
@@ -758,7 +790,9 @@
     },
     "actions": {
       "alert": "Marker som varsel",
-      "notification": "Send meldingsvarsel"
+      "notification": "Send meldingsvarsel",
+      "sub_label": "Legg til underetikett",
+      "attribute": "Legg til attributt"
     },
     "dialog": {
       "createTrigger": {
@@ -776,25 +810,28 @@
       "form": {
         "name": {
           "title": "Navn",
-          "placeholder": "Skriv inn navn på utløser",
+          "placeholder": "Navngi denne utløseren",
           "error": {
-            "minLength": "Navnet må være minst 2 tegn langt.",
-            "invalidCharacters": "Navnet kan bare inneholde bokstaver, tall, understreker og bindestreker.",
+            "minLength": "Feltet må være minst 2 tegn langt.",
+            "invalidCharacters": "Feltet kan bare inneholde bokstaver, tall, understreker og bindestreker.",
             "alreadyExists": "En utløser med dette navnet finnes allerede for dette kameraet."
-          }
+          },
+          "description": "Skriv inn et unikt navn eller beskrivelse for å identifisere denne utløseren"
         },
         "enabled": {
           "description": "Aktiver eller deaktiver denne utløseren"
         },
         "type": {
           "title": "Type",
-          "placeholder": "Velg utløsertype"
+          "placeholder": "Velg utløsertype",
+          "description": "Utløs når en lignende sporet objektbeskrivelse blir detektert",
+          "thumbnail": "Utløs når et lignende sporet miniatyrbilde blir detektert"
         },
         "content": {
           "title": "Innhold",
-          "imagePlaceholder": "Velg et bilde",
+          "imagePlaceholder": "Velg et miniatyrbilde",
           "textPlaceholder": "Skriv inn tekstinnhold",
-          "imageDesc": "Velg et bilde for å utløse denne handlingen når et lignende bilde oppdages.",
+          "imageDesc": "Kun de siste 100 miniatyrbildene vises. Hvis du ikke finner ønsket miniatyrbilde, kan du se gjennom tidligere objekter i Utforsk og opprette en utløser fra menyen der.",
           "textDesc": "Skriv inn tekst for å utløse denne handlingen når en lignende beskrivelse av et sporet objekt oppdages.",
           "error": {
             "required": "Innhold er påkrevd."
@@ -805,14 +842,20 @@
           "error": {
             "min": "Terskelverdien må minst være 0",
             "max": "Terskelverdien kan maksimum være 1"
-          }
+          },
+          "desc": "Angi likhetsgrensen for denne utløseren. En høyere grense betyr at et høyere samsvar kreves for å utløse hendelsen."
         },
         "actions": {
           "title": "Handlinger",
-          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Velg en ekstra handling som skal utføres når denne utløseren aktiveres.",
+          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Underetiketter legger til navnet på utløseren i objektetiketten. Attributter er søkbare metadata som lagres separat i objektets sporingsmetadata.",
           "error": {
             "min": "Minst én handling må velges."
           }
+        },
+        "friendly_name": {
+          "description": "Et valgfritt brukervennlig navn eller beskrivende tekst for denne utløseren.",
+          "title": "Brukervennlig navn",
+          "placeholder": "Navngi eller beskriv denne utløseren"
         }
       }
     },
@@ -826,6 +869,27 @@
         "createTriggerFailed": "Kunne ikke opprette utløser: {{errorMessage}}",
         "updateTriggerFailed": "Kunne ikke oppdatere utløser: {{errorMessage}}",
         "deleteTriggerFailed": "Kunne ikke slette utløser: {{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "title": "Semantisk søk er deaktivert",
+      "desc": "Semantisk søk må aktiveres for å bruke utløsere."
+    },
+    "wizard": {
+      "title": "Opprett utløser",
+      "step1": {
+        "description": "Konfigurer grunnleggende innstillinger for utløseren."
+      },
+      "step2": {
+        "description": "Sett opp innholdet som skal utløse denne handlingen."
+      },
+      "step3": {
+        "description": "Konfigurer terskelen og handlingene for denne utløseren."
+      },
+      "steps": {
+        "nameAndType": "Navn og type",
+        "configureData": "Konfigurer data",
+        "thresholdAndActions": "Terskel og handlinger"
       }
     }
   },
@@ -848,7 +912,8 @@
         "createRole": "Rollen {{role}} ble opprettet",
         "updateCameras": "Kameraer oppdatert for rollen {{role}}",
         "deleteRole": "Rollen {{role}} ble slettet",
-        "userRolesUpdated": "{{count}} bruker(e) som var tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer."
+        "userRolesUpdated_one": "{{count}} bruker tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer.",
+        "userRolesUpdated_other": "{{count}} brukere tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer."
       },
       "error": {
         "createRoleFailed": "Kunne ikke opprette rolle: {{errorMessage}}",
@@ -886,6 +951,359 @@
           "desc": "Velg hvilke kameraer denne rollen skal ha tilgang til. Minst ett kamera må velges.",
           "required": "Minst ett kamera må velges."
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Legg til kamera",
+    "description": "Følg trinnene nedenfor for å legge til et nytt kamera i din Frigate-installasjon.",
+    "steps": {
+      "nameAndConnection": "Navn og tilkobling",
+      "streamConfiguration": "Strømkonfigurasjon",
+      "validationAndTesting": "Validering og testing",
+      "probeOrSnapshot": "Sjekk eller stillbilde"
+    },
+    "save": {
+      "success": "Lagret nytt kamera {{cameraName}}.",
+      "failure": "Feil ved lagring av {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Oppløsning",
+      "video": "Video",
+      "audio": "Lyd",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Vennligst oppgi en gyldig strøm-URL",
+      "testFailed": "Strømmetest feilet: {{error}}"
+    },
+    "step1": {
+      "description": "Skriv inn kameradetaljene dine og velg å sjekke kameraet eller manuelt velg produsent.",
+      "cameraName": "Kameranavn",
+      "cameraNamePlaceholder": "f.eks. front_dor eller Hageoversikt",
+      "host": "Vert/IP-adresse",
+      "port": "Port",
+      "username": "Brukernavn",
+      "usernamePlaceholder": "Valgfritt",
+      "password": "Passord",
+      "passwordPlaceholder": "Valgfritt",
+      "selectTransport": "Velg transportprotokoll",
+      "cameraBrand": "Kameramerke",
+      "selectBrand": "Velg kameramerke for URL-mal",
+      "customUrl": "Egendefinert strømme-URL",
+      "brandInformation": "Merkevare-informasjon",
+      "brandUrlFormat": "For kameraer med RTSP URL-format som: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://brukernavn:passord@vert:port/sti",
+      "testConnection": "Test tilkobling",
+      "testSuccess": "Tilkoblingstesten var vellykket!",
+      "testFailed": "Tilkoblingstesten feilet. Vennligst sjekk inntastingen din og prøv igjen.",
+      "streamDetails": "Strømdetaljer",
+      "warnings": {
+        "noSnapshot": "Kunne ikke hente et øyeblikksbilde fra den konfigurerte strømmen."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Enten velg et kameramerke med vert/IP eller velg 'Annet' med en egendefinert URL",
+        "nameRequired": "Kameranavn er påkrevd",
+        "nameLength": "Kameranavnet må være 64 tegn eller mindre",
+        "invalidCharacters": "Kameranavnet inneholder ugyldige tegn",
+        "nameExists": "Kameranavnet finnes allerede",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvare-innstillinger og start kameraveiviseren på nytt."
+        },
+        "customUrlRtspRequired": "Egendefinerte URL-er må begynne med \"rtsp://\". Manuell konfigurering kreves for kamera­strømmer som ikke bruker RTSP."
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Henter kamerametadata…",
+        "fetchingSnapshot": "Henter øyeblikksbilde for kamera..."
+      },
+      "connectionSettings": "Tilkoblingsinnstillinger",
+      "detectionMethod": "Metode for strømdeteksjon",
+      "onvifPort": "ONVIF-port",
+      "probeMode": "Sjekk kamera",
+      "manualMode": "Manuelt valg",
+      "detectionMethodDescription": "Sjekk kameraet med ONVIF (hvis støttet) for å finne kameraets strømme-URL-er, eller velg kameramerke manuelt for å bruke forhåndsdefinerte URL-er. For å skrive inn en egendefinert RTSP URL, velg manuell metode og velg \"Annet\".",
+      "onvifPortDescription": "For kameraer som støtter ONVIF, er dette vanligvis 80 eller 8080.",
+      "useDigestAuth": "Bruk digest-autentisering",
+      "useDigestAuthDescription": "Bruk HTTP digest-autentisering for ONVIF. Noen kameraer kan kreve et dedikert ONVIF brukernavn/passord i stedet for standard administrator-bruker."
+    },
+    "step2": {
+      "description": "Sjekk kameraet for tilgjengelige strømmer eller konfigurer manuelle innstillinger basert på valgt deteksjonsmetode.",
+      "streamsTitle": "Kamerastrømmer",
+      "addStream": "Legg til strøm",
+      "addAnotherStream": "Legg til en annen strøm",
+      "streamTitle": "Strøm {{number}}",
+      "streamUrl": "Strøm-URL",
+      "streamUrlPlaceholder": "rtsp://brukernavn:passord@vert:port/sti",
+      "url": "URL",
+      "resolution": "Oppløsning",
+      "selectResolution": "Velg oppløsning",
+      "quality": "Kvalitet",
+      "selectQuality": "Velg kvalitet",
+      "roles": "Roller",
+      "roleLabels": {
+        "detect": "Objektdeteksjon",
+        "record": "Opptak",
+        "audio": "Lyd"
+      },
+      "testStream": "Test tilkobling",
+      "testSuccess": "Tilkoblingstest vellykket!",
+      "testFailed": "Tilkoblingstest feilet. Vennligst sjekk inndataene dine og prøv igjen.",
+      "testFailedTitle": "Test feilet",
+      "connected": "Tilkoblet",
+      "notConnected": "Ikke tilkoblet",
+      "featuresTitle": "Funksjoner",
+      "go2rtc": "Reduser tilkoblinger til kameraet",
+      "detectRoleWarning": "Minst én strøm må ha rollen «deteksjon» for å fortsette.",
+      "rolesPopover": {
+        "title": "Strømroller",
+        "detect": "Hovedstrøm for objektdeteksjon.",
+        "record": "Lagrer segmenter av videostrømmen basert på konfigurasjonsinnstillinger.",
+        "audio": "Strøm for lydbasert deteksjon."
+      },
+      "featuresPopover": {
+        "title": "Strømfunksjoner",
+        "description": "Bruk go2rtc-restrømming for å redusere antall tilkoblinger til kameraet ditt."
+      },
+      "streamDetails": "Strømdetaljer",
+      "probing": "Test kamera...",
+      "retry": "Prøv på nytt",
+      "testing": {
+        "probingMetadata": "Sjekker metadata for kamera...",
+        "fetchingSnapshot": "Henter stillbilde fra kamera..."
+      },
+      "probeFailed": "Kunne ikke å sjekke kamera: {{error}}",
+      "probingDevice": "Tester enhet...",
+      "probeSuccessful": "Sjekk vellykket",
+      "probeError": "Sjekk feilet",
+      "probeNoSuccess": "Sjekk mislyktes",
+      "deviceInfo": "Enhetsinformasjon",
+      "manufacturer": "Produsent",
+      "model": "Modell",
+      "firmware": "Fastvare",
+      "profiles": "Profiler",
+      "ptzSupport": "PTZ-støtte",
+      "autotrackingSupport": "Autosporing-støtte",
+      "presets": "Forhåndsinnstillinger",
+      "rtspCandidates": "RTSP-kandidater",
+      "rtspCandidatesDescription": "Følgende RTSP URL-er ble funnet ved sjekk av kameraet. Test tilkoblingen for å se strømmetadata.",
+      "noRtspCandidates": "Ingen RTSP URL-er ble funnet fra kameraet. Det kan hende at påloggingsinformasjonen din er feil, eller at kameraet ikke støtter ONVIF eller metoden som brukes for å hente RTSP URL-er. Gå tilbake og skriv inn RTSP URL-en manuelt.",
+      "candidateStreamTitle": "Kandidat {{number}}",
+      "useCandidate": "Bruk",
+      "uriCopy": "Kopier",
+      "uriCopied": "URI kopiert til utklippstavlen",
+      "testConnection": "Test tilkobling",
+      "toggleUriView": "Klikk for å vise/skjule full URI",
+      "errors": {
+        "hostRequired": "Vert/IP-adresse er påkrevd"
+      }
+    },
+    "step3": {
+      "description": "Konfigurer strømroller og legg til flere strømmer for kameraet ditt.",
+      "validationTitle": "Strømvalidering",
+      "connectAllStreams": "Koble til alle strømmer",
+      "reconnectionSuccess": "Gjenoppkobling vellykket.",
+      "reconnectionPartial": "Noen strømmer kunne ikke gjenoppkobles.",
+      "streamUnavailable": "Forhåndsvisning av strøm utilgjengelig",
+      "reload": "Last inn på nytt",
+      "connecting": "Kobler til...",
+      "streamTitle": "Strøm {{number}}",
+      "valid": "Gyldig",
+      "failed": "Feilet",
+      "notTested": "Ikke testet",
+      "connectStream": "Koble til",
+      "connectingStream": "Kobler til",
+      "disconnectStream": "Koble fra",
+      "estimatedBandwidth": "Estimert båndbredde",
+      "roles": "Roller",
+      "none": "Ingen",
+      "error": "Feil",
+      "streamValidated": "Strøm {{number}} ble validert",
+      "streamValidationFailed": "Validering av strøm {{number}} feilet",
+      "saveAndApply": "Lagre nytt kamera",
+      "saveError": "Ugyldig konfigurasjon. Vennligst sjekk innstillingene dine.",
+      "issues": {
+        "title": "Strømvalidering",
+        "videoCodecGood": "Video-kodek er {{codec}}.",
+        "audioCodecGood": "Lyd-kodek er {{codec}}.",
+        "noAudioWarning": "Ingen lyd oppdaget for denne strømmen, opptak vil ikke ha lyd.",
+        "audioCodecRecordError": "AAC lyd-kodek er påkrevd for å støtte lyd i opptak.",
+        "audioCodecRequired": "En lydstrøm er påkrevd for å støtte lyddeteksjon.",
+        "restreamingWarning": "Å redusere tilkoblinger til kameraet for opptaksstrømmen kan øke CPU-bruken noe.",
+        "dahua": {
+          "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Dahua / Amcrest / EmpireTech-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
+        },
+        "hikvision": {
+          "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Hikvision-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
+        },
+        "resolutionHigh": "En oppløsning på {{resolution}} kan føre til økt ressursbruk.",
+        "resolutionLow": "En oppløsning på {{resolution}} kan være for lav for pålitelig deteksjon av små objekter."
+      },
+      "ffmpegModuleDescription": "Hvis strømmen ikke lastes inn etter flere forsøk, kan du prøve å aktivere dette. Når det er aktivert, vil Frigate bruke ffmpeg-modulen sammen med go2rtc. Dette kan gi bedre kompatibilitet med enkelte kamerastrømmer.",
+      "ffmpegModule": "Bruk kompatibilitetsmodus for strøm",
+      "streamsTitle": "Kamerastrømmer",
+      "addStream": "Legg til strøm",
+      "addAnotherStream": "Legg til en annen strøm",
+      "streamUrl": "Strøm-URL",
+      "streamUrlPlaceholder": "rtsp://brukernavn:passord@vert:port/sti",
+      "selectStream": "Velg en strøm",
+      "searchCandidates": "Søk blant kandidater...",
+      "noStreamFound": "Ingen strøm funnet",
+      "url": "URL",
+      "resolution": "Oppløsning",
+      "selectResolution": "Velg oppløsning",
+      "quality": "Kvalitet",
+      "selectQuality": "Velg kvalitet",
+      "roleLabels": {
+        "detect": "Objektdeteksjon",
+        "record": "Opptak",
+        "audio": "Lyd"
+      },
+      "testStream": "Test tilkobling",
+      "testSuccess": "Strømmetest vellykket!",
+      "testFailed": "Strømmetest feilet",
+      "testFailedTitle": "Test feilet",
+      "connected": "Tilkoblet",
+      "notConnected": "Ikke tilkoblet",
+      "featuresTitle": "Funksjoner",
+      "go2rtc": "Reduser antall tilkoblinger til kamera",
+      "detectRoleWarning": "Minst én strøm må ha \"deteksjon\"-rollen for å fortsette.",
+      "rolesPopover": {
+        "title": "Strømroller",
+        "detect": "Hovedstrøm for objektdeteksjon.",
+        "record": "Lagrer segmenter av videostrømmen basert på konfigurasjonsinnstillinger.",
+        "audio": "Strøm for lydbasert deteksjon."
+      },
+      "featuresPopover": {
+        "title": "Strømfunksjoner",
+        "description": "Bruk go2rtc-restrømming for å redusere antall tilkoblinger til kameraet."
+      }
+    },
+    "step4": {
+      "description": "Endelig validering og analyse før du lagrer det nye kameraet. Koble til hver strøm før du lagrer.",
+      "validationTitle": "Strømvalidering",
+      "connectAllStreams": "Koble til alle strømmer",
+      "reconnectionSuccess": "Tilkobling vellykket.",
+      "reconnectionPartial": "Noen strømmer kunne ikke koble til på nytt.",
+      "streamUnavailable": "Forhåndsvisning av strøm utilgjengelig",
+      "reload": "Last på nytt",
+      "connecting": "Kobler til...",
+      "streamTitle": "Strøm {{number}}",
+      "valid": "Gyldig",
+      "failed": "Feilet",
+      "notTested": "Ikke testet",
+      "connectStream": "Koble til",
+      "connectingStream": "Kobler til",
+      "disconnectStream": "Koble fra",
+      "estimatedBandwidth": "Estimert båndbredde",
+      "roles": "Roller",
+      "ffmpegModule": "Bruk kompatibilitetsmodus for strøm",
+      "ffmpegModuleDescription": "Hvis strømmen ikke lastes etter flere forsøk, prøv å aktivere dette. Når aktivert, vil Frigate bruke ffmpeg-modulen med go2rtc. Dette kan gi bedre kompatibilitet med noen kamerastrømmer.",
+      "none": "Ingen",
+      "error": "Feil",
+      "streamValidated": "Strøm {{number}} validert",
+      "streamValidationFailed": "Validering av strøm {{number}} feilet",
+      "saveAndApply": "Lagre nytt kamera",
+      "saveError": "Ugyldig konfigurasjon. Vennligst sjekk innstillingene dine.",
+      "issues": {
+        "title": "Strømvalidering",
+        "videoCodecGood": "Videokodek er {{codec}}.",
+        "audioCodecGood": "Lydkodek er {{codec}}.",
+        "resolutionHigh": "En oppløsning på {{resolution}} kan føre til økt ressursbruk.",
+        "resolutionLow": "En oppløsning på {{resolution}} kan være for lav for pålitelig deteksjon av små objekter.",
+        "noAudioWarning": "Ingen lyd oppdaget for denne strømmen, opptak vil ikke ha lyd.",
+        "audioCodecRecordError": "AAC-lydkodeken kreves for å støtte lyd i opptak.",
+        "audioCodecRequired": "En lydstrøm kreves for å støtte lyddeteksjon.",
+        "restreamingWarning": "Å redusere tilkoblinger til kameraet for opptaksstrømmen kan øke CPU-bruken noe.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvareinnstillinger og start veiviseren på nytt.",
+          "reolink-http": "Reolink HTTP-strømmer bør bruke FFmpeg for bedre kompatibilitet. Aktiver 'Bruk kompatibilitetsmodus for strøm' for denne strømmen."
+        },
+        "dahua": {
+          "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Dahua / Amcrest / EmpireTech-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
+        },
+        "hikvision": {
+          "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Hikvision-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
+        }
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "Administrer kameraer",
+    "addCamera": "Legg til nytt kamera",
+    "editCamera": "Rediger kamera:",
+    "selectCamera": "Velg et kamera",
+    "backToSettings": "Tilbake til kamerainnstillinger",
+    "streams": {
+      "title": "Aktiver / Deaktiver kameraer",
+      "desc": "Midlertidig deaktiver et kamera til Frigate startes på nytt. Deaktivering av et kamera stopper Frigates behandling av dette kameraets strømmer fullstendig. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke go2rtc-restrømming.</em>"
+    },
+    "cameraConfig": {
+      "add": "Legg til kamera",
+      "edit": "Rediger kamera",
+      "description": "Konfigurer kamerainnstillinger, inkludert strømmeinnganger og roller.",
+      "name": "Kameranavn",
+      "nameRequired": "Kameranavn er påkrevd",
+      "nameLength": "Kameranavnet må være mindre enn 64 tegn.",
+      "namePlaceholder": "f.eks front_dor eller Hage Oversikt",
+      "enabled": "Aktivert",
+      "ffmpeg": {
+        "inputs": "Inngangsstrømmer",
+        "path": "Lenke til strøm",
+        "pathRequired": "Lenke til strøm er påkrevd",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roller",
+        "rolesRequired": "Minst én rolle er påkrevd",
+        "rolesUnique": "Hver rolle (lyd, deteksjon, opptak) kan bare tildeles én strøm",
+        "addInput": "Legg til inngangsstrøm",
+        "removeInput": "Fjern inngangsstrøm",
+        "inputsRequired": "Minst én inngangsstrøm er påkrevd"
+      },
+      "go2rtcStreams": "go2rtc-strømmer",
+      "streamUrls": "Strøm-URL'er",
+      "addUrl": "Legg til URL",
+      "addGo2rtcStream": "Legg til go2rtc-strøm",
+      "toast": {
+        "success": "Kamera {{cameraName}} ble lagret"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Innstillinger for kamerainspeksjon",
+    "object_descriptions": {
+      "title": "Generative KI-objektbeskrivelser",
+      "desc": "Midlertidig aktiver/deaktiver generative KI-objektbeskrivelser for dette kameraet. Når deaktivert, vil KI-genererte beskrivelser ikke bli forespurt for sporede objekter på dette kameraet."
+    },
+    "review_descriptions": {
+      "title": "Generative KI beskrivelser for inspeksjon",
+      "desc": "Midlertidig aktiver/deaktiver inspeksjonsbeskrivelser med generativ KI for dette kameraet. Når deaktivert, vil det ikke bli bedt om KI-genererte beskrivelser for inspeksjonselementer på dette kameraet."
+    },
+    "review": {
+      "title": "Inspiser",
+      "desc": "Aktiver/deaktiver varsler og deteksjoner midlertidig for dette kameraet til Frigate startes på nytt. Når deaktivert, vil det ikke genereres nye inspeksjonselementer. ",
+      "alerts": "Varsler ",
+      "detections": "Deteksjoner "
+    },
+    "reviewClassification": {
+      "title": "Inspeksjonsklassifisering",
+      "desc": "Frigate kategoriserer inspeksjonselementer som Varsler og Deteksjoner. Som standard regnes alle <em>person</em>- og <em>bil</em>-objekter som Varsler. Du kan finjustere klassifiseringen ved å konfigurere nødvendige soner.",
+      "noDefinedZones": "Ingen soner er definert for dette kameraet.",
+      "objectAlertsTips": "Alle {{alertsLabels}}-objekter på {{cameraName}} vil bli vist som varsler.",
+      "zoneObjectAlertsTips": "Alle {{alertsLabels}}-objekter oppdaget i {{zone}} på {{cameraName}} vil bli vist som varsler.",
+      "objectDetectionsTips": "Alle {{detectionsLabels}}-objekter som ikke er kategorisert på {{cameraName}}, vil bli vist som deteksjoner uavhengig av hvilken sone de er i.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alle {{detectionsLabels}}-objekter som ikke er kategorisert i {{zone}} på {{cameraName}}, vil bli vist som deteksjoner.",
+        "notSelectDetections": "Alle {{detectionsLabels}}-objekter oppdaget i {{zone}} på {{cameraName}} som ikke er kategorisert som varsler, vil bli vist som deteksjoner uavhengig av hvilken sone de er i.",
+        "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}}-objekter som ikke er kategorisert på {{cameraName}}, vil bli vist som deteksjoner uavhengig av hvilken sone de er i."
+      },
+      "unsavedChanges": "Ulagrede innstillinger for inspeksjonsklassifisering for {{camera}}",
+      "selectAlertsZones": "Velg soner for varsler",
+      "selectDetectionsZones": "Velg soner for deteksjoner",
+      "limitDetections": "Avgrens deteksjoner til bestemte soner",
+      "toast": {
+        "success": "Konfigurasjonen for inspeksjonsklassifisering er lagret. Start Frigate på nytt for å aktivere endringer."
       }
     }
   }

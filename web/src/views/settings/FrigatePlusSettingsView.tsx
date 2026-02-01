@@ -1,7 +1,7 @@
 import Heading from "@/components/ui/heading";
 import { Label } from "@/components/ui/label";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { Separator } from "../../components/ui/separator";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type FrigatePlusModel = {
   id: string;
@@ -211,7 +211,7 @@ export default function FrigatePlusSettingsView({
     <>
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+        <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
           <Heading as="h4" className="mb-2">
             {t("frigatePlus.title")}
           </Heading>

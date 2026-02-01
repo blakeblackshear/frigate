@@ -1,10 +1,7 @@
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import {
-  useHashState,
-  usePersistedOverlayState,
-  useSearchEffect,
-} from "@/hooks/use-overlay-state";
+import { useHashState, useSearchEffect } from "@/hooks/use-overlay-state";
+import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
@@ -14,17 +11,17 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { useIsCustomRole } from "@/hooks/use-is-custom-role";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
-  const isCustomRole = useIsCustomRole();
+  const isAdmin = useIsAdmin();
 
   // selection
 
   const [selectedCameraName, setSelectedCameraName] = useHashState();
-  const [cameraGroup, setCameraGroup, loaded, ,] = usePersistedOverlayState(
+  const [cameraGroup, setCameraGroup, loaded] = useUserPersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
@@ -93,19 +90,23 @@ function Live() {
   const allowedCameras = useAllowedCameras();
 
   const includesBirdseye = useMemo(() => {
+    // Restricted users should never have access to birdseye
+    if (!isAdmin) {
+      return false;
+    }
+
     if (
       config &&
       Object.keys(config.camera_groups).length &&
       cameraGroup &&
       config.camera_groups[cameraGroup] &&
-      cameraGroup != "default" &&
-      (!isCustomRole || "birdseye" in allowedCameras)
+      cameraGroup != "default"
     ) {
       return config.camera_groups[cameraGroup].cameras.includes("birdseye");
     } else {
       return false;
     }
-  }, [config, cameraGroup, allowedCameras, isCustomRole]);
+  }, [config, cameraGroup, isAdmin]);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -133,10 +134,20 @@ function Live() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config, cameraGroup, allowedCameras]);
 
-  const selectedCamera = useMemo(
-    () => cameras.find((cam) => cam.name == selectedCameraName),
-    [cameras, selectedCameraName],
-  );
+  const selectedCamera = useMemo(() => {
+    if (!config || !selectedCameraName || selectedCameraName === "birdseye") {
+      return undefined;
+    }
+    const camera = config.cameras[selectedCameraName];
+    if (
+      camera &&
+      allowedCameras.includes(selectedCameraName) &&
+      camera.enabled_in_config
+    ) {
+      return camera;
+    }
+    return undefined;
+  }, [config, selectedCameraName, allowedCameras]);
 
   return (
     <div className="size-full" ref={mainRef}>
@@ -145,6 +156,7 @@ function Live() {
           supportsFullscreen={supportsFullScreen}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
+          onSelectCamera={setSelectedCameraName}
         />
       ) : selectedCamera ? (
         <LiveCameraView

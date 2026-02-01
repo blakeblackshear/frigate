@@ -177,6 +177,12 @@ class CameraConfig(FrigateBaseModel):
     def ffmpeg_cmds(self) -> list[dict[str, list[str]]]:
         return self._ffmpeg_cmds
 
+    def get_formatted_name(self) -> str:
+        """Return the friendly name if set, otherwise return a formatted version of the camera name."""
+        if self.friendly_name:
+            return self.friendly_name
+        return self.name.replace("_", " ").title() if self.name else ""
+
     def create_ffmpeg_cmds(self):
         if "_ffmpeg_cmds" in self:
             return
@@ -235,6 +241,7 @@ class CameraConfig(FrigateBaseModel):
                 self.detect.fps,
                 self.detect.width,
                 self.detect.height,
+                self.ffmpeg.gpu,
             )
             or ffmpeg_input.hwaccel_args
             or parse_preset_hardware_acceleration_decode(
@@ -242,6 +249,7 @@ class CameraConfig(FrigateBaseModel):
                 self.detect.fps,
                 self.detect.width,
                 self.detect.height,
+                self.ffmpeg.gpu,
             )
             or camera_arg
             or []

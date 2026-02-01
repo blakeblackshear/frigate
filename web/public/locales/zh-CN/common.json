@@ -75,7 +75,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "yy年MM月dd日",
       "24hour": "yy年MM月dd日"
-    }
+    },
+    "inProgress": "进行中",
+    "invalidStartTime": "无效的开始时间",
+    "invalidEndTime": "无效的结束时间"
   },
   "unit": {
     "speed": {
@@ -85,10 +88,24 @@
     "length": {
       "feet": "英尺",
       "meters": "米"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/每小时",
+      "mbph": "MB/每小时",
+      "gbph": "GB/每小时"
     }
   },
   "label": {
-    "back": "返回"
+    "back": "返回",
+    "hide": "隐藏 {{item}}",
+    "show": "显示 {{item}}",
+    "ID": "ID",
+    "none": "无",
+    "all": "所有",
+    "other": "其他"
   },
   "pagination": {
     "label": "分页",
@@ -137,7 +154,8 @@
     "deleteNow": "立即删除",
     "next": "下一个",
     "cameraAudio": "摄像头音频",
-    "twoWayTalk": "双向对话"
+    "twoWayTalk": "双向对话",
+    "continue": "继续"
   },
   "menu": {
     "system": "系统",
@@ -237,7 +255,8 @@
       "setPassword": "设置密码",
       "title": "用户"
     },
-    "restart": "重启 Frigate"
+    "restart": "重启 Frigate",
+    "classification": "目标分类"
   },
   "toast": {
     "copyUrlToClipboard": "已复制链接到剪贴板。",
@@ -266,5 +285,17 @@
     "desc": "页面未找到"
   },
   "selectItem": "选择 {{item}}",
-  "readTheDocumentation": "阅读文档"
+  "readTheDocumentation": "阅读文档",
+  "information": {
+    "pixels": "{{area}} 像素"
+  },
+  "list": {
+    "two": "{{0}} 和 {{1}}",
+    "many": "{{items}} 以及 {{last}}",
+    "separatorWithSpace": "、 "
+  },
+  "field": {
+    "optional": "可选",
+    "internalID": "Frigate 在配置与数据库中使用的内部 ID"
+  }
 }

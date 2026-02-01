@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Đổi tên tệp xuất thất bại: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Chia sẻ bản xuất",
+    "downloadVideo": "Tải video",
+    "editName": "Chỉnh sửa tên",
+    "deleteExport": "Xóa bản xuất"
   }
 }

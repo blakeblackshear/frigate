@@ -45,7 +45,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { cn } from "@/lib/utils";
 
@@ -331,7 +331,7 @@ export default function NotificationView({
 
   if (!("Notification" in window) || !window.isSecureContext) {
     return (
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
           <div className="col-span-1">
             <Heading as="h4" className="mb-2">
@@ -385,7 +385,7 @@ export default function NotificationView({
     <>
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
+        <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <div
             className={cn(
               isAdmin && "grid w-full grid-cols-1 gap-4 md:grid-cols-2",
@@ -476,7 +476,7 @@ export default function NotificationView({
                                   <FilterSwitch
                                     key={camera.name}
                                     label={camera.name}
-                                    isCameraName={true}
+                                    type={"camera"}
                                     isChecked={field.value?.includes(
                                       camera.name,
                                     )}

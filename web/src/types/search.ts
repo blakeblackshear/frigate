@@ -5,6 +5,7 @@ const SEARCH_FILTERS = [
   "general",
   "zone",
   "sub",
+  "attribute",
   "source",
   "sort",
 ] as const;
@@ -16,6 +17,7 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
   "general",
   "zone",
   "sub",
+  "attribute",
   "source",
   "sort",
 ];
@@ -28,6 +30,8 @@ export type SearchSortType =
   | "score_asc"
   | "score_desc"
   | "relevance";
+
+export type EventType = "object" | "audio" | "manual";
 
 export type SearchResult = {
   id: string;
@@ -54,7 +58,7 @@ export type SearchResult = {
     box: number[];
     area: number;
     ratio: number;
-    type: "object" | "audio" | "manual";
+    type: EventType;
     description?: string;
     average_estimated_speed: number;
     velocity_angle: number;
@@ -69,6 +73,7 @@ export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  attributes?: string[];
   recognized_license_plate?: string[];
   zones?: string[];
   before?: number;
@@ -93,6 +98,7 @@ export type SearchQueryParams = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  attributes?: string[];
   recognized_license_plate?: string[];
   zones?: string[];
   before?: string;

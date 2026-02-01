@@ -1,7 +1,6 @@
 import logging
 import os
 import threading
-import time
 from pathlib import Path
 from typing import Callable, List
 
@@ -10,38 +9,9 @@ import requests
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
+from frigate.util.file import FileLock
 
 logger = logging.getLogger(__name__)
-
-
-class FileLock:
-    def __init__(self, path):
-        self.path = path
-        self.lock_file = f"{path}.lock"
-
-        # we have not acquired the lock yet so it should not exist
-        if os.path.exists(self.lock_file):
-            try:
-                os.remove(self.lock_file)
-            except Exception:
-                pass
-
-    def acquire(self):
-        parent_dir = os.path.dirname(self.lock_file)
-        os.makedirs(parent_dir, exist_ok=True)
-
-        while True:
-            try:
-                with open(self.lock_file, "x"):
-                    return
-            except FileExistsError:
-                time.sleep(0.1)
-
-    def release(self):
-        try:
-            os.remove(self.lock_file)
-        except FileNotFoundError:
-            pass
 
 
 class ModelDownloader:
@@ -81,15 +51,13 @@ class ModelDownloader:
     def _download_models(self):
         for file_name in self.file_names:
             path = os.path.join(self.download_path, file_name)
-            lock = FileLock(path)
+            lock_path = f"{path}.lock"
+            lock = FileLock(lock_path, cleanup_stale_on_init=True)
 
             if not os.path.exists(path):
-                lock.acquire()
-                try:
+                with lock:
                     if not os.path.exists(path):
                         self.download_func(path)
-                finally:
-                    lock.release()
 
             self.requestor.send_data(
                 UPDATE_MODEL_STATE,

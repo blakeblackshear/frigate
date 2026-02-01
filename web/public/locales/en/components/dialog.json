@@ -52,7 +52,8 @@
     "export": "Export",
     "selectOrExport": "Select or Export",
     "toast": {
-      "success": "Successfully started export. View the file in the /exports folder.",
+      "success": "Successfully started export. View the file in the exports page.",
+      "view": "View",
       "error": {
         "failed": "Failed to start export: {{error}}",
         "endTimeMustAfterStartTime": "End time must be after start time",
@@ -106,11 +107,13 @@
     "button": {
       "export": "Export",
       "markAsReviewed": "Mark as reviewed",
+      "markAsUnreviewed": "Mark as unreviewed",
       "deleteNow": "Delete Now"
     }
   },
   "imagePicker": {
     "selectImage": "Select a tracked object's thumbnail",
+    "unknownLabel": "Saved Trigger Image",
     "search": {
       "placeholder": "Search by label or sub label..."
     },

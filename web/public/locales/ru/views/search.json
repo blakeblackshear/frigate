@@ -26,7 +26,8 @@
       "max_speed": "Макс. скорость",
       "has_clip": "Есть клип",
       "has_snapshot": "Есть снимок",
-      "labels": "Метки"
+      "labels": "Метки",
+      "attributes": "Атрибуты"
     },
     "searchType": {
       "thumbnail": "Миниатюра",

@@ -3,7 +3,7 @@
     "downloadVideo": {
       "label": "下載影片",
       "toast": {
-        "success": "你的審查影片已開始下載。"
+        "success": "你的審查項目影片已開始下載。"
       }
     }
   }

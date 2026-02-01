@@ -1,6 +1,6 @@
 ---
 id: gpu
-title: Troubleshooting GPU
+title: GPU Errors
 ---
 
 ## OpenVINO

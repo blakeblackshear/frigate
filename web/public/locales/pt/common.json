@@ -18,9 +18,9 @@
     "year_one": "{{time}} ano",
     "year_many": "{{time}} de anos",
     "year_other": "{{time}} anos",
-    "month_one": "{{time}} mes",
+    "month_one": "{{time}} mês",
     "month_many": "{{time}} meses",
-    "month_other": "",
+    "month_other": "{{time}} meses",
     "day_one": "{{time}} dia",
     "day_many": "{{time}} dias",
     "day_other": "{{time}} dias",
@@ -87,7 +87,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyyy"
-    }
+    },
+    "inProgress": "Em andamento",
+    "invalidStartTime": "Horário de início inválido",
+    "invalidEndTime": "Horário de término inválido"
   },
   "unit": {
     "speed": {
@@ -97,6 +100,14 @@
     "length": {
       "feet": "pés",
       "meters": "metros"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/hora",
+      "mbph": "MB/hora",
+      "gbph": "GB/hora"
     }
   },
   "button": {
@@ -108,7 +119,7 @@
     "saving": "A guardar…",
     "apply": "Aplicar",
     "disable": "Desativar",
-    "save": "Guardar",
+    "save": "Salvar",
     "copy": "Copiar",
     "cancel": "Cancelar",
     "close": "Fechar",
@@ -134,10 +145,16 @@
     "export": "Exportar",
     "next": "Seguinte",
     "play": "Tocar",
-    "pictureInPicture": "Imagem sobre Imagem"
+    "pictureInPicture": "Imagem sobre Imagem",
+    "continue": "Continuar"
   },
   "label": {
-    "back": "Voltar"
+    "back": "Voltar",
+    "hide": "Ocultar {{item}}",
+    "show": "Exibir {{item}}",
+    "ID": "ID",
+    "none": "Nenhum",
+    "all": "Todos"
   },
   "menu": {
     "user": {
@@ -169,7 +186,7 @@
     "languages": "Idiomas",
     "language": {
       "en": "Inglês (EUA)",
-      "zhCN": "Chinês (Chinês Simplificado)",
+      "zhCN": "简体中文 (Chinês Simplificado)",
       "withSystem": {
         "label": "Utilizar as definições do sistema para o idioma"
       },
@@ -239,7 +256,8 @@
     "export": "Exportar",
     "explore": "Explorar",
     "review": "Rever",
-    "uiPlayground": "Área de Testes da IU"
+    "uiPlayground": "Área de Testes da IU",
+    "classification": "Classificação"
   },
   "pagination": {
     "previous": {
@@ -280,5 +298,17 @@
     "title": "404"
   },
   "selectItem": "Selecionar {{item}}",
-  "readTheDocumentation": "Leia a documentação"
+  "readTheDocumentation": "Leia a documentação",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} e {{1}}",
+    "many": "{{items}} e {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opcional",
+    "internalID": "o Frigate utiliza o ID na configuração e no banco de dados"
+  }
 }

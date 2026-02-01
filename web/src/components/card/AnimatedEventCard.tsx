@@ -13,7 +13,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { VideoPreview } from "../preview/ScrubbablePreview";
 import { useApiHost } from "@/api";
 import { isDesktop, isSafari } from "react-device-detect";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { FaCircleCheck } from "react-icons/fa6";
@@ -112,7 +112,7 @@ export function AnimatedEventCard({
 
   // image behavior
 
-  const [alertVideos, _, alertVideosLoaded] = usePersistence(
+  const [alertVideos, _, alertVideosLoaded] = useUserPersistence(
     "alertVideos",
     true,
   );
@@ -145,7 +145,7 @@ export function AnimatedEventCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  className="absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   size="xs"
                   aria-label={t("markAsReviewed")}
                   onClick={async () => {

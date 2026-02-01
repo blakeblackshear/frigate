@@ -26,7 +26,8 @@
       "after": "Po",
       "search_type": "Typ wyszukiwania",
       "time_range": "Zakres czasu",
-      "before": "Przed"
+      "before": "Przed",
+      "attributes": "Właściwości"
     },
     "searchType": {
       "thumbnail": "Miniatura",

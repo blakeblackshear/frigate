@@ -2,14 +2,18 @@
   "alerts": "警报",
   "detections": "检测",
   "motion": {
-    "label": "运动",
-    "only": "仅运动画面"
+    "label": "画面变动",
+    "only": "仅变动画面"
   },
   "allCameras": "所有摄像头",
   "empty": {
     "alert": "还没有“警报”类核查项",
     "detection": "还没有“检测”类核查项",
-    "motion": "还没有运动类数据"
+    "motion": "还没有画面变动类数据",
+    "recordingsDisabled": {
+      "title": "必须要开启录制功能",
+      "description": "必须要摄像头启用录制功能时，才可为其创建回放项目。"
+    }
   },
   "timeline": "时间线",
   "timeline.aria": "选择时间线",
@@ -37,5 +41,28 @@
   "selected_other": "已选择 {{count}} 个",
   "detected": "已检测",
   "suspiciousActivity": "可疑活动",
-  "threateningActivity": "威胁性活动"
+  "threateningActivity": "风险类活动",
+  "detail": {
+    "noDataFound": "没有可供核查的详细数据",
+    "aria": "切换详细视图",
+    "trackedObject_one": "{{count}}个目标或物体",
+    "trackedObject_other": "{{count}}个目标或物体",
+    "noObjectDetailData": "没有目标详细信息。",
+    "label": "详细信息",
+    "settings": "详细视图设置",
+    "alwaysExpandActive": {
+      "title": "始终展开当前项",
+      "desc": "在可用情况下，将始终展开当前核查项的目标详细信息。"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "追踪点",
+    "clickToSeek": "点击从该时间进行寻找"
+  },
+  "zoomIn": "放大",
+  "zoomOut": "缩小",
+  "normalActivity": "正常",
+  "needsReview": "需要核查",
+  "securityConcern": "安全隐患",
+  "select_all": "所有"
 }

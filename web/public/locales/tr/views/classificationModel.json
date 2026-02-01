@@ -1,0 +1,188 @@
+{
+  "documentTitle": "Sınıflandırma Modelleri - Frigate",
+  "details": {
+    "scoreInfo": "Skor, modelin nesneyi tespit ettiği tüm durumlar için ortalama güven düzeyini gösterir.",
+    "none": "Hiçbiri",
+    "unknown": "Bilinmiyor"
+  },
+  "button": {
+    "deleteClassificationAttempts": "Sınıflandırma Fotoğraflarını Sil",
+    "renameCategory": "Sınıfı Yeniden Adlandır",
+    "deleteCategory": "Sınıfı Sil",
+    "deleteImages": "Fotoğrafları Sil",
+    "trainModel": "Modeli Eğit",
+    "addClassification": "Sınıflandırma Ekle",
+    "deleteModels": "Modelleri Sil",
+    "editModel": "Modeli Düzenle"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Silinmiş Sınıf",
+      "deletedImage": "Silinmiş Fotoğraflar",
+      "deletedModel_one": "{{count}} model başarıyla silindi",
+      "deletedModel_other": "{{count}} model başarıyla silindi",
+      "categorizedImage": "Fotoğraf Başarıyla Sınıflandırıldı",
+      "trainedModel": "Model başarıyla eğitildi.",
+      "trainingModel": "Model eğitimi başarıyla başladı.",
+      "updatedModel": "Model yapılandırması başarıyla güncellendi",
+      "renamedCategory": "Sınıf başarıyla {{name}} olarak yeniden adlandırıldı"
+    },
+    "error": {
+      "deleteImageFailed": "Silinemedi: {{errorMessage}}",
+      "deleteModelFailed": "Model silinemedi: {{errorMessage}}",
+      "categorizeFailed": "Görsel sınıflandırılamadı: {{errorMessage}}",
+      "trainingFailed": "Model eğitimi başarısız oldu. Ayrıntılar için Frigate günlüklerini kontrol edin.",
+      "deleteCategoryFailed": "Sınıf silinemedi: {{errorMessage}}",
+      "trainingFailedToStart": "Model eğitimi başlatılamadı: {{errorMessage}}",
+      "updateModelFailed": "Model güncellenemedi: {{errorMessage}}",
+      "renameCategoryFailed": "Sınıf yeniden adlandırılamadı: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Sınıfı Sil",
+    "desc": "{{name}} adlı sınıfı silmek istediğinizden emin misiniz? Bu işlem, sınıfa ait tüm görselleri kalıcı olarak silecek ve modelin yeniden eğitilmesini gerektirecektir.",
+    "minClassesTitle": "Sınıf Silinemiyor",
+    "minClassesDesc": "Bu sınıfı silmeden önce bir sınıflandırma modelinin en az 2 sınıfa sahip olması gerekir. Bu sınıfı silmeden önce başka bir sınıf ekleyin."
+  },
+  "deleteModel": {
+    "title": "Sınıflandırma Modelini Sil",
+    "single": "{{name}} öğesini silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
+    "desc_one": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
+    "desc_other": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz."
+  },
+  "deleteDatasetImages": {
+    "title": "Eğitim verisi görsellerini sil",
+    "desc_one": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirir.",
+    "desc_other": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirir."
+  },
+  "deleteTrainImages": {
+    "title": "Eğitim Görsellerini Sil",
+    "desc_one": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "desc_other": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+  },
+  "renameCategory": {
+    "title": "Sınıfı Yeniden Adlandır",
+    "desc": "{{name}} için yeni bir ad girin. Ad değişikliğinin geçerli olması için modeli yeniden eğitmeniz gerekecektir."
+  },
+  "description": {
+    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir."
+  },
+  "train": {
+    "title": "Son Sınıflandırmalar",
+    "titleShort": "Son",
+    "aria": "Son Sınıflandırmaları Seç"
+  },
+  "categories": "Sınıflar",
+  "createCategory": {
+    "new": "Yeni Sınıf Oluştur"
+  },
+  "categorizeImageAs": "Görseli Şu Şekilde Sınıflandır:",
+  "categorizeImage": "Görseli Sınıflandır",
+  "menu": {
+    "objects": "Nesneler",
+    "states": "Durumlar"
+  },
+  "noModels": {
+    "object": {
+      "title": "Nesne sınıflandırma modeli mevcut değil",
+      "description": "Algılanan nesneleri sınıflandırmak için özel bir model oluşturun.",
+      "buttonText": "Nesne Modeli Oluştur"
+    },
+    "state": {
+      "title": "Durum Sınıflandırma Modeli Yok",
+      "description": "Belirli kamera alanlarındaki durum değişimlerini izlemek ve sınıflandırmak için özel bir model oluşturun.",
+      "buttonText": "Durum Modeli Oluştur"
+    }
+  },
+  "tooltip": {
+    "trainingInProgress": "Model şu anda eğitiliyor",
+    "noNewImages": "Eğitilecek yeni görsel bulunmuyor. Önce veri kümesinde daha fazla görseli sınıflandırın.",
+    "noChanges": "Son eğitimden bu yana veri kümesinde herhangi bir değişiklik yapılmadı.",
+    "modelNotReady": "Model eğitim için hazır değil"
+  },
+  "edit": {
+    "title": "Sınıflandırma Modelini Düzenle",
+    "descriptionState": "Bu durum sınıflandırma modeli için sınıfları düzenleyin. Değişiklikler, modelin yeniden eğitilmesini gerektirecektir.",
+    "descriptionObject": "Bu nesne sınıflandırma modeli için nesne türünü ve sınıflandırma türünü düzenleyin.",
+    "stateClassesInfo": "Not: Durum sınıflarını değiştirmek, modelin güncellenmiş sınıflarla yeniden eğitilmesini gerektirir."
+  },
+  "wizard": {
+    "title": "Yeni Sınıflandırma Oluştur",
+    "steps": {
+      "nameAndDefine": "İsim ver ve Tanımla",
+      "stateArea": "Durum Alanı",
+      "chooseExamples": "Örnekleri Seç"
+    },
+    "step1": {
+      "description": "Durum modelleri, sabit kamera alanlarındaki değişiklikleri (ör. kapının açılması/kapanması) izler. Nesne modelleri ise algılanan nesnelere ek sınıflandırmalar ekler (ör. bilinen hayvanlar, kuryeler vb.).",
+      "name": "İsim",
+      "namePlaceholder": "Model ismi girin...",
+      "type": "Tür",
+      "typeState": "Durum",
+      "typeObject": "Nesne",
+      "objectLabel": "Nesne Etiketi",
+      "objectLabelPlaceholder": "Nesne türünü seçin...",
+      "classificationType": "Sınıflandırma Türü",
+      "classificationTypeTip": "Sınıflandırma türleri hakkında bilgi edinin",
+      "classificationTypeDesc": "Alt etiketler, nesne etiketine ek olarak saklanır (örneğin: “Person: UPS”). Öznitelikler(attributes) ise nesne meta verilerinde saklanan aranabilir meta verilerdir.",
+      "classificationSubLabel": "Alt Etiket",
+      "classificationAttribute": "Özellik",
+      "classes": "Sınıflar",
+      "states": "Durumlar",
+      "classesTip": "Sınıflar hakkında bilgi edinin",
+      "classesStateDesc": "Kamera alanınızın içinde bulunabileceği farklı durumları tanımlayın. Örneğin: bir garaj kapısı için ‘açık’ ve ‘kapalı’.",
+      "classesObjectDesc": "Algılanan nesneleri sınıflandırmak için farklı kategorileri tanımlayın. Örneğin: Bir kişi sınıflandırması için \"kurye\", \"bahçıvan\" veya \"yabancı\" olabilir.",
+      "classPlaceholder": "Sınıf ismi girin...",
+      "errors": {
+        "nameRequired": "Model ismi gereklidir",
+        "nameLength": "Model ismi en fazla 64 karakter olmalıdır",
+        "nameOnlyNumbers": "Model ismi yalnızca rakamlardan oluşamaz",
+        "classRequired": "En az 1 sınıf gereklidir",
+        "classesUnique": "Sınıf isimleri benzersiz olmalıdır",
+        "stateRequiresTwoClasses": "Durum modelleri en az 2 sınıf gerektirir",
+        "objectLabelRequired": "Lütfen bir nesne etiketi seçin",
+        "objectTypeRequired": "Lütfen bir sınıflandırma türü seçin",
+        "noneNotAllowed": "'none' sınıfına izin verilmiyor"
+      }
+    },
+    "step2": {
+      "description": "İzlenecek alanı her kamera için seçin ve tanımlayın. Model bu alanların durumunu sınıflandıracaktır.",
+      "cameras": "Kameralar",
+      "selectCamera": "Kamera Seç",
+      "noCameras": "Kameraları eklemek için + simgesine tıklayın",
+      "selectCameraPrompt": "Listedeki bir kamerayı seçerek izlenecek alanı tanımlayın"
+    },
+    "step3": {
+      "selectImagesPrompt": "{{className}} etiketli tüm görselleri seç",
+      "selectImagesDescription": "Görselleri seçmek için üzerlerine tıklayın. Bu sınıfla işiniz bittiğinde Devam Et’e tıklayın.",
+      "allImagesRequired_one": "Lütfen tüm görselleri sınıflandırın. Bir görsel kaldı.",
+      "allImagesRequired_other": "Lütfen tüm görselleri sınıflandırın. {{count}} görsel kaldı.",
+      "generating": {
+        "title": "Örnek Görseller Oluşturuluyor",
+        "description": "Frigate kayıtlarınızdan temsili görüntüler alınıyor. Bu işlem biraz zaman alabilir…"
+      },
+      "training": {
+        "title": "Model Eğitiliyor",
+        "description": "Modeliniz arka planda eğitiliyor. Bu pencereyi kapatabilirsiniz; eğitim tamamlandığında model otomatik olarak çalışmaya başlayacaktır."
+      },
+      "retryGenerate": "Oluşturmayı Yeniden Dene",
+      "noImages": "Örnek görsel oluşturulamadı",
+      "classifying": "Sınıflandırılıyor ve Eğitiliyor...",
+      "trainingStarted": "Eğitim başarıyla başlatıldı",
+      "modelCreated": "Model başarıyla oluşturuldu. Eksik durumlar için görseller eklemek üzere Son Sınıflandırmalar görünümünü kullanın ve ardından modeli eğitin.",
+      "errors": {
+        "noCameras": "Hiç kamera yapılandırılmadı",
+        "noObjectLabel": "Nesne etiketi seçilmedi",
+        "generateFailed": "Örnekler oluşturulamadı: {{error}}",
+        "generationFailed": "Oluşturma başarısız oldu. Lütfen tekrar deneyin.",
+        "classifyFailed": "Görseller sınıflandırılamadı: {{error}}"
+      },
+      "generateSuccess": "Örnek görseller başarıyla oluşturuldu",
+      "missingStatesWarning": {
+        "title": "Eksik Durum Örnekleri",
+        "description": "En iyi sonuçlar için her bir durum için örnek görseller seçmeniz tavsiye edilir. Tüm durumlar için görsel seçmeden devam edebilirsiniz fakat tüm durumlar için görseller seçilmedikçe model eğitilemeyecektir. Son Sınıflandırmalar arayüzünü kullanarak görselleri sınıflandırmak üzere görüntüleyebilir, yeterince görsel seçildikten sonra da modeli eğitebilirsiniz."
+      }
+    }
+  },
+  "none": "Yok"
+}

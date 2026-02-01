@@ -123,7 +123,7 @@ auth:
   # Optional: Refresh time in seconds (default: shown below)
   # When the session is going to expire in less time than this setting,
   # it will be refreshed back to the session_length.
-  refresh_time: 43200 # 12 hours
+  refresh_time: 1800 # 30 minutes
   # Optional: Rate limiting for login failures to help prevent brute force
   # login attacks (default: shown below)
   # See the docs for more information on valid values
@@ -240,11 +240,13 @@ birdseye:
     scaling_factor: 2.0
     # Optional: Maximum number of cameras to show at one time, showing the most recent (default: show all cameras)
     max_cameras: 1
+  # Optional: Frames-per-second to re-send the last composed Birdseye frame when idle (no motion or active updates). (default: shown below)
+  idle_heartbeat_fps: 0.0
 
 # Optional: ffmpeg configuration
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
-  # Optional: ffmpeg binry path (default: shown below)
+  # Optional: ffmpeg binary path (default: shown below)
   # can also be set to `7.0` or `5.0` to specify one of the included versions
   # or can be set to any path that holds `bin/ffmpeg` & `bin/ffprobe`
   path: "default"
@@ -268,6 +270,8 @@ ffmpeg:
   retry_interval: 10
   # Optional: Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players. (default: shown below)
   apple_compatibility: false
+  # Optional: Set the index of the GPU to use for hardware acceleration. (default: shown below)
+  gpu: 0
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
@@ -425,6 +429,15 @@ review:
     alerts: True
     # Optional: Enable GenAI review summaries for detections (default: shown below)
     detections: False
+    # Optional: Activity Context Prompt to give context to the GenAI what activity is and is not suspicious.
+    # It is important to be direct and detailed. See documentation for the default prompt structure.
+    activity_context_prompt: """Define what is and is not suspicious
+"""
+    # Optional: Image source for GenAI (default: preview)
+    # Options: "preview" (uses cached preview frames at ~180p) or "recordings" (extracts frames from recordings at 480p)
+    # Using "recordings" provides better image quality but uses more tokens per image.
+    # Frame count is automatically calculated based on context window size, aspect ratio, and image source (capped at 20 frames).
+    image_source: preview
     # Optional: Additional concerns that the GenAI should make note of (default: None)
     additional_concerns:
       - Animals in the garden
@@ -535,7 +548,7 @@ record:
     # Optional: Retention settings for recordings of alerts
     retain:
       # Required: Retention days (default: shown below)
-      days: 14
+      days: 10
       # Optional: Mode for retention. (default: shown below)
       #   all - save all recording segments for alerts regardless of activity
       #   motion - save all recordings segments for alerts with any detected motion
@@ -555,7 +568,7 @@ record:
     # Optional: Retention settings for recordings of detections
     retain:
       # Required: Retention days (default: shown below)
-      days: 14
+      days: 10
       # Optional: Mode for retention. (default: shown below)
       #   all - save all recording segments for detections regardless of activity
       #   motion - save all recordings segments for detections with any detected motion
@@ -572,7 +585,7 @@ record:
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
   enabled: False
-  # Optional: save a clean PNG copy of the snapshot image (default: shown below)
+  # Optional: save a clean copy of the snapshot image (default: shown below)
   clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
@@ -626,7 +639,7 @@ face_recognition:
   # Optional: Min face recognitions for the sub label to be applied to the person object (default: shown below)
   min_faces: 1
   # Optional: Number of images of recognized faces to save for training (default: shown below)
-  save_attempts: 100
+  save_attempts: 200
   # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
   blur_confidence_filter: True
   # Optional: Set the model size used face recognition. (default: shown below)
@@ -667,37 +680,76 @@ lpr:
   # Optional: List of regex replacement rules to normalize detected plates (default: shown below)
   replace_rules: {}
 
-# Optional: Configuration for AI generated tracked object descriptions
+# Optional: Configuration for AI / LLM provider
 # WARNING: Depending on the provider, this will send thumbnails over the internet
-# to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
-# the camera level (enabled: False) to enhance privacy for indoor cameras.
+# to Google or OpenAI's LLMs to generate descriptions. GenAI features can be configured at
+# the camera level to enhance privacy for indoor cameras.
 genai:
-  # Optional: Enable AI description generation (default: shown below)
-  enabled: False
-  # Required if enabled: Provider must be one of ollama, gemini, or openai
+  # Required: Provider must be one of ollama, gemini, or openai
   provider: ollama
   # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Required if enabled: The model to use with the provider.
+  # Required: The model to use with the provider.
   model: gemini-1.5-flash
   # Optional additional args to pass to the GenAI Provider (default: None)
   provider_options:
     keep_alive: -1
+  # Optional: Options to pass during inference calls (default: {})
+  runtime_options:
+    temperature: 0.7
 
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
 audio_transcription:
-  # Optional: Enable license plate recognition (default: shown below)
+  # Optional: Enable live and speech event audio transcription (default: shown below)
   enabled: False
-  # Optional: The device to run the models on (default: shown below)
+  # Optional: The device to run the models on for live transcription. (default: shown below)
   device: CPU
-  # Optional: Set the model size used for transcription. (default: shown below)
+  # Optional: Set the model size used for live transcription. (default: shown below)
   model_size: small
   # Optional: Set the language used for transcription translation. (default: shown below)
   # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
   language: en
+
+# Optional: Configuration for classification models
+classification:
+  # Optional: Configuration for bird classification
+  bird:
+    # Optional: Enable bird classification (default: shown below)
+    enabled: False
+    # Optional: Minimum classification score required to be considered a match (default: shown below)
+    threshold: 0.9
+  custom:
+    # Required: name of the classification model
+    model_name:
+      # Optional: Enable running the model (default: shown below)
+      enabled: True
+      # Optional: Name of classification model (default: shown below)
+      name: None
+      # Optional: Classification score threshold to change the state (default: shown below)
+      threshold: 0.8
+      # Optional: Number of classification attempts to save in the recent classifications tab (default: shown below)
+      # NOTE: Defaults to 200 for object classification and 100 for state classification if not specified
+      save_attempts: None
+      # Optional: Object classification configuration
+      object_config:
+        # Required: Object types to classify
+        objects: [dog]
+        # Optional: Type of classification that is applied (default: shown below)
+        classification_type: sub_label
+      # Optional: State classification configuration
+      state_config:
+        # Required: Cameras to run classification on
+        cameras:
+          camera_name:
+            # Required: Crop of image frame on this camera to run classification on
+            crop: [0, 180, 220, 400]
+        # Optional: If classification should be run when motion is detected in the crop (default: shown below)
+        motion: False
+        # Optional: Interval to run classification on in seconds (default: shown below)
+        interval: None
 
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.10)
@@ -799,6 +851,8 @@ cameras:
       # NOTE: This must be different than any camera names, but can match with another zone on another
       #       camera.
       front_steps:
+        # Optional: A friendly name or descriptive text for the zones
+        friendly_name: ""
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
@@ -860,7 +914,7 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
-      # Optional: Skip TLS verification from the ONVIF server (default: shown below)
+      # Optional: Skip TLS verification and disable digest authentication for the ONVIF server (default: shown below)
       tls_insecure: False
       # Optional: Ignores time synchronization mismatches between the camera and the server during authentication.
       # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents.
@@ -918,10 +972,13 @@ cameras:
         type: thumbnail
         # Reference data for matching, either an event ID for `thumbnail` or a text string for `description`. (default: none)
         data: 1751565549.853251-b69j73
-        # Similarity threshold for triggering. (default: none)
-        threshold: 0.7
+        # Similarity threshold for triggering. (default: shown below)
+        threshold: 0.8
         # List of actions to perform when the trigger fires. (default: none)
-        # Available options: `notification` (send a webpush notification)
+        # Available options:
+        # - `notification` (send a webpush notification)
+        # - `sub_label` (add trigger friendly name as a sub label to the triggering tracked object)
+        # - `attribute` (add trigger's name and similarity score as a data attribute to the triggering tracked object)
         actions:
           - notification
 
@@ -948,10 +1005,6 @@ ui:
   #    full: 8:15:22 PM Mountain Standard Time
   # (default: shown below).
   time_style: medium
-  # Optional: Ability to manually override the date / time styling to use strftime format
-  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
-  # possible values are shown above (default: not set)
-  strftime_fmt: "%Y/%m/%d %H:%M"
   # Optional: Set the unit system to either "imperial" or "metric" (default: metric)
   # Used in the UI and in MQTT topics
   unit_system: metric

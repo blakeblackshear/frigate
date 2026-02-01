@@ -46,13 +46,13 @@ export default function NavItem({
       onClick={onClick}
       className={({ isActive }) =>
         cn(
-          "flex flex-col items-center justify-center rounded-lg",
+          "flex flex-col items-center justify-center rounded-lg p-[6px]",
           className,
           variants[item.variant ?? "primary"][isActive ? "active" : "inactive"],
         )
       }
     >
-      <Icon className="size-5 md:m-[6px]" />
+      <Icon className="size-5" />
     </NavLink>
   );
 

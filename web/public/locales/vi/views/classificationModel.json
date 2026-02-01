@@ -1,0 +1,59 @@
+{
+  "documentTitle": "شمار بندی کے ماڈل",
+  "button": {
+    "deleteClassificationAttempts": "Xóa Hình Ảnh Phân Loại",
+    "renameCategory": "Đổi Tên Lớp",
+    "deleteCategory": "Xoá Lớp",
+    "deleteImages": "Xoá Hình Ảnh",
+    "trainModel": "Huấn Luyện Mô Hình",
+    "addClassification": "Thêm Phân Loại",
+    "deleteModels": "Xoá Mô Hình",
+    "editModel": "Chỉnh sửa mô hình"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Lớp Đã Bị Xoá",
+      "deletedImage": "Hình ảnh đã bị xóa",
+      "deletedModel_other": "Đã xóa thành công {{count}} mô hình",
+      "categorizedImage": "Phân Loại Hình Ảnh Thành Công",
+      "trainedModel": "Đã huấn luyện mô hình thành công.",
+      "trainingModel": "Đã bắt đầu huấn luyện mô hình thành công.",
+      "updatedModel": "Đã cập nhật cấu hình mô hình thành công",
+      "renamedCategory": "Đã đổi tên lớp thành công thành {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Xóa không thành công: {{errorMessage}}",
+      "deleteCategoryFailed": "Xóa lớp không thành công: {{errorMessage}}",
+      "deleteModelFailed": "Xóa mô hình không thành công: {{errorMessage}}",
+      "categorizeFailed": "Phân loại hình ảnh không thành công: {{errorMessage}}",
+      "trainingFailed": "Huấn luyện mô hình thất bại. Vui lòng kiểm tra nhật ký của Frigate để biết chi tiết.",
+      "trainingFailedToStart": "Khởi động huấn luyện mô hình không thành công: {{errorMessage}}",
+      "updateModelFailed": "Cập nhật mô hình không thành công: {{errorMessage}}",
+      "renameCategoryFailed": "Không đổi tên được lớp: {{errorMessage}}"
+    }
+  },
+  "details": {
+    "scoreInfo": "Điểm số cho biết mức độ tự tin trung bình mà hệ thống xác định được cho tất cả các lần phát hiện đối tượng này."
+  },
+  "tooltip": {
+    "trainingInProgress": "Mô hình hiện đang được huấn luyện",
+    "noNewImages": "Không có hình ảnh mới để đào tạo. Trước tiên, hãy phân loại nhiều hình ảnh hơn trong tập dữ liệu.",
+    "noChanges": "Không có thay đổi nào đối với tập dữ liệu kể từ lần đào tạo cuối cùng.",
+    "modelNotReady": "Mô hình chưa sẵn sàng để huấn luyện"
+  },
+  "deleteCategory": {
+    "title": "Xóa lớp",
+    "desc": "Bạn có chắc chắn muốn xóa lớp {{name}} không? Điều này sẽ xóa vĩnh viễn tất cả các hình ảnh liên quan và yêu cầu đào tạo lại mô hình.",
+    "minClassesTitle": "Không thể xóa lớp",
+    "minClassesDesc": "Một mô hình phân loại phải có ít nhất 2 lớp. Thêm một lớp khác trước khi xóa lớp này."
+  },
+  "deleteModel": {
+    "title": "Xóa mô hình phân loại",
+    "single": "Bạn có chắc chắn muốn xóa {{name}} không? Thao tác này sẽ xóa vĩnh viễn tất cả dữ liệu liên quan bao gồm hình ảnh và dữ liệu đào tạo. Không thể hoàn tác hành động này.",
+    "desc_other": "Bạn có chắc chắn muốn xóa mô hình {{count}} không? Thao tác này sẽ xóa vĩnh viễn tất cả dữ liệu liên quan bao gồm hình ảnh và dữ liệu đào tạo. Không thể hoàn tác hành động này."
+  },
+  "edit": {
+    "title": "Chỉnh sửa mô hình phân loại",
+    "descriptionState": "Chỉnh sửa các lớp cho mô hình phân loại trạng thái này. Những thay đổi sẽ yêu cầu đào tạo lại mô hình."
+  }
+}

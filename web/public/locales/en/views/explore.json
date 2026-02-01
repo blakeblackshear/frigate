@@ -33,15 +33,16 @@
   "type": {
     "details": "details",
     "snapshot": "snapshot",
+    "thumbnail": "thumbnail",
     "video": "video",
-    "object_lifecycle": "object lifecycle"
+    "tracking_details": "tracking details"
   },
-  "objectLifecycle": {
-    "title": "Object Lifecycle",
+  "trackingDetails": {
+    "title": "Tracking Details",
     "noImageFound": "No image found for this timestamp.",
     "createObjectMask": "Create Object Mask",
     "adjustAnnotationSettings": "Adjust annotation settings",
-    "scrollViewTips": "Scroll to view the significant moments of this object's lifecycle.",
+    "scrollViewTips": "Click to view the significant moments of this object's lifecycle.",
     "autoTrackingTips": "Bounding box positions will be inaccurate for autotracking cameras.",
     "count": "{{first}} of {{second}}",
     "trackedPoint": "Tracked Point",
@@ -60,7 +61,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ratio",
-        "area": "Area"
+        "area": "Area",
+        "score": "Score"
       }
     },
     "annotationSettings": {
@@ -71,11 +73,11 @@
       },
       "offset": {
         "label": "Annotation Offset",
-        "desc": "This data comes from your camera's detect feed but is overlayed on images from the the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. However, the <code>annotation_offset</code> field can be used to adjust this.",
+        "desc": "This data comes from your camera's detect feed but is overlayed on images from the the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. You can use this setting to offset the annotations forward or backward in time to better align them with the recorded footage.",
         "millisecondsToOffset": "Milliseconds to offset detect annotations by. <em>Default: 0</em>",
-        "tips": "TIP: Imagine there is an event clip with a person walking from left to right. If the event timeline bounding box is consistently to the left of the person then the value should be decreased. Similarly, if a person is walking from left to right and the bounding box is consistently ahead of the person then the value should be increased.",
+        "tips": "Lower the value if the video playback is ahead of the boxes and path points, and increase the value if the video playback is behind them. This value can be negative.",
         "toast": {
-          "success": "Annotation offset for {{camera}} has been saved to the config file. Restart Frigate to apply your changes."
+          "success": "Annotation offset for {{camera}} has been saved to the config file."
         }
       }
     },
@@ -102,12 +104,14 @@
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
           "updatedSublabel": "Successfully updated sub label.",
           "updatedLPR": "Successfully updated license plate.",
-          "audioTranscription": "Successfully requested audio transcription."
+          "updatedAttributes": "Successfully updated attributes.",
+          "audioTranscription": "Successfully requested audio transcription. Depending on the speed of your Frigate server, the transcription may take some time to complete."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
           "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}",
           "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}",
+          "updatedAttributesFailed": "Failed to update attributes: {{errorMessage}}",
           "audioTranscription": "Failed to request audio transcription: {{errorMessage}}"
         }
       }
@@ -123,6 +127,10 @@
       "desc": "Enter a new license plate value for this {{label}}",
       "descNoLabel": "Enter a new license plate value for this tracked object"
     },
+    "editAttributes": {
+      "title": "Edit attributes",
+      "desc": "Select classification attributes for this {{label}}"
+    },
     "snapshotScore": {
       "label": "Snapshot Score"
     },
@@ -134,6 +142,7 @@
       "label": "Score"
     },
     "recognizedLicensePlate": "Recognized License Plate",
+    "attributes": "Classification Attributes",
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
     "camera": "Camera",
@@ -157,6 +166,9 @@
     "tips": {
       "descriptionSaved": "Successfully saved description",
       "saveDescriptionFailed": "Failed to update the description: {{errorMessage}}"
+    },
+    "title": {
+      "label": "Title"
     }
   },
   "itemMenu": {
@@ -168,9 +180,13 @@
       "label": "Download snapshot",
       "aria": "Download snapshot"
     },
-    "viewObjectLifecycle": {
-      "label": "View object lifecycle",
-      "aria": "Show the object lifecycle"
+    "downloadCleanSnapshot": {
+      "label": "Download clean snapshot",
+      "aria": "Download clean snapshot"
+    },
+    "viewTrackingDetails": {
+      "label": "View tracking details",
+      "aria": "Show the tracking details"
     },
     "findSimilar": {
       "label": "Find similar",
@@ -194,12 +210,18 @@
     },
     "deleteTrackedObject": {
       "label": "Delete this tracked object"
+    },
+    "showObjectDetails": {
+      "label": "Show object path"
+    },
+    "hideObjectDetails": {
+      "label": "Hide object path"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirm Delete",
-      "desc": "Deleting this tracked object removes the snapshot, any saved embeddings, and any associated object lifecycle entries. Recorded footage of this tracked object in History view will <em>NOT</em> be deleted.<br /><br />Are you sure you want to proceed?"
+      "desc": "Deleting this tracked object removes the snapshot, any saved embeddings, and any associated tracking details entries. Recorded footage of this tracked object in History view will <em>NOT</em> be deleted.<br /><br />Are you sure you want to proceed?"
     }
   },
   "noTrackedObjects": "No Tracked Objects Found",
@@ -208,6 +230,8 @@
   "trackedObjectsCount_other": "{{count}} tracked objects ",
   "searchResult": {
     "tooltip": "Matched {{type}} at {{confidence}}%",
+    "previousTrackedObject": "Previous tracked object",
+    "nextTrackedObject": "Next tracked object",
     "deleteTrackedObject": {
       "toast": {
         "success": "Tracked object deleted successfully.",

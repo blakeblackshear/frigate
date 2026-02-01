@@ -25,7 +25,8 @@
       "after": "Dopo",
       "max_speed": "Velocità massima",
       "recognized_license_plate": "Targa riconosciuta",
-      "sub_labels": "Sottoetichette"
+      "sub_labels": "Sottoetichette",
+      "attributes": "Attributi"
     },
     "tips": {
       "desc": {

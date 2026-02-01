@@ -12,11 +12,11 @@ class TestRecordRetention(unittest.TestCase):
         assert not segment_info.should_discard_segment(RetainModeEnum.motion)
         assert segment_info.should_discard_segment(RetainModeEnum.active_objects)
 
-    def test_object_should_keep_object_not_motion(self):
+    def test_object_should_keep_object_when_motion(self):
         segment_info = SegmentInfo(
             motion_count=0, active_object_count=1, region_count=0, average_dBFS=0
         )
-        assert segment_info.should_discard_segment(RetainModeEnum.motion)
+        assert not segment_info.should_discard_segment(RetainModeEnum.motion)
         assert not segment_info.should_discard_segment(RetainModeEnum.active_objects)
 
     def test_all_should_keep_all(self):

@@ -6,7 +6,6 @@ export interface UiConfig {
   time_format?: "browser" | "12hour" | "24hour";
   date_style?: "full" | "long" | "medium" | "short";
   time_style?: "full" | "long" | "medium" | "short";
-  strftime_fmt?: string;
   dashboard: boolean;
   order: number;
   unit_system?: "metric" | "imperial";
@@ -280,6 +279,7 @@ export interface CameraConfig {
       speed_threshold: number;
       objects: string[];
       color: number[];
+      friendly_name?: string;
     };
   };
 }
@@ -304,10 +304,12 @@ export type CustomClassificationModelConfig = {
   enabled: boolean;
   name: string;
   threshold: number;
-  object_config: null | {
+  save_attempts?: number;
+  object_config?: {
     objects: string[];
+    classification_type: string;
   };
-  state_config: null | {
+  state_config?: {
     cameras: {
       [cameraName: string]: {
         crop: [number, number, number, number];

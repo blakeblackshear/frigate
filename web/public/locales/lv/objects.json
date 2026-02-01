@@ -1,0 +1,19 @@
+{
+  "person": "Persona",
+  "bicycle": "Velosipēds",
+  "car": "Automašīna",
+  "motorcycle": "Motocikls",
+  "airplane": "Lidmašīna",
+  "bus": "Autobuss",
+  "train": "Vilciens",
+  "package": "Paciņa",
+  "bbq_grill": "Grils",
+  "amazon": "Amazon",
+  "usps": "USPS",
+  "ups": "UPS",
+  "fedex": "FedEx",
+  "dhl": "DHL",
+  "postnl": "PostNL",
+  "dpd": "DPD",
+  "boat": "Laiva"
+}

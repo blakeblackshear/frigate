@@ -425,5 +425,9 @@
   "artillery_fire": "Fogo de Artilharia",
   "cap_gun": "Espoleta",
   "fireworks": "Fogos de Artifício",
-  "firecracker": "Rojões"
+  "firecracker": "Rojões",
+  "noise": "Ruído",
+  "distortion": "Distorção",
+  "cacophony": "Cacofonia",
+  "vibration": "Vibração"
 }

@@ -13,5 +13,10 @@
     "error": {
       "renameExportFailed": "Αποτυχία μετονομασίας εξαγωγής:{{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Κοινή χρήση εξαγωγής",
+    "downloadVideo": "Λήψη βίντεο",
+    "deleteExport": "Διαγραφή εξαγωγής"
   }
 }

@@ -133,6 +133,7 @@ class User(Model):
         default="admin",
     )
     password_hash = CharField(null=False, max_length=120)
+    password_changed_at = DateTimeField(null=True)
     notification_tokens = JSONField()
 
     @classmethod

@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { LuSettings } from "react-icons/lu";
 import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import AutoUpdatingCameraImage from "./AutoUpdatingCameraImage";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +24,7 @@ export default function DebugCameraImage({
 }: DebugCameraImageProps) {
   const { t } = useTranslation(["components/camera"]);
   const [showSettings, setShowSettings] = useState(false);
-  const [options, setOptions] = usePersistence<Options>(
+  const [options, setOptions] = useUserPersistence<Options>(
     `${cameraConfig?.name}-feed`,
     emptyObject,
   );

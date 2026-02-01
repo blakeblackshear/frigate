@@ -8,7 +8,11 @@
   "empty": {
     "alert": "Nu sunt alerte de revizuit",
     "detection": "Nu sunt detecții de revizuit",
-    "motion": "Nu au fost găsite date despre mișcare"
+    "motion": "Nu au fost găsite date despre mișcare",
+    "recordingsDisabled": {
+      "title": "Înregistrările trebuie să fie activate",
+      "description": "Elementele de revizuire pot fi create doar pentru o cameră atunci când înregistrările sunt activate pentru acea cameră."
+    }
   },
   "timeline": "Cronologie",
   "timeline.aria": "Selectează cronologia",
@@ -36,5 +40,28 @@
   "selected_one": "{{count}} selectate",
   "selected_other": "{{count}} selectate",
   "suspiciousActivity": "Activitate suspectă",
-  "threateningActivity": "Activitate amenințătoare"
+  "threateningActivity": "Activitate amenințătoare",
+  "detail": {
+    "noDataFound": "Nicio dată detaliată de revizuit",
+    "aria": "Comută vizualizarea detaliată",
+    "trackedObject_one": "{{count}} obiect",
+    "trackedObject_other": "{{count}} obiecte",
+    "noObjectDetailData": "Nicio dată de detaliu obiect disponibilă.",
+    "label": "Detaliu",
+    "settings": "Setări vizualizare detaliată",
+    "alwaysExpandActive": {
+      "title": "Extinde întotdeauna activul",
+      "desc": "Extinde întotdeauna detaliile obiectului elementului activ de revizuire, atunci când sunt disponibile."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Punct urmărit",
+    "clickToSeek": "Apasă pentru a naviga la acest moment"
+  },
+  "zoomIn": "Mărește",
+  "zoomOut": "Micșorează",
+  "normalActivity": "Normal",
+  "needsReview": "Necesită revizuire",
+  "securityConcern": "Potențială problemă de securitate",
+  "select_all": "Toate"
 }

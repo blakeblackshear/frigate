@@ -1,4 +1,4 @@
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import {
   AllGroupsStreamingSettings,
   BirdseyeConfig,
@@ -24,6 +24,7 @@ import "react-resizable/css/styles.css";
 import {
   AudioState,
   LivePlayerMode,
+  LiveStreamMetadata,
   StatsState,
   VolumeState,
 } from "@/types/live";
@@ -39,7 +40,7 @@ import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard, LuPencil } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
-import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
+import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import {
   Tooltip,
@@ -47,7 +48,6 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
@@ -65,6 +65,16 @@ type DraggableGridLayoutProps = {
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   fullscreen: boolean;
   toggleFullscreen: () => void;
+  preferredLiveModes: { [key: string]: LivePlayerMode };
+  setPreferredLiveModes: React.Dispatch<
+    React.SetStateAction<{ [key: string]: LivePlayerMode }>
+  >;
+  resetPreferredLiveMode: (cameraName: string) => void;
+  isRestreamedStates: { [key: string]: boolean };
+  supportsAudioOutputStates: {
+    [key: string]: { supportsAudio: boolean; cameraName: string };
+  };
+  streamMetadata: { [key: string]: LiveStreamMetadata };
 };
 export default function DraggableGridLayout({
   cameras,
@@ -79,6 +89,12 @@ export default function DraggableGridLayout({
   setIsEditMode,
   fullscreen,
   toggleFullscreen,
+  preferredLiveModes,
+  setPreferredLiveModes,
+  resetPreferredLiveMode,
+  isRestreamedStates,
+  supportsAudioOutputStates,
+  streamMetadata,
 }: DraggableGridLayoutProps) {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -86,15 +102,8 @@ export default function DraggableGridLayout({
 
   // preferred live modes per camera
 
-  const {
-    preferredLiveModes,
-    setPreferredLiveModes,
-    resetPreferredLiveMode,
-    isRestreamedStates,
-    supportsAudioOutputStates,
-  } = useCameraLiveMode(cameras, windowVisible);
-
-  const [globalAutoLive] = usePersistence("autoLiveView", true);
+  const [globalAutoLive] = useUserPersistence("autoLiveView", true);
+  const [displayCameraNames] = useUserPersistence("displayCameraNames", false);
 
   const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
     useStreamingSettings();
@@ -109,11 +118,14 @@ export default function DraggableGridLayout({
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
-  const [gridLayout, setGridLayout, isGridLayoutLoaded] = usePersistence<
+  const [gridLayout, setGridLayout, isGridLayoutLoaded] = useUserPersistence<
     Layout[]
   >(`${cameraGroup}-draggable-layout`);
 
-  const [group] = usePersistedOverlayState("cameraGroup", "default" as string);
+  const [group] = useUserPersistedOverlayState(
+    "cameraGroup",
+    "default" as string,
+  );
 
   const groups = useMemo(() => {
     if (!config) {
@@ -133,6 +145,11 @@ export default function DraggableGridLayout({
   useEffect(() => {
     setIsEditMode(false);
     setEditGroup(false);
+    // Reset camera tracking state when group changes to prevent the camera-change
+    // effect from incorrectly overwriting the loaded layout
+    setCurrentCameras(undefined);
+    setCurrentIncludeBirdseye(undefined);
+    setCurrentGridLayout(undefined);
   }, [cameraGroup, setIsEditMode]);
 
   // camera state
@@ -156,104 +173,120 @@ export default function DraggableGridLayout({
     [setGridLayout, isGridLayoutLoaded, gridLayout, currentGridLayout],
   );
 
-  const generateLayout = useCallback(() => {
-    if (!isGridLayoutLoaded) {
-      return;
-    }
-
-    const cameraNames =
-      includeBirdseye && birdseyeConfig?.enabled
-        ? ["birdseye", ...cameras.map((camera) => camera?.name || "")]
-        : cameras.map((camera) => camera?.name || "");
-
-    const optionsMap: Layout[] = currentGridLayout
-      ? currentGridLayout.filter((layout) => cameraNames?.includes(layout.i))
-      : [];
-
-    cameraNames.forEach((cameraName, index) => {
-      const existingLayout = optionsMap.find(
-        (layout) => layout.i === cameraName,
-      );
-
-      // Skip if the camera already exists in the layout
-      if (existingLayout) {
+  const generateLayout = useCallback(
+    (baseLayout: Layout[] | undefined) => {
+      if (!isGridLayoutLoaded) {
         return;
       }
 
-      let aspectRatio;
-      let col;
+      const cameraNames =
+        includeBirdseye && birdseyeConfig?.enabled
+          ? ["birdseye", ...cameras.map((camera) => camera?.name || "")]
+          : cameras.map((camera) => camera?.name || "");
 
-      // Handle "birdseye" camera as a special case
-      if (cameraName === "birdseye") {
-        aspectRatio =
-          (birdseyeConfig?.width || 1) / (birdseyeConfig?.height || 1);
-        col = 0; // Set birdseye camera in the first column
-      } else {
-        const camera = cameras.find((cam) => cam.name === cameraName);
-        aspectRatio =
-          (camera && camera?.detect.width / camera?.detect.height) || 16 / 9;
-        col = index % 3; // Regular cameras distributed across columns
-      }
+      const optionsMap: Layout[] = baseLayout
+        ? baseLayout.filter((layout) => cameraNames?.includes(layout.i))
+        : [];
 
-      // Calculate layout options based on aspect ratio
-      const columnsPerPlayer = 4;
-      let height;
-      let width;
+      cameraNames.forEach((cameraName, index) => {
+        const existingLayout = optionsMap.find(
+          (layout) => layout.i === cameraName,
+        );
 
-      if (aspectRatio < 1) {
-        // Portrait
-        height = 2 * columnsPerPlayer;
-        width = columnsPerPlayer;
-      } else if (aspectRatio > 2) {
-        // Wide
-        height = 1 * columnsPerPlayer;
-        width = 2 * columnsPerPlayer;
-      } else {
-        // Landscape
-        height = 1 * columnsPerPlayer;
-        width = columnsPerPlayer;
-      }
+        // Skip if the camera already exists in the layout
+        if (existingLayout) {
+          return;
+        }
 
-      const options = {
-        i: cameraName,
-        x: col * width,
-        y: 0, // don't set y, grid does automatically
-        w: width,
-        h: height,
-      };
+        let aspectRatio;
+        let col;
 
-      optionsMap.push(options);
-    });
+        // Handle "birdseye" camera as a special case
+        if (cameraName === "birdseye") {
+          aspectRatio =
+            (birdseyeConfig?.width || 1) / (birdseyeConfig?.height || 1);
+          col = 0; // Set birdseye camera in the first column
+        } else {
+          const camera = cameras.find((cam) => cam.name === cameraName);
+          aspectRatio =
+            (camera && camera?.detect.width / camera?.detect.height) || 16 / 9;
+          col = index % 3; // Regular cameras distributed across columns
+        }
 
-    return optionsMap;
-  }, [
-    cameras,
-    isGridLayoutLoaded,
-    currentGridLayout,
-    includeBirdseye,
-    birdseyeConfig,
-  ]);
+        // Calculate layout options based on aspect ratio
+        const columnsPerPlayer = 4;
+        let height;
+        let width;
+
+        if (aspectRatio < 1) {
+          // Portrait
+          height = 2 * columnsPerPlayer;
+          width = columnsPerPlayer;
+        } else if (aspectRatio > 2) {
+          // Wide
+          height = 1 * columnsPerPlayer;
+          width = 2 * columnsPerPlayer;
+        } else {
+          // Landscape
+          height = 1 * columnsPerPlayer;
+          width = columnsPerPlayer;
+        }
+
+        const options = {
+          i: cameraName,
+          x: col * width,
+          y: 0, // don't set y, grid does automatically
+          w: width,
+          h: height,
+        };
+
+        optionsMap.push(options);
+      });
+
+      return optionsMap;
+    },
+    [cameras, isGridLayoutLoaded, includeBirdseye, birdseyeConfig],
+  );
 
   useEffect(() => {
     if (isGridLayoutLoaded) {
       if (gridLayout) {
-        // set current grid layout from loaded
-        setCurrentGridLayout(gridLayout);
+        // set current grid layout from loaded, possibly adding new cameras
+        const updatedLayout = generateLayout(gridLayout);
+        setCurrentGridLayout(updatedLayout);
+        // Only save if cameras were added (layout changed)
+        if (!isEqual(updatedLayout, gridLayout)) {
+          setGridLayout(updatedLayout);
+        }
+        // Set camera tracking state so the camera-change effect has a baseline
+        setCurrentCameras(cameras);
+        setCurrentIncludeBirdseye(includeBirdseye);
       } else {
         // idb is empty, set it with an initial layout
-        setGridLayout(generateLayout());
+        const newLayout = generateLayout(undefined);
+        setCurrentGridLayout(newLayout);
+        setGridLayout(newLayout);
+        setCurrentCameras(cameras);
+        setCurrentIncludeBirdseye(includeBirdseye);
       }
     }
   }, [
-    isEditMode,
     gridLayout,
-    currentGridLayout,
     setGridLayout,
     isGridLayoutLoaded,
     generateLayout,
+    cameras,
+    includeBirdseye,
   ]);
 
   useEffect(() => {
+    // Only regenerate layout when cameras change WITHIN an already-loaded group
+    // Skip if currentCameras is undefined (means we just switched groups and
+    // the first useEffect hasn't run yet to set things up)
+    if (!isGridLayoutLoaded || currentCameras === undefined) {
+      return;
+    }
+
     if (
       !isEqual(cameras, currentCameras) ||
       includeBirdseye !== currentIncludeBirdseye
@@ -261,15 +294,17 @@ export default function DraggableGridLayout({
       setCurrentCameras(cameras);
       setCurrentIncludeBirdseye(includeBirdseye);
 
-      // set new grid layout in idb
-      setGridLayout(generateLayout());
+      // Regenerate layout based on current layout, adding any new cameras
+      const updatedLayout = generateLayout(currentGridLayout);
+      setCurrentGridLayout(updatedLayout);
+      setGridLayout(updatedLayout);
     }
   }, [
     cameras,
     includeBirdseye,
     currentCameras,
     currentIncludeBirdseye,
-    setCurrentGridLayout,
+    currentGridLayout,
     generateLayout,
     setGridLayout,
     isGridLayoutLoaded,
@@ -604,12 +639,14 @@ export default function DraggableGridLayout({
                     resetPreferredLiveMode(camera.name)
                   }
                   config={config}
+                  streamMetadata={streamMetadata}
                 >
                   <LivePlayer
                     key={camera.name}
                     streamName={streamName}
                     autoLive={autoLive ?? globalAutoLive}
                     showStillWithoutActivity={showStillWithoutActivity ?? true}
+                    alwaysShowCameraName={displayCameraNames}
                     useWebGL={useWebGL}
                     cameraRef={cameraRef}
                     className={cn(
@@ -817,6 +854,7 @@ type GridLiveContextMenuProps = {
   unmuteAll: () => void;
   resetPreferredLiveMode: () => void;
   config?: FrigateConfig;
+  streamMetadata?: { [key: string]: LiveStreamMetadata };
 };
 
 const GridLiveContextMenu = React.forwardRef<
@@ -847,6 +885,7 @@ const GridLiveContextMenu = React.forwardRef<
       unmuteAll,
       resetPreferredLiveMode,
       config,
+      streamMetadata,
       ...props
     },
     ref,
@@ -878,6 +917,7 @@ const GridLiveContextMenu = React.forwardRef<
           unmuteAll={unmuteAll}
           resetPreferredLiveMode={resetPreferredLiveMode}
           config={config}
+          streamMetadata={streamMetadata}
         >
           {children}
         </LiveContextMenu>

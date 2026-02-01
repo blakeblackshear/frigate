@@ -9,6 +9,12 @@
     "desc": "Enter a new name for this export.",
     "saveExport": "Save Export"
   },
+  "tooltip": {
+    "shareExport": "Share export",
+    "downloadVideo": "Download video",
+    "editName": "Edit name",
+    "deleteExport": "Delete export"
+  },
   "toast": {
     "error": {
       "renameExportFailed": "Failed to rename export: {{errorMessage}}"

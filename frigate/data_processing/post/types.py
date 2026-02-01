@@ -8,6 +8,9 @@ class ReviewMetadata(BaseModel):
     scene: str = Field(
         description="A comprehensive description of the setting and entities, including relevant context and plausible inferences if supported by visual evidence."
     )
+    shortSummary: str = Field(
+        description="A brief 2-sentence summary of the scene, suitable for notifications. Should capture the key activity and context without full detail."
+    )
     confidence: float = Field(
         description="A float between 0 and 1 representing your overall confidence in this analysis."
     )

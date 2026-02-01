@@ -1,0 +1,23 @@
+{
+  "documentTitle": "Eksport Frigate'ist",
+  "search": "Otsi",
+  "noExports": "Eksporditud sisu ei leidu",
+  "deleteExport": "Kustuta eksporditud sisu",
+  "deleteExport.desc": "Kas sa oled kindel et soovid „{{exportName}}“ kustutada?",
+  "editExport": {
+    "title": "Muuda eksporditud sisu nime",
+    "desc": "Sisesta eksporditud sisu jaoks uus nimi.",
+    "saveExport": "Salvesta eksporditud sisu"
+  },
+  "tooltip": {
+    "shareExport": "Jaga eksporditud sisu",
+    "downloadVideo": "Laadi video alla",
+    "editName": "Muuda nime",
+    "deleteExport": "Kustuta eksporditud sisu"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Eksporditud sisu nime muutmine ei õnnestunud: {{errorMessage}}"
+    }
+  }
+}

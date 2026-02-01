@@ -132,5 +132,9 @@
     "selectPlatesFromList": "リストから1件以上選択してください。",
     "selectAll": "すべて選択",
     "clearAll": "すべてクリア"
+  },
+  "attributes": {
+    "label": "分類属性",
+    "all": "すべての属性"
   }
 }

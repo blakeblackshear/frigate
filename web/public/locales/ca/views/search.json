@@ -15,7 +15,8 @@
       "max_speed": "Velocitat màxima",
       "recognized_license_plate": "Matrícula reconeguda",
       "has_clip": "Té Clip",
-      "has_snapshot": "Té instantània"
+      "has_snapshot": "Té instantània",
+      "attributes": "Atributs"
     },
     "searchType": {
       "thumbnail": "Miniatura",
@@ -55,12 +56,12 @@
   "searchFor": "Buscar {{inputValue}}",
   "button": {
     "clear": "Netejar cerca",
-    "save": "Desar la cerca",
-    "delete": "Suprimeix la recerca desada",
-    "filterInformation": "Informació de filtre",
+    "save": "Desa la cerca",
+    "delete": "Elimina la recerca desada",
+    "filterInformation": "Informació del filtre",
     "filterActive": "Filtres actius"
   },
-  "trackedObjectId": "ID d'objecte rastrejat",
+  "trackedObjectId": "ID de l'objecte rastrejat",
   "placeholder": {
     "search": "Cercar…"
   },

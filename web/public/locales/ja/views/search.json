@@ -26,7 +26,8 @@
       "max_speed": "最大速度",
       "recognized_license_plate": "認識されたナンバープレート",
       "has_clip": "クリップあり",
-      "has_snapshot": "スナップショットあり"
+      "has_snapshot": "スナップショットあり",
+      "attributes": "属性"
     },
     "searchType": {
       "thumbnail": "サムネイル",

@@ -95,6 +95,11 @@ export default function ExportDialog({
         if (response.status == 200) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
+            action: (
+              <a href="/export" target="_blank" rel="noopener noreferrer">
+                <Button>{t("export.toast.view")}</Button>
+              </a>
+            ),
           });
           setName("");
           setRange(undefined);
@@ -435,6 +440,7 @@ function CustomTimeSelector({
       <FaCalendarAlt />
       <div className="flex flex-wrap items-center">
         <Popover
+          modal={false}
           open={startOpen}
           onOpenChange={(open) => {
             if (!open) {
@@ -456,7 +462,10 @@ function CustomTimeSelector({
               {formattedStart}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center">
+          <PopoverContent
+            disablePortal={isDesktop}
+            className="flex flex-col items-center"
+          >
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(startTime * 1000)}
@@ -501,6 +510,7 @@ function CustomTimeSelector({
         </Popover>
         <FaArrowRight className="size-4 text-primary" />
         <Popover
+          modal={false}
           open={endOpen}
           onOpenChange={(open) => {
             if (!open) {
@@ -522,7 +532,10 @@ function CustomTimeSelector({
               {formattedEnd}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center">
+          <PopoverContent
+            disablePortal={isDesktop}
+            className="flex flex-col items-center"
+          >
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(endTime * 1000)}
@@ -540,7 +553,7 @@ function CustomTimeSelector({
             <SelectSeparator className="bg-secondary" />
             <input
               className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-              id="startTime"
+              id="endTime"
               type="time"
               value={endClock}
               step={isIOS ? "60" : "1"}

@@ -65,6 +65,13 @@ export default function SearchFilterDialog({
   const { t } = useTranslation(["components/filter"]);
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
+  const hasCustomClassificationModels = useMemo(
+    () => Object.keys(config?.classification?.custom ?? {}).length > 0,
+    [config],
+  );
+  const { data: allAttributes } = useSWR(
+    hasCustomClassificationModels ? "classification/attributes" : null,
+  );
   const { data: allRecognizedLicensePlates } = useSWR<string[]>(
     "recognized_license_plates",
   );
@@ -91,8 +98,10 @@ export default function SearchFilterDialog({
         (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0 ||
+        (hasCustomClassificationModels &&
+          (currentFilter.attributes?.length ?? 0) > 0) ||
         (currentFilter.recognized_license_plate?.length ?? 0) > 0),
-    [currentFilter],
+    [currentFilter, hasCustomClassificationModels],
   );
 
   const trigger = (
@@ -133,6 +142,15 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
+      {hasCustomClassificationModels && (
+        <AttributeFilterContent
+          allAttributes={allAttributes}
+          attributes={currentFilter.attributes}
+          setAttributes={(newAttributes) =>
+            setCurrentFilter({ ...currentFilter, attributes: newAttributes })
+          }
+        />
+      )}
       <RecognizedLicensePlatesFilterContent
         allRecognizedLicensePlates={allRecognizedLicensePlates}
         recognizedLicensePlates={currentFilter.recognized_license_plate}
@@ -216,6 +234,7 @@ export default function SearchFilterDialog({
               max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
+              ...(hasCustomClassificationModels && { attributes: undefined }),
               recognized_license_plate: undefined,
             }));
           }}
@@ -230,6 +249,7 @@ export default function SearchFilterDialog({
     <PlatformAwareSheet
       trigger={trigger}
       title={t("more")}
+      titleClassName="mb-5 -mt-3"
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
@@ -429,7 +449,8 @@ export function ZoneFilterContent({
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={item}
+                  type={"zone"}
                   isChecked={zones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {
@@ -1082,6 +1103,75 @@ export function RecognizedLicensePlatesFilterContent({
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+type AttributeFilterContentProps = {
+  allAttributes?: string[];
+  attributes: string[] | undefined;
+  setAttributes: (labels: string[] | undefined) => void;
+};
+export function AttributeFilterContent({
+  allAttributes,
+  attributes,
+  setAttributes,
+}: AttributeFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
+  const sortedAttributes = useMemo(
+    () =>
+      [...(allAttributes || [])].sort((a, b) =>
+        a.toLowerCase().localeCompare(b.toLowerCase()),
+      ),
+    [allAttributes],
+  );
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="text-lg">{t("attributes.label")}</div>
+      <div className="mb-5 mt-2.5 flex items-center justify-between">
+        <Label
+          className="mx-2 cursor-pointer text-primary"
+          htmlFor="allAttributes"
+        >
+          {t("attributes.all")}
+        </Label>
+        <Switch
+          className="ml-1"
+          id="allAttributes"
+          checked={attributes == undefined}
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              setAttributes(undefined);
+            }
+          }}
+        />
+      </div>
+      <div className="mt-2.5 flex flex-col gap-2.5">
+        {sortedAttributes.map((item) => (
+          <FilterSwitch
+            key={item}
+            label={item.replaceAll("_", " ")}
+            isChecked={attributes?.includes(item) ?? false}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updatedAttributes = attributes ? [...attributes] : [];
+
+                updatedAttributes.push(item);
+                setAttributes(updatedAttributes);
+              } else {
+                const updatedAttributes = attributes ? [...attributes] : [];
+
+                // can not deselect the last item
+                if (updatedAttributes.length > 1) {
+                  updatedAttributes.splice(updatedAttributes.indexOf(item), 1);
+                  setAttributes(updatedAttributes);
+                }
+              }
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Sikertelen export átnevezés: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "downloadVideo": "Videó letöltése",
+    "editName": "Név szerkesztése",
+    "deleteExport": "Export törlése",
+    "shareExport": "Export megosztása"
   }
 }

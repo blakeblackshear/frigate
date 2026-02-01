@@ -1,11 +1,29 @@
 import i18n, { t } from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpBackend from "i18next-http-backend";
+import { EventType } from "@/types/search";
 
-export const getTranslatedLabel = (label: string) => {
+export const getTranslatedLabel = (
+  label: string,
+  type: EventType = "object",
+) => {
   if (!label) return "";
 
-  return t(`${label.replace(/\s+/g, "_").toLowerCase()}`, { ns: "objects" });
+  if (type === "manual") return label;
+
+  const normalize = (s: string) =>
+    s
+      .trim()
+      .replace(/[-'\s]+/g, "_")
+      .replace(/__+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .toLowerCase();
+
+  const key = normalize(label);
+
+  const ns = type === "audio" ? "audio" : "objects";
+
+  return t(key, { ns });
 };
 
 i18n
@@ -15,7 +33,7 @@ i18n
     fallbackLng: "en", // use en if detected lng is not available
 
     backend: {
-      loadPath: "locales/{{lng}}/{{ns}}.json",
+      loadPath: `locales/{{lng}}/{{ns}}.json?v=${import.meta.env.VITE_GIT_COMMIT_HASH || "unknown"}`,
     },
 
     ns: [
@@ -60,6 +78,21 @@ i18n
     keySeparator: ".",
     parseMissingKeyHandler: (key: string) => {
       const parts = key.split(".");
+
+      if (parts[0] === "time" && parts[1]?.includes("formattedTimestamp")) {
+        // Extract the format type from the last part (12hour, 24hour)
+        const formatType = parts[parts.length - 1];
+
+        // Return actual date-fns format strings as fallbacks
+        const formatDefaults: Record<string, string> = {
+          "12hour": "h:mm aaa",
+          "24hour": "HH:mm",
+        };
+
+        if (formatDefaults[formatType]) {
+          return formatDefaults[formatType];
+        }
+      }
 
       // Handle special cases for objects and audio
       if (parts[0] === "object" || parts[0] === "audio") {

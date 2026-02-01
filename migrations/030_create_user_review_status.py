@@ -8,7 +8,7 @@ Some examples (model - class or model_name)::
 
     > Model = migrator.orm['model_name']            # Return model in current state by name
     > migrator.sql(sql)                             # Run custom SQL
-    > migrator.python(func, *args, **kwargs)        # Run python code
+    > migrator.run(func, *args, **kwargs)           # Run python code
     > migrator.create_model(Model)                  # Create a model (could be used as decorator)
     > migrator.remove_model(model, cascade=True)    # Remove a model
     > migrator.add_fields(model, **fields)          # Add fields to a model
@@ -54,7 +54,9 @@ def migrate(migrator, database, fake=False, **kwargs):
 
     # Migrate existing has_been_reviewed data to UserReviewStatus for all users
     def migrate_data():
-        all_users = list(User.select())
+        # Use raw SQL to avoid ORM issues with columns that don't exist yet
+        cursor = database.execute_sql('SELECT "username" FROM "user"')
+        all_users = cursor.fetchall()
         if not all_users:
             return
 
@@ -63,7 +65,7 @@ def migrate(migrator, database, fake=False, **kwargs):
         )
         reviewed_segment_ids = [row[0] for row in cursor.fetchall()]
         # also migrate for anonymous (unauthenticated users)
-        usernames = [user.username for user in all_users] + ["anonymous"]
+        usernames = [user[0] for user in all_users] + ["anonymous"]
 
         for segment_id in reviewed_segment_ids:
             for username in usernames:
@@ -74,7 +76,7 @@ def migrate(migrator, database, fake=False, **kwargs):
                 )
 
     if not fake:  # Only run data migration if not faking
-        migrator.python(migrate_data)
+        migrator.run(migrate_data)
 
     migrator.sql('ALTER TABLE "reviewsegment" DROP COLUMN "has_been_reviewed"')
 

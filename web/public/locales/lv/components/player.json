@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Šim laika brīdim nav atrasti ieraksti",
+  "noPreviewFound": "Priekšskatījums nav atrasts",
+  "noPreviewFoundFor": "{{cameraName}} nav atrasts priekšskatījums",
+  "submitFrigatePlus": {
+    "title": "Nosūtīt šo kadru uz Frigate+?",
+    "submit": "Iesniegt"
+  },
+  "livePlayerRequiredIOSVersion": "Šāda veida straumēšanai nepieciešama iOS 17.1 vai jaunāka versija.",
+  "streamOffline": {
+    "title": "Bezsaistes straume",
+    "desc": "No kameras {{cameraName}} <code>detect</code> straumes netika saņemti kadri, pārbaudiet kļūdu žurnālus."
+  },
+  "cameraDisabled": "Kamera ir izslēgta",
+  "stats": {
+    "streamType": {
+      "title": "Straumes veids:",
+      "short": "Tips"
+    },
+    "bandwidth": {
+      "title": "Joslas platums:",
+      "short": "Joslas platums"
+    },
+    "latency": {
+      "title": "Latentums:",
+      "value": "{{seconds}} sekundes",
+      "short": {
+        "title": "Latentums",
+        "value": "{{seconds}} sek"
+      }
+    },
+    "totalFrames": "Kopējais kadru skaits:",
+    "droppedFrames": {
+      "title": "Izlaisti kadri:",
+      "short": {
+        "title": "Izlaisti",
+        "value": "{{droppedFrames}} kadri"
+      }
+    },
+    "decodedFrames": "Dekodētie kadri:",
+    "droppedFrameRate": "Kadru nomaiņas ātruma kritums:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Kadrs veiksmīgi iesniegts pakalpojumam Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Neizdevās iesniegt kadru Frigate+"
+    }
+  }
+}

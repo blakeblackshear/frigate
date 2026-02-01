@@ -1,8 +1,5 @@
-variable "AMDGPU" {
-  default = "gfx900"
-}
 variable "ROCM" {
-  default = "7.0.2"
+  default = "7.1.1"
 }
 variable "HSA_OVERRIDE_GFX_VERSION" {
   default = ""
@@ -38,7 +35,6 @@ target rocm {
   }
   platforms = ["linux/amd64"]
   args = {
-    AMDGPU = AMDGPU,
     ROCM = ROCM,
     HSA_OVERRIDE_GFX_VERSION = HSA_OVERRIDE_GFX_VERSION,
     HSA_OVERRIDE = HSA_OVERRIDE

@@ -32,7 +32,178 @@ from frigate.models import User
 
 logger = logging.getLogger(__name__)
 
+
+def require_admin_by_default():
+    """
+    Global admin requirement dependency for all endpoints by default.
+
+    This is set as the default dependency on the FastAPI app to ensure all
+    endpoints require admin access unless explicitly overridden with
+    allow_public(), allow_any_authenticated(), or require_role().
+
+    Port 5000 (internal) always has admin role set by the /auth endpoint,
+    so this check passes automatically for internal requests.
+
+    Certain paths are exempted from the global admin check because they must
+    be accessible before authentication (login, auth) or they have their own
+    route-level authorization dependencies that handle access control.
+    """
+    # Paths that have route-level auth dependencies and should bypass global admin check
+    # These paths still have authorization - it's handled by their route-level dependencies
+    EXEMPT_PATHS = {
+        # Public auth endpoints (allow_public)
+        "/auth",
+        "/auth/first_time_login",
+        "/login",
+        "/logout",
+        # Authenticated user endpoints (allow_any_authenticated)
+        "/profile",
+        # Public info endpoints (allow_public)
+        "/",
+        "/version",
+        "/config/schema.json",
+        # Authenticated user endpoints (allow_any_authenticated)
+        "/metrics",
+        "/stats",
+        "/stats/history",
+        "/config",
+        "/config/raw",
+        "/vainfo",
+        "/nvinfo",
+        "/labels",
+        "/sub_labels",
+        "/plus/models",
+        "/recognized_license_plates",
+        "/timeline",
+        "/timeline/hourly",
+        "/recordings/storage",
+        "/recordings/summary",
+        "/recordings/unavailable",
+        "/go2rtc/streams",
+        "/event_ids",
+        "/events",
+        "/exports",
+    }
+
+    # Path prefixes that should be exempt (for paths with parameters)
+    EXEMPT_PREFIXES = (
+        "/logs/",  # /logs/{service}
+        "/review",  # /review, /review/{id}, /review/summary, /review_ids, etc.
+        "/reviews/",  # /reviews/viewed, /reviews/delete
+        "/events/",  # /events/{id}/thumbnail, /events/summary, etc. (camera-scoped)
+        "/export/",  # /export/{camera}/start/..., /export/{id}/rename, /export/{id}
+        "/go2rtc/streams/",  # /go2rtc/streams/{camera}
+        "/users/",  # /users/{username}/password (has own auth)
+        "/preview/",  # /preview/{file}/thumbnail.jpg
+        "/exports/",  # /exports/{export_id}
+        "/vod/",  # /vod/{camera_name}/...
+        "/notifications/",  # /notifications/pubkey, /notifications/register
+    )
+
+    async def admin_checker(request: Request):
+        path = request.url.path
+
+        # Check exact path matches
+        if path in EXEMPT_PATHS:
+            return
+
+        # Check prefix matches for parameterized paths
+        if path.startswith(EXEMPT_PREFIXES):
+            return
+
+        # Dynamic camera path exemption:
+        # Any path whose first segment matches a configured camera name should
+        # bypass the global admin requirement. These endpoints enforce access
+        # via route-level dependencies (e.g. require_camera_access) to ensure
+        # per-camera authorization. This allows non-admin authenticated users
+        # (e.g. viewer role) to access camera-specific resources without
+        # needing admin privileges.
+        try:
+            if path.startswith("/"):
+                first_segment = path.split("/", 2)[1]
+                if (
+                    first_segment
+                    and first_segment in request.app.frigate_config.cameras
+                ):
+                    return
+        except Exception:
+            pass
+
+        # For all other paths, require admin role
+        # Port 5000 (internal) requests have admin role set automatically
+        role = request.headers.get("remote-role")
+        if role == "admin":
+            return
+
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied. A user with the admin role is required.",
+        )
+
+    return admin_checker
+
+
+def allow_public():
+    """
+    Override dependency to allow unauthenticated access to an endpoint.
+
+    Use this for endpoints that should be publicly accessible without
+    authentication, such as login page, health checks, or pre-auth info.
+
+    Example:
+        @router.get("/public-endpoint", dependencies=[Depends(allow_public())])
+    """
+
+    async def public_checker(request: Request):
+        return  # Always allow
+
+    return public_checker
+
+
+def allow_any_authenticated():
+    """
+    Override dependency to allow any request that passed through the /auth endpoint.
+
+    Allows:
+    - Port 5000 internal requests (remote-user: "anonymous", remote-role: "admin")
+    - Authenticated users with JWT tokens (remote-user: username)
+    - Unauthenticated requests when auth is disabled (remote-user: "viewer")
+
+    Rejects:
+    - Requests with no remote-user header (did not pass through /auth endpoint)
+
+    Example:
+        @router.get("/authenticated-endpoint", dependencies=[Depends(allow_any_authenticated())])
+    """
+
+    async def auth_checker(request: Request):
+        # Ensure a remote-user has been set by the /auth endpoint
+        username = request.headers.get("remote-user")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Authentication required")
+        return
+
+    return auth_checker
+
+
 router = APIRouter(tags=[Tags.auth])
+
+
+@router.get("/auth/first_time_login", dependencies=[Depends(allow_public())])
+def first_time_login(request: Request):
+    """Return whether the admin first-time login help flag is set in config.
+
+    This endpoint is intentionally unauthenticated so the login page can
+    query it before a user is authenticated.
+    """
+    auth_config = request.app.frigate_config.auth
+
+    return JSONResponse(
+        content={
+            "admin_first_time_login": auth_config.admin_first_time_login
+            or auth_config.reset_admin_password
+        }
+    )
 
 
 class RateLimiter:
@@ -126,7 +297,10 @@ def get_jwt_secret() -> str:
             )
             jwt_secret = secrets.token_hex(64)
             try:
-                with open(jwt_secret_file, "w") as f:
+                fd = os.open(
+                    jwt_secret_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600
+                )
+                with os.fdopen(fd, "w") as f:
                     f.write(str(jwt_secret))
             except Exception:
                 logger.warning(
@@ -171,9 +345,35 @@ def verify_password(password, password_hash):
     return secrets.compare_digest(password_hash, compare_hash)
 
 
+def validate_password_strength(password: str) -> tuple[bool, Optional[str]]:
+    """
+    Validate password strength.
+
+    Returns a tuple of (is_valid, error_message).
+    """
+    if not password:
+        return False, "Password cannot be empty"
+
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+
+    if not any(c.isupper() for c in password):
+        return False, "Password must contain at least one uppercase letter"
+
+    if not any(c.isdigit() for c in password):
+        return False, "Password must contain at least one digit"
+
+    if not any(c in '!@#$%^&*(),.?":{}|<>' for c in password):
+        return False, "Password must contain at least one special character"
+
+    return True, None
+
+
 def create_encoded_jwt(user, role, expiration, secret):
     return jwt.encode(
-        {"alg": "HS256"}, {"sub": user, "role": role, "exp": expiration}, secret
+        {"alg": "HS256"},
+        {"sub": user, "role": role, "exp": expiration, "iat": int(time.time())},
+        secret,
     )
 
 
@@ -335,7 +535,37 @@ def resolve_role(
 
 
 # Endpoints
-@router.get("/auth")
+@router.get(
+    "/auth",
+    dependencies=[Depends(allow_public())],
+    summary="Authenticate request",
+    description=(
+        "Authenticates the current request based on proxy headers or JWT token. "
+        "This endpoint verifies authentication credentials and manages JWT token refresh. "
+        "On success, no JSON body is returned; authentication state is communicated via response headers and cookies."
+    ),
+    status_code=202,
+    responses={
+        202: {
+            "description": "Authentication Accepted (no response body)",
+            "headers": {
+                "remote-user": {
+                    "description": 'Authenticated username or "viewer" in proxy-only mode',
+                    "schema": {"type": "string"},
+                },
+                "remote-role": {
+                    "description": "Resolved role (e.g., admin, viewer, or custom)",
+                    "schema": {"type": "string"},
+                },
+                "Set-Cookie": {
+                    "description": "May include refreshed JWT cookie when applicable",
+                    "schema": {"type": "string"},
+                },
+            },
+        },
+        401: {"description": "Authentication Failed"},
+    },
+)
 def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     proxy_config: ProxyConfig = request.app.frigate_config.proxy
@@ -362,12 +592,12 @@ def auth(request: Request):
     # if auth is disabled, just apply the proxy header map and return success
     if not auth_config.enabled:
         # pass the user header value from the upstream proxy if a mapping is specified
-        # or use anonymous if none are specified
+        # or use viewer if none are specified
         user_header = proxy_config.header_map.user
         success_response.headers["remote-user"] = (
-            request.headers.get(user_header, default="anonymous")
+            request.headers.get(user_header, default="viewer")
             if user_header
-            else "anonymous"
+            else "viewer"
         )
 
         # parse header and resolve a valid role
@@ -434,13 +664,27 @@ def auth(request: Request):
             return fail_response
 
         # if the jwt cookie is expiring soon
-        elif jwt_source == "cookie" and expiration - JWT_REFRESH <= current_time:
+        if jwt_source == "cookie" and expiration - JWT_REFRESH <= current_time:
             logger.debug("jwt token expiring soon, refreshing cookie")
-            # ensure the user hasn't been deleted
+
+            # Check if password has been changed since token was issued
+            # If so, force re-login by rejecting the refresh
             try:
-                User.get_by_id(user)
+                user_obj = User.get_by_id(user)
+                if user_obj.password_changed_at is not None:
+                    token_iat = int(token.claims.get("iat", 0))
+                    password_changed_timestamp = int(
+                        user_obj.password_changed_at.timestamp()
+                    )
+                    if token_iat < password_changed_timestamp:
+                        logger.debug(
+                            "jwt token issued before password change, rejecting refresh"
+                        )
+                        return fail_response
             except DoesNotExist:
+                logger.debug("user not found")
                 return fail_response
+
             new_expiration = current_time + JWT_SESSION_LENGTH
             new_encoded_jwt = create_encoded_jwt(
                 user, role, new_expiration, request.app.jwt_token
@@ -461,9 +705,14 @@ def auth(request: Request):
         return fail_response
 
 
-@router.get("/profile")
+@router.get(
+    "/profile",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get user profile",
+    description="Returns the current authenticated user's profile including username, role, and allowed cameras. This endpoint requires authentication and returns information about the user's permissions.",
+)
 def profile(request: Request):
-    username = request.headers.get("remote-user", "anonymous")
+    username = request.headers.get("remote-user", "viewer")
     role = request.headers.get("remote-role", "viewer")
 
     all_camera_names = set(request.app.frigate_config.cameras.keys())
@@ -475,7 +724,12 @@ def profile(request: Request):
     )
 
 
-@router.get("/logout")
+@router.get(
+    "/logout",
+    dependencies=[Depends(allow_public())],
+    summary="Logout user",
+    description="Logs out the current user by clearing the session cookie. After logout, subsequent requests will require re-authentication.",
+)
 def logout(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     response = RedirectResponse("/login", status_code=303)
@@ -486,7 +740,12 @@ def logout(request: Request):
 limiter = Limiter(key_func=get_remote_addr)
 
 
-@router.post("/login")
+@router.post(
+    "/login",
+    dependencies=[Depends(allow_public())],
+    summary="Login with credentials",
+    description='Authenticates a user with username and password. Returns a JWT token as a secure HTTP-only cookie that can be used for subsequent API requests. The JWT token can also be retrieved from the response and used as a Bearer token in the Authorization header.\n\nExample using Bearer token:\n```\ncurl -H "Authorization: Bearer <token_value>" https://frigate_ip:8971/api/profile\n```',
+)
 @limiter.limit(limit_value=rateLimiter.get_limit)
 def login(request: Request, body: AppPostLoginBody):
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
@@ -515,11 +774,21 @@ def login(request: Request, body: AppPostLoginBody):
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
+        # Clear admin_first_time_login flag after successful admin login so the
+        # UI stops showing the first-time login documentation link.
+        if role == "admin":
+            request.app.frigate_config.auth.admin_first_time_login = False
+
         return response
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
-@router.get("/users", dependencies=[Depends(require_role(["admin"]))])
+@router.get(
+    "/users",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get all users",
+    description="Returns a list of all users with their usernames and roles. Requires admin role. Each user object contains the username and assigned role.",
+)
 def get_users():
     exports = (
         User.select(User.username, User.role).order_by(User.username).dicts().iterator()
@@ -527,7 +796,12 @@ def get_users():
     return JSONResponse([e for e in exports])
 
 
-@router.post("/users", dependencies=[Depends(require_role(["admin"]))])
+@router.post(
+    "/users",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Create new user",
+    description='Creates a new user with the specified username, password, and role. Requires admin role. Password must meet strength requirements: minimum 8 characters, at least one uppercase letter, at least one digit, and at least one special character (!@#$%^&*(),.?":{} |<>).',
+)
 def create_user(
     request: Request,
     body: AppPostUsersBody,
@@ -556,13 +830,29 @@ def create_user(
     return JSONResponse(content={"username": body.username})
 
 
-@router.delete("/users/{username}")
-def delete_user(username: str):
+@router.delete(
+    "/users/{username}",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete user",
+    description="Deletes a user by username. The built-in admin user cannot be deleted. Requires admin role. Returns success message or error if user not found.",
+)
+def delete_user(request: Request, username: str):
+    # Prevent deletion of the built-in admin user
+    if username == "admin":
+        return JSONResponse(
+            content={"message": "Cannot delete admin user"}, status_code=403
+        )
+
     User.delete_by_id(username)
     return JSONResponse(content={"success": True})
 
 
-@router.put("/users/{username}/password")
+@router.put(
+    "/users/{username}/password",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Update user password",
+    description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity for non-admin users. Password must meet strength requirements: minimum 8 characters, at least one uppercase letter, at least one digit, and at least one special character (!@#$%^&*(),.?\":{} |<>). If user changes their own password, a new JWT cookie is automatically issued.",
+)
 async def update_password(
     request: Request,
     username: str,
@@ -584,15 +874,66 @@ async def update_password(
 
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
-    password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
-    User.set_by_id(username, {User.password_hash: password_hash})
+    try:
+        user = User.get_by_id(username)
+    except DoesNotExist:
+        return JSONResponse(content={"message": "User not found"}, status_code=404)
 
-    return JSONResponse(content={"success": True})
+    # Require old_password when non-admin user is changing any password
+    # Admin users changing passwords do NOT need to provide the current password
+    if current_role != "admin":
+        if not body.old_password:
+            return JSONResponse(
+                content={"message": "Current password is required"},
+                status_code=400,
+            )
+        if not verify_password(body.old_password, user.password_hash):
+            return JSONResponse(
+                content={"message": "Current password is incorrect"},
+                status_code=401,
+            )
+
+    # Validate new password strength
+    is_valid, error_message = validate_password_strength(body.password)
+    if not is_valid:
+        return JSONResponse(
+            content={"message": error_message},
+            status_code=400,
+        )
+
+    password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
+    User.update(
+        {
+            User.password_hash: password_hash,
+            User.password_changed_at: datetime.now(),
+        }
+    ).where(User.username == username).execute()
+
+    response = JSONResponse(content={"success": True})
+
+    # If user changed their own password, issue a new JWT to keep them logged in
+    if current_username == username:
+        JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
+        JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
+        JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
+
+        expiration = int(time.time()) + JWT_SESSION_LENGTH
+        encoded_jwt = create_encoded_jwt(
+            username, current_role, expiration, request.app.jwt_token
+        )
+        # Set new JWT cookie on response
+        set_jwt_cookie(
+            response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
+        )
+
+    return response
 
 
 @router.put(
     "/users/{username}/role",
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Update user role",
+    description="Updates a user's role. The built-in admin user's role cannot be modified. Requires admin role. Valid roles are defined in the configuration.",
 )
 async def update_role(
     request: Request,

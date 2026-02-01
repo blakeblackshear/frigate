@@ -14,7 +14,8 @@ from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.record.util import remove_empty_directories, sync_recordings
-from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
+from frigate.util.builtin import clear_and_unlink
+from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,7 @@ class RecordingCleanup(threading.Thread):
                 Recordings.path,
                 Recordings.objects,
                 Recordings.motion,
+                Recordings.dBFS,
             )
             .where(
                 (Recordings.camera == config.name)
@@ -125,6 +127,7 @@ class RecordingCleanup(threading.Thread):
                     (
                         (Recordings.end_time < continuous_expire_date)
                         & (Recordings.motion == 0)
+                        & (Recordings.dBFS == 0)
                     )
                     | (Recordings.end_time < motion_expire_date)
                 )
@@ -180,7 +183,12 @@ class RecordingCleanup(threading.Thread):
             # Delete recordings outside of the retention window or based on the retention mode
             if (
                 not keep
-                or (mode == RetainModeEnum.motion and recording.motion == 0)
+                or (
+                    mode == RetainModeEnum.motion
+                    and recording.motion == 0
+                    and recording.objects == 0
+                    and recording.dBFS == 0
+                )
                 or (mode == RetainModeEnum.active_objects and recording.objects == 0)
             ):
                 Path(recording.path).unlink(missing_ok=True)

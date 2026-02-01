@@ -56,7 +56,8 @@
         "noVaildTimeSelected": "Chưa chọn khoảng thời gian hợp lệ",
         "failed": "Không thể bắt đầu xuất: {{error}}"
       },
-      "success": "Đã bắt đầu xuất thành công. Xem tệp trong thư mục /exports."
+      "success": "Đã bắt đầu xuất dữ liệu thành công. Xem tệp trên trang xuất dữ liệu.",
+      "view": "Xem"
     },
     "fromTimeline": {
       "saveExport": "Lưu bản xuất",
@@ -92,7 +93,8 @@
     "button": {
       "deleteNow": "Xóa ngay",
       "export": "Xuất",
-      "markAsReviewed": "Đánh dấu là đã xem xét"
+      "markAsReviewed": "Đánh dấu là đã xem xét",
+      "markAsUnreviewed": "Đánh dấu là chưa xem xét"
     }
   },
   "search": {
@@ -114,6 +116,7 @@
     "search": {
       "placeholder": "Tìm theo nhãn hoặc nhãn phụ..."
     },
-    "noImages": "Không tìm thấy hình thu nhỏ cho camera này"
+    "noImages": "Không tìm thấy hình thu nhỏ cho camera này",
+    "unknownLabel": "Ảnh kích hoạt đã lưu"
   }
 }

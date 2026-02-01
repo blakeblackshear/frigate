@@ -67,13 +67,14 @@ export default function EnrichmentMetrics({
 
   // features stats
 
-  const embeddingInferenceTimeSeries = useMemo(() => {
+  const groupedEnrichmentMetrics = useMemo(() => {
     if (!statsHistory) {
       return [];
     }
 
     const series: {
       [key: string]: {
+        rawKey: string;
         name: string;
         metrics: Threshold;
         data: { x: number; y: number }[];
@@ -87,10 +88,20 @@ export default function EnrichmentMetrics({
 
       Object.entries(stats.embeddings).forEach(([rawKey, stat]) => {
         const key = rawKey.replaceAll("_", " ");
-
         if (!(key in series)) {
+          const classificationIndex = rawKey.indexOf("_classification_");
+          const seriesName =
+            classificationIndex === -1
+              ? t("enrichments.embeddings." + rawKey)
+              : t(
+                  `enrichments.embeddings.${rawKey.substring(classificationIndex + 1)}`,
+                  {
+                    name: rawKey.substring(0, classificationIndex),
+                  },
+                );
           series[key] = {
-            name: t("enrichments.embeddings." + rawKey),
+            rawKey,
+            name: seriesName,
             metrics: getThreshold(rawKey),
             data: [],
           };
@@ -99,7 +110,63 @@ export default function EnrichmentMetrics({
         series[key].data.push({ x: statsIdx + 1, y: stat });
       });
     });
-    return Object.values(series);
+
+    // Group series by category (extract base name from raw key)
+    const grouped: {
+      [category: string]: {
+        categoryName: string;
+        speedSeries?: {
+          name: string;
+          metrics: Threshold;
+          data: { x: number; y: number }[];
+        };
+        eventsSeries?: {
+          name: string;
+          metrics: Threshold;
+          data: { x: number; y: number }[];
+        };
+      };
+    } = {};
+
+    Object.values(series).forEach((s) => {
+      // Extract base category name from raw key
+      // All metrics follow the pattern: {base}_speed and {base}_events_per_second
+      let categoryKey = s.rawKey;
+      let isSpeed = false;
+
+      if (s.rawKey.endsWith("_speed")) {
+        categoryKey = s.rawKey.replace("_speed", "");
+        isSpeed = true;
+      } else if (s.rawKey.endsWith("_events_per_second")) {
+        categoryKey = s.rawKey.replace("_events_per_second", "");
+        isSpeed = false;
+      }
+
+      let categoryName = "";
+      // Get translated category name
+      if (categoryKey.endsWith("_classification")) {
+        const name = categoryKey.replace("_classification", "");
+        categoryName = t("enrichments.embeddings.classification", { name });
+      } else {
+        categoryName = t("enrichments.embeddings." + categoryKey);
+      }
+
+      if (!(categoryKey in grouped)) {
+        grouped[categoryKey] = {
+          categoryName,
+          speedSeries: undefined,
+          eventsSeries: undefined,
+        };
+      }
+
+      if (isSpeed) {
+        grouped[categoryKey].speedSeries = s;
+      } else {
+        grouped[categoryKey].eventsSeries = s;
+      }
+    });
+
+    return Object.values(grouped);
   }, [statsHistory, t, getThreshold]);
 
   return (
@@ -110,35 +177,42 @@ export default function EnrichmentMetrics({
         </div>
         <div
           className={cn(
-            "mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-3",
-            embeddingInferenceTimeSeries && "sm:grid-cols-4",
+            "mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4",
           )}
         >
           {statsHistory.length != 0 ? (
             <>
-              {embeddingInferenceTimeSeries.map((series) => (
-                <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5 smart-capitalize">{series.name}</div>
-                  {series.name.endsWith("Speed") ? (
-                    <ThresholdBarGraph
-                      key={series.name}
-                      graphId={`${series.name}-inference`}
-                      name={series.name}
-                      unit="ms"
-                      threshold={series.metrics}
-                      updateTimes={updateTimes}
-                      data={[series]}
-                    />
-                  ) : (
-                    <EventsPerSecondsLineGraph
-                      key={series.name}
-                      graphId={`${series.name}-fps`}
-                      unit=""
-                      name={t("enrichments.infPerSecond")}
-                      updateTimes={updateTimes}
-                      data={[series]}
-                    />
-                  )}
+              {groupedEnrichmentMetrics.map((group) => (
+                <div
+                  key={group.categoryName}
+                  className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl"
+                >
+                  <div className="mb-5 smart-capitalize">
+                    {group.categoryName}
+                  </div>
+                  <div className="space-y-4">
+                    {group.speedSeries && (
+                      <ThresholdBarGraph
+                        key={`${group.categoryName}-speed`}
+                        graphId={`${group.categoryName}-inference`}
+                        name={t("enrichments.averageInf")}
+                        unit="ms"
+                        threshold={group.speedSeries.metrics}
+                        updateTimes={updateTimes}
+                        data={[group.speedSeries]}
+                      />
+                    )}
+                    {group.eventsSeries && (
+                      <EventsPerSecondsLineGraph
+                        key={`${group.categoryName}-events`}
+                        graphId={`${group.categoryName}-fps`}
+                        unit=""
+                        name={t("enrichments.infPerSecond")}
+                        updateTimes={updateTimes}
+                        data={[group.eventsSeries]}
+                      />
+                    )}
+                  </div>
                 </div>
               ))}
             </>

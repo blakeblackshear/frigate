@@ -12,7 +12,7 @@
     "24hours": "24 Stunden",
     "month_one": "{{time}} Monat",
     "month_other": "{{time}} Monate",
-    "d": "{{time}} Tag",
+    "d": "{{time}} Tg.",
     "day_one": "{{time}} Tag",
     "day_other": "{{time}} Tage",
     "m": "{{time}} Min",
@@ -37,12 +37,12 @@
     "30minutes": "30 Minuten",
     "1hour": "1 Stunde",
     "lastWeek": "Letzte Woche",
-    "h": "{{time}} Stunde",
+    "h": "{{time}} Std.",
     "ago": "vor {{timeAgo}}",
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
-    "mo": "{{time}}Monat",
+    "mo": "{{time}} Mon.",
     "formattedTimestamp": {
       "12hour": "d. MMM, hh:mm:ss aaa",
       "24hour": "dd. MMM, hh:mm:ss aaa"
@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d. MMM yyyy",
       "24hour": "d. MMM yyyy"
-    }
+    },
+    "inProgress": "Im Gange",
+    "invalidStartTime": "Ungültige Startzeit",
+    "invalidEndTime": "Ungültige Endzeit"
   },
   "button": {
     "save": "Speichern",
@@ -118,10 +121,17 @@
     "pictureInPicture": "Bild in Bild",
     "on": "AN",
     "suspended": "Pausierte",
-    "unsuspended": "fortsetzen"
+    "unsuspended": "fortsetzen",
+    "continue": "Weiter"
   },
   "label": {
-    "back": "Zurück"
+    "back": "Zurück",
+    "hide": "Verstecke {{item}}",
+    "show": "Zeige {{item}}",
+    "ID": "ID",
+    "none": "Nichts",
+    "all": "Alle",
+    "other": "andere"
   },
   "menu": {
     "configurationEditor": "Konfigurationseditor",
@@ -222,7 +232,8 @@
       "logout": "Abmelden"
     },
     "uiPlayground": "Testgebiet für Benutzeroberfläche",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "classification": "Klassifizierung"
   },
   "unit": {
     "speed": {
@@ -232,6 +243,14 @@
     "length": {
       "feet": "Fuß",
       "meters": "Meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/Stunde",
+      "mbph": "MB/Stunde",
+      "gbph": "GB/Stunde"
     }
   },
   "toast": {
@@ -273,5 +292,17 @@
     "desc": "Du hast keine Berechtigung diese Seite anzuzeigen.",
     "documentTitle": "Zugang verweigert - Frigate",
     "title": "Zugang verweigert"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "field": {
+    "optional": "Optional",
+    "internalID": "Die interne ID, die Frigate in der Konfiguration und Datenbank verwendet"
+  },
+  "list": {
+    "two": "{{0}} und {{1}}",
+    "many": "{{items}}, und {{last}}",
+    "separatorWithSpace": ", "
   }
 }

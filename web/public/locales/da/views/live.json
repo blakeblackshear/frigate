@@ -8,5 +8,14 @@
   "cameraAudio": {
     "enable": "Aktivér kameralyd",
     "disable": "Deaktivér kamera lyd"
+  },
+  "lowBandwidthMode": "Lavbåndbredde-tilstand",
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klik i billedrammen for at centrere kameraet",
+        "enable": "Aktivér klik for at flytte"
+      }
+    }
   }
 }

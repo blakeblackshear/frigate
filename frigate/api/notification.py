@@ -5,11 +5,12 @@ import os
 from typing import Any
 
 from cryptography.hazmat.primitives import serialization
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
 from py_vapid import Vapid01, utils
 
+from frigate.api.auth import allow_any_authenticated
 from frigate.api.defs.tags import Tags
 from frigate.const import CONFIG_DIR
 from frigate.models import User
@@ -21,6 +22,7 @@ router = APIRouter(tags=[Tags.notifications])
 
 @router.get(
     "/notifications/pubkey",
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get VAPID public key",
     description="""Gets the VAPID public key for the notifications.
     Returns the public key or an error if notifications are not enabled.
@@ -47,6 +49,7 @@ def get_vapid_pub_key(request: Request):
 
 @router.post(
     "/notifications/register",
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Register notifications",
     description="""Registers a notifications subscription.
     Returns a success message or an error if the subscription is not provided.

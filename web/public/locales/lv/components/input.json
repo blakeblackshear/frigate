@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Lejuplādēt video",
+      "toast": {
+        "success": "Video augšupielāde ir sākusies."
+      }
+    }
+  }
+}

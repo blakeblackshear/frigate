@@ -23,7 +23,8 @@
       "has_clip": "Klibi var",
       "min_speed": "Min. Hız",
       "sub_labels": "Alt Etiketler",
-      "max_speed": "Maks. Hız"
+      "max_speed": "Maks. Hız",
+      "attributes": "Özellikler"
     },
     "searchType": {
       "description": "Açıklama",

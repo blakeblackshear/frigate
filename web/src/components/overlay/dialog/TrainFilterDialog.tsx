@@ -60,7 +60,7 @@ export default function TrainFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      {isDesktop && t("more")}
+      {isDesktop && t("filter")}
     </Button>
   );
   const content = (
@@ -97,20 +97,9 @@ export default function TrainFilterDialog({
         <Button
           aria-label={t("reset.label")}
           onClick={() => {
-            setCurrentFilter((prevFilter) => ({
-              ...prevFilter,
-              time_range: undefined,
-              zones: undefined,
-              sub_labels: undefined,
-              search_type: undefined,
-              min_score: undefined,
-              max_score: undefined,
-              min_speed: undefined,
-              max_speed: undefined,
-              has_snapshot: undefined,
-              has_clip: undefined,
-              recognized_license_plate: undefined,
-            }));
+            const resetFilter: TrainFilter = {};
+            setCurrentFilter(resetFilter);
+            onUpdateFilter(resetFilter);
           }}
         >
           {t("button.reset", { ns: "common" })}
@@ -122,7 +111,7 @@ export default function TrainFilterDialog({
   return (
     <PlatformAwareSheet
       trigger={trigger}
-      title={t("more")}
+      title={t("filter")}
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
@@ -180,7 +169,11 @@ export function ClassFilterContent({
               {allClasses.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={
+                    item === "none"
+                      ? t("details.none", { ns: "views/classificationModel" })
+                      : item.replaceAll("_", " ")
+                  }
                   isChecked={classes?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {

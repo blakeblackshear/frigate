@@ -4,6 +4,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { isPWA } from "@/utils/isPWA";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
+import { useHistoryBack } from "@/hooks/use-history-back";
 
 const MobilePageContext = createContext<{
   open: boolean;
@@ -23,15 +24,16 @@ type MobilePageProps = {
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  enableHistoryBack?: boolean;
 };
 
 export function MobilePage({
   children,
   open: controlledOpen,
   onOpenChange,
+  enableHistoryBack = true,
 }: MobilePageProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-  const location = useLocation();
 
   const open = controlledOpen ?? uncontrolledOpen;
   const setOpen = useCallback(
@@ -45,33 +47,12 @@ export function MobilePage({
     [onOpenChange, setUncontrolledOpen],
   );
 
-  useEffect(() => {
-    let isActive = true;
-
-    if (open && isActive) {
-      window.history.pushState({ isMobilePage: true }, "", location.pathname);
-    }
-
-    const handlePopState = (event: PopStateEvent) => {
-      if (open && isActive) {
-        event.preventDefault();
-        setOpen(false);
-        // Delay replaceState to ensure state updates are processed
-        setTimeout(() => {
-          if (isActive) {
-            window.history.replaceState(null, "", location.pathname);
-          }
-        }, 0);
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      isActive = false;
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [open, setOpen, location.pathname]);
+  // Handle browser back button to close mobile page
+  useHistoryBack({
+    enabled: enableHistoryBack,
+    open,
+    onClose: () => setOpen(false),
+  });
 
   return (
     <MobilePageContext.Provider value={{ open, onOpenChange: setOpen }}>
@@ -121,17 +102,20 @@ export function MobilePagePortal({
 type MobilePageContentProps = {
   children: React.ReactNode;
   className?: string;
+  scrollerRef?: React.RefObject<HTMLDivElement>;
 };
 
 export function MobilePageContent({
   children,
   className,
+  scrollerRef,
 }: MobilePageContentProps) {
   const context = useContext(MobilePageContext);
   if (!context)
     throw new Error("MobilePageContent must be used within MobilePage");
 
   const [isVisible, setIsVisible] = useState(context.open);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (context.open) {
@@ -140,15 +124,27 @@ export function MobilePageContent({
   }, [context.open]);
 
   const handleAnimationComplete = () => {
-    if (!context.open) {
+    if (context.open) {
+      // After opening animation completes, ensure scroller is at the top
+      if (scrollerRef?.current) {
+        scrollerRef.current.scrollTop = 0;
+      }
+    } else {
       setIsVisible(false);
     }
   };
+
+  useEffect(() => {
+    if (context.open && scrollerRef?.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+  }, [context.open, scrollerRef]);
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          ref={containerRef}
           className={cn(
             "fixed inset-0 z-50 mb-12 bg-background",
             isPWA && "mb-16",

@@ -369,6 +369,10 @@ def get_ort_providers(
                     "enable_cpu_mem_arena": False,
                 }
             )
+        elif provider == "AzureExecutionProvider":
+            # Skip Azure provider - not typically available on local hardware
+            # and prevents fallback to OpenVINO when it's the first provider
+            continue
         else:
             providers.append(provider)
             options.append({})

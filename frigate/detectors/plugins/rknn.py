@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from pydantic import Field
 
-from frigate.const import MODEL_CACHE_DIR
+from frigate.const import MODEL_CACHE_DIR, SUPPORTED_RK_SOCS
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import RKNNModelRunner
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
@@ -82,9 +82,9 @@ class Rknn(DetectionApi):
         except FileNotFoundError:
             raise Exception("Make sure to run docker in privileged mode.")
 
-        if soc not in supported_socs:
+        if soc not in SUPPORTED_RK_SOCS:
             raise Exception(
-                f"Your SoC is not supported. Your SoC is: {soc}. Currently these SoCs are supported: {supported_socs}."
+                f"Your SoC is not supported. Your SoC is: {soc}. Currently these SoCs are supported: {SUPPORTED_RK_SOCS}."
             )
 
         return soc

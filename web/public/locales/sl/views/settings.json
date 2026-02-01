@@ -9,7 +9,9 @@
     "general": "Splošne Nastavitve - Frigate",
     "frigatePlus": "Frigate+ Nastavitve - Frigate",
     "enrichments": "Nastavitve Obogatitev - Frigate",
-    "motionTuner": "Nastavitev gibanja - Frigate"
+    "motionTuner": "Nastavitev gibanja - Frigate",
+    "cameraManagement": "Upravljaj kamere - Frigate",
+    "cameraReview": "Nastavitve pregleda kamer – Frigate"
   },
   "menu": {
     "ui": "Uporabniški vmesnik",
@@ -21,7 +23,10 @@
     "notifications": "Obvestila",
     "frigateplus": "Frigate+",
     "motionTuner": "Nastavitev Gibanja",
-    "triggers": "Prožilniki"
+    "triggers": "Prožilniki",
+    "cameraManagement": "Upravljanje",
+    "cameraReview": "Pregled",
+    "roles": "Vloge"
   },
   "masksAndZones": {
     "zones": {
@@ -86,7 +91,7 @@
     "calendar": {
       "title": "Koledar",
       "firstWeekday": {
-        "label": "Prvi Delovni Dan",
+        "label": "Prvi dan v tednu",
         "desc": "Dan, na katerega se začnejo tedni v koledarju za preglede.",
         "sunday": "Nedelja",
         "monday": "Ponedeljek"
@@ -202,6 +207,131 @@
       "nameRequired": "Ime kamere je obvezno",
       "nameInvalid": "Ime kamere mora vsebovati samo črke, številke, podčrtaje ali vezaje",
       "namePlaceholder": "npr. vhodna_vrata"
+    }
+  },
+  "cameraWizard": {
+    "title": "Dodaj kamero",
+    "description": "Sledi spodnjim korakom, da dodaš novo kamero v svojo namestitev Frigate.",
+    "steps": {
+      "nameAndConnection": "Ime & Zbirka",
+      "streamConfiguration": "Konfiguracija pretoka",
+      "validationAndTesting": "Uverjanje in testiranje"
+    },
+    "save": {
+      "success": "Kamera {{cameraName}} je bila uspešno shranjena.",
+      "failure": "Napaka pri shranjevanju {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolucija",
+      "video": "Video",
+      "audio": "Zvok",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Prosimo, vnesite veljaven URL pretoka",
+      "testFailed": "Preizkus pretoka ni uspel: {{error}}"
+    },
+    "step1": {
+      "description": "Vnesite podatke vaše kamere in preizkusite povezavo.",
+      "cameraName": "Ime kamere",
+      "cameraNamePlaceholder": "npr. sprednja_vrata ali Pregled zadnjega dvorišča",
+      "host": "Gostitelj/IP naslov",
+      "port": "Vrata",
+      "username": "Uporabniško ime",
+      "usernamePlaceholder": "Opcijsko",
+      "password": "Geslo",
+      "passwordPlaceholder": "Opcijsko",
+      "selectTransport": "Izberi transportni protokol",
+      "cameraBrand": "Znamka kamere",
+      "selectBrand": "Izberi znamko kamere za predlogo URL-ja",
+      "customUrl": "Po meri URL za pretok",
+      "brandInformation": "Informacije o znamki",
+      "brandUrlFormat": "Za kamere z obliko URL-ja RTSP: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://uporabniškoime:geslo@gostitelj:vrata/pot",
+      "testConnection": "Preveri povezavo",
+      "testSuccess": "Test povezave uspešen!",
+      "testFailed": "Test povezave neuspešen. Prosim preveri vnos in poskusi še enkrat.",
+      "streamDetails": "Podrobnosti pretoka",
+      "testing": {
+        "probingMetadata": "Preiskovanje metapodatkov kamere...",
+        "fetchingSnapshot": "Pridobivanje posnetka kamere..."
+      },
+      "warnings": {
+        "noSnapshot": "Ni mogoče pridobiti posnetka iz nastavljenega pretoka."
+      },
+      "errors": {
+        "nameLength": "Ime kamere mora biti 64 znakov ali manj",
+        "invalidCharacters": "Ime kamere vsebuje neveljavne znake",
+        "nameExists": "Ime kamere že obstaja",
+        "customUrlRtspRequired": "URL-ji po meri se morajo začeti z \"rtsp://\". Za ne-RTSP pretoke kamer je potrebna ročna nastavitev.",
+        "brands": {
+          "reolink-rtsp": "RTSP za Reolink ni priporočen. \nV nastavitvah kamere omogočite HTTP in znova zaženite čarovnika."
+        }
+      }
+    },
+    "step2": {
+      "streamUrlPlaceholder": "rtsp://uporabniskoime:geslo@gostitelj:vrata/pot",
+      "url": "URL",
+      "resolution": "Resolucija",
+      "selectResolution": "Izberi resolucijo",
+      "quality": "Kvaliteta",
+      "selectQuality": "Izberi kvaliteto",
+      "roles": "Vloge",
+      "roleLabels": {
+        "detect": "Prepoznavanje objektov",
+        "record": "Snemanje",
+        "audio": "Zvok"
+      },
+      "testStream": "Preveri povezavo",
+      "testSuccess": "Test pretoka uspešen!",
+      "testFailed": "Test pretoka spodletel",
+      "testFailedTitle": "Test spodletel",
+      "connected": "Povezan",
+      "notConnected": "Ni povezave",
+      "featuresTitle": "Funkcije",
+      "go2rtc": "Zmanjšaj povezave na kamero",
+      "detectRoleWarning": "Vsaj en pretok mora imeti vlogo »zaznavanje«, da lahko nadaljuješ.",
+      "rolesPopover": {
+        "title": "Vloge pretoka",
+        "detect": "Glavni vir za zaznavanje objektov.",
+        "record": "Shranjuje odseke video posnetka glede na nastavitve konfiguracije.",
+        "audio": "Vir za zaznavanje na podlagi zvoka."
+      },
+      "featuresPopover": {
+        "title": "Značilnosti pretoka",
+        "description": "Uporabi ponovno pretakanje go2rtc, da zmanjšaš število povezav s kamero."
+      }
+    },
+    "step3": {
+      "description": "Končno preverjanje in analiza pred shranjevanjem nove kamere. Poveži vsak pretok, preden shranjuješ.",
+      "validationTitle": "Preverjanje pretoka",
+      "connectAllStreams": "Poveži vse pretoke",
+      "reconnectionSuccess": "Ponovna povezava uspešna.",
+      "reconnectionPartial": "Nekateri pretoki se niso ponovno povezali.",
+      "streamUnavailable": "Predogled pretoka ni na voljo",
+      "reload": "Ponovno naloži",
+      "connecting": "Povezujem...",
+      "streamTitle": "Pretok {{number}}",
+      "valid": "Veljaven",
+      "failed": "Spodletel",
+      "notTested": "Ni testiran",
+      "connectStream": "Poveži",
+      "connectingStream": "Povezujem",
+      "disconnectStream": "Prekini povezavo",
+      "estimatedBandwidth": "Predvidena pasovna širina",
+      "roles": "Vloge",
+      "none": "Noben",
+      "error": "Napaka",
+      "streamValidated": "Pretok {{number}} uspešno preverjen",
+      "streamValidationFailed": "Preverjanje pretoka {{number}} spodletelo",
+      "saveAndApply": "Shrani novo kamero",
+      "saveError": "Neveljavna konfiguracija. Prosimo preverite vaše nastavitve.",
+      "issues": {
+        "title": "Preverjanje pretoka",
+        "videoCodecGood": "Video kodek je {{codec}}.",
+        "audioCodecGood": "Audio kodek je {{codec}}.",
+        "resolutionHigh": "Resolucija {{resolution}} lahko povzroči povečano porabo virov."
+      }
     }
   }
 }

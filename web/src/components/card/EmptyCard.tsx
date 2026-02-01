@@ -1,27 +1,47 @@
 import React from "react";
 import { Button } from "../ui/button";
 import Heading from "../ui/heading";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 type EmptyCardProps = {
+  className?: string;
   icon: React.ReactNode;
   title: string;
-  description: string;
+  titleHeading?: boolean;
+  description?: string;
   buttonText?: string;
+  link?: string;
 };
 export function EmptyCard({
+  className,
   icon,
   title,
+  titleHeading = true,
   description,
   buttonText,
+  link,
 }: EmptyCardProps) {
+  let TitleComponent;
+
+  if (titleHeading) {
+    TitleComponent = <Heading as="h4">{title}</Heading>;
+  } else {
+    TitleComponent = <div>{title}</div>;
+  }
+
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className={cn("flex flex-col items-center gap-2", className)}>
       {icon}
-      <Heading as="h4">{title}</Heading>
-      <div className="text-secondary-foreground">{description}</div>
+      {TitleComponent}
+      {description && (
+        <div className="mb-3 text-center text-secondary-foreground">
+          {description}
+        </div>
+      )}
       {buttonText?.length && (
         <Button size="sm" variant="select">
-          {buttonText}
+          <Link to={link ?? "#"}>{buttonText}</Link>
         </Button>
       )}
     </div>

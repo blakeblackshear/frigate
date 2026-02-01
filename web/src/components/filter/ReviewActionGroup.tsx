@@ -1,10 +1,11 @@
-import { FaCircleCheck } from "react-icons/fa6";
+import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { Button, buttonVariants } from "../ui/button";
 import { isDesktop } from "react-device-detect";
 import { FaCompactDisc } from "react-icons/fa";
 import { HiTrash } from "react-icons/hi";
+import { ReviewSegment } from "@/types/review";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,10 +19,11 @@ import {
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type ReviewActionGroupProps = {
-  selectedReviews: string[];
-  setSelectedReviews: (ids: string[]) => void;
+  selectedReviews: ReviewSegment[];
+  setSelectedReviews: (reviews: ReviewSegment[]) => void;
   onExport: (id: string) => void;
   pullLatestData: () => void;
 };
@@ -32,19 +34,29 @@ export default function ReviewActionGroup({
   pullLatestData,
 }: ReviewActionGroupProps) {
   const { t } = useTranslation(["components/dialog"]);
+  const isAdmin = useIsAdmin();
   const onClearSelected = useCallback(() => {
     setSelectedReviews([]);
   }, [setSelectedReviews]);
 
-  const onMarkAsReviewed = useCallback(async () => {
-    await axios.post(`reviews/viewed`, { ids: selectedReviews });
+  const allReviewed = selectedReviews.every(
+    (review) => review.has_been_reviewed,
+  );
+
+  const onToggleReviewed = useCallback(async () => {
+    const ids = selectedReviews.map((review) => review.id);
+    await axios.post(`reviews/viewed`, {
+      ids,
+      reviewed: !allReviewed,
+    });
     setSelectedReviews([]);
     pullLatestData();
-  }, [selectedReviews, setSelectedReviews, pullLatestData]);
+  }, [selectedReviews, setSelectedReviews, pullLatestData, allReviewed]);
 
   const onDelete = useCallback(() => {
+    const ids = selectedReviews.map((review) => review.id);
     axios
-      .post(`reviews/delete`, { ids: selectedReviews })
+      .post(`reviews/delete`, { ids })
       .then((resp) => {
         if (resp.status === 200) {
           toast.success(t("recording.confirmDelete.toast.success"), {
@@ -140,7 +152,7 @@ export default function ReviewActionGroup({
               aria-label={t("recording.button.export")}
               size="sm"
               onClick={() => {
-                onExport(selectedReviews[0]);
+                onExport(selectedReviews[0].id);
                 onClearSelected();
               }}
             >
@@ -154,32 +166,44 @@ export default function ReviewActionGroup({
           )}
           <Button
             className="flex items-center gap-2 p-2"
-            aria-label={t("recording.button.markAsReviewed")}
+            aria-label={
+              allReviewed
+                ? t("recording.button.markAsUnreviewed")
+                : t("recording.button.markAsReviewed")
+            }
             size="sm"
-            onClick={onMarkAsReviewed}
+            onClick={onToggleReviewed}
           >
-            <FaCircleCheck className="text-secondary-foreground" />
+            {allReviewed ? (
+              <FaCircleXmark className="text-secondary-foreground" />
+            ) : (
+              <FaCircleCheck className="text-secondary-foreground" />
+            )}
             {isDesktop && (
               <div className="text-primary">
-                {t("recording.button.markAsReviewed")}
+                {allReviewed
+                  ? t("recording.button.markAsUnreviewed")
+                  : t("recording.button.markAsReviewed")}
               </div>
             )}
           </Button>
-          <Button
-            className="flex items-center gap-2 p-2"
-            aria-label={t("button.delete", { ns: "common" })}
-            size="sm"
-            onClick={handleDelete}
-          >
-            <HiTrash className="text-secondary-foreground" />
-            {isDesktop && (
-              <div className="text-primary">
-                {bypassDialog
-                  ? t("recording.button.deleteNow")
-                  : t("button.delete", { ns: "common" })}
-              </div>
-            )}
-          </Button>
+          {isAdmin && (
+            <Button
+              className="flex items-center gap-2 p-2"
+              aria-label={t("button.delete", { ns: "common" })}
+              size="sm"
+              onClick={handleDelete}
+            >
+              <HiTrash className="text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {bypassDialog
+                    ? t("recording.button.deleteNow")
+                    : t("button.delete", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </>

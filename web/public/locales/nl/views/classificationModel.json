@@ -1,0 +1,188 @@
+{
+  "documentTitle": "Classificatiemodellen - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "Classificatieafbeeldingen verwijderen",
+    "renameCategory": "Klasse hernoemen",
+    "deleteCategory": "Klasse verwijderen",
+    "deleteImages": "Afbeeldingen verwijderen",
+    "trainModel": "Model trainen",
+    "addClassification": "Classificatie toevoegen",
+    "deleteModels": "Modellen verwijderen",
+    "editModel": "Model bewerken"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Verwijderde klasse",
+      "deletedImage": "Verwijderde afbeeldingen",
+      "categorizedImage": "Succesvol geclassificeerde afbeelding",
+      "trainedModel": "Succesvol getraind model.",
+      "trainingModel": "Modeltraining succesvol gestart.",
+      "deletedModel_one": "{{count}} model succesvol verwijderd",
+      "deletedModel_other": "{{count}} modellen succesvol verwijderd",
+      "updatedModel": "Modelconfiguratie succesvol bijgewerkt",
+      "renamedCategory": "Klasse succesvol hernoemd naar {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Verwijderen mislukt: {{errorMessage}}",
+      "deleteCategoryFailed": "Het verwijderen van de klasse is mislukt: {{errorMessage}}",
+      "categorizeFailed": "Afbeelding categoriseren mislukt: {{errorMessage}}",
+      "trainingFailed": "Modeltraining mislukt. Raadpleeg de Frigate-logs voor details.",
+      "deleteModelFailed": "Model verwijderen mislukt: {{errorMessage}}",
+      "updateModelFailed": "Bijwerken van model mislukt: {{errorMessage}}",
+      "renameCategoryFailed": "Hernoemen van klasse mislukt: {{errorMessage}}",
+      "trainingFailedToStart": "Het is niet gelukt om het model te trainen: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Klasse verwijderen",
+    "desc": "Weet je zeker dat je de klasse {{name}} wilt verwijderen? Hiermee worden alle bijbehorende afbeeldingen permanent verwijderd en moet het model opnieuw worden getraind.",
+    "minClassesTitle": "Kan klasse niet verwijderen",
+    "minClassesDesc": "Een classificatiemodel moet minimaal twee klassen hebben. Voeg een andere klasse toe voordat u deze verwijdert."
+  },
+  "deleteDatasetImages": {
+    "title": "Datasetafbeeldingen verwijderen",
+    "desc_one": "Weet u zeker dat u {{count}} afbeelding uit {{dataset}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt en vereist een hertraining van het model.",
+    "desc_other": "Weet u zeker dat u {{count}} afbeeldingen uit {{dataset}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt en vereist een hertraining van het model."
+  },
+  "deleteTrainImages": {
+    "title": "Trainingsafbeeldingen verwijderen",
+    "desc_one": "Weet je zeker dat je {{count}} afbeelding wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "desc_other": "Weet je zeker dat je {{count}} afbeeldingen wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+  },
+  "renameCategory": {
+    "title": "Klasse hernoemen",
+    "desc": "Voer een nieuwe naam in voor {{name}}. U moet het model opnieuw trainen om de naamswijziging door te voeren."
+  },
+  "description": {
+    "invalidName": "Ongeldige naam. Namen mogen alleen letters, cijfers, spaties, apostroffen, underscores en koppeltekens bevatten."
+  },
+  "train": {
+    "title": "Recente classificaties",
+    "aria": "Selecteer recente classificaties",
+    "titleShort": "Recent"
+  },
+  "categories": "Klassen",
+  "createCategory": {
+    "new": "Nieuwe klasse maken"
+  },
+  "categorizeImageAs": "Afbeelding classificeren als:",
+  "categorizeImage": "Afbeelding classificeren",
+  "noModels": {
+    "object": {
+      "title": "Geen objectclassificatiemodellen",
+      "description": "Maak een aangepast model om gedetecteerde objecten te classificeren.",
+      "buttonText": "Objectmodel maken"
+    },
+    "state": {
+      "title": "Geen status-classificatiemodellen",
+      "description": "Maak een aangepast model om statuswijzigingen in specifieke cameragebieden te monitoren en te classificeren.",
+      "buttonText": "Maak een statusmodel"
+    }
+  },
+  "wizard": {
+    "title": "Nieuwe classificatie maken",
+    "steps": {
+      "nameAndDefine": "Naam & definiëren",
+      "stateArea": "Staatsgebied",
+      "chooseExamples": "Voorbeelden kiezen"
+    },
+    "step1": {
+      "description": "Statusmodellen houden vaste cameragebieden in de gaten op veranderingen (bijv. deur open/dicht). Objectmodellen voegen classificaties toe aan gedetecteerde objecten (bijv. bekende dieren, bezorgers, enz.).",
+      "name": "Naam",
+      "namePlaceholder": "Voer modelnaam in...",
+      "type": "Type",
+      "typeState": "Staat",
+      "typeObject": "Object",
+      "objectLabel": "Objectlabel",
+      "objectLabelPlaceholder": "Selecteer objecttype...",
+      "classificationType": "Classificatietype",
+      "classificationTypeTip": "Leer meer over classificatietypen",
+      "classificationTypeDesc": "Sublabels voegen extra tekst toe aan het objectlabel (bijv. ‘Persoon: UPS’). Attributen zijn doorzoekbare metadata die apart in de objectmetadata worden opgeslagen.",
+      "classificationSubLabel": "Sublabel",
+      "classificationAttribute": "Attribuut",
+      "classes": "Klassen",
+      "classesTip": "Meer over klassen leren",
+      "classesStateDesc": "Definieer de verschillende staten waarin uw cameragebied zich kan bevinden. Bijvoorbeeld: ‘open’ en ‘gesloten’ voor een garagedeur.",
+      "classesObjectDesc": "Definieer de verschillende categorieën om gedetecteerde objecten in te classificeren. Bijvoorbeeld: ‘bezorger’, ‘bewoner’, ‘vreemdeling’ voor persoonsclassificatie.",
+      "classPlaceholder": "Voer klassenaam in...",
+      "errors": {
+        "nameRequired": "Modelnaam is vereist",
+        "nameLength": "De modelnaam mag maximaal 64 tekens lang zijn",
+        "nameOnlyNumbers": "Modelnaam mag niet alleen uit cijfers bestaan",
+        "classRequired": "Minimaal 1 klasse is vereist",
+        "classesUnique": "Klassennamen moeten uniek zijn",
+        "stateRequiresTwoClasses": "Statusmodellen vereisen minimaal 2 klassen",
+        "objectLabelRequired": "Selecteer een objectlabel",
+        "objectTypeRequired": "Selecteer een classificatietype",
+        "noneNotAllowed": "De klasse 'none' is niet toegestaan"
+      },
+      "states": "Staten"
+    },
+    "step2": {
+      "description": "Selecteer camera’s en definieer voor elke camera het te monitoren gebied. Het model zal de status van deze gebieden classificeren.",
+      "cameras": "Camera's",
+      "selectCamera": "Selecteer camera",
+      "noCameras": "Klik op + om camera’s toe te voegen",
+      "selectCameraPrompt": "Selecteer een camera uit de lijst om het te monitoren gebied te definiëren"
+    },
+    "step3": {
+      "selectImagesPrompt": "Selecteer alle afbeeldingen met: {{className}}",
+      "selectImagesDescription": "Klik op afbeeldingen om ze te selecteren. Klik op doorgaan wanneer je klaar bent met deze klasse.",
+      "generating": {
+        "title": "Voorbeeldafbeeldingen genereren",
+        "description": "Frigate haalt representatieve afbeeldingen uit je opnames. Dit kan even duren..."
+      },
+      "training": {
+        "title": "Model trainen",
+        "description": "Je model wordt op de achtergrond getraind. Sluit dit venster, en je model zal starten zodra de training is voltooid."
+      },
+      "retryGenerate": "Generatie opnieuw proberen",
+      "noImages": "Geen voorbeeldafbeeldingen gegenereerd",
+      "classifying": "Classificeren en trainen...",
+      "trainingStarted": "Training succesvol gestart",
+      "errors": {
+        "noCameras": "Geen camera’s geconfigureerd",
+        "noObjectLabel": "Geen objectlabel geselecteerd",
+        "generateFailed": "Genereren van voorbeelden mislukt: {{error}}",
+        "generationFailed": "Generatie mislukt. Probeer het opnieuw.",
+        "classifyFailed": "Afbeeldingen classificeren mislukt: {{error}}"
+      },
+      "generateSuccess": "Met succes gegenereerde voorbeeldafbeeldingen",
+      "allImagesRequired_one": "Classificeer alle afbeeldingen. {{count}} afbeelding resterend.",
+      "allImagesRequired_other": "Classificeer alle afbeeldingen. {{count}} afbeeldingen resterend.",
+      "modelCreated": "Model succesvol aangemaakt. Gebruik de weergave Recente classificaties om afbeeldingen voor ontbrekende statussen toe te voegen en train vervolgens het model.",
+      "missingStatesWarning": {
+        "title": "Voorbeelden van ontbrekende staten",
+        "description": "Het wordt aanbevolen om voor alle staten voorbeelden te selecteren voor het beste resultaat. Je kunt doorgaan zonder alle staten te selecteren, maar het model wordt pas getraind zodra alle staten afbeeldingen hebben. Na het doorgaan kun je in de weergave ‘Recente Classificaties’ de ontbrekende staten van afbeeldingen voorzien, en daarna het model trainen."
+      }
+    }
+  },
+  "deleteModel": {
+    "title": "Classificatiemodel verwijderen",
+    "single": "Weet u zeker dat u {{name}} wilt verwijderen? Hiermee worden alle bijbehorende gegevens, inclusief afbeeldingen en trainingsgegevens, definitief verwijderd. Deze actie kan niet ongedaan worden gemaakt.",
+    "desc_one": "Weet u zeker dat u {{count}} model wilt verwijderen? Hiermee worden alle bijbehorende gegevens, inclusief afbeeldingen en trainingsgegevens, permanent verwijderd. Deze actie kan niet ongedaan worden gemaakt.",
+    "desc_other": "Weet u zeker dat u {{count}} modellen wilt verwijderen? Hiermee worden alle bijbehorende gegevens, inclusief afbeeldingen en trainingsgegevens, permanent verwijderd. Deze actie kan niet ongedaan worden gemaakt."
+  },
+  "menu": {
+    "objects": "Objecten",
+    "states": "Staten"
+  },
+  "details": {
+    "scoreInfo": "Score geeft het gemiddelde classificatievertrouwen weer over alle detecties van dit object.",
+    "none": "Geen overeenkomst",
+    "unknown": "Onbekend"
+  },
+  "edit": {
+    "title": "Classificatiemodel bewerken",
+    "descriptionState": "Bewerk de klassen voor dit statusclassificatiemodel. Wijzigingen vereisen dat het model opnieuw wordt getraind.",
+    "descriptionObject": "Bewerk het objecttype en het classificatietype voor dit objectclassificatiemodel.",
+    "stateClassesInfo": "Let op: het wijzigen van statusklassen vereist dat het model opnieuw wordt getraind met de bijgewerkte klassen."
+  },
+  "tooltip": {
+    "trainingInProgress": "Model is momenteel aan het trainen",
+    "noNewImages": "Geen nieuwe afbeeldingen om te trainen. Classificeer eerst meer afbeeldingen in de dataset.",
+    "modelNotReady": "Model is niet klaar voor training",
+    "noChanges": "Geen wijzigingen in de dataset sinds de laatste training."
+  },
+  "none": "Geen overeenkomst"
+}

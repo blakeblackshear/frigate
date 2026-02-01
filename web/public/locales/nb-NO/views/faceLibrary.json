@@ -1,9 +1,9 @@
 {
   "selectItem": "Velg {{item}}",
   "description": {
-    "addFace": "Gå gjennom prosessen med å legge til en ny samling i ansiktsbiblioteket.",
+    "addFace": "Legg til en ny samling i ansiktsbiblioteket ved å laste opp ditt første bilde.",
     "placeholder": "Skriv inn et navn for denne samlingen",
-    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrofer, understreker og bindestreker."
+    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrof, understrek og bindestrek."
   },
   "details": {
     "person": "Person",
@@ -11,7 +11,7 @@
     "face": "Ansiktsdetaljer",
     "faceDesc": "Detaljer for sporet objekt som genererte dette ansiktet",
     "timestamp": "Tidsstempel",
-    "scoreInfo": "Under-merkelappens poengsum er basert på en vektet sum ut ifra hvor sikre gjenkjenningene av ansiktene er, så den kan avvike fra poengsummen som vises på øyeblikksbildet.",
+    "scoreInfo": "Score er et vektet gjennomsnitt av alle ansiktsscorer, vektet etter størrelsen på ansiktet i hvert bilde.",
     "subLabelScore": "Poengsum for under-merkelapp",
     "unknown": "Ukjent"
   },
@@ -20,12 +20,13 @@
     "new": "Opprett nytt ansikt",
     "title": "Opprett samling",
     "desc": "Opprett en ny samling",
-    "nextSteps": "For å bygge et sterkt grunnlag:<li>Bruk Tren-fanen for å velge og trene på bilder for hver oppdaget person.</li><li>Fokuser på bilder rett forfra for best resultat; unngå å trene bilder som fanger ansikter i vinkel.</li></ul>"
+    "nextSteps": "For å bygge et sterkt grunnlag:<li>Bruk Nylige gjenkjennelser-fanen for å velge og trene på bilder for hver oppdaget person.</li><li>Fokuser på bilder rett forfra for best resultat; unngå å trene bilder som fanger ansikter i vinkel.</li></ul>"
   },
   "train": {
-    "aria": "Velg tren",
-    "title": "Tren",
-    "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning"
+    "aria": "Velg nylige gjenkjennelser",
+    "title": "Nylige gjenkjennelser",
+    "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning",
+    "titleShort": "Nylige"
   },
   "selectFace": "Velg ansikt",
   "deleteFaceLibrary": {
@@ -38,7 +39,7 @@
       "deleteFaceFailed": "Kunne ikke slette: {{errorMessage}}",
       "uploadingImageFailed": "Kunne ikke laste opp bilde: {{errorMessage}}",
       "trainFailed": "Kunne ikke trene: {{errorMessage}}",
-      "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsskåring: {{errorMessage}}",
+      "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsscore: {{errorMessage}}",
       "addFaceLibraryFailed": "Kunne ikke angi ansiktsnavn: {{errorMessage}}",
       "deleteNameFailed": "Kunne ikke slette navn: {{errorMessage}}",
       "renameFaceFailed": "Kunne ikke gi nytt navn til ansikt: {{errorMessage}}"
@@ -49,7 +50,7 @@
       "deletedName_one": "{{count}} ansikt ble slettet.",
       "deletedName_other": "{{count}} ansikter ble slettet.",
       "trainedFace": "Ansiktet ble trent.",
-      "updatedFaceScore": "Ansiktsskåring ble oppdatert.",
+      "updatedFaceScore": "Oppdaterte ansiktsscore for {{name}} ({{score}}).",
       "uploadedImage": "Bildet ble lastet opp.",
       "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!",
       "renamedFace": "Nytt navn ble gitt til ansikt {{name}}"
@@ -57,7 +58,7 @@
   },
   "imageEntry": {
     "dropActive": "Slipp bildet her…",
-    "dropInstructions": "Dra og slipp et bilde her, eller klikk for å velge",
+    "dropInstructions": "Dra og slipp, lim inn et bilde her eller klikk for å velge",
     "maxSize": "Maks størrelse: {{size}}MB",
     "validation": {
       "selectImage": "Vennligst velg en bildefil."

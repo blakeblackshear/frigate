@@ -2,9 +2,9 @@
   "babbling": "Бърборене",
   "whispering": "Шепнене",
   "laughter": "Смях",
-  "crying": "Плача",
+  "crying": "Плач",
   "sigh": "Въздишка",
-  "singing": "Подписвам",
+  "singing": "Пеене",
   "choir": "Хор",
   "yodeling": "Йоделинг",
   "mantra": "Мантра",
@@ -264,5 +264,6 @@
   "pant": "Здъхване",
   "stomach_rumble": "Къркорене на стомах",
   "heartbeat": "Сърцебиене",
-  "scream": "Вик"
+  "scream": "Вик",
+  "snicker": "Хихикане"
 }

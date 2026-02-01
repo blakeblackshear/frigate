@@ -8,5 +8,7 @@
     }
   },
   "trackedObjectsCount_one": "{{count}} проследен обект ",
-  "trackedObjectsCount_other": "{{count}} проследени обекта "
+  "trackedObjectsCount_other": "{{count}} проследени обекта ",
+  "documentTitle": "Разгледай - Фригейт",
+  "generativeAI": "Генеративен Изкъствен Интелект"
 }

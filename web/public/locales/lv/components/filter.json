@@ -1,0 +1,52 @@
+{
+  "filter": "Filtrs",
+  "classes": {
+    "label": "Klases",
+    "all": {
+      "title": "Visas klases"
+    },
+    "count_one": "{{count}} klase",
+    "count_other": "{{count}} klases"
+  },
+  "labels": {
+    "label": "Atzīmes",
+    "all": {
+      "title": "Visas atzīmes",
+      "short": "Atzīmes"
+    },
+    "count_one": "{{count}} atzīme",
+    "count_other": "{{count}} Atzīmes"
+  },
+  "zones": {
+    "label": "Zonas",
+    "all": {
+      "title": "Visas zonas",
+      "short": "Zonas"
+    }
+  },
+  "dates": {
+    "selectPreset": "Periods…",
+    "all": {
+      "title": "Visi datumi",
+      "short": "Datumi"
+    }
+  },
+  "more": "Vairāk filtru",
+  "reset": {
+    "label": "Atiestatīt filtrus uz noklusējuma vērtībām"
+  },
+  "timeRange": "Laika diapazons",
+  "subLabels": {
+    "label": "Papildus atzīmes",
+    "all": "Visas papildus atzīmes"
+  },
+  "attributes": {
+    "label": "Klasifikācijas atribūti",
+    "all": "Visi atribūti"
+  },
+  "score": "Vērtējums",
+  "estimatedSpeed": "Paredzamais ātrums ({{unit}})",
+  "features": {
+    "label": "Funkcijas"
+  }
+}

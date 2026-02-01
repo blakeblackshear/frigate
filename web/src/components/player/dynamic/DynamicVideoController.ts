@@ -1,8 +1,11 @@
 import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
-import { TimeRange, ObjectLifecycleSequence } from "@/types/timeline";
-import { calculateInpointOffset } from "@/utils/videoUtil";
+import { TimeRange, TrackingDetailsSequence } from "@/types/timeline";
+import {
+  calculateInpointOffset,
+  calculateSeekPosition,
+} from "@/utils/videoUtil";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -12,7 +15,7 @@ export class DynamicVideoController {
   private playerController: HTMLVideoElement;
   private previewController: PreviewController;
   private setNoRecording: (noRecs: boolean) => void;
-  private setFocusedItem: (timeline: ObjectLifecycleSequence) => void;
+  private setFocusedItem: (timeline: TrackingDetailsSequence) => void;
   private playerMode: PlayerMode = "playback";
 
   // playback
@@ -29,7 +32,7 @@ export class DynamicVideoController {
     annotationOffset: number,
     defaultMode: PlayerMode,
     setNoRecording: (noRecs: boolean) => void,
-    setFocusedItem: (timeline: ObjectLifecycleSequence) => void,
+    setFocusedItem: (timeline: TrackingDetailsSequence) => void,
   ) {
     this.camera = camera;
     this.playerController = playerController;
@@ -62,18 +65,13 @@ export class DynamicVideoController {
     this.playerController.pause();
   }
 
+  isPlaying(): boolean {
+    return !this.playerController.paused && !this.playerController.ended;
+  }
+
   seekToTimestamp(time: number, play: boolean = false) {
     if (time < this.timeRange.after || time > this.timeRange.before) {
       this.timeToStart = time;
-      return;
-    }
-
-    if (
-      this.recordings.length == 0 ||
-      time < this.recordings[0].start_time ||
-      time > this.recordings[this.recordings.length - 1].end_time
-    ) {
-      this.setNoRecording(true);
       return;
     }
 
@@ -81,25 +79,16 @@ export class DynamicVideoController {
       this.playerMode = "playback";
     }
 
-    let seekSeconds = 0;
-    (this.recordings || []).every((segment) => {
-      // if the next segment is past the desired time, stop calculating
-      if (segment.start_time > time) {
-        return false;
-      }
+    const seekSeconds = calculateSeekPosition(
+      time,
+      this.recordings,
+      this.inpointOffset,
+    );
 
-      if (segment.end_time < time) {
-        seekSeconds += segment.end_time - segment.start_time;
-        return true;
-      }
-
-      seekSeconds +=
-        segment.end_time - segment.start_time - (segment.end_time - time);
-      return true;
-    });
-
-    // adjust for HLS inpoint offset
-    seekSeconds -= this.inpointOffset;
+    if (seekSeconds === undefined) {
+      this.setNoRecording(true);
+      return;
+    }
 
     if (seekSeconds != 0) {
       this.playerController.currentTime = seekSeconds;
@@ -128,7 +117,7 @@ export class DynamicVideoController {
     });
   }
 
-  seekToTimelineItem(timeline: ObjectLifecycleSequence) {
+  seekToTimelineItem(timeline: TrackingDetailsSequence) {
     this.playerController.pause();
     this.seekToTimestamp(timeline.timestamp + this.annotationOffset);
     this.setFocusedItem(timeline);

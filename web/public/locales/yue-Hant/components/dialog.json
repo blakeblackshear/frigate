@@ -106,7 +106,15 @@
     "button": {
       "export": "匯出",
       "markAsReviewed": "標記為已審查",
-      "deleteNow": "立即刪除"
+      "deleteNow": "立即刪除",
+      "markAsUnreviewed": "標記為未審查"
     }
+  },
+  "imagePicker": {
+    "selectImage": "選取追蹤物件縮圖",
+    "search": {
+      "placeholder": "以標籤或子標籤搜尋..."
+    },
+    "noImages": "未找到此鏡頭的縮圖"
   }
 }

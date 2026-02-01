@@ -27,6 +27,28 @@
     },
     "deleteTrackedObject": {
       "label": "מחק את אובייקט המעקב הזה"
+    },
+    "audioTranscription": {
+      "aria": "בקשת תמלול אודיו",
+      "label": "תמלל"
+    },
+    "showObjectDetails": {
+      "label": "הצגת מסלול האובייקט"
+    },
+    "hideObjectDetails": {
+      "label": "הסתרת מסלול האובייקט"
+    },
+    "downloadCleanSnapshot": {
+      "label": "הורד תמונה נקיה",
+      "aria": "הורד תמונה נקיה"
+    },
+    "viewTrackingDetails": {
+      "label": "הצג פרטי מעקב",
+      "aria": "הצג את פרטי המעקב"
+    },
+    "addTrigger": {
+      "label": "הוסף טריגר",
+      "aria": "הוסף טריגר לאובייקט במעקב זה"
     }
   },
   "generativeAI": "Generative - AI",
@@ -64,7 +86,9 @@
     "details": "פרטים",
     "snapshot": "לכידת תמונה",
     "video": "וידיאו",
-    "object_lifecycle": "שלבי זיהוי של האובייקט"
+    "object_lifecycle": "שלבי זיהוי של האובייקט",
+    "thumbnail": "תמונה ממוזערת",
+    "tracking_details": "פרטי מעקב"
   },
   "objectLifecycle": {
     "title": "שלבי זיהוי של האובייקט",
@@ -132,12 +156,16 @@
         "success": {
           "updatedSublabel": "תווית המשנה עודכנה בהצלחה.",
           "updatedLPR": "לוחית הרישוי עודכנה בהצלחה.",
-          "regenerate": "תיאור חדש התבקש מ-{{provider}}. בהתאם למהירות הספק שלך, ייתכן שייקח זמן מה ליצירת התיאור החדש."
+          "regenerate": "תיאור חדש התבקש מ-{{provider}}. בהתאם למהירות הספק שלך, ייתכן שייקח זמן מה ליצירת התיאור החדש.",
+          "updatedAttributes": "המאפיינים עודכנו בהצלחה.",
+          "audioTranscription": "בקשת תמלול האודיו נשלחה בהצלחה. בהתאם למהירות שרת ה־Frigate שלך, התמלול עשוי להימשך זמן מה עד להשלמתו."
         },
         "error": {
           "regenerate": "ההתקשרות ל-{{provider}} לקבלת תיאור חדש נכשלה: {{errorMessage}}",
           "updatedSublabelFailed": "עדכון תווית המשנה נכשל: {{errorMessage}}",
-          "updatedLPRFailed": "עדכון לוחית הרישוי נכשל: {{errorMessage}}"
+          "updatedLPRFailed": "עדכון לוחית הרישוי נכשל: {{errorMessage}}",
+          "updatedAttributesFailed": "נכשל בעדכון המאפיינים: {{errorMessage}}",
+          "audioTranscription": "נכשל בשליחת בקשה לתמלול אודיו: {{errorMessage}}"
         }
       },
       "title": "סקירת הפריט",
@@ -184,12 +212,23 @@
       "descriptionSaved": "התיאור נשמר בהצלחה",
       "saveDescriptionFailed": "עדכון התיאור נכשל: {{errorMessage}}"
     },
-    "zones": "אזורים"
+    "zones": "אזורים",
+    "editAttributes": {
+      "title": "ערוך מאפיינים",
+      "desc": "בחר מאפייני סיווג עבור {{label}} זה"
+    },
+    "score": {
+      "label": "ציון"
+    },
+    "attributes": "מאפייני סיווג",
+    "title": {
+      "label": "כותרת"
+    }
   },
   "dialog": {
     "confirmDelete": {
       "title": "אישור מחיקה",
-      "desc": "מחיקת אובייקט זה במעקב מסירה את תמונת המצב, כל ההטמעות שנשמרו וכל ערכי שלבי האובייקט המשויכים. קטעי וידאו מוקלטים של אובייקט זה במעקב בתצוגת היסטוריה <em>לא</em> יימחקו.<br /><br />האם אתה בטוח שברצונך להמשיך?"
+      "desc": "מחיקת אובייקט זה במעקב תסיר את הצילום, כל ה־embeddings השמורים וכל רשומות פרטי המעקב המשויכות. קטעי וידאו מוקלטים של אובייקט זה בתצוגת היסטוריה <em>לא</em> יימחקו.<br /><br />האם אתה בטוח שברצונך להמשיך?"
     }
   },
   "searchResult": {
@@ -199,11 +238,68 @@
         "error": "מחיקת האובייקט במעקב נכשלה: {{errorMessage}}",
         "success": "האובייקט המעקב נמחק בהצלחה."
       }
-    }
+    },
+    "previousTrackedObject": "האובייקט הקודם במעקב",
+    "nextTrackedObject": "האובייקט הבא במעקב"
   },
   "noTrackedObjects": "לא נמצאו אובייקטים במעקב",
   "fetchingTrackedObjectsFailed": "שגיאה באחזור אובייקטים במעקב: {{errorMessage}}",
   "trackedObjectsCount_one": "אובייקט במעקב ({{count}}) ",
   "trackedObjectsCount_two": "אובייקטים במעקב ({{count}}) ",
-  "trackedObjectsCount_other": "אובייקטים במעקב ({{count}}) "
+  "trackedObjectsCount_other": "אובייקטים במעקב ({{count}}) ",
+  "trackingDetails": {
+    "title": "פרטי מעקב",
+    "noImageFound": "לא נמצאה תמונה עבור חותמת הזמן הזו.",
+    "createObjectMask": "יצירת מסכת אובייקט",
+    "adjustAnnotationSettings": "התאמת הגדרות הסימון",
+    "scrollViewTips": "לחץ כדי לראות את הרגעים החשובים לאורך כל זמן המעקב אחרי האובייקט הזה.",
+    "autoTrackingTips": "מיקומי תיבות התחימה (Bounding Boxes) לא יהיו מדויקים עבור מצלמות עם מעקב אוטומטי (Autotracking).",
+    "count": "{{first}} מתוך {{second}}",
+    "trackedPoint": "נקודת מעקב",
+    "lifecycleItemDesc": {
+      "visible": "זוהה {{label}}",
+      "entered_zone": "{{label}} נכנס ל־{{zones}}",
+      "active": "{{label}} הפך לפעיל",
+      "stationary": "{{label}} הפך לנייח",
+      "attribute": {
+        "faceOrLicense_plate": "זוהה {{attribute}} עבור {{label}}",
+        "other": "{{label}} זוהה כ־{{attribute}}"
+      },
+      "gone": "{{label}} יצא",
+      "heard": "{{label}} נשמע",
+      "external": "זוהה {{label}}",
+      "header": {
+        "zones": "אזורים",
+        "ratio": "יחס",
+        "area": "אזור",
+        "score": "ציון"
+      }
+    },
+    "annotationSettings": {
+      "title": "הגדרות סימון",
+      "showAllZones": {
+        "title": "הצגת כל האזורים",
+        "desc": "תמיד להציג אזורים בפריימים שבהם אובייקטים נכנסו לאזור."
+      },
+      "offset": {
+        "label": "היסט סימון",
+        "desc": "הנתונים האלה מגיעים מזרם ה־Detect של המצלמה, אבל מוצגים כשכבה מעל תמונות מזרם ה־Record. סביר ששני הזרמים לא מסונכרנים בצורה מושלמת. לכן, מסגרת הזיהוי (Bounding Box) והווידאו לא תמיד יסתדרו בדיוק אחד על השני.\nאפשר להשתמש בהגדרה הזו כדי להזיז את הסימונים קדימה או אחורה בזמן (היסט), וכך ליישר אותם טוב יותר עם ההקלטה.",
+        "millisecondsToOffset": "מספר המילישניות להיסט סימוני ה־Detect. <em>ברירת מחדל: 0</em>",
+        "tips": "הקטן את הערך אם הווידאו מקדים את המסגרות ונקודות המסלול, והגדל את הערך אם הווידאו מאחוריהם. הערך יכול להיות גם שלילי.",
+        "toast": {
+          "success": "היסט הסימון עבור {{camera}} נשמר בקובץ התצורה."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "שקופית קודמת",
+      "next": "שקופית הבאה"
+    }
+  },
+  "aiAnalysis": {
+    "title": "ניתוח AI"
+  },
+  "concerns": {
+    "label": "סיכונים"
+  }
 }

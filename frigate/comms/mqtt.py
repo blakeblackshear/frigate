@@ -225,7 +225,8 @@ class MqttClient(Communicator):
             "birdseye_mode",
             "review_alerts",
             "review_detections",
-            "genai",
+            "object_descriptions",
+            "review_descriptions",
         ]
 
         for name in self.config.cameras.keys():

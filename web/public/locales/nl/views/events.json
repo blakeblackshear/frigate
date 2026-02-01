@@ -13,7 +13,11 @@
   "empty": {
     "alert": "Er zijn geen meldingen om te beoordelen",
     "detection": "Er zijn geen detecties om te beoordelen",
-    "motion": "Geen bewegingsgegevens gevonden"
+    "motion": "Geen bewegingsgegevens gevonden",
+    "recordingsDisabled": {
+      "title": "Opnames moeten zijn ingeschakeld",
+      "description": "Beoordelingsitems kunnen alleen voor een camera worden aangemaakt als opnames voor die camera zijn ingeschakeld."
+    }
   },
   "events": {
     "aria": "Selecteer activiteiten",
@@ -36,5 +40,28 @@
   "selected_one": "{{count}} geselecteerd",
   "detected": "gedetecteerd",
   "suspiciousActivity": "Verdachte activiteit",
-  "threateningActivity": "Bedreigende activiteit"
+  "threateningActivity": "Bedreigende activiteit",
+  "detail": {
+    "noDataFound": "Geen gedetailleerde gegevens om te beoordelen",
+    "aria": "Detailweergave in- of uitschakelen",
+    "trackedObject_one": "{{count}} object",
+    "trackedObject_other": "{{count}} objecten",
+    "noObjectDetailData": "Geen objectdetails beschikbaar.",
+    "label": "Detail",
+    "settings": "Instellingen voor detailweergave",
+    "alwaysExpandActive": {
+      "desc": "Altijd de objectdetails van het actieve beoordelingsitem uitklappen wanneer deze beschikbaar zijn.",
+      "title": "Het huidige item altijd uitvouwen"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Gevolgd punt",
+    "clickToSeek": "Klik om naar deze tijd te zoeken"
+  },
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom uit",
+  "normalActivity": "Normaal",
+  "needsReview": "Heeft een beoordeling nodig",
+  "securityConcern": "Beveiligingsprobleem",
+  "select_all": "Alle"
 }

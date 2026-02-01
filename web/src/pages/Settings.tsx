@@ -26,7 +26,8 @@ import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import CameraSettingsView from "@/views/settings/CameraSettingsView";
+import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView";
+import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
@@ -41,7 +42,7 @@ import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import TriggerView from "@/views/settings/TriggerView";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import {
   Sidebar,
   SidebarContent,
@@ -70,7 +71,8 @@ import {
 const allSettingsViews = [
   "ui",
   "enrichments",
-  "cameras",
+  "cameraManagement",
+  "cameraReview",
   "masksAndZones",
   "motionTuner",
   "triggers",
@@ -90,7 +92,8 @@ const settingsGroups = [
   {
     label: "cameras",
     items: [
-      { key: "cameras", component: CameraSettingsView },
+      { key: "cameraManagement", component: CameraManagementView },
+      { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
       { key: "motionTuner", component: MotionTunerView },
     ],
@@ -119,6 +122,16 @@ const settingsGroups = [
   },
 ];
 
+const CAMERA_SELECT_BUTTON_PAGES = [
+  "debug",
+  "cameraReview",
+  "masksAndZones",
+  "motionTuner",
+  "triggers",
+];
+
+const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
+
 const getCurrentComponent = (page: SettingsType) => {
   for (const group of settingsGroups) {
     for (const item of group.items) {
@@ -144,9 +157,11 @@ function MobileMenuItem({
   const { t } = useTranslation(["views/settings"]);
 
   return (
-    <Button
-      variant="ghost"
-      className={cn("w-full justify-between pr-2", className)}
+    <div
+      className={cn(
+        "inline-flex h-10 w-full cursor-pointer items-center justify-between whitespace-nowrap rounded-md px-4 py-2 pr-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
+        className,
+      )}
       onClick={() => {
         onSelect(item.key);
         onClose?.();
@@ -154,7 +169,7 @@ function MobileMenuItem({
     >
       <div className="smart-capitalize">{t("menu." + item.key)}</div>
       <LuChevronRight className="size-4" />
-    </Button>
+    </div>
   );
 }
 
@@ -172,13 +187,8 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
-  const allowedViewsForViewer: SettingsType[] = [
-    "ui",
-    "debug",
-    "notifications",
-  ];
   const visibleSettingsViews = !isAdmin
-    ? allowedViewsForViewer
+    ? ALLOWED_VIEWS_FOR_VIEWER
     : allSettingsViews;
 
   // TODO: confirm leave page
@@ -242,7 +252,7 @@ export default function Settings() {
         setSelectedCamera(firstEnabledCamera.name);
       } else if (
         !cameraEnabledStates[selectedCamera] &&
-        pageToggle !== "cameras"
+        pageToggle !== "cameraReview"
       ) {
         // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
         const firstEnabledCamera =
@@ -257,10 +267,16 @@ export default function Settings() {
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
-      if (!isAdmin && !allowedViewsForViewer.includes(page as SettingsType)) {
+      if (
+        !isAdmin &&
+        !ALLOWED_VIEWS_FOR_VIEWER.includes(page as SettingsType)
+      ) {
         setPageToggle("ui");
       } else {
         setPageToggle(page as SettingsType);
+      }
+      if (isMobile) {
+        setContentMobileOpen(true);
       }
     }
     // don't clear url params if we're creating a new object mask
@@ -271,6 +287,9 @@ export default function Settings() {
     const cameraNames = cameras.map((c) => c.name);
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask or trigger
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));
@@ -321,7 +340,9 @@ export default function Settings() {
                         onSelect={(key) => {
                           if (
                             !isAdmin &&
-                            !allowedViewsForViewer.includes(key as SettingsType)
+                            !ALLOWED_VIEWS_FOR_VIEWER.includes(
+                              key as SettingsType,
+                            )
                           ) {
                             setPageToggle("ui");
                           } else {
@@ -348,13 +369,7 @@ export default function Settings() {
               className="top-0 mb-0"
               onClose={() => navigate(-1)}
               actions={
-                [
-                  "debug",
-                  "cameras",
-                  "masksAndZones",
-                  "motionTuner",
-                  "triggers",
-                ].includes(pageToggle) ? (
+                CAMERA_SELECT_BUTTON_PAGES.includes(pageToggle) ? (
                   <div className="flex items-center gap-2">
                     {pageToggle == "masksAndZones" && (
                       <ZoneMaskFilterButton
@@ -422,17 +437,11 @@ export default function Settings() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-secondary p-3">
+      <div className="flex min-h-16 items-center justify-between border-b border-secondary p-3">
         <Heading as="h3" className="mb-0">
           {t("menu.settings", { ns: "common" })}
         </Heading>
-        {[
-          "debug",
-          "cameras",
-          "masksAndZones",
-          "motionTuner",
-          "triggers",
-        ].includes(page) && (
+        {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
           <div className="flex items-center gap-2">
             {pageToggle == "masksAndZones" && (
               <ZoneMaskFilterButton
@@ -452,7 +461,7 @@ export default function Settings() {
       </div>
       <SidebarProvider>
         <Sidebar variant="inset" className="relative mb-8 pl-0 pt-0">
-          <SidebarContent className="scrollbar-container mb-20 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
+          <SidebarContent className="scrollbar-container mb-24 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
                 const filteredItems = group.items.filter((item) =>
@@ -470,7 +479,7 @@ export default function Settings() {
                             onClick={() => {
                               if (
                                 !isAdmin &&
-                                !allowedViewsForViewer.includes(
+                                !ALLOWED_VIEWS_FOR_VIEWER.includes(
                                   filteredItems[0].key as SettingsType,
                                 )
                               ) {
@@ -512,7 +521,7 @@ export default function Settings() {
                                 onClick={() => {
                                   if (
                                     !isAdmin &&
-                                    !allowedViewsForViewer.includes(
+                                    !ALLOWED_VIEWS_FOR_VIEWER.includes(
                                       item.key as SettingsType,
                                     )
                                   ) {
@@ -538,7 +547,7 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="flex-1 overflow-auto p-2 pr-0">
+          <div className="scrollbar-container mb-24 flex-1 overflow-y-auto p-2 pr-0">
             {(() => {
               const CurrentComponent = getCurrentComponent(page);
               if (!CurrentComponent) return null;
@@ -635,13 +644,13 @@ function CameraSelectButton({
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => {
             const isEnabled = cameraEnabledStates[item.name];
-            const isCameraSettingsPage = currentPage === "cameras";
+            const isCameraSettingsPage = currentPage === "cameraReview";
             return (
               <FilterSwitch
                 key={item.name}
                 isChecked={item.name === selectedCamera}
                 label={item.name}
-                isCameraName={true}
+                type={"camera"}
                 onCheckedChange={(isChecked) => {
                   if (isChecked && (isEnabled || isCameraSettingsPage)) {
                     setSelectedCamera(item.name);

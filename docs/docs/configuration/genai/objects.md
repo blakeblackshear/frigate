@@ -39,9 +39,10 @@ You are also able to define custom prompts in your configuration.
 genai:
   provider: ollama
   base_url: http://localhost:11434
-  model: llava
+  model: qwen3-vl:8b-instruct
 
 objects:
+  genai:
     prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."
     object_prompts:
       person: "Examine the main person in these images. What are they doing and what might their actions suggest about their intent (e.g., approaching a door, leaving an area, standing still)? Do not describe the surroundings or static details."

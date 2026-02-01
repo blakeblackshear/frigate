@@ -5,6 +5,7 @@ import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
+import BlurredIconButton from "@/components/button/BlurredIconButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +52,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
@@ -63,15 +64,14 @@ import {
 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
-import SearchDetailDialog, {
-  SearchTab,
-} from "@/components/overlay/detail/SearchDetailDialog";
-import { SearchResult } from "@/types/search";
 import {
   ClassificationCard,
   GroupedClassificationCard,
 } from "@/components/card/ClassificationCard";
-import { ClassificationItemData } from "@/types/classification";
+import {
+  ClassificationItemData,
+  ClassifiedEvent,
+} from "@/types/classification";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -373,8 +373,13 @@ export default function FaceLibrary() {
         />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
-            <div className="mx-1 flex w-48 items-center justify-center text-sm text-muted-foreground">
-              <div className="p-1">{`${selectedFaces.length} selected`}</div>
+            <div className="mx-1 flex w-auto items-center justify-center text-sm text-muted-foreground">
+              <div className="p-1">
+                {t("selected", {
+                  ns: "views/events",
+                  count: selectedFaces.length,
+                })}
+              </div>
               <div className="p-1">{"|"}</div>
               <div
                 className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
@@ -382,6 +387,24 @@ export default function FaceLibrary() {
               >
                 {t("button.unselect", { ns: "common" })}
               </div>
+              {selectedFaces.length <
+                (pageToggle === "train"
+                  ? trainImages.length
+                  : faceImages.length) && (
+                <>
+                  <div className="p-1">{"|"}</div>
+                  <div
+                    className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                    onClick={() =>
+                      setSelectedFaces([
+                        ...(pageToggle === "train" ? trainImages : faceImages),
+                      ])
+                    }
+                  >
+                    {t("select_all", { ns: "views/events" })}
+                  </div>
+                </>
+              )}
             </div>
             <Button
               className="flex gap-2"
@@ -480,6 +503,18 @@ function LibrarySelector({
     [renameFace],
   );
 
+  const pageTitle = useMemo(() => {
+    if (pageToggle != "train") {
+      return pageToggle;
+    }
+
+    if (isMobileOnly) {
+      return t("train.titleShort");
+    }
+
+    return t("train.title");
+  }, [pageToggle, t]);
+
   return (
     <>
       <Dialog
@@ -527,10 +562,10 @@ function LibrarySelector({
         regexErrorMessage={t("description.invalidName")}
       />
 
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
-            {pageToggle == "train" ? t("train.title") : pageToggle}
+            {pageTitle}
             <span className="ml-2 text-primary-variant">
               ({(pageToggle && faceData?.[pageToggle]?.length) || 0})
             </span>
@@ -625,7 +660,15 @@ type TrainingGridProps = {
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
-  onRefresh: () => void;
+  onRefresh: (
+    data?:
+      | FaceLibraryData
+      | Promise<FaceLibraryData>
+      | ((
+          currentData: FaceLibraryData | undefined,
+        ) => FaceLibraryData | undefined),
+    opts?: boolean | { revalidate?: boolean },
+  ) => Promise<FaceLibraryData | undefined>;
 };
 function TrainingGrid({
   config,
@@ -686,11 +729,6 @@ function TrainingGrid({
     { ids: eventIdsQuery },
   ]);
 
-  // selection
-
-  const [selectedEvent, setSelectedEvent] = useState<Event>();
-  const [dialogTab, setDialogTab] = useState<SearchTab>("details");
-
   if (attemptImages.length == 0) {
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
@@ -701,40 +739,29 @@ function TrainingGrid({
   }
 
   return (
-    <>
-      <SearchDetailDialog
-        search={
-          selectedEvent ? (selectedEvent as unknown as SearchResult) : undefined
-        }
-        page={dialogTab}
-        setSimilarity={undefined}
-        setSearchPage={setDialogTab}
-        setSearch={(search) => setSelectedEvent(search as unknown as Event)}
-        setInputFocused={() => {}}
-      />
-
-      <div
-        ref={contentRef}
-        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
-      >
-        {Object.entries(faceGroups).map(([key, group]) => {
-          const event = events?.find((ev) => ev.id == key);
-          return (
+    <div
+      ref={contentRef}
+      className={cn(
+        "scrollbar-container grid grid-cols-2 gap-3 overflow-y-scroll p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
+      )}
+    >
+      {Object.entries(faceGroups).map(([key, group]) => {
+        const event = events?.find((ev) => ev.id == key);
+        return (
+          <div key={key} className="aspect-square w-full">
             <FaceAttemptGroup
-              key={key}
               config={config}
               group={group}
               event={event}
               faceNames={faceNames}
               selectedFaces={selectedFaces}
               onClickFaces={onClickFaces}
-              onSelectEvent={setSelectedEvent}
               onRefresh={onRefresh}
             />
-          );
-        })}
-      </div>
-    </>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -745,8 +772,15 @@ type FaceAttemptGroupProps = {
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (image: string[], ctrl: boolean) => void;
-  onSelectEvent: (event: Event) => void;
-  onRefresh: () => void;
+  onRefresh: (
+    data?:
+      | FaceLibraryData
+      | Promise<FaceLibraryData>
+      | ((
+          currentData: FaceLibraryData | undefined,
+        ) => FaceLibraryData | undefined),
+    opts?: boolean | { revalidate?: boolean },
+  ) => Promise<FaceLibraryData | undefined>;
 };
 function FaceAttemptGroup({
   config,
@@ -755,7 +789,6 @@ function FaceAttemptGroup({
   faceNames,
   selectedFaces,
   onClickFaces,
-  onSelectEvent,
   onRefresh,
 }: FaceAttemptGroupProps) {
   const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
@@ -773,8 +806,8 @@ function FaceAttemptGroup({
 
   const handleClickEvent = useCallback(
     (meta: boolean) => {
-      if (event && selectedFaces.length == 0 && !meta) {
-        onSelectEvent(event);
+      if (!meta) {
+        return;
       } else {
         const anySelected =
           group.find((face) => selectedFaces.includes(face.filename)) !=
@@ -798,7 +831,7 @@ function FaceAttemptGroup({
         }
       }
     },
-    [event, group, selectedFaces, onClickFaces, onSelectEvent],
+    [group, selectedFaces, onClickFaces],
   );
 
   // api calls
@@ -813,6 +846,7 @@ function FaceAttemptGroup({
           if (resp.status == 200) {
             toast.success(t("toast.success.trainedFace"), {
               position: "top-center",
+              closeButton: true,
             });
             onRefresh();
           }
@@ -835,11 +869,44 @@ function FaceAttemptGroup({
       axios
         .post(`/faces/reprocess`, { training_file: data.filename })
         .then((resp) => {
-          if (resp.status == 200) {
-            toast.success(t("toast.success.updatedFaceScore"), {
-              position: "top-center",
-            });
-            onRefresh();
+          if (resp.status == 200 && resp.data?.success) {
+            const { face_name, score } = resp.data;
+            const oldFilename = data.filename;
+            const parts = oldFilename.split("-");
+            const newFilename = `${parts[0]}-${parts[1]}-${parts[2]}-${face_name}-${score}.webp`;
+
+            onRefresh(
+              (currentData: FaceLibraryData | undefined) => {
+                if (!currentData?.train) return currentData;
+
+                return {
+                  ...currentData,
+                  train: currentData.train.map((filename: string) =>
+                    filename === oldFilename ? newFilename : filename,
+                  ),
+                };
+              },
+              { revalidate: true },
+            );
+
+            toast.success(
+              t("toast.success.updatedFaceScore", {
+                name: face_name,
+                score: score.toFixed(2),
+              }),
+              {
+                position: "top-center",
+              },
+            );
+          } else if (resp.data?.success === false) {
+            // Handle case where API returns success: false
+            const errorMessage = resp.data?.message || "Unknown error";
+            toast.error(
+              t("toast.error.updateFaceScoreFailed", { errorMessage }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -858,14 +925,27 @@ function FaceAttemptGroup({
     [onRefresh, t],
   );
 
+  const classifiedEvent: ClassifiedEvent | undefined = useMemo(() => {
+    if (!event) {
+      return undefined;
+    }
+
+    return {
+      id: event.id,
+      label: event.sub_label,
+      score: event.data?.sub_label_score,
+    };
+  }, [event]);
+
   return (
     <GroupedClassificationCard
       group={group}
-      event={event}
+      classifiedEvent={classifiedEvent}
       threshold={threshold}
       selectedItems={selectedFaces}
       i18nLibrary="views/faceLibrary"
       objectType="person"
+      noClassificationLabel="details.unknown"
       onClick={(data) => {
         if (data) {
           onClickFaces([data.filename], true);
@@ -873,7 +953,6 @@ function FaceAttemptGroup({
           handleClickEvent(true);
         }
       }}
-      onSelectEvent={onSelectEvent}
     >
       {(data) => (
         <>
@@ -881,14 +960,15 @@ function FaceAttemptGroup({
             faceNames={faceNames}
             onTrainAttempt={(name) => onTrainAttempt(data, name)}
           >
-            <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+            <BlurredIconButton>
+              <AddFaceIcon className="size-5" />
+            </BlurredIconButton>
           </FaceSelectionDialog>
           <Tooltip>
-            <TooltipTrigger>
-              <LuRefreshCw
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                onClick={() => onReprocess(data)}
-              />
+            <TooltipTrigger asChild>
+              <BlurredIconButton onClick={() => onReprocess(data)}>
+                <LuRefreshCw className="size-5" />
+              </BlurredIconButton>
             </TooltipTrigger>
             <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
           </Tooltip>
@@ -934,36 +1014,36 @@ function FaceGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container gap-2 overflow-y-scroll p-1",
-        isDesktop ? "flex flex-wrap" : "grid grid-cols-2 md:grid-cols-4",
+        "scrollbar-container grid grid-cols-2 gap-2 overflow-y-scroll p-1 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
       )}
     >
       {sortedFaces.map((image: string) => (
-        <ClassificationCard
-          className="gap-2 rounded-lg bg-card p-2"
-          key={image}
-          data={{
-            name: pageToggle,
-            filename: image,
-            filepath: `clips/faces/${pageToggle}/${image}`,
-          }}
-          selected={selectedFaces.includes(image)}
-          i18nLibrary="views/faceLibrary"
-          onClick={(data, meta) => onClickFaces([data.filename], meta)}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(pageToggle, [image]);
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
-          </Tooltip>
-        </ClassificationCard>
+        <div key={image} className="aspect-square w-full">
+          <ClassificationCard
+            data={{
+              name: pageToggle,
+              filename: image,
+              filepath: `clips/faces/${pageToggle}/${image}`,
+            }}
+            selected={selectedFaces.includes(image)}
+            clickable={selectedFaces.length > 0}
+            i18nLibrary="views/faceLibrary"
+            onClick={(data, meta) => onClickFaces([data.filename], meta)}
+          >
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-gray-200 hover:text-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(pageToggle, [image]);
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
+            </Tooltip>
+          </ClassificationCard>
+        </div>
       ))}
     </div>
   );

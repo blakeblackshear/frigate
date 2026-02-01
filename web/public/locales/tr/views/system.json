@@ -43,12 +43,24 @@
       "gpuEncoder": "GPU Kodlayıcı",
       "title": "Donanım Bilgisi",
       "npuUsage": "NPU Kullanımı",
-      "npuMemory": "NPU Bellek Kullanımı"
+      "npuMemory": "NPU Bellek Kullanımı",
+      "intelGpuWarning": {
+        "title": "Intel GPU İstatistik Uyarısı",
+        "message": "GPU istatistikleri kullanılamıyor",
+        "description": "Bu durum, donanımsal hızlandırma ve nesne tespiti (i)GPU üzerinde sorunsuz çalışıyor olsa bile, Intel’in GPU istatistik raporlama aracındaki (intel_gpu_top) bilinen bir hatadan ötürü GPU kullanımının %0 olarak bildirilmesinden kaynaklanmakta olup, Frigate hatası değildir. Sorunu geçici olarak düzeltmek ve (i)GPU’nun doğru çalıştığını doğrulamak için ana makineyi yeniden başlatabilirsiniz. Bu durum performansı etkilememektedir."
+      }
     },
     "otherProcesses": {
       "title": "Diğer İşlemler",
       "processCpuUsage": "İşlem CPU Kullanımı",
-      "processMemoryUsage": "İşlem Bellek Kullanımı"
+      "processMemoryUsage": "İşlem Bellek Kullanımı",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "kayıt",
+        "embeddings": "gömülü vektörler",
+        "audio_detector": "ses detektörü",
+        "review_segment": "inceleme bölümü"
+      }
     },
     "detector": {
       "title": "Algılayıcılar",
@@ -154,10 +166,20 @@
       "plate_recognition": "Plaka Tanıma",
       "face_recognition_speed": "Yüz Tanıma Hızı",
       "yolov9_plate_detection_speed": "YOLOv9 Plaka Tanıma Hızı",
-      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma"
+      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma",
+      "review_description": "İnceleme Açıklaması",
+      "review_description_speed": "İnceleme Açıklama Hızı",
+      "review_description_events_per_second": "İnceleme Açıklaması",
+      "object_description": "Nesne Açıklaması",
+      "object_description_speed": "Nesne Açıklama Hızı",
+      "object_description_events_per_second": "Nesne Açıklaması",
+      "classification": "{{name}} Sınıflandırması",
+      "classification_speed": "{{name}} Sınıflandırma Hızı",
+      "classification_events_per_second": "{{name}} Saniyede Sınıflandırma Olayları"
     },
     "infPerSecond": "Saniye Başına Çıkarım",
-    "title": "Zenginleştirmeler"
+    "title": "Zenginleştirmeler",
+    "averageInf": "Ortalama Çıkarım Süresi"
   },
   "logs": {
     "download": {

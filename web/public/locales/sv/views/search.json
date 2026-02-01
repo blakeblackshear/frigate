@@ -43,7 +43,8 @@
       "has_clip": "Har klipp",
       "has_snapshot": "Har Ögonblicksbild",
       "labels": "Etiketter",
-      "max_score": "Högsta Poäng"
+      "max_score": "Högsta Poäng",
+      "attributes": "Attribut"
     },
     "searchType": {
       "thumbnail": "Miniatyrbild",

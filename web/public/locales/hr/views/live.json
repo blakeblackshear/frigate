@@ -1,3 +1,101 @@
 {
-  "documentTitle": "Uživo - Frigate"
+  "documentTitle": "Uživo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Uživo - Frigate",
+  "twoWayTalk": {
+    "enable": "Omogući dvosmjerni razgovor",
+    "disable": "Onemogući dvosmjerni razgovor"
+  },
+  "cameraAudio": {
+    "enable": "Omogući zvuk kamere",
+    "disable": "Onemogući zvuk kamere"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klikni unutar kadra da centriraš kameru",
+        "enable": "Omogući pomicanje klikom",
+        "disable": "Onemogući pomicanje klikom"
+      },
+      "left": {
+        "label": "Pomakni PTZ kameru u lijevo"
+      },
+      "up": {
+        "label": "Pomakni PTZ kameru gore"
+      },
+      "down": {
+        "label": "Pomakni PTZ kameru dolje"
+      },
+      "right": {
+        "label": "Pomakni PTZ kameru u desno"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Približi PTZ kameru"
+      },
+      "out": {
+        "label": "Udalji PTZ kameru"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Izoštri fokus PTZ kamere"
+      },
+      "out": {
+        "label": "Fokusirajte PTZ kameru prema van"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kliknite unutar kadra da centrirate PTZ kameru"
+      }
+    },
+    "presets": "Unaprijed postavljene pozicije PTZ kamere"
+  },
+  "lowBandwidthMode": "Način niskog bandwidtha",
+  "camera": {
+    "enable": "Omogući Kameru",
+    "disable": "Onemogući Kameru"
+  },
+  "muteCameras": {
+    "enable": "Isključi zvuk svih kamera",
+    "disable": "Uključi zvuk svih kamera"
+  },
+  "detect": {
+    "enable": "Omogući Detekciju",
+    "disable": "Onemogući detekciju"
+  },
+  "recording": {
+    "enable": "Omogući Snimanje",
+    "disable": "Onemogući Snimanje"
+  },
+  "snapshots": {
+    "enable": "Omogući Snimke",
+    "disable": "Onemogući snimke slike"
+  },
+  "snapshot": {
+    "takeSnapshot": "Preuzmi instantnu snimku slike",
+    "noVideoSource": "Video izvor nije dostupan za snimku slike.",
+    "captureFailed": "Snimanje slike neuspješno.",
+    "downloadStarted": "Preuzimanje snimke slike započeto."
+  },
+  "audioDetect": {
+    "enable": "Omogući Zvučnu Detekciju",
+    "disable": "Onemogući Zvučnu Detekciju"
+  },
+  "transcription": {
+    "enable": "Omogući Transkripciju Zvuka Uživo",
+    "disable": "Onemogući Transkripciju Zvuka Uživo"
+  },
+  "autotracking": {
+    "enable": "Omogući Automatsko Praćenje",
+    "disable": "Onemogući Auto Praćenje"
+  },
+  "streamStats": {
+    "enable": "Prikaži statistike emitiranja",
+    "disable": "Sakrij statistike emitiranja"
+  },
+  "manualRecording": {
+    "title": "Na Zahtjev"
+  }
 }

@@ -73,8 +73,8 @@
     "disable": "Avaktivera ljudaktivering"
   },
   "autotracking": {
-    "enable": "Aktivera automatisk panorering",
-    "disable": "Avaktivera automatisk panorering"
+    "enable": "Aktivera Autospårning",
+    "disable": "Avaktivera Autospårning"
   },
   "notifications": "Notifikationer",
   "audio": "Ljud",
@@ -82,8 +82,8 @@
   "manualRecording": {
     "failedToEnd": "Misslyckades med att avsluta manuell vid behov-inspelning.",
     "started": "Starta manuell inspelning vid behov.",
-    "title": "Aktivera inspelning vid behov",
-    "tips": "Starta en manuell händelse enligt denna kameras inställningar för inspelningslagring.",
+    "title": "Vid behov",
+    "tips": "Ladda ner en omedelbar ögonblicksbild eller starta en manuell händelse baserat på kamerans inställningar för inspelningslagring.",
     "playInBackground": {
       "label": "Spela upp i bakgrunden",
       "desc": "Strömma vidare när spelaren inte visas."
@@ -137,7 +137,7 @@
     "forTime": "Pausa för: "
   },
   "stream": {
-    "title": "Ström (Swedish also use the word Stream)",
+    "title": "Ström",
     "audio": {
       "tips": {
         "title": "Ljud måste skickas ut från din kamera och konfigureras i go2rtc för den här strömmen.",
@@ -170,5 +170,20 @@
   "transcription": {
     "enable": "Aktivera live-ljudtranskription",
     "disable": "Inaktivera live-ljudtranskription"
+  },
+  "noCameras": {
+    "title": "Inga kameror konfigurerade",
+    "description": "Börja med att ansluta en kamera till Frigate.",
+    "buttonText": "Lägg till kamera",
+    "restricted": {
+      "title": "Inga kameror tillgängliga",
+      "description": "Du har inte behörighet att visa några kameror i den här gruppen."
+    }
+  },
+  "snapshot": {
+    "takeSnapshot": "Ladda ner omedelbar ögonblicksbild",
+    "noVideoSource": "Ingen videokälla tillgänglig för ögonblicksbilden.",
+    "captureFailed": "Misslyckades med att ta en ögonblicksbild.",
+    "downloadStarted": "Nedladdning av ögonblicksbild har startat."
   }
 }

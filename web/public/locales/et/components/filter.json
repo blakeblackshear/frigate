@@ -1,0 +1,88 @@
+{
+  "filter": "Filter",
+  "trackedObjectDelete": {
+    "toast": {
+      "error": "Jälgitavate objektide kustutamine ei õnnestunud: {{errorMessage}}",
+      "success": "Jälgitavate objektide kustutamine õnnestus."
+    }
+  },
+  "cameras": {
+    "all": {
+      "title": "Kõik kaamerad",
+      "short": "Kaamerad"
+    }
+  },
+  "labels": {
+    "all": {
+      "title": "Kõik sildid",
+      "short": "Sildid"
+    },
+    "label": "Sildid",
+    "count_one": "{{count}} silt",
+    "count_other": "{{count}} silti"
+  },
+  "subLabels": {
+    "all": "Kõik alamsildid",
+    "label": "Alamsildid"
+  },
+  "dates": {
+    "all": {
+      "title": "Kõik kuupäevad",
+      "short": "Kuupäevad"
+    },
+    "selectPreset": "Vali eelseadistus…"
+  },
+  "explore": {
+    "settings": {
+      "title": "Seadistused",
+      "defaultView": {
+        "title": "Vaikimisi vaade",
+        "summary": "Kokkuvõte",
+        "unfilteredGrid": "Filtreerimata ruudustik"
+      },
+      "gridColumns": {
+        "title": "Ruudustiku veerud",
+        "desc": "Vali ruudustikus kuvatavate veergude arv."
+      },
+      "searchSource": {
+        "options": {
+          "thumbnailImage": "Pisipilt",
+          "description": "Kirjeldus"
+        }
+      }
+    }
+  },
+  "logSettings": {
+    "loading": {
+      "title": "Laadin"
+    },
+    "disableLogStreaming": "Keela logi voogedastus",
+    "allLogs": "Kõik logid"
+  },
+  "classes": {
+    "label": "Klassid",
+    "all": {
+      "title": "Kõik klassid"
+    },
+    "count_one": "{{count}} klass",
+    "count_other": "{{count}} klassi"
+  },
+  "zones": {
+    "label": "Tsoonid",
+    "all": {
+      "title": "Kõik tsoonid",
+      "short": "Tsoonid"
+    }
+  },
+  "more": "Täiendavad filtrid",
+  "timeRange": "Ajavahemik",
+  "reset": {
+    "label": "Lähtesta filtrid vaikimisi väärtusteks"
+  },
+  "score": "Punktiskoor",
+  "estimatedSpeed": "Hinnanguline kiirus: ({{unit}})",
+  "features": {
+    "label": "Omadused",
+    "hasSnapshot": "Leidub hetkvõte"
+  }
+}

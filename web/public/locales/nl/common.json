@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM yyyy",
       "24hour": "d MMM yyyy"
-    }
+    },
+    "inProgress": "Wordt uitgevoerd",
+    "invalidStartTime": "Ongeldige starttijd",
+    "invalidEndTime": "Ongeldige eindtijd"
   },
   "button": {
     "enabled": "Ingeschakeld",
@@ -118,7 +121,8 @@
     "download": "Download",
     "unselect": "Deselecteren",
     "next": "Volgende",
-    "deleteNow": "Nu verwijderen"
+    "deleteNow": "Nu verwijderen",
+    "continue": "Doorgaan"
   },
   "unit": {
     "speed": {
@@ -128,10 +132,24 @@
     "length": {
       "feet": "voet",
       "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/uur",
+      "mbph": "MB/uur",
+      "gbph": "GB/uur"
     }
   },
   "label": {
-    "back": "Ga terug"
+    "back": "Ga terug",
+    "hide": "Verberg {{item}}",
+    "show": "Toon {{item}}",
+    "ID": "ID",
+    "none": "Geen",
+    "all": "Alle",
+    "other": "Overige"
   },
   "menu": {
     "system": "Systeem",
@@ -232,7 +250,8 @@
       "setPassword": "Wachtwoord instellen",
       "account": "Account",
       "anonymous": "anoniem"
-    }
+    },
+    "classification": "Classificatie"
   },
   "toast": {
     "copyUrlToClipboard": "URL naar klembord gekopieerd.",
@@ -247,7 +266,7 @@
   "role": {
     "title": "Rol",
     "admin": "Beheerder",
-    "viewer": "Gebruiker",
+    "viewer": "Kijker",
     "desc": "Beheerders hebben volledige toegang tot alle functies in de Frigate-interface. Kijkers kunnen alleen camera’s bekijken, items beoordelen en historische beelden terugkijken."
   },
   "pagination": {
@@ -273,5 +292,17 @@
     "documentTitle": "Niet gevonden - Frigate"
   },
   "selectItem": "Selecteer {{item}}",
-  "readTheDocumentation": "Lees de documentatie"
+  "readTheDocumentation": "Lees de documentatie",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} en {{1}}",
+    "many": "{{items}}, en {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Optioneel",
+    "internalID": "De interne ID die Frigate gebruikt in de configuratie en database"
+  }
 }

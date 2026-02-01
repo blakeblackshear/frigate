@@ -84,7 +84,9 @@
     "details": "detalls",
     "snapshot": "instantània",
     "video": "vídeo",
-    "object_lifecycle": "cicle de vida de l'objecte"
+    "object_lifecycle": "cicle de vida de l'objecte",
+    "thumbnail": "miniatura",
+    "tracking_details": "detalls del seguiment"
   },
   "details": {
     "timestamp": "Marca temporal",
@@ -98,13 +100,15 @@
           "updatedSublabel": "Subetiqueta actualitzada amb èxit.",
           "updatedLPR": "Matrícula actualitzada amb èxit.",
           "regenerate": "El {{provider}} ha sol·licitat una nova descripció. En funció de la velocitat del vostre proveïdor, la nova descripció pot trigar un temps a regenerar-se.",
-          "audioTranscription": "Transcripció d'àudio sol·licitada amb èxit."
+          "audioTranscription": "S'ha sol·licitat correctament la transcripció d'àudio. Depenent de la velocitat del vostre servidor Frigate, la transcripció pot trigar una estona a completar-se.",
+          "updatedAttributes": "Els atributs s'han actualitzat correctament."
         },
         "error": {
           "regenerate": "No s'ha pogut contactar amb {{provider}} per obtenir una nova descripció: {{errorMessage}}",
           "updatedSublabelFailed": "No s'ha pogut actualitzar la subetiqueta: {{errorMessage}}",
           "updatedLPRFailed": "No s'ha pogut actualitzar la matrícula: {{errorMessage}}",
-          "audioTranscription": "Error en demanar la transcripció d'audio {{errorMessage}}"
+          "audioTranscription": "Error en demanar la transcripció d'audio {{errorMessage}}",
+          "updatedAttributesFailed": "No s'han pogut actualitzar els atributs: {{errorMessage}}"
         }
       },
       "title": "Revisar detalls de l'element",
@@ -160,6 +164,14 @@
     },
     "score": {
       "label": "Puntuació"
+    },
+    "editAttributes": {
+      "title": "Edita els atributs",
+      "desc": "Seleccioneu els atributs de classificació per a aquesta {{label}}"
+    },
+    "attributes": "Atributs de classificació",
+    "title": {
+      "label": "Títol"
     }
   },
   "searchResult": {
@@ -169,7 +181,9 @@
         "success": "L'objectes amb seguiment s'ha suprimit correctament.",
         "error": "No s'ha pogut suprimir l'objecte rastrejat: {{errorMessage}}"
       }
-    }
+    },
+    "nextTrackedObject": "Següent objecte rastrejat",
+    "previousTrackedObject": "Objecte rastrejat anterior"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -206,13 +220,27 @@
     "audioTranscription": {
       "label": "Transcriu",
       "aria": "Demanar una transcripció d'audio"
+    },
+    "showObjectDetails": {
+      "label": "Mostra la ruta de l'objecte"
+    },
+    "hideObjectDetails": {
+      "label": "Amaga la ruta de l'objecte"
+    },
+    "viewTrackingDetails": {
+      "label": "Veure detalls de seguiment",
+      "aria": "Mostra els detalls de seguiment"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Descarrega la instantània neta",
+      "aria": "Descarrega la instantània neta"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar la supressió",
-      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol objecte associat. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol detall de seguiment. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
     }
   },
   "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
@@ -224,5 +252,54 @@
   },
   "concerns": {
     "label": "Preocupacions"
+  },
+  "trackingDetails": {
+    "title": "Detalls de seguiment",
+    "noImageFound": "No s'ha trobat cap imatge amb aquesta hora.",
+    "createObjectMask": "Crear màscara d'objecte",
+    "adjustAnnotationSettings": "Ajustar configuració d'anotacions",
+    "scrollViewTips": "Feu clic per veure els moments significatius del cicle de vida d'aquest objecte.",
+    "autoTrackingTips": "Limitar les posicións de la caixa serà inacurat per càmeras de seguiment automàtic.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Punt Seguit",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detectat",
+      "entered_zone": "{{label}} ha entrat a {{zones}}",
+      "active": "{{label}} ha esdevingut actiu",
+      "stationary": "{{label}} ha esdevingut estacionari",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectat per {{label}}",
+        "other": "{{label}} reconegut com a {{attribute}}"
+      },
+      "gone": "{{label}} esquerra",
+      "heard": "{{label}} sentit",
+      "external": "{{label}} detectat",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Ràtio",
+        "area": "Àrea",
+        "score": "Puntuació"
+      }
+    },
+    "annotationSettings": {
+      "title": "Configuració d'anotacions",
+      "showAllZones": {
+        "title": "Mostra totes les Zones",
+        "desc": "Mostra sempre les zones amb marcs on els objectes hagin entrat a la zona."
+      },
+      "offset": {
+        "label": "Òfset d'Anotació",
+        "desc": "Aquestes dades provenen del flux de detecció de la càmera, però se superposen a les imatges del flux de gravació. És poc probable que els dos fluxos estiguin perfectament sincronitzats. Com a resultat, el quadre delimitador i les imatges no s'alinearan perfectament. Tanmateix, es pot utilitzar el camp <code>annotation_offset</code> per ajustar-ho.",
+        "millisecondsToOffset": "Millisegons per l'òfset de detecció d'anotacions per. <em>Per defecte: 0</em>",
+        "tips": "Reduïu el valor si la reproducció del vídeo es troba per davant dels quadres i els punts de ruta, i augmenteu-lo si es troba per darrere. Aquest valor pot ser negatiu.",
+        "toast": {
+          "success": "El desplaçament de l'anotació per {{camera}} s'ha desat al fitxer de configuració."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Diapositiva anterior",
+      "next": "Dispositiva posterior"
+    }
   }
 }

@@ -20,8 +20,8 @@ from frigate.genai import GenAIClient
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import create_thumbnail, ensure_jpeg_bytes
-from frigate.util.path import get_event_thumbnail_bytes
 
 if TYPE_CHECKING:
     from frigate.embeddings import Embeddings
@@ -86,7 +86,11 @@ class ObjectDescriptionProcessor(PostProcessorApi):
                 and data["id"] not in self.early_request_sent
             ):
                 if data["has_clip"] and data["has_snapshot"]:
-                    event: Event = Event.get(Event.id == data["id"])
+                    try:
+                        event: Event = Event.get(Event.id == data["id"])
+                    except DoesNotExist:
+                        logger.error(f"Event {data['id']} not found")
+                        return
 
                     if (
                         not camera_config.objects.genai.objects
@@ -131,6 +135,8 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             )
         ):
             self._process_genai_description(event, camera_config, thumbnail)
+        else:
+            self.cleanup_event(event.id)
 
     def __regenerate_description(self, event_id: str, source: str, force: bool) -> None:
         """Regenerate the description for an event."""
@@ -203,6 +209,17 @@ class ObjectDescriptionProcessor(PostProcessorApi):
                 data["event_id"], data["source"], data["force"]
             )
         return None
+
+    def cleanup_event(self, event_id: str) -> None:
+        """Clean up tracked event data to prevent memory leaks.
+
+        This should be called when an event ends, regardless of whether
+        genai processing is triggered.
+        """
+        if event_id in self.tracked_events:
+            del self.tracked_events[event_id]
+        if event_id in self.early_request_sent:
+            del self.early_request_sent[event_id]
 
     def _read_and_crop_snapshot(self, event: Event) -> bytes | None:
         """Read, decode, and crop the snapshot image."""
@@ -299,9 +316,8 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             ),
         ).start()
 
-        # Delete tracked events based on the event_id
-        if event.id in self.tracked_events:
-            del self.tracked_events[event.id]
+        # Clean up tracked events and early request state
+        self.cleanup_event(event.id)
 
     def _genai_embed_description(self, event: Event, thumbnails: list[bytes]) -> None:
         """Embed the description for an event."""

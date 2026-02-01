@@ -36,7 +36,7 @@ import EditRoleCamerasDialog from "@/components/overlay/EditRoleCamerasDialog";
 import { useTranslation } from "react-i18next";
 import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
 import { Separator } from "@/components/ui/separator";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type AuthenticationViewProps = {
   section?: "users" | "roles";
@@ -57,6 +57,8 @@ export default function AuthenticationView({
   const [showCreateRole, setShowCreateRole] = useState(false);
   const [showEditRole, setShowEditRole] = useState(false);
   const [showDeleteRole, setShowDeleteRole] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<string>();
   const [selectedUserRole, setSelectedUserRole] = useState<string>();
@@ -70,12 +72,15 @@ export default function AuthenticationView({
   }, [t]);
 
   const onSavePassword = useCallback(
-    (user: string, password: string) => {
+    (user: string, password: string, oldPassword?: string) => {
+      setIsPasswordLoading(true);
       axios
-        .put(`users/${user}/password`, { password })
+        .put(`users/${user}/password`, { password, old_password: oldPassword })
         .then((response) => {
           if (response.status === 200) {
             setShowSetPassword(false);
+            setPasswordError(null);
+            setIsPasswordLoading(false);
             toast.success(t("users.toast.success.updatePassword"), {
               position: "top-center",
             });
@@ -86,14 +91,10 @@ export default function AuthenticationView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(
-            t("users.toast.error.setPasswordFailed", {
-              errorMessage,
-            }),
-            {
-              position: "top-center",
-            },
-          );
+
+          // Keep dialog open and show error
+          setPasswordError(errorMessage);
+          setIsPasswordLoading(false);
         });
     },
     [t],
@@ -478,33 +479,32 @@ export default function AuthenticationView({
                       <TableCell className="text-right">
                         <TooltipProvider>
                           <div className="flex items-center justify-end gap-2">
-                            {user.username !== "admin" &&
-                              user.username !== "viewer" && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-8 px-2"
-                                      onClick={() => {
-                                        setSelectedUser(user.username);
-                                        setSelectedUserRole(
-                                          user.role || "viewer",
-                                        );
-                                        setShowRoleChange(true);
-                                      }}
-                                    >
-                                      <LuUserCog className="size-3.5" />
-                                      <span className="ml-1.5 hidden sm:inline-block">
-                                        {t("role.title", { ns: "common" })}
-                                      </span>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{t("users.table.changeRole")}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
+                            {user.username !== "admin" && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 px-2"
+                                    onClick={() => {
+                                      setSelectedUser(user.username);
+                                      setSelectedUserRole(
+                                        user.role || "viewer",
+                                      );
+                                      setShowRoleChange(true);
+                                    }}
+                                  >
+                                    <LuUserCog className="size-3.5" />
+                                    <span className="ml-1.5 hidden sm:inline-block">
+                                      {t("role.title", { ns: "common" })}
+                                    </span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{t("users.table.changeRole")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -564,8 +564,15 @@ export default function AuthenticationView({
       </div>
       <SetPasswordDialog
         show={showSetPassword}
-        onCancel={() => setShowSetPassword(false)}
-        onSave={(password) => onSavePassword(selectedUser!, password)}
+        onCancel={() => {
+          setShowSetPassword(false);
+          setPasswordError(null);
+        }}
+        initialError={passwordError}
+        onSave={(password, oldPassword) =>
+          onSavePassword(selectedUser!, password, oldPassword)
+        }
+        isLoading={isPasswordLoading}
       />
       <DeleteUserDialog
         show={showDelete}
@@ -784,7 +791,7 @@ export default function AuthenticationView({
   return (
     <div className="flex size-full flex-col">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
+      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
         {section === "users" && UsersSection}
         {section === "roles" && RolesSection}
         {!section && (

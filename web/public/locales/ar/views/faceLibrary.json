@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "قم بإضافة مجموعة جديدة لمكتبة الأوجه.",
+    "addFace": "أضف مجموعة جديدة إلى مكتبة الوجوه عن طريق رفع صورتك الأولى.",
     "invalidName": "أسم غير صالح. يجب أن يشمل الأسم فقط على الحروف، الأرقام، المسافات، الفاصلة العليا، الشرطة التحتية، والشرطة الواصلة.",
     "placeholder": "أدخل أسم لهذه المجموعة"
   },
@@ -21,6 +21,88 @@
   "collections": "المجموعات",
   "createFaceLibrary": {
     "title": "إنشاء المجاميع",
-    "desc": "إنشاء مجموعة جديدة"
+    "desc": "إنشاء مجموعة جديدة",
+    "new": "إضافة وجه جديد",
+    "nextSteps": "لبناء أساس قوي:<li>استخدم علامة التبويب \"التعرّفات الأخيرة\" لاختيار الصور والتدريب عليها لكل شخص تم اكتشافه.</li> <li>ركّز على الصور الأمامية المباشرة للحصول على أفضل النتائج؛ وتجنّب صور التدريب التي تُظهر الوجوه بزاوية.</li>"
+  },
+  "steps": {
+    "faceName": "ادخل اسم للوجه",
+    "uploadFace": "ارفع صورة للوجه",
+    "nextSteps": "الخطوة التالية",
+    "description": {
+      "uploadFace": "قم برفع صورة لـ {{name}} تُظهر وجهه من زاوية أمامية مباشرة. لا يلزم أن تكون الصورة مقتصرة على الوجه فقط."
+    }
+  },
+  "train": {
+    "title": "التعرّفات الأخيرة",
+    "titleShort": "الأخيرة",
+    "aria": "اختر التعرّفات الأخيرة",
+    "empty": "لا توجد أي محاولات حديثة للتعرّف على الوجوه"
+  },
+  "deleteFaceLibrary": {
+    "title": "احذف الاسم",
+    "desc": "هل أنت متأكد أنك تريد حذف المجموعة {{name}}؟ سيؤدي هذا إلى حذف جميع الوجوه المرتبطة بها نهائيًا."
+  },
+  "deleteFaceAttempts": {
+    "title": "احذف الوجوه",
+    "desc_zero": "وجه",
+    "desc_one": "وجه",
+    "desc_two": "وجهان",
+    "desc_few": "وجوه",
+    "desc_many": "وجهًا",
+    "desc_other": "وجه"
+  },
+  "renameFace": {
+    "title": "اعادة تسمية الوجه",
+    "desc": "ادخل اسم جديد لـ{{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "احذف الوجوه",
+    "addFace": "اظف وجهًا",
+    "renameFace": "اعد تسمية وجه",
+    "deleteFace": "احذف وجهًا",
+    "uploadImage": "ارفع صورة",
+    "reprocessFace": "إعادة معالجة الوجه"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "يرجى اختيار ملف صورة."
+    },
+    "dropActive": "اسحب الصورة إلى هنا…",
+    "dropInstructions": "اسحب وأفلت أو الصق صورة هنا، أو انقر للاختيار",
+    "maxSize": "الحجم الأقصى: {{size}} ميغابايت"
+  },
+  "nofaces": "لا توجد وجوه متاحة",
+  "trainFaceAs": "درّب الوجه كـ:",
+  "trainFace": "درّب الوجه",
+  "toast": {
+    "success": {
+      "uploadedImage": "تم رفع الصورة بنجاح.",
+      "addFaceLibrary": "تمت إضافة {{name}} بنجاح إلى مكتبة الوجوه!",
+      "deletedFace_zero": "وجه",
+      "deletedFace_one": "وجه",
+      "deletedFace_two": "وجهين",
+      "deletedFace_few": "وجوه",
+      "deletedFace_many": "وجهًا",
+      "deletedFace_other": "وجه",
+      "deletedName_zero": "وجه",
+      "deletedName_one": "وجه",
+      "deletedName_two": "وجهين",
+      "deletedName_few": "وجوه",
+      "deletedName_many": "وجهًا",
+      "deletedName_other": "وجه",
+      "renamedFace": "تمت إعادة تسمية الوجه بنجاح إلى {{name}}",
+      "trainedFace": "تم تدريب الوجه بنجاح.",
+      "updatedFaceScore": "تم تحديث درجة الوجه بنجاح إلى {{name}} ({{score}})."
+    },
+    "error": {
+      "uploadingImageFailed": "فشل في رفع الصورة: {{errorMessage}}",
+      "addFaceLibraryFailed": "فشل في تعيين اسم الوجه: {{errorMessage}}",
+      "deleteFaceFailed": "فشل الحذف: {{errorMessage}}",
+      "deleteNameFailed": "فشل في حذف الاسم: {{errorMessage}}",
+      "renameFaceFailed": "فشل في إعادة تسمية الوجه: {{errorMessage}}",
+      "trainFailed": "فشل التدريب: {{errorMessage}}",
+      "updateFaceScoreFailed": "فشل في تحديث درجة الوجه: {{errorMessage}}"
+    }
   }
 }

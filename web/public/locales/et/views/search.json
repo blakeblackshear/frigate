@@ -1,0 +1,23 @@
+{
+  "placeholder": {
+    "search": "Otsi…"
+  },
+  "search": "Otsi",
+  "savedSearches": "Salvestatud otsingud",
+  "searchFor": "Otsi: {{inputValue}}",
+  "button": {
+    "clear": "Tühjenda otsing",
+    "save": "Salvesta otsing",
+    "delete": "Kustuta salvestatud otsing",
+    "filterInformation": "Filtri teave"
+  },
+  "filter": {
+    "label": {
+      "has_snapshot": "Leidub hetkvõte",
+      "cameras": "Kaamerad",
+      "labels": "Sildid",
+      "zones": "Tsoonid",
+      "sub_labels": "Alamsildid"
+    }
+  }
+}

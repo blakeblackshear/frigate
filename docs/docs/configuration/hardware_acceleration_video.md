@@ -3,78 +3,65 @@ id: hardware_acceleration_video
 title: Video Decoding
 ---
 
+import CommunityBadge from '@site/src/components/CommunityBadge';
+
 # Video Decoding
 
-It is highly recommended to use a GPU for hardware acceleration video decoding in Frigate. Some types of hardware acceleration are detected and used automatically, but you may need to update your configuration to enable hardware accelerated decoding in ffmpeg.
+It is highly recommended to use an integrated or discrete GPU for hardware acceleration video decoding in Frigate.
 
-Depending on your system, these parameters may not be compatible. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
+Some types of hardware acceleration are detected and used automatically, but you may need to update your configuration to enable hardware accelerated decoding in ffmpeg. To verify that hardware acceleration is working:
+- Check the logs: A message will either say that hardware acceleration was automatically detected, or there will be a warning that no hardware acceleration was automatically detected
+- If hardware acceleration is specified in the config, verification can be done by ensuring the logs are free from errors. There is no CPU fallback for hardware acceleration.
 
+:::info
 
-## Raspberry Pi 3/4
+Frigate supports presets for optimal hardware accelerated video decoding:
 
-Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
-If you are using the HA Add-on, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
+**AMD**
 
-```yaml
-# if you want to decode a h264 stream
-ffmpeg:
-  hwaccel_args: preset-rpi-64-h264
+- [AMD](#amd-based-cpus): Frigate can utilize modern AMD integrated GPUs and AMD discrete GPUs to accelerate video decoding.
 
-# if you want to decode a h265 (hevc) stream
-ffmpeg:
-  hwaccel_args: preset-rpi-64-h265
-```
+**Intel**
 
-:::note
+- [Intel](#intel-based-cpus): Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video decoding.
 
-If running Frigate through Docker, you either need to run in privileged mode or
-map the `/dev/video*` devices to Frigate. With Docker Compose add:
+**Nvidia GPU**
 
-```yaml
-services:
-  frigate:
-    ...
-    devices:
-      - /dev/video11:/dev/video11
-```
+- [Nvidia GPU](#nvidia-gpus): Frigate can utilize most modern Nvidia GPUs to accelerate video decoding.
 
-Or with `docker run`:
+**Raspberry Pi 3/4**
 
-```bash
-docker run -d \
-  --name frigate \
-  ...
-  --device /dev/video11 \
-  ghcr.io/blakeblackshear/frigate:stable
-```
+- [Raspberry Pi](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
 
-`/dev/video11` is the correct device (on Raspberry Pi 4B). You can check
-by running the following and looking for `H264`:
+**Nvidia Jetson** <CommunityBadge />
 
-```bash
-for d in /dev/video*; do
-  echo -e "---\n$d"
-  v4l2-ctl --list-formats-ext -d $d
-done
-```
+- [Jetson](#nvidia-jetson): Frigate can utilize the media engine in Jetson hardware to accelerate video decoding.
 
-Or map in all the `/dev/video*` devices.
+**Rockchip** <CommunityBadge />
+
+- [RKNN](#rockchip-platform): Frigate can utilize the media engine in RockChip SOCs to accelerate video decoding.
+
+**Other Hardware**
+
+Depending on your system, these presets may not be compatible, and you may need to use manual hwaccel args to take advantage of your hardware. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
 :::
 
 ## Intel-based CPUs
 
+Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video decoding.
+
 :::info
 
 **Recommended hwaccel Preset**
 
-| CPU Generation | Intel Driver | Recommended Preset  | Notes                                |
-| -------------- | ------------ | ------------------- | ------------------------------------ |
-| gen1 - gen5    | i965         | preset-vaapi        | qsv is not supported                 |
-| gen6 - gen7    | iHD          | preset-vaapi        | qsv is not supported                 |
-| gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used |
-| gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                      |
-| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                      |
+| CPU Generation | Intel Driver | Recommended Preset  | Notes                                       |
+| -------------- | ------------ | ------------------- | ------------------------------------------- |
+| gen1 - gen5    | i965         | preset-vaapi        | qsv is not supported, may not support H.265 |
+| gen6 - gen7    | iHD          | preset-vaapi        | qsv is not supported                        |
+| gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used        |
+| gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                             |
+| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                             |
 
 :::
 
@@ -195,15 +182,17 @@ telemetry:
 
 If you are passing in a device path, make sure you've passed the device through to the container.
 
-## AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
+## AMD-based CPUs
 
-VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
+Frigate can utilize modern AMD integrated GPUs and AMD GPUs to accelerate video decoding using VAAPI.
 
-:::note
+### Configuring Radeon Driver
 
 You need to change the driver to `radeonsi` by adding the following environment variable `LIBVA_DRIVER_NAME=radeonsi` to your docker-compose file or [in the `config.yml` for HA Add-on users](advanced.md#environment_vars).
 
-:::
+### Via VAAPI
+
+VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
 ```yaml
 ffmpeg:
@@ -264,7 +253,7 @@ processes:
 
 :::note
 
-`nvidia-smi` may not show `ffmpeg` processes when run inside the container [due to docker limitations](https://github.com/NVIDIA/nvidia-docker/issues/179#issuecomment-645579458).
+`nvidia-smi` will not show `ffmpeg` processes when run inside the container [due to docker limitations](https://github.com/NVIDIA/nvidia-docker/issues/179#issuecomment-645579458).
 
 :::
 
@@ -300,12 +289,63 @@ If you do not see these processes, check the `docker logs` for the container and
 
 These instructions were originally based on the [Jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux).
 
+## Raspberry Pi 3/4
+
+Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
+If you are using the HA Add-on, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
+
+```yaml
+# if you want to decode a h264 stream
+ffmpeg:
+  hwaccel_args: preset-rpi-64-h264
+
+# if you want to decode a h265 (hevc) stream
+ffmpeg:
+  hwaccel_args: preset-rpi-64-h265
+```
+
+:::note
+
+If running Frigate through Docker, you either need to run in privileged mode or
+map the `/dev/video*` devices to Frigate. With Docker Compose add:
+
+```yaml
+services:
+  frigate:
+    ...
+    devices:
+      - /dev/video11:/dev/video11
+```
+
+Or with `docker run`:
+
+```bash
+docker run -d \
+  --name frigate \
+  ...
+  --device /dev/video11 \
+  ghcr.io/blakeblackshear/frigate:stable
+```
+
+`/dev/video11` is the correct device (on Raspberry Pi 4B). You can check
+by running the following and looking for `H264`:
+
+```bash
+for d in /dev/video*; do
+  echo -e "---\n$d"
+  v4l2-ctl --list-formats-ext -d $d
+done
+```
+
+Or map in all the `/dev/video*` devices.
+
+:::
+
 # Community Supported
 
-## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano\*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
+## NVIDIA Jetson
 
-A separate set of docker images is available that is based on Jetpack/L4T. They come with an `ffmpeg` build
-with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 6.0+ use the `stable-tensorrt-jp6` tagged image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform, but the image will still allow hardware decoding and tensorrt object detection.
+A separate set of docker images is available for Jetson devices. They come with an `ffmpeg` build with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 6.0+ use the `stable-tensorrt-jp6` tagged image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform, but the image will still allow hardware decoding and tensorrt object detection.
 
 You will need to use the image with the nvidia container runtime:
 

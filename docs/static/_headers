@@ -1,0 +1,8 @@
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://docs-dev.frigate.video/*
+  X-Robots-Tag: noindex

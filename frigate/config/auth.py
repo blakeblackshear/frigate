@@ -20,7 +20,7 @@ class AuthConfig(FrigateBaseModel):
         default=86400, title="Session length for jwt session tokens", ge=60
     )
     refresh_time: int = Field(
-        default=43200,
+        default=1800,
         title="Refresh the session if it is going to expire in this many seconds",
         ge=30,
     )
@@ -37,6 +37,13 @@ class AuthConfig(FrigateBaseModel):
     roles: Dict[str, List[str]] = Field(
         default_factory=dict,
         title="Role to camera mappings. Empty list grants access to all cameras.",
+    )
+    admin_first_time_login: Optional[bool] = Field(
+        default=False,
+        title="Internal field to expose first-time admin login flag to the UI",
+        description=(
+            "When true the UI may show a help link on the login page informing users how to sign in after an admin password reset. "
+        ),
     )
 
     @field_validator("roles")

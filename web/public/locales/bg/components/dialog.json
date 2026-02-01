@@ -8,5 +8,12 @@
       "lastHour_other": "Последните {{count}} часа"
     },
     "select": "Избери"
+  },
+  "restart": {
+    "title": "Сигурен ли сте, че искате да рестартирате Frigate?",
+    "button": "Рестартирай",
+    "restarting": {
+      "title": "Frigare се рестартира"
+    }
   }
 }

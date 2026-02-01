@@ -57,6 +57,7 @@ import {
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import {
+  TbCameraDown,
   TbRecordMail,
   TbRecordMailOff,
   TbViewfinder,
@@ -100,18 +101,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
 import PtzControlPanel from "@/components/overlay/PtzControlPanel";
 import ObjectSettingsView from "../settings/ObjectSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
+import {
+  downloadSnapshot,
+  fetchCameraSnapshot,
+  generateSnapshotFilename,
+  grabVideoSnapshot,
+  SnapshotResult,
+} from "@/utils/snapshotUtil";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -137,10 +147,11 @@ export default function LiveCameraView({
 
   // supported features
 
-  const [streamName, setStreamName] = usePersistence<string>(
-    `${camera.name}-stream`,
-    Object.values(camera.live.streams)[0],
-  );
+  const [streamName, setStreamName, streamNameLoaded] =
+    useUserPersistence<string>(
+      `${camera.name}-stream`,
+      Object.values(camera.live.streams)[0],
+    );
 
   const isRestreamed = useMemo(
     () =>
@@ -149,41 +160,31 @@ export default function LiveCameraView({
     [config, streamName],
   );
 
+  // validate stored stream name and reset if now invalid
+
+  useEffect(() => {
+    if (!streamNameLoaded) return;
+
+    const available = Object.values(camera.live.streams || {});
+    if (available.length === 0) return;
+
+    if (streamName != null && !available.includes(streamName)) {
+      setStreamName(available[0]);
+    }
+  }, [streamNameLoaded, camera.live.streams, streamName, setStreamName]);
+
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
     isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 60000,
     },
   );
 
-  const supports2WayTalk = useMemo(() => {
-    if (!window.isSecureContext || !cameraMetadata) {
-      return false;
-    }
-
-    return (
-      cameraMetadata.producers.find(
-        (prod) =>
-          prod.medias &&
-          prod.medias.find((media) => media.includes("audio, sendonly")) !=
-            undefined,
-      ) != undefined
-    );
-  }, [cameraMetadata]);
-  const supportsAudioOutput = useMemo(() => {
-    if (!cameraMetadata) {
-      return false;
-    }
-
-    return (
-      cameraMetadata.producers.find(
-        (prod) =>
-          prod.medias &&
-          prod.medias.find((media) => media.includes("audio, recvonly")) !=
-            undefined,
-      ) != undefined
-    );
-  }, [cameraMetadata]);
+  const { twoWayAudio: supports2WayTalk, audioOutput: supportsAudioOutput } =
+    useMemo(() => detectCameraAudioFeatures(cameraMetadata), [cameraMetadata]);
 
   // camera enabled state
   const { payload: enabledState } = useEnabledState(camera.name);
@@ -267,7 +268,7 @@ export default function LiveCameraView({
   const [pip, setPip] = useState(false);
   const [lowBandwidth, setLowBandwidth] = useState(false);
 
-  const [playInBackground, setPlayInBackground] = usePersistence<boolean>(
+  const [playInBackground, setPlayInBackground] = useUserPersistence<boolean>(
     `${camera.name}-background-play`,
     false,
   );
@@ -645,6 +646,7 @@ export default function LiveCameraView({
                   className={`${fullscreen ? "*:rounded-none" : ""}`}
                   windowVisible
                   showStillWithoutActivity={false}
+                  alwaysShowCameraName={false}
                   cameraConfig={camera}
                   playAudio={audio}
                   playInBackground={playInBackground ?? false}
@@ -701,42 +703,6 @@ export default function LiveCameraView({
       )}
     </TransformWrapper>
   );
-}
-
-function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
-  const { t } = useTranslation(["views/live", "views/events"]);
-  const rankMap = { all: 0, motion: 1, active_objects: 2 };
-  const getValidMode = (retain?: { mode?: string }): keyof typeof rankMap => {
-    const mode = retain?.mode;
-    return mode && mode in rankMap ? (mode as keyof typeof rankMap) : "all";
-  };
-
-  const recordRetainMode = getValidMode(camera.record.retain);
-  const alertsRetainMode = getValidMode(camera.review.alerts.retain);
-
-  const effectiveRetainMode =
-    rankMap[alertsRetainMode] < rankMap[recordRetainMode]
-      ? recordRetainMode
-      : alertsRetainMode;
-
-  const source = effectiveRetainMode === recordRetainMode ? "camera" : "alerts";
-
-  return effectiveRetainMode !== "all" ? (
-    <div>
-      <Trans
-        ns="views/live"
-        values={{
-          source,
-          effectiveRetainMode,
-          effectiveRetainModeName: t(
-            "effectiveRetainMode.modes." + effectiveRetainMode,
-          ),
-        }}
-      >
-        effectiveRetainMode.notAllTips
-      </Trans>
-    </div>
-  ) : null;
 }
 
 type FrigateCameraFeaturesProps = {
@@ -832,11 +798,10 @@ function FrigateCameraFeatures({
         const toastId = toast.success(
           <div className="flex flex-col space-y-3">
             <div className="font-semibold">{t("manualRecording.started")}</div>
-            {!camera.record.enabled || camera.record.alerts.retain.days == 0 ? (
-              <div>{t("manualRecording.recordDisabledTips")}</div>
-            ) : (
-              <OnDemandRetentionMessage camera={camera} />
-            )}
+            {!camera.record.enabled ||
+              (camera.record.alerts.retain.days == 0 && (
+                <div>{t("manualRecording.recordDisabledTips")}</div>
+              ))}
           </div>,
           {
             position: "top-center",
@@ -874,6 +839,29 @@ function FrigateCameraFeatures({
     }
   }, [activeToastId, t]);
 
+  const endEventViaBeacon = useCallback(() => {
+    if (!recordingEventIdRef.current) return;
+
+    const url = `${window.location.origin}/api/events/${recordingEventIdRef.current}/end`;
+    const payload = JSON.stringify({
+      end_time: Math.ceil(Date.now() / 1000),
+    });
+
+    // this needs to be a synchronous XMLHttpRequest to guarantee the PUT
+    // reaches the server before the browser kills the page
+    const xhr = new XMLHttpRequest();
+    try {
+      xhr.open("PUT", url, false);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("X-CSRF-TOKEN", "1");
+      xhr.setRequestHeader("X-CACHE-BYPASS", "1");
+      xhr.withCredentials = true;
+      xhr.send(payload);
+    } catch (e) {
+      // Silently ignore errors during unload
+    }
+  }, []);
+
   const handleEventButtonClick = useCallback(() => {
     if (isRecording) {
       endEvent();
@@ -882,9 +870,48 @@ function FrigateCameraFeatures({
     }
   }, [createEvent, endEvent, isRecording]);
 
+  const [isSnapshotLoading, setIsSnapshotLoading] = useState(false);
+
+  const handleSnapshotClick = useCallback(async () => {
+    setIsSnapshotLoading(true);
+    try {
+      let result: SnapshotResult;
+
+      if (isRestreamed && preferredLiveMode !== "jsmpeg") {
+        // For restreamed streams with video elements (MSE/WebRTC), grab directly from video element
+        result = await grabVideoSnapshot();
+      } else {
+        // For detect stream or JSMpeg players, use the API endpoint
+        result = await fetchCameraSnapshot(camera.name);
+      }
+
+      if (result.success) {
+        const { dataUrl } = result.data;
+        const filename = generateSnapshotFilename(camera.name);
+        downloadSnapshot(dataUrl, filename);
+        toast.success(t("snapshot.downloadStarted"));
+      } else {
+        toast.error(t("snapshot.captureFailed"));
+      }
+    } finally {
+      setIsSnapshotLoading(false);
+    }
+  }, [camera.name, isRestreamed, preferredLiveMode, t]);
+
   useEffect(() => {
+    // Handle page unload/close (browser close, tab close, refresh, navigation to external site)
+    const handleBeforeUnload = () => {
+      if (recordingEventIdRef.current) {
+        endEventViaBeacon();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     // ensure manual event is stopped when component unmounts
     return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+
       if (recordingEventIdRef.current) {
         endEvent();
       }
@@ -1016,25 +1043,400 @@ function FrigateCameraFeatures({
           onClick={handleEventButtonClick}
           disabled={!cameraEnabled || debug}
         />
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger>
-            <div
-              className={cn(
-                "flex flex-col items-center justify-center rounded-lg bg-secondary p-2 text-secondary-foreground md:p-0",
-              )}
-            >
-              <FaCog
-                className={`text-secondary-foreground" size-5 md:m-[6px]`}
-              />
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="max-w-96">
-            <div className="flex flex-col gap-5 p-4">
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={TbCameraDown}
+          isActive={false}
+          title={t("snapshot.takeSnapshot")}
+          onClick={handleSnapshotClick}
+          disabled={!cameraEnabled || debug || isSnapshotLoading}
+          loading={isSnapshotLoading}
+        />
+        {!fullscreen && (
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger>
+              <div
+                className={cn(
+                  "flex flex-col items-center justify-center rounded-lg bg-secondary p-2 text-secondary-foreground md:p-0",
+                )}
+              >
+                <FaCog
+                  className={`text-secondary-foreground" size-5 md:m-[6px]`}
+                />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-w-96">
+              <div className="flex flex-col gap-5 p-4">
+                {!isRestreamed && (
+                  <div className="flex flex-col gap-2">
+                    <Label>
+                      {t("streaming.label", { ns: "components/dialog" })}
+                    </Label>
+                    <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                      <LuX className="size-4 text-danger" />
+                      <div>
+                        {t("streaming.restreaming.disabled", {
+                          ns: "components/dialog",
+                        })}
+                      </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="cursor-pointer p-0">
+                            <LuInfo className="size-4" />
+                            <span className="sr-only">
+                              {t("button.info", { ns: "common" })}
+                            </span>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 text-xs">
+                          {t("streaming.restreaming.desc.title", {
+                            ns: "components/dialog",
+                          })}
+                          <div className="mt-2 flex items-center text-primary">
+                            <Link
+                              to={getLocaleDocUrl("configuration/live")}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline"
+                            >
+                              {t("readTheDocumentation", { ns: "common" })}
+                              <LuExternalLink className="ml-2 inline-flex size-3" />
+                            </Link>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                )}
+                {isRestreamed &&
+                  Object.values(camera.live.streams).length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="streaming-method">
+                        {t("stream.title")}
+                      </Label>
+                      <Select
+                        value={streamName}
+                        disabled={debug}
+                        onValueChange={(value) => {
+                          setStreamName?.(value);
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue>
+                            {Object.keys(camera.live.streams).find(
+                              (key) => camera.live.streams[key] === streamName,
+                            )}
+                          </SelectValue>
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          <SelectGroup>
+                            {Object.entries(camera.live.streams).map(
+                              ([stream, name]) => (
+                                <SelectItem
+                                  key={stream}
+                                  className="cursor-pointer"
+                                  value={name}
+                                >
+                                  {stream}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+
+                      {debug && (
+                        <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                          <>
+                            <LuX className="size-8 text-danger" />
+                            <div>{t("stream.debug.picker")}</div>
+                          </>
+                        </div>
+                      )}
+
+                      {preferredLiveMode != "jsmpeg" &&
+                        !debug &&
+                        isRestreamed && (
+                          <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                            {supportsAudioOutput ? (
+                              <>
+                                <LuCheck className="size-4 text-success" />
+                                <div>{t("stream.audio.available")}</div>
+                              </>
+                            ) : (
+                              <>
+                                <LuX className="size-4 text-danger" />
+                                <div>{t("stream.audio.unavailable")}</div>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <div className="cursor-pointer p-0">
+                                      <LuInfo className="size-4" />
+                                      <span className="sr-only">
+                                        {t("button.info", { ns: "common" })}
+                                      </span>
+                                    </div>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80 text-xs">
+                                    {t("stream.audio.tips.title")}
+                                    <div className="mt-2 flex items-center text-primary">
+                                      <Link
+                                        to={getLocaleDocUrl(
+                                          "configuration/live",
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline"
+                                      >
+                                        {t("readTheDocumentation", {
+                                          ns: "common",
+                                        })}
+                                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                                      </Link>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      {preferredLiveMode != "jsmpeg" &&
+                        !debug &&
+                        isRestreamed &&
+                        supportsAudioOutput && (
+                          <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                            {supports2WayTalk ? (
+                              <>
+                                <LuCheck className="size-4 text-success" />
+                                <div>{t("stream.twoWayTalk.available")}</div>
+                              </>
+                            ) : (
+                              <>
+                                <LuX className="size-4 text-danger" />
+                                <div>{t("stream.twoWayTalk.unavailable")}</div>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <div className="cursor-pointer p-0">
+                                      <LuInfo className="size-4" />
+                                      <span className="sr-only">
+                                        {t("button.info", { ns: "common" })}
+                                      </span>
+                                    </div>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80 text-xs">
+                                    {t("stream.twoWayTalk.tips")}
+                                    <div className="mt-2 flex items-center text-primary">
+                                      <Link
+                                        to={getLocaleDocUrl(
+                                          "configuration/live/#webrtc-extra-configuration",
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline"
+                                      >
+                                        {t("readTheDocumentation", {
+                                          ns: "common",
+                                        })}
+                                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                                      </Link>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                      {preferredLiveMode == "jsmpeg" &&
+                        !debug &&
+                        isRestreamed && (
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="flex flex-row items-center gap-2">
+                              <IoIosWarning className="mr-1 size-8 text-danger" />
+
+                              <p className="text-sm">
+                                {t("stream.lowBandwidth.tips")}
+                              </p>
+                            </div>
+                            <Button
+                              className={`flex items-center gap-2.5 rounded-lg`}
+                              aria-label={t("stream.lowBandwidth.resetStream")}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLowBandwidth(false)}
+                            >
+                              <MdOutlineRestartAlt className="size-5 text-primary-variant" />
+                              <div className="text-primary-variant">
+                                {t("stream.lowBandwidth.resetStream")}
+                              </div>
+                            </Button>
+                          </div>
+                        )}
+                    </div>
+                  )}
+                {isRestreamed && (
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                      <Label
+                        className="mx-0 cursor-pointer text-primary"
+                        htmlFor="backgroundplay"
+                      >
+                        {t("stream.playInBackground.label")}
+                      </Label>
+                      <Switch
+                        className="ml-1"
+                        id="backgroundplay"
+                        disabled={debug}
+                        checked={playInBackground}
+                        onCheckedChange={(checked) =>
+                          setPlayInBackground(checked)
+                        }
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {t("stream.playInBackground.tips")}
+                    </p>
+                  </div>
+                )}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      className="mx-0 cursor-pointer text-primary"
+                      htmlFor="showstats"
+                    >
+                      {t("streaming.showStats.label", {
+                        ns: "components/dialog",
+                      })}
+                    </Label>
+                    <Switch
+                      className="ml-1"
+                      id="showstats"
+                      disabled={debug}
+                      checked={showStats}
+                      onCheckedChange={(checked) => setShowStats(checked)}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("streaming.showStats.desc", {
+                      ns: "components/dialog",
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      className="mx-0 cursor-pointer text-primary"
+                      htmlFor="debug"
+                    >
+                      {t("streaming.debugView", {
+                        ns: "components/dialog",
+                      })}
+                    </Label>
+                    <Switch
+                      className="ml-1"
+                      id="debug"
+                      checked={debug}
+                      onCheckedChange={(checked) => setDebug(checked)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </>
+    );
+  }
+
+  // mobile doesn't show settings in fullscreen view
+  if (fullscreen) {
+    return;
+  }
+
+  return (
+    <Drawer>
+      <DrawerTrigger>
+        <CameraFeatureToggle
+          className="p-2 landscape:size-9"
+          variant="primary"
+          Icon={FaCog}
+          isActive={false}
+          title={t("cameraSettings.title", { camera })}
+        />
+      </DrawerTrigger>
+      <DrawerContent className="max-h-[75dvh] overflow-hidden rounded-2xl">
+        <div className="scrollbar-container mt-2 flex h-auto flex-col gap-2 overflow-y-auto px-2 py-4">
+          <>
+            {isAdmin && (
+              <>
+                <FilterSwitch
+                  label={t("cameraSettings.cameraEnabled")}
+                  isChecked={enabledState == "ON"}
+                  onCheckedChange={() =>
+                    sendEnabled(enabledState == "ON" ? "OFF" : "ON")
+                  }
+                />
+                <FilterSwitch
+                  label={t("cameraSettings.objectDetection")}
+                  isChecked={detectState == "ON"}
+                  onCheckedChange={() =>
+                    sendDetect(detectState == "ON" ? "OFF" : "ON")
+                  }
+                />
+                {recordingEnabled && (
+                  <FilterSwitch
+                    label={t("cameraSettings.recording")}
+                    isChecked={recordState == "ON"}
+                    onCheckedChange={() =>
+                      sendRecord(recordState == "ON" ? "OFF" : "ON")
+                    }
+                  />
+                )}
+                <FilterSwitch
+                  label={t("cameraSettings.snapshots")}
+                  isChecked={snapshotState == "ON"}
+                  onCheckedChange={() =>
+                    sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
+                  }
+                />
+                {audioDetectEnabled && (
+                  <FilterSwitch
+                    label={t("cameraSettings.audioDetection")}
+                    isChecked={audioState == "ON"}
+                    onCheckedChange={() =>
+                      sendAudio(audioState == "ON" ? "OFF" : "ON")
+                    }
+                  />
+                )}
+                {audioDetectEnabled && transcriptionEnabled && (
+                  <FilterSwitch
+                    label={t("cameraSettings.transcription")}
+                    disabled={audioState == "OFF"}
+                    isChecked={transcriptionState == "ON"}
+                    onCheckedChange={() =>
+                      sendTranscription(
+                        transcriptionState == "ON" ? "OFF" : "ON",
+                      )
+                    }
+                  />
+                )}
+                {autotrackingEnabled && (
+                  <FilterSwitch
+                    label={t("cameraSettings.autotracking")}
+                    isChecked={autotrackingState == "ON"}
+                    onCheckedChange={() =>
+                      sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+                    }
+                  />
+                )}
+              </>
+            )}
+
+            <div className="mt-3 flex flex-col gap-5">
               {!isRestreamed && (
-                <div className="flex flex-col gap-2">
-                  <Label>
-                    {t("streaming.label", { ns: "components/dialog" })}
-                  </Label>
+                <div className="flex flex-col gap-2 p-2">
+                  <Label>{t("stream.title")}</Label>
                   <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                     <LuX className="size-4 text-danger" />
                     <div>
@@ -1042,7 +1444,7 @@ function FrigateCameraFeatures({
                         ns: "components/dialog",
                       })}
                     </div>
-                    <Popover>
+                    <Popover modal={true}>
                       <PopoverTrigger asChild>
                         <div className="cursor-pointer p-0">
                           <LuInfo className="size-4" />
@@ -1073,16 +1475,14 @@ function FrigateCameraFeatures({
               )}
               {isRestreamed &&
                 Object.values(camera.live.streams).length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    <Label htmlFor="streaming-method">
-                      {t("stream.title")}
-                    </Label>
+                  <div className="mt-1 p-2">
+                    <div className="mb-1 text-sm">{t("stream.title")}</div>
                     <Select
                       value={streamName}
-                      disabled={debug}
                       onValueChange={(value) => {
                         setStreamName?.(value);
                       }}
+                      disabled={debug}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue>
@@ -1121,7 +1521,7 @@ function FrigateCameraFeatures({
                     {preferredLiveMode != "jsmpeg" &&
                       !debug &&
                       isRestreamed && (
-                        <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                        <div className="mt-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
                           {supportsAudioOutput ? (
                             <>
                               <LuCheck className="size-4 text-success" />
@@ -1131,7 +1531,7 @@ function FrigateCameraFeatures({
                             <>
                               <LuX className="size-4 text-danger" />
                               <div>{t("stream.audio.unavailable")}</div>
-                              <Popover>
+                              <Popover modal={true}>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
                                     <LuInfo className="size-4" />
@@ -1140,7 +1540,7 @@ function FrigateCameraFeatures({
                                     </span>
                                   </div>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-80 text-xs">
+                                <PopoverContent className="w-52 text-xs">
                                   {t("stream.audio.tips.title")}
                                   <div className="mt-2 flex items-center text-primary">
                                     <Link
@@ -1175,7 +1575,7 @@ function FrigateCameraFeatures({
                             <>
                               <LuX className="size-4 text-danger" />
                               <div>{t("stream.twoWayTalk.unavailable")}</div>
-                              <Popover>
+                              <Popover modal={true}>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
                                     <LuInfo className="size-4" />
@@ -1184,7 +1584,7 @@ function FrigateCameraFeatures({
                                     </span>
                                   </div>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-80 text-xs">
+                                <PopoverContent className="w-52 text-xs">
                                   {t("stream.twoWayTalk.tips")}
                                   <div className="mt-2 flex items-center text-primary">
                                     <Link
@@ -1207,434 +1607,101 @@ function FrigateCameraFeatures({
                           )}
                         </div>
                       )}
-
-                    {preferredLiveMode == "jsmpeg" &&
-                      !debug &&
-                      isRestreamed && (
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="flex flex-row items-center gap-2">
-                            <IoIosWarning className="mr-1 size-8 text-danger" />
-
-                            <p className="text-sm">
-                              {t("stream.lowBandwidth.tips")}
-                            </p>
-                          </div>
-                          <Button
-                            className={`flex items-center gap-2.5 rounded-lg`}
-                            aria-label={t("stream.lowBandwidth.resetStream")}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setLowBandwidth(false)}
-                          >
-                            <MdOutlineRestartAlt className="size-5 text-primary-variant" />
-                            <div className="text-primary-variant">
-                              {t("stream.lowBandwidth.resetStream")}
-                            </div>
-                          </Button>
+                    {preferredLiveMode == "jsmpeg" && isRestreamed && (
+                      <div className="mt-2 flex flex-col items-center gap-3">
+                        <div className="flex flex-row items-center gap-2">
+                          <IoIosWarning className="mr-1 size-8 text-danger" />
+                          <p className="text-sm">
+                            {t("stream.lowBandwidth.tips")}
+                          </p>
                         </div>
-                      )}
-                  </div>
-                )}
-              {isRestreamed && (
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center justify-between">
-                    <Label
-                      className="mx-0 cursor-pointer text-primary"
-                      htmlFor="backgroundplay"
-                    >
-                      {t("stream.playInBackground.label")}
-                    </Label>
-                    <Switch
-                      className="ml-1"
-                      id="backgroundplay"
-                      disabled={debug}
-                      checked={playInBackground}
-                      onCheckedChange={(checked) =>
-                        setPlayInBackground(checked)
-                      }
-                    />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t("stream.playInBackground.tips")}
-                  </p>
-                </div>
-              )}
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <Label
-                    className="mx-0 cursor-pointer text-primary"
-                    htmlFor="showstats"
-                  >
-                    {t("streaming.showStats.label", {
-                      ns: "components/dialog",
-                    })}
-                  </Label>
-                  <Switch
-                    className="ml-1"
-                    id="showstats"
-                    disabled={debug}
-                    checked={showStats}
-                    onCheckedChange={(checked) => setShowStats(checked)}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t("streaming.showStats.desc", {
-                    ns: "components/dialog",
-                  })}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <Label
-                    className="mx-0 cursor-pointer text-primary"
-                    htmlFor="debug"
-                  >
-                    {t("streaming.debugView", {
-                      ns: "components/dialog",
-                    })}
-                  </Label>
-                  <Switch
-                    className="ml-1"
-                    id="debug"
-                    checked={debug}
-                    onCheckedChange={(checked) => setDebug(checked)}
-                  />
-                </div>
-              </div>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </>
-    );
-  }
-
-  // mobile doesn't show settings in fullscreen view
-  if (fullscreen) {
-    return;
-  }
-
-  return (
-    <Drawer>
-      <DrawerTrigger>
-        <CameraFeatureToggle
-          className="p-2 landscape:size-9"
-          variant="primary"
-          Icon={FaCog}
-          isActive={false}
-          title={t("cameraSettings.title", { camera })}
-        />
-      </DrawerTrigger>
-      <DrawerContent className="rounded-2xl px-2 py-4">
-        <div className="mt-2 flex flex-col gap-2">
-          {isAdmin && (
-            <>
-              <FilterSwitch
-                label={t("cameraSettings.cameraEnabled")}
-                isChecked={enabledState == "ON"}
-                onCheckedChange={() =>
-                  sendEnabled(enabledState == "ON" ? "OFF" : "ON")
-                }
-              />
-              <FilterSwitch
-                label={t("cameraSettings.objectDetection")}
-                isChecked={detectState == "ON"}
-                onCheckedChange={() =>
-                  sendDetect(detectState == "ON" ? "OFF" : "ON")
-                }
-              />
-              {recordingEnabled && (
-                <FilterSwitch
-                  label={t("cameraSettings.recording")}
-                  isChecked={recordState == "ON"}
-                  onCheckedChange={() =>
-                    sendRecord(recordState == "ON" ? "OFF" : "ON")
-                  }
-                />
-              )}
-              <FilterSwitch
-                label={t("cameraSettings.snapshots")}
-                isChecked={snapshotState == "ON"}
-                onCheckedChange={() =>
-                  sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
-                }
-              />
-              {audioDetectEnabled && (
-                <FilterSwitch
-                  label={t("cameraSettings.audioDetection")}
-                  isChecked={audioState == "ON"}
-                  onCheckedChange={() =>
-                    sendAudio(audioState == "ON" ? "OFF" : "ON")
-                  }
-                />
-              )}
-              {audioDetectEnabled && transcriptionEnabled && (
-                <FilterSwitch
-                  label={t("cameraSettings.transcription")}
-                  disabled={audioState == "OFF"}
-                  isChecked={transcriptionState == "ON"}
-                  onCheckedChange={() =>
-                    sendTranscription(transcriptionState == "ON" ? "OFF" : "ON")
-                  }
-                />
-              )}
-              {autotrackingEnabled && (
-                <FilterSwitch
-                  label={t("cameraSettings.autotracking")}
-                  isChecked={autotrackingState == "ON"}
-                  onCheckedChange={() =>
-                    sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
-                  }
-                />
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="mt-3 flex flex-col gap-5">
-          {!isRestreamed && (
-            <div className="flex flex-col gap-2 p-2">
-              <Label>{t("stream.title")}</Label>
-              <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                <LuX className="size-4 text-danger" />
-                <div>
-                  {t("streaming.restreaming.disabled", {
-                    ns: "components/dialog",
-                  })}
-                </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="cursor-pointer p-0">
-                      <LuInfo className="size-4" />
-                      <span className="sr-only">
-                        {t("button.info", { ns: "common" })}
-                      </span>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 text-xs">
-                    {t("streaming.restreaming.desc.title", {
-                      ns: "components/dialog",
-                    })}
-                    <div className="mt-2 flex items-center text-primary">
-                      <Link
-                        to={getLocaleDocUrl("configuration/live")}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline"
-                      >
-                        {t("readTheDocumentation", { ns: "common" })}
-                        <LuExternalLink className="ml-2 inline-flex size-3" />
-                      </Link>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          )}
-          {isRestreamed && Object.values(camera.live.streams).length > 0 && (
-            <div className="mt-1 p-2">
-              <div className="mb-1 text-sm">{t("stream.title")}</div>
-              <Select
-                value={streamName}
-                onValueChange={(value) => {
-                  setStreamName?.(value);
-                }}
-                disabled={debug}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {Object.keys(camera.live.streams).find(
-                      (key) => camera.live.streams[key] === streamName,
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectGroup>
-                    {Object.entries(camera.live.streams).map(
-                      ([stream, name]) => (
-                        <SelectItem
-                          key={stream}
-                          className="cursor-pointer"
-                          value={name}
+                        <Button
+                          className={`flex items-center gap-2.5 rounded-lg`}
+                          aria-label={t("stream.lowBandwidth.resetStream")}
+                          variant="outline"
+                          size="sm"
+                          disabled={debug}
+                          onClick={() => setLowBandwidth(false)}
                         >
-                          {stream}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-
-              {debug && (
-                <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                  <>
-                    <LuX className="size-8 text-danger" />
-                    <div>{t("stream.debug.picker")}</div>
-                  </>
-                </div>
-              )}
-
-              {preferredLiveMode != "jsmpeg" && !debug && isRestreamed && (
-                <div className="mt-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                  {supportsAudioOutput ? (
-                    <>
-                      <LuCheck className="size-4 text-success" />
-                      <div>{t("stream.audio.available")}</div>
-                    </>
-                  ) : (
-                    <>
-                      <LuX className="size-4 text-danger" />
-                      <div>{t("stream.audio.unavailable")}</div>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <div className="cursor-pointer p-0">
-                            <LuInfo className="size-4" />
-                            <span className="sr-only">
-                              {t("button.info", { ns: "common" })}
-                            </span>
+                          <MdOutlineRestartAlt className="size-5 text-primary-variant" />
+                          <div className="text-primary-variant">
+                            {t("stream.lowBandwidth.resetStream")}
                           </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-52 text-xs">
-                          {t("stream.audio.tips.title")}
-                          <div className="mt-2 flex items-center text-primary">
-                            <Link
-                              to={getLocaleDocUrl("configuration/live")}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline"
-                            >
-                              {t("readTheDocumentation", { ns: "common" })}
-                              <LuExternalLink className="ml-2 inline-flex size-3" />
-                            </Link>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </>
-                  )}
-                </div>
-              )}
-              {preferredLiveMode != "jsmpeg" &&
-                !debug &&
-                isRestreamed &&
-                supportsAudioOutput && (
-                  <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                    {supports2WayTalk ? (
-                      <>
-                        <LuCheck className="size-4 text-success" />
-                        <div>{t("stream.twoWayTalk.available")}</div>
-                      </>
-                    ) : (
-                      <>
-                        <LuX className="size-4 text-danger" />
-                        <div>{t("stream.twoWayTalk.unavailable")}</div>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <div className="cursor-pointer p-0">
-                              <LuInfo className="size-4" />
-                              <span className="sr-only">
-                                {t("button.info", { ns: "common" })}
-                              </span>
-                            </div>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-52 text-xs">
-                            {t("stream.twoWayTalk.tips")}
-                            <div className="mt-2 flex items-center text-primary">
-                              <Link
-                                to={getLocaleDocUrl(
-                                  "configuration/live/#webrtc-extra-configuration",
-                                )}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline"
-                              >
-                                {t("readTheDocumentation", { ns: "common" })}
-                                <LuExternalLink className="ml-2 inline-flex size-3" />
-                              </Link>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </>
+                        </Button>
+                      </div>
                     )}
                   </div>
                 )}
-              {preferredLiveMode == "jsmpeg" && isRestreamed && (
-                <div className="mt-2 flex flex-col items-center gap-3">
-                  <div className="flex flex-row items-center gap-2">
-                    <IoIosWarning className="mr-1 size-8 text-danger" />
-                    <p className="text-sm">{t("stream.lowBandwidth.tips")}</p>
-                  </div>
+              <div className="flex flex-col gap-1 px-2">
+                <div className="mb-1 text-sm font-medium leading-none">
+                  {t("manualRecording.title")}
+                </div>
+                <div className="flex flex-row items-stretch gap-2">
                   <Button
-                    className={`flex items-center gap-2.5 rounded-lg`}
-                    aria-label={t("stream.lowBandwidth.resetStream")}
-                    variant="outline"
-                    size="sm"
-                    disabled={debug}
-                    onClick={() => setLowBandwidth(false)}
+                    onClick={handleSnapshotClick}
+                    disabled={!cameraEnabled || debug || isSnapshotLoading}
+                    className="h-auto w-full whitespace-normal"
                   >
-                    <MdOutlineRestartAlt className="size-5 text-primary-variant" />
-                    <div className="text-primary-variant">
-                      {t("stream.lowBandwidth.resetStream")}
-                    </div>
+                    {isSnapshotLoading && (
+                      <ActivityIndicator className="mr-2 size-4" />
+                    )}
+                    {t("snapshot.takeSnapshot")}
+                  </Button>
+                  <Button
+                    onClick={handleEventButtonClick}
+                    className={cn(
+                      "h-auto w-full whitespace-normal",
+                      isRecording &&
+                        "animate-pulse bg-red-500 hover:bg-red-600",
+                    )}
+                    disabled={debug}
+                  >
+                    {t("manualRecording." + (isRecording ? "end" : "start"))}
                   </Button>
                 </div>
-              )}
-            </div>
-          )}
-          <div className="flex flex-col gap-1 px-2">
-            <div className="mb-1 text-sm font-medium leading-none">
-              {t("manualRecording.title")}
-            </div>
-            <Button
-              onClick={handleEventButtonClick}
-              className={cn(
-                "w-full",
-                isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
-              )}
-              disabled={debug}
-            >
-              {t("manualRecording." + (isRecording ? "end" : "start"))}
-            </Button>
-            <p className="text-sm text-muted-foreground">
-              {t("manualRecording.tips")}
-            </p>
-          </div>
-          {isRestreamed && (
-            <>
-              <div className="flex flex-col gap-2">
-                <FilterSwitch
-                  label={t("manualRecording.playInBackground.label")}
-                  isChecked={playInBackground}
-                  onCheckedChange={(checked) => {
-                    setPlayInBackground(checked);
-                  }}
-                  disabled={debug}
-                />
-                <p className="mx-2 -mt-2 text-sm text-muted-foreground">
-                  {t("manualRecording.playInBackground.desc")}
+                <p className="text-sm text-muted-foreground">
+                  {t("manualRecording.tips")}
                 </p>
               </div>
-              <div className="flex flex-col gap-2">
+              {isRestreamed && (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <FilterSwitch
+                      label={t("manualRecording.playInBackground.label")}
+                      isChecked={playInBackground}
+                      onCheckedChange={(checked) => {
+                        setPlayInBackground(checked);
+                      }}
+                      disabled={debug}
+                    />
+                    <p className="mx-2 -mt-2 text-sm text-muted-foreground">
+                      {t("manualRecording.playInBackground.desc")}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <FilterSwitch
+                      label={t("manualRecording.showStats.label")}
+                      isChecked={showStats}
+                      onCheckedChange={(checked) => {
+                        setShowStats(checked);
+                      }}
+                      disabled={debug}
+                    />
+                    <p className="mx-2 -mt-2 text-sm text-muted-foreground">
+                      {t("manualRecording.showStats.desc")}
+                    </p>
+                  </div>
+                </>
+              )}
+              <div className="mb-3 flex flex-col">
                 <FilterSwitch
-                  label={t("manualRecording.showStats.label")}
-                  isChecked={showStats}
-                  onCheckedChange={(checked) => {
-                    setShowStats(checked);
-                  }}
-                  disabled={debug}
+                  label={t("streaming.debugView", { ns: "components/dialog" })}
+                  isChecked={debug}
+                  onCheckedChange={(checked) => setDebug(checked)}
                 />
-                <p className="mx-2 -mt-2 text-sm text-muted-foreground">
-                  {t("manualRecording.showStats.desc")}
-                </p>
               </div>
-            </>
-          )}
-          <div className="mb-3 flex flex-col">
-            <FilterSwitch
-              label={t("streaming.debugView", { ns: "components/dialog" })}
-              isChecked={debug}
-              onCheckedChange={(checked) => setDebug(checked)}
-            />
-          </div>
+            </div>
+          </>
         </div>
       </DrawerContent>
     </Drawer>

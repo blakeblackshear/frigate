@@ -407,6 +407,19 @@ class ReviewSegmentMaintainer(threading.Thread):
                 segment.last_detection_time = frame_time
 
             for object in activity.get_all_objects():
+                # Alert-level objects should always be added (they extend/upgrade the segment)
+                # Detection-level objects should only be added if:
+                #   - The segment is a detection segment (matching severity), OR
+                #   - The segment is an alert AND the object started before the alert ended
+                #     (objects starting after will be in the new detection segment)
+                is_alert_object = object in activity.categorized_objects["alerts"]
+
+                if not is_alert_object and segment.severity == SeverityEnum.alert:
+                    # This is a detection-level object
+                    # Only add if it started during the alert's active period
+                    if object["start_time"] > segment.last_alert_time:
+                        continue
+
                 if not object["sub_label"]:
                     segment.detections[object["id"]] = object["label"]
                 elif object["sub_label"][0] in self.config.model.all_attributes:

@@ -16,6 +16,7 @@
       "labels": "Labels",
       "zones": "Zones",
       "sub_labels": "Sub Labels",
+      "attributes": "Attributes",
       "search_type": "Search Type",
       "time_range": "Time Range",
       "before": "Before",

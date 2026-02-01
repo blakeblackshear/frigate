@@ -44,7 +44,7 @@ module.exports = {
       },
       backgroundImage: {
         slashes:
-          "repeating-linear-gradient(45deg, hsl(var(--primary-variant) / 0.2), hsl(var(--primary-variant) / 0.2) 2px, transparent 2px, transparent 8px)",
+          "repeating-linear-gradient(135deg, hsl(var(--primary-variant) / 0.3), hsl(var(--primary-variant) / 0.3) 2px, transparent 2px, transparent 8px), linear-gradient(to right, hsl(var(--background)), hsl(var(--background)))",
       },
       colors: {
         border: "hsl(var(--border))",

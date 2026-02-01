@@ -133,5 +133,9 @@
     "all": {
       "title": "Tüm Sınıflar"
     }
+  },
+  "attributes": {
+    "label": "Sınıflandırma Özellikleri",
+    "all": "Tüm Özellikler"
   }
 }

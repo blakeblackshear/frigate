@@ -5,7 +5,7 @@ import shutil
 import threading
 from pathlib import Path
 
-from peewee import fn
+from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR
@@ -44,13 +44,19 @@ class StorageMaintainer(threading.Thread):
                     )
                 }
 
-                # calculate MB/hr
+                # calculate MB/hr from last 100 segments
                 try:
-                    bandwidth = round(
-                        Recordings.select(fn.AVG(bandwidth_equation))
+                    # Subquery to get last 100 segments, then average their bandwidth
+                    last_100 = (
+                        Recordings.select(bandwidth_equation.alias("bw"))
                         .where(Recordings.camera == camera, Recordings.segment_size > 0)
+                        .order_by(Recordings.start_time.desc())
                         .limit(100)
-                        .scalar()
+                        .alias("recent")
+                    )
+
+                    bandwidth = round(
+                        Recordings.select(fn.AVG(SQL("bw"))).from_(last_100).scalar()
                         * 3600,
                         2,
                     )
@@ -113,6 +119,7 @@ class StorageMaintainer(threading.Thread):
         recordings: Recordings = (
             Recordings.select(
                 Recordings.id,
+                Recordings.camera,
                 Recordings.start_time,
                 Recordings.end_time,
                 Recordings.segment_size,
@@ -137,7 +144,7 @@ class StorageMaintainer(threading.Thread):
         )
 
         event_start = 0
-        deleted_recordings = set()
+        deleted_recordings = []
         for recording in recordings:
             # check if 1 hour of storage has been reclaimed
             if deleted_segments_size > hourly_bandwidth:
@@ -172,7 +179,7 @@ class StorageMaintainer(threading.Thread):
             if not keep:
                 try:
                     clear_and_unlink(Path(recording.path), missing_ok=False)
-                    deleted_recordings.add(recording.id)
+                    deleted_recordings.append(recording)
                     deleted_segments_size += recording.segment_size
                 except FileNotFoundError:
                     # this file was not found so we must assume no space was cleaned up
@@ -186,6 +193,9 @@ class StorageMaintainer(threading.Thread):
             recordings = (
                 Recordings.select(
                     Recordings.id,
+                    Recordings.camera,
+                    Recordings.start_time,
+                    Recordings.end_time,
                     Recordings.path,
                     Recordings.segment_size,
                 )
@@ -201,7 +211,7 @@ class StorageMaintainer(threading.Thread):
                 try:
                     clear_and_unlink(Path(recording.path), missing_ok=False)
                     deleted_segments_size += recording.segment_size
-                    deleted_recordings.add(recording.id)
+                    deleted_recordings.append(recording)
                 except FileNotFoundError:
                     # this file was not found so we must assume no space was cleaned up
                     pass
@@ -211,7 +221,50 @@ class StorageMaintainer(threading.Thread):
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
         max_deletes = 100000
-        deleted_recordings_list = list(deleted_recordings)
+
+        # Update has_clip for events that overlap with deleted recordings
+        if deleted_recordings:
+            # Group deleted recordings by camera
+            camera_recordings = {}
+            for recording in deleted_recordings:
+                if recording.camera not in camera_recordings:
+                    camera_recordings[recording.camera] = {
+                        "min_start": recording.start_time,
+                        "max_end": recording.end_time,
+                    }
+                else:
+                    camera_recordings[recording.camera]["min_start"] = min(
+                        camera_recordings[recording.camera]["min_start"],
+                        recording.start_time,
+                    )
+                    camera_recordings[recording.camera]["max_end"] = max(
+                        camera_recordings[recording.camera]["max_end"],
+                        recording.end_time,
+                    )
+
+            # Find all events that overlap with deleted recordings time range per camera
+            events_to_update = []
+            for camera, time_range in camera_recordings.items():
+                overlapping_events = Event.select(Event.id).where(
+                    Event.camera == camera,
+                    Event.has_clip == True,
+                    Event.start_time < time_range["max_end"],
+                    Event.end_time > time_range["min_start"],
+                )
+
+                for event in overlapping_events:
+                    events_to_update.append(event.id)
+
+            # Update has_clip to False for overlapping events
+            if events_to_update:
+                for i in range(0, len(events_to_update), max_deletes):
+                    batch = events_to_update[i : i + max_deletes]
+                    Event.update(has_clip=False).where(Event.id << batch).execute()
+                logger.debug(
+                    f"Updated has_clip to False for {len(events_to_update)} events"
+                )
+
+        deleted_recordings_list = [r.id for r in deleted_recordings]
         for i in range(0, len(deleted_recordings_list), max_deletes):
             Recordings.delete().where(
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]

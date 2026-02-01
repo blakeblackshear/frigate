@@ -4,7 +4,6 @@ import logging
 import os
 
 import sherpa_onnx
-from faster_whisper.utils import download_model
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR
@@ -25,6 +24,9 @@ class AudioTranscriptionModelRunner:
 
         if model_size == "large":
             # use the Whisper download function instead of our own
+            # Import dynamically to avoid crashes on systems without AVX support
+            from faster_whisper.utils import download_model
+
             logger.debug("Downloading Whisper audio transcription model")
             download_model(
                 size_or_id="small" if device == "cuda" else "tiny",

@@ -239,6 +239,12 @@ class ImprovedMotionDetector(MotionDetector):
         )
         self.mask = np.where(resized_mask == [0])
 
+        # Reset motion detection state when mask changes
+        # so motion detection can quickly recalibrate with the new mask
+        self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
+        self.calibrating = True
+        self.motion_frame_count = 0
+
     def stop(self) -> None:
         """stop the motion detector."""
         pass

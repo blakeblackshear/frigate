@@ -191,8 +191,8 @@ export const useEventSegmentUtils = (
     [events, getSegmentStart, getSegmentEnd, severityType],
   );
 
-  const getEventThumbnail = useCallback(
-    (time: number): string => {
+  const getEvent = useCallback(
+    (time: number): ReviewSegment | undefined => {
       const matchingEvent = events.find((event) => {
         return (
           time >= getSegmentStart(event.start_time) &&
@@ -201,7 +201,7 @@ export const useEventSegmentUtils = (
         );
       });
 
-      return matchingEvent?.thumb_path ?? "";
+      return matchingEvent;
     },
     [events, getSegmentStart, getSegmentEnd, severityType],
   );
@@ -214,6 +214,6 @@ export const useEventSegmentUtils = (
     getReviewed,
     shouldShowRoundedCorners,
     getEventStart,
-    getEventThumbnail,
+    getEvent,
   };
 };

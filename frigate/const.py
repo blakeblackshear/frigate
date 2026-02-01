@@ -77,6 +77,9 @@ FFMPEG_HWACCEL_RKMPP = "preset-rkmpp"
 FFMPEG_HWACCEL_AMF = "preset-amd-amf"
 FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
+# RKNN constants
+SUPPORTED_RK_SOCS = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
+
 # Regex constants
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
@@ -113,6 +116,7 @@ CLEAR_ONGOING_REVIEW_SEGMENTS = "clear_ongoing_review_segments"
 UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
 UPDATE_AUDIO_ACTIVITY = "update_audio_activity"
 EXPIRE_AUDIO_ACTIVITY = "expire_audio_activity"
+UPDATE_AUDIO_TRANSCRIPTION_STATE = "update_audio_transcription_state"
 UPDATE_EVENT_DESCRIPTION = "update_event_description"
 UPDATE_REVIEW_DESCRIPTION = "update_review_description"
 UPDATE_MODEL_STATE = "update_model_state"

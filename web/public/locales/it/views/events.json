@@ -8,7 +8,11 @@
   "empty": {
     "alert": "Non ci sono avvisi da rivedere",
     "detection": "Non ci sono rilevamenti da rivedere",
-    "motion": "Nessun dato di movimento trovato"
+    "motion": "Nessun dato di movimento trovato",
+    "recordingsDisabled": {
+      "description": "Gli elementi di revisione possono essere creati per una telecamera solo quando le registrazioni sono abilitate per quella telecamera.",
+      "title": "Le registrazioni devono essere abilitate"
+    }
   },
   "newReviewItems": {
     "label": "Visualizza i nuovi elementi da rivedere",
@@ -37,5 +41,28 @@
   "selected_other": "{{count}} selezionati",
   "detected": "rilevato",
   "suspiciousActivity": "Attività sospetta",
-  "threateningActivity": "Attività minacciosa"
+  "threateningActivity": "Attività minacciosa",
+  "detail": {
+    "noDataFound": "Nessun dato dettagliato da rivedere",
+    "aria": "Attiva/disattiva la visualizzazione dettagliata",
+    "trackedObject_one": "{{count}} oggetto",
+    "trackedObject_other": "{{count}} oggetti",
+    "noObjectDetailData": "Non sono disponibili dati dettagliati sull'oggetto.",
+    "label": "Dettaglio",
+    "settings": "Impostazioni di visualizzazione dettagliata",
+    "alwaysExpandActive": {
+      "title": "Espandi sempre attivo",
+      "desc": "Espandere sempre i dettagli dell'oggetto dell'elemento di revisione attivo quando disponibili."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Punto tracciato",
+    "clickToSeek": "Premi per cercare in questo momento"
+  },
+  "zoomIn": "Ingrandisci",
+  "zoomOut": "Rimpicciolisci",
+  "normalActivity": "Normale",
+  "needsReview": "Necessita revisione",
+  "securityConcern": "Rischio per la sicurezza",
+  "select_all": "Tutti"
 }

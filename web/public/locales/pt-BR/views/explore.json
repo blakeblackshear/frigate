@@ -111,7 +111,8 @@
     "details": "detalhes",
     "snapshot": "captura de imagem",
     "video": "vídeo",
-    "object_lifecycle": "ciclo de vida do objeto"
+    "object_lifecycle": "ciclo de vida do objeto",
+    "thumbnail": "thumbnail"
   },
   "objectLifecycle": {
     "title": "Ciclo de Vida do Objeto",

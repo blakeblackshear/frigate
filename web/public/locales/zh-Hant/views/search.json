@@ -5,7 +5,7 @@
   "button": {
     "clear": "清空搜尋",
     "filterActive": "過濾中",
-    "save": "保存搜尋",
+    "save": "儲存搜尋",
     "delete": "刪除保存的搜尋",
     "filterInformation": "過濾資訊"
   },
@@ -26,7 +26,8 @@
       "recognized_license_plate": "已辨識的車牌",
       "has_clip": "包含片段",
       "has_snapshot": "包含截圖",
-      "time_range": "時間範圍"
+      "time_range": "時間範圍",
+      "attributes": "屬性"
     },
     "searchType": {
       "thumbnail": "截圖",

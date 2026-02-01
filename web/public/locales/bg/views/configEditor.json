@@ -1,1 +1,18 @@
-{}
+{
+  "documentTitle": "Настройки на конфигурацията - Frigate",
+  "configEditor": "Конфигуратор",
+  "safeConfigEditor": "Конфигуратор (Safe Mode)",
+  "safeModeDescription": "Frigate е в режим \"Safe Mode\" тъй като конфигурацията не минава проверките за валидност.",
+  "copyConfig": "Копирай Конфигурацията",
+  "saveAndRestart": "Запази и Рестартирай",
+  "saveOnly": "Запази",
+  "confirm": "Изход без запис?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Конфигурацията е копирана."
+    },
+    "error": {
+      "savingError": "Грешка при запис на конфигурацията"
+    }
+  }
+}

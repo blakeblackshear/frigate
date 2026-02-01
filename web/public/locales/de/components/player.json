@@ -24,7 +24,7 @@
       "title": "Latenz:",
       "value": "{{seconds}} Sekunden",
       "short": {
-        "title": "Lazenz",
+        "title": "Latenz",
         "value": "{{seconds}} s"
       }
     },

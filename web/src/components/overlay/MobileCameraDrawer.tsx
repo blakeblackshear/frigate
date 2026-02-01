@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { FaVideo } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
-import { CameraNameLabel } from "../camera/CameraNameLabel";
+import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 
 type MobileCameraDrawerProps = {
   allCameras: string[];

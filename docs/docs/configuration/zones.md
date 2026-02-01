@@ -27,6 +27,7 @@ cameras:
           - entire_yard
     zones:
       entire_yard:
+        friendly_name: Entire yard # You can use characters from any language text
         coordinates: ...
 ```
 
@@ -44,8 +45,10 @@ cameras:
           - edge_yard
     zones:
       edge_yard:
+        friendly_name: Edge yard # You can use characters from any language text
         coordinates: ...
       inner_yard:
+        friendly_name: Inner yard # You can use characters from any language text
         coordinates: ...
 ```
 
@@ -59,6 +62,7 @@ cameras:
         - entire_yard
     zones:
       entire_yard:
+        friendly_name: Entire yard
         coordinates: ...
 ```
 
@@ -81,6 +85,7 @@ cameras:
 ```
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. Objects will be tracked for any `person` that enter anywhere in the yard, and for cars only if they enter the street.
+
 
 ### Zone Loitering
 

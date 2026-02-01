@@ -1,6 +1,6 @@
 ---
 id: recordings
-title: Troubleshooting Recordings
+title: Recordings Errors
 ---
 
 ## I have Frigate configured for motion recording only, but it still seems to be recording even with no motion. Why?

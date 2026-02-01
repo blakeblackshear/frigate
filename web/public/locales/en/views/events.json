@@ -9,14 +9,37 @@
   "empty": {
     "alert": "There are no alerts to review",
     "detection": "There are no detections to review",
-    "motion": "No motion data found"
+    "motion": "No motion data found",
+    "recordingsDisabled": {
+      "title": "Recordings must be enabled",
+      "description": "Review items can only be created for a camera when recordings are enabled for that camera."
+    }
   },
   "timeline": "Timeline",
   "timeline.aria": "Select timeline",
+  "zoomIn": "Zoom In",
+  "zoomOut": "Zoom Out",
   "events": {
     "label": "Events",
     "aria": "Select events",
     "noFoundForTimePeriod": "No events found for this time period."
+  },
+  "detail": {
+    "label": "Detail",
+    "noDataFound": "No detail data to review",
+    "aria": "Toggle detail view",
+    "trackedObject_one": "{{count}} object",
+    "trackedObject_other": "{{count}} objects",
+    "noObjectDetailData": "No object detail data available.",
+    "settings": "Detail View Settings",
+    "alwaysExpandActive": {
+      "title": "Always expand active",
+      "desc": "Always expand the active review item's object details when available."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Tracked point",
+    "clickToSeek": "Click to seek to this time"
   },
   "documentTitle": "Review - Frigate",
   "recordings": {
@@ -33,8 +56,10 @@
   },
   "selected_one": "{{count}} selected",
   "selected_other": "{{count}} selected",
+  "select_all": "All",
   "camera": "Camera",
   "detected": "detected",
-  "suspiciousActivity": "Suspicious Activity",
-  "threateningActivity": "Threatening Activity"
+  "normalActivity": "Normal",
+  "needsReview": "Needs review",
+  "securityConcern": "Security concern"
 }

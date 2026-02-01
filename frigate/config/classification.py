@@ -33,6 +33,8 @@ class TriggerType(str, Enum):
 
 class TriggerAction(str, Enum):
     NOTIFICATION = "notification"
+    SUB_LABEL = "sub_label"
+    ATTRIBUTE = "attribute"
 
 
 class ObjectClassificationType(str, Enum):
@@ -69,7 +71,7 @@ class BirdClassificationConfig(FrigateBaseModel):
 
 
 class CustomClassificationStateCameraConfig(FrigateBaseModel):
-    crop: list[int, int, int, int] = Field(
+    crop: list[float, float, float, float] = Field(
         title="Crop of image frame on this camera to run classification on."
     )
 
@@ -102,6 +104,11 @@ class CustomClassificationConfig(FrigateBaseModel):
     name: str | None = Field(default=None, title="Name of classification model.")
     threshold: float = Field(
         default=0.8, title="Classification score threshold to change the state."
+    )
+    save_attempts: int | None = Field(
+        default=None,
+        title="Number of classification attempts to save in the recent classifications tab. If not specified, defaults to 200 for object classification and 100 for state classification.",
+        ge=0,
     )
     object_config: CustomClassificationObjectConfig | None = Field(default=None)
     state_config: CustomClassificationStateConfig | None = Field(default=None)
@@ -197,7 +204,9 @@ class FaceRecognitionConfig(FrigateBaseModel):
         title="Min face recognitions for the sub label to be applied to the person object.",
     )
     save_attempts: int = Field(
-        default=100, ge=0, title="Number of face attempts to save in the train tab."
+        default=200,
+        ge=0,
+        title="Number of face attempts to save in the recent recognitions tab.",
     )
     blur_confidence_filter: bool = Field(
         default=True, title="Apply blur quality filter to face confidence."

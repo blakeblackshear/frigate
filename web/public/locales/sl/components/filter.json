@@ -129,6 +129,8 @@
     "loading": "Nalaganje prepoznanih registrskih tablic…",
     "placeholder": "Iskanje registrskih tablic…",
     "noLicensePlatesFound": "Nobena registrska tablica ni bila najdena.",
-    "selectPlatesFromList": "Na seznamu izberite eno ali več registrskih tablic."
+    "selectPlatesFromList": "Na seznamu izberite eno ali več registrskih tablic.",
+    "selectAll": "Izberi vse",
+    "clearAll": "Počisti vse"
   }
 }

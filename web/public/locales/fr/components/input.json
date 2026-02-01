@@ -3,7 +3,7 @@
     "downloadVideo": {
       "label": "Télécharger la vidéo",
       "toast": {
-        "success": "Le téléchargement de la vidéo de votre élément de la revue d'événements a commencé."
+        "success": "Le téléchargement de la vidéo a commencé."
       }
     }
   }

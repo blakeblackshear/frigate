@@ -14,6 +14,7 @@ push-boards: $(BOARDS:%=push-%)
 
 version:
 	echo 'VERSION = "$(VERSION)-$(COMMIT_HASH)"' > frigate/version.py
+	echo 'VITE_GIT_COMMIT_HASH=$(COMMIT_HASH)' > web/.env
 
 local: version
 	docker buildx build --target=frigate --file docker/main/Dockerfile . \

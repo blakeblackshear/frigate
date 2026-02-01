@@ -14,7 +14,8 @@
     "move": {
       "clickMove": {
         "label": "Klik kotak ini untuk menengahkan kamera",
-        "enable": "Aktifkan klik untuk bergerak"
+        "enable": "Aktifkan klik untuk bergerak",
+        "disable": "Non-aktifkan klik untuk bergerak"
       }
     }
   }

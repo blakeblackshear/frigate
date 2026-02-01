@@ -14,8 +14,8 @@ from typing import Any, List, Optional, Tuple
 
 import cv2
 import numpy as np
-from Levenshtein import distance, jaro_winkler
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
+from rapidfuzz.distance import JaroWinkler, Levenshtein
 from shapely.geometry import Polygon
 
 from frigate.comms.event_metadata_updater import (
@@ -48,6 +48,9 @@ class LicensePlateProcessingMixin:
                 MODEL_CACHE_DIR, "paddleocr-onnx", "ppocr_keys_v1.txt"
             )
         )
+        # process plates that are stationary and have no position changes for 5 seconds
+        self.stationary_scan_duration = 5
+
         self.batch_size = 6
 
         # Object config
@@ -371,6 +374,9 @@ class LicensePlateProcessingMixin:
                             combined_plate = re.sub(
                                 pattern, replacement, combined_plate
                             )
+                            logger.debug(
+                                f"{camera}: Processing replace rule: '{pattern}' -> '{replacement}', result: '{combined_plate}'"
+                            )
                     except re.error as e:
                         logger.warning(
                             f"{camera}: Invalid regex in replace_rules '{pattern}': {e}"
@@ -378,7 +384,7 @@ class LicensePlateProcessingMixin:
 
             if combined_plate != original_combined:
                 logger.debug(
-                    f"{camera}: Rules applied: '{original_combined}' -> '{combined_plate}'"
+                    f"{camera}: All rules applied: '{original_combined}' -> '{combined_plate}'"
                 )
 
             # Compute the combined area for qualifying boxes
@@ -1120,7 +1126,9 @@ class LicensePlateProcessingMixin:
         for i, plate in enumerate(plates):
             merged = False
             for j, cluster in enumerate(clusters):
-                sims = [jaro_winkler(plate["plate"], v["plate"]) for v in cluster]
+                sims = [
+                    JaroWinkler.similarity(plate["plate"], v["plate"]) for v in cluster
+                ]
                 if len(sims) > 0:
                     avg_sim = sum(sims) / len(sims)
                     if avg_sim >= self.cluster_threshold:
@@ -1269,21 +1277,39 @@ class LicensePlateProcessingMixin:
                 )
                 return
 
-            # don't run for stationary car objects
-            if obj_data.get("stationary") == True:
+            # don't run for non-stationary objects with no position changes to avoid processing uncertain moving objects
+            # zero position_changes is the initial state after registering a new tracked object
+            # LPR will run 2 frames after detect.min_initialized is reached
+            if obj_data.get("position_changes", 0) == 0 and not obj_data.get(
+                "stationary", False
+            ):
                 logger.debug(
-                    f"{camera}: Not a processing license plate for a stationary car/motorcycle object."
+                    f"{camera}: Skipping LPR for non-stationary {obj_data['label']} object {id} with no position changes.  (Detected in {self.config.cameras[camera].detect.min_initialized + 1} concurrent frames, threshold to run is {self.config.cameras[camera].detect.min_initialized + 2} frames)"
                 )
                 return
 
-            # don't run for objects with no position changes
-            # this is the initial state after registering a new tracked object
-            # LPR will run 2 frames after detect.min_initialized is reached
-            if obj_data.get("position_changes", 0) == 0:
-                logger.debug(
-                    f"{camera}: Plate detected in {self.config.cameras[camera].detect.min_initialized + 1} concurrent frames, LPR frame threshold ({self.config.cameras[camera].detect.min_initialized + 2})"
-                )
-                return
+            # run for stationary objects for a limited time after they become stationary
+            if obj_data.get("stationary") == True:
+                threshold = self.config.cameras[camera].detect.stationary.threshold
+                if obj_data.get("motionless_count", 0) >= threshold:
+                    frames_since_stationary = (
+                        obj_data.get("motionless_count", 0) - threshold
+                    )
+                    fps = self.config.cameras[camera].detect.fps
+                    time_since_stationary = frames_since_stationary / fps
+
+                    # only print this log for a short time to avoid log spam
+                    if (
+                        self.stationary_scan_duration
+                        < time_since_stationary
+                        <= self.stationary_scan_duration + 1
+                    ):
+                        logger.debug(
+                            f"{camera}: {obj_data.get('label', 'An')} object {id} has been stationary for > {self.stationary_scan_duration} seconds, skipping LPR."
+                        )
+
+                    if time_since_stationary > self.stationary_scan_duration:
+                        return
 
             license_plate: Optional[dict[str, Any]] = None
 
@@ -1424,7 +1450,7 @@ class LicensePlateProcessingMixin:
                     license_plate_frame,
                 )
 
-        logger.debug(f"{camera}: Running plate recognition.")
+        logger.debug(f"{camera}: Running plate recognition for id: {id}.")
 
         # run detection, returns results sorted by confidence, best first
         start = datetime.datetime.now().timestamp()
@@ -1479,7 +1505,7 @@ class LicensePlateProcessingMixin:
                     and current_time - data["last_seen"]
                     <= self.config.cameras[camera].lpr.expire_time
                 ):
-                    similarity = jaro_winkler(data["plate"], top_plate)
+                    similarity = JaroWinkler.similarity(data["plate"], top_plate)
                     if similarity >= self.similarity_threshold:
                         plate_id = existing_id
                         logger.debug(
@@ -1559,7 +1585,8 @@ class LicensePlateProcessingMixin:
                     for label, plates_list in self.lpr_config.known_plates.items()
                     if any(
                         re.match(f"^{plate}$", rep_plate)
-                        or distance(plate, rep_plate) <= self.lpr_config.match_distance
+                        or Levenshtein.distance(plate, rep_plate)
+                        <= self.lpr_config.match_distance
                         for plate in plates_list
                     )
                 ),

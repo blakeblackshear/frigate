@@ -943,6 +943,58 @@ def add_mask(mask: str, mask_img: np.ndarray):
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
 
 
+def run_ffmpeg_snapshot(
+    ffmpeg,
+    input_path: str,
+    codec: str,
+    seek_time: Optional[float] = None,
+    height: Optional[int] = None,
+    timeout: Optional[int] = None,
+) -> tuple[Optional[bytes], str]:
+    """Run ffmpeg to extract a snapshot/image from a video source."""
+    ffmpeg_cmd = [
+        ffmpeg.ffmpeg_path,
+        "-hide_banner",
+        "-loglevel",
+        "warning",
+    ]
+
+    if seek_time is not None:
+        ffmpeg_cmd.extend(["-ss", f"00:00:{seek_time}"])
+
+    ffmpeg_cmd.extend(
+        [
+            "-i",
+            input_path,
+            "-frames:v",
+            "1",
+            "-c:v",
+            codec,
+            "-f",
+            "image2pipe",
+            "-",
+        ]
+    )
+
+    if height is not None:
+        ffmpeg_cmd.insert(-3, "-vf")
+        ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
+
+    try:
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+            timeout=timeout,
+        )
+
+        if process.returncode == 0 and process.stdout:
+            return process.stdout, ""
+        else:
+            return None, process.stderr.decode() if process.stderr else "ffmpeg failed"
+    except sp.TimeoutExpired:
+        return None, "timeout"
+
+
 def get_image_from_recording(
     ffmpeg,  # Ffmpeg Config
     file_path: str,
@@ -952,37 +1004,11 @@ def get_image_from_recording(
 ) -> Optional[Any]:
     """retrieve a frame from given time in recording file."""
 
-    ffmpeg_cmd = [
-        ffmpeg.ffmpeg_path,
-        "-hide_banner",
-        "-loglevel",
-        "warning",
-        "-ss",
-        f"00:00:{relative_frame_time}",
-        "-i",
-        file_path,
-        "-frames:v",
-        "1",
-        "-c:v",
-        codec,
-        "-f",
-        "image2pipe",
-        "-",
-    ]
-
-    if height is not None:
-        ffmpeg_cmd.insert(-3, "-vf")
-        ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
-
-    process = sp.run(
-        ffmpeg_cmd,
-        capture_output=True,
+    image_data, _ = run_ffmpeg_snapshot(
+        ffmpeg, file_path, codec, seek_time=relative_frame_time, height=height
     )
 
-    if process.returncode == 0:
-        return process.stdout
-    else:
-        return None
+    return image_data
 
 
 def get_histogram(image, x_min, y_min, x_max, y_max):

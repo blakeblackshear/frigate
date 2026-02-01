@@ -56,7 +56,7 @@ services:
     volumes:
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # Recommended: 1GB of memory
         target: /tmp/cache
         tmpfs:
           size: 1000000000
@@ -94,6 +94,10 @@ $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 20 + 270480) / 1048576
 
 The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
 
+## Extra Steps for Specific Hardware
+
+The following sections contain additional setup steps that are only required if you are using specific hardware. If you are not using any of these hardware types, you can skip to the [Docker](#docker) installation section.
+
 ### Raspberry Pi 3/4
 
 By default, the Raspberry Pi limits the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.org/documentation/computers/config_txt.html#memory-options).
@@ -106,14 +110,107 @@ The Hailo-8 and Hailo-8L AI accelerators are available in both M.2 and HAT form 
 
 #### Installation
 
-For Raspberry Pi 5 users with the AI Kit, installation is straightforward. Simply follow this [guide](https://www.raspberrypi.com/documentation/accessories/ai-kit.html#ai-kit-installation) to install the driver and software.
+:::warning
 
-For other installations, follow these steps for installation:
+The Raspberry Pi kernel includes an older version of the Hailo driver that is incompatible with Frigate. You **must** follow the installation steps below to install the correct driver version, and you **must** disable the built-in kernel driver as described in step 1.
 
-1. Install the driver from the [Hailo GitHub repository](https://github.com/hailo-ai/hailort-drivers). A convenient script for Linux is available to clone the repository, build the driver, and install it.
-2. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/hailo8l/user_installation.sh).
-3. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
-4. Run the script with `./user_installation.sh`
+:::
+
+1. **Disable the built-in Hailo driver (Raspberry Pi only)**:
+
+   :::note
+
+   If you are **not** using a Raspberry Pi, skip this step and proceed directly to step 2.
+
+   :::
+
+   If you are using a Raspberry Pi, you need to blacklist the built-in kernel Hailo driver to prevent conflicts. First, check if the driver is currently loaded:
+
+   ```bash
+   lsmod | grep hailo
+   ```
+
+   If it shows `hailo_pci`, unload it:
+
+   ```bash
+   sudo rmmod hailo_pci
+   ```
+
+   Now blacklist the driver to prevent it from loading on boot:
+
+   ```bash
+   echo "blacklist hailo_pci" | sudo tee /etc/modprobe.d/blacklist-hailo_pci.conf
+   ```
+
+   Update initramfs to ensure the blacklist takes effect:
+
+   ```bash
+   sudo update-initramfs -u
+   ```
+
+   Reboot your Raspberry Pi:
+
+   ```bash
+   sudo reboot
+   ```
+
+   After rebooting, verify the built-in driver is not loaded:
+
+   ```bash
+   lsmod | grep hailo
+   ```
+
+   This command should return no results. If it still shows `hailo_pci`, the blacklist did not take effect properly and you may need to check for other Hailo packages installed via apt that are loading the driver.
+
+2. **Run the installation script**:
+
+   Download the installation script:
+
+   ```bash
+   wget https://raw.githubusercontent.com/blakeblackshear/frigate/dev/docker/hailo8l/user_installation.sh
+   ```
+
+   Make it executable:
+
+   ```bash
+   sudo chmod +x user_installation.sh
+   ```
+
+   Run the script:
+
+   ```bash
+   ./user_installation.sh
+   ```
+
+   The script will:
+
+   - Install necessary build dependencies
+   - Clone and build the Hailo driver from the official repository
+   - Install the driver
+   - Download and install the required firmware
+   - Set up udev rules
+
+3. **Reboot your system**:
+
+   After the script completes successfully, reboot to load the firmware:
+
+   ```bash
+   sudo reboot
+   ```
+
+4. **Verify the installation**:
+
+   After rebooting, verify that the Hailo device is available:
+
+   ```bash
+   ls -l /dev/hailo0
+   ```
+
+   You should see the device listed. You can also verify the driver is loaded:
+
+   ```bash
+   lsmod | grep hailo_pci
+   ```
 
 #### Setup
 
@@ -132,18 +229,18 @@ If you are using `docker run`, add this option to your command `--device /dev/ha
 
 Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
 
-### MemryX MX3  
+### MemryX MX3
 
 The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVMe SSD), and supports a variety of configurations:
+
 - x86 (Intel/AMD) PCs
 - Raspberry Pi 5
 - Orange Pi 5 Plus/Max
 - Multi-M.2 PCIe carrier cards
 
-#### Configuration  
+#### Configuration
 
-
-#### Installation  
+#### Installation
 
 To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/get_started/hardware_setup.html).
 
@@ -154,9 +251,9 @@ Then follow these steps for installing the correct driver/runtime configuration:
 3. Run the script with `./user_installation.sh`
 4. **Restart your computer** to complete driver installation.
 
-#### Setup  
+#### Setup
 
-To set up Frigate, follow the default installation instructions, for example:   `ghcr.io/blakeblackshear/frigate:stable`
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
 Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
 
@@ -173,7 +270,7 @@ In your `docker-compose.yml`, also add:
 privileged: true
 
 volumes:
-    /run/mxa_manager:/run/mxa_manager
+  - /run/mxa_manager:/run/mxa_manager
 ```
 
 If you can't use Docker Compose, you can run the container with something similar to this:
@@ -280,7 +377,7 @@ or add these options to your `docker run` command:
 ```
 --device /dev/synap \
 --device /dev/video0 \
---device /dev/video1 
+--device /dev/video1
 ```
 
 #### Configuration
@@ -302,14 +399,15 @@ services:
     shm_size: "512mb" # update for your cameras based on calculation above
     devices:
       - /dev/bus/usb:/dev/bus/usb # Passes the USB Coral, needs to be modified for other versions
-      - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+      - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://github.com/jnicolson/gasket-builder
       - /dev/video11:/dev/video11 # For Raspberry Pi 4B
-      - /dev/dri/renderD128:/dev/dri/renderD128 # For intel hwaccel, needs to be updated for your hardware
+      - /dev/dri/renderD128:/dev/dri/renderD128 # AMD / Intel GPU, needs to be updated for your hardware
+      - /dev/accel:/dev/accel # Intel NPU
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # Recommended: 1GB of memory
         target: /tmp/cache
         tmpfs:
           size: 1000000000
@@ -367,6 +465,7 @@ There are important limitations in HA OS to be aware of:
 
 - Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
+- Intel NPUs are not supported because HA OS does not include the NPU firmware.
 - Nvidia GPUs are not supported because addons do not support the nvidia runtime.
 
 :::
@@ -410,7 +509,7 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 ## Proxmox
 
-[According to Proxmox documentation](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_pct) it is recommended that you run application containers like Frigate inside a Proxmox QEMU VM. This will give you all the advantages of application containerization, while also providing the benefits that VMs offer, such as strong isolation from the host and the ability to live-migrate, which otherwise isn’t possible with containers.
+[According to Proxmox documentation](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_pct) it is recommended that you run application containers like Frigate inside a Proxmox QEMU VM. This will give you all the advantages of application containerization, while also providing the benefits that VMs offer, such as strong isolation from the host and the ability to live-migrate, which otherwise isn’t possible with containers. Ensure that ballooning is **disabled**, especially if you are passing through a GPU to the VM.
 
 :::warning
 

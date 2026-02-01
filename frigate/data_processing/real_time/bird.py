@@ -13,7 +13,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
-from frigate.log import redirect_output_to_logger
+from frigate.log import suppress_stderr_during
 from frigate.util.object import calculate_region
 
 from ..types import DataProcessorMetrics
@@ -80,13 +80,14 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         except Exception as e:
             logger.error(f"Failed to download {path}: {e}")
 
-    @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
-        self.interpreter = Interpreter(
-            model_path=os.path.join(MODEL_CACHE_DIR, "bird/bird.tflite"),
-            num_threads=2,
-        )
-        self.interpreter.allocate_tensors()
+        # Suppress TFLite delegate creation messages that bypass Python logging
+        with suppress_stderr_during("tflite_interpreter_init"):
+            self.interpreter = Interpreter(
+                model_path=os.path.join(MODEL_CACHE_DIR, "bird/bird.tflite"),
+                num_threads=2,
+            )
+            self.interpreter.allocate_tensors()
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
 

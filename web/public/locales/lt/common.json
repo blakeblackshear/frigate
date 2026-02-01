@@ -78,7 +78,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "Apdorojama",
+    "invalidStartTime": "Netinkamas pradžios laikas",
+    "invalidEndTime": "Netinkamas pabaigos laikas"
   },
   "unit": {
     "speed": {
@@ -88,10 +91,20 @@
     "length": {
       "feet": "pėdos",
       "meters": "metrai"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/val",
+      "mbph": "MB/val",
+      "gbph": "GB/val"
     }
   },
   "label": {
-    "back": "Eiti atgal"
+    "back": "Eiti atgal",
+    "hide": "Slėpti {{item}}",
+    "show": "Rodyti {{item}}"
   },
   "button": {
     "apply": "Pritaikyti",
@@ -270,5 +283,8 @@
     "desc": "Puslapis nerastas"
   },
   "selectItem": "Pasirinkti {{item}}",
-  "readTheDocumentation": "Skaityti dokumentaciją"
+  "readTheDocumentation": "Skaityti dokumentaciją",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

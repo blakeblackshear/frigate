@@ -1,10 +1,18 @@
+from enum import Enum
 from typing import Optional, Union
 
 from pydantic import Field, field_validator
 
 from ..base import FrigateBaseModel
 
-__all__ = ["ReviewConfig", "DetectionsConfig", "AlertsConfig"]
+__all__ = ["ReviewConfig", "DetectionsConfig", "AlertsConfig", "ImageSourceEnum"]
+
+
+class ImageSourceEnum(str, Enum):
+    """Image source options for GenAI Review."""
+
+    preview = "preview"
+    recordings = "recordings"
 
 
 DEFAULT_ALERT_OBJECTS = ["person", "car"]
@@ -77,6 +85,10 @@ class GenAIReviewConfig(FrigateBaseModel):
     )
     alerts: bool = Field(default=True, title="Enable GenAI for alerts.")
     detections: bool = Field(default=False, title="Enable GenAI for detections.")
+    image_source: ImageSourceEnum = Field(
+        default=ImageSourceEnum.preview,
+        title="Image source for review descriptions.",
+    )
     additional_concerns: list[str] = Field(
         default=[],
         title="Additional concerns that GenAI should make note of on this camera.",
@@ -93,13 +105,40 @@ class GenAIReviewConfig(FrigateBaseModel):
         default=None,
     )
     activity_context_prompt: str = Field(
-        default="""- **Zone context is critical**: Private enclosed spaces (back yards, back decks, fenced areas, inside garages) are resident territory where brief transient activity, routine tasks, and pet care are expected and normal. Front yards, driveways, and porches are semi-public but still resident spaces where deliveries, parking, and coming/going are routine. Consider whether the zone and activity align with normal residential use.
-- **Person + Pet = Normal Activity**: When both "Person" and "Dog" (or "Cat") are detected together in residential zones, this is routine pet care activity (walking, letting out, playing, supervising). Assign Level 0 unless there are OTHER strong suspicious behaviors present (like testing doors, taking items, etc.). A person with their pet in a residential zone is baseline normal activity.
-- Brief appearances in private zones (back yards, garages) are normal residential patterns.
-- Normal residential activity includes: residents, family members, guests, deliveries, services, maintenance workers, routine property use (parking, unloading, mail pickup, trash removal).
-- Brief movement with legitimate items (bags, packages, tools, equipment) in appropriate zones is routine.
-""",
-        title="Custom activity context prompt defining normal activity patterns for this property.",
+        default="""### Normal Activity Indicators (Level 0)
+- Known/verified people in any zone at any time
+- People with pets in residential areas
+- Deliveries or services during daytime/evening (6 AM - 10 PM): carrying packages to doors/porches, placing items, leaving
+- Services/maintenance workers with visible tools, uniforms, or service vehicles during daytime
+- Activity confined to public areas only (sidewalks, streets) without entering property at any time
+
+### Suspicious Activity Indicators (Level 1)
+- **Testing or attempting to open doors/windows/handles on vehicles or buildings** — ALWAYS Level 1 regardless of time or duration
+- **Unidentified person in private areas (driveways, near vehicles/buildings) during late night/early morning (11 PM - 5 AM)** — ALWAYS Level 1 regardless of activity or duration
+- Taking items that don't belong to them (packages, objects from porches/driveways)
+- Climbing or jumping fences/barriers to access property
+- Attempting to conceal actions or items from view
+- Prolonged loitering: remaining in same area without visible purpose throughout most of the sequence
+
+### Critical Threat Indicators (Level 2)
+- Holding break-in tools (crowbars, pry bars, bolt cutters)
+- Weapons visible (guns, knives, bats used aggressively)
+- Forced entry in progress
+- Physical aggression or violence
+- Active property damage or theft in progress
+
+### Assessment Guidance
+Evaluate in this order:
+
+1. **If person is verified/known** → Level 0 regardless of time or activity
+2. **If person is unidentified:**
+   - Check time: If late night/early morning (11 PM - 5 AM) AND in private areas (driveways, near vehicles/buildings) → Level 1
+   - Check actions: If testing doors/handles, taking items, climbing → Level 1
+   - Otherwise, if daytime/evening (6 AM - 10 PM) with clear legitimate purpose (delivery, service worker) → Level 0
+3. **Escalate to Level 2 if:** Weapons, break-in tools, forced entry in progress, violence, or active property damage visible (escalates from Level 0 or 1)
+
+The mere presence of an unidentified person in private areas during late night hours is inherently suspicious and warrants human review, regardless of what activity they appear to be doing or how brief the sequence is.""",
+        title="Custom activity context prompt defining normal and suspicious activity patterns for this property.",
     )
 
 

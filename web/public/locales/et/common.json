@@ -1,0 +1,298 @@
+{
+  "time": {
+    "untilForTime": "Kuni {{time}}",
+    "today": "Täna",
+    "untilForRestart": "Kuni Frigate käivitub uuesti.",
+    "untilRestart": "Kuni uuesti käivitamiseni",
+    "ago": "{{timeAgo}} tagasi",
+    "justNow": "Hetk tagasi",
+    "yesterday": "Eile",
+    "last7": "Viimase 7 päeva jooksul",
+    "last14": "Viimase 14 päeva jooksul",
+    "last30": "Viimase 30 päeva jooksul",
+    "thisWeek": "Sel nädalal",
+    "lastWeek": "Eelmisel nädalal",
+    "thisMonth": "Sel kuul",
+    "lastMonth": "Eelmisel kuul",
+    "5minutes": "5 minutit",
+    "10minutes": "10 minutit",
+    "30minutes": "30 minutit",
+    "1hour": "1 tund",
+    "12hours": "12 tundi",
+    "24hours": "24 tundi",
+    "pm": "pl",
+    "am": "el",
+    "yr": "{{time}} a",
+    "year_one": "{{time}} aasta",
+    "year_other": "{{time}} aastat",
+    "mo": "{{time}} k",
+    "month_one": "{{time}} kuu",
+    "month_other": "{{time}} kuud",
+    "d": "{{time}} pv",
+    "day_one": "{{time}} päev",
+    "day_other": "{{time}} päeva",
+    "h": "{{time}} t",
+    "hour_one": "{{time}} tund",
+    "hour_other": "{{time}} tundi",
+    "m": "{{time}} min",
+    "minute_one": "{{time}} minut",
+    "minute_other": "{{time}} minutit",
+    "s": "{{time}} sek",
+    "second_one": "{{time}} sekund",
+    "second_other": "{{time}} sekundit",
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "hh:mm aaa"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "hh:mm:ss aaa"
+    },
+    "formattedTimestampFilename": {
+      "12hour": "yy-MM-dd-hh-mm-ss-a",
+      "24hour": "yy-MM-dd-HH-mm-ss"
+    },
+    "formattedTimestamp": {
+      "12hour": "MMM d, hh:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd.MM hh:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, hh:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "inProgress": "Töös",
+    "invalidStartTime": "Vigane algusaeg",
+    "invalidEndTime": "Vigane lõpuaeg",
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "dd. MMM yyyy, hh:mm aaa",
+      "24hour": "dd. MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "dd. MMM"
+  },
+  "menu": {
+    "user": {
+      "setPassword": "Lisa salasõna",
+      "logout": "Logi välja",
+      "title": "Kasutaja",
+      "account": "Kasutajakonto",
+      "current": "Praegune kasutaja: {{user}}",
+      "anonymous": "anonüümne"
+    },
+    "live": {
+      "allCameras": "Kõik kaamerad",
+      "title": "Otseülekanne",
+      "cameras": {
+        "title": "Kaamerad",
+        "count_one": "{{count}} kaamera",
+        "count_other": "{{count}} kaamerat"
+      }
+    },
+    "settings": "Seadistused",
+    "language": {
+      "withSystem": {
+        "label": "Kasuta keele jaoks süsteemi seadistusi"
+      },
+      "en": "English (inglise keel)",
+      "es": "Español (hispaania keel)",
+      "zhCN": "简体中文 (hiina keel lihtsustatud hieroglüüfidega)",
+      "hi": "हिन्दी (hindi keel)",
+      "fr": "Français (prantsuse keel)",
+      "ar": "العربية (araabia keel)",
+      "pt": "Português (portugali keel)",
+      "ptBR": "Português brasileiro (Brasiilia portugali keel)",
+      "ru": "Русский (vene keel)",
+      "de": "Deutsch (saksa keel)",
+      "ja": "日本語 (jaapani keel)",
+      "tr": "Türkçe (türgi keel)",
+      "it": "Italiano (itaalia keel)",
+      "nl": "Nederlands (hollandi keel)",
+      "sv": "Svenska (rootsi keel)",
+      "cs": "Čeština (tšehhi keel)",
+      "nb": "Norsk Bokmål (norra bokmål)",
+      "ko": "한국어 (korea keel)",
+      "vi": "Tiếng Việt (vietnami keel)",
+      "fa": "فارسی (pärsia keel)",
+      "pl": "Polski (poola keel)",
+      "uk": "Українська (ukraina keel)",
+      "he": "עברית (heebrea keel)",
+      "el": "Ελληνικά (kreeka keel)",
+      "ro": "Română (rumeenia keel)",
+      "hu": "Magyar (ungari keel)",
+      "fi": "Suomi (soome keel)",
+      "da": "Dansk (taani keel)",
+      "sk": "Slovenčina (slovaki keel)",
+      "yue": "粵語 (kantoni keel)",
+      "th": "ไทย (tai keel)",
+      "ca": "Català (katalaani keel)",
+      "sr": "Српски (serbia keel)",
+      "sl": "Slovenščina (sloveeni keel)",
+      "lt": "Lietuvių (leedu keel)",
+      "bg": "Български (bulgaaria keel)",
+      "gl": "Galego (galeegi keel)",
+      "id": "Bahasa Indonesia (indoneesia keel)",
+      "ur": "اردو (urdu keel)"
+    },
+    "system": "Süsteem",
+    "systemMetrics": "Süsteemi meetrika",
+    "configuration": "Seadistused",
+    "systemLogs": "Süsteemi logid",
+    "configurationEditor": "Seadistuste haldur",
+    "languages": "Keeled",
+    "appearance": "Välimus",
+    "darkMode": {
+      "label": "Tume kujundus",
+      "light": "Hele kujundus",
+      "dark": "Tume kujundus",
+      "withSystem": {
+        "label": "Kasuta süsteemi seadistusi heleda või tumeda kujunduse jaoks"
+      }
+    },
+    "withSystem": "Süsteem",
+    "theme": {
+      "label": "Kujundus",
+      "blue": "Sinine",
+      "green": "Roheline",
+      "nord": "Põhjala",
+      "red": "Punane",
+      "highcontrast": "Väga kontrastne",
+      "default": "Vaikimisi kujundus"
+    },
+    "help": "Abiteave",
+    "documentation": {
+      "title": "Dokumentatsioon",
+      "label": "Frigate'i dokumentatsioon"
+    },
+    "restart": "Käivita Frigate uuesti",
+    "review": "Ülevaatamine",
+    "explore": "Uuri",
+    "export": "Ekspordi",
+    "uiPlayground": "Leht kasutajaliidese katsetamiseks",
+    "faceLibrary": "Näoteek",
+    "classification": "Klassifikatsioon"
+  },
+  "unit": {
+    "speed": {
+      "mph": "ml/t",
+      "kph": "km/t"
+    },
+    "data": {
+      "kbps": "kB/sek",
+      "mbps": "MB/sek",
+      "gbps": "GB/sek",
+      "kbph": "kB/t",
+      "mbph": "MB/t",
+      "gbph": "GB/t"
+    },
+    "length": {
+      "feet": "jalga",
+      "meters": "meetrit"
+    }
+  },
+  "button": {
+    "apply": "Rakenda",
+    "reset": "Lähtesta",
+    "done": "Valmis",
+    "enabled": "Kasutusel",
+    "enable": "Võta kasutusele",
+    "disabled": "Pole kasutusel",
+    "disable": "Eemalda kasutuselt",
+    "save": "Salvesta",
+    "saving": "Salvestan…",
+    "cancel": "Katkesta",
+    "close": "Sulge",
+    "copy": "Kopeeri",
+    "back": "Tagasi",
+    "history": "Ajalugu",
+    "fullscreen": "Täisekraanivaade",
+    "exitFullscreen": "Välju täisekraanivaatest",
+    "pictureInPicture": "Pilt pildis vaade",
+    "twoWayTalk": "Kahepoolne kõneside",
+    "cameraAudio": "Kaamera heli",
+    "on": "SEES",
+    "off": "VÄLJAS",
+    "edit": "Muuda",
+    "copyCoordinates": "Kopeeri koordinaadid",
+    "delete": "Kustuta",
+    "yes": "Jah",
+    "no": "Ei",
+    "download": "Laadi alla",
+    "info": "Teave",
+    "suspended": "Peata",
+    "unsuspended": "Lõpeta peatamine",
+    "play": "Esita",
+    "unselect": "Eemalda valik",
+    "export": "Ekspordi",
+    "deleteNow": "Kustuta kohe",
+    "next": "Järgmine",
+    "continue": "Jätka"
+  },
+  "label": {
+    "back": "Mine tagasi",
+    "hide": "Peida: {{item}}",
+    "show": "Näita: {{item}}",
+    "all": "Kõik",
+    "ID": "Tunnus",
+    "none": "Puudub",
+    "other": "Muu"
+  },
+  "list": {
+    "two": "{{0}} ja {{1}}",
+    "many": "{{items}} ja {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Valikuline",
+    "internalID": "Seadistustes ja andmebaasis kasutatav Frigate'i sisemine tunnus"
+  },
+  "toast": {
+    "copyUrlToClipboard": "Võrguaadress on kopeeritud lõikelauale.",
+    "save": {
+      "title": "Salvesta",
+      "error": {
+        "title": "Seadistuste muudatuste salvestamine ei õnnestunud: {{errorMessage}}",
+        "noMessage": "Seadistuste muudatuste salvestamine ei õnnestunud"
+      }
+    }
+  },
+  "role": {
+    "title": "Roll",
+    "admin": "Peakasutaja",
+    "viewer": "Vaataja",
+    "desc": "Peakasutajatel on Frigate'i kasutajaliideses kõik õigused. Vaatajad võivad vaid kaamerate pilti vaadata, objekte ülevaadata ning otsida arhiivist vanu videoid."
+  },
+  "pagination": {
+    "label": "lehenummerdus",
+    "previous": {
+      "title": "Eelmine",
+      "label": "Mine eelmisele lehele"
+    },
+    "next": {
+      "title": "Järgmine",
+      "label": "Mine järgmisele lehele"
+    },
+    "more": "Järgnevad lehed"
+  },
+  "accessDenied": {
+    "documentTitle": "Ligipääs on keelatud - Frigate",
+    "title": "Ligipääs on keelatud",
+    "desc": "Sul pole õigusi selle lehe vaatamiseks."
+  },
+  "notFound": {
+    "documentTitle": "Lehte ei leidu - Frigate",
+    "title": "404",
+    "desc": "Veebilehte ei leidu"
+  },
+  "selectItem": "Vali {{item}}",
+  "readTheDocumentation": "Loe dokumentatsiooni ja juhendit",
+  "information": {
+    "pixels": "{{area}} px"
+  }
+}

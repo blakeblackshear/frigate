@@ -133,5 +133,9 @@
     },
     "count_one": "{{count}} Clase",
     "count_other": "{{count}} Clases"
+  },
+  "attributes": {
+    "label": "Clasificación de Atributos",
+    "all": "Todos los Atributos"
   }
 }

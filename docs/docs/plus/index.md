@@ -15,13 +15,11 @@ There are three model types offered in Frigate+, `mobiledet`, `yolonas`, and `yo
 
 Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models.
 
-| Model Type  | Description                                                                                                                                                                                                                        |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                                                                                                  |
-| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                                                                                       |
-| `yolov9`    | A leading SOTA (state of the art) object detection model with similar performance to yolonas, but on a wider range of hardware options. Runs on Intel, NVidia GPUs, AMD GPUs, Hailo, MemryX\*, Apple Silicon\*, and Rockchip NPUs. |
-
-_\* Support coming in 0.17_
+| Model Type  | Description                                                                                                                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                                                                                              |
+| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                                                                                   |
+| `yolov9`    | A leading SOTA (state of the art) object detection model with similar performance to yolonas, but on a wider range of hardware options. Runs on Intel, NVidia GPUs, AMD GPUs, Hailo, MemryX, Apple Silicon, and Rockchip NPUs. |
 
 ### YOLOv9 Details
 
@@ -39,7 +37,7 @@ If you have a Hailo device, you will need to specify the hardware you have when 
 
 #### Rockchip (RKNN) Support
 
-For 0.16, YOLOv9 onnx models will need to be manually converted. First, you will need to configure Frigate to use the model id for your YOLOv9 onnx model so it downloads the model to your `model_cache` directory. From there, you can follow the [documentation](/configuration/object_detectors.md#converting-your-own-onnx-model-to-rknn-format) to convert it. Automatic conversion is coming in 0.17.
+For 0.16, YOLOv9 onnx models will need to be manually converted. First, you will need to configure Frigate to use the model id for your YOLOv9 onnx model so it downloads the model to your `model_cache` directory. From there, you can follow the [documentation](/configuration/object_detectors.md#converting-your-own-onnx-model-to-rknn-format) to convert it. Automatic conversion is available in 0.17 and later.
 
 ## Supported detector types
 
@@ -55,7 +53,7 @@ Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVi
 | [Hailo8/Hailo8L/Hailo8R](/configuration/object_detectors#hailo-8)                | `hailo8l`                 | `yolov9`               |
 | [Rockchip NPU](/configuration/object_detectors#rockchip-platform)\*              | `rknn`                    | `yolov9`               |
 
-_\* Requires manual conversion in 0.16. Automatic conversion coming in 0.17._
+_\* Requires manual conversion in 0.16. Automatic conversion available in 0.17 and later._
 
 ## Improving your model
 

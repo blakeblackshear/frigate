@@ -1,0 +1,182 @@
+{
+  "documentTitle": "分類モデル - Frigate",
+  "button": {
+    "deleteImages": "画像を削除",
+    "deleteClassificationAttempts": "分類画像を削除",
+    "renameCategory": "クラス名を変更",
+    "deleteCategory": "クラスを削除",
+    "trainModel": "モデルを学習",
+    "addClassification": "分類を追加",
+    "deleteModels": "モデルを削除",
+    "editModel": "モデルを編集"
+  },
+  "toast": {
+    "success": {
+      "deletedImage": "削除された画像",
+      "categorizedImage": "画像の分類に成功しました",
+      "trainedModel": "モデルを正常に学習させました。",
+      "trainingModel": "モデルのトレーニングを正常に開始しました。",
+      "deletedCategory": "クラスを削除しました",
+      "deletedModel_other": "{{count}} 件のモデルを削除しました",
+      "updatedModel": "モデル設定を更新しました",
+      "renamedCategory": "クラス名を {{name}} に変更しました"
+    },
+    "error": {
+      "deleteImageFailed": "削除に失敗しました: {{errorMessage}}",
+      "deleteCategoryFailed": "クラスの削除に失敗しました: {{errorMessage}}",
+      "deleteModelFailed": "モデルの削除に失敗しました: {{errorMessage}}",
+      "categorizeFailed": "画像の分類に失敗しました: {{errorMessage}}",
+      "trainingFailed": "モデルの学習に失敗しました。Frigate のログを確認してください。",
+      "trainingFailedToStart": "モデルの学習を開始できませんでした: {{errorMessage}}",
+      "updateModelFailed": "モデルの更新に失敗しました: {{errorMessage}}",
+      "renameCategoryFailed": "クラス名の変更に失敗しました: {{errorMessage}}"
+    }
+  },
+  "train": {
+    "titleShort": "Classifications,最近の分類結果を選択,,False,train.aria,,",
+    "title": "最近の分類結果",
+    "aria": "最近の分類結果を選択"
+  },
+  "wizard": {
+    "step1": {
+      "typeObject": "Classification",
+      "typeState": "Classification",
+      "description": "状態モデルは固定カメラ領域の状態変化（例：ドアの開閉）を監視し、オブジェクトモデルは検出されたオブジェクトに分類（例：既知の動物や配達員など）を追加します。",
+      "name": "名前",
+      "namePlaceholder": "モデル名を入力...",
+      "type": "タイプ",
+      "objectLabel": "オブジェクトラベル",
+      "objectLabelPlaceholder": "オブジェクトタイプを選択...",
+      "classificationType": "分類タイプ",
+      "classificationTypeTip": "分類タイプについて",
+      "classificationTypeDesc": "サブラベルはオブジェクトのラベルに追加のテキストを追加します（例：「人: UPS」）。属性は、オブジェクトのメタデータとは別に保存される、検索可能なメタデータです。",
+      "classificationSubLabel": "サブラベル",
+      "classificationAttribute": "属性",
+      "classes": "クラス",
+      "states": "状態",
+      "classesTip": "クラスについて",
+      "classesStateDesc": "カメラ領域の状態を定義します。例: ガレージドアの「開」「閉」。",
+      "classesObjectDesc": "検出されたオブジェクトを分類するための、異なるカテゴリを定義します。例：人物の分類として「delivery_person」「resident」「stranger」など。",
+      "classPlaceholder": "クラス名を入力...",
+      "errors": {
+        "nameRequired": "モデル名は必須です",
+        "nameLength": "モデル名は 64 文字以内で入力してください",
+        "nameOnlyNumbers": "モデル名を数字のみにはできません",
+        "classRequired": "少なくとも 1 つのクラスが必要です",
+        "classesUnique": "クラス名は一意である必要があります",
+        "noneNotAllowed": "「none」というクラス名は使用できません",
+        "stateRequiresTwoClasses": "状態モデルには少なくとも 2 つのクラスが必要です",
+        "objectLabelRequired": "オブジェクトラベルを選択してください",
+        "objectTypeRequired": "分類タイプを選択してください"
+      }
+    },
+    "title": "新しい分類を作成",
+    "steps": {
+      "nameAndDefine": "名前と定義",
+      "stateArea": "状態エリア",
+      "chooseExamples": "例を選択"
+    },
+    "step2": {
+      "description": "カメラを選択し、それぞれの監視エリアを定義します。モデルはこれらのエリアの状態を分類します。",
+      "cameras": "カメラ",
+      "selectCamera": "カメラを選択",
+      "noCameras": "+ をクリックしてカメラを追加",
+      "selectCameraPrompt": "リストからカメラを選択して監視エリアを定義します"
+    },
+    "step3": {
+      "selectImagesPrompt": "{{className}} の画像をすべて選択",
+      "selectImagesDescription": "画像をクリックして選択します。このクラスの作業が完了したら「続行」をクリックしてください。",
+      "allImagesRequired_other": "すべての画像を分類してください。残り {{count}} 枚です。",
+      "generating": {
+        "title": "サンプル画像を生成中",
+        "description": "Frigate が録画から代表的な画像を抽出しています。しばらくお待ちください..."
+      },
+      "training": {
+        "title": "モデルを学習中",
+        "description": "モデルはバックグラウンドで学習されています。このダイアログを閉じると、学習完了後すぐにモデルが有効になります。"
+      },
+      "retryGenerate": "再生成",
+      "noImages": "サンプル画像が生成されませんでした",
+      "classifying": "分類・学習中...",
+      "trainingStarted": "学習を開始しました",
+      "modelCreated": "モデルを作成しました。不足している状態の画像を「最近の分類」から追加し、モデルを学習してください。",
+      "errors": {
+        "noCameras": "カメラが設定されていません",
+        "noObjectLabel": "オブジェクトラベルが選択されていません",
+        "generateFailed": "例の生成に失敗しました: {{error}}",
+        "generationFailed": "生成に失敗しました。もう一度お試しください。",
+        "classifyFailed": "画像の分類に失敗しました: {{error}}"
+      },
+      "generateSuccess": "サンプル画像を生成しました",
+      "missingStatesWarning": {
+        "title": "状態の例が不足しています",
+        "description": "最良の結果を得るため、すべての状態の例を選択することを推奨します。すべてを選択しなくても続行できますが、全状態に画像が揃うまでモデルは学習されません。続行後、「最近の分類」から不足分を分類し、学習を行ってください。"
+      }
+    }
+  },
+  "details": {
+    "scoreInfo": "このスコアは、このオブジェクトに対するすべての検出結果の分類信頼度の平均を表します。",
+    "none": "なし",
+    "unknown": "不明"
+  },
+  "tooltip": {
+    "trainingInProgress": "モデルは現在学習中です",
+    "noNewImages": "学習に使用できる新しい画像がありません。先にデータセット内の画像を分類してください。",
+    "noChanges": "前回の学習以降、データセットに変更はありません。",
+    "modelNotReady": "モデルはまだ学習可能な状態ではありません"
+  },
+  "deleteCategory": {
+    "title": "クラスを削除",
+    "desc": "クラス {{name}} を削除してもよろしいですか？関連するすべての画像が完全に削除され、モデルの再学習が必要になります。",
+    "minClassesTitle": "クラスを削除できません",
+    "minClassesDesc": "分類モデルには少なくとも 2 つのクラスが必要です。別のクラスを追加してから削除してください。"
+  },
+  "deleteModel": {
+    "title": "分類モデルを削除",
+    "single": "{{name}} を削除してもよろしいですか？画像や学習データを含むすべての関連データが完全に削除され、この操作は元に戻せません。",
+    "desc_other": "{{count}} 件のモデルを削除してもよろしいですか？関連するすべてのデータが完全に削除され、この操作は元に戻せません。"
+  },
+  "edit": {
+    "title": "分類モデルを編集",
+    "descriptionState": "この状態分類モデルのクラスを編集します。変更を反映するにはモデルの再学習が必要です。",
+    "descriptionObject": "このオブジェクト分類モデルのオブジェクトタイプおよび分類タイプを編集します。",
+    "stateClassesInfo": "注意: 状態クラスを変更すると、更新後のクラスでモデルを再学習する必要があります。"
+  },
+  "deleteDatasetImages": {
+    "title": "データセット画像を削除",
+    "desc_other": "{{dataset}} から {{count}} 枚の画像を削除してもよろしいですか？この操作は元に戻せず、モデルの再学習が必要になります。"
+  },
+  "deleteTrainImages": {
+    "title": "学習用画像を削除",
+    "desc_other": "{{count}} 枚の画像を削除してもよろしいですか？この操作は元に戻すことができません。"
+  },
+  "renameCategory": {
+    "title": "クラス名を変更",
+    "desc": "{{name}} の新しい名前を入力してください。変更を有効にするにはモデルの再学習が必要です。"
+  },
+  "description": {
+    "invalidName": "無効な名前です。使用できるのは、英数字、空白、アポストロフィ、アンダースコア、ハイフンのみです。"
+  },
+  "categories": "クラス",
+  "createCategory": {
+    "new": "新しいクラスを作成"
+  },
+  "categorizeImageAs": "画像を次として分類:",
+  "categorizeImage": "画像を分類",
+  "menu": {
+    "objects": "オブジェクト",
+    "states": "状態"
+  },
+  "noModels": {
+    "object": {
+      "title": "オブジェクト分類モデルがありません",
+      "description": "検出されたオブジェクトを分類するためのカスタムモデルを作成します。",
+      "buttonText": "オブジェクトモデルを作成"
+    },
+    "state": {
+      "title": "状態分類モデルがありません",
+      "description": "特定のカメラ領域の状態変化を監視・分類するためのカスタムモデルを作成します。",
+      "buttonText": "状態モデルを作成"
+    }
+  }
+}

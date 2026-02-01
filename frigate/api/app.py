@@ -14,7 +14,6 @@ from pathlib import Path as FilePath
 from typing import Any, Dict, List, Optional
 
 import aiofiles
-import requests
 import ruamel.yaml
 from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
@@ -24,7 +23,12 @@ from markupsafe import escape
 from peewee import SQL, fn, operator
 from pydantic import ValidationError
 
-from frigate.api.auth import require_role
+from frigate.api.auth import (
+    allow_any_authenticated,
+    allow_public,
+    get_allowed_cameras_for_filter,
+    require_role,
+)
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
@@ -38,18 +42,17 @@ from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
     flatten_config_data,
-    get_tz_modifiers,
     process_config_query_string,
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
 from frigate.util.services import (
-    ffprobe_stream,
     get_nvidia_driver_info,
     process_logs,
     restart_frigate,
     vainfo_hwaccel,
 )
+from frigate.util.time import get_tz_modifiers
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -58,66 +61,33 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.app])
 
 
-@router.get("/", response_class=PlainTextResponse)
+@router.get(
+    "/", response_class=PlainTextResponse, dependencies=[Depends(allow_public())]
+)
 def is_healthy():
     return "Frigate is running. Alive and healthy!"
 
 
-@router.get("/config/schema.json")
+@router.get("/config/schema.json", dependencies=[Depends(allow_public())])
 def config_schema(request: Request):
     return Response(
         content=request.app.frigate_config.schema_json(), media_type="application/json"
     )
 
 
-@router.get("/go2rtc/streams")
-def go2rtc_streams():
-    r = requests.get("http://127.0.0.1:1984/api/streams")
-    if not r.ok:
-        logger.error("Failed to fetch streams from go2rtc")
-        return JSONResponse(
-            content=({"success": False, "message": "Error fetching stream data"}),
-            status_code=500,
-        )
-    stream_data = r.json()
-    for data in stream_data.values():
-        for producer in data.get("producers") or []:
-            producer["url"] = clean_camera_user_pass(producer.get("url", ""))
-    return JSONResponse(content=stream_data)
-
-
-@router.get("/go2rtc/streams/{camera_name}")
-def go2rtc_camera_stream(request: Request, camera_name: str):
-    r = requests.get(
-        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
-    )
-    if not r.ok:
-        camera_config = request.app.frigate_config.cameras.get(camera_name)
-
-        if camera_config and camera_config.enabled:
-            logger.error("Failed to fetch streams from go2rtc")
-
-        return JSONResponse(
-            content=({"success": False, "message": "Error fetching stream data"}),
-            status_code=500,
-        )
-    stream_data = r.json()
-    for producer in stream_data.get("producers", []):
-        producer["url"] = clean_camera_user_pass(producer.get("url", ""))
-    return JSONResponse(content=stream_data)
-
-
-@router.get("/version", response_class=PlainTextResponse)
+@router.get(
+    "/version", response_class=PlainTextResponse, dependencies=[Depends(allow_public())]
+)
 def version():
     return VERSION
 
 
-@router.get("/stats")
+@router.get("/stats", dependencies=[Depends(allow_any_authenticated())])
 def stats(request: Request):
     return JSONResponse(content=request.app.stats_emitter.get_latest_stats())
 
 
-@router.get("/stats/history")
+@router.get("/stats/history", dependencies=[Depends(allow_any_authenticated())])
 def stats_history(request: Request, keys: str = None):
     if keys:
         keys = keys.split(",")
@@ -125,7 +95,7 @@ def stats_history(request: Request, keys: str = None):
     return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
 
 
-@router.get("/metrics")
+@router.get("/metrics", dependencies=[Depends(allow_any_authenticated())])
 def metrics(request: Request):
     """Expose Prometheus metrics endpoint and update metrics with latest stats"""
     # Retrieve the latest statistics and update the Prometheus metrics
@@ -142,7 +112,7 @@ def metrics(request: Request):
     return Response(content=content, media_type=content_type)
 
 
-@router.get("/config")
+@router.get("/config", dependencies=[Depends(allow_any_authenticated())])
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
     config: dict[str, dict[str, Any]] = config_obj.model_dump(
@@ -218,7 +188,37 @@ def config(request: Request):
     return JSONResponse(content=config)
 
 
-@router.get("/config/raw")
+@router.get("/config/raw_paths", dependencies=[Depends(require_role(["admin"]))])
+def config_raw_paths(request: Request):
+    """Admin-only endpoint that returns camera paths and go2rtc streams without credential masking."""
+    config_obj: FrigateConfig = request.app.frigate_config
+
+    raw_paths = {"cameras": {}, "go2rtc": {"streams": {}}}
+
+    # Extract raw camera ffmpeg input paths
+    for camera_name, camera in config_obj.cameras.items():
+        raw_paths["cameras"][camera_name] = {
+            "ffmpeg": {
+                "inputs": [
+                    {"path": input.path, "roles": input.roles}
+                    for input in camera.ffmpeg.inputs
+                ]
+            }
+        }
+
+    # Extract raw go2rtc stream URLs
+    go2rtc_config = config_obj.go2rtc.model_dump(
+        mode="json", warnings="none", exclude_none=True
+    )
+    for stream_name, stream in go2rtc_config.get("streams", {}).items():
+        if stream is None:
+            continue
+        raw_paths["go2rtc"]["streams"][stream_name] = stream
+
+    return JSONResponse(content=raw_paths)
+
+
+@router.get("/config/raw", dependencies=[Depends(allow_any_authenticated())])
 def config_raw():
     config_file = find_config_file()
 
@@ -426,20 +426,29 @@ def config_set(request: Request, body: AppConfigSetBody):
         old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
 
-        if body.update_topic and body.update_topic.startswith("config/cameras/"):
-            _, _, camera, field = body.update_topic.split("/")
+        if body.update_topic:
+            if body.update_topic.startswith("config/cameras/"):
+                _, _, camera, field = body.update_topic.split("/")
 
-            if field == "add":
-                settings = config.cameras[camera]
-            elif field == "remove":
-                settings = old_config.cameras[camera]
+                if field == "add":
+                    settings = config.cameras[camera]
+                elif field == "remove":
+                    settings = old_config.cameras[camera]
+                else:
+                    settings = config.get_nested_object(body.update_topic)
+
+                request.app.config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                    settings,
+                )
             else:
+                # Generic handling for global config updates
                 settings = config.get_nested_object(body.update_topic)
 
-            request.app.config_publisher.publish_update(
-                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
-                settings,
-            )
+                # Publish None for removal, actual config for add/update
+                request.app.config_publisher.publisher.publish(
+                    body.update_topic, settings
+                )
 
     return JSONResponse(
         content=(
@@ -452,67 +461,7 @@ def config_set(request: Request, body: AppConfigSetBody):
     )
 
 
-@router.get("/ffprobe")
-def ffprobe(request: Request, paths: str = ""):
-    path_param = paths
-
-    if not path_param:
-        return JSONResponse(
-            content=({"success": False, "message": "Path needs to be provided."}),
-            status_code=404,
-        )
-
-    if path_param.startswith("camera"):
-        camera = path_param[7:]
-
-        if camera not in request.app.frigate_config.cameras.keys():
-            return JSONResponse(
-                content=(
-                    {"success": False, "message": f"{camera} is not a valid camera."}
-                ),
-                status_code=404,
-            )
-
-        if not request.app.frigate_config.cameras[camera].enabled:
-            return JSONResponse(
-                content=({"success": False, "message": f"{camera} is not enabled."}),
-                status_code=404,
-            )
-
-        paths = map(
-            lambda input: input.path,
-            request.app.frigate_config.cameras[camera].ffmpeg.inputs,
-        )
-    elif "," in clean_camera_user_pass(path_param):
-        paths = path_param.split(",")
-    else:
-        paths = [path_param]
-
-    # user has multiple streams
-    output = []
-
-    for path in paths:
-        ffprobe = ffprobe_stream(request.app.frigate_config.ffmpeg, path.strip())
-        output.append(
-            {
-                "return_code": ffprobe.returncode,
-                "stderr": (
-                    ffprobe.stderr.decode("unicode_escape").strip()
-                    if ffprobe.returncode != 0
-                    else ""
-                ),
-                "stdout": (
-                    json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                    if ffprobe.returncode == 0
-                    else ""
-                ),
-            }
-        )
-
-    return JSONResponse(content=output)
-
-
-@router.get("/vainfo")
+@router.get("/vainfo", dependencies=[Depends(allow_any_authenticated())])
 def vainfo():
     vainfo = vainfo_hwaccel()
     return JSONResponse(
@@ -532,12 +481,16 @@ def vainfo():
     )
 
 
-@router.get("/nvinfo")
+@router.get("/nvinfo", dependencies=[Depends(allow_any_authenticated())])
 def nvinfo():
     return JSONResponse(content=get_nvidia_driver_info())
 
 
-@router.get("/logs/{service}", tags=[Tags.logs])
+@router.get(
+    "/logs/{service}",
+    tags=[Tags.logs],
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
     download: Optional[str] = None,
@@ -645,7 +598,7 @@ def restart():
     )
 
 
-@router.get("/labels")
+@router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
 def get_labels(camera: str = ""):
     try:
         if camera:
@@ -663,7 +616,7 @@ def get_labels(camera: str = ""):
     return JSONResponse(content=labels)
 
 
-@router.get("/sub_labels")
+@router.get("/sub_labels", dependencies=[Depends(allow_any_authenticated())])
 def get_sub_labels(split_joined: Optional[int] = None):
     try:
         events = Event.select(Event.sub_label).distinct()
@@ -694,7 +647,7 @@ def get_sub_labels(split_joined: Optional[int] = None):
     return JSONResponse(content=sub_labels)
 
 
-@router.get("/plus/models")
+@router.get("/plus/models", dependencies=[Depends(allow_any_authenticated())])
 def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
     if not request.app.frigate_config.plus_api.is_active():
         return JSONResponse(
@@ -736,14 +689,22 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
     return JSONResponse(content=validModels)
 
 
-@router.get("/recognized_license_plates")
-def get_recognized_license_plates(split_joined: Optional[int] = None):
+@router.get(
+    "/recognized_license_plates", dependencies=[Depends(allow_any_authenticated())]
+)
+def get_recognized_license_plates(
+    split_joined: Optional[int] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         query = (
             Event.select(
                 SQL("json_extract(data, '$.recognized_license_plate') AS plate")
             )
-            .where(SQL("json_extract(data, '$.recognized_license_plate') IS NOT NULL"))
+            .where(
+                (SQL("json_extract(data, '$.recognized_license_plate') IS NOT NULL"))
+                & (Event.camera << allowed_cameras)
+            )
             .distinct()
         )
         recognized_license_plates = [row[0] for row in query.tuples()]
@@ -770,7 +731,7 @@ def get_recognized_license_plates(split_joined: Optional[int] = None):
     return JSONResponse(content=recognized_license_plates)
 
 
-@router.get("/timeline")
+@router.get("/timeline", dependencies=[Depends(allow_any_authenticated())])
 def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = None):
     clauses = []
 
@@ -787,7 +748,11 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
         clauses.append((Timeline.camera == camera))
 
     if source_id:
-        clauses.append((Timeline.source_id == source_id))
+        source_ids = [sid.strip() for sid in source_id.split(",")]
+        if len(source_ids) == 1:
+            clauses.append((Timeline.source_id == source_ids[0]))
+        else:
+            clauses.append((Timeline.source_id.in_(source_ids)))
 
     if len(clauses) == 0:
         clauses.append((True))
@@ -803,7 +768,7 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
     return JSONResponse(content=[t for t in timeline])
 
 
-@router.get("/timeline/hourly")
+@router.get("/timeline/hourly", dependencies=[Depends(allow_any_authenticated())])
 def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     """Get hourly summary for timeline."""
     cameras = params.cameras

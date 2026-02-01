@@ -1,0 +1,193 @@
+{
+  "documentTitle": "Models de classificació - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "Suprimeix les imatges de classificació",
+    "renameCategory": "Reanomena la classe",
+    "deleteCategory": "Suprimeix la classe",
+    "deleteImages": "Suprimeix les imatges",
+    "trainModel": "Model de tren",
+    "addClassification": "Afegeix una classificació",
+    "deleteModels": "Suprimeix els models",
+    "editModel": "Edita el model"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Classe suprimida",
+      "deletedImage": "Imatges suprimides",
+      "categorizedImage": "Imatge classificada amb èxit",
+      "trainedModel": "Model entrenat amb èxit.",
+      "trainingModel": "S'ha iniciat amb èxit la formació de models.",
+      "deletedModel_one": "S'ha suprimit correctament {{count}} model",
+      "deletedModel_many": "S'han suprimit correctament els {{count}} models",
+      "deletedModel_other": "S'han suprimit correctament els {{count}} models",
+      "updatedModel": "S'ha actualitzat correctament la configuració del model",
+      "renamedCategory": "S'ha canviat el nom de la classe a {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "No s'ha pogut suprimir: {{errorMessage}}",
+      "deleteCategoryFailed": "No s'ha pogut suprimir la classe: {{errorMessage}}",
+      "categorizeFailed": "No s'ha pogut categoritzar la imatge: {{errorMessage}}",
+      "trainingFailed": "Ha fallat l'entrenament del model. Comproveu els registres de fragata per a més detalls.",
+      "deleteModelFailed": "No s'ha pogut suprimir el model: {{errorMessage}}",
+      "updateModelFailed": "No s'ha pogut actualitzar el model: {{errorMessage}}",
+      "renameCategoryFailed": "No s'ha pogut canviar el nom de la classe: {{errorMessage}}",
+      "trainingFailedToStart": "Errar en arrencar l'entrenament del model: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Suprimeix la classe",
+    "desc": "Esteu segur que voleu suprimir la classe {{name}}? Això suprimirà permanentment totes les imatges associades i requerirà tornar a entrenar el model.",
+    "minClassesTitle": "No es pot suprimir la classe",
+    "minClassesDesc": "Un model de classificació ha de tenir almenys 2 classes. Afegeix una altra classe abans d'eliminar aquesta."
+  },
+  "deleteDatasetImages": {
+    "title": "Suprimeix les imatges del conjunt de dades",
+    "desc_one": "Esteu segur que voleu suprimir {{count}} imatge de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model.",
+    "desc_many": "Esteu segur que voleu suprimir {{count}} imatges de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model.",
+    "desc_other": "Esteu segur que voleu suprimir {{count}} imatges de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model."
+  },
+  "deleteTrainImages": {
+    "title": "Suprimeix les imatges del tren",
+    "desc_one": "Esteu segur que voleu suprimir {{count}} imatge? Aquesta acció no es pot desfer.",
+    "desc_many": "Esteu segur que voleu suprimir {{count}} imatges? Aquesta acció no es pot desfer.",
+    "desc_other": "Esteu segur que voleu suprimir {{count}} imatges? Aquesta acció no es pot desfer."
+  },
+  "renameCategory": {
+    "title": "Reanomena la classe",
+    "desc": "Introduïu un nom nou per {{name}}. Se us requerirà que torneu a entrenar el model per al canvi de nom afectar."
+  },
+  "description": {
+    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guions."
+  },
+  "train": {
+    "title": "Classificacions recents",
+    "aria": "Selecciona les classificacions recents",
+    "titleShort": "Recent"
+  },
+  "categories": "Classes",
+  "createCategory": {
+    "new": "Crea una classe nova"
+  },
+  "categorizeImageAs": "Classifica la imatge com a:",
+  "categorizeImage": "Classifica la imatge",
+  "noModels": {
+    "object": {
+      "title": "No hi ha models de classificació d'objectes",
+      "description": "Crea un model personalitzat per classificar els objectes detectats.",
+      "buttonText": "Crea un model d'objecte"
+    },
+    "state": {
+      "title": "Cap model de classificació d'estat",
+      "description": "Crea un model personalitzat per a monitoritzar i classificar els canvis d'estat en àrees de càmera específiques.",
+      "buttonText": "Crea un model d'estat"
+    }
+  },
+  "wizard": {
+    "title": "Crea una classificació nova",
+    "steps": {
+      "nameAndDefine": "Nom i definició",
+      "stateArea": "Àrea estatal",
+      "chooseExamples": "Trieu exemples"
+    },
+    "step1": {
+      "description": "Els models estatals monitoritzen àrees de càmera fixes per als canvis (p. ex., porta oberta/tancada). Els models d'objectes afegeixen classificacions als objectes detectats (per exemple, animals coneguts, persones de lliurament, etc.).",
+      "name": "Nom",
+      "namePlaceholder": "Introduïu el nom del model...",
+      "type": "Tipus",
+      "typeState": "Estat",
+      "typeObject": "Objecte",
+      "objectLabel": "Etiqueta de l'objecte",
+      "objectLabelPlaceholder": "Selecciona el tipus d'objecte...",
+      "classificationType": "Tipus de classificació",
+      "classificationTypeTip": "Apreneu sobre els tipus de classificació",
+      "classificationTypeDesc": "Les subetiquetes afegeixen text addicional a l'etiqueta de l'objecte (p. ex., 'Person: UPS'). Els atributs són metadades cercables emmagatzemades per separat a les metadades de l'objecte.",
+      "classificationSubLabel": "Subetiqueta",
+      "classificationAttribute": "Atribut",
+      "classes": "Classes",
+      "classesTip": "Aprèn sobre les classes",
+      "classesStateDesc": "Defineix els diferents estats en què pot estar la teva àrea de càmera. Per exemple: \"obert\" i \"tancat\" per a una porta de garatge.",
+      "classesObjectDesc": "Defineix les diferents categories en què classificar els objectes detectats. Per exemple: 'lliuramentpersonpersona', 'resident', 'amenaça' per a la classificació de persones.",
+      "classPlaceholder": "Introduïu el nom de la classe...",
+      "errors": {
+        "nameRequired": "Es requereix el nom del model",
+        "nameLength": "El nom del model ha de tenir 64 caràcters o menys",
+        "nameOnlyNumbers": "El nom del model no pot contenir només números",
+        "classRequired": "Es requereix com a mínim 1 classe",
+        "classesUnique": "Els noms de classe han de ser únics",
+        "stateRequiresTwoClasses": "Els models d'estat requereixen almenys 2 classes",
+        "objectLabelRequired": "Seleccioneu una etiqueta d'objecte",
+        "objectTypeRequired": "Seleccioneu un tipus de classificació",
+        "noneNotAllowed": "La classe 'none' no està permesa"
+      },
+      "states": "Estats"
+    },
+    "step2": {
+      "description": "Seleccioneu les càmeres i definiu l'àrea a monitoritzar per a cada càmera. El model classificarà l'estat d'aquestes àrees.",
+      "cameras": "Càmeres",
+      "selectCamera": "Selecciona la càmera",
+      "noCameras": "Feu clic a + per a afegir càmeres",
+      "selectCameraPrompt": "Seleccioneu una càmera de la llista per definir la seva àrea de monitoratge"
+    },
+    "step3": {
+      "selectImagesPrompt": "Selecciona totes les imatges amb: {{className}}",
+      "selectImagesDescription": "Feu clic a les imatges per a seleccionar-les. Feu clic a Continua quan hàgiu acabat amb aquesta classe.",
+      "generating": {
+        "title": "S'estan generant imatges de mostra",
+        "description": "Frigate està traient imatges representatives dels vostres enregistraments. Això pot trigar un moment..."
+      },
+      "training": {
+        "title": "Model d'entrenament",
+        "description": "El teu model s'està entrenant en segon pla. Tanqueu aquest diàleg i el vostre model començarà a funcionar tan aviat com s'hagi completat l'entrenament."
+      },
+      "retryGenerate": "Torna a provar la generació",
+      "noImages": "No s'ha generat cap imatge de mostra",
+      "classifying": "Classificació i formació...",
+      "trainingStarted": "L'entrenament s'ha iniciat amb èxit",
+      "errors": {
+        "noCameras": "No s'ha configurat cap càmera",
+        "noObjectLabel": "No s'ha seleccionat cap etiqueta d'objecte",
+        "generateFailed": "No s'han pogut generar exemples: {{error}}",
+        "generationFailed": "Ha fallat la generació. Torneu-ho a provar.",
+        "classifyFailed": "No s'han pogut classificar les imatges: {{error}}"
+      },
+      "generateSuccess": "Imatges de mostra generades amb èxit",
+      "allImagesRequired_one": "Classifiqueu totes les imatges. Queda {{count}} imatge.",
+      "allImagesRequired_many": "Classifiqueu totes les imatges. Queden {{count}} imatges.",
+      "allImagesRequired_other": "Classifiqueu totes les imatges. Queden {{count}} imatges.",
+      "modelCreated": "El model s'ha creat correctament. Utilitzeu la vista Classificacions recents per a afegir imatges per als estats que falten i, a continuació, entrenar el model.",
+      "missingStatesWarning": {
+        "title": "Falten exemples d'estat",
+        "description": "Es recomana seleccionar exemples per a tots els estats per obtenir els millors resultats. Podeu continuar sense seleccionar tots els estats, però el model no serà entrenat fins que tots els estats tinguin imatges. Després de continuar, utilitzeu la vista Classificacions recents per classificar imatges per als estats que falten, i després entrenar el model."
+      }
+    }
+  },
+  "deleteModel": {
+    "title": "Suprimeix el model de classificació",
+    "single": "Esteu segur que voleu suprimir {{name}}? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
+    "desc_one": "Esteu segur que voleu suprimir el model {{count}}? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
+    "desc_many": "Esteu segur que voleu suprimir {{count}} models? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
+    "desc_other": "Esteu segur que voleu suprimir {{count}} models? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer."
+  },
+  "menu": {
+    "objects": "Objectes",
+    "states": "Estats"
+  },
+  "details": {
+    "scoreInfo": "La puntuació representa la confiança mitjana de la classificació en totes les deteccions d'aquest objecte.",
+    "none": "Cap",
+    "unknown": "Desconegut"
+  },
+  "edit": {
+    "title": "Edita el model de classificació",
+    "descriptionState": "Edita les classes per a aquest model de classificació d'estats. Els canvis requeriran tornar a entrenar el model.",
+    "descriptionObject": "Edita el tipus d'objecte i el tipus de classificació per a aquest model de classificació d'objectes.",
+    "stateClassesInfo": "Nota: Canviar les classes d'estat requereix tornar a entrenar el model amb les classes actualitzades."
+  },
+  "tooltip": {
+    "trainingInProgress": "El model s'està entrenant actualment",
+    "noNewImages": "Sense noves imatges per entrenar. Classifica més imatges primer.",
+    "modelNotReady": "El model no está preparat per entrenar",
+    "noChanges": "No hi ha canvis al conjunt de dades des de l'última formació."
+  },
+  "none": "Cap"
+}

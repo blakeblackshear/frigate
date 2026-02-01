@@ -1,0 +1,18 @@
+{
+  "documentTitle": "Klassifikationsmodeller",
+  "details": {
+    "scoreInfo": "Scoren repræsenterer den gennemsnitlige klassifikationssikkerhed på tværs af alle registreringer af dette objekt.",
+    "unknown": "Ukendt"
+  },
+  "description": {
+    "invalidName": "Ugyldigt navn. Navne må kun indeholde bogstaver, tal, mellemrum, apostroffer, understregninger og bindestreger."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Slet klassifikationsbilleder",
+    "renameCategory": "Omdøb klasse",
+    "deleteCategory": "Slet klasse",
+    "deleteImages": "Slet billeder",
+    "trainModel": "Træn model",
+    "addClassification": "Tilføj klassifikation"
+  }
+}

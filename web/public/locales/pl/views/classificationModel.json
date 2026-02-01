@@ -1,0 +1,193 @@
+{
+  "documentTitle": "Modele klasyfikacji - Frigate",
+  "button": {
+    "deleteClassificationAttempts": "Usuń obrazy klasyfikacyjne",
+    "renameCategory": "Zmień nazwę klasy",
+    "deleteCategory": "Usuń klasyfikację",
+    "deleteImages": "Usuń obrazy",
+    "trainModel": "Trenuj model",
+    "addClassification": "Dodaj klasyfikację",
+    "deleteModels": "Usuń modele",
+    "editModel": "Edytuj model"
+  },
+  "details": {
+    "scoreInfo": "Wynik przedstawia średnią pewność klasyfikacji wszystkich wykryć danego obiektu.",
+    "none": "Brak",
+    "unknown": "Nieznany"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Usunięte klasy",
+      "deletedImage": "Usunięte obrazy",
+      "deletedModel_one": "Pomyślenie usunięto {{count}} model",
+      "deletedModel_few": "Pomyślenie usunięto {{count}} modele",
+      "deletedModel_many": "Pomyślenie usunięto {{count}} modeli",
+      "categorizedImage": "Obraz pomyślnie sklasyfikowany",
+      "trainedModel": "Model pomyślnie wytrenowany.",
+      "trainingModel": "Pomyślnie uruchomiono trenowanie modelu.",
+      "updatedModel": "Pomyślnie zaktualizowane ustawienia modelu",
+      "renamedCategory": "Pomyślnie zmieniono nazwę klasy na {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Nie udało się usunąć: {{errorMessage}}",
+      "deleteCategoryFailed": "Nie udało się usunąć klasy: {{errorMessage}}",
+      "deleteModelFailed": "Nie udało się usunąć modelu: {{errorMessage}}",
+      "categorizeFailed": "Nie udało się skategoryzować obrazka: {{errorMessage}}",
+      "trainingFailed": "Trening modelu zakończył się niepowodzeniem. Sprawdź logi Frigate aby uzyskać więcej informacji.",
+      "updateModelFailed": "Nie udało się zaktualizować modelu: {{errorMessage}}",
+      "trainingFailedToStart": "Nie udało się rozpocząć trenowania modelu: {{errorMessage}}",
+      "renameCategoryFailed": "Nie udało się zmienić nazwy klasy: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Usuń klasę",
+    "desc": "Czy na pewno chcesz usunąć klasę {{name}}? Spowoduje to trawałe usunięcie wszystkich powiązanych obrazków i konieczność ponownego trenowania modelu.",
+    "minClassesTitle": "Nie można usunąć kategorii",
+    "minClassesDesc": "Model klasyfikacyjny musi posiadać co najmniej dwie kategorie. Dodaj inną kategorię aby możliwe było usunięcie tej kategorii."
+  },
+  "deleteModel": {
+    "title": "Usuń model klasyfikacji",
+    "single": "Czy na pewno chcesz usunąć {{name}}? Spowoduje to trwałe usunięcie wszystkich powiązanych data włącznie z obrazkami i danymi treningowymi. Nie można cofnąć tej operacji.",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} model? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji.",
+    "desc_few": "Czy na pewno chcesz usunąć {{count}} modele? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji.",
+    "desc_many": "Czy na pewno chcesz usunąć {{count}} modeli? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji."
+  },
+  "edit": {
+    "title": "Edytuj model klasyfikacji",
+    "descriptionObject": "Zmień typ obiektu i kryteria dla tego modelu klasyfikacji.",
+    "stateClassesInfo": "Uwaga: Zmiana typu klasyfikacji wymaga treningu nowego modelu.",
+    "descriptionState": "Edycja klas dla tego modelu klasyfikacji stanu. Zmiany będą wymagały przekwalifikowania modelu."
+  },
+  "tooltip": {
+    "trainingInProgress": "Trwa trenowanie modelu",
+    "modelNotReady": "Mode nie jest gotowy do trenowania",
+    "noChanges": "Brak zmian w zbiorze danych od czasu ostatniego treningu.",
+    "noNewImages": "Nie ma więcej obrazów do trenowania. Zaklasyfikuj więcej obrazów do zbioru danych."
+  },
+  "deleteDatasetImages": {
+    "title": "Usuń obrazy z puli danych",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} obraz z {{dataset}}? Ta akcja nie może zostać cofnięta i będzie wymagała przetrenowania modelu.",
+    "desc_few": "Czy na pewno chcesz usunąć obrazy {{count}} z {{dataset}}? Ta akcja nie może zostać cofnięta i będzie wymagała przetrenowania modelu.",
+    "desc_many": "Czy na pewno chcesz usunąć obrazy {{count}} z {{dataset}}? Ta akcja nie może zostać cofnięta i będzie wymagała przetrenowania modelu."
+  },
+  "renameCategory": {
+    "title": "Zmień nazwę klasy",
+    "desc": "Wprowadź nową nazwę dla {{name}}. Zastosowanie tej zmiany wymagać będzie treningu nowego modelu."
+  },
+  "description": {
+    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki."
+  },
+  "train": {
+    "title": "Ostatnie Klasyfikacje",
+    "titleShort": "Ostatnie",
+    "aria": "Wybierz Najnowsze Klasyfikacje"
+  },
+  "createCategory": {
+    "new": "Stwórz nową klasyfikację"
+  },
+  "deleteTrainImages": {
+    "title": "Usuń obrazy pociągów",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} obraz? Tego działania nie da się cofnąć.",
+    "desc_few": "Czy na pewno chcesz usunąć obrazy {{count}}? Tego działania nie da się cofnąć.",
+    "desc_many": "Czy na pewno chcesz usunąć obrazy {{count}}? Tego działania nie da się cofnąć."
+  },
+  "categories": "Zajęcia",
+  "none": "Nic",
+  "categorizeImageAs": "Klasyfikuj Obraz Jako:",
+  "categorizeImage": "Klasyfikuj obraz",
+  "menu": {
+    "objects": "Obiekty",
+    "states": "Stany"
+  },
+  "noModels": {
+    "object": {
+      "title": "Brak modeli klasyfikacji obiektów",
+      "description": "Utwórz model niestandardowy do klasyfikacji wykrytych obiektów.",
+      "buttonText": "Tworzenie modelu obiektu"
+    },
+    "state": {
+      "title": "Brak państwowych modeli klasyfikacji",
+      "description": "Utwórz niestandardowy model do monitorowania i klasyfikacji zmian stanu w określonych obszarach kamery.",
+      "buttonText": "Utwórz model stanu"
+    }
+  },
+  "wizard": {
+    "title": "Tworzenie nowej klasyfikacji",
+    "steps": {
+      "nameAndDefine": "Nazwij i zdefiniuj",
+      "stateArea": "Obszar stanu",
+      "chooseExamples": "Wybierz przykłady"
+    },
+    "step1": {
+      "name": "Nazwa",
+      "type": "Typ",
+      "classes": "Klasy",
+      "errors": {
+        "noneNotAllowed": "Klasa 'żadne' jest niedozwolona",
+        "stateRequiresTwoClasses": "Modele stanowe wymagają co najmniej dwie klasy",
+        "objectLabelRequired": "Proszę wybrać etykietę obiektu",
+        "objectTypeRequired": "Proszę wybrać typ klasyfikacji",
+        "nameRequired": "Nazwa modelu jest wymagana",
+        "nameLength": "Nazwa modelu może mieć 64 znaki lub mniej",
+        "nameOnlyNumbers": "Nazwa modelu nie może być ciągiem cyfr",
+        "classRequired": "Przynajmniej jedna klasa jest wymagana",
+        "classesUnique": "Nazwa klasy musi być unikalna"
+      },
+      "classPlaceholder": "Wpisz nazwę klasy...",
+      "classesObjectDesc": "Zdefiniuj różne kategorie, do których będą klasyfikowane wykryte obiekty. Na przykład: 'dostawca', 'mieszkaniec', 'nieznajomy' w przypadku klasyfikacji osób.",
+      "description": "Modele stanowe monitorują stałe obszary kamer pod kątem zmian (np. otwarte/zamknięte drzwi). Modele obiektów dodają klasyfikacje do wykrytych obiektów (np. znane zwierzęta, dostawcy itp.).",
+      "namePlaceholder": "Wprowadź nazwę modelu...",
+      "typeState": "Stan",
+      "typeObject": "Obiekt",
+      "objectLabel": "Etykieta obiektu",
+      "objectLabelPlaceholder": "Wybierz typ obiektu...",
+      "classificationType": "Rodzaj klasyfikacji",
+      "classificationTypeTip": "Dowiedz się więcej o typach klasyfikacji",
+      "classificationTypeDesc": "Podetykiety dodają dodatkowy tekst do etykiety obiektu (np. 'Osoba: UPS'). Atrybuty to metadane, które można przeszukiwać, przechowywane oddzielnie w metadanych obiektu.",
+      "classificationSubLabel": "Podetykieta",
+      "classificationAttribute": "Atrybut",
+      "states": "Stany",
+      "classesTip": "Dowiedz się więcej o klasach obiektów",
+      "classesStateDesc": "Zdefiniuj różne stany, w jakich może znajdować się obszar objęty zasięgiem kamery. Na przykład: 'otwarte' i 'zamknięte' dla bramy garażowej."
+    },
+    "step2": {
+      "description": "Wybierz kamery i określ obszar monitorowania dla każdej z nich. Model sklasyfikuje stan tych obszarów.",
+      "cameras": "Kamery",
+      "selectCamera": "Wybierz kamerę",
+      "noCameras": "Kliknij +, aby dodać kamery",
+      "selectCameraPrompt": "Wybierz kamerę z listy, aby zdefiniować jej obszar monitorowania"
+    },
+    "step3": {
+      "selectImagesPrompt": "Zaznacz wszystkie obrazy z: {{className}}",
+      "selectImagesDescription": "Kliknij na zdjęcia, aby je wybrać. Po zakończeniu zajęć kliknij „Kontynuuj”.",
+      "allImagesRequired_one": "Proszę sklasyfikować wszystkie obrazy. Pozostał {{count}} obraz.",
+      "allImagesRequired_few": "Proszę sklasyfikować wszystkie obrazy. Pozostały {{count}} obrazy.",
+      "allImagesRequired_many": "Proszę sklasyfikować wszystkie obrazy. Pozostało {{count}} obrazów.",
+      "generating": {
+        "title": "Generowanie przykładowych obrazów",
+        "description": "Frigate pobiera reprezentatywne obrazy z Twoich nagrań. Może to chwilę potrwać..."
+      },
+      "trainingStarted": "Szkolenie rozpoczęło się pomyślnie",
+      "training": {
+        "title": "Model treningowy",
+        "description": "Twój model jest szkolony w tle. Zamknij to okno dialogowe, a model zacznie działać zaraz po zakończeniu szkolenia."
+      },
+      "retryGenerate": "Ponowne generowanie",
+      "noImages": "Nie wygenerowano przykładowych obrazów",
+      "classifying": "Klasyfikacja i szkolenie...",
+      "modelCreated": "Model został pomyślnie utworzony. Użyj widoku Ostatnie klasyfikacje, aby dodać obrazy dla brakujących stanów, a następnie wytrenuj model.",
+      "errors": {
+        "noCameras": "Brak skonfigurowanych kamer",
+        "noObjectLabel": "Nie wybrano żadnej etykiety obiektu",
+        "generateFailed": "Nie udało się wygenerować przykładów: {{error}}",
+        "generationFailed": "Generowanie nie powiodło się. Spróbuj ponownie.",
+        "classifyFailed": "Nie udało się sklasyfikować obrazów: {{error}}"
+      },
+      "generateSuccess": "Pomyślnie wygenerowane przykładowe obrazy",
+      "missingStatesWarning": {
+        "title": "Przykłady brakujących stanów",
+        "description": "Aby uzyskać najlepsze wyniki, zaleca się wybranie przykładów dla wszystkich stanów. Można kontynuować bez wybierania wszystkich stanów, ale model nie zostanie wytrenowany, dopóki wszystkie stany nie będą miały obrazów. Po kontynuowaniu należy użyć widoku Ostatnie klasyfikacje, aby sklasyfikować obrazy dla brakujących stanów, a następnie wytrenować model."
+      }
+    }
+  }
+}

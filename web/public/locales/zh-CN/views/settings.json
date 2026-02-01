@@ -5,25 +5,30 @@
     "camera": "摄像头设置 - Frigate",
     "classification": "分类设置 - Frigate",
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
-    "motionTuner": "运动调整器 - Frigate",
+    "motionTuner": "画面变动调整 - Frigate",
     "object": "调试 - Frigate",
-    "general": "常规设置 - Frigate",
+    "general": "页面设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
     "notifications": "通知设置 - Frigate",
-    "enrichments": "增强功能设置 - Frigate"
+    "enrichments": "增强功能设置 - Frigate",
+    "cameraManagement": "管理摄像头 - Frigate",
+    "cameraReview": "摄像头核查设置 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
     "classification": "分类设置",
     "cameras": "摄像头设置",
     "masksAndZones": "遮罩/ 区域",
-    "motionTuner": "运动调整器",
+    "motionTuner": "画面变动调整",
     "debug": "调试",
     "users": "用户",
     "notifications": "通知",
     "frigateplus": "Frigate+",
     "enrichments": "增强功能",
-    "triggers": "触发器"
+    "triggers": "触发器",
+    "roles": "权限组",
+    "cameraManagement": "管理",
+    "cameraReview": "核查"
   },
   "dialog": {
     "unsavedChanges": {
@@ -36,7 +41,7 @@
     "noCamera": "没有摄像头"
   },
   "general": {
-    "title": "常规设置",
+    "title": "页面设置",
     "liveDashboard": {
       "title": "实时监控面板",
       "automaticLiveView": {
@@ -46,6 +51,14 @@
       "playAlertVideos": {
         "label": "播放警报视频",
         "desc": "默认情况下，实时监控页面上的最新警报会以一小段循环视频的形式进行播放。禁用此选项将仅显示浏览器本地缓存的静态图片。"
+      },
+      "displayCameraNames": {
+        "label": "始终显示摄像头名称",
+        "desc": "在有多摄像头情况下的实时监控页面，将始终显示摄像头名称标签。"
+      },
+      "liveFallbackTimeout": {
+        "label": "实时监控播放器回退超时",
+        "desc": "当摄像头的高清实时监控流不可用时，将在此时间后回退到低带宽模式。默认值：3秒。"
       }
     },
     "storedLayouts": {
@@ -238,7 +251,8 @@
           "mustNotBeSameWithCamera": "区域名称不能与摄像头名称相同。",
           "alreadyExists": "该摄像头已有相同的区域名称。",
           "mustNotContainPeriod": "区域名称不能包含句点。",
-          "hasIllegalCharacter": "区域名称包含非法字符。"
+          "hasIllegalCharacter": "区域名称包含非法字符。",
+          "mustHaveAtLeastOneLetter": "区域名称必须至少包含一个字母。"
         }
       },
       "distance": {
@@ -295,7 +309,7 @@
       "name": {
         "title": "区域名称",
         "inputPlaceHolder": "请输入名称…",
-        "tips": "名称至少包含两个字符，且不能和摄像头或其他区域同名。<br>当前仅支持英文与数字组合。"
+        "tips": "名称至少包含两个字符，且不能和摄像头名或该摄像头下的其他区域同名。"
       },
       "inertia": {
         "title": "惯性",
@@ -330,33 +344,33 @@
         }
       },
       "toast": {
-        "success": "区域 ({{zoneName}}) 已保存。请重启 Frigate 以应用更改。"
+        "success": "区域 ({{zoneName}}) 已保存。"
       }
     },
     "motionMasks": {
-      "label": "运动遮罩",
-      "documentTitle": "编辑运动遮罩 - Frigate",
+      "label": "画面变动遮罩",
+      "documentTitle": "编辑画面变动遮罩 - Frigate",
       "desc": {
         "title": "画面变动遮罩用于防止触发不必要的画面变动检测。过度的设置遮罩将使目标更加难以被追踪。",
         "documentation": "文档"
       },
-      "add": "添加运动遮罩",
-      "edit": "编辑运动遮罩",
+      "add": "添加画面变动遮罩",
+      "edit": "编辑画面变动遮罩",
       "context": {
-        "title": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头画面显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
+        "title": "画面变动遮罩用于防止不需要的画面变动触发检测（例如：容易被风吹动的树枝、摄像头画面上显示的时间等）。画面变动遮罩应<strong>谨慎使用</strong>，过度的遮罩会导致追踪目标变得更加困难。",
         "documentation": "阅读文档"
       },
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "polygonAreaTooLarge": {
-        "title": "运动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的运动遮罩。",
+        "title": "画面变动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的画面变动遮罩。",
         "tips": "画面变动遮罩并不会使该区域无法检测到指定目标/物体，如有需要，你应该使用 区域 来限制检测的目标/物体类型。",
         "documentation": "阅读文档"
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-          "noName": "运动遮罩已保存。请重启 Frigate 以应用更改。"
+          "title": "{{polygonName}} 已保存。",
+          "noName": "画面变动遮罩已保存。"
         }
       }
     },
@@ -379,37 +393,37 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-          "noName": "目标遮罩已保存。请重启 Frigate 以应用更改。"
+          "title": "{{polygonName}} 已保存。",
+          "noName": "目标遮罩已保存。"
         }
       }
     },
     "restart_required": "需要重启（遮罩与区域已修改）",
-    "motionMaskLabel": "运动遮罩 {{number}}",
+    "motionMaskLabel": "画面变动遮罩 {{number}}",
     "objectMaskLabel": "目标/物体遮罩 {{number}}（{{label}}）"
   },
   "motionDetectionTuner": {
-    "title": "运动检测调整器",
+    "title": "画面变动检测调整",
     "desc": {
-      "title": "Frigate 将使用画面变化检测作为首个步骤，以确认一帧画面中是否有目标或物体需要使用目标检测。",
-      "documentation": "阅读有关运动检测的文档"
+      "title": "Frigate 将首先使用画面变动检测来确认每一帧画面中是否有变动的区域，然后再对该区域使用目标检测。",
+      "documentation": "阅读有关画面变动检测的文档"
     },
     "Threshold": {
       "title": "阈值",
-      "desc": "阈值决定像素亮度高于多少时会被认为是运动。<em>默认值：30</em>"
+      "desc": "阈值决定像素亮度变化达到多少时会被认为是画面变动。<em>默认值：30</em>"
     },
     "contourArea": {
       "title": "轮廓面积",
-      "desc": "轮廓面积决定哪些变化的像素组符合运动条件。<em>默认值：10</em>"
+      "desc": "轮廓面积值用于判断产生了多大的变化区域可被认定为画面变动。<em>默认值：10</em>"
     },
     "improveContrast": {
       "title": "提高对比度",
       "desc": "提高较暗场景的对比度。<em>默认值：启用</em>"
     },
     "toast": {
-      "success": "运动设置已保存。"
+      "success": "画面变动设置已保存。"
     },
-    "unsavedChanges": "{{camera}} 的运动调整器设置未保存"
+    "unsavedChanges": "{{camera}} 的画面变动调整设置未保存"
   },
   "debug": {
     "title": "调试",
@@ -423,7 +437,7 @@
       "desc": "将在被追踪的目标周围显示边界框",
       "colors": {
         "label": "目标边界框颜色定义",
-        "info": "<li>启用后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示该目标或物体为自动跟踪的主体（在启动时）</li>"
+        "info": "<li>启用后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示在启动自动追踪时，该目标为自动追踪的主体</li>"
       }
     },
     "timestamp": {
@@ -435,32 +449,32 @@
       "desc": "显示已定义的区域图层"
     },
     "mask": {
-      "title": "运动遮罩",
-      "desc": "显示运动遮罩图层"
+      "title": "画面变动遮罩",
+      "desc": "显示画面变动遮罩图层"
     },
     "motion": {
-      "title": "运动区域框",
-      "desc": "在检测到运动的区域显示区域框",
-      "tips": "<p><strong>运动区域框</strong></p><br><p>将在当前检测到运动的区域内显示红色区域框。</p>"
+      "title": "画面变动区域框",
+      "desc": "在检测到画面变动的区域显示区域框",
+      "tips": "<p><strong>画面变动区域框</strong></p><br><p>将在当前检测到画面变动的区域内显示红色区域框。</p>"
     },
     "regions": {
       "title": "范围",
-      "desc": "显示发送到运动检测器感兴趣范围的框",
+      "desc": "显示发送给目标检测器感兴趣的区域框",
       "tips": "<p><strong>范围框</strong></p><br><p>将在帧中发送到目标检测器的感兴趣范围上叠加绿色框。</p>"
     },
     "objectShapeFilterDrawing": {
-      "title": "允许绘制“对象形状过滤器”",
+      "title": "允许绘制“目标形状过滤器”",
       "desc": "在图像上绘制矩形，以查看区域和比例详细信息",
-      "tips": "启用此选项，能够在摄像头图像上绘制矩形，将显示其区域和比例。然后，您可以使用这些值在配置中设置对象形状过滤器参数。",
+      "tips": "启用此选项，能够在摄像头画面上绘制矩形，将显示其区域和比例。你可以通过使用这些值在配置中设置目标形状过滤器的参数。",
       "document": "阅读文档 ",
       "score": "分数",
       "ratio": "比例",
       "area": "区域"
     },
     "paths": {
-      "title": "运动轨迹",
-      "desc": "显示被追踪目标的运动轨迹关键点",
-      "tips": "<p><strong>运动轨迹</strong></p><p>将使用线条和圆圈标示被追踪目标在其活动周期内移动的关键位置点。</p>"
+      "title": "行动轨迹",
+      "desc": "显示被追踪目标的行动轨迹关键点",
+      "tips": "<p><strong>行动轨迹</strong></p><p>将使用<strong>线条</strong>和<strong>点</strong>来标示被追踪目标在其活动周期内移动的关键位置点。</p>"
     },
     "audio": {
       "title": "音频",
@@ -499,7 +513,7 @@
       "role": "权限组",
       "noUsers": "未找到用户。",
       "changeRole": "更改用户角色",
-      "password": "密码",
+      "password": "修改密码",
       "deleteUser": "删除用户"
     },
     "dialog": {
@@ -524,7 +538,16 @@
             "veryStrong": "非常强"
           },
           "match": "密码匹配",
-          "notMatch": "密码不匹配"
+          "notMatch": "密码不匹配",
+          "show": "显示密码",
+          "hide": "隐藏密码",
+          "requirements": {
+            "title": "密码要求：",
+            "length": "至少8个字符",
+            "uppercase": "至少一个大写字母",
+            "digit": "至少一位数字",
+            "special": "至少一个特殊符号 (!@#$%^&*(),.?\":{}|<>)"
+          }
         },
         "newPassword": {
           "title": "新密码",
@@ -534,7 +557,11 @@
           }
         },
         "usernameIsRequired": "用户名为必填项",
-        "passwordIsRequired": "必须输入密码"
+        "passwordIsRequired": "必须输入密码",
+        "currentPassword": {
+          "title": "当前密码",
+          "placeholder": "请输入当前密码"
+        }
       },
       "createUser": {
         "title": "创建新用户",
@@ -552,7 +579,12 @@
         "setPassword": "设置密码",
         "desc": "创建一个强密码来保护此账户。",
         "doNotMatch": "两次输入密码不匹配",
-        "cannotBeEmpty": "密码不能为空"
+        "cannotBeEmpty": "密码不能为空",
+        "currentPasswordRequired": "当前密码为必填",
+        "incorrectCurrentPassword": "当前密码错误",
+        "passwordVerificationFailed": "验证密码失败",
+        "multiDeviceWarning": "其他已登录的设备将需要在 {{refresh_time}} 内重新登录。",
+        "multiDeviceAdmin": "你也可以通过轮换你的 JWT 密钥，强制所有用户立即重新登录验证。"
       },
       "changeRole": {
         "title": "更改用户权限组",
@@ -672,12 +704,12 @@
   "enrichments": {
     "title": "增强功能设置",
     "birdClassification": {
-      "desc": "鸟类分类通过量化的TensorFlow模型识别已知鸟类。当识别到已知鸟类时，其通用名称将作为子标签（sub_label）添加。此信息包含在用户界面、筛选器以及通知中。",
+      "desc": "鸟类分类通过量化的 TensorFlow 模型识别已知鸟类。当识别到已知鸟类时，其通用名称将作为子标签（sub_label）添加。此信息包含在用户界面、筛选器以及通知中。",
       "title": "鸟类分类"
     },
     "semanticSearch": {
       "reindexNow": {
-        "desc": "重建索引将为所有追踪目标重新生成特征向量信息。该过程将在后台进行，可能会使CPU满载，所需时间取决于追踪目标的数量。",
+        "desc": "重建索引将为所有追踪的目标重新生成特征向量信息。该过程将在后台进行，期间可能会使 CPU 满载，所需时间取决于追踪目标的数量。",
         "label": "立即重建索引",
         "confirmTitle": "确认重建索引",
         "confirmDesc": "确定要为所有追踪目标重建特征向量索引信息吗？此过程将在后台进行，但可能会导致CPU满载并耗费较长时间。您可以在 浏览 页面查看进度。",
@@ -691,19 +723,19 @@
         "desc": "用于语义搜索的语言模型大小。",
         "small": {
           "title": "小",
-          "desc": "将使用 <strong>小</strong>模型。该模型将使用少量的内存，在CPU上也能较快的运行，质量较好。"
+          "desc": "将使用 <strong>小</strong>模型。该模型使用的内存较少，在 CPU 上也能较快的运行，质量较好。"
         },
         "large": {
           "title": "大",
-          "desc": "将使用 <strong>大</strong>模型。该选项使用了完整的Jina模型，在合适的时候将自动使用GPU。"
+          "desc": "将使用 <strong>大</strong>模型。该选项使用了完整的 Jina 模型，条件允许的情况下将自动使用 GPU 运行。"
         }
       },
       "title": "分类搜索",
-      "desc": "Frigate中的语义搜索功能允许您通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找目标/物体。",
+      "desc": "Frigate 中的语义搜索功能将能够让你通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找目标/物体。",
       "readTheDocumentation": "阅读文档"
     },
     "licensePlateRecognition": {
-      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 recognized_license_plate 字段中，或将已知车牌对应的名称作为子标签添加到该车辆目标中。一般常用于读取驶入车道的车辆车牌或经过街道的车辆车牌。",
+      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 识别的车牌（recognized_license_plate）字段中，或将已知车牌对应的名称作为子标签添加到该车辆目标中。该功能常用于识别驶入车道的车辆车牌或经过街道的车辆车牌。",
       "title": "车牌识别",
       "readTheDocumentation": "阅读文档"
     },
@@ -716,11 +748,11 @@
         "desc": "用于人脸识别的模型大小。",
         "small": {
           "title": "小",
-          "desc": "将使用<strong>小</strong>模型。该选项采用FaceNet人脸特征提取模型，可在大多数CPU上高效运行。"
+          "desc": "将使用<strong>小</strong>模型。该选项采用 FaceNet 人脸特征提取模型，可在大多数 CPU 上高效运行。"
         },
         "large": {
           "title": "大",
-          "desc": "将使用<strong>大</strong>模型。该选项使用ArcFace人脸特征提取模型，在需要的时候自动使用GPU运行。"
+          "desc": "将使用<strong>大</strong>模型。该选项使用 ArcFace 人脸特征提取模型，条件允许的情况下将自动使用 GPU 运行。"
         }
       }
     },
@@ -734,8 +766,8 @@
   "triggers": {
     "documentTitle": "触发器",
     "management": {
-      "title": "触发器管理",
-      "desc": "管理 {{camera}} 的触发器。您可以使用“缩略图”类型，基于与所选追踪对象相似的缩略图来触发；也可以使用“描述”类型，基于与您指定的文本相似的描述来触发。"
+      "title": "触发器",
+      "desc": "管理 {{camera}} 的触发器。你可以选择“缩略图”类型，将通过与追踪目标相似的缩略图来触发；也可以通过“描述”类型，与你描述的文本相似来触发（中文描述需要使用 jina v2模型，对配置要求更高）。"
     },
     "addTrigger": "添加触发器",
     "table": {
@@ -755,7 +787,9 @@
     },
     "actions": {
       "alert": "标记为警报",
-      "notification": "发送通知"
+      "notification": "发送通知",
+      "sub_label": "添加子标签",
+      "attribute": "添加属性"
     },
     "dialog": {
       "createTrigger": {
@@ -773,26 +807,29 @@
       "form": {
         "name": {
           "title": "名称",
-          "placeholder": "输入触发器名称",
+          "placeholder": "触发器名称",
           "error": {
-            "minLength": "名称至少要两个字符。",
-            "invalidCharacters": "名称只能包含字母、数字、下划线和连字符。",
+            "minLength": "该字段至少需要两个字符。",
+            "invalidCharacters": "该字段只能包含字母、数字、下划线和连字符。",
             "alreadyExists": "此摄像头已存在同名触发器。"
-          }
+          },
+          "description": "请输入用于识别此触发器的唯一名称或描述"
         },
         "enabled": {
           "description": "开启/关闭此触发器"
         },
         "type": {
           "title": "类型",
-          "placeholder": "选择触发类型"
+          "placeholder": "选择触发类型",
+          "description": "当检测到相似的追踪目标描述时触发",
+          "thumbnail": "当检测到相似的追踪目标缩略图时触发"
         },
         "content": {
           "title": "内容",
           "imagePlaceholder": "选择图片",
           "textPlaceholder": "输入文字内容",
-          "imageDesc": "选择一张图片，当检测到相似图片时触发此操作。",
-          "textDesc": "输入文本，当检测到相似的追踪对象描述时触发此操作。",
+          "imageDesc": "仅显示最近的 100 张缩略图。如果找不到需要的图片，请前往“浏览”页面查看更早的目标，并从菜单中设置触发器。",
+          "textDesc": "输入文本，当检测到相似的追踪目标描述时触发此操作。",
           "error": {
             "required": "内容为必填项。"
           }
@@ -802,14 +839,20 @@
           "error": {
             "min": "阈值必须大于 0",
             "max": "阈值必须小于 1"
-          }
+          },
+          "desc": "设置此触发器的相似度阈值。阈值越高，触发所需的匹配就越精确。"
         },
         "actions": {
           "title": "动作",
-          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。请选择此触发器触发时需要执行的附加操作。",
+          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。子标签会将触发器名称添加到目标标签中。属性是可搜索的元数据，独立存储在追踪目标的元数据中。",
           "error": {
             "min": "必须至少选择一项动作。"
           }
+        },
+        "friendly_name": {
+          "title": "友好名称",
+          "placeholder": "为此触发器命名或添加描述",
+          "description": "（可选）为触发器添加友好名称或描述。"
         }
       }
     },
@@ -823,6 +866,27 @@
         "createTriggerFailed": "创建触发器失败：{{errorMessage}}",
         "updateTriggerFailed": "更新触发器失败：{{errorMessage}}",
         "deleteTriggerFailed": "删除触发器失败：{{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "title": "语义搜索已关闭",
+      "desc": "必须启用语义搜索功能才能使用触发器。"
+    },
+    "wizard": {
+      "title": "创建触发器",
+      "step1": {
+        "description": "配置触发器的基础设置。"
+      },
+      "step2": {
+        "description": "设置触发此操作的内容。"
+      },
+      "step3": {
+        "description": "配置此触发器的相似度阈值与执行动作。"
+      },
+      "steps": {
+        "nameAndType": "名称与类型",
+        "configureData": "配置数据",
+        "thresholdAndActions": "阈值与动作"
       }
     }
   },
@@ -845,7 +909,7 @@
         "createRole": "权限组 {{role}} 创建成功",
         "updateCameras": "已更新摄像头至 {{role}} 权限组",
         "deleteRole": "已删除 {{role}} 权限组",
-        "userRolesUpdated": "已将分配到此权限组的 {{count}} 位用户更新为 “成员”，该权限组可访问所有摄像头。"
+        "userRolesUpdated_other": "已将分配到此权限组的 {{count}} 位用户更新为 “成员”，该权限组可访问所有摄像头。"
       },
       "error": {
         "createRoleFailed": "创建权限组失败：{{errorMessage}}",
@@ -879,8 +943,363 @@
           "roleExists": "该权限组名称已存在。"
         },
         "cameras": {
-          "title": "摄像头"
+          "title": "摄像头",
+          "desc": "请选择该权限组能够访问的摄像头。至少需要选择一个摄像头。",
+          "required": "至少要选择一个摄像头。"
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "添加摄像头",
+    "description": "请按照以下步骤添加摄像头至 Frigate 中。",
+    "steps": {
+      "nameAndConnection": "名称与连接",
+      "streamConfiguration": "视频流配置",
+      "validationAndTesting": "验证与测试",
+      "probeOrSnapshot": "探测或快照"
+    },
+    "save": {
+      "success": "已保存新摄像头 {{cameraName}}。",
+      "failure": "保存摄像头 {{cameraName}} 遇到了错误。"
+    },
+    "testResultLabels": {
+      "resolution": "分辨率",
+      "video": "视频",
+      "audio": "音频",
+      "fps": "帧率"
+    },
+    "commonErrors": {
+      "noUrl": "请提供正确的视频流地址",
+      "testFailed": "视频流测试失败：{{error}}"
+    },
+    "step1": {
+      "description": "请输入你的摄像头信息，并选择是自动探测摄像头信息还是手动指定品牌。",
+      "cameraName": "摄像头名称",
+      "cameraNamePlaceholder": "例如：大门，后院等",
+      "host": "主机/IP地址",
+      "port": "端口号",
+      "username": "用户名",
+      "usernamePlaceholder": "可选",
+      "password": "密码",
+      "passwordPlaceholder": "可选",
+      "selectTransport": "选择传输协议",
+      "cameraBrand": "摄像头品牌",
+      "selectBrand": "选择摄像头品牌用于生成URL地址模板",
+      "customUrl": "自定义视频流地址",
+      "brandInformation": "品牌信息",
+      "brandUrlFormat": "对于采用RTSP URL格式的摄像头，其格式为：{{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://用户名:密码@主机或IP地址:端口/路径",
+      "testConnection": "测试连接",
+      "testSuccess": "连接测试通过！",
+      "testFailed": "连接测试失败。请检查输入是否正确并重试。",
+      "streamDetails": "视频流信息",
+      "warnings": {
+        "noSnapshot": "无法从配置的视频流中获取快照。"
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "请选择摄像头品牌并配置主机/IP地址，或选择“其他”后手动配置视频流地址",
+        "nameRequired": "摄像头名称为必填项",
+        "nameLength": "摄像头名称要少于64个字符",
+        "invalidCharacters": "摄像头名称内有不允许使用的字符",
+        "nameExists": "该摄像头名称已存在",
+        "brands": {
+          "reolink-rtsp": "不建议使用萤石 RTSP 协议。建议在摄像头设置中启用 HTTP 协议，并重新运行摄像头添加向导。"
+        },
+        "customUrlRtspRequired": "自定义URL必须以“rtsp://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
+      },
+      "docs": {
+        "reolink": "https://docs.frigate-cn.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "正在获取摄像头基本数据……",
+        "fetchingSnapshot": "正在获取摄像头快照……"
+      },
+      "connectionSettings": "连接设置",
+      "detectionMethod": "视频流检测方法",
+      "onvifPort": "ONVIF 端口",
+      "probeMode": "探测摄像头",
+      "manualMode": "手动选择",
+      "detectionMethodDescription": "如果摄像头支持 ONVIF 协议，将使用该协议探测摄像头，以自动获取摄像头视频流地址；若不支持，也可手动选择摄像头品牌来使用预设地址。如需输入自定义RTSP地址，请选择“手动选择”并选择“其他”选项。",
+      "onvifPortDescription": "对于支持ONVIF协议的摄像头，该端口通常为80或8080。",
+      "useDigestAuth": "使用摘要认证",
+      "useDigestAuthDescription": "为ONVIF协议启用HTTP摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的admin账户。"
+    },
+    "step2": {
+      "description": "将根据你选择的检测方式，将会自动查找摄像头可用流配置，或进行手动配置。",
+      "streamsTitle": "摄像头视频流",
+      "addStream": "添加视频流",
+      "addAnotherStream": "添加另一个视频流",
+      "streamTitle": "{{number}} 号视频流",
+      "streamUrl": "视频流地址",
+      "streamUrlPlaceholder": "rtsp://用户名:密码@主机或IP:端口/路径",
+      "url": "URL地址",
+      "resolution": "分辨率",
+      "selectResolution": "选择分辨率",
+      "quality": "质量",
+      "selectQuality": "选择质量",
+      "roles": "功能",
+      "roleLabels": {
+        "detect": "目标/物体检测",
+        "record": "录制",
+        "audio": "音频"
+      },
+      "testStream": "测试连接",
+      "testSuccess": "连接测试通过！",
+      "testFailed": "连接测试失败，请检查输入项后重试。",
+      "testFailedTitle": "测试失败",
+      "connected": "已连接",
+      "notConnected": "未连接",
+      "featuresTitle": "特殊功能",
+      "go2rtc": "减少摄像头连接数",
+      "detectRoleWarning": "至少需要一个视频流分配\"detect\"功能才能继续。",
+      "rolesPopover": {
+        "title": "视频流功能",
+        "detect": "目标/物体的主数据流。",
+        "record": "根据配置设置保存视频流的片段。",
+        "audio": "用于音频的检测的输入流。"
+      },
+      "featuresPopover": {
+        "title": "视频流特殊功能",
+        "description": "将使用go2rtc的转流功能来减少摄像头连接数。"
+      },
+      "streamDetails": "视频流详情",
+      "probing": "正在检测摄像头中……",
+      "retry": "重试",
+      "testing": {
+        "probingMetadata": "正在查询摄像头参数……",
+        "fetchingSnapshot": "正在获取摄像头快照……"
+      },
+      "probeFailed": "检测摄像头失败：{{error}}",
+      "probingDevice": "寻找设备中……",
+      "probeSuccessful": "检测成功",
+      "probeError": "检测遇到错误",
+      "probeNoSuccess": "检测未成功",
+      "deviceInfo": "设备信息",
+      "manufacturer": "制造商",
+      "model": "型号",
+      "firmware": "固件",
+      "profiles": "配置文件",
+      "ptzSupport": "支持 PTZ",
+      "autotrackingSupport": "支持自动追踪",
+      "presets": "预设配置",
+      "rtspCandidates": "RTSP候选地址",
+      "rtspCandidatesDescription": "通过摄像头自动检测发现了以下RTSP地址。测试连接以查看视频流参数。",
+      "noRtspCandidates": "未从摄像头检测到任何 RTSP 地址。可能是你的账号密码错误，或者摄像头不支持 ONVIF 协议，亦或是当前采用的 RTSP 地址获取方式无效。请返回上一步，尝试手动输入RTSP地址。",
+      "candidateStreamTitle": "候选{{number}}",
+      "useCandidate": "使用",
+      "uriCopy": "复制",
+      "uriCopied": "地址已复制到剪贴板",
+      "testConnection": "测试连接",
+      "toggleUriView": "点击切换完整 URI 显示",
+      "errors": {
+        "hostRequired": "主机/IP地址为必填"
+      }
+    },
+    "step3": {
+      "description": "为你的摄像头配置视频流功能并添加额外视频流。",
+      "validationTitle": "视频流验证",
+      "connectAllStreams": "连接所有视频流",
+      "reconnectionSuccess": "重连成功。",
+      "reconnectionPartial": "有些视频流重连失败了。",
+      "streamUnavailable": "视频流预览不可用",
+      "reload": "重新加载",
+      "connecting": "连接中……",
+      "streamTitle": "{{number}} 号视频流",
+      "valid": "通过",
+      "failed": "失败",
+      "notTested": "未测试",
+      "connectStream": "连接",
+      "connectingStream": "连接中",
+      "disconnectStream": "断开连接",
+      "estimatedBandwidth": "预计带宽",
+      "roles": "功能",
+      "none": "无",
+      "error": "错误",
+      "streamValidated": "{{number}} 号视频流验证通过",
+      "streamValidationFailed": "{{number}} 号视频流验证失败",
+      "saveAndApply": "保存新摄像头",
+      "saveError": "配置无效，请检查你的设置。",
+      "issues": {
+        "title": "视频流验证",
+        "videoCodecGood": "视频编码为 {{codec}}。",
+        "audioCodecGood": "音频编码为 {{codec}}。",
+        "noAudioWarning": "未检测到此视频流包含音频，录制将不会有声音。",
+        "audioCodecRecordError": "录制音频需要支持AAC音频编码器。",
+        "audioCodecRequired": "需要带音频的流才能开启声音检测。",
+        "restreamingWarning": "为录制流开启减少与摄像头的连接数可能会导致 CPU 使用率略有提升。",
+        "dahua": {
+          "substreamWarning": "子码流1被锁定为低分辨率。多数大华的摄像头支持额外的子码流，但需要在摄像头设置中手动开启。如果可以，建议检查并使用这些子码流。"
+        },
+        "hikvision": {
+          "substreamWarning": "子码流1被锁定为低分辨率。多数海康威视的摄像头支持额外的子码流，但需要在摄像头设置中手动开启。如果可以，建议检查并使用这些子码流。"
+        },
+        "resolutionHigh": "使用 {{resolution}} 分辨率可能会导致占用更多的系统资源。",
+        "resolutionLow": "使用 {{resolution}} 分辨率可能过低，难以检测较小的物体。"
+      },
+      "ffmpegModule": "使用视频流兼容模式",
+      "ffmpegModuleDescription": "如果多次尝试后视频流仍无法加载，可以尝试启用此功能。启用后，Frigate 将使用集成 go2rtc 的 ffmpeg 模块，这可能会提高与某些摄像头视频流的兼容性。",
+      "streamsTitle": "摄像头视频流",
+      "addStream": "添加视频流",
+      "addAnotherStream": "添加其他视频流",
+      "streamUrl": "视频流地址",
+      "streamUrlPlaceholder": "rtsp://用户名:密码@主机:端口/路径",
+      "selectStream": "选择一个视频流",
+      "searchCandidates": "搜索候选项……",
+      "noStreamFound": "没有找到视频流",
+      "url": "URL地址",
+      "resolution": "分辨率",
+      "selectResolution": "选择分辨率",
+      "quality": "质量",
+      "selectQuality": "选择质量",
+      "roleLabels": {
+        "detect": "目标检测",
+        "record": "录制",
+        "audio": "音频检测"
+      },
+      "testStream": "测试连接",
+      "testSuccess": "视频流测试成功！",
+      "testFailed": "视频流测试失败",
+      "testFailedTitle": "测试失败",
+      "connected": "已连接",
+      "notConnected": "未连接",
+      "featuresTitle": "功能特性",
+      "go2rtc": "减少与摄像头的连接数",
+      "detectRoleWarning": "必须得有一个视频流设置了“检测”功能才能继续操作。",
+      "rolesPopover": {
+        "title": "视频流功能",
+        "detect": "用于目标检测的主码流。",
+        "record": "根据配置设置保存视频流片段。",
+        "audio": "用于音频检测的音视频流。"
+      },
+      "featuresPopover": {
+        "title": "视频流功能特性",
+        "description": "使用 go2rtc 中继转流功能，减少与摄像头的网络连接数，提升效率。"
+      }
+    },
+    "step4": {
+      "description": "将进行保存新摄像头配置前的最终验证与分析，请在保存前确保所有视频流均已连接。",
+      "validationTitle": "视频流验证",
+      "connectAllStreams": "连接所有视频流",
+      "reconnectionSuccess": "重新连接成功。",
+      "reconnectionPartial": "部分视频流重新连接失败。",
+      "streamUnavailable": "视频流预览不可用",
+      "reload": "重新加载",
+      "connecting": "连接中……",
+      "streamTitle": "视频流 {{number}}",
+      "valid": "通过",
+      "failed": "失败",
+      "notTested": "未测试",
+      "connectStream": "连接",
+      "connectingStream": "连接中",
+      "disconnectStream": "断开连接",
+      "estimatedBandwidth": "预估带宽",
+      "roles": "功能",
+      "ffmpegModule": "使用视频流兼容模式",
+      "ffmpegModuleDescription": "若多次尝试后仍无法加载视频流，可尝试启用此功能。启用后，Frigate 将通过 go2rtc 调用 ffmpeg 模块。这可能会提升与部分摄像头视频流的兼容性。",
+      "none": "无",
+      "error": "错误",
+      "streamValidated": "视频流 {{number}} 验证成功",
+      "streamValidationFailed": "视频流 {{number}} 验证失败",
+      "saveAndApply": "保存新摄像头",
+      "saveError": "配置无效，请检查您的设置。",
+      "issues": {
+        "title": "视频流验证",
+        "videoCodecGood": "视频编解码器为 {{codec}}。",
+        "audioCodecGood": "音频编解码器为 {{codec}}。",
+        "resolutionHigh": "使用 {{resolution}} 分辨率可能导致资源使用率增加。",
+        "resolutionLow": "{{resolution}} 分辨率可能过低，难以可靠检测小型目标或物体。",
+        "noAudioWarning": "检测到该视频流无音频信号，录制视频将没有声音。",
+        "audioCodecRecordError": "录制功能需要 AAC 音频编解码器以实现音频支持。",
+        "audioCodecRequired": "要实现音频检测功能，必须要有音频流。",
+        "restreamingWarning": "为录制流开启“减少与摄像头的连接数”可能会略微增加 CPU 使用率。",
+        "brands": {
+          "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中启用 HTTP协议，并重新启动向导。",
+          "reolink-http": "Reolink HTTP 视频流应该使用 FFmpeg 以获得更好的兼容性，为此视频流启用“使用流兼容模式”。"
+        },
+        "dahua": {
+          "substreamWarning": "子码流1当前被锁定为低分辨率。多数大华、安讯士、EmpireTech品牌的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
+        },
+        "hikvision": {
+          "substreamWarning": "子码流1当前被锁定为低分辨率。多数海康威视的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
+        }
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "管理摄像头",
+    "addCamera": "添加新摄像头",
+    "editCamera": "编辑摄像头：",
+    "selectCamera": "选择摄像头",
+    "backToSettings": "返回摄像头设置",
+    "streams": {
+      "title": "开启或关闭摄像头",
+      "desc": "将临时禁用摄像头，直至 Frigate 重启。禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：go2rtc 的转流服务不受影响。</em>"
+    },
+    "cameraConfig": {
+      "add": "添加摄像头",
+      "edit": "编辑摄像头",
+      "description": "配置摄像头设置，包括视频流输入和功能选择。",
+      "name": "摄像头名称",
+      "nameRequired": "摄像头名称为必填项",
+      "nameLength": "摄像头名称必须少于64个字符。",
+      "namePlaceholder": "例如：大门、后院等",
+      "enabled": "开启",
+      "ffmpeg": {
+        "inputs": "视频流输入",
+        "path": "视频流地址",
+        "pathRequired": "视频流地址为必填项",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "功能",
+        "rolesRequired": "至少选择一个功能",
+        "rolesUnique": "每个功能（音频audio、检测detect、录制record）只能分配给一个视频流",
+        "addInput": "添加输入视频流",
+        "removeInput": "移除输入视频流",
+        "inputsRequired": "至少需要一个输入视频流"
+      },
+      "go2rtcStreams": "go2rtc 视频流",
+      "streamUrls": "视频流地址",
+      "addUrl": "添加地址",
+      "addGo2rtcStream": "添加 go2rtc 视频流",
+      "toast": {
+        "success": "摄像头 {{cameraName}} 已保存"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "摄像头核查设置",
+    "object_descriptions": {
+      "title": "生成式AI目标描述",
+      "desc": "临时启用或禁用此摄像头的 生成式AI目标描述 功能。禁用后，系统将不再请求该摄像头追踪目标和物体的AI生成描述。"
+    },
+    "review_descriptions": {
+      "title": "生成式 AI 核查总结",
+      "desc": "临时开关该摄像头的 生成式 AI 核查总结 功能。禁用后，系统将不再请求 AI 生成该摄像头核查项目的总结。"
+    },
+    "review": {
+      "title": "核查",
+      "desc": "临时开关该摄像头的警报与检测项生成功能，直到 Frigate 重启后恢复。禁用期间，系统将不再生成新的核查项目。 ",
+      "alerts": "警报 ",
+      "detections": "检测 "
+    },
+    "reviewClassification": {
+      "title": "核查分类",
+      "desc": "Frigate 将核查项的严重程度分为“警报”和“检测”两个等级。默认情况下，所有的<strong>人</strong>、<strong>汽车</strong> 目标都将视为警报。你可以通过修改配置文件配置区域来细分。",
+      "noDefinedZones": "此摄像头未设置任何监控区。",
+      "objectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下都将视为警报。",
+      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区域内都将视为警报。",
+      "objectDetectionsTips": "所有在摄像头 {{cameraName}} 上，检测到的 {{detectionsLabels}} 目标或物体，无论它位于哪个区，都将显示为检测。",
+      "zoneObjectDetectionsTips": {
+        "text": "所有在摄像头 {{cameraName}} 下的 {{zone}} 区域内检测到未分类的 {{detectionsLabels}} 目标或物体，都将显示为检测。",
+        "notSelectDetections": "所有在摄像头 {{cameraName}}下的 {{zone}} 区域内检测到的 {{detectionsLabels}} 目标或物体，如果它未归类为警报，无论它位于哪个区，都将显示为检测。",
+        "regardlessOfZoneObjectDetectionsTips": "在摄像头 {{cameraName}} 上，所有未分类的 {{detectionsLabels}} 检测目标或物体，无论出现在哪个区域，都将显示为检测。"
+      },
+      "unsavedChanges": "摄像头 {{camera}} 的核查分类设置尚未保存",
+      "selectAlertsZones": "选择警报区",
+      "selectDetectionsZones": "选择检测区",
+      "limitDetections": "限制仅在特定区域内进行检测",
+      "toast": {
+        "success": "核查分类设置已保存，重启后生效。"
       }
     }
   }

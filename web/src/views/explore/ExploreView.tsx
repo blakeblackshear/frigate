@@ -11,28 +11,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { SearchResult } from "@/types/search";
+import { EventType, SearchResult } from "@/types/search";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useTrackedObjectUpdate } from "@/api/ws";
-import { isEqual } from "lodash";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import SearchResultActions from "@/components/menu/SearchResultActions";
 import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { LuSearchX } from "react-icons/lu";
 
 type ExploreViewProps = {
-  searchDetail: SearchResult | undefined;
   setSearchDetail: (search: SearchResult | undefined) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 
 export default function ExploreView({
-  searchDetail,
   setSearchDetail,
   setSimilaritySearch,
   onSelectSearch,
@@ -83,23 +81,18 @@ export default function ExploreView({
     }
   }, [wsUpdate, mutate]);
 
-  // update search detail when results change
-
-  useEffect(() => {
-    if (searchDetail && events) {
-      const updatedSearchDetail = events.find(
-        (result) => result.id === searchDetail.id,
-      );
-
-      if (updatedSearchDetail && !isEqual(updatedSearchDetail, searchDetail)) {
-        setSearchDetail(updatedSearchDetail);
-      }
-    }
-  }, [events, searchDetail, setSearchDetail]);
-
   if (isLoading) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
+  if (eventsByLabel && Object.keys(eventsByLabel).length == 0 && !isLoading) {
+    return (
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+        <LuSearchX className="size-16" />
+        {t("noTrackedObjects")}
+      </div>
     );
   }
 
@@ -110,7 +103,8 @@ export default function ExploreView({
           key={label}
           searchResults={filteredEvents}
           isValidating={isValidating}
-          objectType={label}
+          label={label}
+          labelType={filteredEvents[0]?.data?.type || "object"}
           setSearchDetail={setSearchDetail}
           mutate={mutate}
           setSimilaritySearch={setSimilaritySearch}
@@ -122,7 +116,8 @@ export default function ExploreView({
 }
 
 type ThumbnailRowType = {
-  objectType: string;
+  label: string;
+  labelType: EventType;
   searchResults?: SearchResult[];
   isValidating: boolean;
   setSearchDetail: (search: SearchResult | undefined) => void;
@@ -132,7 +127,8 @@ type ThumbnailRowType = {
 };
 
 function ThumbnailRow({
-  objectType,
+  label,
+  labelType,
   searchResults,
   isValidating,
   setSearchDetail,
@@ -153,7 +149,7 @@ function ThumbnailRow({
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
       <div className="flex flex-row items-center text-lg smart-capitalize">
-        {getTranslatedLabel(objectType)}
+        {getTranslatedLabel(label, labelType)}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
             {t("trackedObjectsCount", {
@@ -181,7 +177,7 @@ function ThumbnailRow({
         ))}
         <div
           className="flex cursor-pointer items-center justify-center"
-          onClick={() => handleSearch(objectType)}
+          onClick={() => handleSearch(label)}
         >
           <Tooltip>
             <TooltipTrigger>
@@ -192,7 +188,9 @@ function ThumbnailRow({
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent>
-                {t("exploreMore", { label: getTranslatedLabel(objectType) })}
+                {t("exploreMore", {
+                  label: getTranslatedLabel(label, labelType),
+                })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -227,12 +225,8 @@ function ExploreThumbnailImage({
     }
   };
 
-  const handleShowObjectLifecycle = () => {
-    onSelectSearch(event, false, "object_lifecycle");
-  };
-
-  const handleShowSnapshot = () => {
-    onSelectSearch(event, false, "snapshot");
+  const handleShowTrackingDetails = () => {
+    onSelectSearch(event, false, "tracking_details");
   };
 
   const handleAddTrigger = () => {
@@ -246,8 +240,7 @@ function ExploreThumbnailImage({
       searchResult={event}
       findSimilar={handleFindSimilar}
       refreshResults={mutate}
-      showObjectLifecycle={handleShowObjectLifecycle}
-      showSnapshot={handleShowSnapshot}
+      showTrackingDetails={handleShowTrackingDetails}
       addTrigger={handleAddTrigger}
       isContextMenu={true}
     >

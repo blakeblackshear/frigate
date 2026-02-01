@@ -5,7 +5,7 @@ import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
 import { type DayButtonProps, TZDate } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -27,7 +27,7 @@ export default function ReviewActivityCalendar({
 }: ReviewActivityCalendarProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const timezone = useTimezone(config);
-  const [weekStartsOn] = usePersistence("weekStartsOn", 0);
+  const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
 
   const disabledDates = useMemo(() => {
     const tomorrow = new Date();
@@ -176,7 +176,7 @@ export function TimezoneAwareCalendar({
   selectedDay,
   onSelect,
 }: TimezoneAwareCalendarProps) {
-  const [weekStartsOn] = usePersistence("weekStartsOn", 0);
+  const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
 
   const timezoneOffset = useMemo(
     () =>

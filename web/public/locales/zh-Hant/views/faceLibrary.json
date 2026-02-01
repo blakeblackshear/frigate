@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "了解如何新增圖片集合至人臉資料庫。",
+    "addFace": "上傳您的第一張照片至臉部資料庫以新增一個新的集合。",
     "placeholder": "輸入此集合的名稱",
     "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。"
   },
@@ -24,7 +24,7 @@
     "title": "建立集合",
     "desc": "建立新集合",
     "new": "建立新人臉",
-    "nextSteps": "為了建立可靠的模型基底：<li>在訓練分頁中選擇並針對每個偵測到人的圖片進行訓練。</li><li>請優先使用正臉照以獲得最佳效果，請盡量避免使用從側面或有傾斜角度的人臉</li></ul>"
+    "nextSteps": "為了建立可靠的模型基底：<li>在最近的識別紀錄分頁中選擇並針對每個偵測到人的圖片進行訓練。</li><li>請優先使用正臉照以獲得最佳效果，請盡量避免使用從側面或有傾斜角度的人臉</li></ul>"
   },
   "steps": {
     "faceName": "輸入人臉名稱",
@@ -35,9 +35,10 @@
     }
   },
   "train": {
-    "title": "訓練",
-    "aria": "選擇訓練",
-    "empty": "最近沒有辨識人臉的操作"
+    "title": "最近的識別紀錄",
+    "aria": "選擇最近的識別紀錄",
+    "empty": "最近沒有辨識人臉的操作",
+    "titleShort": "最近"
   },
   "selectFace": "選擇人臉",
   "deleteFaceLibrary": {
@@ -65,7 +66,7 @@
       "selectImage": "請選擇一個圖片檔。"
     },
     "dropActive": "將圖片拖到這裡…",
-    "dropInstructions": "將圖片拖放至此處，或點擊以選取",
+    "dropInstructions": "拖放或貼上圖片至此處，或點擊以選取",
     "maxSize": "最大檔案大小：{{size}}MB"
   },
   "nofaces": "沒有可用的人臉",
@@ -81,7 +82,7 @@
       "deletedName_other": "{{count}} 個人臉已成功刪除。",
       "renamedFace": "成功將人臉重新命名為 {{name}}",
       "trainedFace": "成功訓練人臉。",
-      "updatedFaceScore": "成功更新人臉分數。"
+      "updatedFaceScore": "成功更新人臉分數{{name}}({{score}})。"
     },
     "error": {
       "uploadingImageFailed": "上傳圖片失敗：{{errorMessage}}",

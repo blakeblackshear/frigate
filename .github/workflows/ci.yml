@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: 3.11
 
 jobs:
   amd64_build:
@@ -23,7 +23,7 @@ jobs:
     name: AMD64 Build
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -47,7 +47,7 @@ jobs:
     name: ARM Build
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -82,7 +82,7 @@ jobs:
     name: Jetson Jetpack 6
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -113,7 +113,7 @@ jobs:
       - amd64_build
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -136,7 +136,6 @@ jobs:
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt,mode=max
       - name: AMD/ROCm general build
         env:
-          AMDGPU: gfx
           HSA_OVERRIDE: 0
         uses: docker/bake-action@v6
         with:
@@ -155,7 +154,7 @@ jobs:
       - arm64_build
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -180,7 +179,7 @@ jobs:
       - arm64_build
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx

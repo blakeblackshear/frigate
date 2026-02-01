@@ -1,5 +1,8 @@
 {
   "button": {
     "save": "Запазване на търсенето"
-  }
+  },
+  "search": "Търси",
+  "savedSearches": "Запазени търсения",
+  "searchFor": "Търсене за {{inputValue}}"
 }

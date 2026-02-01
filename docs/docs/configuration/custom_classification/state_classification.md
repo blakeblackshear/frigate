@@ -3,14 +3,26 @@ id: state_classification
 title: State Classification
 ---
 
-State classification allows you to train a custom MobileNetV2 classification model on a fixed region of your camera frame(s) to determine a current state. The model can be configured to run on a schedule and/or when motion is detected in that region.
+State classification allows you to train a custom MobileNetV2 classification model on a fixed region of your camera frame(s) to determine a current state. The model can be configured to run on a schedule and/or when motion is detected in that region. Classification results are available through the `frigate/<camera_name>/classification/<model_name>` MQTT topic and in Home Assistant sensors via the official Frigate integration.
 
 ## Minimum System Requirements
 
 State classification models are lightweight and run very fast on CPU. Inference should be usable on virtually any machine that can run Frigate.
 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
-When running the `-tensorrt` image, Nvidia GPUs will automatically be used to accelerate training.
+
+A CPU with AVX instructions is required for training and inference.
+
+## Classes
+
+Classes are the different states an area on your camera can be in. Each class represents a distinct visual state that the model will learn to recognize.
+
+For state classification:
+
+- Define classes that represent mutually exclusive states
+- Examples: `open` and `closed` for a garage door, `on` and `off` for lights
+- Use at least 2 classes (typically binary states work best)
+- Keep class names clear and descriptive
 
 ## Example use cases
 
@@ -36,17 +48,60 @@ classification:
             crop: [0, 180, 220, 400]
 ```
 
+An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For state classification models, the default is 100.
+
 ## Training the model
 
-Creating and training the model is done within the Frigate UI using the `Classification` page.
+Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of three steps:
 
-### Getting Started
+### Step 1: Name and Define
 
-When choosing a portion of the camera frame for state classification, it is important to make the crop tight around the area of interest to avoid extra signals unrelated to what is being classified.
+Enter a name for your model and define at least 2 classes (states) that represent mutually exclusive states. For example, `open` and `closed` for a door, or `on` and `off` for lights.
 
-// TODO add this section once UI is implemented. Explain process of selecting a crop.
+### Step 2: Select the Crop Area
+
+Choose one or more cameras and draw a rectangle over the area of interest for each camera. The crop should be tight around the region you want to classify to avoid extra signals unrelated to what is being classified. You can drag and resize the rectangle to adjust the crop area.
+
+### Step 3: Assign Training Examples
+
+The system will automatically generate example images from your camera feeds. You'll be guided through each class one at a time to select which images represent that state. It's not strictly required to select all images you see. If a state is missing from the samples, you can train it from the Recent tab later.
+
+Once some images are assigned, training will begin automatically.
 
 ### Improving the Model
 
 - **Problem framing**: Keep classes visually distinct and state-focused (e.g., `open`, `closed`, `unknown`). Avoid combining object identity with state in a single model unless necessary.
-- **Data collection**: Use the model’s Train tab to gather balanced examples across times of day and weather.
+- **Data collection**: Use the model's Recent Classifications tab to gather balanced examples across times of day and weather.
+- **When to train**: Focus on cases where the model is entirely incorrect or flips between states when it should not. There's no need to train additional images when the model is already working consistently.
+- **Selecting training images**: Images scoring below 100% due to new conditions (e.g., first snow of the year, seasonal changes) or variations (e.g., objects temporarily in view, insects at night) are good candidates for training, as they represent scenarios different from the default state. Training these lower-scoring images that differ from existing training data helps prevent overfitting. Avoid training large quantities of images that look very similar, especially if they already score 100% as this can lead to overfitting.
+
+## Debugging Classification Models
+
+To troubleshoot issues with state classification models, enable debug logging to see detailed information about classification attempts, scores, and state verification.
+
+Enable debug logs for classification models by adding `frigate.data_processing.real_time.custom_classification: debug` to your `logger` configuration. These logs are verbose, so only keep this enabled when necessary. Restart Frigate after this change.
+
+```yaml
+logger:
+  default: info
+  logs:
+    frigate.data_processing.real_time.custom_classification: debug
+```
+
+The debug logs will show:
+
+- Classification probabilities for each attempt
+- Whether scores meet the threshold requirement
+- State verification progress (consecutive detections needed)
+- When state changes are published
+
+### Recent Classifications
+
+For state classification, images are only added to recent classifications under specific circumstances:
+
+- **First detection**: The first classification attempt for a camera is always saved
+- **State changes**: Images are saved when the detected state differs from the current verified state
+- **Pending verification**: Images are saved when there's a pending state change being verified (requires 3 consecutive identical states)
+- **Low confidence**: Images with scores below 100% are saved even if the state matches the current state (useful for training)
+
+Images are **not** saved when the state is stable (detected state matches current state) **and** the score is 100%. This prevents unnecessary storage of redundant high-confidence classifications.

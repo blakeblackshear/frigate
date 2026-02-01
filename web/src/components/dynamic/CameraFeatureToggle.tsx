@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { isDesktop } from "react-device-detect";
 import { cn } from "@/lib/utils";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 const variants = {
   primary: {
@@ -30,7 +31,8 @@ type CameraFeatureToggleProps = {
   Icon: IconType;
   title: string;
   onClick?: () => void;
-  disabled?: boolean; // New prop for disabling
+  disabled?: boolean;
+  loading?: boolean;
 };
 
 export default function CameraFeatureToggle({
@@ -40,7 +42,8 @@ export default function CameraFeatureToggle({
   Icon,
   title,
   onClick,
-  disabled = false, // Default to false
+  disabled = false,
+  loading = false,
 }: CameraFeatureToggleProps) {
   const content = (
     <div
@@ -53,16 +56,20 @@ export default function CameraFeatureToggle({
         className,
       )}
     >
-      <Icon
-        className={cn(
-          "size-5 md:m-[6px]",
-          disabled
-            ? "text-gray-400"
-            : isActive
-              ? "text-white"
-              : "text-secondary-foreground",
-        )}
-      />
+      {loading ? (
+        <ActivityIndicator className="size-5 md:m-[6px]" />
+      ) : (
+        <Icon
+          className={cn(
+            "size-5 md:m-[6px]",
+            disabled
+              ? "text-gray-400"
+              : isActive
+                ? "text-white"
+                : "text-secondary-foreground",
+          )}
+        />
+      )}
     </div>
   );
 

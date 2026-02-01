@@ -289,6 +289,7 @@ export default function VideoControls({
           }}
           onUploadFrame={onUploadFrame}
           containerRef={containerRef}
+          fullscreen={fullscreen}
         />
       )}
       {features.fullscreen && toggleFullscreen && (
@@ -306,6 +307,7 @@ type FrigatePlusUploadButtonProps = {
   onClose: () => void;
   onUploadFrame: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  fullscreen?: boolean;
 };
 function FrigatePlusUploadButton({
   video,
@@ -313,6 +315,7 @@ function FrigatePlusUploadButton({
   onClose,
   onUploadFrame,
   containerRef,
+  fullscreen,
 }: FrigatePlusUploadButtonProps) {
   const { t } = useTranslation(["components/player"]);
 
@@ -349,7 +352,11 @@ function FrigatePlusUploadButton({
         />
       </AlertDialogTrigger>
       <AlertDialogContent
-        portalProps={{ container: containerRef?.current }}
+        portalProps={
+          fullscreen && containerRef?.current
+            ? { container: containerRef.current }
+            : undefined
+        }
         className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl"
       >
         <AlertDialogHeader>

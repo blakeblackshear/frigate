@@ -4,7 +4,7 @@ import useSWR from "swr";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,9 +20,10 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { cn } from "@/lib/utils";
+import { isDesktop } from "react-device-detect";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -45,8 +46,6 @@ export default function MotionTunerView({
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
   const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
@@ -117,7 +116,10 @@ export default function MotionTunerView({
     axios
       .put(
         `config/set?cameras.${selectedCamera}.motion.threshold=${motionSettings.threshold}&cameras.${selectedCamera}.motion.contour_area=${motionSettings.contour_area}&cameras.${selectedCamera}.motion.improve_contrast=${motionSettings.improve_contrast ? "True" : "False"}`,
-        { requires_restart: 0 },
+        {
+          requires_restart: 0,
+          update_topic: `config/cameras/${selectedCamera}/motion`,
+        },
       )
       .then((res) => {
         if (res.status === 200) {
@@ -162,23 +164,7 @@ export default function MotionTunerView({
   const onCancel = useCallback(() => {
     setMotionSettings(origMotionSettings);
     setChangedValue(false);
-    removeMessage("motion_tuner", `motion_tuner_${selectedCamera}`);
-  }, [origMotionSettings, removeMessage, selectedCamera]);
-
-  useEffect(() => {
-    if (changedValue) {
-      addMessage(
-        "motion_tuner",
-        t("motionDetectionTuner.unsavedChanges", { camera: selectedCamera }),
-        undefined,
-        `motion_tuner_${selectedCamera}`,
-      );
-    } else {
-      removeMessage("motion_tuner", `motion_tuner_${selectedCamera}`);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changedValue, selectedCamera]);
+  }, [origMotionSettings]);
 
   useEffect(() => {
     document.title = t("documentTitle.motionTuner");
@@ -191,7 +177,7 @@ export default function MotionTunerView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
+      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
         <Heading as="h4" className="mb-2">
           {t("motionDetectionTuner.title")}
         </Heading>
@@ -325,7 +311,12 @@ export default function MotionTunerView({
       </div>
 
       {cameraConfig ? (
-        <div className="flex max-h-[70%] md:mr-3 md:h-dvh md:max-h-full md:w-7/12 md:grow">
+        <div
+          className={cn(
+            "flex max-h-[70%] md:h-dvh md:max-h-full md:w-7/12 md:grow",
+            isDesktop && "md:mr-3",
+          )}
+        >
           <div className="size-full min-h-10">
             <AutoUpdatingCameraImage
               camera={cameraConfig.name}

@@ -11,6 +11,7 @@ class AppConfigSetBody(BaseModel):
 
 class AppPutPasswordBody(BaseModel):
     password: str
+    old_password: Optional[str] = None
 
 
 class AppPostUsersBody(BaseModel):

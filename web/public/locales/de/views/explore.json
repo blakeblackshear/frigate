@@ -18,13 +18,15 @@
           "updatedSublabel": "Unterkategorie erfolgreich aktualisiert.",
           "updatedLPR": "Nummernschild erfolgreich aktualisiert.",
           "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist.",
-          "audioTranscription": "Audio Transkription erfolgreich angefordert."
+          "audioTranscription": "Die Audio-Transkription wurde erfolgreich angefordert. Je nach Geschwindigkeit Ihres Frigate-Servers kann die Transkription einige Zeit in Anspruch nehmen.",
+          "updatedAttributes": "Attribute erfolgreich aktualisiert."
         },
         "error": {
           "regenerate": "Der Aufruf von {{provider}} für eine neue Beschreibung ist fehlgeschlagen: {{errorMessage}}",
           "updatedSublabelFailed": "Untekategorie konnte nicht aktualisiert werden: {{errorMessage}}",
           "updatedLPRFailed": "Aktualisierung des Kennzeichens fehlgeschlagen: {{errorMessage}}",
-          "audioTranscription": "Die Anforderung der Audio Transkription ist fehlgeschlagen: {{errorMessage}}"
+          "audioTranscription": "Die Anforderung der Audio Transkription ist fehlgeschlagen: {{errorMessage}}",
+          "updatedAttributesFailed": "Attribute konnten nicht aktualisiert werden: {{errorMessage}}"
         }
       }
     },
@@ -72,6 +74,14 @@
     },
     "score": {
       "label": "Ergebnis"
+    },
+    "editAttributes": {
+      "title": "Attribute bearbeiten",
+      "desc": "Wählen Sie Klassifizierungsattribute für dieses {{label}} aus"
+    },
+    "attributes": "Klassifizierungsattribute",
+    "title": {
+      "label": "Titel"
     }
   },
   "documentTitle": "Erkunde - Frigate",
@@ -158,7 +168,9 @@
     "details": "Details",
     "video": "Video",
     "object_lifecycle": "Objekt-Lebenszyklus",
-    "snapshot": "Snapshot"
+    "snapshot": "Snapshot",
+    "thumbnail": "Vorschaubild",
+    "tracking_details": "Nachverfolgungs-Details"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -195,12 +207,26 @@
     "addTrigger": {
       "aria": "Einen Trigger für dieses verfolgte Objekt hinzufügen",
       "label": "Trigger hinzufügen"
+    },
+    "viewTrackingDetails": {
+      "label": "Details zum Verfolgen anzeigen",
+      "aria": "Details zum Verfolgen anzeigen"
+    },
+    "showObjectDetails": {
+      "label": "Objektpfad anzeigen"
+    },
+    "hideObjectDetails": {
+      "label": "Objektpfad verbergen"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Bereinigte Momentaufnahme herunterladen",
+      "aria": "Bereinigte Momentaufnahme herunterladen"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Löschen bestätigen",
-      "desc": "Beim Löschen dieses verfolgten Objekts werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Objektlebenszykluseinträge entfernt. Aufgezeichnetes Filmmaterial dieses verfolgten Objekts in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Sind Sie sicher, dass Sie fortfahren möchten?"
+      "desc": "Beim Löschen dieses verfolgten Objekts werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Verfolgungsdetails entfernt. Aufgezeichnetes Filmmaterial dieses verfolgten Objekts in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Sind Sie sicher, dass Sie fortfahren möchten?"
     }
   },
   "searchResult": {
@@ -210,7 +236,9 @@
         "error": "Das verfolgte Objekt konnte nicht gelöscht werden: {{errorMessage}}"
       }
     },
-    "tooltip": "Entspricht {{type}} bei {{confidence}}%"
+    "tooltip": "Entspricht {{type}} bei {{confidence}}%",
+    "previousTrackedObject": "Vorheriges verfolgtes Objekt",
+    "nextTrackedObject": "Nächstes verfolgtes Objekt"
   },
   "noTrackedObjects": "Keine verfolgten Objekte gefunden",
   "fetchingTrackedObjectsFailed": "Fehler beim Abrufen von verfolgten Objekten: {{errorMessage}}",
@@ -222,5 +250,54 @@
   },
   "concerns": {
     "label": "Bedenken"
+  },
+  "trackingDetails": {
+    "noImageFound": "Kein Bild mit diesem Zeitstempel gefunden.",
+    "createObjectMask": "Objekt-Maske erstellen",
+    "scrollViewTips": "Klicke, um die relevanten Momente aus dem Lebenszyklus dieses Objektes zu sehen.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} erkannt",
+      "entered_zone": "{{label}} betrat {{zones}}",
+      "active": "{{label}} wurde aktiv",
+      "stationary": "{{label}} wurde stationär",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}",
+        "other": "{{label}} erkannt als {{attribute}}"
+      },
+      "gone": "{{label}} hat sich entfernt",
+      "heard": "{{label}} wurde gehört",
+      "external": "{{label}} erkannt",
+      "header": {
+        "zones": "Zonen",
+        "ratio": "Verhältnis",
+        "area": "Bereich",
+        "score": "Bewertung"
+      }
+    },
+    "annotationSettings": {
+      "title": "Anmerkungseinstellungen",
+      "showAllZones": {
+        "title": "Zeige alle Zonen",
+        "desc": "Immer Zonen auf Rahmen anzeigen, in die Objekte eingetreten sind."
+      },
+      "offset": {
+        "label": "Anmerkungen Versatz",
+        "desc": "Diese Daten stammen aus dem Erkennungsfeed der Kamera, werden jedoch über Bilder aus dem Aufzeichnungsfeed gelegt. Es ist unwahrscheinlich, dass beide Streams perfekt synchron sind. Daher stimmen der Begrenzungsrahmen und das Filmmaterial nicht vollständig überein. Mit dieser Einstellung lassen sich die Anmerkungen zeitlich nach vorne oder hinten verschieben, um sie besser an das aufgezeichnete Filmmaterial anzupassen.",
+        "millisecondsToOffset": "Millisekunden, um Erkennungs-Anmerkungen zu verschieben. <em>Standard: 0</em>",
+        "tips": "Verringere den Wert, wenn die Videowiedergabe den Boxen und Wegpunkten voraus ist, und erhöhe den Wert, wenn die Videowiedergabe hinter ihnen zurückbleibt. Dieser Wert kann negativ sein.",
+        "toast": {
+          "success": "Der Anmerkungs-Offset für {{camera}} wurde in der Konfigurationsdatei gespeichert."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Vorherige Anzeige",
+      "next": "Nächste Anzeige"
+    },
+    "title": "Verfolgungsdetails",
+    "adjustAnnotationSettings": "Anmerkungseinstellungen anpassen",
+    "autoTrackingTips": "Die Positionen der Begrenzungsrahmen sind bei Kameras mit automatischer Verfolgung ungenau.",
+    "count": "{{first}} von {{second}}",
+    "trackedPoint": "Verfolgter Punkt"
   }
 }

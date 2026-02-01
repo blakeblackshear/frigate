@@ -5,8 +5,8 @@ import {
   useRef,
   useState,
 } from "react";
-import Hls from "hls.js";
-import { isAndroid, isDesktop, isMobile } from "react-device-detect";
+import Hls, { HlsConfig } from "hls.js";
+import { isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
 import { VideoResolutionType } from "@/types/live";
@@ -15,13 +15,15 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { useOverlayState } from "@/hooks/use-overlay-state";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { cn } from "@/lib/utils";
 import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
+import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 // Android native hls does not seek correctly
-const USE_NATIVE_HLS = !isAndroid;
+const USE_NATIVE_HLS = false;
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
   MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
@@ -47,11 +49,16 @@ type HlsVideoPlayerProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
   onError?: (error: RecordingPlayerError) => void;
+  isDetailMode?: boolean;
+  camera?: string;
+  currentTimeOverride?: number;
 };
+
 export default function HlsVideoPlayer({
   videoRef,
   containerRef,
@@ -66,13 +73,21 @@ export default function HlsVideoPlayer({
   onPlayerLoaded,
   onTimeUpdate,
   onPlaying,
+  onSeekToTime,
   setFullResolution,
   onUploadFrame,
   toggleFullscreen,
   onError,
+  isDetailMode = false,
+  camera,
+  currentTimeOverride,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isAdmin = useIsAdmin();
+
+  // for detail stream context in History
+  const currentTime = currentTimeOverride;
 
   // playback
 
@@ -81,22 +96,52 @@ export default function HlsVideoPlayer({
   const [loadedMetadata, setLoadedMetadata] = useState(false);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
+  const applyVideoDimensions = useCallback(
+    (width: number, height: number) => {
+      if (setFullResolution) {
+        setFullResolution({ width, height });
+      }
+      setVideoDimensions({ width, height });
+      if (height > 0) {
+        setTallCamera(width / height < ASPECT_VERTICAL_LAYOUT);
+      }
+    },
+    [setFullResolution],
+  );
+
   const handleLoadedMetadata = useCallback(() => {
     setLoadedMetadata(true);
-    if (videoRef.current) {
-      if (setFullResolution) {
-        setFullResolution({
-          width: videoRef.current.videoWidth,
-          height: videoRef.current.videoHeight,
-        });
-      }
-
-      setTallCamera(
-        videoRef.current.videoWidth / videoRef.current.videoHeight <
-          ASPECT_VERTICAL_LAYOUT,
-      );
+    if (!videoRef.current) {
+      return;
     }
-  }, [videoRef, setFullResolution]);
+
+    const width = videoRef.current.videoWidth;
+    const height = videoRef.current.videoHeight;
+
+    // iOS Safari occasionally reports 0x0 for videoWidth/videoHeight
+    // Poll with requestAnimationFrame until dimensions become available (or timeout).
+    if (width > 0 && height > 0) {
+      applyVideoDimensions(width, height);
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 120; // ~2 seconds at 60fps
+    const tryGetDims = () => {
+      if (!videoRef.current) return;
+      const w = videoRef.current.videoWidth;
+      const h = videoRef.current.videoHeight;
+      if (w > 0 && h > 0) {
+        applyVideoDimensions(w, h);
+        return;
+      }
+      if (attempts < maxAttempts) {
+        attempts += 1;
+        requestAnimationFrame(tryGetDims);
+      }
+    };
+    requestAnimationFrame(tryGetDims);
+  }, [videoRef, applyVideoDimensions]);
 
   useEffect(() => {
     if (!videoRef.current) {
@@ -115,6 +160,8 @@ export default function HlsVideoPlayer({
       return;
     }
 
+    setLoadedMetadata(false);
+
     const currentPlaybackRate = videoRef.current.playbackRate;
 
     if (!useHlsCompat) {
@@ -123,11 +170,14 @@ export default function HlsVideoPlayer({
       return;
     }
 
-    hlsRef.current = new Hls({
+    // Base HLS configuration
+    const hlsConfig: Partial<HlsConfig> = {
       maxBufferLength: 10,
       maxBufferSize: 20 * 1000 * 1000,
       startPosition: currentSource.startPosition,
-    });
+    };
+
+    hlsRef.current = new Hls(hlsConfig);
     hlsRef.current.attachMedia(videoRef.current);
     hlsRef.current.loadSource(currentSource.playlist);
     videoRef.current.playbackRate = currentPlaybackRate;
@@ -163,9 +213,9 @@ export default function HlsVideoPlayer({
 
   const [tallCamera, setTallCamera] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [muted, setMuted] = usePersistence("hlsPlayerMuted", true);
+  const [muted, setMuted] = useUserPersistence("hlsPlayerMuted", true);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
-  const [defaultPlaybackRate] = usePersistence("playbackRate", 1);
+  const [defaultPlaybackRate] = useUserPersistence("playbackRate", 1);
   const [playbackRate, setPlaybackRate] = useOverlayState(
     "playbackRate",
     defaultPlaybackRate ?? 1,
@@ -174,6 +224,10 @@ export default function HlsVideoPlayer({
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(1.0);
+  const [videoDimensions, setVideoDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!isDesktop) {
@@ -236,7 +290,7 @@ export default function HlsVideoPlayer({
             volume: true,
             seek: true,
             playbackRate: true,
-            plusUpload: config?.plus?.enabled == true,
+            plusUpload: isAdmin && config?.plus?.enabled == true,
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}
@@ -296,6 +350,39 @@ export default function HlsVideoPlayer({
           height: isMobile ? "100%" : undefined,
         }}
       >
+        {isDetailMode &&
+          camera &&
+          currentTime &&
+          loadedMetadata &&
+          videoDimensions.width > 0 &&
+          videoDimensions.height > 0 && (
+            <div
+              className={cn(
+                "absolute inset-0 z-50",
+                isDesktop
+                  ? "size-full"
+                  : "mx-auto flex items-center justify-center portrait:max-h-[50dvh]",
+              )}
+              style={{
+                aspectRatio: `${videoDimensions.width} / ${videoDimensions.height}`,
+              }}
+            >
+              <ObjectTrackOverlay
+                key={`overlay-${currentTime}`}
+                camera={camera}
+                showBoundingBoxes={!isPlaying}
+                currentTime={currentTime}
+                videoWidth={videoDimensions.width}
+                videoHeight={videoDimensions.height}
+                className="absolute inset-0 z-10"
+                onSeekToTime={(timestamp, play) => {
+                  if (onSeekToTime) {
+                    onSeekToTime(timestamp, play);
+                  }
+                }}
+              />
+            </div>
+          )}
         <video
           ref={videoRef}
           className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"} cursor-pointer`}

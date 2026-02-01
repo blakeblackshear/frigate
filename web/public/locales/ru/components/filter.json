@@ -133,5 +133,9 @@
     },
     "count_one": "{{count}} класс",
     "count_other": "{{count}} классы"
+  },
+  "attributes": {
+    "label": "Атрибуты классификации",
+    "all": "Все атрибуты"
   }
 }

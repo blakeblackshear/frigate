@@ -26,7 +26,8 @@
       "recognized_license_plate": "Atpažinti Registracijos Numeriai",
       "has_clip": "Turi Klipą",
       "has_snapshot": "Turi Nuotrauką",
-      "sub_labels": "Sub Etiketės"
+      "sub_labels": "Sub Etiketės",
+      "attributes": "Atributai"
     },
     "searchType": {
       "thumbnail": "Miniatiūra",

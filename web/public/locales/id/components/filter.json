@@ -15,5 +15,13 @@
       "title": "Semua Zona",
       "short": "Zona"
     }
+  },
+  "classes": {
+    "label": "Kelas",
+    "all": {
+      "title": "Semua Kelas"
+    },
+    "count_one": "{{count}} Kelas",
+    "count_other": "{{count}} Kelas"
   }
 }

@@ -37,9 +37,6 @@ class UIConfig(FrigateBaseModel):
     time_style: DateTimeStyleEnum = Field(
         default=DateTimeStyleEnum.medium, title="Override UI timeStyle."
     )
-    strftime_fmt: Optional[str] = Field(
-        default=None, title="Override date and time format using strftime syntax."
-    )
     unit_system: UnitSystemEnum = Field(
         default=UnitSystemEnum.metric, title="The unit system to use for measurements."
     )

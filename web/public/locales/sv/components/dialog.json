@@ -34,7 +34,7 @@
     "time": {
       "fromTimeline": "Välj från tidslinjen",
       "lastHour_one": "Sista timma",
-      "lastHour_other": "Sista t {{count}} Timmarna",
+      "lastHour_other": "Sista {{count}} timmar",
       "start": {
         "title": "Start Tid",
         "label": "Välj Start Tid"
@@ -52,12 +52,13 @@
     "export": "Eksport",
     "selectOrExport": "Välj eller exportera",
     "toast": {
-      "success": "Exporten har startats. Visa filen i mappen /exports.",
+      "success": "Exporten har startats. Visa filen på exportsidan.",
       "error": {
         "failed": "Misslyckades med att starta exporten: {{error}}",
         "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
         "noVaildTimeSelected": "Inget giltigt tidsintervall valt"
-      }
+      },
+      "view": "Visa"
     },
     "fromTimeline": {
       "saveExport": "Spara export",
@@ -107,7 +108,8 @@
     "button": {
       "export": "Exportera",
       "markAsReviewed": "Markera som granskad",
-      "deleteNow": "Ta bort nu"
+      "deleteNow": "Ta bort nu",
+      "markAsUnreviewed": "Markera som ogranskad"
     }
   },
   "imagePicker": {
@@ -115,6 +117,7 @@
     "search": {
       "placeholder": "Sök efter etikett eller underetikett..."
     },
-    "noImages": "Inga miniatyrbilder hittades för den här kameran"
+    "noImages": "Inga miniatyrbilder hittades för den här kameran",
+    "unknownLabel": "Sparad triggerbild"
   }
 }

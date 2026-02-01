@@ -42,7 +42,7 @@
       "label": "Rodyti transliacijos statistiką",
       "desc": "Įjungti šią galimybę rodyti transliacijos statistiką kaip pridėtinę informaciją kameros vaizde."
     },
-    "debugView": "Derinimo Vaizdas"
+    "debugView": "Debug Vaizdas"
   },
   "export": {
     "time": {
@@ -71,19 +71,21 @@
     "export": "Eksportuoti",
     "selectOrExport": "Pasirinkti ar Eksportuoti",
     "toast": {
-      "success": "Sėkmingai pradėtas eksportavimas. Įrašą galima peržiūrėti /exports kataloge.",
+      "success": "Sėkmingai pradėtas eksportavimas. Peržiūrėti įrašą exports puslapyje.",
       "error": {
         "failed": "Nepavyko pradėti eksportavimo: {{error}}",
         "endTimeMustAfterStartTime": "Pabaigos Laikas privalo būti vėliau nei pradžios laikas",
         "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio"
-      }
+      },
+      "view": "Žiūrėti"
     }
   },
   "recording": {
     "button": {
       "markAsReviewed": "Žymėti kaip peržiūrėtą",
       "export": "Eksportuoti",
-      "deleteNow": "Ištrinti Dabar"
+      "deleteNow": "Ištrinti Dabar",
+      "markAsUnreviewed": "Pažymėti kaip nematytą"
     },
     "confirmDelete": {
       "desc": {
@@ -115,6 +117,7 @@
     "search": {
       "placeholder": "Ieškoti pagal etiketę arba sub etiketę..."
     },
-    "noImages": "Šiai kamerai miniatiūrų nerasta"
+    "noImages": "Šiai kamerai miniatiūrų nerasta",
+    "unknownLabel": "Išsaugotas Trigerio Paveiksliukas"
   }
 }

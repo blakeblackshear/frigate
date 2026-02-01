@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Misslyckades att byta namn på export: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Dela export",
+    "downloadVideo": "Ladda ner video",
+    "editName": "Redigera namn",
+    "deleteExport": "Ta bort export"
   }
 }

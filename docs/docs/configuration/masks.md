@@ -28,7 +28,6 @@ To create a poly mask:
 5. Click the plus icon under the type of mask or zone you would like to create
 6. Click on the camera's latest image to create the points for a masked area. Click the first point again to close the polygon.
 7. When you've finished creating your mask, press Save.
-8. Restart Frigate to apply your changes.
 
 Your config file will be updated with the relative coordinates of the mask/zone:
 

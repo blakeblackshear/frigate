@@ -55,5 +55,10 @@
   "stats": {
     "cameraIsOffline": "{{camera}} ออฟไลน์",
     "detectIsVerySlow": "{{detect}} ช้ามาก ({{speed}} มิลลิวินาที)"
+  },
+  "documentTitle": {
+    "cameras": "ข้อมูลกล้อง - Frigate",
+    "storage": "สถิติคลังข้อมูล - Frigate",
+    "general": "สถิติทั่วไป - Frigate"
   }
 }

@@ -9,7 +9,8 @@
       "estimatedTime": "Perkiraan waktu tersisa:",
       "finishingShortly": "Selesai sesaat lagi",
       "step": {
-        "thumbnailsEmbedded": "Keluku dilampirkan "
+        "thumbnailsEmbedded": "Keluku dilampirkan ",
+        "descriptionsEmbedded": "Deskripsi terlampir: "
       }
     }
   },

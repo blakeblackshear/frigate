@@ -2,6 +2,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHistoryBack } from "@/hooks/use-history-back";
 
 // Enhanced Dialog with History Support
 interface HistoryDialogProps extends DialogPrimitive.DialogProps {
@@ -15,51 +16,28 @@ const Dialog = ({
   ...props
 }: HistoryDialogProps) => {
   const [internalOpen, setInternalOpen] = React.useState(open || false);
-  const historyStateRef = React.useRef<null | {
-    listener: (e: PopStateEvent) => void;
-  }>(null);
 
+  // Sync internal state with controlled open prop
   React.useEffect(() => {
     if (open !== undefined) {
       setInternalOpen(open);
     }
   }, [open]);
 
-  React.useEffect(() => {
-    if (enableHistoryBack) {
-      if (internalOpen) {
-        window.history.pushState({ dialogOpen: true }, "");
+  const handleOpenChange = React.useCallback(
+    (newOpen: boolean) => {
+      setInternalOpen(newOpen);
+      onOpenChange?.(newOpen);
+    },
+    [onOpenChange],
+  );
 
-        const listener = () => {
-          setInternalOpen(false);
-          if (onOpenChange) onOpenChange(false);
-        };
-
-        historyStateRef.current = { listener };
-        window.addEventListener("popstate", listener);
-
-        return () => {
-          if (internalOpen) {
-            window.removeEventListener("popstate", listener);
-            historyStateRef.current = null;
-          }
-        };
-      } else if (historyStateRef.current) {
-        window.removeEventListener(
-          "popstate",
-          historyStateRef.current.listener,
-        );
-        historyStateRef.current = null;
-      }
-    }
-  }, [enableHistoryBack, internalOpen, onOpenChange]);
-
-  const handleOpenChange = (open: boolean) => {
-    setInternalOpen(open);
-    if (onOpenChange) {
-      onOpenChange(open);
-    }
-  };
+  // Handle browser back button to close dialog
+  useHistoryBack({
+    enabled: enableHistoryBack,
+    open: internalOpen,
+    onClose: () => handleOpenChange(false),
+  });
 
   return (
     <DialogPrimitive.Root
@@ -107,7 +85,7 @@ const DialogContent = React.forwardRef<
     >
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4 text-secondary-foreground" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

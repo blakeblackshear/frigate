@@ -1,0 +1,61 @@
+{
+  "alerts": "Paziņojumi",
+  "detections": "Atklājumi",
+  "motion": {
+    "label": "Kustība",
+    "only": "Tikai kustība"
+  },
+  "allCameras": "Visas kameras",
+  "empty": {
+    "alert": "Nav paziņojumu, kurus pārskatīt",
+    "detection": "Nav apskatāmu konstatējumu",
+    "motion": "Nav atrasti kustības dati"
+  },
+  "timeline": "Laika skala",
+  "timeline.aria": "Izvēlieties laika skalu",
+  "zoomIn": "Pietuvināt",
+  "zoomOut": "Tālināt",
+  "events": {
+    "label": "Notikumi",
+    "aria": "Izvēlieties notikumus",
+    "noFoundForTimePeriod": "Šajā laika periodā nav atrasts neviens notikums."
+  },
+  "detail": {
+    "label": "Detaļas",
+    "noDataFound": "Nav detalizētu datu pārskatīšanai",
+    "aria": "Pārslēgt detalizēto skatu",
+    "trackedObject_one": "{{count}} objekts",
+    "trackedObject_other": "{{count}} objekti",
+    "noObjectDetailData": "Nav pieejami objekta detalizēti dati.",
+    "settings": "Detaļas skata iestatījumi",
+    "alwaysExpandActive": {
+      "title": "Vienmēr izvērst aktīvs",
+      "desc": "Vienmēr izvērsiet aktīvā pārskata vienuma objekta informāciju, ja tāda ir pieejama."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Izsekots punkts",
+    "clickToSeek": "Noklikšķiniet, lai pārietu uz šo laiku"
+  },
+  "documentTitle": "Pārskats - Frigate",
+  "recordings": {
+    "documentTitle": "Ieraksti - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Pēdējās 24 stundas"
+  },
+  "markAsReviewed": "Atzīmēt kā pārskatītu",
+  "markTheseItemsAsReviewed": "Atzīmēt šos vienumus kā pārskatītus",
+  "newReviewItems": {
+    "label": "Skatīt jaunus atsauksmju vienumus",
+    "button": "Jauni vienumi, kas jāpārskata"
+  },
+  "selected_one": "atlasīts {{count}}",
+  "selected_other": "atlasīts {{count}}",
+  "select_all": "Viss",
+  "camera": "Kamera",
+  "detected": "atklāts",
+  "normalActivity": "Normāls",
+  "needsReview": "Nepieciešama pārskatīšana",
+  "securityConcern": "Drošības jautājums"
+}

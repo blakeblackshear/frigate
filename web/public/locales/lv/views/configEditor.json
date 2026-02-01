@@ -1,0 +1,18 @@
+{
+  "documentTitle": "Konfigurācijas rediģēšana - Frigate",
+  "configEditor": "Konfigurācijas redaktors",
+  "safeConfigEditor": "Konfigurācijas redaktors (drošais režīms)",
+  "safeModeDescription": "Frigate ir drošajā režīmā konfigurācijas pārbaudes kļūdas dēļ.",
+  "copyConfig": "Kopēt konfigurāciju",
+  "saveAndRestart": "Saglabāt un pārstartēt",
+  "saveOnly": "Tikai saglabāt",
+  "confirm": "Vai iziet, nesaglabājot?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfigurācija ir kopēta starpliktuvē."
+    },
+    "error": {
+      "savingError": "Saglabājot konfigurāciju, radās kļūda"
+    }
+  }
+}

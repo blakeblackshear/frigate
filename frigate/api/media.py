@@ -22,7 +22,11 @@ from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn, operator
 from tzlocal import get_localzone_name
 
-from frigate.api.auth import get_allowed_cameras_for_filter, require_camera_access
+from frigate.api.auth import (
+    allow_any_authenticated,
+    get_allowed_cameras_for_filter,
+    require_camera_access,
+)
 from frigate.api.defs.query.media_query_parameters import (
     Extension,
     MediaEventsSnapshotQueryParams,
@@ -44,9 +48,9 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.track.object_processing import TrackedObjectProcessor
-from frigate.util.builtin import get_tz_modifiers
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
-from frigate.util.path import get_event_thumbnail_bytes
+from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
@@ -393,7 +397,7 @@ async def submit_recording_snapshot_to_plus(
         )
 
 
-@router.get("/recordings/storage")
+@router.get("/recordings/storage", dependencies=[Depends(allow_any_authenticated())])
 def get_recordings_storage_usage(request: Request):
     recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
         "storage"
@@ -417,14 +421,13 @@ def get_recordings_storage_usage(request: Request):
     return JSONResponse(content=camera_usages)
 
 
-@router.get("/recordings/summary")
+@router.get("/recordings/summary", dependencies=[Depends(allow_any_authenticated())])
 def all_recordings_summary(
     request: Request,
     params: MediaRecordingsSummaryQueryParams = Depends(),
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Returns true/false by day indicating if recordings exist"""
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
 
     cameras = params.cameras
     if cameras != "all":
@@ -432,43 +435,72 @@ def all_recordings_summary(
         filtered = requested.intersection(allowed_cameras)
         if not filtered:
             return JSONResponse(content={})
-        cameras = ",".join(filtered)
+        camera_list = list(filtered)
     else:
-        cameras = allowed_cameras
+        camera_list = allowed_cameras
 
-    query = (
+    time_range_query = (
         Recordings.select(
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Recordings.start_time + seconds_offset,
-                    "unixepoch",
-                    hour_modifier,
-                    minute_modifier,
-                ),
-            ).alias("day")
+            fn.MIN(Recordings.start_time).alias("min_time"),
+            fn.MAX(Recordings.start_time).alias("max_time"),
         )
-        .group_by(
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Recordings.start_time + seconds_offset,
-                    "unixepoch",
-                    hour_modifier,
-                    minute_modifier,
-                ),
-            )
-        )
-        .order_by(Recordings.start_time.desc())
+        .where(Recordings.camera << camera_list)
+        .dicts()
+        .get()
     )
 
-    if params.cameras != "all":
-        query = query.where(Recordings.camera << cameras.split(","))
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
 
-    recording_days = query.namedtuples()
-    days = {day.day: True for day in recording_days}
+    if min_time is None or max_time is None:
+        return JSONResponse(content={})
 
-    return JSONResponse(content=days)
+    dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
+
+    days: dict[str, bool] = {}
+
+    for period_start, period_end, period_offset in dst_periods:
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        period_query = (
+            Recordings.select(
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        Recordings.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("day")
+            )
+            .where(
+                (Recordings.camera << camera_list)
+                & (Recordings.end_time >= period_start)
+                & (Recordings.start_time <= period_end)
+            )
+            .group_by(
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        Recordings.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                )
+            )
+            .order_by(Recordings.start_time.desc())
+            .namedtuples()
+        )
+
+        for g in period_query:
+            days[g.day] = True
+
+    return JSONResponse(content=dict(sorted(days.items())))
 
 
 @router.get(
@@ -476,61 +508,103 @@ def all_recordings_summary(
 )
 async def recordings_summary(camera_name: str, timezone: str = "utc"):
     """Returns hourly summary for recordings of given camera"""
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(timezone)
-    recording_groups = (
+
+    time_range_query = (
         Recordings.select(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).alias("hour"),
-            fn.SUM(Recordings.duration).alias("duration"),
-            fn.SUM(Recordings.motion).alias("motion"),
-            fn.SUM(Recordings.objects).alias("objects"),
+            fn.MIN(Recordings.start_time).alias("min_time"),
+            fn.MAX(Recordings.start_time).alias("max_time"),
         )
         .where(Recordings.camera == camera_name)
-        .group_by((Recordings.start_time + seconds_offset).cast("int") / 3600)
-        .order_by(Recordings.start_time.desc())
-        .namedtuples()
+        .dicts()
+        .get()
     )
 
-    event_groups = (
-        Event.select(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).alias("hour"),
-            fn.COUNT(Event.id).alias("count"),
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
+
+    days: dict[str, dict] = {}
+
+    if min_time is None or max_time is None:
+        return JSONResponse(content=list(days.values()))
+
+    dst_periods = get_dst_transitions(timezone, min_time, max_time)
+
+    for period_start, period_end, period_offset in dst_periods:
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        recording_groups = (
+            Recordings.select(
+                fn.strftime(
+                    "%Y-%m-%d %H",
+                    fn.datetime(
+                        Recordings.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("hour"),
+                fn.SUM(Recordings.duration).alias("duration"),
+                fn.SUM(Recordings.motion).alias("motion"),
+                fn.SUM(Recordings.objects).alias("objects"),
+            )
+            .where(
+                (Recordings.camera == camera_name)
+                & (Recordings.end_time >= period_start)
+                & (Recordings.start_time <= period_end)
+            )
+            .group_by((Recordings.start_time + period_offset).cast("int") / 3600)
+            .order_by(Recordings.start_time.desc())
+            .namedtuples()
         )
-        .where(Event.camera == camera_name, Event.has_clip)
-        .group_by((Event.start_time + seconds_offset).cast("int") / 3600)
-        .namedtuples()
-    )
 
-    event_map = {g.hour: g.count for g in event_groups}
+        event_groups = (
+            Event.select(
+                fn.strftime(
+                    "%Y-%m-%d %H",
+                    fn.datetime(
+                        Event.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("hour"),
+                fn.COUNT(Event.id).alias("count"),
+            )
+            .where(Event.camera == camera_name, Event.has_clip)
+            .where(
+                (Event.start_time >= period_start) & (Event.start_time <= period_end)
+            )
+            .group_by((Event.start_time + period_offset).cast("int") / 3600)
+            .namedtuples()
+        )
 
-    days = {}
+        event_map = {g.hour: g.count for g in event_groups}
 
-    for recording_group in recording_groups:
-        parts = recording_group.hour.split()
-        hour = parts[1]
-        day = parts[0]
-        events_count = event_map.get(recording_group.hour, 0)
-        hour_data = {
-            "hour": hour,
-            "events": events_count,
-            "motion": recording_group.motion,
-            "objects": recording_group.objects,
-            "duration": round(recording_group.duration),
-        }
-        if day not in days:
-            days[day] = {"events": events_count, "hours": [hour_data], "day": day}
-        else:
-            days[day]["events"] += events_count
-            days[day]["hours"].append(hour_data)
+        for recording_group in recording_groups:
+            parts = recording_group.hour.split()
+            hour = parts[1]
+            day = parts[0]
+            events_count = event_map.get(recording_group.hour, 0)
+            hour_data = {
+                "hour": hour,
+                "events": events_count,
+                "motion": recording_group.motion,
+                "objects": recording_group.objects,
+                "duration": round(recording_group.duration),
+            }
+            if day in days:
+                # merge counts if already present (edge-case at DST boundary)
+                days[day]["events"] += events_count or 0
+                days[day]["hours"].append(hour_data)
+            else:
+                days[day] = {
+                    "events": events_count or 0,
+                    "hours": [hour_data],
+                    "day": day,
+                }
 
     return JSONResponse(content=list(days.values()))
 
@@ -565,7 +639,11 @@ async def recordings(
     return JSONResponse(content=list(recordings))
 
 
-@router.get("/recordings/unavailable", response_model=list[dict])
+@router.get(
+    "/recordings/unavailable",
+    response_model=list[dict],
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def no_recordings(
     request: Request,
     params: MediaRecordingsAvailabilityQueryParams = Depends(),
@@ -589,7 +667,7 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Recordings.camera << camera_list))
@@ -608,33 +686,39 @@ async def no_recordings(
     # Convert recordings to list of (start, end) tuples
     recordings = [(r["start_time"], r["end_time"]) for r in data]
 
-    # Generate all time segments
-    current = after
+    # Iterate through time segments and check if each has any recording
     no_recording_segments = []
-    current_start = None
+    current = after
+    current_gap_start = None
 
     while current < before:
-        segment_end = current + scale
-        # Check if segment overlaps with any recording
+        segment_end = min(current + scale, before)
+
+        # Check if this segment overlaps with any recording
         has_recording = any(
-            start <= segment_end and end >= current for start, end in recordings
+            rec_start < segment_end and rec_end > current
+            for rec_start, rec_end in recordings
         )
+
         if not has_recording:
-            if current_start is None:
-                current_start = current  # Start a new gap
+            # This segment has no recordings
+            if current_gap_start is None:
+                current_gap_start = current  # Start a new gap
         else:
-            if current_start is not None:
+            # This segment has recordings
+            if current_gap_start is not None:
                 # End the current gap and append it
                 no_recording_segments.append(
-                    {"start_time": int(current_start), "end_time": int(current)}
+                    {"start_time": int(current_gap_start), "end_time": int(current)}
                 )
-                current_start = None
+                current_gap_start = None
+
         current = segment_end
 
     # Append the last gap if it exists
-    if current_start is not None:
+    if current_gap_start is not None:
         no_recording_segments.append(
-            {"start_time": int(current_start), "end_time": int(before)}
+            {"start_time": int(current_gap_start), "end_time": int(before)}
         )
 
     return JSONResponse(content=no_recording_segments)
@@ -685,6 +769,15 @@ async def recording_clip(
         .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.asc())
     )
+
+    if recordings.count() == 0:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "No recordings found for the specified time range",
+            },
+            status_code=400,
+        )
 
     file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
     file_path = os.path.join(CACHE_DIR, file_name)
@@ -744,7 +837,19 @@ async def recording_clip(
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
+async def vod_ts(
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+    force_discontinuity: bool = False,
+):
+    logger.debug(
+        "VOD: Generating VOD for %s from %s to %s with force_discontinuity=%s",
+        camera_name,
+        start_ts,
+        end_ts,
+        force_discontinuity,
+    )
     recordings = (
         Recordings.select(
             Recordings.path,
@@ -764,10 +869,19 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
     clips = []
     durations = []
+    min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
 
     recording: Recordings
     for recording in recordings:
+        logger.debug(
+            "VOD: processing recording: %s start=%s end=%s duration=%s",
+            recording.path,
+            recording.start_time,
+            recording.end_time,
+            recording.duration,
+        )
+
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
@@ -776,19 +890,35 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
             inpoint = int((start_ts - recording.start_time) * 1000)
             clip["clipFrom"] = inpoint
             duration -= inpoint
+            logger.debug(
+                "VOD: applied clipFrom %sms to %s",
+                inpoint,
+                recording.path,
+            )
 
         # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-        if duration <= 0:
-            # skip if the clip has no valid duration
+        if duration < min_duration_ms:
+            # skip if the clip has no valid duration (too short to contain frames)
+            logger.debug(
+                "VOD: skipping recording %s - resulting duration %sms too short",
+                recording.path,
+                duration,
+            )
             continue
 
-        if 0 < duration < max_duration_ms:
+        if min_duration_ms <= duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
+            logger.debug(
+                "VOD: added clip %s duration_ms=%s clipFrom=%s",
+                recording.path,
+                duration,
+                clip.get("clipFrom"),
+            )
         else:
             logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
@@ -808,7 +938,7 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     return JSONResponse(
         content={
             "cache": hour_ago.timestamp() > start_ts,
-            "discontinuity": False,
+            "discontinuity": force_discontinuity,
             "consistentSequenceMediaInfo": True,
             "durations": durations,
             "segment_duration": max(durations),
@@ -851,6 +981,7 @@ async def vod_hour(
 
 @router.get(
     "/vod/event/{event_id}",
+    dependencies=[Depends(allow_any_authenticated())],
     description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_event(
@@ -889,6 +1020,19 @@ async def vod_event(
         Event.update(has_clip=False).where(Event.id == event_id).execute()
 
     return vod_response
+
+
+@router.get(
+    "/vod/clip/{camera_name}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for a timestamp range with HLS discontinuity enabled. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+async def vod_clip(
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+):
+    return await vod_ts(camera_name, start_ts, end_ts, force_discontinuity=True)
 
 
 @router.get(
@@ -967,7 +1111,10 @@ async def event_snapshot(
     )
 
 
-@router.get("/events/{event_id}/thumbnail.{extension}")
+@router.get(
+    "/events/{event_id}/thumbnail.{extension}",
+    dependencies=[Depends(require_camera_access)],
+)
 async def event_thumbnail(
     request: Request,
     event_id: str,
@@ -1165,9 +1312,12 @@ def grid_snapshot(
         )
 
 
-@router.get("/events/{event_id}/snapshot-clean.png")
+@router.get(
+    "/events/{event_id}/snapshot-clean.webp",
+    dependencies=[Depends(require_camera_access)],
+)
 def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
-    png_bytes = None
+    webp_bytes = None
     try:
         event = Event.get(Event.id == event_id)
         snapshot_config = request.app.frigate_config.cameras[event.camera].snapshots
@@ -1189,7 +1339,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     if event_id in camera_state.tracked_objects:
                         tracked_obj = camera_state.tracked_objects.get(event_id)
                         if tracked_obj is not None:
-                            png_bytes = tracked_obj.get_clean_png()
+                            webp_bytes = tracked_obj.get_clean_webp()
                             break
             except Exception:
                 return JSONResponse(
@@ -1205,12 +1355,56 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
-    if png_bytes is None:
+    if webp_bytes is None:
         try:
-            clean_snapshot_path = os.path.join(
+            # webp
+            clean_snapshot_path_webp = os.path.join(
+                CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"
+            )
+            # png (legacy)
+            clean_snapshot_path_png = os.path.join(
                 CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
             )
-            if not os.path.exists(clean_snapshot_path):
+
+            if os.path.exists(clean_snapshot_path_webp):
+                with open(clean_snapshot_path_webp, "rb") as image_file:
+                    webp_bytes = image_file.read()
+            elif os.path.exists(clean_snapshot_path_png):
+                # convert png to webp and save for future use
+                png_image = cv2.imread(clean_snapshot_path_png, cv2.IMREAD_UNCHANGED)
+                if png_image is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Invalid png snapshot",
+                        },
+                        status_code=400,
+                    )
+
+                ret, webp_data = cv2.imencode(
+                    ".webp", png_image, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+                )
+                if not ret:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to convert png to webp",
+                        },
+                        status_code=400,
+                    )
+
+                webp_bytes = webp_data.tobytes()
+
+                # save the converted webp for future requests
+                try:
+                    with open(clean_snapshot_path_webp, "wb") as f:
+                        f.write(webp_bytes)
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to save converted webp for event {event.id}: {e}"
+                    )
+                    # continue since we now have the data to return
+            else:
                 return JSONResponse(
                     content={
                         "success": False,
@@ -1218,38 +1412,36 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     },
                     status_code=404,
                 )
-            with open(
-                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
-            ) as image_file:
-                png_bytes = image_file.read()
         except Exception:
-            logger.error(f"Unable to load clean png for event: {event.id}")
+            logger.error(f"Unable to load clean snapshot for event: {event.id}")
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": "Unable to load clean png for event",
+                    "message": "Unable to load clean snapshot for event",
                 },
                 status_code=400,
             )
 
     headers = {
-        "Content-Type": "image/png",
+        "Content-Type": "image/webp",
         "Cache-Control": "private, max-age=31536000",
     }
 
     if download:
         headers["Content-Disposition"] = (
-            f"attachment; filename=snapshot-{event_id}-clean.png"
+            f"attachment; filename=snapshot-{event_id}-clean.webp"
         )
 
     return Response(
-        png_bytes,
-        media_type="image/png",
+        webp_bytes,
+        media_type="image/webp",
         headers=headers,
     )
 
 
-@router.get("/events/{event_id}/clip.mp4")
+@router.get(
+    "/events/{event_id}/clip.mp4", dependencies=[Depends(require_camera_access)]
+)
 async def event_clip(
     request: Request,
     event_id: str,
@@ -1277,7 +1469,9 @@ async def event_clip(
     )
 
 
-@router.get("/events/{event_id}/preview.gif")
+@router.get(
+    "/events/{event_id}/preview.gif", dependencies=[Depends(require_camera_access)]
+)
 def event_preview(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -1630,7 +1824,7 @@ def preview_mp4(
     )
 
 
-@router.get("/review/{event_id}/preview")
+@router.get("/review/{event_id}/preview", dependencies=[Depends(require_camera_access)])
 def review_preview(
     request: Request,
     event_id: str,
@@ -1656,8 +1850,12 @@ def review_preview(
         return preview_mp4(request, review.camera, start_ts, end_ts)
 
 
-@router.get("/preview/{file_name}/thumbnail.jpg")
-@router.get("/preview/{file_name}/thumbnail.webp")
+@router.get(
+    "/preview/{file_name}/thumbnail.jpg", dependencies=[Depends(require_camera_access)]
+)
+@router.get(
+    "/preview/{file_name}/thumbnail.webp", dependencies=[Depends(require_camera_access)]
+)
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview frames."""
     if len(file_name) > 1000:
@@ -1737,7 +1935,7 @@ async def label_clip(request: Request, camera_name: str, label: str):
     try:
         event = event_query.get()
 
-        return await event_clip(request, event.id)
+        return await event_clip(request, event.id, 0)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404

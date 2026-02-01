@@ -47,12 +47,16 @@
         "success": {
           "regenerate": "已從 {{provider}} 請求新的說明。根據提供者的速度，生成新的說明可能會需要一段時間。",
           "updatedSublabel": "成功更新子標籤。",
-          "updatedLPR": "成功更新車牌。"
+          "updatedLPR": "成功更新車牌。",
+          "updatedAttributes": "已成功更新屬性。",
+          "audioTranscription": "已成功送出音訊轉錄請求。轉錄完成所需時間會依您的 Frigate 伺服器速度而定，可能需要一段時間。"
         },
         "error": {
           "regenerate": "請求 {{provider}} 生成新的說明失敗：{{errorMessage}}",
           "updatedSublabelFailed": "更新子標籤失敗：{{errorMessage}}",
-          "updatedLPRFailed": "更新車牌失敗：{{errorMessage}}"
+          "updatedLPRFailed": "更新車牌失敗：{{errorMessage}}",
+          "updatedAttributesFailed": "更新屬性失敗：{{errorMessage}}",
+          "audioTranscription": "請求音訊轉錄失敗：{{errorMessage}}"
         }
       }
     },
@@ -97,6 +101,17 @@
     "tips": {
       "descriptionSaved": "成功保存說明",
       "saveDescriptionFailed": "更新說明失敗：{{errorMessage}}"
+    },
+    "editAttributes": {
+      "title": "編輯屬性",
+      "desc": "為此 {{label}} 選擇分類屬性"
+    },
+    "score": {
+      "label": "分數"
+    },
+    "attributes": "分類屬性",
+    "title": {
+      "label": "標題"
     }
   },
   "trackedObjectDetails": "追蹤物件詳情",
@@ -104,7 +119,9 @@
     "details": "詳情",
     "snapshot": "截圖",
     "video": "影片",
-    "object_lifecycle": "物件生命週期"
+    "object_lifecycle": "物件生命週期",
+    "thumbnail": "預覽圖",
+    "tracking_details": "追蹤詳情"
   },
   "objectLifecycle": {
     "title": "物件生命週期",
@@ -182,12 +199,34 @@
     },
     "deleteTrackedObject": {
       "label": "刪除此追蹤物件"
+    },
+    "hideObjectDetails": {
+      "label": "隱藏物件路徑"
+    },
+    "showObjectDetails": {
+      "label": "顯示物件路徑"
+    },
+    "addTrigger": {
+      "label": "新增觸發器",
+      "aria": "為此追蹤物件新增觸發器"
+    },
+    "audioTranscription": {
+      "label": "轉錄",
+      "aria": "請求音訊轉錄"
+    },
+    "downloadCleanSnapshot": {
+      "label": "下載乾淨的快照",
+      "aria": "下載乾淨的快照"
+    },
+    "viewTrackingDetails": {
+      "label": "檢視追蹤詳細資訊",
+      "aria": "顯示追蹤詳細資訊"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "確認刪除",
-      "desc": "刪除此追蹤物件將移除截圖、所有已保存的嵌入，以及所有相關的物件生命週期紀錄。歷史記錄中的錄影<em>不會</em>被刪除。<br /><br />你確定要刪除嗎？"
+      "desc": "刪除此追蹤物件將移除截圖、所有已保存的嵌入，以及所有相關的追蹤詳情。歷史記錄中的錄影<em>不會</em>被刪除。<br /><br />你確定要刪除嗎？"
     }
   },
   "noTrackedObjects": "找不到追蹤物件",
@@ -200,6 +239,60 @@
         "success": "成功刪除蹤物件。",
         "error": "刪除追蹤物件失敗：{{errorMessage}}"
       }
+    },
+    "previousTrackedObject": "上一個追蹤物件",
+    "nextTrackedObject": "下一個追蹤物件"
+  },
+  "trackingDetails": {
+    "title": "追蹤詳情",
+    "noImageFound": "沒有找到在此時間點的圖片。",
+    "createObjectMask": "建立物件遮罩",
+    "adjustAnnotationSettings": "調整標記設定",
+    "scrollViewTips": "點擊查看物件周期的關鍵時間。",
+    "autoTrackingTips": "自動追蹤鏡頭的邊框位置可能不準確。",
+    "count": "{{second}}之{{first}}",
+    "trackedPoint": "追蹤點",
+    "lifecycleItemDesc": {
+      "visible": "偵測到 {{label}}",
+      "entered_zone": "{{label}} 已進入 {{zones}}",
+      "active": "{{label}} 正在活動",
+      "stationary": "{{label}} 變為靜止",
+      "attribute": {
+        "faceOrLicense_plate": "偵測到{{label}} {{attribute}}",
+        "other": "{{label}} 被識別為 {{attribute}}"
+      },
+      "gone": "{{label}} 已離開",
+      "heard": "聽到了 {{label}}",
+      "external": "偵測到 {{label}}",
+      "header": {
+        "zones": "區域",
+        "ratio": "比例",
+        "score": "分數",
+        "area": "面積"
+      }
+    },
+    "annotationSettings": {
+      "title": "標記設定",
+      "showAllZones": {
+        "title": "顯示所有區域",
+        "desc": "總是在物件進入區域時在畫面上顯示區域範圍。"
+      },
+      "offset": {
+        "label": "標記偏移量",
+        "desc": "這個資料來自您的鏡頭的偵測串流源，但是被疊加在錄影串流源的畫面上，兩個串流源不太可能完美的同步，因此邊框與畫面無法完美的對齊。您可以用這項設定調整標記在時間上前後偏移的補償量來更好的將其與錄影畫面對齊。",
+        "millisecondsToOffset": "偵測標記偏移補償的毫秒數。<em>預設值: 0</em>",
+        "tips": "如果影片播放進度超前於方框和路徑點，則降低該值；如果影片播放進度落後於方框和路徑點，則增加該數值。該值可以為負數。",
+        "toast": {
+          "success": "{{camera}} 的標記偏移補償量已儲存至設定檔。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "上一張投影片",
+      "next": "下一張投影片"
     }
+  },
+  "aiAnalysis": {
+    "title": "AI 分析"
   }
 }

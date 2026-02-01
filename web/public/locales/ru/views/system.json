@@ -76,7 +76,12 @@
         }
       },
       "npuMemory": "Память NPU",
-      "npuUsage": "Использование NPU"
+      "npuUsage": "Использование NPU",
+      "intelGpuWarning": {
+        "title": "Предупреждение: статистика Intel GPU",
+        "message": "Статистика GPU недоступна",
+        "description": "Это известная ошибка в инструментах отчетности статистики Intel GPU (intel_gpu_top), из-за которой они ломаются и постоянно возвращают уровень использования GPU 0%, даже в случаях, когда аппаратное ускорение и обнаружение объектов корректно работают на (i)GPU. Это не ошибка Frigate. Вы можете перезапустить хост-систему, чтобы временно устранить проблему и убедиться, что GPU работает правильно. На производительность это не влияет."
+      }
     },
     "otherProcesses": {
       "title": "Другие процессы",
@@ -180,7 +185,17 @@
       "yolov9_plate_detection": "Обнаружение номеров YOLOv9",
       "face_recognition": "Распознавание лиц",
       "plate_recognition": "Распознавание номеров",
-      "image_embedding": "Векторизация изображений"
-    }
+      "image_embedding": "Векторизация изображений",
+      "review_description": "Описание проверки",
+      "review_description_speed": "Скорость просмотра описания",
+      "review_description_events_per_second": "Описание проверки",
+      "object_description": "Описание объекта",
+      "object_description_speed": "Скорость описания объекта",
+      "object_description_events_per_second": "Описание объекта",
+      "classification": "{{name}} Классификация",
+      "classification_speed": "{{name}}Классификация скорости",
+      "classification_events_per_second": "{{name}} событий классификации в секунду"
+    },
+    "averageInf": "Среднее время обработки"
   }
 }

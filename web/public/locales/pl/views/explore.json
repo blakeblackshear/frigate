@@ -21,13 +21,15 @@
           "regenerate": "Zażądano nowego opisu od {{provider}}. W zależności od szybkości twojego dostawcy, wygenerowanie nowego opisu może zająć trochę czasu.",
           "updatedSublabel": "Pomyślnie zaktualizowano podetykietę.",
           "updatedLPR": "Pomyślnie zaktualizowano tablicę rejestracyjną.",
-          "audioTranscription": "Wysłano prośbę o audio transkrypcję."
+          "audioTranscription": "Wysłano prośbę o audio transkrypcję. W zależności od szybkości serwera Frigate, transkrypcja może potrwać trochę czasu.",
+          "updatedAttributes": "Atrybuty zostały pomyślnie zaktualizowane."
         },
         "error": {
           "regenerate": "Nie udało się wezwać {{provider}} dla nowego opisu: {{errorMessage}}",
           "updatedSublabelFailed": "Nie udało się zaktualizować podetykiety: {{errorMessage}}",
           "updatedLPRFailed": "Nie udało się zaktualizować tablicy rejestracyjnej: {{errorMessage}}",
-          "audioTranscription": "Nie udało się włączyć audio transkrypcji: {{errorMessage}}"
+          "audioTranscription": "Nie udało się włączyć audio transkrypcji: {{errorMessage}}",
+          "updatedAttributesFailed": "Nie udało się zaktualizować atrybutów: {{errorMessage}}"
         }
       }
     },
@@ -75,6 +77,14 @@
     },
     "score": {
       "label": "Wynik"
+    },
+    "editAttributes": {
+      "title": "Edytuj atrybuty",
+      "desc": "Wybierz atrybuty klasyfikacji dla tego {{label}}"
+    },
+    "attributes": "Atrybuty klasyfikacji",
+    "title": {
+      "label": "Tytuł"
     }
   },
   "objectLifecycle": {
@@ -159,7 +169,9 @@
     "details": "szczegóły",
     "snapshot": "zrzut ekranu",
     "video": "wideo",
-    "object_lifecycle": "cykl życia obiektu"
+    "object_lifecycle": "cykl życia obiektu",
+    "thumbnail": "miniaturka",
+    "tracking_details": "szczegóły śledzenia"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -196,6 +208,20 @@
     "audioTranscription": {
       "label": "Rozpisz",
       "aria": "Poproś o audiotranskrypcję"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Pobierz czysty snapshot",
+      "aria": "Pobierz czysty snapshot"
+    },
+    "viewTrackingDetails": {
+      "label": "Wyświetl szczegóły śledzenia",
+      "aria": "Pokaż szczegóły śledzenia"
+    },
+    "showObjectDetails": {
+      "label": "Pokaż ścieżkę obiektu"
+    },
+    "hideObjectDetails": {
+      "label": "Ukryj ścieżkę obiektu"
     }
   },
   "trackedObjectsCount_one": "{{count}} śledzony obiekt ",
@@ -204,7 +230,7 @@
   "noTrackedObjects": "Nie znaleziono śledzonych obiektów",
   "dialog": {
     "confirmDelete": {
-      "desc": "Usunięcie tego śledzonego obiektu usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy cyklu życia obiektu. Nagrany materiał tego śledzonego obiektu w widoku Historii <em>NIE</em> zostanie usunięty.<br /><br />Czy na pewno chcesz kontynuować?",
+      "desc": "Usunięcie tego śledzonego obiektu usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy śledzenia obiektu. Nagrany materiał tego śledzonego obiektu w widoku Historii <em>NIE</em> zostanie usunięty.<br /><br />Czy na pewno chcesz kontynuować?",
       "title": "Potwierdź usunięcie"
     }
   },
@@ -216,7 +242,9 @@
         "error": "Nie udało się usunąć śledzonego obiektu: {{errorMessage}}"
       }
     },
-    "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%"
+    "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%",
+    "previousTrackedObject": "Poprzednio śledzony obiekt",
+    "nextTrackedObject": "Następny śledzony obiekt"
   },
   "exploreMore": "Odkryj więcej obiektów typu {{label}}",
   "aiAnalysis": {
@@ -224,5 +252,54 @@
   },
   "concerns": {
     "label": "Obawy"
+  },
+  "trackingDetails": {
+    "title": "Szczegóły śledzenia",
+    "noImageFound": "Nie znaleziono obrazka dla podanego czasu.",
+    "createObjectMask": "Utwórz maskę obiektu",
+    "adjustAnnotationSettings": "Dostosuj ustawienia adnotacji",
+    "scrollViewTips": "Kliknij, aby zobaczyć najważniejsze momenty cyklu życia tego obiektu.",
+    "count": "{{first}} z {{second}}",
+    "autoTrackingTips": "Pozycja znacznika obiektu jest niedokładna dla kamer z automatycznym śledzeniem.",
+    "lifecycleItemDesc": {
+      "visible": "Wykryto {{label}}",
+      "entered_zone": "{{label}} pojawił się w {{zones}}",
+      "active": "{{label}} poruszył się",
+      "stationary": "{{label}} zatrzymał się",
+      "attribute": {
+        "faceOrLicense_plate": "Wykryto {{attribute}} dla obiektu {{label}}",
+        "other": "{{label}} został rozpoznany jako {{attribute}}"
+      },
+      "gone": "Utracono śledzenie dla {{label}}",
+      "external": "Wykryto {{label}}",
+      "header": {
+        "zones": "Strefy",
+        "area": "Powierzchnia",
+        "score": "Wynik",
+        "ratio": "Proporcje"
+      },
+      "heard": "{{label}} słyszałem"
+    },
+    "annotationSettings": {
+      "title": "Ustawienia adnotacji",
+      "showAllZones": {
+        "title": "Pokaż wszystkie strefy",
+        "desc": "Pokazuj linie stref w momencie wejścia obiektu w strefę."
+      },
+      "offset": {
+        "label": "Przesunięcie adnotacji",
+        "desc": "Dane te pochodzą z kanału wykrywania kamery, ale są nakładane na obrazy z kanału nagrywania. Jest mało prawdopodobne, aby oba strumienie były idealnie zsynchronizowane. W rezultacie ramka ograniczająca i materiał filmowy nie będą idealnie dopasowane. Można użyć tego ustawienia, aby przesunąć adnotacje do przodu lub do tyłu w czasie, aby lepiej dopasować je do nagranego materiału filmowego.",
+        "millisecondsToOffset": "Milisekundy, po których wykrywane są adnotacje. <em>Domyślnie: 0</em>",
+        "tips": "Zmniejsz wartość, jeśli odtwarzanie wideo wyprzedza pola i punkty ścieżki, i zwiększ wartość, jeśli odtwarzanie wideo pozostaje w tyle. Wartość ta może być ujemna.",
+        "toast": {
+          "success": "Przesunięcie adnotacji dla {{camera}} zostało zapisane w pliku konfiguracyjnym."
+        }
+      }
+    },
+    "trackedPoint": "Śledzony Punkt",
+    "carousel": {
+      "previous": "Poprzedni slajd",
+      "next": "Następny slajd"
+    }
   }
 }

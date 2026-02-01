@@ -16,18 +16,24 @@ import {
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { toast } from "sonner";
 import { Trans, useTranslation } from "react-i18next";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type SearchActionGroupProps = {
   selectedObjects: string[];
   setSelectedObjects: (ids: string[]) => void;
   pullLatestData: () => void;
+  onSelectAllObjects: () => void;
+  totalItems: number;
 };
 export default function SearchActionGroup({
   selectedObjects,
   setSelectedObjects,
   pullLatestData,
+  onSelectAllObjects,
+  totalItems,
 }: SearchActionGroupProps) {
   const { t } = useTranslation(["components/filter"]);
+  const isAdmin = useIsAdmin();
   const onClearSelected = useCallback(() => {
     setSelectedObjects([]);
   }, [setSelectedObjects]);
@@ -122,24 +128,37 @@ export default function SearchActionGroup({
           >
             {t("button.unselect", { ns: "common" })}
           </div>
-        </div>
-        <div className="flex items-center gap-1 md:gap-2">
-          <Button
-            className="flex items-center gap-2 p-2"
-            aria-label={t("button.delete", { ns: "common" })}
-            size="sm"
-            onClick={handleDelete}
-          >
-            <HiTrash className="text-secondary-foreground" />
-            {isDesktop && (
-              <div className="text-primary">
-                {bypassDialog
-                  ? t("button.deleteNow", { ns: "common" })
-                  : t("button.delete", { ns: "common" })}
+          {selectedObjects.length < totalItems && (
+            <>
+              <div className="p-1">{"|"}</div>
+              <div
+                className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                onClick={onSelectAllObjects}
+              >
+                {t("select_all", { ns: "views/events" })}
               </div>
-            )}
-          </Button>
+            </>
+          )}
         </div>
+        {isAdmin && (
+          <div className="flex items-center gap-1 md:gap-2">
+            <Button
+              className="flex items-center gap-2 p-2"
+              aria-label={t("button.delete", { ns: "common" })}
+              size="sm"
+              onClick={handleDelete}
+            >
+              <HiTrash className="text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {bypassDialog
+                    ? t("button.deleteNow", { ns: "common" })
+                    : t("button.delete", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </>
   );

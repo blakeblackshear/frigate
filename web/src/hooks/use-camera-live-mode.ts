@@ -1,17 +1,20 @@
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
-import { LivePlayerMode, LiveStreamMetadata } from "@/types/live";
+import { LivePlayerMode } from "@/types/live";
+import useDeferredStreamMetadata from "./use-deferred-stream-metadata";
+import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
 
 export default function useCameraLiveMode(
   cameras: CameraConfig[],
   windowVisible: boolean,
+  activeStreams?: { [cameraName: string]: string },
 ) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // Get comma-separated list of restreamed stream names for SWR key
-  const restreamedStreamsKey = useMemo(() => {
-    if (!cameras || !config) return null;
+  // Compute which streams need metadata (restreamed streams only)
+  const restreamedStreamNames = useMemo(() => {
+    if (!cameras || !config) return [];
 
     const streamNames = new Set<string>();
     cameras.forEach((camera) => {
@@ -20,57 +23,23 @@ export default function useCameraLiveMode(
       );
 
       if (isRestreamed) {
-        Object.values(camera.live.streams).forEach((streamName) => {
-          streamNames.add(streamName);
-        });
-      }
-    });
-
-    return streamNames.size > 0
-      ? Array.from(streamNames).sort().join(",")
-      : null;
-  }, [cameras, config]);
-
-  const streamsFetcher = useCallback(async (key: string) => {
-    const streamNames = key.split(",");
-
-    const metadataPromises = streamNames.map(async (streamName) => {
-      try {
-        const response = await fetch(`/api/go2rtc/streams/${streamName}`, {
-          priority: "low",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          return { streamName, data };
+        if (activeStreams && activeStreams[camera.name]) {
+          streamNames.add(activeStreams[camera.name]);
+        } else {
+          Object.values(camera.live.streams).forEach((streamName) => {
+            streamNames.add(streamName);
+          });
         }
-        return { streamName, data: null };
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(`Failed to fetch metadata for ${streamName}:`, error);
-        return { streamName, data: null };
       }
     });
 
-    const results = await Promise.allSettled(metadataPromises);
+    return Array.from(streamNames);
+  }, [cameras, config, activeStreams]);
 
-    const metadata: { [key: string]: LiveStreamMetadata } = {};
-    results.forEach((result) => {
-      if (result.status === "fulfilled" && result.value.data) {
-        metadata[result.value.streamName] = result.value.data;
-      }
-    });
+  // Fetch stream metadata with deferred loading (doesn't block initial render)
+  const streamMetadata = useDeferredStreamMetadata(restreamedStreamNames);
 
-    return metadata;
-  }, []);
-
-  const { data: allStreamMetadata = {} } = useSWR<{
-    [key: string]: LiveStreamMetadata;
-  }>(restreamedStreamsKey, streamsFetcher, {
-    revalidateOnFocus: false,
-    dedupingInterval: 10000,
-  });
-
+  // Compute live mode states
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
   }>({});
@@ -85,7 +54,7 @@ export default function useCameraLiveMode(
   }>({});
 
   useEffect(() => {
-    if (!cameras) return;
+    if (!cameras || cameras.length === 0) return;
 
     const mseSupported =
       "MediaSource" in window || "ManagedMediaSource" in window;
@@ -111,20 +80,13 @@ export default function useCameraLiveMode(
         newPreferredLiveModes[camera.name] = isRestreamed ? "mse" : "jsmpeg";
       }
 
-      // check each stream for audio support
+      // Check each stream for audio support
       if (isRestreamed) {
         Object.values(camera.live.streams).forEach((streamName) => {
-          const metadata = allStreamMetadata?.[streamName];
+          const metadata = streamMetadata[streamName];
+          const audioFeatures = detectCameraAudioFeatures(metadata);
           newSupportsAudioOutputStates[streamName] = {
-            supportsAudio: metadata
-              ? metadata.producers.find(
-                  (prod) =>
-                    prod.medias &&
-                    prod.medias.find((media) =>
-                      media.includes("audio, recvonly"),
-                    ) !== undefined,
-                ) !== undefined
-              : false,
+            supportsAudio: audioFeatures.audioOutput,
             cameraName: camera.name,
           };
         });
@@ -139,7 +101,7 @@ export default function useCameraLiveMode(
     setPreferredLiveModes(newPreferredLiveModes);
     setIsRestreamedStates(newIsRestreamedStates);
     setSupportsAudioOutputStates(newSupportsAudioOutputStates);
-  }, [cameras, config, windowVisible, allStreamMetadata]);
+  }, [cameras, config, windowVisible, streamMetadata]);
 
   const resetPreferredLiveMode = useCallback(
     (cameraName: string) => {
@@ -169,5 +131,6 @@ export default function useCameraLiveMode(
     resetPreferredLiveMode,
     isRestreamedStates,
     supportsAudioOutputStates,
+    streamMetadata,
   };
 }

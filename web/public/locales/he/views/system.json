@@ -7,7 +7,8 @@
     "reindexingEmbeddings": "אינדקס מחדש של ההטמעות ({{processed}}% הושלם)",
     "cameraIsOffline": "{{camera}} לא זמינה",
     "detectIsSlow": "{{detect}} איטי ({{speed}} אלפיות שנייה)",
-    "detectIsVerySlow": "{{detect}} איטי מאוד ({{speed}} אלפיות שנייה)"
+    "detectIsVerySlow": "{{detect}} איטי מאוד ({{speed}} אלפיות שנייה)",
+    "shmTooLow": "יש להגדיל את הקצאת ‎/dev/shm‏ ({{total}} MB) לפחות ל־{{min}} MB."
   },
   "documentTitle": {
     "cameras": "מצב מצלמות - Frigate",
@@ -52,7 +53,8 @@
       "inferenceSpeed": "מהירות זיהוי",
       "temperature": "טמפרטורת הגלאי",
       "cpuUsage": "ניצול מעבד על ידי הגלאי",
-      "memoryUsage": "שימוש בזיכרון על ידי הגלאי"
+      "memoryUsage": "שימוש בזיכרון על ידי הגלאי",
+      "cpuUsageInformation": "המעבד המשמש להכנת נתוני קלט ופלט אל/ממודלי זיהוי. ערך זה אינו מודד את השימוש בהסקה, גם אם נעשה שימוש במעבד גרפי או מאיץ."
     },
     "hardwareInfo": {
       "gpuMemory": "זיכרון GPU",
@@ -85,12 +87,24 @@
         }
       },
       "npuUsage": "שימוש ב-NPU",
-      "npuMemory": "NPU זיכרון"
+      "npuMemory": "NPU זיכרון",
+      "intelGpuWarning": {
+        "title": "אזהרת סטטיסטיקות GPU של Intel",
+        "message": "נתוני ה־GPU אינם זמינים",
+        "description": "זהו באג ידוע בכלי הדיווח של Intel לסטטיסטיקות GPU ‏(intel_gpu_top): לפעמים הוא “נשבר” ומתחיל להחזיר שוב ושוב שימוש GPU של 0%, גם במקרים שבהם ההאצה החומרתית וזיהוי האובייקטים כן עובדים תקין על ה־(i)GPU.\nזה לא באג של Frigate. אפשר לאתחל את ה־Host כדי לתקן את זה זמנית, וככה גם לוודא שה־GPU באמת עובד כמו שצריך.\nהתקלה הזו לא משפיעה על הביצועים."
+      }
     },
     "otherProcesses": {
       "title": "תהליכים אחרים",
       "processCpuUsage": "ניצול CPU של התהליך",
-      "processMemoryUsage": "ניצול זיכרון של תהליך"
+      "processMemoryUsage": "ניצול זיכרון של תהליך",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "מקליט",
+        "review_segment": "קטע סקירה",
+        "embeddings": "הטמעות",
+        "audio_detector": "זיהוי שמע"
+      }
     }
   },
   "enrichments": {
@@ -107,8 +121,18 @@
       "plate_recognition_speed": "מהירות זיהוי לוחית",
       "text_embedding_speed": "מהירות הטמעת טקסט",
       "yolov9_plate_detection_speed": "מהירות זיהוי לוחיות YOLOv9",
-      "yolov9_plate_detection": "זיהוי לוחיות YOLOv9"
-    }
+      "yolov9_plate_detection": "זיהוי לוחיות YOLOv9",
+      "review_description": "תיאור סקירה",
+      "review_description_speed": "מהירות תיאור הסקירה",
+      "review_description_events_per_second": "תיאור סקירה",
+      "object_description": "תיאור אובייקט",
+      "object_description_speed": "מהירות תיאור האובייקט",
+      "object_description_events_per_second": "תיאור אובייקט",
+      "classification": "סיווג {{name}}",
+      "classification_speed": "מהירות סיווג {{name}}",
+      "classification_events_per_second": "אירועי סיווג לשנייה עבור {{name}}"
+    },
+    "averageInf": "זמן הסקה ממוצע"
   },
   "storage": {
     "cameraStorage": {
@@ -129,6 +153,10 @@
       "title": "הקלטות",
       "earliestRecording": "ההקלטה המוקדמת ביותר הזמינה:",
       "tips": "ערך זה מייצג את סך האחסון בו משתמשים ההקלטות במסד הנתונים של Frigate. Frigate אינו עוקב אחר ניצול האחסון עבור כל הקבצים בדיסק שלך."
+    },
+    "shm": {
+      "title": "הקצאת SHM (זיכרון משותף)",
+      "warning": "גודל ה־SHM הנוכחי של {{total}}MB קטן מדי. הגדל אותו לפחות ל־{{min_shm}}MB."
     }
   },
   "cameras": {

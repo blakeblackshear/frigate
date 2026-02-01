@@ -24,12 +24,18 @@ class EventsLPRBody(BaseModel):
     )
 
 
+class EventsAttributesBody(BaseModel):
+    attributes: List[str] = Field(
+        title="Selected classification attributes for the event",
+        default_factory=list,
+    )
+
+
 class EventsDescriptionBody(BaseModel):
     description: Union[str, None] = Field(title="The description of the event")
 
 
 class EventsCreateBody(BaseModel):
-    source_type: Optional[str] = "api"
     sub_label: Optional[str] = None
     score: Optional[float] = 0
     duration: Optional[int] = 30

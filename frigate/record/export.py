@@ -28,7 +28,7 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Export, Previews, Recordings
-from frigate.util.builtin import is_current_hour
+from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
 

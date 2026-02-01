@@ -1,13 +1,18 @@
 .alert {
-    padding: 12px;
-    background: #fff8e6;
-    border-bottom: 1px solid #ffd166;
-    text-align: center;
-    font-size: 15px;
-  }
-  
-  .alert a {
-    color: #1890ff;
-    font-weight: 500;
-    margin-left: 6px;
-  }
+  padding: 12px;
+  background: #fff8e6;
+  border-bottom: 1px solid #ffd166;
+  text-align: center;
+  font-size: 15px;
+}
+
+[data-theme="dark"] .alert {
+  background: #3b2f0b;
+  border-bottom: 1px solid #665c22;
+}
+
+.alert a {
+  color: #1890ff;
+  font-weight: 500;
+  margin-left: 6px;
+}

@@ -6,7 +6,7 @@ import {
   useContext,
 } from "react";
 import { AllGroupsStreamingSettings } from "@/types/frigateConfig";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 
 type StreamingSettingsContextType = {
   allGroupsStreamingSettings: AllGroupsStreamingSettings;
@@ -29,7 +29,7 @@ export function StreamingSettingsProvider({
     persistedGroupStreamingSettings,
     setPersistedGroupStreamingSettings,
     isPersistedStreamingSettingsLoaded,
-  ] = usePersistence<AllGroupsStreamingSettings>("streaming-settings");
+  ] = useUserPersistence<AllGroupsStreamingSettings>("streaming-settings");
 
   useEffect(() => {
     if (isPersistedStreamingSettingsLoaded) {
