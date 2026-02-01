@@ -91,7 +91,7 @@ class Rknn(DetectionApi):
 
     def parse_model_input(self, model_path, soc):
         model_props = {}
-        
+
         # Map rk3588s to rk3588 for model compatibility
         model_soc = "rk3588" if soc == "rk3588s" else soc
 
