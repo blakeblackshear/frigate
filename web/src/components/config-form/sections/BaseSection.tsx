@@ -6,6 +6,9 @@ import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import sectionRenderers, {
+  RendererComponent,
+} from "@/components/config-form/sectionExtras/registry";
 import { ConfigForm } from "../ConfigForm";
 import type { UiSchema } from "@rjsf/utils";
 import {
@@ -51,6 +54,8 @@ export interface SectionConfig {
   liveValidate?: boolean;
   /** Additional uiSchema overrides */
   uiSchema?: UiSchema;
+  /** Optional per-section renderers usable by FieldTemplate `ui:before`/`ui:after` */
+  renderers?: Record<string, RendererComponent>;
 }
 
 export interface BaseSectionProps {
@@ -418,32 +423,45 @@ export function createConfigSection({
       updateTopic,
     ]);
 
-    // Handle reset to global - removes camera-level override by deleting the section
+    // Handle reset to global/defaults - removes camera-level override or resets global to defaults
     const handleResetToGlobal = useCallback(async () => {
-      if (level !== "camera" || !cameraName) return;
+      if (level === "camera" && !cameraName) return;
 
       try {
-        const basePath = `cameras.${cameraName}.${sectionPath}`;
+        const basePath =
+          level === "camera" && cameraName
+            ? `cameras.${cameraName}.${sectionPath}`
+            : sectionPath;
 
-        // Send empty string to delete the key from config (see update_yaml in backend)
+        // const configData = level === "global" ? schemaDefaults : "";
+
         // await axios.put("config/set", {
         //   requires_restart: requiresRestart ? 0 : 1,
         //   update_topic: updateTopic,
         //   config_data: {
-        //     [basePath]: "",
+        //     [basePath]: configData,
         //   },
         // });
 
         // log reset to console for debugging
-        console.log("Reset to global config for path:", basePath, {
-          update_topic: updateTopic,
-          requires_restart: requiresRestart ? 0 : 1,
-        });
+        console.log(
+          level === "global"
+            ? "Reset to defaults for path:"
+            : "Reset to global config for path:",
+          basePath,
+          {
+            update_topic: updateTopic,
+            requires_restart: requiresRestart ? 0 : 1,
+          },
+        );
 
         toast.success(
           t("toast.resetSuccess", {
             ns: "views/settings",
-            defaultValue: "Reset to global defaults",
+            defaultValue:
+              level === "global"
+                ? "Reset to defaults"
+                : "Reset to global defaults",
           }),
         );
 
@@ -519,6 +537,8 @@ export function createConfigSection({
             // section prefix to templates so they can attempt `${section}.${field}` lookups.
             sectionI18nPrefix: sectionPath,
             t,
+            renderers:
+              sectionConfig?.renderers ?? sectionRenderers?.[sectionPath],
           }}
         />
 
@@ -593,7 +613,8 @@ export function createConfigSection({
                     </Badge>
                   )}
                 </div>
-                {level === "camera" && isOverridden && (
+                {((level === "camera" && isOverridden) ||
+                  level === "global") && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -604,10 +625,15 @@ export function createConfigSection({
                     className="gap-2"
                   >
                     <LuRotateCcw className="h-4 w-4" />
-                    {t("button.resetToGlobal", {
-                      ns: "common",
-                      defaultValue: "Reset to Global",
-                    })}
+                    {level === "global"
+                      ? t("button.resetToDefault", {
+                          ns: "common",
+                          defaultValue: "Reset to Default",
+                        })
+                      : t("button.resetToGlobal", {
+                          ns: "common",
+                          defaultValue: "Reset to Global",
+                        })}
                   </Button>
                 )}
               </div>
@@ -650,7 +676,7 @@ export function createConfigSection({
                 </p>
               )}
             </div>
-            {level === "camera" && isOverridden && (
+            {((level === "camera" && isOverridden) || level === "global") && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -658,32 +684,43 @@ export function createConfigSection({
                 className="gap-2"
               >
                 <LuRotateCcw className="h-4 w-4" />
-                {t("button.resetToGlobal", {
-                  ns: "common",
-                  defaultValue: "Reset to Global",
-                })}
+                {level === "global"
+                  ? t("button.resetToDefault", {
+                      ns: "common",
+                      defaultValue: "Reset to Default",
+                    })
+                  : t("button.resetToGlobal", {
+                      ns: "common",
+                      defaultValue: "Reset to Global",
+                    })}
               </Button>
             )}
           </div>
         )}
 
         {/* Reset button when title is hidden but we're at camera level with override */}
-        {!shouldShowTitle && level === "camera" && isOverridden && (
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResetToGlobal}
-              className="gap-2"
-            >
-              <LuRotateCcw className="h-4 w-4" />
-              {t("button.resetToGlobal", {
-                ns: "common",
-                defaultValue: "Reset to Global",
-              })}
-            </Button>
-          </div>
-        )}
+        {!shouldShowTitle &&
+          ((level === "camera" && isOverridden) || level === "global") && (
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetToGlobal}
+                className="gap-2"
+              >
+                <LuRotateCcw className="h-4 w-4" />
+                {level === "global"
+                  ? t("button.resetToDefault", {
+                      ns: "common",
+                      defaultValue: "Reset to Default",
+                    })
+                  : t("button.resetToGlobal", {
+                      ns: "common",
+                      defaultValue: "Reset to Global",
+                    })}
+              </Button>
+            </div>
+          )}
 
         {sectionContent}
       </div>

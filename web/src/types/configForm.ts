@@ -1,3 +1,4 @@
+import type { RendererComponent } from "@/components/config-form/sectionExtras/registry";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 
 export type JsonPrimitive = string | number | boolean | null;
@@ -22,4 +23,5 @@ export type ConfigFormContext = {
   i18nNamespace?: string;
   sectionI18nPrefix?: string;
   t?: (key: string, options?: Record<string, unknown>) => string;
+  renderers?: Record<string, RendererComponent>;
 };

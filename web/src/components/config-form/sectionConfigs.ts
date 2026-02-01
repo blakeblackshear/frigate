@@ -604,6 +604,11 @@ const sectionConfigs: Record<string, SectionConfigOverrides> = {
       hiddenFields: [],
       advancedFields: [],
       overrideFields: [],
+      uiSchema: {
+        enabled: {
+          "ui:after": { render: "SemanticSearchReindex" },
+        },
+      },
     },
     global: {
       fieldOrder: ["enabled", "reindex", "model", "model_size", "device"],

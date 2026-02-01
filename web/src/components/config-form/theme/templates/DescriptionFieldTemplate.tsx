@@ -30,8 +30,8 @@ export function DescriptionFieldTemplate(props: DescriptionFieldProps) {
   }
 
   return (
-    <p id={id} className="text-sm text-muted-foreground">
+    <span id={id} className="text-sm text-muted-foreground">
       {resolvedDescription}
-    </p>
+    </span>
   );
 }

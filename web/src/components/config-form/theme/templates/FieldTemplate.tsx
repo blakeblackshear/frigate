@@ -5,6 +5,8 @@ import {
   getUiOptions,
   ADDITIONAL_PROPERTY_FLAG,
 } from "@rjsf/utils";
+import { ComponentType, ReactNode } from "react";
+import { isValidElement } from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -51,6 +53,14 @@ function humanizeKey(value: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
+
+type FieldRenderSpec =
+  | ReactNode
+  | ComponentType<unknown>
+  | {
+      render: string;
+      props?: Record<string, unknown>;
+    };
 
 export function FieldTemplate(props: FieldTemplateProps) {
   const {
@@ -264,6 +274,41 @@ export function FieldTemplate(props: FieldTemplateProps) {
   }
 
   const uiOptions = getUiOptions(uiSchema);
+  const beforeSpec = uiSchema?.["ui:before"] as FieldRenderSpec | undefined;
+  const afterSpec = uiSchema?.["ui:after"] as FieldRenderSpec | undefined;
+
+  const renderCustom = (spec: FieldRenderSpec | undefined) => {
+    if (spec === undefined || spec === null) {
+      return null;
+    }
+
+    if (isValidElement(spec) || typeof spec === "string") {
+      return spec;
+    }
+
+    if (typeof spec === "number") {
+      return <span>{spec}</span>;
+    }
+
+    if (typeof spec === "function") {
+      const SpecComponent = spec as ComponentType<unknown>;
+      return <SpecComponent />;
+    }
+
+    if (typeof spec === "object" && "render" in spec) {
+      const renderKey = spec.render;
+      const renderers = formContext?.renderers;
+      const RenderComponent = renderers?.[renderKey];
+      if (RenderComponent) {
+        return <RenderComponent {...(spec.props ?? {})} />;
+      }
+    }
+
+    return null;
+  };
+
+  const beforeContent = renderCustom(beforeSpec);
+  const afterContent = renderCustom(afterSpec);
   const WrapIfAdditionalTemplate = getTemplate(
     "WrapIfAdditionalTemplate",
     registry,
@@ -290,64 +335,71 @@ export function FieldTemplate(props: FieldTemplateProps) {
       rawErrors={rawErrors}
       hideError={false}
     >
-      <div
-        className={cn(
-          "space-y-1",
-          isAdvanced && "border-l-2 border-muted pl-4",
-          isBoolean && "flex items-center justify-between gap-4",
-        )}
-        data-field-id={translationPath}
-      >
-        {displayLabel &&
-          finalLabel &&
-          !isBoolean &&
-          !isMultiSchemaWrapper &&
-          !isObjectField &&
-          !isAdditionalProperty && (
-            <Label
-              htmlFor={id}
-              className={cn(
-                "text-sm font-medium",
-                errors &&
-                  errors.props?.errors?.length > 0 &&
-                  "text-destructive",
-              )}
-            >
-              {finalLabel}
-              {required && <span className="ml-1 text-destructive">*</span>}
-            </Label>
+      <div className="flex flex-col space-y-6">
+        {beforeContent}
+        <div
+          className={cn(
+            "space-y-1",
+            isAdvanced && "border-l-2 border-muted pl-4",
+            isBoolean && "flex items-center justify-between gap-4",
           )}
+          data-field-id={translationPath}
+        >
+          {displayLabel &&
+            finalLabel &&
+            !isBoolean &&
+            !isMultiSchemaWrapper &&
+            !isObjectField &&
+            !isAdditionalProperty && (
+              <Label
+                htmlFor={id}
+                className={cn(
+                  "text-sm font-medium",
+                  errors &&
+                    errors.props?.errors?.length > 0 &&
+                    "text-destructive",
+                )}
+              >
+                {finalLabel}
+                {required && <span className="ml-1 text-destructive">*</span>}
+              </Label>
+            )}
 
-        {isBoolean ? (
-          <div className="flex w-full items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              {displayLabel && finalLabel && (
-                <Label htmlFor={id} className="text-sm font-medium">
-                  {finalLabel}
-                  {required && <span className="ml-1 text-destructive">*</span>}
-                </Label>
-              )}
-              {finalDescription && !isMultiSchemaWrapper && (
+          {isBoolean ? (
+            <div className="flex w-full items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                {displayLabel && finalLabel && (
+                  <Label htmlFor={id} className="text-sm font-medium">
+                    {finalLabel}
+                    {required && (
+                      <span className="ml-1 text-destructive">*</span>
+                    )}
+                  </Label>
+                )}
+                {finalDescription && !isMultiSchemaWrapper && (
+                  <p className="text-xs text-muted-foreground">
+                    {finalDescription}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">{children}</div>
+            </div>
+          ) : (
+            <>
+              {children}
+
+              {finalDescription && !isMultiSchemaWrapper && !isObjectField && (
                 <p className="text-xs text-muted-foreground">
                   {finalDescription}
                 </p>
               )}
-            </div>
-            {children}
-          </div>
-        ) : (
-          <>
-            {children}
-            {finalDescription && !isMultiSchemaWrapper && !isObjectField && (
-              <p className="text-xs text-muted-foreground">
-                {finalDescription}
-              </p>
-            )}
-          </>
-        )}
+            </>
+          )}
 
-        {errors}
-        {help}
+          {errors}
+          {help}
+        </div>
+        {afterContent}
       </div>
     </WrapIfAdditionalTemplate>
   );
