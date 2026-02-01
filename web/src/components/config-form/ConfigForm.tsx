@@ -1,7 +1,7 @@
 // ConfigForm - Main RJSF form wrapper component
 import Form from "@rjsf/shadcn";
 import validator from "@rjsf/validator-ajv8";
-import type { RJSFSchema, UiSchema } from "@rjsf/utils";
+import type { FormValidation, RJSFSchema, UiSchema } from "@rjsf/utils";
 import type { IChangeEvent } from "@rjsf/core";
 import { frigateTheme } from "./theme";
 import { transformSchema } from "@/lib/config-schema";
@@ -182,6 +182,11 @@ export interface ConfigFormProps {
   formContext?: ConfigFormContext;
   /** i18n namespace for field labels */
   i18nNamespace?: string;
+  /** Optional custom validation */
+  customValidate?: (
+    formData: unknown,
+    errors: FormValidation,
+  ) => FormValidation;
 }
 
 export function ConfigForm({
@@ -202,6 +207,7 @@ export function ConfigForm({
   liveValidate = true,
   formContext,
   i18nNamespace,
+  customValidate,
 }: ConfigFormProps) {
   const { t, i18n } = useTranslation([
     i18nNamespace || "common",
@@ -319,6 +325,7 @@ export function ConfigForm({
         liveValidate={liveValidate}
         formContext={extendedFormContext}
         transformErrors={errorTransformer}
+        customValidate={customValidate}
         {...frigateTheme}
       />
     </div>
