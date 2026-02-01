@@ -33,12 +33,9 @@ import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
-import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
-import GlobalConfigView from "@/views/settings/GlobalConfigView";
-import CameraConfigView from "@/views/settings/CameraConfigView";
 import {
   SingleSectionPage,
   type SettingsPageProps,
@@ -76,16 +73,59 @@ import {
 } from "@/components/mobile/MobilePage";
 
 const allSettingsViews = [
-  "ui",
-  "globalConfig",
-  "mqtt",
-  "cameraConfig",
-  "cameraMqtt",
-  "enrichments",
+  "profileSettings",
+  "globalDetect",
+  "globalRecording",
+  "globalSnapshots",
+  "globalMotion",
+  "globalObjects",
+  "globalReview",
+  "globalAudioEvents",
+  "globalLivePlayback",
+  "globalTimestampStyle",
+  "systemDatabase",
+  "systemTls",
+  "systemAuthentication",
+  "systemNetworking",
+  "systemProxy",
+  "systemUi",
+  "systemLogging",
+  "systemEnvironmentVariables",
+  "systemTelemetry",
+  "systemBirdseye",
+  "systemFfmpeg",
+  "systemDetectorHardware",
+  "systemDetectionModel",
+  "systemMqtt",
+  "integrationSemanticSearch",
+  "integrationGenerativeAi",
+  "integrationFaceRecognition",
+  "integrationLpr",
+  "integrationObjectClassification",
+  "integrationAudioTranscription",
+  "cameraDetect",
+  "cameraFfmpeg",
+  "cameraRecording",
+  "cameraSnapshots",
+  "cameraMotion",
+  "cameraObjects",
+  "cameraConfigReview",
+  "cameraAudioEvents",
+  "cameraAudioTranscription",
+  "cameraNotifications",
+  "cameraLivePlayback",
+  "cameraBirdseye",
+  "cameraFaceRecognition",
+  "cameraLpr",
+  "cameraMqttConfig",
+  "cameraOnvif",
+  "cameraUi",
+  "cameraTimestampStyle",
   "cameraManagement",
   "cameraReview",
   "masksAndZones",
   "motionTuner",
+  "enrichments",
   "triggers",
   "debug",
   "users",
@@ -96,33 +136,175 @@ const allSettingsViews = [
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
-const MqttSettingsPage = (props: SettingsPageProps) => (
-  <SingleSectionPage sectionKey="mqtt" level="global" {...props} />
+const createSectionPage = (
+  sectionKey: string,
+  level: "global" | "camera",
+  options?: { showOverrideIndicator?: boolean },
+) => {
+  return (props: SettingsPageProps) => (
+    <SingleSectionPage
+      sectionKey={sectionKey}
+      level={level}
+      showOverrideIndicator={options?.showOverrideIndicator}
+      {...props}
+    />
+  );
+};
+
+const GlobalDetectSettingsPage = createSectionPage("detect", "global");
+const GlobalRecordingSettingsPage = createSectionPage("record", "global");
+const GlobalSnapshotsSettingsPage = createSectionPage("snapshots", "global");
+const GlobalMotionSettingsPage = createSectionPage("motion", "global");
+const GlobalObjectsSettingsPage = createSectionPage("objects", "global");
+const GlobalReviewSettingsPage = createSectionPage("review", "global");
+const GlobalAudioEventsSettingsPage = createSectionPage("audio", "global");
+const GlobalLivePlaybackSettingsPage = createSectionPage("live", "global");
+const GlobalTimestampStyleSettingsPage = createSectionPage(
+  "timestamp_style",
+  "global",
 );
 
-const CameraMqttSettingsPage = (props: SettingsPageProps) => (
-  <SingleSectionPage
-    sectionKey="mqtt"
-    level="camera"
-    showOverrideIndicator={false}
-    {...props}
-  />
+const SystemDatabaseSettingsPage = createSectionPage("database", "global");
+const SystemTlsSettingsPage = createSectionPage("tls", "global");
+const SystemAuthenticationSettingsPage = createSectionPage("auth", "global");
+const SystemNetworkingSettingsPage = createSectionPage("networking", "global");
+const SystemProxySettingsPage = createSectionPage("proxy", "global");
+const SystemUiSettingsPage = createSectionPage("ui", "global");
+const SystemLoggingSettingsPage = createSectionPage("logger", "global");
+const SystemEnvironmentVariablesSettingsPage = createSectionPage(
+  "environment_vars",
+  "global",
+);
+const SystemTelemetrySettingsPage = createSectionPage("telemetry", "global");
+const SystemBirdseyeSettingsPage = createSectionPage("birdseye", "global");
+const SystemFfmpegSettingsPage = createSectionPage("ffmpeg", "global");
+const SystemDetectorHardwareSettingsPage = createSectionPage(
+  "detectors",
+  "global",
+);
+const SystemDetectionModelSettingsPage = createSectionPage("model", "global");
+
+const SystemMqttSettingsPage = createSectionPage("mqtt", "global");
+const IntegrationSemanticSearchSettingsPage = createSectionPage(
+  "semantic_search",
+  "global",
+);
+const IntegrationGenerativeAiSettingsPage = createSectionPage(
+  "genai",
+  "global",
+);
+const IntegrationFaceRecognitionSettingsPage = createSectionPage(
+  "face_recognition",
+  "global",
+);
+const IntegrationLprSettingsPage = createSectionPage("lpr", "global");
+const IntegrationObjectClassificationSettingsPage = createSectionPage(
+  "classification",
+  "global",
+);
+const IntegrationAudioTranscriptionSettingsPage = createSectionPage(
+  "audio_transcription",
+  "global",
+);
+
+const CameraDetectSettingsPage = createSectionPage("detect", "camera");
+const CameraFfmpegSettingsPage = createSectionPage("ffmpeg", "camera");
+const CameraRecordingSettingsPage = createSectionPage("record", "camera");
+const CameraSnapshotsSettingsPage = createSectionPage("snapshots", "camera");
+const CameraMotionSettingsPage = createSectionPage("motion", "camera");
+const CameraObjectsSettingsPage = createSectionPage("objects", "camera");
+const CameraConfigReviewSettingsPage = createSectionPage("review", "camera");
+const CameraAudioEventsSettingsPage = createSectionPage("audio", "camera");
+const CameraAudioTranscriptionSettingsPage = createSectionPage(
+  "audio_transcription",
+  "camera",
+);
+const CameraNotificationsSettingsPage = createSectionPage(
+  "notifications",
+  "camera",
+);
+const CameraLivePlaybackSettingsPage = createSectionPage("live", "camera");
+const CameraBirdseyeSettingsPage = createSectionPage("birdseye", "camera");
+const CameraFaceRecognitionSettingsPage = createSectionPage(
+  "face_recognition",
+  "camera",
+);
+const CameraLprSettingsPage = createSectionPage("lpr", "camera");
+const CameraMqttConfigSettingsPage = createSectionPage("mqtt", "camera", {
+  showOverrideIndicator: false,
+});
+const CameraOnvifSettingsPage = createSectionPage("onvif", "camera", {
+  showOverrideIndicator: false,
+});
+const CameraUiSettingsPage = createSectionPage("ui", "camera", {
+  showOverrideIndicator: false,
+});
+const CameraTimestampStyleSettingsPage = createSectionPage(
+  "timestamp_style",
+  "camera",
 );
 
 const settingsGroups = [
   {
     label: "general",
+    items: [{ key: "profileSettings", component: UiSettingsView }],
+  },
+  {
+    label: "globalConfig",
     items: [
-      { key: "ui", component: UiSettingsView },
-      { key: "globalConfig", component: GlobalConfigView },
-      { key: "mqtt", component: MqttSettingsPage },
+      { key: "globalDetect", component: GlobalDetectSettingsPage },
+      { key: "globalRecording", component: GlobalRecordingSettingsPage },
+      { key: "globalSnapshots", component: GlobalSnapshotsSettingsPage },
+      { key: "globalMotion", component: GlobalMotionSettingsPage },
+      { key: "globalObjects", component: GlobalObjectsSettingsPage },
+      { key: "globalReview", component: GlobalReviewSettingsPage },
+      { key: "globalAudioEvents", component: GlobalAudioEventsSettingsPage },
+      {
+        key: "globalLivePlayback",
+        component: GlobalLivePlaybackSettingsPage,
+      },
+      {
+        key: "globalTimestampStyle",
+        component: GlobalTimestampStyleSettingsPage,
+      },
     ],
   },
   {
     label: "cameras",
     items: [
-      { key: "cameraConfig", component: CameraConfigView },
-      { key: "cameraMqtt", component: CameraMqttSettingsPage },
+      { key: "cameraDetect", component: CameraDetectSettingsPage },
+      { key: "cameraFfmpeg", component: CameraFfmpegSettingsPage },
+      { key: "cameraRecording", component: CameraRecordingSettingsPage },
+      { key: "cameraSnapshots", component: CameraSnapshotsSettingsPage },
+      { key: "cameraMotion", component: CameraMotionSettingsPage },
+      { key: "cameraObjects", component: CameraObjectsSettingsPage },
+      { key: "cameraConfigReview", component: CameraConfigReviewSettingsPage },
+      { key: "cameraAudioEvents", component: CameraAudioEventsSettingsPage },
+      {
+        key: "cameraAudioTranscription",
+        component: CameraAudioTranscriptionSettingsPage,
+      },
+      {
+        key: "cameraNotifications",
+        component: CameraNotificationsSettingsPage,
+      },
+      {
+        key: "cameraLivePlayback",
+        component: CameraLivePlaybackSettingsPage,
+      },
+      { key: "cameraBirdseye", component: CameraBirdseyeSettingsPage },
+      {
+        key: "cameraFaceRecognition",
+        component: CameraFaceRecognitionSettingsPage,
+      },
+      { key: "cameraLpr", component: CameraLprSettingsPage },
+      { key: "cameraMqttConfig", component: CameraMqttConfigSettingsPage },
+      { key: "cameraOnvif", component: CameraOnvifSettingsPage },
+      { key: "cameraUi", component: CameraUiSettingsPage },
+      {
+        key: "cameraTimestampStyle",
+        component: CameraTimestampStyleSettingsPage,
+      },
       { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
@@ -131,7 +313,60 @@ const settingsGroups = [
   },
   {
     label: "enrichments",
-    items: [{ key: "enrichments", component: EnrichmentsSettingsView }],
+    items: [
+      {
+        key: "integrationSemanticSearch",
+        component: IntegrationSemanticSearchSettingsPage,
+      },
+      {
+        key: "integrationGenerativeAi",
+        component: IntegrationGenerativeAiSettingsPage,
+      },
+      {
+        key: "integrationFaceRecognition",
+        component: IntegrationFaceRecognitionSettingsPage,
+      },
+      { key: "integrationLpr", component: IntegrationLprSettingsPage },
+      {
+        key: "integrationObjectClassification",
+        component: IntegrationObjectClassificationSettingsPage,
+      },
+      {
+        key: "integrationAudioTranscription",
+        component: IntegrationAudioTranscriptionSettingsPage,
+      },
+    ],
+  },
+  {
+    label: "system",
+    items: [
+      { key: "systemDatabase", component: SystemDatabaseSettingsPage },
+      { key: "systemMqtt", component: SystemMqttSettingsPage },
+      { key: "systemTls", component: SystemTlsSettingsPage },
+      {
+        key: "systemAuthentication",
+        component: SystemAuthenticationSettingsPage,
+      },
+      { key: "systemNetworking", component: SystemNetworkingSettingsPage },
+      { key: "systemProxy", component: SystemProxySettingsPage },
+      { key: "systemUi", component: SystemUiSettingsPage },
+      { key: "systemLogging", component: SystemLoggingSettingsPage },
+      {
+        key: "systemEnvironmentVariables",
+        component: SystemEnvironmentVariablesSettingsPage,
+      },
+      { key: "systemTelemetry", component: SystemTelemetrySettingsPage },
+      { key: "systemBirdseye", component: SystemBirdseyeSettingsPage },
+      { key: "systemFfmpeg", component: SystemFfmpegSettingsPage },
+      {
+        key: "systemDetectorHardware",
+        component: SystemDetectorHardwareSettingsPage,
+      },
+      {
+        key: "systemDetectionModel",
+        component: SystemDetectionModelSettingsPage,
+      },
+    ],
   },
   {
     label: "users",
@@ -159,8 +394,24 @@ const settingsGroups = [
 
 const CAMERA_SELECT_BUTTON_PAGES = [
   "debug",
-  "cameraConfig",
-  "cameraMqtt",
+  "cameraDetect",
+  "cameraFfmpeg",
+  "cameraRecording",
+  "cameraSnapshots",
+  "cameraMotion",
+  "cameraObjects",
+  "cameraConfigReview",
+  "cameraAudioEvents",
+  "cameraAudioTranscription",
+  "cameraNotifications",
+  "cameraLivePlayback",
+  "cameraBirdseye",
+  "cameraFaceRecognition",
+  "cameraLpr",
+  "cameraMqttConfig",
+  "cameraOnvif",
+  "cameraUi",
+  "cameraTimestampStyle",
   "cameraReview",
   "masksAndZones",
   "motionTuner",
@@ -212,7 +463,7 @@ function MobileMenuItem({
 
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
-  const [page, setPage] = useState<SettingsType>("ui");
+  const [page, setPage] = useState<SettingsType>("profileSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [contentMobileOpen, setContentMobileOpen] = useState(false);
 
@@ -308,7 +559,7 @@ export default function Settings() {
         !isAdmin &&
         !ALLOWED_VIEWS_FOR_VIEWER.includes(page as SettingsType)
       ) {
-        setPageToggle("ui");
+        setPageToggle("profileSettings");
       } else {
         setPageToggle(page as SettingsType);
       }
@@ -381,7 +632,7 @@ export default function Settings() {
                               key as SettingsType,
                             )
                           ) {
-                            setPageToggle("ui");
+                            setPageToggle("profileSettings");
                           } else {
                             setPageToggle(key as SettingsType);
                           }
@@ -520,7 +771,7 @@ export default function Settings() {
                                   filteredItems[0].key as SettingsType,
                                 )
                               ) {
-                                setPageToggle("ui");
+                                setPageToggle("profileSettings");
                               } else {
                                 setPageToggle(
                                   filteredItems[0].key as SettingsType,
@@ -562,7 +813,7 @@ export default function Settings() {
                                       item.key as SettingsType,
                                     )
                                   ) {
-                                    setPageToggle("ui");
+                                    setPageToggle("profileSettings");
                                   } else {
                                     setPageToggle(item.key as SettingsType);
                                   }
