@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
@@ -47,6 +47,7 @@ export function SingleSectionPage({
   showOverrideIndicator = true,
   selectedCamera,
   setUnsavedChanges,
+  onSectionStatusChange,
   pendingDataBySection,
   onPendingDataChange,
 }: SingleSectionPageProps) {
@@ -61,6 +62,14 @@ export function SingleSectionPage({
     hasChanges: false,
     isOverridden: false,
   });
+
+  const handleSectionStatusChange = useCallback(
+    (status: SectionStatus) => {
+      setSectionStatus(status);
+      onSectionStatusChange?.(sectionKey, level, status);
+    },
+    [level, onSectionStatusChange, sectionKey],
+  );
 
   if (level === "camera" && !selectedCamera) {
     return (
@@ -122,7 +131,7 @@ export function SingleSectionPage({
         pendingDataBySection={pendingDataBySection}
         onPendingDataChange={onPendingDataChange}
         requiresRestart={requiresRestart}
-        onStatusChange={setSectionStatus}
+        onStatusChange={handleSectionStatusChange}
       />
     </div>
   );

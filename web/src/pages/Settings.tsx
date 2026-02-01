@@ -464,6 +464,32 @@ const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
   timestamp_style: "globalTimestampStyle",
 };
 
+const ENRICHMENTS_SECTION_MAPPING: Record<string, SettingsType> = {
+  semantic_search: "integrationSemanticSearch",
+  genai: "integrationGenerativeAi",
+  face_recognition: "integrationFaceRecognition",
+  lpr: "integrationLpr",
+  classification: "integrationObjectClassification",
+  audio_transcription: "integrationAudioTranscription",
+};
+
+const SYSTEM_SECTION_MAPPING: Record<string, SettingsType> = {
+  database: "systemDatabase",
+  mqtt: "systemMqtt",
+  tls: "systemTls",
+  auth: "systemAuthentication",
+  networking: "systemNetworking",
+  proxy: "systemProxy",
+  ui: "systemUi",
+  logger: "systemLogging",
+  environment_vars: "systemEnvironmentVariables",
+  telemetry: "systemTelemetry",
+  birdseye: "systemBirdseye",
+  ffmpeg: "systemFfmpeg",
+  detectors: "systemDetectorHardware",
+  model: "systemDetectionModel",
+};
+
 const CAMERA_SECTION_KEYS = new Set<SettingsType>(
   Object.values(CAMERA_SECTION_MAPPING),
 );
@@ -661,7 +687,11 @@ export default function Settings() {
       if (level === "camera") {
         menuKey = CAMERA_SECTION_MAPPING[sectionKey] || sectionKey;
       } else {
-        menuKey = GLOBAL_SECTION_MAPPING[sectionKey] || sectionKey;
+        menuKey =
+          GLOBAL_SECTION_MAPPING[sectionKey] ||
+          ENRICHMENTS_SECTION_MAPPING[sectionKey] ||
+          SYSTEM_SECTION_MAPPING[sectionKey] ||
+          sectionKey;
       }
 
       setSectionStatusByKey((prev) => ({
