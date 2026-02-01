@@ -1290,5 +1290,8 @@
     "resetSuccess": "Reset to global defaults",
     "resetError": "Failed to reset settings"
   },
-  "unsavedChanges": "You have unsaved changes"
+  "unsavedChanges": "You have unsaved changes",
+  "confirmReset": "Confirm Reset",
+  "resetToDefaultDescription": "This will reset all settings in this section to their default values. This action cannot be undone.",
+  "resetToGlobalDescription": "This will reset the settings in this section to the global defaults. This action cannot be undone."
 }

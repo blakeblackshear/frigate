@@ -28,6 +28,7 @@ import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import type { ConfigSectionData } from "@/types/configForm";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
@@ -539,6 +540,11 @@ export default function Settings() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
+  // Store pending form data keyed by "sectionKey" or "cameraName::sectionKey"
+  const [pendingDataBySection, setPendingDataBySection] = useState<
+    Record<string, unknown>
+  >({});
+
   const navigate = useNavigate();
 
   const cameras = useMemo(() => {
@@ -666,6 +672,30 @@ export default function Settings() {
     [],
   );
 
+  const handlePendingDataChange = useCallback(
+    (
+      sectionKey: string,
+      cameraName: string | undefined,
+      data: ConfigSectionData | null,
+    ) => {
+      const pendingDataKey = cameraName
+        ? `${cameraName}::${sectionKey}`
+        : sectionKey;
+
+      setPendingDataBySection((prev) => {
+        if (data === null) {
+          const { [pendingDataKey]: _, ...rest } = prev;
+          return rest;
+        }
+        return {
+          ...prev,
+          [pendingDataKey]: data,
+        };
+      });
+    },
+    [],
+  );
+
   // Initialize override status for all camera sections
   useEffect(() => {
     if (!selectedCamera || !cameraOverrides) return;
@@ -701,8 +731,7 @@ export default function Settings() {
       const status = sectionStatusByKey[key];
       const showOverrideDot =
         CAMERA_SECTION_KEYS.has(key) && status?.isOverridden;
-      // const showUnsavedDot = status?.hasChanges;
-      const showUnsavedDot = false; // Disable unsaved changes indicator for now
+      const showUnsavedDot = status?.hasChanges;
 
       return (
         <div className="flex w-full items-center justify-between pr-4 md:pr-0">
@@ -824,6 +853,8 @@ export default function Settings() {
                     setUnsavedChanges={setUnsavedChanges}
                     selectedZoneMask={filterZoneMask}
                     onSectionStatusChange={handleSectionStatusChange}
+                    pendingDataBySection={pendingDataBySection}
+                    onPendingDataChange={handlePendingDataChange}
                   />
                 );
               })()}
@@ -983,6 +1014,8 @@ export default function Settings() {
                   setUnsavedChanges={setUnsavedChanges}
                   selectedZoneMask={filterZoneMask}
                   onSectionStatusChange={handleSectionStatusChange}
+                  pendingDataBySection={pendingDataBySection}
+                  onPendingDataChange={handlePendingDataChange}
                 />
               );
             })()}

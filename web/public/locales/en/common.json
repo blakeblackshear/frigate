@@ -117,6 +117,7 @@
   "button": {
     "apply": "Apply",
     "reset": "Reset",
+    "undo": "Undo",
     "done": "Done",
     "enabled": "Enabled",
     "enable": "Enable",

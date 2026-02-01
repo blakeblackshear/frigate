@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Heading from "@/components/ui/heading";
 import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
+import type { ConfigSectionData } from "@/types/configForm";
 
 export type SettingsPageProps = {
   selectedCamera?: string;
@@ -14,6 +14,12 @@ export type SettingsPageProps = {
     sectionKey: string,
     level: "global" | "camera",
     status: SectionStatus,
+  ) => void;
+  pendingDataBySection?: Record<string, unknown>;
+  onPendingDataChange?: (
+    sectionKey: string,
+    cameraName: string | undefined,
+    data: ConfigSectionData | null,
   ) => void;
 };
 
@@ -41,7 +47,8 @@ export function SingleSectionPage({
   showOverrideIndicator = true,
   selectedCamera,
   setUnsavedChanges,
-  onSectionStatusChange,
+  pendingDataBySection,
+  onPendingDataChange,
 }: SingleSectionPageProps) {
   const sectionNamespace =
     level === "camera" ? "config/cameras" : "config/global";
@@ -55,10 +62,6 @@ export function SingleSectionPage({
     isOverridden: false,
   });
 
-  useEffect(() => {
-    onSectionStatusChange?.(sectionKey, level, sectionStatus);
-  }, [onSectionStatusChange, sectionKey, level, sectionStatus]);
-
   if (level === "camera" && !selectedCamera) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -68,32 +71,44 @@ export function SingleSectionPage({
   }
 
   return (
-    <div className="flex size-full flex-col pr-2">
-      <div className="space-y-4">
-        <Heading as="h3">
-          {t(`${sectionKey}.label`, { ns: sectionNamespace })}
-        </Heading>
-
-        {i18n.exists(`${sectionKey}.description`, {
-          ns: sectionNamespace,
-        }) && (
-          <p className="text-sm text-muted-foreground">
-            {t(`${sectionKey}.description`, { ns: sectionNamespace })}
-          </p>
-        )}
-        <div className="flex flex-wrap items-center gap-2">
-          {level === "camera" &&
-            showOverrideIndicator &&
-            sectionStatus.isOverridden && (
-              <Badge variant="secondary" className="text-xs">
-                {t("overridden", { ns: "common", defaultValue: "Overridden" })}
+    <div className="flex size-full flex-col lg:pr-2">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <div className="text-xl">
+            {t(`${sectionKey}.label`, { ns: sectionNamespace })}
+          </div>
+          {i18n.exists(`${sectionKey}.description`, {
+            ns: sectionNamespace,
+          }) && (
+            <div className="my-1 text-sm text-muted-foreground">
+              {t(`${sectionKey}.description`, { ns: sectionNamespace })}
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {level === "camera" &&
+              showOverrideIndicator &&
+              sectionStatus.isOverridden && (
+                <Badge
+                  variant="secondary"
+                  className="border-2 border-selected text-xs text-primary-variant"
+                >
+                  {t("overridden", {
+                    ns: "common",
+                    defaultValue: "Overridden",
+                  })}
+                </Badge>
+              )}
+            {sectionStatus.hasChanges && (
+              <Badge
+                variant="secondary"
+                className="bg-danger text-xs text-white"
+              >
+                {t("modified", { ns: "common", defaultValue: "Modified" })}
               </Badge>
             )}
-          {sectionStatus.hasChanges && (
-            <Badge variant="outline" className="text-xs">
-              {t("modified", { ns: "common", defaultValue: "Modified" })}
-            </Badge>
-          )}
+          </div>
         </div>
       </div>
       <ConfigSectionTemplate
@@ -104,6 +119,8 @@ export function SingleSectionPage({
         onSave={() => setUnsavedChanges?.(false)}
         showTitle={false}
         sectionConfig={sectionConfig}
+        pendingDataBySection={pendingDataBySection}
+        onPendingDataChange={onPendingDataChange}
         requiresRestart={requiresRestart}
         onStatusChange={setSectionStatus}
       />

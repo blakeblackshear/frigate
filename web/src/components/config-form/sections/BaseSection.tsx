@@ -36,6 +36,16 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { ConfigSectionData, JsonObject, JsonValue } from "@/types/configForm";
@@ -92,6 +102,14 @@ export interface BaseSectionProps {
     hasChanges: boolean;
     isOverridden: boolean;
   }) => void;
+  /** Pending form data keyed by "sectionKey" or "cameraName::sectionKey" */
+  pendingDataBySection?: Record<string, unknown>;
+  /** Callback to update pending data for a section */
+  onPendingDataChange?: (
+    sectionKey: string,
+    cameraName: string | undefined,
+    data: ConfigSectionData | null,
+  ) => void;
 }
 
 export interface CreateSectionOptions {
@@ -140,6 +158,8 @@ export function ConfigSection({
   defaultCollapsed = false,
   showTitle,
   onStatusChange,
+  pendingDataBySection,
+  onPendingDataChange,
 }: ConfigSectionProps) {
   const { t, i18n } = useTranslation([
     level === "camera" ? "config/cameras" : "config/global",
@@ -148,12 +168,40 @@ export function ConfigSection({
     "common",
   ]);
   const [isOpen, setIsOpen] = useState(!defaultCollapsed);
-  const [pendingData, setPendingData] = useState<ConfigSectionData | null>(
-    null,
+
+  // Create a key for this section's pending data
+  const pendingDataKey = useMemo(
+    () =>
+      level === "camera" && cameraName
+        ? `${cameraName}::${sectionPath}`
+        : sectionPath,
+    [level, cameraName, sectionPath],
+  );
+
+  // Use pending data from parent if available, otherwise use local state
+  const [localPendingData, setLocalPendingData] =
+    useState<ConfigSectionData | null>(null);
+
+  const pendingData =
+    pendingDataBySection !== undefined
+      ? (pendingDataBySection[pendingDataKey] as ConfigSectionData | null)
+      : localPendingData;
+
+  const setPendingData = useCallback(
+    (data: ConfigSectionData | null) => {
+      if (onPendingDataChange) {
+        onPendingDataChange(sectionPath, cameraName, data);
+      } else {
+        setLocalPendingData(data);
+      }
+    },
+    [onPendingDataChange, sectionPath, cameraName],
   );
   const [isSaving, setIsSaving] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const isResettingRef = useRef(false);
+  const isInitializingRef = useRef(true);
 
   const updateTopic =
     level === "camera" && cameraName
@@ -226,9 +274,15 @@ export function ConfigSection({
 
   // Clear pendingData whenever formData changes (e.g., from server refresh)
   // This prevents RJSF's initial onChange call from being treated as a user edit
+  // Only clear if pendingData is managed locally (not by parent)
   useEffect(() => {
-    setPendingData(null);
-  }, [formData]);
+    if (!pendingData) {
+      isInitializingRef.current = true;
+    }
+    if (onPendingDataChange === undefined) {
+      setPendingData(null);
+    }
+  }, [formData, pendingData, setPendingData, onPendingDataChange]);
 
   useEffect(() => {
     if (isResettingRef.current) {
@@ -323,20 +377,36 @@ export function ConfigSection({
         return;
       }
       const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
-      if (isEqual(formData, sanitizedData)) {
+      const rawData = sanitizeSectionData(rawFormData as ConfigSectionData);
+      const overrides = buildOverrides(sanitizedData, rawData, schemaDefaults);
+      if (isInitializingRef.current && !pendingData) {
+        isInitializingRef.current = false;
+        if (overrides === undefined) {
+          setPendingData(null);
+          return;
+        }
+      }
+      if (overrides === undefined) {
         setPendingData(null);
         return;
       }
       setPendingData(sanitizedData);
     },
-    [formData, sanitizeSectionData],
+    [
+      pendingData,
+      rawFormData,
+      sanitizeSectionData,
+      buildOverrides,
+      schemaDefaults,
+      setPendingData,
+    ],
   );
 
   const handleReset = useCallback(() => {
     isResettingRef.current = true;
     setPendingData(null);
     setFormKey((prev) => prev + 1);
-  }, []);
+  }, [setPendingData]);
 
   // Handle save button click
   const handleSave = useCallback(async () => {
@@ -433,6 +503,7 @@ export function ConfigSection({
     buildOverrides,
     schemaDefaults,
     updateTopic,
+    setPendingData,
   ]);
 
   // Handle reset to global/defaults - removes camera-level override or resets global to defaults
@@ -496,6 +567,7 @@ export function ConfigSection({
     t,
     refreshConfig,
     updateTopic,
+    setPendingData,
   ]);
 
   const sectionValidation = useMemo(
@@ -597,7 +669,7 @@ export function ConfigSection({
       <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-2">
           {hasChanges && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-danger">
               {t("unsavedChanges", {
                 ns: "views/settings",
                 defaultValue: "You have unsaved changes",
@@ -606,6 +678,26 @@ export function ConfigSection({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {((level === "camera" && isOverridden) || level === "global") &&
+            !hasChanges && (
+              <Button
+                onClick={() => setIsResetDialogOpen(true)}
+                variant="outline"
+                disabled={isSaving || disabled}
+                className="gap-2"
+              >
+                <LuRotateCcw className="h-4 w-4" />
+                {level === "global"
+                  ? t("button.resetToDefault", {
+                      ns: "common",
+                      defaultValue: "Reset to Default",
+                    })
+                  : t("button.resetToGlobal", {
+                      ns: "common",
+                      defaultValue: "Reset to Global",
+                    })}
+              </Button>
+            )}
           {hasChanges && (
             <Button
               onClick={handleReset}
@@ -613,7 +705,7 @@ export function ConfigSection({
               disabled={isSaving || disabled}
               className="gap-2"
             >
-              {t("reset", { ns: "common", defaultValue: "Reset" })}
+              {t("undo", { ns: "common", defaultValue: "Undo" })}
             </Button>
           )}
           <Button
@@ -629,6 +721,37 @@ export function ConfigSection({
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("confirmReset", { ns: "views/settings" })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {level === "global"
+                ? t("resetToDefaultDescription", { ns: "views/settings" })
+                : t("resetToGlobalDescription", { ns: "views/settings" })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-selected text-white hover:bg-selected/90"
+              onClick={async () => {
+                await handleResetToGlobal();
+                setIsResetDialogOpen(false);
+              }}
+            >
+              {level === "global"
+                ? t("button.resetToDefault", { ns: "common" })
+                : t("button.resetToGlobal", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 
@@ -664,28 +787,6 @@ export function ConfigSection({
                   </Badge>
                 )}
               </div>
-              {((level === "camera" && isOverridden) || level === "global") && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleResetToGlobal();
-                  }}
-                  className="gap-2"
-                >
-                  <LuRotateCcw className="h-4 w-4" />
-                  {level === "global"
-                    ? t("button.resetToDefault", {
-                        ns: "common",
-                        defaultValue: "Reset to Default",
-                      })
-                    : t("button.resetToGlobal", {
-                        ns: "common",
-                        defaultValue: "Reset to Global",
-                      })}
-                </Button>
-              )}
             </div>
           </CollapsibleTrigger>
 
@@ -724,51 +825,8 @@ export function ConfigSection({
               </p>
             )}
           </div>
-          {((level === "camera" && isOverridden) || level === "global") && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResetToGlobal}
-              className="gap-2"
-            >
-              <LuRotateCcw className="h-4 w-4" />
-              {level === "global"
-                ? t("button.resetToDefault", {
-                    ns: "common",
-                    defaultValue: "Reset to Default",
-                  })
-                : t("button.resetToGlobal", {
-                    ns: "common",
-                    defaultValue: "Reset to Global",
-                  })}
-            </Button>
-          )}
         </div>
       )}
-
-      {/* Reset button when title is hidden but we're at camera level with override */}
-      {!shouldShowTitle &&
-        ((level === "camera" && isOverridden) || level === "global") && (
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResetToGlobal}
-              className="gap-2"
-            >
-              <LuRotateCcw className="h-4 w-4" />
-              {level === "global"
-                ? t("button.resetToDefault", {
-                    ns: "common",
-                    defaultValue: "Reset to Default",
-                  })
-                : t("button.resetToGlobal", {
-                    ns: "common",
-                    defaultValue: "Reset to Global",
-                  })}
-            </Button>
-          </div>
-        )}
 
       {sectionContent}
     </div>
