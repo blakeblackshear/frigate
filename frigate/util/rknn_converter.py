@@ -189,13 +189,16 @@ def convert_onnx_to_rknn(
             logger.debug("Could not determine SoC type")
             return False
 
+    # Map rk3588s to rk3588 for RKNN toolkit compatibility
+    target_soc = "rk3588" if soc == "rk3588s" else soc
+
     # Get model config for the specified type
     if model_type not in MODEL_TYPE_CONFIGS:
         logger.debug(f"Unsupported model type: {model_type}")
         return False
 
     config = MODEL_TYPE_CONFIGS[model_type].copy()
-    config["target_platform"] = soc
+    config["target_platform"] = target_soc
 
     # RKNN toolkit requires .onnx extension, create temporary copy if needed
     temp_onnx_path = None
