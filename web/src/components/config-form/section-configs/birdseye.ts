@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const birdseye: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/birdseye",
+    restartRequired: [],
     fieldOrder: ["enabled", "mode", "order"],
     hiddenFields: [],
     advancedFields: [],

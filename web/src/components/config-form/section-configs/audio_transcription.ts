@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const audioTranscription: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/audio_detectors#audio-transcription",
+    restartRequired: [],
     fieldOrder: ["enabled", "language", "device", "model_size", "live_enabled"],
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["language", "device", "model_size"],

@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const faceRecognition: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/face_recognition",
+    restartRequired: [],
     fieldOrder: ["enabled", "min_area"],
     hiddenFields: [],
     advancedFields: ["min_area"],

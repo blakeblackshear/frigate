@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const lpr: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/license_plate_recognition",
+    restartRequired: [],
     fieldOrder: ["enabled", "expire_time", "min_area", "enhancement"],
     hiddenFields: [],
     advancedFields: ["expire_time", "min_area", "enhancement"],

@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const audio: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/audio_detectors",
+    restartRequired: [],
     fieldOrder: [
       "enabled",
       "listen",

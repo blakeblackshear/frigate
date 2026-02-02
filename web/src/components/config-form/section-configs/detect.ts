@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const detect: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/camera_specific",
+    restartRequired: [],
     fieldOrder: [
       "enabled",
       "fps",

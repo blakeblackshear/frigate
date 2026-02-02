@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const proxy: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/authentication#proxy",
+    restartRequired: [],
     fieldOrder: [
       "header_map",
       "logout_url",

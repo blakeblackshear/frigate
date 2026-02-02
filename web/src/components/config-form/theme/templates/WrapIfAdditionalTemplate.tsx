@@ -1,6 +1,7 @@
 import {
   ADDITIONAL_PROPERTY_FLAG,
   FormContextType,
+  getUiOptions,
   RJSFSchema,
   StrictRJSFSchema,
   WrapIfAdditionalTemplateProps,
@@ -30,6 +31,7 @@ export function WrapIfAdditionalTemplate<
     readonly,
     required,
     schema,
+    uiSchema,
   } = props;
 
   const { t } = useTranslation(["views/settings"]);
@@ -57,41 +59,63 @@ export function WrapIfAdditionalTemplate<
   const removeLabel = t("configForm.additionalProperties.remove", {
     ns: "views/settings",
   });
+  const uiOptions = getUiOptions(uiSchema);
+  const keyIsReadonly = uiOptions.additionalPropertyKeyReadonly === true;
 
   return (
     <div
       className={cn("grid grid-cols-12 items-start gap-2", classNames)}
       style={style}
     >
-      <div className="col-span-12 space-y-2 md:col-span-1">
-        {displayLabel && <Label htmlFor={keyId}>{keyLabel}</Label>}
-        <Input
-          id={keyId}
-          name={keyId}
-          required={required}
-          defaultValue={label}
-          placeholder={keyPlaceholder}
-          disabled={disabled || readonly}
-          onBlur={!readonly ? onKeyRenameBlur : undefined}
-        />
-      </div>
-      <div className="col-span-12 space-y-2 md:col-span-10">
-        {displayLabel && <Label htmlFor={id}>{valueLabel}</Label>}
+      {!keyIsReadonly && (
+        <div className="col-span-12 space-y-2 md:col-span-1">
+          {displayLabel && <Label htmlFor={keyId}>{keyLabel}</Label>}
+          {keyIsReadonly ? (
+            <div
+              id={keyId}
+              className="flex items-center text-sm text-muted-foreground"
+            >
+              {label}
+            </div>
+          ) : (
+            <Input
+              id={keyId}
+              name={keyId}
+              required={required}
+              defaultValue={label}
+              placeholder={keyPlaceholder}
+              disabled={disabled || readonly}
+              onBlur={!readonly ? onKeyRenameBlur : undefined}
+            />
+          )}
+        </div>
+      )}
+      <div
+        className={cn(
+          "col-span-12 space-y-2",
+          !keyIsReadonly && "md:col-span-10",
+        )}
+      >
+        {!keyIsReadonly && displayLabel && (
+          <Label htmlFor={id}>{valueLabel}</Label>
+        )}
         <div className="min-w-0">{children}</div>
       </div>
-      <div className="col-span-12 flex items-center md:col-span-1 md:justify-center">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRemoveProperty}
-          disabled={disabled || readonly}
-          aria-label={removeLabel}
-          title={removeLabel}
-        >
-          <LuTrash2 className="h-4 w-4" />
-        </Button>
-      </div>
+      {!keyIsReadonly && (
+        <div className="col-span-12 flex items-center md:col-span-1 md:justify-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemoveProperty}
+            disabled={disabled || readonly}
+            aria-label={removeLabel}
+            title={removeLabel}
+          >
+            <LuTrash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

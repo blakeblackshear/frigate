@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const ffmpeg: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/ffmpeg_presets",
+    restartRequired: [],
     fieldOrder: [
       "inputs",
       "path",

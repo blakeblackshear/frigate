@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const review: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/review",
+    restartRequired: [],
     fieldOrder: ["alerts", "detections", "genai"],
     fieldGroups: {},
     hiddenFields: [

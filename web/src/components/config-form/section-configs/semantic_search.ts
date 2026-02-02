@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const semanticSearch: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/semantic_search",
+    restartRequired: [],
     fieldOrder: ["triggers"],
     hiddenFields: [],
     advancedFields: [],

@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const snapshots: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/snapshots",
+    restartRequired: [],
     fieldOrder: [
       "enabled",
       "bounding_box",

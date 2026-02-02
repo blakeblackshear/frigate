@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const mqtt: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/integrations/mqtt",
+    restartRequired: [],
     fieldOrder: [
       "enabled",
       "timestamp",

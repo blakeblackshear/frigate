@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const motion: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/motion_detection",
+    restartRequired: [],
     fieldOrder: [
       "enabled",
       "threshold",

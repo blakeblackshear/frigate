@@ -1286,6 +1286,7 @@
   },
   "toast": {
     "success": "Settings saved successfully",
+    "successRestartRequired": "Settings saved successfully. Restart Frigate to apply your changes.",
     "error": "Failed to save settings",
     "validationError": "Validation failed: {{message}}",
     "resetSuccess": "Reset to global defaults",

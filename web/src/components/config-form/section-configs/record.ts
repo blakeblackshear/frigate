@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const record: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/record",
+    restartRequired: [],
     fieldOrder: [
       "enabled",
       "expire_interval",

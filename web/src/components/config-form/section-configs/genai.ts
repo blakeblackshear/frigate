@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const genai: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/genai/config",
+    restartRequired: [],
     fieldOrder: [
       "provider",
       "api_key",

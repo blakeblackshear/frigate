@@ -61,6 +61,12 @@ export interface SectionConfig {
   advancedFields?: string[];
   /** Fields to compare for override detection */
   overrideFields?: string[];
+  /** Documentation link for the section */
+  sectionDocs?: string;
+  /** Per-field documentation links */
+  fieldDocs?: Record<string, string>;
+  /** Fields that require restart when modified (empty means all fields) */
+  restartRequired?: string[];
   /** Whether to enable live validation */
   liveValidate?: boolean;
   /** Additional uiSchema overrides */
@@ -402,6 +408,27 @@ export function ConfigSection({
     ],
   );
 
+  const requiresRestartForOverrides = useCallback(
+    (overrides: unknown) => {
+      if (sectionConfig.restartRequired === undefined) {
+        return requiresRestart;
+      }
+
+      if (sectionConfig.restartRequired.length === 0) {
+        return true;
+      }
+
+      if (!overrides || typeof overrides !== "object") {
+        return false;
+      }
+
+      return sectionConfig.restartRequired.some(
+        (path) => get(overrides as JsonObject, path) !== undefined,
+      );
+    },
+    [requiresRestart, sectionConfig.restartRequired],
+  );
+
   const handleReset = useCallback(() => {
     isResettingRef.current = true;
     setPendingData(null);
@@ -426,8 +453,10 @@ export function ConfigSection({
         return;
       }
 
+      const needsRestart = requiresRestartForOverrides(overrides);
+
       await axios.put("config/sett", {
-        requires_restart: requiresRestart ? 0 : 1,
+        requires_restart: needsRestart ? 1 : 0,
         update_topic: updateTopic,
         config_data: {
           [basePath]: overrides,
@@ -438,13 +467,15 @@ export function ConfigSection({
       console.log("Saved config data:", {
         [basePath]: overrides,
         update_topic: updateTopic,
-        requires_restart: requiresRestart ? 0 : 1,
+        requires_restart: needsRestart ? 1 : 0,
       });
 
       toast.success(
-        t("toast.success", {
+        t(needsRestart ? "toast.successRestartRequired" : "toast.success", {
           ns: "views/settings",
-          defaultValue: "Settings saved successfully",
+          defaultValue: needsRestart
+            ? "Settings saved successfully. Restart Frigate to apply your changes."
+            : "Settings saved successfully",
         }),
       );
 
@@ -494,7 +525,6 @@ export function ConfigSection({
     pendingData,
     level,
     cameraName,
-    requiresRestart,
     t,
     refreshConfig,
     onSave,
@@ -504,6 +534,7 @@ export function ConfigSection({
     schemaDefaults,
     updateTopic,
     setPendingData,
+    requiresRestartForOverrides,
   ]);
 
   // Handle reset to global/defaults - removes camera-level override or resets global to defaults
@@ -662,6 +693,8 @@ export function ConfigSection({
           t,
           renderers:
             sectionConfig?.renderers ?? sectionRenderers?.[sectionPath],
+          sectionDocs: sectionConfig.sectionDocs,
+          fieldDocs: sectionConfig.fieldDocs,
         }}
       />
 

@@ -22,6 +22,8 @@ export type ConfigFormContext = {
   fullConfig?: FrigateConfig;
   i18nNamespace?: string;
   sectionI18nPrefix?: string;
+  sectionDocs?: string;
+  fieldDocs?: Record<string, string>;
   t?: (key: string, options?: Record<string, unknown>) => string;
   renderers?: Record<string, RendererComponent>;
 };

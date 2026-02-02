@@ -13,6 +13,9 @@ import { useTranslation } from "react-i18next";
 import { isNullableUnionSchema } from "../fields/nullableUtils";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { ConfigFormContext } from "@/types/configForm";
+import { Link } from "react-router-dom";
+import { LuExternalLink } from "react-icons/lu";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 /**
  * Build the i18n translation key path for nested fields using the field path
@@ -114,6 +117,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     i18nNamespace || "common",
     "views/settings",
   ]);
+  const { getLocaleDocUrl } = useDocDomain();
 
   if (hidden) {
     return <div className="hidden">{children}</div>;
@@ -147,6 +151,13 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const filterObjectLabel = getFilterObjectLabel(pathSegments);
   const translatedFilterObjectLabel = filterObjectLabel
     ? getTranslatedLabel(filterObjectLabel, "object")
+    : undefined;
+  const fieldDocsKey = translationPath || pathSegments.join(".");
+  const fieldDocsPath = fieldDocsKey
+    ? formContext?.fieldDocs?.[fieldDocsKey]
+    : undefined;
+  const fieldDocsUrl = fieldDocsPath
+    ? getLocaleDocUrl(fieldDocsPath)
     : undefined;
 
   // Use schema title/description as primary source (from JSON Schema)
@@ -394,6 +405,19 @@ export function FieldTemplate(props: FieldTemplateProps) {
                     {finalDescription}
                   </p>
                 )}
+                {fieldDocsUrl && !isMultiSchemaWrapper && !isObjectField && (
+                  <div className="flex items-center text-xs text-primary">
+                    <Link
+                      to={fieldDocsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2">{children}</div>
             </div>
@@ -405,6 +429,19 @@ export function FieldTemplate(props: FieldTemplateProps) {
                 <p className="text-xs text-muted-foreground">
                   {finalDescription}
                 </p>
+              )}
+              {fieldDocsUrl && !isMultiSchemaWrapper && !isObjectField && (
+                <div className="flex items-center text-xs text-primary">
+                  <Link
+                    to={fieldDocsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    {t("readTheDocumentation", { ns: "common" })}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
               )}
             </>
           )}

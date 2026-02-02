@@ -1,10 +1,14 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
 import type { ConfigSectionData } from "@/types/configForm";
+import { getSectionConfig } from "@/utils/sectionConfigsUtils";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { Link } from "react-router-dom";
+import { LuExternalLink } from "react-icons/lu";
 
 export type SettingsPageProps = {
   selectedCamera?: string;
@@ -58,10 +62,18 @@ export function SingleSectionPage({
     "views/settings",
     "common",
   ]);
+  const { getLocaleDocUrl } = useDocDomain();
   const [sectionStatus, setSectionStatus] = useState<SectionStatus>({
     hasChanges: false,
     isOverridden: false,
   });
+  const resolvedSectionConfig = useMemo(
+    () => sectionConfig ?? getSectionConfig(sectionKey, level),
+    [level, sectionConfig, sectionKey],
+  );
+  const sectionDocsUrl = resolvedSectionConfig.sectionDocs
+    ? getLocaleDocUrl(resolvedSectionConfig.sectionDocs)
+    : undefined;
 
   const handleSectionStatusChange = useCallback(
     (status: SectionStatus) => {
@@ -91,6 +103,19 @@ export function SingleSectionPage({
           }) && (
             <div className="my-1 text-sm text-muted-foreground">
               {t(`${sectionKey}.description`, { ns: sectionNamespace })}
+            </div>
+          )}
+          {sectionDocsUrl && (
+            <div className="flex items-center text-sm text-primary">
+              <Link
+                to={sectionDocsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                {t("readTheDocumentation", { ns: "common" })}
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
             </div>
           )}
         </div>
@@ -127,7 +152,7 @@ export function SingleSectionPage({
         showOverrideIndicator={showOverrideIndicator}
         onSave={() => setUnsavedChanges?.(false)}
         showTitle={false}
-        sectionConfig={sectionConfig}
+        sectionConfig={resolvedSectionConfig}
         pendingDataBySection={pendingDataBySection}
         onPendingDataChange={onPendingDataChange}
         requiresRestart={requiresRestart}

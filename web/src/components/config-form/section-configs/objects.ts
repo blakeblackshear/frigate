@@ -2,6 +2,8 @@ import type { SectionConfigOverrides } from "./types";
 
 const objects: SectionConfigOverrides = {
   base: {
+    sectionDocs: "/configuration/object_filters",
+    restartRequired: [],
     fieldOrder: ["track", "alert", "detect", "filters"],
     fieldGroups: {
       tracking: ["track", "alert", "detect"],
@@ -14,12 +16,19 @@ const objects: SectionConfigOverrides = {
       "genai.enabled_in_config",
       "filters.*.mask",
       "filters.*.raw_mask",
+      "filters.mask",
+      "filters.raw_mask",
     ],
     advancedFields: ["filters"],
     uiSchema: {
       "filters.*.min_area": {
         "ui:options": {
           suppressMultiSchema: true,
+        },
+      },
+      "filters.*": {
+        "ui:options": {
+          additionalPropertyKeyReadonly: true,
         },
       },
       "filters.*.max_area": {
@@ -56,7 +65,17 @@ const objects: SectionConfigOverrides = {
     },
   },
   global: {
-    hiddenFields: ["genai.required_zones"],
+    hiddenFields: [
+      "enabled_in_config",
+      "mask",
+      "raw_mask",
+      "genai.enabled_in_config",
+      "filters.*.mask",
+      "filters.*.raw_mask",
+      "filters.mask",
+      "filters.raw_mask",
+      "genai.required_zones",
+    ],
   },
 };
 
