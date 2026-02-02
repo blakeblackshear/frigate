@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "rknn"
 
-supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588", "rk3588s"]
-
 supported_models = {
     ModelTypeEnum.yologeneric: "^frigate-fp16-yolov9-[cemst]$",
     ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$",
