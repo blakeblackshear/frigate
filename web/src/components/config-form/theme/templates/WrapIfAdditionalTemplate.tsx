@@ -63,7 +63,7 @@ export function WrapIfAdditionalTemplate<
       className={cn("grid grid-cols-12 items-start gap-2", classNames)}
       style={style}
     >
-      <div className="col-span-12 space-y-2 md:col-span-5">
+      <div className="col-span-12 space-y-2 md:col-span-1">
         {displayLabel && <Label htmlFor={keyId}>{keyLabel}</Label>}
         <Input
           id={keyId}
@@ -75,11 +75,11 @@ export function WrapIfAdditionalTemplate<
           onBlur={!readonly ? onKeyRenameBlur : undefined}
         />
       </div>
-      <div className="col-span-12 space-y-2 md:col-span-6">
+      <div className="col-span-12 space-y-2 md:col-span-10">
         {displayLabel && <Label htmlFor={id}>{valueLabel}</Label>}
         <div className="min-w-0">{children}</div>
       </div>
-      <div className="col-span-12 flex items-center md:col-span-1 md:justify-end">
+      <div className="col-span-12 flex items-center md:col-span-1 md:justify-center">
         <Button
           type="button"
           variant="ghost"

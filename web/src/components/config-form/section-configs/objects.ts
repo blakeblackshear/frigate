@@ -40,6 +40,9 @@ const objects: SectionConfigOverrides = {
             suppressMultiSchema: true,
           },
         },
+        prompt: {
+          "ui:widget": "textarea",
+        },
         required_zones: {
           "ui:widget": "zoneNames",
           "ui:options": {
@@ -51,6 +54,9 @@ const objects: SectionConfigOverrides = {
         },
       },
     },
+  },
+  global: {
+    hiddenFields: ["genai.required_zones"],
   },
 };
 

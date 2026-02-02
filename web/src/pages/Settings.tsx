@@ -86,6 +86,7 @@ const allSettingsViews = [
   "globalDetect",
   "globalRecording",
   "globalSnapshots",
+  "globalFfmpeg",
   "globalMotion",
   "globalObjects",
   "globalReview",
@@ -163,6 +164,7 @@ const createSectionPage = (
 const GlobalDetectSettingsPage = createSectionPage("detect", "global");
 const GlobalRecordingSettingsPage = createSectionPage("record", "global");
 const GlobalSnapshotsSettingsPage = createSectionPage("snapshots", "global");
+const GlobalFfmpegSettingsPage = createSectionPage("ffmpeg", "global");
 const GlobalMotionSettingsPage = createSectionPage("motion", "global");
 const GlobalObjectsSettingsPage = createSectionPage("objects", "global");
 const GlobalReviewSettingsPage = createSectionPage("review", "global");
@@ -264,6 +266,7 @@ const settingsGroups = [
       { key: "globalDetect", component: GlobalDetectSettingsPage },
       { key: "globalRecording", component: GlobalRecordingSettingsPage },
       { key: "globalSnapshots", component: GlobalSnapshotsSettingsPage },
+      { key: "globalFfmpeg", component: GlobalFfmpegSettingsPage },
       { key: "globalMotion", component: GlobalMotionSettingsPage },
       { key: "globalObjects", component: GlobalObjectsSettingsPage },
       { key: "globalReview", component: GlobalReviewSettingsPage },

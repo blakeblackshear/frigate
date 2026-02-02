@@ -19,11 +19,8 @@ import { ConfigFormContext } from "@/types/configForm";
  * provided by RJSF. This avoids ambiguity with underscores in field names and
  * skips dynamic filter labels for per-object filter fields.
  */
-function buildTranslationPath(path: Array<string | number>): string {
-  const segments = path.filter(
-    (segment): segment is string => typeof segment === "string",
-  );
-
+function buildTranslationPath(segments: string[], sectionI18nPrefix?: string) {
+  // Example: filters.person.threshold -> filters.threshold or ov1.model -> model
   const filtersIndex = segments.indexOf("filters");
   if (filtersIndex !== -1 && segments.length > filtersIndex + 2) {
     const normalized = [
@@ -31,6 +28,22 @@ function buildTranslationPath(path: Array<string | number>): string {
       ...segments.slice(filtersIndex + 2),
     ];
     return normalized.join(".");
+  }
+
+  // Example: detectors.ov1.type -> detectors.type
+  const detectorsIndex = segments.indexOf("detectors");
+  if (detectorsIndex !== -1 && segments.length > detectorsIndex + 2) {
+    const normalized = [
+      ...segments.slice(0, detectorsIndex + 1),
+      ...segments.slice(detectorsIndex + 2),
+    ];
+    return normalized.join(".");
+  }
+
+  // If we are in the detectors section but 'detectors' is not in the path (specialized section)
+  // then the first segment is the dynamic detector name.
+  if (sectionI18nPrefix === "detectors" && segments.length > 1) {
+    return segments.slice(1).join(".");
   }
 
   return segments.join(".");
@@ -130,7 +143,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const pathSegments = fieldPathId.path.filter(
     (segment): segment is string => typeof segment === "string",
   );
-  const translationPath = buildTranslationPath(pathSegments);
+  const translationPath = buildTranslationPath(pathSegments, sectionI18nPrefix);
   const filterObjectLabel = getFilterObjectLabel(pathSegments);
   const translatedFilterObjectLabel = filterObjectLabel
     ? getTranslatedLabel(filterObjectLabel, "object")

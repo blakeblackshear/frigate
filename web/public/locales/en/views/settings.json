@@ -26,6 +26,7 @@
     "globalDetect": "Object Detection",
     "globalRecording": "Recording",
     "globalSnapshots": "Snapshots",
+    "globalFfmpeg": "FFmpeg",
     "globalMotion": "Motion detection",
     "globalObjects": "Objects",
     "globalReview": "Review",

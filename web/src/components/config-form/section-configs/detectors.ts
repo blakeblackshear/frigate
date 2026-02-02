@@ -4,6 +4,12 @@ const detectors: SectionConfigOverrides = {
   base: {
     fieldOrder: [],
     advancedFields: [],
+    hiddenFields: [
+      "*.model.labelmap",
+      "*.model.attributes_map",
+      "*.model",
+      "*.model_path",
+    ],
   },
 };
 

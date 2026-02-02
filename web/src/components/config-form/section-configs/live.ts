@@ -7,6 +7,9 @@ const live: SectionConfigOverrides = {
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["quality"],
   },
+  global: {
+    hiddenFields: ["streams"],
+  },
 };
 
 export default live;
