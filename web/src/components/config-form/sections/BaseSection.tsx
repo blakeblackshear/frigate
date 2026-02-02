@@ -10,7 +10,7 @@ import sectionRenderers, {
   RendererComponent,
 } from "@/components/config-form/sectionExtras/registry";
 import { ConfigForm } from "../ConfigForm";
-import type { FormValidation, UiSchema } from "@rjsf/utils";
+import type { FormValidation, RJSFSchema, UiSchema } from "@rjsf/utils";
 import { getSectionValidation } from "../section-validations";
 import {
   useConfigOverride,
@@ -234,15 +234,25 @@ export function ConfigSection({
   });
 
   // Get current form data
+  const rawSectionValue = useMemo(() => {
+    if (!config) return undefined;
+
+    if (level === "camera" && cameraName) {
+      return get(config.cameras?.[cameraName], sectionPath);
+    }
+
+    return get(config, sectionPath);
+  }, [config, level, cameraName, sectionPath]);
+
   const rawFormData = useMemo(() => {
     if (!config) return {};
 
-    if (level === "camera" && cameraName) {
-      return get(config.cameras?.[cameraName], sectionPath) || {};
+    if (rawSectionValue === undefined || rawSectionValue === null) {
+      return {};
     }
 
-    return get(config, sectionPath) || {};
-  }, [config, level, cameraName, sectionPath]);
+    return rawSectionValue;
+  }, [config, rawSectionValue]);
 
   const sanitizeSectionData = useCallback(
     (data: ConfigSectionData) => {
@@ -277,6 +287,47 @@ export function ConfigSection({
     }
     return applySchemaDefaults(sectionSchema, {});
   }, [sectionSchema]);
+
+  const effectiveSchemaDefaults = useMemo(() => {
+    // Special-case: the server JSON Schema for the top-level `motion` global
+    // value is expressed as `anyOf` including `null` (default: null). The
+    // backend intentionally allows `motion` to be omitted/`null` so that an
+    // absent global motion config does not get merged into every camera's
+    // config. However, the form renderer materializes schema defaults into
+    // an object for display. That object-vs-null mismatch would cause our
+    // override-detection to see a difference on first render and show the
+    // false "Modified" badge.
+    //
+    // To avoid changing backend semantics we derive the effective defaults
+    // from the non-null anyOf branch for the `motion` global section and
+    // use those defaults as the comparison baseline in the UI. This ensures
+    // the displayed form and the comparison baseline match while leaving
+    // server behavior unchanged.
+    if (sectionPath !== "motion" || level !== "global" || !sectionSchema) {
+      return schemaDefaults;
+    }
+
+    const defaultsKeys = Object.keys(schemaDefaults);
+    if (defaultsKeys.length > 0) {
+      return schemaDefaults;
+    }
+
+    const anyOfSchemas = (sectionSchema as { anyOf?: unknown[] }).anyOf;
+    if (!Array.isArray(anyOfSchemas)) {
+      return schemaDefaults;
+    }
+
+    const motionSchema = anyOfSchemas.find(
+      (schema) =>
+        typeof schema === "object" && schema !== null && "properties" in schema,
+    );
+
+    if (!motionSchema || typeof motionSchema !== "object") {
+      return schemaDefaults;
+    }
+
+    return applySchemaDefaults(motionSchema as RJSFSchema, {});
+  }, [level, schemaDefaults, sectionPath, sectionSchema]);
 
   // Clear pendingData whenever formData changes (e.g., from server refresh)
   // This prevents RJSF's initial onChange call from being treated as a user edit
@@ -383,8 +434,25 @@ export function ConfigSection({
         return;
       }
       const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
-      const rawData = sanitizeSectionData(rawFormData as ConfigSectionData);
-      const overrides = buildOverrides(sanitizedData, rawData, schemaDefaults);
+      // When the server-stored `rawSectionValue` for `motion` global is
+      // actually `null` we must preserve that `null` sentinel for base
+      // comparisons. `isMotionGlobal` signals that the stored value is
+      // intentionally null (meaning "no global override provided"), so the
+      // baseline used by `buildOverrides` should be `null` rather than an
+      // object. This keeps the UI from treating the form-populated default
+      // object as a user edit on initial render.
+      const isMotionGlobal =
+        sectionPath === "motion" &&
+        level === "global" &&
+        rawSectionValue === null;
+      const rawData = isMotionGlobal
+        ? null
+        : sanitizeSectionData(rawFormData as ConfigSectionData);
+      const overrides = buildOverrides(
+        sanitizedData,
+        rawData,
+        effectiveSchemaDefaults,
+      );
       if (isInitializingRef.current && !pendingData) {
         isInitializingRef.current = false;
         if (overrides === undefined) {
@@ -400,10 +468,13 @@ export function ConfigSection({
     },
     [
       pendingData,
+      level,
+      sectionPath,
+      rawSectionValue,
       rawFormData,
       sanitizeSectionData,
       buildOverrides,
-      schemaDefaults,
+      effectiveSchemaDefaults,
       setPendingData,
     ],
   );
@@ -446,7 +517,11 @@ export function ConfigSection({
           ? `cameras.${cameraName}.${sectionPath}`
           : sectionPath;
       const rawData = sanitizeSectionData(rawFormData);
-      const overrides = buildOverrides(pendingData, rawData, schemaDefaults);
+      const overrides = buildOverrides(
+        pendingData,
+        rawData,
+        effectiveSchemaDefaults,
+      );
 
       if (!overrides || Object.keys(overrides).length === 0) {
         setPendingData(null);
@@ -531,7 +606,7 @@ export function ConfigSection({
     rawFormData,
     sanitizeSectionData,
     buildOverrides,
-    schemaDefaults,
+    effectiveSchemaDefaults,
     updateTopic,
     setPendingData,
     requiresRestartForOverrides,
@@ -547,7 +622,7 @@ export function ConfigSection({
           ? `cameras.${cameraName}.${sectionPath}`
           : sectionPath;
 
-      const configData = level === "global" ? schemaDefaults : "";
+      const configData = level === "global" ? effectiveSchemaDefaults : "";
 
       await axios.put("config/sett", {
         requires_restart: requiresRestart ? 0 : 1,
@@ -590,7 +665,7 @@ export function ConfigSection({
       );
     }
   }, [
-    schemaDefaults,
+    effectiveSchemaDefaults,
     sectionPath,
     level,
     cameraName,
