@@ -3,6 +3,7 @@ import { WidgetProps } from "@rjsf/utils";
 import { useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Collapsible,
   CollapsibleContent,
@@ -11,10 +12,16 @@ import {
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { ConfigFormContext } from "@/types/configForm";
+import { cn } from "@/lib/utils";
 
 type FormContext = Pick<
   ConfigFormContext,
-  "cameraValue" | "globalValue" | "fullCameraConfig" | "fullConfig" | "t"
+  | "cameraValue"
+  | "globalValue"
+  | "fullCameraConfig"
+  | "fullConfig"
+  | "t"
+  | "level"
 > & {
   fullCameraConfig?: CameraConfig;
   fullConfig?: FrigateConfig;
@@ -31,6 +38,10 @@ export type SwitchesWidgetOptions = {
   i18nKey: string;
   /** Translation namespace (default: "views/settings") */
   namespace?: string;
+  /** Optional class name for the list container */
+  listClassName?: string;
+  /** Enable search input to filter the list */
+  enableSearch?: boolean;
 };
 
 function normalizeValue(value: unknown): string[] {
@@ -100,8 +111,30 @@ export function SwitchesWidget(props: WidgetProps) {
     [props.options],
   );
 
+  const listClassName = useMemo(
+    () => props.options?.listClassName as string | undefined,
+    [props.options],
+  );
+
+  const enableSearch = useMemo(
+    () => props.options?.enableSearch as boolean | undefined,
+    [props.options],
+  );
+
   const selectedEntities = useMemo(() => normalizeValue(value), [value]);
   const [isOpen, setIsOpen] = useState(selectedEntities.length > 0);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredEntities = useMemo(() => {
+    if (!enableSearch || !searchTerm.trim()) {
+      return availableEntities;
+    }
+    const term = searchTerm.toLowerCase();
+    return availableEntities.filter((entity) => {
+      const displayLabel = getDisplayLabel(entity, context);
+      return displayLabel.toLowerCase().includes(term);
+    });
+  }, [availableEntities, searchTerm, enableSearch, getDisplayLabel, context]);
 
   const toggleEntity = (entity: string, enabled: boolean) => {
     if (enabled) {
@@ -150,28 +183,41 @@ export function SwitchesWidget(props: WidgetProps) {
           {availableEntities.length === 0 ? (
             <div className="text-sm text-muted-foreground">{emptyMessage}</div>
           ) : (
-            <div className="grid gap-2">
-              {availableEntities.map((entity) => {
-                const checked = selectedEntities.includes(entity);
-                const displayLabel = getDisplayLabel(entity, context);
-                return (
-                  <div
-                    key={entity}
-                    className="flex items-center justify-between rounded-md px-3 py-0"
-                  >
-                    <label htmlFor={`${id}-${entity}`} className="text-sm">
-                      {displayLabel}
-                    </label>
-                    <Switch
-                      id={`${id}-${entity}`}
-                      checked={checked}
-                      disabled={disabled || readonly}
-                      onCheckedChange={(value) => toggleEntity(entity, !!value)}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+            <>
+              {enableSearch && (
+                <Input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="mb-2"
+                />
+              )}
+              <div className={cn("grid gap-2", listClassName)}>
+                {filteredEntities.map((entity) => {
+                  const checked = selectedEntities.includes(entity);
+                  const displayLabel = getDisplayLabel(entity, context);
+                  return (
+                    <div
+                      key={entity}
+                      className="flex items-center justify-between rounded-md px-3 py-0"
+                    >
+                      <label htmlFor={`${id}-${entity}`} className="text-sm">
+                        {displayLabel}
+                      </label>
+                      <Switch
+                        id={`${id}-${entity}`}
+                        checked={checked}
+                        disabled={disabled || readonly}
+                        onCheckedChange={(value) =>
+                          toggleEntity(entity, !!value)
+                        }
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </CollapsibleContent>
       </div>
