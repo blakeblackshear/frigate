@@ -86,7 +86,14 @@
     "otherProcesses": {
       "title": "Kiti Procesai",
       "processCpuUsage": "Procesų CPU Naudojimas",
-      "processMemoryUsage": "Procesu Atminties Naudojimas"
+      "processMemoryUsage": "Procesu Atminties Naudojimas",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "įrašas",
+        "review_segment": "peržiūros segmentas",
+        "embeddings": "įterpiniai",
+        "audio_detector": "garso aptikiklis"
+      }
     }
   },
   "storage": {
@@ -184,8 +191,18 @@
       "plate_recognition": "Numerių Atpažinimas",
       "face_recognition": "Veido Atpažinimas",
       "text_embedding": "Teksto Įterpimas",
-      "image_embedding": "Vaizdo Įterpimas"
+      "image_embedding": "Vaizdo Įterpimas",
+      "review_description": "Apžvalgos Aprašymas",
+      "review_description_speed": "Apžvalgos Aprašymo Greitis",
+      "review_description_events_per_second": "Apžvalgos Aprašymas",
+      "object_description": "Objekto Aprašymas",
+      "object_description_speed": "Objekto Aprašymo Greitis",
+      "object_description_events_per_second": "Objekto Aprašymas",
+      "classification": "{{name}} Klasifikavimas",
+      "classification_speed": "{{name}} Klasifikavimo Greitis",
+      "classification_events_per_second": "{{name}} Klasifikavimo Įvykiai Per Sekundę"
     },
-    "infPerSecond": "Išvadų Per Sekundę"
+    "infPerSecond": "Išvadų Per Sekundę",
+    "averageInf": "Vidutinis Vertinimo Laikas"
   }
 }

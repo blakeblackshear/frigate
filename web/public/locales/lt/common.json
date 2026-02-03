@@ -81,7 +81,8 @@
     },
     "inProgress": "Apdorojama",
     "invalidStartTime": "Netinkamas pradžios laikas",
-    "invalidEndTime": "Netinkamas pabaigos laikas"
+    "invalidEndTime": "Netinkamas pabaigos laikas",
+    "never": "Niekada"
   },
   "unit": {
     "speed": {
@@ -104,7 +105,11 @@
   "label": {
     "back": "Eiti atgal",
     "hide": "Slėpti {{item}}",
-    "show": "Rodyti {{item}}"
+    "show": "Rodyti {{item}}",
+    "ID": "ID",
+    "none": "Nėra",
+    "all": "Visi",
+    "other": "Kiti"
   },
   "button": {
     "apply": "Pritaikyti",
@@ -141,7 +146,8 @@
     "export": "Eksportuoti",
     "deleteNow": "Trinti Dabar",
     "next": "Kitas",
-    "off": "OFF"
+    "off": "OFF",
+    "continue": "Tęsti"
   },
   "menu": {
     "system": "Sistema",
@@ -242,7 +248,8 @@
       "logout": "atsijungti",
       "setPassword": "Nustatyti Slaptažodi"
     },
-    "uiPlayground": "UI Playground"
+    "uiPlayground": "UI Playground",
+    "classification": "Klasifikavimas"
   },
   "toast": {
     "copyUrlToClipboard": "URL nukopijuotas į atmintį.",
@@ -286,5 +293,14 @@
   "readTheDocumentation": "Skaityti dokumentaciją",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} ir {{1}}",
+    "many": "{{items}}, ir {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Pasirinktinis",
+    "internalID": "Vidinį ID Frigate naudoja konfiguracijoje ir duombazėje"
   }
 }

@@ -172,7 +172,21 @@
   "noCameras": {
     "title": "Nėra Sukonfiguruotų Kamerų",
     "description": "Pradėti nuo kameros prijungimo pire Frigate.",
-    "buttonText": "Pridėti Kamerą"
+    "buttonText": "Pridėti Kamerą",
+    "restricted": {
+      "title": "Nėra Prieinamų Kamerų",
+      "description": "Jūs neturite leidimo matyti kameras šioje grupėje."
+    },
+    "default": {
+      "title": "Nėra Sukonfiguruotų Kamerų",
+      "description": "Pradėkite nuo kameros prijungimo prie Frigate.",
+      "buttonText": "Pridėti Kamerą"
+    },
+    "group": {
+      "title": "Grupėje Kamerų Nėra",
+      "description": "Ši kamerų grupė neturi priskirtų ar įjungtų kamerų.",
+      "buttonText": "Valdyti Grupes"
+    }
   },
   "snapshot": {
     "takeSnapshot": "Atsisiųsti momentinį kadrą",

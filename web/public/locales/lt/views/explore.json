@@ -50,13 +50,14 @@
           "updatedSublabel": "Sėkmingai atnaujinta sub etiketė.",
           "updatedLPR": "Sėkmingai atnaujinti registracijos numeriai.",
           "audioTranscription": "Sėkmingai užklausta garso aprašymo. Priklausomai nuo jūsų Frigate serverio pajėgumų, tai gali užtrukti.",
-          "updatedAttributes": "Atributai sekmingai užkelti."
+          "updatedAttributes": "Atributai sekmingai atnaujinti."
         },
         "error": {
           "regenerate": "Nepavyko pakviesti {{provider}} naujam aprašymui: {{errorMessage}}",
           "updatedSublabelFailed": "Nepavyko atnaujinti sub etikečių: {{errorMessage}}",
           "updatedLPRFailed": "Nepavyko atnaujinti registracijos numerių: {{errorMessage}}",
-          "audioTranscription": "Nepavyko užklausti garso aprašymo: {{errorMessage}}"
+          "audioTranscription": "Nepavyko užklausti garso aprašymo: {{errorMessage}}",
+          "updatedAttributesFailed": "Nepavyko atnaujinti atributų: {{errorMessage}}"
         }
       }
     },
@@ -104,6 +105,14 @@
     "tips": {
       "descriptionSaved": "Aprašymas sėkmingai išsaugotas",
       "saveDescriptionFailed": "Nepavyko atnaujinti aprašymo: {{errorMessage}}"
+    },
+    "editAttributes": {
+      "title": "Koreguoti atributus",
+      "desc": "Pasirinkite klasifikavimo atributus šiai etiketei {{label}}"
+    },
+    "attributes": "Klasifikavimo Atributai",
+    "title": {
+      "label": "Antraštė"
     }
   },
   "trackedObjectsCount_one": "{{count}} sekamas objektas ",
@@ -207,6 +216,20 @@
     },
     "deleteTrackedObject": {
       "label": "Ištrinti šį sekamą objektą"
+    },
+    "showObjectDetails": {
+      "label": "Rodyti objektų kelią"
+    },
+    "hideObjectDetails": {
+      "label": "Slėpti objektų kelią"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Atsisiųsti švarią nuotrauką",
+      "aria": "Atsisiųsti švarią nuotrauką"
+    },
+    "viewTrackingDetails": {
+      "label": "Žiūrėti sekimo detales",
+      "aria": "Rodyti sekimo detales"
     }
   },
   "noTrackedObjects": "Sekamų Objektų Nerasta",
@@ -218,7 +241,9 @@
         "success": "Sekami objektai sėkmingai ištrinti.",
         "error": "Sekamų objektų nepavyko ištrinti: {{errorMessage}}"
       }
-    }
+    },
+    "previousTrackedObject": "Anksčiau sekti objektai",
+    "nextTrackedObject": "Sekantis sekamas objektas"
   },
   "aiAnalysis": {
     "title": "DI Analizė"

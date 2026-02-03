@@ -4,7 +4,7 @@
     "authentication": "Autentifikavimo Nustatymai - Frigate",
     "camera": "Kameros Nustatymai - Frigate",
     "object": "Debug - Frigate",
-    "general": "Vartotojo Sąsajos Nustatymai - Frigate",
+    "general": "Vizualiniai Nustatymai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
     "motionTuner": "Judesio Derinimas - Frigate",
@@ -845,7 +845,8 @@
     "steps": {
       "nameAndConnection": "Pavadinimas ir Jungtis",
       "streamConfiguration": "Transliacijos Nustatymai",
-      "validationAndTesting": "Patikra ir Testavimas"
+      "validationAndTesting": "Patikra ir Testavimas",
+      "probeOrSnapshot": "Mėginys ar Kadras"
     },
     "save": {
       "success": "Nauja kamera sėkmingai išsaugota {{cameraName}}.",
@@ -879,7 +880,126 @@
       "brandUrlFormat": "Kamerai su RTSP URL formatas kaip: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://vartotojas:slaptažodis@host:port/path",
       "testConnection": "Testuoti Susijungimą",
-      "testSuccess": "Susijungimo testas sėkmingas!"
+      "testSuccess": "Susijungimo testas sėkmingas!",
+      "connectionSettings": "Prisijungimo Nustatymai",
+      "detectionMethod": "Transliacijos Aptikimo Metodas",
+      "onvifPort": "ONVIF Portas",
+      "probeMode": "Probuoti kamerą",
+      "manualMode": "Rankinis pasirinkimas",
+      "detectionMethodDescription": "Probuoti kamerą su ONVIF (jei palaikomas), kad rasti kameros srautų URL, arba rankiniu būdu pasirinkite kameros gamintoją kad naudoti iš anksto žinomus URL adresus. Kad įvesti individualų RTSP URL, pasirinkite rankinį metodą ir pasirinkite \"Kitas\".",
+      "onvifPortDescription": "Kameroms su palaikomu ONVIF, tai dažniausiai 80 ar 8080.",
+      "useDigestAuth": "Naudoti digest autentifikavimą",
+      "useDigestAuthDescription": "Naudoti HTTP digest autentifikavimą su ONVIF. Kai kurios kameros gali reikalauti priskirto ONVIF vartojo/ slaptažodžio vietoje standartinio admin vartotojo.",
+      "errors": {
+        "brandOrCustomUrlRequired": "Arba pasirinkite kameros gamintoją su host/IP arb rinkites 'Kita' su individualiu URL",
+        "nameRequired": "Kameros pavadinimas privalomas",
+        "nameLength": "Kameros pavadinimas privalo būti 64 ar mažiau simbolių",
+        "invalidCharacters": "Kameros pavadinime yra neleistinų simbolių",
+        "nameExists": "Toks kameros pavadinimas jau yra",
+        "customUrlRtspRequired": "Individualus URL turi prasidėti su \"rtsp://\". Rankinis konfiguravimas yra reikalaujas ne-RTSP kamerų transliacijoms."
+      }
+    },
+    "step2": {
+      "description": "Probuoti kamerą srautams atrasti ar konfiguruoti nustatymus rankiniu būdų pasirinktam aptikimo metodui.",
+      "testSuccess": "Prisijungimo testas sėkmingas!",
+      "testFailed": "Prisijungimo testas nepavyko. Prašau patikrinkite savo įvestis ir bandykite vėl.",
+      "testFailedTitle": "Testas Nepavyko",
+      "streamDetails": "Srauto Detalės",
+      "probing": "Probuojama kamera...",
+      "retry": "Pakartoti",
+      "testing": {
+        "probingMetadata": "Probuojami kameros metaduomenys...",
+        "fetchingSnapshot": "Gaunama kameros atvaizdas..."
+      },
+      "probeFailed": "Nepavyko probuoti kameros: {{error}}",
+      "probingDevice": "Probuojamas įrenginys...",
+      "probeSuccessful": "Probuojamas sėkmingas",
+      "probeError": "Probavimo Klaida",
+      "probeNoSuccess": "Probavimas nesėkmingas",
+      "deviceInfo": "Įrenginio Informacija",
+      "manufacturer": "Gamintojas",
+      "model": "Modelis",
+      "firmware": "Programinė Įranga",
+      "profiles": "Profiliai",
+      "ptzSupport": "PTZ Palaikymas",
+      "autotrackingSupport": "Autosekimo Palaikymas",
+      "presets": "Paruoštukai",
+      "rtspCandidates": "RTSP Kandidatai",
+      "rtspCandidatesDescription": "Sekantys RTSP URL adresai buvo rasti probuojant kamerą. Testuoti prisijungimą kad pamatyti srauto metaduomenis.",
+      "noRtspCandidates": "Iš kameros nerasta RTSP URL'ų. Jūsų prisijungimo duomenys gali būti neteisingi. ar kamera nepalaiko ONVIF ar metodas naudotas rasti RTSP URL. Grįžkite atgal ir rankiniu būdu suveskite RTSP URL.",
+      "candidateStreamTitle": "Kandidatų {{number}}",
+      "useCandidate": "Naudoti",
+      "uriCopy": "Kopijuoti",
+      "uriCopied": "URI nukopijuotas į iškarpinę",
+      "testConnection": "Testuoti Prisijungimą",
+      "toggleUriView": "Spustelkit kad atskleisti pilną URI vaizdą",
+      "connected": "Prisijungta",
+      "notConnected": "Neprisijungta",
+      "errors": {
+        "hostRequired": "Host/IP adresas yra privalomas"
+      }
+    },
+    "step3": {
+      "description": "Konfiguruoti srauto roles ir prideti papildomus srautus jūsų kamerai.",
+      "streamsTitle": "Kameros Srautai",
+      "addStream": "Pridėti Srautus",
+      "addAnotherStream": "Dar Pridėti Srautą",
+      "streamTitle": "Srautų {{number}}",
+      "streamUrl": "Srauto URL",
+      "streamUrlPlaceholder": "rtsp://vartotojas:slaptažodis@host:port/kelias",
+      "selectStream": "Pasirinkti srautą",
+      "searchCandidates": "Ieškoti kandidatų...",
+      "noStreamFound": "Srautų nerasta",
+      "url": "URL",
+      "resolution": "Raiška",
+      "selectResolution": "Pasirinkti raišką",
+      "quality": "Kokybė",
+      "selectQuality": "Pasirinkti kokybę",
+      "roles": "Rolės",
+      "roleLabels": {
+        "detect": "Objektų Aptikimas",
+        "record": "Įrašymas",
+        "audio": "Garsas"
+      },
+      "testStream": "Testuoti Prisijungimą",
+      "testSuccess": "Srauto testas sėkmingas!",
+      "testFailed": "Srauto testas nepavyko",
+      "testFailedTitle": "Testas Nepavyko",
+      "connected": "Prisijungta",
+      "notConnected": "Neprisijungta",
+      "featuresTitle": "Savybės",
+      "go2rtc": "Sumažinti prisijungimų prie kameros",
+      "detectRoleWarning": "Bent vienas srautas privalo turėti \"aptikimo\" rolę norint tęsti.",
+      "rolesPopover": {
+        "title": "Srauto Rolės",
+        "detect": "Pagrindinis srautas ojektų aptikimui.",
+        "record": "Įrašo vaizdo segmentus pagal konfiguracijos nustatymus.",
+        "audio": "Srautas audio aptikimams."
+      },
+      "featuresPopover": {
+        "title": "Srauto Savybės",
+        "description": "Naudoti go2rtc pertransliavimą kad sumažinti prisijungimus prie kameros."
+      }
+    },
+    "step4": {
+      "description": "Galutinis patvirtinimas ir analizė prieš išsaugant jūsų naują kamerą. Prijunkite kiekvieną srautą prieš išsaugant.",
+      "validationTitle": "Srauto Tikrinimas",
+      "connectAllStreams": "Prijungti Visus Srautus",
+      "reconnectionSuccess": "Pakartotinis Prisijungimas Sėkmingas.",
+      "reconnectionPartial": "Prie kai kurių srautų nepavyko atstatyti prisijungimo.",
+      "streamUnavailable": "Srauto peržiūra negalia",
+      "reload": "Perleisti",
+      "connecting": "Prisijungiama...",
+      "streamTitle": "Srautų {{number}}",
+      "valid": "Tinkamas",
+      "failed": "Nepavyko",
+      "notTested": "Netestuota",
+      "connectStream": "Prijungti",
+      "connectingStream": "Prisijungiama",
+      "disconnectStream": "Atsijungti",
+      "estimatedBandwidth": "Tikėtinas Greitis",
+      "roles": "Rolės",
+      "ffmpegModule": "Naudoti srauto pritaikymo rėžimą"
     }
   }
 }

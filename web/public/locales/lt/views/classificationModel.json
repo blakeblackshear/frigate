@@ -110,12 +110,79 @@
     "step3": {
       "allImagesRequired_one": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėlis.",
       "allImagesRequired_few": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėliai.",
-      "allImagesRequired_other": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėlių."
+      "allImagesRequired_other": "Prašom klasifikuoti visus paveikslėlius. Liko {{count}} paveikslėlių.",
+      "selectImagesPrompt": "Pasirinkti visus paveikslėlius su: {{className}}",
+      "selectImagesDescription": "Spauskite ant paveikslėlių, kad juos pasirinkti. Spauskite Tęsti kai su šia klase baigsite.",
+      "generating": {
+        "title": "Generuojami Pavyzdiniai Paveikslėliai",
+        "description": "Frigate traukia iš jūsų įrašų reprezentatyvius paveikslėlius. Tai gali užtrukti..."
+      },
+      "training": {
+        "title": "Modelio Apmokymas",
+        "description": "Jūsų modelis yra apmokomas fone. Uždarykite šį pranešimą, jūsų modelis pradės veikti iš karto kai bus užbaigtas."
+      },
+      "retryGenerate": "Pakartoti Generavimą",
+      "noImages": "Pavyzdinių paveikslėlių nesugeneruota",
+      "classifying": "Klasifikuojama ir Apmokoma...",
+      "trainingStarted": "Apmokymai pradėti sėkmingai",
+      "modelCreated": "Modelis sėkmingai sukurtas. Naudoti paskutinius Klasifikavimus, žiūrėti paveiksliukus trūkstamų būklių pridėjimui ir tada apmokyti modelį.",
+      "errors": {
+        "noCameras": "Nėra sukonfiguruotų kamerų",
+        "noObjectLabel": "Nepasirinkta objekto etiketė",
+        "generateFailed": "Nepavyko sugeneruoti pavyzdžių: {{error}}",
+        "generationFailed": "Generavimas nepavyko. Prašau bandykite dar kartą.",
+        "classifyFailed": "Nepavyko suklasifikuoti paveikslėlių: {{error}}"
+      },
+      "generateSuccess": "Sėkmingai sugeneruoti pavyzdiniai paveikslėliai",
+      "missingStatesWarning": {
+        "title": "Trūksta Būklių Pavyzdžių",
+        "description": "Geriausiam rezultatui rekomenduojama parinkti pavyzdžių visoms būklėms. Jūs galite tęsti ir nepasirinkdami visų būklių, tačiau modelis nebus apmokytas kol visos būklės turės pavyzdinius paveikslėlius. Tęsiant naudokite Pastarųjų Klasifikavimų meniu, kad klasifikuoti paveikslėlius trūkstamoms būklėms, tada apmokykite modelį."
+      }
     },
     "title": "Sukurti Naują Klasifikavimą",
     "steps": {
       "nameAndDefine": "Pavadinimas ir Apibūdinimas",
-      "stateArea": "Būsenos Plotas"
+      "stateArea": "Būsenos Plotas",
+      "chooseExamples": "Pasirinkti Pavyzdžius"
+    },
+    "step1": {
+      "description": "Būklės modeliai vertina pasikeitimus fiksuotuose kamerų plotuose (pvz., door open/closed). Objektų modeliai pridedą klasifikavimą aptiktiems objektams (pvz., žinomi gyvūnai, pristatymų kurjeriai, kt.).",
+      "name": "Pavadinimas",
+      "namePlaceholder": "Įveskite modelio pavadinimą...",
+      "type": "Tipas",
+      "typeState": "Būklė",
+      "typeObject": "Objektas",
+      "objectLabel": "Ojektų Etiketė",
+      "objectLabelPlaceholder": "Pasirinkite objekto tipą...",
+      "classificationType": "Klasifikavimo Tipas",
+      "classificationTypeTip": "Sužinoti daugiau apie klasifikavimo tipus",
+      "classificationTypeDesc": "Sub Etiketės prideda papildomą teksta prie objekto etikečių (pvz., 'Asmuo: UPS'). Atributai yra paieškai naudojami metaduomenys saugomi atskirai su objektų metaduomenimis.",
+      "classificationSubLabel": "Sub Etiketė",
+      "classificationAttribute": "Atributas",
+      "classes": "Klasės",
+      "states": "Būklės",
+      "classesTip": "Sužinoti apie klases",
+      "classesStateDesc": "Įvardinkite skirtingas būkles kokiose jūsų kameros plotas gali skaitytis. Pavyzdžiui: 'Atidaryti' ir 'Uždaryti' garažo vartai.",
+      "classesObjectDesc": "Įvardinkite skirtingas klasifikavimo kategorijas aptiktų objektų klasifikavimui. Pavyzdžiui: Asmenų klasifikavimui 'Pristatymų_kurjeris','Gyventojas','Nepažystamasis'.",
+      "classPlaceholder": "Įveskite klasės pavadinimą...",
+      "errors": {
+        "nameRequired": "Modelio pavadinimas privalomas",
+        "nameLength": "Modelio pavadinimas privalo būti trumpesnis nei 64 simboliai",
+        "nameOnlyNumbers": "Modelio pavadinime negali būti tik skaičiai",
+        "classRequired": "Bent viena klasė yra privaloma",
+        "classesUnique": "Klasių pavadinimai privalo būti unikalūs",
+        "noneNotAllowed": "Klasė 'nėra' yra neleidžiama",
+        "stateRequiresTwoClasses": "Būklių modeliui privalomos bent 2 klasės",
+        "objectLabelRequired": "Prašome pasirinkti objekto etiketę",
+        "objectTypeRequired": "Prašome pasirinkti klasifikavimo tipą"
+      }
+    },
+    "step2": {
+      "description": "Pasirinkite kameras ir nustatykite plotą stebėjimui kiekvienai kamerai. Modelis klasifikuos būkles šiems plotams.",
+      "cameras": "Kameros",
+      "selectCamera": "Pasirinkite Kamerą",
+      "noCameras": "Spauskite + kad pridėti kameras",
+      "selectCameraPrompt": "Pasirinkite iš kamerą iš sarašo kad nurodytumėte plotą"
     }
   },
   "menu": {
