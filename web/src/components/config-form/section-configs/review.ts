@@ -18,6 +18,9 @@ const review: SectionConfigOverrides = {
     ],
     advancedFields: [],
     uiSchema: {
+      alerts: {
+        "ui:before": { render: "CameraReviewSettingsView" },
+      },
       genai: {
         additional_concerns: {
           "ui:widget": "textarea",

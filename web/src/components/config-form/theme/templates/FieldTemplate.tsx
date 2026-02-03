@@ -406,7 +406,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
                   </p>
                 )}
                 {fieldDocsUrl && !isMultiSchemaWrapper && !isObjectField && (
-                  <div className="flex items-center text-xs text-primary">
+                  <div className="flex items-center text-xs text-primary-variant">
                     <Link
                       to={fieldDocsUrl}
                       target="_blank"
@@ -431,7 +431,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
                 </p>
               )}
               {fieldDocsUrl && !isMultiSchemaWrapper && !isObjectField && (
-                <div className="flex items-center text-xs text-primary">
+                <div className="flex items-center text-xs text-primary-variant">
                   <Link
                     to={fieldDocsUrl}
                     target="_blank"

@@ -106,7 +106,7 @@ export function SingleSectionPage({
             </div>
           )}
           {sectionDocsUrl && (
-            <div className="flex items-center text-sm text-primary">
+            <div className="flex items-center text-sm text-primary-variant">
               <Link
                 to={sectionDocsUrl}
                 target="_blank"

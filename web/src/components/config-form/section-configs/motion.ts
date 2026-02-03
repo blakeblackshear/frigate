@@ -13,7 +13,6 @@ const motion: SectionConfigOverrides = {
       "delta_alpha",
       "frame_alpha",
       "frame_height",
-      "mask",
       "mqtt_off_delay",
     ],
     fieldGroups: {
