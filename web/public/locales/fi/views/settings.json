@@ -10,7 +10,8 @@
     "object": "Virheenjäljitys - Frigate",
     "authentication": "Autentikointiuasetukset - Frigate",
     "notifications": "Ilmoitusasetukset - Frigate",
-    "enrichments": "Laajennusasetukset – Frigate"
+    "enrichments": "Laajennusasetukset – Frigate",
+    "cameraManagement": "Hallitse Kameroita - Frigate"
   },
   "menu": {
     "ui": "Käyttöliittymä",

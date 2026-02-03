@@ -1,1 +1,11 @@
-{}
+{
+  "documentTitle": "Luokittelumallit - Frigate",
+  "details": {
+    "scoreInfo": "Pistemäärä edustaa tämän objektin kaikkien havaintojen keskimääräistä luokitteluvarmuutta.",
+    "none": "Ei mitään"
+  },
+  "button": {
+    "deleteImages": "Poista kuvat",
+    "trainModel": "Kouluta malli"
+  }
+}

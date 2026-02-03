@@ -13,5 +13,8 @@
     "title": "Nimeä uudelleen",
     "desc": "Anna uusi nimi viedylle kohteelle.",
     "saveExport": "Tallenna vienti"
+  },
+  "tooltip": {
+    "editName": "Muokkaa nimeä"
   }
 }
