@@ -749,6 +749,10 @@ export function ConfigSection({
     ? t(`${sectionPath}.description`, { ns: configNamespace })
     : undefined;
 
+  if (!sectionSchema || !config) {
+    return <ActivityIndicator />;
+  }
+
   const sectionContent = (
     <div className="space-y-6">
       <ConfigForm
