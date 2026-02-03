@@ -213,7 +213,9 @@
     "video": "videó",
     "object_lifecycle": "tárgy életciklus",
     "details": "részletek",
-    "snapshot": "pillanatfelvétel"
+    "snapshot": "pillanatfelvétel",
+    "thumbnail": "bélyegkép",
+    "tracking_details": "követési adatok"
   },
   "trackedObjectDetails": "Követett Tárgy Részletei",
   "exploreMore": "Fedezzen fel több {{label}} tárgyat",
@@ -222,5 +224,21 @@
   },
   "concerns": {
     "label": "Aggodalmak"
+  },
+  "trackingDetails": {
+    "lifecycleItemDesc": {
+      "active": "{{label}} aktív lett",
+      "attribute": {
+        "other": "{{label}} felismerve mint {{attribute}}"
+      },
+      "external": "{{label}} érzékelve",
+      "header": {
+        "zones": "Zónák",
+        "ratio": "Arány",
+        "area": "Terület"
+      }
+    },
+    "title": "Követési adatok",
+    "noImageFound": "Nem található kép ehhez az időbélyeghez."
   }
 }

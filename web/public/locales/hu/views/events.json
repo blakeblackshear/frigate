@@ -3,7 +3,11 @@
   "empty": {
     "detection": "Nincs megnézendő észlelés",
     "alert": "Nincs megnézendő riasztás",
-    "motion": "Nem található mozgás"
+    "motion": "Nem található mozgás",
+    "recordingsDisabled": {
+      "title": "A felvétel készítést engedélyezni kell",
+      "description": "Csak akkor hozhatók létre áttekintési elemek egy kamerához, ha az adott kamerához engedélyezve vannak a felvételek."
+    }
   },
   "detections": "Észlelések",
   "motion": {
@@ -38,5 +42,17 @@
   "suspiciousActivity": "Gyanús Tevékenység",
   "threateningActivity": "Fenyegető Tevékenység",
   "zoomIn": "Nagyítás",
-  "zoomOut": "Kicsinyítés"
+  "zoomOut": "Kicsinyítés",
+  "detail": {
+    "trackedObject_other": "{{count}} objektum",
+    "label": "Részletes",
+    "noDataFound": "Nincsenek részletes adatok áttekintésre",
+    "aria": "Részletes nézet kapcsolása",
+    "trackedObject_one": "{{count}} objektum",
+    "noObjectDetailData": "Nincsenek elérhető objektumrészlet adatok.",
+    "settings": "Részletes nézet beállításai",
+    "alwaysExpandActive": {
+      "title": "Mindig kibontja az aktív részt"
+    }
+  }
 }

@@ -16,10 +16,15 @@
       "deletedModel_one": "Sikeresen törölt {{count}} modellt",
       "deletedModel_other": "",
       "categorizedImage": "A kép sikeresen osztályozva",
-      "deletedCategory": "Osztály törlése"
+      "deletedCategory": "Osztály törlése",
+      "trainedModel": "Sikeresen betanított modell.",
+      "trainingModel": "A modell tanítás sikeresen megkezdődött.",
+      "updatedModel": "Modellkonfiguráció sikeresen frissítve",
+      "renamedCategory": "Sikeresen átneveztük az osztályt {{name}} névre"
     },
     "error": {
-      "deleteImageFailed": "Törlés sikertelen: {{errorMessage}}"
+      "deleteImageFailed": "Törlés sikertelen: {{errorMessage}}",
+      "deleteCategoryFailed": "Nem sikerült törölni az osztályt: {{errorMessage}}"
     }
   },
   "details": {
@@ -43,5 +48,11 @@
     "noNewImages": "Nincsenek új képek a betanításhoz. Először osztályozzon több képet az adathalmazban.",
     "noChanges": "Az adathalmazban nem történt változás az utolsó betanítás óta.",
     "modelNotReady": "A modell nem áll készen a betanításra"
+  },
+  "menu": {
+    "objects": "Objektumok"
+  },
+  "train": {
+    "titleShort": "Friss"
   }
 }

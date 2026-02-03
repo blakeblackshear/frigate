@@ -778,6 +778,12 @@
     "semanticSearch": {
       "title": "Szemantikus keresés le van tiltva",
       "desc": "A Triggerek használatához engedélyezni kell a szemantikus keresést."
+    },
+    "wizard": {
+      "steps": {
+        "nameAndType": "Név és típus",
+        "configureData": "Configurációs adatok"
+      }
     }
   },
   "roles": {

@@ -121,12 +121,19 @@
       "gpuEncoder": "GPU Enkóder",
       "gpuDecoder": "GPU Dekóder",
       "npuUsage": "NPU Kihasználtság",
-      "npuMemory": "NPU Memória"
+      "npuMemory": "NPU Memória",
+      "intelGpuWarning": {
+        "message": "GPU statisztika nem érhető el"
+      }
     },
     "otherProcesses": {
       "processMemoryUsage": "Folyamat Memória Kihasználtság",
       "title": "Egyéb Folyamatok",
-      "processCpuUsage": "Folyamat CPU Kihasználtság"
+      "processCpuUsage": "Folyamat CPU Kihasználtság",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "felvétel"
+      }
     }
   },
   "storage": {

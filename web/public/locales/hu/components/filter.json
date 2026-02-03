@@ -132,5 +132,9 @@
     },
     "count_one": "{{count}} Osztály",
     "count_other": "{{count}} Osztályok"
+  },
+  "attributes": {
+    "label": "Osztályozási attribútumok",
+    "all": "Minden attribútum"
   }
 }

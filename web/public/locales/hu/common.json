@@ -72,7 +72,10 @@
       "24hour": "MMM d, HH:mm",
       "12hour": "MMM d, h:mm aaa"
     },
-    "formattedTimestampMonthDay": "MMM d"
+    "formattedTimestampMonthDay": "MMM d",
+    "inProgress": "Folyamatban",
+    "invalidStartTime": "Érvénytelen kezdeti idő",
+    "never": "Soha"
   },
   "menu": {
     "darkMode": {
@@ -269,7 +272,8 @@
     "next": "Következő"
   },
   "label": {
-    "back": "Vissza"
+    "back": "Vissza",
+    "all": "Mind"
   },
   "readTheDocumentation": "Olvassa el a dokumentációt",
   "information": {
