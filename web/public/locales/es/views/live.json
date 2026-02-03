@@ -178,6 +178,16 @@
     "restricted": {
       "title": "No hay cámaras disponibles",
       "description": "No tiene permiso para ver ninguna cámara en este grupo."
+    },
+    "default": {
+      "title": "No hay Cámaras Configuradas",
+      "description": "Comienza conectando una cámara a Frigate.",
+      "buttonText": "Añadir Cámara"
+    },
+    "group": {
+      "title": "No hay Cámaras en Grupo",
+      "description": "Estae grupo de cámaras no tiene cámaras asignadas o habilitadas.",
+      "buttonText": "Gestionar Grupos"
     }
   },
   "snapshot": {

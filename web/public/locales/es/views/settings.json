@@ -52,7 +52,7 @@
       },
       "title": "Panel en directo",
       "displayCameraNames": {
-        "label": "Siempre mostrar nombres de las Camaras",
+        "label": "Siempre mostrar nombres de las Cámaras",
         "desc": "Siempre mostrar nombres de cámaras en la vista en vivo multi-cámara."
       },
       "liveFallbackTimeout": {
@@ -708,7 +708,7 @@
     "unsavedChanges": "Cambios en la configuración de Frigate+ no guardados"
   },
   "enrichments": {
-    "title": "Configuración de Análisis Avanzado",
+    "title": "Configuración de Enriquecimientos",
     "unsavedChanges": "Cambios sin guardar en la configuración de Análisis Avanzado",
     "birdClassification": {
       "title": "Clasificación de Aves",
@@ -1191,11 +1191,11 @@
     "title": "Configuración de revisión de la cámara",
     "object_descriptions": {
       "title": "Descripciones de objetos de IA generativa",
-      "desc": "Habilite o deshabilite temporalmente las descripciones de objetos generadas por IA para esta cámara. Al deshabilitarlas, no se solicitarán descripciones generadas por IA para los objetos rastreados en esta cámara."
+      "desc": "Habilite o deshabilite temporalmente las descripciones de objetos generadas por IA para esta cámara hasta que Frigate se reinicie. Al deshabilitarlas, no se solicitarán descripciones generadas por IA para los objetos rastreados en esta cámara."
     },
     "review_descriptions": {
       "title": "Revisión de descripciones de IA generativa",
-      "desc": "Habilita o deshabilita temporalmente las revisión de descripciones generadas por IA para esta cámara. Al deshabilitarlas, no se solicitarán descripciones generadas por IA para los elementos de revisión de esta cámara."
+      "desc": "Habilita o deshabilita temporalmente las revisión de descripciones generadas por IA para esta cámara hasta que Frigate se reinicie. Al deshabilitarlas, no se solicitarán descripciones generadas por IA para los elementos de revisión de esta cámara."
     },
     "review": {
       "title": "Revisar",

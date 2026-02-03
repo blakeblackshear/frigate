@@ -90,7 +90,8 @@
     },
     "inProgress": "En progreso",
     "invalidStartTime": "Hora de inicio no válida",
-    "invalidEndTime": "Hora de finalización no válida"
+    "invalidEndTime": "Hora de finalización no válida",
+    "never": "Nunca"
   },
   "menu": {
     "settings": "Ajustes",
@@ -267,7 +268,8 @@
     "show": "Mostrar {{item}}",
     "ID": "ID",
     "none": "Ninguno",
-    "all": "Todas"
+    "all": "Todas",
+    "other": "Otro"
   },
   "role": {
     "title": "Rol",

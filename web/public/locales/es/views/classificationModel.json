@@ -62,7 +62,7 @@
   "details": {
     "scoreInfo": "La puntuación representa la confianza media de clasificación en todas las detecciones de este objeto.",
     "unknown": "Desconocido",
-    "none": "Nada"
+    "none": "Ninguna"
   },
   "categorizeImage": "Clasificar Imagen",
   "menu": {

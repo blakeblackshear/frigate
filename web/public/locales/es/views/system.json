@@ -90,7 +90,9 @@
       "series": {
         "go2rtc": "go2rtc",
         "recording": "grabación",
-        "review_segment": "revisar segmento"
+        "review_segment": "revisar segmento",
+        "embeddings": "embeddings",
+        "audio_detector": "detector de audio"
       }
     }
   },
@@ -190,7 +192,7 @@
       "classification_speed": "Velocidad de clasificación de {{name}}",
       "classification_events_per_second": "Clasificacion de eventos por segundo de {{name}}"
     },
-    "title": "Enriquecimientos",
+    "title": "Enriquicimientos",
     "averageInf": "Tiempo promedio de inferencia"
   },
   "stats": {

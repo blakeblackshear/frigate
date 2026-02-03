@@ -14,5 +14,5 @@
   "documentTitle": "Editor de Configuración - Frigate",
   "confirm": "¿Salir sin guardar?",
   "safeConfigEditor": "Editor de Configuración (Modo Seguro)",
-  "safeModeDescription": "Frigate esta en modo seguro debido a un error en la configuración."
+  "safeModeDescription": "Frigate esta en modo seguro debido a un error en la validación de la configuración."
 }
