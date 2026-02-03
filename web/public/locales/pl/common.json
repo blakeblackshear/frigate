@@ -6,9 +6,9 @@
     "last7": "Ostatnie 7 dni",
     "last14": "Ostatnie 14 dni",
     "last30": "Ostatnie 30 dni",
-    "thisWeek": "Ten tydzień",
+    "thisWeek": "W tym tygodniu",
     "lastWeek": "Ostatni tydzień",
-    "thisMonth": "Ten miesiąc",
+    "thisMonth": "W tym miesiącu",
     "lastMonth": "Ostatni miesiąc",
     "5minutes": "5 minut",
     "10minutes": "10 minut",
@@ -17,11 +17,11 @@
     "untilForRestart": "Do czasu restartu Frigate.",
     "untilRestart": "Do restartu",
     "ago": "{{timeAgo}} temu",
-    "justNow": "Właśnie teraz",
+    "justNow": "W tej chwili",
     "today": "Dzisiaj",
     "yesterday": "Wczoraj",
-    "pm": "po południu",
-    "am": "przed południem",
+    "pm": "pm",
+    "am": "am",
     "yr": "{{time}}r",
     "year_one": "{{time}} rok",
     "year_few": "{{time}} lata",
@@ -90,7 +90,8 @@
     },
     "inProgress": "W trakcie",
     "invalidStartTime": "Nieprawidłowy czas rozpoczęcia",
-    "invalidEndTime": "Nieprawidłowy czas zakończenia"
+    "invalidEndTime": "Nieprawidłowy czas zakończenia",
+    "never": "Nigdy"
   },
   "unit": {
     "speed": {
@@ -106,8 +107,8 @@
       "mbps": "MB/s",
       "gbps": "GB/s",
       "kbph": "kB/godz",
-      "mbph": "MB/godz",
-      "gbph": "GB/godz"
+      "mbph": "MB/h",
+      "gbph": "GB/h"
     }
   },
   "label": {
@@ -116,7 +117,8 @@
     "show": "Pokaż {{item}}",
     "ID": "ID",
     "none": "Brak",
-    "all": "Wszystko"
+    "all": "Wszystko",
+    "other": "Inne"
   },
   "button": {
     "apply": "Zastosuj",
