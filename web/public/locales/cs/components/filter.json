@@ -132,5 +132,9 @@
     },
     "count_one": "Třída {{count}}",
     "count_other": "Třídy {{count}}"
+  },
+  "attributes": {
+    "label": "Atributy Klasifikace",
+    "all": "Všechny Atributy"
   }
 }

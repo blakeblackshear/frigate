@@ -1,6 +1,6 @@
 {
   "imageEntry": {
-    "dropInstructions": "Přetáhněte obrázek zde, nebo klikněte na výběr",
+    "dropInstructions": "Přetáhněte obrázek sem, nebo klikněte na výběr",
     "maxSize": "Maximální velikost: {{size}}MB",
     "dropActive": "Přetáhněte obrázek zde…",
     "validation": {
@@ -10,7 +10,7 @@
   "createFaceLibrary": {
     "new": "Vytvořit nový obličej",
     "desc": "Vytvořit novou kolekci",
-    "nextSteps": "Chcete-li vybudovat pevný základ:<li>Použijte kartu Trénování k výběru a trénování na snímcích pro každou detekovanou osobu.</li><li>Pro nejlepší výsledky se zaměřte na přímé snímky; vyhněte se trénování snímků, které zachycují obličeje pod úhlem.</li></ul>",
+    "nextSteps": "Chcete-li vybudovat pevný základ:<li>Použijte kartu Nedávná Rozpoznání k výběru a trénování na snímcích pro každou detekovanou osobu.</li><li>Pro nejlepší výsledky se zaměřte na přímé snímky; vyhněte se trénování snímků, které zachycují obličeje pod úhlem.</li></ul>",
     "title": "Vytvořit kolekci"
   },
   "details": {
@@ -44,7 +44,7 @@
   "description": {
     "addFace": "Přidejte novou kolekci do Knihovny obličejů nahráním prvního obrázku.",
     "placeholder": "Zadejte název pro tuto kolekci",
-    "invalidName": "Neplatný název. Názvy mohou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a pomlčky."
+    "invalidName": "Neplatné jméno. Jméno můžou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a spojovníky."
   },
   "documentTitle": "Knihovna obličejů - Frigate",
   "uploadFaceImage": {

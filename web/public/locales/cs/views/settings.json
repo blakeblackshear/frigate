@@ -134,7 +134,7 @@
       "name": {
         "inputPlaceHolder": "Zadejte jméno…",
         "title": "Jméno",
-        "tips": "Název musí mít alespoň 2 znaky a nesmí být shodný s názvem kamery nebo jiné zóny."
+        "tips": "Název musí mít alespoň 2 znaky, musí obsahovat alespoň jedno písmeno a nesmí být shodný s názvem kamery nebo jiné zóny této kamery."
       },
       "inertia": {
         "title": "Setrvačnost",
@@ -160,7 +160,7 @@
         }
       },
       "toast": {
-        "success": "Zóna {{zoneName}} byla uložena. Restartujte Frigate pro aplikování změn."
+        "success": "Zóna {{zoneName}} byla uložena."
       },
       "label": "Zóny",
       "desc": {
@@ -199,8 +199,8 @@
       "clickDrawPolygon": "Kliknutím nakreslíte polygon do obrázku.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} byl uložen. Restartujte Frigate pro aplikování změn.",
-          "noName": "Maska Detekce pohybu byla uložena. Restartujte Frigate pro aplikování změn."
+          "title": "{{polygonName}} byl uložen.",
+          "noName": "Maska Detekce pohybu byla uložena."
         }
       }
     },
@@ -284,8 +284,8 @@
       "clickDrawPolygon": "Kliknutím nakreslete polygon do obrázku.",
       "toast": {
         "success": {
-          "title": "{{polygonName}} byl uložen. Restartujte Frigate pro aplikování změn.",
-          "noName": "Maska Objektu byla uložena. Restartujte Frigate pro aplikování změn."
+          "title": "{{polygonName}} byl uložen.",
+          "noName": "Maska Objektu byla uložena."
         }
       },
       "point_one": "{{count}} bod",
@@ -322,7 +322,7 @@
     "noCamera": "Žádná Kamera"
   },
   "general": {
-    "title": "Hlavní nastavení",
+    "title": "Nastavení rozhraní",
     "liveDashboard": {
       "title": "Živý dashboard",
       "automaticLiveView": {
@@ -332,6 +332,13 @@
       "playAlertVideos": {
         "label": "Přehrát videa s výstrahou",
         "desc": "Ve výchozím nastavení se nedávná upozornění na ovládacím panelu Živě přehrávají jako malá opakující se videa. Vypněte tuto možnost, chcete-li na tomto zařízení/prohlížeči zobrazovat pouze statický obrázek nedávných výstrah."
+      },
+      "displayCameraNames": {
+        "label": "Vždy zobrazit názvy kamer",
+        "desc": "Vždy zobrazit názvy kamer v čipu na ovládacím panelu živého náhledu s více kamerami."
+      },
+      "liveFallbackTimeout": {
+        "label": "Časový limit pádu živého přehrávání"
       }
     },
     "storedLayouts": {
@@ -629,11 +636,11 @@
       "actions": "Akce",
       "noUsers": "Žádní uživatelé nebyli nalezeni.",
       "changeRole": "Změnit roli uživatele",
-      "password": "Heslo",
+      "password": "Resetovat Heslo",
       "deleteUser": "Smazat uživatele",
       "role": "Role"
     },
-    "updatePassword": "Aktualizovat heslo",
+    "updatePassword": "Resetovat heslo",
     "toast": {
       "success": {
         "createUser": "Uživatel {{user}} úspěšně vytvořen",
@@ -743,7 +750,7 @@
   "triggers": {
     "documentTitle": "Spouštěče",
     "management": {
-      "title": "Správa spouštěčů",
+      "title": "Spouštěče",
       "desc": "Spravovat spouštěče pro {{camera}}. Použít typ miniatury ke spuštění u miniatur podobných vybranému sledovanému objektu a typ popisu ke spuštění u popisů podobných zadanému textu."
     },
     "addTrigger": "Přidat spouštěč",
@@ -782,10 +789,10 @@
       "form": {
         "name": {
           "title": "Název",
-          "placeholder": "Zadejte název spouštěče",
+          "placeholder": "Pojmenujte tento spouštěč",
           "error": {
-            "minLength": "Název musí mít alespoň 2 znaky.",
-            "invalidCharacters": "Jméno může obsahovat pouze písmena, číslice, podtržítka a pomlčky.",
+            "minLength": "Pole musí mít alespoň 2 znaky.",
+            "invalidCharacters": "Pole může obsahovat pouze písmena, číslice, podtržítka a pomlčky.",
             "alreadyExists": "Spouštěč s tímto názvem již pro tuto kameru existuje."
           }
         },
@@ -798,9 +805,9 @@
         },
         "content": {
           "title": "Obsah",
-          "imagePlaceholder": "Vybrat obrázek",
+          "imagePlaceholder": "Vyberte miniaturu",
           "textPlaceholder": "Zadat textový obsah",
-          "imageDesc": "Vybrat obrázek, který spustí tuto akci, když bude detekován podobný obrázek.",
+          "imageDesc": "Je zobrazeno pouze posledních 100 miniatur. Pokud nemůžete najít požadovanou miniaturu, prosím zkontrolujte dřívější objekty v Prozkoumat a nastavte spouštěč ze tamějšího menu.",
           "textDesc": "Zadejte text, který spustí tuto akci, když bude zjištěn podobný popis sledovaného objektu.",
           "error": {
             "required": "Obsah je povinný."
@@ -808,7 +815,7 @@
         },
         "actions": {
           "title": "Akce",
-          "desc": "Ve výchozím nastavení Frigate odesílá MQTT zprávu pro všechny spouštěče. Zvolte dodatečnou akci, která se má provést, když se tento spouštěč aktivuje.",
+          "desc": "Ve výchozím nastavení Frigate odesílá MQTT zprávu pro všechny spouštěče. Podřazené popisky přidávají název spouštěče k popisku objektu. Atributy jsou prohledávatelná metadata uložená samostatně v metadatech sledovaného objektu.",
           "error": {
             "min": "Musí být vybrána alespoň jedna akce."
           }
@@ -850,9 +857,9 @@
         "createRole": "Role {{role}} byla úspěšně vytvořena",
         "updateCameras": "Kamery byly aktualizovány pro roli {{role}}",
         "deleteRole": "Role {{role}} byla úspěšně smazána",
-        "userRolesUpdated_one": "{{count}} uživatel(ů) přiřazených k této roli bylo aktualizováno na „Divák“, který má přístup ke všem kamerám.",
-        "userRolesUpdated_few": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} uživatel přiřazený k této roli byl aktualizován na „diváka“, který má přístup ke všem kamerám.",
+        "userRolesUpdated_few": "{{count}} uživatelé přiřazení k této roli bylo aktualizováno na „diváky“, kteří mají přístup ke všem kamerám.",
+        "userRolesUpdated_other": "{{count}} uživatelů přiřazených k této roli bylo aktualizováno na „diváky“, kteří mají přístup ke všem kamerám."
       },
       "error": {
         "createRoleFailed": "Nepodařilo se vytvořit roli: {{errorMessage}}",
@@ -895,6 +902,37 @@
     "management": {
       "title": "Správa role diváka",
       "desc": "Spravujte vlastní role diváků a jejich oprávnění k přístupu ke kamerám pro tuto instanci Frigate."
+    }
+  },
+  "cameraWizard": {
+    "save": {
+      "success": "Nová kamera {{cameraName}} úspěšně uložena."
+    },
+    "step2": {
+      "testSuccess": "Test připojení v pořádku!",
+      "probeSuccessful": "Sonda úspěšná",
+      "probeNoSuccess": "Sonda neúspěšná"
+    },
+    "step3": {
+      "testSuccess": "Test streamu v pořádku!"
+    },
+    "step4": {
+      "reconnectionSuccess": "Opakované připojení úspěšné.",
+      "streamValidated": "Stream {{number}} úspěšně ověřený"
+    }
+  },
+  "cameraManagement": {
+    "cameraConfig": {
+      "toast": {
+        "success": "Kamera {{cameraName}} úspěšně uložena"
+      }
+    }
+  },
+  "cameraReview": {
+    "reviewClassification": {
+      "toast": {
+        "success": "Konfigurace Klasifikací Revizí byla uložena. Restartujte Frigate pro aplikování změn."
+      }
     }
   }
 }

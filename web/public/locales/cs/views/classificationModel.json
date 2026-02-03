@@ -38,10 +38,65 @@
       "deleteImageFailed": "Chyba při mazání: {{errorMessage}}",
       "deleteCategoryFailed": "Chyba při mazání třídy: {{errorMessage}}",
       "deleteModelFailed": "Chyba při mazání modelu: {{errorMessage}}",
-      "categorizeFailed": "Chyba při mazání obrázku: {{errorMessage}}"
+      "categorizeFailed": "Chyba při mazání obrázku: {{errorMessage}}",
+      "trainingFailed": "Trénování modelu selhalo. Zkontrolujte logy Frigate pro zjištění detailů.",
+      "trainingFailedToStart": "Chyba spuštění trénování modelu: {{errorMessage}}",
+      "updateModelFailed": "Chyba aktualizace modelu: {{errorMessage}}",
+      "renameCategoryFailed": "Chyba přejmenování třídy: {{errorMessage}}"
     }
   },
   "train": {
-    "titleShort": "Nedávný"
-  }
+    "titleShort": "Nedávný",
+    "title": "Předchozí klasifikace",
+    "aria": "Vybrat předchozí Klasifikace"
+  },
+  "deleteModel": {
+    "desc_one": "Jste si jistí, že chcete odstranit {{count}} model? Tím trvale odstraníte všechny související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
+    "desc_few": "Jste si jistí, že chcete odstranit {{count}} modely? Tím trvale odstraníte všechny související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
+    "desc_other": "Jste si jistí, že chcete odstranit {{count}} modelů? Tím trvale odstraníte všechny související data včetně obrázků a tréninkových dat. Tato akce je nevratná."
+  },
+  "deleteDatasetImages": {
+    "desc_one": "Opravdu chcete odstranit {{count}} obrázek z {{dataset}}? Tato akce je nevratná a vyžaduje přetrénování modelu.",
+    "desc_few": "Opravdu chcete odstranit {{count}} obrázky z {{dataset}}? Tato akce je nevratná a vyžaduje přetrénování modelu.",
+    "desc_other": "Opravdu chcete odstranit {{count}} obrázků z {{dataset}}? Tato akce je nevratná a vyžaduje přetrénování modelu.",
+    "title": "Smazat obrázky datové sady"
+  },
+  "deleteTrainImages": {
+    "desc_one": "Opravdu chcete odstranit {{count}} obrázek? Tato akce je nevratná.",
+    "desc_few": "Opravdu chcete odstranit {{count}} obrázky? Tato akce je nevratná.",
+    "desc_other": "Opravdu chcete odstranit {{count}} obrázků? Tato akce je nevratná.",
+    "title": "Odstranit tréninkové obrázky"
+  },
+  "wizard": {
+    "step3": {
+      "allImagesRequired_one": "Prosím, zařaďte všechny obrázky. Zbývá {{count}} obrázek.",
+      "allImagesRequired_few": "Prosím, zařaďte všechny obrázky. Zbývají {{count}} obrázky.",
+      "allImagesRequired_other": "Prosím, zařaďte všechny obrázky. Zbývá {{count}} obrázků.",
+      "trainingStarted": "Trénování úspěšně spuštěno",
+      "generateSuccess": "Vzorové obrázky byly úspěšně vytvořeny"
+    }
+  },
+  "deleteCategory": {
+    "title": "Smazat Třídu",
+    "desc": "Opravdu chcete odstranit třídu {{name}}? Tím se na trvalo odstraní všechny související obrázky a bude potřeba přetrénovat model.",
+    "minClassesTitle": "Nemůžete smazat třídu",
+    "minClassesDesc": "Klasifikační model musí mít alespoň 2 třídy. Než tuto třídu odstraníte přidejte další třídu."
+  },
+  "edit": {
+    "descriptionObject": "Upravte typ objektu a typ klasifikace pro tento model klasifikace.",
+    "stateClassesInfo": "Poznámka: Změna tříd stavů vyžaduje přetrénování modelu s aktualizovanými třídami."
+  },
+  "renameCategory": {
+    "title": "Přejmenovat třídu",
+    "desc": "Vložte nové jméno pro {{name}}. Aby se změna názvu projevila, bude nutné model znovu natrénovat."
+  },
+  "description": {
+    "invalidName": "Neplatné jméno. Jméno můžou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a spojovníky."
+  },
+  "categories": "Třídy",
+  "createCategory": {
+    "new": "Vytvořit novou Třídu"
+  },
+  "categorizeImageAs": "Klasifikovat obrázek jako:",
+  "categorizeImage": "Klasifikovat obrázek"
 }

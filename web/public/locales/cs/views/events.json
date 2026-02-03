@@ -9,14 +9,18 @@
   "empty": {
     "alert": "Nejsou žádné výstrahy na kontrolu",
     "detection": "Nejsou žádné detekce na kontrolu",
-    "motion": "Nenalezena žádná data o pohybu"
+    "motion": "Nenalezena žádná data o pohybu",
+    "recordingsDisabled": {
+      "title": "Nahrávání musí být povoleno",
+      "description": "Položky revize lze pro kameru vytvořit pouze tehdy, je-li pro ni povoleno nahrávání."
+    }
   },
   "timeline": "Časová osa",
   "timeline.aria": "Zvolit časovou osu",
   "events": {
     "label": "Události",
     "aria": "Zvolit události",
-    "noFoundForTimePeriod": "Pro toto období nebyly nalezeny žádné události."
+    "noFoundForTimePeriod": "Pro toto časové období nebyly nalezeny žádné události."
   },
   "documentTitle": "Revize - Frigate",
   "camera": "Kamera",
@@ -26,8 +30,8 @@
   "markAsReviewed": "Označit jako zkontrolované",
   "markTheseItemsAsReviewed": "Označit tyto položky jako zkontrolované",
   "newReviewItems": {
-    "label": "Zobrazit nové položky na kontrolu",
-    "button": "Nové položky na kontrolu"
+    "label": "Zobrazit nové položky revize",
+    "button": "Nové položky revize"
   },
   "recordings": {
     "documentTitle": "Záznamy - Frigate"
@@ -42,8 +46,22 @@
   "detail": {
     "label": "Detail",
     "noDataFound": "Žádná detailní data k prohlédnutí",
-    "aria": "Přepnout detailní zobrazení",
+    "aria": "Přepnout zobrazení detailů",
     "trackedObject_other": "{{count}} objektů",
-    "trackedObject_one": "{{count}} objektů"
-  }
+    "trackedObject_one": "{{count}} objekt",
+    "noObjectDetailData": "Nejsou k dispozici žádné podrobné údaje o objektu.",
+    "settings": "Nastavení Detailního Zobrazení",
+    "alwaysExpandActive": {
+      "title": "Vždy rozbalit aktivní",
+      "desc": "Vždy zobrazit podrobnosti objektu aktivní položky revize, pokud jsou k dispozici."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Sledovaný bod",
+    "clickToSeek": "Kliknutím přeskočte na tento čas"
+  },
+  "select_all": "Vše",
+  "normalActivity": "Normální",
+  "needsReview": "Potřebuje revizi",
+  "securityConcern": "Obava o bezpečnost"
 }

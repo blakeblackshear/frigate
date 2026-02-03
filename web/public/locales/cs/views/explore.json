@@ -24,7 +24,8 @@
           "regenerate": "Od {{provider}} byl vyžádán nový popis. V závislosti na rychlosti vašeho poskytovatele může obnovení nového popisu nějakou dobu trvat.",
           "updatedSublabel": "Úspěšně aktualizovaný podružný štítek.",
           "updatedLPR": "Úspěšně aktualizovaná SPZ.",
-          "audioTranscription": "Požádání o přepis zvuku bylo úspěšné."
+          "audioTranscription": "Požádání o přepis zvuku bylo úspěšné. V závislosti na rychlosti Vašeho Frigate serveru může přepis trvat nějaký čas než bude dokončen.",
+          "updatedAttributes": "Atributy byly úspěšně aktualizovány."
         },
         "error": {
           "regenerate": "Chyba volání {{provider}} pro nový popis: {{errorMessage}}",
@@ -206,7 +207,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Potvrdit smazání",
-      "desc": "Odstraněním tohoto sledovaného objektu se odstraní snímek, všechna uložená vložení a všechny související položky životního cyklu objektu. Zaznamenaný záznam tohoto sledovaného objektu v zobrazení Historie <em>NEBUDE</em> smazán.<br /><br />Opravdu chcete pokračovat?"
+      "desc": "Odstraněním tohoto sledovaného objektu se odstraní snímek, všechna uložená vložení a všechny související položky s podrobnostmi o sledování. Zaznamenaný záznam tohoto sledovaného objektu v zobrazení Historie <em>NEBUDE</em> smazán.<br /><br />Opravdu chcete pokračovat?"
     }
   },
   "trackedObjectDetails": "Detaily sledovaných objektů",
@@ -214,7 +215,9 @@
     "details": "detaily",
     "snapshot": "snímek",
     "video": "video",
-    "object_lifecycle": "životní cyklus objektu"
+    "object_lifecycle": "životní cyklus objektu",
+    "thumbnail": "Náhled",
+    "tracking_details": "detaily sledování"
   },
   "noTrackedObjects": "Žádné sledované objekty nebyly nalezeny",
   "fetchingTrackedObjectsFailed": "Chyba při načítání sledovaných objektů: {{errorMessage}}",
@@ -224,5 +227,49 @@
   },
   "concerns": {
     "label": "Obavy"
+  },
+  "trackingDetails": {
+    "title": "Detaily Sledování",
+    "noImageFound": "Nebyl nalezen obrázek pro tuto časovou značku.",
+    "createObjectMask": "Vytvořit Masku Objektu",
+    "adjustAnnotationSettings": "Upravte nastavení poznámek",
+    "scrollViewTips": "Klikněte pro zobrazení významných okamžiků z životního cyklu tohoto objektu.",
+    "autoTrackingTips": "Pozice ohraničujících rámečků budou nepřesné pro kamery s automatickým sledováním.",
+    "count": "{{first}} z {{second}}",
+    "trackedPoint": "Sledovaný Bod",
+    "lifecycleItemDesc": {
+      "visible": "Detekován {{label}}",
+      "entered_zone": "{{label}} vstoupil do {{zones}}",
+      "active": "{{label}} se stal aktivním",
+      "stationary": "{{label}} se zastavil",
+      "attribute": {
+        "faceOrLicense_plate": "Pro {{label}} zjištěn {{attribute}}"
+      },
+      "header": {
+        "ratio": "Poměr",
+        "area": "Oblast",
+        "score": "Skóre"
+      }
+    },
+    "annotationSettings": {
+      "title": "Nastavení anotací",
+      "showAllZones": {
+        "title": "Zobrazit všechny zóny",
+        "desc": "Vždy zobrazovat zóny na snímcích, na kterých objekty vstoupili do zóny."
+      },
+      "offset": {
+        "label": "Odsazení anotace",
+        "desc": "Tato data pocházejí z detekčního kanálu vaší kamery, ale překrývají se s obrázky ze záznamového kanálu. Je nepravděpodobné, že by oba streamy byly dokonale synchronizované. V důsledku toho se ohraničovací rámeček a záznam nebudou dokonale srovnávat. Toto nastavení můžete použít k časovému posunutí anotací dopředu nebo dozadu, abyste je lépe zarovnali se zaznamenaným záznamem.",
+        "millisecondsToOffset": "Milisekundy na posunutí detekce anotací. <em>Výchozí: 0</em>",
+        "tips": "Snižte hodnotu, pokud je přehrávané video před ohraničením a body cesty, nebo zvyšte hodnotu, pokud je přehrávané video za nimi. Hodnota může být i záporná.",
+        "toast": {
+          "success": "Odsazení anotací pro {{camera}} bylo uloženo do konfiguračního souboru."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Předcházející snímek",
+      "next": "Další snímek"
+    }
   }
 }

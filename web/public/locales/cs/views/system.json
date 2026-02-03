@@ -112,12 +112,23 @@
       "gpuUsage": "Využití CPU",
       "gpuMemory": "Paměť GPU",
       "gpuEncoder": "GPU kodér",
-      "gpuDecoder": "GPU Dekodér"
+      "gpuDecoder": "GPU Dekodér",
+      "intelGpuWarning": {
+        "title": "Upozornění Intel GPU Stats",
+        "message": "Statistiky GPU nedostupné",
+        "description": "Toto je známá chyba v nástrojích Intel pro hlášení statistik GPU (intel_gpu_top), která selhává a opakovaně vrací využití GPU 0 %, a to i v případech, kdy na (i)GPU správně běží hardwarová akcelerace a detekce objektů. Nejedná se o chybu Frigate. Můžete restartovat hostitele, abyste problém dočasně vyřešili a potvrdili, že GPU funguje správně. Toto neovlivňuje výkon."
+      }
     },
     "otherProcesses": {
       "title": "Ostatní procesy",
       "processCpuUsage": "Využití CPU procesy",
-      "processMemoryUsage": "Využití paměti procesy"
+      "processMemoryUsage": "Využití paměti procesy",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "nahrávání",
+        "review_segment": "revidovat segment",
+        "embeddings": "vložení"
+      }
     },
     "title": "Hlavní"
   },

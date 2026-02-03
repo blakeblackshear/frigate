@@ -44,7 +44,8 @@
     "button": {
       "markAsReviewed": "Označit jako zkontrolované",
       "deleteNow": "Smazat hned",
-      "export": "Exportovat"
+      "export": "Exportovat",
+      "markAsUnreviewed": "Označit jako nezkontrolované"
     }
   },
   "export": {
@@ -67,12 +68,13 @@
     "export": "Exportovat",
     "selectOrExport": "Vybrat pro Export",
     "toast": {
-      "success": "Export úspěšně spuštěn. Soubor najdete v adresáři /exports.",
+      "success": "Export úspěšně spuštěn. Soubor najdete na stránce exportů.",
       "error": {
         "failed": "Chyba spuštění exportu: {{error}}",
         "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku",
         "noVaildTimeSelected": "Není vybráno žádné platné časové období"
-      }
+      },
+      "view": "Zobrazení"
     },
     "fromTimeline": {
       "saveExport": "Uložit export",
@@ -116,6 +118,7 @@
     "search": {
       "placeholder": "Hledej pomocí štítku nebo podštítku..."
     },
-    "noImages": "Nebyly nalezeny žádné náhledy pro tuto kameru"
+    "noImages": "Nebyly nalezeny žádné náhledy pro tuto kameru",
+    "unknownLabel": "Uložený obrázek Spouštěče"
   }
 }
