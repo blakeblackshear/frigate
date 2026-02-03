@@ -75,7 +75,8 @@
     "s": "{{time}}δ",
     "inProgress": "Σε εξέλιξη",
     "invalidStartTime": "Μη έγκυρη ώρα έναρξης",
-    "invalidEndTime": "Μη έγκυρη ώρα λήξης"
+    "invalidEndTime": "Μη έγκυρη ώρα λήξης",
+    "never": "Ποτέ"
   },
   "menu": {
     "live": {
