@@ -129,7 +129,9 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
     return arg if isinstance(arg, list) else shlex.split(arg)
 
 
-def load_labels(path: Optional[str], encoding="utf-8", prefill=91, indexed: bool | None = None):
+def load_labels(
+    path: Optional[str], encoding="utf-8", prefill=91, indexed: bool | None = None
+):
     """Loads labels from file (with or without index numbers).
     Args:
       path: path to label file.
