@@ -10,7 +10,8 @@
     "objectDetection": "Objektide tuvastamine",
     "audioDetection": "Heli tuvastus",
     "transcription": "Heli üleskirjutus",
-    "snapshots": "Hetkvõtted"
+    "snapshots": "Hetkvõtted",
+    "autotracking": "Automaatne jälgimine"
   },
   "documentTitle": "Otseülekanne - Frigate",
   "documentTitle.withCamera": "{{camera}} - Otseülekanne - Frigate",
@@ -95,6 +96,10 @@
     "playInBackground": {
       "label": "Esita taustal",
       "tips": "Selle eelistusega saad määrata, et voogedastus jääb tööle ka siis, kui meesiaesitaja on suletud."
+    },
+    "audio": {
+      "available": "Selles voogedastuses on heliriba saadaval",
+      "unavailable": "Selles voogedastuses pole heliriba saadaval"
     }
   },
   "notifications": "Teavitused",
@@ -129,6 +134,25 @@
     "restricted": {
       "title": "Ühtegi kaamerat pole saadaval",
       "description": "Sul pole õigust ühegi selle grupi kaamera vaatamiseks."
+    },
+    "title": "Ühtegi kaamerat pole seadistatud",
+    "description": "Alustamiseks ühenda mõni kaamera Frigate'iga."
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "active_objects": "Aktiivsed objektid",
+      "all": "Kõik",
+      "motion": "Liikumine"
     }
+  },
+  "editLayout": {
+    "label": "Muuda paigutust",
+    "group": {
+      "label": "Muuda kaameragruppi"
+    },
+    "exitEdit": "Välju muutmisest"
+  },
+  "history": {
+    "label": "Näita varasemat sisu"
   }
 }

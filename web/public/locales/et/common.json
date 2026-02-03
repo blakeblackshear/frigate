@@ -75,7 +75,8 @@
       "12hour": "dd. MMM yyyy, hh:mm aaa",
       "24hour": "dd. MMM yyyy, HH:mm"
     },
-    "formattedTimestampMonthDay": "dd. MMM"
+    "formattedTimestampMonthDay": "dd. MMM",
+    "never": "Mitte kunagi"
   },
   "menu": {
     "user": {
