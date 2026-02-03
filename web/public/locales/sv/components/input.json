@@ -1,9 +1,9 @@
 {
   "button": {
     "downloadVideo": {
-      "label": "Ladda ner Video",
+      "label": "Ladda ner video",
       "toast": {
-        "success": "Din video laddas ner."
+        "success": "Nedladdning påbörjad för granskningsobjekt."
       }
     }
   }

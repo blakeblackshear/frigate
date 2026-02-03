@@ -1202,11 +1202,11 @@
     "title": "Inställningar för kameragranskning",
     "object_descriptions": {
       "title": "Generativa AI-objektbeskrivningar",
-      "desc": "Aktivera/inaktivera tillfälligt generativa AI-objektbeskrivningar för den här kameran. När den är inaktiverad kommer AI-genererade beskrivningar inte att begäras för spårade objekt på den här kameran."
+      "desc": "Aktivera/inaktivera generativa AI-objektbeskrivningar temporärt för den här kameran tills Frigate startas om. Vid inaktivering kommer AI-genererade beskrivningar inte att begäras för spårade objekt på den här kameran."
     },
     "review_descriptions": {
       "title": "Beskrivningar av generativa AI-granskningar",
-      "desc": "Tillfälligt aktivera/inaktivera genererade AI-granskningsbeskrivningar för den här kameran. När det är inaktiverat kommer AI-genererade beskrivningar inte att begäras för granskningsobjekt på den här kameran."
+      "desc": "Aktivera/inaktivera generativa AI-granskningsbeskrivningar för den här kameran temporärt tills Frigate startas om. Vid inaktivering kommer AI-genererade beskrivningar inte att begäras för granskningsobjekt på den här kameran."
     },
     "review": {
       "title": "Granska",

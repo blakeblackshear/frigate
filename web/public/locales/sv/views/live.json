@@ -178,6 +178,16 @@
     "restricted": {
       "title": "Inga kameror tillgängliga",
       "description": "Du har inte behörighet att visa några kameror i den här gruppen."
+    },
+    "default": {
+      "title": "Ingen kamera konfigurerad",
+      "description": "Börja med att ansluta en kamera till Frigate.",
+      "buttonText": "Lägg till kamera"
+    },
+    "group": {
+      "title": "Inga kameror i gruppen",
+      "description": "Kameragruppen har inga tilldelade eller aktiverade kameror.",
+      "buttonText": "Hantera grupper"
     }
   },
   "snapshot": {

@@ -75,7 +75,8 @@
     "day_other": "{{time}} dagar",
     "inProgress": "Pågår",
     "invalidStartTime": "Ogiltig starttid",
-    "invalidEndTime": "Ogiltig sluttid"
+    "invalidEndTime": "Ogiltig sluttid",
+    "never": "Aldrig"
   },
   "button": {
     "save": "Spara",
