@@ -10,7 +10,11 @@ import sectionRenderers, {
   RendererComponent,
 } from "@/components/config-form/sectionExtras/registry";
 import { ConfigForm } from "../ConfigForm";
-import type { FormValidation, RJSFSchema, UiSchema } from "@rjsf/utils";
+import type { FormValidation, UiSchema } from "@rjsf/utils";
+import {
+  modifySchemaForSection,
+  getEffectiveDefaultsForSection,
+} from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import {
   useConfigOverride,
@@ -225,6 +229,13 @@ export function ConfigSection({
   // Get section schema using cached hook
   const sectionSchema = useSectionSchema(sectionPath, level);
 
+  // Apply special case handling for sections with problematic schema defaults
+  const modifiedSchema = useMemo(
+    () =>
+      modifySchemaForSection(sectionPath, level, sectionSchema ?? undefined),
+    [sectionPath, level, sectionSchema],
+  );
+
   // Get override status
   const { isOverridden, globalValue, cameraValue } = useConfigOverride({
     config,
@@ -275,59 +286,31 @@ export function ConfigSection({
   );
 
   const formData = useMemo(() => {
-    const baseData = sectionSchema
-      ? applySchemaDefaults(sectionSchema, rawFormData)
+    const baseData = modifiedSchema
+      ? applySchemaDefaults(modifiedSchema, rawFormData)
       : rawFormData;
     return sanitizeSectionData(baseData);
-  }, [rawFormData, sectionSchema, sanitizeSectionData]);
+  }, [rawFormData, modifiedSchema, sanitizeSectionData]);
 
   const schemaDefaults = useMemo(() => {
-    if (!sectionSchema) {
+    if (!modifiedSchema) {
       return {};
     }
-    return applySchemaDefaults(sectionSchema, {});
-  }, [sectionSchema]);
+    return applySchemaDefaults(modifiedSchema, {});
+  }, [modifiedSchema]);
 
-  const effectiveSchemaDefaults = useMemo(() => {
-    // Special-case: the server JSON Schema for the top-level `motion` global
-    // value is expressed as `anyOf` including `null` (default: null). The
-    // backend intentionally allows `motion` to be omitted/`null` so that an
-    // absent global motion config does not get merged into every camera's
-    // config. However, the form renderer materializes schema defaults into
-    // an object for display. That object-vs-null mismatch would cause our
-    // override-detection to see a difference on first render and show the
-    // false "Modified" badge.
-    //
-    // To avoid changing backend semantics we derive the effective defaults
-    // from the non-null anyOf branch for the `motion` global section and
-    // use those defaults as the comparison baseline in the UI. This ensures
-    // the displayed form and the comparison baseline match while leaving
-    // server behavior unchanged.
-    if (sectionPath !== "motion" || level !== "global" || !sectionSchema) {
-      return schemaDefaults;
-    }
-
-    const defaultsKeys = Object.keys(schemaDefaults);
-    if (defaultsKeys.length > 0) {
-      return schemaDefaults;
-    }
-
-    const anyOfSchemas = (sectionSchema as { anyOf?: unknown[] }).anyOf;
-    if (!Array.isArray(anyOfSchemas)) {
-      return schemaDefaults;
-    }
-
-    const motionSchema = anyOfSchemas.find(
-      (schema) =>
-        typeof schema === "object" && schema !== null && "properties" in schema,
-    );
-
-    if (!motionSchema || typeof motionSchema !== "object") {
-      return schemaDefaults;
-    }
-
-    return applySchemaDefaults(motionSchema as RJSFSchema, {});
-  }, [level, schemaDefaults, sectionPath, sectionSchema]);
+  // Get effective defaults, handling special cases where schema defaults
+  // don't match semantic intent
+  const effectiveSchemaDefaults = useMemo(
+    () =>
+      getEffectiveDefaultsForSection(
+        sectionPath,
+        level,
+        modifiedSchema,
+        schemaDefaults,
+      ),
+    [level, schemaDefaults, sectionPath, modifiedSchema],
+  );
 
   // Clear pendingData whenever formData changes (e.g., from server refresh)
   // This prevents RJSF's initial onChange call from being treated as a user edit
@@ -705,7 +688,7 @@ export function ConfigSection({
       );
   }, [sectionConfig.customValidate, sectionValidation]);
 
-  if (!sectionSchema) {
+  if (!modifiedSchema) {
     return null;
   }
 
@@ -734,7 +717,7 @@ export function ConfigSection({
     <div className="space-y-6">
       <ConfigForm
         key={formKey}
-        schema={sectionSchema}
+        schema={modifiedSchema}
         formData={pendingData || formData}
         onChange={handleChange}
         fieldOrder={sectionConfig.fieldOrder}
