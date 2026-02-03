@@ -695,7 +695,7 @@ def write_classification_attempt(
     # delete oldest face image if maximum is reached
     try:
         files = sorted(
-            filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
+            filter(lambda f: f.endswith(".webp"), os.listdir(folder)),
             key=lambda f: os.path.getctime(os.path.join(folder, f)),
             reverse=True,
         )

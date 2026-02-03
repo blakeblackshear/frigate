@@ -208,8 +208,10 @@ class RecordingMaintainer(threading.Thread):
             processed_segment_count = len(
                 list(
                     filter(
-                        lambda r: r["start_time"].timestamp()
-                        < most_recently_processed_frame_time,
+                        lambda r: (
+                            r["start_time"].timestamp()
+                            < most_recently_processed_frame_time
+                        ),
                         grouped_recordings[camera],
                     )
                 )
