@@ -177,7 +177,7 @@ class CameraConfig(FrigateBaseModel):
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig,
         title="Camera UI",
-        description="Display ordering and dashboard visibility for this camera in the UI.",
+        description="Display ordering and visibility for this camera in the UI. Ordering affects the default dashboard. For more granular control, use camera groups.",
     )
     webui_url: Optional[str] = Field(
         None,

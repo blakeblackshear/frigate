@@ -33,7 +33,7 @@ class FilterConfig(FrigateBaseModel):
     )
     threshold: float = Field(
         default=0.7,
-        title="Avg confidence",
+        title="Confidence threshold",
         description="Average detection confidence threshold required for the object to be considered a true positive.",
     )
     min_score: float = Field(

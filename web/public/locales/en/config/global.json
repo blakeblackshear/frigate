@@ -716,7 +716,7 @@
         "description": "Maximum width/height ratio allowed for the bounding box to qualify."
       },
       "threshold": {
-        "label": "Avg confidence",
+        "label": "Confidence threshold",
         "description": "Average detection confidence threshold required for the object to be considered a true positive."
       },
       "min_score": {
@@ -1360,14 +1360,14 @@
   },
   "camera_ui": {
     "label": "Camera UI",
-    "description": "Display ordering and dashboard visibility for this camera in the UI.",
+    "description": "Display ordering and visibility for this camera in the UI. Ordering affects the default dashboard. For more granular control, use camera groups.",
     "order": {
       "label": "UI order",
-      "description": "Numeric order used to sort the camera in the UI; larger numbers appear later."
+      "description": "Numeric order used to sort the camera in the UI (default dashboard and lists); larger numbers appear later."
     },
     "dashboard": {
-      "label": "Show in dashboard",
-      "description": "Toggle whether this camera is visible in the main dashboard."
+      "label": "Show in UI",
+      "description": "Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again."
     }
   },
   "onvif": {
