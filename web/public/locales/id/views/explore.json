@@ -10,12 +10,37 @@
       "finishingShortly": "Selesai sesaat lagi",
       "step": {
         "thumbnailsEmbedded": "Keluku dilampirkan ",
-        "descriptionsEmbedded": "Deskripsi terlampir: "
+        "descriptionsEmbedded": "Deskripsi terlampir: ",
+        "trackedObjectsProcessed": "Objek yang dilacak diproses: "
       }
+    },
+    "downloadingModels": {
+      "context": "Frigate sedang mengunduh model embedding yang diperlukan untuk mendukung fitur Pencarian Semantik. Proses ini mungkin memakan waktu beberapa menit tergantung pada kecepatan koneksi jaringan Anda.",
+      "setup": {
+        "visionModel": "Model vision",
+        "visionModelFeatureExtractor": "Ekstraktor fitur model visi",
+        "textModel": "Model teks",
+        "textTokenizer": "Teks tokenizer"
+      },
+      "tips": {
+        "context": "Anda mungkin ingin mengindeks ulang embeddings dari objek yang Anda lacak setelah model-model tersebut diunduh."
+      },
+      "error": "Terjadi eror. Periksa log Frigate."
     }
   },
   "details": {
     "timestamp": "Stempel waktu"
   },
-  "exploreMore": "Eksplor lebih jauh objek-objek {{label}}"
+  "exploreMore": "Eksplor lebih jauh objek-objek {{label}}",
+  "trackedObjectDetails": "Detail Objek Terlacak",
+  "type": {
+    "details": "detail",
+    "snapshot": "tangkapan layar",
+    "thumbnail": "thumbnail",
+    "video": "video",
+    "tracking_details": "detail pelacakan"
+  },
+  "trackingDetails": {
+    "title": "Detail Pelacakan"
+  }
 }

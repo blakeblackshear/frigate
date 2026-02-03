@@ -23,5 +23,35 @@
     },
     "count_one": "{{count}} Kelas",
     "count_other": "{{count}} Kelas"
+  },
+  "dates": {
+    "selectPreset": "Pilih preset…",
+    "all": {
+      "title": "Semua Tanggal",
+      "short": "Tanggal"
+    }
+  },
+  "more": "Lebih Banyak",
+  "reset": {
+    "label": "Atur ulang filter ke default"
+  },
+  "timeRange": "Rentang Waktu",
+  "subLabels": {
+    "label": "Sublabel",
+    "all": "Semua Sublabel"
+  },
+  "attributes": {
+    "label": "Klasifikasi Atribut",
+    "all": "Semua Atribut"
+  },
+  "score": "Skor",
+  "estimatedSpeed": "Perkiraan Kecepatan {{unit}}",
+  "features": {
+    "label": "Fitur"
+  },
+  "cameras": {
+    "all": {
+      "short": "Kamera"
+    }
   }
 }

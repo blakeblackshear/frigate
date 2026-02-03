@@ -36,7 +36,8 @@
   "train": {
     "title": "Pengenalan Terkini",
     "aria": "Pilih pengenalan terkini",
-    "empty": "Tidak ada percobaan pengenalan wajah baru-baru ini"
+    "empty": "Tidak ada percobaan pengenalan wajah baru-baru ini",
+    "titleShort": "Terkini"
   },
   "deleteFaceLibrary": {
     "title": "Hapus Nama",

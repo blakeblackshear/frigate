@@ -16,8 +16,38 @@
       "errorMessage": {
         "mustLeastCharacters": "Nama grup kamera minimal harus 2 karakter.",
         "exists": "Nama grup kamera sudah ada.",
-        "nameMustNotPeriod": "Nama grup kamera tidak boleh ada titik."
+        "nameMustNotPeriod": "Nama grup kamera tidak boleh ada titik.",
+        "invalid": "Nama grup kamera tidak valid."
+      }
+    },
+    "cameras": {
+      "label": "Kamera",
+      "desc": "Pilih kamera untuk grup ini."
+    },
+    "icon": "Ikon",
+    "success": "Grup kamera {{name}} telah disimpan.",
+    "camera": {
+      "birdseye": "Mata Elang",
+      "setting": {
+        "label": "Pengaturan Streaming Kamera",
+        "title": "Pengaturan Kamera {{cameraName}}",
+        "desc": "Ubah pengaturan streaming untuk dasbor grup kamera ini. <em>Pengaturan ini spesifik untuk perangkat / browser tertentu.</em>",
+        "audioIsAvailable": "Terdapat audio untuk stream ini",
+        "audioIsUnavailable": "Tidak terdapat audio untuk stream ini",
+        "audio": {
+          "tips": {
+            "title": "Audio harus dikeluarkan dari kamera Anda dan dikonfigurasi di go2rtc untuk stream ini."
+          }
+        },
+        "stream": "Siaran",
+        "placeholder": "Pilih stream",
+        "streamMethod": {
+          "label": "Metode Streaming"
+        }
       }
     }
+  },
+  "debug": {
+    "boundingBox": "Batas Kotak"
   }
 }

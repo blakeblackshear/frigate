@@ -20,8 +20,43 @@
           "ask_a": "Apakah objek ini adalah sebuah<code>{{label}}</code>?",
           "ask_an": "Apakah objek ini <code>{{label}}</code>?",
           "ask_full": "Apakah ini object <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Terkirim"
         }
       }
+    },
+    "video": {
+      "viewInHistory": "Lihat di Histori"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Pilih dari Linimasa",
+      "lastHour_other": "{{count}} Jam Terakhir",
+      "custom": "Kustom",
+      "start": {
+        "title": "Waktu Mulai",
+        "label": "Pilih Waktu Mulai"
+      },
+      "end": {
+        "title": "Waktu Akhir",
+        "label": "Pilih Waktu Akhir"
+      }
+    },
+    "name": {
+      "placeholder": "Nama Ekspor"
+    },
+    "select": "Pilih",
+    "export": "Ekspor",
+    "selectOrExport": "Pilih atau Ekspor",
+    "toast": {
+      "success": "Berhasil memulai ekspor. Lihat file pada halaman ekspor."
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "overwrite": "{{searchName}} sudah ada. Menyimpan akan menimpa file yang sudah ada."
     }
   }
 }

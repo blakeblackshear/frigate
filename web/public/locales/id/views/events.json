@@ -9,7 +9,11 @@
   "empty": {
     "detection": "Tidak ada deteksi untuk ditinjau",
     "alert": "Tidak ada peringatan untuk ditinjau",
-    "motion": "Data gerakan tidak ditemukan"
+    "motion": "Data gerakan tidak ditemukan",
+    "recordingsDisabled": {
+      "title": "Perekaman harus di aktifkan",
+      "description": "Ulasan item hanya dapat dibuat untuk kamera jika perekaman diaktifkan untuk kamera tersebut."
+    }
   },
   "timeline.aria": "Pilih timeline",
   "timeline": "Linimasa",
@@ -24,8 +28,8 @@
     "label": "Detil",
     "noDataFound": "Tidak ada detil data untuk di review",
     "aria": "Beralih tampilan detil",
-    "trackedObject_one": "objek",
-    "trackedObject_other": "objek-objek",
+    "trackedObject_one": "{{count}} objek",
+    "trackedObject_other": "{{count}} objek",
     "noObjectDetailData": "Tidak ada data objek detil tersedia.",
     "settings": "Pengaturan Tampilan Detil",
     "alwaysExpandActive": {

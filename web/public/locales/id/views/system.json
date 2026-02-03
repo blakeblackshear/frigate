@@ -15,6 +15,34 @@
   "logs": {
     "download": {
       "label": "Unduh Log"
+    },
+    "copy": {
+      "label": "Salin ke Clipboard",
+      "success": "Log tersalin ke clipboard",
+      "error": "Tidak dapat menyalin ke clipboard"
+    },
+    "type": {
+      "label": "Tipe",
+      "timestamp": "Waktu",
+      "tag": "Tag",
+      "message": "Pesan"
+    },
+    "tips": "Logs sedang berjalan dari server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Error saat mengambil log: {{errorMessage}}",
+        "whileStreamingLogs": "Eror saat streaming logs: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Umum",
+    "detector": {
+      "title": "Pendeteksi",
+      "inferenceSpeed": "Pendeteksi Kecepatan Inferensi",
+      "temperature": "Pendeteksi Suhu",
+      "cpuUsage": "Pendeteksi penggunaan CPU",
+      "cpuUsageInformation": "CPU yang digunakan dalam mempersiapkan data masukan dan keluaran ke/dari model deteksi. Nilai ini tidak mengukur penggunaan inferensi, bahkan jika menggunakan GPU atau akselerator."
     }
   }
 }

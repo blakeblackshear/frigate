@@ -10,7 +10,22 @@
     "last7": "7 hari terakhir",
     "last14": "14 hari terakhir",
     "last30": "30 hari terakhir",
-    "thisWeek": "Minggu Ini"
+    "thisWeek": "Minggu Ini",
+    "never": "Tidak Pernah",
+    "lastWeek": "Minggu Lalu",
+    "thisMonth": "Bulan Ini",
+    "lastMonth": "Bulan Lalu",
+    "5minutes": "5 menit",
+    "10minutes": "10 menit",
+    "30minutes": "30 menit",
+    "1hour": "1 jam",
+    "12hours": "12 jam",
+    "24hours": "24 jam",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}} tahun",
+    "year_other": "{{time}} tahun",
+    "mo": "{{time}} bulan"
   },
   "readTheDocumentation": "Baca dokumentasi"
 }

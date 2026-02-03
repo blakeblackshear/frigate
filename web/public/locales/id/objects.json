@@ -17,5 +17,15 @@
   "goat": "Kambing",
   "sheep": "Domba",
   "bird": "Burung",
-  "street_sign": "Rambu Jalan"
+  "street_sign": "Rambu Jalan",
+  "stop_sign": "Tanda Stop",
+  "parking_meter": "Parkir Meter",
+  "bench": "Kursi",
+  "cow": "Sapi",
+  "elephant": "Gajah",
+  "bear": "Beruang",
+  "zebra": "Zebra",
+  "giraffe": "Jerapah",
+  "hat": "Topi",
+  "backpack": "Tas"
 }

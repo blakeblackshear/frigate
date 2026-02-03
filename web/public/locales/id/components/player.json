@@ -16,6 +16,36 @@
     "streamType": {
       "title": "Tipe stream:",
       "short": "Jenis"
+    },
+    "bandwidth": {
+      "title": "Bandwith:",
+      "short": "Bandwith"
+    },
+    "latency": {
+      "title": "Latensi:",
+      "value": "{{seconds}} detik",
+      "short": {
+        "title": "Latensi",
+        "value": "{{seconds}} detik"
+      }
+    },
+    "totalFrames": "Total Frame:",
+    "droppedFrames": {
+      "title": "Frame Terbuang:",
+      "short": {
+        "title": "Terbuang",
+        "value": "{{droppedFrames}} frame"
+      }
+    },
+    "decodedFrames": "Decoded Frames:",
+    "droppedFrameRate": "Frame Rate Terbuang:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Berhasil mengirim frame ke Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Gagal mengirim frame ke Frigate+"
     }
   }
 }

@@ -12,5 +12,36 @@
     "addClassification": "Tambah Klasifikasi",
     "deleteModels": "Hapus Model",
     "editModel": "Ubah Model"
+  },
+  "tooltip": {
+    "trainingInProgress": "Model dalam training",
+    "noNewImages": "Tidak ada gambar untuk dilatih. Klasifikasikan gambar terlebih dahulu di dataset.",
+    "noChanges": "Tidak ada perubahan dataset sejak latihan terakhir.",
+    "modelNotReady": "Model tidak siap untuk dilatih"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Kelas dihapus",
+      "deletedImage": "Image dihapus",
+      "deletedModel_other": "Berhasil menghapus {{count}} model",
+      "categorizedImage": "Berhasil Mengklasifikasikan Gambar",
+      "trainedModel": "Berhasil melatih model.",
+      "trainingModel": "Berhasil memulai pelatihan model.",
+      "updatedModel": "Berhasil memperbarui konfigurasi model",
+      "renamedCategory": "Berhasil mengganti nama class ke {{name}}"
+    },
+    "error": {
+      "updateModelFailed": "Gagal melakukan perubahan pada model: {{errorMessage}}",
+      "renameCategoryFailed": "Gagal merubah penamaan kelas: {{errorMessage}}",
+      "deleteImageFailed": "Gagal menghapus: {{errorMessage}}",
+      "deleteCategoryFailed": "Gagal menghapus kelas: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Kelas dihapus",
+    "minClassesTitle": "Dilarang menghapus Kelas"
+  },
+  "train": {
+    "titleShort": "Terkini"
   }
 }

@@ -12,7 +12,25 @@
   "trackedObjectId": "Tracked Object ID",
   "filter": {
     "label": {
-      "cameras": "Kamera"
+      "cameras": "Kamera",
+      "labels": "Label",
+      "zones": "Zona",
+      "sub_labels": "Sublabel",
+      "attributes": "Atribut",
+      "search_type": "Tipe pencarian",
+      "time_range": "Rentang Waktu",
+      "before": "Sebelum",
+      "after": "Sesudah",
+      "min_score": "Minimal Skor",
+      "max_score": "Maks Skor",
+      "min_speed": "Kecepatan Min",
+      "max_speed": "Kecepatan Maks",
+      "recognized_license_plate": "Plat Kendaraan Dikenali",
+      "has_clip": "Memiliki Klip",
+      "has_snapshot": "Memiliki tangkapan layar"
+    },
+    "searchType": {
+      "thumbnail": "Tumbnail"
     }
   }
 }

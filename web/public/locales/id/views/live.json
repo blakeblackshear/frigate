@@ -16,7 +16,53 @@
         "label": "Klik kotak ini untuk menengahkan kamera",
         "enable": "Aktifkan klik untuk bergerak",
         "disable": "Non-aktifkan klik untuk bergerak"
+      },
+      "left": {
+        "label": "Geser kamera PTZ ke kiri"
+      },
+      "up": {
+        "label": "Geser kamera PTZ keatas"
+      },
+      "down": {
+        "label": "Geser kamera PTZ kebawah"
+      },
+      "right": {
+        "label": "Geser kamera PTZ ke kanan"
       }
-    }
+    },
+    "zoom": {
+      "in": {
+        "label": "Perbesar kamera PTZ"
+      },
+      "out": {
+        "label": "Perkecil kamera PTZ"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Fokus kamera PTZ kedalam"
+      },
+      "out": {
+        "label": "Fokus kamera PTZ keluar"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Klik pada frame untuk menengahkan kamera PTZ"
+      }
+    },
+    "presets": "Preset kamera PTZ"
+  },
+  "camera": {
+    "enable": "Aktifkan Kamera",
+    "disable": "Nonaktifkan Kamera"
+  },
+  "muteCameras": {
+    "enable": "Bisukan Semua Kamera",
+    "disable": "Bunyikan Semua Kamera"
+  },
+  "detect": {
+    "enable": "Aktifkan Pendeteksi",
+    "disable": "Nonaktifkan Pendeteksi"
   }
 }

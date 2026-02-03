@@ -11,7 +11,8 @@
     "enrichments": "Frigate - Pengaturan Pengayaan",
     "cameraManagement": "Pengaturan Kamera - Frigate",
     "cameraReview": "Pengaturan Ulasan Kamera - Frigate",
-    "frigatePlus": "Pengaturan Frigate+ - Frigate"
+    "frigatePlus": "Pengaturan Frigate+ - Frigate",
+    "notifications": "Pengaturan Notifikasi - Frigate"
   },
   "menu": {
     "cameraManagement": "Manajemen",
@@ -23,7 +24,9 @@
     "triggers": "Pemicu",
     "users": "Pengguna",
     "roles": "Peran",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "masksAndZones": "Mask / Zona",
+    "debug": "Debug"
   },
   "dialog": {
     "unsavedChanges": {
