@@ -90,7 +90,8 @@
     },
     "inProgress": "In corso",
     "invalidStartTime": "Ora di inizio non valida",
-    "invalidEndTime": "Ora di fine non valida"
+    "invalidEndTime": "Ora di fine non valida",
+    "never": "Mai"
   },
   "button": {
     "cancel": "Annulla",

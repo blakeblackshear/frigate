@@ -84,7 +84,7 @@
       "label": "Mostra statistiche di trasmissione",
       "desc": "Abilita questa opzione per visualizzare le statistiche della trasmissione come sovrapposizione sul flusso della telecamera."
     },
-    "debugView": "Vista correzioni",
+    "debugView": "Visualizzazione debug",
     "restreaming": {
       "disabled": "La ritrasmissione non è abilitata per questa telecamera.",
       "desc": {

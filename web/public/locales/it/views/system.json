@@ -1,7 +1,7 @@
 {
   "documentTitle": {
     "cameras": "Statistiche telecamere - Frigate",
-    "enrichments": "Statistiche di miglioramento - Frigate",
+    "enrichments": "Statistiche Componenti Aggiuntivi - Frigate",
     "storage": "Statistiche archiviazione - Frigate",
     "general": "Statistiche generali - Frigate",
     "logs": {
@@ -117,7 +117,7 @@
       "classification_speed": "Velocità di classificazione {{name}}",
       "classification_events_per_second": "Eventi di classificazione {{name}} al secondo"
     },
-    "title": "Miglioramenti",
+    "title": "Componenti Aggiuntivi",
     "infPerSecond": "Inferenze al secondo",
     "averageInf": "Tempo medio di inferenza"
   },

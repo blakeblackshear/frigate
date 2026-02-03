@@ -178,6 +178,16 @@
     "restricted": {
       "title": "Nessuna telecamera disponibile",
       "description": "Non hai l'autorizzazione per visualizzare alcuna telecamera in questo gruppo."
+    },
+    "default": {
+      "title": "Nessuna telecamera configurata",
+      "description": "Per iniziare, collega una telecamera a Frigate.",
+      "buttonText": "Aggiungi telecamera"
+    },
+    "group": {
+      "title": "Nessuna telecamera nel gruppo",
+      "description": "Questo gruppo di telecamere non ha telecamere assegnate o abilitate.",
+      "buttonText": "Gestisci gruppi"
     }
   },
   "snapshot": {

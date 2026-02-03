@@ -10,7 +10,7 @@
     "general": "Impostazioni interfaccia - Frigate",
     "frigatePlus": "Impostazioni Frigate+ - Frigate",
     "notifications": "Impostazioni di notifiche - Frigate",
-    "enrichments": "Impostazioni di miglioramento - Frigate",
+    "enrichments": "Impostazioni Componenti Aggiuntivi - Frigate",
     "cameraManagement": "Gestisci telecamere - Frigate",
     "cameraReview": "Impostazioni revisione telecamera - Frigate"
   },
@@ -87,9 +87,9 @@
       "desc": "Mostra un riquadro della regione di interesse inviata al rilevatore di oggetti"
     },
     "noObjects": "Nessun oggetto",
-    "title": "Correzioni",
-    "desc": "La vista di correzione mostra una vista in tempo reale degli oggetti tracciati e delle relative statistiche. L'elenco degli oggetti mostra un riepilogo ritardato degli oggetti rilevati.",
-    "debugging": "Correzioni",
+    "title": "Debug",
+    "desc": "La vista di debug mostra in tempo reale gli oggetti tracciati e le relative statistiche. L'elenco degli oggetti mostra un riepilogo in differita degli oggetti rilevati.",
+    "debugging": "Debugging",
     "objectList": "Elenco degli oggetti",
     "mask": {
       "desc": "Mostra i poligoni della maschera di movimento",
@@ -377,14 +377,14 @@
     "classification": "Classificazione",
     "cameras": "Impostazioni telecamera",
     "masksAndZones": "Maschere / Zone",
-    "debug": "Correzioni",
+    "debug": "Debug",
     "users": "Utenti",
     "frigateplus": "Frigate+",
-    "enrichments": "Miglioramenti",
+    "enrichments": "Componenti Aggiuntivi",
     "triggers": "Inneschi",
     "roles": "Ruoli",
     "cameraManagement": "Gestione",
-    "cameraReview": "Rivedi"
+    "cameraReview": "Revisione"
   },
   "users": {
     "dialog": {
@@ -510,7 +510,7 @@
       },
       "playAlertVideos": {
         "label": "Riproduci video di avvisi",
-        "desc": "Per impostazione predefinita, gli avvisi recenti nella schermata dal vivo vengono riprodotti come brevi video in ciclo. Disattiva questa opzione per visualizzare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
+        "desc": "Per impostazione predefinita, gli avvisi recenti nella dashboard Live vengono riprodotti come piccoli video in loop. Disabilita questa opzione per mostrare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
       },
       "title": "Schermata dal vivo",
       "displayCameraNames": {
@@ -708,10 +708,10 @@
   },
   "enrichments": {
     "toast": {
-      "success": "Le impostazioni di miglioramento sono state salvate. Riavvia Frigate per applicare le modifiche.",
+      "success": "Le impostazioni dei componenti aggiuntivi sono state salvate. Riavvia Frigate per applicare le modifiche.",
       "error": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}"
     },
-    "title": "Impostazioni di miglioramento",
+    "title": "Impostazioni Componenti Aggiuntivi",
     "semanticSearch": {
       "reindexNow": {
         "desc": "La reindicizzazione rigenererà gli incorporamenti per tutti gli oggetti tracciati. Questo processo viene eseguito in sottofondo e potrebbe impegnare al massimo la CPU e richiedere un tempo considerevole, a seconda del numero di oggetti tracciati.",
@@ -762,11 +762,11 @@
     },
     "licensePlateRecognition": {
       "desc": "Frigate può riconoscere le targhe dei veicoli e aggiungere automaticamente i caratteri rilevati al campo recognized_license_plate o un nome noto come sub_label agli oggetti di tipo automobile (car). Un caso d'uso comune potrebbe essere la lettura delle targhe delle auto che entrano in un vialetto o che transitano lungo una strada.",
-      "title": "Riconoscimento della targa",
+      "title": "Riconoscimento targhe",
       "readTheDocumentation": "Leggi la documentazione"
     },
-    "unsavedChanges": "Modifiche alle impostazioni di miglioramento non salvate",
-    "restart_required": "Riavvio richiesto (impostazioni di miglioramento modificate)"
+    "unsavedChanges": "Modifiche alle impostazioni dei Componenti aggiuntivi non salvate",
+    "restart_required": "Riavvio richiesto (impostazioni dei componenti aggiuntivi modificate)"
   },
   "triggers": {
     "documentTitle": "Inneschi",
@@ -961,11 +961,11 @@
     "title": "Impostazioni revisione telecamera",
     "object_descriptions": {
       "title": "Descrizioni oggetti IA generativa",
-      "desc": "Abilita/disabilita temporaneamente le descrizioni degli oggetti generate dall'IA per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli oggetti tracciati su questa telecamera."
+      "desc": "Abilita/disabilita temporaneamente le descrizioni degli oggetti generate dall'IA per questa telecamera fino al riavvio di Frigate. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli oggetti tracciati su questa telecamera."
     },
     "review_descriptions": {
       "title": "Descrizioni revisioni IA generativa",
-      "desc": "Abilita/disabilita temporaneamente le descrizioni delle revisioni generate dall'IA per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli elementi da rivedere su questa telecamera."
+      "desc": "Abilita/disabilita temporaneamente le descrizioni di revisione generate dall'IA per questa telecamera fino al riavvio di Frigate. Se disabilitate, le descrizioni generate dall'IA non saranno richieste per gli elementi di revisione su questa telecamera."
     },
     "review": {
       "title": "Rivedi",
@@ -1278,7 +1278,7 @@
     "backToSettings": "Torna alle impostazioni della telecamera",
     "streams": {
       "title": "Abilita/Disabilita telecamere",
-      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>"
+      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e debug non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>"
     },
     "cameraConfig": {
       "add": "Aggiungi telecamera",
