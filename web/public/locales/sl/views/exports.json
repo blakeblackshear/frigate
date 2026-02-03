@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Napaka pri preimenovanju izvoza: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Deli izvoz",
+    "editName": "Uredi ime",
+    "deleteExport": "Izbriši izvoz",
+    "downloadVideo": "Prenesi videoposnetek"
   }
 }

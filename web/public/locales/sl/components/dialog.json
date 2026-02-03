@@ -59,7 +59,8 @@
         "failed": "Npaka pri začetku izvoza: {{error}}",
         "endTimeMustAfterStartTime": "Končni čas mora biti po začetnem čase",
         "noVaildTimeSelected": "Ni izbranega veljavnega časovnega obdobja"
-      }
+      },
+      "view": "Pregled"
     },
     "fromTimeline": {
       "saveExport": "Shrani Izvoz",
@@ -83,7 +84,7 @@
   },
   "search": {
     "saveSearch": {
-      "label": "Varno Iskanje",
+      "label": "Shrani iskanje",
       "desc": "Vnesite ime za to shranjeno iskanje.",
       "placeholder": "Vnesite ime za iskanje",
       "overwrite": "{{searchName}} že obstaja. Shranjevanje bo prepisalo obstoječo vrednost.",
@@ -118,6 +119,7 @@
     "search": {
       "placeholder": "Iskanje po oznaki ali podoznaki..."
     },
-    "noImages": "Za to kamero ni bilo najdenih sličic"
+    "noImages": "Za to kamero ni bilo najdenih sličic",
+    "unknownLabel": "Shranjena slika prožilca"
   }
 }

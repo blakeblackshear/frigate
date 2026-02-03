@@ -87,7 +87,8 @@
     },
     "invalidStartTime": "Napačen čas začetka",
     "invalidEndTime": "Napačen čas konca",
-    "inProgress": "V teku"
+    "inProgress": "V teku",
+    "never": "Nikoli"
   },
   "menu": {
     "live": {
@@ -254,7 +255,8 @@
     "show": "Prikaži {{item}}",
     "ID": "ID",
     "none": "Brez",
-    "all": "Vse"
+    "all": "Vse",
+    "other": "Drugo"
   },
   "pagination": {
     "next": {

@@ -25,7 +25,8 @@
       "has_clip": "Ima posnetek",
       "max_speed": "Najvišja hitrost",
       "min_speed": "Najnižja hitrost",
-      "has_snapshot": "Ima sliko"
+      "has_snapshot": "Ima sliko",
+      "attributes": "Atributi"
     },
     "searchType": {
       "thumbnail": "Sličica",

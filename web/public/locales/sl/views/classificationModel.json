@@ -11,19 +11,30 @@
     "deleteCategory": "Zbriši razred",
     "deleteImages": "Zbriši slike",
     "trainModel": "Treniraj model",
-    "deleteClassificationAttempts": "Izbriši klasifikacijske slike"
+    "deleteClassificationAttempts": "Izbriši klasifikacijske slike",
+    "addClassification": "Dodaj klasifikacijo",
+    "deleteModels": "Izbriši model",
+    "editModel": "Uredi model"
   },
   "toast": {
     "success": {
       "deletedCategory": "Izbrisan razred",
       "deletedImage": "Zbrisane slike",
       "trainedModel": "Uspešno treniranje modela.",
-      "trainingModel": "Uspešen začetek treniranje modela."
+      "trainingModel": "Uspešen začetek treniranje modela.",
+      "deletedModel_one": "Uspešno izbrisan {{count}} model",
+      "deletedModel_two": "Uspešno izbrisana {{count}} modela",
+      "deletedModel_few": "Uspešno izbrisani {{count}} modeli",
+      "deletedModel_other": "Uspešno izbrisanih {{count}} modelov",
+      "categorizedImage": "Uspešna klasifikacija slike",
+      "updatedModel": "Uspešno posodobljene podrobnosti modela",
+      "renamedCategory": "Uspešno preimenovan razred v {{name}}"
     },
     "error": {
       "deleteImageFailed": "Neuspešno brisanje: {{errorMessage}}",
       "deleteCategoryFailed": "Neuspešno brisanje razreda: {{errorMessage}}",
-      "trainingFailed": "Neuspešen začetek treniranje modela: {{errorMessage}}"
+      "trainingFailed": "Neuspešen začetek treniranje modela: {{errorMessage}}",
+      "deleteModelFailed": "Napaka pri brisanju modela: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -39,7 +50,8 @@
   },
   "train": {
     "title": "Nedavne razvrstitve",
-    "aria": "Izberi nedavne razvrstitve"
+    "aria": "Izberi nedavne razvrstitve",
+    "titleShort": "Nedavno"
   },
   "categorizeImageAs": "Razvrsti sliko kot:",
   "categorizeImage": "Razvrsti sliko",
@@ -50,6 +62,14 @@
   },
   "documentTitle": "Klasifikacijski modeli - fregate",
   "details": {
-    "scoreInfo": "Razultat predstavlja povprečno stopnjo sigurnosti čez vsa zaznavynja objekta."
+    "scoreInfo": "Razultat predstavlja povprečno stopnjo sigurnosti čez vsa zaznavynja objekta.",
+    "none": "Nobeno",
+    "unknown": "Neznano"
+  },
+  "tooltip": {
+    "trainingInProgress": "Model se trenutno trenira",
+    "noNewImages": "Novih slik za treniranje ni na voljo. Označite več slik v bazi.",
+    "noChanges": "Ni sprememb v bazi od zadnjega treniranja.",
+    "modelNotReady": "Model ni pripravljen na treniranje"
   }
 }

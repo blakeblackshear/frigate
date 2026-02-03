@@ -52,6 +52,10 @@
         "title": "Neporabljeno",
         "tips": "Ta vrednost ne predstavlja dejanske proste kapacitete za Frigate posnetke, če na disku shranjujete še druge datoteke. Frigate ne spremlja velikost drugih datotek na disku."
       }
+    },
+    "shm": {
+      "warning": "Trenutna SHM velikost {{total}}MB je premajhna. Povečajte jo na vsaj {{min_shm}}MB.",
+      "title": "SHM (deljen pomnilnik) razdelitev"
     }
   },
   "general": {
@@ -86,7 +90,12 @@
           "success": "GPU informacije kopirane v odložišče"
         }
       },
-      "npuUsage": "Poraba NPE"
+      "npuUsage": "Poraba NPE",
+      "intelGpuWarning": {
+        "message": "GPU status nerazpoložljiv",
+        "description": "To je znana napaka v orodjih za poročanje statistike Intelovega GPU-ja (intel_gpu_top), kjer se orodje pokvari in ponavljajoče javlja 0 % uporabe GPU-ja, tudi kadar strojna pospešitev in detekcija objektov pravilno tečeta na (i)GPU-ju. To ni napaka v Frigateu. Lahko ponovno zaženeš gostitelja (host), da začasno odpraviš težavo in potrdiš, da GPU dejansko deluje pravilno. Na zmogljivost to ne vpliva.",
+        "title": "Opozorilo statistike Intel GPU-ja"
+      }
     },
     "title": "Splošno",
     "detector": {
@@ -94,12 +103,20 @@
       "inferenceSpeed": "Hitrost sklepanja detektorja",
       "temperature": "Temperatura detektorja",
       "cpuUsage": "Poraba CPE detektorja",
-      "memoryUsage": "Poraba pomnilnika detektorja"
+      "memoryUsage": "Poraba pomnilnika detektorja",
+      "cpuUsageInformation": "CPU poraba pri pripravi vhodnih in izhodnih podatkov za / iz modelov za detekcijo. Ta vrednost ne meri porabe pri sami inferenci (izvajanju modela), tudi če uporabljaš GPU ali kakšen drug pospeševalnik."
     },
     "otherProcesses": {
       "title": "Ostali procesi",
       "processMemoryUsage": "Poraba pomnilnika",
-      "processCpuUsage": "Poraba CPE"
+      "processCpuUsage": "Poraba CPE",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "snemanje",
+        "audio_detector": "detektor zvoka",
+        "review_segment": "preglej segment",
+        "embeddings": "vdelave"
+      }
     }
   },
   "title": "Sistem",
@@ -158,7 +175,8 @@
     "reindexingEmbeddings": "Ponovno indeksiranje vdelanih elementov (embeddings) ({{processed}}% končano)",
     "cameraIsOffline": "{{camera}} je nedosegljiva",
     "detectIsSlow": "{{detect}} je počasen ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} je zelo počasen ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} je zelo počasen ({{speed}} ms)",
+    "shmTooLow": "/dev/shm direktorij({{total}} MB) bi moral imeti vsaj {{min}} MB."
   },
   "enrichments": {
     "title": "Obogatitve",
@@ -168,7 +186,23 @@
       "plate_recognition": "Prepoznavanje Registrskih Tablic",
       "face_recognition_speed": "Hitrost Prepoznavanja Obrazov",
       "plate_recognition_speed": "Hitrost Prepoznavanja Registrskih Tablic",
-      "yolov9_plate_detection": "YOLOv9 Zaznavanje Registrskih Tablic"
-    }
+      "yolov9_plate_detection": "YOLOv9 Zaznavanje Registrskih Tablic",
+      "image_embedding": "Vdelava slik",
+      "text_embedding": "Vdelava besedila",
+      "image_embedding_speed": "Hitrost vdelave slik",
+      "yolov9_plate_detection_speed": "Hitrost zaznavanja tablic YOLOv9",
+      "review_description": "Opis pregleda",
+      "review_description_speed": "Preverite hitrost opisa",
+      "classification": "Klasifikacija {{name}}",
+      "classification_speed": "Hitrost klasificiranja {{name}}",
+      "classification_events_per_second": "Hitrost klasificiranja dogodkov {{name}} na sekundo",
+      "face_embedding_speed": "Hitrost vdelave obrazov",
+      "text_embedding_speed": "Hitrost vdelave besedila",
+      "review_description_events_per_second": "Opis pregleda",
+      "object_description": "Opis objekta",
+      "object_description_speed": "Hitrost opisa objekta",
+      "object_description_events_per_second": "Opis objekta"
+    },
+    "averageInf": "Povprečen čas inference"
   }
 }

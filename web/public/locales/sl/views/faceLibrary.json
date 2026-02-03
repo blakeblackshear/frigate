@@ -1,12 +1,12 @@
 {
   "description": {
-    "addFace": "Dodajanje nove zbirke v knjižnico obrazov z nalaganjem slike.",
+    "addFace": "Dodaj novo zbirko v knjižnico obrazov tako, da naložiš svojo prvo sliko.",
     "placeholder": "Vnesite ime za to zbirko",
     "invalidName": "Neveljavno ime. Ime lahko vsebuje črke, števila, presledke, narekovaje, podčrtaje in pomišljaje."
   },
   "details": {
     "person": "Oseba",
-    "unknown": "Nenznano",
+    "unknown": "Neznano",
     "timestamp": "Časovni žig",
     "subLabelScore": "Ocena Podoznake",
     "scoreInfo": "Rezultat podoznake je utežena ocena vseh stopenj gotovosti prepoznanih obrazov, zato se lahko razlikuje od ocene, prikazane na posnetku.",
@@ -38,7 +38,7 @@
       "addFaceLibrary": "Oseba {{name}} je bila uspešno dodana v Knjižnico Obrazov!",
       "renamedFace": "Obraz uspešno preimenovan v {{name}}",
       "trainedFace": "Uspešno treniran obraz.",
-      "updatedFaceScore": "Ocena obraza je bila uspešno posodobljena."
+      "updatedFaceScore": "Ocena obraza je bila uspešno posodobljena {{name}} ({{score}})."
     },
     "error": {
       "uploadingImageFailed": "Nalaganje slike ni uspelo: {{errorMessage}}",
@@ -69,7 +69,8 @@
   "train": {
     "title": "Nedavne prepoznave",
     "aria": "Izberite nedavne prepoznave",
-    "empty": "Ni nedavnih poskusov prepoznavanja obrazov"
+    "empty": "Ni nedavnih poskusov prepoznavanja obrazov",
+    "titleShort": "Nedavno"
   },
   "selectItem": "Izberi {{item}}",
   "selectFace": "Izberi Obraz",

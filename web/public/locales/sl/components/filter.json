@@ -132,5 +132,9 @@
     "selectPlatesFromList": "Na seznamu izberite eno ali več registrskih tablic.",
     "selectAll": "Izberi vse",
     "clearAll": "Počisti vse"
+  },
+  "attributes": {
+    "label": "Atributi klasifikacije",
+    "all": "Vsi atributi"
   }
 }

@@ -6,7 +6,7 @@
     "notifications": "Nastavitve obvestil - Frigate",
     "masksAndZones": "Urejevalnik mask in območij - Frigate",
     "object": "Odpravljanje napak - Frigate",
-    "general": "Splošne Nastavitve - Frigate",
+    "general": "Splošne nastavitve - Frigate",
     "frigatePlus": "Frigate+ Nastavitve - Frigate",
     "enrichments": "Nastavitve Obogatitev - Frigate",
     "motionTuner": "Nastavitev gibanja - Frigate",
@@ -69,6 +69,9 @@
       "playAlertVideos": {
         "label": "Predvajajte opozorilne videoposnetke",
         "desc": "Privzeto se nedavna opozorila na nadzorni plošči predvajajo kot kratki ponavljajoči videoposnetki . To možnost onemogočite, če želite, da se v tej napravi/brskalniku prikaže samo statična slika nedavnih opozoril."
+      },
+      "displayCameraNames": {
+        "label": "Vedno prikaži imena kamer"
       }
     },
     "storedLayouts": {
@@ -232,7 +235,7 @@
       "testFailed": "Preizkus pretoka ni uspel: {{error}}"
     },
     "step1": {
-      "description": "Vnesite podatke vaše kamere in preizkusite povezavo.",
+      "description": "Vnesite podatke o kameri in izberite, ali želite kamero zaznati samodejno ali ročno izbrati blagovno znamko.",
       "cameraName": "Ime kamere",
       "cameraNamePlaceholder": "npr. sprednja_vrata ali Pregled zadnjega dvorišča",
       "host": "Gostitelj/IP naslov",
@@ -283,8 +286,8 @@
         "audio": "Zvok"
       },
       "testStream": "Preveri povezavo",
-      "testSuccess": "Test pretoka uspešen!",
-      "testFailed": "Test pretoka spodletel",
+      "testSuccess": "Test povezave je bil uspešen!",
+      "testFailed": "Test povezave ni bil uspešen. Preverite nastavitve in poskusite znova.",
       "testFailedTitle": "Test spodletel",
       "connected": "Povezan",
       "notConnected": "Ni povezave",
@@ -303,7 +306,7 @@
       }
     },
     "step3": {
-      "description": "Končno preverjanje in analiza pred shranjevanjem nove kamere. Poveži vsak pretok, preden shranjuješ.",
+      "description": "Konfigurirajte vloge tokov in dodajte dodatne tokove za vašo kamero.",
       "validationTitle": "Preverjanje pretoka",
       "connectAllStreams": "Poveži vse pretoke",
       "reconnectionSuccess": "Ponovna povezava uspešna.",
@@ -331,6 +334,77 @@
         "videoCodecGood": "Video kodek je {{codec}}.",
         "audioCodecGood": "Audio kodek je {{codec}}.",
         "resolutionHigh": "Resolucija {{resolution}} lahko povzroči povečano porabo virov."
+      }
+    }
+  },
+  "roles": {
+    "toast": {
+      "success": {
+        "userRolesUpdated_one": "{{count}} uporabnik, dodeljen tej vlogi, je bil posodobljen na »gledalec«, ki ima dostop do vseh kamer.",
+        "userRolesUpdated_two": "{{count}} uporabnika, dodeljena tej vlogi, sta bila posodobljena na »gledalec«, ki ima dostop do vseh kamer.",
+        "userRolesUpdated_few": "{{count}} uporabniki, dodeljeni tej vlogi, so bili posodobljeni na »gledalec«, ki ima dostop do vseh kamer.",
+        "userRolesUpdated_other": "{{count}} uporabnikov, dodeljenih tej vlogi, so bili posodobljeni na »gledalec«, ki ima dostop do vseh kamer."
+      }
+    }
+  },
+  "triggers": {
+    "toast": {
+      "error": {
+        "createTriggerFailed": "Napaka pri ustvarjanju sprožilca: {{errorMessage}}"
+      },
+      "success": {
+        "deleteTrigger": "Sprožilec {{name}} je bil uspešno odstranjen.",
+        "updateTrigger": "Sprožilec {{name}} je bil uspešno posodobljen.",
+        "createTrigger": "Sprožilec {{name}} je bil uspešno ustvarjen."
+      }
+    },
+    "wizard": {
+      "steps": {
+        "thresholdAndActions": "Mejne vrednosti in dejanja",
+        "configureData": "Nastavitve podatkov",
+        "nameAndType": "Ime in tip"
+      },
+      "step3": {
+        "description": "Konfigurirajte mejno vrednost in dejanja za ta sprožilec."
+      },
+      "step2": {
+        "description": "Konfigurirajte vsebino sprožilca, da se bo akcija izvedla."
+      },
+      "step1": {
+        "description": "Konfigurirajte osnovne nastavitve sprožilca."
+      },
+      "title": "Ustvarite sprožilec"
+    },
+    "dialog": {
+      "form": {
+        "actions": {
+          "error": {
+            "min": "Vsaj ena akcija mora biti izbrana."
+          },
+          "desc": "Privzeto Frigate pošlje MQTT sporočilo za vse sprožilce. Podnalepke dodajo ime sprožilca oznaki objekta. Atributi so iskalni metapodatki, shranjeni ločeno v metapodatkih sledenega objekta.",
+          "title": "Akcije"
+        },
+        "threshold": {
+          "error": {
+            "max": "Mejna vrednost ne sme presegati 1",
+            "min": "Mena vrednost mora biti vsaj 0"
+          },
+          "desc": "Nastavite mejno vrednost podobnosti za ta sprožilec. Višja mejna vrednost pomeni, da je za sprožitev potrebna večja ujemanje.",
+          "title": "Mejna vrednost"
+        },
+        "content": {
+          "error": {
+            "required": "Vsebina je zahtevana."
+          },
+          "textDesc": "Vnesite besedilo, ki bo sprožilo to dejanje, ko bo zaznan opis podobnega sledenega objekta.",
+          "imageDesc": "Prikazanih je le zadnjih 100 sličic. Če ne najdete želene sličice, si oglejte starejše objekte v razdelku Razišči in tam nastavite sprožilec iz menija.",
+          "textPlaceholder": "Vnesite besedilo",
+          "imagePlaceholder": "Izberite sličico",
+          "title": "Vsebina"
+        },
+        "type": {
+          "thumbnail": "Sproži, ko je zaznana podobna sličica sledenega objekta"
+        }
       }
     }
   }
