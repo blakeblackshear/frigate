@@ -70,7 +70,7 @@ export interface SectionConfig {
   sectionDocs?: string;
   /** Per-field documentation links */
   fieldDocs?: Record<string, string>;
-  /** Fields that require restart when modified (empty means all fields) */
+  /** Fields that require restart when modified (empty means none; undefined uses default) */
   restartRequired?: string[];
   /** Whether to enable live validation */
   liveValidate?: boolean;
@@ -470,7 +470,7 @@ export function ConfigSection({
       }
 
       if (sectionConfig.restartRequired.length === 0) {
-        return true;
+        return false;
       }
 
       if (!overrides || typeof overrides !== "object") {
@@ -606,7 +606,7 @@ export function ConfigSection({
           ? `cameras.${cameraName}.${sectionPath}`
           : sectionPath;
 
-      const configData = level === "global" ? effectiveSchemaDefaults : "";
+      const configData = "";
 
       await axios.put("config/set", {
         requires_restart: requiresRestart ? 0 : 1,
@@ -649,7 +649,6 @@ export function ConfigSection({
       );
     }
   }, [
-    effectiveSchemaDefaults,
     sectionPath,
     level,
     cameraName,
