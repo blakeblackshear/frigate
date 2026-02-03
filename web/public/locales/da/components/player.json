@@ -11,5 +11,28 @@
   "streamOffline": {
     "title": "Stream offline",
     "desc": "Der er ikke modtaget nogen frames på {{cameraName}}-<code>detect</code>-streamen, tjek fejlloggene."
+  },
+  "stats": {
+    "streamType": {
+      "title": "Stream type:",
+      "short": "Type"
+    },
+    "bandwidth": {
+      "title": "Bandbredde:",
+      "short": "Bandbredde"
+    },
+    "latency": {
+      "title": "Latenstid:",
+      "value": "{{seconds}} sekunder",
+      "short": {
+        "title": "Latenstid",
+        "value": "{{seconds}} sek"
+      }
+    },
+    "droppedFrames": {
+      "short": {
+        "title": "Tabt"
+      }
+    }
   }
 }

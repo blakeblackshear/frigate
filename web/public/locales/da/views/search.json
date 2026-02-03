@@ -8,5 +8,6 @@
     "filterInformation": "Filter information",
     "filterActive": "Filtre aktiv",
     "clear": "Ryd søgning"
-  }
+  },
+  "trackedObjectId": "Sporet genstands-ID"
 }

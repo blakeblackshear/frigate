@@ -1,18 +1,187 @@
 {
-  "documentTitle": "Klassifikationsmodeller",
+  "documentTitle": "Kategoriseringsmodeller - Frigate",
   "details": {
-    "scoreInfo": "Scoren repræsenterer den gennemsnitlige klassifikationssikkerhed på tværs af alle registreringer af dette objekt.",
-    "unknown": "Ukendt"
+    "scoreInfo": "Scoren viser den gennemsnitlige sikkerhed for kategoriseringen på tværs af alle registreringer af dette objekt.",
+    "unknown": "Ukendt",
+    "none": "Ingen"
   },
   "description": {
     "invalidName": "Ugyldigt navn. Navne må kun indeholde bogstaver, tal, mellemrum, apostroffer, understregninger og bindestreger."
   },
   "button": {
-    "deleteClassificationAttempts": "Slet klassifikationsbilleder",
+    "deleteClassificationAttempts": "Slet kategoriseringsbilleder",
     "renameCategory": "Omdøb klasse",
     "deleteCategory": "Slet klasse",
     "deleteImages": "Slet billeder",
     "trainModel": "Træn model",
-    "addClassification": "Tilføj klassifikation"
+    "addClassification": "Tilføj Kategori",
+    "deleteModels": "Slet modeller",
+    "editModel": "Rediger model"
+  },
+  "tooltip": {
+    "trainingInProgress": "Modellen er ved at blive trænet",
+    "noNewImages": "Der er ingen nye billeder at lære af. Kategorisér flere billeder i datasættet først.",
+    "noChanges": "Ingen ændringer i datasættet siden sidste træning.",
+    "modelNotReady": "Modellen er ikke klar til træning"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Slettet kategori",
+      "deletedImage": "Slettede billeder",
+      "deletedModel_one": "{{count}} model er nu slettet",
+      "deletedModel_other": "{{count}} modeller er nu slettet",
+      "categorizedImage": "Billedet er nu kategoriseret",
+      "trainedModel": "Modellen er klar.",
+      "trainingModel": "Modeltræning er started.",
+      "updatedModel": "Modellens indstillinger er opdateret",
+      "renamedCategory": "Kategorien er omdøbt til {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Fejl under sletning: {{errorMessage}}",
+      "deleteCategoryFailed": "Sletning af kategori fejlede: {{errorMessage}}",
+      "deleteModelFailed": "Sletning af model fejlede: {{errorMessage}}",
+      "categorizeFailed": "Kategorisering af billedet fejlede: {{errorMessage}}",
+      "trainingFailed": "Træning af modellen fejlede. Check Frigate loggen.",
+      "trainingFailedToStart": "Opstart af modeltræning fejlede: {{errorMessage}}",
+      "updateModelFailed": "Ændring af modellen fejlede: {{errorMessage}}",
+      "renameCategoryFailed": "Kan ikke omdøbe kategorien: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Slet kategori",
+    "desc": "Er du sikker på at du vil slette kategorien {{name}}? Dette kan ikke fortrydes og sletter alle tilhørende billeder samt træning af modellen.",
+    "minClassesTitle": "Kan ikke slette Kategori",
+    "minClassesDesc": "Modellen skal have mindst 2 kategorier. Tilføj en kategori, før du sletter denne."
+  },
+  "deleteModel": {
+    "title": "Slet Kategoriseringsmodellen",
+    "desc_one": "Er du sikker på, at du vil slette {{count}} model? Dette vil permanent slette alle tilknyttede data, inkl. billeder og træningsdata. Denne handling kan ikke fortrydes.",
+    "desc_other": "Er du sikker på, at du vil slette {{count}} modeller? Dette vil permanent slette alle tilknyttede data, inkl. billeder og træningsdata. Denne handling kan ikke fortrydes.",
+    "single": "Er du sikker på, at du vil slette {{name}}? Dette vil permanent slette alle tilknyttede data, inklusive billeder og træningsdata. Denne handling kan ikke fortrydes."
+  },
+  "train": {
+    "title": "Nyeste kategorier",
+    "titleShort": "Nyeste",
+    "aria": "Vælg de nyeste kategorier"
+  },
+  "categories": "Kategorier",
+  "createCategory": {
+    "new": "Opret en ny kategori"
+  },
+  "categorizeImageAs": "Kategoriser billedet som:",
+  "categorizeImage": "Kategoriser billedet",
+  "menu": {
+    "objects": "Genstande",
+    "states": "Statestik"
+  },
+  "noModels": {
+    "object": {
+      "title": "Ingen kategoriseringsmodeller for genstande",
+      "description": "Opret en model, der kan kategorisere genstande.",
+      "buttonText": "Opret Genstands Model"
+    },
+    "state": {
+      "title": "Ingen modeller til genstandstilstande",
+      "description": "Opret en brugerdefineret model til at overvåge og kategorisere tilstandsændringer i specifikke kamerområder.",
+      "buttonText": "Opret tilstandsmodel"
+    }
+  },
+  "wizard": {
+    "step1": {
+      "type": "Type",
+      "typeState": "Tilstand",
+      "typeObject": "Genstand",
+      "objectLabel": "Genstands mærkat",
+      "objectLabelPlaceholder": "Vælg genstands type...",
+      "classificationType": "Kategoriseringstype",
+      "classificationTypeTip": "Udforsk kategoriseringstyper",
+      "errors": {
+        "nameLength": "Modellens navn må højst være 64 tegn",
+        "nameOnlyNumbers": "Modellens navn skal indeholde bogstaver",
+        "classRequired": "Der mangler en kategori",
+        "classesUnique": "Kategorinavne skal være unikke",
+        "noneNotAllowed": "Kategorinavnet 'none' er ikke tilladt",
+        "stateRequiresTwoClasses": "Tilstandsmodeller har brug for 2 kategorier",
+        "objectLabelRequired": "Vælg genstands mærkat",
+        "objectTypeRequired": "Vælg kategoriseringstype",
+        "nameRequired": "Modelnavn er påkrævet"
+      },
+      "description": "Tilstandsmodeller overvåger faste kameraområder for ændringer (f.eks. dør åben/lukket). Genstandsmodeller tilføjer kategoriseringer til detekterede genstande (f.eks. kendte dyr, leveringspersoner osv.).",
+      "name": "Navn",
+      "namePlaceholder": "Skriv modelnavn...",
+      "classificationTypeDesc": "Underetiketter tilføjer ekstra tekst til genstandens etiket (f.eks. 'Person: UPS'). Attributter er søgbare metadata, der opbevares separat i genstandens metadata.",
+      "classificationSubLabel": "Underetiketter",
+      "classificationAttribute": "Attribut",
+      "classes": "Kategori",
+      "states": "Tilstande",
+      "classesTip": "Lær om kategorier",
+      "classesStateDesc": "Definér de forskellige tilstande, dit kameraområde kan være i. For eksempel: 'åben' og 'lukket' for en garageport.",
+      "classesObjectDesc": "Definér de forskellige kategorier, som detekterede genstande skal kategoriseres i. For eksempel: 'leveringsperson', 'beboer', 'fremmed' til kategorisering af personer.",
+      "classPlaceholder": "Skriv kategorinavn..."
+    },
+    "step2": {
+      "description": "Vælg kameraer, og definer det område, der skal overvåges for hvert kamera. Modellen vil kategorisere tilstanden i disse områder.",
+      "cameras": "Kameraer",
+      "selectCamera": "Vælg Kamera",
+      "noCameras": "Klik + for at tilføje kamera",
+      "selectCameraPrompt": "Vælg et kamera fra listen for at definere dets overvågningsområde"
+    },
+    "step3": {
+      "selectImagesPrompt": "Vælg alle billeder med: {{className}}",
+      "selectImagesDescription": "Klik på billederne for at vælge dem. Klik på Fortsæt, når du er færdig med denne kategori.",
+      "allImagesRequired_one": "Venligst kategoriser alle billeder. {{count}} billede tilbage.",
+      "allImagesRequired_other": "Venligst kategoriser alle billeder. {{count}} billeder tilbage.",
+      "generating": {
+        "title": "Genererer testbilleder",
+        "description": "Frigate henter repræsentative billeder fra dine optagelser. Det kan tage et øjeblik..."
+      },
+      "training": {
+        "title": "Træningsmodel",
+        "description": "Din model trænes i baggrunden. Luk denne dialog, og din model vil begynde at køre, så snart træningen er færdig."
+      },
+      "retryGenerate": "Forsøg at generere igen",
+      "noImages": "Ingen prøvebilleder blev genereret",
+      "classifying": "Kategoriserer og træner...",
+      "trainingStarted": "Træningen er startet",
+      "modelCreated": "Model er oprettet. Brug visningen af nylige kategoriseringer til at tilføje billeder for de manglende tilstande, og træn modellen derefter.",
+      "errors": {
+        "noCameras": "Ingen kamera konfigureret",
+        "noObjectLabel": "Ingen genstandsmærkat valgt",
+        "generateFailed": "Kunne ikke generere eksempler: {{error}}",
+        "generationFailed": "Der opstod en fejl under genereringen. Prøv igen.",
+        "classifyFailed": "Kunne ikke kategorisere billederne: {{error}}"
+      },
+      "generateSuccess": "Eksempelbilleder er nu genereret",
+      "missingStatesWarning": {
+        "title": "Manglende tilstandseksempler",
+        "description": "Det anbefales at vælge eksempler for alle tilstande for at opnå de bedste resultater. Du kan fortsætte uden at vælge alle tilstande, men modellen bliver ikke trænet, før alle tilstande har billeder. Efter du fortsætter, kan du bruge visningen Seneste kategoriseringer til at kategorisere billeder for de manglende tilstande og derefter træne modellen."
+      }
+    },
+    "title": "Opret ny kategorisering",
+    "steps": {
+      "nameAndDefine": "Navn og definition",
+      "stateArea": "Tilstandsområde",
+      "chooseExamples": "Vælg Eksempler"
+    }
+  },
+  "edit": {
+    "title": "Rediger kategoriseringsmodel",
+    "descriptionState": "Rediger kategorierne for denne model til genstandstilstande. Ændringer kræver, at modellen trænes igen.",
+    "descriptionObject": "Rediger genstandstypen og kategoriseringstypen for denne genstandskategoriseringsmodel.",
+    "stateClassesInfo": "Bemærk: Ændring af tilstandskategorier kræver, at modellen trænes igen med de opdaterede kategorier."
+  },
+  "deleteDatasetImages": {
+    "title": "Slet billeder i datasættet",
+    "desc_one": "Er du sikker på, at du vil slette {{count}} billede fra {{dataset}}? Denne handling kan ikke fortrydes og kræver, at modellen trænes igen.",
+    "desc_other": "Er du sikker på, at du vil slette {{count}} billeder fra {{dataset}}? Denne handling kan ikke fortrydes og kræver, at modellen trænes igen."
+  },
+  "deleteTrainImages": {
+    "title": "Slet trænings billeder",
+    "desc_one": "Er du sikker på, at du vil slette {{count}} billede? Denne handling kan ikke fortrydes.",
+    "desc_other": "Er du sikker på, at du vil slette {{count}} billeder? Denne handling kan ikke fortrydes."
+  },
+  "renameCategory": {
+    "title": "Omdøb Kategori",
+    "desc": "Indtast et nyt navn til {{name}}. Modellen skal trænes igen, før navneændringen træder i kraft."
   }
 }

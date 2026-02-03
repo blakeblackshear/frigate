@@ -3,8 +3,16 @@
   "copyConfig": "Kopiér konfiguration",
   "saveAndRestart": "Gem & Genstart",
   "saveOnly": "Kun gem",
-  "configEditor": "Konfigurationseditor",
-  "safeConfigEditor": "Konfigurationseditor (Sikker tilstand)",
-  "safeModeDescription": "Frigate er i sikker tilstand på grund af en fejl ved validering af konfigurationen.",
-  "confirm": "Afslut uden at gemme?"
+  "configEditor": "Konfigurationsværktøj",
+  "safeConfigEditor": "Konfigurationsværktøj (Sikker tilstand)",
+  "safeModeDescription": "Frigate er i sikker tilstand på grund af valideringsfejl af konfigurationen.",
+  "confirm": "Afslut uden at gemme?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfigurationen er kopieret."
+    },
+    "error": {
+      "savingError": "Kan ikke gemme konfigurationen"
+    }
+  }
 }

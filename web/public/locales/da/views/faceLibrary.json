@@ -15,5 +15,8 @@
   "uploadFaceImage": {
     "title": "Upload ansigtsbillede",
     "desc": "Upload et billede for at scanne efter ansigter og inkludere det for {{pageToggle}}"
+  },
+  "train": {
+    "titleShort": "Nyeste"
   }
 }

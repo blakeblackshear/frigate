@@ -8,5 +8,11 @@
     "desc": "Indtast et nyt navn for denne eksport."
   },
   "noExports": "Ingen eksporter fundet",
-  "deleteExport": "Slet eksport"
+  "deleteExport": "Slet eksport",
+  "tooltip": {
+    "shareExport": "Del eksport",
+    "downloadVideo": "Download video",
+    "editName": "Rediger navn",
+    "deleteExport": "Slette eksport"
+  }
 }

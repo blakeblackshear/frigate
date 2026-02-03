@@ -14,8 +14,73 @@
       "label": "Navn",
       "placeholder": "Indtast et navn…",
       "errorMessage": {
-        "mustLeastCharacters": "Kameragruppens navn skal være mindst 2 tegn."
+        "mustLeastCharacters": "Kameragruppens navn skal være mindst 2 tegn.",
+        "exists": "Kameragruppenavn findes allerede.",
+        "nameMustNotPeriod": "Kameragruppenavn må ikke indeholde en periode.",
+        "invalid": "Ugyldigt kamera gruppenavn."
+      }
+    },
+    "cameras": {
+      "label": "Kameraer",
+      "desc": "Vælg kameraer til denne gruppe."
+    },
+    "icon": "Ikon",
+    "success": "Kameragruppe ({{name}}) er blevet gemt.",
+    "camera": {
+      "birdseye": "Fugleøje",
+      "setting": {
+        "label": "Kamera Streaming Indstillinger",
+        "title": "{{cameraName}} Streaming Indstillinger",
+        "desc": "Skift de live streaming muligheder for denne kameragruppes dashboard. <em> Disse indstillinger er enheds- og browserspecifikke.</em>",
+        "audioIsAvailable": "Lyd er tilgængelig for denne stream",
+        "audioIsUnavailable": "Lyd er ikke tilgængelig for denne strøm",
+        "audio": {
+          "tips": {
+            "title": "Lyd skal komme fra dit kamera og konfigureret i go2rtc til denne stream."
+          }
+        },
+        "stream": "Stream",
+        "placeholder": "Vælg en stream",
+        "streamMethod": {
+          "label": "Streaming Metode",
+          "placeholder": "Vælg en streaming metode",
+          "method": {
+            "noStreaming": {
+              "label": "Ingen Streaming",
+              "desc": "Kamerabilleder vil kun opdatere én gang i minuttet og ingen live streaming vil forekomme."
+            },
+            "smartStreaming": {
+              "label": "Smart Streaming (anbefalet)",
+              "desc": "Smart streaming vil opdatere dit kamerabillede én gang i minuttet, når der ikke sker noget, for at spare båndbredde og ressourcer. Når der registreres aktivitet, skifter billedet problemfrit til en live stream."
+            },
+            "continuousStreaming": {
+              "label": "Kontinuerlig Streaming",
+              "desc": {
+                "title": "Kamerabillede vil altid være en live stream, når det er synligt på instrumentbrættet, selv om der ikke registreres nogen aktivitet.",
+                "warning": "Kontinuerlig streaming kan forårsage højt båndbreddeforbrug og ydelsesproblemer. Brug med omtanke."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Kompatibilitetstilstand",
+          "desc": "Aktivér kun denne mulighed, hvis kameraets live stream viser farve artefakter og har en diagonal linje på højre side af billedet."
+        }
       }
     }
+  },
+  "debug": {
+    "options": {
+      "label": "Indstillinger",
+      "title": "Valgmuligheder",
+      "showOptions": "Vis muligheder",
+      "hideOptions": "Skjul muligheder"
+    },
+    "boundingBox": "Afgrænsningsfelt",
+    "timestamp": "Tidsstempel",
+    "zones": "Zoner",
+    "mask": "Maske",
+    "motion": "Bevægelse",
+    "regions": "Regioner"
   }
 }

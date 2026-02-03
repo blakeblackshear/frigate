@@ -24,13 +24,13 @@
     "am": "am",
     "year_one": "{{time}} år",
     "year_other": "{{time}} år",
-    "mo": "{{time}}mo",
+    "mo": "{{time}}må",
     "month_one": "{{time}} måned",
     "month_other": "{{time}} måneder",
     "d": "{{time}}d",
     "day_one": "{{time}} dag",
     "day_other": "{{time}} dage",
-    "h": "{{time}}h",
+    "h": "{{time}}t",
     "yr": "{{time}}yr",
     "hour_one": "{{time}} time",
     "hour_other": "{{time}} timer",
@@ -41,11 +41,11 @@
     "second_one": "{{time}} sekund",
     "second_other": "{{time}} sekunder",
     "formattedTimestamp": {
-      "12hour": "MMM d, h:mm:ss aaa",
-      "24hour": "MMM d, HH:mm:ss"
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d. MMM, HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "MM/dd h:mm:ssa",
+      "12hour": "dd/MM h:mm:ss",
       "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
@@ -57,22 +57,26 @@
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "MMM d, h:mm aaa",
-      "24hour": "MMM d, HH:mm"
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
     },
     "formattedTimestampMonthDayYear": {
-      "12hour": "MMM d, yyyy",
-      "24hour": "MMM d, yyyy"
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "MMM d yyyy, h:mm aaa",
-      "24hour": "MMM d yyyy, HH:mm"
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
     },
-    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampMonthDay": "d MMM",
     "formattedTimestampFilename": {
-      "12hour": "MM-dd-yy-h-mm-ss-a",
-      "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "never": "Aldrig",
+    "inProgress": "Under behandling",
+    "invalidStartTime": "Ugyldig starttid",
+    "invalidEndTime": "Ugyldig sluttid"
   },
   "unit": {
     "speed": {
@@ -82,14 +86,28 @@
     "length": {
       "feet": "fod",
       "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/time",
+      "mbph": "MB/time",
+      "gbph": "GB/time"
     }
   },
   "label": {
-    "back": "Gå tilbage"
+    "back": "Gå tilbage",
+    "hide": "Skjul {{item}}",
+    "show": "Vis {{item}}",
+    "ID": "ID",
+    "none": "Ingen",
+    "all": "Alle",
+    "other": "Andet"
   },
   "button": {
     "apply": "Anvend",
-    "reset": "Reset",
+    "reset": "Nulstil",
     "done": "Udført",
     "enabled": "Aktiveret",
     "enable": "Aktiver",
@@ -116,21 +134,22 @@
     "no": "Nej",
     "download": "Download",
     "info": "Info",
-    "suspended": "Suspenderet",
-    "unsuspended": "Ophæv suspendering",
+    "suspended": "Sat på pause",
+    "unsuspended": "Genoptag",
     "play": "Afspil",
     "unselect": "Fravælg",
     "export": "Eksporter",
     "deleteNow": "Slet nu",
-    "next": "Næste"
+    "next": "Næste",
+    "continue": "Fortsæt"
   },
   "menu": {
     "system": "System",
-    "systemMetrics": "System metrics",
+    "systemMetrics": "Systemstatistik",
     "configuration": "Konfiguration",
-    "systemLogs": "System logs",
+    "systemLogs": "Systemlogfiler",
     "settings": "Indstillinger",
-    "configurationEditor": "Konfiguratons Editor",
+    "configurationEditor": "Konfigurationsværktøj",
     "languages": "Sprog",
     "language": {
       "en": "English (Engelsk)",
@@ -165,8 +184,16 @@
       "th": "ไทย (Thai)",
       "ca": "Català (Katalansk)",
       "withSystem": {
-        "label": "Brug system indstillinger for sprog"
-      }
+        "label": "Brug systemindstillinger for sprog"
+      },
+      "ptBR": "Português brasileiro (Brasiliansk Portugisisk)",
+      "sr": "Српски (Serbisk)",
+      "sl": "Slovenščina (Slovensk)",
+      "lt": "Lietuvių (Litauisk)",
+      "bg": "Български (Bulgarsk)",
+      "gl": "Galego (Galisisk)",
+      "id": "Bahasa Indonesia (Indonesisk)",
+      "ur": "اردو (Urdu)"
     },
     "appearance": "Udseende",
     "darkMode": {
@@ -185,7 +212,7 @@
       "nord": "Nord",
       "red": "Rød",
       "highcontrast": "Høj Kontrast",
-      "default": "Default"
+      "default": "Standard"
     },
     "help": "Hjælp",
     "documentation": {
@@ -202,19 +229,20 @@
         "count_other": "{{count}} Kameraer"
       }
     },
-    "review": "Review",
+    "review": "Gennemse",
     "explore": "Udforsk",
     "export": "Eksporter",
     "uiPlayground": "UI sandkasse",
-    "faceLibrary": "Face Library",
+    "faceLibrary": "Ansigtsarkiv",
     "user": {
       "title": "Bruger",
       "account": "Konto",
       "current": "Aktiv bruger: {{user}}",
       "anonymous": "anonym",
-      "logout": "Logout",
+      "logout": "Log ud",
       "setPassword": "Set Password"
-    }
+    },
+    "classification": "Kategorisering"
   },
   "toast": {
     "copyUrlToClipboard": "Kopieret URL til klippebord.",
@@ -252,8 +280,20 @@
   "notFound": {
     "documentTitle": "Ikke fundet - Frigate",
     "title": "404",
-    "desc": "Side ikke fundet"
+    "desc": "Siden blev ikke fundet"
   },
   "selectItem": "Vælg {{item}}",
-  "readTheDocumentation": "Læs dokumentationen"
+  "readTheDocumentation": "Læs dokumentationen",
+  "list": {
+    "two": "{{0}} og {{1}}",
+    "many": "{{items}}, og {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Valgfrit",
+    "internalID": "Det interne ID som Frigate bruger i konfigurationen og databasen"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }
