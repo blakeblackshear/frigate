@@ -184,6 +184,16 @@
     "restricted": {
       "title": "Nicio Cameră Disponibilă",
       "description": "Nu aveți permisiunea de a vizualiza camere în acest grup."
+    },
+    "default": {
+      "title": "Nicio cameră configurată",
+      "description": "Începe prin a conecta o cameră la Frigate.",
+      "buttonText": "Adaugă cameră"
+    },
+    "group": {
+      "title": "Nicio cameră în grup",
+      "description": "Acest grup de camere nu are camere alocate sau activate.",
+      "buttonText": "Gestionează grupuri"
     }
   }
 }

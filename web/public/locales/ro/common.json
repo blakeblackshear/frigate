@@ -81,7 +81,8 @@
     "second_other": "{{time}} de secunde",
     "inProgress": "În desfășurare",
     "invalidStartTime": "Oră de început invalidă",
-    "invalidEndTime": "Oră de sfârșit invalidă"
+    "invalidEndTime": "Oră de sfârșit invalidă",
+    "never": "Niciodată"
   },
   "menu": {
     "documentation": {

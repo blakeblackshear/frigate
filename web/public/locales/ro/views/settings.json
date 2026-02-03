@@ -1214,11 +1214,11 @@
     "title": "Setări de Revizuire a Camerei",
     "object_descriptions": {
       "title": "Descrieri de Obiecte cu AI Generativ",
-      "desc": "Activează/dezactivează temporar descrierile de obiecte cu AI Generativ pentru această cameră. Când este dezactivată, descrierile generate de AI nu vor fi solicitate pentru obiectele urmărite pe această cameră."
+      "desc": "Activează/dezactivează temporar descrierile de obiecte cu AI Generativ pentru această cameră până la repornirea Frigate. Când este dezactivată, descrierile generate de AI nu vor fi solicitate pentru obiectele urmărite pe această cameră."
     },
     "review_descriptions": {
       "title": "Descrieri de revizuire cu AI Generativ",
-      "desc": "Activează/dezactivează temporar descrierile de revizuire cu AI Generativ pentru această cameră. Când este dezactivat, descrierile generate de AI nu vor fi solicitate pentru elementele de revizuire de pe această cameră."
+      "desc": "Activează/dezactivează temporar descrierile de revizuire cu AI Generativ pentru această cameră până la repornirea Frigate. Când este dezactivat, descrierile generate de AI nu vor fi solicitate pentru elementele de revizuire de pe această cameră."
     },
     "review": {
       "title": "Revizuire",
