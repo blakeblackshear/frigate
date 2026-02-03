@@ -90,7 +90,8 @@
     },
     "inProgress": "В процессе",
     "invalidStartTime": "Некорректное время начала",
-    "invalidEndTime": "Некорректное время окончания"
+    "invalidEndTime": "Некорректное время окончания",
+    "never": "Никогда"
   },
   "selectItem": "Выбрать {{item}}",
   "button": {
@@ -137,7 +138,8 @@
     "show": "Показать {{item}}",
     "ID": "ID",
     "all": "Все",
-    "none": "Ничего"
+    "none": "Ничего",
+    "other": "Другой"
   },
   "unit": {
     "speed": {

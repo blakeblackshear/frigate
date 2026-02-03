@@ -86,7 +86,14 @@
     "otherProcesses": {
       "title": "Другие процессы",
       "processCpuUsage": "Использование CPU процессом",
-      "processMemoryUsage": "Использование памяти процессом"
+      "processMemoryUsage": "Использование памяти процессом",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "запись",
+        "review_segment": "сегмент обзора",
+        "embeddings": "вложения",
+        "audio_detector": "аудиодетектор"
+      }
     }
   },
   "storage": {
