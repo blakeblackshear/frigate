@@ -83,7 +83,7 @@
     "uploadFace": "Yüz Resmi Yükle",
     "nextSteps": "Sonraki Adımlar",
     "description": {
-      "uploadFace": "{{name}}'ın yüzünü direkt karşıdan, ön açıdan gösteren bir fotoğraf yükleyin. Fotoğrafı yalnızca yüzü kalacak şekilde kırpmanıza gerek YOKTUR."
+      "uploadFace": "{{name}}'in yüzünü önden gösteren bir fotoğraf yükleyin. Fotoğrafın sadece yüzünü gösterecek şekilde kırpılması gerekmez."
     }
   },
   "renameFace": {

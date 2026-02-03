@@ -27,7 +27,7 @@
           "regenerate": "{{provider}} sağlayıcısından yeni açıklama talep edilemedi: {{errorMessage}}",
           "updatedLPRFailed": "Plaka güncellenemedi: {{errorMessage}}",
           "audioTranscription": "Ses çözümlemesi talep edilemedi: {{errorMessage}}",
-          "updatedAttributesFailed": "Öznitelikler güncellenemedi: {{errorMessage}}"
+          "updatedAttributesFailed": "Özellikler güncellenemedi: {{errorMessage}}"
         }
       }
     },

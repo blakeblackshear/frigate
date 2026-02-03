@@ -613,7 +613,7 @@
     "notificationUnavailable": {
       "title": "Bildirimler Kullanılamıyor",
       "documentation": "Dökümantasyonu Oku",
-      "desc": "Web push bildirimleri güvenli bağlantı (<code>https://…</code>) gerektirir. Bu tarayıcınızın bir sınırlandırmasıdır. Bildirimleri kullanmak için Frigate arayüzüne HTTPS ile erişin."
+      "desc": "Web push bildirimleri güvenli bir bağlam gerektirir (<code>https://…</code>). Bu, tarayıcı sınırlamasıdır. Bildirimleri kullanmak için Frigate'e güvenli bir şekilde (https) erişin."
     },
     "globalSettings": {
       "title": "Genel Ayarlar",
@@ -1120,7 +1120,7 @@
     "title": "Kamera İnceleme Ayarları",
     "object_descriptions": {
       "title": "Üretken Yapay Zeka Nesne Açıklamaları",
-      "desc": "Bu kamera için yapay zekadan nesne tanımlama taleplerini geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameradaki izlenen nesneler için yapay zekadan tanımlar istenmeyecektir."
+      "desc": "Frigate yeniden başlatılana kadar bu kamera için Üretken Yapay Zeka nesne açıklamalarını geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameradaki izlenen nesneler için yapay zeka tarafından oluşturulan açıklamalar istenmeyecektir."
     },
     "review_descriptions": {
       "title": "Üretken Yapay Zeka İnceleme Açıklamaları",
@@ -1193,7 +1193,7 @@
       },
       "deleteRole": {
         "title": "Rolü Sil",
-        "desc": "Bu işlem geri alınamaz. Bu işlem, rolü kalıcı olarak silecek ve bu role sahip tüm kullanıcıları varsayılan 'izleyici' rolüne atayarak kullanıcıların BÜTÜN kameralara erişim sağlamasına neden olacaktır.",
+        "desc": "Bu işlem geri alınamaz. Bu işlem, rolü kalıcı olarak siler ve bu role sahip tüm kullanıcılara 'izleyici' rolü atar; bu da izleyiciye tüm kameralara erişim sağlar.",
         "warn": "<strong>{{role}}</strong> rolünü silmek istediğinizden emin misiniz?",
         "deleting": "Siliniyor..."
       },

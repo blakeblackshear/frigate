@@ -57,7 +57,7 @@
       "series": {
         "go2rtc": "go2rtc",
         "recording": "kayıt",
-        "embeddings": "gömülü vektörler",
+        "embeddings": "gömüler",
         "audio_detector": "ses detektörü",
         "review_segment": "inceleme bölümü"
       }

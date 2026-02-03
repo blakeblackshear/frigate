@@ -184,6 +184,16 @@
     "restricted": {
       "title": "Kullanılabilir Kamera Yok",
       "description": "Bu gruptaki kameraları görüntüleme izniniz yok."
+    },
+    "default": {
+      "title": "Hiçbir kamera yapılandırılmamış",
+      "description": "Öncelikle bir kamerayı Frigate'e bağlayarak başlayın.",
+      "buttonText": "Kamera Ekle"
+    },
+    "group": {
+      "title": "Grupta Kamera Yok",
+      "description": "Bu kamera grubuna atanmış veya etkinleştirilmiş kamera bulunmamaktadır.",
+      "buttonText": "Grupları Yönet"
     }
   }
 }

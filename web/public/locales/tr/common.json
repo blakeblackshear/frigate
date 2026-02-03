@@ -84,7 +84,8 @@
     },
     "inProgress": "Devam ediyor",
     "invalidStartTime": "Geçersiz başlangıç zamanı",
-    "invalidEndTime": "Geçersiz bitiş zamanı"
+    "invalidEndTime": "Geçersiz bitiş zamanı",
+    "never": "Asla"
   },
   "button": {
     "off": "KAPALI",
