@@ -27,7 +27,7 @@
   },
   "train": {
     "aria": "Selecionar treino",
-    "title": "Treinar",
+    "title": "Reconhecimentos Recentes",
     "empty": "Não há tentativas recentes de reconhecimento facial"
   },
   "selectItem": "Selecionar {{item}}",
@@ -55,7 +55,7 @@
   "trainFace": "Treinar rosto",
   "toast": {
     "success": {
-      "updatedFaceScore": "Pontuação facial atualizada com sucesso.",
+      "updatedFaceScore": "Pontuação facial atualizada com sucesso para {{name}} ({{score}}).",
       "trainedFace": "Rosto treinado com sucesso.",
       "deletedFace_one": "{{count}} rosto excluído com sucesso.",
       "deletedFace_many": "{{count}} rostos excluídos com sucesso.",

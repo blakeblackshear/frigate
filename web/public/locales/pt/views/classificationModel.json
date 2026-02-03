@@ -46,5 +46,6 @@
     "desc": "Tem certeza de que deseja excluir a classe {{name}}? Isso excluirá permanentemente todas as imagens associadas e exigirá o treinamento do modelo novamente.",
     "minClassesTitle": "Não é possível excluir a classe",
     "minClassesDesc": "Um modelo de classificação deve ter pelo menos duas classes. Adicione outra classe antes de excluir esta."
-  }
+  },
+  "documentTitle": "Modelos de Classificação – Frigate"
 }

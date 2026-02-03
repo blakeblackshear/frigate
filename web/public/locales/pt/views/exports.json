@@ -13,5 +13,8 @@
       "renameExportFailed": "Falha ao renomear exportação: {{errorMessage}}"
     }
   },
-  "deleteExport.desc": "Tem a certeza de que deseja excluir {{exportName}}?"
+  "deleteExport.desc": "Tem a certeza de que deseja excluir {{exportName}}?",
+  "tooltip": {
+    "shareExport": "Partilhar exportação"
+  }
 }
