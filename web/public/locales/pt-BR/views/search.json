@@ -26,7 +26,8 @@
       "time_range": "Intervalo de Tempo",
       "recognized_license_plate": "Placa de Carro Reconhecida",
       "has_clip": "Possui Clipe",
-      "has_snapshot": "Possui Captura de Imagem"
+      "has_snapshot": "Possui Captura de Imagem",
+      "attributes": "Atributos"
     },
     "searchType": {
       "thumbnail": "Miniatura",

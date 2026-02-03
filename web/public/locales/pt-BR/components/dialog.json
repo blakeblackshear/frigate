@@ -53,12 +53,13 @@
     "export": "Exportar",
     "selectOrExport": "Selecionar ou Exportar",
     "toast": {
-      "success": "Exportação iniciada com sucesso. Veja o arquivo na pasta /exports.",
+      "success": "Exportação iniciada com sucesso. Veja o arquivo na tela exportar.",
       "error": {
         "failed": "Falha em iniciar exportação: {{error}}",
         "endTimeMustAfterStartTime": "Tempo de finalização deve ser após tempo de início",
         "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada"
-      }
+      },
+      "view": "Ver"
     },
     "fromTimeline": {
       "saveExport": "Salvar Exportação",

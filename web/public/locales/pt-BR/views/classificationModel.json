@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Modelos de Classificação",
+  "documentTitle": "Modelos de Classificação - Frigate",
   "button": {
     "deleteClassificationAttempts": "Apagar Imagens de Classificação",
     "renameCategory": "Renomear Classe",
@@ -28,7 +28,7 @@
       "deleteCategoryFailed": "Falha ao deletar classe:{{errorMessage}}",
       "categorizeFailed": "Falha ao categorizar imagem:{{errorMessage}}",
       "deleteModelFailed": "Falha ao excluir o modelo: {{errorMessage}}",
-      "trainingFailed": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
+      "trainingFailed": "Treinamento do modelo falhou. Verifique os logs do Frigate para mais detalhes.",
       "trainingFailedToStart": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
       "updateModelFailed": "Falha ao atualizar modelo: {{errorMessage}}",
       "renameCategoryFailed": "Falha ao renomear classe: {{errorMessage}}"
@@ -37,19 +37,66 @@
   "deleteCategory": {
     "title": "Excluir Classe",
     "desc": "Tem certeza de que deseja excluir a classe {{name}}? Isso excluirá permanentemente todas as imagens associadas e exigirá o treinamento do modelo novamente.",
-    "minClassesTitle": "Não é possível apagar a classe"
+    "minClassesTitle": "Não é possível apagar a classe",
+    "minClassesDesc": "Um modelo de classificação deve ter pelo menos 2 classes. Adicione outra classe antes de excluir esta."
   },
   "deleteModel": {
     "title": "Deletar modelo de classificação",
-    "single": "Tem certeza de que deseja excluir {{name}}? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita."
+    "single": "Tem certeza de que deseja excluir {{name}}? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita.",
+    "desc_one": "Tem certeza de que deseja excluir {{count}} modelo? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita.",
+    "desc_many": "Tem certeza de que deseja excluir {{count}} modelos? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita.",
+    "desc_other": "Tem certeza de que deseja excluir {{count}} modelos? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita."
   },
   "details": {
-    "scoreInfo": "A pontuação representa a média de confiança da classificação de todas as detecções deste objeto."
+    "scoreInfo": "A pontuação representa a média de confiança da classificação de todas as detecções deste objeto.",
+    "none": "Nenhum",
+    "unknown": "Desconhecido"
   },
   "tooltip": {
     "trainingInProgress": "O modelo está sendo treinado",
     "noNewImages": "Nenhuma nova imagem para treinar. Classifique mais imagens para treinar mais.",
     "noChanges": "Nenhuma alteração ao conjunto de dados desde o último treinamento.",
     "modelNotReady": "O modelo não está pronto para treinamento"
+  },
+  "deleteTrainImages": {
+    "desc_one": "Tem certeza que deseja deletar {{count}} imagem? Esta ação não pode ser desfeita.",
+    "desc_many": "Tem certeza que deseja deletar {{count}} imagens? Esta ação não pode ser desfeita.",
+    "desc_other": "Tem certeza que deseja deletar {{count}} imagens? Esta ação não pode ser desfeita.",
+    "title": "Apagar Imagens de Treinamento"
+  },
+  "renameCategory": {
+    "title": "Renomear Classe",
+    "desc": "Insira um novo nome para {{name}}. O modelo deverá ser treinado novamente para a mudança de nome ter efeito."
+  },
+  "description": {
+    "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens."
+  },
+  "train": {
+    "title": "Classificações Recentes",
+    "titleShort": "Recente",
+    "aria": "Selecionar Classificações Recentes"
+  },
+  "categories": "Classes",
+  "createCategory": {
+    "new": "Criar Nova Classe"
+  },
+  "categorizeImageAs": "Classificar Imagem Como:",
+  "categorizeImage": "Classificar Imagem",
+  "menu": {
+    "objects": "Objetos",
+    "states": "Estados"
+  },
+  "noModels": {
+    "object": {
+      "title": "Nenhum Modelo de Classificação de Objetos"
+    }
+  },
+  "deleteDatasetImages": {
+    "title": "Deletar Imagens do Dataset"
+  },
+  "edit": {
+    "title": "Editar Modelo de Classificação",
+    "descriptionState": "Edite as classes deste modelo de classificação de estado. As alterações exigirão treinar novamente o modelo.",
+    "descriptionObject": "Edite o tipo de objeto e tipo de classificação para este modelo de classificação de objeto."
   }
 }

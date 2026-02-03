@@ -50,7 +50,7 @@
           "regenerate": "Uma nova descrição foi solicitada do {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para regenerar.",
           "updatedSublabel": "Sub-rótulo atualizado com sucesso.",
           "updatedLPR": "Placa de identificação atualizada com sucesso.",
-          "audioTranscription": "Transcrição de áudio requisitada com sucesso."
+          "audioTranscription": "Transcrição de áudio requisitada com sucesso. Dependendo da velocidade de seu servidor Frigate, a transcrição pode demorar um tempo para completar."
         },
         "error": {
           "regenerate": "Falha ao ligar para {{provider}} para uma descrição nova: {{errorMessage}}",
@@ -112,7 +112,8 @@
     "snapshot": "captura de imagem",
     "video": "vídeo",
     "object_lifecycle": "ciclo de vida do objeto",
-    "thumbnail": "thumbnail"
+    "thumbnail": "thumbnail",
+    "tracking_details": "detalhes de rastreamento"
   },
   "objectLifecycle": {
     "title": "Ciclo de Vida do Objeto",
@@ -203,7 +204,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar Exclusão",
-      "desc": "Deletar esse objeto rastreado remove a captura de imagem, quaisquer embeddings salvos, e quaisquer entradas de ciclo de vida de objeto associadas. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que quer prosseguir?"
+      "desc": "Deletar esse objeto rastreado remove a captura de imagem, os embeddings salvos, e os detalhes de rastreamento associados. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que deseja prosseguir?"
     }
   },
   "noTrackedObjects": "Nenhum Objeto Rastreado Encontrado",
@@ -225,5 +226,42 @@
   },
   "concerns": {
     "label": "Preocupações"
+  },
+  "trackingDetails": {
+    "lifecycleItemDesc": {
+      "gone": "{{label}} saiu",
+      "visible": "{{label}} detectado(a)",
+      "entered_zone": "{{label}} entrou em {{zones}}",
+      "active": "{{label}} em movimento",
+      "stationary": "{{label}} parou",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectado para {{label}}",
+        "other": "{{label}} reconhecido como {{attribute}}"
+      },
+      "heard": "Som de {{label}} detectado",
+      "external": "{{label}} detectado(a)",
+      "header": {
+        "zones": "Zonas",
+        "area": "Área",
+        "ratio": "Proporção"
+      }
+    },
+    "title": "Detalhes de Rastreamento",
+    "createObjectMask": "Criar máscara de objeto",
+    "annotationSettings": {
+      "showAllZones": {
+        "title": "Mostrar todas as Zonas"
+      }
+    },
+    "carousel": {
+      "previous": "Slide anterior",
+      "next": "Próximo slide"
+    },
+    "noImageFound": "Sem imagens encontradas para esse período.",
+    "adjustAnnotationSettings": "Ajustar configurações de anotação",
+    "scrollViewTips": "Clique para ver os momentos importantes do ciclo de vida deste objeto.",
+    "autoTrackingTips": "As posições das caixas de delimitação ficarão imprecisas para câmeras com rastreamento automático.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Ponto Rastreado"
   }
 }

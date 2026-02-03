@@ -59,7 +59,7 @@
   "description": {
     "placeholder": "Informe um nome para esta coleção",
     "addFace": "Adicione uma nova coleção à Biblioteca Facial subindo a sua primeira imagem.",
-    "invalidName": "Nome inválido. Nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífenes."
+    "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens."
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {
@@ -70,7 +70,8 @@
   "train": {
     "title": "Reconhecimentos Recentes",
     "aria": "Selecionar reconhecimentos recentes",
-    "empty": "Não há tentativas recentes de reconhecimento facial"
+    "empty": "Não há tentativas recentes de reconhecimento facial",
+    "titleShort": "Recente"
   },
   "selectFace": "Selecionar Rosto",
   "trainFaceAs": "Treinar Rosto como:",
@@ -83,7 +84,7 @@
       "deletedFace_many": "{{count}} rostos apagados com sucesso.",
       "deletedFace_other": "{{count}} rostos apagados com sucesso.",
       "trainedFace": "Rosto treinado com sucesso.",
-      "updatedFaceScore": "Pontuação de rosto atualizada com sucesso.",
+      "updatedFaceScore": "Pontuação de rosto atualizada com sucesso para {{name}}{{score}}.",
       "renamedFace": "O rosto foi renomeado com sucesso para {{name}}",
       "deletedName_one": "{{count}} rosto foi deletado com sucesso.",
       "deletedName_many": "{{count}} rostos foram deletados com sucesso.",

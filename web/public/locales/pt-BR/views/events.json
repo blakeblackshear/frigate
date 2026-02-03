@@ -9,7 +9,11 @@
   "empty": {
     "alert": "Não existe nenhum alerta para revisar",
     "detection": "Não há nenhuma detecção para revisar",
-    "motion": "Nenhum dado de movimento encontrado"
+    "motion": "Nenhum dado de movimento encontrado",
+    "recordingsDisabled": {
+      "title": "As gravações devem estar habilitadas",
+      "description": "A revisão de itens só pode ser criada para uma câmera quando a gravação está habilitada."
+    }
   },
   "timeline": "Linha do tempo",
   "timeline.aria": "Selecione a linha do tempo",
@@ -46,7 +50,8 @@
     "label": "Detalhe",
     "settings": "Configurações de visualização detalhada",
     "alwaysExpandActive": {
-      "title": "Expandir sempre o modo ativo"
+      "title": "Expandir sempre o modo ativo",
+      "desc": "Sempre expandir os detalhes do objeto do item de revisão ativo quando disponíveis."
     }
   },
   "objectTrack": {
@@ -54,5 +59,8 @@
     "clickToSeek": "Clique para ir para esse horário"
   },
   "zoomIn": "Ampliar",
-  "zoomOut": "Diminuir o zoom"
+  "zoomOut": "Diminuir o zoom",
+  "select_all": "Todos",
+  "normalActivity": "Normal",
+  "needsReview": "Precisa de revisão"
 }

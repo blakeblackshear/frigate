@@ -39,7 +39,7 @@
     "noCamera": "Sem Câmera"
   },
   "general": {
-    "title": "Opções Gerais",
+    "title": "Configurações de Interface",
     "liveDashboard": {
       "title": "Painel em Tempo Real",
       "automaticLiveView": {
@@ -51,7 +51,12 @@
         "desc": "Por padrão, alertas recentes no Painel em Tempo Real são reproduzidos como vídeos em loop. Desative essa opção para mostrar apenas a imagens estáticas de alertas recentes nesse dispositivo / navegador."
       },
       "displayCameraNames": {
-        "label": "Sempre mostrar os nomes das câmeras"
+        "label": "Sempre mostrar os nomes das câmeras",
+        "desc": "Sempre mostrar os nomes das câmeras em um chip no painel de visualização ao vivo com várias câmeras."
+      },
+      "liveFallbackTimeout": {
+        "label": "Tempo limite de fallback do reprodutor ao vivo",
+        "desc": "Quando o stream ao vivo em alta qualidade de uma câmera não estiver disponível, fazer fallback para o modo de baixa largura de banda após este número de segundos. Padrão: 3."
       }
     },
     "storedLayouts": {
@@ -278,7 +283,7 @@
         },
         "snapPoints": {
           "true": "Pontos de encaixe",
-          "false": "Não encaixar os ponts"
+          "false": "Não encaixar os pontos"
         },
         "delete": {
           "title": "Confirmar Deletar",
@@ -306,7 +311,7 @@
       "name": {
         "title": "Nome",
         "inputPlaceHolder": "Digite um nome…",
-        "tips": "O nome deve ter no mínimo 2 caracteres e não pode ter o nome de uma câmera ou outra zona."
+        "tips": "O nome deve ter no mínimo 2 caracteres, deve ter ao menos uma letra e não pode ter o nome de uma câmera ou outra zona nesta câmera."
       },
       "inertia": {
         "title": "Inércia",
@@ -341,7 +346,7 @@
         }
       },
       "toast": {
-        "success": "A zona ({{zoneName}}) foi salva. Reinicie o Frigate para aplicar as mudanças."
+        "success": "A zona ({{zoneName}}) foi salva."
       }
     },
     "objectMasks": {
@@ -352,8 +357,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} foi salvo. Reinicie o Frigate para aplicar as alterações.",
-          "noName": "A máscara de objeto foi salva. Reinicie o Frigate para aplicar as alterações."
+          "title": "{{polygonName}} foi salvo.",
+          "noName": "A máscara de objeto foi salva."
         }
       },
       "label": "Máscaras de Objeto",
@@ -394,8 +399,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} foi salvo. Reinicie o Frigate para aplicar as alterações.",
-          "noName": "Máscara de Movimento salva. Reinicie o Frigate para aplicar as alterações."
+          "title": "{{polygonName}} foi salvo.",
+          "noName": "Máscara de Movimento salva."
         }
       }
     }
@@ -490,7 +495,7 @@
       "desc": "Gerenciar as contas de usuário dessa instância do Frigate."
     },
     "addUser": "Adicionar Usuário",
-    "updatePassword": "Atualizar Senha",
+    "updatePassword": "Resetar Senha",
     "toast": {
       "success": {
         "createUser": "Usuário {{user}} criado com sucesso",
@@ -577,7 +582,7 @@
       "role": "Papel",
       "noUsers": "Nenhum usuário encontrado.",
       "changeRole": "Mudar papel do usuário",
-      "password": "Senha",
+      "password": "Resetar Senha",
       "deleteUser": "Deletar usuário"
     }
   },
@@ -683,7 +688,7 @@
   "triggers": {
     "documentTitle": "Gatilhos",
     "management": {
-      "title": "Gerenciamento de Gatilhos",
+      "title": "Gatilhos",
       "desc": "Gerenciar gatilhos para {{camera}}. Use o tipo de miniatura para acionar miniaturas semelhantes para os seus objetos rastreados selecionados, e o tipo de descrição para acionar descrições semelhantes para textos que você especifica."
     },
     "addTrigger": "Adicionar Gatilho",
@@ -722,10 +727,10 @@
       "form": {
         "name": {
           "title": "Nome",
-          "placeholder": "Digite o nome do gatilho",
+          "placeholder": "Nomeie este gatilho",
           "error": {
-            "minLength": "O nome precisa ter no mínimo 2 caracteres.",
-            "invalidCharacters": "O nome pode contar apenas letras, números, sublinhados, e hífens.",
+            "minLength": "O campo precisa ter no mínimo 2 caracteres.",
+            "invalidCharacters": "O campo pode contar apenas letras, números, sublinhados, e hifens.",
             "alreadyExists": "Um gatilho com esse nome já existe para essa câmera."
           }
         },
@@ -738,7 +743,7 @@
         },
         "content": {
           "title": "Conteúdo",
-          "imagePlaceholder": "Selecionar uma imagem",
+          "imagePlaceholder": "Selecionar um thumbnail",
           "textPlaceholder": "Digitar conteúdo do texto",
           "imageDesc": "Selecionar uma imagem para acionar essa ação quando uma imagem semelhante for detectada.",
           "textDesc": "Digite o texto para ativar essa ação quando uma descrição semelhante de objeto rastreado for detectada.",
@@ -803,9 +808,9 @@
         "createRole": "Papel {{role}} criado com sucesso",
         "updateCameras": "Câmeras atualizados para o papel {{role}}",
         "deleteRole": "Papel {{role}} apagado com sucesso",
-        "userRolesUpdated_one": "{{count}} usuário(os) atribuídos a esse papel foram atualizados para 'visualizador', que possui acesso a todas as câmeras.",
-        "userRolesUpdated_many": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} usuário atribuído a essa função foi atualizado para 'visualizador', com acesso a todas as câmeras.",
+        "userRolesUpdated_many": "{{count}} usuários atribuídos a essa função foram atualizados para 'visualizador', com acesso a todas as câmeras.",
+        "userRolesUpdated_other": "{{count}} usuários atribuídos a esse papel foram atualizados para 'visualizador', com acesso a todas as câmeras."
       },
       "error": {
         "createRoleFailed": "Falha ao criar papel: {{errorMessage}}",
@@ -869,7 +874,7 @@
       "testFailed": "Teste de stream falhou: {{error}}"
     },
     "step1": {
-      "description": "Adicione os detalhes da sua câmera e teste a conexão.",
+      "description": "Insira os detalhes da sua câmera e escolha entre sondar a câmera ou selecionar a marca manualmente.",
       "cameraName": "Nome da Câmera",
       "cameraNamePlaceholder": "ex., porta_entrada ou Visão Geral do Quintal",
       "host": "Host/Endereço IP",

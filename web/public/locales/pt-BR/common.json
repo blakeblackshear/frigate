@@ -78,7 +78,8 @@
     "formattedTimestampFilename": {
       "12hour": "dd-MM-yy-hh-mm-ss",
       "24hour": "dd-MM-yy-HH-mm-ss"
-    }
+    },
+    "never": "Nunca"
   },
   "selectItem": "Selecionar {{item}}",
   "unit": {

@@ -173,7 +173,7 @@
   },
   "noCameras": {
     "title": "Nenhuma Câmera Configurada",
-    "description": "Inicie conectando uma câmera ao Frigate",
+    "description": "Inicie conectando uma câmera ao Frigate.",
     "buttonText": "Adicionar Câmera"
   },
   "snapshot": {
