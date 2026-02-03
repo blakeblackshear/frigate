@@ -68,7 +68,7 @@ export function WrapIfAdditionalTemplate<
       style={style}
     >
       {!keyIsReadonly && (
-        <div className="col-span-12 space-y-2 md:col-span-1">
+        <div className="col-span-12 space-y-2 md:col-span-2">
           {displayLabel && <Label htmlFor={keyId}>{keyLabel}</Label>}
           {keyIsReadonly ? (
             <div
@@ -93,7 +93,7 @@ export function WrapIfAdditionalTemplate<
       <div
         className={cn(
           "col-span-12 space-y-2",
-          !keyIsReadonly && "md:col-span-10",
+          !keyIsReadonly && "md:col-span-9",
         )}
       >
         {!keyIsReadonly && displayLabel && (
