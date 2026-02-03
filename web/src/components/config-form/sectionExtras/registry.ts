@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { ComponentType } from "react";
 import SemanticSearchReindex from "./SemanticSearchReindex.tsx";
 import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView.tsx";
@@ -15,6 +16,20 @@ export type SectionRenderers = Record<
   string,
   Record<string, RendererComponent>
 >;
+
+const CameraReviewSettingsRenderer: RendererComponent = ({
+  selectedCamera,
+  setUnsavedChanges,
+}) => {
+  if (!selectedCamera) {
+    return null;
+  }
+
+  return createElement(CameraReviewSettingsView, {
+    selectedCamera,
+    setUnsavedChanges,
+  });
+};
 
 // Section renderers registry
 // Used to register custom renderer components for specific config sections.
@@ -40,7 +55,7 @@ export const sectionRenderers: SectionRenderers = {
     SemanticSearchReindex,
   },
   review: {
-    CameraReviewSettingsView,
+    CameraReviewSettingsView: CameraReviewSettingsRenderer,
   },
 };
 
