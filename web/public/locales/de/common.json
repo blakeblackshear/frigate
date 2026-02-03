@@ -84,7 +84,8 @@
     },
     "inProgress": "Im Gange",
     "invalidStartTime": "Ungültige Startzeit",
-    "invalidEndTime": "Ungültige Endzeit"
+    "invalidEndTime": "Ungültige Endzeit",
+    "never": "Nie"
   },
   "button": {
     "save": "Speichern",
