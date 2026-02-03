@@ -954,7 +954,7 @@
       "useDigestAuthDescription": "Usa l'autenticació de resum HTTP per a ONVIF. Algunes càmeres poden requerir un nom d'usuari/contrasenya ONVIF dedicat en lloc de l'usuari administrador estàndard."
     },
     "save": {
-      "failure": "SS'ha produït un error en desar {{cameraName}}.",
+      "failure": "S'ha produït un error en desar {{cameraName}}.",
       "success": "S'ha desat correctament la càmera nova {{cameraName}}."
     },
     "testResultLabels": {
@@ -1211,11 +1211,11 @@
   "cameraReview": {
     "object_descriptions": {
       "title": "Descripcions d'objectes generadors d'IA",
-      "desc": "Activa/desactiva temporalment les descripcions d'objectes generatius d'IA per a aquesta càmera. Quan està desactivat, les descripcions generades per IA no se sol·licitaran per als objectes rastrejats en aquesta càmera."
+      "desc": "Activa/desactiva temporalment les descripcions d'objectes generatius d'IA per a aquesta càmera fins que es reiniciï Frigate. Quan està desactivat, les descripcions generades per IA no se sol·licitaran per als objectes rastrejats en aquesta càmera."
     },
     "review_descriptions": {
       "title": "Descripcions de la IA generativa",
-      "desc": "Activa/desactiva temporalment les descripcions de revisió de la IA generativa per a aquesta càmera. Quan està desactivat, les descripcions generades per IA no se sol·licitaran per als elements de revisió d'aquesta càmera."
+      "desc": "Activa/desactiva temporalment les descripcions de la IA Generativa per a aquesta càmera fins que es reiniciï Frigate. Quan està desactivat, les descripcions generades per IA no se sol·licitaran per als elements de revisió d'aquesta càmera."
     },
     "review": {
       "title": "Revisió",

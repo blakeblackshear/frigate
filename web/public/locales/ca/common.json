@@ -201,7 +201,8 @@
     },
     "inProgress": "En curs",
     "invalidStartTime": "Hora d'inici no vàlida",
-    "invalidEndTime": "Hora de finalització no vàlida"
+    "invalidEndTime": "Hora de finalització no vàlida",
+    "never": "Mai"
   },
   "unit": {
     "speed": {

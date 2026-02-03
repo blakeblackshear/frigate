@@ -184,6 +184,16 @@
     "restricted": {
       "title": "No hi ha càmeres disponibles",
       "description": "No teniu permís per veure cap càmera en aquest grup."
+    },
+    "default": {
+      "title": "No s'ha configurat cap càmera",
+      "description": "Comenceu connectant una càmera a Frigate.",
+      "buttonText": "Afegeix una càmera"
+    },
+    "group": {
+      "title": "No hi ha càmeres al grup",
+      "description": "Aquest grup de càmeres no té càmeres assignades o habilitades.",
+      "buttonText": "Gestiona els grups"
     }
   }
 }
