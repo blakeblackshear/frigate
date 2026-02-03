@@ -115,7 +115,7 @@
     "title": "视频流",
     "audio": {
       "tips": {
-        "title": "必须要摄像头能够播放音频，以及需要 go2rtc 支持并配置。",
+        "title": "必须要摄像头支持音频，以及需要 go2rtc 支持并配置。",
         "documentation": "阅读文档 "
       },
       "available": "此视频流支持音频",
@@ -178,6 +178,16 @@
     "restricted": {
       "title": "无可用摄像头",
       "description": "你没有权限查看此分组中的任何摄像头。"
+    },
+    "default": {
+      "title": "没有配置摄像头",
+      "description": "现在就将摄像头接入到 Frigate 吧。",
+      "buttonText": "添加摄像头"
+    },
+    "group": {
+      "title": "摄像头组目前为空",
+      "description": "该摄像头组未分配或启动了摄像头。",
+      "buttonText": "管理摄像头组"
     }
   },
   "snapshot": {

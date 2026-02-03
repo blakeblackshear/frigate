@@ -78,7 +78,8 @@
     },
     "inProgress": "进行中",
     "invalidStartTime": "无效的开始时间",
-    "invalidEndTime": "无效的结束时间"
+    "invalidEndTime": "无效的结束时间",
+    "never": "从不"
   },
   "unit": {
     "speed": {
