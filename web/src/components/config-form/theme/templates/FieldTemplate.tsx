@@ -400,12 +400,48 @@ export function FieldTemplate(props: FieldTemplateProps) {
                     )}
                   </Label>
                 )}
-                {finalDescription && !isMultiSchemaWrapper && (
+                {finalDescription &&
+                  !isMultiSchemaWrapper &&
+                  !isAdditionalProperty && (
+                    <p className="text-xs text-muted-foreground">
+                      {finalDescription}
+                    </p>
+                  )}
+                {fieldDocsUrl &&
+                  !isMultiSchemaWrapper &&
+                  !isObjectField &&
+                  !isAdditionalProperty && (
+                    <div className="flex items-center text-xs text-primary-variant">
+                      <Link
+                        to={fieldDocsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
+                      >
+                        {t("readTheDocumentation", { ns: "common" })}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </Link>
+                    </div>
+                  )}
+              </div>
+              <div className="flex items-center gap-2">{children}</div>
+            </div>
+          ) : (
+            <>
+              {children}
+
+              {finalDescription &&
+                !isMultiSchemaWrapper &&
+                !isObjectField &&
+                !isAdditionalProperty && (
                   <p className="text-xs text-muted-foreground">
                     {finalDescription}
                   </p>
                 )}
-                {fieldDocsUrl && !isMultiSchemaWrapper && !isObjectField && (
+              {fieldDocsUrl &&
+                !isMultiSchemaWrapper &&
+                !isObjectField &&
+                !isAdditionalProperty && (
                   <div className="flex items-center text-xs text-primary-variant">
                     <Link
                       to={fieldDocsUrl}
@@ -418,31 +454,6 @@ export function FieldTemplate(props: FieldTemplateProps) {
                     </Link>
                   </div>
                 )}
-              </div>
-              <div className="flex items-center gap-2">{children}</div>
-            </div>
-          ) : (
-            <>
-              {children}
-
-              {finalDescription && !isMultiSchemaWrapper && !isObjectField && (
-                <p className="text-xs text-muted-foreground">
-                  {finalDescription}
-                </p>
-              )}
-              {fieldDocsUrl && !isMultiSchemaWrapper && !isObjectField && (
-                <div className="flex items-center text-xs text-primary-variant">
-                  <Link
-                    to={fieldDocsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline"
-                  >
-                    {t("readTheDocumentation", { ns: "common" })}
-                    <LuExternalLink className="ml-2 inline-flex size-3" />
-                  </Link>
-                </div>
-              )}
             </>
           )}
 
