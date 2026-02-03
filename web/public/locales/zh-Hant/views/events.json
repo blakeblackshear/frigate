@@ -62,5 +62,6 @@
   },
   "normalActivity": "正常",
   "needsReview": "待審核",
-  "securityConcern": "安全隱憂"
+  "securityConcern": "安全隱憂",
+  "select_all": "全選"
 }

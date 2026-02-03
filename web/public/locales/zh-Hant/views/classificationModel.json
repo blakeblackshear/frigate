@@ -6,7 +6,7 @@
       "deletedCategory": "已刪除分類",
       "categorizedImage": "成功分類圖片",
       "trainedModel": "訓練模型成功。",
-      "trainingModel": "已開始訓練模型。",
+      "trainingModel": "已開始模型訓練。",
       "updatedModel": "已更新模型配置",
       "renamedCategory": "成功修改分類名稱為{{name}}"
     },
@@ -99,6 +99,19 @@
     },
     "steps": {
       "chooseExamples": "選擇範本"
+    }
+  },
+  "menu": {
+    "states": "狀態"
+  },
+  "noModels": {
+    "object": {
+      "title": "沒有物件檢測模型",
+      "description": "建立自訂模型以對偵測到的物件進行分類。",
+      "buttonText": "建立物件模型"
+    },
+    "state": {
+      "description": "建立自訂模型，用於監控和分類特定攝影機區域的狀態變化。"
     }
   }
 }
