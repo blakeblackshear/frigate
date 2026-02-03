@@ -38,7 +38,7 @@
       "24hour": "d MMM, HH:mm:ss"
     },
     "formattedTimestampOnlyMonthAndDay": "%-d %b",
-    "d": "{{time}}dag",
+    "d": "{{time}}d",
     "day_one": "{{time}} dag",
     "day_other": "{{time}} dagen",
     "h": "{{time}}u",
@@ -84,7 +84,8 @@
     },
     "inProgress": "Wordt uitgevoerd",
     "invalidStartTime": "Ongeldige starttijd",
-    "invalidEndTime": "Ongeldige eindtijd"
+    "invalidEndTime": "Ongeldige eindtijd",
+    "never": "Nooit"
   },
   "button": {
     "enabled": "Ingeschakeld",

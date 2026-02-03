@@ -1274,11 +1274,11 @@
     "title": "Camerabeoordelings-instellingen",
     "object_descriptions": {
       "title": "AI-gegenereerde objectomschrijvingen",
-      "desc": "AI-gegenereerde objectomschrijvingen tijdelijk uitschakelen voor deze camera. Wanneer uitgeschakeld, zullen omschrijvingen van gevolgde objecten op deze camera niet aangevraagd worden."
+      "desc": "AI-gegenereerde objectomschrijvingen tijdelijk uitschakelen voor deze camera totdat Frigate opnieuw opstart. Wanneer uitgeschakeld, zullen omschrijvingen van gevolgde objecten op deze camera niet aangevraagd worden."
     },
     "review_descriptions": {
       "title": "Generatieve-AI Beoordelingsbeschrijvingen",
-      "desc": "Tijdelijk generatieve-AI-beoordelingsbeschrijvingen voor deze camera in- of uitschakelen. Wanneer dit is uitgeschakeld, worden er geen door AI gegenereerde beschrijvingen opgevraagd voor beoordelingsitems van deze camera."
+      "desc": "Schakel tijdelijk generatieve AI-beoordelingsbeschrijvingen voor deze camera in/uit totdat Frigate opnieuw wordt opgestart. Wanneer deze functie is uitgeschakeld, worden er geen door AI gegenereerde beschrijvingen gevraagd voor beoordelingsitems op deze camera."
     },
     "review": {
       "title": "Beoordeel",

@@ -184,6 +184,16 @@
     "restricted": {
       "title": "Geen camera's beschikbaar",
       "description": "Je hebt geen toestemming om camera's in deze groep te bekijken."
+    },
+    "default": {
+      "title": "Geen camera’s ingesteld",
+      "description": "Begin door een camera te verbinden met Frigate.",
+      "buttonText": "Camera toevoegen"
+    },
+    "group": {
+      "title": "Geen camera's in groep",
+      "description": "Deze cameragroep heeft geen toegewezen of ingeschakelde camera's.",
+      "buttonText": "Groepen beheren"
     }
   }
 }
