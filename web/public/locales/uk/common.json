@@ -81,7 +81,8 @@
     },
     "inProgress": "У процесі",
     "invalidStartTime": "Недійсний час початку",
-    "invalidEndTime": "Недійсний час завершення"
+    "invalidEndTime": "Недійсний час завершення",
+    "never": "Ніколи"
   },
   "button": {
     "exitFullscreen": "Вийти з повноекранного режиму",
