@@ -49,6 +49,7 @@ from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
     clean_camera_user_pass,
     flatten_config_data,
+    load_labels,
     process_config_query_string,
     update_yaml_file_bulk,
 )
@@ -753,6 +754,12 @@ def get_sub_labels(split_joined: Optional[int] = None):
 
     sub_labels.sort()
     return JSONResponse(content=sub_labels)
+
+
+@router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
+def get_audio_labels():
+    labels = load_labels("/audio-labelmap.txt", prefill=521)
+    return JSONResponse(content=labels)
 
 
 @router.get("/plus/models", dependencies=[Depends(allow_any_authenticated())])
