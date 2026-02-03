@@ -9,6 +9,57 @@
   "empty": {
     "alert": "Nema upozorenja za pregled",
     "detection": "Nema detekcija za pregled",
-    "motion": "Nema podataka o pokretu"
-  }
+    "motion": "Nema podataka o pokretu",
+    "recordingsDisabled": {
+      "title": "Снимање мора бити омогућено",
+      "description": "Преглед ставки може бити креиран само за камеру када је омогућено снимање за њу."
+    }
+  },
+  "timeline": "Временска линија",
+  "timeline.aria": "Изаберите временску линију",
+  "zoomIn": "Зумирање",
+  "zoomOut": "Одзумирање",
+  "events": {
+    "label": "Догађаји",
+    "aria": "Изаберите догађаје",
+    "noFoundForTimePeriod": "Нису пронађени догађају у овом периоду."
+  },
+  "detail": {
+    "label": "Детаљ",
+    "noDataFound": "Нема детаљних података за преглед",
+    "aria": "Промена детаљности прегледа",
+    "trackedObject_one": "{{count}} објеката",
+    "trackedObject_other": "{{count}} објеката",
+    "noObjectDetailData": "Нема података о детаљима објекта.",
+    "settings": "Подешавање приказа детаља",
+    "alwaysExpandActive": {
+      "title": "Увек проширити активан",
+      "desc": "Увек прошири детаље кативног прегледа објекта, уколико су доступни."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Праћена тачка",
+    "clickToSeek": "Кликните да претражите у ово време"
+  },
+  "documentTitle": "Преглед - Фригејт",
+  "recordings": {
+    "documentTitle": "Снимци - Фригејт"
+  },
+  "calendarFilter": {
+    "last24Hours": "Последња 24 часа"
+  },
+  "markAsReviewed": "Означавање да је прегледано",
+  "markTheseItemsAsReviewed": "Означи ове ставке као прегледане",
+  "newReviewItems": {
+    "label": "Приказ нових ставки за прегледање",
+    "button": "Нове ставке за преглед"
+  },
+  "selected_one": "{{count}} изабрано",
+  "selected_other": "{{count}} изабрано",
+  "select_all": "Све",
+  "camera": "Камера",
+  "detected": "детектовано",
+  "normalActivity": "Нормално",
+  "needsReview": "Потребан је преглед",
+  "securityConcern": "Безбедносно питање"
 }

@@ -4,9 +4,70 @@
   "searchFor": "Pretraži {{inputValue}}",
   "button": {
     "clear": "Obriši pretragu",
-    "save": "Sačuvaj pretragu",
+    "save": "Чување претраге",
     "delete": "Izbrišite sačuvanu pretragu",
     "filterInformation": "Filtriraj informacije",
     "filterActive": "Aktivni filteri"
+  },
+  "trackedObjectId": "ID праћеног објекта",
+  "filter": {
+    "label": {
+      "cameras": "Камере",
+      "labels": "Ознаке",
+      "zones": "Зоне",
+      "sub_labels": "Под-ознаке",
+      "attributes": "Атрибути",
+      "search_type": "Тип претраге",
+      "time_range": "Временски распон",
+      "before": "Пре",
+      "after": "Након",
+      "min_score": "Најнижи резултат",
+      "max_score": "Најбољи резултат",
+      "min_speed": "Најнижа брзина",
+      "max_speed": "Највиша брзина",
+      "recognized_license_plate": "Препознате регистарске таблице",
+      "has_clip": "Има клип",
+      "has_snapshot": "Има снепшот"
+    },
+    "searchType": {
+      "thumbnail": "Сличица",
+      "description": "Опис"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Датум 'пре' мора бити након датума 'после'.",
+        "afterDatebeEarlierBefore": "Датум 'после' мора бити пре датума 'пре'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'min_score' мора бити нижи или један 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'max_score' мора бити већи или једнак од 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'min_speed' мора бити мања или једнака 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'max_speed' мора бити већа или једнака 'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "Како да се користе филтери за текст",
+      "desc": {
+        "text": "Филтери Вам помажу да сузите резултате претраге. Ево како да их користите у пољима за унос:",
+        "step1": "Откуцајте назив кључа филтера а затим две тачке (нпр. \"cameras:\").",
+        "step2": "Изаберите предложену или сопствену вредност.",
+        "step3": "Примените више филтера тако што ћете их додати један за другим са размаком између.",
+        "step4": "Филтери за датум (пре: и касније:) користе {{DateFormat}} формат.",
+        "step5": "Филтер за временски распон користи {{exampleTime}} формат.",
+        "step6": "Уклоните филтере кликом на 'x' поред њих.",
+        "exampleLabel": "Пример:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Филтрирање вредности",
+      "noFilters": "Филтери",
+      "activeFilters": "Активни филтери"
+    }
+  },
+  "similaritySearch": {
+    "title": "Претрага сличности",
+    "active": "Претрага по сличности је активна",
+    "clear": "Почистити претрагу сличности"
+  },
+  "placeholder": {
+    "search": "Претрага…"
   }
 }

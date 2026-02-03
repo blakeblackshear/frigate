@@ -8,6 +8,44 @@
   },
   "livePlayerRequiredIOSVersion": "Za ovaj tip prenosa uživo potreban je iOS 17.1 ili noviji.",
   "streamOffline": {
-    "title": "Strim je oflajn"
+    "title": "Strim je oflajn",
+    "desc": "Ни један фрејм није добијен од {{cameraName}} <code>detect</code>, проверите лог грешака"
+  },
+  "cameraDisabled": "Камера је онемогућена",
+  "stats": {
+    "streamType": {
+      "title": "Тип стрима:",
+      "short": "Тип"
+    },
+    "bandwidth": {
+      "title": "Пропусни опсег:",
+      "short": "Ширина опсега"
+    },
+    "latency": {
+      "title": "Кашњење:",
+      "value": "{{seconds}} секунди",
+      "short": {
+        "title": "Кашњење",
+        "value": "{{seconds}}s"
+      }
+    },
+    "totalFrames": "Укупно фрејмова:",
+    "droppedFrames": {
+      "title": "Изгубљени фрејмови:",
+      "short": {
+        "title": "Испуштено",
+        "value": "{{droppedFrames}} фрејмова"
+      }
+    },
+    "decodedFrames": "Декодовани фрејмови:",
+    "droppedFrameRate": "Однос испуштених фрејмова:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Фрејм је успешно послат у Фригејт+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Неуспешно слање фрејма у Фригејт+"
+    }
   }
 }

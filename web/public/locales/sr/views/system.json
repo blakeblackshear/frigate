@@ -2,7 +2,7 @@
   "documentTitle": {
     "cameras": "Statusi kamera - Frigate",
     "storage": "Statistika skladištenja - Frigate",
-    "general": "Opšta statistika - Frigate",
+    "general": "Општа статистика - Фригејт",
     "enrichments": "Statistika obogaćivanja - Frigate",
     "logs": {
       "frigate": "Frigate logovi - Frigate",
@@ -10,5 +10,83 @@
       "nginx": "Nginx logovi - Frigate"
     }
   },
-  "title": "Sistem"
+  "title": "Sistem",
+  "metrics": "Системске метрике",
+  "logs": {
+    "download": {
+      "label": "Преузимање логова"
+    },
+    "copy": {
+      "label": "Копирање",
+      "success": "Логови су копирани",
+      "error": "Копирање логова није успело"
+    },
+    "type": {
+      "label": "Тип",
+      "timestamp": "Временски тренутак",
+      "tag": "Ознака",
+      "message": "Порука"
+    },
+    "tips": "Логови стримују са сервера",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Грешка при преузимању логова: {{errorMessage}}",
+        "whileStreamingLogs": "Грешка код стримовања логова: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Опште",
+    "detector": {
+      "title": "Детектори",
+      "inferenceSpeed": "Детектор брзине закључивања",
+      "temperature": "Детектор температуре",
+      "cpuUsage": "Детектор употребе CPU-а",
+      "cpuUsageInformation": "CPU коришћен за припрему улаза и излаза података у/из модела детекције. Ова вредност не мери коришћење инференције, чак ни када користи GPU или акселератор.",
+      "memoryUsage": "Употреба меморије од стране детектора"
+    },
+    "hardwareInfo": {
+      "title": "Информације о хардверу",
+      "gpuUsage": "Употреба GPU",
+      "gpuMemory": "GPU меморија",
+      "gpuEncoder": "GPU енкодер",
+      "gpuDecoder": "GPU декодер",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo Output",
+          "returnCode": "Повратни код: {{code}}",
+          "processOutput": "Обрада излаза:",
+          "processError": "Грешка у обради:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI излаз",
+          "name": "Назив: {{name}}",
+          "driver": "Драјвер: {{driver}}",
+          "cudaComputerCapability": "Способност CUDA рачунања: {{cuda_compute}}",
+          "vbios": "VBios Info: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Затварање GPU информација"
+        },
+        "copyInfo": {
+          "label": "Копирање GPU ифнормација"
+        },
+        "toast": {
+          "success": "Копиране су GPU информације у клипборд"
+        }
+      },
+      "npuUsage": "Употреба NPU",
+      "npuMemory": "NPU меморија",
+      "intelGpuWarning": {
+        "title": "Упозорење за Intel GPU статистику",
+        "message": "GPU статистика није доступна",
+        "description": "Ово је познати баг у алатима за извештавање статистике код Intel GPU (intel_gpu_top) где се јавља пуцање и враћа 0% као GPU искоришћење, чак и у случајевима када хардверска акцелерација и детектовање објекта регуларно раде на (i)GPU. Ово није баг у Фригејту. Можете рестартовати хост да привремено поправите проблем и потврдите да GPU ради исправно. Ово не утиче на перформансе."
+      }
+    },
+    "otherProcesses": {
+      "title": "Остали процеси",
+      "processCpuUsage": "Процесна употреба CPU",
+      "processMemoryUsage": "Процесна употреба меморије"
+    }
+  }
 }

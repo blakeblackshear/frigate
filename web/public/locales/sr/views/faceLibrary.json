@@ -1,14 +1,96 @@
 {
   "description": {
-    "addFace": "Prođite kroz dodavanje nove kolekcije u biblioteku lica.",
+    "addFace": "Додавање нове колекције у библиотеку лица отпремањем прве слике.",
     "placeholder": "Unesite ime za ovu kolekciju",
-    "invalidName": "Nevažeće ime. Imena mogu da sadrže samo slova, brojeve, razmake, apostrofe, donje crte i crtice."
+    "invalidName": "Неисправно име. Имена могу да садрже само слова, цифре, размаке, апострофе, доње црте и повлаке."
   },
   "details": {
     "person": "Osoba",
     "subLabelScore": "Sub Label Skor",
     "scoreInfo": "Rezultat podoznake je otežan rezultat za sve prepoznate pouzdanosti lica, tako da se može razlikovati od rezultata prikazanog na snimku.",
     "face": "Detalji lica",
-    "faceDesc": "Detalji praćenog objekta koji je generisao ovo lice"
+    "faceDesc": "Detalji praćenog objekta koji je generisao ovo lice",
+    "timestamp": "Временски тренутак",
+    "unknown": "Непознато"
+  },
+  "documentTitle": "Библиотека лица - Фригејт",
+  "uploadFaceImage": {
+    "title": "Отпремање слике лица",
+    "desc": "Орпремање слике за скенирање за лица и укључивање у {{pageToggle}}"
+  },
+  "collections": "Колекције",
+  "createFaceLibrary": {
+    "new": "Креирање новог лика",
+    "nextSteps": "За изградњу снажне основе: <li>Користите картицу \"Скорашња препознавања\" да бисте изабрали и тренирали на сликама за сваку од откривених особа.</li><li>За најбоље резултате фокусирајте се на фронталне слике; избегавајте тренирање на сликама где су лица приказана под углом.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Унесите назив лица",
+    "uploadFace": "Отпремање слике лица",
+    "nextSteps": "Следећи кораци",
+    "description": {
+      "uploadFace": "Отпремите слику {{name}} која приказује његово/њено лице спреда. Слика не мора да садржи само лице."
+    }
+  },
+  "train": {
+    "title": "Скорашња препознавања",
+    "titleShort": "Скорашње",
+    "aria": "Изаберите скорашња препознавања",
+    "empty": "Нема скорашњих покушаја препознавања лица"
+  },
+  "deleteFaceLibrary": {
+    "title": "Брисање имена",
+    "desc": "Да ли сте сигурни да желите да обришете колекцију {{name}}? То ће трајно обрисати и сва придружена лица."
+  },
+  "deleteFaceAttempts": {
+    "title": "Обрисана лица",
+    "desc_one": "Да ли сте сигурни да желите да обришете {{count}} лице? Ова акција се не може опозвати накнадно.",
+    "desc_few": "Да ли сте сигурни да желите да обришете {{count}} лица? Ова акција се не може опозвати накнадно.",
+    "desc_other": "Да ли сте сигурни да желите да обришете {{count}} лица? Ова акција се не може опозвати накнадно."
+  },
+  "renameFace": {
+    "title": "Преименовање лица",
+    "desc": "Унесите ново име за {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Брисање лица",
+    "addFace": "Додавање лица",
+    "renameFace": "Преименовање лица",
+    "deleteFace": "Брисање лица",
+    "uploadImage": "Отпремање слике",
+    "reprocessFace": "Поново обради лице"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Изаберите фајл са сликом."
+    },
+    "dropActive": "Превуците слику овде…",
+    "dropInstructions": "Превуците или пејстујте слику овде, или кликните за избор",
+    "maxSize": "Максимална величина: {{size}}MB"
+  },
+  "nofaces": "Нема доступних лица",
+  "trainFaceAs": "Тренирање лица као:",
+  "trainFace": "Тренирање лица",
+  "toast": {
+    "success": {
+      "uploadedImage": "Слика је успешно отпремљена.",
+      "addFaceLibrary": "{{name}} је успешно додат у библиотеку лица!",
+      "deletedFace_one": "Успешно је обрисано {{count}} лице.",
+      "deletedFace_few": "Успешно је обрисано {{count}} лица.",
+      "deletedFace_other": "Успешно је обрисано {{count}} лица.",
+      "deletedName_one": "{{count}} лице је успешно обрисано.",
+      "deletedName_few": "{{count}} лица су успешно обрисана.",
+      "deletedName_other": "{{count}} лица је успешно обрисано.",
+      "renamedFace": "Лице је успешно преименовано у {{name}}",
+      "trainedFace": "Лице је успешно истренирано.",
+      "updatedFaceScore": "Успешно је ажуриран резултат лица за {{name}} ({{score}})."
+    },
+    "error": {
+      "uploadingImageFailed": "Неуспешно отпремање слике: {{errorMessage}}",
+      "addFaceLibraryFailed": "Неуспешно постављање имена лица: {{errorMessage}}",
+      "deleteFaceFailed": "Неуспешно брисање: {{errorMessage}}",
+      "deleteNameFailed": "Неуспешно брисање имена: {{errorMessage}}",
+      "renameFaceFailed": "Неуспешна промена назива лица: {{errorMessage}}",
+      "trainFailed": "Неуспешно тренирање: {{errorMessage}}"
+    }
   }
 }

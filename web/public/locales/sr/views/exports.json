@@ -8,5 +8,16 @@
     "title": "Preimenuj izvoz",
     "desc": "Unesite novo ime za ovaj izvoz.",
     "saveExport": "Sačuvaj izvoz"
+  },
+  "tooltip": {
+    "shareExport": "Дељење експорта",
+    "downloadVideo": "Преузимање видео-снимка",
+    "editName": "Уређивање имена",
+    "deleteExport": "Брисање извоза"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Промена назива извоза није успела: {{errorMessage}}"
+    }
   }
 }

@@ -23,10 +23,57 @@
     "pm": "pm",
     "am": "am",
     "yr": "{{time}}god",
-    "year_one": "1,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21...",
-    "year_few": "2,3,4,22,23,24,32,33,34,42,...",
-    "year_other": "",
-    "mo": "{{time}}mes"
+    "year_one": "{{time}} година",
+    "year_few": "{{time}} године",
+    "year_other": "{{time}} година",
+    "mo": "{{time}}mes",
+    "month_one": "{{time}} месец",
+    "month_few": "{{time}} месеца",
+    "month_other": "{{time}} месеци",
+    "d": "{{time}}d",
+    "day_one": "{{time}} дан",
+    "day_few": "{{time}} дана",
+    "day_other": "{{time}} дана",
+    "h": "{{time}}h",
+    "hour_one": "{{time}} сат",
+    "hour_few": "{{time}} сата",
+    "hour_other": "{{time}} сати",
+    "m": "{{time}}m",
+    "minute_one": "{{time}} минут",
+    "minute_few": "{{time}} минута",
+    "minute_other": "{{time}} минута",
+    "s": "{{time}}s",
+    "second_one": "{{time}} секунда",
+    "second_few": "{{time}} секунде",
+    "second_other": "{{time}} секунди",
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
   },
   "readTheDocumentation": "Прочитајте документацију"
 }

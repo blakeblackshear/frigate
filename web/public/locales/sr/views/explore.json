@@ -7,7 +7,73 @@
     "embeddingsReindexing": {
       "context": "Istraživanje se može koristiti nakon što se završi reindeksiranje ugrađivanja praćenih objekata.",
       "startingUp": "Pokretanje…",
-      "estimatedTime": "Procenjeno preostalo vreme:"
+      "estimatedTime": "Procenjeno preostalo vreme:",
+      "finishingShortly": "Завршава се ускоро",
+      "step": {
+        "thumbnailsEmbedded": "Угњеждене сличице: ",
+        "descriptionsEmbedded": "Угњеждени описи: ",
+        "trackedObjectsProcessed": "Обрађени праћени објекти: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Фригејт преузима неопходне <em>embedding</em> моделе за подршку могућности Семантичке претраге. Ово може потрајати неколико минута, зависно од брзине Ваше мрежне везе.",
+      "setup": {
+        "visionModel": "Модел визије",
+        "visionModelFeatureExtractor": "Екстрактор особина модела визије",
+        "textModel": "Модел текста",
+        "textTokenizer": "Токенизатор текста"
+      },
+      "tips": {
+        "context": "Можда ћете желети да реиндексујете ембединге праћених објеката када модели буду преузети."
+      },
+      "error": "Дошло је до грешке. Проверите логове."
+    }
+  },
+  "details": {
+    "timestamp": "Временски тренутак"
+  },
+  "trackedObjectDetails": "Детаљи праћеног објекта",
+  "type": {
+    "details": "детаљи",
+    "snapshot": "снимак",
+    "thumbnail": "сличица",
+    "video": "видео",
+    "tracking_details": "детаљи праћења"
+  },
+  "trackingDetails": {
+    "title": "Детаљи праћења",
+    "noImageFound": "Нема слике за овај временски тренутак.",
+    "createObjectMask": "Креирање маске објекта",
+    "adjustAnnotationSettings": "Прилагођавање подешавања анотације",
+    "scrollViewTips": "Кликните да видите значајне моменте у животном циклусу овог објекта.",
+    "autoTrackingTips": "Позиције оквира неће бити тачне за камере са аутоматским праћењем.",
+    "count": "{{first}} од {{second}}",
+    "trackedPoint": "Праћена тачка",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} детектован",
+      "entered_zone": "{{label}} је ушао у {{zones}}",
+      "active": "{{label}} се активирао",
+      "stationary": "{{label}} је постао стационаран",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} детектован за {{label}}",
+        "other": "{{label}} је препознат као {{attribute}}"
+      },
+      "gone": "{{label}} преостало",
+      "heard": "{{label}} се чуло",
+      "external": "{{label}} детектован",
+      "header": {
+        "zones": "Зоне",
+        "ratio": "Однос",
+        "area": "Подручје",
+        "score": "Резултат"
+      }
+    },
+    "annotationSettings": {
+      "title": "Подешавања анотације",
+      "showAllZones": {
+        "title": "Приказ свих зона",
+        "desc": "Увек приказати зоне на фрејмовима у којима су објекти ушли у зону."
+      }
     }
   }
 }
