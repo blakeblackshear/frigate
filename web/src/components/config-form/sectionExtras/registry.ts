@@ -1,9 +1,15 @@
 import type { ComponentType } from "react";
 import SemanticSearchReindex from "./SemanticSearchReindex.tsx";
+import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView.tsx";
 
-export type RendererComponent = ComponentType<
-  Record<string, unknown> | undefined
->;
+// Props that will be injected into all section renderers
+export type SectionRendererProps = {
+  selectedCamera?: string;
+  setUnsavedChanges?: (hasChanges: boolean) => void;
+  [key: string]: unknown; // Allow additional props from uiSchema
+};
+
+export type RendererComponent = ComponentType<SectionRendererProps>;
 
 export type SectionRenderers = Record<
   string,
@@ -16,9 +22,25 @@ export type SectionRenderers = Record<
 // names to React components. These names are referenced from `uiSchema`
 // descriptors (e.g., `{ "ui:after": { render: "SemanticSearchReindex" } }`) and
 // are resolved by `FieldTemplate` through `formContext.renderers`.
+//
+// RUNTIME PROPS INJECTION:
+// All renderers automatically receive the following props from BaseSection:
+// - selectedCamera?: string - The current camera name (camera-level only)
+// - setUnsavedChanges?: (hasChanges: boolean) => void - Callback to signal unsaved state
+//
+// Additional static props can be passed via uiSchema:
+// { "ui:after": { render: "MyRenderer", props: { customProp: "value" } } }
+//
+// ADDING NEW RENDERERS:
+// 1. Create your component accepting SectionRendererProps
+// 2. Import and add it to the appropriate section in this registry
+// 3. Reference it in your section's uiSchema using the { render: "ComponentName" } syntax
 export const sectionRenderers: SectionRenderers = {
   semantic_search: {
     SemanticSearchReindex,
+  },
+  review: {
+    CameraReviewSettingsView,
   },
 };
 

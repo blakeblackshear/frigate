@@ -33,7 +33,6 @@ import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView";
 import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
@@ -80,6 +79,7 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
+import { Toaster } from "@/components/ui/sonner";
 
 const allSettingsViews = [
   "profileSettings",
@@ -119,7 +119,7 @@ const allSettingsViews = [
   "cameraSnapshots",
   "cameraMotion",
   "cameraObjects",
-  "cameraConfigReview",
+  "cameraReview",
   "cameraAudioEvents",
   "cameraAudioTranscription",
   "cameraNotifications",
@@ -132,7 +132,6 @@ const allSettingsViews = [
   "cameraUi",
   "cameraTimestampStyle",
   "cameraManagement",
-  "cameraReview",
   "masksAndZones",
   "motionTuner",
   "enrichments",
@@ -224,7 +223,7 @@ const CameraRecordingSettingsPage = createSectionPage("record", "camera");
 const CameraSnapshotsSettingsPage = createSectionPage("snapshots", "camera");
 const CameraMotionSettingsPage = createSectionPage("motion", "camera");
 const CameraObjectsSettingsPage = createSectionPage("objects", "camera");
-const CameraConfigReviewSettingsPage = createSectionPage("review", "camera");
+const CameraReviewSettingsPage = createSectionPage("review", "camera");
 const CameraAudioEventsSettingsPage = createSectionPage("audio", "camera");
 const CameraAudioTranscriptionSettingsPage = createSectionPage(
   "audio_transcription",
@@ -290,7 +289,7 @@ const settingsGroups = [
       { key: "cameraSnapshots", component: CameraSnapshotsSettingsPage },
       { key: "cameraMotion", component: CameraMotionSettingsPage },
       { key: "cameraObjects", component: CameraObjectsSettingsPage },
-      { key: "cameraConfigReview", component: CameraConfigReviewSettingsPage },
+      { key: "cameraReview", component: CameraReviewSettingsPage },
       { key: "cameraAudioEvents", component: CameraAudioEventsSettingsPage },
       {
         key: "cameraAudioTranscription",
@@ -318,7 +317,6 @@ const settingsGroups = [
         component: CameraTimestampStyleSettingsPage,
       },
       { key: "cameraManagement", component: CameraManagementView },
-      { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
       { key: "motionTuner", component: MotionTunerView },
     ],
@@ -412,7 +410,7 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "cameraSnapshots",
   "cameraMotion",
   "cameraObjects",
-  "cameraConfigReview",
+  "cameraReview",
   "cameraAudioEvents",
   "cameraAudioTranscription",
   "cameraNotifications",
@@ -424,7 +422,6 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "cameraOnvif",
   "cameraUi",
   "cameraTimestampStyle",
-  "cameraReview",
   "masksAndZones",
   "motionTuner",
   "triggers",
@@ -440,7 +437,7 @@ const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
   snapshots: "cameraSnapshots",
   motion: "cameraMotion",
   objects: "cameraObjects",
-  review: "cameraConfigReview",
+  review: "cameraReview",
   audio: "cameraAudioEvents",
   audio_transcription: "cameraAudioTranscription",
   notifications: "cameraNotifications",
@@ -788,6 +785,7 @@ export default function Settings() {
   if (isMobile) {
     return (
       <>
+        <Toaster position="top-center" />
         {!contentMobileOpen && (
           <div className="flex size-full flex-col">
             <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
@@ -925,7 +923,8 @@ export default function Settings() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex min-h-16 items-center justify-between border-b border-secondary p-3">
+      <Toaster position="top-center" />
+      <div className="flex items-center justify-between border-b border-secondary p-3">
         <Heading as="h3" className="mb-0">
           {t("menu.settings", { ns: "common" })}
         </Heading>

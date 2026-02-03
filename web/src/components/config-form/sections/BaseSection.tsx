@@ -53,6 +53,7 @@ import {
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { ConfigSectionData, JsonObject, JsonValue } from "@/types/configForm";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -513,7 +514,7 @@ export function ConfigSection({
 
       const needsRestart = requiresRestartForOverrides(overrides);
 
-      await axios.put("config/sett", {
+      await axios.put("config/set", {
         requires_restart: needsRestart ? 1 : 0,
         update_topic: updateTopic,
         config_data: {
@@ -607,7 +608,7 @@ export function ConfigSection({
 
       const configData = level === "global" ? effectiveSchemaDefaults : "";
 
-      await axios.put("config/sett", {
+      await axios.put("config/set", {
         requires_restart: requiresRestart ? 0 : 1,
         update_topic: updateTopic,
         config_data: {
@@ -688,6 +689,42 @@ export function ConfigSection({
       );
   }, [sectionConfig.customValidate, sectionValidation]);
 
+  // Wrap renderers with runtime props (selectedCamera, setUnsavedChanges, etc.)
+  const wrappedRenderers = useMemo(() => {
+    const baseRenderers =
+      sectionConfig?.renderers ?? sectionRenderers?.[sectionPath];
+    if (!baseRenderers) return undefined;
+
+    // Create wrapper that injects runtime props
+    return Object.fromEntries(
+      Object.entries(baseRenderers).map(([key, RendererComponent]) => [
+        key,
+        (staticProps: Record<string, unknown> = {}) => (
+          <RendererComponent
+            {...staticProps}
+            selectedCamera={cameraName}
+            setUnsavedChanges={(hasChanges: boolean) => {
+              // Translate setUnsavedChanges to pending data state
+              if (hasChanges && !pendingData) {
+                // Component signaled changes but we don't have pending data yet
+                // This can happen when the component manages its own state
+              } else if (!hasChanges && pendingData) {
+                // Component signaled no changes, clear pending
+                setPendingData(null);
+              }
+            }}
+          />
+        ),
+      ]),
+    );
+  }, [
+    sectionConfig?.renderers,
+    sectionPath,
+    cameraName,
+    pendingData,
+    setPendingData,
+  ]);
+
   if (!modifiedSchema) {
     return null;
   }
@@ -749,8 +786,7 @@ export function ConfigSection({
           // section prefix to templates so they can attempt `${section}.${field}` lookups.
           sectionI18nPrefix: sectionPath,
           t,
-          renderers:
-            sectionConfig?.renderers ?? sectionRenderers?.[sectionPath],
+          renderers: wrappedRenderers,
           sectionDocs: sectionConfig.sectionDocs,
           fieldDocs: sectionConfig.fieldDocs,
         }}
@@ -775,7 +811,7 @@ export function ConfigSection({
                 onClick={() => setIsResetDialogOpen(true)}
                 variant="outline"
                 disabled={isSaving || disabled}
-                className="gap-2"
+                className="flex flex-1 gap-2"
               >
                 <LuRotateCcw className="h-4 w-4" />
                 {level === "global"
@@ -794,7 +830,7 @@ export function ConfigSection({
               onClick={handleReset}
               variant="outline"
               disabled={isSaving || disabled}
-              className="gap-2"
+              className="flex min-w-36 flex-1 gap-2"
             >
               {t("undo", { ns: "common", defaultValue: "Undo" })}
             </Button>
@@ -803,12 +839,19 @@ export function ConfigSection({
             onClick={handleSave}
             variant="select"
             disabled={!hasChanges || isSaving || disabled}
-            className="gap-2"
+            className="flex min-w-36 flex-1 gap-2"
           >
-            <LuSave className="h-4 w-4" />
-            {isSaving
-              ? t("saving", { ns: "common", defaultValue: "Saving..." })
-              : t("save", { ns: "common", defaultValue: "Save" })}
+            {isSaving ? (
+              <>
+                <ActivityIndicator className="h-4 w-4" />
+                {t("saving", { ns: "common", defaultValue: "Saving..." })}
+              </>
+            ) : (
+              <>
+                <LuSave className="h-4 w-4" />
+                {t("save", { ns: "common", defaultValue: "Save" })}
+              </>
+            )}
           </Button>
         </div>
       </div>

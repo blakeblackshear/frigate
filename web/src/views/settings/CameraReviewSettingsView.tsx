@@ -43,7 +43,7 @@ import { formatList } from "@/utils/stringUtil";
 
 type CameraReviewSettingsViewProps = {
   selectedCamera: string;
-  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  setUnsavedChanges?: (hasChanges: boolean) => void;
 };
 
 type CameraReviewSettingsValueType = {
@@ -249,7 +249,7 @@ export default function CameraReviewSettingsView({
     }
 
     setChangedValue(false);
-    setUnsavedChanges(false);
+    setUnsavedChanges?.(false);
     removeMessage(
       "camera_settings",
       `review_classification_settings_${selectedCamera}`,
@@ -746,6 +746,7 @@ export default function CameraReviewSettingsView({
           </Form>
         </div>
       </div>
+      <Separator className="my-2 flex bg-secondary" />
     </>
   );
 }
