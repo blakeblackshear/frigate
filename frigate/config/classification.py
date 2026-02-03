@@ -425,7 +425,7 @@ class CameraAudioTranscriptionConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
         title="Enable transcription",
-        description="Enable or disable automatic audio transcription.",
+        description="Enable or disable manually triggered audio event transcription.",
     )
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Original transcription state"

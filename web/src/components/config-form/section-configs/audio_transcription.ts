@@ -4,13 +4,13 @@ const audioTranscription: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/audio_detectors#audio-transcription",
     restartRequired: [],
-    fieldOrder: ["enabled", "language", "device", "model_size", "live_enabled"],
-    hiddenFields: ["enabled_in_config"],
+    fieldOrder: ["enabled", "language", "device", "model_size"],
+    hiddenFields: ["enabled_in_config", "live_enabled"],
     advancedFields: ["language", "device", "model_size"],
     overrideFields: ["enabled", "live_enabled"],
   },
   global: {
-    fieldOrder: ["enabled", "language", "device", "model_size", "live_enabled"],
+    fieldOrder: ["enabled", "language", "device", "model_size"],
     advancedFields: ["language", "device", "model_size"],
   },
 };

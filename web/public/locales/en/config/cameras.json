@@ -49,7 +49,7 @@
     "description": "Settings for live and speech audio transcription used for events and live captions.",
     "enabled": {
       "label": "Enable transcription",
-      "description": "Enable or disable automatic audio transcription."
+      "description": "Enable or disable manually triggered audio event transcription."
     },
     "enabled_in_config": {
       "label": "Original transcription state"

@@ -263,11 +263,11 @@ const settingsGroups = [
     label: "globalConfig",
     items: [
       { key: "globalDetect", component: GlobalDetectSettingsPage },
+      { key: "globalObjects", component: GlobalObjectsSettingsPage },
+      { key: "globalMotion", component: GlobalMotionSettingsPage },
+      { key: "globalFfmpeg", component: GlobalFfmpegSettingsPage },
       { key: "globalRecording", component: GlobalRecordingSettingsPage },
       { key: "globalSnapshots", component: GlobalSnapshotsSettingsPage },
-      { key: "globalFfmpeg", component: GlobalFfmpegSettingsPage },
-      { key: "globalMotion", component: GlobalMotionSettingsPage },
-      { key: "globalObjects", component: GlobalObjectsSettingsPage },
       { key: "globalReview", component: GlobalReviewSettingsPage },
       { key: "globalAudioEvents", component: GlobalAudioEventsSettingsPage },
       {
@@ -283,42 +283,42 @@ const settingsGroups = [
   {
     label: "cameras",
     items: [
+      { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraDetect", component: CameraDetectSettingsPage },
+      { key: "cameraObjects", component: CameraObjectsSettingsPage },
+      { key: "cameraMotion", component: CameraMotionSettingsPage },
+      { key: "motionTuner", component: MotionTunerView },
       { key: "cameraFfmpeg", component: CameraFfmpegSettingsPage },
       { key: "cameraRecording", component: CameraRecordingSettingsPage },
       { key: "cameraSnapshots", component: CameraSnapshotsSettingsPage },
-      { key: "cameraMotion", component: CameraMotionSettingsPage },
-      { key: "cameraObjects", component: CameraObjectsSettingsPage },
+      { key: "masksAndZones", component: MasksAndZonesView },
       { key: "cameraReview", component: CameraReviewSettingsPage },
       { key: "cameraAudioEvents", component: CameraAudioEventsSettingsPage },
       {
         key: "cameraAudioTranscription",
         component: CameraAudioTranscriptionSettingsPage,
       },
+      { key: "cameraBirdseye", component: CameraBirdseyeSettingsPage },
+      {
+        key: "cameraLivePlayback",
+        component: CameraLivePlaybackSettingsPage,
+      },
       {
         key: "cameraNotifications",
         component: CameraNotificationsSettingsPage,
       },
       {
-        key: "cameraLivePlayback",
-        component: CameraLivePlaybackSettingsPage,
-      },
-      { key: "cameraBirdseye", component: CameraBirdseyeSettingsPage },
-      {
         key: "cameraFaceRecognition",
         component: CameraFaceRecognitionSettingsPage,
       },
       { key: "cameraLpr", component: CameraLprSettingsPage },
-      { key: "cameraMqttConfig", component: CameraMqttConfigSettingsPage },
       { key: "cameraOnvif", component: CameraOnvifSettingsPage },
+      { key: "cameraMqttConfig", component: CameraMqttConfigSettingsPage },
       { key: "cameraUi", component: CameraUiSettingsPage },
       {
         key: "cameraTimestampStyle",
         component: CameraTimestampStyleSettingsPage,
       },
-      { key: "cameraManagement", component: CameraManagementView },
-      { key: "masksAndZones", component: MasksAndZonesView },
-      { key: "motionTuner", component: MotionTunerView },
     ],
   },
   {
