@@ -89,7 +89,10 @@
       "processMemoryUsage": "Utilisation mémoire du processus",
       "series": {
         "go2rtc": "go2rtc",
-        "recording": "enregistrement"
+        "recording": "enregistrement",
+        "review_segment": "Segment d'activité",
+        "embeddings": "embeddings",
+        "audio_detector": "détecteur audio"
       }
     }
   },
@@ -147,11 +150,11 @@
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraSkippedDetectionsPerSecond": "{{camName}} détections ignorées par seconde",
       "overallDetectionsPerSecond": "Moyenne de détections par seconde",
-      "overallFramesPerSecond": "Moyenne d'images par seconde (IPS)",
+      "overallFramesPerSecond": "images par seconde (global)",
       "overallSkippedDetectionsPerSecond": "Moyenne de détections ignorées par seconde",
       "cameraCapture": "{{camName}} capture",
       "cameraDetect": "{{camName}} détection",
-      "cameraFramesPerSecond": "{{camName}} images par seconde (IPS)",
+      "cameraFramesPerSecond": "{{camName}} images par seconde",
       "cameraDetectionsPerSecond": "{{camName}} détections par seconde"
     },
     "overview": "Vue d'ensemble",

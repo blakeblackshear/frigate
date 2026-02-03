@@ -1278,11 +1278,11 @@
     "title": "Paramètres des activités caméra",
     "object_descriptions": {
       "title": "Descriptions d'objets par l'IA générative",
-      "desc": "Active ou désactive temporairement les descriptions d'objets générées par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description par l'IA n'est générée pour les objets suivis sur cette caméra."
+      "desc": "Activez ou désactivez temporairement les descriptions par IA générative jusqu'au redémarrage. Si désactivé, l'IA ne sera plus sollicitée pour décrire les objets suivis sur cette caméra."
     },
     "review_descriptions": {
       "title": "Descriptions des activités par l'IA générative",
-      "desc": "Active ou désactive temporairement les descriptions par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description nouvelle n'est générée pour les activités sur cette caméra."
+      "desc": "Activez ou désactivez temporairement les descriptions d'activités par IA générative jusqu'au redémarrage. Si désactivé, l'IA ne sera plus sollicitée pour décrire les activités sur cette caméra."
     },
     "review": {
       "title": "Activités",

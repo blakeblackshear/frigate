@@ -178,6 +178,16 @@
     "restricted": {
       "title": "Aucune caméra disponible",
       "description": "Vous n'avez pas la permission de visionner les caméras de ce groupe."
+    },
+    "default": {
+      "title": "Aucune caméra configurée",
+      "description": "Pour commencer, connectez une caméra à Frigate.",
+      "buttonText": "Ajouter une caméra"
+    },
+    "group": {
+      "title": "Aucune caméra dans le groupe",
+      "description": "Ce groupe de caméras ne contient aucune caméra assignée ou activée.",
+      "buttonText": "Gérer les groupes"
     }
   },
   "snapshot": {

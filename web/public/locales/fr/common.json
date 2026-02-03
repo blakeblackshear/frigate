@@ -90,7 +90,8 @@
     },
     "inProgress": "En cours",
     "invalidStartTime": "Heure de début invalide",
-    "invalidEndTime": "Heure de fin invalide"
+    "invalidEndTime": "Heure de fin invalide",
+    "never": "Jamais"
   },
   "button": {
     "apply": "Appliquer",
@@ -279,7 +280,8 @@
     "show": "Afficher {{item}}",
     "ID": "ID",
     "none": "Aucun",
-    "all": "Tous"
+    "all": "Tous",
+    "other": "Autre"
   },
   "unit": {
     "speed": {
