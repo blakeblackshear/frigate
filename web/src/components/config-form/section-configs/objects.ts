@@ -3,6 +3,14 @@ import type { SectionConfigOverrides } from "./types";
 const objects: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_filters",
+    fieldDocs: {
+      "filters.min_area": "/configuration/object_filters#object-area",
+      "filters.max_area": "/configuration/object_filters#object-area",
+      "filters.min_score": "/configuration/object_filters#minimum-score",
+      "filters.threshold": "/configuration/object_filters#threshold",
+      "filters.min_ratio": "/configuration/object_filters/#object-proportions",
+      "filters.max_ratio": "/configuration/object_filters/#object-proportions",
+    },
     restartRequired: [],
     fieldOrder: ["track", "alert", "detect", "filters"],
     fieldGroups: {
