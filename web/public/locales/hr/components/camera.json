@@ -29,9 +29,9 @@
     "camera": {
       "birdseye": "Ptičja perspektiva",
       "setting": {
-        "label": "Postavke streamanja kamere",
-        "title": "{{cameraName}} Streaming Postavke",
-        "desc": "Promijenite opcije streamanja uživo za nadzornu ploču ove grupe kamera. <em>Ove postavke su specifične za uređaj/preglednik.</em>",
+        "label": "Postavke emitiranja kamere",
+        "title": "{{cameraName}} Postavke Emitiranja",
+        "desc": "Promijenite opcije emitiranja uživo za nadzornu ploču ove grupe kamera. <em>Ove postavke su specifične za uređaj/preglednik.</em>",
         "audioIsAvailable": "Za ovaj prijenos dostupan je zvuk",
         "audioIsUnavailable": "Za ovaj prijenos zvuk nije dostupan",
         "audio": {
@@ -39,15 +39,15 @@
             "title": "Audio mora dolaziti s vaše kamere i biti konfiguriran u go2rtc za ovaj prijenos."
           }
         },
-        "stream": "Prijenos",
-        "placeholder": "Izaberi prijenos",
+        "stream": "Emitiranje",
+        "placeholder": "Izaberi emitiranje",
         "streamMethod": {
-          "label": "Metoda Prijenosa",
-          "placeholder": "Odaberi metodu prijenosa",
+          "label": "Metoda emitiranja",
+          "placeholder": "Odaberi metodu emitiranja",
           "method": {
             "noStreaming": {
-              "label": "Nema Prijenosa",
-              "desc": "Slike s kamere bit će ažurirane samo jednom u minuti, a prijenos uživo neće biti dostupan."
+              "label": "Nema emitiranja",
+              "desc": "Slike s kamere bit će ažurirane samo jednom u minuti, a emitiranje uživo neće biti dostupno."
             },
             "smartStreaming": {
               "desc": "Pametno emitiranje ažurirat će sliku vaše kamere jednom u minuti kada nema prepoznatljive aktivnosti kako bi uštedjelo propusnost i resurse. Kada se detektira aktivnost, slika će se besprijekorno prebaciti na prijenos uživo.",

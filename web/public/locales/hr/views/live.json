@@ -96,6 +96,101 @@
     "disable": "Sakrij statistike emitiranja"
   },
   "manualRecording": {
-    "title": "Na Zahtjev"
+    "title": "Na Zahtjev",
+    "tips": "Preuzmite trenutnu snimku ili pokrenite ručni događaj prema postavkama zadržavanja snimki ove kamere.",
+    "playInBackground": {
+      "label": "Reproduciraj u pozadini",
+      "desc": "Omogući ovu opciju za nastavak emitiranja kada je prozor za reprodukciju skriven."
+    },
+    "showStats": {
+      "label": "Prikaži statistike",
+      "desc": "Omogući ovu opciju da se statistika emitiranja prikazuje preko prikaza kamere."
+    },
+    "debugView": "Debug prikaz",
+    "start": "Pokreni snimanje na zahtjev",
+    "started": "Pokrenuto ručno snimanje na zahtjev.",
+    "failedToStart": "Neuspješno pokretanje ručnog snimanja na zahtjev.",
+    "recordDisabledTips": "Budući da je snimanje onemogućeno ili ograničeno u konfiguraciji za ovu kameru, spremit će se samo jedna snimka.",
+    "end": "Kraj snimanja na zahtjev",
+    "ended": "Prekinuto je ručno snimanje na zahtjev.",
+    "failedToEnd": "Neuspješno prekidanje ručnog snimanja na zahtjev."
+  },
+  "streamingSettings": "Postavke emitiranja",
+  "notifications": "Obavijesti",
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Pauziraj zbog: "
+  },
+  "stream": {
+    "title": "Emitiranje",
+    "audio": {
+      "tips": {
+        "title": "Zvuk mora biti izlazan iz vaše kamere i konfiguriran u go2rtc za ovaj stream."
+      },
+      "available": "Audio je dostupan za ovo emitiranje",
+      "unavailable": "Audio nije dostupan za ovo emitiranje"
+    },
+    "debug": {
+      "picker": "Odabir streama nije dostupan u debug načinu. Debug prikaz uvijek koristi emitiranje dodijeljeno ulozi detekcije."
+    },
+    "twoWayTalk": {
+      "tips": "Vaš uređaj mora podržavati tu značajku, a WebRTC mora biti konfiguriran za dvosmjernu komunikaciju.",
+      "available": "Za ovo emitiranje dostupan je dvosmjerni razgovor",
+      "unavailable": "Dvosmjerni razgovor nije dostupan za ovo emitiranje"
+    },
+    "lowBandwidth": {
+      "tips": "Prikaz uživo je u načinu rada s niskom propusnošću zbog međuspremnika ili grešaka u emitiranju.",
+      "resetStream": "Resetiraj emitiranje"
+    },
+    "playInBackground": {
+      "label": "Reproduciraj u pozadini",
+      "tips": "Omogući ovu opciju za nastavak emitiranja kad je player skriven."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Postavke",
+    "cameraEnabled": "Kamera omogućena",
+    "objectDetection": "Detekcija objekata",
+    "recording": "Snimanje",
+    "snapshots": "Snimke",
+    "audioDetection": "Detekcija zvuka",
+    "transcription": "Audio transkripcija",
+    "autotracking": "Automatsko praćenje"
+  },
+  "history": {
+    "label": "Prikaži povijesne snimke"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Svi",
+      "motion": "Prijedlog",
+      "active_objects": "Aktivni objekti"
+    }
+  },
+  "editLayout": {
+    "label": "Uredi raspored",
+    "group": {
+      "label": "Uredi Grupu Kamera"
+    },
+    "exitEdit": "Izlaz iz uređivanja"
+  },
+  "noCameras": {
+    "title": "Nema konfiguriranih kamera",
+    "description": "Započnite povezivanjem kamere na Frigate.",
+    "buttonText": "Dodaj kameru",
+    "restricted": {
+      "title": "Nema dostupnih kamera",
+      "description": "Nemate dopuštenje za gledanje kamera u ovoj grupi."
+    },
+    "default": {
+      "title": "Nema konfiguriranih kamera",
+      "description": "Započnite povezivanjem kamere na Frigate.",
+      "buttonText": "Dodaj kameru"
+    },
+    "group": {
+      "title": "Nema kamera u grupi",
+      "description": "Ova grupa kamera nema dodijeljene niti omogućene kamere.",
+      "buttonText": "Upravljanje grupama"
+    }
   }
 }

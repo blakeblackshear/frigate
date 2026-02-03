@@ -81,7 +81,8 @@
     },
     "inProgress": "U tijeku",
     "invalidStartTime": "Nevažeće vrijeme početka",
-    "invalidEndTime": "Nevažeće vrijeme završetka"
+    "invalidEndTime": "Nevažeće vrijeme završetka",
+    "never": "Nikad"
   },
   "menu": {
     "live": {

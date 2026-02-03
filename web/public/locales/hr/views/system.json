@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "cameras": "Statistika kamera - Frigate",
-    "general": "Generalne statistike - Frigate",
+    "cameras": "Statistika Kamera - Frigate",
+    "general": "Opća Statistika - Frigate",
     "logs": {
-      "go2rtc": "Go2RTC Zapisnici- Frigate",
-      "nginx": "Nginx Zapisnici - Frigate",
-      "frigate": "Frigate Zapisnici - Frigate"
+      "go2rtc": "Zapisnici Go2RTC - Frigate",
+      "nginx": "Zapisnici Nginx - Frigate",
+      "frigate": "Zapisnici Frigate - Frigate"
     },
-    "storage": "Statistika pohrane - Frigate",
-    "enrichments": "Statistika obogaćivanja - Frigate"
+    "storage": "Statistika Pohrane - Frigate",
+    "enrichments": "Statistika Obogaćenja - Frigate"
   },
   "title": "Sustav",
   "logs": {
@@ -22,15 +22,15 @@
       "message": "Poruka"
     },
     "copy": {
-      "label": "Kopiraj u Međuspremnik",
-      "success": "Kopirani zapisnici u međuspremnik",
-      "error": "Nisam mogao kopirati zapisnike u međuspremnik"
+      "label": "Kopiraj u međuspremnik",
+      "success": "Zapisnici kopirani u međuspremnik",
+      "error": "Nije moguće kopirati zapisnike u međuspremnik"
     },
-    "tips": "Zapisnici se prenose s poslužitelja",
+    "tips": "Zapisnici se prenose sa servera",
     "toast": {
       "error": {
-        "fetchingLogsFailed": "Greška dohvaćanja zapisnika: {{errorMessage}}",
-        "whileStreamingLogs": "Pogreška tijekom prijenosa zapisnika: {{errorMessage}}"
+        "fetchingLogsFailed": "Greška pri dohvaćanju zapisnika: {{errorMessage}}",
+        "whileStreamingLogs": "Greška tijekom prijenosa zapisnika: {{errorMessage}}"
       }
     }
   },
@@ -39,26 +39,170 @@
     "title": "Općenito",
     "detector": {
       "title": "Detektori",
-      "inferenceSpeed": "Brzina izvođenja detektora",
-      "temperature": "Temperatura Detektora",
-      "cpuUsage": "Detektorova iskorištenost CPU-a",
-      "cpuUsageInformation": "CPU korišten za pripremu ulaznih i izlaznih podataka za modele detekcije. Ova vrijednost ne mjeri korištenje tijekom izvođenja modela, čak ni ako se koristi GPU ili akcelerator.",
-      "memoryUsage": "Detektorova Iskorištenost Memorije"
+      "inferenceSpeed": "Brzina inferencije detektora",
+      "temperature": "Temperatura detektora",
+      "cpuUsage": "Upotreba CPU-a detektora",
+      "cpuUsageInformation": "CPU korišten za pripremu ulaznih i izlaznih podataka za/od modela detekcije. Ova vrijednost ne mjeri korištenje za inferenciju, čak ni ako se koristi GPU ili akcelerator.",
+      "memoryUsage": "Upotreba memorije detektora"
     },
     "hardwareInfo": {
       "title": "Informacije o hardveru",
-      "gpuUsage": "Iskorištenost GPU-a",
-      "gpuMemory": "GPU Memorija",
-      "gpuEncoder": "GPU Enkoder",
-      "gpuDecoder": "GPU Dekoder",
+      "gpuUsage": "Upotreba GPU-a",
+      "gpuMemory": "Memorija GPU-a",
+      "gpuEncoder": "GPU Encoder",
+      "gpuDecoder": "GPU Decoder",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Ispis Vainfo",
+          "title": "Vainfo Izlaz",
           "returnCode": "Povratni kod: {{code}}",
-          "processOutput": "Ispis procesa:",
+          "processOutput": "Izlaz procesa:",
           "processError": "Greška procesa:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI Izlaz",
+          "name": "Naziv: {{name}}",
+          "driver": "Driver: {{driver}}",
+          "cudaComputerCapability": "CUDA Compute Capability: {{cuda_compute}}",
+          "vbios": "VBios Informacije: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zatvori informacije o GPU-u"
+        },
+        "copyInfo": {
+          "label": "Kopiraj informacije o GPU-u"
+        },
+        "toast": {
+          "success": "Informacije o GPU-u kopirane u međuspremnik"
         }
+      },
+      "npuUsage": "Upotreba NPU-a",
+      "npuMemory": "Memorija NPU-a",
+      "intelGpuWarning": {
+        "title": "Upozorenje Intel GPU Statistika",
+        "message": "Statistika GPU-a nije dostupna",
+        "description": "Ovo je poznata greška u Intelovim alatima za izvještavanje GPU statistike (intel_gpu_top) gdje će se podaci prekinuti i stalno prikazivati 0% korištenja GPU-a, čak i kada hardversko ubrzanje i detekcija objekata pravilno rade na (i)GPU-u. Ovo nije greška Frigate-a. Možete ponovno pokrenuti host da privremeno riješite problem i potvrdite da GPU radi ispravno. Ovo ne utječe na performanse."
       }
+    },
+    "otherProcesses": {
+      "title": "Ostali Procesi",
+      "processCpuUsage": "Upotreba CPU-a procesa",
+      "processMemoryUsage": "Upotreba memorije procesa",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "snimanje",
+        "review_segment": "pregled segmenta",
+        "embeddings": "ugrađivanja",
+        "audio_detector": "audio detektor"
+      }
+    }
+  },
+  "storage": {
+    "title": "Pohrana",
+    "overview": "Pregled",
+    "recordings": {
+      "title": "Snimke",
+      "tips": "Ova vrijednost predstavlja ukupno korištenje prostora za snimke u Frigate bazi podataka. Frigate ne prati korištenje prostora za sve datoteke na disku.",
+      "earliestRecording": "Najranija dostupna snimka:"
+    },
+    "shm": {
+      "title": "SHM (zajednička memorija) alokacija",
+      "warning": "Trenutna veličina SHM od {{total}} MB je premala. Povećajte je na najmanje {{min_shm}} MB."
+    },
+    "cameraStorage": {
+      "title": "Pohrana Kamere",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Informacije o neiskorištenom prostoru",
+      "storageUsed": "Pohrana",
+      "percentageOfTotalUsed": "Postotak od ukupnog",
+      "bandwidth": "Propusnost",
+      "unused": {
+        "title": "Neiskorišteno",
+        "tips": "Ova vrijednost možda ne prikazuje točno slobodan prostor dostupan Frigate-u ako imate druge datoteke pohranjene na disku osim Frigate snimaka. Frigate ne prati korištenje prostora izvan svojih snimki."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Kamere",
+    "overview": "Pregled",
+    "info": {
+      "aspectRatio": "Omjer stranica",
+      "cameraProbeInfo": "{{camera}} Informacije ispitane od kamere",
+      "streamDataFromFFPROBE": "Podaci emitiranja dohvaćeni su pomoću <code>ffprobe</code>.",
+      "fetching": "Dohvaćanje podataka kamere",
+      "stream": "Emitiranje {{idx}}",
+      "video": "Video:",
+      "codec": "Kodek:",
+      "resolution": "Rezolucija:",
+      "fps": "FPS:",
+      "unknown": "Nepoznato",
+      "audio": "Audio:",
+      "error": "Greška: {{error}}",
+      "tips": {
+        "title": "Informacije Ispitivanja Kamere"
+      }
+    },
+    "framesAndDetections": "Okviri / Detekcije",
+    "label": {
+      "camera": "kamera",
+      "detect": "detekcija",
+      "skipped": "preskočeno",
+      "ffmpeg": "FFmpeg",
+      "capture": "snimanje",
+      "overallFramesPerSecond": "ukupni okviri po sekundi",
+      "overallDetectionsPerSecond": "ukupne detekcije po sekundi",
+      "overallSkippedDetectionsPerSecond": "ukupne preskočene detekcije po sekundi",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} snimanje",
+      "cameraDetect": "{{camName}} detekcija",
+      "cameraFramesPerSecond": "{{camName}} okviri po sekundi",
+      "cameraDetectionsPerSecond": "{{camName}} detekcije po sekundi",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} preskočene detekcije po sekundi"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Podaci probe kopirani u međuspremnik."
+      },
+      "error": {
+        "unableToProbeCamera": "Nije moguće probati kameru: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Zadnje osvježavanje: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} ima visoku upotrebu CPU-a za FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} ima visoku upotrebu CPU-a za detekciju ({{detectAvg}}%)",
+    "healthy": "Sustav je zdrav",
+    "reindexingEmbeddings": "Reindeksiranje embeddings ({{processed}}% završeno)",
+    "cameraIsOffline": "{{camera}} je offline",
+    "detectIsSlow": "{{detect}} je sporo ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} je vrlo sporo ({{speed}} ms)",
+    "shmTooLow": "/dev/shm alokacija ({{total}} MB) treba biti povećana na najmanje {{min}} MB."
+  },
+  "enrichments": {
+    "title": "Obogaćenja",
+    "infPerSecond": "Inferencija po sekundi",
+    "averageInf": "Prosječno vrijeme inferencije",
+    "embeddings": {
+      "image_embedding": "Ugrađivanja slike",
+      "text_embedding": "Ugrađivanja teksta",
+      "face_recognition": "Prepoznavanje lica",
+      "plate_recognition": "Prepoznavanje registarskih pločica",
+      "image_embedding_speed": "Brzina Image Embedding",
+      "face_embedding_speed": "Brzina Face Embedding",
+      "face_recognition_speed": "Brzina prepoznavanja lica",
+      "plate_recognition_speed": "Brzina prepoznavanja registarskih pločica",
+      "text_embedding_speed": "Brzina Text Embedding",
+      "yolov9_plate_detection_speed": "Brzina YOLOv9 prepoznavanja pločica",
+      "yolov9_plate_detection": "YOLOv9 Prepoznavanje pločica",
+      "review_description": "Opis Pregleda",
+      "review_description_speed": "Brzina Opisa Pregleda",
+      "review_description_events_per_second": "Opis Pregleda",
+      "object_description": "Opis Objekta",
+      "object_description_speed": "Brzina Opisa Objekta",
+      "object_description_events_per_second": "Opis Objekta",
+      "classification": "{{name}} Klasifikacija",
+      "classification_speed": "Brzina {{name}} Klasifikacije",
+      "classification_events_per_second": "{{name}} Klasifikacija po događajima po sekundi"
     }
   }
 }

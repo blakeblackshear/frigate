@@ -37,7 +37,7 @@
   "noPreviewFoundFor": "Pretpregled nije nađen za {{cameraName}}",
   "livePlayerRequiredIOSVersion": "iOS 17.1 ili noviji je potreban za ovu vrstu uživog prijenosa.",
   "streamOffline": {
-    "title": "Stream nije dostupan",
+    "title": "Emitiranje nije dostupno",
     "desc": "Slike nisu primljene sa {{cameraName}} <code>detect</code> stream-a, provjeri logove"
   },
   "toast": {
