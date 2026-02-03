@@ -184,6 +184,16 @@
     "restricted": {
       "title": "Ingen kameraer tilgjengelig",
       "description": "Du har ikke tilgang for å se noen kameraer i denne gruppen."
+    },
+    "default": {
+      "title": "Ingen kameraer konfigurert",
+      "description": "Kom i gang ved å koble et kamera til Frigate.",
+      "buttonText": "Legg til kamera"
+    },
+    "group": {
+      "title": "Ingen kameraer i gruppe",
+      "description": "Denne kameragruppen har ingen tildelte eller aktiverte kameraer.",
+      "buttonText": "Administrer grupper"
     }
   }
 }

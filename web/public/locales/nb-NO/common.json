@@ -84,7 +84,8 @@
     },
     "inProgress": "Pågår",
     "invalidStartTime": "Ugyldig starttid",
-    "invalidEndTime": "Ugyldig sluttid"
+    "invalidEndTime": "Ugyldig sluttid",
+    "never": "Aldri"
   },
   "button": {
     "copy": "Kopier",
@@ -263,7 +264,7 @@
     "ID": "ID",
     "none": "Ingen",
     "all": "Alle",
-    "other": "Andre"
+    "other": "Annet"
   },
   "toast": {
     "copyUrlToClipboard": "Nettadresse kopiert til utklippstavlen.",
