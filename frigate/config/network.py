@@ -35,5 +35,7 @@ class NetworkingConfig(FrigateBaseModel):
         description="IPv6-specific settings for Frigate network services.",
     )
     listen: ListenConfig = Field(
-        default_factory=ListenConfig, title="Listening ports configuration"
+        default_factory=ListenConfig,
+        title="Listening ports configuration",
+        description="Configuration for internal and external listening ports. This is for advanced users. For the majority of use cases it's recommended to change the ports section of your Docker compose file.",
     )

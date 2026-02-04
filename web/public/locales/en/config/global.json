@@ -172,6 +172,7 @@
     },
     "listen": {
       "label": "Listening ports configuration",
+      "description": "Configuration for internal and external listening ports. This is for advanced users. For the majority of use cases it's recommended to change the ports section of your Docker compose file.",
       "internal": {
         "label": "Internal port",
         "description": "Internal listening port for Frigate (default 5000)."
