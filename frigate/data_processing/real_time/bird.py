@@ -22,7 +22,7 @@ from .api import RealTimeProcessorApi
 try:
     from tflite_runtime.interpreter import Interpreter
 except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
+    from ai_edge_litert.interpreter import Interpreter
 
 logger = logging.getLogger(__name__)
 
