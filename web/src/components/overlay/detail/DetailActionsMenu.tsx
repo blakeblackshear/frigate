@@ -81,7 +81,7 @@ export default function DetailActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent align="end">
-          {search.has_snapshot && (
+          {search.has_snapshot && search?.data?.type === "object" && (
             <DropdownMenuItem>
               <a
                 className="w-full"
@@ -95,7 +95,8 @@ export default function DetailActionsMenu({
             </DropdownMenuItem>
           )}
           {search.has_snapshot &&
-            config?.cameras[search.camera].snapshots.clean_copy && (
+            config?.cameras[search.camera].snapshots.clean_copy &&
+            search?.data?.type === "object" && (
               <DropdownMenuItem>
                 <a
                   className="w-full"

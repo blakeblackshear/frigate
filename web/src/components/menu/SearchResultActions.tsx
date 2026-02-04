@@ -99,7 +99,7 @@ export default function SearchResultActions({
           </a>
         </MenuItem>
       )}
-      {searchResult.has_snapshot && (
+      {searchResult.has_snapshot && searchResult?.data?.type === "object" && (
         <MenuItem aria-label={t("itemMenu.downloadSnapshot.aria")}>
           <a
             className="flex items-center"
@@ -111,6 +111,7 @@ export default function SearchResultActions({
         </MenuItem>
       )}
       {searchResult.has_snapshot &&
+        searchResult?.data?.type === "object" &&
         config?.cameras[searchResult.camera].snapshots.clean_copy && (
           <MenuItem aria-label={t("itemMenu.downloadCleanSnapshot.aria")}>
             <a
