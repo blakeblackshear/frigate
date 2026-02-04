@@ -2,15 +2,19 @@
 
 # Update package list and install dependencies
 sudo apt-get update
-sudo apt-get install -y build-essential cmake git wget
+sudo apt-get install -y build-essential cmake git wget linux-headers-$(uname -r)
 
 hailo_version="4.21.0"
 arch=$(uname -m)
 
-if [[ $arch == "x86_64" ]]; then
-    sudo apt install -y linux-headers-$(uname -r);
-else
-    sudo apt install -y linux-modules-extra-$(uname -r);
+if [[ $arch == "aarch64" ]]; then
+    source /etc/os-release
+    os_codename=$VERSION_CODENAME
+    echo "Detected OS codename: $VERSION_CODENAME"
+fi
+
+if [ "$os_codename" = "trixie" ]; then
+    sudo apt install -y dkms
 fi
 
 # Clone the HailoRT driver repository
@@ -47,3 +51,4 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 echo "HailoRT driver installation complete."
 echo "reboot your system to load the firmware!"
+echo "Driver version: $(modinfo -F version hailo_pci)"
