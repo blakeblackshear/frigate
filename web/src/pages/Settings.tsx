@@ -454,6 +454,7 @@ const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
 // keys for global sections
 const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
   detect: "globalDetect",
+  ffmpeg: "globalFfmpeg",
   record: "globalRecording",
   snapshots: "globalSnapshots",
   motion: "globalMotion",
