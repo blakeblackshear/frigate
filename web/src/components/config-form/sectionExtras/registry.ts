@@ -1,12 +1,13 @@
-import { createElement } from "react";
 import type { ComponentType } from "react";
 import SemanticSearchReindex from "./SemanticSearchReindex.tsx";
-import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView.tsx";
+import CameraReviewStatusToggles from "./CameraReviewStatusToggles";
+import type { ConfigFormContext } from "@/types/configForm";
 
 // Props that will be injected into all section renderers
 export type SectionRendererProps = {
   selectedCamera?: string;
   setUnsavedChanges?: (hasChanges: boolean) => void;
+  formContext?: ConfigFormContext;
   [key: string]: unknown; // Allow additional props from uiSchema
 };
 
@@ -16,20 +17,6 @@ export type SectionRenderers = Record<
   string,
   Record<string, RendererComponent>
 >;
-
-const CameraReviewSettingsRenderer: RendererComponent = ({
-  selectedCamera,
-  setUnsavedChanges,
-}) => {
-  if (!selectedCamera) {
-    return null;
-  }
-
-  return createElement(CameraReviewSettingsView, {
-    selectedCamera,
-    setUnsavedChanges,
-  });
-};
 
 // Section renderers registry
 // Used to register custom renderer components for specific config sections.
@@ -55,7 +42,7 @@ export const sectionRenderers: SectionRenderers = {
     SemanticSearchReindex,
   },
   review: {
-    CameraReviewSettingsView: CameraReviewSettingsRenderer,
+    CameraReviewStatusToggles,
   },
 };
 

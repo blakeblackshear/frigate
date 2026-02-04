@@ -18,6 +18,9 @@ export type ConfigFormContext = {
   cameraName?: string;
   globalValue?: JsonValue;
   cameraValue?: JsonValue;
+  hasChanges?: boolean;
+  formData?: JsonObject;
+  onFormDataChange?: (data: ConfigSectionData) => void;
   fullCameraConfig?: CameraConfig;
   fullConfig?: FrigateConfig;
   i18nNamespace?: string;

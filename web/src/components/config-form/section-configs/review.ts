@@ -9,16 +9,22 @@ const review: SectionConfigOverrides = {
       "enabled_in_config",
       "alerts.labels",
       "alerts.enabled_in_config",
-      "alerts.required_zones",
       "detections.labels",
       "detections.enabled_in_config",
-      "detections.required_zones",
       "genai.enabled_in_config",
     ],
     advancedFields: [],
     uiSchema: {
       alerts: {
-        "ui:before": { render: "CameraReviewSettingsView" },
+        "ui:before": { render: "CameraReviewStatusToggles" },
+        required_zones: {
+          "ui:widget": "hidden",
+        },
+      },
+      detections: {
+        required_zones: {
+          "ui:widget": "hidden",
+        },
       },
       genai: {
         additional_concerns: {

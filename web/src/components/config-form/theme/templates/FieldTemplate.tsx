@@ -324,7 +324,9 @@ export function FieldTemplate(props: FieldTemplateProps) {
       const renderers = formContext?.renderers;
       const RenderComponent = renderers?.[renderKey];
       if (RenderComponent) {
-        return <RenderComponent {...(spec.props ?? {})} />;
+        return (
+          <RenderComponent {...(spec.props ?? {})} formContext={formContext} />
+        );
       }
     }
 
