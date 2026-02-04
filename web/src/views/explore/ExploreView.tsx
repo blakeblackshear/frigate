@@ -23,6 +23,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { LuSearchX } from "react-icons/lu";
+import { getIconForLabel } from "@/utils/iconUtil";
 
 type ExploreViewProps = {
   setSearchDetail: (search: SearchResult | undefined) => void;
@@ -149,6 +150,9 @@ function ThumbnailRow({
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
       <div className="flex flex-row items-center text-lg smart-capitalize">
+        {labelType === "audio"
+          ? getIconForLabel("", labelType, "size-4 mr-1")
+          : null}
         {getTranslatedLabel(label, labelType)}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
