@@ -883,12 +883,15 @@ export function ConfigSection({
             {isSaving ? (
               <>
                 <ActivityIndicator className="h-4 w-4" />
-                {t("saving", { ns: "common", defaultValue: "Saving..." })}
+                {t("button.saving", {
+                  ns: "common",
+                  defaultValue: "Saving...",
+                })}
               </>
             ) : (
               <>
                 <LuSave className="h-4 w-4" />
-                {t("save", { ns: "common", defaultValue: "Save" })}
+                {t("button.save", { ns: "common", defaultValue: "Save" })}
               </>
             )}
           </Button>
@@ -909,7 +912,7 @@ export function ConfigSection({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {t("cancel", { ns: "common" })}
+              {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-selected text-white hover:bg-selected/90"
@@ -945,7 +948,7 @@ export function ConfigSection({
                   level === "camera" &&
                   isOverridden && (
                     <Badge variant="secondary" className="text-xs">
-                      {t("overridden", {
+                      {t("button.overridden", {
                         ns: "common",
                         defaultValue: "Overridden",
                       })}
@@ -980,7 +983,7 @@ export function ConfigSection({
               <Heading as="h4">{title}</Heading>
               {showOverrideIndicator && level === "camera" && isOverridden && (
                 <Badge variant="secondary" className="text-xs">
-                  {t("overridden", {
+                  {t("button.overridden", {
                     ns: "common",
                     defaultValue: "Overridden",
                   })}

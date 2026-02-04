@@ -1,28 +1,68 @@
 {
   "audio": {
-    "detection": "Detection",
-    "sensitivity": "Sensitivity"
+    "global": {
+      "detection": "Detection",
+      "sensitivity": "Sensitivity"
+    },
+    "cameras": {
+      "detection": "Detection",
+      "sensitivity": "Sensitivity"
+    }
   },
   "timestamp_style": {
-    "appearance": "Appearance"
+    "global": {
+      "appearance": "Appearance"
+    },
+    "cameras": {
+      "appearance": "Appearance"
+    }
   },
   "motion": {
-    "sensitivity": "Sensitivity",
-    "algorithm": "Algorithm"
+    "global": {
+      "sensitivity": "Sensitivity",
+      "algorithm": "Algorithm"
+    },
+    "cameras": {
+      "sensitivity": "Sensitivity",
+      "algorithm": "Algorithm"
+    }
   },
   "snapshots": {
-    "display": "Display"
+    "global": {
+      "display": "Display"
+    },
+    "cameras": {
+      "display": "Display"
+    }
   },
   "detect": {
-    "resolution": "Resolution",
-    "tracking": "Tracking"
+    "global": {
+      "resolution": "Resolution",
+      "tracking": "Tracking!!!"
+    },
+    "cameras": {
+      "resolution": "Resolution",
+      "tracking": "Tracking!!!"
+    }
   },
   "objects": {
-    "tracking": "Tracking",
-    "filtering": "Filtering"
+    "global": {
+      "tracking": "Tracking",
+      "filtering": "Filtering"
+    },
+    "cameras": {
+      "tracking": "Tracking",
+      "filtering": "Filtering"
+    }
   },
   "record": {
-    "retention": "Retention",
-    "events": "Events"
+    "global": {
+      "retention": "Retention",
+      "events": "Events"
+    },
+    "cameras": {
+      "retention": "Retention",
+      "events": "Events"
+    }
   }
 }

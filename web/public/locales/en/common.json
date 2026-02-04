@@ -115,6 +115,7 @@
     "internalID": "The Internal ID Frigate uses in the configuration and database"
   },
   "button": {
+    "add": "Add",
     "apply": "Apply",
     "reset": "Reset",
     "undo": "Undo",

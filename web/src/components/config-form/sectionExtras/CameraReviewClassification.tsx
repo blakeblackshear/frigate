@@ -193,7 +193,7 @@ export default function CameraReviewClassification({
             <>
               <div className="mb-2">
                 <Label className="flex flex-row items-center text-base">
-                  <Trans ns="views/settings">camera.review.alerts</Trans>
+                  <Trans ns="views/settings">cameraReview.review.alerts</Trans>
                   <MdCircle className="ml-3 size-2 text-severity_alert" />
                 </Label>
                 <div className="text-sm text-muted-foreground">
@@ -256,7 +256,9 @@ export default function CameraReviewClassification({
             <>
               <div className="mb-2">
                 <Label className="flex flex-row items-center text-base">
-                  <Trans ns="views/settings">camera.review.detections</Trans>
+                  <Trans ns="views/settings">
+                    cameraReview.review.detections
+                  </Trans>
                   <MdCircle className="ml-3 size-2 text-severity_detection" />
                 </Label>
                 {selectDetections && (

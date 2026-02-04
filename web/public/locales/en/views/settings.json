@@ -1244,8 +1244,12 @@
     "objects": {
       "title": "Object Settings"
     },
+    "audioLabels": {
+      "summary": "{{count}} audio labels selected",
+      "empty": "No audio labels available"
+    },
     "objectLabels": {
-      "summary": "{{count}} selected",
+      "summary": "{{count}} object types selected",
       "empty": "No object labels available"
     },
     "filters": {

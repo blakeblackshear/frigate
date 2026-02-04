@@ -179,7 +179,7 @@ export function SwitchesWidget(props: WidgetProps) {
           </Button>
         </CollapsibleTrigger>
 
-        <CollapsibleContent className="bg-background_alt p-2">
+        <CollapsibleContent className="bg-background_alt p-2 md:max-w-xl">
           {availableEntities.length === 0 ? (
             <div className="text-sm text-muted-foreground">{emptyMessage}</div>
           ) : (

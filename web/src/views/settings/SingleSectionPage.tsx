@@ -128,7 +128,7 @@ export function SingleSectionPage({
                   variant="secondary"
                   className="border-2 border-selected text-xs text-primary-variant"
                 >
-                  {t("overridden", {
+                  {t("button.overridden", {
                     ns: "common",
                     defaultValue: "Overridden",
                   })}

@@ -195,8 +195,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         ordered.forEach((item) => grouped.add(item.name));
 
         const label = domain
-          ? t(`${domain}.${groupKey}`, {
-              ns: "config/global",
+          ? t(`${sectionI18nPrefix}.${domain}.${groupKey}`, {
+              ns: "config/groups",
               defaultValue: toTitle(groupKey),
             })
           : t(`groups.${groupKey}`, {
@@ -261,7 +261,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         className="gap-2"
       >
         <LuPlus className="h-4 w-4" />
-        {t("add", { ns: "common", defaultValue: "Add" })}
+        {t("button.add", { ns: "common", defaultValue: "Add" })}
       </Button>
     );
   };
