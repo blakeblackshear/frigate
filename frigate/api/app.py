@@ -196,6 +196,54 @@ def config(request: Request):
     return JSONResponse(content=config)
 
 
+@router.get("/ffmpeg/presets", dependencies=[Depends(allow_any_authenticated())])
+def ffmpeg_presets():
+    """Return available ffmpeg preset keys for config UI usage."""
+
+    # Whitelist based on documented presets in ffmpeg_presets.md
+    hwaccel_presets = {
+        "preset-rpi-64-h264",
+        "preset-rpi-64-h265",
+        "preset-vaapi",
+        "preset-intel-qsv-h264",
+        "preset-intel-qsv-h265",
+        "preset-nvidia",
+        "preset-jetson-h264",
+        "preset-jetson-h265",
+        "preset-rkmpp",
+    }
+    input_presets = {
+        "preset-http-jpeg-generic",
+        "preset-http-mjpeg-generic",
+        "preset-http-reolink",
+        "preset-rtmp-generic",
+        "preset-rtsp-generic",
+        "preset-rtsp-restream",
+        "preset-rtsp-restream-low-latency",
+        "preset-rtsp-udp",
+        "preset-rtsp-blue-iris",
+    }
+    record_output_presets = {
+        "preset-record-generic",
+        "preset-record-generic-audio-copy",
+        "preset-record-generic-audio-aac",
+        "preset-record-mjpeg",
+        "preset-record-jpeg",
+        "preset-record-ubiquiti",
+    }
+
+    return JSONResponse(
+        content={
+            "hwaccel_args": hwaccel_presets,
+            "input_args": input_presets,
+            "output_args": {
+                "record": record_output_presets,
+                "detect": [],
+            },
+        }
+    )
+
+
 @router.get("/config/raw_paths", dependencies=[Depends(require_role(["admin"]))])
 def config_raw_paths(request: Request):
     """Admin-only endpoint that returns camera paths and go2rtc streams without credential masking."""

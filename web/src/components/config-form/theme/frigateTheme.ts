@@ -22,6 +22,7 @@ import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
 import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
+import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -48,6 +49,7 @@ export const frigateTheme: FrigateTheme = {
     SelectWidget: SelectWidget,
     CheckboxWidget: SwitchWidget,
     ArrayAsTextWidget: ArrayAsTextWidget,
+    FfmpegArgsWidget: FfmpegArgsWidget,
     // Custom widgets
     switch: SwitchWidget,
     password: PasswordWidget,

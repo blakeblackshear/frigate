@@ -14,6 +14,7 @@ import type { FormValidation, UiSchema } from "@rjsf/utils";
 import {
   modifySchemaForSection,
   getEffectiveDefaultsForSection,
+  sanitizeOverridesForSection,
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import {
@@ -349,6 +350,13 @@ export function ConfigSection({
 
       if (Array.isArray(current)) {
         if (
+          current.length === 0 &&
+          (base === undefined || base === null) &&
+          (defaults === undefined || defaults === null)
+        ) {
+          return undefined;
+        }
+        if (
           (base === undefined &&
             defaults !== undefined &&
             isEqual(current, defaults)) ||
@@ -366,6 +374,10 @@ export function ConfigSection({
 
         const result: JsonObject = {};
         for (const [key, value] of Object.entries(currentObj)) {
+          if (value === undefined && baseObj && baseObj[key] !== undefined) {
+            result[key] = "";
+            continue;
+          }
           const overrideValue = buildOverrides(
             value,
             baseObj ? baseObj[key] : undefined,
@@ -373,6 +385,18 @@ export function ConfigSection({
           );
           if (overrideValue !== undefined) {
             result[key] = overrideValue as JsonValue;
+          }
+        }
+
+        if (baseObj) {
+          for (const [key, baseValue] of Object.entries(baseObj)) {
+            if (Object.prototype.hasOwnProperty.call(currentObj, key)) {
+              continue;
+            }
+            if (baseValue === undefined) {
+              continue;
+            }
+            result[key] = "";
           }
         }
 
@@ -506,25 +530,34 @@ export function ConfigSection({
         rawData,
         effectiveSchemaDefaults,
       );
+      const sanitizedOverrides = sanitizeOverridesForSection(
+        sectionPath,
+        level,
+        overrides,
+      );
 
-      if (!overrides || Object.keys(overrides).length === 0) {
+      if (
+        !sanitizedOverrides ||
+        typeof sanitizedOverrides !== "object" ||
+        Object.keys(sanitizedOverrides).length === 0
+      ) {
         setPendingData(null);
         return;
       }
 
-      const needsRestart = requiresRestartForOverrides(overrides);
+      const needsRestart = requiresRestartForOverrides(sanitizedOverrides);
 
       await axios.put("config/set", {
         requires_restart: needsRestart ? 1 : 0,
         update_topic: updateTopic,
         config_data: {
-          [basePath]: overrides,
+          [basePath]: sanitizedOverrides,
         },
       });
       // log save to console for debugging
       // eslint-disable-next-line no-console
       console.log("Saved config data:", {
-        [basePath]: overrides,
+        [basePath]: sanitizedOverrides,
         update_topic: updateTopic,
         requires_restart: needsRestart ? 1 : 0,
       });
@@ -776,6 +809,9 @@ export function ConfigSection({
           cameraName,
           globalValue,
           cameraValue,
+          hasChanges,
+          formData: (pendingData || formData) as ConfigSectionData,
+          onFormDataChange: (data: ConfigSectionData) => handleChange(data),
           // For widgets that need access to full camera config (e.g., zone names)
           fullCameraConfig:
             level === "camera" && cameraName

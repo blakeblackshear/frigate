@@ -8,6 +8,8 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
+import { isJsonObject } from "@/lib/utils";
+import { JsonObject } from "@/types/configForm";
 
 /**
  * Sections that require special handling at the global level.
@@ -101,4 +103,48 @@ export function getEffectiveDefaultsForSection(
   }
 
   return schemaDefaults;
+}
+
+/**
+ * Sanitize overrides payloads for section-specific quirks.
+ */
+export function sanitizeOverridesForSection(
+  sectionPath: string,
+  level: string,
+  overrides: unknown,
+): unknown {
+  if (!overrides || !isJsonObject(overrides)) {
+    return overrides;
+  }
+
+  if (sectionPath === "ffmpeg" && level === "camera") {
+    const overridesObj = overrides as JsonObject;
+    const inputs = overridesObj.inputs;
+    if (!Array.isArray(inputs)) {
+      return overrides;
+    }
+
+    const cleanedInputs = inputs.map((input) => {
+      if (!isJsonObject(input)) {
+        return input;
+      }
+
+      const cleanedInput = { ...input } as JsonObject;
+      ["global_args", "hwaccel_args", "input_args"].forEach((key) => {
+        const value = cleanedInput[key];
+        if (Array.isArray(value) && value.length === 0) {
+          delete cleanedInput[key];
+        }
+      });
+
+      return cleanedInput;
+    });
+
+    return {
+      ...overridesObj,
+      inputs: cleanedInputs,
+    };
+  }
+
+  return overrides;
 }

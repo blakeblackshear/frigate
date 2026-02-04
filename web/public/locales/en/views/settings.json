@@ -1196,6 +1196,12 @@
       "keyPlaceholder": "New key",
       "remove": "Remove"
     },
+    "ffmpegArgs": {
+      "preset": "Preset",
+      "manual": "Manual arguments",
+      "selectPreset": "Select preset",
+      "manualPlaceholder": "Enter FFmpeg arguments"
+    },
     "sections": {
       "detect": "Detection",
       "record": "Recording",

@@ -1,8 +1,30 @@
 import type { SectionConfigOverrides } from "./types";
 
+const arrayAsTextWidget = {
+  "ui:widget": "ArrayAsTextWidget",
+  "ui:options": {
+    suppressMultiSchema: true,
+  },
+};
+
+const ffmpegArgsWidget = (presetField: string) => ({
+  "ui:widget": "FfmpegArgsWidget",
+  "ui:options": {
+    suppressMultiSchema: true,
+    ffmpegPresetField: presetField,
+  },
+});
+
 const ffmpeg: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/ffmpeg_presets",
+    fieldDocs: {
+      hwaccel_args: "/configuration/ffmpeg_presets#hwaccel-presets",
+      "inputs.hwaccel_args": "/configuration/ffmpeg_presets#hwaccel-presets",
+      input_args: "/configuration/ffmpeg_presets#input-args-presets",
+      "inputs.input_args": "/configuration/ffmpeg_presets#input-args-presets",
+      "output_args.record": "/configuration/ffmpeg_presets#output-args-presets",
+    },
     restartRequired: [],
     fieldOrder: [
       "inputs",
@@ -36,94 +58,26 @@ const ffmpeg: SectionConfigOverrides = {
       "gpu",
     ],
     uiSchema: {
-      global_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-      },
-      hwaccel_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-      },
-      input_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-      },
+      global_args: arrayAsTextWidget,
+      hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
+      input_args: ffmpegArgsWidget("input_args"),
       output_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-        detect: {
-          "ui:widget": "ArrayAsTextWidget",
-          "ui:options": {
-            suppressMultiSchema: true,
-          },
-        },
-        record: {
-          "ui:widget": "ArrayAsTextWidget",
-          "ui:options": {
-            suppressMultiSchema: true,
-          },
-        },
+        detect: arrayAsTextWidget,
+        record: ffmpegArgsWidget("output_args.record"),
         items: {
-          detect: {
-            "ui:widget": "ArrayAsTextWidget",
-            "ui:options": {
-              suppressMultiSchema: true,
-            },
-          },
-          record: {
-            "ui:widget": "ArrayAsTextWidget",
-            "ui:options": {
-              suppressMultiSchema: true,
-            },
-          },
+          detect: arrayAsTextWidget,
+          record: ffmpegArgsWidget("output_args.record"),
         },
       },
       inputs: {
         items: {
-          global_args: {
-            "ui:widget": "ArrayAsTextWidget",
-            "ui:options": {
-              suppressMultiSchema: true,
-            },
-          },
-          hwaccel_args: {
-            "ui:widget": "ArrayAsTextWidget",
-            "ui:options": {
-              suppressMultiSchema: true,
-            },
-          },
-          input_args: {
-            "ui:widget": "ArrayAsTextWidget",
-            "ui:options": {
-              suppressMultiSchema: true,
-            },
-          },
+          global_args: arrayAsTextWidget,
+          hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
+          input_args: ffmpegArgsWidget("input_args"),
           output_args: {
-            "ui:widget": "ArrayAsTextWidget",
-            "ui:options": {
-              suppressMultiSchema: true,
-            },
             items: {
-              detect: {
-                "ui:widget": "ArrayAsTextWidget",
-                "ui:options": {
-                  suppressMultiSchema: true,
-                },
-              },
-              record: {
-                "ui:widget": "ArrayAsTextWidget",
-                "ui:options": {
-                  suppressMultiSchema: true,
-                },
-              },
+              detect: arrayAsTextWidget,
+              record: ffmpegArgsWidget("output_args.record"),
             },
           },
         },
@@ -151,41 +105,12 @@ const ffmpeg: SectionConfigOverrides = {
       "gpu",
     ],
     uiSchema: {
-      global_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-      },
-      hwaccel_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-      },
-      input_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-      },
+      global_args: arrayAsTextWidget,
+      hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
+      input_args: ffmpegArgsWidget("input_args"),
       output_args: {
-        "ui:widget": "ArrayAsTextWidget",
-        "ui:options": {
-          suppressMultiSchema: true,
-        },
-        detect: {
-          "ui:widget": "ArrayAsTextWidget",
-          "ui:options": {
-            suppressMultiSchema: true,
-          },
-        },
-        record: {
-          "ui:widget": "ArrayAsTextWidget",
-          "ui:options": {
-            suppressMultiSchema: true,
-          },
-        },
+        detect: arrayAsTextWidget,
+        record: ffmpegArgsWidget("output_args.record"),
       },
     },
   },
