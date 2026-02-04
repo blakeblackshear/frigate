@@ -154,7 +154,7 @@ export default function CameraReviewClassification({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mb-4 space-y-6">
       <Heading as="h4" className="my-2">
         <Trans ns="views/settings">
           cameraReview.reviewClassification.title

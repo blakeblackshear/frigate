@@ -66,7 +66,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   // Check if this is a root-level object
   const isRoot = registry?.rootSchema === schema;
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const isCameraLevel = formContext?.level === "camera";
   const effectiveNamespace = isCameraLevel ? "config/cameras" : "config/global";
@@ -276,7 +276,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         {advancedProps.length > 0 && (
           <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 pl-0"
+              >
                 {showAdvanced ? (
                   <LuChevronDown className="h-4 w-4" />
                 ) : (
@@ -328,7 +331,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start gap-2"
+                    className="w-full justify-start gap-2 pl-0"
                   >
                     {showAdvanced ? (
                       <LuChevronDown className="h-4 w-4" />

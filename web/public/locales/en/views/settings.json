@@ -1245,14 +1245,14 @@
       "title": "Object Settings"
     },
     "objectLabels": {
-      "summary": "Selected {{count}}",
+      "summary": "{{count}} selected",
       "empty": "No object labels available"
     },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"
     },
     "zoneNames": {
-      "summary": "Selected {{count}}",
+      "summary": "{{count}} selected",
       "empty": "No zones available"
     },
     "review": {

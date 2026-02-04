@@ -167,7 +167,7 @@ export function ConfigSection({
   onSave,
   requiresRestart = true,
   collapsible = false,
-  defaultCollapsed = false,
+  defaultCollapsed = true,
   showTitle,
   onStatusChange,
   pendingDataBySection,

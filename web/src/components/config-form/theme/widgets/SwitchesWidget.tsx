@@ -148,10 +148,10 @@ export function SwitchesWidget(props: WidgetProps) {
   const summary = t
     ? t(`configForm.${i18nKey}.summary`, {
         ns: namespace,
-        defaultValue: "Selected {{count}}",
+        defaultValue: "{{count}} selected",
         count: selectedEntities.length,
       })
-    : `Selected ${selectedEntities.length}`;
+    : `${selectedEntities.length} selected`;
 
   const emptyMessage = t
     ? t(`configForm.${i18nKey}.empty`, {
@@ -167,7 +167,7 @@ export function SwitchesWidget(props: WidgetProps) {
           <Button
             type="button"
             variant="ghost"
-            className="w-full justify-start gap-2"
+            className="w-full justify-start gap-2 pl-0"
             disabled={disabled || readonly}
           >
             {isOpen ? (
