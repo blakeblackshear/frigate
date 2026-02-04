@@ -142,7 +142,6 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    
    Then locate the built-in kernel driver and rename it so it cannot be loaded.
    Renaming allows the original driver to be restored later if needed.
-
    First, locate the currently installed kernel module:
 
    ```bash
