@@ -53,23 +53,23 @@ class FfmpegConfig(FrigateBaseModel):
     )
     global_args: Union[str, list[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT,
-        title="FFmpeg global args",
-        description="Global args passed to FFmpeg processes by default.",
+        title="FFmpeg global arguments",
+        description="Global arguments passed to FFmpeg processes.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
         default="auto",
-        title="Hardware acceleration args",
-        description="Hardware acceleration arguments for FFmpeg (auto or provider-specific).",
+        title="Hardware acceleration arguments",
+        description="Hardware acceleration arguments for FFmpeg. Provider-specific presets are recommended.",
     )
     input_args: Union[str, list[str]] = Field(
         default=FFMPEG_INPUT_ARGS_DEFAULT,
-        title="Input args",
-        description="Input arguments applied to FFmpeg input streams by default.",
+        title="Input arguments",
+        description="Input arguments applied to FFmpeg input streams.",
     )
     output_args: FfmpegOutputArgsConfig = Field(
         default_factory=FfmpegOutputArgsConfig,
-        title="Output args",
-        description="Default output args used for different FFmpeg roles such as detect and record.",
+        title="Output arguments",
+        description="Default output arguments used for different FFmpeg roles such as detect and record.",
     )
     retry_interval: float = Field(
         default=10.0,

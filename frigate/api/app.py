@@ -201,7 +201,7 @@ def ffmpeg_presets():
     """Return available ffmpeg preset keys for config UI usage."""
 
     # Whitelist based on documented presets in ffmpeg_presets.md
-    hwaccel_presets = {
+    hwaccel_presets = [
         "preset-rpi-64-h264",
         "preset-rpi-64-h265",
         "preset-vaapi",
@@ -211,8 +211,8 @@ def ffmpeg_presets():
         "preset-jetson-h264",
         "preset-jetson-h265",
         "preset-rkmpp",
-    }
-    input_presets = {
+    ]
+    input_presets = [
         "preset-http-jpeg-generic",
         "preset-http-mjpeg-generic",
         "preset-http-reolink",
@@ -222,15 +222,15 @@ def ffmpeg_presets():
         "preset-rtsp-restream-low-latency",
         "preset-rtsp-udp",
         "preset-rtsp-blue-iris",
-    }
-    record_output_presets = {
+    ]
+    record_output_presets = [
         "preset-record-generic",
         "preset-record-generic-audio-copy",
         "preset-record-generic-audio-aac",
         "preset-record-mjpeg",
         "preset-record-jpeg",
         "preset-record-ubiquiti",
-    }
+    ]
 
     return JSONResponse(
         content={

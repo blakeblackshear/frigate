@@ -155,20 +155,20 @@
       "description": "Path to the FFmpeg binary to use or a version alias (\"5.0\" or \"7.0\")."
     },
     "global_args": {
-      "label": "FFmpeg global args",
-      "description": "Global args passed to FFmpeg processes by default."
+      "label": "FFmpeg global arguments",
+      "description": "Global arguments passed to FFmpeg processes."
     },
     "hwaccel_args": {
-      "label": "Hardware acceleration args",
-      "description": "Hardware acceleration arguments for FFmpeg (auto or provider-specific)."
+      "label": "Hardware acceleration arguments",
+      "description": "Hardware acceleration arguments for FFmpeg. Provider-specific presets are recommended."
     },
     "input_args": {
-      "label": "Input args",
-      "description": "Input arguments applied to FFmpeg input streams by default."
+      "label": "Input arguments",
+      "description": "Input arguments applied to FFmpeg input streams."
     },
     "output_args": {
-      "label": "Output args",
-      "description": "Default output args used for different FFmpeg roles such as detect and record.",
+      "label": "Output arguments",
+      "description": "Default output arguments used for different FFmpeg roles such as detect and record.",
       "detect": {
         "label": "Detect output args",
         "description": "Default output args for detect role streams."
