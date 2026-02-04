@@ -10,7 +10,7 @@ arch=$(uname -m)
 if [[ $arch == "aarch64" ]]; then
     source /etc/os-release
     os_codename=$VERSION_CODENAME
-    echo "Detected OS codename: $VERSION_CODENAME"
+    echo "Detected OS codename: $os_codename"
 fi
 
 if [ "$os_codename" = "trixie" ]; then
