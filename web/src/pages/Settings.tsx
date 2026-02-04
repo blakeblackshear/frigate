@@ -341,6 +341,7 @@ const settingsGroups = [
         key: "integrationObjectClassification",
         component: IntegrationObjectClassificationSettingsPage,
       },
+      { key: "triggers", component: TriggerView },
       {
         key: "integrationAudioTranscription",
         component: IntegrationAudioTranscriptionSettingsPage,
@@ -387,10 +388,7 @@ const settingsGroups = [
   },
   {
     label: "notifications",
-    items: [
-      { key: "notifications", component: NotificationView },
-      { key: "triggers", component: TriggerView },
-    ],
+    items: [{ key: "notifications", component: NotificationView }],
   },
   {
     label: "frigateplus",

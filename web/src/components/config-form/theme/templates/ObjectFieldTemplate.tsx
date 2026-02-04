@@ -220,11 +220,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     return (
       <div className="space-y-6">
         {groups.map((group) => (
-          <div key={group.key} className="space-y-4">
+          <div key={group.key} className="space-y-6">
             <div className="text-md font-medium text-primary">
               {group.label}
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {group.items.map((element) => (
                 <div key={element.name}>{element.content}</div>
               ))}
@@ -233,7 +233,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         ))}
 
         {ungrouped.length > 0 && (
-          <div className={cn("space-y-4", groups.length > 0 && "pt-2")}>
+          <div className={cn("space-y-6", groups.length > 0 && "pt-2")}>
             {ungrouped.map((element) => (
               <div key={element.name}>{element.content}</div>
             ))}

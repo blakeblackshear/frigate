@@ -70,6 +70,20 @@ function humanizeKey(value: string): string {
     .join(" ");
 }
 
+function _isArrayItemInAdditionalProperty(
+  pathSegments: Array<string | number>,
+): boolean {
+  // // If we find a numeric index, this is an array item
+  for (let i = 0; i < pathSegments.length; i++) {
+    const segment = pathSegments[i];
+    if (typeof segment === "number") {
+      // Consider any array item as being inside additional properties if it's not at the root level
+      return i > 0;
+    }
+  }
+  return false;
+}
+
 type FieldRenderSpec =
   | ReactNode
   | ComponentType<unknown>
@@ -147,6 +161,19 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const pathSegments = fieldPathId.path.filter(
     (segment): segment is string => typeof segment === "string",
   );
+
+  // Check if this is an array item inside an object with additionalProperties
+  const isArrayItemInAdditionalProp = _isArrayItemInAdditionalProperty(
+    fieldPathId.path,
+  );
+
+  // Conditions for showing descriptions/docs links
+  const shouldShowDescription =
+    !isMultiSchemaWrapper &&
+    !isObjectField &&
+    !isAdditionalProperty &&
+    !isArrayItemInAdditionalProp;
+
   const translationPath = buildTranslationPath(pathSegments, sectionI18nPrefix);
   const filterObjectLabel = getFilterObjectLabel(pathSegments);
   const translatedFilterObjectLabel = filterObjectLabel
@@ -402,48 +429,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
                     )}
                   </Label>
                 )}
-                {finalDescription &&
-                  !isMultiSchemaWrapper &&
-                  !isAdditionalProperty && (
-                    <p className="text-xs text-muted-foreground">
-                      {finalDescription}
-                    </p>
-                  )}
-                {fieldDocsUrl &&
-                  !isMultiSchemaWrapper &&
-                  !isObjectField &&
-                  !isAdditionalProperty && (
-                    <div className="flex items-center text-xs text-primary-variant">
-                      <Link
-                        to={fieldDocsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline"
-                      >
-                        {t("readTheDocumentation", { ns: "common" })}
-                        <LuExternalLink className="ml-2 inline-flex size-3" />
-                      </Link>
-                    </div>
-                  )}
-              </div>
-              <div className="flex items-center gap-2">{children}</div>
-            </div>
-          ) : (
-            <>
-              {children}
-
-              {finalDescription &&
-                !isMultiSchemaWrapper &&
-                !isObjectField &&
-                !isAdditionalProperty && (
+                {finalDescription && shouldShowDescription && (
                   <p className="text-xs text-muted-foreground">
                     {finalDescription}
                   </p>
                 )}
-              {fieldDocsUrl &&
-                !isMultiSchemaWrapper &&
-                !isObjectField &&
-                !isAdditionalProperty && (
+                {fieldDocsUrl && shouldShowDescription && (
                   <div className="flex items-center text-xs text-primary-variant">
                     <Link
                       to={fieldDocsUrl}
@@ -456,6 +447,31 @@ export function FieldTemplate(props: FieldTemplateProps) {
                     </Link>
                   </div>
                 )}
+              </div>
+              <div className="flex items-center gap-2">{children}</div>
+            </div>
+          ) : (
+            <>
+              {children}
+
+              {finalDescription && shouldShowDescription && (
+                <p className="text-xs text-muted-foreground">
+                  {finalDescription}
+                </p>
+              )}
+              {fieldDocsUrl && shouldShowDescription && (
+                <div className="flex items-center text-xs text-primary-variant">
+                  <Link
+                    to={fieldDocsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    {t("readTheDocumentation", { ns: "common" })}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
+              )}
             </>
           )}
 
