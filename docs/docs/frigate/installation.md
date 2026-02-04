@@ -238,7 +238,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    Verify the driver version:
    
    ```bash
-   modinfo hailo_pci | grep version
+   cat /sys/module/hailo_pci/version
    ```
    
    Verify that the firmware was installed correctly:
