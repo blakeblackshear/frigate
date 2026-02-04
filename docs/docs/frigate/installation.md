@@ -140,11 +140,31 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    sudo modprobe -r hailo_pci
    ```
    
-   Then rename the built-in driver so it can be restored later if needed:
+   Then locate the built-in kernel driver and rename it so it cannot be loaded.
+   Renaming allows the original driver to be restored later if needed.
+
+   First, locate the currently installed kernel module:
+
+   ```bash
+   modinfo -n hailo_pci
+   ```
+
+   Example output:
+   
+   ```
+   /lib/modules/6.6.31+rpt-rpi-2712/kernel/drivers/media/pci/hailo/hailo_pci.ko.xz
+   ```
+
+   Save the module path to a variable:
+   
+   ```bash
+   BUILTIN=$(modinfo -n hailo_pci)
+   ```
+
+   And rename the module by appending .bak:
     
    ```bash
-   sudo mv /lib/modules/$(uname -r)/kernel/drivers/media/pci/hailo/hailo_pci.ko.xz \
-           /lib/modules/$(uname -r)/kernel/drivers/media/pci/hailo/hailo_pci.ko.xz.bak
+   sudo mv "$BUILTIN" "${BUILTIN}.bak"
    ```
    
    Now refresh the kernel module map so the system recognizes the change:
@@ -167,7 +187,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
 
    This command should return no results.
 
-2. **Run the installation script**:
+3. **Run the installation script**:
 
    Download the installation script:
 
@@ -195,7 +215,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    - Download and install the required firmware
    - Set up udev rules
 
-3. **Reboot your system**:
+4. **Reboot your system**:
 
    After the script completes successfully, reboot to load the firmware:
 
@@ -203,7 +223,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    sudo reboot
    ```
 
-4. **Verify the installation**:
+5. **Verify the installation**:
 
    After rebooting, verify that the Hailo device is available:
 
