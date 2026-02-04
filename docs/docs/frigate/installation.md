@@ -153,7 +153,6 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    ```
    /lib/modules/6.6.31+rpt-rpi-2712/kernel/drivers/media/pci/hailo/hailo_pci.ko.xz
    ```
-
    Save the module path to a variable:
    
    ```bash
@@ -246,6 +245,27 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    
    ```bash
    ls -l /lib/firmware/hailo/hailo8_fw.bin
+   ```
+
+  **Optional: Fix PCIe descriptor page size error**
+
+   If you encounter the following error:
+
+   ```
+   [HailoRT] [error] CHECK failed - max_desc_page_size given 16384 is bigger than hw max desc page size 4096
+   ```
+
+   Create a configuration file to force the correct descriptor page size:
+
+   ```bash
+   echo 'options hailo_pci force_desc_page_size=4096' | sudo tee /etc/modprobe.d/hailo_pci.conf
+   ```
+
+   and reboot:
+
+   ```bash
+   sudo reboot
+   ```
 
 #### Setup
 
