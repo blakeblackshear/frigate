@@ -16,59 +16,11 @@ import { ConfigFormContext } from "@/types/configForm";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-
-/**
- * Build the i18n translation key path for nested fields using the field path
- * provided by RJSF. This avoids ambiguity with underscores in field names and
- * skips dynamic filter labels for per-object filter fields.
- */
-function buildTranslationPath(segments: string[], sectionI18nPrefix?: string) {
-  // Example: filters.person.threshold -> filters.threshold or ov1.model -> model
-  const filtersIndex = segments.indexOf("filters");
-  if (filtersIndex !== -1 && segments.length > filtersIndex + 2) {
-    const normalized = [
-      ...segments.slice(0, filtersIndex + 1),
-      ...segments.slice(filtersIndex + 2),
-    ];
-    return normalized.join(".");
-  }
-
-  // Example: detectors.ov1.type -> detectors.type
-  const detectorsIndex = segments.indexOf("detectors");
-  if (detectorsIndex !== -1 && segments.length > detectorsIndex + 2) {
-    const normalized = [
-      ...segments.slice(0, detectorsIndex + 1),
-      ...segments.slice(detectorsIndex + 2),
-    ];
-    return normalized.join(".");
-  }
-
-  // If we are in the detectors section but 'detectors' is not in the path (specialized section)
-  // then the first segment is the dynamic detector name.
-  if (sectionI18nPrefix === "detectors" && segments.length > 1) {
-    return segments.slice(1).join(".");
-  }
-
-  return segments.join(".");
-}
-
-function getFilterObjectLabel(pathSegments: string[]): string | undefined {
-  const filtersIndex = pathSegments.indexOf("filters");
-  if (filtersIndex === -1 || pathSegments.length <= filtersIndex + 1) {
-    return undefined;
-  }
-  const objectLabel = pathSegments[filtersIndex + 1];
-  return typeof objectLabel === "string" && objectLabel.length > 0
-    ? objectLabel
-    : undefined;
-}
-
-function humanizeKey(value: string): string {
-  return value
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-}
+import {
+  buildTranslationPath,
+  getFilterObjectLabel,
+  humanizeKey,
+} from "../utils/i18n";
 
 function _isArrayItemInAdditionalProperty(
   pathSegments: Array<string | number>,

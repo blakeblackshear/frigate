@@ -1,5 +1,4 @@
 // Object Field Template - renders nested object fields with i18n support
-import { canExpand } from "@rjsf/utils";
 import type { ObjectFieldTemplateProps } from "@rjsf/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -7,47 +6,20 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
 import { Children, useState } from "react";
 import type { ReactNode } from "react";
-import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { ConfigFormContext } from "@/types/configForm";
-
-/**
- * Build the i18n translation key path for nested fields using the field path
- * provided by RJSF. This avoids ambiguity with underscores in field names and
- * skips dynamic filter labels for per-object filter fields.
- */
-function buildTranslationPath(path: Array<string | number>): string {
-  const segments = path.filter(
-    (segment): segment is string => typeof segment === "string",
-  );
-
-  const filtersIndex = segments.indexOf("filters");
-  if (filtersIndex !== -1 && segments.length > filtersIndex + 2) {
-    const normalized = [
-      ...segments.slice(0, filtersIndex + 1),
-      ...segments.slice(filtersIndex + 2),
-    ];
-    return normalized.join(".");
-  }
-
-  return segments.join(".");
-}
-
-function getFilterObjectLabel(
-  pathSegments: Array<string | number>,
-): string | undefined {
-  const index = pathSegments.indexOf("filters");
-  if (index === -1 || pathSegments.length <= index + 1) {
-    return undefined;
-  }
-  const label = pathSegments[index + 1];
-  return typeof label === "string" && label.length > 0 ? label : undefined;
-}
+import {
+  buildTranslationPath,
+  getFilterObjectLabel,
+  humanizeKey,
+  getDomainFromNamespace,
+} from "../utils/i18n";
+import { AddPropertyButton, AdvancedCollapsible } from "../components";
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const {
@@ -80,12 +52,6 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     "common",
   ]);
 
-  // Extract domain from i18nNamespace (e.g., "config/audio" -> "audio")
-  const getDomainFromNamespace = (ns?: string): string => {
-    if (!ns || !ns.startsWith("config/")) return "";
-    return ns.replace("config/", "");
-  };
-
   const domain = getDomainFromNamespace(formContext?.i18nNamespace);
 
   const groupDefinitions =
@@ -109,9 +75,6 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     children?: ReactNode;
   };
   const hasCustomChildren = Children.count(children) > 0;
-
-  const toTitle = (value: string) =>
-    value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
   // Get the full translation path from the field path
   const fieldPathId = (
@@ -157,7 +120,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   }
   const schemaTitle = schema?.title;
   const fallbackLabel =
-    title || schemaTitle || (propertyName ? toTitle(propertyName) : undefined);
+    title ||
+    schemaTitle ||
+    (propertyName ? humanizeKey(propertyName) : undefined);
   inferredLabel = inferredLabel ?? fallbackLabel;
 
   let inferredDescription: string | undefined;
@@ -203,10 +168,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         const label = domain
           ? t(`${sectionI18nPrefix}.${domain}.${groupKey}`, {
               ns: "config/groups",
-              defaultValue: toTitle(groupKey),
+              defaultValue: humanizeKey(groupKey),
             })
           : t(`groups.${groupKey}`, {
-              defaultValue: toTitle(groupKey),
+              defaultValue: humanizeKey(groupKey),
             });
 
         return {
@@ -249,29 +214,6 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     );
   };
 
-  const renderAddButton = () => {
-    const canAdd =
-      Boolean(onAddProperty) && canExpand(schema, uiSchema, formData);
-
-    if (!canAdd) {
-      return null;
-    }
-
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={onAddProperty}
-        disabled={disabled || readonly}
-        className="gap-2"
-      >
-        <LuPlus className="h-4 w-4" />
-        {t("button.add", { ns: "common", defaultValue: "Add" })}
-      </Button>
-    );
-  };
-
   // Root level renders children directly
   if (isRoot) {
     return (
@@ -281,32 +223,23 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         ) : (
           <>
             {renderGroupedFields(regularProps)}
-            {renderAddButton()}
+            <AddPropertyButton
+              onAddProperty={onAddProperty}
+              schema={schema}
+              uiSchema={uiSchema}
+              formData={formData}
+              disabled={disabled}
+              readonly={readonly}
+            />
 
-            {advancedProps.length > 0 && (
-              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 pl-0"
-                  >
-                    {showAdvanced ? (
-                      <LuChevronDown className="h-4 w-4" />
-                    ) : (
-                      <LuChevronRight className="h-4 w-4" />
-                    )}
-                    {t("configForm.advancedSettingsCount", {
-                      ns: "views/settings",
-                      defaultValue: "Advanced Settings ({{count}})",
-                      count: advancedProps.length,
-                    })}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 pt-2">
-                  {renderGroupedFields(advancedProps)}
-                </CollapsibleContent>
-              </Collapsible>
-            )}
+            <AdvancedCollapsible
+              count={advancedProps.length}
+              open={showAdvanced}
+              onOpenChange={setShowAdvanced}
+              isRoot
+            >
+              {renderGroupedFields(advancedProps)}
+            </AdvancedCollapsible>
           </>
         )}
       </div>
@@ -343,36 +276,22 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
             ) : (
               <>
                 {renderGroupedFields(regularProps)}
-                {renderAddButton()}
+                <AddPropertyButton
+                  onAddProperty={onAddProperty}
+                  schema={schema}
+                  uiSchema={uiSchema}
+                  formData={formData}
+                  disabled={disabled}
+                  readonly={readonly}
+                />
 
-                {advancedProps.length > 0 && (
-                  <Collapsible
-                    open={showAdvanced}
-                    onOpenChange={setShowAdvanced}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start gap-2 pl-0"
-                      >
-                        {showAdvanced ? (
-                          <LuChevronDown className="h-4 w-4" />
-                        ) : (
-                          <LuChevronRight className="h-4 w-4" />
-                        )}
-                        {t("configForm.advancedCount", {
-                          ns: "views/settings",
-                          defaultValue: "Advanced ({{count}})",
-                          count: advancedProps.length,
-                        })}
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-4 pt-2">
-                      {renderGroupedFields(advancedProps)}
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
+                <AdvancedCollapsible
+                  count={advancedProps.length}
+                  open={showAdvanced}
+                  onOpenChange={setShowAdvanced}
+                >
+                  {renderGroupedFields(advancedProps)}
+                </AdvancedCollapsible>
               </>
             )}
           </CardContent>

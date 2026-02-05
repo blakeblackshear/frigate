@@ -77,19 +77,13 @@
  *   handling).
  */
 
-import { canExpand } from "@rjsf/utils";
 import type { FieldProps, ObjectFieldTemplateProps } from "@rjsf/utils";
 import { useState } from "react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { ConfigFormContext } from "@/types/configForm";
+import { getDomainFromNamespace, humanizeKey } from "../utils/i18n";
+import { AddPropertyButton, AdvancedCollapsible } from "../components";
 
 type LayoutGridColumnConfig = {
   "ui:col"?: number | string;
@@ -171,29 +165,20 @@ function GridLayoutObjectFieldTemplate(
     (p) => p.content.props.uiSchema?.["ui:options"]?.advanced !== true,
   );
 
-  // Extract domain from i18nNamespace (e.g., "config/audio" -> "audio")
-  const getDomainFromNamespace = (ns?: string): string => {
-    if (!ns || !ns.startsWith("config/")) return "";
-    return ns.replace("config/", "");
-  };
-
   const domain = getDomainFromNamespace(formContext?.i18nNamespace);
   const sectionI18nPrefix = formContext?.sectionI18nPrefix;
-
-  const toTitle = (value: string) =>
-    value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
   const getGroupLabel = (groupKey: string) => {
     if (domain && sectionI18nPrefix) {
       return t(`${sectionI18nPrefix}.${domain}.${groupKey}`, {
         ns: "config/groups",
-        defaultValue: toTitle(groupKey),
+        defaultValue: humanizeKey(groupKey),
       });
     }
 
     return t(`groups.${groupKey}`, {
       ns: "config/groups",
-      defaultValue: toTitle(groupKey),
+      defaultValue: humanizeKey(groupKey),
     });
   };
 
@@ -460,29 +445,6 @@ function GridLayoutObjectFieldTemplate(
     );
   };
 
-  const renderAddButton = () => {
-    const canAdd =
-      Boolean(onAddProperty) && canExpand(schema, uiSchema, formData);
-
-    if (!canAdd) {
-      return null;
-    }
-
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={onAddProperty}
-        disabled={disabled || readonly}
-        className="gap-2"
-      >
-        <LuPlus className="h-4 w-4" />
-        {t("button.add", { ns: "common", defaultValue: "Add" })}
-      </Button>
-    );
-  };
-
   const regularLayout = renderGroupedGridLayout(regularProps, baseRowClassName);
   const advancedLayout = useGridForAdvanced
     ? renderGroupedGridLayout(advancedProps, advancedRowClassName)
@@ -496,32 +458,23 @@ function GridLayoutObjectFieldTemplate(
     return (
       <div className="space-y-6">
         {regularLayout}
-        {renderAddButton()}
+        <AddPropertyButton
+          onAddProperty={onAddProperty}
+          schema={schema}
+          uiSchema={uiSchema}
+          formData={formData}
+          disabled={disabled}
+          readonly={readonly}
+        />
 
-        {advancedProps.length > 0 && (
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-2 pl-0"
-              >
-                {showAdvanced ? (
-                  <LuChevronDown className="h-4 w-4" />
-                ) : (
-                  <LuChevronRight className="h-4 w-4" />
-                )}
-                {t("configForm.advancedSettingsCount", {
-                  ns: "views/settings",
-                  defaultValue: "Advanced Settings ({{count}})",
-                  count: advancedProps.length,
-                })}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 pt-2">
-              {advancedLayout}
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+        <AdvancedCollapsible
+          count={advancedProps.length}
+          open={showAdvanced}
+          onOpenChange={setShowAdvanced}
+          isRoot
+        >
+          {advancedLayout}
+        </AdvancedCollapsible>
       </div>
     );
   }
@@ -533,33 +486,22 @@ function GridLayoutObjectFieldTemplate(
     <ObjectFieldTemplate {...props}>
       <div className="space-y-4">
         {regularLayout}
-        {renderAddButton()}
+        <AddPropertyButton
+          onAddProperty={onAddProperty}
+          schema={schema}
+          uiSchema={uiSchema}
+          formData={formData}
+          disabled={disabled}
+          readonly={readonly}
+        />
 
-        {advancedProps.length > 0 && (
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 pl-0"
-              >
-                {showAdvanced ? (
-                  <LuChevronDown className="h-4 w-4" />
-                ) : (
-                  <LuChevronRight className="h-4 w-4" />
-                )}
-                {t("label.advancedCount", {
-                  ns: "common",
-                  defaultValue: "Advanced ({{count}})",
-                  count: advancedProps.length,
-                })}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 pt-2">
-              {advancedLayout}
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+        <AdvancedCollapsible
+          count={advancedProps.length}
+          open={showAdvanced}
+          onOpenChange={setShowAdvanced}
+        >
+          {advancedLayout}
+        </AdvancedCollapsible>
       </div>
     </ObjectFieldTemplate>
   );
