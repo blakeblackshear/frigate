@@ -1184,6 +1184,8 @@
       "title": "Camera Settings",
       "description": "These settings apply only to this camera and override the global settings."
     },
+    "advancedSettingsCount": "Advanced Settings ({{count}})",
+    "advancedCount": "Advanced ({{count}})",
     "showAdvanced": "Show Advanced Settings",
     "tabs": {
       "sharedDefaults": "Shared Defaults",

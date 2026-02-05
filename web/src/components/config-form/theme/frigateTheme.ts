@@ -35,6 +35,8 @@ import { ErrorListTemplate } from "./templates/ErrorListTemplate";
 import { MultiSchemaFieldTemplate } from "./templates/MultiSchemaFieldTemplate";
 import { WrapIfAdditionalTemplate } from "./templates/WrapIfAdditionalTemplate";
 
+import { LayoutGridField } from "./fields/LayoutGridField";
+
 export interface FrigateTheme {
   widgets: RegistryWidgetsType;
   templates: Partial<TemplatesType>;
@@ -75,5 +77,7 @@ export const frigateTheme: FrigateTheme = {
     MultiSchemaFieldTemplate: MultiSchemaFieldTemplate,
     WrapIfAdditionalTemplate: WrapIfAdditionalTemplate,
   },
-  fields: {},
+  fields: {
+    LayoutGridField: LayoutGridField,
+  },
 };

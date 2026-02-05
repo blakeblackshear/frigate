@@ -8,7 +8,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { Children, useState } from "react";
+import type { ReactNode } from "react";
 import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -75,6 +76,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const { t, i18n } = useTranslation([
     effectiveNamespace,
     "config/groups",
+    "views/settings",
     "common",
   ]);
 
@@ -103,6 +105,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   );
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const { children } = props as ObjectFieldTemplateProps & {
+    children?: ReactNode;
+  };
+  const hasCustomChildren = Children.count(children) > 0;
 
   const toTitle = (value: string) =>
     value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -270,28 +276,38 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   if (isRoot) {
     return (
       <div className="space-y-6">
-        {renderGroupedFields(regularProps)}
-        {renderAddButton()}
+        {hasCustomChildren ? (
+          children
+        ) : (
+          <>
+            {renderGroupedFields(regularProps)}
+            {renderAddButton()}
 
-        {advancedProps.length > 0 && (
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-2 pl-0"
-              >
-                {showAdvanced ? (
-                  <LuChevronDown className="h-4 w-4" />
-                ) : (
-                  <LuChevronRight className="h-4 w-4" />
-                )}
-                Advanced Settings ({advancedProps.length})
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 pt-2">
-              {renderGroupedFields(advancedProps)}
-            </CollapsibleContent>
-          </Collapsible>
+            {advancedProps.length > 0 && (
+              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2 pl-0"
+                  >
+                    {showAdvanced ? (
+                      <LuChevronDown className="h-4 w-4" />
+                    ) : (
+                      <LuChevronRight className="h-4 w-4" />
+                    )}
+                    {t("configForm.advancedSettingsCount", {
+                      ns: "views/settings",
+                      defaultValue: "Advanced Settings ({{count}})",
+                      count: advancedProps.length,
+                    })}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-2">
+                  {renderGroupedFields(advancedProps)}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+          </>
         )}
       </div>
     );
@@ -322,29 +338,42 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
-            {renderGroupedFields(regularProps)}
-            {renderAddButton()}
+            {hasCustomChildren ? (
+              children
+            ) : (
+              <>
+                {renderGroupedFields(regularProps)}
+                {renderAddButton()}
 
-            {advancedProps.length > 0 && (
-              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start gap-2 pl-0"
+                {advancedProps.length > 0 && (
+                  <Collapsible
+                    open={showAdvanced}
+                    onOpenChange={setShowAdvanced}
                   >
-                    {showAdvanced ? (
-                      <LuChevronDown className="h-4 w-4" />
-                    ) : (
-                      <LuChevronRight className="h-4 w-4" />
-                    )}
-                    Advanced ({advancedProps.length})
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 pt-2">
-                  {renderGroupedFields(advancedProps)}
-                </CollapsibleContent>
-              </Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start gap-2 pl-0"
+                      >
+                        {showAdvanced ? (
+                          <LuChevronDown className="h-4 w-4" />
+                        ) : (
+                          <LuChevronRight className="h-4 w-4" />
+                        )}
+                        {t("configForm.advancedCount", {
+                          ns: "views/settings",
+                          defaultValue: "Advanced ({{count}})",
+                          count: advancedProps.length,
+                        })}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-4 pt-2">
+                      {renderGroupedFields(advancedProps)}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </>
             )}
           </CardContent>
         </CollapsibleContent>
