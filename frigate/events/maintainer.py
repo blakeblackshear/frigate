@@ -24,7 +24,7 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
         and (prev_event["has_clip"] or prev_event["has_snapshot"])
     ):
         return True
-    
+
     if current_event["has_clip"] or current_event["has_snapshot"]:
         # if this is the first time has_clip or has_snapshot turned true
         if not prev_event["has_clip"] and not prev_event["has_snapshot"]:
