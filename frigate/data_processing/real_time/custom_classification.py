@@ -601,7 +601,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
         if consensus_label is not None:
             camera = obj_data["camera"]
-            logger.info(
+            logger.debug(
                 f"{self.model_config.name}: Publishing sub_label={consensus_label} for {obj_data['label']} object {object_id} on {camera}"
             )
 
