@@ -103,7 +103,6 @@ const allSettingsViews = [
   "systemEnvironmentVariables",
   "systemTelemetry",
   "systemBirdseye",
-  "systemFfmpeg",
   "systemDetectorHardware",
   "systemDetectionModel",
   "systemMqtt",
@@ -187,7 +186,6 @@ const SystemEnvironmentVariablesSettingsPage = createSectionPage(
 );
 const SystemTelemetrySettingsPage = createSectionPage("telemetry", "global");
 const SystemBirdseyeSettingsPage = createSectionPage("birdseye", "global");
-const SystemFfmpegSettingsPage = createSectionPage("ffmpeg", "global");
 const SystemDetectorHardwareSettingsPage = createSectionPage(
   "detectors",
   "global",
@@ -351,8 +349,17 @@ const settingsGroups = [
   {
     label: "system",
     items: [
+      {
+        key: "systemDetectorHardware",
+        component: SystemDetectorHardwareSettingsPage,
+      },
+      {
+        key: "systemDetectionModel",
+        component: SystemDetectionModelSettingsPage,
+      },
       { key: "systemDatabase", component: SystemDatabaseSettingsPage },
       { key: "systemMqtt", component: SystemMqttSettingsPage },
+      { key: "systemBirdseye", component: SystemBirdseyeSettingsPage },
       { key: "systemTls", component: SystemTlsSettingsPage },
       {
         key: "systemAuthentication",
@@ -367,16 +374,6 @@ const settingsGroups = [
         component: SystemEnvironmentVariablesSettingsPage,
       },
       { key: "systemTelemetry", component: SystemTelemetrySettingsPage },
-      { key: "systemBirdseye", component: SystemBirdseyeSettingsPage },
-      { key: "systemFfmpeg", component: SystemFfmpegSettingsPage },
-      {
-        key: "systemDetectorHardware",
-        component: SystemDetectorHardwareSettingsPage,
-      },
-      {
-        key: "systemDetectionModel",
-        component: SystemDetectionModelSettingsPage,
-      },
     ],
   },
   {
@@ -484,7 +481,6 @@ const SYSTEM_SECTION_MAPPING: Record<string, SettingsType> = {
   environment_vars: "systemEnvironmentVariables",
   telemetry: "systemTelemetry",
   birdseye: "systemBirdseye",
-  ffmpeg: "systemFfmpeg",
   detectors: "systemDetectorHardware",
   model: "systemDetectionModel",
 };

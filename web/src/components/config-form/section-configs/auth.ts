@@ -17,7 +17,7 @@ const auth: SectionConfigOverrides = {
       "hash_iterations",
       "roles",
     ],
-    hiddenFields: ["admin_first_time_login"],
+    hiddenFields: ["admin_first_time_login", "roles"],
     advancedFields: [
       "cookie_name",
       "cookie_secure",
