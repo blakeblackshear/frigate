@@ -97,7 +97,6 @@ const ffmpeg: SectionConfigOverrides = {
     ],
     advancedFields: [
       "global_args",
-      "hwaccel_args",
       "input_args",
       "output_args",
       "retry_interval",

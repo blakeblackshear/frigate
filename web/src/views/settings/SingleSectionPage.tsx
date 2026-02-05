@@ -9,6 +9,7 @@ import { getSectionConfig } from "@/utils/sectionConfigsUtils";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
+import Heading from "@/components/ui/heading";
 
 export type SettingsPageProps = {
   selectedCamera?: string;
@@ -95,9 +96,9 @@ export function SingleSectionPage({
     <div className="flex size-full flex-col lg:pr-2">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div className="flex flex-col">
-          <div className="text-xl">
+          <Heading as="h4">
             {t(`${sectionKey}.label`, { ns: sectionNamespace })}
-          </div>
+          </Heading>
           {i18n.exists(`${sectionKey}.description`, {
             ns: sectionNamespace,
           }) && (

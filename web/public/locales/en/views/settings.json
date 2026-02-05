@@ -8,7 +8,7 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
-    "general": "UI Settings - Frigate",
+    "general": "Profile Settings - Frigate",
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
@@ -96,7 +96,7 @@
     "noCamera": "No Camera"
   },
   "general": {
-    "title": "UI Settings",
+    "title": "Profile Settings",
     "liveDashboard": {
       "title": "Live Dashboard",
       "automaticLiveView": {

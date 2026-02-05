@@ -1,8 +1,8 @@
 {
   "audio": {
     "global": {
-      "detection": "Detection",
-      "sensitivity": "Sensitivity"
+      "detection": "Global Detection",
+      "sensitivity": "Global Sensitivity"
     },
     "cameras": {
       "detection": "Detection",
@@ -11,7 +11,7 @@
   },
   "timestamp_style": {
     "global": {
-      "appearance": "Appearance"
+      "appearance": "Global Appearance"
     },
     "cameras": {
       "appearance": "Appearance"
@@ -19,8 +19,8 @@
   },
   "motion": {
     "global": {
-      "sensitivity": "Sensitivity",
-      "algorithm": "Algorithm"
+      "sensitivity": "Global Sensitivity",
+      "algorithm": "Global Algorithm"
     },
     "cameras": {
       "sensitivity": "Sensitivity",
@@ -29,7 +29,7 @@
   },
   "snapshots": {
     "global": {
-      "display": "Display"
+      "display": "Global Display"
     },
     "cameras": {
       "display": "Display"
@@ -37,18 +37,18 @@
   },
   "detect": {
     "global": {
-      "resolution": "Resolution",
-      "tracking": "Tracking!!!"
+      "resolution": "Global Resolution",
+      "tracking": "Global Tracking"
     },
     "cameras": {
       "resolution": "Resolution",
-      "tracking": "Tracking!!!"
+      "tracking": "Tracking"
     }
   },
   "objects": {
     "global": {
-      "tracking": "Tracking",
-      "filtering": "Filtering"
+      "tracking": "Global Tracking",
+      "filtering": "Global Filtering"
     },
     "cameras": {
       "tracking": "Tracking",
@@ -57,8 +57,8 @@
   },
   "record": {
     "global": {
-      "retention": "Retention",
-      "events": "Events"
+      "retention": "Global Retention",
+      "events": "Global Events"
     },
     "cameras": {
       "retention": "Retention",
