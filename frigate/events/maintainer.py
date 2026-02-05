@@ -15,6 +15,16 @@ logger = logging.getLogger(__name__)
 
 def should_update_db(prev_event: Event, current_event: Event) -> bool:
     """If current_event has updated fields and (clip or snapshot)."""
+    # If event is ending and was previously saved, always update to set end_time
+    # This ensures events are properly ended even when alerts/detections are disabled
+    # mid-event (which can cause has_clip/has_snapshot to become False)
+    if (
+        prev_event["end_time"] is None
+        and current_event["end_time"] is not None
+        and (prev_event["has_clip"] or prev_event["has_snapshot"])
+    ):
+        return True
+    
     if current_event["has_clip"] or current_event["has_snapshot"]:
         # if this is the first time has_clip or has_snapshot turned true
         if not prev_event["has_clip"] and not prev_event["has_snapshot"]:
