@@ -56,7 +56,9 @@ def _is_valid_host(host: str) -> bool:
 
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
 def go2rtc_streams():
-    r = requests.get("http://127.0.0.1:1984/api/streams")
+    r = requests.get(
+        "http://127.0.0.1:1984/api/streams", proxies={"http": None, "https": None}
+    )
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
         return JSONResponse(
@@ -75,7 +77,8 @@ def go2rtc_streams():
 )
 def go2rtc_camera_stream(request: Request, camera_name: str):
     r = requests.get(
-        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
+        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone",
+        proxies={"http": None, "https": None},
     )
     if not r.ok:
         camera_config = request.app.frigate_config.cameras.get(camera_name)
@@ -107,6 +110,7 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
             "http://127.0.0.1:1984/api/streams",
             params=params,
             timeout=10,
+            proxies={"http": None, "https": None},
         )
         if not r.ok:
             logger.error(f"Failed to add go2rtc stream {stream_name}: {r.text}")
@@ -142,6 +146,7 @@ def go2rtc_delete_stream(stream_name: str):
             "http://127.0.0.1:1984/api/streams",
             params={"src": stream_name},
             timeout=10,
+            proxies={"http": None, "https": None},
         )
         if not r.ok:
             logger.error(f"Failed to delete go2rtc stream {stream_name}: {r.text}")
