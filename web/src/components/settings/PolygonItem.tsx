@@ -283,7 +283,10 @@ export default function PolygonItem({
               <Trans
                 ns="views/settings"
                 values={{
-                  type: polygon.type.replace("_", " "),
+                  type: t(
+                    `masksAndZones.form.polygonDrawing.type.${polygon.type}`,
+                    { ns: "views/settings" },
+                  ),
                   name: polygon.friendly_name ?? polygon.name,
                 }}
               >

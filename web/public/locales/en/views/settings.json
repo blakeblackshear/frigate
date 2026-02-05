@@ -468,6 +468,11 @@
         }
       },
       "polygonDrawing": {
+        "type": {
+          "zone": "zone",
+          "motion_mask": "motion mask",
+          "object_mask": "object mask"
+        },
         "removeLastPoint": "Remove last point",
         "reset": {
           "label": "Clear all points"
