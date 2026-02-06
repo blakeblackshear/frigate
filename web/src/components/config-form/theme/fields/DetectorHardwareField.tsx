@@ -628,13 +628,6 @@ export function DetectorHardwareField(props: FieldProps) {
 
   const detectorEntries = Object.entries(detectors);
   const isDisabled = Boolean(disabled || readonly);
-  const addLabel = `${t("button.add", {
-    ns: "common",
-    defaultValue: "Add",
-  })} ${t("detectors.label", {
-    ns: configNamespace,
-    defaultValue: "Detector hardware",
-  })}`;
 
   return (
     <div className="space-y-4">
@@ -806,10 +799,13 @@ export function DetectorHardwareField(props: FieldProps) {
         </div>
       )}
 
-      <div className="flex justify-start">
-        <div className="w-full max-w-md rounded-lg border bg-card p-4">
+      <div className="flex justify-start pt-5">
+        <div className="w-full max-w-lg rounded-lg border bg-card p-4">
           <div className="text-sm font-medium text-muted-foreground">
-            {addLabel}
+            {t("configForm.detectors.add", {
+              ns: "views/settings",
+              defaultValue: "Add detector",
+            })}
           </div>
           <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-end">
             <div className="flex-1 space-y-2">

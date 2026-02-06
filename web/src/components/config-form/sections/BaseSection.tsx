@@ -25,12 +25,7 @@ import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  LuRotateCcw,
-  LuSave,
-  LuChevronDown,
-  LuChevronRight,
-} from "react-icons/lu";
+import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
 import get from "lodash/get";
 import unset from "lodash/unset";
@@ -874,7 +869,6 @@ export function ConfigSection({
                 disabled={isSaving || disabled}
                 className="flex flex-1 gap-2"
               >
-                <LuRotateCcw className="h-4 w-4" />
                 {level === "global"
                   ? t("button.resetToDefault", {
                       ns: "common",
@@ -911,10 +905,7 @@ export function ConfigSection({
                 })}
               </>
             ) : (
-              <>
-                <LuSave className="h-4 w-4" />
-                {t("button.save", { ns: "common", defaultValue: "Save" })}
-              </>
+              <>{t("button.save", { ns: "common", defaultValue: "Save" })}</>
             )}
           </Button>
         </div>

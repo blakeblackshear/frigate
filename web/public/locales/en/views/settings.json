@@ -1240,7 +1240,8 @@
       "keyRequired": "Detector name is required.",
       "keyDuplicate": "Detector name already exists.",
       "noSchema": "No detector schemas are available.",
-      "none": "No detector instances configured."
+      "none": "No detector instances configured.",
+      "add": "Add detector"
     },
     "record": {
       "title": "Recording Settings"
