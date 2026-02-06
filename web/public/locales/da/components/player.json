@@ -4,13 +4,13 @@
   "cameraDisabled": "Kamera er deaktiveret",
   "noPreviewFoundFor": "Ingen forhåndsvisning fundet for {{cameraName}}",
   "submitFrigatePlus": {
-    "title": "Indsend denne frame til Frigate+?",
+    "title": "Indsend dette billede til Frigate+?",
     "submit": "Indsend"
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller nyere kræves for denne type livestream.",
   "streamOffline": {
     "title": "Stream offline",
-    "desc": "Der er ikke modtaget nogen frames på {{cameraName}}-<code>detect</code>-streamen, tjek fejlloggene."
+    "desc": "Der er ikke modtaget nogen billeder på {{cameraName}}-<code>detect</code>-streamen, tjek fejllogs."
   },
   "stats": {
     "streamType": {
@@ -18,8 +18,8 @@
       "short": "Type"
     },
     "bandwidth": {
-      "title": "Bandbredde:",
-      "short": "Bandbredde"
+      "title": "Båndbredde:",
+      "short": "Båndbredde"
     },
     "latency": {
       "title": "Latenstid:",
@@ -31,8 +31,21 @@
     },
     "droppedFrames": {
       "short": {
-        "title": "Tabt"
-      }
+        "title": "Tabt",
+        "value": "{{droppedFrames}} billeder"
+      },
+      "title": "Tabte billeder:"
+    },
+    "totalFrames": "Antal billeder i alt:",
+    "decodedFrames": "Dekodede billeder:",
+    "droppedFrameRate": "Rate for tabte billeder:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Billede sendt til Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Kunne ikke sende billede til Frigate+"
     }
   }
 }

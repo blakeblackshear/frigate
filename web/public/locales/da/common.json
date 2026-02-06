@@ -193,7 +193,8 @@
       "bg": "Български (Bulgarsk)",
       "gl": "Galego (Galisisk)",
       "id": "Bahasa Indonesia (Indonesisk)",
-      "ur": "اردو (Urdu)"
+      "ur": "اردو (Urdu)",
+      "hr": "Hrvatski (Kroatisk)"
     },
     "appearance": "Udseende",
     "darkMode": {
@@ -221,7 +222,7 @@
     },
     "restart": "Genstart Frigate",
     "live": {
-      "title": "Live",
+      "title": "Direkte",
       "allCameras": "Alle kameraer",
       "cameras": {
         "title": "Kameraer",
@@ -240,17 +241,17 @@
       "current": "Aktiv bruger: {{user}}",
       "anonymous": "anonym",
       "logout": "Log ud",
-      "setPassword": "Set Password"
+      "setPassword": "Vælg kodeord"
     },
     "classification": "Kategorisering"
   },
   "toast": {
-    "copyUrlToClipboard": "Kopieret URL til klippebord.",
+    "copyUrlToClipboard": "Kopieret URL til udklipsholder.",
     "save": {
       "title": "Gem",
       "error": {
-        "title": "Ændringer kan ikke gemmes: {{errorMessage}}",
-        "noMessage": "Kan ikke gemme konfigurationsændringer"
+        "title": "Ændringer kunne ikke gemmes: {{errorMessage}}",
+        "noMessage": "Kunne ikke gemme konfigurationsændringer"
       }
     }
   },
@@ -261,7 +262,7 @@
     "desc": "Admins har fuld adgang til Frigate UI. Viewers er begrænset til at se kameraer, gennemse items, og historik i UI."
   },
   "pagination": {
-    "label": "paginering",
+    "label": "sideinddeling",
     "previous": {
       "title": "Forrige",
       "label": "Gå til forrige side"
@@ -273,9 +274,9 @@
     "more": "Flere sider"
   },
   "accessDenied": {
-    "documentTitle": "Adgang forbudt - Frigate",
-    "title": "Adgang forbudt",
-    "desc": "Du har ikke tiiladelse til at se denne side."
+    "documentTitle": "Adgang nægtet - Frigate",
+    "title": "Adgang nægtet",
+    "desc": "Du har ikke rettigheder til at se denne side."
   },
   "notFound": {
     "documentTitle": "Ikke fundet - Frigate",

@@ -14,8 +14,104 @@
     "move": {
       "clickMove": {
         "label": "Klik i billedrammen for at centrere kameraet",
-        "enable": "Aktivér klik for at flytte"
+        "enable": "Aktivér klik for at flytte",
+        "disable": "Deaktiver klik for at flytte"
+      },
+      "left": {
+        "label": "Flyt PTZ-kameraet til venstre"
+      },
+      "up": {
+        "label": "Flyt PTZ kamera op"
+      },
+      "down": {
+        "label": "Flyt PTZ-kameraet ned"
+      },
+      "right": {
+        "label": "Flyt PTZ-kameraet til højre"
       }
-    }
+    },
+    "zoom": {
+      "in": {
+        "label": "Zoom PTZ-kamera ind"
+      },
+      "out": {
+        "label": "Zoom PTZ kamera ud"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Focus PTZ kamera ind"
+      },
+      "out": {
+        "label": "Focus PTZ kamera ud"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Klik på billedet for at centrere PTZ-kameraet"
+      }
+    },
+    "presets": "PTZ kamera forudindstillinger"
+  },
+  "camera": {
+    "enable": "Aktivér kamera",
+    "disable": "Deaktivér kamera"
+  },
+  "muteCameras": {
+    "enable": "Slå lyd på alle kameraer fra",
+    "disable": "Slå lyd på alle kameraer til"
+  },
+  "detect": {
+    "enable": "Aktiver detektering",
+    "disable": "Deaktiver detektering"
+  },
+  "recording": {
+    "enable": "Aktivér optagelse",
+    "disable": "Deaktiver optagelse"
+  },
+  "snapshots": {
+    "enable": "Aktivér Snapshots",
+    "disable": "Deaktivér Snapshots"
+  },
+  "snapshot": {
+    "takeSnapshot": "Hent instant snapshot",
+    "noVideoSource": "Ingen videokilde til snapshot.",
+    "captureFailed": "Kunne ikke tage snapshot.",
+    "downloadStarted": "Hentning af snapshot startet."
+  },
+  "audioDetect": {
+    "enable": "Aktiver lyddetektor",
+    "disable": "Deaktiver lyddetektor"
+  },
+  "transcription": {
+    "enable": "Aktiver Live Audio Transkription",
+    "disable": "Deaktiver Live Audio Transkription"
+  },
+  "autotracking": {
+    "enable": "Aktiver Autotracking",
+    "disable": "Deaktiver Autotracking"
+  },
+  "streamStats": {
+    "enable": "Vis Stream statistik",
+    "disable": "Skjul Stream statistik"
+  },
+  "manualRecording": {
+    "title": "Manuel optagelse",
+    "tips": "Hent et øjebliksbillede eller start en manuel begivenhed baseret på dette kameras indstillinger for optagelse af opbevaring.",
+    "playInBackground": {
+      "label": "Afspil i baggrunden",
+      "desc": "Aktiver denne mulighed for at fortsætte streaming, når afspilleren er skjult."
+    },
+    "showStats": {
+      "label": "Vis statistik",
+      "desc": "Aktiver denne mulighed for at vise streamstatistikker som en overlejring på kameraets feed."
+    },
+    "debugView": "Debug View",
+    "start": "Start on-demand optagelse",
+    "started": "Start manuel optagelse.",
+    "failedToStart": "Manuel optagelse fejlede.",
+    "recordDisabledTips": "Da optagelsen er deaktiveret eller begrænset i konfig for dette kamera, gemmes der kun et snapshot.",
+    "end": "Afslut manuel optagelse",
+    "ended": "Afsluttet manuel optagelse."
   }
 }
