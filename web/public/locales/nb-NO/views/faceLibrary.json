@@ -3,7 +3,8 @@
   "description": {
     "addFace": "Legg til en ny samling i ansiktsbiblioteket ved å laste opp ditt første bilde.",
     "placeholder": "Skriv inn et navn for denne samlingen",
-    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrof, understrek og bindestrek."
+    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrof, understrek og bindestrek.",
+    "nameCannotContainHash": "Navn kan ikke inneholde #."
   },
   "details": {
     "person": "Person",

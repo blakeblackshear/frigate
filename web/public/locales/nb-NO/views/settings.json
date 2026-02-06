@@ -537,7 +537,7 @@
           "hide": "Skjul passord",
           "requirements": {
             "title": "Passordkrav:",
-            "length": "Minst 8 tegn",
+            "length": "Minst 12 tegn",
             "uppercase": "Minst en stor bokstav",
             "digit": "Minst ett tall",
             "special": "Minst ett spesialtegn (!@#$%^&*(),.?\":{}|<>)"
@@ -591,7 +591,7 @@
         "incorrectCurrentPassword": "Nåværende passord er feil",
         "passwordVerificationFailed": "Kunne ikke verifisere passord",
         "multiDeviceWarning": "Andre enheter du er logget inn på vil kreve ny innlogging innen {{refresh_time}}.",
-        "multiDeviceAdmin": "Du kan også tvinge alle brukere til å logge inn på nytt umiddelbart ved å rotere JWT-hemmeligheten din."
+        "multiDeviceAdmin": "Du kan også tvinge alle brukere til å logge inn på nytt ved å endre JWT (JSON Web Token)-nøkkelen."
       }
     },
     "table": {
