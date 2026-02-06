@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import requests
 from PIL import Image
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -16,12 +16,28 @@ DETECTOR_KEY = "deepstack"
 
 
 class DeepstackDetectorConfig(BaseDetectorConfig):
+    """DeepStack/CodeProject.AI detector that sends images to a remote DeepStack HTTP API for inference. Not recommended."""
+
+    model_config = ConfigDict(
+        title="DeepStack",
+    )
+
     type: Literal[DETECTOR_KEY]
     api_url: str = Field(
-        default="http://localhost:80/v1/vision/detection", title="DeepStack API URL"
+        default="http://localhost:80/v1/vision/detection",
+        title="DeepStack API URL",
+        description="The URL of the DeepStack API.",
     )
-    api_timeout: float = Field(default=0.1, title="DeepStack API timeout (in seconds)")
-    api_key: str = Field(default="", title="DeepStack API key (if required)")
+    api_timeout: float = Field(
+        default=0.1,
+        title="DeepStack API timeout (in seconds)",
+        description="Maximum time allowed for a DeepStack API request.",
+    )
+    api_key: str = Field(
+        default="",
+        title="DeepStack API key (if required)",
+        description="Optional API key for authenticated DeepStack services.",
+    )
 
 
 class DeepStack(DetectionApi):

@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.const import MODEL_CACHE_DIR
@@ -410,5 +410,15 @@ class HailoDetector(DetectionApi):
 
 # ----------------- HailoDetectorConfig Class ----------------- #
 class HailoDetectorConfig(BaseDetectorConfig):
+    """Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware."""
+
+    model_config = ConfigDict(
+        title="Hailo-8/Hailo-8L",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default="PCIe", title="Device Type")
+    device: str = Field(
+        default="PCIe",
+        title="Device Type",
+        description="The device to use for Hailo inference (e.g. 'PCIe', 'M.2').",
+    )

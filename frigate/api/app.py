@@ -54,6 +54,7 @@ from frigate.util.builtin import (
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
+from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
     process_logs,
@@ -78,9 +79,7 @@ def is_healthy():
 
 @router.get("/config/schema.json", dependencies=[Depends(allow_public())])
 def config_schema(request: Request):
-    return Response(
-        content=request.app.frigate_config.schema_json(), media_type="application/json"
-    )
+    return JSONResponse(content=get_config_schema(FrigateConfig))
 
 
 @router.get(

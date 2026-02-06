@@ -287,8 +287,7 @@
     "label": "Detector hardware",
     "description": "Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
     "type": {
-      "label": "Detector Type",
-      "description": "Type of detector to use for object detection (for example 'cpu', 'edgetpu', 'openvino')."
+      "label": "Type"
     },
     "model": {
       "label": "Detector specific model configuration",
@@ -337,6 +336,106 @@
     "model_path": {
       "label": "Detector specific model path",
       "description": "File path to the detector model binary if required by the chosen detector."
+    },
+    "num_threads": {
+      "label": "Number of detection threads",
+      "description": "The number of threads used for CPU-based inference."
+    },
+    "api_url": {
+      "label": "DeepStack API URL",
+      "description": "The URL of the DeepStack API."
+    },
+    "api_timeout": {
+      "label": "DeepStack API timeout (in seconds)",
+      "description": "Maximum time allowed for a DeepStack API request."
+    },
+    "api_key": {
+      "label": "DeepStack API key (if required)",
+      "description": "Optional API key for authenticated DeepStack services."
+    },
+    "location": {
+      "label": "Inference Location",
+      "description": "Location of the DeGirim inference engine (e.g. '@cloud', '127.0.0.1')."
+    },
+    "zoo": {
+      "label": "Model Zoo",
+      "description": "Path or URL to the DeGirum model zoo."
+    },
+    "token": {
+      "label": "DeGirum Cloud Token",
+      "description": "Token for DeGirum Cloud access."
+    },
+    "device": {
+      "label": "GPU Device Index",
+      "description": "The GPU device index to use."
+    },
+    "num_cores": {
+      "label": "Number of NPU cores to use.",
+      "description": "The number of NPU cores to use (0 for auto)."
+    },
+    "endpoint": {
+      "label": "ZMQ IPC endpoint",
+      "description": "The ZMQ endpoint to connect to."
+    },
+    "request_timeout_ms": {
+      "label": "ZMQ request timeout in milliseconds",
+      "description": "Timeout for ZMQ requests in milliseconds."
+    },
+    "linger_ms": {
+      "label": "ZMQ socket linger in milliseconds",
+      "description": "Socket linger period in milliseconds."
+    },
+    "cpu": {
+      "label": "CPU",
+      "description": "CPU TFLite detector that runs TensorFlow Lite models on the host CPU without hardware acceleration. Not recommended."
+    },
+    "deepstack": {
+      "label": "DeepStack",
+      "description": "DeepStack/CodeProject.AI detector that sends images to a remote DeepStack HTTP API for inference. Not recommended."
+    },
+    "degirum": {
+      "label": "DeGirum",
+      "description": "DeGirum detector for running models via DeGirum cloud or local inference services."
+    },
+    "edgetpu": {
+      "label": "EdgeTPU",
+      "description": "EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate."
+    },
+    "hailo8l": {
+      "label": "Hailo-8/Hailo-8L",
+      "description": "Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware."
+    },
+    "memryx": {
+      "label": "MemryX",
+      "description": "MemryX MX3 detector that runs compiled DFP models on MemryX accelerators."
+    },
+    "onnx": {
+      "label": "ONNX",
+      "description": "ONNX detector for running ONNX models; will use available acceleration backends (CUDA/ROCm/OpenVINO) when available."
+    },
+    "openvino": {
+      "label": "OpenVINO",
+      "description": "OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware."
+    },
+    "rknn": {
+      "label": "RKNN",
+      "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware."
+    },
+    "synaptics": {
+      "label": "Synaptics",
+      "description": "Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware."
+    },
+    "teflon_tfl": {
+      "label": "Teflon",
+      "description": "Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs."
+    },
+    "tensorrt": {
+      "label": "TensorRT",
+      "description": "TensorRT detector for Nvidia Jetson devices using serialized TensorRT engines for accelerated inference."
+    },
+    "zmq": {
+      "label": "ZMQ IPC",
+      "description": "ZMQ IPC detector that offloads inference to an external process via a ZeroMQ IPC endpoint."
     }
   },
   "model": {

@@ -2,6 +2,7 @@ import logging
 import os
 
 import numpy as np
+from pydantic import ConfigDict
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -27,6 +28,12 @@ DETECTOR_KEY = "synaptics"
 
 
 class SynapDetectorConfig(BaseDetectorConfig):
+    """Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware."""
+
+    model_config = ConfigDict(
+        title="Synaptics",
+    )
+
     type: Literal[DETECTOR_KEY]
 
 

@@ -1,6 +1,6 @@
 import logging
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -21,8 +21,18 @@ DETECTOR_KEY = "cpu"
 
 
 class CpuDetectorConfig(BaseDetectorConfig):
+    """CPU TFLite detector that runs TensorFlow Lite models on the host CPU without hardware acceleration. Not recommended."""
+
+    model_config = ConfigDict(
+        title="CPU",
+    )
+
     type: Literal[DETECTOR_KEY]
-    num_threads: int = Field(default=3, title="Number of detection threads")
+    num_threads: int = Field(
+        default=3,
+        title="Number of detection threads",
+        description="The number of threads used for CPU-based inference.",
+    )
 
 
 class CpuTfl(DetectionApi):

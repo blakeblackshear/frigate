@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, get_args, get_origin
 
 from frigate.config.config import FrigateConfig
+from frigate.util.schema import get_config_schema
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -187,6 +188,49 @@ def generate_section_translation(config_class: type) -> Dict[str, Any]:
     return extract_translations_from_schema(schema)
 
 
+def get_detector_translations(
+    config_schema: Dict[str, Any],
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    """Build detector field and type translations based on schema definitions."""
+    defs = config_schema.get("$defs", {})
+    detector_schema = defs.get("DetectorConfig", {})
+    discriminator = detector_schema.get("discriminator", {})
+    mapping = discriminator.get("mapping", {})
+
+    type_translations: Dict[str, Any] = {}
+    field_translations: Dict[str, Any] = {}
+    for detector_type, ref in mapping.items():
+        if not isinstance(ref, str):
+            continue
+
+        if not ref.startswith("#/$defs/"):
+            continue
+
+        ref_name = ref.split("/")[-1]
+        ref_schema = defs.get(ref_name, {})
+        if not ref_schema:
+            continue
+
+        type_entry: Dict[str, str] = {}
+        title = ref_schema.get("title")
+        description = ref_schema.get("description")
+        if title:
+            type_entry["label"] = title
+        if description:
+            type_entry["description"] = description
+
+        if type_entry:
+            type_translations[detector_type] = type_entry
+
+        nested = extract_translations_from_schema(ref_schema, defs=defs)
+        nested_without_root = {
+            k: v for k, v in nested.items() if k not in ("label", "description")
+        }
+        field_translations.update(nested_without_root)
+
+    return field_translations, type_translations
+
+
 def main():
     """Main function to generate config translations."""
 
@@ -207,6 +251,7 @@ def main():
     )
 
     config_fields = FrigateConfig.model_fields
+    config_schema = get_config_schema(FrigateConfig)
     logger.info(f"Found {len(config_fields)} top-level config sections")
 
     global_translations = {}
@@ -254,6 +299,11 @@ def main():
                 k: v for k, v in nested.items() if k not in ("label", "description")
             }
             section_data.update(nested_without_root)
+
+        if field_name == "detectors":
+            detector_fields, detector_types = get_detector_translations(config_schema)
+            section_data.update(detector_fields)
+            section_data.update(detector_types)
 
         if not section_data:
             logger.warning(f"No translations found for section: {field_name}")
