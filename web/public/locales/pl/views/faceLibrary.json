@@ -3,7 +3,8 @@
   "description": {
     "addFace": "Dodaj nową kolekcję do biblioteki twarzy, przesyłając swoje pierwsze zdjęcie.",
     "placeholder": "Wprowadź nazwę tej kolekcji",
-    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki."
+    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki.",
+    "nameCannotContainHash": "Nazwa nie może zawierać #."
   },
   "details": {
     "person": "Osoba",
