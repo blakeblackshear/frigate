@@ -55,6 +55,8 @@ import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { ConfigSectionData, JsonObject, JsonValue } from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import { useRestart } from "@/api/ws";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -178,8 +180,10 @@ export function ConfigSection({
     "config/cameras",
     "views/settings",
     "common",
+    "components/dialog",
   ]);
   const [isOpen, setIsOpen] = useState(!defaultCollapsed);
+  const { send: sendRestart } = useRestart();
 
   // Create a key for this section's pending data
   const pendingDataKey = useMemo(
@@ -212,6 +216,7 @@ export function ConfigSection({
   const [isSaving, setIsSaving] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const isResettingRef = useRef(false);
   const isInitializingRef = useRef(true);
 
@@ -562,14 +567,31 @@ export function ConfigSection({
         requires_restart: needsRestart ? 1 : 0,
       });
 
-      toast.success(
-        t(needsRestart ? "toast.successRestartRequired" : "toast.success", {
-          ns: "views/settings",
-          defaultValue: needsRestart
-            ? "Settings saved successfully. Restart Frigate to apply your changes."
-            : "Settings saved successfully",
-        }),
-      );
+      if (needsRestart) {
+        toast.success(
+          t("toast.successRestartRequired", {
+            ns: "views/settings",
+            defaultValue:
+              "Settings saved successfully. Restart Frigate to apply your changes.",
+          }),
+          {
+            action: (
+              <a onClick={() => setRestartDialogOpen(true)}>
+                <Button>
+                  {t("restart.button", { ns: "components/dialog" })}
+                </Button>
+              </a>
+            ),
+          },
+        );
+      } else {
+        toast.success(
+          t("toast.success", {
+            ns: "views/settings",
+            defaultValue: "Settings saved successfully",
+          }),
+        );
+      }
 
       setPendingData(null);
       refreshConfig();
@@ -933,16 +955,61 @@ export function ConfigSection({
 
   if (collapsible) {
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="space-y-3">
-          <CollapsibleTrigger asChild>
-            <div className="flex cursor-pointer items-center justify-between">
+      <>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <div className="space-y-3">
+            <CollapsibleTrigger asChild>
+              <div className="flex cursor-pointer items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {isOpen ? (
+                    <LuChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <LuChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <Heading as="h4">{title}</Heading>
+                  {showOverrideIndicator &&
+                    level === "camera" &&
+                    isOverridden && (
+                      <Badge variant="secondary" className="text-xs">
+                        {t("button.overridden", {
+                          ns: "common",
+                          defaultValue: "Overridden",
+                        })}
+                      </Badge>
+                    )}
+                  {hasChanges && (
+                    <Badge variant="outline" className="text-xs">
+                      {t("modified", {
+                        ns: "common",
+                        defaultValue: "Modified",
+                      })}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent>
+              <div className="pl-7">{sectionContent}</div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+        <RestartDialog
+          isOpen={restartDialogOpen}
+          onClose={() => setRestartDialogOpen(false)}
+          onRestart={() => sendRestart("restart")}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-3">
+        {shouldShowTitle && (
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
-                {isOpen ? (
-                  <LuChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <LuChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
                 <Heading as="h4">{title}</Heading>
                 {showOverrideIndicator &&
                   level === "camera" &&
@@ -956,55 +1023,26 @@ export function ConfigSection({
                   )}
                 {hasChanges && (
                   <Badge variant="outline" className="text-xs">
-                    {t("modified", {
-                      ns: "common",
-                      defaultValue: "Modified",
-                    })}
+                    {t("modified", { ns: "common", defaultValue: "Modified" })}
                   </Badge>
                 )}
               </div>
-            </div>
-          </CollapsibleTrigger>
-
-          <CollapsibleContent>
-            <div className="pl-7">{sectionContent}</div>
-          </CollapsibleContent>
-        </div>
-      </Collapsible>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {shouldShowTitle && (
-        <div className="flex items-start justify-between">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <Heading as="h4">{title}</Heading>
-              {showOverrideIndicator && level === "camera" && isOverridden && (
-                <Badge variant="secondary" className="text-xs">
-                  {t("button.overridden", {
-                    ns: "common",
-                    defaultValue: "Overridden",
-                  })}
-                </Badge>
-              )}
-              {hasChanges && (
-                <Badge variant="outline" className="text-xs">
-                  {t("modified", { ns: "common", defaultValue: "Modified" })}
-                </Badge>
+              {sectionDescription && (
+                <p className="text-sm text-muted-foreground">
+                  {sectionDescription}
+                </p>
               )}
             </div>
-            {sectionDescription && (
-              <p className="text-sm text-muted-foreground">
-                {sectionDescription}
-              </p>
-            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {sectionContent}
-    </div>
+        {sectionContent}
+      </div>
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => sendRestart("restart")}
+      />
+    </>
   );
 }
