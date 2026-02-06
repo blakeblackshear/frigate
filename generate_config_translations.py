@@ -190,15 +190,15 @@ def generate_section_translation(config_class: type) -> Dict[str, Any]:
 
 def get_detector_translations(
     config_schema: Dict[str, Any],
-) -> tuple[Dict[str, Any], Dict[str, Any]]:
-    """Build detector field and type translations based on schema definitions."""
+) -> tuple[Dict[str, Any], set[str]]:
+    """Build detector type translations with nested fields based on schema definitions."""
     defs = config_schema.get("$defs", {})
     detector_schema = defs.get("DetectorConfig", {})
     discriminator = detector_schema.get("discriminator", {})
     mapping = discriminator.get("mapping", {})
 
     type_translations: Dict[str, Any] = {}
-    field_translations: Dict[str, Any] = {}
+    nested_field_keys: set[str] = set()
     for detector_type, ref in mapping.items():
         if not isinstance(ref, str):
             continue
@@ -219,16 +219,18 @@ def get_detector_translations(
         if description:
             type_entry["description"] = description
 
-        if type_entry:
-            type_translations[detector_type] = type_entry
-
         nested = extract_translations_from_schema(ref_schema, defs=defs)
         nested_without_root = {
             k: v for k, v in nested.items() if k not in ("label", "description")
         }
-        field_translations.update(nested_without_root)
+        if nested_without_root:
+            type_entry.update(nested_without_root)
+            nested_field_keys.update(nested_without_root.keys())
 
-    return field_translations, type_translations
+        if type_entry:
+            type_translations[detector_type] = type_entry
+
+    return type_translations, nested_field_keys
 
 
 def main():
@@ -301,9 +303,14 @@ def main():
             section_data.update(nested_without_root)
 
         if field_name == "detectors":
-            detector_fields, detector_types = get_detector_translations(config_schema)
-            section_data.update(detector_fields)
+            detector_types, detector_field_keys = get_detector_translations(
+                config_schema
+            )
             section_data.update(detector_types)
+            for key in detector_field_keys:
+                if key == "type":
+                    continue
+                section_data.pop(key, None)
 
         if not section_data:
             logger.warning(f"No translations found for section: {field_name}")

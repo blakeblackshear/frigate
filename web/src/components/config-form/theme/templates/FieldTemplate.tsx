@@ -126,7 +126,11 @@ export function FieldTemplate(props: FieldTemplateProps) {
     !isAdditionalProperty &&
     !isArrayItemInAdditionalProp;
 
-  const translationPath = buildTranslationPath(pathSegments, sectionI18nPrefix);
+  const translationPath = buildTranslationPath(
+    pathSegments,
+    sectionI18nPrefix,
+    formContext,
+  );
   const filterObjectLabel = getFilterObjectLabel(pathSegments);
   const translatedFilterObjectLabel = filterObjectLabel
     ? getTranslatedLabel(filterObjectLabel, "object")
