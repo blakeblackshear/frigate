@@ -146,5 +146,26 @@ export function sanitizeOverridesForSection(
     };
   }
 
+  // detectors: Strip readonly model fields that are generated on startup
+  // and should never be persisted back to the config file.
+  if (sectionPath === "detectors") {
+    const overridesObj = overrides as JsonObject;
+    const cleaned: JsonObject = {};
+
+    Object.entries(overridesObj).forEach(([key, value]) => {
+      if (!isJsonObject(value)) {
+        cleaned[key] = value;
+        return;
+      }
+
+      const cleanedValue = { ...value } as JsonObject;
+      delete cleanedValue.model;
+      delete cleanedValue.model_path;
+      cleaned[key] = cleanedValue;
+    });
+
+    return cleaned;
+  }
+
   return overrides;
 }

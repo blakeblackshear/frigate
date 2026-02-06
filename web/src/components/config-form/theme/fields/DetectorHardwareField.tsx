@@ -6,6 +6,7 @@ import type {
   UiSchema,
 } from "@rjsf/utils";
 import { toFieldPathId } from "@rjsf/utils";
+import { cloneDeep, set as lodashSet } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -297,8 +298,8 @@ export function DetectorHardwareField(props: FieldProps) {
   }, [detectors]);
 
   const updateDetectors = useCallback(
-    (nextDetectors: JsonObject) => {
-      onChange(nextDetectors as unknown, [] as FieldPathList);
+    (nextDetectors: JsonObject, path?: FieldPathList) => {
+      onChange(nextDetectors as unknown, path ?? ([] as FieldPathList));
     },
     [onChange],
   );
@@ -562,14 +563,12 @@ export function DetectorHardwareField(props: FieldProps) {
 
       const handleInstanceChange = (
         nextValue: unknown,
-        _path: FieldPathList,
+        path: FieldPathList,
         _errors?: ErrorSchema,
         _id?: string,
       ) => {
-        const nextDetectors = {
-          ...detectors,
-          [key]: nextValue ?? {},
-        } as JsonObject;
+        const nextDetectors = cloneDeep(detectors);
+        lodashSet(nextDetectors, path, nextValue);
         updateDetectors(nextDetectors);
       };
 

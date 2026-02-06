@@ -10,7 +10,6 @@ const detectorHiddenFields = [
 const detectors: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_detectors",
-    restartRequired: [],
     fieldOrder: [],
     advancedFields: [],
     hiddenFields: detectorHiddenFields,
