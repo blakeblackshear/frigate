@@ -508,7 +508,7 @@
           "hide": "Ascunde parola",
           "requirements": {
             "title": "Cerințe parolă:",
-            "length": "Cel puțin 8 caracter",
+            "length": "Cel puțin 12 caractere",
             "uppercase": "Cel puțin o literă majusculă",
             "digit": "Cel puțin o cifră",
             "special": "Cel puțin un caracter special (!@#$%^&*(),.?\":{}|<>)"

@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Adaugă o colecție nouă în Biblioteca de fețe încărcând prima ta imagine.",
     "placeholder": "Introduceti un nume pentru aceasta colectie",
-    "invalidName": "Nume invalid. Numele pot include doar litere, cifre, spații, apostrofuri, underscore-uri și liniuțe."
+    "invalidName": "Nume invalid. Numele pot include doar litere, cifre, spații, apostrofuri, underscore-uri și liniuțe.",
+    "nameCannotContainHash": "Numele nu poate conține #."
   },
   "details": {
     "person": "Persoană",
