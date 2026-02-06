@@ -19,7 +19,8 @@
   "description": {
     "addFace": "Afegiu una col·lecció nova a la biblioteca de cares pujant la vostra primera imatge.",
     "placeholder": "Introduïu un nom per a aquesta col·lecció",
-    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guions."
+    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guions.",
+    "nameCannotContainHash": "El nom no pot contenir #."
   },
   "documentTitle": "Biblioteca de rostres - Frigate",
   "uploadFaceImage": {

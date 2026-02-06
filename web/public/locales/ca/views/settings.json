@@ -532,7 +532,7 @@
           "hide": "Amaga contrasenya",
           "requirements": {
             "title": "Requisits contrasenya:",
-            "length": "Com a mínim 8 carácters",
+            "length": "Com a mínim 12 carácters",
             "uppercase": "Com a mínim una majúscula",
             "digit": "Com a mínim un digit",
             "special": "Com a mínim un carácter especial (!@#$%^&*(),.?\":{}|<>)"
