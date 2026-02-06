@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Ajoutez une nouvelle collection à la bibliothèque de visages en téléversant votre première image.",
     "placeholder": "Saisissez un nom pour cette collection.",
-    "invalidName": "Nom invalide. Les noms ne peuvent contenir que des lettres, des chiffres, des espaces, des apostrophes, des traits de soulignement et des tirets."
+    "invalidName": "Nom invalide. Les noms ne peuvent contenir que des lettres, des chiffres, des espaces, des apostrophes, des traits de soulignement et des tirets.",
+    "nameCannotContainHash": "Le nom ne peut pas contenir le caractère #."
   },
   "details": {
     "person": "Personne",

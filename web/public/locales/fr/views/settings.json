@@ -649,7 +649,7 @@
           "hide": "Masquer le mot de passe",
           "requirements": {
             "title": "Critères du mot de passe :",
-            "length": "Au moins 8 caractères",
+            "length": "Au moins 12 caractères",
             "uppercase": "Au moins une lettre majuscule",
             "digit": "Au moins un chiffre",
             "special": "Au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>)"
