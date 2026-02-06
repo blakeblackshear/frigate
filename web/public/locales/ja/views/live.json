@@ -176,6 +176,16 @@
     "restricted": {
       "title": "利用可能なカメラがありません",
       "description": "このグループ内のカメラを表示する権限がありません。"
+    },
+    "default": {
+      "title": "設定済みのカメラがありません",
+      "description": "Frigate にカメラを接続して開始しましょう。",
+      "buttonText": "カメラを追加"
+    },
+    "group": {
+      "title": "このグループにカメラがありません",
+      "description": "このカメラグループには、割り当て済みまたは有効なカメラがありません。",
+      "buttonText": "グループを管理"
     }
   },
   "snapshot": {

@@ -69,7 +69,8 @@
     },
     "inProgress": "処理中",
     "invalidStartTime": "開始時刻が無効です",
-    "invalidEndTime": "終了時刻が無効です"
+    "invalidEndTime": "終了時刻が無効です",
+    "never": "なし"
   },
   "readTheDocumentation": "ドキュメントを見る",
   "unit": {
@@ -232,7 +233,8 @@
       "ur": "اردو (ウルドゥー語)",
       "withSystem": {
         "label": "システム設定に従う"
-      }
+      },
+      "hr": "Hrvatski (クロアチア語)"
     },
     "classification": "分類"
   },

@@ -86,7 +86,13 @@
     "otherProcesses": {
       "title": "その他のプロセス",
       "processCpuUsage": "プロセスの CPU 使用率",
-      "processMemoryUsage": "プロセスのメモリ使用量"
+      "processMemoryUsage": "プロセスのメモリ使用量",
+      "series": {
+        "recording": "録画",
+        "review_segment": "レビューセグメント",
+        "audio_detector": "音声検知",
+        "go2rtc": "go2rtc"
+      }
     }
   },
   "storage": {
