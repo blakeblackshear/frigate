@@ -544,7 +544,7 @@
           "placeholder": "Passwort eingeben",
           "requirements": {
             "title": "Passwort Anforderungen:",
-            "length": "Mindestens 8 Zeichen",
+            "length": "Mindestens 12 Zeichen",
             "uppercase": "Mindestens ein Großbuchstabe",
             "digit": "Mindestens eine Ziffer",
             "special": "Mindestens ein Sonderzeichen (!@#$%^&*(),.?\":{}|<>)"
