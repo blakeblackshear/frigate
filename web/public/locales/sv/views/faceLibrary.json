@@ -12,7 +12,8 @@
   "description": {
     "placeholder": "Ange ett namn för denna samling",
     "addFace": "Lägg till en ny samling i ansiktsbiblioteket genom att ladda upp din första bild.",
-    "invalidName": "Ogiltigt namn. Namn får endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck."
+    "invalidName": "Ogiltigt namn. Namn får endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck.",
+    "nameCannotContainHash": "Namn får inte innehålla #."
   },
   "documentTitle": "Ansiktsbibliotek - Frigate",
   "steps": {

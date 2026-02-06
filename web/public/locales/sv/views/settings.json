@@ -540,7 +540,7 @@
           "hide": "Dölj lösenord",
           "requirements": {
             "title": "Lösenordskrav:",
-            "length": "Minst 8 tecken",
+            "length": "Minst 12 tecken",
             "uppercase": "Minst en stor bokstav",
             "digit": "Minst en siffra",
             "special": "Minst ett specialtecken (!@#$%^&*(),.?\":{}|<>)"
