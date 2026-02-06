@@ -282,7 +282,7 @@
         },
         "delete": {
           "title": "确认删除",
-          "desc": "你确定要删除{{type}} <em>{{name}}</em> 吗？",
+          "desc": "你确定要删除{{type}} “<strong>{{name}}</strong>” 吗？",
           "success": "{{name}} 已被删除。"
         },
         "error": {
@@ -543,7 +543,7 @@
           "hide": "隐藏密码",
           "requirements": {
             "title": "密码要求：",
-            "length": "至少8个字符",
+            "length": "至少需要 12 位字符",
             "uppercase": "至少一个大写字母",
             "digit": "至少一位数字",
             "special": "至少一个特殊符号 (!@#$%^&*(),.?\":{}|<>)"

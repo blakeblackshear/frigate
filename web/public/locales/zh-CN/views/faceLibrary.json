@@ -2,7 +2,8 @@
   "description": {
     "addFace": "我们将引导你如何向人脸库中添加新的合集。",
     "placeholder": "请输入此合集的名称",
-    "invalidName": "名称无效。名称只能包含字母、数字、空格、撇号、下划线和连字符。"
+    "invalidName": "名称无效。名称只能包含字母、数字、空格、撇号、下划线和连字符。",
+    "nameCannotContainHash": "名称中不允许包含“#”符号。"
   },
   "details": {
     "person": "人",
