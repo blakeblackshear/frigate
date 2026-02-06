@@ -125,6 +125,10 @@ def config(request: Request):
     config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
+    config["detectors"] = {
+        name: detector.model_dump(mode="json", warnings="none", exclude_none=True)
+        for name, detector in config_obj.detectors.items()
+    }
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
