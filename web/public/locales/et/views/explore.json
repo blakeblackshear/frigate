@@ -30,11 +30,21 @@
       "stationary": "{{label}} jäi paigale",
       "active": "{{label}} muutus aktiivseks",
       "entered_zone": "{{label}} sisenes tsooni {{zones}}",
-      "visible": "{{label}} on tuvastatud"
+      "visible": "{{label}} on tuvastatud",
+      "header": {
+        "zones": "Tsoonid",
+        "ratio": "Suhtarv",
+        "area": "Ala",
+        "score": "Punktiskoor"
+      }
     },
     "title": "Jälgimise üksikasjad",
     "noImageFound": "Selle ajatempli kohta ei leidu pilti.",
-    "createObjectMask": "Loo objektimask"
+    "createObjectMask": "Loo objektimask",
+    "carousel": {
+      "previous": "Eelmine slaid",
+      "next": "Järgmine slaid"
+    }
   },
   "documentTitle": "Avasta - Frigate",
   "generativeAI": "Generatiivne tehisaru",
@@ -63,12 +73,15 @@
       "tips": {
         "mismatch_one": "Tuvastasin {{count}} võõra objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud.",
         "mismatch_other": "Tuvastasin {{count}} võõrast objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud."
-      }
+      },
+      "title": "Vaata objekti üksikasju",
+      "desc": "Vaata objekti üksikasju"
     },
     "snapshotScore": {
       "label": "Hetkvõttete punktiskoor"
     },
     "regenerateFromSnapshot": "Loo uuesti hetkvõttest",
     "timestamp": "Ajatampel"
-  }
+  },
+  "trackedObjectDetails": "Jälgitava objekti üksikasjad"
 }

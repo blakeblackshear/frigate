@@ -4,10 +4,23 @@
       "password": "Salasõna",
       "passwordPlaceholder": "Valikuline",
       "customUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht",
-      "connectionSettings": "Ühenduse seadistused"
+      "connectionSettings": "Ühenduse seadistused",
+      "port": "Port",
+      "username": "Kasutajanimi",
+      "usernamePlaceholder": "Valikuline"
     },
     "step3": {
-      "streamUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht"
+      "streamUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht",
+      "url": "Võrguaadress",
+      "resolution": "Resolutsioon",
+      "quality": "Kvaliteet",
+      "roles": "Rollid",
+      "roleLabels": {
+        "record": "Salvestamine",
+        "audio": "Heliriba"
+      },
+      "connected": "Ühendatud",
+      "featuresTitle": "Funktsionaalsused"
     },
     "steps": {
       "probeOrSnapshot": "Võta proov või tee hetkvõte"
@@ -15,7 +28,34 @@
     "step2": {
       "testing": {
         "fetchingSnapshot": "Laadin kaamera hetkvõtet alla..."
-      }
+      },
+      "retry": "Proovi uuesti",
+      "manufacturer": "Tootja",
+      "model": "Mudel",
+      "firmware": "Püsivara",
+      "profiles": "Profiilid",
+      "presets": "Eelseadistused",
+      "useCandidate": "Kasuta",
+      "uriCopy": "Kopeeri",
+      "connected": "Ühendatud"
+    },
+    "testResultLabels": {
+      "resolution": "Resolutsioon",
+      "video": "Video",
+      "audio": "Heliriba",
+      "fps": "Kaadrisagedus"
+    },
+    "step4": {
+      "reload": "Laadi uuesti",
+      "connecting": "Ühendan…",
+      "valid": "Kehtiv",
+      "failed": "Ebaõnnestunud",
+      "connectStream": "Ühenda",
+      "connectingStream": "Ühendan",
+      "disconnectStream": "Katkesta ühendus",
+      "roles": "Rollid",
+      "none": "Määramata",
+      "error": "Viga"
     }
   },
   "users": {
@@ -29,7 +69,10 @@
       }
     },
     "table": {
-      "password": "Lähtesta salasõna"
+      "password": "Lähtesta salasõna",
+      "username": "Kasutajanimi",
+      "actions": "Tegevused",
+      "role": "Roll"
     },
     "dialog": {
       "form": {
@@ -53,7 +96,7 @@
           "hide": "Peida salasõna",
           "requirements": {
             "title": "Salasõna reeglid:",
-            "length": "Vähemalt 8 tähemärki",
+            "length": "Vähemalt 12 tähemärki",
             "uppercase": "Vähemalt üks suurtäht",
             "digit": "Vähemalt üks number",
             "special": "Vähemalt üks erimärk (!@#$%^&*(),.?\":{}|<>)"
@@ -70,6 +113,9 @@
         "currentPassword": {
           "title": "Senine salasõna",
           "placeholder": "Sisesta oma senine salasõna"
+        },
+        "user": {
+          "title": "Kasutajanimi"
         }
       },
       "createUser": {
@@ -84,12 +130,42 @@
         "currentPasswordRequired": "Senine salasõna on vajalik",
         "incorrectCurrentPassword": "Senine salasõna pole õige",
         "passwordVerificationFailed": "Salasõna kontrollimine ei õnnestunud"
+      },
+      "changeRole": {
+        "roleInfo": {
+          "admin": "Peakasutaja",
+          "viewer": "Vaataja"
+        }
       }
-    }
+    },
+    "title": "Kasutajad"
   },
   "debug": {
     "boundingBoxes": {
       "desc": "Näita jälgitavate objektide ümber märgiskaste"
+    },
+    "title": "Silumine ja veaotsing",
+    "debugging": "Veaotsing ja silumine",
+    "audio": {
+      "title": "Heliriba",
+      "score": "punktiskoor"
+    },
+    "timestamp": {
+      "title": "Ajatempel"
+    },
+    "zones": {
+      "title": "Tsoonid"
+    },
+    "regions": {
+      "title": "Alad"
+    },
+    "paths": {
+      "title": "Asukohad"
+    },
+    "objectShapeFilterDrawing": {
+      "score": "Punktiskoor",
+      "ratio": "Suhtarv",
+      "area": "Ala"
     }
   },
   "documentTitle": {
@@ -113,10 +189,31 @@
       "automaticLiveView": {
         "label": "Automaatne otseülekande vaade"
       }
+    },
+    "calendar": {
+      "title": "Kalender",
+      "firstWeekday": {
+        "sunday": "Pühapäev",
+        "monday": "Esmaspäev",
+        "label": "Esimene nädalapäev"
+      }
+    },
+    "storedLayouts": {
+      "title": "Salvestatud paigutused"
+    },
+    "recordingsViewer": {
+      "title": "Salvestuste vaataja"
     }
   },
   "cameraManagement": {
-    "backToSettings": "Tagasi kaameraseadistuste juurde"
+    "backToSettings": "Tagasi kaameraseadistuste juurde",
+    "cameraConfig": {
+      "enabled": "Kasutusel",
+      "ffmpeg": {
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rollid"
+      }
+    }
   },
   "notification": {
     "notificationSettings": {
@@ -130,6 +227,16 @@
       "success": {
         "settingSaved": "Teavituste seadistused on salvestatud."
       }
+    },
+    "title": "Teavitused",
+    "email": {
+      "title": "E-post"
+    },
+    "cameras": {
+      "title": "Kaamerad"
+    },
+    "suspendTime": {
+      "suspend": "Peata arvuti töö"
     }
   },
   "frigatePlus": {
@@ -145,20 +252,48 @@
         "cleanCopySnapshots": "<code>clean_copy</code> Hetkvõtted",
         "camera": "Kaamera"
       }
+    },
+    "modelInfo": {
+      "plusModelType": {
+        "userModel": "Peenhäälestatud"
+      },
+      "cameras": "Kaamerad"
     }
   },
   "masksAndZones": {
     "zones": {
       "point_one": "{{count}} punkt",
-      "point_other": "{{count}} punkti"
+      "point_other": "{{count}} punkti",
+      "label": "Tsoonid",
+      "desc": {
+        "documentation": "Dokumentatsioon"
+      },
+      "name": {
+        "title": "Nimi"
+      },
+      "inertia": {
+        "title": "Inerts"
+      },
+      "objects": {
+        "title": "Objektid"
+      }
     },
     "motionMasks": {
       "point_one": "{{count}} punkt",
-      "point_other": "{{count}} punkti"
+      "point_other": "{{count}} punkti",
+      "desc": {
+        "documentation": "Dokumentatsioon"
+      }
     },
     "objectMasks": {
       "point_one": "{{count}} punkt",
-      "point_other": "{{count}} punkti"
+      "point_other": "{{count}} punkti",
+      "desc": {
+        "documentation": "Dokumentatsioon"
+      },
+      "objects": {
+        "title": "Objektid"
+      }
     }
   },
   "roles": {
@@ -166,6 +301,21 @@
       "success": {
         "userRolesUpdated_one": "{{count}} selle rolliga kasutaja on nüüd määratud Vaatajaks, kellel on ligipääs kõikidele kaameratele.",
         "userRolesUpdated_other": "{{count}} selle rolliga kasutajat on nüüd määratud Vaatajaks, kellel on ligipääs kõikidele kaameratele."
+      }
+    },
+    "table": {
+      "role": "Roll",
+      "cameras": "Kaamerad",
+      "actions": "Tegevused"
+    },
+    "dialog": {
+      "deleteRole": {
+        "deleting": "Kustutan..."
+      },
+      "form": {
+        "cameras": {
+          "title": "Kaamerad"
+        }
       }
     }
   },
@@ -178,7 +328,8 @@
     "users": "Kasutajad",
     "roles": "Rollid",
     "notifications": "Teavitused",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "cameraReview": "Ülevaatamine"
   },
   "dialog": {
     "unsavedChanges": {
@@ -189,5 +340,84 @@
   "cameraSetting": {
     "camera": "Kaamera",
     "noCamera": "Kaamerat pole"
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmButton": "Indekseeri uuesti",
+        "label": "Indekseeri uuesti kohe"
+      },
+      "modelSize": {
+        "small": {
+          "title": "väike"
+        },
+        "large": {
+          "title": "suur"
+        }
+      },
+      "title": "Semantiline otsing"
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "title": "väike"
+        },
+        "large": {
+          "title": "suur"
+        }
+      }
+    },
+    "birdClassification": {
+      "title": "Lindude klassifikatsioon"
+    }
+  },
+  "cameraReview": {
+    "review": {
+      "title": "Ülevaatamine",
+      "alerts": "Hoiatused ",
+      "detections": "Tuvastamise tulemused "
+    }
+  },
+  "motionDetectionTuner": {
+    "Threshold": {
+      "title": "Lävi"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Päästikud",
+    "management": {
+      "title": "Päästikud"
+    },
+    "table": {
+      "name": "Nimi",
+      "type": "Tüüp",
+      "content": "Sisu",
+      "threshold": "Lävi",
+      "actions": "Tegevused",
+      "edit": "Muuda"
+    },
+    "type": {
+      "thumbnail": "Pisipilt",
+      "description": "Kirjeldus"
+    },
+    "dialog": {
+      "form": {
+        "name": {
+          "title": "Nimi"
+        },
+        "type": {
+          "title": "Tüüp"
+        },
+        "content": {
+          "title": "Sisu"
+        },
+        "threshold": {
+          "title": "Lävi"
+        },
+        "actions": {
+          "title": "Tegevused"
+        }
+      }
+    }
   }
 }
