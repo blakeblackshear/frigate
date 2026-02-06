@@ -56,6 +56,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   const groupDefinitions =
     (uiSchema?.["ui:groups"] as Record<string, string[]> | undefined) || {};
+  const disableNestedCard =
+    uiSchema?.["ui:options"]?.disableNestedCard === true;
 
   const isHiddenProp = (prop: (typeof properties)[number]) =>
     prop.content.props.uiSchema?.["ui:widget"] === "hidden";
@@ -241,6 +243,36 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
               open={showAdvanced}
               onOpenChange={setShowAdvanced}
               isRoot
+            >
+              {renderGroupedFields(advancedProps)}
+            </AdvancedCollapsible>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  if (disableNestedCard) {
+    return (
+      <div className="space-y-4">
+        {hasCustomChildren ? (
+          children
+        ) : (
+          <>
+            {renderGroupedFields(regularProps)}
+            <AddPropertyButton
+              onAddProperty={onAddProperty}
+              schema={schema}
+              uiSchema={uiSchema}
+              formData={formData}
+              disabled={disabled}
+              readonly={readonly}
+            />
+
+            <AdvancedCollapsible
+              count={advancedProps.length}
+              open={showAdvanced}
+              onOpenChange={setShowAdvanced}
             >
               {renderGroupedFields(advancedProps)}
             </AdvancedCollapsible>

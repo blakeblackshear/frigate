@@ -532,10 +532,19 @@ export function DetectorHardwareField(props: FieldProps) {
       const globalHidden = buildHiddenUiSchema(globalHiddenFields);
       const hiddenOverrides = buildHiddenUiSchema(hiddenByType[type] ?? []);
       const typeHidden = { type: { "ui:widget": "hidden" } } as UiSchema;
+      const nestedOverrides = {
+        "ui:options": {
+          disableNestedCard: true,
+        },
+      } as UiSchema;
 
       const withGlobalHidden = mergeUiSchema(baseUiSchema, globalHidden);
       const withTypeHidden = mergeUiSchema(withGlobalHidden, hiddenOverrides);
-      return mergeUiSchema(withTypeHidden, typeHidden);
+      const withTypeHiddenAndOptions = mergeUiSchema(
+        withTypeHidden,
+        typeHidden,
+      );
+      return mergeUiSchema(withTypeHiddenAndOptions, nestedOverrides);
     },
     [globalHiddenFields, hiddenByType, uiSchema?.additionalProperties],
   );
@@ -785,12 +794,7 @@ export function DetectorHardwareField(props: FieldProps) {
                         </div>
                       </div>
 
-                      <div
-                        className={cn(
-                          "rounded-md border border-border/70 bg-background p-0",
-                          readonly && "opacity-90",
-                        )}
-                      >
+                      <div className={cn(readonly && "opacity-90")}>
                         {renderInstanceForm(key, value)}
                       </div>
                     </div>
