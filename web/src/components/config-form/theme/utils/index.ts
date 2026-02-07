@@ -8,3 +8,10 @@ export {
   humanizeKey,
   getDomainFromNamespace,
 } from "./i18n";
+
+export { getOverrideAtPath, hasOverrideAtPath } from "./overrides";
+export {
+  deepNormalizeValue,
+  normalizeFieldValue,
+  isSubtreeModified,
+} from "./overrides";

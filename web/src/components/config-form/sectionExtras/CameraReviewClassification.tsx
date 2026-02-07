@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
 import cloneDeep from "lodash/cloneDeep";
 import get from "lodash/get";
+import isEqual from "lodash/isEqual";
 import set from "lodash/set";
 import { LuExternalLink } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
@@ -36,6 +37,9 @@ export default function CameraReviewClassification({
   const { getLocaleDocUrl } = useDocDomain();
   const cameraName = formContext?.cameraName ?? selectedCamera;
   const fullFormData = formContext?.formData as JsonObject | undefined;
+  const baselineFormData = formContext?.baselineFormData as
+    | JsonObject
+    | undefined;
   const cameraConfig = formContext?.fullCameraConfig;
 
   const alertsZones = useMemo(
@@ -46,6 +50,25 @@ export default function CameraReviewClassification({
     () => getRequiredZones(fullFormData, "detections.required_zones"),
     [fullFormData],
   );
+
+  // Track whether zones have been modified from baseline for label coloring
+  const alertsZonesModified = useMemo(() => {
+    if (!baselineFormData) return false;
+    const baseline = getRequiredZones(
+      baselineFormData,
+      "alerts.required_zones",
+    );
+    return !isEqual(alertsZones, baseline);
+  }, [alertsZones, baselineFormData]);
+
+  const detectionsZonesModified = useMemo(() => {
+    if (!baselineFormData) return false;
+    const baseline = getRequiredZones(
+      baselineFormData,
+      "detections.required_zones",
+    );
+    return !isEqual(detectionsZones, baseline);
+  }, [detectionsZones, baselineFormData]);
 
   const [selectDetections, setSelectDetections] = useState(
     detectionsZones.length > 0,
@@ -192,7 +215,12 @@ export default function CameraReviewClassification({
           {zones && zones.length > 0 ? (
             <>
               <div className="mb-2">
-                <Label className="flex flex-row items-center text-base">
+                <Label
+                  className={cn(
+                    "flex flex-row items-center text-base",
+                    alertsZonesModified && "text-danger",
+                  )}
+                >
                   <Trans ns="views/settings">cameraReview.review.alerts</Trans>
                   <MdCircle className="ml-3 size-2 text-severity_alert" />
                 </Label>
@@ -255,7 +283,12 @@ export default function CameraReviewClassification({
           {zones && zones.length > 0 && (
             <>
               <div className="mb-2">
-                <Label className="flex flex-row items-center text-base">
+                <Label
+                  className={cn(
+                    "flex flex-row items-center text-base",
+                    detectionsZonesModified && "text-danger",
+                  )}
+                >
                   <Trans ns="views/settings">
                     cameraReview.review.detections
                   </Trans>

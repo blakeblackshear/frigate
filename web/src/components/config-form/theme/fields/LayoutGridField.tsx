@@ -78,11 +78,15 @@
  */
 
 import type { FieldProps, ObjectFieldTemplateProps } from "@rjsf/utils";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { ConfigFormContext } from "@/types/configForm";
-import { getDomainFromNamespace, humanizeKey } from "../utils/i18n";
+import {
+  getDomainFromNamespace,
+  hasOverrideAtPath,
+  humanizeKey,
+} from "../utils";
 import { AddPropertyButton, AdvancedCollapsible } from "../components";
 
 type LayoutGridColumnConfig = {
@@ -126,7 +130,6 @@ function GridLayoutObjectFieldTemplate(
     readonly,
   } = props;
   const formContext = registry?.formContext as ConfigFormContext | undefined;
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const { t } = useTranslation(["common", "config/groups"]);
 
   // Use the original ObjectFieldTemplate passed as parameter, not from registry
@@ -145,11 +148,11 @@ function GridLayoutObjectFieldTemplate(
   const useGridForAdvanced = layoutGridOptions.useGridForAdvanced ?? true;
   const groupDefinitions =
     (uiSchema?.["ui:groups"] as Record<string, string[]> | undefined) || {};
+  const overrides = formContext?.overrides;
+  const fieldPath = props.fieldPathId.path;
 
-  // If no layout grid is defined, use the default template
-  if (layoutGrid.length === 0) {
-    return <ObjectFieldTemplate {...props} />;
-  }
+  const isPathModified = (path: Array<string | number>) =>
+    hasOverrideAtPath(overrides, path, formContext?.formData);
 
   // Override the properties rendering with grid layout
   const isHiddenProp = (prop: (typeof properties)[number]) =>
@@ -164,6 +167,15 @@ function GridLayoutObjectFieldTemplate(
   const regularProps = visibleProps.filter(
     (p) => p.content.props.uiSchema?.["ui:options"]?.advanced !== true,
   );
+  const hasModifiedAdvanced = advancedProps.some((prop) =>
+    isPathModified([...fieldPath, prop.name]),
+  );
+  const [showAdvanced, setShowAdvanced] = useState(hasModifiedAdvanced);
+
+  // If no layout grid is defined, use the default template
+  if (layoutGrid.length === 0) {
+    return <ObjectFieldTemplate {...props} />;
+  }
 
   const domain = getDomainFromNamespace(formContext?.i18nNamespace);
   const sectionI18nPrefix = formContext?.sectionI18nPrefix;
@@ -518,14 +530,22 @@ export function LayoutGridField(props: FieldProps) {
 
   // Create a modified registry with our custom template
   // But we'll pass the original template to it to prevent circular reference
-  const modifiedRegistry = {
-    ...registry,
-    templates: {
-      ...registry.templates,
-      ObjectFieldTemplate: (tProps: ObjectFieldTemplateProps) =>
-        GridLayoutObjectFieldTemplate(tProps, originalObjectFieldTemplate),
-    },
-  };
+  const gridObjectFieldTemplate = useCallback(
+    (tProps: ObjectFieldTemplateProps) =>
+      GridLayoutObjectFieldTemplate(tProps, originalObjectFieldTemplate),
+    [originalObjectFieldTemplate],
+  );
+
+  const modifiedRegistry = useMemo(
+    () => ({
+      ...registry,
+      templates: {
+        ...registry.templates,
+        ObjectFieldTemplate: gridObjectFieldTemplate,
+      },
+    }),
+    [registry, gridObjectFieldTemplate],
+  );
 
   // Delegate to ObjectField with the modified registry
   return (

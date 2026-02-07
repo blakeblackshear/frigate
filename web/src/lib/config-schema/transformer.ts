@@ -606,7 +606,10 @@ export function extractSchemaSection(
 }
 
 /**
- * Merges default values from schema into form data
+ * Merges default values from schema into form data.
+ *
+ * Handles anyOf/oneOf schemas (e.g., `anyOf: [MotionConfig, null]`) by
+ * finding the non-null object branch and applying its property defaults.
  */
 export function applySchemaDefaults(
   schema: RJSFSchema,
@@ -615,12 +618,32 @@ export function applySchemaDefaults(
   const result = { ...formData };
   const schemaObj = schema as Record<string, unknown>;
 
-  if (!isSchemaObject(schemaObj.properties)) {
+  // Resolve properties, falling back to the non-null object branch of
+  // anyOf/oneOf schemas when top-level properties are not present.
+  let properties = schemaObj.properties;
+  if (!isSchemaObject(properties)) {
+    const branches = (schemaObj.anyOf ?? schemaObj.oneOf) as
+      | unknown[]
+      | undefined;
+    if (Array.isArray(branches)) {
+      const objectBranch = branches.find(
+        (s) =>
+          isSchemaObject(s) &&
+          (s as Record<string, unknown>).type !== "null" &&
+          isSchemaObject((s as Record<string, unknown>).properties),
+      ) as Record<string, unknown> | undefined;
+      if (objectBranch) {
+        properties = objectBranch.properties;
+      }
+    }
+  }
+
+  if (!isSchemaObject(properties)) {
     return result;
   }
 
   for (const [key, prop] of Object.entries(
-    schemaObj.properties as Record<string, unknown>,
+    properties as Record<string, unknown>,
   )) {
     if (!isSchemaObject(prop)) continue;
 

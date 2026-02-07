@@ -19,8 +19,13 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 import {
   buildTranslationPath,
   getFilterObjectLabel,
+  hasOverrideAtPath,
   humanizeKey,
-} from "../utils/i18n";
+  normalizeFieldValue,
+} from "../utils";
+import { normalizeOverridePath } from "../utils/overrides";
+import get from "lodash/get";
+import isEqual from "lodash/isEqual";
 
 function _isArrayItemInAdditionalProperty(
   pathSegments: Array<string | number>,
@@ -66,6 +71,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     onRemoveProperty,
     rawDescription,
     rawErrors,
+    formData: fieldFormData,
     disabled,
     readonly,
   } = props;
@@ -131,6 +137,30 @@ export function FieldTemplate(props: FieldTemplateProps) {
     sectionI18nPrefix,
     formContext,
   );
+  const fieldPath = fieldPathId.path;
+  const overrides = formContext?.overrides;
+  const baselineFormData = formContext?.baselineFormData;
+  const normalizedFieldPath = normalizeOverridePath(
+    fieldPath,
+    formContext?.formData,
+  );
+  let baselineValue = baselineFormData
+    ? get(baselineFormData, normalizedFieldPath)
+    : undefined;
+  if (baselineValue === undefined || baselineValue === null) {
+    if (schema.default !== undefined && schema.default !== null) {
+      baselineValue = schema.default;
+    }
+  }
+  const isBaselineModified =
+    baselineFormData !== undefined &&
+    !isEqual(
+      normalizeFieldValue(fieldFormData),
+      normalizeFieldValue(baselineValue),
+    );
+  const isModified = baselineFormData
+    ? isBaselineModified
+    : hasOverrideAtPath(overrides, fieldPath, formContext?.formData);
   const filterObjectLabel = getFilterObjectLabel(pathSegments);
   const translatedFilterObjectLabel = filterObjectLabel
     ? getTranslatedLabel(filterObjectLabel, "object")
@@ -364,6 +394,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
                 htmlFor={id}
                 className={cn(
                   "text-sm font-medium",
+                  isModified && "text-danger",
                   errors &&
                     errors.props?.errors?.length > 0 &&
                     "text-destructive",
@@ -378,7 +409,13 @@ export function FieldTemplate(props: FieldTemplateProps) {
             <div className="flex w-full items-center justify-between gap-4">
               <div className="space-y-0.5">
                 {displayLabel && finalLabel && (
-                  <Label htmlFor={id} className="text-sm font-medium">
+                  <Label
+                    htmlFor={id}
+                    className={cn(
+                      "text-sm font-medium",
+                      isModified && "text-danger",
+                    )}
+                  >
                     {finalLabel}
                     {required && (
                       <span className="ml-1 text-destructive">*</span>

@@ -18,8 +18,11 @@ export type ConfigFormContext = {
   cameraName?: string;
   globalValue?: JsonValue;
   cameraValue?: JsonValue;
+  overrides?: JsonValue;
   hasChanges?: boolean;
   formData?: JsonObject;
+  baselineFormData?: JsonObject;
+  hiddenFields?: string[];
   onFormDataChange?: (data: ConfigSectionData) => void;
   fullCameraConfig?: CameraConfig;
   fullConfig?: FrigateConfig;

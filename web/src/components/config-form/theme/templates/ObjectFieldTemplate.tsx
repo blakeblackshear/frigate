@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Children, useState } from "react";
+import { Children, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
@@ -15,10 +15,12 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import { ConfigFormContext } from "@/types/configForm";
 import {
   buildTranslationPath,
+  getDomainFromNamespace,
   getFilterObjectLabel,
   humanizeKey,
-  getDomainFromNamespace,
-} from "../utils/i18n";
+  isSubtreeModified,
+} from "../utils";
+import get from "lodash/get";
 import { AddPropertyButton, AdvancedCollapsible } from "../components";
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
@@ -38,8 +40,115 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   // Check if this is a root-level object
   const isRoot = registry?.rootSchema === schema;
+  const overrides = formContext?.overrides;
+  const baselineFormData = formContext?.baselineFormData;
+  const hiddenFields = formContext?.hiddenFields;
+  const fieldPath = props.fieldPathId.path;
 
-  const [isOpen, setIsOpen] = useState(false);
+  // Strip fields from an object that should be excluded from modification
+  // detection: fields listed in hiddenFields (stripped from baseline by
+  // sanitizeSectionData) and fields with ui:widget=hidden in uiSchema
+  // (managed by custom components, not the standard form).
+  const stripExcludedFields = (
+    data: unknown,
+    path: Array<string | number>,
+  ): unknown => {
+    if (
+      !data ||
+      typeof data !== "object" ||
+      Array.isArray(data) ||
+      data === null
+    ) {
+      return data;
+    }
+    const result = { ...(data as Record<string, unknown>) };
+    const pathStrings = path.map(String);
+
+    // Strip hiddenFields that match the current path prefix
+    if (hiddenFields) {
+      for (const hidden of hiddenFields) {
+        const parts = hidden.split(".");
+        if (
+          parts.length === pathStrings.length + 1 &&
+          pathStrings.every((s, i) => s === parts[i])
+        ) {
+          delete result[parts[parts.length - 1]];
+        }
+      }
+    }
+
+    // Strip ui:widget=hidden fields from uiSchema at this level
+    if (uiSchema) {
+      // Navigate to the uiSchema subtree matching the relative path
+      let subUiSchema = uiSchema;
+      const relativePath = path.slice(fieldPath.length);
+      for (const segment of relativePath) {
+        if (
+          typeof segment === "string" &&
+          subUiSchema &&
+          typeof subUiSchema[segment] === "object"
+        ) {
+          subUiSchema = subUiSchema[segment] as typeof uiSchema;
+        } else {
+          subUiSchema = undefined as unknown as typeof uiSchema;
+          break;
+        }
+      }
+      if (subUiSchema && typeof subUiSchema === "object") {
+        for (const [key, propSchema] of Object.entries(subUiSchema)) {
+          if (
+            !key.startsWith("ui:") &&
+            typeof propSchema === "object" &&
+            propSchema !== null &&
+            (propSchema as Record<string, unknown>)["ui:widget"] === "hidden"
+          ) {
+            delete result[key];
+          }
+        }
+      }
+    }
+
+    return result;
+  };
+
+  // Use props.formData (always up-to-date from RJSF) rather than
+  // formContext.formData which can be stale in parent templates.
+  const checkSubtreeModified = (path: Array<string | number>): boolean => {
+    // Compute relative path from this object's fieldPath to get the
+    // value from props.formData (which represents this object's data)
+    const relativePath = path.slice(fieldPath.length);
+    let currentValue =
+      relativePath.length > 0 ? get(formData, relativePath) : formData;
+
+    // Strip hidden/excluded fields from the RJSF data before comparing
+    // against the baseline (which already has these stripped)
+    currentValue = stripExcludedFields(currentValue, path);
+
+    let baselineValue =
+      path.length > 0 ? get(baselineFormData, path) : baselineFormData;
+    // Also strip hidden/excluded fields from the baseline so that fields
+    // managed by custom components (e.g. required_zones with ui:widget=hidden)
+    // don't cause false modification detection.
+    baselineValue = stripExcludedFields(baselineValue, path);
+
+    return isSubtreeModified(
+      currentValue,
+      baselineValue,
+      overrides,
+      path,
+      formContext?.formData,
+    );
+  };
+
+  const hasModifiedDescendants = checkSubtreeModified(fieldPath);
+  const [isOpen, setIsOpen] = useState(hasModifiedDescendants);
+
+  // Auto-expand collapsible when modifications are detected
+  useEffect(() => {
+    if (hasModifiedDescendants) {
+      setIsOpen(true);
+    }
+  }, [hasModifiedDescendants]);
 
   const isCameraLevel = formContext?.level === "camera";
   const effectiveNamespace = isCameraLevel ? "config/cameras" : "config/global";
@@ -71,8 +180,17 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const regularProps = visibleProps.filter(
     (p) => p.content.props.uiSchema?.["ui:options"]?.advanced !== true,
   );
+  const hasModifiedAdvanced = advancedProps.some((prop) =>
+    checkSubtreeModified([...fieldPath, prop.name]),
+  );
+  const [showAdvanced, setShowAdvanced] = useState(hasModifiedAdvanced);
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  // Auto-expand advanced section when modifications are detected
+  useEffect(() => {
+    if (hasModifiedAdvanced) {
+      setShowAdvanced(true);
+    }
+  }, [hasModifiedAdvanced]);
   const { children } = props as ObjectFieldTemplateProps & {
     children?: ReactNode;
   };
@@ -290,7 +408,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-sm">{inferredLabel}</CardTitle>
+                <CardTitle
+                  className={cn(
+                    "text-sm",
+                    hasModifiedDescendants && "text-danger",
+                  )}
+                >
+                  {inferredLabel}
+                </CardTitle>
                 {inferredDescription && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {inferredDescription}

@@ -192,6 +192,14 @@ export function ConfigSection({
   // Use pending data from parent if available, otherwise use local state
   const [localPendingData, setLocalPendingData] =
     useState<ConfigSectionData | null>(null);
+  const [pendingOverrides, setPendingOverrides] = useState<
+    JsonValue | undefined
+  >(undefined);
+  const [dirtyOverrides, setDirtyOverrides] = useState<JsonValue | undefined>(
+    undefined,
+  );
+  const [baselineFormData, setBaselineFormData] =
+    useState<ConfigSectionData | null>(null);
 
   const pendingData =
     pendingDataBySection !== undefined
@@ -314,17 +322,31 @@ export function ConfigSection({
     [level, schemaDefaults, sectionPath, modifiedSchema],
   );
 
+  const compareBaseData = useMemo(
+    () => sanitizeSectionData(rawFormData as ConfigSectionData),
+    [rawFormData, sanitizeSectionData],
+  );
+
   // Clear pendingData whenever formData changes (e.g., from server refresh)
   // This prevents RJSF's initial onChange call from being treated as a user edit
   // Only clear if pendingData is managed locally (not by parent)
   useEffect(() => {
     if (!pendingData) {
       isInitializingRef.current = true;
+      setPendingOverrides(undefined);
+      setDirtyOverrides(undefined);
+      setBaselineFormData(cloneDeep(formData as ConfigSectionData));
     }
     if (onPendingDataChange === undefined) {
       setPendingData(null);
     }
-  }, [formData, pendingData, setPendingData, onPendingDataChange]);
+  }, [
+    formData,
+    pendingData,
+    setPendingData,
+    setBaselineFormData,
+    onPendingDataChange,
+  ]);
 
   useEffect(() => {
     if (isResettingRef.current) {
@@ -435,57 +457,97 @@ export function ConfigSection({
     (data: unknown) => {
       if (isResettingRef.current) {
         setPendingData(null);
+        setPendingOverrides(undefined);
         return;
       }
       if (!data || typeof data !== "object") {
         setPendingData(null);
+        setPendingOverrides(undefined);
         return;
       }
       const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
-      // When the server-stored `rawSectionValue` for `motion` global is
-      // actually `null` we must preserve that `null` sentinel for base
-      // comparisons. `isMotionGlobal` signals that the stored value is
-      // intentionally null (meaning "no global override provided"), so the
-      // baseline used by `buildOverrides` should be `null` rather than an
-      // object. This keeps the UI from treating the form-populated default
-      // object as a user edit on initial render.
-      const isMotionGlobal =
-        sectionPath === "motion" &&
-        level === "global" &&
-        rawSectionValue === null;
-      const rawData = isMotionGlobal
-        ? null
-        : sanitizeSectionData(rawFormData as ConfigSectionData);
+      let nextBaselineFormData = baselineFormData ?? formData;
       const overrides = buildOverrides(
         sanitizedData,
-        rawData,
+        compareBaseData,
         effectiveSchemaDefaults,
       );
+      setPendingOverrides(overrides as JsonValue | undefined);
       if (isInitializingRef.current && !pendingData) {
         isInitializingRef.current = false;
+        if (!baselineFormData) {
+          // Always use formData (server data + schema defaults) for the
+          // baseline snapshot, NOT sanitizedData from the onChange callback.
+          // If a custom component (e.g., zone checkboxes) triggers onChange
+          // before RJSF's initial onChange, sanitizedData would include the
+          // user's modification, corrupting the baseline.
+          const baselineSnapshot = cloneDeep(formData as ConfigSectionData);
+          setBaselineFormData(baselineSnapshot);
+          nextBaselineFormData = baselineSnapshot;
+        }
         if (overrides === undefined) {
           setPendingData(null);
+          setPendingOverrides(undefined);
+          setDirtyOverrides(undefined);
           return;
         }
       }
+      const dirty = buildOverrides(
+        sanitizedData,
+        nextBaselineFormData,
+        undefined,
+      );
+      setDirtyOverrides(dirty as JsonValue | undefined);
       if (overrides === undefined) {
         setPendingData(null);
+        setPendingOverrides(undefined);
+        setDirtyOverrides(undefined);
         return;
       }
       setPendingData(sanitizedData);
     },
     [
       pendingData,
-      level,
-      sectionPath,
-      rawSectionValue,
-      rawFormData,
+      compareBaseData,
       sanitizeSectionData,
       buildOverrides,
       effectiveSchemaDefaults,
       setPendingData,
+      setPendingOverrides,
+      setDirtyOverrides,
+      baselineFormData,
+      setBaselineFormData,
+      formData,
     ],
   );
+
+  const currentFormData = pendingData || formData;
+  const effectiveBaselineFormData = baselineFormData ?? formData;
+
+  const currentOverrides = useMemo(() => {
+    if (!currentFormData || typeof currentFormData !== "object") {
+      return undefined;
+    }
+    const sanitizedData = sanitizeSectionData(
+      currentFormData as ConfigSectionData,
+    );
+    return buildOverrides(
+      sanitizedData,
+      compareBaseData,
+      effectiveSchemaDefaults,
+    );
+  }, [
+    currentFormData,
+    sanitizeSectionData,
+    buildOverrides,
+    compareBaseData,
+    effectiveSchemaDefaults,
+  ]);
+
+  const effectiveOverrides = pendingData
+    ? (pendingOverrides ?? currentOverrides)
+    : undefined;
+  const uiOverrides = dirtyOverrides ?? effectiveOverrides;
 
   const requiresRestartForOverrides = useCallback(
     (overrides: unknown) => {
@@ -511,8 +573,10 @@ export function ConfigSection({
   const handleReset = useCallback(() => {
     isResettingRef.current = true;
     setPendingData(null);
+    setPendingOverrides(undefined);
+    setDirtyOverrides(undefined);
     setFormKey((prev) => prev + 1);
-  }, [setPendingData]);
+  }, [setPendingData, setPendingOverrides, setDirtyOverrides]);
 
   // Handle save button click
   const handleSave = useCallback(async () => {
@@ -808,7 +872,7 @@ export function ConfigSection({
       <ConfigForm
         key={formKey}
         schema={modifiedSchema}
-        formData={pendingData || formData}
+        formData={currentFormData}
         onChange={handleChange}
         fieldOrder={sectionConfig.fieldOrder}
         fieldGroups={sectionConfig.fieldGroups}
@@ -827,7 +891,9 @@ export function ConfigSection({
           globalValue,
           cameraValue,
           hasChanges,
-          formData: (pendingData || formData) as ConfigSectionData,
+          overrides: uiOverrides as JsonValue | undefined,
+          formData: currentFormData as ConfigSectionData,
+          baselineFormData: effectiveBaselineFormData as ConfigSectionData,
           onFormDataChange: (data: ConfigSectionData) => handleChange(data),
           // For widgets that need access to full camera config (e.g., zone names)
           fullCameraConfig:
@@ -845,6 +911,7 @@ export function ConfigSection({
           renderers: wrappedRenderers,
           sectionDocs: sectionConfig.sectionDocs,
           fieldDocs: sectionConfig.fieldDocs,
+          hiddenFields: sectionConfig.hiddenFields,
         }}
       />
 
