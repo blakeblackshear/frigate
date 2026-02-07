@@ -536,8 +536,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "sub_label": sub_label,
                     "score": score,
                     "camera": camera_name,
-                    "start_time": frame_time
-                    - self.config.cameras[camera_name].record.event_pre_capture,
+                    "start_time": frame_time,
                     "end_time": end_time,
                     "has_clip": self.config.cameras[camera_name].record.enabled
                     and include_recording,
