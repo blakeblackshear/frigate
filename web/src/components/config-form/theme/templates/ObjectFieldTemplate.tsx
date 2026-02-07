@@ -287,7 +287,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     <Card className="w-full">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer transition-colors hover:bg-muted/50">
+          <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-sm">{inferredLabel}</CardTitle>
@@ -306,7 +306,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4 pt-0">
+          <CardContent className="space-y-6 p-4 pt-0">
             {hasCustomChildren ? (
               children
             ) : (

@@ -127,7 +127,7 @@ export function SingleSectionPage({
               sectionStatus.isOverridden && (
                 <Badge
                   variant="secondary"
-                  className="border-2 border-selected text-xs text-primary-variant"
+                  className="cursor-default border-2 border-selected text-xs text-primary-variant"
                 >
                   {t("button.overridden", {
                     ns: "common",
@@ -138,7 +138,7 @@ export function SingleSectionPage({
             {sectionStatus.hasChanges && (
               <Badge
                 variant="secondary"
-                className="bg-danger text-xs text-white"
+                className="cursor-default bg-danger text-xs text-white hover:bg-danger"
               >
                 {t("modified", { ns: "common", defaultValue: "Modified" })}
               </Badge>
