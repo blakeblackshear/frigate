@@ -181,6 +181,13 @@ export default function PreviewThumbnailPlayer({
     config?.ui?.timezone,
   );
 
+  const getEventType = (text: string) => {
+    if (review.data.objects.includes(text)) return "object";
+    if (review.data.audio.includes(text)) return "audio";
+    if (review.data.sub_labels?.includes(text)) return "manual";
+    return "object";
+  };
+
   return (
     <div
       className="relative size-full cursor-pointer"
@@ -295,7 +302,7 @@ export default function PreviewThumbnailPlayer({
                       (item) =>
                         item !== undefined && !item.includes("-verified"),
                     )
-                    .map((text) => getTranslatedLabel(text))
+                    .map((text) => getTranslatedLabel(text, getEventType(text)))
                     .sort()
                     .join(", ")}
             </TooltipContent>
