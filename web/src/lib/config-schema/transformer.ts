@@ -97,11 +97,17 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
           ? [nonNullType, "null"]
           : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
-      return {
+      const merged: Record<string, unknown> = {
         ...rest,
         ...normalizedNonNullObj,
         type: mergedType,
-      } as RJSFSchema;
+      };
+      // When unwrapping a nullable enum, add null to the enum list so
+      // JSON Schema validation accepts the null default value.
+      if (Array.isArray(merged.enum)) {
+        merged.enum = [...(merged.enum as unknown[]), null];
+      }
+      return merged as RJSFSchema;
     }
 
     return {
@@ -135,11 +141,16 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
           ? [nonNullType, "null"]
           : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
-      return {
+      const merged: Record<string, unknown> = {
         ...rest,
         ...normalizedNonNullObj,
         type: mergedType,
-      } as RJSFSchema;
+      };
+      // When unwrapping a nullable oneOf enum, add null to the enum list.
+      if (Array.isArray(merged.enum)) {
+        merged.enum = [...(merged.enum as unknown[]), null];
+      }
+      return merged as RJSFSchema;
     }
 
     return {
