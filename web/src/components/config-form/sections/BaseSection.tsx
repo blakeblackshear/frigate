@@ -47,7 +47,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
-import { isJsonObject } from "@/lib/utils";
+import { cn, isJsonObject } from "@/lib/utils";
 import { ConfigSectionData, JsonObject, JsonValue } from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
@@ -849,65 +849,72 @@ export function ConfigSection({
       />
 
       {/* Save button */}
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2">
-          {hasChanges && (
-            <span className="text-sm text-danger">
-              {t("unsavedChanges", {
-                ns: "views/settings",
-                defaultValue: "You have unsaved changes",
-              })}
-            </span>
+      <div className="sticky bottom-0 z-50 w-full border-t border-secondary bg-background pb-5 pt-0">
+        <div
+          className={cn(
+            "flex flex-col items-center gap-4 pt-2 md:flex-row",
+            hasChanges ? "justify-between" : "justify-end",
           )}
-        </div>
-        <div className="flex items-center gap-2">
-          {((level === "camera" && isOverridden) || level === "global") &&
-            !hasChanges && (
+        >
+          {hasChanges && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-danger">
+                {t("unsavedChanges", {
+                  ns: "views/settings",
+                  defaultValue: "You have unsaved changes",
+                })}
+              </span>
+            </div>
+          )}
+          <div className="flex w-full items-center gap-2 md:w-auto">
+            {((level === "camera" && isOverridden) || level === "global") &&
+              !hasChanges && (
+                <Button
+                  onClick={() => setIsResetDialogOpen(true)}
+                  variant="outline"
+                  disabled={isSaving || disabled}
+                  className="flex flex-1 gap-2"
+                >
+                  {level === "global"
+                    ? t("button.resetToDefault", {
+                        ns: "common",
+                        defaultValue: "Reset to Default",
+                      })
+                    : t("button.resetToGlobal", {
+                        ns: "common",
+                        defaultValue: "Reset to Global",
+                      })}
+                </Button>
+              )}
+            {hasChanges && (
               <Button
-                onClick={() => setIsResetDialogOpen(true)}
+                onClick={handleReset}
                 variant="outline"
                 disabled={isSaving || disabled}
-                className="flex flex-1 gap-2"
+                className="flex min-w-36 flex-1 gap-2"
               >
-                {level === "global"
-                  ? t("button.resetToDefault", {
-                      ns: "common",
-                      defaultValue: "Reset to Default",
-                    })
-                  : t("button.resetToGlobal", {
-                      ns: "common",
-                      defaultValue: "Reset to Global",
-                    })}
+                {t("undo", { ns: "common", defaultValue: "Undo" })}
               </Button>
             )}
-          {hasChanges && (
             <Button
-              onClick={handleReset}
-              variant="outline"
-              disabled={isSaving || disabled}
+              onClick={handleSave}
+              variant="select"
+              disabled={!hasChanges || isSaving || disabled}
               className="flex min-w-36 flex-1 gap-2"
             >
-              {t("undo", { ns: "common", defaultValue: "Undo" })}
+              {isSaving ? (
+                <>
+                  <ActivityIndicator className="h-4 w-4" />
+                  {t("button.saving", {
+                    ns: "common",
+                    defaultValue: "Saving...",
+                  })}
+                </>
+              ) : (
+                <>{t("button.save", { ns: "common", defaultValue: "Save" })}</>
+              )}
             </Button>
-          )}
-          <Button
-            onClick={handleSave}
-            variant="select"
-            disabled={!hasChanges || isSaving || disabled}
-            className="flex min-w-36 flex-1 gap-2"
-          >
-            {isSaving ? (
-              <>
-                <ActivityIndicator className="h-4 w-4" />
-                {t("button.saving", {
-                  ns: "common",
-                  defaultValue: "Saving...",
-                })}
-              </>
-            ) : (
-              <>{t("button.save", { ns: "common", defaultValue: "Save" })}</>
-            )}
-          </Button>
+          </div>
         </div>
       </div>
 
@@ -1005,7 +1012,10 @@ export function ConfigSection({
                 {showOverrideIndicator &&
                   level === "camera" &&
                   isOverridden && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="cursor-default border-2 border-selected text-xs text-primary-variant"
+                    >
                       {t("button.overridden", {
                         ns: "common",
                         defaultValue: "Overridden",
@@ -1013,7 +1023,10 @@ export function ConfigSection({
                     </Badge>
                   )}
                 {hasChanges && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+                  >
                     {t("modified", { ns: "common", defaultValue: "Modified" })}
                   </Badge>
                 )}

@@ -1031,7 +1031,7 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="scrollbar-container mb-24 flex-1 overflow-y-auto p-2 pr-0">
+          <div className="scrollbar-container mb-16 flex-1 overflow-y-auto p-2 pr-0">
             {(() => {
               const CurrentComponent = getCurrentComponent(page);
               if (!CurrentComponent) return null;
