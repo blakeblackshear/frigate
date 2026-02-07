@@ -9,6 +9,9 @@ const notifications: SectionConfigOverrides = {
     hiddenFields: ["enabled_in_config"],
     advancedFields: [],
   },
+  camera: {
+    hiddenFields: ["enabled_in_config", "email"],
+  },
 };
 
 export default notifications;
