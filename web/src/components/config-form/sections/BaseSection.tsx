@@ -51,7 +51,7 @@ import {
   buildOverrides,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
-} from "@/utils/configSaveUtil";
+} from "@/utils/configUtil";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useRestart } from "@/api/ws";
 

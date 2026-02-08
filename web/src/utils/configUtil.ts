@@ -8,6 +8,7 @@ import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
+import mergeWith from "lodash/mergeWith";
 import { isJsonObject } from "@/lib/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { normalizeConfigValue } from "@/hooks/use-config-override";
@@ -16,7 +17,6 @@ import {
   getEffectiveDefaultsForSection,
   sanitizeOverridesForSection,
 } from "@/components/config-form/sections/section-special-cases";
-import { getSectionConfig } from "@/utils/sectionConfigsUtils";
 import type { RJSFSchema } from "@rjsf/utils";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type {
@@ -24,6 +24,8 @@ import type {
   JsonObject,
   JsonValue,
 } from "@/types/configForm";
+import type { SectionConfig } from "../components/config-form/sections/BaseSection";
+import { sectionConfigs } from "../components/config-form/sectionConfigs";
 
 // ---------------------------------------------------------------------------
 // cameraUpdateTopicMap — maps config section paths to MQTT/WS update topics
@@ -396,4 +398,33 @@ export function prepareSectionSavePayload(opts: {
     needsRestart,
     pendingDataKey,
   };
+}
+
+const mergeSectionConfig = (
+  base: SectionConfig | undefined,
+  overrides: Partial<SectionConfig> | undefined,
+): SectionConfig =>
+  mergeWith({}, base ?? {}, overrides ?? {}, (objValue, srcValue, key) => {
+    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+      return srcValue ?? objValue;
+    }
+
+    if (key === "uiSchema" && srcValue !== undefined) {
+      return srcValue;
+    }
+
+    return undefined;
+  });
+
+export function getSectionConfig(
+  sectionKey: string,
+  level: "global" | "camera",
+): SectionConfig {
+  const entry = sectionConfigs[sectionKey];
+  if (!entry) {
+    return {};
+  }
+
+  const overrides = level === "global" ? entry.global : entry.camera;
+  return mergeSectionConfig(entry.base, overrides);
 }

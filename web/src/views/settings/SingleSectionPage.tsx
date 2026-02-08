@@ -5,7 +5,7 @@ import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
 import type { ConfigSectionData } from "@/types/configForm";
-import { getSectionConfig } from "@/utils/sectionConfigsUtils";
+import { getSectionConfig } from "@/utils/configUtil";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";

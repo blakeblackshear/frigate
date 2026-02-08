@@ -84,7 +84,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
-import { prepareSectionSavePayload } from "@/utils/configSaveUtil";
+import { prepareSectionSavePayload } from "@/utils/configUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useRestart } from "@/api/ws";
