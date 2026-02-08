@@ -1622,6 +1622,7 @@ def create_event(
             body.duration,
             "api",
             body.draw,
+            body.pre_capture,
         ),
         EventMetadataTypeEnum.manual_event_create.value,
     )
