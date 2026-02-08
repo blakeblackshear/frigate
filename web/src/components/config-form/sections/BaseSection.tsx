@@ -17,10 +17,7 @@ import {
   sanitizeOverridesForSection,
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
-import {
-  useConfigOverride,
-  normalizeConfigValue,
-} from "@/hooks/use-config-override";
+import { useConfigOverride } from "@/hooks/use-config-override";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
 import get from "lodash/get";
-import unset from "lodash/unset";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import {
@@ -47,9 +43,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
-import { cn, isJsonObject } from "@/lib/utils";
-import { ConfigSectionData, JsonObject, JsonValue } from "@/types/configForm";
+import { cn } from "@/lib/utils";
+import { ConfigSectionData, JsonValue } from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import {
+  cameraUpdateTopicMap,
+  buildOverrides,
+  sanitizeSectionData as sharedSanitizeSectionData,
+  requiresRestartForOverrides as sharedRequiresRestartForOverrides,
+} from "@/utils/configSaveUtil";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useRestart } from "@/api/ws";
 
@@ -127,28 +129,6 @@ export interface CreateSectionOptions {
   /** Default section configuration */
   defaultConfig: SectionConfig;
 }
-
-const cameraUpdateTopicMap: Record<string, string> = {
-  detect: "detect",
-  record: "record",
-  snapshots: "snapshots",
-  motion: "motion",
-  objects: "objects",
-  review: "review",
-  audio: "audio",
-  notifications: "notifications",
-  live: "live",
-  timestamp_style: "timestamp_style",
-  audio_transcription: "audio_transcription",
-  birdseye: "birdseye",
-  face_recognition: "face_recognition",
-  ffmpeg: "ffmpeg",
-  lpr: "lpr",
-  semantic_search: "semantic_search",
-  mqtt: "mqtt",
-  onvif: "onvif",
-  ui: "ui",
-};
 
 export type ConfigSectionProps = BaseSectionProps & CreateSectionOptions;
 
@@ -276,22 +256,8 @@ export function ConfigSection({
   }, [config, rawSectionValue]);
 
   const sanitizeSectionData = useCallback(
-    (data: ConfigSectionData) => {
-      const normalized = normalizeConfigValue(data) as ConfigSectionData;
-      if (
-        !sectionConfig.hiddenFields ||
-        sectionConfig.hiddenFields.length === 0
-      ) {
-        return normalized;
-      }
-
-      const cleaned = cloneDeep(normalized) as ConfigSectionData;
-      sectionConfig.hiddenFields.forEach((path) => {
-        if (!path) return;
-        unset(cleaned, path);
-      });
-      return cleaned;
-    },
+    (data: ConfigSectionData) =>
+      sharedSanitizeSectionData(data, sectionConfig.hiddenFields),
     [sectionConfig.hiddenFields],
   );
 
@@ -353,94 +319,6 @@ export function ConfigSection({
       isResettingRef.current = false;
     }
   }, [formKey]);
-
-  // Build a minimal overrides payload by comparing `current` against `base`
-  // (existing config) and `defaults` (schema defaults).
-  // - Returns `undefined` for null/empty values or when `current` equals `base`
-  //   (or equals `defaults` when `base` is undefined).
-  // - For objects, recurses and returns an object containing only keys that
-  //   are overridden; returns `undefined` if no keys are overridden.
-  const buildOverrides = useCallback(
-    (
-      current: unknown,
-      base: unknown,
-      defaults: unknown,
-    ): unknown | undefined => {
-      if (current === null || current === undefined || current === "") {
-        return undefined;
-      }
-
-      if (Array.isArray(current)) {
-        if (
-          current.length === 0 &&
-          (base === undefined || base === null) &&
-          (defaults === undefined || defaults === null)
-        ) {
-          return undefined;
-        }
-        if (
-          (base === undefined &&
-            defaults !== undefined &&
-            isEqual(current, defaults)) ||
-          isEqual(current, base)
-        ) {
-          return undefined;
-        }
-        return current;
-      }
-
-      if (isJsonObject(current)) {
-        const currentObj = current;
-        const baseObj = isJsonObject(base) ? base : undefined;
-        const defaultsObj = isJsonObject(defaults) ? defaults : undefined;
-
-        const result: JsonObject = {};
-        for (const [key, value] of Object.entries(currentObj)) {
-          if (value === undefined && baseObj && baseObj[key] !== undefined) {
-            result[key] = "";
-            continue;
-          }
-          const overrideValue = buildOverrides(
-            value,
-            baseObj ? baseObj[key] : undefined,
-            defaultsObj ? defaultsObj[key] : undefined,
-          );
-          if (overrideValue !== undefined) {
-            result[key] = overrideValue as JsonValue;
-          }
-        }
-
-        if (baseObj) {
-          for (const [key, baseValue] of Object.entries(baseObj)) {
-            if (Object.prototype.hasOwnProperty.call(currentObj, key)) {
-              continue;
-            }
-            if (baseValue === undefined) {
-              continue;
-            }
-            result[key] = "";
-          }
-        }
-
-        return Object.keys(result).length > 0 ? result : undefined;
-      }
-
-      if (
-        base === undefined &&
-        defaults !== undefined &&
-        isEqual(current, defaults)
-      ) {
-        return undefined;
-      }
-
-      if (isEqual(current, base)) {
-        return undefined;
-      }
-
-      return current;
-    },
-    [],
-  );
 
   // Track if there are unsaved changes
   const hasChanges = useMemo(() => {
@@ -510,7 +388,6 @@ export function ConfigSection({
       pendingData,
       compareBaseData,
       sanitizeSectionData,
-      buildOverrides,
       effectiveSchemaDefaults,
       setPendingData,
       setPendingOverrides,
@@ -539,7 +416,6 @@ export function ConfigSection({
   }, [
     currentFormData,
     sanitizeSectionData,
-    buildOverrides,
     compareBaseData,
     effectiveSchemaDefaults,
   ]);
@@ -550,23 +426,12 @@ export function ConfigSection({
   const uiOverrides = dirtyOverrides ?? effectiveOverrides;
 
   const requiresRestartForOverrides = useCallback(
-    (overrides: unknown) => {
-      if (sectionConfig.restartRequired === undefined) {
-        return requiresRestart;
-      }
-
-      if (sectionConfig.restartRequired.length === 0) {
-        return false;
-      }
-
-      if (!overrides || typeof overrides !== "object") {
-        return false;
-      }
-
-      return sectionConfig.restartRequired.some(
-        (path) => get(overrides as JsonObject, path) !== undefined,
-      );
-    },
+    (overrides: unknown) =>
+      sharedRequiresRestartForOverrides(
+        overrides,
+        sectionConfig.restartRequired,
+        requiresRestart,
+      ),
     [requiresRestart, sectionConfig.restartRequired],
   );
 
@@ -703,7 +568,6 @@ export function ConfigSection({
     onSave,
     rawFormData,
     sanitizeSectionData,
-    buildOverrides,
     effectiveSchemaDefaults,
     updateTopic,
     setPendingData,

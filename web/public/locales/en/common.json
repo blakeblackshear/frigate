@@ -156,7 +156,9 @@
     "modified": "Modified",
     "overridden": "Overridden",
     "resetToGlobal": "Reset to Global",
-    "resetToDefault": "Reset to Default"
+    "resetToDefault": "Reset to Default",
+    "saveAll": "Save All",
+    "savingAll": "Saving All…"
   },
   "menu": {
     "system": "System",

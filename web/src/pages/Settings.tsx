@@ -80,6 +80,14 @@ import {
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
 import { Toaster } from "@/components/ui/sonner";
+import axios from "axios";
+import { toast } from "sonner";
+import { mutate } from "swr";
+import { RJSFSchema } from "@rjsf/utils";
+import { prepareSectionSavePayload } from "@/utils/configSaveUtil";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import { useRestart } from "@/api/ws";
 
 const allSettingsViews = [
   "profileSettings",
@@ -557,7 +565,6 @@ export default function Settings() {
     ? ALLOWED_VIEWS_FOR_VIEWER
     : allSettingsViews;
 
-  // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -606,15 +613,206 @@ export default function Settings() {
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
+  // Save All state
+  const [isSavingAll, setIsSavingAll] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const { send: sendRestart } = useRestart();
+  const { data: fullSchema } = useSWR<RJSFSchema>("config/schema.json");
+
+  const hasPendingChanges = Object.keys(pendingDataBySection).length > 0;
+
+  // Map a pendingDataKey to SettingsType menu key for clearing section status
+  const pendingKeyToMenuKey = useCallback(
+    (pendingDataKey: string): SettingsType | undefined => {
+      let sectionPath: string;
+      let level: "global" | "camera";
+
+      if (pendingDataKey.includes("::")) {
+        sectionPath = pendingDataKey.slice(pendingDataKey.indexOf("::") + 2);
+        level = "camera";
+      } else {
+        sectionPath = pendingDataKey;
+        level = "global";
+      }
+
+      if (level === "camera") {
+        return CAMERA_SECTION_MAPPING[sectionPath] as SettingsType | undefined;
+      }
+      return (
+        (GLOBAL_SECTION_MAPPING[sectionPath] as SettingsType | undefined) ??
+        (ENRICHMENTS_SECTION_MAPPING[sectionPath] as
+          | SettingsType
+          | undefined) ??
+        (SYSTEM_SECTION_MAPPING[sectionPath] as SettingsType | undefined)
+      );
+    },
+    [],
+  );
+
+  const handleSaveAll = useCallback(async () => {
+    if (!config || !fullSchema || !hasPendingChanges) return;
+
+    setIsSavingAll(true);
+    let successCount = 0;
+    let failCount = 0;
+    let anyNeedsRestart = false;
+    const savedKeys: string[] = [];
+
+    const pendingKeys = Object.keys(pendingDataBySection);
+
+    for (const key of pendingKeys) {
+      const pendingData = pendingDataBySection[key];
+      try {
+        const payload = prepareSectionSavePayload({
+          pendingDataKey: key,
+          pendingData,
+          config,
+          fullSchema,
+        });
+
+        if (!payload) {
+          // No actual overrides — clear the pending entry
+          setPendingDataBySection((prev) => {
+            const { [key]: _, ...rest } = prev;
+            return rest;
+          });
+          successCount++;
+          continue;
+        }
+
+        await axios.put("config/set", {
+          requires_restart: payload.needsRestart ? 1 : 0,
+          update_topic: payload.updateTopic,
+          config_data: { [payload.basePath]: payload.sanitizedOverrides },
+        });
+
+        // eslint-disable-next-line no-console
+        console.log("Save All – saved:", {
+          [payload.basePath]: payload.sanitizedOverrides,
+          update_topic: payload.updateTopic,
+          requires_restart: payload.needsRestart ? 1 : 0,
+        });
+
+        if (payload.needsRestart) {
+          anyNeedsRestart = true;
+        }
+
+        // Clear pending entry on success
+        setPendingDataBySection((prev) => {
+          const { [key]: _, ...rest } = prev;
+          return rest;
+        });
+        savedKeys.push(key);
+        successCount++;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Save All – error saving", key, error);
+        failCount++;
+      }
+    }
+
+    // Refresh config from server once
+    await mutate("config");
+
+    // Clear hasChanges in sidebar for all successfully saved sections
+    if (savedKeys.length > 0) {
+      setSectionStatusByKey((prev) => {
+        const updated = { ...prev };
+        for (const key of savedKeys) {
+          const menuKey = pendingKeyToMenuKey(key);
+          if (menuKey && updated[menuKey]) {
+            updated[menuKey] = {
+              ...updated[menuKey],
+              hasChanges: false,
+            };
+          }
+        }
+        return updated;
+      });
+    }
+
+    // Aggregate toast
+    const totalCount = successCount + failCount;
+    if (failCount === 0) {
+      if (anyNeedsRestart) {
+        toast.success(
+          t("toast.saveAllSuccess", {
+            ns: "views/settings",
+            count: successCount,
+          }),
+          {
+            action: (
+              <a onClick={() => setRestartDialogOpen(true)}>
+                <Button>
+                  {t("restart.button", { ns: "components/dialog" })}
+                </Button>
+              </a>
+            ),
+          },
+        );
+      } else {
+        toast.success(
+          t("toast.saveAllSuccess", {
+            ns: "views/settings",
+            count: successCount,
+          }),
+        );
+      }
+    } else if (successCount > 0) {
+      toast.warning(
+        t("toast.saveAllPartial", {
+          ns: "views/settings",
+          count: totalCount,
+          successCount,
+          totalCount,
+          failCount,
+        }),
+      );
+    } else {
+      toast.error(t("toast.saveAllFailure", { ns: "views/settings" }));
+    }
+
+    setIsSavingAll(false);
+  }, [
+    config,
+    fullSchema,
+    hasPendingChanges,
+    pendingDataBySection,
+    pendingKeyToMenuKey,
+    t,
+  ]);
+
+  const handleUndoAll = useCallback(() => {
+    const pendingKeys = Object.keys(pendingDataBySection);
+    if (pendingKeys.length === 0) return;
+
+    setPendingDataBySection({});
+    setUnsavedChanges(false);
+
+    setSectionStatusByKey((prev) => {
+      const updated = { ...prev };
+      for (const key of pendingKeys) {
+        const menuKey = pendingKeyToMenuKey(key);
+        if (menuKey && updated[menuKey]) {
+          updated[menuKey] = {
+            ...updated[menuKey],
+            hasChanges: false,
+          };
+        }
+      }
+      return updated;
+    });
+  }, [pendingDataBySection, pendingKeyToMenuKey]);
+
   const handleDialog = useCallback(
     (save: boolean) => {
       if (unsavedChanges && save) {
-        // TODO
+        handleSaveAll();
       }
       setConfirmationDialogOpen(false);
       setUnsavedChanges(false);
     },
-    [unsavedChanges],
+    [unsavedChanges, handleSaveAll],
   );
 
   useEffect(() => {
@@ -834,6 +1032,42 @@ export default function Settings() {
                 );
               })}
             </div>
+            {hasPendingChanges && (
+              <div className="sticky bottom-0 z-50 mt-2 bg-background p-4">
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-sm text-danger">
+                    {t("unsavedChanges", {
+                      ns: "views/settings",
+                      defaultValue: "You have unsaved changes",
+                    })}
+                  </span>
+
+                  <Button
+                    onClick={handleUndoAll}
+                    variant="outline"
+                    disabled={isSavingAll}
+                    className="flex w-full items-center justify-center gap-2"
+                  >
+                    {t("undo", { ns: "common", defaultValue: "Undo" })}
+                  </Button>
+                  <Button
+                    onClick={handleSaveAll}
+                    variant="select"
+                    disabled={isSavingAll}
+                    className="flex w-full items-center justify-center gap-2"
+                  >
+                    {isSavingAll ? (
+                      <>
+                        <ActivityIndicator className="h-4 w-4" />
+                        {t("button.savingAll", { ns: "common" })}
+                      </>
+                    ) : (
+                      t("button.saveAll", { ns: "common" })
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
         <MobilePage
@@ -847,23 +1081,25 @@ export default function Settings() {
               className="top-0 mb-0"
               onClose={() => navigate(-1)}
               actions={
-                CAMERA_SELECT_BUTTON_PAGES.includes(pageToggle) ? (
-                  <div className="flex items-center gap-2">
-                    {pageToggle == "masksAndZones" && (
-                      <ZoneMaskFilterButton
-                        selectedZoneMask={filterZoneMask}
-                        updateZoneMaskFilter={setFilterZoneMask}
+                <div className="flex items-center gap-2">
+                  {CAMERA_SELECT_BUTTON_PAGES.includes(pageToggle) && (
+                    <>
+                      {pageToggle == "masksAndZones" && (
+                        <ZoneMaskFilterButton
+                          selectedZoneMask={filterZoneMask}
+                          updateZoneMaskFilter={setFilterZoneMask}
+                        />
+                      )}
+                      <CameraSelectButton
+                        allCameras={cameras}
+                        selectedCamera={selectedCamera}
+                        setSelectedCamera={setSelectedCamera}
+                        cameraEnabledStates={cameraEnabledStates}
+                        currentPage={page}
                       />
-                    )}
-                    <CameraSelectButton
-                      allCameras={cameras}
-                      selectedCamera={selectedCamera}
-                      setSelectedCamera={setSelectedCamera}
-                      cameraEnabledStates={cameraEnabledStates}
-                      currentPage={page}
-                    />
-                  </div>
-                ) : undefined
+                    </>
+                  )}
+                </div>
               }
             >
               <MobilePageTitle>{t("menu." + page)}</MobilePageTitle>
@@ -912,6 +1148,11 @@ export default function Settings() {
             </AlertDialogContent>
           </AlertDialog>
         )}
+        <RestartDialog
+          isOpen={restartDialogOpen}
+          onClose={() => setRestartDialogOpen(false)}
+          onRestart={() => sendRestart("restart")}
+        />
       </>
     );
   }
@@ -923,23 +1164,37 @@ export default function Settings() {
         <Heading as="h3" className="mb-0">
           {t("menu.settings", { ns: "common" })}
         </Heading>
-        {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
-          <div className="flex items-center gap-2">
-            {pageToggle == "masksAndZones" && (
-              <ZoneMaskFilterButton
-                selectedZoneMask={filterZoneMask}
-                updateZoneMaskFilter={setFilterZoneMask}
+        <div className="flex items-center gap-2">
+          {hasPendingChanges && (
+            <Button size="sm" onClick={handleSaveAll} disabled={isSavingAll}>
+              {isSavingAll ? (
+                <>
+                  <ActivityIndicator className="mr-2" />
+                  {t("button.savingAll", { ns: "common" })}
+                </>
+              ) : (
+                t("button.saveAll", { ns: "common" })
+              )}
+            </Button>
+          )}
+          {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
+            <>
+              {pageToggle == "masksAndZones" && (
+                <ZoneMaskFilterButton
+                  selectedZoneMask={filterZoneMask}
+                  updateZoneMaskFilter={setFilterZoneMask}
+                />
+              )}
+              <CameraSelectButton
+                allCameras={cameras}
+                selectedCamera={selectedCamera}
+                setSelectedCamera={setSelectedCamera}
+                cameraEnabledStates={cameraEnabledStates}
+                currentPage={page}
               />
-            )}
-            <CameraSelectButton
-              allCameras={cameras}
-              selectedCamera={selectedCamera}
-              setSelectedCamera={setSelectedCamera}
-              cameraEnabledStates={cameraEnabledStates}
-              currentPage={page}
-            />
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
       <SidebarProvider>
         <Sidebar variant="inset" className="relative mb-8 pl-0 pt-0">
@@ -1074,6 +1329,11 @@ export default function Settings() {
           </AlertDialog>
         )}
       </SidebarProvider>
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => sendRestart("restart")}
+      />
     </div>
   );
 }

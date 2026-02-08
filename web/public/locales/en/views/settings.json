@@ -1311,7 +1311,12 @@
     "error": "Failed to save settings",
     "validationError": "Validation failed: {{message}}",
     "resetSuccess": "Reset to global defaults",
-    "resetError": "Failed to reset settings"
+    "resetError": "Failed to reset settings",
+    "saveAllSuccess_one": "Saved {{count}} section successfully.",
+    "saveAllSuccess_other": "All {{count}} sections saved successfully.",
+    "saveAllPartial_one": "{{successCount}} of {{totalCount}} section saved. {{failCount}} failed.",
+    "saveAllPartial_other": "{{successCount}} of {{totalCount}} sections saved. {{failCount}} failed.",
+    "saveAllFailure": "Failed to save all sections."
   },
   "unsavedChanges": "You have unsaved changes",
   "confirmReset": "Confirm Reset",
