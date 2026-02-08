@@ -394,7 +394,8 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if activity.has_activity_category(SeverityEnum.alert):
                 # update current time for last alert activity
-                segment.last_alert_time = frame_time
+                if frame_time > segment.last_alert_time:
+                    segment.last_alert_time = frame_time
 
                 if segment.severity != SeverityEnum.alert:
                     # if segment is not alert category but current activity is
@@ -404,7 +405,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                     should_update_image = True
 
             if activity.has_activity_category(SeverityEnum.detection):
-                segment.last_detection_time = frame_time
+                if frame_time > segment.last_detection_time:
+                    segment.last_detection_time = frame_time
 
             for object in activity.get_all_objects():
                 # Alert-level objects should always be added (they extend/upgrade the segment)
@@ -484,57 +486,52 @@ class ReviewSegmentMaintainer(threading.Thread):
                 except FileNotFoundError:
                     return
 
-            # indefinite (manual) events should extend the segment until they end
-            if (
-                segment.camera not in self.indefinite_events
-                or len(self.indefinite_events[segment.camera]) == 0
+            if segment.severity == SeverityEnum.alert and frame_time > (
+                segment.last_alert_time + camera_config.review.alerts.cutoff_time
             ):
-                if segment.severity == SeverityEnum.alert and frame_time > (
-                    segment.last_alert_time + camera_config.review.alerts.cutoff_time
-                ):
-                    needs_new_detection = (
-                        segment.last_detection_time > segment.last_alert_time
-                        and (
-                            segment.last_detection_time
-                            + camera_config.review.detections.cutoff_time
-                        )
-                        > frame_time
+                needs_new_detection = (
+                    segment.last_detection_time > segment.last_alert_time
+                    and (
+                        segment.last_detection_time
+                        + camera_config.review.detections.cutoff_time
                     )
-                    last_detection_time = segment.last_detection_time
+                    > frame_time
+                )
+                last_detection_time = segment.last_detection_time
 
-                    end_time = self._publish_segment_end(segment, prev_data)
+                end_time = self._publish_segment_end(segment, prev_data)
 
-                    if needs_new_detection:
-                        new_detections: dict[str, str] = {}
-                        new_zones = set()
+                if needs_new_detection:
+                    new_detections: dict[str, str] = {}
+                    new_zones = set()
 
-                        for o in activity.categorized_objects["detections"]:
-                            new_detections[o["id"]] = o["label"]
-                            new_zones.update(o["current_zones"])
+                    for o in activity.categorized_objects["detections"]:
+                        new_detections[o["id"]] = o["label"]
+                        new_zones.update(o["current_zones"])
 
-                        if new_detections:
-                            self.active_review_segments[activity.camera_config.name] = (
-                                PendingReviewSegment(
-                                    activity.camera_config.name,
-                                    end_time,
-                                    SeverityEnum.detection,
-                                    new_detections,
-                                    sub_labels={},
-                                    audio=set(),
-                                    zones=list(new_zones),
-                                )
+                    if new_detections:
+                        self.active_review_segments[activity.camera_config.name] = (
+                            PendingReviewSegment(
+                                activity.camera_config.name,
+                                end_time,
+                                SeverityEnum.detection,
+                                new_detections,
+                                sub_labels={},
+                                audio=set(),
+                                zones=list(new_zones),
                             )
-                            self._publish_segment_start(
-                                self.active_review_segments[activity.camera_config.name]
-                            )
-                            self.active_review_segments[
-                                activity.camera_config.name
-                            ].last_detection_time = last_detection_time
-                elif segment.severity == SeverityEnum.detection and frame_time > (
-                    segment.last_detection_time
-                    + camera_config.review.detections.cutoff_time
-                ):
-                    self._publish_segment_end(segment, prev_data)
+                        )
+                        self._publish_segment_start(
+                            self.active_review_segments[activity.camera_config.name]
+                        )
+                        self.active_review_segments[
+                            activity.camera_config.name
+                        ].last_detection_time = last_detection_time
+            elif segment.severity == SeverityEnum.detection and frame_time > (
+                segment.last_detection_time
+                + camera_config.review.detections.cutoff_time
+            ):
+                self._publish_segment_end(segment, prev_data)
 
     def check_if_new_segment(
         self,
