@@ -761,7 +761,7 @@ async def event_snapshot(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        jpg_bytes = tracked_obj.get_img_bytes(
+                        jpg_bytes, frame_time = tracked_obj.get_img_bytes(
                             ext="jpg",
                             timestamp=params.timestamp,
                             bounding_box=params.bbox,
@@ -790,6 +790,7 @@ async def event_snapshot(
     headers = {
         "Content-Type": "image/jpeg",
         "Cache-Control": "private, max-age=31536000" if event_complete else "no-store",
+        "X-Frame-Time": frame_time,
     }
 
     if params.download:
