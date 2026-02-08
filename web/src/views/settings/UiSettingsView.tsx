@@ -196,7 +196,7 @@ export default function UiSettingsView() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((timeout) => (
+                    {[1, 2, 3, 5, 8, 10, 12, 15].map((timeout) => (
                       <SelectItem
                         key={timeout}
                         className="cursor-pointer"
