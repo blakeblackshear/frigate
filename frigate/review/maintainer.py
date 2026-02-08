@@ -841,9 +841,6 @@ class ReviewSegmentMaintainer(threading.Thread):
                             self.active_review_segments[
                                 camera
                             ].last_detection_time = sys.maxsize
-                            self._publish_segment_start(
-                                self.active_review_segments[camera]
-                            )
                         elif manual_info["state"] == ManualEventState.complete:
                             self.active_review_segments[
                                 camera
