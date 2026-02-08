@@ -158,7 +158,8 @@
     "resetToGlobal": "Reset to Global",
     "resetToDefault": "Reset to Default",
     "saveAll": "Save All",
-    "savingAll": "Saving All…"
+    "savingAll": "Saving All…",
+    "undoAll": "Undo All"
   },
   "menu": {
     "system": "System",

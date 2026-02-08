@@ -824,7 +824,7 @@ export function ConfigSection({
                 disabled={isSaving || disabled}
                 className="flex min-w-36 flex-1 gap-2"
               >
-                {t("undo", { ns: "common", defaultValue: "Undo" })}
+                {t("button.undo", { ns: "common", defaultValue: "Undo" })}
               </Button>
             )}
             <Button

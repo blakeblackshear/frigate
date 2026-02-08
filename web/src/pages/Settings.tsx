@@ -1048,7 +1048,10 @@ export default function Settings() {
                     disabled={isSavingAll}
                     className="flex w-full items-center justify-center gap-2"
                   >
-                    {t("undo", { ns: "common", defaultValue: "Undo" })}
+                    {t("button.undoAll", {
+                      ns: "common",
+                      defaultValue: "Undo All",
+                    })}
                   </Button>
                   <Button
                     onClick={handleSaveAll}
@@ -1164,18 +1167,36 @@ export default function Settings() {
         <Heading as="h3" className="mb-0">
           {t("menu.settings", { ns: "common" })}
         </Heading>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-5">
           {hasPendingChanges && (
-            <Button size="sm" onClick={handleSaveAll} disabled={isSavingAll}>
-              {isSavingAll ? (
-                <>
-                  <ActivityIndicator className="mr-2" />
-                  {t("button.savingAll", { ns: "common" })}
-                </>
-              ) : (
-                t("button.saveAll", { ns: "common" })
-              )}
-            </Button>
+            <div className="flex flex-row gap-2 border-r border-secondary pr-5">
+              <Button
+                onClick={handleUndoAll}
+                variant="outline"
+                disabled={isSavingAll}
+                className="flex w-full items-center justify-center gap-2"
+              >
+                {t("button.undoAll", {
+                  ns: "common",
+                  defaultValue: "Undo All",
+                })}
+              </Button>
+              <Button
+                variant="select"
+                size="sm"
+                onClick={handleSaveAll}
+                disabled={isSavingAll}
+              >
+                {isSavingAll ? (
+                  <>
+                    <ActivityIndicator className="mr-2" />
+                    {t("button.savingAll", { ns: "common" })}
+                  </>
+                ) : (
+                  t("button.saveAll", { ns: "common" })
+                )}
+              </Button>
+            </div>
           )}
           {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
             <>
