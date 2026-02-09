@@ -5,6 +5,86 @@ title: Face Recognition
 
 Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
+## Alerts, Notifications, and Automations
+
+### How face recognition relates to alerts
+
+Alerts are created when a tracked object (like `person` or `car`) in your `review.alerts.labels` is detected and meets your [zone requirements](/configuration/review.md). The `face` label is an [attribute label](/plus/#label-attributes), not a regular tracked object — attribute labels are not tracked independently and do not generate review items or alerts. Any detected `person` will generate an alert as long as `person` is in your `review.alerts.labels` list and the object is in a [required zone](/configuration/review.md) (if configured). Face detection and recognition have no effect on whether the alert is created.
+
+Face processing happens in two stages on any detected `person` object. Frigate attempts face processing on each detect frame, but limits the number of recognition attempts per person. Frames where no face is detected do not count toward the limit. Once a face is detected and recognition runs, the attempt is counted — Frigate will stop after 6 recognition attempts once a person is successfully identified, or after 12 total recognition attempts if no match is found.
+
+1. **Face detection**: Frigate scans the `person` object for a face. If a face is found, it is recorded as a `face` attribute on the person (visible in the event's `attributes` field and in the MQTT event data). The detected face image also appears in the Face Library's Recent Recognitions tab. However, if the face is not recognized, there is no visible indicator in the Tracked Object Details — the label remains `Person` with no sub_label. This stage alone does not change the review item.
+2. **Face recognition**: If a detected face matches a known person from your Face Library, Frigate:
+   - Adds the person's name as a `sub_label` on the tracked object and **updates the review item**. In the review item's data, the object is listed as `person-verified` in the `objects` list (this is a display label used in the review data and UI — the tracked object's underlying label remains `person`, so `review.alerts.labels: [person-verified]` would not work).
+   - Publishes the name via MQTT on the [`frigate/events`](/integrations/mqtt.md#frigateevents) topic (in the `sub_label` field) and the [`frigate/tracked_object_update`](/integrations/mqtt.md#frigatetrackedobjectupdate) topic.
+   - Includes the name in the `sub_labels` array of the [`frigate/reviews`](/integrations/mqtt.md#frigatereviews) MQTT topic.
+   - Displays the name in the Frigate UI: in the Tracked Object Details, the label shows as `Person (John)` and the top score includes the recognition confidence in parentheses. The name also appears on review cards, in built-in notifications, and is available as a sub_label filter in the Explore view.
+
+:::note
+
+There is no built-in way to only create alerts when a face is detected or recognized. Neither `face`, `person-verified`, nor specific person names can be used in `review.alerts.labels`. To send notifications based on face recognition results, use a [Home Assistant automation](#custom-automations-with-home-assistant).
+
+:::
+
+### Frigate's built-in notifications
+
+Frigate's [built-in notifications](/configuration/notifications) are sent for all review alerts. If face recognition identifies the person during the alert, the person's name will be included in the notification. However, you cannot configure built-in notifications to only fire for specific recognized faces.
+
+### Custom automations with Home Assistant
+
+While Frigate's built-in alerts cannot filter by recognized face, you **can** build custom automations in Home Assistant using the MQTT data that Frigate publishes. This allows you to send notifications only for specific people, unknown faces, or other custom logic.
+
+**Example: Notify only when an unknown person is detected**
+
+```yaml
+automation:
+  - alias: Notify on unknown person
+    trigger:
+      - platform: mqtt
+        topic: frigate/events
+    condition:
+      - condition: template
+        value_template: >-
+          {{ trigger.payload_json["type"] == "new" and
+             trigger.payload_json["after"]["label"] == "person" }}
+    action:
+      - wait_for_trigger:
+          - platform: mqtt
+            topic: frigate/events
+        timeout: "00:00:30"
+        continue_on_timeout: true
+      - condition: template
+        value_template: >-
+          {{ trigger.payload_json["after"]["sub_label"] is none or
+             trigger.payload_json["after"]["sub_label"][0] == "unknown" }}
+      - service: notify.mobile_app_your_phone
+        data:
+          message: "An unknown person was detected on {{ trigger.payload_json['after']['camera'] }}."
+          data:
+            image: "https://your.hass.address/api/frigate/notifications/{{ trigger.payload_json['after']['id'] }}/thumbnail.jpg"
+```
+
+**Example: Notify when a specific person is recognized**
+
+```yaml
+automation:
+  - alias: Notify when John arrives
+    trigger:
+      - platform: mqtt
+        topic: frigate/tracked_object_update
+    condition:
+      - condition: template
+        value_template: >-
+          {{ trigger.payload_json["type"] == "face" and
+             trigger.payload_json["name"] == "John" }}
+    action:
+      - service: notify.mobile_app_your_phone
+        data:
+          message: "John was recognized on {{ trigger.payload_json['camera'] }}."
+```
+
+See the [Home Assistant notifications guide](/guides/ha_notifications.md) and the [MQTT documentation](/integrations/mqtt.md) for more details on the available data.
+
 ## Model Requirements
 
 ### Face Detection
@@ -69,9 +149,9 @@ Fine-tune face recognition with these optional parameters at the global level of
   - Default: `0.9`.
 - `min_faces`: Min face recognitions for the sub label to be applied to the person object.
   - Default: `1`
-- `save_attempts`: Number of images of recognized faces to save for training.
+- `save_attempts`: Maximum number of face attempt images to keep in the training folder. Frigate saves a face image after each recognition attempt; when the limit is reached, the oldest image is deleted. These images are displayed in the Face Library's Recent Recognitions tab.
   - Default: `200`.
-- `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
+- `blur_confidence_filter`: Enables a filter that measures face image blurriness (using Laplacian variance) and reduces the recognition confidence score accordingly. Blurrier images receive a larger penalty (up to -0.06 for very blurry, down to 0 for clear images), making it harder for blurry faces to meet the `recognition_threshold`.
   - Default: `True`.
 - `device`: Target a specific device to run the face recognition model on (multi-GPU installation).
   - Default: `None`.
@@ -118,9 +198,19 @@ When choosing images to include in the face training set it is recommended to al
 
 The Recent Recognitions tab in the face library displays recent face recognition attempts. Detected face images are grouped according to the person they were identified as potentially matching.
 
-Each face image is labeled with a name (or `Unknown`) along with the confidence score of the recognition attempt. While each image can be used to train the system for a specific person, not all images are suitable for training.
+Each face image is labeled with a name (or `Unknown`) along with the confidence score of the recognition attempt. The score is color-coded based on your configured thresholds:
 
-Refer to the guidelines below for best practices on selecting images for training.
+- **Green**: score >= `recognition_threshold` (default `0.9`) — a confident match
+- **Orange**: score >= `unknown_score` (default `0.8`) — a potential match
+- **Red**: score < `unknown_score` — unknown or no match
+
+When an event has multiple recognition attempts, the face cards are displayed within a group. The group shows the recognized person's name if one was identified, or "Unknown" if not. Within the group, each individual face card shows its own recognition score. Frigate uses a weighted average across all attempts for a person object to determine whether to assign a name (`sub_label`) — so a single high-scoring card does not guarantee the person will be identified (see the [FAQ](#i-see-scores-above-the-threshold-in-the-recent-recognitions-tab-but-a-sub-label-wasnt-assigned) for more details).
+
+If the weighted average did not meet the `recognition_threshold`, there is no place in the UI to see it. The weighted average is published in the `score` field of the [`frigate/tracked_object_update`](/integrations/mqtt.md#face-recognition-update) MQTT topic after each recognition attempt, regardless of whether it meets the threshold. This is the most useful tool for debugging why a sub label was or wasn't assigned.
+
+Clicking a face card navigates to the Tracked Object Details for the associated event. To select face cards for deletion, right-click (or Ctrl/Cmd+click) individual cards, or use Ctrl+A to select all. A delete button will appear in the toolbar once cards are selected. Removing cards from the Recent Recognitions tab only removes the saved attempt images — it does not affect recognition accuracy or training data.
+
+While each image can be used to train the system for a specific person, not all images are suitable for training. Refer to the guidelines below for best practices on selecting images for training.
 
 ### Step 1 - Building a Strong Foundation
 
@@ -156,6 +246,8 @@ Start with the [Usage](#usage) section and re-read the [Model Requirements](#mod
 
    - Make sure you have trained at least one face per the recommendations above.
    - Adjust `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
+
+3. To see recognition scores for an event, check the **Face Library** > **Recent Recognitions** tab. Face cards from the same event are grouped together, with the group header showing the combined result. Each card within the group shows its individual recognition score with [color coding](#understanding-the-recent-recognitions-tab). The **Tracked Object Details** view only shows the final weighted average score (in parentheses next to the top score) if a `sub_label` was assigned.
 
 ### Detection does not work well with blurry images?
 
