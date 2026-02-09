@@ -704,6 +704,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                             manual_info["label"]
                         )
                         if topic == DetectionTypeEnum.api:
+                            # manual_info["label"] contains 'label: sub_label'
+                            # so split out the label without modifying manual_info
                             if (
                                 self.config.cameras[camera].review.detections.enabled
                                 and manual_info["label"].split(": ")[0]
@@ -734,6 +736,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                             topic == DetectionTypeEnum.api
                             and self.config.cameras[camera].review.alerts.enabled
                         ):
+                            # manual_info["label"] contains 'label: sub_label'
+                            # so split out the label without modifying manual_info
                             if (
                                 not self.config.cameras[
                                     camera
@@ -816,6 +820,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                         )
                 elif topic == DetectionTypeEnum.api:
                     severity = None
+                    # manual_info["label"] contains 'label: sub_label'
+                    # so split out the label without modifying manual_info
                     if (
                         self.config.cameras[camera].review.detections.enabled
                         and manual_info["label"].split(": ")[0]
