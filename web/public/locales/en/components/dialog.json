@@ -1,6 +1,7 @@
 {
   "restart": {
     "title": "Are you sure you want to restart Frigate?",
+    "description": "This will briefly stop Frigate while it restarts.",
     "button": "Restart",
     "restarting": {
       "title": "Frigate is Restarting",

@@ -42,12 +42,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { isDesktop, isMobile } from "react-device-detect";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerTitle,
+  DrawerTrigger,
+} from "../ui/drawer";
 import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogPortal,
+  DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
@@ -194,6 +202,16 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               : "max-h-[75dvh] overflow-hidden p-2"
           }
         >
+          {!isDesktop && (
+            <>
+              <DrawerTitle className="sr-only">
+                {t("menu.settings")}
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                {t("menu.settings")}
+              </DrawerDescription>
+            </>
+          )}
           <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
             {isMobile && (
               <div className="mb-2">
@@ -355,6 +373,16 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       : "scrollbar-container max-h-[75dvh] w-[92%] overflow-y-scroll rounded-lg md:rounded-2xl"
                   }
                 >
+                  {!isDesktop && (
+                    <>
+                      <DialogTitle className="sr-only">
+                        {t("menu.languages")}
+                      </DialogTitle>
+                      <DialogDescription className="sr-only">
+                        {t("menu.languages")}
+                      </DialogDescription>
+                    </>
+                  )}
                   <span tabIndex={0} className="sr-only" />
                   {languages.map(({ code, label }) => (
                     <MenuItem
@@ -395,6 +423,16 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
                   }
                 >
+                  {!isDesktop && (
+                    <>
+                      <DialogTitle className="sr-only">
+                        {t("menu.darkMode.label")}
+                      </DialogTitle>
+                      <DialogDescription className="sr-only">
+                        {t("menu.darkMode.label")}
+                      </DialogDescription>
+                    </>
+                  )}
                   <span tabIndex={0} className="sr-only" />
                   <MenuItem
                     className={
@@ -472,6 +510,16 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
                   }
                 >
+                  {!isDesktop && (
+                    <>
+                      <DialogTitle className="sr-only">
+                        {t("menu.theme.label")}
+                      </DialogTitle>
+                      <DialogDescription className="sr-only">
+                        {t("menu.theme.label")}
+                      </DialogDescription>
+                    </>
+                  )}
                   <span tabIndex={0} className="sr-only" />
                   {colorSchemes.map((scheme) => (
                     <MenuItem
