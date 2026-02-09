@@ -1004,25 +1004,25 @@ export default function Settings() {
     Object.entries(CAMERA_SECTION_MAPPING).forEach(
       ([sectionKey, settingsKey]) => {
         const isOverridden = cameraOverrides.includes(sectionKey);
+        // Check if there are pending changes for this camera and section
+        const pendingDataKey = `${selectedCamera}::${sectionKey}`;
+        const hasChanges = pendingDataKey in pendingDataBySection;
         overrideMap[settingsKey] = {
-          hasChanges: false,
+          hasChanges,
           isOverridden,
         };
       },
     );
 
     setSectionStatusByKey((prev) => {
-      // Merge but preserve hasChanges from previous state
+      // Merge and update both hasChanges and isOverridden for camera sections
       const merged = { ...prev };
       Object.entries(overrideMap).forEach(([key, status]) => {
-        merged[key as SettingsType] = {
-          hasChanges: prev[key as SettingsType]?.hasChanges || false,
-          isOverridden: status.isOverridden,
-        };
+        merged[key as SettingsType] = status;
       });
       return merged;
     });
-  }, [selectedCamera, cameraOverrides]);
+  }, [selectedCamera, cameraOverrides, pendingDataBySection]);
 
   const renderMenuItemLabel = useCallback(
     (key: SettingsType) => {
@@ -1055,7 +1055,10 @@ export default function Settings() {
       <>
         <Toaster position="top-center" />
         {!contentMobileOpen && (
-          <div className="flex size-full flex-col">
+          <div
+            key={`mobile-menu-${selectedCamera}`}
+            className="flex size-full flex-col"
+          >
             <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
               <div className="relative flex w-full items-center justify-center">
                 <Logo className="h-8" />
