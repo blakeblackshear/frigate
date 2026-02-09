@@ -156,8 +156,8 @@ Published when a license plate is recognized on a car object. See the [License P
   "type": "lpr",
   "id": "1607123955.475377-mxklsc",
   "name": "John's Car", // known name for the plate, or null
-  "plate": "123ABC", // recognized plate string
-  "score": 0.95, // recognition confidence
+  "plate": "123ABC",
+  "score": 0.95,
   "camera": "driveway_cam",
   "timestamp": 1607123958.748393
 }
