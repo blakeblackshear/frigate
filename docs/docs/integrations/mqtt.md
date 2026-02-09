@@ -149,7 +149,7 @@ Published after each recognition attempt, regardless of whether the score meets 
 
 #### License Plate Recognition Update
 
-Published when a license plate is recognized on a car object. See the [License Plate Recognition](/configuration/lpr) documentation for details.
+Published when a license plate is recognized on a car object. See the [License Plate Recognition](/configuration/license_plate_recognition) documentation for details.
 
 ```json
 {
