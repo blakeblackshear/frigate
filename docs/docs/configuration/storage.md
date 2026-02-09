@@ -135,15 +135,6 @@ This avoids the CPU cost of scanning an empty filesystem and avoids tripping the
 
 Each of these paths can be on a different filesystem via bind mounts. Frigate's System page reports disk usage independently for recordings, clips, and cache using OS-level filesystem stats, so usage will be correct even when paths are on separate mounts. However, only the recordings path is monitored for emergency cleanup — the other paths are managed solely through retention-based expiration.
 
-## Debugging Storage Issues
+## Troubleshooting
 
-Enable debug logging for the relevant modules to understand storage behavior:
-
-```yaml
-logger:
-  logs:
-    frigate.storage: debug
-    frigate.record.cleanup: debug
-    frigate.record.maintainer: debug
-    frigate.events.cleanup: debug
-```
+For issues with recordings not being written to disk fast enough (segment cache warnings, slow copy times, network share performance), see [Recordings Errors](/troubleshooting/recordings).
