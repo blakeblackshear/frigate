@@ -87,6 +87,9 @@ import { RJSFSchema } from "@rjsf/utils";
 import { prepareSectionSavePayload } from "@/utils/configUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import SaveAllPreviewPopover, {
+  type SaveAllPreviewItem,
+} from "@/components/overlay/detail/SaveAllPreviewPopover";
 import { useRestart } from "@/api/ws";
 
 const allSettingsViews = [
@@ -151,6 +154,42 @@ const allSettingsViews = [
   "maintenance",
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
+
+const parsePendingDataKey = (pendingDataKey: string) => {
+  if (pendingDataKey.includes("::")) {
+    const idx = pendingDataKey.indexOf("::");
+    return {
+      scope: "camera" as const,
+      cameraName: pendingDataKey.slice(0, idx),
+      sectionPath: pendingDataKey.slice(idx + 2),
+    };
+  }
+
+  return {
+    scope: "global" as const,
+    cameraName: undefined,
+    sectionPath: pendingDataKey,
+  };
+};
+
+const flattenOverrides = (
+  value: unknown,
+  path: string[] = [],
+): Array<{ path: string; value: unknown }> => {
+  if (value === undefined) return [];
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return [{ path: path.join("."), value }];
+  }
+
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length === 0) {
+    return [{ path: path.join("."), value: {} }];
+  }
+
+  return entries.flatMap(([key, entryValue]) =>
+    flattenOverrides(entryValue, [...path, key]),
+  );
+};
 
 const createSectionPage = (
   sectionKey: string,
@@ -620,6 +659,42 @@ export default function Settings() {
   const { data: fullSchema } = useSWR<RJSFSchema>("config/schema.json");
 
   const hasPendingChanges = Object.keys(pendingDataBySection).length > 0;
+  const pendingChangesPreview = useMemo<SaveAllPreviewItem[]>(() => {
+    if (!config || !fullSchema) return [];
+
+    const items: SaveAllPreviewItem[] = [];
+    Object.entries(pendingDataBySection).forEach(
+      ([pendingDataKey, pendingData]) => {
+        const payload = prepareSectionSavePayload({
+          pendingDataKey,
+          pendingData,
+          config,
+          fullSchema,
+        });
+
+        if (!payload) return;
+
+        const { scope, cameraName, sectionPath } =
+          parsePendingDataKey(pendingDataKey);
+        const flattened = flattenOverrides(payload.sanitizedOverrides);
+
+        flattened.forEach(({ path, value }) => {
+          const fieldPath = path ? `${sectionPath}.${path}` : sectionPath;
+          items.push({ scope, cameraName, fieldPath, value });
+        });
+      },
+    );
+
+    return items.sort((left, right) => {
+      const scopeCompare = left.scope.localeCompare(right.scope);
+      if (scopeCompare !== 0) return scopeCompare;
+      const cameraCompare = (left.cameraName ?? "").localeCompare(
+        right.cameraName ?? "",
+      );
+      if (cameraCompare !== 0) return cameraCompare;
+      return left.fieldPath.localeCompare(right.fieldPath);
+    });
+  }, [config, fullSchema, pendingDataBySection]);
 
   // Map a pendingDataKey to SettingsType menu key for clearing section status
   const pendingKeyToMenuKey = useCallback(
@@ -982,8 +1057,17 @@ export default function Settings() {
         {!contentMobileOpen && (
           <div className="flex size-full flex-col">
             <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
-              <div className="flex items-center justify-center">
+              <div className="relative flex w-full items-center justify-center">
                 <Logo className="h-8" />
+                <div className="absolute right-0">
+                  <CameraSelectButton
+                    allCameras={cameras}
+                    selectedCamera={selectedCamera}
+                    setSelectedCamera={setSelectedCamera}
+                    cameraEnabledStates={cameraEnabledStates}
+                    currentPage={page}
+                  />
+                </div>
               </div>
               <div className="flex flex-row text-center">
                 <h2 className="ml-2 text-lg">
@@ -1035,12 +1119,20 @@ export default function Settings() {
             {hasPendingChanges && (
               <div className="sticky bottom-0 z-50 mt-2 bg-background p-4">
                 <div className="flex flex-col items-center gap-2">
-                  <span className="text-sm text-danger">
-                    {t("unsavedChanges", {
-                      ns: "views/settings",
-                      defaultValue: "You have unsaved changes",
-                    })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-danger">
+                      {t("unsavedChanges", {
+                        ns: "views/settings",
+                        defaultValue: "You have unsaved changes",
+                      })}
+                    </span>
+                    <SaveAllPreviewPopover
+                      items={pendingChangesPreview}
+                      className="h-7 w-7"
+                      align="center"
+                      side="top"
+                    />
+                  </div>
 
                   <Button
                     onClick={handleUndoAll}
@@ -1169,7 +1261,19 @@ export default function Settings() {
         </Heading>
         <div className="flex items-center gap-5">
           {hasPendingChanges && (
-            <div className="flex flex-row gap-2 border-r border-secondary pr-5">
+            <div
+              className={cn(
+                "flex flex-row items-center gap-2",
+                CAMERA_SELECT_BUTTON_PAGES.includes(page) &&
+                  "border-r border-secondary pr-5",
+              )}
+            >
+              <SaveAllPreviewPopover
+                items={pendingChangesPreview}
+                className="size-8"
+                align="end"
+                side="bottom"
+              />
               <Button
                 onClick={handleUndoAll}
                 variant="outline"

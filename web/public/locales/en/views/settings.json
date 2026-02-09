@@ -91,6 +91,23 @@
       "desc": "Do you want to save your changes before continuing?"
     }
   },
+  "saveAllPreview": {
+    "title": "Changes to be saved",
+    "triggerLabel": "Review pending changes",
+    "empty": "No pending changes.",
+    "scope": {
+      "label": "Scope",
+      "global": "Global",
+      "camera": "Camera: {{cameraName}}"
+    },
+    "field": {
+      "label": "Field"
+    },
+    "value": {
+      "label": "New value",
+      "reset": "Reset"
+    }
+  },
   "cameraSetting": {
     "camera": "Camera",
     "noCamera": "No Camera"
