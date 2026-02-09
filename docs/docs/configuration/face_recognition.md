@@ -282,7 +282,7 @@ For more guidance, refer to the section above on improving recognition accuracy.
 
 ### I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?
 
-Frigate considers recognition scores across all attempts for each person object. The `score` shown in MQTT updates and the UI is a running weighted average — not the score from a single attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average.
+Frigate considers recognition scores across all attempts for each person object. The score shown in the UI is the final weighted average across all attempts, while MQTT publishes a running weighted average that updates after each attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average.
 
 A sub label will only be assigned if:
 
