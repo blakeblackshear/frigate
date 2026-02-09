@@ -134,7 +134,7 @@ Message published for updates to tracked object metadata, for example:
 
 #### Face Recognition Update
 
-Published after each recognition attempt. The `id` is the tracked object's event ID, which can be used to look up the event via the API or match it to items in the UI. The `score` is a weighted average across all recognition attempts for this person object, not the score from a single attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average. The `name` is the best matching person based on that weighted average, or `null` if no match. Both `name` and `score` will be `null` / `0` if fewer than `min_faces` attempts have been recorded or if two names are tied for the most detections. This message is published regardless of whether the score meets `recognition_threshold`.
+Published after each recognition attempt. The `id` is the tracked object's event ID, which can be used to look up the event via the API or match it to items in the UI. The `score` is a running weighted average across all recognition attempts for this person object up to that point, not the score from a single attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average. The `name` is the best matching person based on that weighted average, or `null` if no match. Both `name` and `score` will be `null` / `0` if fewer than `min_faces` attempts have been recorded or if two names are tied for the most detections. This message is published regardless of whether the score meets `recognition_threshold`.
 
 ```json
 {
