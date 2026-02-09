@@ -394,7 +394,10 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if activity.has_activity_category(SeverityEnum.alert):
                 # update current time for last alert activity
-                if frame_time > segment.last_alert_time:
+                if (
+                    segment.last_alert_time is None
+                    or frame_time > segment.last_alert_time
+                ):
                     segment.last_alert_time = frame_time
 
                 if segment.severity != SeverityEnum.alert:
@@ -405,7 +408,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                     should_update_image = True
 
             if activity.has_activity_category(SeverityEnum.detection):
-                if frame_time > segment.last_detection_time:
+                if (
+                    segment.last_detection_time is None
+                    or frame_time > segment.last_detection_time
+                ):
                     segment.last_detection_time = frame_time
 
             for object in activity.get_all_objects():
