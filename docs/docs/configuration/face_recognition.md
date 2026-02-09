@@ -282,7 +282,15 @@ For more guidance, refer to the section above on improving recognition accuracy.
 
 ### I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?
 
-The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
+Frigate considers recognition scores across all attempts for each person object. The `score` shown in MQTT updates and the UI is a running weighted average — not the score from a single attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average.
+
+A sub label will only be assigned if:
+
+- At least `min_faces` recognition attempts have been recorded.
+- A single person name has the most detections (no ties).
+- The weighted average score meets the `recognition_threshold`.
+
+This avoids cases where a single high-confidence recognition would throw off the results.
 
 ### Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?
 
