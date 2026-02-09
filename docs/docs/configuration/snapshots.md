@@ -28,10 +28,6 @@ Frigate can produce up to two snapshot files per event, each used in different p
 
 MQTT snapshots are configured separately under `cameras -> your_camera -> mqtt` and are unrelated to the clean copy.
 
-:::note
-Clean copies were previously saved as `.png`. Frigate now saves them as `.webp` for smaller file sizes, but the API will still load legacy `.png` clean copies for older events.
-:::
-
 The clean copy is required for submitting events to [Frigate+](/plus/first_model) — if you plan to use Frigate+, keep `clean_copy` enabled regardless of your other snapshot settings.
 
 If you are not using Frigate+ and `timestamp`, `bounding_box`, and `crop` are all disabled, the regular snapshot is already effectively clean, so `clean_copy` provides no benefit and only uses additional disk space. You can safely set `clean_copy: False` in this case.
