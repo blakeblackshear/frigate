@@ -120,7 +120,7 @@ Message published for each changed tracked object. The first message is publishe
 
 ### `frigate/tracked_object_update`
 
-Message published for updates to tracked object metadata, for example:
+Message published for updates to tracked object metadata. All messages include an `id` field which is the tracked object's event ID, and can be used to look up the event via the API or match it to items in the UI.
 
 #### Generative AI Description Update
 
@@ -134,14 +134,14 @@ Message published for updates to tracked object metadata, for example:
 
 #### Face Recognition Update
 
-Published after each recognition attempt. The `id` is the tracked object's event ID, which can be used to look up the event via the API or match it to items in the UI. The `score` is a running weighted average across all recognition attempts for this person object up to that point, not the score from a single attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average. The `name` is the best matching person based on that weighted average, or `null` if no match. Both `name` and `score` will be `null` / `0` if fewer than `min_faces` attempts have been recorded or if two names are tied for the most detections. This message is published regardless of whether the score meets `recognition_threshold`.
+Published after each recognition attempt, regardless of whether the score meets `recognition_threshold`. See the [Face Recognition](/configuration/face_recognition) documentation for details on how scoring works.
 
 ```json
 {
   "type": "face",
   "id": "1607123955.475377-mxklsc",
-  "name": "John",
-  "score": 0.95,
+  "name": "John", // best matching person, or null if no match
+  "score": 0.95, // running weighted average across all recognition attempts
   "camera": "front_door_cam",
   "timestamp": 1607123958.748393
 }
@@ -149,13 +149,15 @@ Published after each recognition attempt. The `id` is the tracked object's event
 
 #### License Plate Recognition Update
 
+Published when a license plate is recognized on a car object. See the [License Plate Recognition](/configuration/lpr) documentation for details.
+
 ```json
 {
   "type": "lpr",
   "id": "1607123955.475377-mxklsc",
-  "name": "John's Car",
-  "plate": "123ABC",
-  "score": 0.95,
+  "name": "John's Car", // known name for the plate, or null
+  "plate": "123ABC", // recognized plate string
+  "score": 0.95, // recognition confidence
   "camera": "driveway_cam",
   "timestamp": 1607123958.748393
 }
