@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Children, useState, useEffect } from "react";
+import { Children, useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
@@ -142,6 +142,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   const hasModifiedDescendants = checkSubtreeModified(fieldPath);
   const [isOpen, setIsOpen] = useState(hasModifiedDescendants);
+  const resetKey = `${formContext?.level ?? "global"}::${
+    formContext?.cameraName ?? "global"
+  }`;
+  const lastResetKeyRef = useRef<string | null>(null);
 
   // Auto-expand collapsible when modifications are detected
   useEffect(() => {
@@ -191,6 +195,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
       setShowAdvanced(true);
     }
   }, [hasModifiedAdvanced]);
+
+  useEffect(() => {
+    if (lastResetKeyRef.current !== resetKey) {
+      lastResetKeyRef.current = resetKey;
+      setIsOpen(hasModifiedDescendants);
+      setShowAdvanced(hasModifiedAdvanced);
+    }
+  }, [resetKey, hasModifiedDescendants, hasModifiedAdvanced]);
   const { children } = props as ObjectFieldTemplateProps & {
     children?: ReactNode;
   };

@@ -178,8 +178,7 @@ export function ConfigSection({
   const [dirtyOverrides, setDirtyOverrides] = useState<JsonValue | undefined>(
     undefined,
   );
-  const [baselineFormData, setBaselineFormData] =
-    useState<ConfigSectionData | null>(null);
+  const baselineByKeyRef = useRef<Record<string, ConfigSectionData>>({});
 
   const pendingData =
     pendingDataBySection !== undefined
@@ -202,6 +201,7 @@ export function ConfigSection({
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const isResettingRef = useRef(false);
   const isInitializingRef = useRef(true);
+  const lastPendingDataKeyRef = useRef<string | null>(null);
 
   const updateTopic =
     level === "camera" && cameraName
@@ -268,6 +268,23 @@ export function ConfigSection({
     return sanitizeSectionData(baseData);
   }, [rawFormData, modifiedSchema, sanitizeSectionData]);
 
+  const baselineSnapshot = useMemo(() => {
+    if (!pendingData) {
+      const snapshot = cloneDeep(formData as ConfigSectionData);
+      baselineByKeyRef.current[pendingDataKey] = snapshot;
+      return snapshot;
+    }
+
+    const cached = baselineByKeyRef.current[pendingDataKey];
+    if (cached) {
+      return cached;
+    }
+
+    const snapshot = cloneDeep(formData as ConfigSectionData);
+    baselineByKeyRef.current[pendingDataKey] = snapshot;
+    return snapshot;
+  }, [formData, pendingData, pendingDataKey]);
+
   const schemaDefaults = useMemo(() => {
     if (!modifiedSchema) {
       return {};
@@ -297,21 +314,29 @@ export function ConfigSection({
   // This prevents RJSF's initial onChange call from being treated as a user edit
   // Only clear if pendingData is managed locally (not by parent)
   useEffect(() => {
-    if (!pendingData) {
+    const pendingKeyChanged = lastPendingDataKeyRef.current !== pendingDataKey;
+
+    if (pendingKeyChanged) {
+      lastPendingDataKeyRef.current = pendingDataKey;
       isInitializingRef.current = true;
       setPendingOverrides(undefined);
       setDirtyOverrides(undefined);
-      setBaselineFormData(cloneDeep(formData as ConfigSectionData));
+    } else if (!pendingData) {
+      isInitializingRef.current = true;
+      setPendingOverrides(undefined);
+      setDirtyOverrides(undefined);
     }
+
     if (onPendingDataChange === undefined) {
       setPendingData(null);
     }
   }, [
-    formData,
-    pendingData,
-    setPendingData,
-    setBaselineFormData,
     onPendingDataChange,
+    pendingData,
+    pendingDataKey,
+    setPendingData,
+    setDirtyOverrides,
+    setPendingOverrides,
   ]);
 
   useEffect(() => {
@@ -344,7 +369,7 @@ export function ConfigSection({
         return;
       }
       const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
-      let nextBaselineFormData = baselineFormData ?? formData;
+      const nextBaselineFormData = baselineSnapshot;
       const overrides = buildOverrides(
         sanitizedData,
         compareBaseData,
@@ -353,16 +378,6 @@ export function ConfigSection({
       setPendingOverrides(overrides as JsonValue | undefined);
       if (isInitializingRef.current && !pendingData) {
         isInitializingRef.current = false;
-        if (!baselineFormData) {
-          // Always use formData (server data + schema defaults) for the
-          // baseline snapshot, NOT sanitizedData from the onChange callback.
-          // If a custom component (e.g., zone checkboxes) triggers onChange
-          // before RJSF's initial onChange, sanitizedData would include the
-          // user's modification, corrupting the baseline.
-          const baselineSnapshot = cloneDeep(formData as ConfigSectionData);
-          setBaselineFormData(baselineSnapshot);
-          nextBaselineFormData = baselineSnapshot;
-        }
         if (overrides === undefined) {
           setPendingData(null);
           setPendingOverrides(undefined);
@@ -392,14 +407,12 @@ export function ConfigSection({
       setPendingData,
       setPendingOverrides,
       setDirtyOverrides,
-      baselineFormData,
-      setBaselineFormData,
-      formData,
+      baselineSnapshot,
     ],
   );
 
   const currentFormData = pendingData || formData;
-  const effectiveBaselineFormData = baselineFormData ?? formData;
+  const effectiveBaselineFormData = baselineSnapshot;
 
   const currentOverrides = useMemo(() => {
     if (!currentFormData || typeof currentFormData !== "object") {
