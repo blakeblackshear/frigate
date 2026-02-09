@@ -97,6 +97,7 @@ const sidebars: SidebarsConfig = {
         "configuration/ffmpeg_presets",
         "configuration/pwa",
         "configuration/tls",
+        "configuration/storage",
         "configuration/advanced",
       ],
     },
