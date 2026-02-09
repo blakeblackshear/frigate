@@ -5,85 +5,17 @@ title: Face Recognition
 
 Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
-## Alerts, Notifications, and Automations
+## Alerts and Notifications
 
-### How face recognition relates to alerts
+Face recognition does not affect whether an alert is created — alerts are based on tracked objects like `person` in your `review.alerts.labels` and your [zone requirements](./review). The `face` label is an [attribute label](/plus/#available-label-types), not a tracked object, so it cannot trigger alerts on its own.
 
-Alerts are created when a tracked object (like `person` or `car`) in your `review.alerts.labels` is detected and meets your [zone requirements](/configuration/review.md). The `face` label is an [attribute label](/plus/#label-attributes), not a regular tracked object — attribute labels are not tracked independently and do not generate review items or alerts. Any detected `person` will generate an alert as long as `person` is in your `review.alerts.labels` list and the object is in a [required zone](/configuration/review.md) (if configured). Face detection and recognition have no effect on whether the alert is created.
-
-Face processing happens in two stages on any detected `person` object. Frigate attempts face processing on each detect frame, but limits the number of recognition attempts per person. Frames where no face is detected do not count toward the limit. Once a face is detected and recognition runs, the attempt is counted — Frigate will stop after 6 recognition attempts once a person is successfully identified, or after 12 total recognition attempts if no match is found.
-
-1. **Face detection**: Frigate scans the `person` object for a face. If a face is found, it is recorded as a `face` attribute on the person (visible in the event's `attributes` field and in the MQTT event data). The detected face image also appears in the Face Library's Recent Recognitions tab. However, if the face is not recognized, there is no visible indicator in the Tracked Object Details — the label remains `Person` with no sub_label. This stage alone does not change the review item.
-2. **Face recognition**: If a detected face matches a known person from your Face Library, Frigate:
-   - Adds the person's name as a `sub_label` on the tracked object and **updates the review item**. In the review item's data, the object is listed as `person-verified` in the `objects` list (this is a display label used in the review data and UI — the tracked object's underlying label remains `person`, so `review.alerts.labels: [person-verified]` would not work).
-   - Publishes the name via MQTT on the [`frigate/events`](/integrations/mqtt.md#frigateevents) topic (in the `sub_label` field) and the [`frigate/tracked_object_update`](/integrations/mqtt.md#frigatetrackedobjectupdate) topic.
-   - Includes the name in the `sub_labels` array of the [`frigate/reviews`](/integrations/mqtt.md#frigatereviews) MQTT topic.
-   - Displays the name in the Frigate UI: in the Tracked Object Details, the label shows as `Person (John)` and the top score includes the recognition confidence in parentheses. The name also appears on review cards, in built-in notifications, and is available as a sub_label filter in the Explore view.
+When a face is recognized, the person's name is added as a `sub_label` on the tracked object. This name appears in the Frigate UI, in [built-in notifications](/configuration/notifications), and is published via [MQTT](/integrations/mqtt).
 
 :::note
 
-There is no built-in way to only create alerts when a face is detected or recognized. Neither `face`, `person-verified`, nor specific person names can be used in `review.alerts.labels`. To send notifications based on face recognition results, use a [Home Assistant automation](#custom-automations-with-home-assistant).
+There is no built-in way to only create alerts for specific recognized faces. Neither `face`, `person-verified`, nor specific person names can be used in `review.alerts.labels`. To trigger automations based on face recognition results, use the [official Frigate integration's sensors](/integrations/home-assistant) and/or the [MQTT data](/integrations/mqtt) Frigate publishes.
 
 :::
-
-### Frigate's built-in notifications
-
-Frigate's [built-in notifications](/configuration/notifications) are sent for all review alerts. If face recognition identifies the person during the alert, the person's name will be included in the notification. However, you cannot configure built-in notifications to only fire for specific recognized faces.
-
-### Custom automations with Home Assistant
-
-While Frigate's built-in alerts cannot filter by recognized face, you **can** build custom automations in Home Assistant using the MQTT data that Frigate publishes. This allows you to send notifications only for specific people, unknown faces, or other custom logic.
-
-**Example: Notify only when an unknown person is detected**
-
-```yaml
-automation:
-  - alias: Notify on unknown person
-    trigger:
-      - platform: mqtt
-        topic: frigate/events
-    condition:
-      - condition: template
-        value_template: >-
-          {{ trigger.payload_json["type"] == "new" and
-             trigger.payload_json["after"]["label"] == "person" }}
-    action:
-      - wait_for_trigger:
-          - platform: mqtt
-            topic: frigate/events
-        timeout: "00:00:30"
-        continue_on_timeout: true
-      - condition: template
-        value_template: >-
-          {{ trigger.payload_json["after"]["sub_label"] is none or
-             trigger.payload_json["after"]["sub_label"][0] == "unknown" }}
-      - service: notify.mobile_app_your_phone
-        data:
-          message: "An unknown person was detected on {{ trigger.payload_json['after']['camera'] }}."
-          data:
-            image: "https://your.hass.address/api/frigate/notifications/{{ trigger.payload_json['after']['id'] }}/thumbnail.jpg"
-```
-
-**Example: Notify when a specific person is recognized**
-
-```yaml
-automation:
-  - alias: Notify when John arrives
-    trigger:
-      - platform: mqtt
-        topic: frigate/tracked_object_update
-    condition:
-      - condition: template
-        value_template: >-
-          {{ trigger.payload_json["type"] == "face" and
-             trigger.payload_json["name"] == "John" }}
-    action:
-      - service: notify.mobile_app_your_phone
-        data:
-          message: "John was recognized on {{ trigger.payload_json['camera'] }}."
-```
-
-See the [Home Assistant notifications guide](/guides/ha_notifications.md) and the [MQTT documentation](/integrations/mqtt.md) for more details on the available data.
 
 ## Model Requirements
 
