@@ -119,7 +119,7 @@ export default function SaveAllPreviewPopover({
                         ns: "views/settings",
                       })}
                     </span>
-                    <span className="font-mono break-words">
+                    <span className="break-all font-mono">
                       {item.fieldPath}
                     </span>
                     <span className="text-muted-foreground">
@@ -127,7 +127,7 @@ export default function SaveAllPreviewPopover({
                         ns: "views/settings",
                       })}
                     </span>
-                    <span className="font-mono whitespace-pre-wrap break-words">
+                    <span className="whitespace-pre-wrap break-words font-mono">
                       {formatValue(item.value)}
                     </span>
                   </div>

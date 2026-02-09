@@ -471,6 +471,14 @@ const CAMERA_SELECT_BUTTON_PAGES = [
 
 const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 
+const LARGE_BOTTOM_MARGIN_PAGES = [
+  "masksAndZones",
+  "motionTuner",
+  "notifications",
+  "frigateplus",
+  "maintenance",
+];
+
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
   detect: "cameraDetect",
@@ -1140,6 +1148,7 @@ export default function Settings() {
                   <Button
                     onClick={handleUndoAll}
                     variant="outline"
+                    size="sm"
                     disabled={isSavingAll}
                     className="flex w-full items-center justify-center gap-2"
                   >
@@ -1151,6 +1160,7 @@ export default function Settings() {
                   <Button
                     onClick={handleSaveAll}
                     variant="select"
+                    size="sm"
                     disabled={isSavingAll}
                     className="flex w-full items-center justify-center gap-2"
                   >
@@ -1280,8 +1290,9 @@ export default function Settings() {
               <Button
                 onClick={handleUndoAll}
                 variant="outline"
+                size="sm"
                 disabled={isSavingAll}
-                className="flex w-full items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2"
               >
                 {t("button.undoAll", {
                   ns: "common",
@@ -1293,6 +1304,7 @@ export default function Settings() {
                 size="sm"
                 onClick={handleSaveAll}
                 disabled={isSavingAll}
+                className="flex items-center justify-center gap-2"
               >
                 {isSavingAll ? (
                   <>
@@ -1414,7 +1426,12 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="scrollbar-container mb-16 flex-1 overflow-y-auto p-2 pr-0">
+          <div
+            className={cn(
+              "scrollbar-container mb-16 flex-1 overflow-y-auto p-2 pr-0",
+              LARGE_BOTTOM_MARGIN_PAGES.includes(pageToggle) && "mb-24",
+            )}
+          >
             {(() => {
               const CurrentComponent = getCurrentComponent(page);
               if (!CurrentComponent) return null;
