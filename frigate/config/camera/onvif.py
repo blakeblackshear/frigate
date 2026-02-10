@@ -42,6 +42,10 @@ class PtzAutotrackConfig(FrigateBaseModel):
     timeout: int = Field(
         default=10, title="Seconds to delay before returning to preset."
     )
+    ptz_idle_method: str = Field(
+        default="status",
+        title="PTZ idle detection method: 'status' (default) or 'position' (for buggy MoveStatus).",
+    )
     movement_weights: Optional[Union[str, list[str]]] = Field(
         default_factory=list,
         title="Internal value used for PTZ movements based on the speed of your camera's motor.",
