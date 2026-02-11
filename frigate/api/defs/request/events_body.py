@@ -41,6 +41,7 @@ class EventsCreateBody(BaseModel):
     duration: Optional[int] = 30
     include_recording: Optional[bool] = True
     draw: Optional[dict] = {}
+    pre_capture: Optional[int] = None
 
 
 class EventsEndBody(BaseModel):

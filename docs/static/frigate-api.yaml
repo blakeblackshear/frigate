@@ -3200,6 +3200,7 @@ paths:
                 duration: 30
                 include_recording: true
                 draw: {}
+                pre_capture: null
       responses:
         "200":
           description: Successful Response
@@ -5002,6 +5003,12 @@ components:
             - type: "null"
           title: Draw
           default: {}
+        pre_capture:
+          anyOf:
+            - type: integer
+            - type: "null"
+          title: Pre Capture Seconds
+          default: null
       type: object
       title: EventsCreateBody
     EventsDeleteBody:
