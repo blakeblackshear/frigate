@@ -33,7 +33,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly, isTablet } from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
@@ -738,7 +738,7 @@ export function RecordingView({
                   aspectRatio: getCameraAspect(mainCamera),
                 }}
               >
-                {isDesktop && (
+                {(isDesktop || isTablet) && (
                   <GenAISummaryDialog
                     review={activeReviewItem}
                     onOpen={onAnalysisOpen}
@@ -1001,7 +1001,7 @@ function Timeline({
             ),
       )}
     >
-      {isMobile && timelineType == "timeline" && (
+      {isMobileOnly && timelineType == "timeline" && (
         <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen}>
           <GenAISummaryChip review={activeReviewItem} />
         </GenAISummaryDialog>
