@@ -1218,6 +1218,13 @@
     "timezone": {
       "defaultOption": "Use browser timezone"
     },
+    "roleMap": {
+      "empty": "No role mappings",
+      "roleLabel": "Role",
+      "groupsLabel": "Groups",
+      "addMapping": "Add role mapping",
+      "remove": "Remove"
+    },
     "ffmpegArgs": {
       "preset": "Preset",
       "manual": "Manual arguments",

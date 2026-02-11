@@ -1,6 +1,7 @@
 import type { FormValidation } from "@rjsf/utils";
 import type { TFunction } from "i18next";
 import { validateFfmpegInputRoles } from "./ffmpeg";
+import { validateProxyRoleHeader } from "./proxy";
 
 export type SectionValidation = (
   formData: unknown,
@@ -20,6 +21,10 @@ export function getSectionValidation({
 }: SectionValidationOptions): SectionValidation | undefined {
   if (sectionPath === "ffmpeg" && level === "camera") {
     return (formData, errors) => validateFfmpegInputRoles(formData, errors, t);
+  }
+
+  if (sectionPath === "proxy" && level === "global") {
+    return (formData, errors) => validateProxyRoleHeader(formData, errors, t);
   }
 
   return undefined;

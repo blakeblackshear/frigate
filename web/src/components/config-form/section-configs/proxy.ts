@@ -13,6 +13,14 @@ const proxy: SectionConfigOverrides = {
     ],
     advancedFields: ["header_map", "auth_secret", "separator"],
     liveValidate: true,
+    uiSchema: {
+      header_map: {
+        "ui:after": { render: "ProxyRoleMap" },
+      },
+      "header_map.role_map": {
+        "ui:widget": "hidden",
+      },
+    },
   },
 };
 

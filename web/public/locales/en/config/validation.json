@@ -17,5 +17,6 @@
   "additionalProperties": "Unknown property is not allowed",
   "oneOf": "Must match exactly one of the allowed schemas",
   "anyOf": "Must match at least one of the allowed schemas",
+  "proxy.header_map.roleHeaderRequired": "Role header is required when role mappings are configured.",
   "ffmpeg.inputs.rolesUnique": "Each role can only be assigned to one input stream."
 }

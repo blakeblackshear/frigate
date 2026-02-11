@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import SemanticSearchReindex from "./SemanticSearchReindex.tsx";
 import CameraReviewStatusToggles from "./CameraReviewStatusToggles";
+import ProxyRoleMap from "./ProxyRoleMap";
 import type { ConfigFormContext } from "@/types/configForm";
 
 // Props that will be injected into all section renderers
@@ -43,6 +44,9 @@ export const sectionRenderers: SectionRenderers = {
   },
   review: {
     CameraReviewStatusToggles,
+  },
+  proxy: {
+    ProxyRoleMap,
   },
 };
 
