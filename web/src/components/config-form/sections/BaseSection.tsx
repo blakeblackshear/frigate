@@ -57,6 +57,7 @@ import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
   cameraUpdateTopicMap,
   buildOverrides,
+  buildConfigDataForPath,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
 } from "@/utils/configUtil";
@@ -507,12 +508,11 @@ export function ConfigSection({
 
       const needsRestart = requiresRestartForOverrides(sanitizedOverrides);
 
+      const configData = buildConfigDataForPath(basePath, sanitizedOverrides);
       await axios.put("config/set", {
         requires_restart: needsRestart ? 1 : 0,
         update_topic: updateTopic,
-        config_data: {
-          [basePath]: sanitizedOverrides,
-        },
+        config_data: configData,
       });
       // log save to console for debugging
       // eslint-disable-next-line no-console
@@ -625,14 +625,12 @@ export function ConfigSection({
           ? `cameras.${cameraName}.${sectionPath}`
           : sectionPath;
 
-      const configData = "";
+      const configData = buildConfigDataForPath(basePath, "");
 
       await axios.put("config/set", {
         requires_restart: requiresRestart ? 0 : 1,
         update_topic: updateTopic,
-        config_data: {
-          [basePath]: configData,
-        },
+        config_data: configData,
       });
 
       // log reset to console for debugging

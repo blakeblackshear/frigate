@@ -9,6 +9,7 @@ import cloneDeep from "lodash/cloneDeep";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
+import set from "lodash/set";
 import { isJsonObject } from "@/lib/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { normalizeConfigValue } from "@/hooks/use-config-override";
@@ -167,6 +168,24 @@ export function sanitizeSectionData(
     unset(cleaned, path);
   });
   return cleaned;
+}
+
+// ---------------------------------------------------------------------------
+// buildConfigDataForPath — convert dotted path to nested config_data payload
+// ---------------------------------------------------------------------------
+
+// Converts a dotted path (e.g. "cameras.front_door.detect") and a value into
+// a properly nested config_data object (e.g. { cameras: { front_door: { detect: value } } }).
+// This ensures the backend's flatten_config_data function can correctly distinguish
+// between path separators (dots in the path) and literal dots in keys
+// (e.g. "frigate.foo.bar" in logger.logs).
+export function buildConfigDataForPath(
+  path: string,
+  value: unknown,
+): Record<string, unknown> {
+  const configData: Record<string, unknown> = {};
+  set(configData, path, value);
+  return configData;
 }
 
 // ---------------------------------------------------------------------------

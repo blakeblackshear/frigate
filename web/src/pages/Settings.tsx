@@ -83,7 +83,10 @@ import axios from "axios";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
-import { prepareSectionSavePayload } from "@/utils/configUtil";
+import {
+  buildConfigDataForPath,
+  prepareSectionSavePayload,
+} from "@/utils/configUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import SaveAllPreviewPopover, {
@@ -764,10 +767,14 @@ export default function Settings() {
           continue;
         }
 
+        const configData = buildConfigDataForPath(
+          payload.basePath,
+          payload.sanitizedOverrides,
+        );
         await axios.put("config/set", {
           requires_restart: payload.needsRestart ? 1 : 0,
           update_topic: payload.updateTopic,
-          config_data: { [payload.basePath]: payload.sanitizedOverrides },
+          config_data: configData,
         });
 
         // eslint-disable-next-line no-console
