@@ -9,7 +9,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
-import { JsonObject } from "@/types/configForm";
+import { JsonObject, JsonValue } from "@/types/configForm";
 
 /**
  * Sections that require special handling at the global level.
@@ -146,6 +146,22 @@ export function sanitizeOverridesForSection(
     };
   }
 
+  const flattenRecordWithDots = (
+    value: JsonObject,
+    prefix: string = "",
+  ): JsonObject => {
+    const flattened: JsonObject = {};
+    Object.entries(value).forEach(([key, entry]) => {
+      const nextKey = prefix ? `${prefix}.${key}` : key;
+      if (isJsonObject(entry)) {
+        Object.assign(flattened, flattenRecordWithDots(entry, nextKey));
+      } else {
+        flattened[nextKey] = entry as JsonValue;
+      }
+    });
+    return flattened;
+  };
+
   // detectors: Strip readonly model fields that are generated on startup
   // and should never be persisted back to the config file.
   if (sectionPath === "detectors") {
@@ -165,6 +181,22 @@ export function sanitizeOverridesForSection(
     });
 
     return cleaned;
+  }
+
+  if (sectionPath === "logger") {
+    const overridesObj = overrides as JsonObject;
+    const logs = overridesObj.logs;
+    if (isJsonObject(logs)) {
+      return {
+        ...overridesObj,
+        logs: flattenRecordWithDots(logs),
+      };
+    }
+  }
+
+  if (sectionPath === "environment_vars") {
+    const overridesObj = overrides as JsonObject;
+    return flattenRecordWithDots(overridesObj);
   }
 
   return overrides;

@@ -195,12 +195,48 @@ def flatten_config_data(
 ) -> Dict[str, Any]:
     items = []
     for key, value in config_data.items():
-        new_key = f"{parent_key}.{key}" if parent_key else key
+        escaped_key = escape_config_key_segment(str(key))
+        new_key = f"{parent_key}.{escaped_key}" if parent_key else escaped_key
         if isinstance(value, dict):
             items.extend(flatten_config_data(value, new_key).items())
         else:
             items.append((new_key, value))
     return dict(items)
+
+
+def escape_config_key_segment(segment: str) -> str:
+    """Escape dots and backslashes so they can be treated as literal key chars."""
+    return segment.replace("\\", "\\\\").replace(".", "\\.")
+
+
+def split_config_key_path(key_path_str: str) -> list[str]:
+    """Split a dotted config path, honoring \\. as a literal dot in a key."""
+    parts: list[str] = []
+    current: list[str] = []
+    escaped = False
+
+    for char in key_path_str:
+        if escaped:
+            current.append(char)
+            escaped = False
+            continue
+
+        if char == "\\":
+            escaped = True
+            continue
+
+        if char == ".":
+            parts.append("".join(current))
+            current = []
+            continue
+
+        current.append(char)
+
+    if escaped:
+        current.append("\\")
+
+    parts.append("".join(current))
+    return parts
 
 
 def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
@@ -218,7 +254,7 @@ def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
 
     # Apply all updates
     for key_path_str, new_value in updates.items():
-        key_path = key_path_str.split(".")
+        key_path = split_config_key_path(key_path_str)
         for i in range(len(key_path)):
             try:
                 index = int(key_path[i])
