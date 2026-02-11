@@ -193,6 +193,11 @@ export function ConfigSection({
     pendingDataBySection !== undefined
       ? (pendingDataBySection[pendingDataKey] as ConfigSectionData | null)
       : localPendingData;
+  const pendingDataRef = useRef<ConfigSectionData | null>(null);
+
+  useEffect(() => {
+    pendingDataRef.current = pendingData;
+  }, [pendingData]);
 
   const setPendingData = useCallback(
     (data: ConfigSectionData | null) => {
@@ -205,6 +210,7 @@ export function ConfigSection({
     [onPendingDataChange, sectionPath, cameraName],
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [extraHasChanges, setExtraHasChanges] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
@@ -356,9 +362,11 @@ export function ConfigSection({
 
   // Track if there are unsaved changes
   const hasChanges = useMemo(() => {
-    if (!pendingData) return false;
-    return !isEqual(formData, pendingData);
-  }, [formData, pendingData]);
+    const pendingChanged = pendingData
+      ? !isEqual(formData, pendingData)
+      : false;
+    return pendingChanged || extraHasChanges;
+  }, [formData, pendingData, extraHasChanges]);
 
   useEffect(() => {
     onStatusChange?.({ hasChanges, isOverridden });
@@ -462,6 +470,7 @@ export function ConfigSection({
     setPendingData(null);
     setPendingOverrides(undefined);
     setDirtyOverrides(undefined);
+    setExtraHasChanges(false);
     setFormKey((prev) => prev + 1);
   }, [setPendingData, setPendingOverrides, setDirtyOverrides]);
 
@@ -649,6 +658,7 @@ export function ConfigSection({
       );
 
       setPendingData(null);
+      setExtraHasChanges(false);
       refreshConfig();
     } catch {
       toast.error(
@@ -714,10 +724,11 @@ export function ConfigSection({
             selectedCamera={cameraName}
             setUnsavedChanges={(hasChanges: boolean) => {
               // Translate setUnsavedChanges to pending data state
-              if (hasChanges && !pendingData) {
+              const currentPending = pendingDataRef.current;
+              if (hasChanges && !currentPending) {
                 // Component signaled changes but we don't have pending data yet
                 // This can happen when the component manages its own state
-              } else if (!hasChanges && pendingData) {
+              } else if (!hasChanges && currentPending) {
                 // Component signaled no changes, clear pending
                 setPendingData(null);
               }
@@ -726,13 +737,7 @@ export function ConfigSection({
         ),
       ]),
     );
-  }, [
-    sectionConfig?.renderers,
-    sectionPath,
-    cameraName,
-    pendingData,
-    setPendingData,
-  ]);
+  }, [sectionConfig?.renderers, sectionPath, cameraName, setPendingData]);
 
   if (!modifiedSchema) {
     return null;
@@ -787,9 +792,13 @@ export function ConfigSection({
           globalValue,
           cameraValue,
           hasChanges,
+          extraHasChanges,
+          setExtraHasChanges,
           overrides: uiOverrides as JsonValue | undefined,
           formData: currentFormData as ConfigSectionData,
           baselineFormData: effectiveBaselineFormData as ConfigSectionData,
+          pendingDataBySection,
+          onPendingDataChange,
           onFormDataChange: (data: ConfigSectionData) => handleChange(data),
           // For widgets that need access to full camera config (e.g., zone names)
           fullCameraConfig:
@@ -811,7 +820,6 @@ export function ConfigSection({
         }}
       />
 
-      {/* Save button */}
       <div className="sticky bottom-0 z-50 w-full border-t border-secondary bg-background pb-5 pt-0">
         <div
           className={cn(
@@ -874,7 +882,7 @@ export function ConfigSection({
                   })}
                 </>
               ) : (
-                <>{t("button.save", { ns: "common", defaultValue: "Save" })}</>
+                t("button.save", { ns: "common", defaultValue: "Save" })
               )}
             </Button>
           </div>

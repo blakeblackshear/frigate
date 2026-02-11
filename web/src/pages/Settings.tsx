@@ -38,7 +38,6 @@ import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
-import NotificationView from "@/views/settings/NotificationsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
@@ -238,6 +237,7 @@ const SystemDetectorHardwareSettingsPage = createSectionPage(
   "global",
 );
 const SystemDetectionModelSettingsPage = createSectionPage("model", "global");
+const NotificationsSettingsPage = createSectionPage("notifications", "global");
 
 const SystemMqttSettingsPage = createSectionPage("mqtt", "global");
 const IntegrationSemanticSearchSettingsPage = createSectionPage(
@@ -432,7 +432,7 @@ const settingsGroups = [
   },
   {
     label: "notifications",
-    items: [{ key: "notifications", component: NotificationView }],
+    items: [{ key: "notifications", component: NotificationsSettingsPage }],
   },
   {
     label: "frigateplus",
@@ -513,6 +513,7 @@ const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
   audio: "globalAudioEvents",
   live: "globalLivePlayback",
   timestamp_style: "globalTimestampStyle",
+  notifications: "notifications",
 };
 
 const ENRICHMENTS_SECTION_MAPPING: Record<string, SettingsType> = {

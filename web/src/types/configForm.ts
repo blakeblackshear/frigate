@@ -20,7 +20,15 @@ export type ConfigFormContext = {
   cameraValue?: JsonValue;
   overrides?: JsonValue;
   hasChanges?: boolean;
+  extraHasChanges?: boolean;
+  setExtraHasChanges?: (hasChanges: boolean) => void;
   formData?: JsonObject;
+  pendingDataBySection?: Record<string, unknown>;
+  onPendingDataChange?: (
+    sectionKey: string,
+    cameraName: string | undefined,
+    data: ConfigSectionData | null,
+  ) => void;
   baselineFormData?: JsonObject;
   hiddenFields?: string[];
   onFormDataChange?: (data: ConfigSectionData) => void;
