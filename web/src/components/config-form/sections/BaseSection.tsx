@@ -1,7 +1,14 @@
 // Base Section Component for config form sections
 // Used as a foundation for reusable section components
 
-import { useMemo, useCallback, useState, useEffect, useRef } from "react";
+import {
+  useMemo,
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+} from "react";
 import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
@@ -46,6 +53,7 @@ import { applySchemaDefaults } from "@/lib/config-schema";
 import { cn } from "@/lib/utils";
 import { ConfigSectionData, JsonValue } from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
   cameraUpdateTopicMap,
   buildOverrides,
@@ -159,6 +167,7 @@ export function ConfigSection({
   ]);
   const [isOpen, setIsOpen] = useState(!defaultCollapsed);
   const { send: sendRestart } = useRestart();
+  const statusBar = useContext(StatusBarMessagesContext);
 
   // Create a key for this section's pending data
   const pendingDataKey = useMemo(
@@ -505,6 +514,15 @@ export function ConfigSection({
       });
 
       if (needsRestart) {
+        statusBar?.addMessage(
+          "config_restart_required",
+          t("configForm.restartRequiredFooter", {
+            ns: "views/settings",
+            defaultValue: "Configuration changed - Restart required",
+          }),
+          undefined,
+          "config_restart_required",
+        );
         toast.success(
           t("toast.successRestartRequired", {
             ns: "views/settings",
@@ -578,6 +596,7 @@ export function ConfigSection({
     cameraName,
     t,
     refreshConfig,
+    statusBar,
     onSave,
     rawFormData,
     sanitizeSectionData,

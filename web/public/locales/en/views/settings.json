@@ -1231,6 +1231,7 @@
       "selectPreset": "Select preset",
       "manualPlaceholder": "Enter FFmpeg arguments"
     },
+    "restartRequiredFooter": "Configuration changed - Restart required",
     "sections": {
       "detect": "Detection",
       "record": "Recording",
