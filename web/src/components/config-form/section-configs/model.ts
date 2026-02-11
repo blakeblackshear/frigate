@@ -25,6 +25,7 @@ const model: SectionConfigOverrides = {
       "attributes_map",
       "colormap",
       "all_attributes",
+      "non_logo_attributes",
       "plus",
     ],
   },
