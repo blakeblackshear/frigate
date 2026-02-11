@@ -515,6 +515,7 @@ class TrackedObjectProcessor(threading.Thread):
             duration,
             source_type,
             draw,
+            pre_capture,
         ) = payload
 
         # save the snapshot image
@@ -522,6 +523,11 @@ class TrackedObjectProcessor(threading.Thread):
             None, event_id, label, draw
         )
         end_time = frame_time + duration if duration is not None else None
+        start_time = (
+            frame_time - self.config.cameras[camera_name].record.event_pre_capture
+            if pre_capture is None
+            else frame_time - pre_capture
+        )
 
         # send event to event maintainer
         self.event_sender.publish(
@@ -536,8 +542,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "sub_label": sub_label,
                     "score": score,
                     "camera": camera_name,
-                    "start_time": frame_time
-                    - self.config.cameras[camera_name].record.event_pre_capture,
+                    "start_time": start_time,
                     "end_time": end_time,
                     "has_clip": self.config.cameras[camera_name].record.enabled
                     and include_recording,

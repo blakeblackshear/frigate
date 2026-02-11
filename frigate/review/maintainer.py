@@ -394,7 +394,11 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if activity.has_activity_category(SeverityEnum.alert):
                 # update current time for last alert activity
-                segment.last_alert_time = frame_time
+                if (
+                    segment.last_alert_time is None
+                    or frame_time > segment.last_alert_time
+                ):
+                    segment.last_alert_time = frame_time
 
                 if segment.severity != SeverityEnum.alert:
                     # if segment is not alert category but current activity is
@@ -404,7 +408,11 @@ class ReviewSegmentMaintainer(threading.Thread):
                     should_update_image = True
 
             if activity.has_activity_category(SeverityEnum.detection):
-                segment.last_detection_time = frame_time
+                if (
+                    segment.last_detection_time is None
+                    or frame_time > segment.last_detection_time
+                ):
+                    segment.last_detection_time = frame_time
 
             for object in activity.get_all_objects():
                 # Alert-level objects should always be added (they extend/upgrade the segment)
@@ -695,17 +703,28 @@ class ReviewSegmentMaintainer(threading.Thread):
                         current_segment.detections[manual_info["event_id"]] = (
                             manual_info["label"]
                         )
-                        if (
-                            topic == DetectionTypeEnum.api
-                            and self.config.cameras[camera].review.alerts.enabled
-                        ):
-                            current_segment.severity = SeverityEnum.alert
+                        if topic == DetectionTypeEnum.api:
+                            # manual_info["label"] contains 'label: sub_label'
+                            # so split out the label without modifying manual_info
+                            if (
+                                self.config.cameras[camera].review.detections.enabled
+                                and manual_info["label"].split(": ")[0]
+                                in self.config.cameras[camera].review.detections.labels
+                            ):
+                                current_segment.last_detection_time = manual_info[
+                                    "end_time"
+                                ]
+                            elif self.config.cameras[camera].review.alerts.enabled:
+                                current_segment.severity = SeverityEnum.alert
+                                current_segment.last_alert_time = manual_info[
+                                    "end_time"
+                                ]
                         elif (
                             topic == DetectionTypeEnum.lpr
                             and self.config.cameras[camera].review.detections.enabled
                         ):
                             current_segment.severity = SeverityEnum.detection
-                        current_segment.last_alert_time = manual_info["end_time"]
+                            current_segment.last_alert_time = manual_info["end_time"]
                     elif manual_info["state"] == ManualEventState.start:
                         self.indefinite_events[camera][manual_info["event_id"]] = (
                             manual_info["label"]
@@ -717,7 +736,18 @@ class ReviewSegmentMaintainer(threading.Thread):
                             topic == DetectionTypeEnum.api
                             and self.config.cameras[camera].review.alerts.enabled
                         ):
-                            current_segment.severity = SeverityEnum.alert
+                            # manual_info["label"] contains 'label: sub_label'
+                            # so split out the label without modifying manual_info
+                            if (
+                                not self.config.cameras[
+                                    camera
+                                ].review.detections.enabled
+                                or manual_info["label"].split(": ")[0]
+                                not in self.config.cameras[
+                                    camera
+                                ].review.detections.labels
+                            ):
+                                current_segment.severity = SeverityEnum.alert
                         elif (
                             topic == DetectionTypeEnum.lpr
                             and self.config.cameras[camera].review.detections.enabled
@@ -789,11 +819,23 @@ class ReviewSegmentMaintainer(threading.Thread):
                             detections,
                         )
                 elif topic == DetectionTypeEnum.api:
-                    if self.config.cameras[camera].review.alerts.enabled:
+                    severity = None
+                    # manual_info["label"] contains 'label: sub_label'
+                    # so split out the label without modifying manual_info
+                    if (
+                        self.config.cameras[camera].review.detections.enabled
+                        and manual_info["label"].split(": ")[0]
+                        in self.config.cameras[camera].review.detections.labels
+                    ):
+                        severity = SeverityEnum.detection
+                    elif self.config.cameras[camera].review.alerts.enabled:
+                        severity = SeverityEnum.alert
+
+                    if severity:
                         self.active_review_segments[camera] = PendingReviewSegment(
                             camera,
                             frame_time,
-                            SeverityEnum.alert,
+                            severity,
                             {manual_info["event_id"]: manual_info["label"]},
                             {},
                             [],
@@ -820,7 +862,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             ].last_detection_time = manual_info["end_time"]
                     else:
                         logger.warning(
-                            f"Manual event API has been called for {camera}, but alerts are disabled. This manual event will not appear as an alert."
+                            f"Manual event API has been called for {camera}, but alerts and detections are disabled. This manual event will not appear as an alert or detection."
                         )
                 elif topic == DetectionTypeEnum.lpr:
                     if self.config.cameras[camera].review.detections.enabled:
