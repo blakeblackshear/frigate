@@ -20,7 +20,13 @@ const model: SectionConfigOverrides = {
       "input_dtype",
       "model_type",
     ],
-    hiddenFields: ["labelmap", "attributes_map"],
+    hiddenFields: [
+      "labelmap",
+      "attributes_map",
+      "colormap",
+      "all_attributes",
+      "plus",
+    ],
   },
 };
 
