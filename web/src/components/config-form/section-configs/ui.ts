@@ -18,6 +18,11 @@ const ui: SectionConfigOverrides = {
       "unit_system",
     ],
     advancedFields: [],
+    uiSchema: {
+      timezone: {
+        "ui:widget": "timezoneSelect",
+      },
+    },
   },
 };
 

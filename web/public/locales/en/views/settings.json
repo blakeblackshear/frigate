@@ -1215,6 +1215,9 @@
       "keyPlaceholder": "New key",
       "remove": "Remove"
     },
+    "timezone": {
+      "defaultOption": "Use browser timezone"
+    },
     "ffmpegArgs": {
       "preset": "Preset",
       "manual": "Manual arguments",

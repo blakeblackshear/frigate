@@ -23,6 +23,7 @@ import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
+import { TimezoneSelectWidget } from "./widgets/TimezoneSelectWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -65,6 +66,7 @@ export const frigateTheme: FrigateTheme = {
     objectLabels: ObjectLabelSwitchesWidget,
     audioLabels: AudioLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
+    timezoneSelect: TimezoneSelectWidget,
   },
   templates: {
     FieldTemplate: FieldTemplate as React.ComponentType<FieldTemplateProps>,
