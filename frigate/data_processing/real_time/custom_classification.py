@@ -658,6 +658,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
     def handle_request(self, topic, request_data):
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
+                self.__build_detector()
                 logger.info(
                     f"Successfully loaded updated model for {self.model_config.name}"
                 )
