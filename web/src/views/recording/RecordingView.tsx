@@ -33,7 +33,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile, isMobileOnly, isTablet } from "react-device-detect";
+import {
+  isDesktop,
+  isMobile,
+  isMobileOnly,
+  isTablet,
+} from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
