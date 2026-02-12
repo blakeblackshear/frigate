@@ -40,6 +40,15 @@ const lpr: SectionConfigOverrides = {
       "device",
       "replace_rules",
     ],
+    uiSchema: {
+      replace_rules: {
+        "ui:field": "ReplaceRulesField",
+        "ui:options": {
+          label: false,
+          suppressDescription: true,
+        },
+      },
+    },
   },
 };
 

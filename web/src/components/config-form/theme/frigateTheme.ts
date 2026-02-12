@@ -38,6 +38,7 @@ import { WrapIfAdditionalTemplate } from "./templates/WrapIfAdditionalTemplate";
 
 import { LayoutGridField } from "./fields/LayoutGridField";
 import { DetectorHardwareField } from "./fields/DetectorHardwareField";
+import { ReplaceRulesField } from "./fields/ReplaceRulesField";
 
 export interface FrigateTheme {
   widgets: RegistryWidgetsType;
@@ -83,5 +84,6 @@ export const frigateTheme: FrigateTheme = {
   fields: {
     LayoutGridField: LayoutGridField,
     DetectorHardwareField: DetectorHardwareField,
+    ReplaceRulesField: ReplaceRulesField,
   },
 };

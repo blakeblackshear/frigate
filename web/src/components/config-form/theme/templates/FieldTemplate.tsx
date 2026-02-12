@@ -98,6 +98,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
   // Get UI options
   const uiOptionsFromSchema = uiSchema?.["ui:options"] || {};
 
+  const suppressDescription = uiOptionsFromSchema.suppressDescription === true;
+
   // Determine field characteristics
   const isAdvanced = uiOptionsFromSchema.advanced === true;
   const isBoolean =
@@ -130,7 +132,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
     !isMultiSchemaWrapper &&
     !isObjectField &&
     !isAdditionalProperty &&
-    !isArrayItemInAdditionalProp;
+    !isArrayItemInAdditionalProp &&
+    !suppressDescription;
 
   const translationPath = buildTranslationPath(
     pathSegments,
