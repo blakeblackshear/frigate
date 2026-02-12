@@ -6,6 +6,11 @@ const database: SectionConfigOverrides = {
     restartRequired: [],
     fieldOrder: ["path"],
     advancedFields: [],
+    uiSchema: {
+      path: {
+        "ui:options": { size: "md" },
+      },
+    },
   },
 };
 

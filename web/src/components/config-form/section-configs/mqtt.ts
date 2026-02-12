@@ -47,7 +47,26 @@ const mqtt: SectionConfigOverrides = {
       "tls_insecure",
     ],
     liveValidate: true,
-    uiSchema: {},
+    uiSchema: {
+      host: {
+        "ui:options": { size: "sm" },
+      },
+      topic_prefix: {
+        "ui:options": { size: "md" },
+      },
+      client_id: {
+        "ui:options": { size: "sm" },
+      },
+      tls_ca_certs: {
+        "ui:options": { size: "md" },
+      },
+      tls_client_cert: {
+        "ui:options": { size: "md" },
+      },
+      tls_client_key: {
+        "ui:options": { size: "md" },
+      },
+    },
   },
 };
 

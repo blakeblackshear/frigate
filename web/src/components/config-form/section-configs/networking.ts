@@ -14,11 +14,13 @@ const networking: SectionConfigOverrides = {
       "listen.internal": {
         "ui:options": {
           suppressMultiSchema: true,
+          size: "sm",
         },
       },
       "listen.external": {
         "ui:options": {
           suppressMultiSchema: true,
+          size: "sm",
         },
       },
     },

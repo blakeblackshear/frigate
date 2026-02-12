@@ -147,6 +147,35 @@ const applyUiSchemaPathOverrides = (
   return updated;
 };
 
+const applyLayoutGridFieldDefaults = (uiSchema: UiSchema): UiSchema => {
+  const applyDefaults = (node: unknown): unknown => {
+    if (Array.isArray(node)) {
+      return node.map((item) => applyDefaults(item));
+    }
+
+    if (typeof node !== "object" || node === null) {
+      return node;
+    }
+
+    const nextNode: Record<string, unknown> = {};
+
+    Object.entries(node).forEach(([key, value]) => {
+      nextNode[key] = applyDefaults(value);
+    });
+
+    if (
+      Array.isArray(nextNode["ui:layoutGrid"]) &&
+      nextNode["ui:field"] === undefined
+    ) {
+      nextNode["ui:field"] = "LayoutGridField";
+    }
+
+    return nextNode;
+  };
+
+  return applyDefaults(uiSchema) as UiSchema;
+};
+
 export interface ConfigFormProps {
   /** JSON Schema for the form */
   schema: RJSFSchema;
@@ -245,7 +274,9 @@ export function ConfigForm({
       transformedSchema,
       pathOverrides,
     );
-    const merged = mergeUiSchema(expandedUiSchema, baseUiSchema);
+    const merged = applyLayoutGridFieldDefaults(
+      mergeUiSchema(expandedUiSchema, baseUiSchema),
+    );
 
     // Add field groups
     if (fieldGroups) {
@@ -311,7 +342,7 @@ export function ConfigForm({
   );
 
   return (
-    <div className={cn("config-form", className)}>
+    <div className={cn("config-form w-full max-w-5xl", className)}>
       <Form
         schema={transformedSchema}
         uiSchema={finalUiSchema}

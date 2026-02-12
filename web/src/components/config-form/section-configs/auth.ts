@@ -32,6 +32,12 @@ const auth: SectionConfigOverrides = {
       reset_admin_password: {
         "ui:widget": "switch",
       },
+      native_oauth_url: {
+        "ui:options": { size: "lg" },
+      },
+      failed_login_rate_limit: {
+        "ui:options": { size: "md" },
+      },
     },
   },
 };

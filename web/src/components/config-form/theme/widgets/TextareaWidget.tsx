@@ -1,6 +1,8 @@
 // Textarea Widget - maps to shadcn/ui Textarea
 import type { WidgetProps } from "@rjsf/utils";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { getSizedFieldClassName } from "../utils";
 
 export function TextareaWidget(props: WidgetProps) {
   const {
@@ -19,11 +21,12 @@ export function TextareaWidget(props: WidgetProps) {
   const isNullable = Array.isArray(schema.type)
     ? schema.type.includes("null")
     : false;
+  const fieldClassName = getSizedFieldClassName(options, "md");
 
   return (
     <Textarea
       id={id}
-      className="text-md"
+      className={cn("text-md", fieldClassName)}
       value={value ?? ""}
       disabled={disabled || readonly}
       placeholder={placeholder || (options.placeholder as string) || ""}

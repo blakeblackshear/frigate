@@ -14,6 +14,12 @@ const proxy: SectionConfigOverrides = {
     advancedFields: ["header_map", "auth_secret", "separator"],
     liveValidate: true,
     uiSchema: {
+      logout_url: {
+        "ui:options": { size: "lg" },
+      },
+      auth_secret: {
+        "ui:options": { size: "md" },
+      },
       header_map: {
         "ui:after": { render: "ProxyRoleMap" },
       },

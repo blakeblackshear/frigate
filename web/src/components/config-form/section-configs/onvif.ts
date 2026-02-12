@@ -20,6 +20,9 @@ const onvif: SectionConfigOverrides = {
     advancedFields: ["tls_insecure", "ignore_time_mismatch"],
     overrideFields: [],
     uiSchema: {
+      host: {
+        "ui:options": { size: "sm" },
+      },
       autotracking: {
         required_zones: {
           "ui:widget": "zoneNames",

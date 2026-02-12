@@ -6,6 +6,14 @@ const tls: SectionConfigOverrides = {
     restartRequired: [],
     fieldOrder: ["enabled", "cert", "key"],
     advancedFields: [],
+    uiSchema: {
+      cert: {
+        "ui:options": { size: "md" },
+      },
+      key: {
+        "ui:options": { size: "md" },
+      },
+    },
   },
 };
 

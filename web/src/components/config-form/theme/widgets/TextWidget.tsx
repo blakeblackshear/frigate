@@ -1,6 +1,8 @@
 // Text Widget - maps to shadcn/ui Input
 import type { WidgetProps } from "@rjsf/utils";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { getSizedFieldClassName } from "../utils";
 
 export function TextWidget(props: WidgetProps) {
   const {
@@ -19,11 +21,12 @@ export function TextWidget(props: WidgetProps) {
   const isNullable = Array.isArray(schema.type)
     ? schema.type.includes("null")
     : false;
+  const fieldClassName = getSizedFieldClassName(options, "xs");
 
   return (
     <Input
       id={id}
-      className="text-md"
+      className={cn("text-md", fieldClassName)}
       type="text"
       value={value ?? ""}
       disabled={disabled || readonly}

@@ -58,6 +58,9 @@ const ffmpeg: SectionConfigOverrides = {
       "gpu",
     ],
     uiSchema: {
+      path: {
+        "ui:options": { size: "md" },
+      },
       global_args: arrayAsTextWidget,
       hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
       input_args: ffmpegArgsWidget("input_args"),
@@ -71,6 +74,9 @@ const ffmpeg: SectionConfigOverrides = {
       },
       inputs: {
         items: {
+          path: {
+            "ui:options": { size: "full" },
+          },
           global_args: arrayAsTextWidget,
           hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
           input_args: ffmpegArgsWidget("input_args"),
@@ -104,6 +110,9 @@ const ffmpeg: SectionConfigOverrides = {
       "gpu",
     ],
     uiSchema: {
+      path: {
+        "ui:options": { size: "md" },
+      },
       global_args: arrayAsTextWidget,
       hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
       input_args: ffmpegArgsWidget("input_args"),

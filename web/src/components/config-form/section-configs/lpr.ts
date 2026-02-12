@@ -41,6 +41,9 @@ const lpr: SectionConfigOverrides = {
       "replace_rules",
     ],
     uiSchema: {
+      format: {
+        "ui:options": { size: "md" },
+      },
       replace_rules: {
         "ui:field": "ReplaceRulesField",
         "ui:options": {

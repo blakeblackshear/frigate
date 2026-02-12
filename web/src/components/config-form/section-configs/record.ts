@@ -20,6 +20,13 @@ const record: SectionConfigOverrides = {
     },
     hiddenFields: ["enabled_in_config", "sync_recordings"],
     advancedFields: ["expire_interval", "preview", "export"],
+    uiSchema: {
+      export: {
+        hwaccel_args: {
+          "ui:options": { size: "lg" },
+        },
+      },
+    },
   },
 };
 

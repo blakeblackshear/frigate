@@ -101,7 +101,6 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const suppressDescription = uiOptionsFromSchema.suppressDescription === true;
 
   // Determine field characteristics
-  const isAdvanced = uiOptionsFromSchema.advanced === true;
   const isBoolean =
     schema.type === "boolean" ||
     (Array.isArray(schema.type) && schema.type.includes("boolean"));
@@ -111,11 +110,33 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const suppressMultiSchema =
     (uiSchema?.["ui:options"] as UiSchema["ui:options"] | undefined)
       ?.suppressMultiSchema === true;
+  const schemaTypes = Array.isArray(schema.type)
+    ? schema.type
+    : schema.type
+      ? [schema.type]
+      : [];
+  const nonNullSchemaTypes = schemaTypes.filter((type) => type !== "null");
+  const isScalarValueField =
+    nonNullSchemaTypes.length === 1 &&
+    ["string", "number", "integer"].includes(nonNullSchemaTypes[0]);
 
   // Only suppress labels/descriptions if this is a multi-schema field (anyOf/oneOf) with suppressMultiSchema flag
   // This prevents duplicate labels while still showing the inner field's label
   const isMultiSchemaWrapper =
     (schema.anyOf || schema.oneOf) && (suppressMultiSchema || isNullableUnion);
+  const useSplitBooleanLayout =
+    uiOptionsFromSchema.splitLayout !== false &&
+    isBoolean &&
+    !isMultiSchemaWrapper &&
+    !isObjectField &&
+    !isAdditionalProperty;
+  const useSplitLayout =
+    uiOptionsFromSchema.splitLayout !== false &&
+    isScalarValueField &&
+    !isBoolean &&
+    !isMultiSchemaWrapper &&
+    !isObjectField &&
+    !isAdditionalProperty;
 
   // Get translation path for this field
   const pathSegments = fieldPathId.path.filter(
@@ -379,17 +400,11 @@ export function FieldTemplate(props: FieldTemplateProps) {
     >
       <div className="flex flex-col space-y-6">
         {beforeContent}
-        <div
-          className={cn(
-            "space-y-1",
-            isAdvanced && "border-l-2 border-muted pl-4",
-            isBoolean && "flex items-center justify-between gap-4",
-          )}
-          data-field-id={translationPath}
-        >
+        <div className={cn("space-y-1")} data-field-id={translationPath}>
           {displayLabel &&
             finalLabel &&
             !isBoolean &&
+            !useSplitLayout &&
             !isMultiSchemaWrapper &&
             !isObjectField &&
             !isAdditionalProperty && (
@@ -409,29 +424,157 @@ export function FieldTemplate(props: FieldTemplateProps) {
             )}
 
           {isBoolean ? (
-            <div className="flex w-full items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                {displayLabel && finalLabel && (
-                  <Label
-                    htmlFor={id}
-                    className={cn(
-                      "text-sm font-medium",
-                      isModified && "text-danger",
+            useSplitBooleanLayout ? (
+              <>
+                <div className="space-y-1.5 md:hidden">
+                  <div className="flex items-center justify-between gap-4">
+                    {displayLabel && finalLabel && (
+                      <Label
+                        htmlFor={id}
+                        className={cn(
+                          "text-sm font-medium",
+                          isModified && "text-danger",
+                        )}
+                      >
+                        {finalLabel}
+                        {required && (
+                          <span className="ml-1 text-destructive">*</span>
+                        )}
+                      </Label>
                     )}
-                  >
-                    {finalLabel}
-                    {required && (
-                      <span className="ml-1 text-destructive">*</span>
+                    <div className="flex items-center gap-2">{children}</div>
+                  </div>
+                  {finalDescription && shouldShowDescription && (
+                    <p className="text-xs text-muted-foreground">
+                      {finalDescription}
+                    </p>
+                  )}
+                  {fieldDocsUrl && shouldShowDescription && (
+                    <div className="flex items-center text-xs text-primary-variant">
+                      <Link
+                        to={fieldDocsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
+                      >
+                        {t("readTheDocumentation", { ns: "common" })}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                <div className="hidden md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6">
+                  <div className="space-y-0.5">
+                    {displayLabel && finalLabel && (
+                      <Label
+                        htmlFor={id}
+                        className={cn(
+                          "text-sm font-medium",
+                          isModified && "text-danger",
+                        )}
+                      >
+                        {finalLabel}
+                        {required && (
+                          <span className="ml-1 text-destructive">*</span>
+                        )}
+                      </Label>
                     )}
-                  </Label>
-                )}
+                    {finalDescription && shouldShowDescription && (
+                      <p className="text-xs text-muted-foreground">
+                        {finalDescription}
+                      </p>
+                    )}
+                    {fieldDocsUrl && shouldShowDescription && (
+                      <div className="flex items-center text-xs text-primary-variant">
+                        <Link
+                          to={fieldDocsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline"
+                        >
+                          {t("readTheDocumentation", { ns: "common" })}
+                          <LuExternalLink className="ml-2 inline-flex size-3" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  <div className="w-full max-w-2xl">
+                    <div className="flex items-center gap-2">{children}</div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex w-full items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  {displayLabel && finalLabel && (
+                    <Label
+                      htmlFor={id}
+                      className={cn(
+                        "text-sm font-medium",
+                        isModified && "text-danger",
+                      )}
+                    >
+                      {finalLabel}
+                      {required && (
+                        <span className="ml-1 text-destructive">*</span>
+                      )}
+                    </Label>
+                  )}
+                  {finalDescription && shouldShowDescription && (
+                    <p className="text-xs text-muted-foreground">
+                      {finalDescription}
+                    </p>
+                  )}
+                  {fieldDocsUrl && shouldShowDescription && (
+                    <div className="flex items-center text-xs text-primary-variant">
+                      <Link
+                        to={fieldDocsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
+                      >
+                        {t("readTheDocumentation", { ns: "common" })}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">{children}</div>
+              </div>
+            )
+          ) : useSplitLayout ? (
+            <div className="space-y-3 md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0">
+              <div className="space-y-1.5">
+                {displayLabel &&
+                  finalLabel &&
+                  !isMultiSchemaWrapper &&
+                  !isObjectField &&
+                  !isAdditionalProperty && (
+                    <Label
+                      htmlFor={id}
+                      className={cn(
+                        "text-sm font-medium",
+                        isModified && "text-danger",
+                        errors &&
+                          errors.props?.errors?.length > 0 &&
+                          "text-destructive",
+                      )}
+                    >
+                      {finalLabel}
+                      {required && (
+                        <span className="ml-1 text-destructive">*</span>
+                      )}
+                    </Label>
+                  )}
+
                 {finalDescription && shouldShowDescription && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="hidden text-xs text-muted-foreground md:block">
                     {finalDescription}
                   </p>
                 )}
                 {fieldDocsUrl && shouldShowDescription && (
-                  <div className="flex items-center text-xs text-primary-variant">
+                  <div className="hidden items-center text-xs text-primary-variant md:flex">
                     <Link
                       to={fieldDocsUrl}
                       target="_blank"
@@ -444,7 +587,29 @@ export function FieldTemplate(props: FieldTemplateProps) {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2">{children}</div>
+
+              <div className="w-full max-w-2xl space-y-1">
+                {children}
+
+                {finalDescription && shouldShowDescription && (
+                  <p className="text-xs text-muted-foreground md:hidden">
+                    {finalDescription}
+                  </p>
+                )}
+                {fieldDocsUrl && shouldShowDescription && (
+                  <div className="flex items-center text-xs text-primary-variant md:hidden">
+                    <Link
+                      to={fieldDocsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <>

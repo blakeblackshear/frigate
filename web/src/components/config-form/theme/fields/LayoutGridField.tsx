@@ -114,6 +114,13 @@ interface PropertyElement {
   content: React.ReactElement;
 }
 
+function isObjectLikeElement(item: PropertyElement) {
+  const fieldSchema = item.content.props?.schema as
+    | { type?: string | string[] }
+    | undefined;
+  return fieldSchema?.type === "object";
+}
+
 // Custom ObjectFieldTemplate wrapper that applies grid layout
 function GridLayoutObjectFieldTemplate(
   props: ObjectFieldTemplateProps,
@@ -361,9 +368,16 @@ function GridLayoutObjectFieldTemplate(
         }
 
         return (
-          <div key={rowIndex} className="space-y-4">
+          <div
+            key={rowIndex}
+            className={cn(
+              "space-y-4",
+              rowGroupKey &&
+                "rounded-lg border border-border/70 bg-card/30 p-4",
+            )}
+          >
             {showGroupLabel && (
-              <div className="text-md font-medium text-primary">
+              <div className="border-b border-border/60 pb-2 text-sm font-semibold text-primary-variant">
                 {getGroupLabel(rowGroupKey)}
               </div>
             )}
@@ -404,9 +418,12 @@ function GridLayoutObjectFieldTemplate(
       }
 
       leftoverSections.push(
-        <div key={groupKey} className="space-y-6">
+        <div
+          key={groupKey}
+          className="space-y-4 rounded-lg border border-border/70 bg-card/30 p-4"
+        >
           {showGroupLabel && (
-            <div className="text-md font-medium text-primary">
+            <div className="border-b border-border/60 pb-2 text-sm font-semibold text-primary-variant">
               {getGroupLabel(groupKey)}
             </div>
           )}
@@ -429,7 +446,16 @@ function GridLayoutObjectFieldTemplate(
           )}
         >
           {ungroupedLeftovers.map((item) => (
-            <div key={item.name}>{item.content}</div>
+            <div
+              key={item.name}
+              className={cn(
+                groupedLeftovers.size > 0 &&
+                  !isObjectLikeElement(item) &&
+                  "px-4",
+              )}
+            >
+              {item.content}
+            </div>
           ))}
         </div>,
       );

@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getSizedFieldClassName } from "../utils";
 
 export function SelectWidget(props: WidgetProps) {
   const {
@@ -21,6 +22,7 @@ export function SelectWidget(props: WidgetProps) {
   } = props;
 
   const { enumOptions = [] } = options;
+  const fieldClassName = getSizedFieldClassName(options, "sm");
 
   return (
     <Select
@@ -34,7 +36,7 @@ export function SelectWidget(props: WidgetProps) {
       }}
       disabled={disabled || readonly}
     >
-      <SelectTrigger id={id} className="w-full">
+      <SelectTrigger id={id} className={fieldClassName}>
         <SelectValue placeholder={placeholder || schema.title || "Select..."} />
       </SelectTrigger>
       <SelectContent>

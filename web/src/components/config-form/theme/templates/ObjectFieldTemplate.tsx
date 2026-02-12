@@ -323,12 +323,21 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     }>;
 
     const ungrouped = items.filter((item) => !grouped.has(item.name));
+    const isObjectLikeField = (item: (typeof properties)[number]) => {
+      const fieldSchema = item.content.props.schema as
+        | { type?: string | string[] }
+        | undefined;
+      return fieldSchema?.type === "object";
+    };
 
     return (
       <div className="space-y-6">
         {groups.map((group) => (
-          <div key={group.key} className="space-y-6">
-            <div className="text-md font-medium text-primary">
+          <div
+            key={group.key}
+            className="space-y-4 rounded-lg border border-border/70 bg-card/30 p-4"
+          >
+            <div className="text-md border-b border-border/60 pb-4 font-semibold text-primary-variant">
               {group.label}
             </div>
             <div className="space-y-6">
@@ -342,7 +351,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         {ungrouped.length > 0 && (
           <div className={cn("space-y-6", groups.length > 0 && "pt-2")}>
             {ungrouped.map((element) => (
-              <div key={element.name}>{element.content}</div>
+              <div
+                key={element.name}
+                className={cn(
+                  groups.length > 0 && !isObjectLikeField(element) && "px-4",
+                )}
+              >
+                {element.content}
+              </div>
             ))}
           </div>
         )}

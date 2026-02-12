@@ -6,6 +6,11 @@ const environmentVars: SectionConfigOverrides = {
     restartRequired: [],
     fieldOrder: [],
     advancedFields: [],
+    uiSchema: {
+      additionalProperties: {
+        "ui:options": { size: "lg" },
+      },
+    },
   },
 };
 

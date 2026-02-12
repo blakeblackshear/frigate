@@ -59,6 +59,16 @@ const objects: SectionConfigOverrides = {
         },
         prompt: {
           "ui:widget": "textarea",
+          "ui:options": {
+            size: "full",
+          },
+        },
+        object_prompts: {
+          additionalProperties: {
+            "ui:options": {
+              size: "full",
+            },
+          },
         },
         required_zones: {
           "ui:widget": "zoneNames",

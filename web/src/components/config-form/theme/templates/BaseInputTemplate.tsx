@@ -1,6 +1,7 @@
 // Base Input Template - default input wrapper
 import type { WidgetProps } from "@rjsf/utils";
 import { Input } from "@/components/ui/input";
+import { getSizedFieldClassName } from "../utils";
 
 export function BaseInputTemplate(props: WidgetProps) {
   const {
@@ -14,9 +15,11 @@ export function BaseInputTemplate(props: WidgetProps) {
     onFocus,
     placeholder,
     schema,
+    options,
   } = props;
 
   const inputType = type || "text";
+  const fieldClassName = getSizedFieldClassName(options, "xs");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -32,6 +35,7 @@ export function BaseInputTemplate(props: WidgetProps) {
     <Input
       id={id}
       type={inputType}
+      className={fieldClassName}
       value={value ?? ""}
       disabled={disabled || readonly}
       placeholder={placeholder || ""}

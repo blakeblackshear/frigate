@@ -15,3 +15,4 @@ export {
   normalizeFieldValue,
   isSubtreeModified,
 } from "./overrides";
+export { getSizedFieldClassName } from "./fieldSizing";

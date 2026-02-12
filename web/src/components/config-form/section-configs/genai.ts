@@ -14,6 +14,27 @@ const genai: SectionConfigOverrides = {
     ],
     advancedFields: ["base_url", "provider_options", "runtime_options"],
     hiddenFields: ["genai.enabled_in_config"],
+    uiSchema: {
+      api_key: {
+        "ui:options": { size: "md" },
+      },
+      base_url: {
+        "ui:options": { size: "lg" },
+      },
+      model: {
+        "ui:options": { size: "md" },
+      },
+      provider_options: {
+        additionalProperties: {
+          "ui:options": { size: "lg" },
+        },
+      },
+      runtime_options: {
+        additionalProperties: {
+          "ui:options": { size: "lg" },
+        },
+      },
+    },
   },
 };
 

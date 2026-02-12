@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
+import { cn } from "@/lib/utils";
+import { getSizedFieldClassName } from "../utils";
 
 export function PasswordWidget(props: WidgetProps) {
   const {
@@ -16,12 +18,14 @@ export function PasswordWidget(props: WidgetProps) {
     onFocus,
     placeholder,
     schema,
+    options,
   } = props;
 
   const [showPassword, setShowPassword] = useState(false);
+  const fieldClassName = getSizedFieldClassName(options, "sm");
 
   return (
-    <div className="relative">
+    <div className={cn("relative", fieldClassName)}>
       <Input
         id={id}
         type={showPassword ? "text" : "password"}
@@ -34,7 +38,7 @@ export function PasswordWidget(props: WidgetProps) {
         onBlur={(e) => onBlur(id, e.target.value)}
         onFocus={(e) => onFocus(id, e.target.value)}
         aria-label={schema.title}
-        className="pr-10"
+        className="w-full pr-10"
       />
       <Button
         type="button"

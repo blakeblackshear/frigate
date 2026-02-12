@@ -28,6 +28,14 @@ const model: SectionConfigOverrides = {
       "non_logo_attributes",
       "plus",
     ],
+    uiSchema: {
+      path: {
+        "ui:options": { size: "md" },
+      },
+      labelmap_path: {
+        "ui:options": { size: "md" },
+      },
+    },
   },
 };
 
