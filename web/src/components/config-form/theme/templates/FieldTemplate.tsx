@@ -378,6 +378,190 @@ export function FieldTemplate(props: FieldTemplateProps) {
     uiOptions,
   );
 
+  const shouldRenderStandardLabel =
+    displayLabel &&
+    finalLabel &&
+    !isBoolean &&
+    !useSplitLayout &&
+    !isMultiSchemaWrapper &&
+    !isObjectField &&
+    !isAdditionalProperty;
+
+  const shouldRenderSplitLabel =
+    displayLabel &&
+    finalLabel &&
+    !isMultiSchemaWrapper &&
+    !isObjectField &&
+    !isAdditionalProperty;
+
+  const shouldRenderBooleanLabel = displayLabel && finalLabel;
+
+  const renderDocsLink = (className?: string) => {
+    if (!fieldDocsUrl || !shouldShowDescription) {
+      return null;
+    }
+
+    return (
+      <div
+        className={cn(
+          "flex items-center text-xs text-primary-variant",
+          className,
+        )}
+      >
+        <Link
+          to={fieldDocsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline"
+        >
+          {t("readTheDocumentation", { ns: "common" })}
+          <LuExternalLink className="ml-2 inline-flex size-3" />
+        </Link>
+      </div>
+    );
+  };
+
+  const renderDescription = (className?: string) => {
+    if (!finalDescription || !shouldShowDescription) {
+      return null;
+    }
+
+    return (
+      <p className={cn("text-xs text-muted-foreground", className)}>
+        {finalDescription}
+      </p>
+    );
+  };
+
+  const renderStandardLabel = () => {
+    if (!shouldRenderStandardLabel) {
+      return null;
+    }
+
+    return (
+      <Label
+        htmlFor={id}
+        className={cn(
+          "text-sm font-medium",
+          isModified && "text-danger",
+          errors && errors.props?.errors?.length > 0 && "text-destructive",
+        )}
+      >
+        {finalLabel}
+        {required && <span className="ml-1 text-destructive">*</span>}
+      </Label>
+    );
+  };
+
+  const renderBooleanLabel = () => {
+    if (!shouldRenderBooleanLabel) {
+      return null;
+    }
+
+    return (
+      <Label
+        htmlFor={id}
+        className={cn("text-sm font-medium", isModified && "text-danger")}
+      >
+        {finalLabel}
+        {required && <span className="ml-1 text-destructive">*</span>}
+      </Label>
+    );
+  };
+
+  const renderSplitLabel = () => {
+    if (!shouldRenderSplitLabel) {
+      return null;
+    }
+
+    return (
+      <Label
+        htmlFor={id}
+        className={cn(
+          "text-sm font-medium",
+          isModified && "text-danger",
+          errors && errors.props?.errors?.length > 0 && "text-destructive",
+        )}
+      >
+        {finalLabel}
+        {required && <span className="ml-1 text-destructive">*</span>}
+      </Label>
+    );
+  };
+
+  const renderBooleanSplitLayout = () => (
+    <>
+      <div className="space-y-1.5 md:hidden">
+        <div className="flex items-center justify-between gap-4">
+          {renderBooleanLabel()}
+          <div className="flex items-center gap-2">{children}</div>
+        </div>
+        {renderDescription()}
+        {renderDocsLink()}
+      </div>
+
+      <div className="hidden md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6">
+        <div className="space-y-0.5">
+          {renderBooleanLabel()}
+          {renderDescription()}
+          {renderDocsLink()}
+        </div>
+        <div className="w-full max-w-2xl">
+          <div className="flex items-center gap-2">{children}</div>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderBooleanInlineLayout = () => (
+    <div className="flex w-full items-center justify-between gap-4">
+      <div className="space-y-0.5">
+        {renderBooleanLabel()}
+        {renderDescription()}
+        {renderDocsLink()}
+      </div>
+      <div className="flex items-center gap-2">{children}</div>
+    </div>
+  );
+
+  const renderSplitValueLayout = () => (
+    <div className="space-y-1.5 md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0 md:space-y-3">
+      <div className="space-y-1.5">
+        {renderSplitLabel()}
+        {renderDescription("hidden md:block")}
+        {renderDocsLink("hidden md:flex")}
+      </div>
+
+      <div className="w-full max-w-2xl space-y-1">
+        {children}
+        {renderDescription("md:hidden")}
+        {renderDocsLink("md:hidden")}
+      </div>
+    </div>
+  );
+
+  const renderDefaultValueLayout = () => (
+    <>
+      {children}
+      {renderDescription()}
+      {renderDocsLink()}
+    </>
+  );
+
+  const renderFieldLayout = () => {
+    if (isBoolean) {
+      return useSplitBooleanLayout
+        ? renderBooleanSplitLayout()
+        : renderBooleanInlineLayout();
+    }
+
+    if (useSplitLayout) {
+      return renderSplitValueLayout();
+    }
+
+    return renderDefaultValueLayout();
+  };
+
   return (
     <WrapIfAdditionalTemplate
       classNames={classNames}
@@ -401,240 +585,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
       <div className="flex flex-col space-y-6">
         {beforeContent}
         <div className={cn("space-y-1")} data-field-id={translationPath}>
-          {displayLabel &&
-            finalLabel &&
-            !isBoolean &&
-            !useSplitLayout &&
-            !isMultiSchemaWrapper &&
-            !isObjectField &&
-            !isAdditionalProperty && (
-              <Label
-                htmlFor={id}
-                className={cn(
-                  "text-sm font-medium",
-                  isModified && "text-danger",
-                  errors &&
-                    errors.props?.errors?.length > 0 &&
-                    "text-destructive",
-                )}
-              >
-                {finalLabel}
-                {required && <span className="ml-1 text-destructive">*</span>}
-              </Label>
-            )}
-
-          {isBoolean ? (
-            useSplitBooleanLayout ? (
-              <>
-                <div className="space-y-1.5 md:hidden">
-                  <div className="flex items-center justify-between gap-4">
-                    {displayLabel && finalLabel && (
-                      <Label
-                        htmlFor={id}
-                        className={cn(
-                          "text-sm font-medium",
-                          isModified && "text-danger",
-                        )}
-                      >
-                        {finalLabel}
-                        {required && (
-                          <span className="ml-1 text-destructive">*</span>
-                        )}
-                      </Label>
-                    )}
-                    <div className="flex items-center gap-2">{children}</div>
-                  </div>
-                  {finalDescription && shouldShowDescription && (
-                    <p className="text-xs text-muted-foreground">
-                      {finalDescription}
-                    </p>
-                  )}
-                  {fieldDocsUrl && shouldShowDescription && (
-                    <div className="flex items-center text-xs text-primary-variant">
-                      <Link
-                        to={fieldDocsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline"
-                      >
-                        {t("readTheDocumentation", { ns: "common" })}
-                        <LuExternalLink className="ml-2 inline-flex size-3" />
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                <div className="hidden md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6">
-                  <div className="space-y-0.5">
-                    {displayLabel && finalLabel && (
-                      <Label
-                        htmlFor={id}
-                        className={cn(
-                          "text-sm font-medium",
-                          isModified && "text-danger",
-                        )}
-                      >
-                        {finalLabel}
-                        {required && (
-                          <span className="ml-1 text-destructive">*</span>
-                        )}
-                      </Label>
-                    )}
-                    {finalDescription && shouldShowDescription && (
-                      <p className="text-xs text-muted-foreground">
-                        {finalDescription}
-                      </p>
-                    )}
-                    {fieldDocsUrl && shouldShowDescription && (
-                      <div className="flex items-center text-xs text-primary-variant">
-                        <Link
-                          to={fieldDocsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline"
-                        >
-                          {t("readTheDocumentation", { ns: "common" })}
-                          <LuExternalLink className="ml-2 inline-flex size-3" />
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                  <div className="w-full max-w-2xl">
-                    <div className="flex items-center gap-2">{children}</div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex w-full items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  {displayLabel && finalLabel && (
-                    <Label
-                      htmlFor={id}
-                      className={cn(
-                        "text-sm font-medium",
-                        isModified && "text-danger",
-                      )}
-                    >
-                      {finalLabel}
-                      {required && (
-                        <span className="ml-1 text-destructive">*</span>
-                      )}
-                    </Label>
-                  )}
-                  {finalDescription && shouldShowDescription && (
-                    <p className="text-xs text-muted-foreground">
-                      {finalDescription}
-                    </p>
-                  )}
-                  {fieldDocsUrl && shouldShowDescription && (
-                    <div className="flex items-center text-xs text-primary-variant">
-                      <Link
-                        to={fieldDocsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline"
-                      >
-                        {t("readTheDocumentation", { ns: "common" })}
-                        <LuExternalLink className="ml-2 inline-flex size-3" />
-                      </Link>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">{children}</div>
-              </div>
-            )
-          ) : useSplitLayout ? (
-            <div className="space-y-3 md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0">
-              <div className="space-y-1.5">
-                {displayLabel &&
-                  finalLabel &&
-                  !isMultiSchemaWrapper &&
-                  !isObjectField &&
-                  !isAdditionalProperty && (
-                    <Label
-                      htmlFor={id}
-                      className={cn(
-                        "text-sm font-medium",
-                        isModified && "text-danger",
-                        errors &&
-                          errors.props?.errors?.length > 0 &&
-                          "text-destructive",
-                      )}
-                    >
-                      {finalLabel}
-                      {required && (
-                        <span className="ml-1 text-destructive">*</span>
-                      )}
-                    </Label>
-                  )}
-
-                {finalDescription && shouldShowDescription && (
-                  <p className="hidden text-xs text-muted-foreground md:block">
-                    {finalDescription}
-                  </p>
-                )}
-                {fieldDocsUrl && shouldShowDescription && (
-                  <div className="hidden items-center text-xs text-primary-variant md:flex">
-                    <Link
-                      to={fieldDocsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline"
-                    >
-                      {t("readTheDocumentation", { ns: "common" })}
-                      <LuExternalLink className="ml-2 inline-flex size-3" />
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              <div className="w-full max-w-2xl space-y-1">
-                {children}
-
-                {finalDescription && shouldShowDescription && (
-                  <p className="text-xs text-muted-foreground md:hidden">
-                    {finalDescription}
-                  </p>
-                )}
-                {fieldDocsUrl && shouldShowDescription && (
-                  <div className="flex items-center text-xs text-primary-variant md:hidden">
-                    <Link
-                      to={fieldDocsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline"
-                    >
-                      {t("readTheDocumentation", { ns: "common" })}
-                      <LuExternalLink className="ml-2 inline-flex size-3" />
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>
-              {children}
-
-              {finalDescription && shouldShowDescription && (
-                <p className="text-xs text-muted-foreground">
-                  {finalDescription}
-                </p>
-              )}
-              {fieldDocsUrl && shouldShowDescription && (
-                <div className="flex items-center text-xs text-primary-variant">
-                  <Link
-                    to={fieldDocsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline"
-                  >
-                    {t("readTheDocumentation", { ns: "common" })}
-                    <LuExternalLink className="ml-2 inline-flex size-3" />
-                  </Link>
-                </div>
-              )}
-            </>
-          )}
+          {renderStandardLabel()}
+          {renderFieldLayout()}
 
           {errors}
           {help}

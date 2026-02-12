@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { getSizedFieldClassName } from "../utils";
 
 const DEFAULT_TIMEZONE_VALUE = "__browser__";
 
@@ -27,11 +28,12 @@ function getTimezoneList(): string[] {
 }
 
 export function TimezoneSelectWidget(props: WidgetProps) {
-  const { id, value, disabled, readonly, onChange, schema } = props;
+  const { id, value, disabled, readonly, onChange, schema, options } = props;
   const { t } = useTranslation(["views/settings", "common"]);
 
   const timezones = useMemo(() => getTimezoneList(), []);
   const selectedValue = value ? String(value) : DEFAULT_TIMEZONE_VALUE;
+  const fieldClassName = getSizedFieldClassName(options, "sm");
   const defaultLabel = t("configForm.timezone.defaultOption", {
     ns: "views/settings",
   });
@@ -44,7 +46,7 @@ export function TimezoneSelectWidget(props: WidgetProps) {
       }
       disabled={disabled || readonly}
     >
-      <SelectTrigger id={id} className="w-full">
+      <SelectTrigger id={id} className={fieldClassName}>
         <SelectValue placeholder={schema.title || defaultLabel} />
       </SelectTrigger>
       <SelectContent>
