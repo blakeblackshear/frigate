@@ -60,6 +60,11 @@ export default function ChatPage() {
             {msg.content}
           </div>
         ))}
+        {isLoading && (
+          <div className="self-start rounded-lg bg-muted px-3 py-2 text-muted-foreground">
+            {t("processing")}
+          </div>
+        )}
         {error && (
           <p className="self-start text-sm text-destructive" role="alert">
             {error}

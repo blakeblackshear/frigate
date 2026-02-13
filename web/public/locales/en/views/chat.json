@@ -1,4 +1,5 @@
 {
   "placeholder": "Ask anything...",
-  "error": "Something went wrong. Please try again."
+  "error": "Something went wrong. Please try again.",
+  "processing": "Processing..."
 }
