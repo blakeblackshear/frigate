@@ -27,6 +27,7 @@ const Settings = lazy(() => import("@/pages/Settings"));
 const UIPlayground = lazy(() => import("@/pages/UIPlayground"));
 const FaceLibrary = lazy(() => import("@/pages/FaceLibrary"));
 const Classification = lazy(() => import("@/pages/ClassificationModel"));
+const Chat = lazy(() => import("@/pages/Chat"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
 
@@ -106,6 +107,7 @@ function DefaultAppView() {
               <Route path="/logs" element={<Logs />} />
               <Route path="/faces" element={<FaceLibrary />} />
               <Route path="/classification" element={<Classification />} />
+              <Route path="/chat" element={<Chat />} />
               <Route path="/playground" element={<UIPlayground />} />
             </Route>
             <Route path="/unauthorized" element={<AccessDenied />} />
