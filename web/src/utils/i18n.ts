@@ -46,6 +46,7 @@ i18n
       "components/icons",
       "components/player",
       "views/events",
+      "views/chat",
       "views/explore",
       "views/live",
       "views/settings",
