@@ -4,6 +4,7 @@ import { FaArrowUpLong } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback } from "react";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -57,7 +58,11 @@ export default function ChatPage() {
                 : "self-start rounded-lg bg-muted px-3 py-2"
             }
           >
-            {msg.content}
+            {msg.role === "assistant" ? (
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
+            ) : (
+              msg.content
+            )}
           </div>
         ))}
         {isLoading && (
