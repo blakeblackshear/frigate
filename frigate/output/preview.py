@@ -50,11 +50,11 @@ PREVIEW_QUALITY_BIT_RATES = {
 # the -qmax param for ffmpeg prevents the encoder from overly compressing frames while still trying to hit the bitrate target
 # lower values are higher quality. This is especially important for iniitial frames in the segment
 PREVIEW_QMAX_PARAM = {
-    RecordQualityEnum.very_low: '',
-    RecordQualityEnum.low: '',
-    RecordQualityEnum.medium: '',
-    RecordQualityEnum.high: '-qmax 25',
-    RecordQualityEnum.very_high: '-qmax 25',
+    RecordQualityEnum.very_low: "",
+    RecordQualityEnum.low: "",
+    RecordQualityEnum.medium: "",
+    RecordQualityEnum.high: "-qmax 25",
+    RecordQualityEnum.very_high: "-qmax 25",
 }
 
 
