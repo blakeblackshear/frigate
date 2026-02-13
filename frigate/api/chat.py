@@ -43,10 +43,14 @@ def _format_events_with_local_time(events_list: List[Dict[str, Any]]) -> List[Di
             end_ts = evt.get("end_time")
             if start_ts is not None:
                 dt_start = datetime.fromtimestamp(start_ts)
-                copy_evt["start_time_local"] = dt_start.strftime("%Y-%m-%d %H:%M:%S %Z")
+                copy_evt["start_time_local"] = dt_start.strftime(
+                    "%Y-%m-%d %I:%M:%S %p"
+                )
             if end_ts is not None:
                 dt_end = datetime.fromtimestamp(end_ts)
-                copy_evt["end_time_local"] = dt_end.strftime("%Y-%m-%d %H:%M:%S %Z")
+                copy_evt["end_time_local"] = dt_end.strftime(
+                    "%Y-%m-%d %I:%M:%S %p"
+                )
         except (TypeError, ValueError, OSError):
             pass
         result.append(copy_evt)
@@ -420,7 +424,7 @@ async def chat_completion(
 
     current_datetime = datetime.now()
     current_date_str = current_datetime.strftime("%Y-%m-%d")
-    current_time_str = current_datetime.strftime("%H:%M:%S %Z")
+    current_time_str = current_datetime.strftime("%I:%M:%S %p")
 
     cameras_info = []
     config = request.app.frigate_config
