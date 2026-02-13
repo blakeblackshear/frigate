@@ -3,6 +3,7 @@
 import base64
 import json
 import logging
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -162,23 +163,26 @@ async def _execute_search_objects(
     This searches for detected objects (events) in Frigate using the same
     logic as the events API endpoint.
     """
-    # Parse ISO 8601 timestamps to Unix timestamps if provided
+    # Parse after/before as server local time; convert to Unix timestamp
     after = arguments.get("after")
     before = arguments.get("before")
 
+    def _parse_as_local_timestamp(s: str):
+        s = s.replace("Z", "").strip()[:19]
+        dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+        return time.mktime(dt.timetuple())
+
     if after:
         try:
-            after_dt = datetime.fromisoformat(after.replace("Z", "+00:00"))
-            after = after_dt.timestamp()
-        except (ValueError, AttributeError):
+            after = _parse_as_local_timestamp(after)
+        except (ValueError, AttributeError, TypeError):
             logger.warning(f"Invalid 'after' timestamp format: {after}")
             after = None
 
     if before:
         try:
-            before_dt = datetime.fromisoformat(before.replace("Z", "+00:00"))
-            before = before_dt.timestamp()
-        except (ValueError, AttributeError):
+            before = _parse_as_local_timestamp(before)
+        except (ValueError, AttributeError, TypeError):
             logger.warning(f"Invalid 'before' timestamp format: {before}")
             before = None
 
