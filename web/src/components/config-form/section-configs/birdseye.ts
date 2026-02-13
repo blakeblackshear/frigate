@@ -22,6 +22,11 @@ const birdseye: SectionConfigOverrides = {
       "idle_heartbeat_fps",
     ],
     advancedFields: ["width", "height", "quality", "inactivity_threshold"],
+    uiSchema: {
+      mode: {
+        "ui:size": "xs",
+      },
+    },
   },
 };
 

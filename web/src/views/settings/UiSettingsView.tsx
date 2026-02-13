@@ -222,7 +222,7 @@ export default function UiSettingsView() {
   ];
 
   return (
-    <div className="flex size-full flex-col md:flex-row">
+    <div className="flex size-full flex-col md:flex-row md:pb-8">
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
         <div className="w-full max-w-5xl space-y-6">

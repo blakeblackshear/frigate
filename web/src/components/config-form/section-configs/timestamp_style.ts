@@ -7,6 +7,14 @@ const timestampStyle: SectionConfigOverrides = {
     fieldOrder: ["position", "format", "color", "thickness"],
     hiddenFields: ["effect", "enabled_in_config"],
     advancedFields: [],
+    uiSchema: {
+      position: {
+        "ui:size": "xs",
+      },
+      format: {
+        "ui:size": "xs",
+      },
+    },
   },
 };
 

@@ -448,7 +448,7 @@ class FrigateConfig(FrigateBaseModel):
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
         title="Timestamp style",
-        description="Styling options for in-feed timestamps applied to recordings and snapshots.",
+        description="Styling options for in-feed timestamps applied to debug view and snapshots.",
     )
 
     # Classification Config

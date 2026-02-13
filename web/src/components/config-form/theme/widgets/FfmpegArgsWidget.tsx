@@ -3,6 +3,7 @@ import useSWR from "swr";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
+import { ConfigFormContext } from "@/types/configForm";
 import {
   Select,
   SelectContent,
@@ -86,7 +87,17 @@ const normalizeManualText = (value: unknown): string => {
 };
 
 export function FfmpegArgsWidget(props: WidgetProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const formContext = props.registry?.formContext as
+    | ConfigFormContext
+    | undefined;
+  const i18nNamespace = formContext?.i18nNamespace as string | undefined;
+  const isCameraLevel = formContext?.level === "camera";
+  const effectiveNamespace = isCameraLevel ? "config/cameras" : i18nNamespace;
+  const { t, i18n } = useTranslation([
+    effectiveNamespace || i18nNamespace || "common",
+    i18nNamespace || "common",
+    "views/settings",
+  ]);
   const {
     value,
     onChange,
@@ -165,6 +176,47 @@ export function FfmpegArgsWidget(props: WidgetProps) {
   const manualValue = normalizeManualText(value);
   const presetValue =
     typeof value === "string" && presetOptions.includes(value) ? value : "";
+  const fallbackDescriptionKey = useMemo(() => {
+    if (!presetField) {
+      return undefined;
+    }
+
+    const isInputScoped = id.includes("_inputs_");
+    const prefix = isInputScoped ? "ffmpeg.inputs" : "ffmpeg";
+
+    if (presetField === "hwaccel_args") {
+      return `${prefix}.hwaccel_args.description`;
+    }
+
+    if (presetField === "input_args") {
+      return `${prefix}.input_args.description`;
+    }
+
+    if (presetField === "output_args.record") {
+      return isInputScoped
+        ? "ffmpeg.inputs.output_args.record.description"
+        : "ffmpeg.output_args.record.description";
+    }
+
+    if (presetField === "output_args.detect") {
+      return isInputScoped
+        ? "ffmpeg.inputs.output_args.detect.description"
+        : "ffmpeg.output_args.detect.description";
+    }
+
+    return undefined;
+  }, [id, presetField]);
+
+  const translatedDescription =
+    fallbackDescriptionKey &&
+    effectiveNamespace &&
+    i18n.exists(fallbackDescriptionKey, { ns: effectiveNamespace })
+      ? t(fallbackDescriptionKey, { ns: effectiveNamespace })
+      : "";
+  const fieldDescription =
+    typeof schema.description === "string" && schema.description.length > 0
+      ? schema.description
+      : translatedDescription;
 
   return (
     <div className="space-y-2">
@@ -244,6 +296,10 @@ export function FfmpegArgsWidget(props: WidgetProps) {
           }
         />
       )}
+
+      {fieldDescription ? (
+        <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+      ) : null}
     </div>
   );
 }

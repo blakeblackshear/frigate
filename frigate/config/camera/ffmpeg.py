@@ -35,13 +35,13 @@ DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
 class FfmpegOutputArgsConfig(FrigateBaseModel):
     detect: Union[str, list[str]] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Detect output args",
-        description="Default output args for detect role streams.",
+        title="Detect output arguments",
+        description="Default output arguments for detect role streams.",
     )
     record: Union[str, list[str]] = Field(
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Record output args",
-        description="Default output args for record role streams.",
+        title="Record output arguments",
+        description="Default output arguments for record role streams.",
     )
 
 
@@ -124,17 +124,17 @@ class CameraInput(FrigateBaseModel):
     )
     global_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="FFmpeg global args",
+        title="FFmpeg global arguments",
         description="FFmpeg global arguments for this input stream.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="Hardware acceleration args",
+        title="Hardware acceleration arguments",
         description="Hardware acceleration arguments for this input stream.",
     )
     input_args: Union[str, list[str]] = Field(
         default_factory=list,
-        title="Input args",
+        title="Input arguments",
         description="Input arguments specific to this stream.",
     )
 

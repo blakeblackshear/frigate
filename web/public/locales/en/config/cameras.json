@@ -170,12 +170,12 @@
       "label": "Output arguments",
       "description": "Default output arguments used for different FFmpeg roles such as detect and record.",
       "detect": {
-        "label": "Detect output args",
-        "description": "Default output args for detect role streams."
+        "label": "Detect output arguments",
+        "description": "Default output arguments for detect role streams."
       },
       "record": {
-        "label": "Record output args",
-        "description": "Default output args for record role streams."
+        "label": "Record output arguments",
+        "description": "Default output arguments for record role streams."
       }
     },
     "retry_interval": {
@@ -202,15 +202,15 @@
         "description": "Roles for this input stream (for example: detect, record, audio)."
       },
       "global_args": {
-        "label": "FFmpeg global args",
+        "label": "FFmpeg global arguments",
         "description": "FFmpeg global arguments for this input stream."
       },
       "hwaccel_args": {
-        "label": "Hardware acceleration args",
+        "label": "Hardware acceleration arguments",
         "description": "Hardware acceleration arguments for this input stream."
       },
       "input_args": {
-        "label": "Input args",
+        "label": "Input arguments",
         "description": "Input arguments specific to this stream."
       }
     }

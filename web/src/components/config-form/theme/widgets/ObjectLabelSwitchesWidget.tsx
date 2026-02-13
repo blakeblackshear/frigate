@@ -93,7 +93,8 @@ export function ObjectLabelSwitchesWidget(props: WidgetProps) {
         getEntities: getObjectLabels,
         getDisplayLabel: getObjectLabelDisplayName,
         i18nKey: "objectLabels",
-        listClassName: "max-h-64 overflow-y-auto scrollbar-container",
+        listClassName:
+          "max-h-none overflow-visible md:max-h-64 md:overflow-y-auto md:overscroll-contain md:scrollbar-container",
       }}
     />
   );

@@ -1298,6 +1298,15 @@
       "summary": "{{count}} selected",
       "empty": "No zones available"
     },
+    "inputRoles": {
+      "summary": "{{count}} roles selected",
+      "empty": "No roles available",
+      "options": {
+        "detect": "Detect",
+        "record": "Record",
+        "audio": "Audio"
+      }
+    },
     "review": {
       "title": "Review Settings"
     },

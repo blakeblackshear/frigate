@@ -77,7 +77,12 @@ const ffmpeg: SectionConfigOverrides = {
           path: {
             "ui:options": { size: "full" },
           },
-          global_args: arrayAsTextWidget,
+          roles: {
+            "ui:widget": "inputRoles",
+          },
+          global_args: {
+            "ui:widget": "hidden",
+          },
           hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
           input_args: ffmpegArgsWidget("input_args"),
           output_args: {
