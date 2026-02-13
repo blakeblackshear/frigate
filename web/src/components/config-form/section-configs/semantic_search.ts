@@ -17,6 +17,7 @@ const semanticSearch: SectionConfigOverrides = {
   global: {
     fieldOrder: ["enabled", "reindex", "model", "model_size", "device"],
     advancedFields: ["reindex", "device"],
+    restartRequired: ["enabled", "reindex", "model", "model_size", "device"],
   },
 };
 

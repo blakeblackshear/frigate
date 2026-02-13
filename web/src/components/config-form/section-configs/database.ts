@@ -3,7 +3,7 @@ import type { SectionConfigOverrides } from "./types";
 const database: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/advanced#database",
-    restartRequired: [],
+    restartRequired: ["path"],
     fieldOrder: ["path"],
     advancedFields: [],
     uiSchema: {

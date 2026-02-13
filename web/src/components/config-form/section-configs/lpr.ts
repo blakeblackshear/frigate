@@ -40,6 +40,21 @@ const lpr: SectionConfigOverrides = {
       "device",
       "replace_rules",
     ],
+    restartRequired: [
+      "enabled",
+      "model_size",
+      "detection_threshold",
+      "min_area",
+      "recognition_threshold",
+      "min_plate_length",
+      "format",
+      "match_distance",
+      "known_plates",
+      "enhancement",
+      "debug_save_plates",
+      "device",
+      "replace_rules",
+    ],
     uiSchema: {
       format: {
         "ui:options": { size: "md" },

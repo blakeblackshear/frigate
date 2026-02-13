@@ -32,6 +32,18 @@ const faceRecognition: SectionConfigOverrides = {
       "blur_confidence_filter",
       "device",
     ],
+    restartRequired: [
+      "enabled",
+      "model_size",
+      "unknown_score",
+      "detection_threshold",
+      "recognition_threshold",
+      "min_area",
+      "min_faces",
+      "save_attempts",
+      "blur_confidence_filter",
+      "device",
+    ],
   },
 };
 

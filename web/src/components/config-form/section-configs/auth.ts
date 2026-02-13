@@ -3,7 +3,11 @@ import type { SectionConfigOverrides } from "./types";
 const auth: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/authentication",
-    restartRequired: [],
+    restartRequired: [
+      "enabled",
+      "reset_admin_password",
+      "failed_login_rate_limit",
+    ],
     fieldOrder: [
       "enabled",
       "reset_admin_password",

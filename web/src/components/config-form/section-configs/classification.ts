@@ -3,7 +3,7 @@ import type { SectionConfigOverrides } from "./types";
 const classification: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/custom_classification/object_classification",
-    restartRequired: [],
+    restartRequired: ["bird.enabled", "bird.threshold"],
     hiddenFields: ["custom"],
     advancedFields: [],
   },

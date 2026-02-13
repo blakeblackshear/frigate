@@ -46,6 +46,21 @@ const mqtt: SectionConfigOverrides = {
       "tls_client_key",
       "tls_insecure",
     ],
+    restartRequired: [
+      "enabled",
+      "host",
+      "port",
+      "user",
+      "password",
+      "topic_prefix",
+      "client_id",
+      "stats_interval",
+      "qos",
+      "tls_ca_certs",
+      "tls_client_cert",
+      "tls_client_key",
+      "tls_insecure",
+    ],
     liveValidate: true,
     uiSchema: {
       password: {

@@ -7,7 +7,7 @@ const networking: SectionConfigOverrides = {
       "listen.internal": "/configuration/advanced#listen-on-different-ports",
       "listen.external": "/configuration/advanced#listen-on-different-ports",
     },
-    restartRequired: [],
+    restartRequired: ["ipv6.enabled", "listen.internal", "listen.external"],
     fieldOrder: [],
     advancedFields: [],
     uiSchema: {

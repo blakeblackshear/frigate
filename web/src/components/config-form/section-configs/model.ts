@@ -3,7 +3,18 @@ import type { SectionConfigOverrides } from "./types";
 const model: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_detectors#model",
-    restartRequired: [],
+    restartRequired: [
+      "path",
+      "labelmap_path",
+      "width",
+      "height",
+      "labelmap",
+      "attributes_map",
+      "input_tensor",
+      "input_pixel_format",
+      "input_dtype",
+      "model_type",
+    ],
     fieldOrder: [
       "path",
       "labelmap_path",

@@ -12,6 +12,7 @@ const audioTranscription: SectionConfigOverrides = {
   global: {
     fieldOrder: ["enabled", "language", "device", "model_size"],
     advancedFields: ["language", "device", "model_size"],
+    restartRequired: ["enabled", "language", "device", "model_size"],
   },
 };
 
