@@ -9,9 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -60,7 +58,12 @@ import type { ConfigSectionData, JsonObject } from "@/types/configForm";
 import { sanitizeSectionData } from "@/utils/configUtil";
 import type { SectionRendererProps } from "./registry";
 
-const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
+const NOTIFICATION_SERVICE_WORKER = "/notification-worker.js";
+import {
+  SettingsGroupCard,
+  SPLIT_ROW_CLASS_NAME,
+  CONTROL_COLUMN_CLASS_NAME,
+} from "@/components/card/SettingsGroupCard";
 
 export default function NotificationsSettingsExtras({
   formContext,
@@ -431,13 +434,12 @@ export default function NotificationsSettingsExtras({
   if (!("Notification" in window) || !window.isSecureContext) {
     return (
       <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="col-span-1">
-            <Heading as="h4" className="mb-2">
-              {t("notification.notificationSettings.title")}
-            </Heading>
-            <div className="max-w-6xl">
-              <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+        <div className="w-full max-w-5xl">
+          <SettingsGroupCard
+            title={t("notification.notificationSettings.title")}
+          >
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2 text-sm text-primary-variant">
                 <p>{t("notification.notificationSettings.desc")}</p>
                 <div className="flex items-center text-primary">
                   <Link
@@ -451,30 +453,31 @@ export default function NotificationsSettingsExtras({
                   </Link>
                 </div>
               </div>
+
+              <Alert variant="destructive">
+                <CiCircleAlert className="size-5" />
+                <AlertTitle>
+                  {t("notification.notificationUnavailable.title")}
+                </AlertTitle>
+                <AlertDescription>
+                  <Trans ns="views/settings">
+                    notification.notificationUnavailable.desc
+                  </Trans>
+                  <div className="mt-3 flex items-center">
+                    <Link
+                      to={getLocaleDocUrl("configuration/authentication")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}{" "}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
+                </AlertDescription>
+              </Alert>
             </div>
-            <Alert variant="destructive">
-              <CiCircleAlert className="size-5" />
-              <AlertTitle>
-                {t("notification.notificationUnavailable.title")}
-              </AlertTitle>
-              <AlertDescription>
-                <Trans ns="views/settings">
-                  notification.notificationUnavailable.desc
-                </Trans>
-                <div className="mt-3 flex items-center">
-                  <Link
-                    to={getLocaleDocUrl("configuration/authentication")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline"
-                  >
-                    {t("readTheDocumentation", { ns: "common" })}{" "}
-                    <LuExternalLink className="ml-2 inline-flex size-3" />
-                  </Link>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
+          </SettingsGroupCard>
         </div>
       </div>
     );
@@ -484,136 +487,146 @@ export default function NotificationsSettingsExtras({
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
-        <div
-          className={cn(
-            isAdmin && "grid w-full grid-cols-1 gap-4 md:grid-cols-2",
-          )}
-        >
-          <div className="col-span-1">
-            {isAdmin && (
-              <Form {...form}>
-                <div className="mt-2 space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("notification.email.title")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
-                            placeholder={t("notification.email.placeholder")}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          {t("notification.email.desc")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="cameras"
-                    render={({ field }) => (
-                      <FormItem>
-                        {allCameras && allCameras?.length > 0 ? (
-                          <>
-                            <div className="mb-2">
-                              <FormLabel className="flex flex-row items-center text-base">
-                                {t("notification.cameras.title")}
-                              </FormLabel>
-                            </div>
-                            <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
-                              <FormField
-                                control={form.control}
-                                name="allEnabled"
-                                render={({ field }) => (
-                                  <FilterSwitch
-                                    label={t("cameras.all.title", {
-                                      ns: "components/filter",
-                                    })}
-                                    isChecked={field.value}
-                                    onCheckedChange={(checked) => {
-                                      setCameraSelectionTouched(true);
-                                      if (checked) {
-                                        form.setValue("cameras", []);
-                                      }
-                                      field.onChange(checked);
-                                    }}
-                                  />
-                                )}
-                              />
-                              {allCameras?.map((camera) => {
-                                const currentCameras = Array.isArray(
-                                  field.value,
-                                )
-                                  ? field.value
-                                  : [];
-                                return (
-                                  <FilterSwitch
-                                    key={camera.name}
-                                    label={camera.name}
-                                    type="camera"
-                                    isChecked={currentCameras.includes(
-                                      camera.name,
-                                    )}
-                                    onCheckedChange={(checked) => {
-                                      setCameraSelectionTouched(true);
-                                      const newCameras = checked
-                                        ? Array.from(
-                                            new Set([
-                                              ...currentCameras,
-                                              camera.name,
-                                            ]),
-                                          )
-                                        : currentCameras.filter(
-                                            (value) => value !== camera.name,
-                                          );
-                                      field.onChange(newCameras);
-                                      form.setValue("allEnabled", false);
-                                    }}
-                                  />
-                                );
-                              })}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="font-normal text-destructive">
-                            {t("notification.cameras.noCameras")}
+        <div className={cn("w-full max-w-5xl space-y-6")}>
+          {isAdmin && (
+            <SettingsGroupCard
+              title={t("notification.notificationSettings.title")}
+            >
+              <div className="space-y-6">
+                <Form {...form}>
+                  <div className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem className={SPLIT_ROW_CLASS_NAME}>
+                          <div className="space-y-1.5">
+                            <FormLabel htmlFor="notification-email">
+                              {t("notification.email.title")}
+                            </FormLabel>
+                            <FormDescription className="hidden md:block">
+                              {t("notification.email.desc")}
+                            </FormDescription>
                           </div>
-                        )}
 
-                        <FormMessage />
-                        <FormDescription>
-                          {t("notification.cameras.desc")}
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </Form>
-            )}
-          </div>
+                          <div
+                            className={`${CONTROL_COLUMN_CLASS_NAME} space-y-1.5`}
+                          >
+                            <FormControl>
+                              <Input
+                                id="notification-email"
+                                className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
+                                placeholder={t(
+                                  "notification.email.placeholder",
+                                )}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription className="md:hidden">
+                              {t("notification.email.desc")}
+                            </FormDescription>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
 
-          <div className="col-span-1">
-            <div className="mt-4 gap-2 space-y-6">
-              <div
-                className={cn(isAdmin && "flex flex-col gap-2 md:max-w-[50%]")}
-              >
-                <Separator
-                  className={cn(
-                    "my-2 flex bg-secondary",
-                    isAdmin && "md:hidden",
-                  )}
-                />
-                <Heading as="h4" className={cn(isAdmin ? "my-2" : "my-4")}>
-                  {t("notification.deviceSpecific")}
-                </Heading>
+                    <FormField
+                      control={form.control}
+                      name="cameras"
+                      render={({ field }) => (
+                        <FormItem className={SPLIT_ROW_CLASS_NAME}>
+                          <div className="space-y-1.5">
+                            <FormLabel className="text-base">
+                              {t("notification.cameras.title")}
+                            </FormLabel>
+                            <FormDescription className="hidden md:block">
+                              {t("notification.cameras.desc")}
+                            </FormDescription>
+                          </div>
+
+                          <div
+                            className={`${CONTROL_COLUMN_CLASS_NAME} space-y-1.5`}
+                          >
+                            {allCameras.length > 0 ? (
+                              <div className="w-full space-y-2 rounded-lg bg-secondary p-4">
+                                <FormField
+                                  control={form.control}
+                                  name="allEnabled"
+                                  render={({ field: allEnabledField }) => (
+                                    <FilterSwitch
+                                      label={t("cameras.all.title", {
+                                        ns: "components/filter",
+                                      })}
+                                      isChecked={allEnabledField.value}
+                                      onCheckedChange={(checked) => {
+                                        setCameraSelectionTouched(true);
+                                        if (checked) {
+                                          form.setValue("cameras", []);
+                                        }
+                                        allEnabledField.onChange(checked);
+                                      }}
+                                    />
+                                  )}
+                                />
+                                {allCameras.map((camera) => {
+                                  const currentCameras = Array.isArray(
+                                    field.value,
+                                  )
+                                    ? field.value
+                                    : [];
+                                  return (
+                                    <FilterSwitch
+                                      key={camera.name}
+                                      label={camera.name}
+                                      type="camera"
+                                      isChecked={currentCameras.includes(
+                                        camera.name,
+                                      )}
+                                      onCheckedChange={(checked) => {
+                                        setCameraSelectionTouched(true);
+                                        const newCameras = checked
+                                          ? Array.from(
+                                              new Set([
+                                                ...currentCameras,
+                                                camera.name,
+                                              ]),
+                                            )
+                                          : currentCameras.filter(
+                                              (value) => value !== camera.name,
+                                            );
+                                        field.onChange(newCameras);
+                                        form.setValue("allEnabled", false);
+                                      }}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="font-normal text-destructive">
+                                {t("notification.cameras.noCameras")}
+                              </div>
+                            )}
+                            <FormDescription className="md:hidden">
+                              {t("notification.cameras.desc")}
+                            </FormDescription>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </Form>
+              </div>
+            </SettingsGroupCard>
+          )}
+
+          <div className="space-y-6">
+            <SettingsGroupCard title={t("notification.deviceSpecific")}>
+              <div className={cn("space-y-2", isAdmin && "md:max-w-[50%]")}>
                 <Button
                   aria-label={t("notification.registerDevice")}
+                  className="w-full md:w-auto"
                   disabled={!shouldFetchPubKey || publicKey == undefined}
                   onClick={() => {
                     if (registration == null) {
@@ -659,6 +672,7 @@ export default function NotificationsSettingsExtras({
                 </Button>
                 {isAdmin && registration != null && registration.active && (
                   <Button
+                    className="w-full md:w-auto"
                     aria-label={t("notification.sendTestNotification")}
                     onClick={() => sendTestNotification("notification_test")}
                   >
@@ -666,35 +680,27 @@ export default function NotificationsSettingsExtras({
                   </Button>
                 )}
               </div>
-            </div>
-            {isAdmin && notificationCameras.length > 0 && (
-              <div className="mt-4 gap-2 space-y-6">
-                <div className="space-y-3">
-                  <Separator className="my-2 flex bg-secondary" />
-                  <Heading as="h4" className="my-2">
-                    {t("notification.globalSettings.title")}
-                  </Heading>
-                  <div className="max-w-xl">
-                    <div className="mb-5 mt-2 flex flex-col gap-2 text-sm text-primary-variant">
-                      <p>{t("notification.globalSettings.desc")}</p>
-                    </div>
-                  </div>
+            </SettingsGroupCard>
 
-                  <div className="flex max-w-2xl flex-col gap-2.5">
-                    <div className="rounded-lg bg-secondary p-5">
-                      <div className="grid gap-6">
-                        {notificationCameras.map((item) => (
-                          <CameraNotificationSwitch
-                            key={item.name}
-                            config={config}
-                            camera={item.name}
-                          />
-                        ))}
-                      </div>
+            {isAdmin && notificationCameras.length > 0 && (
+              <SettingsGroupCard title={t("notification.globalSettings.title")}>
+                <div className="space-y-4">
+                  <div className="flex max-w-xl flex-col gap-2 text-sm text-primary-variant">
+                    <p>{t("notification.globalSettings.desc")}</p>
+                  </div>
+                  <div className="w-full rounded-lg bg-secondary p-5 md:max-w-2xl">
+                    <div className="grid gap-6">
+                      {notificationCameras.map((item) => (
+                        <CameraNotificationSwitch
+                          key={item.name}
+                          config={config}
+                          camera={item.name}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
-              </div>
+              </SettingsGroupCard>
             )}
           </div>
         </div>

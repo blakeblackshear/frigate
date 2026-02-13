@@ -18,6 +18,7 @@ export function validateFfmpegInputRoles(
   }
 
   const roleCounts = new Map<string, number>();
+  let hasDetect = false;
   inputs.forEach((input) => {
     if (!isJsonObject(input) || !Array.isArray(input.roles)) {
       return;
@@ -28,6 +29,9 @@ export function validateFfmpegInputRoles(
       }
       roleCounts.set(role, (roleCounts.get(role) || 0) + 1);
     });
+    if (input.roles.includes("detect")) {
+      hasDetect = true;
+    }
   });
 
   const hasDuplicates = Array.from(roleCounts.values()).some(
@@ -40,6 +44,15 @@ export function validateFfmpegInputRoles(
     };
     inputsErrors?.addError?.(
       t("ffmpeg.inputs.rolesUnique", { ns: "config/validation" }),
+    );
+  }
+
+  if (!hasDetect) {
+    const inputsErrors = errors.inputs as {
+      addError?: (message: string) => void;
+    };
+    inputsErrors?.addError?.(
+      t("ffmpeg.inputs.detectRequired", { ns: "config/validation" }),
     );
   }
 

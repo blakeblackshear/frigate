@@ -982,6 +982,12 @@
   },
   "frigatePlus": {
     "title": "Frigate+ Settings",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "Current model",
+      "otherModels": "Other models",
+      "configuration": "Configuration"
+    },
     "apiKey": {
       "title": "Frigate+ API Key",
       "validated": "Frigate+ API key is detected and validated",

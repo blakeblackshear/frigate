@@ -1367,11 +1367,11 @@
     },
     "height": {
       "label": "Live height",
-      "description": "Height (pixels) to render the live stream in the Web UI; must be <= detect stream height."
+      "description": "Height (pixels) to render the jsmpeg live stream in the Web UI; must be <= detect stream height."
     },
     "quality": {
       "label": "Live quality",
-      "description": "Encoding quality for the live jsmpeg stream (1 highest, 31 lowest)."
+      "description": "Encoding quality for the jsmpeg stream (1 highest, 31 lowest)."
     }
   },
   "motion": {
@@ -1407,7 +1407,7 @@
     },
     "frame_height": {
       "label": "Frame height",
-      "description": "Height in pixels to scale frames to when computing motion (useful for performance)."
+      "description": "Height in pixels to scale frames to when computing motion."
     },
     "mask": {
       "label": "Mask coordinates",

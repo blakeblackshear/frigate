@@ -477,8 +477,6 @@ const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 const LARGE_BOTTOM_MARGIN_PAGES = [
   "masksAndZones",
   "motionTuner",
-  "notifications",
-  "frigateplus",
   "maintenance",
 ];
 

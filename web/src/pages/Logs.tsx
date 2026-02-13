@@ -533,7 +533,7 @@ function Logs() {
         </div>
       </div>
 
-      <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-xs sm:p-1">
+      <div className="relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt font-mono text-xs sm:p-1">
         <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
           <div className="col-span-3 lg:col-span-2">
             <div className="flex w-full flex-row items-center">

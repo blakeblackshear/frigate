@@ -16,7 +16,7 @@ const snapshots: SectionConfigOverrides = {
       display: ["enabled", "bounding_box", "crop", "quality", "timestamp"],
     },
     hiddenFields: ["enabled_in_config"],
-    advancedFields: ["quality", "retain"],
+    advancedFields: ["height", "quality", "retain"],
     uiSchema: {
       required_zones: {
         "ui:widget": "zoneNames",

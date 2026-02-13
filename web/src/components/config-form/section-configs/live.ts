@@ -7,7 +7,7 @@ const live: SectionConfigOverrides = {
     fieldOrder: ["stream_name", "height", "quality"],
     fieldGroups: {},
     hiddenFields: ["enabled_in_config"],
-    advancedFields: ["quality"],
+    advancedFields: ["height", "quality"],
   },
   global: {
     hiddenFields: ["streams"],

@@ -50,7 +50,7 @@ class MotionConfig(FrigateBaseModel):
     frame_height: Optional[int] = Field(
         default=100,
         title="Frame height",
-        description="Height in pixels to scale frames to when computing motion (useful for performance).",
+        description="Height in pixels to scale frames to when computing motion.",
     )
     mask: Union[str, list[str]] = Field(
         default="",

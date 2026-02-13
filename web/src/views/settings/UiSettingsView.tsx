@@ -19,29 +19,14 @@ import {
 } from "../../components/ui/select";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/context/auth-context";
+import {
+  SettingsGroupCard,
+  SPLIT_ROW_CLASS_NAME,
+  DESCRIPTION_CLASS_NAME,
+  CONTROL_COLUMN_CLASS_NAME,
+} from "@/components/card/SettingsGroupCard";
 
-const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
-const SPLIT_ROW_CLASS_NAME =
-  "space-y-2 md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0";
-const DESCRIPTION_CLASS_NAME = "text-sm text-muted-foreground";
-const CONTROL_COLUMN_CLASS_NAME = "w-full md:max-w-2xl";
-
-type SettingsGroupCardProps = {
-  title: string;
-  children: ReactNode;
-};
-
-function SettingsGroupCard({ title, children }: SettingsGroupCardProps) {
-  return (
-    <div className="space-y-4 rounded-lg border border-border/70 bg-card/30 p-4">
-      <div className="text-md border-b border-border/60 pb-4 font-semibold text-primary-variant">
-        {title}
-      </div>
-      {children}
-    </div>
-  );
-}
 
 type SwitchSettingRowProps = {
   id: string;
@@ -122,6 +107,8 @@ export default function UiSettingsView() {
   const { t } = useTranslation("views/settings");
   const { auth } = useContext(AuthContext);
   const username = auth?.user?.username;
+
+  const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
   const clearStoredLayouts = useCallback(() => {
     if (!config) {

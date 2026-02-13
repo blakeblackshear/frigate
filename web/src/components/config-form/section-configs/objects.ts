@@ -27,7 +27,7 @@ const objects: SectionConfigOverrides = {
       "filters.mask",
       "filters.raw_mask",
     ],
-    advancedFields: ["filters"],
+    advancedFields: ["genai"],
     uiSchema: {
       "filters.*.min_area": {
         "ui:options": {
