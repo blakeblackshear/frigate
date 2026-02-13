@@ -297,14 +297,15 @@ export default function PreviewThumbnailPlayer({
                 : formatList(
                     [
                       ...new Set([
-                        ...(review.data.objects || []).map((text) =>
-                          text.replace("-verified", ""),
-                        ),
+                        ...(review.data.objects || []),
                         ...(review.data.sub_labels || []),
                         ...(review.data.audio || []),
                       ]),
                     ]
-                      .filter((item) => item !== undefined)
+                      .filter(
+                        (item) =>
+                          item !== undefined && !item.includes("-verified"),
+                      )
                       .map((text) =>
                         getTranslatedLabel(text, getEventType(text)),
                       )

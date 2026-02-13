@@ -70,14 +70,12 @@ export function AnimatedEventCard({
       `${formatList(
         [
           ...new Set([
-            ...(event.data.objects || []).map((text) =>
-              text.replace("-verified", ""),
-            ),
+            ...(event.data.objects || []),
             ...(event.data.sub_labels || []),
             ...(event.data.audio || []),
           ]),
         ]
-          .filter((item) => item !== undefined)
+          .filter((item) => item !== undefined && !item.includes("-verified"))
           .map((text) => getTranslatedLabel(text, getEventType(text)))
           .sort(),
       )} ` + t("detected")
