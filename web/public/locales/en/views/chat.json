@@ -1,5 +1,8 @@
 {
   "placeholder": "Ask anything...",
   "error": "Something went wrong. Please try again.",
-  "processing": "Processing..."
+  "processing": "Processing...",
+  "toolsUsed": "Used: {{tools}}",
+  "showTools": "Show tools ({{count}})",
+  "hideTools": "Hide tools"
 }

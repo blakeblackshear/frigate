@@ -3,7 +3,7 @@
 import base64
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import cv2
@@ -20,6 +20,7 @@ from frigate.api.defs.request.chat_body import ChatCompletionRequest
 from frigate.api.defs.response.chat_response import (
     ChatCompletionResponse,
     ChatMessageResponse,
+    ToolCall,
 )
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
@@ -27,6 +28,29 @@ from frigate.api.event import events
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.chat])
+
+
+def _format_events_with_local_time(events_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Add human-readable local start/end times to each event for the LLM."""
+    result = []
+    for evt in events_list:
+        if not isinstance(evt, dict):
+            result.append(evt)
+            continue
+        copy_evt = dict(evt)
+        try:
+            start_ts = evt.get("start_time")
+            end_ts = evt.get("end_time")
+            if start_ts is not None:
+                dt_start = datetime.fromtimestamp(start_ts)
+                copy_evt["start_time_local"] = dt_start.strftime("%Y-%m-%d %H:%M:%S %Z")
+            if end_ts is not None:
+                dt_end = datetime.fromtimestamp(end_ts)
+                copy_evt["end_time_local"] = dt_end.strftime("%Y-%m-%d %H:%M:%S %Z")
+        except (TypeError, ValueError, OSError):
+            pass
+        result.append(copy_evt)
+    return result
 
 
 class ToolExecuteRequest(BaseModel):
@@ -394,7 +418,7 @@ async def chat_completion(
     tools = get_tool_definitions()
     conversation = []
 
-    current_datetime = datetime.now(timezone.utc)
+    current_datetime = datetime.now()
     current_date_str = current_datetime.strftime("%Y-%m-%d")
     current_time_str = current_datetime.strftime("%H:%M:%S %Z")
 
@@ -429,9 +453,10 @@ async def chat_completion(
 
     system_prompt = f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
 
-Current date and time: {current_date_str} at {current_time_str} (UTC)
+Current server local date and time: {current_date_str} at {current_time_str}
 
-When users ask questions about "today", "yesterday", "this week", etc., use the current date above as reference.
+Always present times to the user in the server's local timezone. When tool results include start_time_local and end_time_local, use those exact strings when listing or describing detection times—do not convert or invent timestamps. Do not use UTC or ISO format with Z for the user-facing answer unless the tool result only provides Unix timestamps without local time fields.
+When users ask about "today", "yesterday", "this week", etc., use the current date above as reference.
 When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
 Always be accurate with time calculations based on the current date provided.{cameras_section}{live_image_note}"""
 
@@ -471,6 +496,7 @@ Always be accurate with time calculations based on the current date provided.{ca
         conversation.append(msg_dict)
 
     tool_iterations = 0
+    tool_calls: List[ToolCall] = []
     max_iterations = body.max_tool_iterations
 
     logger.debug(
@@ -517,8 +543,8 @@ Always be accurate with time calculations based on the current date provided.{ca
                 ]
             conversation.append(assistant_message)
 
-            tool_calls = response.get("tool_calls")
-            if not tool_calls:
+            pending_tool_calls = response.get("tool_calls")
+            if not pending_tool_calls:
                 logger.debug(
                     f"Chat completion finished with final answer (iterations: {tool_iterations})"
                 )
@@ -531,6 +557,7 @@ Always be accurate with time calculations based on the current date provided.{ca
                         ),
                         finish_reason=response.get("finish_reason", "stop"),
                         tool_iterations=tool_iterations,
+                        tool_calls=tool_calls,
                     ).model_dump(),
                 )
 
@@ -538,11 +565,11 @@ Always be accurate with time calculations based on the current date provided.{ca
             tool_iterations += 1
             logger.debug(
                 f"Tool calls detected (iteration {tool_iterations}/{max_iterations}): "
-                f"{len(tool_calls)} tool(s) to execute"
+                f"{len(pending_tool_calls)} tool(s) to execute"
             )
             tool_results = []
 
-            for tool_call in tool_calls:
+            for tool_call in pending_tool_calls:
                 tool_name = tool_call["name"]
                 tool_args = tool_call["arguments"]
                 tool_call_id = tool_call["id"]
@@ -555,6 +582,12 @@ Always be accurate with time calculations based on the current date provided.{ca
                     tool_result = await _execute_tool_internal(
                         tool_name, tool_args, request, allowed_cameras
                     )
+
+                    # Add local time fields to search_objects results so the LLM doesn't hallucinate timestamps
+                    if tool_name == "search_objects" and isinstance(
+                        tool_result, list
+                    ):
+                        tool_result = _format_events_with_local_time(tool_result)
 
                     if isinstance(tool_result, dict):
                         result_content = json.dumps(tool_result)
@@ -573,6 +606,12 @@ Always be accurate with time calculations based on the current date provided.{ca
                             f"Tool {tool_name} (id: {tool_call_id}) completed successfully. "
                             f"Result: {json.dumps(result_summary, indent=2)}"
                         )
+                    elif isinstance(tool_result, list):
+                        result_content = json.dumps(tool_result)
+                        logger.debug(
+                            f"Tool {tool_name} (id: {tool_call_id}) completed successfully. "
+                            f"Result: {len(tool_result)} item(s)"
+                        )
                     elif isinstance(tool_result, str):
                         result_content = tool_result
                         logger.debug(
@@ -586,6 +625,13 @@ Always be accurate with time calculations based on the current date provided.{ca
                             f"Result type: {type(tool_result).__name__}"
                         )
 
+                    tool_calls.append(
+                        ToolCall(
+                            name=tool_name,
+                            arguments=tool_args or {},
+                            response=result_content,
+                        )
+                    )
                     tool_results.append(
                         {
                             "role": "tool",
@@ -599,6 +645,13 @@ Always be accurate with time calculations based on the current date provided.{ca
                         exc_info=True,
                     )
                     error_content = json.dumps({"error": "Tool execution failed"})
+                    tool_calls.append(
+                        ToolCall(
+                            name=tool_name,
+                            arguments=tool_args or {},
+                            response=error_content,
+                        )
+                    )
                     tool_results.append(
                         {
                             "role": "tool",
@@ -628,6 +681,7 @@ Always be accurate with time calculations based on the current date provided.{ca
                 ),
                 finish_reason="length",
                 tool_iterations=tool_iterations,
+                tool_calls=tool_calls,
             ).model_dump(),
         )
 

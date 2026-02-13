@@ -4,9 +4,16 @@ import { FaArrowUpLong } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback } from "react";
 import axios from "axios";
-import ReactMarkdown from "react-markdown";
+import {
+  AssistantMessage,
+  type ToolCall,
+} from "@/components/chat/AssistantMessage";
 
-type ChatMessage = { role: "user" | "assistant"; content: string };
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  toolCalls?: ToolCall[];
+};
 
 export default function ChatPage() {
   const { t } = useTranslation(["views/chat"]);
@@ -32,12 +39,17 @@ export default function ChatPage() {
       }));
       const { data } = await axios.post<{
         message: { role: string; content: string | null };
+        tool_calls?: ToolCall[];
       }>("chat/completion", { messages: apiMessages });
 
       const content = data.message?.content ?? "";
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: content || " " },
+        {
+          role: "assistant",
+          content: content || " ",
+          toolCalls: data.tool_calls?.length ? data.tool_calls : undefined,
+        },
       ]);
     } catch {
       setError(t("error"));
@@ -59,7 +71,10 @@ export default function ChatPage() {
             }
           >
             {msg.role === "assistant" ? (
-              <ReactMarkdown>{msg.content}</ReactMarkdown>
+              <AssistantMessage
+                content={msg.content}
+                toolCalls={msg.toolCalls}
+              />
             ) : (
               msg.content
             )}
