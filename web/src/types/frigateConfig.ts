@@ -467,7 +467,7 @@ export interface FrigateConfig {
       supportedDetectors: string[];
       width: number;
       height: number;
-    };
+    } | null;
   };
 
   motion: Record<string, unknown> | null;

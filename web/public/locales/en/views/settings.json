@@ -984,8 +984,8 @@
     "title": "Frigate+ Settings",
     "cardTitles": {
       "api": "API",
-      "currentModel": "Current model",
-      "otherModels": "Other models",
+      "currentModel": "Current Model",
+      "otherModels": "Other Models",
       "configuration": "Configuration"
     },
     "apiKey": {
@@ -1027,6 +1027,15 @@
     "toast": {
       "success": "Frigate+ settings have been saved. Restart Frigate to apply changes.",
       "error": "Failed to save config changes: {{errorMessage}}"
+    }
+  },
+  "detectionModel": {
+    "plusActive": {
+      "title": "Frigate+ model management",
+      "label": "Current model source",
+      "description": "This instance is running a Frigate+ model. Select or change your model in Frigate+ settings.",
+      "goToFrigatePlus": "Go to Frigate+ settings",
+      "showModelForm": "Manually configure a model"
     }
   },
   "triggers": {

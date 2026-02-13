@@ -41,6 +41,7 @@ import RolesView from "@/views/settings/RolesView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
+import SystemDetectionModelSettingsView from "@/views/settings/SystemDetectionModelSettingsView";
 import {
   SingleSectionPage,
   type SettingsPageProps,
@@ -239,7 +240,7 @@ const SystemDetectorHardwareSettingsPage = createSectionPage(
   "detectors",
   "global",
 );
-const SystemDetectionModelSettingsPage = createSectionPage("model", "global");
+const SystemDetectionModelSettingsPage = SystemDetectionModelSettingsView;
 const NotificationsSettingsPage = createSectionPage("notifications", "global");
 
 const SystemMqttSettingsPage = createSectionPage("mqtt", "global");

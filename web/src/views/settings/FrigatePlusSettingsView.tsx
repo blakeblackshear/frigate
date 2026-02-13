@@ -26,6 +26,7 @@ import {
   SettingsGroupCard,
   SplitCardRow,
 } from "@/components/card/SettingsGroupCard";
+import FrigatePlusCurrentModelSummary from "@/views/settings/components/FrigatePlusCurrentModelSummary";
 
 type FrigatePlusModel = {
   id: string;
@@ -259,70 +260,7 @@ export default function FrigatePlusSettingsView({
               </SettingsGroupCard>
 
               {config?.model.plus && (
-                <SettingsGroupCard
-                  title={t("frigatePlus.cardTitles.currentModel")}
-                >
-                  {!config?.model?.plus && (
-                    <p className="text-muted-foreground">
-                      {t("frigatePlus.modelInfo.loading")}
-                    </p>
-                  )}
-                  {config?.model?.plus === null && (
-                    <p className="text-danger">
-                      {t("frigatePlus.modelInfo.error")}
-                    </p>
-                  )}
-                  {config?.model?.plus && (
-                    <div className="space-y-6">
-                      <SplitCardRow
-                        label={t("frigatePlus.modelInfo.baseModel")}
-                        content={
-                          <p>
-                            {config.model.plus.baseModel} (
-                            {config.model.plus.isBaseModel
-                              ? t(
-                                  "frigatePlus.modelInfo.plusModelType.baseModel",
-                                )
-                              : t(
-                                  "frigatePlus.modelInfo.plusModelType.userModel",
-                                )}
-                            )
-                          </p>
-                        }
-                      />
-                      <SplitCardRow
-                        label={t("frigatePlus.modelInfo.trainDate")}
-                        content={
-                          <p>
-                            {new Date(
-                              config.model.plus.trainDate,
-                            ).toLocaleString()}
-                          </p>
-                        }
-                      />
-                      <SplitCardRow
-                        label={t("frigatePlus.modelInfo.modelType")}
-                        content={
-                          <p>
-                            {config.model.plus.name} (
-                            {config.model.plus.width +
-                              "x" +
-                              config.model.plus.height}
-                            )
-                          </p>
-                        }
-                      />
-                      <SplitCardRow
-                        label={t("frigatePlus.modelInfo.supportedDetectors")}
-                        content={
-                          <p>
-                            {config.model.plus.supportedDetectors.join(", ")}
-                          </p>
-                        }
-                      />
-                    </div>
-                  )}
-                </SettingsGroupCard>
+                <FrigatePlusCurrentModelSummary plusModel={config.model.plus} />
               )}
 
               {config?.model.plus && (
