@@ -30,7 +30,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.chat])
 
 
-def _format_events_with_local_time(events_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _format_events_with_local_time(
+    events_list: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
     """Add human-readable local start/end times to each event for the LLM."""
     result = []
     for evt in events_list:
@@ -43,14 +45,10 @@ def _format_events_with_local_time(events_list: List[Dict[str, Any]]) -> List[Di
             end_ts = evt.get("end_time")
             if start_ts is not None:
                 dt_start = datetime.fromtimestamp(start_ts)
-                copy_evt["start_time_local"] = dt_start.strftime(
-                    "%Y-%m-%d %I:%M:%S %p"
-                )
+                copy_evt["start_time_local"] = dt_start.strftime("%Y-%m-%d %I:%M:%S %p")
             if end_ts is not None:
                 dt_end = datetime.fromtimestamp(end_ts)
-                copy_evt["end_time_local"] = dt_end.strftime(
-                    "%Y-%m-%d %I:%M:%S %p"
-                )
+                copy_evt["end_time_local"] = dt_end.strftime("%Y-%m-%d %I:%M:%S %p")
         except (TypeError, ValueError, OSError):
             pass
         result.append(copy_evt)
@@ -588,10 +586,23 @@ Always be accurate with time calculations based on the current date provided.{ca
                     )
 
                     # Add local time fields to search_objects results so the LLM doesn't hallucinate timestamps
-                    if tool_name == "search_objects" and isinstance(
-                        tool_result, list
-                    ):
+                    if tool_name == "search_objects" and isinstance(tool_result, list):
                         tool_result = _format_events_with_local_time(tool_result)
+                        _keys = {
+                            "id",
+                            "camera",
+                            "label",
+                            "zones",
+                            "start_time_local",
+                            "end_time_local",
+                            "sub_label",
+                            "event_count",
+                        }
+                        tool_result = [
+                            {k: evt[k] for k in _keys if k in evt}
+                            for evt in tool_result
+                            if isinstance(evt, dict)
+                        ]
 
                     if isinstance(tool_result, dict):
                         result_content = json.dumps(tool_result)
