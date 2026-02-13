@@ -87,6 +87,7 @@ export default function useNavigation(
           id: ID_CHAT,
           variant,
           icon: MdChat,
+          title: "menu.chat",
           url: "/chat",
           enabled: isDesktop && isAdmin && config?.genai?.model !== "none",
         },
