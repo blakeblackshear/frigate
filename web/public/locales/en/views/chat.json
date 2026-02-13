@@ -4,5 +4,7 @@
   "processing": "Processing...",
   "toolsUsed": "Used: {{tools}}",
   "showTools": "Show tools ({{count}})",
-  "hideTools": "Hide tools"
+  "hideTools": "Hide tools",
+  "call": "Call",
+  "result": "Result"
 }

@@ -4,16 +4,9 @@ import { FaArrowUpLong } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback } from "react";
 import axios from "axios";
-import {
-  AssistantMessage,
-  type ToolCall,
-} from "@/components/chat/AssistantMessage";
-
-type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-  toolCalls?: ToolCall[];
-};
+import { AssistantMessage } from "@/components/chat/AssistantMessage";
+import { ToolCallBubble } from "@/components/chat/ToolCallBubble";
+import type { ChatMessage, ToolCall } from "@/types/chat";
 
 export default function ChatPage() {
   const { t } = useTranslation(["views/chat"]);
@@ -62,22 +55,40 @@ export default function ChatPage() {
     <div className="flex size-full flex-col items-center p-2">
       <div className="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto xl:w-[50%]">
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={
-              msg.role === "user"
-                ? "self-end rounded-lg bg-primary px-3 py-2 text-primary-foreground"
-                : "self-start rounded-lg bg-muted px-3 py-2"
-            }
-          >
-            {msg.role === "assistant" ? (
-              <AssistantMessage
-                content={msg.content}
-                toolCalls={msg.toolCalls}
-              />
-            ) : (
-              msg.content
+          <div key={i} className="flex flex-col gap-2">
+            {msg.role === "assistant" && msg.toolCalls && (
+              <>
+                {msg.toolCalls.map((tc, tcIdx) => (
+                  <div key={tcIdx} className="flex flex-col gap-2">
+                    <ToolCallBubble
+                      name={tc.name}
+                      arguments={tc.arguments}
+                      side="left"
+                    />
+                    {tc.response && (
+                      <ToolCallBubble
+                        name={tc.name}
+                        response={tc.response}
+                        side="right"
+                      />
+                    )}
+                  </div>
+                ))}
+              </>
             )}
+            <div
+              className={
+                msg.role === "user"
+                  ? "self-end rounded-lg bg-primary px-3 py-2 text-primary-foreground"
+                  : "self-start rounded-lg bg-muted px-3 py-2"
+              }
+            >
+              {msg.role === "assistant" ? (
+                <AssistantMessage content={msg.content} />
+              ) : (
+                msg.content
+              )}
+            </div>
           </div>
         ))}
         {isLoading && (
