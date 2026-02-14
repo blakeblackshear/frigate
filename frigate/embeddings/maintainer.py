@@ -145,7 +145,6 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
         self.genai_manager = GenAIClientManager(config)
-        self.genai_client = self.genai_manager.vision_client
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
@@ -204,12 +203,15 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
-        if self.genai_client is not None and any(
+        if self.genai_manager.vision_client is not None and any(
             c.review.genai.enabled_in_config for c in self.config.cameras.values()
         ):
             self.post_processors.append(
                 ReviewDescriptionProcessor(
-                    self.config, self.requestor, self.metrics, self.genai_client
+                    self.config,
+                    self.requestor,
+                    self.metrics,
+                    self.genai_manager.vision_client,
                 )
             )
 
@@ -247,7 +249,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
             self.post_processors.append(semantic_trigger_processor)
 
-        if self.genai_client is not None and any(
+        if self.genai_manager.vision_client is not None and any(
             c.objects.genai.enabled_in_config for c in self.config.cameras.values()
         ):
             self.post_processors.append(
@@ -256,7 +258,7 @@ class EmbeddingMaintainer(threading.Thread):
                     self.embeddings,
                     self.requestor,
                     self.metrics,
-                    self.genai_client,
+                    self.genai_manager.vision_client,
                     semantic_trigger_processor,
                 )
             )
