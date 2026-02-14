@@ -6,6 +6,7 @@ from typing import Dict
 
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from frigate.config import FrigateConfig
+from frigate.config.classification import ObjectClassificationType
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
 from frigate.util.builtin import to_relative_box
@@ -246,6 +247,18 @@ class EventProcessor(threading.Thread):
                 event[Event.data]["recognized_license_plate_score"] = event_data[
                     "recognized_license_plate"
                 ][1]
+
+            # only overwrite attribute-type custom model fields in the database if they're set
+            for name, model_config in self.config.classification.custom.items():
+                if (
+                    model_config.object_config
+                    and model_config.object_config.classification_type
+                    == ObjectClassificationType.attribute
+                ):
+                    value = event_data.get(name)
+                    if value is not None:
+                        event[Event.data][name] = value[0]
+                        event[Event.data][f"{name}_score"] = value[1]
 
             (
                 Event.insert(event)
