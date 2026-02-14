@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Optional
 
 from frigate.config import FrigateConfig
 from frigate.config.camera.genai import GenAIRoleEnum
-from frigate.genai import PROVIDERS, load_providers
 
 if TYPE_CHECKING:
     from frigate.genai import GenAIClient
@@ -35,6 +34,7 @@ class GenAIClientManager:
         Each role (tools, vision, embeddings) gets the client for the provider
         that has that role in its roles list.
         """
+        from frigate.genai import PROVIDERS, load_providers
 
         self._tool_client = None
         self._vision_client = None

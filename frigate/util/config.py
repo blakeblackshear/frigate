@@ -8,7 +8,6 @@ from typing import Any, Optional, Union
 
 from ruamel.yaml import YAML
 
-from frigate.config.camera.genai import GenAIRoleEnum
 from frigate.const import CONFIG_DIR, EXPORT_DIR
 from frigate.util.services import get_video_properties
 
@@ -443,11 +442,7 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     genai = new_config.get("genai")
 
     if genai and genai.get("provider"):
-        genai["roles"] = [
-            GenAIRoleEnum.embeddings,
-            GenAIRoleEnum.vision,
-            GenAIRoleEnum.tools,
-        ]
+        genai["roles"] = ["embeddings", "vision", "tools"]
         new_config["genai"] = {"default": genai}
 
     # Remove deprecated sync_recordings from global record config
