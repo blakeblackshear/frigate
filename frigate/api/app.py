@@ -38,6 +38,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
+from frigate.genai import GenAIClientManager
 from frigate.jobs.media_sync import (
     get_current_media_sync_job,
     get_media_sync_job_by_id,
@@ -432,6 +433,7 @@ def config_set(request: Request, body: AppConfigSetBody):
     if body.requires_restart == 0 or body.update_topic:
         old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
+        request.app.genai_manager = GenAIClientManager(config)
 
         if body.update_topic:
             if body.update_topic.startswith("config/cameras/"):

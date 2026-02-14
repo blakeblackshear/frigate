@@ -45,7 +45,7 @@ from .camera.audio import AudioConfig
 from .camera.birdseye import BirdseyeConfig
 from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
-from .camera.genai import GenAIConfig
+from .camera.genai import GenAIConfig, GenAIRoleEnum
 from .camera.motion import MotionConfig
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
@@ -347,9 +347,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ModelConfig, title="Detection model configuration."
     )
 
-    # GenAI config
-    genai: GenAIConfig = Field(
-        default_factory=GenAIConfig, title="Generative AI configuration."
+    # GenAI config (named provider configs: name -> GenAIConfig)
+    genai: Dict[str, GenAIConfig] = Field(
+        default_factory=dict, title="Generative AI configuration (named providers)."
     )
 
     # Camera config
@@ -430,6 +430,18 @@ class FrigateConfig(FrigateBaseModel):
 
         # set notifications state
         self.notifications.enabled_in_config = self.notifications.enabled
+
+        # validate genai: each role (tools, vision, embeddings) at most once
+        role_to_name: dict[GenAIRoleEnum, str] = {}
+        for name, genai_cfg in self.genai.items():
+            for role in genai_cfg.roles:
+                if role in role_to_name:
+                    raise ValueError(
+                        f"GenAI role '{role.value}' is assigned to both "
+                        f"'{role_to_name[role]}' and '{name}'; each role must have "
+                        "exactly one provider."
+                    )
+                role_to_name[role] = name
 
         # set default min_score for object attributes
         for attribute in self.model.all_attributes:

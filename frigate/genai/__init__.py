@@ -23,7 +23,6 @@ __all__ = [
     "GenAIConfig",
     "GenAIProviderEnum",
     "PROVIDERS",
-    "get_genai_client",
     "load_providers",
     "register_genai_provider",
 ]
@@ -362,19 +361,6 @@ Guidelines:
             "tool_calls": None,
             "finish_reason": "error",
         }
-
-
-def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
-    """Get the GenAI client."""
-    if not config.genai.provider:
-        return None
-
-    load_providers()
-    provider = PROVIDERS.get(config.genai.provider)
-    if provider:
-        return provider(config.genai)
-
-    return None
 
 
 def load_providers():

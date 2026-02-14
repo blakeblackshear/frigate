@@ -33,7 +33,6 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
@@ -747,9 +746,7 @@ async def set_not_reviewed(
     description="Use GenAI to summarize review items over a period of time.",
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):
-    config: FrigateConfig = request.app.frigate_config
-
-    if not config.genai.provider:
+    if not request.app.genai_manager.vision_client:
         return JSONResponse(
             content=(
                 {

@@ -59,7 +59,7 @@ from frigate.data_processing.real_time.license_plate import (
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
-from frigate.genai import get_genai_client
+from frigate.genai import GenAIClientManager
 from frigate.models import Event, Recordings, ReviewSegment, Trigger
 from frigate.util.builtin import serialize
 from frigate.util.file import get_event_thumbnail_bytes
@@ -144,7 +144,8 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
-        self.genai_client = get_genai_client(config)
+        self.genai_manager = GenAIClientManager(config)
+        self.genai_client = self.genai_manager.vision_client
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:

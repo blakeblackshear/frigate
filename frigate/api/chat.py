@@ -23,7 +23,6 @@ from frigate.api.defs.response.chat_response import (
 )
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
-from frigate.genai import get_genai_client
 
 logger = logging.getLogger(__name__)
 
@@ -383,7 +382,7 @@ async def chat_completion(
     6. Repeats until final answer
     7. Returns response to user
     """
-    genai_client = get_genai_client(request.app.frigate_config)
+    genai_client = request.app.genai_manager.tool_client
     if not genai_client:
         return JSONResponse(
             content={
