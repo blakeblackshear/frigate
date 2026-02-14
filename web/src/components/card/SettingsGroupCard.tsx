@@ -7,7 +7,7 @@ export const DESCRIPTION_CLASS_NAME = "text-sm text-muted-foreground";
 export const CONTROL_COLUMN_CLASS_NAME = "w-full md:max-w-2xl";
 
 type SettingsGroupCardProps = {
-  title: string;
+  title: string | ReactNode;
   children: ReactNode;
 };
 

@@ -38,6 +38,8 @@ export type ConfigFormContext = {
   sectionI18nPrefix?: string;
   sectionDocs?: string;
   fieldDocs?: Record<string, string>;
+  restartRequired?: string[];
+  requiresRestart?: boolean;
   t?: (key: string, options?: Record<string, unknown>) => string;
   renderers?: Record<string, RendererComponent>;
 };

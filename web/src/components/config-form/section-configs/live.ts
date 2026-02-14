@@ -10,7 +10,11 @@ const live: SectionConfigOverrides = {
     advancedFields: ["height", "quality"],
   },
   global: {
+    restartRequired: ["stream_name", "height", "quality"],
     hiddenFields: ["streams"],
+  },
+  camera: {
+    restartRequired: ["height", "quality"],
   },
 };
 

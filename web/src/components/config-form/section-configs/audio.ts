@@ -24,6 +24,19 @@ const audio: SectionConfigOverrides = {
       },
     },
   },
+  global: {
+    restartRequired: [
+      "enabled",
+      "listen",
+      "filters",
+      "min_volume",
+      "max_not_heard",
+      "num_threads",
+    ],
+  },
+  camera: {
+    restartRequired: ["num_threads"],
+  },
 };
 
 export default audio;

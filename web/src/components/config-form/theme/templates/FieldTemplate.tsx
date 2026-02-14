@@ -16,6 +16,8 @@ import { ConfigFormContext } from "@/types/configForm";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { requiresRestartForFieldPath } from "@/utils/configUtil";
+import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
 import {
   buildTranslationPath,
   getFilterObjectLabel,
@@ -196,6 +198,13 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const fieldDocsUrl = fieldDocsPath
     ? getLocaleDocUrl(fieldDocsPath)
     : undefined;
+  const restartRequired = formContext?.restartRequired;
+  const defaultRequiresRestart = formContext?.requiresRestart ?? true;
+  const fieldRequiresRestart = requiresRestartForFieldPath(
+    normalizedFieldPath,
+    restartRequired,
+    defaultRequiresRestart,
+  );
 
   // Use schema title/description as primary source (from JSON Schema)
   const schemaTitle = schema.title;
@@ -449,6 +458,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
       >
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
+        {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
       </Label>
     );
   };
@@ -465,6 +475,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
       >
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
+        {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
       </Label>
     );
   };
@@ -485,6 +496,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
       >
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
+        {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
       </Label>
     );
   };

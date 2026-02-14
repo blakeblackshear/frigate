@@ -514,13 +514,6 @@ export function ConfigSection({
         update_topic: updateTopic,
         config_data: configData,
       });
-      // log save to console for debugging
-      // eslint-disable-next-line no-console
-      console.log("Saved config data:", {
-        [basePath]: sanitizedOverrides,
-        update_topic: updateTopic,
-        requires_restart: needsRestart ? 1 : 0,
-      });
 
       if (needsRestart) {
         statusBar?.addMessage(
@@ -628,23 +621,11 @@ export function ConfigSection({
       const configData = buildConfigDataForPath(basePath, "");
 
       await axios.put("config/set", {
-        requires_restart: requiresRestart ? 0 : 1,
+        requires_restart: requiresRestart ? 1 : 0,
         update_topic: updateTopic,
         config_data: configData,
       });
 
-      // log reset to console for debugging
-      // eslint-disable-next-line no-console
-      console.log(
-        level === "global"
-          ? "Reset to defaults for path:"
-          : "Reset to global config for path:",
-        basePath,
-        {
-          update_topic: updateTopic,
-          requires_restart: requiresRestart ? 0 : 1,
-        },
-      );
       toast.success(
         t("toast.resetSuccess", {
           ns: "views/settings",
@@ -815,6 +796,8 @@ export function ConfigSection({
           sectionDocs: sectionConfig.sectionDocs,
           fieldDocs: sectionConfig.fieldDocs,
           hiddenFields: sectionConfig.hiddenFields,
+          restartRequired: sectionConfig.restartRequired,
+          requiresRestart,
         }}
       />
 

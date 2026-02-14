@@ -96,6 +96,16 @@ const ffmpeg: SectionConfigOverrides = {
     },
   },
   global: {
+    restartRequired: [
+      "path",
+      "global_args",
+      "hwaccel_args",
+      "input_args",
+      "output_args",
+      "retry_interval",
+      "apple_compatibility",
+      "gpu",
+    ],
     fieldOrder: [
       "path",
       "global_args",
@@ -126,6 +136,19 @@ const ffmpeg: SectionConfigOverrides = {
         record: ffmpegArgsWidget("output_args.record"),
       },
     },
+  },
+  camera: {
+    restartRequired: [
+      "inputs",
+      "path",
+      "global_args",
+      "hwaccel_args",
+      "input_args",
+      "output_args",
+      "retry_interval",
+      "apple_compatibility",
+      "gpu",
+    ],
   },
 };
 

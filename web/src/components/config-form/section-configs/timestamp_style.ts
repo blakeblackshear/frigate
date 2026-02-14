@@ -16,6 +16,12 @@ const timestampStyle: SectionConfigOverrides = {
       },
     },
   },
+  global: {
+    restartRequired: ["position", "format", "color", "thickness", "effect"],
+  },
+  camera: {
+    restartRequired: [],
+  },
 };
 
 export default timestampStyle;

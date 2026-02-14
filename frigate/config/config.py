@@ -314,7 +314,7 @@ class FrigateConfig(FrigateBaseModel):
     environment_vars: EnvVars = Field(
         default_factory=dict,
         title="Environment variables",
-        description="Key/value pairs of environment variables to set for the Frigate process.",
+        description="Key/value pairs of environment variables to set for the Frigate process in Home Assistant OS. Non-HAOS users must use Docker environment variable configuration instead.",
     )
     logger: LoggerConfig = Field(
         default_factory=LoggerConfig,

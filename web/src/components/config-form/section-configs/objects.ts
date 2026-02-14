@@ -83,6 +83,7 @@ const objects: SectionConfigOverrides = {
     },
   },
   global: {
+    restartRequired: ["track", "alert", "detect", "filters", "genai"],
     hiddenFields: [
       "enabled_in_config",
       "mask",
@@ -94,6 +95,9 @@ const objects: SectionConfigOverrides = {
       "filters.raw_mask",
       "genai.required_zones",
     ],
+  },
+  camera: {
+    restartRequired: [],
   },
 };
 

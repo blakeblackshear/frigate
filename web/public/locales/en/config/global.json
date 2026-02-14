@@ -9,7 +9,7 @@
   },
   "environment_vars": {
     "label": "Environment variables",
-    "description": "Key/value pairs of environment variables to set for the Frigate process."
+    "description": "Key/value pairs of environment variables to set for the Frigate process in Home Assistant OS. Non-HAOS users must use Docker environment variable configuration instead."
   },
   "logger": {
     "label": "Logging",

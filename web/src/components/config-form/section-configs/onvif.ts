@@ -3,7 +3,15 @@ import type { SectionConfigOverrides } from "./types";
 const onvif: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/cameras#setting-up-camera-ptz-controls",
-    restartRequired: [],
+    restartRequired: [
+      "host",
+      "port",
+      "user",
+      "password",
+      "tls_insecure",
+      "ignore_time_mismatch",
+      "autotracking.calibrate_on_startup",
+    ],
     fieldOrder: [
       "host",
       "port",

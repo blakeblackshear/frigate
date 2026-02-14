@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/collapsible";
 import { Children, useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { requiresRestartForFieldPath } from "@/utils/configUtil";
 import { ConfigFormContext } from "@/types/configForm";
 import {
   buildTranslationPath,
@@ -44,6 +46,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const baselineFormData = formContext?.baselineFormData;
   const hiddenFields = formContext?.hiddenFields;
   const fieldPath = props.fieldPathId.path;
+  const restartRequired = formContext?.restartRequired;
+  const defaultRequiresRestart = formContext?.requiresRestart ?? true;
 
   // Strip fields from an object that should be excluded from modification
   // detection: fields listed in hiddenFields (stripped from baseline by
@@ -164,6 +168,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     "views/settings",
     "common",
   ]);
+  const objectRequiresRestart = requiresRestartForFieldPath(
+    fieldPath,
+    restartRequired,
+    defaultRequiresRestart,
+  );
 
   const domain = getDomainFromNamespace(formContext?.i18nNamespace);
 
@@ -438,11 +447,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
               <div>
                 <CardTitle
                   className={cn(
-                    "text-sm",
+                    "flex items-center text-sm",
                     hasModifiedDescendants && "text-danger",
                   )}
                 >
                   {inferredLabel}
+                  {objectRequiresRestart && (
+                    <RestartRequiredIndicator className="ml-2" />
+                  )}
                 </CardTitle>
                 {inferredDescription && (
                   <p className="mt-1 text-xs text-muted-foreground">

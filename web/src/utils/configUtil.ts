@@ -197,6 +197,44 @@ export function buildConfigDataForPath(
 // used; an empty array means "never restart"; otherwise the function checks
 // if any of the listed field paths are present in the overrides object.
 
+function hasMatchAtPath(value: unknown, pathSegments: string[]): boolean {
+  if (pathSegments.length === 0) {
+    return value !== undefined;
+  }
+
+  if (value === undefined || value === null) {
+    return false;
+  }
+
+  const [segment, ...rest] = pathSegments;
+
+  if (segment === "*") {
+    if (Array.isArray(value)) {
+      return value.some((item) => hasMatchAtPath(item, rest));
+    }
+
+    if (isJsonObject(value)) {
+      return Object.values(value).some((item) => hasMatchAtPath(item, rest));
+    }
+
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    const index = Number(segment);
+    if (!Number.isInteger(index)) {
+      return false;
+    }
+    return hasMatchAtPath(value[index], rest);
+  }
+
+  if (isJsonObject(value)) {
+    return hasMatchAtPath(value[segment], rest);
+  }
+
+  return false;
+}
+
 export function requiresRestartForOverrides(
   overrides: unknown,
   restartRequired: string[] | undefined,
@@ -211,8 +249,47 @@ export function requiresRestartForOverrides(
   if (!overrides || typeof overrides !== "object") {
     return false;
   }
-  return restartRequired.some(
-    (path) => get(overrides as JsonObject, path) !== undefined,
+  return restartRequired.some((path) => {
+    if (!path) {
+      return false;
+    }
+
+    if (!path.includes("*")) {
+      return get(overrides as JsonObject, path) !== undefined;
+    }
+
+    return hasMatchAtPath(overrides, path.split("."));
+  });
+}
+
+export function requiresRestartForFieldPath(
+  fieldPath: Array<string | number>,
+  restartRequired: string[] | undefined,
+  defaultRequiresRestart: boolean = true,
+): boolean {
+  if (restartRequired === undefined) {
+    return defaultRequiresRestart;
+  }
+
+  if (restartRequired.length === 0) {
+    return false;
+  }
+
+  if (fieldPath.length === 0) {
+    return false;
+  }
+
+  const probe: Record<string, unknown> = {};
+  set(
+    probe,
+    fieldPath.map((segment) => String(segment)),
+    true,
+  );
+
+  return requiresRestartForOverrides(
+    probe,
+    restartRequired,
+    defaultRequiresRestart,
   );
 }
 

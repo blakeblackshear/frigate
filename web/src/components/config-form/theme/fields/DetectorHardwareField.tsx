@@ -18,6 +18,8 @@ import {
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { cn, isJsonObject, mergeUiSchema } from "@/lib/utils";
 import { ConfigFormContext, JsonObject } from "@/types/configForm";
+import { requiresRestartForFieldPath } from "@/utils/configUtil";
+import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -158,6 +160,8 @@ export function DetectorHardwareField(props: FieldProps) {
   const { t: fallbackT } = useTranslation(["common", configNamespace]);
   const t = formContext?.t ?? fallbackT;
   const sectionPrefix = formContext?.sectionI18nPrefix ?? "detectors";
+  const restartRequired = formContext?.restartRequired;
+  const defaultRequiresRestart = formContext?.requiresRestart ?? true;
 
   const options =
     (uiSchema?.["ui:options"] as DetectorHardwareFieldOptions | undefined) ??
@@ -321,6 +325,24 @@ export function DetectorHardwareField(props: FieldProps) {
       }),
     [t, sectionPrefix, configNamespace],
   );
+
+  const shouldShowRestartForPath = useCallback(
+    (path: Array<string | number>) =>
+      requiresRestartForFieldPath(
+        path,
+        restartRequired,
+        defaultRequiresRestart,
+      ),
+    [defaultRequiresRestart, restartRequired],
+  );
+
+  const renderRestartIcon = (isRequired: boolean) => {
+    if (!isRequired) {
+      return null;
+    }
+
+    return <RestartRequiredIndicator className="ml-2" />;
+  };
 
   const isSingleInstanceType = useCallback(
     (type: string) => !multiInstanceSet.has(type),
@@ -646,6 +668,10 @@ export function DetectorHardwareField(props: FieldProps) {
             const typeDescription = type ? getTypeDescription(type) : "";
             const isOpen = openKeys.has(key);
             const renameDraft = renameDrafts[key] ?? key;
+            const detectorPath = [...fieldPathId.path, key];
+            const detectorTypePath = [...detectorPath, "type"];
+            const detectorTypeRequiresRestart =
+              shouldShowRestartForPath(detectorTypePath);
 
             return (
               <div key={key} className="rounded-lg border bg-card">
@@ -680,8 +706,9 @@ export function DetectorHardwareField(props: FieldProps) {
                         </Button>
                       </CollapsibleTrigger>
                       <div>
-                        <div className="text-sm font-medium">
+                        <div className="flex items-center text-sm font-medium">
                           {typeLabel}
+                          {renderRestartIcon(detectorTypeRequiresRestart)}
                           <span className="ml-2 text-xs text-muted-foreground">
                             {key}
                           </span>
@@ -707,7 +734,7 @@ export function DetectorHardwareField(props: FieldProps) {
                     <div className="space-y-4 border-t p-4">
                       <div className="grid gap-4 md:grid-cols-4">
                         <div className="space-y-2">
-                          <Label>
+                          <Label className="flex items-center">
                             {t("label.ID", {
                               ns: "common",
                               defaultValue: "ID",
@@ -746,7 +773,7 @@ export function DetectorHardwareField(props: FieldProps) {
                           )}
                         </div>
                         <div className="col-span-3 space-y-2">
-                          <Label>
+                          <Label className="flex items-center">
                             {t("detectors.type.label", {
                               ns: configNamespace,
                               defaultValue: "Type",

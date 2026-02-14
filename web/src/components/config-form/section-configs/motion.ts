@@ -28,6 +28,22 @@ const motion: SectionConfigOverrides = {
       "mqtt_off_delay",
     ],
   },
+  global: {
+    restartRequired: [
+      "enabled",
+      "threshold",
+      "lightning_threshold",
+      "improve_contrast",
+      "contour_area",
+      "delta_alpha",
+      "frame_alpha",
+      "frame_height",
+      "mqtt_off_delay",
+    ],
+  },
+  camera: {
+    restartRequired: ["frame_height"],
+  },
 };
 
 export default motion;
