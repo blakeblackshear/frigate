@@ -19,10 +19,12 @@ import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { Switch } from "@/components/ui/switch";
 import { Trans } from "react-i18next";
-import { useEnabledState } from "@/api/ws";
+import { useEnabledState, useRestart } from "@/api/ws";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
 
 type CameraManagementViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -43,6 +45,10 @@ export default function CameraManagementView({
     undefined,
   ); // Track camera being edited
   const [showWizard, setShowWizard] = useState(false);
+
+  // State for restart dialog when enabling a disabled camera
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const { send: sendRestart } = useRestart();
 
   // List of cameras for dropdown
   const enabledCameras = useMemo(() => {
@@ -148,6 +154,7 @@ export default function CameraManagementView({
                             htmlFor={"disabled-cameras-switch"}
                           >
                             {t("cameraManagement.streams.disableLabel")}
+                            <RestartRequiredIndicator className="ml-1" />
                           </Label>
                           <p className="hidden text-sm text-muted-foreground md:block">
                             {t("cameraManagement.streams.disableDesc")}
@@ -166,6 +173,7 @@ export default function CameraManagementView({
                                 <CameraConfigEnableSwitch
                                   cameraName={camera}
                                   onConfigChanged={updateConfig}
+                                  setRestartDialogOpen={setRestartDialogOpen}
                                 />
                               </div>
                             ))}
@@ -213,6 +221,11 @@ export default function CameraManagementView({
         open={showWizard}
         onClose={() => setShowWizard(false)}
       />
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => sendRestart("restart")}
+      />
     </>
   );
 }
@@ -238,13 +251,22 @@ function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
   );
 }
 
+type CameraConfigEnableSwitchProps = {
+  cameraName: string;
+  setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onConfigChanged: () => Promise<unknown>;
+};
+
 function CameraConfigEnableSwitch({
   cameraName,
   onConfigChanged,
-}: CameraEnableSwitchProps & {
-  onConfigChanged: () => Promise<unknown>;
-}) {
-  const { t } = useTranslation(["common", "views/settings"]);
+  setRestartDialogOpen,
+}: CameraConfigEnableSwitchProps) {
+  const { t } = useTranslation([
+    "common",
+    "views/settings",
+    "components/dialog",
+  ]);
   const [isSaving, setIsSaving] = useState(false);
 
   const onCheckedChange = useCallback(
@@ -257,7 +279,7 @@ function CameraConfigEnableSwitch({
 
       try {
         await axios.put("config/set", {
-          requires_restart: 0,
+          requires_restart: 1,
           config_data: {
             cameras: {
               [cameraName]: {
@@ -265,7 +287,6 @@ function CameraConfigEnableSwitch({
               },
             },
           },
-          update_topic: `config/cameras/${cameraName}/enabled`,
         });
 
         await onConfigChanged();
@@ -277,6 +298,13 @@ function CameraConfigEnableSwitch({
           }),
           {
             position: "top-center",
+            action: (
+              <a onClick={() => setRestartDialogOpen(true)}>
+                <Button>
+                  {t("restart.button", { ns: "components/dialog" })}
+                </Button>
+              </a>
+            ),
           },
         );
       } catch (error) {
@@ -296,7 +324,7 @@ function CameraConfigEnableSwitch({
         setIsSaving(false);
       }
     },
-    [cameraName, isSaving, onConfigChanged, t],
+    [cameraName, isSaving, onConfigChanged, setRestartDialogOpen, t],
   );
 
   return (
