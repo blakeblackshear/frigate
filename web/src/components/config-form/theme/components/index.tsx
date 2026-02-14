@@ -118,7 +118,7 @@ export function AdvancedCollapsible({
         <Button
           variant="ghost"
           size={effectiveSize}
-          className="w-full justify-start gap-2 pl-0"
+          className="w-full justify-start gap-2 pl-0 hover:bg-transparent"
         >
           {open ? (
             <LuChevronDown className="h-4 w-4" />
@@ -128,7 +128,7 @@ export function AdvancedCollapsible({
           {label}
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="mt-2 space-y-4 rounded-lg border border-border/60 bg-background_alt/70 p-4">
+      <CollapsibleContent className="mt-2 space-y-4 rounded-lg border border-border/60 bg-secondary/40 p-4">
         {children}
       </CollapsibleContent>
     </Collapsible>

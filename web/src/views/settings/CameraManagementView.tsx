@@ -1,6 +1,11 @@
 import Heading from "@/components/ui/heading";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SettingsGroupCard } from "@/components/card/SettingsGroupCard";
+import {
+  CONTROL_COLUMN_CLASS_NAME,
+  SettingsGroupCard,
+  SPLIT_ROW_CLASS_NAME,
+} from "@/components/card/SettingsGroupCard";
+import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
@@ -15,6 +20,9 @@ import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { Switch } from "@/components/ui/switch";
 import { Trans } from "react-i18next";
 import { useEnabledState } from "@/api/ws";
+import { Label } from "@/components/ui/label";
+import axios from "axios";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type CameraManagementViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,9 +45,20 @@ export default function CameraManagementView({
   const [showWizard, setShowWizard] = useState(false);
 
   // List of cameras for dropdown
-  const cameras = useMemo(() => {
+  const enabledCameras = useMemo(() => {
     if (config) {
-      return Object.keys(config.cameras).sort();
+      return Object.keys(config.cameras)
+        .filter((camera) => config.cameras[camera].enabled_in_config)
+        .sort();
+    }
+    return [];
+  }, [config]);
+
+  const disabledCameras = useMemo(() => {
+    if (config) {
+      return Object.keys(config.cameras)
+        .filter((camera) => !config.cameras[camera].enabled_in_config)
+        .sort();
     }
     return [];
   }, [config]);
@@ -82,7 +101,7 @@ export default function CameraManagementView({
                   {t("cameraManagement.addCamera")}
                 </Button>
 
-                {cameras.length > 0 && (
+                {enabledCameras.length > 0 && (
                   <SettingsGroupCard
                     title={
                       <Trans ns="views/settings">
@@ -90,14 +109,22 @@ export default function CameraManagementView({
                       </Trans>
                     }
                   >
-                    <div className="space-y-4">
-                      <div className="max-w-md text-sm text-muted-foreground">
-                        <Trans ns="views/settings">
-                          cameraManagement.streams.desc
-                        </Trans>
+                    <div className={SPLIT_ROW_CLASS_NAME}>
+                      <div className="space-y-1.5">
+                        <Label
+                          className="cursor-pointer"
+                          htmlFor={"enabled-cameras-switch"}
+                        >
+                          {t("cameraManagement.streams.enableLabel")}
+                          <p className="hidden text-sm text-muted-foreground md:block">
+                            <Trans ns="views/settings">
+                              cameraManagement.streams.enableDesc
+                            </Trans>
+                          </p>
+                        </Label>
                       </div>
                       <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
-                        {cameras.map((camera) => (
+                        {enabledCameras.map((camera) => (
                           <div
                             key={camera}
                             className="flex flex-row items-center justify-between"
@@ -107,7 +134,48 @@ export default function CameraManagementView({
                           </div>
                         ))}
                       </div>
+                      <p className="text-sm text-muted-foreground md:hidden">
+                        <Trans ns="views/settings">
+                          cameraManagement.streams.enableDesc
+                        </Trans>
+                      </p>
                     </div>
+                    {disabledCameras.length > 0 && (
+                      <div className={SPLIT_ROW_CLASS_NAME}>
+                        <div className="space-y-1.5">
+                          <Label
+                            className="cursor-pointer"
+                            htmlFor={"disabled-cameras-switch"}
+                          >
+                            {t("cameraManagement.streams.disableLabel")}
+                          </Label>
+                          <p className="hidden text-sm text-muted-foreground md:block">
+                            {t("cameraManagement.streams.disableDesc")}
+                          </p>
+                        </div>
+                        <div
+                          className={`${CONTROL_COLUMN_CLASS_NAME} space-y-1.5`}
+                        >
+                          <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+                            {disabledCameras.map((camera) => (
+                              <div
+                                key={camera}
+                                className="flex flex-row items-center justify-between"
+                              >
+                                <CameraNameLabel camera={camera} />
+                                <CameraConfigEnableSwitch
+                                  cameraName={camera}
+                                  onConfigChanged={updateConfig}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-sm text-muted-foreground md:hidden">
+                            {t("cameraManagement.streams.disableDesc")}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </SettingsGroupCard>
                 )}
               </div>
@@ -166,6 +234,82 @@ function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
           sendEnabled(isChecked ? "ON" : "OFF");
         }}
       />
+    </div>
+  );
+}
+
+function CameraConfigEnableSwitch({
+  cameraName,
+  onConfigChanged,
+}: CameraEnableSwitchProps & {
+  onConfigChanged: () => Promise<unknown>;
+}) {
+  const { t } = useTranslation(["common", "views/settings"]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const onCheckedChange = useCallback(
+    async (isChecked: boolean) => {
+      if (!isChecked || isSaving) {
+        return;
+      }
+
+      setIsSaving(true);
+
+      try {
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: {
+            cameras: {
+              [cameraName]: {
+                enabled: true,
+              },
+            },
+          },
+          update_topic: `config/cameras/${cameraName}/enabled`,
+        });
+
+        await onConfigChanged();
+
+        toast.success(
+          t("cameraManagement.streams.enableSuccess", {
+            ns: "views/settings",
+            cameraName,
+          }),
+          {
+            position: "top-center",
+          },
+        );
+      } catch (error) {
+        const errorMessage =
+          axios.isAxiosError(error) &&
+          (error.response?.data?.message || error.response?.data?.detail)
+            ? error.response?.data?.message || error.response?.data?.detail
+            : t("toast.save.error.noMessage", { ns: "common" });
+
+        toast.error(
+          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          {
+            position: "top-center",
+          },
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [cameraName, isSaving, onConfigChanged, t],
+  );
+
+  return (
+    <div className="flex flex-row items-center">
+      {isSaving ? (
+        <ActivityIndicator className="h-5 w-8" size={16} />
+      ) : (
+        <Switch
+          id={`camera-enabled-${cameraName}`}
+          checked={false}
+          onCheckedChange={onCheckedChange}
+        />
+      )}
     </div>
   );
 }

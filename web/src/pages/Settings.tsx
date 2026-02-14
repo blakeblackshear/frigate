@@ -585,9 +585,7 @@ function MobileMenuItem({
       }}
     >
       <div className="w-full">
-        {label ?? (
-          <div className="smart-capitalize">{t("menu." + item.key)}</div>
-        )}
+        {label ?? <div>{t("menu." + item.key)}</div>}
       </div>
       <LuChevronRight className="size-4" />
     </div>
@@ -1048,7 +1046,7 @@ export default function Settings() {
 
       return (
         <div className="flex w-full items-center justify-between pr-4 md:pr-0">
-          <div className="smart-capitalize">{t("menu." + key)}</div>
+          <div>{t("menu." + key)}</div>
           {(showOverrideDot || showUnsavedDot) && (
             <div className="ml-2 flex items-center gap-2">
               {showOverrideDot && (
@@ -1104,9 +1102,7 @@ export default function Settings() {
                   <div key={group.label} className="mb-3">
                     {filteredItems.length > 1 && (
                       <h3 className="mb-2 ml-2 text-sm font-medium text-secondary-foreground">
-                        <div className="smart-capitalize">
-                          {t("menu." + group.label)}
-                        </div>
+                        <div>{t("menu." + group.label)}</div>
                       </h3>
                     )}
                     {filteredItems.map((item) => (
@@ -1275,7 +1271,7 @@ export default function Settings() {
   return (
     <div className="flex h-full flex-col">
       <Toaster position="top-center" />
-      <div className="flex items-center justify-between border-b border-secondary p-3">
+      <div className="flex min-h-16 items-center justify-between border-b border-secondary p-3">
         <Heading as="h3" className="mb-0">
           {t("menu.settings", { ns: "common" })}
         </Heading>
@@ -1393,9 +1389,7 @@ export default function Settings() {
                               : "text-sidebar-foreground/80",
                           )}
                         >
-                          <div className="smart-capitalize">
-                            {t("menu." + group.label)}
-                          </div>
+                          <div>{t("menu." + group.label)}</div>
                         </SidebarGroupLabel>
                         <SidebarMenuSub className="mx-2 border-0">
                           {filteredItems.map((item) => (

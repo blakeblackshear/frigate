@@ -25,6 +25,7 @@ import {
   DESCRIPTION_CLASS_NAME,
   CONTROL_COLUMN_CLASS_NAME,
 } from "@/components/card/SettingsGroupCard";
+import Heading from "@/components/ui/heading";
 
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
 
@@ -209,9 +210,12 @@ export default function UiSettingsView() {
   ];
 
   return (
-    <div className="flex size-full flex-col md:flex-row md:pb-8">
+    <div className="flex size-full flex-col md:pb-8">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+      <Heading as="h4" className="mb-3">
+        {t("general.title")}
+      </Heading>
+      <div className="scrollbar-container mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2">
         <div className="w-full max-w-5xl space-y-6">
           <SettingsGroupCard title={t("general.liveDashboard.title")}>
             <div className="space-y-6">
