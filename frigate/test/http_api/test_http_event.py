@@ -168,6 +168,57 @@ class TestHttpApp(BaseTestHttp):
             assert events[0]["id"] == id
             assert events[1]["id"] == id2
 
+    def test_get_event_list_match_multilingual_attribute(self):
+        event_id = "123456.zh"
+        attribute = "中文标签"
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event(event_id, data={"custom_attr": attribute})
+
+            events = client.get("/events", params={"attributes": attribute}).json()
+            assert len(events) == 1
+            assert events[0]["id"] == event_id
+
+            events = client.get(
+                "/events", params={"attributes": "%E4%B8%AD%E6%96%87%E6%A0%87%E7%AD%BE"}
+            ).json()
+            assert len(events) == 1
+            assert events[0]["id"] == event_id
+
+    def test_events_search_match_multilingual_attribute(self):
+        event_id = "123456.zh.search"
+        attribute = "中文标签"
+        mock_embeddings = Mock()
+        mock_embeddings.search_thumbnail.return_value = [(event_id, 0.05)]
+
+        self.app.frigate_config.semantic_search.enabled = True
+        self.app.embeddings = mock_embeddings
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event(event_id, data={"custom_attr": attribute})
+
+            events = client.get(
+                "/events/search",
+                params={
+                    "search_type": "similarity",
+                    "event_id": event_id,
+                    "attributes": attribute,
+                },
+            ).json()
+            assert len(events) == 1
+            assert events[0]["id"] == event_id
+
+            events = client.get(
+                "/events/search",
+                params={
+                    "search_type": "similarity",
+                    "event_id": event_id,
+                    "attributes": "%E4%B8%AD%E6%96%87%E6%A0%87%E7%AD%BE",
+                },
+            ).json()
+            assert len(events) == 1
+            assert events[0]["id"] == event_id
+
     def test_get_good_event(self):
         id = "123456.random"
 

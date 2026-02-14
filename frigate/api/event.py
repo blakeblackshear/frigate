@@ -69,6 +69,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.events])
 
 
+def _build_attribute_filter_clause(attributes: str):
+    filtered_attributes = [
+        attr.strip() for attr in attributes.split(",") if attr.strip()
+    ]
+    attribute_clauses = []
+
+    for attr in filtered_attributes:
+        attribute_clauses.append(Event.data.cast("text") % f'*:"{attr}"*')
+
+        escaped_attr = json.dumps(attr, ensure_ascii=True)[1:-1]
+        if escaped_attr != attr:
+            attribute_clauses.append(Event.data.cast("text") % f'*:"{escaped_attr}"*')
+
+    if not attribute_clauses:
+        return None
+
+    return reduce(operator.or_, attribute_clauses)
+
+
 @router.get(
     "/events",
     response_model=list[EventResponse],
@@ -193,14 +212,9 @@ def events(
 
     if attributes != "all":
         # Custom classification results are stored as data[model_name] = result_value
-        filtered_attributes = attributes.split(",")
-        attribute_clauses = []
-
-        for attr in filtered_attributes:
-            attribute_clauses.append(Event.data.cast("text") % f'*:"{attr}"*')
-
-        attribute_clause = reduce(operator.or_, attribute_clauses)
-        clauses.append(attribute_clause)
+        attribute_clause = _build_attribute_filter_clause(attributes)
+        if attribute_clause is not None:
+            clauses.append(attribute_clause)
 
     if recognized_license_plate != "all":
         filtered_recognized_license_plates = recognized_license_plate.split(",")
@@ -508,7 +522,7 @@ def events_search(
     cameras = params.cameras
     labels = params.labels
     sub_labels = params.sub_labels
-    attributes = params.attributes
+    attributes = unquote(params.attributes)
     zones = params.zones
     after = params.after
     before = params.before
@@ -607,13 +621,9 @@ def events_search(
 
     if attributes != "all":
         # Custom classification results are stored as data[model_name] = result_value
-        filtered_attributes = attributes.split(",")
-        attribute_clauses = []
-
-        for attr in filtered_attributes:
-            attribute_clauses.append(Event.data.cast("text") % f'*:"{attr}"*')
-
-        event_filters.append(reduce(operator.or_, attribute_clauses))
+        attribute_clause = _build_attribute_filter_clause(attributes)
+        if attribute_clause is not None:
+            event_filters.append(attribute_clause)
 
     if zones != "all":
         zone_clauses = []
