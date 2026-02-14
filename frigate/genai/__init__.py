@@ -12,9 +12,21 @@ from playhouse.shortcuts import model_to_dict
 from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
 from frigate.const import CLIPS_DIR
 from frigate.data_processing.post.types import ReviewMetadata
+from frigate.genai.manager import GenAIClientManager
 from frigate.models import Event
 
 logger = logging.getLogger(__name__)
+
+__all__ = [
+    "GenAIClient",
+    "GenAIClientManager",
+    "GenAIConfig",
+    "GenAIProviderEnum",
+    "PROVIDERS",
+    "get_genai_client",
+    "load_providers",
+    "register_genai_provider",
+]
 
 PROVIDERS = {}
 
