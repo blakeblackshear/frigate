@@ -186,7 +186,7 @@ There are improved capabilities in newer GPU architectures that TensorRT can ben
 
 #### Compatibility References:
 
-[NVIDIA TensorRT Support Matrix](https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-841/support-matrix/index.html)
+[NVIDIA TensorRT Support Matrix](https://docs.nvidia.com/deeplearning/tensorrt-rtx/latest/getting-started/support-matrix.html)
 
 [NVIDIA CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html)
 
