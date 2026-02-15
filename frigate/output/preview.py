@@ -53,8 +53,8 @@ PREVIEW_QMAX_PARAM = {
     RecordQualityEnum.very_low: "",
     RecordQualityEnum.low: "",
     RecordQualityEnum.medium: "",
-    RecordQualityEnum.high: "-qmax 25",
-    RecordQualityEnum.very_high: "-qmax 25",
+    RecordQualityEnum.high: " -qmax 25",
+    RecordQualityEnum.very_high: " -qmax 25",
 }
 
 
@@ -134,7 +134,7 @@ class FFMpegConverter(threading.Thread):
             config.ffmpeg.ffmpeg_path,
             "default",
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -threads 1 -i /dev/stdin",
-            output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {PREVIEW_QMAX_PARAM[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]}{PREVIEW_QMAX_PARAM[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
