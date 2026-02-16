@@ -7,11 +7,15 @@ const arrayAsTextWidget = {
   },
 };
 
-const ffmpegArgsWidget = (presetField: string) => ({
+const ffmpegArgsWidget = (
+  presetField: string,
+  extraOptions?: Record<string, unknown>,
+) => ({
   "ui:widget": "FfmpegArgsWidget",
   "ui:options": {
     suppressMultiSchema: true,
     ffmpegPresetField: presetField,
+    ...extraOptions,
   },
 });
 
@@ -23,35 +27,36 @@ const ffmpeg: SectionConfigOverrides = {
       "inputs.hwaccel_args": "/configuration/ffmpeg_presets#hwaccel-presets",
       input_args: "/configuration/ffmpeg_presets#input-args-presets",
       "inputs.input_args": "/configuration/ffmpeg_presets#input-args-presets",
+      output_args: "/configuration/ffmpeg_presets#output-args-presets",
+      "inputs.output_args": "/configuration/ffmpeg_presets#output-args-presets",
       "output_args.record": "/configuration/ffmpeg_presets#output-args-presets",
     },
     restartRequired: [],
     fieldOrder: [
       "inputs",
-      "path",
       "global_args",
-      "hwaccel_args",
       "input_args",
+      "hwaccel_args",
       "output_args",
+      "path",
       "retry_interval",
       "apple_compatibility",
       "gpu",
     ],
     hiddenFields: [],
     advancedFields: [
+      "path",
       "global_args",
-      "hwaccel_args",
-      "input_args",
-      "output_args",
       "retry_interval",
       "apple_compatibility",
       "gpu",
     ],
     overrideFields: [
+      "inputs",
       "path",
       "global_args",
-      "hwaccel_args",
       "input_args",
+      "hwaccel_args",
       "output_args",
       "retry_interval",
       "apple_compatibility",
@@ -73,6 +78,7 @@ const ffmpeg: SectionConfigOverrides = {
         },
       },
       inputs: {
+        "ui:field": "CameraInputsField",
         items: {
           path: {
             "ui:options": { size: "full" },
@@ -83,8 +89,15 @@ const ffmpeg: SectionConfigOverrides = {
           global_args: {
             "ui:widget": "hidden",
           },
-          hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
-          input_args: ffmpegArgsWidget("input_args"),
+          hwaccel_args: ffmpegArgsWidget("hwaccel_args", {
+            allowInherit: true,
+            hideDescription: true,
+            showArrayItemDescription: true,
+          }),
+          input_args: ffmpegArgsWidget("input_args", {
+            hideDescription: true,
+            showArrayItemDescription: true,
+          }),
           output_args: {
             items: {
               detect: arrayAsTextWidget,
@@ -107,9 +120,9 @@ const ffmpeg: SectionConfigOverrides = {
       "gpu",
     ],
     fieldOrder: [
+      "hwaccel_args",
       "path",
       "global_args",
-      "hwaccel_args",
       "input_args",
       "output_args",
       "retry_interval",
@@ -120,6 +133,7 @@ const ffmpeg: SectionConfigOverrides = {
       "global_args",
       "input_args",
       "output_args",
+      "path",
       "retry_interval",
       "apple_compatibility",
       "gpu",

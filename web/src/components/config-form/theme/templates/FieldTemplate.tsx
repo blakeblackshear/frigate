@@ -28,6 +28,7 @@ import {
 import { normalizeOverridePath } from "../utils/overrides";
 import get from "lodash/get";
 import isEqual from "lodash/isEqual";
+import { SPLIT_ROW_CLASS_NAME } from "@/components/card/SettingsGroupCard";
 
 function _isArrayItemInAdditionalProperty(
   pathSegments: Array<string | number>,
@@ -101,6 +102,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const uiOptionsFromSchema = uiSchema?.["ui:options"] || {};
 
   const suppressDescription = uiOptionsFromSchema.suppressDescription === true;
+  const showArrayItemDescription =
+    uiOptionsFromSchema.showArrayItemDescription === true;
 
   // Determine field characteristics
   const isBoolean =
@@ -155,7 +158,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     !isMultiSchemaWrapper &&
     !isObjectField &&
     !isAdditionalProperty &&
-    !isArrayItemInAdditionalProp &&
+    (!isArrayItemInAdditionalProp || showArrayItemDescription) &&
     !suppressDescription;
 
   const translationPath = buildTranslationPath(
@@ -512,7 +515,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {renderDocsLink()}
       </div>
 
-      <div className="hidden md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6">
+      <div className={cn("hidden md:grid", SPLIT_ROW_CLASS_NAME)}>
         <div className="space-y-0.5">
           {renderBooleanLabel()}
           {renderDescription()}
@@ -537,7 +540,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   );
 
   const renderSplitValueLayout = () => (
-    <div className="space-y-1.5 md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0 md:space-y-3">
+    <div className={cn(SPLIT_ROW_CLASS_NAME, "space-y-1.5 md:space-y-3")}>
       <div className="space-y-1.5">
         {renderSplitLabel()}
         {renderDescription("hidden md:block")}

@@ -185,13 +185,18 @@ export function SwitchesWidget(props: WidgetProps) {
           ) : (
             <>
               {enableSearch && (
-                <Input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="mb-2"
-                />
+                <div className="mr-2">
+                  <Input
+                    type="text"
+                    placeholder={t?.("configForm.searchPlaceholder", {
+                      ns: "views/settings",
+                      defaultValue: "Search...",
+                    })}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mb-2"
+                  />
+                </div>
               )}
               <div className={cn("grid gap-2", listClassName)}>
                 {filteredEntities.map((entity) => {

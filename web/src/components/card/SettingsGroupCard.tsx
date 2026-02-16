@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Label } from "../ui/label";
 
 export const SPLIT_ROW_CLASS_NAME =
-  "space-y-2 md:grid md:grid-cols-[minmax(14rem,22rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0";
+  "space-y-2 md:grid md:grid-cols-[minmax(14rem,24rem)_minmax(0,1fr)] md:items-start md:gap-x-6 md:space-y-0";
 export const DESCRIPTION_CLASS_NAME = "text-sm text-muted-foreground";
 export const CONTROL_COLUMN_CLASS_NAME = "w-full md:max-w-2xl";
 

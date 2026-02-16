@@ -22,7 +22,7 @@
     "integrations": "Integrations",
     "cameras": "Camera configuration",
     "ui": "UI",
-    "profileSettings": "Profile Settings",
+    "profileSettings": "Profile settings",
     "globalDetect": "Object detection",
     "globalRecording": "Recording",
     "globalSnapshots": "Snapshots",
@@ -1247,8 +1247,12 @@
     "ffmpegArgs": {
       "preset": "Preset",
       "manual": "Manual arguments",
+      "inherit": "Inherit from camera setting",
       "selectPreset": "Select preset",
       "manualPlaceholder": "Enter FFmpeg arguments"
+    },
+    "cameraInputs": {
+      "itemTitle": "Stream {{index}}: {{path}}"
     },
     "restartRequiredField": "Restart required",
     "restartRequiredFooter": "Configuration changed - Restart required",
@@ -1341,7 +1345,8 @@
     },
     "timestamp_style": {
       "title": "Timestamp Settings"
-    }
+    },
+    "searchPlaceholder": "Search..."
   },
   "globalConfig": {
     "title": "Global Configuration",

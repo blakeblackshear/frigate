@@ -22,7 +22,7 @@ type FfmpegPresetResponse = {
   };
 };
 
-type FfmpegArgsMode = "preset" | "manual";
+type FfmpegArgsMode = "preset" | "manual" | "inherit";
 
 type PresetField =
   | "hwaccel_args"
@@ -58,7 +58,12 @@ const resolveMode = (
   value: unknown,
   presets: string[],
   defaultMode: FfmpegArgsMode,
+  allowInherit: boolean,
 ): FfmpegArgsMode => {
+  if (allowInherit && (value === null || value === undefined)) {
+    return "inherit";
+  }
+
   if (Array.isArray(value)) {
     return "manual";
   }
@@ -109,6 +114,8 @@ export function FfmpegArgsWidget(props: WidgetProps) {
     id,
   } = props;
   const presetField = options?.ffmpegPresetField as PresetField | undefined;
+  const allowInherit = options?.allowInherit === true;
+  const hideDescription = options?.hideDescription === true;
 
   const { data } = useSWR<FfmpegPresetResponse>("ffmpeg/presets");
 
@@ -121,14 +128,14 @@ export function FfmpegArgsWidget(props: WidgetProps) {
   const defaultMode: FfmpegArgsMode = canUsePresets ? "preset" : "manual";
 
   const detectedMode = useMemo(
-    () => resolveMode(value, presetOptions, defaultMode),
-    [value, presetOptions, defaultMode],
+    () => resolveMode(value, presetOptions, defaultMode, allowInherit),
+    [value, presetOptions, defaultMode, allowInherit],
   );
 
   const [mode, setMode] = useState<FfmpegArgsMode>(detectedMode);
 
   useEffect(() => {
-    if (!canUsePresets) {
+    if (!canUsePresets && detectedMode === "preset") {
       setMode("manual");
       return;
     }
@@ -139,6 +146,11 @@ export function FfmpegArgsWidget(props: WidgetProps) {
   const handleModeChange = useCallback(
     (nextMode: FfmpegArgsMode) => {
       setMode(nextMode);
+
+      if (nextMode === "inherit") {
+        onChange(null);
+        return;
+      }
 
       if (nextMode === "preset") {
         const currentValue = typeof value === "string" ? value : undefined;
@@ -255,9 +267,26 @@ export function FfmpegArgsWidget(props: WidgetProps) {
             {t("configForm.ffmpegArgs.manual", { ns: "views/settings" })}
           </label>
         </div>
+        {allowInherit ? (
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
+              value="inherit"
+              id={`${id}-inherit`}
+              disabled={disabled || readonly}
+              className={
+                mode === "inherit"
+                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+              }
+            />
+            <label htmlFor={`${id}-inherit`} className="cursor-pointer text-sm">
+              {t("configForm.ffmpegArgs.inherit", { ns: "views/settings" })}
+            </label>
+          </div>
+        ) : null}
       </RadioGroup>
 
-      {mode === "preset" && canUsePresets ? (
+      {mode === "inherit" ? null : mode === "preset" && canUsePresets ? (
         <Select
           value={presetValue}
           onValueChange={handlePresetChange}
@@ -297,7 +326,7 @@ export function FfmpegArgsWidget(props: WidgetProps) {
         />
       )}
 
-      {fieldDescription ? (
+      {!hideDescription && fieldDescription ? (
         <p className="text-xs text-muted-foreground">{fieldDescription}</p>
       ) : null}
     </div>

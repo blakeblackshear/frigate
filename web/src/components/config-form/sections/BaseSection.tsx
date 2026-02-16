@@ -211,6 +211,7 @@ export function ConfigSection({
     [onPendingDataChange, sectionPath, cameraName],
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [hasValidationErrors, setHasValidationErrors] = useState(false);
   const [extraHasChanges, setExtraHasChanges] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -754,6 +755,7 @@ export function ConfigSection({
         schema={modifiedSchema}
         formData={currentFormData}
         onChange={handleChange}
+        onValidationChange={setHasValidationErrors}
         fieldOrder={sectionConfig.fieldOrder}
         fieldGroups={sectionConfig.fieldGroups}
         hiddenFields={sectionConfig.hiddenFields}
@@ -851,7 +853,9 @@ export function ConfigSection({
             <Button
               onClick={handleSave}
               variant="select"
-              disabled={!hasChanges || isSaving || disabled}
+              disabled={
+                !hasChanges || hasValidationErrors || isSaving || disabled
+              }
               className="flex min-w-36 flex-1 gap-2"
             >
               {isSaving ? (

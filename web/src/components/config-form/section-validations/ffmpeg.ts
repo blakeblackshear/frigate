@@ -3,6 +3,18 @@ import type { TFunction } from "i18next";
 import { isJsonObject } from "@/lib/utils";
 import type { JsonObject } from "@/types/configForm";
 
+function hasValue(value: unknown): boolean {
+  if (value === null || value === undefined || value === "") {
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  return true;
+}
+
 export function validateFfmpegInputRoles(
   formData: unknown,
   errors: FormValidation,
@@ -19,6 +31,7 @@ export function validateFfmpegInputRoles(
 
   const roleCounts = new Map<string, number>();
   let hasDetect = false;
+  let hasInvalidHwaccel = false;
   inputs.forEach((input) => {
     if (!isJsonObject(input) || !Array.isArray(input.roles)) {
       return;
@@ -31,6 +44,8 @@ export function validateFfmpegInputRoles(
     });
     if (input.roles.includes("detect")) {
       hasDetect = true;
+    } else if (hasValue(input.hwaccel_args)) {
+      hasInvalidHwaccel = true;
     }
   });
 
@@ -53,6 +68,15 @@ export function validateFfmpegInputRoles(
     };
     inputsErrors?.addError?.(
       t("ffmpeg.inputs.detectRequired", { ns: "config/validation" }),
+    );
+  }
+
+  if (hasInvalidHwaccel) {
+    const inputsErrors = errors.inputs as {
+      addError?: (message: string) => void;
+    };
+    inputsErrors?.addError?.(
+      t("ffmpeg.inputs.hwaccelDetectOnly", { ns: "config/validation" }),
     );
   }
 
