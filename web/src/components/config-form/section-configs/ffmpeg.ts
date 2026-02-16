@@ -159,6 +159,9 @@ const ffmpeg: SectionConfigOverrides = {
     },
   },
   camera: {
+    fieldGroups: {
+      cameraFfmpeg: ["input_args", "hwaccel_args", "output_args"],
+    },
     restartRequired: [
       "inputs",
       "path",

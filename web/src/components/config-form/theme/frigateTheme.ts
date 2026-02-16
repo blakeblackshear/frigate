@@ -25,6 +25,7 @@ import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
 import { InputRolesWidget } from "./widgets/InputRolesWidget";
 import { TimezoneSelectWidget } from "./widgets/TimezoneSelectWidget";
+import { CameraPathWidget } from "./widgets/CameraPathWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -57,6 +58,7 @@ export const frigateTheme: FrigateTheme = {
     CheckboxWidget: SwitchWidget,
     ArrayAsTextWidget: ArrayAsTextWidget,
     FfmpegArgsWidget: FfmpegArgsWidget,
+    CameraPathWidget: CameraPathWidget,
     inputRoles: InputRolesWidget,
     // Custom widgets
     switch: SwitchWidget,

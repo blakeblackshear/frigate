@@ -64,5 +64,10 @@
       "retention": "Retention",
       "events": "Events"
     }
+  },
+  "ffmpeg": {
+    "cameras": {
+      "cameraFfmpeg": "Camera-specific FFmpeg arguments"
+    }
   }
 }

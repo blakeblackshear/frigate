@@ -24,6 +24,11 @@ import {
   LuTrash2,
 } from "react-icons/lu";
 import type { ConfigFormContext } from "@/types/configForm";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type FfmpegInput = {
   path?: string;
@@ -351,6 +356,7 @@ export function CameraInputsField(props: FieldProps) {
                   <div className="w-full">
                     {renderField(index, "path", {
                       extraUiSchema: {
+                        "ui:widget": "CameraPathWidget",
                         "ui:options": {
                           size: "full",
                           splitLayout: false,
@@ -377,16 +383,23 @@ export function CameraInputsField(props: FieldProps) {
                   {renderField(index, "output_args")}
 
                   <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveInput(index)}
-                      disabled={disabled || readonly}
-                      aria-label={t("button.delete", { ns: "common" })}
-                    >
-                      <LuTrash2 className="h-4 w-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveInput(index)}
+                          disabled={disabled || readonly}
+                          aria-label={t("button.delete", { ns: "common" })}
+                        >
+                          <LuTrash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("button.delete", { ns: "common" })}
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </CardContent>
               </CollapsibleContent>
