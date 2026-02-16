@@ -216,6 +216,8 @@ export interface ConfigFormProps {
     formData: unknown,
     errors: FormValidation,
   ) => FormValidation;
+  /** Called whenever form validation state changes */
+  onValidationChange?: (hasErrors: boolean) => void;
 }
 
 export function ConfigForm({
@@ -237,6 +239,7 @@ export function ConfigForm({
   formContext,
   i18nNamespace,
   customValidate,
+  onValidationChange,
 }: ConfigFormProps) {
   const { t, i18n } = useTranslation([
     i18nNamespace || "common",
@@ -319,9 +322,10 @@ export function ConfigForm({
 
   const handleChange = useCallback(
     (e: IChangeEvent) => {
+      onValidationChange?.(Array.isArray(e.errors) && e.errors.length > 0);
       onChange?.(e.formData);
     },
-    [onChange],
+    [onChange, onValidationChange],
   );
 
   const handleSubmit = useCallback(
