@@ -108,7 +108,7 @@ export default function MaintenanceSettingsView() {
               </Heading>
 
               <div className="max-w-6xl">
-                <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+                <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-muted-foreground">
                   <p>{t("maintenance.sync.desc")}</p>
                 </div>
               </div>
@@ -165,16 +165,9 @@ export default function MaintenanceSettingsView() {
                 </div>
 
                 {/* Options */}
-                <div className="space-y-4">
+                <div className="max-w-md space-y-4">
                   <div className="flex flex-col">
-                    <div className="flex flex-row items-center">
-                      <Switch
-                        id="dry-run"
-                        className="mr-3"
-                        checked={dryRun}
-                        onCheckedChange={setDryRun}
-                        disabled={isJobRunning}
-                      />
+                    <div className="flex flex-row items-center justify-between gap-4">
                       <div className="space-y-0.5">
                         <Label htmlFor="dry-run" className="cursor-pointer">
                           {t("maintenance.sync.dryRun")}
@@ -185,18 +178,17 @@ export default function MaintenanceSettingsView() {
                             : t("maintenance.sync.dryRunDisabled")}
                         </p>
                       </div>
+                      <Switch
+                        id="dry-run"
+                        checked={dryRun}
+                        onCheckedChange={setDryRun}
+                        disabled={isJobRunning}
+                      />
                     </div>
                   </div>
 
                   <div className="flex flex-col">
-                    <div className="flex flex-row items-center">
-                      <Switch
-                        id="force"
-                        className="mr-3"
-                        checked={force}
-                        onCheckedChange={setForce}
-                        disabled={isJobRunning}
-                      />
+                    <div className="flex flex-row items-center justify-between gap-4">
                       <div className="space-y-0.5">
                         <Label htmlFor="force" className="cursor-pointer">
                           {t("maintenance.sync.force")}
@@ -205,6 +197,12 @@ export default function MaintenanceSettingsView() {
                           {t("maintenance.sync.forceDesc")}
                         </p>
                       </div>
+                      <Switch
+                        id="force"
+                        checked={force}
+                        onCheckedChange={setForce}
+                        disabled={isJobRunning}
+                      />
                     </div>
                   </div>
                 </div>
