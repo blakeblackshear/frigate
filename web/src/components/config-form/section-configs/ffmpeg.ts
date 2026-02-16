@@ -30,6 +30,7 @@ const ffmpeg: SectionConfigOverrides = {
       output_args: "/configuration/ffmpeg_presets#output-args-presets",
       "inputs.output_args": "/configuration/ffmpeg_presets#output-args-presets",
       "output_args.record": "/configuration/ffmpeg_presets#output-args-presets",
+      "inputs.roles": "/configuration/cameras/#setting-up-camera-inputs",
     },
     restartRequired: [],
     fieldOrder: [
@@ -85,6 +86,9 @@ const ffmpeg: SectionConfigOverrides = {
           },
           roles: {
             "ui:widget": "inputRoles",
+            "ui:options": {
+              showArrayItemDescription: true,
+            },
           },
           global_args: {
             "ui:widget": "hidden",
@@ -92,10 +96,13 @@ const ffmpeg: SectionConfigOverrides = {
           hwaccel_args: ffmpegArgsWidget("hwaccel_args", {
             allowInherit: true,
             hideDescription: true,
+            forceSplitLayout: true,
             showArrayItemDescription: true,
           }),
           input_args: ffmpegArgsWidget("input_args", {
+            allowInherit: true,
             hideDescription: true,
+            forceSplitLayout: true,
             showArrayItemDescription: true,
           }),
           output_args: {

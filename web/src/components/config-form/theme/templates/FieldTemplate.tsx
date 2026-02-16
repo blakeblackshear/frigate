@@ -135,9 +135,10 @@ export function FieldTemplate(props: FieldTemplateProps) {
     !isMultiSchemaWrapper &&
     !isObjectField &&
     !isAdditionalProperty;
+  const forceSplitLayout = uiOptionsFromSchema.forceSplitLayout === true;
   const useSplitLayout =
     uiOptionsFromSchema.splitLayout !== false &&
-    isScalarValueField &&
+    (isScalarValueField || forceSplitLayout) &&
     !isBoolean &&
     !isMultiSchemaWrapper &&
     !isObjectField &&

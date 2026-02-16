@@ -64,6 +64,10 @@ const resolveMode = (
     return "inherit";
   }
 
+  if (allowInherit && Array.isArray(value) && value.length === 0) {
+    return "inherit";
+  }
+
   if (Array.isArray(value)) {
     return "manual";
   }
@@ -116,6 +120,7 @@ export function FfmpegArgsWidget(props: WidgetProps) {
   const presetField = options?.ffmpegPresetField as PresetField | undefined;
   const allowInherit = options?.allowInherit === true;
   const hideDescription = options?.hideDescription === true;
+  const useSplitLayout = options?.splitLayout !== false;
 
   const { data } = useSWR<FfmpegPresetResponse>("ffmpeg/presets");
 
@@ -148,7 +153,7 @@ export function FfmpegArgsWidget(props: WidgetProps) {
       setMode(nextMode);
 
       if (nextMode === "inherit") {
-        onChange(null);
+        onChange(undefined);
         return;
       }
 
@@ -164,10 +169,15 @@ export function FfmpegArgsWidget(props: WidgetProps) {
         return;
       }
 
+      if (mode === "preset") {
+        onChange("");
+        return;
+      }
+
       const manualText = normalizeManualText(value);
       onChange(manualText);
     },
-    [onChange, presetOptions, value],
+    [mode, onChange, presetOptions, value],
   );
 
   const handlePresetChange = useCallback(
@@ -237,6 +247,23 @@ export function FfmpegArgsWidget(props: WidgetProps) {
         onValueChange={(next) => handleModeChange(next as FfmpegArgsMode)}
         className="gap-3"
       >
+        {allowInherit ? (
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
+              value="inherit"
+              id={`${id}-inherit`}
+              disabled={disabled || readonly}
+              className={
+                mode === "inherit"
+                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+              }
+            />
+            <label htmlFor={`${id}-inherit`} className="cursor-pointer text-sm">
+              {t("configForm.ffmpegArgs.inherit", { ns: "views/settings" })}
+            </label>
+          </div>
+        ) : null}
         <div className="flex items-center space-x-2">
           <RadioGroupItem
             value="preset"
@@ -267,23 +294,6 @@ export function FfmpegArgsWidget(props: WidgetProps) {
             {t("configForm.ffmpegArgs.manual", { ns: "views/settings" })}
           </label>
         </div>
-        {allowInherit ? (
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem
-              value="inherit"
-              id={`${id}-inherit`}
-              disabled={disabled || readonly}
-              className={
-                mode === "inherit"
-                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
-                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
-              }
-            />
-            <label htmlFor={`${id}-inherit`} className="cursor-pointer text-sm">
-              {t("configForm.ffmpegArgs.inherit", { ns: "views/settings" })}
-            </label>
-          </div>
-        ) : null}
       </RadioGroup>
 
       {mode === "inherit" ? null : mode === "preset" && canUsePresets ? (
@@ -292,7 +302,7 @@ export function FfmpegArgsWidget(props: WidgetProps) {
           onValueChange={handlePresetChange}
           disabled={disabled || readonly}
         >
-          <SelectTrigger id={id} className="w-full">
+          <SelectTrigger id={id} className="w-full md:max-w-md">
             <SelectValue
               placeholder={
                 placeholder ||
@@ -326,7 +336,7 @@ export function FfmpegArgsWidget(props: WidgetProps) {
         />
       )}
 
-      {!hideDescription && fieldDescription ? (
+      {!hideDescription && !useSplitLayout && fieldDescription ? (
         <p className="text-xs text-muted-foreground">{fieldDescription}</p>
       ) : null}
     </div>

@@ -35,31 +35,33 @@ export function InputRolesWidget(props: WidgetProps) {
   };
 
   return (
-    <div className="space-y-2 rounded-lg bg-secondary p-2 pr-0 md:max-w-md">
-      {INPUT_ROLES.map((role) => {
-        const checked = selectedRoles.includes(role);
-        const label = t(`configForm.inputRoles.options.${role}`, {
-          ns: "views/settings",
-          defaultValue: role,
-        });
+    <div className="rounded-lg border border-secondary-highlight bg-background_alt p-2 pr-0 md:max-w-md">
+      <div className="grid gap-2">
+        {INPUT_ROLES.map((role) => {
+          const checked = selectedRoles.includes(role);
+          const label = t(`configForm.inputRoles.options.${role}`, {
+            ns: "views/settings",
+            defaultValue: role,
+          });
 
-        return (
-          <div
-            key={role}
-            className="flex items-center justify-between rounded-md px-3 py-0"
-          >
-            <label htmlFor={`${id}-${role}`} className="text-sm">
-              {label}
-            </label>
-            <Switch
-              id={`${id}-${role}`}
-              checked={checked}
-              disabled={disabled || readonly}
-              onCheckedChange={(enabled) => toggleRole(role, !!enabled)}
-            />
-          </div>
-        );
-      })}
+          return (
+            <div
+              key={role}
+              className="flex items-center justify-between rounded-md px-3 py-0"
+            >
+              <label htmlFor={`${id}-${role}`} className="text-sm">
+                {label}
+              </label>
+              <Switch
+                id={`${id}-${role}`}
+                checked={checked}
+                disabled={disabled || readonly}
+                onCheckedChange={(enabled) => toggleRole(role, !!enabled)}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

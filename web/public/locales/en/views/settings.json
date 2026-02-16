@@ -1252,7 +1252,7 @@
       "manualPlaceholder": "Enter FFmpeg arguments"
     },
     "cameraInputs": {
-      "itemTitle": "Stream {{index}}: {{path}}"
+      "itemTitle": "Stream {{index}}"
     },
     "restartRequiredField": "Restart required",
     "restartRequiredFooter": "Configuration changed - Restart required",

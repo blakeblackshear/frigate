@@ -87,7 +87,7 @@ const normalizeNonDetectHwaccel = (inputs: FfmpegInput[]): FfmpegInput[] =>
 
     return {
       ...input,
-      hwaccel_args: null,
+      hwaccel_args: undefined,
     };
   });
 
@@ -311,8 +311,9 @@ export function CameraInputsField(props: FieldProps) {
         const itemTitle = t("configForm.cameraInputs.itemTitle", {
           ns: "views/settings",
           index: index + 1,
-          path: typeof input.path === "string" ? input.path.trim() : "",
         });
+        const itemPath =
+          typeof input.path === "string" ? input.path.trim() : "";
 
         return (
           <Card key={`${baseId}-${index}`} className="w-full">
@@ -328,7 +329,14 @@ export function CameraInputsField(props: FieldProps) {
               <CollapsibleTrigger asChild>
                 <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
                   <div className="flex items-center justify-between gap-4">
-                    <CardTitle className="text-sm">{itemTitle}</CardTitle>
+                    <CardTitle className="text-sm">
+                      <span>{itemTitle}</span>
+                      {itemPath ? (
+                        <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                          {itemPath}
+                        </span>
+                      ) : null}
+                    </CardTitle>
                     {open ? (
                       <LuChevronDown className="h-4 w-4" />
                     ) : (
@@ -352,11 +360,7 @@ export function CameraInputsField(props: FieldProps) {
                     })}
                   </div>
 
-                  <div className="w-full">
-                    {renderField(index, "roles", {
-                      showSchemaDescription: true,
-                    })}
-                  </div>
+                  <div className="w-full">{renderField(index, "roles")}</div>
 
                   {renderField(index, "input_args")}
 
