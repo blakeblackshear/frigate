@@ -1342,7 +1342,7 @@
       },
       "roles": {
         "label": "Input roles",
-        "description": "Roles for this input stream (for example: detect, record, audio)."
+        "description": "Roles for this input stream."
       },
       "global_args": {
         "label": "FFmpeg global arguments",

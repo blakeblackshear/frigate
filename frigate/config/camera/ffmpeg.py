@@ -120,7 +120,7 @@ class CameraInput(FrigateBaseModel):
     )
     roles: list[CameraRoleEnum] = Field(
         title="Input roles",
-        description="Roles for this input stream (for example: detect, record, audio).",
+        description="Roles for this input stream.",
     )
     global_args: Union[str, list[str]] = Field(
         default_factory=list,
