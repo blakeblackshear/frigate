@@ -5,11 +5,11 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generator, List, Optional
 
 import cv2
 from fastapi import APIRouter, Body, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 from frigate.api.auth import (
@@ -29,6 +29,24 @@ from frigate.api.event import events
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.chat])
+
+
+def _chunk_content(content: str, chunk_size: int = 80) -> Generator[str, None, None]:
+    """Yield content in word-aware chunks for streaming."""
+    if not content:
+        return
+    words = content.split(" ")
+    current: List[str] = []
+    current_len = 0
+    for w in words:
+        current.append(w)
+        current_len += len(w) + 1
+        if current_len >= chunk_size:
+            yield " ".join(current) + " "
+            current = []
+            current_len = 0
+    if current:
+        yield " ".join(current)
 
 
 def _format_events_with_local_time(
@@ -387,7 +405,6 @@ async def _execute_tool_internal(
 
 @router.post(
     "/chat/completion",
-    response_model=ChatCompletionResponse,
     dependencies=[Depends(allow_any_authenticated())],
     summary="Chat completion with tool calling",
     description=(
@@ -399,7 +416,7 @@ async def chat_completion(
     request: Request,
     body: ChatCompletionRequest = Body(...),
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
-) -> JSONResponse:
+):
     """
     Chat completion endpoint with tool calling support.
 
@@ -554,11 +571,41 @@ Always be accurate with time calculations based on the current date provided.{ca
                 logger.debug(
                     f"Chat completion finished with final answer (iterations: {tool_iterations})"
                 )
+                final_content = response.get("content") or ""
+
+                if body.stream:
+                    async def stream_body() -> Any:
+                        if tool_calls:
+                            yield (
+                                json.dumps(
+                                    {
+                                        "type": "tool_calls",
+                                        "tool_calls": [
+                                            tc.model_dump() for tc in tool_calls
+                                        ],
+                                    }
+                                ).encode("utf-8")
+                                + b"\n"
+                            )
+                        # Stream content in word-sized chunks for smooth UX
+                        for part in _chunk_content(final_content):
+                            yield (
+                                json.dumps({"type": "content", "delta": part})
+                                .encode("utf-8")
+                                + b"\n"
+                            )
+                        yield json.dumps({"type": "done"}).encode("utf-8") + b"\n"
+
+                    return StreamingResponse(
+                        stream_body(),
+                        media_type="application/x-ndjson",
+                    )
+
                 return JSONResponse(
                     content=ChatCompletionResponse(
                         message=ChatMessageResponse(
                             role="assistant",
-                            content=response.get("content"),
+                            content=final_content,
                             tool_calls=None,
                         ),
                         finish_reason=response.get("finish_reason", "stop"),

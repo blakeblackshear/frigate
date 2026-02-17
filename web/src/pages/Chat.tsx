@@ -25,27 +25,123 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    try {
-      const apiMessages = [...messages, userMessage].map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-      const { data } = await axios.post<{
-        message: { role: string; content: string | null };
-        tool_calls?: ToolCall[];
-      }>("chat/completion", { messages: apiMessages });
+    const apiMessages = [...messages, userMessage].map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
-      const content = data.message?.content ?? "";
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: content || " ",
-          toolCalls: data.tool_calls?.length ? data.tool_calls : undefined,
-        },
-      ]);
+    try {
+      const baseURL = axios.defaults.baseURL ?? "";
+      const url = `${baseURL}chat/completion`;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(axios.defaults.headers.common as Record<string, string>),
+      };
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ messages: apiMessages, stream: true }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(
+          (errBody as { error?: string }).error ?? res.statusText,
+        );
+      }
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No response body");
+
+      const assistantMessage: ChatMessage = {
+        role: "assistant",
+        content: "",
+        toolCalls: undefined,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      let buffer = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          let data: { type: string; tool_calls?: ToolCall[]; delta?: string };
+          try {
+            data = JSON.parse(trimmed) as {
+              type: string;
+              tool_calls?: ToolCall[];
+              delta?: string;
+            };
+          } catch {
+            continue;
+          }
+          if (data.type === "tool_calls" && data.tool_calls?.length) {
+            setMessages((prev) => {
+              const next = [...prev];
+              const last = next[next.length - 1];
+              if (last?.role === "assistant")
+                next[next.length - 1] = {
+                  ...last,
+                  toolCalls: data.tool_calls,
+                };
+              return next;
+            });
+          } else if (data.type === "content" && data.delta !== undefined) {
+            setMessages((prev) => {
+              const next = [...prev];
+              const last = next[next.length - 1];
+              if (last?.role === "assistant")
+                next[next.length - 1] = {
+                  ...last,
+                  content: last.content + data.delta,
+                };
+              return next;
+            });
+          }
+        }
+      }
+      if (buffer.trim()) {
+        try {
+          const data = JSON.parse(buffer.trim()) as {
+            type: string;
+            tool_calls?: ToolCall[];
+            delta?: string;
+          };
+          if (data.type === "content" && data.delta !== undefined) {
+            setMessages((prev) => {
+              const next = [...prev];
+              const last = next[next.length - 1];
+              if (last?.role === "assistant")
+                next[next.length - 1] = {
+                  ...last,
+                  content: last.content + data.delta,
+                };
+              return next;
+            });
+          }
+        } catch {
+          // ignore final malformed chunk
+        }
+      }
+
+      setMessages((prev) => {
+        const next = [...prev];
+        const last = next[next.length - 1];
+        if (last?.role === "assistant" && last.content === "")
+          next[next.length - 1] = { ...last, content: " " };
+        return next;
+      });
     } catch {
       setError(t("error"));
+      setMessages((prev) =>
+        prev.filter((m) => !(m.role === "assistant" && m.content === "")),
+      );
     } finally {
       setIsLoading(false);
     }

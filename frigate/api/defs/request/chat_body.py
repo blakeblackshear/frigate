@@ -39,3 +39,7 @@ class ChatCompletionRequest(BaseModel):
             "user message as multimodal content. Use with get_live_context for detection info."
         ),
     )
+    stream: bool = Field(
+        default=False,
+        description="If true, stream the final assistant response in the body as newline-delimited JSON.",
+    )
