@@ -6,5 +6,7 @@
   "showTools": "Show tools ({{count}})",
   "hideTools": "Hide tools",
   "call": "Call",
-  "result": "Result"
+  "result": "Result",
+  "arguments": "Arguments:",
+  "response": "Response:"
 }
