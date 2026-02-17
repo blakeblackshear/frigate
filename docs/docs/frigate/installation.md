@@ -689,3 +689,42 @@ docker run \
 ```
 
 Log into QNAP, open Container Station. Frigate docker container should be listed under 'Overview' and running. Visit Frigate Web UI by clicking Frigate docker, and then clicking the URL shown at the top of the detail page.
+
+## macOS - Apple Silicon
+
+:::warning
+
+macOS uses port 5000 for its Airplay Receiver service.  If you want to expose port 5000 in Frigate for local app and API access the port will need to be mapped to another port on the host e.g. 5001
+
+Failure to remap port 5000 on the host will result in the WebUI and all API endpoints on port 5000 being unreachable, even if port 5000 is exposed correctly in Docker.
+
+:::
+
+Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligable, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application. 
+
+To allow Frigate to use the Apple Silicon Neural Engine / Processing Unit (NPU) the host must be running [Apple Silicon Detector](../configuration/object_detectors.md#apple-silicon-detector) on the host (outside Docker)
+
+#### Docker Compose example
+```yaml
+services:
+  frigate:
+    container_name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable-arm64
+    restart: unless-stopped
+    shm_size: "512mb" # update for your cameras based on calculation above
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /path/to/your/config:/config
+      - /path/to/your/recordings:/recordings
+    ports:
+      - "8971:8971"
+      # If exposing on macOS map to a diffent host port like 5001 or any orher port with no conflicts
+      # - "5001:5000" # Internal unauthenticated access. Expose carefully. 
+      - "8554:8554" # RTSP feeds
+    extra_hosts:
+      # This is very important
+      # It allows frigate access to the NPU on Apple Silicon via Apple Silicon Detector
+      - "host.docker.internal:host-gateway" # Required to talk to the NPU detector
+    environment:
+      - FRIGATE_RTSP_PASSWORD: "password"
+```
