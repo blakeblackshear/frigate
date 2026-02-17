@@ -126,8 +126,8 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of objects to return (default: 10).",
-                            "default": 10,
+                            "description": "Maximum number of objects to return (default: 25).",
+                            "default": 25,
                         },
                     },
                 },
@@ -222,7 +222,7 @@ async def _execute_search_objects(
         zone=zones,
         after=after,
         before=before,
-        limit=arguments.get("limit", 10),
+        limit=arguments.get("limit", 25),
     )
 
     try:

@@ -164,7 +164,7 @@ export default function ChatPage() {
   return (
     <div className="flex size-full justify-center p-2">
       <div className="flex size-full flex-col xl:w-[50%] 3xl:w-[35%]">
-        <div className="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto">
+        <div className="scrollbar-container flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto">
           {messages.map((msg, i) => (
             <div key={i} className="flex flex-col gap-2">
               {msg.role === "assistant" && msg.toolCalls && (
