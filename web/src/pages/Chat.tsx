@@ -62,6 +62,7 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, assistantMessage]);
 
       let buffer = "";
+      let hadStreamError = false;
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -80,6 +81,14 @@ export default function ChatPage() {
             };
           } catch {
             continue;
+          }
+          if (data.type === "error" && "error" in data) {
+            setError((data as { error?: string }).error ?? t("error"));
+            setMessages((prev) =>
+              prev.filter((m) => !(m.role === "assistant" && m.content === "")),
+            );
+            hadStreamError = true;
+            break;
           }
           if (data.type === "tool_calls" && data.tool_calls?.length) {
             setMessages((prev) => {
@@ -105,8 +114,11 @@ export default function ChatPage() {
             });
           }
         }
+        if (hadStreamError) break;
       }
-      if (buffer.trim()) {
+      if (hadStreamError) {
+        // already set error and cleaned up
+      } else if (buffer.trim()) {
         try {
           const data = JSON.parse(buffer.trim()) as {
             type: string;
@@ -130,13 +142,15 @@ export default function ChatPage() {
         }
       }
 
-      setMessages((prev) => {
-        const next = [...prev];
-        const last = next[next.length - 1];
-        if (last?.role === "assistant" && last.content === "")
-          next[next.length - 1] = { ...last, content: " " };
-        return next;
-      });
+      if (!hadStreamError) {
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last?.role === "assistant" && last.content === "")
+            next[next.length - 1] = { ...last, content: " " };
+          return next;
+        });
+      }
     } catch {
       setError(t("error"));
       setMessages((prev) =>
