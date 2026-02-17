@@ -292,19 +292,24 @@ class LlamaCppClient(GenAIClient):
                             yield ("content_delta", delta["content"])
                         for tc in delta.get("tool_calls") or []:
                             idx = tc.get("index", 0)
+                            fn = tc.get("function") or {}
                             if idx not in tool_calls_by_index:
                                 tool_calls_by_index[idx] = {
                                     "id": tc.get("id", ""),
-                                    "name": tc.get("name", ""),
+                                    "name": tc.get("name") or fn.get("name", ""),
                                     "arguments": "",
                                 }
                             t = tool_calls_by_index[idx]
                             if tc.get("id"):
                                 t["id"] = tc["id"]
-                            if tc.get("name"):
-                                t["name"] = tc["name"]
-                            if tc.get("arguments"):
-                                t["arguments"] += tc["arguments"]
+                            name = tc.get("name") or fn.get("name")
+                            if name:
+                                t["name"] = name
+                            arg = tc.get("arguments") or fn.get("arguments")
+                            if arg is not None:
+                                t["arguments"] += (
+                                    arg if isinstance(arg, str) else json.dumps(arg)
+                                )
 
             full_content = "".join(content_parts).strip() or None
             tool_calls_list = self._streamed_tool_calls_to_list(tool_calls_by_index)

@@ -398,9 +398,20 @@ async def _execute_tool_internal(
     elif tool_name == "get_live_context":
         camera = arguments.get("camera")
         if not camera:
+            logger.error(
+                "Tool get_live_context failed: camera parameter is required. "
+                "Arguments: %s",
+                json.dumps(arguments),
+            )
             return {"error": "Camera parameter is required"}
         return await _execute_get_live_context(request, camera, allowed_cameras)
     else:
+        logger.error(
+            "Tool call failed: unknown tool %r. Expected one of: search_objects, get_live_context. "
+            "Arguments received: %s",
+            tool_name,
+            json.dumps(arguments),
+        )
         return {"error": f"Unknown tool: {tool_name}"}
 
 
@@ -425,6 +436,14 @@ async def _execute_pending_tools(
             tool_result = await _execute_tool_internal(
                 tool_name, tool_args, request, allowed_cameras
             )
+            if isinstance(tool_result, dict) and tool_result.get("error"):
+                logger.error(
+                    "Tool call %s (id: %s) returned error: %s. Arguments: %s",
+                    tool_name,
+                    tool_call_id,
+                    tool_result.get("error"),
+                    json.dumps(tool_args),
+                )
             if tool_name == "search_objects" and isinstance(tool_result, list):
                 tool_result = _format_events_with_local_time(tool_result)
                 _keys = {
@@ -459,7 +478,11 @@ async def _execute_pending_tools(
             )
         except Exception as e:
             logger.error(
-                f"Error executing tool {tool_name} (id: {tool_call_id}): {e}",
+                "Error executing tool %s (id: %s): %s. Arguments: %s",
+                tool_name,
+                tool_call_id,
+                e,
+                json.dumps(tool_args),
                 exc_info=True,
             )
             error_content = json.dumps({"error": f"Tool execution failed: {str(e)}"})
