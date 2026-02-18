@@ -98,7 +98,9 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                     "Search for detected objects in Frigate by camera, object label, time range, "
                     "zones, and other filters. Use this to answer questions about when "
                     "objects were detected, what objects appeared, or to find specific object detections. "
-                    "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car)."
+                    "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car). "
+                    "When the user asks about a specific name (person, delivery company, animal, etc.), "
+                    "filter by sub_label only and do not set label."
                 ),
                 "parameters": {
                     "type": "object",
@@ -113,7 +115,7 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                         },
                         "sub_label": {
                             "type": "string",
-                            "description": "Sub-label to filter by: name of a person, delivery company, animal, etc.",
+                            "description": "Name of a person, delivery company, animal, etc. When filtering by a specific name, use only sub_label; do not set label.",
                         },
                         "after": {
                             "type": "string",
@@ -253,7 +255,6 @@ async def _execute_search_objects(
     description="Execute a tool function call from an LLM.",
 )
 async def execute_tool(
-    request: Request,
     body: ToolExecuteRequest = Body(...),
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ) -> JSONResponse:
@@ -269,7 +270,7 @@ async def execute_tool(
     logger.debug(f"Executing tool: {tool_name} with arguments: {arguments}")
 
     if tool_name == "search_objects":
-        return await _execute_search_objects(request, arguments, allowed_cameras)
+        return await _execute_search_objects(arguments, allowed_cameras)
 
     return JSONResponse(
         content={
@@ -385,7 +386,7 @@ async def _execute_tool_internal(
     This is used by the chat completion endpoint to execute tools.
     """
     if tool_name == "search_objects":
-        response = await _execute_search_objects(request, arguments, allowed_cameras)
+        response = await _execute_search_objects(arguments, allowed_cameras)
         try:
             if hasattr(response, "body"):
                 body_str = response.body.decode("utf-8")
