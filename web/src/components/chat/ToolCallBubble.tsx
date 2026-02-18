@@ -33,11 +33,12 @@ export function ToolCallBubble({
 
   return (
     <div
-      className={
+      className={cn(
+        "rounded-lg px-3 py-2",
         isLeft
-          ? "self-start rounded-lg bg-muted px-3 py-2"
-          : "self-end rounded-lg bg-primary px-3 py-2 text-primary-foreground"
-      }
+          ? "self-start bg-muted"
+          : "self-end bg-primary text-primary-foreground",
+      )}
     >
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
@@ -66,7 +67,7 @@ export function ToolCallBubble({
                 <div className="font-medium text-muted-foreground">
                   {t("arguments")}
                 </div>
-                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded bg-muted/50 p-2 text-[10px]">
+                <pre className="scrollbar-container mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded bg-muted/50 p-2 text-[10px]">
                   {JSON.stringify(args, null, 2)}
                 </pre>
               </div>
@@ -74,7 +75,7 @@ export function ToolCallBubble({
             {!isLeft && response && response !== "" && (
               <div className="text-xs">
                 <div className="font-medium opacity-80">{t("response")}</div>
-                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded bg-primary/20 p-2 text-[10px]">
+                <pre className="scrollbar-container mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded bg-primary/20 p-2 text-[10px]">
                   {response}
                 </pre>
               </div>

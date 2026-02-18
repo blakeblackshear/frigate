@@ -75,46 +75,65 @@ export default function ChatPage() {
     <div className="flex size-full justify-center p-2">
       <div className="flex size-full flex-col xl:w-[50%] 3xl:w-[35%]">
         <div className="scrollbar-container flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto">
-          {messages.map((msg, i) => (
-            <div key={i} className="flex flex-col gap-2">
-              {msg.role === "assistant" && msg.toolCalls && (
-                <>
-                  {msg.toolCalls.map((tc, tcIdx) => (
-                    <div key={tcIdx} className="flex flex-col gap-2">
-                      <ToolCallBubble
-                        name={tc.name}
-                        arguments={tc.arguments}
-                        side="left"
-                      />
-                      {tc.response && (
+          {messages.map((msg, i) => {
+            const isStreamingPlaceholder =
+              i === messages.length - 1 &&
+              msg.role === "assistant" &&
+              isLoading &&
+              !msg.content?.trim() &&
+              !(msg.toolCalls && msg.toolCalls.length > 0);
+            if (isStreamingPlaceholder) {
+              return <div key={i} />;
+            }
+            return (
+              <div key={i} className="flex flex-col gap-2">
+                {msg.role === "assistant" && msg.toolCalls && (
+                  <>
+                    {msg.toolCalls.map((tc, tcIdx) => (
+                      <div key={tcIdx} className="flex flex-col gap-2">
                         <ToolCallBubble
                           name={tc.name}
-                          response={tc.response}
-                          side="right"
+                          arguments={tc.arguments}
+                          side="left"
                         />
-                      )}
-                    </div>
-                  ))}
-                </>
-              )}
-              <MessageBubble
-                role={msg.role}
-                content={msg.content}
-                messageIndex={i}
-                onEditSubmit={
-                  msg.role === "user" ? handleEditSubmit : undefined
-                }
-                isComplete={
-                  msg.role === "user" || !isLoading || i < messages.length - 1
-                }
-              />
-            </div>
-          ))}
-          {isLoading && (
-            <div className="self-start rounded-lg bg-muted px-3 py-2 text-muted-foreground">
-              {t("processing")}
-            </div>
-          )}
+                        {tc.response && (
+                          <ToolCallBubble
+                            name={tc.name}
+                            response={tc.response}
+                            side="right"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
+                <MessageBubble
+                  role={msg.role}
+                  content={msg.content}
+                  messageIndex={i}
+                  onEditSubmit={
+                    msg.role === "user" ? handleEditSubmit : undefined
+                  }
+                  isComplete={
+                    msg.role === "user" || !isLoading || i < messages.length - 1
+                  }
+                />
+              </div>
+            );
+          })}
+          {(() => {
+            const lastMsg = messages[messages.length - 1];
+            const showProcessing =
+              isLoading &&
+              lastMsg?.role === "assistant" &&
+              !lastMsg.content?.trim() &&
+              !(lastMsg.toolCalls && lastMsg.toolCalls.length > 0);
+            return showProcessing ? (
+              <div className="self-start rounded-lg bg-muted px-3 py-2 text-muted-foreground">
+                {t("processing")}
+              </div>
+            ) : null;
+          })()}
           {error && (
             <p className="self-start text-sm text-destructive" role="alert">
               {error}
