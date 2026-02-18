@@ -105,11 +105,15 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                     "properties": {
                         "camera": {
                             "type": "string",
-                            "description": "Camera name to filter by (optional). Use 'all' for all cameras.",
+                            "description": "Camera name to filter by (optional).",
                         },
                         "label": {
                             "type": "string",
                             "description": "Object label to filter by (e.g., 'person', 'package', 'car').",
+                        },
+                        "sub_label": {
+                            "type": "string",
+                            "description": "Sub-label to filter by: name of a person, delivery company, animal, etc.",
                         },
                         "after": {
                             "type": "string",
@@ -165,14 +169,13 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
     summary="Get available tools",
     description="Returns OpenAI-compatible tool definitions for function calling.",
 )
-def get_tools(request: Request) -> JSONResponse:
+def get_tools() -> JSONResponse:
     """Get list of available tools for LLM function calling."""
     tools = get_tool_definitions()
     return JSONResponse(content={"tools": tools})
 
 
 async def _execute_search_objects(
-    request: Request,
     arguments: Dict[str, Any],
     allowed_cameras: List[str],
 ) -> JSONResponse:
@@ -214,10 +217,9 @@ async def _execute_search_objects(
 
     # Build query parameters compatible with EventsQueryParams
     query_params = EventsQueryParams(
-        camera=arguments.get("camera", "all"),
         cameras=arguments.get("camera", "all"),
-        label=arguments.get("label", "all"),
         labels=arguments.get("label", "all"),
+        sub_labels=arguments.get("sub_label", "all"),
         zones=zones,
         zone=zones,
         after=after,
