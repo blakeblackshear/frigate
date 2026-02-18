@@ -33,7 +33,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.config.classification import ObjectClassificationType
 from frigate.const import (
     FAST_QUEUE_TIMEOUT,
     UPDATE_CAMERA_ACTIVITY,
@@ -760,16 +759,8 @@ class TrackedObjectProcessor(threading.Thread):
 
             self.update_mqtt_motion(camera, frame_time, motion_boxes)
 
-            attribute_model_names = [
-                name
-                for name, model_config in self.config.classification.custom.items()
-                if model_config.object_config
-                and model_config.object_config.classification_type
-                == ObjectClassificationType.attribute
-            ]
             tracked_objects = [
-                o.to_dict(attribute_model_names=attribute_model_names)
-                for o in camera_state.tracked_objects.values()
+                o.to_dict() for o in camera_state.tracked_objects.values()
             ]
 
             # publish info on this frame

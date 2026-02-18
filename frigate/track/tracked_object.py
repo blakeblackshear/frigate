@@ -376,10 +376,7 @@ class TrackedObject:
         )
         return (thumb_update, significant_change, path_update, autotracker_update)
 
-    def to_dict(
-        self,
-        attribute_model_names: list[str] | None = None,
-    ) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera_config.name,
@@ -414,11 +411,6 @@ class TrackedObject:
             "path_data": self.path_data.copy(),
             "recognized_license_plate": self.obj_data.get("recognized_license_plate"),
         }
-        if attribute_model_names is not None:
-            for name in attribute_model_names:
-                value = self.obj_data.get(name)
-                if value is not None:
-                    event[name] = value
 
         return event
 
