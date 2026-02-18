@@ -6,7 +6,8 @@ import { useState, useCallback } from "react";
 import axios from "axios";
 import { MessageBubble } from "@/components/chat/ChatMessage";
 import { ToolCallBubble } from "@/components/chat/ToolCallBubble";
-import type { ChatMessage, ToolCall } from "@/types/chat";
+import type { ChatMessage } from "@/types/chat";
+import { streamChatCompletion } from "@/utils/chatUtil";
 
 export default function ChatPage() {
   const { t } = useTranslation(["views/chat"]);
@@ -15,151 +16,60 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
-    if (!text || isLoading) return;
+  const submitConversation = useCallback(
+    async (messagesToSend: ChatMessage[]) => {
+      if (isLoading) return;
+      const last = messagesToSend[messagesToSend.length - 1];
+      if (!last || last.role !== "user" || !last.content.trim()) return;
 
-    const userMessage: ChatMessage = { role: "user", content: text };
-    setInput("");
-    setError(null);
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+      setError(null);
+      const assistantPlaceholder: ChatMessage = {
+        role: "assistant",
+        content: "",
+        toolCalls: undefined,
+      };
+      setMessages([...messagesToSend, assistantPlaceholder]);
+      setIsLoading(true);
 
-    const apiMessages = [...messages, userMessage].map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
+      const apiMessages = messagesToSend.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
 
-    try {
       const baseURL = axios.defaults.baseURL ?? "";
       const url = `${baseURL}chat/completion`;
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         ...(axios.defaults.headers.common as Record<string, string>),
       };
-      const res = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ messages: apiMessages, stream: true }),
+
+      await streamChatCompletion(url, headers, apiMessages, {
+        updateMessages: (updater) => setMessages(updater),
+        onError: (message) => setError(message),
+        onDone: () => setIsLoading(false),
+        defaultErrorMessage: t("error"),
       });
+    },
+    [isLoading, t],
+  );
 
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(
-          (errBody as { error?: string }).error ?? res.statusText,
-        );
-      }
+  const sendMessage = useCallback(() => {
+    const text = input.trim();
+    if (!text || isLoading) return;
+    setInput("");
+    submitConversation([...messages, { role: "user", content: text }]);
+  }, [input, isLoading, messages, submitConversation]);
 
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error("No response body");
-
-      const assistantMessage: ChatMessage = {
-        role: "assistant",
-        content: "",
-        toolCalls: undefined,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      let buffer = "";
-      let hadStreamError = false;
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-          let data: { type: string; tool_calls?: ToolCall[]; delta?: string };
-          try {
-            data = JSON.parse(trimmed) as {
-              type: string;
-              tool_calls?: ToolCall[];
-              delta?: string;
-            };
-          } catch {
-            continue;
-          }
-          if (data.type === "error" && "error" in data) {
-            setError((data as { error?: string }).error ?? t("error"));
-            setMessages((prev) =>
-              prev.filter((m) => !(m.role === "assistant" && m.content === "")),
-            );
-            hadStreamError = true;
-            break;
-          }
-          if (data.type === "tool_calls" && data.tool_calls?.length) {
-            setMessages((prev) => {
-              const next = [...prev];
-              const last = next[next.length - 1];
-              if (last?.role === "assistant")
-                next[next.length - 1] = {
-                  ...last,
-                  toolCalls: data.tool_calls,
-                };
-              return next;
-            });
-          } else if (data.type === "content" && data.delta !== undefined) {
-            setMessages((prev) => {
-              const next = [...prev];
-              const last = next[next.length - 1];
-              if (last?.role === "assistant")
-                next[next.length - 1] = {
-                  ...last,
-                  content: last.content + data.delta,
-                };
-              return next;
-            });
-          }
-        }
-        if (hadStreamError) break;
-      }
-      if (hadStreamError) {
-        // already set error and cleaned up
-      } else if (buffer.trim()) {
-        try {
-          const data = JSON.parse(buffer.trim()) as {
-            type: string;
-            tool_calls?: ToolCall[];
-            delta?: string;
-          };
-          if (data.type === "content" && data.delta !== undefined) {
-            setMessages((prev) => {
-              const next = [...prev];
-              const last = next[next.length - 1];
-              if (last?.role === "assistant")
-                next[next.length - 1] = {
-                  ...last,
-                  content: last.content + data.delta,
-                };
-              return next;
-            });
-          }
-        } catch {
-          // ignore final malformed chunk
-        }
-      }
-
-      if (!hadStreamError) {
-        setMessages((prev) => {
-          const next = [...prev];
-          const last = next[next.length - 1];
-          if (last?.role === "assistant" && last.content === "")
-            next[next.length - 1] = { ...last, content: " " };
-          return next;
-        });
-      }
-    } catch {
-      setError(t("error"));
-      setMessages((prev) =>
-        prev.filter((m) => !(m.role === "assistant" && m.content === "")),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [input, isLoading, messages, t]);
+  const handleEditSubmit = useCallback(
+    (messageIndex: number, newContent: string) => {
+      const newList: ChatMessage[] = [
+        ...messages.slice(0, messageIndex),
+        { role: "user", content: newContent },
+      ];
+      submitConversation(newList);
+    },
+    [messages, submitConversation],
+  );
 
   return (
     <div className="flex size-full justify-center p-2">
@@ -187,7 +97,14 @@ export default function ChatPage() {
                   ))}
                 </>
               )}
-              <MessageBubble role={msg.role} content={msg.content} />
+              <MessageBubble
+                role={msg.role}
+                content={msg.content}
+                messageIndex={i}
+                onEditSubmit={
+                  msg.role === "user" ? handleEditSubmit : undefined
+                }
+              />
             </div>
           ))}
           {isLoading && (

@@ -8,5 +8,6 @@
   "call": "Call",
   "result": "Result",
   "arguments": "Arguments:",
-  "response": "Response:"
+  "response": "Response:",
+  "send": "Send"
 }
