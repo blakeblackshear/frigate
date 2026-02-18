@@ -221,7 +221,7 @@ async def _execute_search_objects(
     query_params = EventsQueryParams(
         cameras=arguments.get("camera", "all"),
         labels=arguments.get("label", "all"),
-        sub_labels=arguments.get("sub_label", "all"),
+        sub_labels=arguments.get("sub_label", "all").lower(),
         zones=zones,
         zone=zones,
         after=after,
@@ -576,6 +576,8 @@ async def chat_completion(
     system_prompt = f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
 
 Current server local date and time: {current_date_str} at {current_time_str}
+
+Do not start your response with phrases like "I will check...", "Let me see...", or "Let me look...". Answer directly.
 
 Always present times to the user in the server's local timezone. When tool results include start_time_local and end_time_local, use those exact strings when listing or describing detection times—do not convert or invent timestamps. Do not use UTC or ISO format with Z for the user-facing answer unless the tool result only provides Unix timestamps without local time fields.
 When users ask about "today", "yesterday", "this week", etc., use the current date above as reference.

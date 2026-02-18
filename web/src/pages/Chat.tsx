@@ -104,6 +104,9 @@ export default function ChatPage() {
                 onEditSubmit={
                   msg.role === "user" ? handleEditSubmit : undefined
                 }
+                isComplete={
+                  msg.role === "user" || !isLoading || i < messages.length - 1
+                }
               />
             </div>
           ))}

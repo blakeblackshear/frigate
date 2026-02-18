@@ -19,6 +19,7 @@ type MessageBubbleProps = {
   content: string;
   messageIndex?: number;
   onEditSubmit?: (messageIndex: number, newContent: string) => void;
+  isComplete?: boolean;
 };
 
 export function MessageBubble({
@@ -26,6 +27,7 @@ export function MessageBubble({
   content,
   messageIndex = 0,
   onEditSubmit,
+  isComplete = true,
 }: MessageBubbleProps) {
   const { t } = useTranslation(["views/chat", "common"]);
   const isUser = role === "user";
@@ -152,21 +154,25 @@ export function MessageBubble({
             </TooltipContent>
           </Tooltip>
         )}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-muted-foreground hover:text-foreground"
-              onClick={handleCopy}
-              disabled={!content?.trim()}
-              aria-label={t("button.copy", { ns: "common" })}
-            >
-              <FaCopy className="size-3" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("button.copy", { ns: "common" })}</TooltipContent>
-        </Tooltip>
+        {isComplete && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 text-muted-foreground hover:text-foreground"
+                onClick={handleCopy}
+                disabled={!content?.trim()}
+                aria-label={t("button.copy", { ns: "common" })}
+              >
+                <FaCopy className="size-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("button.copy", { ns: "common" })}
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </div>
   );
