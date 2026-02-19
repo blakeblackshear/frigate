@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useTranslation } from "react-i18next";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
@@ -133,7 +134,35 @@ export function MessageBubble({
           isUser ? "bg-primary text-primary-foreground" : "bg-muted",
         )}
       >
-        {isUser ? content : <ReactMarkdown>{content}</ReactMarkdown>}
+        {isUser ? (
+          content
+        ) : (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              table: ({ node: _n, ...props }) => (
+                <table
+                  className="my-2 w-full border-collapse border border-border"
+                  {...props}
+                />
+              ),
+              th: ({ node: _n, ...props }) => (
+                <th
+                  className="border border-border bg-muted/50 px-2 py-1 text-left text-sm font-medium"
+                  {...props}
+                />
+              ),
+              td: ({ node: _n, ...props }) => (
+                <td
+                  className="border border-border px-2 py-1 text-sm"
+                  {...props}
+                />
+              ),
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        )}
       </div>
       <div className="flex items-center gap-0.5">
         {isUser && onEditSubmit != null && (

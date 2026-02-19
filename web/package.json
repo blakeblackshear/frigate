@@ -76,6 +76,7 @@
     "react-konva": "^18.2.10",
     "react-router-dom": "^6.30.3",
     "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
     "react-swipeable": "^7.0.2",
     "react-tracked": "^2.0.1",
     "react-transition-group": "^4.4.5",
