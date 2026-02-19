@@ -40,6 +40,7 @@ class ONNXDetector(DetectionApi):
             path,
             detector_config.device,
             model_type=detector_config.model.model_type,
+            **detector_config.model_extra,
         )
 
         self.onnx_model_type = detector_config.model.model_type
