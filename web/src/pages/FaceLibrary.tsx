@@ -72,10 +72,6 @@ import {
   ClassificationItemData,
   ClassifiedEvent,
 } from "@/types/classification";
-import SearchDetailDialog, {
-  SearchTab,
-} from "@/components/overlay/detail/SearchDetailDialog";
-import { SearchResult } from "@/types/search";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -192,12 +188,6 @@ export default function FaceLibrary() {
     name: string;
     ids: string[];
   } | null>(null);
-
-  // detail dialog
-  const [selectedEvent, setSelectedEvent] = useState<Event | undefined>(
-    undefined,
-  );
-  const [dialogTab, setDialogTab] = useState<SearchTab>("tracking_details");
 
   const onDelete = useCallback(
     (name: string, ids: string[], isName: boolean = false) => {
@@ -537,10 +527,6 @@ export default function FaceLibrary() {
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
-            onClickEvent={(event) => {
-              setSelectedEvent(event);
-              setDialogTab("tracking_details");
-            }}
           />
         ) : (
           <FaceGrid
@@ -553,17 +539,6 @@ export default function FaceLibrary() {
           />
         ))
       )}
-
-      <SearchDetailDialog
-        search={
-          selectedEvent ? (selectedEvent as unknown as SearchResult) : undefined
-        }
-        page={dialogTab}
-        setSimilarity={undefined}
-        setSearchPage={setDialogTab}
-        setSearch={(search) => setSelectedEvent(search as unknown as Event)}
-        setInputFocused={() => {}}
-      />
     </div>
   );
 }
@@ -776,7 +751,6 @@ type TrainingGridProps = {
         ) => FaceLibraryData | undefined),
     opts?: boolean | { revalidate?: boolean },
   ) => Promise<FaceLibraryData | undefined>;
-  onClickEvent: (event: Event) => void;
 };
 function TrainingGrid({
   config,
@@ -786,7 +760,6 @@ function TrainingGrid({
   selectedFaces,
   onClickFaces,
   onRefresh,
-  onClickEvent,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -866,7 +839,6 @@ function TrainingGrid({
               selectedFaces={selectedFaces}
               onClickFaces={onClickFaces}
               onRefresh={onRefresh}
-              onClickEvent={onClickEvent}
             />
           </div>
         );
@@ -891,7 +863,6 @@ type FaceAttemptGroupProps = {
         ) => FaceLibraryData | undefined),
     opts?: boolean | { revalidate?: boolean },
   ) => Promise<FaceLibraryData | undefined>;
-  onClickEvent: (event: Event) => void;
 };
 function FaceAttemptGroup({
   config,
@@ -901,7 +872,6 @@ function FaceAttemptGroup({
   selectedFaces,
   onClickFaces,
   onRefresh,
-  onClickEvent,
 }: FaceAttemptGroupProps) {
   const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
 
@@ -919,10 +889,6 @@ function FaceAttemptGroup({
   const handleClickEvent = useCallback(
     (meta: boolean) => {
       if (!meta) {
-        // Open detail view when clicking without meta key
-        if (event) {
-          onClickEvent(event);
-        }
         return;
       } else {
         const anySelected =
@@ -947,7 +913,7 @@ function FaceAttemptGroup({
         }
       }
     },
-    [group, selectedFaces, onClickFaces, event, onClickEvent],
+    [group, selectedFaces, onClickFaces],
   );
 
   // api calls
