@@ -6,7 +6,6 @@ import type {
   UiSchema,
 } from "@rjsf/utils";
 import { toFieldPathId } from "@rjsf/utils";
-import { cloneDeep, set as lodashSet } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -303,9 +302,9 @@ export function DetectorHardwareField(props: FieldProps) {
 
   const updateDetectors = useCallback(
     (nextDetectors: JsonObject, path?: FieldPathList) => {
-      onChange(nextDetectors as unknown, path ?? ([] as FieldPathList));
+      onChange(nextDetectors as unknown, path ?? fieldPathId.path);
     },
-    [onChange],
+    [fieldPathId.path, onChange],
   );
 
   const getTypeLabel = useCallback(
@@ -595,12 +594,10 @@ export function DetectorHardwareField(props: FieldProps) {
       const handleInstanceChange = (
         nextValue: unknown,
         path: FieldPathList,
-        _errors?: ErrorSchema,
-        _id?: string,
+        errors?: ErrorSchema,
+        id?: string,
       ) => {
-        const nextDetectors = cloneDeep(detectors);
-        lodashSet(nextDetectors, path, nextValue);
-        updateDetectors(nextDetectors);
+        onChange(nextValue, path, errors, id);
       };
 
       return (
@@ -623,17 +620,16 @@ export function DetectorHardwareField(props: FieldProps) {
     },
     [
       detectorSchemaByType,
-      detectors,
       getInstanceUiSchema,
       disabled,
       errorSchema,
       fieldPathId,
       hideError,
+      onChange,
       onBlur,
       onFocus,
       readonly,
       registry,
-      updateDetectors,
     ],
   );
 
