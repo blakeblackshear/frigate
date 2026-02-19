@@ -1,0 +1,25 @@
+FROM ghcr.io/blakeblackshear/frigate:0.17.0-rc2-tensorrt
+
+ARG TRT_RTX_ARCHIVE=TensorRT-RTX-1.3.0.35-Linux-x86_64-cuda-12.9-Release-external.tar.gz
+
+
+COPY rtx/${TRT_RTX_ARCHIVE} .
+#RUN wget https://developer.nvidia.com/downloads/trt/rtx_sdk/secure/1.3/TensorRT-RTX-1.3.0.35-Linux-x86_64-cuda-12.9-Release-external.tar.gz && \
+
+RUN tar -xzf ${TRT_RTX_ARCHIVE} && \
+    rm ${TRT_RTX_ARCHIVE} && \
+    mv TensorRT-RTX* /opt/tensorrt-rtx
+
+COPY rtx/onnxruntime_gpu-1.24.1-cp311-cp311-linux_x86_64.whl /tmp/onnxruntime_gpu-1.24.1-cp311-cp311-linux_x86_64.whl
+COPY rtx/tensorrt_rtx-1.3.0.35-cp311-none-linux_x86_64.whl /tmp/tensorrt_rtx-1.3.0.35-cp311-none-linux_x86_64.whl
+
+RUN rm -f /usr/lib/python3.11/EXTERNALLY-MANAGED && \
+    pip uninstall -y onnxruntime-gpu && \
+    pip install --no-cache-dir --upgrade --break-system-packages /tmp/*.whl
+
+ENV LD_LIBRARY_PATH=/usr/local/lib/python3.11/dist-packages/nvidia/cuda_cupti/lib:/opt/tensorrt-rtx/lib
+ENV PATH=/opt/tensorrt-rtx/bin:${PATH}
+
+COPY frigate/util/model.py /opt/frigate/frigate/util/model.py
+
+# TODO need to copy onnx.py if we want to pass args to runtime
