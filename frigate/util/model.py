@@ -287,6 +287,7 @@ def get_ort_providers(
     force_cpu: bool = False,
     device: str | None = "AUTO",
     requires_fp16: bool = False,
+    **kwargs,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
@@ -337,6 +338,23 @@ def get_ort_providers(
                         ),
                     }
                 )
+                logger.info(f"TensorrtExecutionProvider options: {options[-1]}")
+            else:
+                continue
+        elif provider == "NvTensorRTRTXExecutionProvider":
+            # TODO get rid of logging
+            logging.info("Got NvTensorRTRTXExecutionProvider")
+            if device == "Tensorrtx":
+                logging.info("Configuring NvTensorRTRTXExecutionProvider")
+                # TODO setup cache, any other options
+                # os.makedirs(
+                #     os.path.join(MODEL_CACHE_DIR, "tensorrt/ort/trt-engines"),
+                #     exist_ok=True,
+                # )
+                # device_id = 0 if not device.isdigit() else int(device)
+                providers.append(provider)
+                options.append({"enable_cuda_graph": True})
+                logger.info(f"NvTensorRTRTXExecutionProvider options: {options[-1]}")
             else:
                 continue
         elif provider == "OpenVINOExecutionProvider":
