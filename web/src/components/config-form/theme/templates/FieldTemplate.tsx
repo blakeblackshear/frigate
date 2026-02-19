@@ -109,7 +109,9 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const isBoolean =
     schema.type === "boolean" ||
     (Array.isArray(schema.type) && schema.type.includes("boolean"));
-  const isObjectField = schema.type === "object";
+  const isObjectField =
+    schema.type === "object" ||
+    (Array.isArray(schema.type) && schema.type.includes("object"));
   const isNullableUnion = isNullableUnionSchema(schema as StrictRJSFSchema);
   const isAdditionalProperty = ADDITIONAL_PROPERTY_FLAG in schema;
   const suppressMultiSchema =
