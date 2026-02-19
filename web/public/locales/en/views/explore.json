@@ -143,6 +143,15 @@
     },
     "recognizedLicensePlate": "Recognized License Plate",
     "attributes": "Classification Attributes",
+    "assignment": {
+      "title": "Assign To",
+      "assignToFace": "Assign to Face",
+      "assignToClassification": "Assign to {{model}}",
+      "faceSuccess": "Successfully assigned to face: {{name}}",
+      "faceFailed": "Failed to assign to face: {{errorMessage}}",
+      "classificationSuccess": "Successfully assigned to {{model}} - {{category}}",
+      "classificationFailed": "Failed to assign classification: {{errorMessage}}"
+    },
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
     "camera": "Camera",

@@ -94,6 +94,11 @@ import { useDetailStream } from "@/context/detail-stream-context";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
 import { HiSparkles } from "react-icons/hi";
 import { useAudioTranscriptionProcessState } from "@/api/ws";
+import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
+import ClassificationSelectionDialog from "@/components/overlay/ClassificationSelectionDialog";
+import { FaceLibraryData } from "@/types/face";
+import AddFaceIcon from "@/components/icons/AddFaceIcon";
+import { TbCategoryPlus } from "react-icons/tb";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
@@ -702,6 +707,21 @@ function ObjectDetailsTab({
       : null,
   );
 
+  // Fetch available faces for assignment
+  const { data: faceData } = useSWR<FaceLibraryData>(
+    config?.face_recognition?.enabled ? "faces" : null,
+  );
+
+  const availableFaceNames = useMemo(() => {
+    if (!faceData) return [];
+    return Object.keys(faceData).filter((name) => name !== "train").sort();
+  }, [faceData]);
+
+  const availableClassificationModels = useMemo(() => {
+    if (!config?.classification?.custom) return [];
+    return Object.keys(config.classification.custom).sort();
+  }, [config]);
+
   // mutation / revalidation
 
   const mutate = useGlobalMutation();
@@ -1216,6 +1236,85 @@ function ObjectDetailsTab({
       });
   }, [search, t]);
 
+  // face and classification assignment
+
+  const onAssignToFace = useCallback(
+    (faceName: string) => {
+      if (!search) {
+        return;
+      }
+
+      axios
+        .post(`/faces/train/${faceName}/classify`, {
+          event_id: search.id,
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("details.assignment.faceSuccess", { name: faceName }), {
+              position: "top-center",
+            });
+            // Refresh the event data
+            mutate((key) => isEventsKey(key));
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("details.assignment.faceFailed", { errorMessage }),
+            {
+              position: "top-center",
+            },
+          );
+        });
+    },
+    [search, t, mutate, isEventsKey],
+  );
+
+  const onAssignToClassification = useCallback(
+    (modelName: string, category: string) => {
+      if (!search) {
+        return;
+      }
+
+      axios
+        .post(`/classification/${modelName}/dataset/categorize`, {
+          event_id: search.id,
+          category,
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(
+              t("details.assignment.classificationSuccess", {
+                model: modelName,
+                category,
+              }),
+              {
+                position: "top-center",
+              },
+            );
+            // Refresh the event data
+            mutate((key) => isEventsKey(key));
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("details.assignment.classificationFailed", { errorMessage }),
+            {
+              position: "top-center",
+            },
+          );
+        });
+    },
+    [search, t, mutate, isEventsKey],
+  );
+
   // audio transcription processing state
 
   const { payload: audioTranscriptionProcessState } =
@@ -1473,6 +1572,55 @@ function ObjectDetailsTab({
             )}
         </div>
       </div>
+
+      {isAdmin && (availableFaceNames.length > 0 || availableClassificationModels.length > 0) && (
+        <div className="flex flex-col gap-3">
+          <div className="text-sm text-primary/40">
+            {t("details.assignment.title")}
+          </div>
+          <div className="flex flex-row gap-2">
+            {config?.face_recognition?.enabled && availableFaceNames.length > 0 && (
+              <FaceSelectionDialog
+                faceNames={availableFaceNames}
+                onTrainAttempt={onAssignToFace}
+              >
+                <Button variant="outline" size="sm" className="flex gap-2">
+                  <AddFaceIcon className="size-4" />
+                  {t("details.assignment.assignToFace")}
+                </Button>
+              </FaceSelectionDialog>
+            )}
+            {availableClassificationModels.length > 0 &&
+              availableClassificationModels.map((modelName) => {
+                const model = config?.classification?.custom?.[modelName];
+                if (!model) return null;
+
+                const classes = Object.keys(modelAttributes?.[modelName] ?? {});
+                if (classes.length === 0) return null;
+
+                return (
+                  <ClassificationSelectionDialog
+                    key={modelName}
+                    classes={classes}
+                    modelName={modelName}
+                    image="" // Not needed for event-based assignment
+                    onRefresh={() => {}}
+                    onCategorize={(category) =>
+                      onAssignToClassification(modelName, category)
+                    }
+                  >
+                    <Button variant="outline" size="sm" className="flex gap-2">
+                      <TbCategoryPlus className="size-4" />
+                      {t("details.assignment.assignToClassification", {
+                        model: modelName,
+                      })}
+                    </Button>
+                  </ClassificationSelectionDialog>
+                );
+              })}
+          </div>
+        </div>
+      )}
 
       {isAdmin &&
         search.data.type === "object" &&
