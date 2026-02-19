@@ -458,6 +458,89 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                 </>
               )}
             </div>
+            {pageToggle === "train" && (
+              <ClassificationSelectionDialog
+                classes={classes}
+                modelName={model.name}
+                image={selectedImages[0]}
+                onRefresh={(category: string) => {
+                  // Batch categorize all selected images
+                  let successCount = 0;
+                  let failCount = 0;
+                  const totalCount = selectedImages.length;
+
+                  selectedImages.forEach((filename, index) => {
+                    axios
+                      .post(`/classification/${model.name}/dataset/categorize`, {
+                        category,
+                        training_file: filename,
+                      })
+                      .then((resp) => {
+                        if (resp.status == 200) {
+                          successCount++;
+                        } else {
+                          failCount++;
+                        }
+
+                        // Show final toast after all requests complete
+                        if (index === totalCount - 1) {
+                          if (successCount === totalCount) {
+                            toast.success(
+                              t("toast.success.batchCategorized", {
+                                count: successCount,
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          } else if (successCount > 0) {
+                            toast.warning(
+                              t("toast.warning.partialBatchCategorized", {
+                                success: successCount,
+                                total: totalCount,
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          } else {
+                            toast.error(
+                              t("toast.error.batchCategorizeFailed", {
+                                count: totalCount,
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          }
+                          setSelectedImages([]);
+                          refreshAll();
+                        }
+                      })
+                      .catch(() => {
+                        failCount++;
+                        if (index === totalCount - 1) {
+                          toast.error(
+                            t("toast.error.batchCategorizeFailed", {
+                              count: totalCount,
+                            }),
+                            {
+                              position: "top-center",
+                            },
+                          );
+                          setSelectedImages([]);
+                          refreshAll();
+                        }
+                      });
+                  });
+                }}
+              >
+                <Button className="flex gap-2">
+                  <TbCategoryPlus className="size-7 rounded-md p-1 text-secondary-foreground" />
+                  {isDesktop && t("button.categorizeImages")}
+                </Button>
+              </ClassificationSelectionDialog>
+            )}
             <Button
               className="flex gap-2"
               onClick={() => setDeleteDialogOpen(selectedImages)}
