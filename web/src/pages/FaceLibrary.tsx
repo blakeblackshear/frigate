@@ -193,6 +193,12 @@ export default function FaceLibrary() {
     ids: string[];
   } | null>(null);
 
+  // detail dialog
+  const [selectedEvent, setSelectedEvent] = useState<Event | undefined>(
+    undefined,
+  );
+  const [dialogTab, setDialogTab] = useState<SearchTab>("tracking_details");
+
   const onDelete = useCallback(
     (name: string, ids: string[], isName: boolean = false) => {
       axios
@@ -451,6 +457,10 @@ export default function FaceLibrary() {
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
+            onClickEvent={(event) => {
+              setSelectedEvent(event);
+              setDialogTab("tracking_details");
+            }}
           />
         ) : (
           <FaceGrid
@@ -463,6 +473,17 @@ export default function FaceLibrary() {
           />
         ))
       )}
+
+      <SearchDetailDialog
+        search={
+          selectedEvent ? (selectedEvent as unknown as SearchResult) : undefined
+        }
+        page={dialogTab}
+        setSimilarity={undefined}
+        setSearchPage={setDialogTab}
+        setSearch={(search) => setSelectedEvent(search as unknown as Event)}
+        setInputFocused={() => {}}
+      />
     </div>
   );
 }
@@ -675,6 +696,7 @@ type TrainingGridProps = {
         ) => FaceLibraryData | undefined),
     opts?: boolean | { revalidate?: boolean },
   ) => Promise<FaceLibraryData | undefined>;
+  onClickEvent: (event: Event) => void;
 };
 function TrainingGrid({
   config,
@@ -684,6 +706,7 @@ function TrainingGrid({
   selectedFaces,
   onClickFaces,
   onRefresh,
+  onClickEvent,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -763,6 +786,7 @@ function TrainingGrid({
               selectedFaces={selectedFaces}
               onClickFaces={onClickFaces}
               onRefresh={onRefresh}
+              onClickEvent={onClickEvent}
             />
           </div>
         );
