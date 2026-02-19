@@ -6,6 +6,7 @@ import logging
 from typing import Any, Optional
 
 import httpx
+import numpy as np
 import requests
 
 from frigate.config import GenAIProviderEnum
@@ -175,6 +176,97 @@ class LlamaCppClient(GenAIClient):
                 }
             )
         return result if result else None
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Generate embeddings via llama.cpp /embeddings endpoint.
+
+        Supports batch requests. Uses content format with prompt_string and
+        multimodal_data for images (PR #15108). Server must be started with
+        --embeddings and --mmproj for multimodal support.
+        """
+        if self.provider is None:
+            logger.warning(
+                "llama.cpp provider has not been initialized. Check your llama.cpp configuration."
+            )
+            return []
+
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        EMBEDDING_DIM = 768
+
+        content = []
+        for text in texts:
+            content.append({"prompt_string": text})
+        for img in images:
+            encoded = base64.b64encode(img).decode("utf-8")
+            content.append({"prompt_string": "", "multimodal_data": [encoded]})
+
+        try:
+            response = requests.post(
+                f"{self.provider}/embeddings",
+                json={"content": content},
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            items = result.get("data", result) if isinstance(result, dict) else result
+            if not isinstance(items, list):
+                logger.warning("llama.cpp embeddings returned unexpected format")
+                return []
+
+            embeddings = []
+            for item in items:
+                emb = item.get("embedding") if isinstance(item, dict) else None
+                if emb is None:
+                    logger.warning("llama.cpp embeddings item missing embedding field")
+                    continue
+                arr = np.array(emb, dtype=np.float32)
+                orig_dim = arr.size
+                if orig_dim != EMBEDDING_DIM:
+                    if orig_dim > EMBEDDING_DIM:
+                        arr = arr[:EMBEDDING_DIM]
+                        logger.debug(
+                            "Truncated llama.cpp embedding from %d to %d dimensions",
+                            orig_dim,
+                            EMBEDDING_DIM,
+                        )
+                    else:
+                        arr = np.pad(
+                            arr,
+                            (0, EMBEDDING_DIM - orig_dim),
+                            mode="constant",
+                            constant_values=0,
+                        )
+                        logger.debug(
+                            "Padded llama.cpp embedding from %d to %d dimensions",
+                            orig_dim,
+                            EMBEDDING_DIM,
+                        )
+                embeddings.append(arr)
+            return embeddings
+        except requests.exceptions.Timeout:
+            logger.warning("llama.cpp embeddings request timed out")
+            return []
+        except requests.exceptions.RequestException as e:
+            error_detail = str(e)
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    error_detail = f"{str(e)} - Response: {e.response.text[:500]}"
+                except Exception:
+                    pass
+            logger.warning("llama.cpp embeddings error: %s", error_detail)
+            return []
+        except Exception as e:
+            logger.warning("Unexpected error in llama.cpp embeddings: %s", str(e))
+            return []
 
     def chat_with_tools(
         self,
