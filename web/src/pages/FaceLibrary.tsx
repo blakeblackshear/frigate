@@ -72,6 +72,10 @@ import {
   ClassificationItemData,
   ClassifiedEvent,
 } from "@/types/classification";
+import SearchDetailDialog, {
+  SearchTab,
+} from "@/components/overlay/detail/SearchDetailDialog";
+import { SearchResult } from "@/types/search";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
