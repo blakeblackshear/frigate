@@ -463,7 +463,8 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                 classes={classes}
                 modelName={model.name}
                 image={selectedImages[0]}
-                onRefresh={(category: string) => {
+                onRefresh={refreshAll}
+                onCategorize={(category) => {
                   // Batch categorize all selected images
                   let successCount = 0;
                   let failCount = 0;
