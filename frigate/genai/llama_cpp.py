@@ -1,6 +1,7 @@
 """llama.cpp Provider for Frigate AI."""
 
 import base64
+import io
 import json
 import logging
 from typing import Any, Optional
@@ -8,12 +9,27 @@ from typing import Any, Optional
 import httpx
 import numpy as np
 import requests
+from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
 from frigate.genai.utils import parse_tool_calls_from_message
 
 logger = logging.getLogger(__name__)
+
+
+def _to_jpeg(img_bytes: bytes) -> bytes | None:
+    """Convert image bytes to JPEG. llama.cpp/STB does not support WebP."""
+    try:
+        img = Image.open(io.BytesIO(img_bytes))
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85)
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning("Failed to convert image to JPEG: %s", e)
+        return None
 
 
 @register_genai_provider(GenAIProviderEnum.llamacpp)
@@ -205,8 +221,15 @@ class LlamaCppClient(GenAIClient):
         for text in texts:
             content.append({"prompt_string": text})
         for img in images:
-            encoded = base64.b64encode(img).decode("utf-8")
-            content.append({"prompt_string": "", "multimodal_data": [encoded]})
+            # llama.cpp uses STB which does not support WebP; convert to JPEG
+            jpeg_bytes = _to_jpeg(img)
+            to_encode = jpeg_bytes if jpeg_bytes is not None else img
+            encoded = base64.b64encode(to_encode).decode("utf-8")
+            # prompt_string must contain <__media__> placeholder for image tokenization
+            content.append({
+                "prompt_string": "<__media__>\n",
+                "multimodal_data": [encoded],
+            })
 
         try:
             response = requests.post(
