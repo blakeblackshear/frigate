@@ -67,6 +67,7 @@ class LlamaCppClient(GenAIClient):
 
             # Build request payload with llama.cpp native options
             payload = {
+                "model": self.genai_config.model,
                 "messages": [
                     {
                         "role": "user",
@@ -134,6 +135,7 @@ class LlamaCppClient(GenAIClient):
                     openai_tool_choice = "required"
 
             payload = {
+                "model": self.genai_config.model,
                 "messages": messages,
             }
 
