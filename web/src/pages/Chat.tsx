@@ -4,10 +4,14 @@ import { FaArrowUpLong } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback } from "react";
 import axios from "axios";
+import { ChatEventThumbnailsRow } from "@/components/chat/ChatEventThumbnailsRow";
 import { MessageBubble } from "@/components/chat/ChatMessage";
 import { ToolCallBubble } from "@/components/chat/ToolCallBubble";
 import type { ChatMessage } from "@/types/chat";
-import { streamChatCompletion } from "@/utils/chatUtil";
+import {
+  getEventIdsFromSearchObjectsToolCalls,
+  streamChatCompletion,
+} from "@/utils/chatUtil";
 
 export default function ChatPage() {
   const { t } = useTranslation(["views/chat"]);
@@ -118,6 +122,15 @@ export default function ChatPage() {
                     msg.role === "user" || !isLoading || i < messages.length - 1
                   }
                 />
+                {msg.role === "assistant" &&
+                  (() => {
+                    const isComplete = !isLoading || i < messages.length - 1;
+                    if (!isComplete) return null;
+                    const events = getEventIdsFromSearchObjectsToolCalls(
+                      msg.toolCalls,
+                    );
+                    return <ChatEventThumbnailsRow events={events} />;
+                  })()}
               </div>
             );
           })}

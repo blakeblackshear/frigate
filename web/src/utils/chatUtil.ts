@@ -161,3 +161,33 @@ export async function streamChatCompletion(
     onDone();
   }
 }
+
+/**
+ * Parse search_objects tool call response(s) into event ids for thumbnails.
+ */
+export function getEventIdsFromSearchObjectsToolCalls(
+  toolCalls: ToolCall[] | undefined,
+): { id: string }[] {
+  if (!toolCalls?.length) return [];
+  const results: { id: string }[] = [];
+  for (const tc of toolCalls) {
+    if (tc.name !== "search_objects" || !tc.response?.trim()) continue;
+    try {
+      const parsed = JSON.parse(tc.response) as unknown;
+      if (!Array.isArray(parsed)) continue;
+      for (const item of parsed) {
+        if (
+          item &&
+          typeof item === "object" &&
+          "id" in item &&
+          typeof (item as { id: unknown }).id === "string"
+        ) {
+          results.push({ id: (item as { id: string }).id });
+        }
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
+  return results;
+}
