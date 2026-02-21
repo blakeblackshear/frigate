@@ -6,7 +6,8 @@
       "content": "このページは {{countdown}} 秒後に再読み込みされます。",
       "button": "今すぐ強制再読み込み"
     },
-    "button": "再起動"
+    "button": "再起動",
+    "description": "再起動の間、Frigateが一時的に停止します。"
   },
   "explore": {
     "plus": {

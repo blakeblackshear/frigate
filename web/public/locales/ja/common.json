@@ -97,7 +97,8 @@
     "show": "{{item}} を表示",
     "ID": "ID",
     "none": "なし",
-    "all": "すべて"
+    "all": "すべて",
+    "other": "その他"
   },
   "button": {
     "apply": "適用",

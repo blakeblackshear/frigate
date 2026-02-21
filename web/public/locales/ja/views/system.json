@@ -91,7 +91,8 @@
         "recording": "録画",
         "review_segment": "レビューセグメント",
         "audio_detector": "音声検知",
-        "go2rtc": "go2rtc"
+        "go2rtc": "go2rtc",
+        "embeddings": "ベクトル埋め込み"
       }
     }
   },
