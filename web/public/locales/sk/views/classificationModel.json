@@ -1,55 +1,59 @@
 {
-  "documentTitle": "Klasifikačné modely",
+  "documentTitle": "Klasifikačné modely - Frigate",
   "button": {
-    "deleteClassificationAttempts": "Odstrániť obrázky klasifikácie",
-    "renameCategory": "Premenovať triedu",
-    "deleteCategory": "Odstrániť triedu",
-    "deleteImages": "Odstrániť obrázky",
-    "trainModel": "Model vlaku",
-    "addClassification": "Pridať klasifikáciu",
-    "deleteModels": "Odstrániť modely",
-    "editModel": "Editovať model"
+    "deleteClassificationAttempts": "Odstrániť Obrázky Klasifikácie",
+    "renameCategory": "Premenovať Triedu",
+    "deleteCategory": "Odstrániť Triedu",
+    "deleteImages": "Odstrániť Obrázky",
+    "trainModel": "Trénovať Model",
+    "addClassification": "Pridať Klasifikáciu",
+    "deleteModels": "Odstrániť Modely",
+    "editModel": "Upraviť Model"
   },
   "toast": {
     "success": {
-      "deletedCategory": "Vymazaná trieda",
-      "deletedImage": "Vymazané obrázky",
+      "deletedCategory": "Vymazaná Trieda",
+      "deletedImage": "Vymazané Obrázky",
       "categorizedImage": "Obrázok bol úspešne klasifikovaný",
       "trainedModel": "Úspešne vyškolený model.",
-      "trainingModel": "Úspešne spustený modelový tréning.",
-      "deletedModel_one": "Úspešne zmazané {{count}} model (y)",
-      "deletedModel_few": "",
-      "deletedModel_other": "",
+      "trainingModel": "Úspešne spustené trénovanie modelu.",
+      "deletedModel_one": "Úspešne zmazaný {{count}} model",
+      "deletedModel_few": "Úspešne zmazané {{count}} modely",
+      "deletedModel_other": "Úspešne zmazaných {{count}} modelov",
       "updatedModel": "Úspešne zmenená konfigurácia modelu",
-      "renamedCategory": "Úspešne premenovaná trieda na"
+      "renamedCategory": "Úspešne premenovaná trieda na {{name}}"
     },
     "error": {
       "deleteImageFailed": "Nepodarilo sa odstrániť: {{errorMessage}}",
       "deleteCategoryFailed": "Nepodarilo sa odstrániť triedu: {{errorMessage}}",
       "categorizeFailed": "Nepodarilo sa kategorizovať obrázok: {{errorMessage}}",
-      "trainingFailed": "Nepodarilo sa spustiť trénovanie modelu: {{errorMessage}}",
+      "trainingFailed": "Trénovanie modelu zlyhalo. Skontroluj záznamy Frigate pre viac podrobností.",
       "deleteModelFailed": "Nepodarilo sa odstrániť model: {{errorMessage}}",
-      "trainingFailedToStart": "Neuspešny štart trenovania modelu:",
-      "updateModelFailed": "Chyba pri úprave modelu:",
-      "renameCategoryFailed": "Chyba pri premenovani triedy:"
+      "trainingFailedToStart": "Neuspešné spustenie trénovania modelu: {{errorMessage}}",
+      "updateModelFailed": "Chyba pri aktualizácii modelu: {{errorMessage}}",
+      "renameCategoryFailed": "Chyba pri premenovaní triedy: {{errorMessage}}"
     }
   },
   "deleteCategory": {
-    "title": "Odstrániť triedu",
+    "title": "Odstrániť Triedu",
     "desc": "Naozaj chcete odstrániť triedu {{name}}? Týmto sa natrvalo odstránia všetky súvisiace obrázky a bude potrebné pretrénovať model.",
     "minClassesTitle": "Nemožete zmazať triedu",
     "minClassesDesc": "Klasifikačný model musí mať aspoň 2 triedy. Pred odstránením tejto triedy pridajte ďalšiu triedu."
   },
   "deleteDatasetImages": {
     "title": "Odstrániť obrázky množiny údajov",
-    "desc": "Naozaj chcete odstrániť {{count}} obrázkov z {{dataset}}? Túto akciu nie je možné vrátiť späť a bude si vyžadovať pretrénovanie modelu."
+    "desc_one": "Naozaj chcete odstrániť {{count}} obrázok z {{dataset}}? Túto akciu nie je možné vrátiť späť a bude si vyžadovať pretrénovanie modelu.",
+    "desc_few": "Naozaj chcete odstrániť {{count}} obrázky z {{dataset}}? Túto akciu nie je možné vrátiť späť a bude si vyžadovať pretrénovanie modelu.",
+    "desc_other": "Naozaj chcete odstrániť {{count}} obrázkov z {{dataset}}? Túto akciu nie je možné vrátiť späť a bude si vyžadovať pretrénovanie modelu."
   },
   "deleteTrainImages": {
-    "title": "Odstrániť obrázky vlakov",
-    "desc": "Naozaj chcete odstrániť {{count}} obrázkov? Túto akciu nie je možné vrátiť späť."
+    "title": "Odstrániť Trénovacie Obrázky",
+    "desc_one": "Naozaj chcete odstrániť {{count}} obrázok? Túto akciu nie je možné vrátiť späť.",
+    "desc_few": "Naozaj chcete odstrániť {{count}} obrázky? Túto akciu nie je možné vrátiť späť.",
+    "desc_other": "Naozaj chcete odstrániť {{count}} obrázkov? Túto akciu nie je možné vrátiť späť."
   },
   "renameCategory": {
-    "title": "Premenovať triedu",
+    "title": "Premenovať Triedu",
     "desc": "Zadajte nový názov pre {{name}}. Budete musieť model pretrénovať, aby sa zmena názvu prejavila."
   },
   "description": {
@@ -112,7 +116,8 @@
         "classesUnique": "Názvy tried musia byť jedinečné",
         "stateRequiresTwoClasses": "Modely štátov vyžadujú aspoň 2 triedy",
         "objectLabelRequired": "Vyberte označenie objektu",
-        "objectTypeRequired": "Vyberte typ klasifikácie"
+        "objectTypeRequired": "Vyberte typ klasifikácie",
+        "noneNotAllowed": "Trieda 'none' nie je povolená"
       },
       "states": "Štátov"
     },
@@ -151,32 +156,37 @@
       "allImagesRequired_other": "Uveďte všetky obrázky. {{count}} obrázkov zostávajú.",
       "modelCreated": "Model vytvorený úspešne. Použite aktuálne klasifikácie na pridanie obrázkov pre chýbajúce stavy a nasledne dajte trénovať model.",
       "missingStatesWarning": {
-        "title": "Chýbajúce príklady stavov"
+        "title": "Chýbajúce príklady stavov",
+        "description": "Odporúča sa vybrať príklady pre všetky stavy pre dosiahnutie najlepších výsledkov. Môžeš pokračovať bez zvolenia všetkých stavov, ale model nebude natrénovaný pokiaľ všetky stavy nemajú obrázky. Po pokračovaní použi náhľad Nedávne Klasifikácie na klasifikovanie obrázkov pre chýbajúce stavy, potom natrénuj model."
       }
     }
   },
   "deleteModel": {
     "title": "Odstrániť klasifikačný model",
     "single": "Ste si istí, že chcete odstrániť {{name}}? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a vzdelávacích údajov. Táto akcia nemôže byť neporušená.",
-    "desc": "Ste si istí, že chcete odstrániť {{count}} model (y)? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a vzdelávacích údajov. Táto akcia nemôže byť neporušená."
+    "desc_one": "Ste si istí, že chcete odstrániť {{count}} model? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a trénovacích údajov. Táto akcia nemôže byť neporušená.",
+    "desc_few": "Ste si istí, že chcete odstrániť {{count}} modely? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a trénovacích údajov. Táto akcia nemôže byť neporušená.",
+    "desc_other": "Ste si istí, že chcete odstrániť {{count}} modelov? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a trénovacích údajov. Táto akcia nemôže byť neporušená."
   },
   "menu": {
     "objects": "Objekty",
     "states": "Štátov"
   },
   "details": {
-    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč detekciami tohoto objektu."
+    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč všetkými detekciami tohoto objektu.",
+    "none": "Žiadny",
+    "unknown": "Neznámy"
   },
   "tooltip": {
     "trainingInProgress": "Model sa aktuálne trénuje",
-    "noNewImages": "Žiadne nové obrázky na trénovanie. Najskor klasifikuj nové obrazky do datasetu.",
+    "noNewImages": "Žiadne nové obrázky na trénovanie. Najskôr klasifikuj nové obrazky do datasetu.",
     "noChanges": "Žiadne zmeny v datasete od posledného tréningu.",
-    "modelNotReady": "Model nie je pripravený na trénovanie."
+    "modelNotReady": "Model nie je pripravený na trénovanie"
   },
   "edit": {
-    "title": "Nastavenie modelu",
-    "descriptionState": "Upravte triedy pre tento model klasifikácie. Zmeny budú vyžadovať pretrénovanie modelu.",
-    "descriptionObject": "Upravte typ objektu a typ klasifikácie pre tento model klasifikácie.",
+    "title": "Nastavenie Klasifikácie Modelu",
+    "descriptionState": "Upravte triedy pre tento model stavovej klasifikácie. Zmeny budú vyžadovať pretrénovanie modelu.",
+    "descriptionObject": "Upravte typ objektu a typ klasifikácie pre tento objektový model klasifikácie.",
     "stateClassesInfo": "Poznámka: Zmena tried stavov vyžaduje pretrénovanie modelu s aktualizovanými triedami."
   }
 }

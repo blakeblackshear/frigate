@@ -146,7 +146,7 @@
       }
     },
     "licensePlateRecognition": {
-      "title": "Rozpoznávanie ŠPZ",
+      "title": "Rozpoznávanie Evidenčných Čísel Vozidiel",
       "desc": "Frigate dokáže rozpoznávať evidenčné čísla vozidiel a automaticky pridávať detekované znaky do poľa recognized_license_plate alebo známy názov ako podradený štítok k objektom typu car. Bežným prípadom použitia môže byť čítanie evidenčných čísel áut vchádzajúcich na príjazdovú cestu alebo áut prechádzajúcich po ulici."
     },
     "restart_required": "Vyžaduje sa reštart (zmenené nastavenia obohatenia)",
@@ -300,7 +300,7 @@
       "name": {
         "title": "Meno",
         "inputPlaceHolder": "Zadajte meno…",
-        "tips": "Názov musí mať aspoň 2 znaky, musí mať aspoň jedno písmeno a nesmie byť názvom kamery alebo inej zóny."
+        "tips": "Názov musí mať aspoň 2 znaky, musí mať aspoň jedno písmeno a nesmie byť názvom kamery alebo inej zóny v tejto kamere."
       },
       "inertia": {
         "title": "Zotrvačnosť",
@@ -334,7 +334,7 @@
         }
       },
       "toast": {
-        "success": "Zóna {{zoneName}} bola uložená. Reštartujte Frigate pre aplikovanie zmien."
+        "success": "Zóna {{zoneName}} bola uložená."
       },
       "add": "Pridať zónu",
       "edit": "Upraviť zónu",
@@ -364,8 +364,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} bol uložený. Reštartujte Frigate pre aplikovanie zmien.",
-          "noName": "Maska Detekcia pohybu bola uložená. Reštartujte Frigate pre aplikovanie zmien."
+          "title": "{{polygonName}} bol uložený.",
+          "noName": "Maska detekcie pohybu bola uložená."
         }
       }
     },
@@ -390,8 +390,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} bol uložený. Reštartujte Frigate pre aplikovanie zmien.",
-          "noName": "Maska Objektu bola uložená. Reštartujte Frigate pre aplikovanie zmien."
+          "title": "{{polygonName}} bol uložený.",
+          "noName": "Maska Objektu bola uložená."
         }
       }
     },
@@ -797,11 +797,11 @@
     "title": "Nastavenie recenzie kamery",
     "object_descriptions": {
       "title": "Generatívne popisy objektov umelej inteligencie",
-      "desc": "Dočasne umožňujú/disable Generovať opisy objektu AI pre tento fotoaparát. Keď je zakázané, AI vygenerované popisy nebudú požiadané o sledovanie objektov na tomto fotoaparáte."
+      "desc": "Dočasne povoľ/zakáž AI vygenerované popisy objektov pre túto kameru pokiaľ nebude Frigate reštartovaná. Keď je zakázané, AI vygenerované popisy nebudú žiadané pre sledované objekty na tejto kamere."
     },
     "review_descriptions": {
       "title": "Popisy generatívnej umelej inteligencie",
-      "desc": "Dočasne povoliť/disable Genive AI opisy pre tento fotoaparát. Keď je zakázané, AI vygenerované popisy nebudú požiadané o preskúmanie položiek na tomto fotoaparáte."
+      "desc": "Dočasne povoľ/zakáž AI vygenerované popisy revízií pre túto kameru pokiaľ nebude Frigate reštartovaná. Keď je zakázané, AI vygenerované popisy nebudú žiadané pre sledované objekty na tejto kamere."
     },
     "review": {
       "title": "Recenzia",
@@ -837,7 +837,7 @@
       "desc": "Spravovať používateľské účty tejto inštancie Frigate."
     },
     "addUser": "Pridať používateľa",
-    "updatePassword": "Aktualizovať heslo",
+    "updatePassword": "Obnoviť Heslo",
     "toast": {
       "success": {
         "createUser": "Užívateľ {{user}} úspešne vytvorený",
@@ -858,7 +858,7 @@
       "role": "Rola",
       "noUsers": "Nenašli sa žiadni používatelia.",
       "changeRole": "Zmeniť rolu používateľa",
-      "password": "Heslo",
+      "password": "Resetovať Heslo",
       "deleteUser": "Odstrániť používateľa"
     },
     "dialog": {
@@ -947,9 +947,9 @@
         "createRole": "Rola {{role}} bola úspešne vytvorená",
         "updateCameras": "Kamery aktualizované pre rolu {{role}}",
         "deleteRole": "Rola {{role}} bola úspešne odstránená",
-        "userRolesUpdated_one": "",
-        "userRolesUpdated_few": "",
-        "userRolesUpdated_other": "{{count}} užívatelia priradené tejto úlohe boli aktualizované pre \"viewer\", ktorý má prístup ku všetkým kamerám."
+        "userRolesUpdated_one": "{{count}} užívateľ priradený tejto úlohe bol aktualizovaný na \"viewer\", ktorý má prístup ku všetkým kamerám.",
+        "userRolesUpdated_few": "{{count}} užívatelia priradení tejto úlohe boli aktualizovaní na \"viewer\", ktorý má prístup ku všetkým kamerám.",
+        "userRolesUpdated_other": "{{count}} užívatelia priradení tejto úlohe boli aktualizovaní na \"viewer\", ktorý má prístup ku všetkým kamerám."
       },
       "error": {
         "createRoleFailed": "Nepodarilo sa vytvoriť rolu: {{errorMessage}}",

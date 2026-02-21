@@ -283,7 +283,7 @@
         "millisecondsToOffset": "Milisekundy na posunutie detekcie anotácií. <em>Predvolené: 0</em>",
         "tips": "TIP: Predstavte si klip udalosti, v ktorom osoba kráča zľava doprava. Ak je ohraničujúci rámček časovej osi udalosti stále naľavo od osoby, hodnota by sa mala znížiť. Podobne, ak osoba kráča zľava doprava a ohraničujúci rámček je stále pred ňou, hodnota by sa mala zvýšiť.",
         "toast": {
-          "success": "Odsadenie anotácie pre {{camera}} bolo uložené do konfiguračného súboru. Reštartujte Frigate, aby sa zmeny prejavili."
+          "success": "Odsadenie anotácie pre {{camera}} bolo uložené do konfiguračného súboru."
         }
       }
     },

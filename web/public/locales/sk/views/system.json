@@ -86,7 +86,13 @@
     "otherProcesses": {
       "title": "Iné procesy",
       "processCpuUsage": "Proces využitia CPU",
-      "processMemoryUsage": "Procesné využitie pamäte"
+      "processMemoryUsage": "Procesné využitie pamäte",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "nahrávka",
+        "review_segment": "skontrolovať segment",
+        "audio_detector": "zvukový detektor"
+      }
     }
   },
   "storage": {
@@ -147,7 +153,7 @@
       "overallFramesPerSecond": "celkový počet snímok za sekundu",
       "overallDetectionsPerSecond": "celkový počet detekcií za sekundu",
       "overallSkippedDetectionsPerSecond": "celkový počet vynechaných detekcií za sekundu",
-      "cameraFramesPerSecond": "{{camName}}snimky za sekundu",
+      "cameraFramesPerSecond": "{{camName}} snímky za sekundu",
       "cameraDetectionsPerSecond": "{{camName}}detekcie za sekundu",
       "cameraSkippedDetectionsPerSecond": "{{camName}} vynechaných detekcií za sekundu"
     },
@@ -178,11 +184,11 @@
       "image_embedding": "Vkladanie obrázkov",
       "text_embedding": "Vkladanie textu",
       "face_recognition": "Rozpoznávanie tváre",
-      "plate_recognition": "Rozpoznávanie ŠPZ",
+      "plate_recognition": "Rozpoznávanie EČV",
       "image_embedding_speed": "Rýchlosť vkladania obrázkov",
       "face_embedding_speed": "Rýchlosť vkladania tváre",
       "face_recognition_speed": "Rýchlosť rozpoznávania tváre",
-      "plate_recognition_speed": "Rýchlosť rozpoznávania ŠPZ",
+      "plate_recognition_speed": "Rýchlosť rozpoznávania EČV",
       "text_embedding_speed": "Rýchlosť vkladania textu",
       "yolov9_plate_detection_speed": "YOLOv9 rýchlosť detekcie ŠPZ",
       "yolov9_plate_detection": "YOLOv9 Detekcia ŠPZ",
@@ -191,7 +197,10 @@
       "review_description_events_per_second": "Popis",
       "object_description": "Popis objektu",
       "object_description_speed": "Popis objektu Rýchlosť",
-      "object_description_events_per_second": "Popis objektu"
+      "object_description_events_per_second": "Popis objektu",
+      "classification": "{{name}} Klasifikácia",
+      "classification_speed": "{{name}} Rýchlosť Klasifikácie",
+      "classification_events_per_second": "{{name}} Klasifikácia Udalosti Za Sekundu"
     },
     "averageInf": "Priemerný čas inferencie"
   }

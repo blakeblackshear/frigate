@@ -128,9 +128,13 @@
     "loadFailed": "Nepodarilo sa načítať rozpoznané evidenčné čísla vozidiel.",
     "loading": "Načítavajú sa rozpoznané evidenčné čísla…",
     "placeholder": "Zadajte text pre vyhľadávanie evidenčných čísel…",
-    "noLicensePlatesFound": "Neboli nájdené SPZ.",
+    "noLicensePlatesFound": "Neboli nájdené evidenčné čísla vozidiel.",
     "selectPlatesFromList": "Vyberte jeden alebo viacero tanierov zo zoznamu.",
     "selectAll": "Vybrať všetko",
     "clearAll": "Vymazať všetko"
+  },
+  "attributes": {
+    "label": "Klasifikačné Atribúty",
+    "all": "Všetky Atribúty"
   }
 }

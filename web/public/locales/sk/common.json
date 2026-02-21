@@ -81,7 +81,8 @@
     },
     "inProgress": "Spracováva sa",
     "invalidStartTime": "Neplatný čas štartu",
-    "invalidEndTime": "Neplatný čas ukončenia"
+    "invalidEndTime": "Neplatný čas ukončenia",
+    "never": "Nikdy"
   },
   "selectItem": "Vyberte {{item}}",
   "unit": {
@@ -98,8 +99,8 @@
       "mbps": "MB/s",
       "gbps": "GB/s",
       "kbph": "kb/hour",
-      "mbph": "MB/hour",
-      "gbph": "GB/hour"
+      "mbph": "MB/hodinu",
+      "gbph": "GB/hodinu"
     }
   },
   "readTheDocumentation": "Prečítajte si dokumentáciu",
@@ -109,7 +110,8 @@
     "show": "Zobraziť {{item}}",
     "ID": "ID",
     "none": "None",
-    "all": "Všetko"
+    "all": "Všetko",
+    "other": "Iné"
   },
   "button": {
     "apply": "Použiť",
@@ -199,7 +201,8 @@
       "ur": "اردو (Urdu)",
       "withSystem": {
         "label": "Použiť systémové nastavenia pre jazyk"
-      }
+      },
+      "hr": "Hrvatski (Croatian)"
     },
     "restart": "Reštartovať Frigate",
     "live": {

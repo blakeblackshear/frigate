@@ -11,7 +11,7 @@
     "face": "Detail tváre",
     "faceDesc": "Podrobnosti o sledovanom objekte, ktorý vytvoril túto tvár",
     "timestamp": "Časová pečiatka",
-    "unknown": "Neznáme"
+    "unknown": "Neznámy"
   },
   "documentTitle": "Knižnica tvárí",
   "uploadFaceImage": {
