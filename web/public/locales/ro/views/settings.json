@@ -382,6 +382,11 @@
         },
         "error": {
           "mustBeFinished": "Desenul poligonului trebuie finalizat înainte de salvare."
+        },
+        "type": {
+          "zone": "zonă",
+          "motion_mask": "mască de mișcare",
+          "object_mask": "mască de obiect"
         }
       },
       "distance": {
