@@ -709,7 +709,7 @@ To allow Frigate to use the Apple Silicon Neural Engine / Processing Unit (NPU) 
 services:
   frigate:
     container_name: frigate
-    image: ghcr.io/blakeblackshear/frigate:stable-arm64
+    image: ghcr.io/blakeblackshear/frigate:stable-standard-arm64
     restart: unless-stopped
     shm_size: "512mb" # update for your cameras based on calculation above
     volumes:
