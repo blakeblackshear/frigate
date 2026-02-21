@@ -6,7 +6,8 @@
       "title": "Frigate uruchamia się ponownie",
       "content": "Strona odświeży się za {{countdown}} sekund.",
       "button": "Wymuś odświeżenie"
-    }
+    },
+    "description": "Spowoduje to chwilowe zatrzymanie Frigate i ponowne uruchomienie."
   },
   "explore": {
     "plus": {

@@ -278,6 +278,11 @@
         },
         "error": {
           "mustBeFinished": "Rysowanie wielokąta musi być zakończone przed zapisaniem."
+        },
+        "type": {
+          "object_mask": "maska obiektowa",
+          "motion_mask": "maska ruchu",
+          "zone": "strefa"
         }
       },
       "speed": {
@@ -787,9 +792,9 @@
         "createRole": "Utworzono rolę {{role}}",
         "updateCameras": "Zaktualizowano kamery dla roli {{role}}",
         "deleteRole": "Rola {{role}} została usunięta",
-        "userRolesUpdated_one": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer.",
-        "userRolesUpdated_few": "",
-        "userRolesUpdated_many": ""
+        "userRolesUpdated_one": "{{count}} użytkownik przypisany do tej roli został zaktualizowany do roli 'viewer', która ma dostęp do wszystkich kamer.",
+        "userRolesUpdated_few": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer.",
+        "userRolesUpdated_many": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer."
       },
       "error": {
         "createRoleFailed": "Nie udało się utworzyć roli: {{errorMessage}}",
