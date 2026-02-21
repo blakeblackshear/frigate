@@ -6,7 +6,7 @@
     "notifications": "Nastavitve obvestil - Frigate",
     "masksAndZones": "Urejevalnik mask in območij - Frigate",
     "object": "Odpravljanje napak - Frigate",
-    "general": "Splošne nastavitve - Frigate",
+    "general": "Nastavitve UI - Frigate",
     "frigatePlus": "Frigate+ Nastavitve - Frigate",
     "enrichments": "Nastavitve Obogatitev - Frigate",
     "motionTuner": "Nastavitev gibanja - Frigate",
@@ -59,7 +59,7 @@
     "noCamera": "Brez Kamere"
   },
   "general": {
-    "title": "Splošne Nastavitve",
+    "title": "Nastavitve Uporabniškega Vmesnika",
     "liveDashboard": {
       "title": "Nadzorna plošča (v živo)",
       "automaticLiveView": {
@@ -71,7 +71,12 @@
         "desc": "Privzeto se nedavna opozorila na nadzorni plošči predvajajo kot kratki ponavljajoči videoposnetki . To možnost onemogočite, če želite, da se v tej napravi/brskalniku prikaže samo statična slika nedavnih opozoril."
       },
       "displayCameraNames": {
-        "label": "Vedno prikaži imena kamer"
+        "label": "Vedno prikaži imena kamer",
+        "desc": "Imena kamer vedno prikaži kot žeton v večkamernem nadzornem pogledu v živo."
+      },
+      "liveFallbackTimeout": {
+        "label": "Časovna omejitev povratka (fallback) v live playerju",
+        "desc": "Ko je visokokakovostni tok v živo kamere nedosegljiv, preklopi na način z nizko pasovno širino po toliko sekundah. Privzeto: 3."
       }
     },
     "storedLayouts": {
@@ -112,7 +117,7 @@
     }
   },
   "enrichments": {
-    "title": "Nastavitve Obogatitev",
+    "title": "Nastavitve Obogatitve",
     "unsavedChanges": "Neshranjene Spremembe Nastavitev Obogatitev",
     "birdClassification": {
       "title": "Klasifikacija ptic",
@@ -218,7 +223,8 @@
     "steps": {
       "nameAndConnection": "Ime & Zbirka",
       "streamConfiguration": "Konfiguracija pretoka",
-      "validationAndTesting": "Uverjanje in testiranje"
+      "validationAndTesting": "Uverjanje in testiranje",
+      "probeOrSnapshot": "Preverba ali posnetek"
     },
     "save": {
       "success": "Kamera {{cameraName}} je bila uspešno shranjena.",
@@ -269,8 +275,19 @@
         "customUrlRtspRequired": "URL-ji po meri se morajo začeti z \"rtsp://\". Za ne-RTSP pretoke kamer je potrebna ročna nastavitev.",
         "brands": {
           "reolink-rtsp": "RTSP za Reolink ni priporočen. \nV nastavitvah kamere omogočite HTTP in znova zaženite čarovnika."
-        }
-      }
+        },
+        "brandOrCustomUrlRequired": "Izberi znamko kamere z gostiteljem/IP-naslovom ali izberi 'Drugo' z lastnim URL-jem",
+        "nameRequired": "Potrebno je ime kamere"
+      },
+      "connectionSettings": "Nastavitve povezave",
+      "detectionMethod": "Način zaznavanja pretoka",
+      "onvifPort": "ONVIF Vrata",
+      "probeMode": "Preverba kamere",
+      "manualMode": "Ročni izbor",
+      "detectionMethodDescription": "Preveri kamero prek ONVIF (če je podprto), da najde URL-je tokov kamere, ali ročno izberi znamko kamere za uporabo vnaprej določenih URL-jev. Za vnos poljubnega RTSP URL-ja izberi ročni način in izberi »Drugo«.",
+      "onvifPortDescription": "Za kamere ki podpirajo ONVIF, je to ponavadi 80 ali 8080.",
+      "useDigestAuth": "Uporabi digest avtentikacijo",
+      "useDigestAuthDescription": "Uporabi HTTP digest autentikacijo za ONVIF. Nekatere kamere lahko zahtevajo poseben uporabniški uporabnik/geslo samo za ONVIF, namesto standardnega administratorskega računa."
     },
     "step2": {
       "streamUrlPlaceholder": "rtsp://uporabniskoime:geslo@gostitelj:vrata/pot",
@@ -303,6 +320,39 @@
       "featuresPopover": {
         "title": "Značilnosti pretoka",
         "description": "Uporabi ponovno pretakanje go2rtc, da zmanjšaš število povezav s kamero."
+      },
+      "description": "Preveri kamero za razpoložljive video tokove ali ročno nastavi konfiguracijo glede na izbrani način detekcije.",
+      "streamDetails": "Podrobnosti toka",
+      "probing": "Preveri kamere...",
+      "retry": "Ponovno poskusi",
+      "testing": {
+        "probingMetadata": "Preverjanje metapodatkov kamere…",
+        "fetchingSnapshot": "Pridobivanje posnetka kamere…"
+      },
+      "probeFailed": "Ni uspelo preveriti kamere: {{error}}",
+      "probingDevice": "Preverjam napravo…",
+      "probeSuccessful": "Preverjanje uspešno",
+      "probeError": "Napaka pri preverjanju",
+      "probeNoSuccess": "Preverjanje neuspešno",
+      "deviceInfo": "Podatki naprave",
+      "manufacturer": "Proizvajalec",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profili",
+      "ptzSupport": "PTZ Podpora",
+      "autotrackingSupport": "Podpora za samodejno sledenje",
+      "presets": "Prednastavitve",
+      "rtspCandidates": "RTSP Kandidati",
+      "rtspCandidatesDescription": "Naslednji RTSP URL-ji so bili zaznani med preverjanjem kamere. Preizkusi povezavo, da si ogledaš metapodatke toka.",
+      "noRtspCandidates": "Med preverjanjem kamere niso bili najdeni nobeni RTSP URL-ji. Vaše poverilnice so morda napačne, kamera morda ne podpira ONVIF ali pa metoda, ki se uporablja za pridobivanje RTSP URL-jev, ni podprta. Vrnite se nazaj in ročno vnesite RTSP URL.",
+      "candidateStreamTitle": "Kandidat{{number}}",
+      "useCandidate": "Uporabi",
+      "uriCopy": "Kopiraj",
+      "uriCopied": "URI kopiran v odložišče",
+      "testConnection": "Preveri Povezavo",
+      "toggleUriView": "Klikni za preklop na celoten prikaz URI-ja",
+      "errors": {
+        "hostRequired": "Zahtevan je gostitelj / IP-naslov"
       }
     },
     "step3": {
@@ -334,7 +384,62 @@
         "videoCodecGood": "Video kodek je {{codec}}.",
         "audioCodecGood": "Audio kodek je {{codec}}.",
         "resolutionHigh": "Resolucija {{resolution}} lahko povzroči povečano porabo virov."
+      },
+      "streamsTitle": "Toki Kamer",
+      "addStream": "Dodaj Pretok",
+      "addAnotherStream": "Dodaj še en pretok",
+      "streamUrl": "URL Pretoka",
+      "streamUrlPlaceholder": "rtsp://uporabnik:geslo@gostitelj:vrata/pot",
+      "selectStream": "Izberi Pretok",
+      "searchCandidates": "Išči kandidate...",
+      "noStreamFound": "Noben pretok ni bil najden",
+      "url": "URL",
+      "resolution": "Resolucija",
+      "selectResolution": "Izberi resolucijo",
+      "quality": "Kvaliteta",
+      "selectQuality": "Izberi kvaliteto",
+      "roleLabels": {
+        "detect": "Zaznavanje predmetov",
+        "record": "Snemanje",
+        "audio": "Zvok"
+      },
+      "testStream": "Preveri Povezave",
+      "testSuccess": "Test pretoka uspešen!",
+      "testFailed": "Test pretoka neuspešen",
+      "testFailedTitle": "Test neuspešen",
+      "connected": "Povezan",
+      "notConnected": "Ni povezave",
+      "featuresTitle": "Zmožnosti",
+      "go2rtc": "Zmanjšaj število povezav na kamero",
+      "detectRoleWarning": "Vsaj en tok mora imeti vlogo »detect«, da lahko nadaljuješ.",
+      "rolesPopover": {
+        "title": "Vloge pretokov",
+        "detect": "Glavni pretok za zaznavanje predmetov.",
+        "record": "Shranjuje segmente video vira glede na nastavitve konfiguracije.",
+        "audio": "Tok za detekcijo na osnovi zvoka."
+      },
+      "featuresPopover": {
+        "title": "Zmožnosti Toka",
+        "description": "Uporabi go2rtc restreaming, da zmanjšaš število povezav do kamere."
       }
+    },
+    "step4": {
+      "connectStream": "Poveži",
+      "connectingStream": "Povezovanje",
+      "disconnectStream": "Prekini povezavo",
+      "estimatedBandwidth": "Ocenjena pasovna širina",
+      "roles": "Vloge",
+      "connectAllStreams": "Poveži Vse Pretoke",
+      "reconnectionSuccess": "Ponovna Povezava Uspešna.",
+      "reconnectionPartial": "Nekateri pretoki se niso ponovno povezali.",
+      "streamUnavailable": "Predogled pretoka ni na voljo",
+      "reload": "Ponovno naloži",
+      "connecting": "Povezovanje...",
+      "streamTitle": "Pretok {{number}}",
+      "valid": "Veljaven",
+      "failed": "Spodletel",
+      "notTested": "Ni testirano",
+      "description": "Končna validacija in analiza pred shranjevanjem nove kamere. Pred shranjevanjem povežite vsak tok."
     }
   },
   "roles": {
@@ -368,7 +473,7 @@
         "description": "Konfigurirajte mejno vrednost in dejanja za ta sprožilec."
       },
       "step2": {
-        "description": "Konfigurirajte vsebino sprožilca, da se bo akcija izvedla."
+        "description": "Nastavi vsebino, ki bo sprožila to dejanje."
       },
       "step1": {
         "description": "Konfigurirajte osnovne nastavitve sprožilca."
@@ -406,6 +511,11 @@
           "thumbnail": "Sproži, ko je zaznana podobna sličica sledenega objekta"
         }
       }
+    }
+  },
+  "debug": {
+    "zones": {
+      "title": "Cone"
     }
   }
 }
