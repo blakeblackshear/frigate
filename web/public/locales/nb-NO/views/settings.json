@@ -277,6 +277,11 @@
         },
         "error": {
           "mustBeFinished": "Tegningen av polygonet må fullføres før lagring."
+        },
+        "type": {
+          "zone": "sone",
+          "motion_mask": "bevegelsesmaske",
+          "object_mask": "objektmaske"
         }
       },
       "inertia": {
