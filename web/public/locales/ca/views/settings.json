@@ -114,6 +114,11 @@
         },
         "error": {
           "mustBeFinished": "El dibuix del polígon s'ha d'acabar abans de desar."
+        },
+        "type": {
+          "zone": "zona",
+          "motion_mask": "màscara de moviment",
+          "object_mask": "màscara d'objecte"
         }
       },
       "zoneName": {

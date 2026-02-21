@@ -6,7 +6,8 @@
       "title": "Frigate s'està reiniciant",
       "content": "Aquesta pàgina es tornarà a carregar d'aquí a {{countdown}} segons.",
       "button": "Forçar la recàrrega ara"
-    }
+    },
+    "description": "Això aturarà breument Frigate mentre es reinicia."
   },
   "explore": {
     "plus": {
