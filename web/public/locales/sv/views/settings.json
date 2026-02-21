@@ -293,6 +293,11 @@
         },
         "error": {
           "mustBeFinished": "Polygonritningen måste vara klar innan du sparar."
+        },
+        "type": {
+          "zone": "zon",
+          "motion_mask": "rörelsemask",
+          "object_mask": "objektmask"
         }
       }
     },

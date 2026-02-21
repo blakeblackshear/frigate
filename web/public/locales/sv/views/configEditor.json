@@ -14,5 +14,5 @@
   "configEditor": "Ändra konfiguration",
   "confirm": "Avsluta utan att spara?",
   "safeConfigEditor": "Konfigurationsredigeraren (felsäkert läge)",
-  "safeModeDescription": "Fregate är i felsäkert läge på grund av ett konfigurationsvalideringsfel."
+  "safeModeDescription": "Frigate är i felsäkert läge på grund av ett konfigurationsvalideringsfel."
 }
