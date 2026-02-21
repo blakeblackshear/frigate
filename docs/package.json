@@ -24,7 +24,7 @@
     "@inkeep/docusaurus": "^2.0.16",
     "@mdx-js/react": "^3.1.0",
     "clsx": "^2.1.1",
-    "docusaurus-plugin-openapi-docs": "^4.5.1",
+    "docusaurus-plugin-openapi-docs": "^4.7.1",
     "docusaurus-theme-openapi-docs": "^4.5.1",
     "prism-react-renderer": "^2.4.1",
     "raw-loader": "^4.0.2",
