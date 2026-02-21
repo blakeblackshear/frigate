@@ -287,6 +287,11 @@
         },
         "error": {
           "mustBeFinished": "多边形绘制必须完成闭合后才能保存。"
+        },
+        "type": {
+          "zone": "区域",
+          "motion_mask": "画面变动遮罩",
+          "object_mask": "目标遮罩"
         }
       },
       "speed": {

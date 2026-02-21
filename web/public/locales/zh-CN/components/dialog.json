@@ -6,7 +6,8 @@
       "title": "Frigate 正在重启",
       "content": "该页面将会在 {{countdown}} 秒后自动刷新。",
       "button": "强制刷新"
-    }
+    },
+    "description": "Frigate 在重启期间将短暂停止运行。"
   },
   "explore": {
     "plus": {
