@@ -28,5 +28,8 @@
       }
     }
   },
-  "trackedObjectsCount_other": "{{count}} วัตถุที่เจอ "
+  "trackedObjectsCount_other": "{{count}} วัตถุที่เจอ ",
+  "details": {
+    "timestamp": "เวลา"
+  }
 }

@@ -105,7 +105,11 @@
     "masksAndZones": "ตัวแก้ไขแมสและโซน - Frigate",
     "general": "การตั้งค่าทั่วไป - Frigate",
     "frigatePlus": "การตั้งค่า Frigate+ - Frigate",
-    "notifications": "การตั้งค่าการแจ้งเตือน - Frigate"
+    "notifications": "การตั้งค่าการแจ้งเตือน - Frigate",
+    "cameraManagement": "จัดการกล้อง - Frigate",
+    "enrichments": "การตั้งค่าของเพิ่มเติม - Frigate",
+    "motionTuner": "ปรับแต่งการเคลื่อนไหว - Frigate",
+    "object": "ดีบั๊ก - Frigate"
   },
   "menu": {
     "notifications": "การแจ้งเตือน",

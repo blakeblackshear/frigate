@@ -2,7 +2,8 @@
   "details": {
     "person": "คน",
     "subLabelScore": "คะแนน Sub Label",
-    "unknown": "ไม่รู้"
+    "unknown": "ไม่รู้",
+    "timestamp": "เวลา"
   },
   "steps": {
     "faceName": "ใส่ชื่อหน้า",

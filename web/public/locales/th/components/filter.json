@@ -50,7 +50,8 @@
       "short": "หมวดหมู่"
     },
     "count_other": "{{count}} หมวดหมู่",
-    "count_one": "{{count}} หมวดหมู่"
+    "count_one": "{{count}} หมวดหมู่",
+    "label": "ป้าย"
   },
   "cameras": {
     "all": {
@@ -84,6 +85,10 @@
     }
   },
   "classes": {
-    "label": "หมวดหมู่"
+    "label": "หมวดหมู่",
+    "all": {
+      "title": "คลาสทั้งหมด"
+    },
+    "count_one": "{{count}} คลาส"
   }
 }

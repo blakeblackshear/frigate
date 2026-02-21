@@ -12,5 +12,6 @@
   },
   "saveAndRestart": "บันทึก และ รีสตาร์ท",
   "documentTitle": "ตัวแก้ไขการกำหนดค่า - Frigate",
-  "configEditor": "ตัวแก้ไขการกำหนดค่า"
+  "configEditor": "ตัวแก้ไขการกำหนดค่า",
+  "safeConfigEditor": "ตัวแก้ไขการกำหนดค่า (โหมดปลอดภัย)"
 }
