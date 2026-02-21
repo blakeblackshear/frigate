@@ -13,7 +13,8 @@
   "description": {
     "addFace": "上傳您的第一張圖片，即可在人臉庫中新增新的集合。",
     "placeholder": "請輸入此集合的名稱",
-    "invalidName": "名稱無效。名稱只可以包含英文字母、數字、空格、撇號（'）、底線（_）同連字號（-）。"
+    "invalidName": "名稱無效，只可包含字母、數字、空格、撇號、底線及連字號。",
+    "nameCannotContainHash": "名稱不可包含 #。"
   },
   "documentTitle": "人臉庫 - Frigate",
   "uploadFaceImage": {
@@ -24,7 +25,7 @@
     "title": "建立集合",
     "desc": "建立新集合",
     "new": "建立新的人臉",
-    "nextSteps": "建立穩固基礎：<li>使用訓練分頁，為每位偵測到的人物選擇並訓練圖片。</li><li>以正面照片為主，避免用側面或傾斜角度的人臉作訓練。</li></ul>"
+    "nextSteps": "建立穩固基礎：<li>使用最近識別分頁，為每位偵測到的人物選擇並訓練圖片。</li><li>以正面照片為主，避免用側面或傾斜角度的人臉作訓練。</li></ul>"
   },
   "steps": {
     "faceName": "請輸入人臉名稱",
@@ -35,9 +36,10 @@
     }
   },
   "train": {
-    "title": "訓練",
-    "aria": "選擇訓練",
-    "empty": "最近沒有人臉識別嘗試"
+    "title": "最近識別",
+    "aria": "選擇最近識別",
+    "empty": "最近沒有人臉識別嘗試",
+    "titleShort": "最近"
   },
   "selectFace": "選擇人臉",
   "deleteFaceLibrary": {
@@ -72,7 +74,7 @@
       "uploadedImage": "成功上傳圖片。",
       "renamedFace": "成功將人臉重新命名為 {{name}}",
       "trainedFace": "成功訓練人臉。",
-      "updatedFaceScore": "成功更新人臉分數。",
+      "updatedFaceScore": "已成功更新 {{name}} 的人臉分數（{{score}}）。",
       "deletedFace_other": "成功刪除 {{count}} 個人臉。",
       "addFaceLibrary": "{{name}} 已成功加入人臉庫！",
       "deletedName_other": "成功刪除 {{count}} 個人臉。"

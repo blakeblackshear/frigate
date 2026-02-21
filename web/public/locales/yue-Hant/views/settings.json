@@ -7,7 +7,7 @@
     "masksAndZones": "遮罩與區域編輯器 - Frigate",
     "motionTuner": "移動調校器 - Frigate",
     "object": "除錯 - Frigate",
-    "general": "一般設定 - Frigate",
+    "general": "介面設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
     "notifications": "通知設定 - Frigate",
     "enrichments": "進階功能設定 - Frigate",
@@ -41,7 +41,7 @@
     "noCamera": "沒有鏡頭"
   },
   "general": {
-    "title": "一般設定",
+    "title": "介面設定",
     "liveDashboard": {
       "playAlertVideos": {
         "label": "播放警報影片",
@@ -51,7 +51,15 @@
         "label": "自動即時檢視",
         "desc": "當偵測到活動時，自動切換到該鏡頭的即時畫面。若停用此選項，即時儀表板上的鏡頭靜態畫面將每分鐘只更新一次。"
       },
-      "title": "即時儀表板"
+      "title": "即時儀表板",
+      "displayCameraNames": {
+        "label": "一直顯示鏡頭名稱",
+        "desc": "在多鏡頭即時畫面儀表板中以標籤顯示鏡頭名稱。"
+      },
+      "liveFallbackTimeout": {
+        "label": "即時播放器備援逾時",
+        "desc": "當高畫質即時串流不可用時，於指定秒數後切換至低頻寬模式。預設：3。"
+      }
     },
     "storedLayouts": {
       "title": "儲存的版面配置",
@@ -239,7 +247,8 @@
           "mustNotBeSameWithCamera": "區域名稱不得與鏡頭名稱相同。",
           "alreadyExists": "此鏡頭已存在相同名稱的區域。",
           "mustNotContainPeriod": "區域名稱不可包含句號。",
-          "hasIllegalCharacter": "區域名稱包含非法字元。"
+          "hasIllegalCharacter": "區域名稱包含非法字元。",
+          "mustHaveAtLeastOneLetter": "區域名稱至少需包含一個字母。"
         }
       },
       "distance": {
@@ -274,6 +283,11 @@
         },
         "reset": {
           "label": "清除所有點"
+        },
+        "type": {
+          "zone": "區域",
+          "motion_mask": "移動遮罩",
+          "object_mask": "物件遮罩"
         }
       },
       "speed": {
@@ -291,7 +305,7 @@
       "name": {
         "title": "名稱",
         "inputPlaceHolder": "請輸入名稱…",
-        "tips": "名稱必須至少有2個字元，且不可與鏡頭或其他區域同名。"
+        "tips": "這鏡頭名稱必須至少有2個字元，至少需包含一個字母，且不可與鏡頭或其他區域同名。"
       },
       "inertia": {
         "title": "慣性",
@@ -326,7 +340,7 @@
         }
       },
       "toast": {
-        "success": "區域（{{zoneName}}）已儲存。請重新啟動Frigate以套用更改。"
+        "success": "區域（{{zoneName}}）已儲存。"
       },
       "desc": {
         "title": "區域可讓你定義畫面中的特定範圍，以判斷物件是否進入該範圍。",
@@ -356,8 +370,8 @@
       "add": "新增移動遮罩",
       "toast": {
         "success": {
-          "title": "{{polygonName}}已儲存。請重新啟動Frigate以套用更改。",
-          "noName": "移動遮罩已儲存。請重新啟動Frigate以套用更改。"
+          "title": "{{polygonName}}已儲存。",
+          "noName": "移動遮罩已儲存。"
         }
       }
     },
@@ -378,8 +392,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}}已儲存。請重新啟動Frigate以套用更改。",
-          "noName": "物件遮罩已儲存。請重新啟動Frigate以套用更改。"
+          "title": "{{polygonName}}已儲存。",
+          "noName": "物件遮罩已儲存。"
         }
       },
       "documentTitle": "編輯物件遮罩 - Frigate",
@@ -481,7 +495,7 @@
       "title": "用戶管理"
     },
     "addUser": "新增用戶",
-    "updatePassword": "更新密碼",
+    "updatePassword": "重設密碼",
     "toast": {
       "success": {
         "createUser": "成功建立用戶{{user}}",
@@ -501,7 +515,7 @@
       "role": "角色",
       "noUsers": "找不到用戶。",
       "changeRole": "更改用戶角色",
-      "password": "密碼",
+      "password": "重設密碼",
       "deleteUser": "刪除用戶",
       "actions": "操作"
     },
@@ -527,7 +541,13 @@
             "veryStrong": "非常強"
           },
           "match": "密碼相符",
-          "notMatch": "密碼不相符"
+          "notMatch": "密碼不相符",
+          "show": "顯示密碼",
+          "hide": "隱藏密碼",
+          "requirements": {
+            "title": "密碼要求：",
+            "length": "最少 12 個字元"
+          }
         },
         "newPassword": {
           "confirm": {
@@ -537,7 +557,11 @@
           "placeholder": "輸入新密碼"
         },
         "usernameIsRequired": "必須輸入用戶名稱",
-        "passwordIsRequired": "必須填寫密碼"
+        "passwordIsRequired": "必須填寫密碼",
+        "currentPassword": {
+          "title": "目前密碼",
+          "placeholder": "輸入目前密碼"
+        }
       },
       "createUser": {
         "title": "建立新用戶",
@@ -568,7 +592,12 @@
         "updatePassword": "更新{{username}}的密碼",
         "desc": "建立強密碼以保障此帳戶安全。",
         "cannotBeEmpty": "密碼不能留空",
-        "doNotMatch": "密碼不相符"
+        "doNotMatch": "密碼不相符",
+        "currentPasswordRequired": "必須輸入目前密碼",
+        "incorrectCurrentPassword": "目前密碼不正確",
+        "passwordVerificationFailed": "驗證密碼失敗",
+        "multiDeviceWarning": "其他已登入裝置需於 {{refresh_time}} 內重新登入。",
+        "multiDeviceAdmin": "亦可更換 JWT 密鑰以強制所有使用者重新驗證。"
       }
     },
     "title": "用戶"
@@ -801,7 +830,7 @@
       "desc": "必須啟用語意搜尋才能使用觸發器。"
     },
     "management": {
-      "title": "觸發器管理",
+      "title": "觸發器",
       "desc": "管理 {{camera}} 的觸發器。使用縮圖類型可對與所選追蹤物件相似的縮圖觸發，使用描述類型可對與你指定文字描述相似的事件觸發。"
     },
     "addTrigger": "新增觸發器",
@@ -822,7 +851,9 @@
     },
     "actions": {
       "alert": "標記為警報",
-      "notification": "發送通知"
+      "notification": "發送通知",
+      "sub_label": "新增子標籤",
+      "attribute": "新增屬性"
     },
     "dialog": {
       "createTrigger": {
@@ -840,19 +871,22 @@
       "form": {
         "name": {
           "title": "名稱",
-          "placeholder": "輸入觸發器名稱",
+          "placeholder": "為觸發器命名",
           "error": {
-            "minLength": "名稱至少需 2 個字元。",
-            "invalidCharacters": "名稱只可包含字母、數字、底線及連字符。",
+            "minLength": "欄位至少需 2 個字元。",
+            "invalidCharacters": "欄位只可包含字母、數字、底線及連字符。",
             "alreadyExists": "此鏡頭已有相同名稱的觸發器。"
-          }
+          },
+          "description": "輸入唯一名稱或描述以識別此觸發器"
         },
         "enabled": {
           "description": "啟用或停用此觸發器"
         },
         "type": {
           "title": "類型",
-          "placeholder": "選擇觸發器類型"
+          "placeholder": "選擇觸發器類型",
+          "description": "偵測到相似物件描述時觸發",
+          "thumbnail": "偵測到相似縮圖時觸發"
         },
         "friendly_name": {
           "title": "顯示名稱",
@@ -861,9 +895,9 @@
         },
         "content": {
           "title": "內容",
-          "imagePlaceholder": "選擇圖片",
+          "imagePlaceholder": "選擇縮圖",
           "textPlaceholder": "輸入文字內容",
-          "imageDesc": "選擇圖片，當偵測到相似圖片時觸發此動作。",
+          "imageDesc": "只顯示最近100張縮圖。如果你找不到所需的縮圖，請在「瀏覽」中查看先前的物件，並從選單中設定觸發器。",
           "textDesc": "輸入文字，當偵測到相似追蹤物件描述時觸發此動作。",
           "error": {
             "required": "必須提供內容。"
@@ -874,11 +908,12 @@
           "error": {
             "min": "閾值至少為 0",
             "max": "閾值最多為 1"
-          }
+          },
+          "desc": "為觸發器設定相似度門檻，越高越嚴格。"
         },
         "actions": {
           "title": "操作",
-          "desc": "預設情況下，Frigate 會對所有觸發器發送 MQTT 訊息。可選擇額外操作，在觸發器觸發時執行。",
+          "desc": "預設情況下，Frigate 會對所有觸發器發送 MQTT 訊息。子標籤會將觸發器名稱加入到物件標籤中。屬性是可搜尋的元數據，單獨儲存在被追蹤對象的元數據中。",
           "error": {
             "min": "至少需要選擇一個操作。"
           }
@@ -896,6 +931,23 @@
         "updateTriggerFailed": "更新觸發器失敗：{{errorMessage}}",
         "deleteTriggerFailed": "刪除觸發器失敗：{{errorMessage}}"
       }
+    },
+    "wizard": {
+      "title": "建立觸發器",
+      "step1": {
+        "description": "設定觸發器基本參數。"
+      },
+      "step2": {
+        "description": "設定觸發內容。"
+      },
+      "step3": {
+        "description": "設定觸發器門檻與動作。"
+      },
+      "steps": {
+        "nameAndType": "名稱與類型",
+        "configureData": "設定資料",
+        "thresholdAndActions": "門檻與動作"
+      }
     }
   },
   "cameraWizard": {
@@ -904,7 +956,8 @@
     "steps": {
       "nameAndConnection": "名稱與連線",
       "streamConfiguration": "串流設定",
-      "validationAndTesting": "驗證與測試"
+      "validationAndTesting": "驗證與測試",
+      "probeOrSnapshot": "探測或快照"
     },
     "save": {
       "success": "已成功儲存新鏡頭 {{cameraName}}。",
@@ -921,7 +974,7 @@
       "testFailed": "串流測試失敗：{{error}}"
     },
     "step1": {
-      "description": "輸入鏡頭詳細資料並測試連線。",
+      "description": "輸入鏡頭詳細資料並選擇探測鏡頭或手動選擇品牌。",
       "cameraName": "鏡頭名稱",
       "cameraNamePlaceholder": "例如：front_door 或 back_yard_overview",
       "host": "主機名稱／IP 位址",
@@ -952,14 +1005,24 @@
         "nameExists": "鏡頭名稱已存在",
         "brands": {
           "reolink-rtsp": "不建議使用 Reolink RTSP。建議在鏡頭設定中啟用 HTTP，並重新啟動鏡頭設定精靈。"
-        }
+        },
+        "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」開頭。非 RTSP 串流需手動設定。"
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
-      }
+      },
+      "connectionSettings": "連線設定",
+      "detectionMethod": "串流偵測方式",
+      "onvifPort": "ONVIF 連接埠",
+      "probeMode": "探測鏡頭",
+      "manualMode": "手動選擇",
+      "detectionMethodDescription": "使用 ONVIF（如支援）探測鏡頭以取得串流 URL，或手動選擇鏡頭品牌以使用預設 URL。若要輸入自訂 RTSP URL，請選擇手動方式並選「其他」。",
+      "onvifPortDescription": "支援 ONVIF 的鏡頭通常為 80 或 8080。",
+      "useDigestAuth": "使用摘要驗證",
+      "useDigestAuthDescription": "對 ONVIF 使用 HTTP 摘要驗證。部分鏡頭可能需要專用的 ONVIF 帳號密碼。"
     },
     "step2": {
-      "description": "設定鏡頭的串流角色，並可新增額外串流。",
+      "description": "根據你所選擇的偵測方法，探測鏡頭是否有用串流，或者設定手動設定。",
       "streamsTitle": "鏡頭串流",
       "addStream": "新增串流",
       "addAnotherStream": "新增另一個串流",
@@ -978,8 +1041,8 @@
         "audio": "音訊"
       },
       "testStream": "測試連線",
-      "testSuccess": "串流測試成功！",
-      "testFailed": "串流測試失敗",
+      "testSuccess": "連線測試成功！",
+      "testFailed": "連線測試失敗。請檢查你的輸入並重試。",
       "testFailedTitle": "測試失敗",
       "connected": "已連線",
       "notConnected": "未連線",
@@ -995,10 +1058,42 @@
       "featuresPopover": {
         "title": "串流功能",
         "description": "使用 go2rtc 轉串流以減少與鏡頭的直接連線。"
+      },
+      "streamDetails": "串流詳情",
+      "probing": "正在探測鏡頭…",
+      "retry": "重試",
+      "testing": {
+        "probingMetadata": "正在探測鏡頭中繼資料…",
+        "fetchingSnapshot": "正在取得鏡頭快照…"
+      },
+      "probeFailed": "探測鏡頭失敗：{{error}}",
+      "probingDevice": "正在探測裝置…",
+      "probeSuccessful": "探測成功",
+      "probeError": "探測錯誤",
+      "probeNoSuccess": "探測失敗",
+      "deviceInfo": "裝置資訊",
+      "manufacturer": "製造商",
+      "model": "型號",
+      "firmware": "韌體",
+      "profiles": "設定檔",
+      "ptzSupport": "支援 PTZ",
+      "autotrackingSupport": "支援自動追蹤",
+      "presets": "預設位置",
+      "rtspCandidates": "RTSP 候選",
+      "rtspCandidatesDescription": "已從鏡頭探測到以下 RTSP URL。測試連線以查看串流中繼資料。",
+      "noRtspCandidates": "未從鏡頭找到 RTSP URL，可能憑證錯誤或不支援 ONVIF，請手動輸入。",
+      "candidateStreamTitle": "候選 {{number}}",
+      "useCandidate": "使用",
+      "uriCopy": "複製",
+      "uriCopied": "URI 已複製到剪貼簿",
+      "testConnection": "測試連線",
+      "toggleUriView": "點擊切換完整 URI 顯示",
+      "errors": {
+        "hostRequired": "必須輸入主機或 IP 位址"
       }
     },
     "step3": {
-      "description": "在儲存新鏡頭前進行最後驗證與分析。請先連線所有串流後再儲存。",
+      "description": "設定串流角色，並為鏡頭新增其他串流。",
       "validationTitle": "串流驗證",
       "connectAllStreams": "連線所有串流",
       "reconnectionSuccess": "重新連線成功。",
@@ -1034,6 +1129,91 @@
         },
         "hikvision": {
           "substreamWarning": "子串流 1 被鎖定為低解析度。許多 Hikvision 鏡頭支援額外子串流，需要在鏡頭設定中啟用。建議如有可用，檢查並使用這些子串流。"
+        }
+      },
+      "streamsTitle": "鏡頭串流",
+      "addStream": "新增串流",
+      "addAnotherStream": "新增另一個串流",
+      "streamUrl": "串流 URL",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "selectStream": "選擇串流",
+      "searchCandidates": "搜尋候選…",
+      "noStreamFound": "找不到串流",
+      "url": "URL",
+      "resolution": "解析度",
+      "selectResolution": "選擇解析度",
+      "quality": "畫質",
+      "selectQuality": "選擇畫質",
+      "roleLabels": {
+        "detect": "物件偵測",
+        "record": "錄影",
+        "audio": "音訊"
+      },
+      "testStream": "測試連線",
+      "testSuccess": "串流測試成功！",
+      "testFailed": "串流測試失敗",
+      "testFailedTitle": "測試失敗",
+      "connected": "已連線",
+      "notConnected": "未連線",
+      "featuresTitle": "功能",
+      "go2rtc": "減少連線至鏡頭",
+      "detectRoleWarning": "至少一個串流需設定為「detect」角色。",
+      "rolesPopover": {
+        "title": "串流角色",
+        "detect": "物件偵測主要來源。",
+        "record": "依設定儲存影片片段。",
+        "audio": "音訊偵測來源。"
+      },
+      "featuresPopover": {
+        "title": "串流功能",
+        "description": "使用 go2rtc 轉串流以減少鏡頭連線。"
+      }
+    },
+    "step4": {
+      "description": "儲存鏡頭前進行最終驗證與分析，請先連接所有串流。",
+      "validationTitle": "串流驗證",
+      "connectAllStreams": "連接所有串流",
+      "reconnectionSuccess": "重新連線成功。",
+      "reconnectionPartial": "部分串流重新連線失敗。",
+      "streamUnavailable": "無法預覽串流",
+      "reload": "重新載入",
+      "connecting": "連線中…",
+      "streamTitle": "串流 {{number}}",
+      "valid": "有效",
+      "failed": "失敗",
+      "notTested": "未測試",
+      "connectStream": "連線",
+      "connectingStream": "連線中",
+      "disconnectStream": "中斷連線",
+      "estimatedBandwidth": "預計頻寬",
+      "roles": "角色",
+      "ffmpegModule": "使用串流相容模式",
+      "ffmpegModuleDescription": "若多次嘗試仍無法載入，建議啟用。啟用後，Frigate 將使用 ffmpeg 模組和 go2rtc。這可能會提高與某些鏡頭串流相容性。",
+      "none": "無",
+      "error": "錯誤",
+      "streamValidated": "串流 {{number}} 驗證成功",
+      "streamValidationFailed": "串流 {{number}} 驗證失敗",
+      "saveAndApply": "儲存新鏡頭",
+      "saveError": "設定無效，請檢查。",
+      "issues": {
+        "title": "串流驗證",
+        "videoCodecGood": "影片編碼為 {{codec}}。",
+        "audioCodecGood": "音訊編碼為 {{codec}}。",
+        "resolutionHigh": "此解析度{{resolution}} 可能增加資源使用。",
+        "resolutionLow": "此解析度{{resolution}}可能過低，不利小物件偵測。",
+        "noAudioWarning": "未偵測到音訊，錄影將沒有聲音。",
+        "audioCodecRecordError": "錄影需 AAC 音訊編碼。",
+        "audioCodecRequired": "音訊偵測需音訊串流。",
+        "restreamingWarning": "減少錄影串流連線可能略增 CPU 使用。",
+        "brands": {
+          "reolink-rtsp": "不建議使用 Reolink RTSP，請啟用 HTTP 並重新啟動精靈。",
+          "reolink-http": "Reolink HTTP 串流建議使用 FFmpeg，請啟用相容模式。"
+        },
+        "dahua": {
+          "substreamWarning": "子串流 1 解析度過低。許多Dahua / Amcrest / EmpireTech鏡頭支援額外的子串流，需要在鏡頭的設定中啟用。建議於鏡頭設定啟用更多子串流。"
+        },
+        "hikvision": {
+          "substreamWarning": "子串流 1 解析度過低。許多Hikvision鏡頭支援額外的子串流，需要在鏡頭的設定中啟用。建議於鏡頭設定啟用更多子串流。"
         }
       }
     }
@@ -1082,11 +1262,11 @@
     "title": "鏡頭檢視設定",
     "object_descriptions": {
       "title": "生成式 AI 物件描述",
-      "desc": "暫時啟用／停用此鏡頭的生成式 AI 物件描述。停用時，系統不會為此鏡頭的追蹤物件生成 AI 描述。"
+      "desc": "暫時啟用／停用此鏡頭的生成式 AI 物件描述直到Frigate重新啟動。停用時，系統不會為此鏡頭的追蹤物件生成 AI 描述。"
     },
     "review_descriptions": {
       "title": "生成式 AI 審查描述",
-      "desc": "暫時啟用／停用此鏡頭的生成式 AI 審查描述。停用時，系統不會為此鏡頭的審查項目生成 AI 描述。"
+      "desc": "暫時啟用／停用此鏡頭的生成式 AI 審查描述直到Frigate重新啟動。停用時，系統不會為此鏡頭的審查項目生成 AI 描述。"
     },
     "review": {
       "title": "審查",

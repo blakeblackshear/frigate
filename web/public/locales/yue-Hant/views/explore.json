@@ -34,7 +34,9 @@
     "details": "詳情",
     "snapshot": "快照",
     "video": "影片",
-    "object_lifecycle": "物件生命周期"
+    "object_lifecycle": "物件生命周期",
+    "thumbnail": "縮圖",
+    "tracking_details": "追蹤詳情"
   },
   "objectLifecycle": {
     "title": "物件生命周期",
@@ -102,13 +104,15 @@
           "updatedSublabel": "成功更新子標籤。",
           "updatedLPR": "成功更新車牌號碼。",
           "regenerate": "已從 {{provider}} 請求新的描述。根據提供者的速度，生成新的描述可能需要一些時間。",
-          "audioTranscription": "成功請求音訊轉錄。"
+          "audioTranscription": "成功請求音訊轉錄。視乎你的 Frigate 伺服器速度，轉錄可能需要一些時間完成。",
+          "updatedAttributes": "已成功更新屬性。"
         },
         "error": {
           "regenerate": "呼叫 {{provider}} 以獲取新描述失敗：{{errorMessage}}",
           "updatedSublabelFailed": "更新子標籤失敗：{{errorMessage}}",
           "updatedLPRFailed": "更新車牌號碼失敗：{{errorMessage}}",
-          "audioTranscription": "請求音訊轉錄失敗：{{errorMessage}}"
+          "audioTranscription": "請求音訊轉錄失敗：{{errorMessage}}",
+          "updatedAttributesFailed": "更新屬性失敗：{{errorMessage}}"
         }
       }
     },
@@ -157,6 +161,14 @@
     "regenerateFromThumbnails": "從縮圖重新生成",
     "score": {
       "label": "分數"
+    },
+    "editAttributes": {
+      "title": "編輯屬性",
+      "desc": "為此 {{label}} 選擇分類屬性"
+    },
+    "attributes": "分類屬性",
+    "title": {
+      "label": "標題"
     }
   },
   "itemMenu": {
@@ -194,12 +206,26 @@
     "audioTranscription": {
       "label": "轉錄音訊",
       "aria": "請求音訊轉錄"
+    },
+    "downloadCleanSnapshot": {
+      "label": "下載乾淨快照",
+      "aria": "下載乾淨快照"
+    },
+    "viewTrackingDetails": {
+      "label": "檢視追蹤詳情",
+      "aria": "顯示追蹤詳情"
+    },
+    "showObjectDetails": {
+      "label": "顯示物件路徑"
+    },
+    "hideObjectDetails": {
+      "label": "隱藏物件路徑"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "確認刪除",
-      "desc": "刪除此追蹤物件會移除快照、所有已保存的嵌入，以及相關的物件生命周期記錄。歷史記錄中的錄影<em>不會</em>被刪除。<br /><br />你確定要繼續嗎？"
+      "desc": "刪除此追蹤物件會移除快照、所有已保存的嵌入，以及相關的追蹤詳情記錄。歷史記錄中的錄影<em>不會</em>被刪除。<br /><br />你確定要繼續嗎？"
     }
   },
   "noTrackedObjects": "找不到追蹤物件",
@@ -211,7 +237,9 @@
         "error": "刪除追蹤物件失敗：{{errorMessage}}"
       }
     },
-    "tooltip": "已配對{{type}}（{{confidence}}% 信心"
+    "tooltip": "已配對{{type}}（{{confidence}}% 信心",
+    "previousTrackedObject": "上一個追蹤物件",
+    "nextTrackedObject": "下一個追蹤物件"
   },
   "trackedObjectsCount_other": "{{count}} 個追蹤物件 ",
   "exploreMore": "瀏覽更多{{label}}物件",
@@ -220,5 +248,54 @@
   },
   "concerns": {
     "label": "關注"
+  },
+  "trackingDetails": {
+    "title": "追蹤詳情",
+    "noImageFound": "找不到此時間點的影像。",
+    "createObjectMask": "建立物件遮罩",
+    "adjustAnnotationSettings": "調整標註設定",
+    "scrollViewTips": "點擊以查看此物件生命週期中的重要時刻。",
+    "autoTrackingTips": "對於自動追蹤鏡頭，邊界框位置可能不準確。",
+    "count": "第 {{first}} 個，共 {{second}} 個",
+    "trackedPoint": "追蹤點",
+    "lifecycleItemDesc": {
+      "visible": "偵測到 {{label}}",
+      "entered_zone": "{{label}} 進入 {{zones}}",
+      "active": "{{label}} 變為活動中",
+      "stationary": "{{label}} 變為靜止",
+      "attribute": {
+        "faceOrLicense_plate": "偵測到 {{label}} 的 {{attribute}}",
+        "other": "{{label}} 被識別為 {{attribute}}"
+      },
+      "gone": "{{label}} 離開",
+      "heard": "偵測到 {{label}} 聲音",
+      "external": "偵測到 {{label}}",
+      "header": {
+        "zones": "區域",
+        "ratio": "比例",
+        "area": "面積",
+        "score": "分數"
+      }
+    },
+    "annotationSettings": {
+      "title": "標註設定",
+      "showAllZones": {
+        "title": "顯示所有區域",
+        "desc": "當物件進入區域時，始終在畫面上顯示該區域。"
+      },
+      "offset": {
+        "label": "標註偏移",
+        "desc": "此資料來自鏡頭的偵測串流，但會疊加在錄影串流的影像上。兩個串流不太可能完全同步，因此邊界框與影片畫面未必完全對齊。你可使用此設定將標註在時間上向前或向後偏移，以更好地對齊錄影畫面。",
+        "millisecondsToOffset": "偵測標註的偏移毫秒數。<em>預設：0</em>",
+        "tips": "如果影片播放比邊界框與路徑點快，請降低數值；如果影片播放較慢，請提高數值。此數值可以為負。",
+        "toast": {
+          "success": "{{camera}} 的標註偏移已儲存到設定檔。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "上一張",
+      "next": "下一張"
+    }
   }
 }

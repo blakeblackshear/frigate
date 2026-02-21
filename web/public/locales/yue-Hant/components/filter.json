@@ -132,5 +132,9 @@
     },
     "count_one": "{{count}} 個分類",
     "count_other": "{{count}} 個分類"
+  },
+  "attributes": {
+    "label": "分類屬性",
+    "all": "全部屬性"
   }
 }

@@ -172,9 +172,23 @@
     "disable": "停用即時音訊轉錄"
   },
   "noCameras": {
-    "title": "未設置任何鏡頭",
-    "description": "連接鏡頭開始使用。",
-    "buttonText": "新增鏡頭"
+    "title": "未設定任何鏡頭",
+    "description": "請先將鏡頭連接到 Frigate 以開始使用。",
+    "buttonText": "新增鏡頭",
+    "restricted": {
+      "title": "沒有可用鏡頭",
+      "description": "你沒有權限檢視此群組中的任何鏡頭。"
+    },
+    "default": {
+      "title": "未設定任何鏡頭",
+      "description": "請先將鏡頭連接到 Frigate 以開始使用。",
+      "buttonText": "新增鏡頭"
+    },
+    "group": {
+      "title": "群組中沒有鏡頭",
+      "description": "此鏡頭群組沒有已指派或已啟用的鏡頭。",
+      "buttonText": "管理群組"
+    }
   },
   "snapshot": {
     "takeSnapshot": "下載即時快照",

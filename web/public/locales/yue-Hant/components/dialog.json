@@ -6,7 +6,8 @@
       "title": "Frigate 正在重新啟動",
       "content": "此頁面將在 {{countdown}} 秒後重新載入。",
       "button": "立即強制重新載入"
-    }
+    },
+    "description": "重新啟動期間將會短暫停止 Frigate。"
   },
   "explore": {
     "plus": {
@@ -56,7 +57,8 @@
         "noVaildTimeSelected": "沒有選取有效的時間範圍",
         "endTimeMustAfterStartTime": "結束時間必須在開始時間之後"
       },
-      "success": "成功開始匯出。請到 /exports 資料夾查看檔案。"
+      "success": "成功開始匯出。請到匯出頁面看檔案。",
+      "view": "檢視"
     },
     "fromTimeline": {
       "saveExport": "儲存匯出",
@@ -115,6 +117,7 @@
     "search": {
       "placeholder": "以標籤或子標籤搜尋..."
     },
-    "noImages": "未找到此鏡頭的縮圖"
+    "noImages": "未找到此鏡頭的縮圖",
+    "unknownLabel": "已儲存的觸發影像"
   }
 }

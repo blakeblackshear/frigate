@@ -4,7 +4,11 @@
   "empty": {
     "alert": "沒有警報需要審查",
     "detection": "沒有偵測到的項目需要審查",
-    "motion": "找不到移動數據"
+    "motion": "找不到移動數據",
+    "recordingsDisabled": {
+      "title": "必須啟用錄影",
+      "description": "只有在該鏡頭啟用錄影時，才可為該鏡頭建立審查項目。"
+    }
   },
   "timeline": "時間線",
   "events": {
@@ -36,5 +40,28 @@
   "timeline.aria": "選擇時間線",
   "detected": "已偵測",
   "suspiciousActivity": "可疑行為",
-  "threateningActivity": "威脅行為"
+  "threateningActivity": "威脅行為",
+  "zoomIn": "放大",
+  "zoomOut": "縮小",
+  "detail": {
+    "label": "詳情",
+    "noDataFound": "沒有可審查的詳情資料",
+    "aria": "切換詳情檢視",
+    "trackedObject_one": "{{count}} 個物件",
+    "trackedObject_other": "{{count}} 個物件",
+    "noObjectDetailData": "沒有可用的物件詳情資料。",
+    "settings": "詳情檢視設定",
+    "alwaysExpandActive": {
+      "title": "總是展開目前項目",
+      "desc": "如有資料，總是展開目前審查項目的物件詳情。"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "追蹤點",
+    "clickToSeek": "點擊以跳轉至此時間"
+  },
+  "select_all": "全部",
+  "normalActivity": "正常",
+  "needsReview": "需要審查",
+  "securityConcern": "安全疑慮"
 }

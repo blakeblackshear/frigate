@@ -75,12 +75,24 @@
       "gpuMemory": "GPU 記憶體",
       "gpuEncoder": "GPU 編碼器",
       "gpuDecoder": "GPU 解碼器",
-      "npuMemory": "NPU 記憶體"
+      "npuMemory": "NPU 記憶體",
+      "intelGpuWarning": {
+        "title": "Intel GPU 狀態警告",
+        "message": "GPU 狀態不可用",
+        "description": "這是 Intel GPU 統計工具已知問題，可能顯示 0% 使用率，但不影響效能。可重新啟動主機暫時修復。"
+      }
     },
     "otherProcesses": {
       "title": "其他程序",
       "processCpuUsage": "程序 CPU 使用率",
-      "processMemoryUsage": "程序記憶體使用量"
+      "processMemoryUsage": "程序記憶體使用量",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "錄影",
+        "review_segment": "檢視片段",
+        "embeddings": "嵌入向量",
+        "audio_detector": "音訊偵測器"
+      }
     },
     "title": "一般"
   },
@@ -180,7 +192,17 @@
       "text_embedding_speed": "文字嵌入速度",
       "yolov9_plate_detection_speed": "YOLOv9 車牌偵測速度",
       "plate_recognition": "車牌辨識",
-      "image_embedding_speed": "圖片嵌入速度"
-    }
+      "image_embedding_speed": "圖片嵌入速度",
+      "review_description": "審查描述",
+      "review_description_speed": "審查描述速度",
+      "review_description_events_per_second": "審查描述",
+      "object_description": "物件描述",
+      "object_description_speed": "物件描述速度",
+      "object_description_events_per_second": "物件描述",
+      "classification": "{{name}} 分類",
+      "classification_speed": "{{name}} 分類速度",
+      "classification_events_per_second": "{{name}} 每秒分類事件數"
+    },
+    "averageInf": "平均推論時間"
   }
 }

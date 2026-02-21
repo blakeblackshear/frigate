@@ -1,6 +1,182 @@
 {
   "documentTitle": "分類模型 - Frigate",
   "details": {
-    "unknown": "未知"
+    "unknown": "未知",
+    "scoreInfo": "分數代表此物件所有偵測結果的平均分類信心度。",
+    "none": "無"
+  },
+  "train": {
+    "titleShort": "最近",
+    "title": "最近分類",
+    "aria": "選擇最近分類"
+  },
+  "button": {
+    "deleteClassificationAttempts": "刪除分類影像",
+    "renameCategory": "重新命名類別",
+    "deleteCategory": "刪除類別",
+    "deleteImages": "刪除影像",
+    "trainModel": "訓練模型",
+    "addClassification": "新增分類",
+    "deleteModels": "刪除模型",
+    "editModel": "編輯模型"
+  },
+  "tooltip": {
+    "trainingInProgress": "模型正在訓練中",
+    "noNewImages": "沒有新影像可訓練，請先分類更多資料集影像。",
+    "noChanges": "自上次訓練後資料集沒有變更。",
+    "modelNotReady": "模型尚未準備好訓練"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "已刪除類別",
+      "deletedImage": "已刪除影像",
+      "deletedModel_other": "已成功刪除 {{count}} 個模型",
+      "categorizedImage": "影像分類成功",
+      "trainedModel": "模型訓練成功。",
+      "trainingModel": "已成功開始模型訓練。",
+      "updatedModel": "已成功更新模型設定",
+      "renamedCategory": "已成功將類別重新命名為 {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "刪除失敗：{{errorMessage}}",
+      "deleteCategoryFailed": "刪除類別失敗：{{errorMessage}}",
+      "deleteModelFailed": "刪除模型失敗：{{errorMessage}}",
+      "categorizeFailed": "影像分類失敗：{{errorMessage}}",
+      "trainingFailed": "模型訓練失敗，請查看 Frigate 日誌。",
+      "trainingFailedToStart": "啟動模型訓練失敗：{{errorMessage}}",
+      "updateModelFailed": "更新模型失敗：{{errorMessage}}",
+      "renameCategoryFailed": "重新命名類別失敗：{{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "刪除類別",
+    "desc": "確定要刪除類別 {{name}}？這將永久刪除所有相關影像，並需要重新訓練模型。",
+    "minClassesTitle": "無法刪除類別",
+    "minClassesDesc": "分類模型至少需要 2 個類別，請先新增類別。"
+  },
+  "deleteModel": {
+    "title": "刪除分類模型",
+    "single": "確定要刪除 {{name}}？所有資料將永久刪除且無法復原。",
+    "desc_other": "確定要刪除 {{count}} 個模型？所有資料將永久刪除且無法復原。"
+  },
+  "edit": {
+    "title": "編輯分類模型",
+    "descriptionState": "編輯此狀態分類模型的類別，變更後需重新訓練。",
+    "descriptionObject": "編輯此物件分類模型的物件類型與分類方式。",
+    "stateClassesInfo": "更改狀態類別需重新訓練模型。"
+  },
+  "deleteDatasetImages": {
+    "title": "刪除資料集影像",
+    "desc_other": "確定要刪除 {{dataset}} 中的 {{count}} 張影像？此操作不可復原並需重新訓練。"
+  },
+  "deleteTrainImages": {
+    "title": "刪除訓練影像",
+    "desc_other": "確定要刪除 {{count}} 張影像？此操作不可復原。"
+  },
+  "renameCategory": {
+    "title": "重新命名類別",
+    "desc": "為 {{name}} 輸入新名稱，需重新訓練模型才會生效。"
+  },
+  "description": {
+    "invalidName": "名稱無效，只可包含字母、數字、空格、撇號、底線及連字號。"
+  },
+  "categories": "類別",
+  "createCategory": {
+    "new": "建立新類別"
+  },
+  "categorizeImageAs": "將影像分類為：",
+  "categorizeImage": "分類影像",
+  "menu": {
+    "objects": "物件",
+    "states": "狀態"
+  },
+  "noModels": {
+    "object": {
+      "title": "沒有物件分類模型",
+      "description": "建立自訂模型以分類偵測到的物件。",
+      "buttonText": "建立物件模型"
+    },
+    "state": {
+      "title": "沒有狀態分類模型",
+      "description": "建立自訂模型監測指定區域狀態。",
+      "buttonText": "建立狀態模型"
+    }
+  },
+  "wizard": {
+    "title": "建立新分類",
+    "steps": {
+      "nameAndDefine": "名稱與定義",
+      "stateArea": "狀態區域",
+      "chooseExamples": "選擇範例"
+    },
+    "step1": {
+      "description": "狀態模型監測固定區域變化（例如，開門/關門）。物件模型為偵測物件加入分類（例如，已知的動物、送貨員等）。",
+      "name": "名稱",
+      "namePlaceholder": "輸入模型名稱…",
+      "type": "類型",
+      "typeState": "狀態",
+      "typeObject": "物件",
+      "objectLabel": "物件標籤",
+      "objectLabelPlaceholder": "選擇物件類型…",
+      "classificationType": "分類類型",
+      "classificationTypeTip": "了解分類類型",
+      "classificationTypeDesc": "子標籤為物件增加附加文字（例如，「人員：UPS」）。屬性是可搜尋的元數據，單獨儲存在物件元資料中。",
+      "classificationSubLabel": "子標籤",
+      "classificationAttribute": "屬性",
+      "classes": "類別",
+      "states": "狀態",
+      "classesTip": "了解類別",
+      "classesStateDesc": "定義區域可能狀態。例如：車房門的「開」和「關」狀態。",
+      "classesObjectDesc": "定義不同類別將偵測到物件去分類。例如：人分類嘅「送貨員」、「居民」、「陌生人」。",
+      "classPlaceholder": "輸入類別名稱…",
+      "errors": {
+        "nameRequired": "必須輸入模型名稱",
+        "nameLength": "名稱不可超過 64 字元",
+        "nameOnlyNumbers": "名稱不可只有數字",
+        "classRequired": "至少需要 1 個類別",
+        "classesUnique": "類別名稱必須唯一",
+        "noneNotAllowed": "不可使用「none」",
+        "stateRequiresTwoClasses": "狀態模型至少需 2 類",
+        "objectLabelRequired": "請選擇物件標籤",
+        "objectTypeRequired": "請選擇分類類型"
+      }
+    },
+    "step2": {
+      "description": "選擇鏡頭並設定監測區域。模型將對這些區域的狀態進行分類。",
+      "cameras": "鏡頭",
+      "selectCamera": "選擇鏡頭",
+      "noCameras": "按 + 新增鏡頭",
+      "selectCameraPrompt": "從清單選擇鏡頭以設定區域"
+    },
+    "step3": {
+      "selectImagesPrompt": "選取所有 {{className}} 影像",
+      "selectImagesDescription": "點擊影像選取，完成後按繼續。",
+      "allImagesRequired_other": "請完成所有分類，尚餘 {{count}} 張影像。",
+      "generating": {
+        "title": "正在產生範例影像",
+        "description": "Frigate 正在擷取代表性影像，請稍候…"
+      },
+      "training": {
+        "title": "正在訓練模型",
+        "description": "模型正在背景訓練，完成後會自動運行。"
+      },
+      "retryGenerate": "重新產生",
+      "noImages": "未產生範例影像",
+      "classifying": "分類及訓練中…",
+      "trainingStarted": "已成功開始訓練",
+      "modelCreated": "模型建立成功，請新增影像後再訓練。",
+      "errors": {
+        "noCameras": "未設定鏡頭",
+        "noObjectLabel": "未選擇物件標籤",
+        "generateFailed": "產生範例失敗：{{error}}",
+        "generationFailed": "產生失敗，請重試。",
+        "classifyFailed": "影像分類失敗：{{error}}"
+      },
+      "generateSuccess": "已成功產生範例影像",
+      "missingStatesWarning": {
+        "title": "缺少狀態範例",
+        "description": "建議為所有狀態選取範例以獲得最佳效果。未齊全前模型不會訓練。繼續操作後，使用「最近分類」對缺失狀態的影像進行分類，然後訓練模型。"
+      }
+    }
   }
 }

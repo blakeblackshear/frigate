@@ -26,7 +26,8 @@
       "max_speed": "最高速度",
       "min_speed": "最低速度",
       "cameras": "鏡頭",
-      "sub_labels": "子標籤"
+      "sub_labels": "子標籤",
+      "attributes": "屬性"
     },
     "searchType": {
       "thumbnail": "縮圖",
