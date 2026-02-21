@@ -6,7 +6,8 @@
       "title": "Frigate wordt opnieuw gestart",
       "button": "Forceer herladen nu",
       "content": "Deze pagina zal herladen in {{countdown}} seconden."
-    }
+    },
+    "description": "Dit zal Frigate kort stoppen terwijl het opnieuw opstart."
   },
   "explore": {
     "plus": {

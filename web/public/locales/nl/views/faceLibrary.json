@@ -14,7 +14,8 @@
   "description": {
     "placeholder": "Voer een naam in voor deze verzameling",
     "addFace": "Voeg een nieuwe collectie toe aan de gezichtenbibliotheek door je eerste afbeelding te uploaden.",
-    "invalidName": "Ongeldige naam. Namen mogen alleen letters, cijfers, spaties, apostroffen, underscores en koppeltekens bevatten."
+    "invalidName": "Ongeldige naam. Namen mogen alleen letters, cijfers, spaties, apostroffen, underscores en koppeltekens bevatten.",
+    "nameCannotContainHash": "De naam mag geen # bevatten."
   },
   "train": {
     "title": "Recente herkenningen",

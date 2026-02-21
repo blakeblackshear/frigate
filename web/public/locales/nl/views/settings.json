@@ -287,6 +287,11 @@
         },
         "reset": {
           "label": "Alle punten wissen"
+        },
+        "type": {
+          "zone": "zone",
+          "motion_mask": "bewegingsmasker",
+          "object_mask": "objectmasker"
         }
       },
       "speed": {
@@ -546,7 +551,7 @@
           "hide": "Wachtwoord verbergen",
           "requirements": {
             "title": "Wachtwoordvereisten:",
-            "length": "Minimaal 8 tekens",
+            "length": "Minimaal 12 tekens",
             "uppercase": "Minimaal één hoofdletter",
             "digit": "Minimaal één cijfer",
             "special": "Minimaal één speciaal teken (!@#$%^&*(),.?\":{}|<>)"

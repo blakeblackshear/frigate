@@ -59,7 +59,7 @@
     "second_other": "{{time}} seconden",
     "formattedTimestampHourMinute": {
       "24hour": "HH:mm",
-      "12hour": "HH:mm"
+      "12hour": "h:mm aaa"
     },
     "formattedTimestampMonthDayYearHourMinute": {
       "12hour": "d MMM yyyy, HH:mm",
@@ -71,7 +71,7 @@
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
     "formattedTimestampHourMinuteSecond": {
-      "12hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa",
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
@@ -202,7 +202,8 @@
       "bg": "Български (Bulgaars)",
       "gl": "Galego (Galicisch)",
       "id": "Bahasa Indonesia (Indonesisch)",
-      "ur": "اردو (Urdu)"
+      "ur": "اردو (Urdu)",
+      "hr": "Hrvatski (Kroatisch)"
     },
     "darkMode": {
       "label": "Donkere modus",
