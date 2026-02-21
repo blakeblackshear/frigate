@@ -27,5 +27,6 @@
   "markTheseItemsAsReviewed": "Marker disse som gennemset",
   "detail": {
     "aria": "Skift til detaljevisning"
-  }
+  },
+  "timeline.aria": "Vælg tidslinje"
 }

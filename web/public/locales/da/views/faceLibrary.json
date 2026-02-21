@@ -3,7 +3,8 @@
   "description": {
     "addFace": "Tilføj en ny samling til ansigtsbiblioteket ved at uploade dit første billede.",
     "placeholder": "Angiv et navn for bibliotek",
-    "invalidName": "Ugyldigt navn. Navne må kun indeholde bogstaver, tal, mellemrum, apostroffer, understregninger og bindestreger."
+    "invalidName": "Ugyldigt navn. Navne må kun indeholde bogstaver, tal, mellemrum, apostroffer, understregninger og bindestreger.",
+    "nameCannotContainHash": "Navet kan ikke indeholde #."
   },
   "details": {
     "person": "Person",
@@ -17,6 +18,76 @@
     "desc": "Upload et billede for at scanne efter ansigter og inkludere det for {{pageToggle}}"
   },
   "train": {
-    "titleShort": "Nyeste"
-  }
+    "titleShort": "Nyeste",
+    "title": "Seneste genkendelser",
+    "aria": "Vælg seneste genkendelser",
+    "empty": "Der er ingen nylige ansigtsgenkendelser"
+  },
+  "createFaceLibrary": {
+    "new": "Nyt ansigt",
+    "nextSteps": "<ul> <li>Brug fanen <strong>Seneste genkendelser</strong> til at udvælge og træne på billeder for hver registreret person.</li> <li>Fokusér på billeder taget lige forfra for de bedste resultater; undgå træningsbilleder, hvor ansigter er fotograferet fra siden eller i vinkel.</li> </ul>"
+  },
+  "steps": {
+    "faceName": "Skriv ansigt navn",
+    "uploadFace": "Upload ansigt billede",
+    "nextSteps": "Næste skridt",
+    "description": {
+      "uploadFace": "Upload et billede af {{name}}, hvor ansigtet er set forfra. Billedet behøver ikke kun at vise ansigtet og skal ikke beskæres."
+    }
+  },
+  "button": {
+    "deleteFace": "Slet ansigt",
+    "deleteFaceAttempts": "Slet ansigter",
+    "addFace": "Tilføj ansigt",
+    "renameFace": "Omdøb ansigt",
+    "uploadImage": "Upload billede",
+    "reprocessFace": "Genbehandl ansigt"
+  },
+  "trainFace": "Lær ansigt",
+  "renameFace": {
+    "title": "Omdøb ansigt",
+    "desc": "Indtast et nyt navn til {{name}}"
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "{{count}} ansigt blev slettet",
+      "deletedFace_other": "{{count}} ansigter blev slettet",
+      "deletedName_one": "{{count}} ansigt slettet",
+      "deletedName_other": "{{count}} ansigter slettet",
+      "uploadedImage": "Billedet blev uploadet.",
+      "addFaceLibrary": "{{name}} er blevet tilføjet til ansigtsbiblioteket!",
+      "renamedFace": "Ansigtet er blevet omdøbt til {{name}}",
+      "trainedFace": "Ansigtet er blevet trænet.",
+      "updatedFaceScore": "Ansigtets score er blevet opdateret til {{score}} ({{name}})."
+    },
+    "error": {
+      "uploadingImageFailed": "Kunne ikke uploade billedet: {{errorMessage}}",
+      "addFaceLibraryFailed": "Kunne ikke angive navn på ansigtet: {{errorMessage}}",
+      "deleteFaceFailed": "Kunne ikke slette: {{errorMessage}}",
+      "deleteNameFailed": "Kunne ikke slette navnet: {{errorMessage}}",
+      "renameFaceFailed": "Kunne ikke omdøbe ansigtet: {{errorMessage}}",
+      "trainFailed": "Kunne ikke træne: {{errorMessage}}",
+      "updateFaceScoreFailed": "Kunne ikke opdatere ansigtets score: {{errorMessage}}"
+    }
+  },
+  "deleteFaceAttempts": {
+    "desc_one": "Er du sikker på, at du vil slette {{count}} ansigt? Denne handling kan ikke fortrydes.",
+    "desc_other": "Er du sikker på, at du vil slette {{count}} ansigter? Denne handling kan ikke fortrydes.",
+    "title": "Slet ansigter"
+  },
+  "collections": "Samlinger",
+  "deleteFaceLibrary": {
+    "title": "Slet navn",
+    "desc": "Er du sikker på, at du vil slette samlingen {{name}}? Dette vil permanent slette alle tilknyttede ansigter."
+  },
+  "imageEntry": {
+    "maxSize": "Maks. størrelse: {{size}} MB",
+    "validation": {
+      "selectImage": "Vælg venligst en billedfil."
+    },
+    "dropActive": "Slip billedet her…",
+    "dropInstructions": "Træk og slip eller indsæt et billede her – eller klik for at vælge"
+  },
+  "nofaces": "Ingen tilgængelige ansigter",
+  "trainFaceAs": "Træn ansigt som:"
 }

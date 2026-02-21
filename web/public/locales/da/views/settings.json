@@ -9,6 +9,11 @@
     "enrichments": "Indstillinger for berigelser - Frigate",
     "masksAndZones": "Maske- og zoneeditor - Frigate",
     "motionTuner": "Bevægelsesjustering - Frigate",
-    "general": "Brugergrænsefladeindstillinger - Frigate"
+    "general": "Brugergrænsefladeindstillinger - Frigate",
+    "frigatePlus": "Frigate+ Indstillinger - Frigate",
+    "notifications": "Notifikations indstillinger - Frigate"
+  },
+  "menu": {
+    "ui": "Brugergrænseflade"
   }
 }

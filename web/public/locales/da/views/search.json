@@ -9,5 +9,11 @@
     "filterActive": "Filtre aktiv",
     "clear": "Ryd søgning"
   },
-  "trackedObjectId": "Sporet genstands-ID"
+  "trackedObjectId": "Sporet genstands-ID",
+  "filter": {
+    "label": {
+      "cameras": "Kameraer",
+      "zones": "Områder"
+    }
+  }
 }

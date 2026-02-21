@@ -17,10 +17,15 @@
       "context": "Udforsk kan bruges, når genindekseringen af de sporede objektindlejringer er fuldført.",
       "finishingShortly": "Afsluttes om lidt",
       "step": {
-        "thumbnailsEmbedded": "Miniaturer indlejret: "
+        "thumbnailsEmbedded": "Miniaturer indlejret: ",
+        "descriptionsEmbedded": "Beskrivelser indlejrede: ",
+        "trackedObjectsProcessed": "Sporede objekter behandlede: "
       }
     },
-    "title": "Udforsk er ikke tilgængelig"
+    "title": "Udforsk er ikke tilgængelig",
+    "downloadingModels": {
+      "context": "Frigate henter de nødvendige indlejringsmodeller for at understøtte semantiske søgninger. Dette kan tage flere minutter, afhængig af hastigheden på din netværksforbindelse."
+    }
   },
   "exploreMore": "Udforsk flere {{label}}-objekter",
   "details": {
