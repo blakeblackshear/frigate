@@ -54,5 +54,12 @@
     "alwaysExpandActive": {
       "title": "Mindig kibontja az aktív részt"
     }
-  }
+  },
+  "objectTrack": {
+    "trackedPoint": "Nyomon követett pont",
+    "clickToSeek": "Kattintson, az időponthoz ugráshoz"
+  },
+  "select_all": "Összes",
+  "needsReview": "Felülvizsgálatra szorul",
+  "securityConcern": "Biztonsági aggályok"
 }

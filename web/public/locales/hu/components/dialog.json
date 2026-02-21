@@ -6,7 +6,8 @@
       "title": "A Frigate újraindul",
       "content": "Az oldal újratölt {{countdown}} másodperc múlva.",
       "button": "Erőltetett újraindítás azonnal"
-    }
+    },
+    "description": "Ez rövid időre leállítja a Frigate programot, amíg újraindul."
   },
   "explore": {
     "plus": {
@@ -57,7 +58,8 @@
         "failed": "Nem sikerült elkezdeni az exportálást: {{error}}",
         "endTimeMustAfterStartTime": "A végső időpontnak a kezdeti időpont után kell következnie",
         "noVaildTimeSelected": "Nincs érvényes idő intervallum kiválasztva"
-      }
+      },
+      "view": "Megtekint"
     },
     "fromTimeline": {
       "saveExport": "Exportálás mentése",

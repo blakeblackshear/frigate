@@ -13,8 +13,8 @@
   "toast": {
     "success": {
       "deletedImage": "Törölt képek",
-      "deletedModel_one": "Sikeresen törölt {{count}} modellt",
-      "deletedModel_other": "",
+      "deletedModel_one": "Sikeresen törölve {{count}} modell",
+      "deletedModel_other": "Sikeresen törölve {{count}} modell",
       "categorizedImage": "A kép sikeresen osztályozva",
       "deletedCategory": "Osztály törlése",
       "trainedModel": "Sikeresen betanított modell.",
@@ -24,7 +24,13 @@
     },
     "error": {
       "deleteImageFailed": "Törlés sikertelen: {{errorMessage}}",
-      "deleteCategoryFailed": "Nem sikerült törölni az osztályt: {{errorMessage}}"
+      "deleteCategoryFailed": "Nem sikerült törölni az osztályt: {{errorMessage}}",
+      "deleteModelFailed": "Modell törlése nem sikerült: {{errorMessage}}",
+      "categorizeFailed": "A kép kategorizálása sikertelen: {{errorMessage}}",
+      "trainingFailed": "A modell képzése sikertelen volt. A részletek a Frigate naplóiban találhatók.",
+      "trainingFailedToStart": "A modell képzésének elindítása sikertelen: {{errorMessage}}",
+      "updateModelFailed": "A modell frissítése sikertelen: {{errorMessage}}",
+      "renameCategoryFailed": "Az osztály átnevezése sikertelen: {{errorMessage}}"
     }
   },
   "details": {
@@ -54,5 +60,16 @@
   },
   "train": {
     "titleShort": "Friss"
+  },
+  "deleteCategory": {
+    "title": "Osztály törlése",
+    "desc": "Biztosan törölni szeretné a {{name}} osztályt? Ezzel véglegesen törli az összes kapcsolódó képet, és a modell újratanítására lesz szükség.",
+    "minClassesTitle": "Osztály törlése nem lehetséges"
+  },
+  "deleteModel": {
+    "title": "Osztályozási modell törlése",
+    "single": "Biztosan törölni szeretné a(z) {{name}}-t? Ezzel véglegesen törli az összes kapcsolódó adatot, beleértve a képeket és a tanítási adatokat is. Ez a művelet visszafordíthatatlan.",
+    "desc_one": "Biztosan törölni szeretné a(z) {{count}} modellt? Ezzel véglegesen törli az összes kapcsolódó adatot, beleértve a képeket és a tanítási adatokat is. Ez a művelet visszafordíthatatlan.",
+    "desc_other": "Biztosan törölni szeretné a(z) {{count}} modelleket? Ezzel véglegesen törli az összes kapcsolódó adatot, beleértve a képeket és a tanítási adatokat is. Ez a művelet visszafordíthatatlan."
   }
 }

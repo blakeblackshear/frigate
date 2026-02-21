@@ -50,6 +50,12 @@
       "playAlertVideos": {
         "label": "Riasztási Videók Lejátszása",
         "desc": "Alapértelmezetten az Élő irányítópulton a legutóbbi riasztások kis, ismétlődő videóként jelennek meg. Kapcsolja ki ezt az opciót, ha csak állóképet szeretne megjeleníteni a legutóbbi riasztásokról ezen az eszközön/böngészőben."
+      },
+      "displayCameraNames": {
+        "label": "Mindig mutatja a kamera nevét"
+      },
+      "liveFallbackTimeout": {
+        "desc": "Ha a kamera kiváló minőségű élő közvetítése nem elérhető, ennyi másodperc elteltével váltson alacsony sávszélességű módra. Alapértelmezett: 3."
       }
     },
     "title": "Alapbeállítások",
@@ -806,7 +812,7 @@
         "updateCameras": "Kamerák frissítve a szerepkörhöz: {{role}}",
         "deleteRole": "Szerepkör sikeresen törölve: {{role}}",
         "userRolesUpdated_one": "{{count}} felhasználó, akit ehhez a szerepkörhöz rendeltünk, frissült „néző”-re, amely hozzáféréssel rendelkezik az összes kamerához.",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_other": "{{count}} felhasználó, akit ehhez a szerepkörhöz rendeltünk, frissült „néző”-re, amely hozzáféréssel rendelkezik az összes kamerához."
       },
       "error": {
         "createRoleFailed": "Nem sikerült létrehozni a szerepkört: {{errorMessage}}",

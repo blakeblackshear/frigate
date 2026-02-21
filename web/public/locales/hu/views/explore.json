@@ -235,10 +235,19 @@
       "header": {
         "zones": "Zónák",
         "ratio": "Arány",
-        "area": "Terület"
-      }
+        "area": "Terület",
+        "score": "Pontszám"
+      },
+      "visible": "{{label}} észlelve",
+      "entered_zone": "{{label}} belépett {{zones}}",
+      "gone": "{{label}} maradt"
     },
     "title": "Követési adatok",
-    "noImageFound": "Nem található kép ehhez az időbélyeghez."
+    "noImageFound": "Nem található kép ehhez az időbélyeghez.",
+    "createObjectMask": "Objektum maszk létrehozása",
+    "scrollViewTips": "Kattintson ide, hogy megtekintse az objektum életciklusának fontosabb pillanatait.",
+    "autoTrackingTips": "Az automatikus követésű kamerák esetében a keret pozíciói pontatlanok lesznek.",
+    "count": "{{first}} a {{second}} közül",
+    "trackedPoint": "Nyomon követett pont"
   }
 }

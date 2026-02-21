@@ -47,7 +47,8 @@
   "description": {
     "placeholder": "Adj nevet ennek a gyűjteménynek",
     "invalidName": "Nem megfelelő név. A nevek csak betűket, számokat, szóközöket, aposztrófokat, alulhúzásokat és kötőjeleket tartalmazhatnak.",
-    "addFace": "Adj hozzá egy új gyűjteményt az Arcképtárhoz az első képed feltöltésével."
+    "addFace": "Adj hozzá egy új gyűjteményt az Arcképtárhoz az első képed feltöltésével.",
+    "nameCannotContainHash": "A név nem tartalmazhat # karaktert."
   },
   "selectFace": "Arc kiválasztása",
   "deleteFaceLibrary": {
@@ -71,7 +72,7 @@
       "deletedName_one": "{{count}} arc sikeresen törölve.",
       "deletedName_other": "{{count}} arc sikeresen törölve.",
       "renamedFace": "Arc sikeresen átnvezezve {{name}}-ra/-re",
-      "updatedFaceScore": "Arc pontszáma sikeresen frissítve.",
+      "updatedFaceScore": "Arc pontszáma sikeresen frissítve a következőhöz {{name}} ({{score}}).",
       "trainedFace": "Arc sikeresen betanítva.",
       "deletedFace_one": "{{count}} arc sikeresen törölve.",
       "deletedFace_other": "{{count}} arc sikeresen törölve."
