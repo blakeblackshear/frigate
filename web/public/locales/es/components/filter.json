@@ -129,13 +129,13 @@
   "classes": {
     "label": "Clases",
     "all": {
-      "title": "Todas las Clases"
+      "title": "Todas las clases"
     },
     "count_one": "{{count}} Clase",
     "count_other": "{{count}} Clases"
   },
   "attributes": {
-    "label": "Atributos de Clasificación",
+    "label": "Atributos de clasificación",
     "all": "Todos los Atributos"
   }
 }

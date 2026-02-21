@@ -276,7 +276,12 @@
         "reset": {
           "label": "Borrar todos los puntos"
         },
-        "removeLastPoint": "Eliminar el último punto"
+        "removeLastPoint": "Eliminar el último punto",
+        "type": {
+          "zone": "zona",
+          "motion_mask": "máscara de movimiento",
+          "object_mask": "máscara de objeto"
+        }
       },
       "speed": {
         "error": {
@@ -548,7 +553,7 @@
           "hide": "Ocultar contraseña",
           "requirements": {
             "title": "Requisitos de contraseña:",
-            "length": "Al menos 8 caracteres",
+            "length": "Al menos 12 caracteres",
             "uppercase": "Al menos una mayúscula",
             "digit": "Al menos un número",
             "special": "Al menos un caracter especial (!@#$%^&*(),.?\":{}|<>)"

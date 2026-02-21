@@ -192,7 +192,7 @@
       "classification_speed": "Velocidad de clasificación de {{name}}",
       "classification_events_per_second": "Clasificacion de eventos por segundo de {{name}}"
     },
-    "title": "Enriquicimientos",
+    "title": "Enriquecimientos",
     "averageInf": "Tiempo promedio de inferencia"
   },
   "stats": {

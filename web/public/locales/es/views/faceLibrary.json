@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Agregar una nueva colección a la Biblioteca de Rostros subiendo tu primera imagen.",
     "placeholder": "Introduce un nombre para esta colección",
-    "invalidName": "Nombre incorrecto. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos, y guiones."
+    "invalidName": "Nombre incorrecto. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos, y guiones.",
+    "nameCannotContainHash": "El nombre no puede contener #."
   },
   "details": {
     "person": "Persona",
