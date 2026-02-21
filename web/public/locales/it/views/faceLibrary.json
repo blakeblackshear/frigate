@@ -3,7 +3,8 @@
   "description": {
     "addFace": "Aggiungi una nuova raccolta alla Libreria dei Volti caricando la tua prima immagine.",
     "placeholder": "Inserisci un nome per questa raccolta",
-    "invalidName": "Nome non valido. I nomi possono contenere solo lettere, numeri, spazi, apostrofi, caratteri di sottolineatura e trattini."
+    "invalidName": "Nome non valido. I nomi possono contenere solo lettere, numeri, spazi, apostrofi, caratteri di sottolineatura e trattini.",
+    "nameCannotContainHash": "Il nome non può contenere #."
   },
   "details": {
     "confidence": "Fiducia",

@@ -10,7 +10,7 @@
     "general": "Impostazioni interfaccia - Frigate",
     "frigatePlus": "Impostazioni Frigate+ - Frigate",
     "notifications": "Impostazioni di notifiche - Frigate",
-    "enrichments": "Impostazioni Componenti Aggiuntivi - Frigate",
+    "enrichments": "Impostazioni di miglioramento - Frigate",
     "cameraManagement": "Gestisci telecamere - Frigate",
     "cameraReview": "Impostazioni revisione telecamera - Frigate"
   },
@@ -87,9 +87,9 @@
       "desc": "Mostra un riquadro della regione di interesse inviata al rilevatore di oggetti"
     },
     "noObjects": "Nessun oggetto",
-    "title": "Debug",
-    "desc": "La vista di debug mostra in tempo reale gli oggetti tracciati e le relative statistiche. L'elenco degli oggetti mostra un riepilogo in differita degli oggetti rilevati.",
-    "debugging": "Debugging",
+    "title": "Correzioni",
+    "desc": "La vista di correzione mostra una vista in tempo reale degli oggetti tracciati e delle relative statistiche. L'elenco degli oggetti mostra un riepilogo ritardato degli oggetti rilevati.",
+    "debugging": "Correzioni",
     "objectList": "Elenco degli oggetti",
     "mask": {
       "desc": "Mostra i poligoni della maschera di movimento",
@@ -181,6 +181,11 @@
         },
         "error": {
           "mustBeFinished": "Prima di salvare, è necessario terminare il disegno del poligono."
+        },
+        "type": {
+          "zone": "zona",
+          "motion_mask": "maschera di movimento",
+          "object_mask": "maschera di oggetto"
         }
       },
       "inertia": {
@@ -377,14 +382,14 @@
     "classification": "Classificazione",
     "cameras": "Impostazioni telecamera",
     "masksAndZones": "Maschere / Zone",
-    "debug": "Debug",
+    "debug": "Correzioni",
     "users": "Utenti",
     "frigateplus": "Frigate+",
-    "enrichments": "Componenti Aggiuntivi",
+    "enrichments": "Miglioramenti",
     "triggers": "Inneschi",
     "roles": "Ruoli",
     "cameraManagement": "Gestione",
-    "cameraReview": "Revisione"
+    "cameraReview": "Rivedi"
   },
   "users": {
     "dialog": {
@@ -432,7 +437,7 @@
           "hide": "Nascondi password",
           "requirements": {
             "title": "Requisiti password:",
-            "length": "Almeno 8 caratteri",
+            "length": "Almeno 12 caratteri",
             "uppercase": "Almeno una lettera maiuscola",
             "digit": "Almeno una cifra",
             "special": "Almeno un carattere speciale (!@#$%^&*(),.?\":{}|<>)"
@@ -510,7 +515,7 @@
       },
       "playAlertVideos": {
         "label": "Riproduci video di avvisi",
-        "desc": "Per impostazione predefinita, gli avvisi recenti nella dashboard Live vengono riprodotti come piccoli video in loop. Disabilita questa opzione per mostrare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
+        "desc": "Per impostazione predefinita, gli avvisi recenti nella schermata dal vivo vengono riprodotti come brevi video in ciclo. Disattiva questa opzione per visualizzare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
       },
       "title": "Schermata dal vivo",
       "displayCameraNames": {
@@ -534,7 +539,7 @@
       "clearAll": "Cancella tutte le impostazioni di trasmissione"
     },
     "recordingsViewer": {
-      "title": "Visualizzatore di registrazioni",
+      "title": "Visualizzatore registrazioni",
       "defaultPlaybackRate": {
         "label": "Velocità di riproduzione predefinita",
         "desc": "Velocità di riproduzione predefinita per la riproduzione delle registrazioni."
@@ -640,7 +645,7 @@
     "title": "Regolatore di rilevamento del movimento",
     "contourArea": {
       "title": "Area di contorno",
-      "desc": "Il valore dell'area di contorno viene utilizzato per decidere quali gruppi di pixel modificati possono essere considerati movimento. <em>Predefinito: 10</em>"
+      "desc": "Il valore dell'area del contorno viene utilizzato per decidere quali gruppi di pixel modificati sono considerati movimento. <em>Predefinito: 10</em>"
     },
     "Threshold": {
       "title": "Soglia",
@@ -708,10 +713,10 @@
   },
   "enrichments": {
     "toast": {
-      "success": "Le impostazioni dei componenti aggiuntivi sono state salvate. Riavvia Frigate per applicare le modifiche.",
+      "success": "Le impostazioni di miglioramento sono state salvate. Riavvia Frigate per applicare le modifiche.",
       "error": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}"
     },
-    "title": "Impostazioni Componenti Aggiuntivi",
+    "title": "Impostazioni di miglioramento",
     "semanticSearch": {
       "reindexNow": {
         "desc": "La reindicizzazione rigenererà gli incorporamenti per tutti gli oggetti tracciati. Questo processo viene eseguito in sottofondo e potrebbe impegnare al massimo la CPU e richiedere un tempo considerevole, a seconda del numero di oggetti tracciati.",
@@ -765,8 +770,8 @@
       "title": "Riconoscimento targhe",
       "readTheDocumentation": "Leggi la documentazione"
     },
-    "unsavedChanges": "Modifiche alle impostazioni dei Componenti aggiuntivi non salvate",
-    "restart_required": "Riavvio richiesto (impostazioni dei componenti aggiuntivi modificate)"
+    "unsavedChanges": "Modifiche alle impostazioni di miglioramento non salvate",
+    "restart_required": "Riavvio richiesto (impostazioni di miglioramento modificate)"
   },
   "triggers": {
     "documentTitle": "Inneschi",
@@ -1278,7 +1283,7 @@
     "backToSettings": "Torna alle impostazioni della telecamera",
     "streams": {
       "title": "Abilita/Disabilita telecamere",
-      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e debug non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>"
+      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>"
     },
     "cameraConfig": {
       "add": "Aggiungi telecamera",
