@@ -185,7 +185,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
 
    This command should return no results.
 
-3. **Run the installation script**:
+2. **Run the installation script**:
 
    Download the installation script:
 
@@ -213,7 +213,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    - Download and install the required firmware
    - Set up udev rules
 
-4. **Reboot your system**:
+3. **Reboot your system**:
 
    After the script completes successfully, reboot to load the firmware:
 
@@ -221,7 +221,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    sudo reboot
    ```
 
-5. **Verify the installation**:
+4. **Verify the installation**:
 
    After rebooting, verify that the Hailo device is available:
 
