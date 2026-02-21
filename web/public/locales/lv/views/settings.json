@@ -22,7 +22,161 @@
         "nameLength": "Kameras nosaukums nedrīkst būt garāks par 64 simboliem",
         "invalidCharacters": "Kameras nosaukumā ir neatļauti simboli",
         "nameExists": "Kameras nosaukums jau pastāv"
+      },
+      "onvifPort": "ONVIF Ports",
+      "port": "Ports"
+    },
+    "title": "Pievienot Kameru",
+    "testResultLabels": {
+      "audio": "Audio",
+      "video": "Video",
+      "resolution": "Izšķirtspēja",
+      "fps": "FSP"
+    },
+    "save": {
+      "failure": "Kļūda saglabājot {{cameraName}}."
+    },
+    "steps": {
+      "nameAndConnection": "Vārds un savienojums"
+    },
+    "step2": {
+      "retry": "Atkārtot",
+      "connected": "Savienots"
+    },
+    "step3": {
+      "quality": "Kvalitāte",
+      "resolution": "Izšķirtspēja",
+      "selectQuality": "Izvēlies kvalitāti",
+      "roleLabels": {
+        "audio": "Audio"
+      },
+      "testStream": "Pārbaudīt Savienojumu",
+      "connected": "Savienots",
+      "notConnected": "Nav Savienots",
+      "testFailedTitle": "Tests Neizdevās"
+    },
+    "step4": {
+      "connectStream": "Savienot",
+      "connectingStream": "Savienojas",
+      "failed": "Neizdevās",
+      "roles": "Lomas",
+      "error": "Kļūda"
+    }
+  },
+  "menu": {
+    "users": "Lietotāji",
+    "roles": "Lomas",
+    "frigateplus": "Frigate+",
+    "notifications": "Paziņojumi",
+    "triggers": "Trigeri"
+  },
+  "cameraSetting": {
+    "camera": "Kamera"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Tev ir nesaglabātas izmaiņas.",
+      "desc": "Vai vēlies saglabāt izmaiņas pirms turpini?"
+    }
+  },
+  "general": {
+    "liveDashboard": {
+      "displayCameraNames": {
+        "label": "Vienmēr rādīt kameras nosaukumus"
       }
+    },
+    "calendar": {
+      "title": "Kalendārs",
+      "firstWeekday": {
+        "label": "Nedēļas pirmā diena",
+        "sunday": "Svētdiena",
+        "monday": "Pirmdiena"
+      }
+    }
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmButton": "Pārindeksēt",
+        "label": "Pārindeksēt tagad",
+        "confirmTitle": "Apstiprināt Pārindeksāciju",
+        "alreadyInProgress": "Pārindeksācija jau notiek."
+      },
+      "modelSize": {
+        "small": {
+          "title": "mazs"
+        },
+        "large": {
+          "title": "liels"
+        },
+        "label": "Modeļa izmērs"
+      }
+    },
+    "birdClassification": {
+      "title": "Putnu klasifikācija"
+    },
+    "faceRecognition": {
+      "title": "Sejas Atpazīšana",
+      "modelSize": {
+        "label": "Modeļa izmērs",
+        "small": {
+          "title": "mazs"
+        },
+        "large": {
+          "title": "liels"
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Auto numura zīmes atpazīšana"
+    },
+    "toast": {
+      "error": "Neizdevās saglabāt konfigurācijas izmaiņas: {{errorMessage}}"
+    }
+  },
+  "cameraManagement": {
+    "addCamera": "Pievienot Jaunu Kameru",
+    "selectCamera": "Izvēlēties Kameru",
+    "cameraConfig": {
+      "add": "Pievienot Kameru",
+      "edit": "Labot Kameru",
+      "name": "Kameras Vārds"
+    }
+  },
+  "triggers": {
+    "wizard": {
+      "steps": {
+        "nameAndType": "Vārds un Tips"
+      }
+    },
+    "dialog": {
+      "form": {
+        "name": {
+          "title": "Vārds"
+        }
+      }
+    },
+    "table": {
+      "edit": "Labot",
+      "name": "Vārds",
+      "type": "Tips",
+      "content": "Saturs"
+    }
+  },
+  "frigatePlus": {
+    "modelInfo": {
+      "cameras": "Kameras"
+    },
+    "snapshotConfig": {
+      "table": {
+        "camera": "Kamera"
+      }
+    }
+  },
+  "notification": {
+    "title": "Paziņojumi",
+    "cameras": {
+      "title": "Kameras"
     }
   }
 }

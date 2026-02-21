@@ -81,7 +81,8 @@
     "untilForRestart": "Līdz Frigate pārstartējas.",
     "untilRestart": "Līdz pārstartēšanai",
     "ago": "{{timeAgo}} pirms",
-    "justNow": "Nupat"
+    "justNow": "Nupat",
+    "never": "Nekad"
   },
   "unit": {
     "speed": {
@@ -107,7 +108,8 @@
     "show": "Rādīt {{item}}",
     "ID": "ID",
     "none": "Nav",
-    "all": "Viss"
+    "all": "Viss",
+    "other": "Cits"
   },
   "list": {
     "two": "{{0}} un {{1}}",

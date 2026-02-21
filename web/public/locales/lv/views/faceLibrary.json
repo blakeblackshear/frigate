@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Pievienojiet savai seju bibliotēkai jaunu kolekciju, augšupielādējot savu pirmo attēlu.",
     "placeholder": "Ievadi kolekcijas nosaukumu",
-    "invalidName": "Nederīgs nosaukums. Nosaukumi drīkst saturēt tikai burtus, ciparus, atstarpes, apostrofus, pasvītras un defises."
+    "invalidName": "Nederīgs nosaukums. Nosaukumi drīkst saturēt tikai burtus, ciparus, atstarpes, apostrofus, pasvītras un defises.",
+    "nameCannotContainHash": "Vārds nedrīkst saturēt #."
   },
   "details": {
     "timestamp": "Laika zīmogs",

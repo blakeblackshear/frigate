@@ -10,7 +10,8 @@
     "embeddingsReindexing": {
       "context": "Meklēšana būs pieejama pēc tam, kad būs pabeigta izsekoto objektu atkārtota indeksēšana.",
       "startingUp": "Notiek palaišana…",
-      "estimatedTime": "Paredzamais atlikušais laiks:"
+      "estimatedTime": "Paredzamais atlikušais laiks:",
+      "finishingShortly": "Drīz pabeigs"
     }
   },
   "itemMenu": {
