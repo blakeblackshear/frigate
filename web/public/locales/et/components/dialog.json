@@ -6,7 +6,8 @@
       "title": "Frigate käivitub uuesti",
       "content": "See leht laaditakse uuesti {{countdown}} sekundi pärast.",
       "button": "Laadi uuesti kohe"
-    }
+    },
+    "description": "Järgnevaga Frigate uuesti käivitamise ajaks lõpetab korraks töö."
   },
   "search": {
     "saveSearch": {
