@@ -1,7 +1,7 @@
 {
   "description": {
     "placeholder": "Gib einen Name für diese Kollektion ein",
-    "addFace": "Füge der Gesichtsbibliothek eine neue Sammlung hinzu, indem du ein Bild hochlädst.",
+    "addFace": "Füge der Gesichtsbibliothek eine neue Sammlung hinzu, indem du ein erstes Bild hochlädst.",
     "invalidName": "Ungültiger Name. Namen dürfen nur Buchstaben, Zahlen, Leerzeichen, Apostrophe, Unterstriche und Bindestriche enthalten.",
     "nameCannotContainHash": "Der Name darf keine # enthalten."
   },

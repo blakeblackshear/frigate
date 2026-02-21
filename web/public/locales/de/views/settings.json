@@ -49,12 +49,12 @@
         "desc": "Standardmäßig werden die letzten Warnmeldungen auf dem Live-Dashboard als kurze Videoschleifen abgespielt. Deaktiviere diese Option, um nur ein statisches Bild der letzten Warnungen auf diesem Gerät/Browser anzuzeigen."
       },
       "automaticLiveView": {
-        "desc": "Zeigt automatisch das Live-Bild einer Kamera an, wenn eine Aktivität erkannt wird. Ist diese Option deaktiviert, werden Kamerabilder im Live-Dashboard nur einmal pro Minute aktualisiert.",
+        "desc": "Automatisch zur Live-Ansicht einer Kamera wechseln, wenn eine Aktivität erkannt wird. Wenn diese Option deaktiviert ist, werden statische Kamerabilder auf dem Live-Dashboard nur einmal pro Minute aktualisiert.",
         "label": "Automatische Live Ansicht"
       },
       "displayCameraNames": {
         "label": "Immer Namen der Kamera anzeigen",
-        "desc": "Kamerabezeichnung immer im einem Chip im Live-View-Dashboard für mehrere Kameras anzeigen."
+        "desc": "Zeige immer die Kameranamen in einem Chip im Dashboard der Mehrkamera-Live-Ansicht an."
       },
       "liveFallbackTimeout": {
         "label": "Live Player Ausfallzeitlimit",
@@ -276,6 +276,11 @@
         },
         "error": {
           "mustBeFinished": "Polygonzeichnung muss vor dem Speichern abgeschlossen sein."
+        },
+        "type": {
+          "zone": "Zone",
+          "motion_mask": "Bewegungsmaske",
+          "object_mask": "Objektmaske"
         }
       },
       "speed": {
@@ -1210,7 +1215,7 @@
         "restreamingWarning": "Die Reduzierung der Verbindungen zur Kamera für den Aufzeichnungsstream kann zu einer geringfügigen Erhöhung der CPU-Auslastung führen.",
         "brands": {
           "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Aktivieren Sie HTTP in den Firmware-Einstellungen der Kamera und starten Sie den Assistenten neu.",
-          "reolink-http": "Für Reolink-HTTP-Streams sollten sie FFmpeg verwenden, um eine bessere Kompatibilität zu gewährleisten. Aktivieren Sie für diesen Stream die Option „Stream-Kompatibilitätsmodus verwenden“."
+          "reolink-http": "Reolink-HTTP-Streams sollten für eine bessere Kompatibilität FFmpeg verwenden. Aktivieren Sie für diesen Stream die Option „Stream-Kompatibilitätsmodus verwenden“."
         },
         "dahua": {
           "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Kameras von Dahua / Amcrest / EmpireTech unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu überprüfen und zu nutzen, sofern sie verfügbar sind."

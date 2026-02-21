@@ -6,7 +6,8 @@
       "content": "Diese Seite wird in {{countdown}} Sekunde(n) aktualisiert.",
       "button": "Neuladen erzwingen"
     },
-    "button": "Neustarten"
+    "button": "Neustarten",
+    "description": "Dies wird Frigate kurz stoppen, während es neu startet."
   },
   "explore": {
     "plus": {
