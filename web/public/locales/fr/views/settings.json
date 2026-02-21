@@ -366,6 +366,11 @@
         "snapPoints": {
           "true": "Points d'accrochage",
           "false": "Ne pas réunir les points"
+        },
+        "type": {
+          "zone": "zone",
+          "motion_mask": "masque de mouvement",
+          "object_mask": "masque d'objet"
         }
       },
       "loiteringTime": {

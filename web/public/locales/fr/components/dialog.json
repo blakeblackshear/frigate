@@ -6,7 +6,8 @@
       "content": "Cette page sera rechargée dans {{countdown}} secondes.",
       "button": "Forcer l'actualisation maintenant"
     },
-    "button": "Redémarrer"
+    "button": "Redémarrer",
+    "description": "Frigate s'arrêtera momentanément pour redémarrer."
   },
   "explore": {
     "plus": {
