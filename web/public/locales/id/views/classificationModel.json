@@ -1,12 +1,14 @@
 {
   "documentTitle": "Klasifikasi Model - Frigate",
   "details": {
-    "scoreInfo": "Skor tersebut mewakili rata-rata kepercayaan klasifikasi di seluruh deteksi objek ini."
+    "scoreInfo": "Skor tersebut mewakili rata-rata kepercayaan klasifikasi di seluruh deteksi objek ini.",
+    "none": "Tidak ada",
+    "unknown": "Tidak diketahui"
   },
   "button": {
     "deleteClassificationAttempts": "Hapus Gambar Klasifikasi",
-    "renameCategory": "Ubah Nama Kelas",
-    "deleteCategory": "Hapus Kelas",
+    "renameCategory": "Ganti Nama Class",
+    "deleteCategory": "Hapus Class",
     "deleteImages": "Hapus Gambar",
     "trainModel": "Latih Model",
     "addClassification": "Tambah Klasifikasi",
@@ -14,14 +16,14 @@
     "editModel": "Ubah Model"
   },
   "tooltip": {
-    "trainingInProgress": "Model dalam training",
-    "noNewImages": "Tidak ada gambar untuk dilatih. Klasifikasikan gambar terlebih dahulu di dataset.",
+    "trainingInProgress": "Model sedang training",
+    "noNewImages": "Tidak ada gambar baru untuk training. Klasifikasi lebih banyak gambar di dataset terlebih dahulu.",
     "noChanges": "Tidak ada perubahan dataset sejak latihan terakhir.",
     "modelNotReady": "Model tidak siap untuk dilatih"
   },
   "toast": {
     "success": {
-      "deletedCategory": "Kelas dihapus",
+      "deletedCategory": "Class Dihapus",
       "deletedImage": "Image dihapus",
       "deletedModel_other": "Berhasil menghapus {{count}} model",
       "categorizedImage": "Berhasil Mengklasifikasikan Gambar",
@@ -31,17 +33,61 @@
       "renamedCategory": "Berhasil mengganti nama class ke {{name}}"
     },
     "error": {
-      "updateModelFailed": "Gagal melakukan perubahan pada model: {{errorMessage}}",
+      "updateModelFailed": "Gagal update model: {{errorMessage}}",
       "renameCategoryFailed": "Gagal merubah penamaan kelas: {{errorMessage}}",
       "deleteImageFailed": "Gagal menghapus: {{errorMessage}}",
-      "deleteCategoryFailed": "Gagal menghapus kelas: {{errorMessage}}"
+      "deleteCategoryFailed": "Gagal menghapus kelas: {{errorMessage}}",
+      "deleteModelFailed": "Gagal menghapus model: {{errorMessage}}",
+      "categorizeFailed": "Gagal mengkategorikan gambar: {{errorMessage}}",
+      "trainingFailed": "Gagal melakukan training model. Cek log Frigate untuk rinciannya.",
+      "trainingFailedToStart": "Gagal memulai training model: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Kelas dihapus",
-    "minClassesTitle": "Dilarang menghapus Kelas"
+    "minClassesTitle": "Dilarang menghapus Kelas",
+    "desc": "Apakah Anda yakin ingin menghapus class {{name}}? Ini akan menghapus semua gambar terkait secara permanen dan memerlukan re-training model.",
+    "minClassesDesc": "Model klasifikasi harus memiliki setidaknya 2 class. Tambahkan class lain sebelum menghapus yang ini."
   },
   "train": {
     "titleShort": "Terkini"
+  },
+  "wizard": {
+    "title": "Buat Klasifikasi Baru",
+    "steps": {
+      "nameAndDefine": "Nama & Definisi",
+      "stateArea": "Pilih Area",
+      "chooseExamples": "Pilih Contoh"
+    },
+    "step1": {
+      "description": "State model memantau area kamera yang tetap untuk setiap perubahan (contoh: pintu terbuka/tertutup). Object model menambahkan klasifikasi pada objek yang terdeteksi (contoh: hewan tertentu, kurir, dll.).",
+      "name": "Nama",
+      "namePlaceholder": "Masukkan nama model...",
+      "type": "Tipe",
+      "typeState": "Status",
+      "typeObject": "Objek",
+      "objectLabel": "Label Objek",
+      "objectLabelPlaceholder": "Pilih tipe objek...",
+      "classificationType": "Pilih Klasifikasi",
+      "classificationTypeTip": "Pelajari tentang tipe klasifikasi",
+      "classificationTypeDesc": "Sub Label menambahkan teks tambahan pada label objek (contoh: 'Orang: UPS'). Atribut adalah metadata yang dapat dicari dan disimpan secara terpisah di dalam metadata objek.",
+      "classificationSubLabel": "Sub Label",
+      "classificationAttribute": "Atribut",
+      "classes": "Class",
+      "classesTip": "Pelajari tentang class",
+      "classesStateDesc": "Tentukan berbagai status (state) pada area kamera Anda. Contoh: 'terbuka' dan 'tertutup' untuk pintu garasi.",
+      "classesObjectDesc": "Tentukan kategori berbeda untuk mengklasifikasikan objek yang terdeteksi. Contoh: 'kurir', 'penghuni', 'orang_asing' untuk klasifikasi orang.",
+      "classPlaceholder": "Masukkan nama class...",
+      "errors": {
+        "nameRequired": "Nama model wajib diisi",
+        "nameLength": "Nama model maksimal 64 karakter",
+        "nameOnlyNumbers": "Nama model tidak boleh hanya berisi angka",
+        "classRequired": "Setidaknya harus ada 1 class yang diisi",
+        "classesUnique": "Nama class harus unik",
+        "stateRequiresTwoClasses": "State model memerlukan minimal 2 class",
+        "objectLabelRequired": "Silakan pilih label objek",
+        "objectTypeRequired": "Silakan pilih tipe klasifikasi"
+      }
+    }
   }
 }

@@ -6,7 +6,8 @@
       "title": "Sedang Merestart Frigate",
       "content": "Halaman ini akan memulai ulang dalam {{countdown}} detik.",
       "button": "Muat Ulang Sekarang"
-    }
+    },
+    "description": "Layanan Frigate akan terhenti sejenak saat proses restart."
   },
   "explore": {
     "plus": {
