@@ -970,6 +970,17 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
 
         snapshot = get_event_snapshot(event)
 
+        if snapshot is None:
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": f"Failed to read snapshot for event {event_id}.",
+                    }
+                ),
+                status_code=500,
+            )
+
         # Get object bounding box for the first detection
         if not event.data.get("attributes") or len(event.data["attributes"]) == 0:
             return JSONResponse(
@@ -987,19 +998,7 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
 
         try:
             # Extract the crop from the snapshot
-            detect_config: DetectConfig = config.cameras[event.camera].detect
-            frame = cv2.imread(snapshot)
-            
-            if frame is None:
-                return JSONResponse(
-                    content=(
-                        {
-                            "success": False,
-                            "message": f"Failed to read snapshot for event {event_id}.",
-                        }
-                    ),
-                    status_code=500,
-                )
+            frame = snapshot
 
             height, width = frame.shape[:2]
 

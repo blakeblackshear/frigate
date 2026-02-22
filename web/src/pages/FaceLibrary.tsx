@@ -410,73 +410,53 @@ export default function FaceLibrary() {
               <FaceSelectionDialog
                 faceNames={faces}
                 onTrainAttempt={(name) => {
-                  // Batch train all selected faces
-                  let successCount = 0;
-                  let failCount = 0;
-                  const totalCount = selectedFaces.length;
-
-                  selectedFaces.forEach((filename, index) => {
+                  const requests = selectedFaces.map((filename) =>
                     axios
                       .post(`/faces/train/${name}/classify`, {
                         training_file: filename,
                       })
-                      .then((resp) => {
-                        if (resp.status == 200) {
-                          successCount++;
-                        } else {
-                          failCount++;
-                        }
+                      .then(() => true)
+                      .catch(() => false),
+                  );
 
-                        // Show final toast after all requests complete
-                        if (index === totalCount - 1) {
-                          if (successCount === totalCount) {
-                            toast.success(
-                              t("toast.success.batchTrainedFaces", {
-                                count: successCount,
-                              }),
-                              {
-                                position: "top-center",
-                              },
-                            );
-                          } else if (successCount > 0) {
-                            toast.warning(
-                              t("toast.warning.partialBatchTrained", {
-                                success: successCount,
-                                total: totalCount,
-                              }),
-                              {
-                                position: "top-center",
-                              },
-                            );
-                          } else {
-                            toast.error(
-                              t("toast.error.batchTrainFailed", {
-                                count: totalCount,
-                              }),
-                              {
-                                position: "top-center",
-                              },
-                            );
-                          }
-                          setSelectedFaces([]);
-                          refreshFaces();
-                        }
-                      })
-                      .catch(() => {
-                        failCount++;
-                        if (index === totalCount - 1) {
-                          toast.error(
-                            t("toast.error.batchTrainFailed", {
-                              count: totalCount,
-                            }),
-                            {
-                              position: "top-center",
-                            },
-                          );
-                          setSelectedFaces([]);
-                          refreshFaces();
-                        }
-                      });
+                  Promise.allSettled(requests).then((results) => {
+                    const successCount = results.filter(
+                      (result) => result.status === "fulfilled" && result.value,
+                    ).length;
+                    const totalCount = results.length;
+
+                    if (successCount === totalCount) {
+                      toast.success(
+                        t("toast.success.batchTrainedFaces", {
+                          count: successCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    } else if (successCount > 0) {
+                      toast.warning(
+                        t("toast.warning.partialBatchTrained", {
+                          success: successCount,
+                          total: totalCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    } else {
+                      toast.error(
+                        t("toast.error.batchTrainFailed", {
+                          count: totalCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    }
+
+                    setSelectedFaces([]);
+                    refreshFaces();
                   });
                 }}
               >

@@ -460,79 +460,62 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             </div>
             {pageToggle === "train" && (
               <ClassificationSelectionDialog
-                classes={classes}
+                classes={Object.keys(dataset || {})}
                 modelName={model.name}
                 image={selectedImages[0]}
                 onRefresh={refreshAll}
                 onCategorize={(category) => {
-                  // Batch categorize all selected images
-                  let successCount = 0;
-                  let failCount = 0;
-                  const totalCount = selectedImages.length;
-
-                  selectedImages.forEach((filename, index) => {
+                  const requests = selectedImages.map((filename) =>
                     axios
-                      .post(`/classification/${model.name}/dataset/categorize`, {
-                        category,
-                        training_file: filename,
-                      })
-                      .then((resp) => {
-                        if (resp.status == 200) {
-                          successCount++;
-                        } else {
-                          failCount++;
-                        }
+                      .post(
+                        `/classification/${model.name}/dataset/categorize`,
+                        {
+                          category,
+                          training_file: filename,
+                        },
+                      )
+                      .then(() => true)
+                      .catch(() => false),
+                  );
 
-                        // Show final toast after all requests complete
-                        if (index === totalCount - 1) {
-                          if (successCount === totalCount) {
-                            toast.success(
-                              t("toast.success.batchCategorized", {
-                                count: successCount,
-                              }),
-                              {
-                                position: "top-center",
-                              },
-                            );
-                          } else if (successCount > 0) {
-                            toast.warning(
-                              t("toast.warning.partialBatchCategorized", {
-                                success: successCount,
-                                total: totalCount,
-                              }),
-                              {
-                                position: "top-center",
-                              },
-                            );
-                          } else {
-                            toast.error(
-                              t("toast.error.batchCategorizeFailed", {
-                                count: totalCount,
-                              }),
-                              {
-                                position: "top-center",
-                              },
-                            );
-                          }
-                          setSelectedImages([]);
-                          refreshAll();
-                        }
-                      })
-                      .catch(() => {
-                        failCount++;
-                        if (index === totalCount - 1) {
-                          toast.error(
-                            t("toast.error.batchCategorizeFailed", {
-                              count: totalCount,
-                            }),
-                            {
-                              position: "top-center",
-                            },
-                          );
-                          setSelectedImages([]);
-                          refreshAll();
-                        }
-                      });
+                  Promise.allSettled(requests).then((results) => {
+                    const successCount = results.filter(
+                      (result) => result.status === "fulfilled" && result.value,
+                    ).length;
+                    const totalCount = results.length;
+
+                    if (successCount === totalCount) {
+                      toast.success(
+                        t("toast.success.batchCategorized", {
+                          count: successCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    } else if (successCount > 0) {
+                      toast.warning(
+                        t("toast.warning.partialBatchCategorized", {
+                          success: successCount,
+                          total: totalCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    } else {
+                      toast.error(
+                        t("toast.error.batchCategorizeFailed", {
+                          count: totalCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    }
+
+                    setSelectedImages([]);
+                    refreshAll();
                   });
                 }}
               >
