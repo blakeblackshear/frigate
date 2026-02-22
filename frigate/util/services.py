@@ -121,7 +121,7 @@ def get_cpu_stats() -> dict[str, dict]:
         pid = str(process.info["pid"])
         try:
             cpu_percent = process.info["cpu_percent"]
-            cmdline = process.info["cmdline"]
+            cmdline = " ".join(process.info["cmdline"]).rstrip()
 
             with open(f"/proc/{pid}/stat", "r") as f:
                 stats = f.readline().split()
@@ -155,7 +155,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 "cpu": str(cpu_percent),
                 "cpu_average": str(round(cpu_average_usage, 2)),
                 "mem": f"{mem_pct}",
-                "cmdline": clean_camera_user_pass(" ".join(cmdline)),
+                "cmdline": clean_camera_user_pass(cmdline),
             }
         except Exception:
             continue
