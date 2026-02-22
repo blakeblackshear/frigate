@@ -57,6 +57,7 @@ import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
   LuImagePlus,
+  LuListChecks,
   LuPencil,
   LuRefreshCw,
   LuScanFace,
@@ -72,6 +73,7 @@ import {
   ClassificationItemData,
   ClassifiedEvent,
 } from "@/types/classification";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -152,10 +154,21 @@ export default function FaceLibrary() {
   // face multiselect
 
   const [selectedFaces, setSelectedFaces] = useState<string[]>([]);
+  const [selectionModeEnabled, setSelectionModeEnabled] = useState(false);
+
+  const toggleSelectionMode = useCallback(() => {
+    setSelectionModeEnabled((prev) => {
+      const next = !prev;
+      if (!next) {
+        setSelectedFaces([]);
+      }
+      return next;
+    });
+  }, []);
 
   const onClickFaces = useCallback(
     (images: string[], ctrl: boolean) => {
-      if (selectedFaces.length == 0 && !ctrl) {
+      if (!selectionModeEnabled && selectedFaces.length == 0 && !ctrl) {
         return;
       }
 
@@ -181,7 +194,7 @@ export default function FaceLibrary() {
 
       setSelectedFaces(newSelectedFaces);
     },
-    [selectedFaces, setSelectedFaces],
+    [selectionModeEnabled, selectedFaces, setSelectedFaces],
   );
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<{
@@ -468,6 +481,19 @@ export default function FaceLibrary() {
             )}
             <Button
               className="flex gap-2"
+              variant={selectionModeEnabled ? "select" : "default"}
+              onClick={toggleSelectionMode}
+            >
+              <LuListChecks className="size-7 rounded-md p-1 text-secondary-foreground" />
+              {isDesktop &&
+                t(
+                  selectionModeEnabled
+                    ? "button.disableSelection"
+                    : "button.enableSelection",
+                )}
+            </Button>
+            <Button
+              className="flex gap-2"
               onClick={() =>
                 setDeleteDialogOpen({ name: pageToggle, ids: selectedFaces })
               }
@@ -478,6 +504,19 @@ export default function FaceLibrary() {
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2">
+            <Button
+              className="flex gap-2"
+              variant={selectionModeEnabled ? "select" : "default"}
+              onClick={toggleSelectionMode}
+            >
+              <LuListChecks className="size-7 rounded-md p-1 text-secondary-foreground" />
+              {isDesktop &&
+                t(
+                  selectionModeEnabled
+                    ? "button.disableSelection"
+                    : "button.enableSelection",
+                )}
+            </Button>
             <Button className="flex gap-2" onClick={() => setAddFace(true)}>
               <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
               {isDesktop && t("button.addFace")}
@@ -505,6 +544,7 @@ export default function FaceLibrary() {
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
+            showSelectionCheckboxes={selectionModeEnabled}
             onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
           />
@@ -514,6 +554,7 @@ export default function FaceLibrary() {
             faceImages={faceImages}
             pageToggle={pageToggle}
             selectedFaces={selectedFaces}
+            showSelectionCheckboxes={selectionModeEnabled}
             onClickFaces={onClickFaces}
             onDelete={onDelete}
           />
@@ -721,6 +762,7 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
+  showSelectionCheckboxes: boolean;
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onRefresh: (
     data?:
@@ -738,6 +780,7 @@ function TrainingGrid({
   attemptImages,
   faceNames,
   selectedFaces,
+  showSelectionCheckboxes,
   onClickFaces,
   onRefresh,
 }: TrainingGridProps) {
@@ -817,6 +860,7 @@ function TrainingGrid({
               event={event}
               faceNames={faceNames}
               selectedFaces={selectedFaces}
+              showSelectionCheckboxes={showSelectionCheckboxes}
               onClickFaces={onClickFaces}
               onRefresh={onRefresh}
             />
@@ -833,6 +877,7 @@ type FaceAttemptGroupProps = {
   event?: Event;
   faceNames: string[];
   selectedFaces: string[];
+  showSelectionCheckboxes: boolean;
   onClickFaces: (image: string[], ctrl: boolean) => void;
   onRefresh: (
     data?:
@@ -850,6 +895,7 @@ function FaceAttemptGroup({
   event,
   faceNames,
   selectedFaces,
+  showSelectionCheckboxes,
   onClickFaces,
   onRefresh,
 }: FaceAttemptGroupProps) {
@@ -999,6 +1045,29 @@ function FaceAttemptGroup({
     };
   }, [event]);
 
+  const toggleGroupSelection = useCallback(() => {
+    const selectedCount = group.filter((face) =>
+      selectedFaces.includes(face.filename),
+    ).length;
+    const allSelected = selectedCount === group.length;
+
+    if (allSelected) {
+      onClickFaces(
+        group
+          .filter((face) => selectedFaces.includes(face.filename))
+          .map((face) => face.filename),
+        false,
+      );
+    } else {
+      onClickFaces(
+        group
+          .filter((face) => !selectedFaces.includes(face.filename))
+          .map((face) => face.filename),
+        true,
+      );
+    }
+  }, [group, onClickFaces, selectedFaces]);
+
   return (
     <GroupedClassificationCard
       group={group}
@@ -1008,6 +1077,24 @@ function FaceAttemptGroup({
       i18nLibrary="views/faceLibrary"
       objectType="person"
       noClassificationLabel="details.unknown"
+      topLeftContent={
+        showSelectionCheckboxes ? (
+          <div className="rounded bg-black/60 p-1">
+            <Checkbox
+              checked={
+                group.filter((face) => selectedFaces.includes(face.filename))
+                  .length === group.length
+                  ? true
+                  : group.some((face) => selectedFaces.includes(face.filename))
+                    ? "indeterminate"
+                    : false
+              }
+              onCheckedChange={toggleGroupSelection}
+              aria-label={t("button.selectGroup")}
+            />
+          </div>
+        ) : undefined
+      }
       onClick={(data) => {
         if (data) {
           onClickFaces([data.filename], true);
@@ -1045,6 +1132,7 @@ type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
   selectedFaces: string[];
+  showSelectionCheckboxes: boolean;
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onDelete: (name: string, ids: string[]) => void;
 };
@@ -1053,6 +1141,7 @@ function FaceGrid({
   faceImages,
   pageToggle,
   selectedFaces,
+  showSelectionCheckboxes,
   onClickFaces,
   onDelete,
 }: FaceGridProps) {
@@ -1088,9 +1177,22 @@ function FaceGrid({
               filepath: `clips/faces/${pageToggle}/${image}`,
             }}
             selected={selectedFaces.includes(image)}
-            clickable={selectedFaces.length > 0}
+            clickable={selectedFaces.length > 0 || showSelectionCheckboxes}
             i18nLibrary="views/faceLibrary"
-            onClick={(data, meta) => onClickFaces([data.filename], meta)}
+            topLeftContent={
+              showSelectionCheckboxes ? (
+                <div className="rounded bg-black/60 p-1">
+                  <Checkbox
+                    checked={selectedFaces.includes(image)}
+                    onCheckedChange={() => onClickFaces([image], true)}
+                    aria-label={t("button.selectImage")}
+                  />
+                </div>
+              ) : undefined
+            }
+            onClick={(data, meta) =>
+              onClickFaces([data.filename], meta || showSelectionCheckboxes)
+            }
           >
             <Tooltip>
               <TooltipTrigger>

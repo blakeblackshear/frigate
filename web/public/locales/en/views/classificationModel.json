@@ -14,7 +14,11 @@
     "addClassification": "Add Classification",
     "deleteModels": "Delete Models",
     "editModel": "Edit Model",
-    "categorizeImages": "Classify Images"
+    "categorizeImages": "Classify Images",
+    "enableSelection": "Enable Selection",
+    "disableSelection": "Disable Selection",
+    "selectImage": "Select Image",
+    "selectGroup": "Select Group"
   },
   "tooltip": {
     "trainingInProgress": "Model is currently training",

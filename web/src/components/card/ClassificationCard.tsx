@@ -44,6 +44,7 @@ type ClassificationCardProps = {
   i18nLibrary: string;
   showArea?: boolean;
   count?: number;
+  topLeftContent?: React.ReactNode;
   onClick: (data: ClassificationItemData, meta: boolean) => void;
   children?: React.ReactNode;
 };
@@ -61,6 +62,7 @@ export const ClassificationCard = forwardRef<
     i18nLibrary,
     showArea = true,
     count,
+    topLeftContent,
     onClick,
     children,
   },
@@ -143,6 +145,15 @@ export const ClassificationCard = forwardRef<
         onLoad={() => setImageLoaded(true)}
         src={`${baseUrl}${data.filepath}`}
       />
+      {topLeftContent && (
+        <div
+          className="absolute left-2 top-2 z-10"
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {topLeftContent}
+        </div>
+      )}
       <ImageShadowOverlay upperClassName="z-0" lowerClassName="h-[30%] z-0" />
       {count && (
         <div className="absolute right-2 top-2 flex flex-row items-center gap-1">
@@ -199,6 +210,7 @@ type GroupedClassificationCardProps = {
   i18nLibrary: string;
   objectType: string;
   noClassificationLabel?: string;
+  topLeftContent?: React.ReactNode;
   onClick: (data: ClassificationItemData | undefined) => void;
   children?: (data: ClassificationItemData) => React.ReactNode;
 };
@@ -209,6 +221,7 @@ export function GroupedClassificationCard({
   selectedItems,
   i18nLibrary,
   noClassificationLabel = "details.none",
+  topLeftContent,
   onClick,
   children,
 }: GroupedClassificationCardProps) {
@@ -295,6 +308,7 @@ export function GroupedClassificationCard({
         clickable={true}
         i18nLibrary={i18nLibrary}
         count={group.length}
+        topLeftContent={topLeftContent}
         onClick={(_, meta) => {
           if (meta || selectedItems.length > 0) {
             onClick(undefined);

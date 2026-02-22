@@ -54,7 +54,11 @@
     "deleteFace": "Delete Face",
     "uploadImage": "Upload Image",
     "reprocessFace": "Reprocess Face",
-    "trainFaces": "Train Faces"
+    "trainFaces": "Train Faces",
+    "enableSelection": "Enable Selection",
+    "disableSelection": "Disable Selection",
+    "selectImage": "Select Image",
+    "selectGroup": "Select Group"
   },
   "imageEntry": {
     "validation": {
