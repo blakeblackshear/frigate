@@ -406,6 +406,66 @@ export default function FaceLibrary() {
                 </>
               )}
             </div>
+            {pageToggle === "train" && (
+              <FaceSelectionDialog
+                faceNames={faces}
+                onTrainAttempt={(name) => {
+                  const requests = selectedFaces.map((filename) =>
+                    axios
+                      .post(`/faces/train/${name}/classify`, {
+                        training_file: filename,
+                      })
+                      .then(() => true)
+                      .catch(() => false),
+                  );
+
+                  Promise.allSettled(requests).then((results) => {
+                    const successCount = results.filter(
+                      (result) => result.status === "fulfilled" && result.value,
+                    ).length;
+                    const totalCount = results.length;
+
+                    if (successCount === totalCount) {
+                      toast.success(
+                        t("toast.success.batchTrainedFaces", {
+                          count: successCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    } else if (successCount > 0) {
+                      toast.warning(
+                        t("toast.warning.partialBatchTrained", {
+                          success: successCount,
+                          total: totalCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    } else {
+                      toast.error(
+                        t("toast.error.batchTrainFailed", {
+                          count: totalCount,
+                        }),
+                        {
+                          position: "top-center",
+                        },
+                      );
+                    }
+
+                    setSelectedFaces([]);
+                    refreshFaces();
+                  });
+                }}
+              >
+                <Button className="flex gap-2">
+                  <AddFaceIcon className="size-7 rounded-md p-1 text-secondary-foreground" />
+                  {isDesktop && t("button.trainFaces")}
+                </Button>
+              </FaceSelectionDialog>
+            )}
             <Button
               className="flex gap-2"
               onClick={() =>

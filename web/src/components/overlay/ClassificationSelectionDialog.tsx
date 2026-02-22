@@ -35,6 +35,7 @@ type ClassificationSelectionDialogProps = {
   modelName: string;
   image: string;
   onRefresh: () => void;
+  onCategorize?: (category: string) => void; // Optional custom categorize handler
   children: ReactNode;
 };
 export default function ClassificationSelectionDialog({
@@ -43,12 +44,20 @@ export default function ClassificationSelectionDialog({
   modelName,
   image,
   onRefresh,
+  onCategorize,
   children,
 }: ClassificationSelectionDialogProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
   const onCategorizeImage = useCallback(
     (category: string) => {
+      // If custom categorize handler is provided, use it instead
+      if (onCategorize) {
+        onCategorize(category);
+        return;
+      }
+
+      // Default behavior: categorize single image
       axios
         .post(`/classification/${modelName}/dataset/categorize`, {
           category,
@@ -72,7 +81,7 @@ export default function ClassificationSelectionDialog({
           });
         });
     },
-    [modelName, image, onRefresh, t],
+    [modelName, image, onRefresh, onCategorize, t],
   );
 
   const isChildButton = useMemo(

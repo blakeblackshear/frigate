@@ -53,7 +53,8 @@
     "renameFace": "Rename Face",
     "deleteFace": "Delete Face",
     "uploadImage": "Upload Image",
-    "reprocessFace": "Reprocess Face"
+    "reprocessFace": "Reprocess Face",
+    "trainFaces": "Train Faces"
   },
   "imageEntry": {
     "validation": {
@@ -77,6 +78,7 @@
       "deletedName_other": "{{count}} faces have been successfully deleted.",
       "renamedFace": "Successfully renamed face to {{name}}",
       "trainedFace": "Successfully trained face.",
+      "batchTrainedFaces": "Successfully trained {{count}} faces.",
       "updatedFaceScore": "Successfully updated face score to {{name}} ({{score}})."
     },
     "error": {
@@ -86,7 +88,11 @@
       "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
       "renameFaceFailed": "Failed to rename face: {{errorMessage}}",
       "trainFailed": "Failed to train: {{errorMessage}}",
+      "batchTrainFailed": "Failed to train {{count}} faces.",
       "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
+    },
+    "warning": {
+      "partialBatchTrained": "Trained {{success}} of {{total}} faces successfully."
     }
   }
 }
