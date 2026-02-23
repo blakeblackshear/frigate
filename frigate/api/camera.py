@@ -17,7 +17,7 @@ from zeep.transports import AsyncTransport
 
 from frigate.api.auth import (
     allow_any_authenticated,
-    require_camera_access,
+    require_go2rtc_stream_access,
     require_role,
 )
 from frigate.api.defs.tags import Tags
@@ -71,14 +71,27 @@ def go2rtc_streams():
 
 
 @router.get(
-    "/go2rtc/streams/{camera_name}", dependencies=[Depends(require_camera_access)]
+    "/go2rtc/streams/{stream_name}",
+    dependencies=[Depends(require_go2rtc_stream_access)],
 )
-def go2rtc_camera_stream(request: Request, camera_name: str):
+def go2rtc_camera_stream(request: Request, stream_name: str):
     r = requests.get(
-        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
+        "http://127.0.0.1:1984/api/streams",
+        params={
+            "src": stream_name,
+            "video": "all",
+            "audio": "all",
+            "microphone": "",
+        },
     )
     if not r.ok:
-        camera_config = request.app.frigate_config.cameras.get(camera_name)
+        camera_config = request.app.frigate_config.cameras.get(stream_name)
+
+        if camera_config is None:
+            for camera_name, camera in request.app.frigate_config.cameras.items():
+                if stream_name in camera.live.streams.values():
+                    camera_config = request.app.frigate_config.cameras.get(camera_name)
+                    break
 
         if camera_config and camera_config.enabled:
             logger.error("Failed to fetch streams from go2rtc")
