@@ -16,7 +16,15 @@ See the [MQTT integration
 documentation](https://www.home-assistant.io/integrations/mqtt/) for more
 details.
 
-In addition, MQTT must be enabled in your Frigate configuration file and Frigate must be connected to the same MQTT server as Home Assistant for many of the entities created by the integration to function.
+In addition, MQTT must be enabled in your Frigate configuration file and Frigate must be connected to the same MQTT server as Home Assistant for many of the entities created by the integration to function, e.g.:
+
+```
+mqtt:
+  enabled: True
+  host: mqtt.server.com # the address of your HA server that's running the MQTT integration
+  user: your_mqtt_broker_username
+  password: your_mqtt_broker_password
+```
 
 ### Integration installation
 
@@ -95,12 +103,12 @@ services:
 
 If you are using Home Assistant Add-on, the URL should be one of the following depending on which Add-on variant you are using. Note that if you are using the Proxy Add-on, you should NOT point the integration at the proxy URL. Just enter the same URL used to access Frigate directly from your network.
 
-| Add-on Variant             | URL                                       |
-| -------------------------- | ----------------------------------------- |
-| Frigate                    | `http://ccab4aaf-frigate:5000`            |
-| Frigate (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
-| Frigate Beta               | `http://ccab4aaf-frigate-beta:5000`       |
-| Frigate Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
+| Add-on Variant             | URL                                    |
+| -------------------------- | -------------------------------------- |
+| Frigate                    | `http://ccab4aaf-frigate:5000`         |
+| Frigate (Full Access)      | `http://ccab4aaf-frigate-fa:5000`      |
+| Frigate Beta               | `http://ccab4aaf-frigate-beta:5000`    |
+| Frigate Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000` |
 
 ### Frigate running on a separate machine
 
