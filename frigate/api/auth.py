@@ -1002,7 +1002,8 @@ async def require_camera_access(
     roles_dict = request.app.frigate_config.auth.roles
     allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
 
-    if role == "admin":
+    # Admin or full access bypasses
+    if role == "admin" or not roles_dict.get(role):
         return
 
     if camera_name not in allowed_cameras:
@@ -1052,7 +1053,8 @@ async def require_go2rtc_stream_access(
     roles_dict = request.app.frigate_config.auth.roles
     allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
 
-    if role == "admin":
+    # Admin or full access bypasses
+    if role == "admin" or not roles_dict.get(role):
         return
 
     owner_cameras = _get_stream_owner_cameras(request, stream_name)
