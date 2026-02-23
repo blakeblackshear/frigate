@@ -18,7 +18,7 @@ details.
 
 In addition, MQTT must be enabled in your Frigate configuration file and Frigate must be connected to the same MQTT server as Home Assistant for many of the entities created by the integration to function, e.g.:
 
-```
+```yaml
 mqtt:
   enabled: True
   host: mqtt.server.com # the address of your HA server that's running the MQTT integration
