@@ -93,6 +93,7 @@ PRESETS_HW_ACCEL_DECODE = {
     f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
     # experimental presets
     FFMPEG_HWACCEL_VULKAN: "-hwaccel vulkan -init_hw_device vulkan=gpu:0 -filter_hw_device gpu -hwaccel_output_format vulkan",
+    "preset-v4l2request": "-hwaccel v4l2request -hwaccel_output_format drm_prime",
     FFMPEG_HWACCEL_AMF: "-hwaccel amf -init_hw_device amf=gpu:0 -filter_hw_device gpu -hwaccel_output_format amf",
 }
 PRESETS_HW_ACCEL_DECODE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_DECODE[
@@ -130,6 +131,7 @@ PRESETS_HW_ACCEL_SCALE = {
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
     # experimental presets
     FFMPEG_HWACCEL_VULKAN: "-r {0} -vf fps={0},hwupload,scale_vulkan=w={1}:h={2},hwdownload",
+    "preset-v4l2request": "-r {0} -vf fps={0},hwdownload,format=nv12,format=yuv420p,scale={1}:{2}",
     FFMPEG_HWACCEL_AMF: "-r {0} -vf fps={0},hwupload,scale_amf=w={1}:h={2},hwdownload",
 }
 PRESETS_HW_ACCEL_SCALE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_SCALE[
