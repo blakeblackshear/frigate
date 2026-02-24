@@ -20,6 +20,17 @@ from frigate.util.time import get_tomorrow_at_time
 logger = logging.getLogger(__name__)
 
 
+def get_directory_size(directory: str) -> float:
+    """Get the size of a directory in MB."""
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+    return total_size / 1000000
+
+
 class RecordingCleanup(threading.Thread):
     """Cleanup existing recordings based on retention config."""
 
@@ -120,6 +131,7 @@ class RecordingCleanup(threading.Thread):
                 Recordings.objects,
                 Recordings.motion,
                 Recordings.dBFS,
+                Recordings.segment_size,
             )
             .where(
                 (Recordings.camera == config.name)
@@ -206,6 +218,10 @@ class RecordingCleanup(threading.Thread):
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
 
+        # Check if we need to enforce max_size
+        if config.record.max_size > 0:
+            self.enforce_max_size(config, deleted_recordings)
+
         previews: list[Previews] = (
             Previews.select(
                 Previews.id,
@@ -264,6 +280,52 @@ class RecordingCleanup(threading.Thread):
         for i in range(0, len(deleted_previews_list), max_deletes):
             Previews.delete().where(
                 Previews.id << deleted_previews_list[i : i + max_deletes]
+            ).execute()
+
+    def enforce_max_size(
+        self, config: CameraConfig, deleted_recordings: set[str]
+    ) -> None:
+        """Ensure that the camera recordings do not exceed the max size."""
+        # Get all recordings for this camera
+        recordings: Recordings = (
+            Recordings.select(
+                Recordings.id,
+                Recordings.path,
+                Recordings.segment_size,
+            )
+            .where(
+                (Recordings.camera == config.name)
+                & (Recordings.id.not_in(list(deleted_recordings)))
+            )
+            .order_by(Recordings.start_time)
+            .namedtuples()
+            .iterator()
+        )
+
+        total_size = 0
+        recordings_list = []
+        for recording in recordings:
+            recordings_list.append(recording)
+            total_size += recording.segment_size
+
+        # If the total size is less than the max size, we are good
+        if total_size <= config.record.max_size:
+            return
+
+        # Delete recordings until we are under the max size
+        recordings_to_delete = []
+        for recording in recordings_list:
+            total_size -= recording.segment_size
+            recordings_to_delete.append(recording.id)
+            Path(recording.path).unlink(missing_ok=True)
+            if total_size <= config.record.max_size:
+                break
+
+        # Delete from database
+        max_deletes = 100000
+        for i in range(0, len(recordings_to_delete), max_deletes):
+            Recordings.delete().where(
+                Recordings.id << recordings_to_delete[i : i + max_deletes]
             ).execute()
 
     def expire_recordings(self) -> None:
