@@ -1,6 +1,5 @@
 """Gemini Provider for Frigate AI."""
 
-import json
 import logging
 from typing import Any, Optional
 
@@ -84,147 +83,169 @@ class GeminiClient(GenAIClient):
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
     ) -> dict[str, Any]:
+        """
+        Send chat messages to Gemini with optional tool definitions.
+
+        Implements function calling/tool usage for Gemini models.
+        """
         try:
+            # Convert messages to Gemini format
+            gemini_messages = []
+            for msg in messages:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+
+                # Map roles to Gemini format
+                if role == "system":
+                    # Gemini doesn't have system role, prepend to first user message
+                    if gemini_messages and gemini_messages[0].role == "user":
+                        gemini_messages[0].parts[
+                            0
+                        ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
+                    else:
+                        gemini_messages.append(
+                            types.Content(
+                                role="user", parts=[types.Part.from_text(text=content)]
+                            )
+                        )
+                elif role == "assistant":
+                    gemini_messages.append(
+                        types.Content(
+                            role="model", parts=[types.Part.from_text(text=content)]
+                        )
+                    )
+                elif role == "tool":
+                    # Handle tool response
+                    function_response = {
+                        "name": msg.get("name", ""),
+                        "response": content,
+                    }
+                    gemini_messages.append(
+                        types.Content(
+                            role="function",
+                            parts=[
+                                types.Part.from_function_response(function_response)
+                            ],
+                        )
+                    )
+                else:  # user
+                    gemini_messages.append(
+                        types.Content(
+                            role="user", parts=[types.Part.from_text(text=content)]
+                        )
+                    )
+
+            # Convert tools to Gemini format
+            gemini_tools = None
             if tools:
-                function_declarations = []
+                gemini_tools = []
                 for tool in tools:
                     if tool.get("type") == "function":
-                        func_def = tool.get("function", {})
-                        function_declarations.append(
-                            genai.protos.FunctionDeclaration(
-                                name=func_def.get("name"),
-                                description=func_def.get("description"),
-                                parameters=genai.protos.Schema(
-                                    type=genai.protos.Type.OBJECT,
-                                    properties={
-                                        prop_name: genai.protos.Schema(
-                                            type=_convert_json_type_to_gemini(
-                                                prop.get("type")
-                                            ),
-                                            description=prop.get("description"),
-                                        )
-                                        for prop_name, prop in func_def.get(
-                                            "parameters", {}
-                                        )
-                                        .get("properties", {})
-                                        .items()
-                                    },
-                                    required=func_def.get("parameters", {}).get(
-                                        "required", []
-                                    ),
-                                ),
+                        func = tool.get("function", {})
+                        gemini_tools.append(
+                            types.Tool(
+                                function_declarations=[
+                                    types.FunctionDeclaration(
+                                        name=func.get("name", ""),
+                                        description=func.get("description", ""),
+                                        parameters=func.get("parameters", {}),
+                                    )
+                                ]
                             )
                         )
 
-                tool_config = genai.protos.Tool(
-                    function_declarations=function_declarations
-                )
-
+            # Configure tool choice
+            tool_config = None
+            if tool_choice:
                 if tool_choice == "none":
-                    function_calling_config = genai.protos.FunctionCallingConfig(
-                        mode=genai.protos.FunctionCallingConfig.Mode.NONE
+                    tool_config = types.ToolConfig(
+                        function_calling_config=types.FunctionCallingConfig(mode="NONE")
+                    )
+                elif tool_choice == "auto":
+                    tool_config = types.ToolConfig(
+                        function_calling_config=types.FunctionCallingConfig(mode="AUTO")
                     )
                 elif tool_choice == "required":
-                    function_calling_config = genai.protos.FunctionCallingConfig(
-                        mode=genai.protos.FunctionCallingConfig.Mode.ANY
-                    )
-                else:
-                    function_calling_config = genai.protos.FunctionCallingConfig(
-                        mode=genai.protos.FunctionCallingConfig.Mode.AUTO
-                    )
-            else:
-                tool_config = None
-                function_calling_config = None
-
-            contents = []
-            for msg in messages:
-                role = msg.get("role")
-                content = msg.get("content", "")
-
-                if role == "system":
-                    continue
-                elif role == "user":
-                    contents.append({"role": "user", "parts": [content]})
-                elif role == "assistant":
-                    parts = [content] if content else []
-                    if "tool_calls" in msg:
-                        for tc in msg["tool_calls"]:
-                            parts.append(
-                                genai.protos.FunctionCall(
-                                    name=tc["function"]["name"],
-                                    args=json.loads(tc["function"]["arguments"]),
-                                )
-                            )
-                    contents.append({"role": "model", "parts": parts})
-                elif role == "tool":
-                    tool_name = msg.get("name", "")
-                    tool_result = (
-                        json.loads(content) if isinstance(content, str) else content
-                    )
-                    contents.append(
-                        {
-                            "role": "function",
-                            "parts": [
-                                genai.protos.FunctionResponse(
-                                    name=tool_name,
-                                    response=tool_result,
-                                )
-                            ],
-                        }
+                    tool_config = types.ToolConfig(
+                        function_calling_config=types.FunctionCallingConfig(mode="ANY")
                     )
 
-            generation_config = genai.types.GenerationConfig(
-                candidate_count=1,
-            )
-            if function_calling_config:
-                generation_config.function_calling_config = function_calling_config
+            # Build request config
+            config_params = {"candidate_count": 1}
 
-            response = self.provider.generate_content(
-                contents,
-                tools=[tool_config] if tool_config else None,
-                generation_config=generation_config,
-                request_options=genai.types.RequestOptions(timeout=self.timeout),
+            if gemini_tools:
+                config_params["tools"] = gemini_tools
+
+            if tool_config:
+                config_params["tool_config"] = tool_config
+
+            # Merge runtime_options
+            if isinstance(self.genai_config.runtime_options, dict):
+                config_params.update(self.genai_config.runtime_options)
+
+            response = self.provider.models.generate_content(
+                model=self.genai_config.model,
+                contents=gemini_messages,
+                config=types.GenerateContentConfig(**config_params),
             )
 
+            # Check if response is valid
+            if not response or not response.candidates:
+                return {
+                    "content": None,
+                    "tool_calls": None,
+                    "finish_reason": "error",
+                }
+
+            candidate = response.candidates[0]
             content = None
             tool_calls = None
 
-            if response.candidates and response.candidates[0].content:
-                parts = response.candidates[0].content.parts
-                text_parts = [p.text for p in parts if hasattr(p, "text") and p.text]
-                if text_parts:
-                    content = " ".join(text_parts).strip()
+            # Extract content and tool calls from response
+            if candidate.content and candidate.content.parts:
+                for part in candidate.content.parts:
+                    if part.text:
+                        content = part.text.strip()
+                    elif part.function_call:
+                        # Handle function call
+                        if tool_calls is None:
+                            tool_calls = []
 
-                function_calls = [
-                    p.function_call
-                    for p in parts
-                    if hasattr(p, "function_call") and p.function_call
-                ]
-                if function_calls:
-                    tool_calls = []
-                    for fc in function_calls:
+                        try:
+                            arguments = (
+                                dict(part.function_call.args)
+                                if part.function_call.args
+                                else {}
+                            )
+                        except Exception:
+                            arguments = {}
+
                         tool_calls.append(
                             {
-                                "id": f"call_{hash(fc.name)}",
-                                "name": fc.name,
-                                "arguments": dict(fc.args)
-                                if hasattr(fc, "args")
-                                else {},
+                                "id": part.function_call.name or "",
+                                "name": part.function_call.name or "",
+                                "arguments": arguments,
                             }
                         )
 
+            # Determine finish reason
             finish_reason = "error"
-            if response.candidates:
-                finish_reason_map = {
-                    genai.types.FinishReason.STOP: "stop",
-                    genai.types.FinishReason.MAX_TOKENS: "length",
-                    genai.types.FinishReason.SAFETY: "stop",
-                    genai.types.FinishReason.RECITATION: "stop",
-                    genai.types.FinishReason.OTHER: "error",
-                }
-                finish_reason = finish_reason_map.get(
-                    response.candidates[0].finish_reason, "error"
-                )
+            if hasattr(candidate, "finish_reason") and candidate.finish_reason:
+                from google.genai.types import FinishReason
+
+                if candidate.finish_reason == FinishReason.STOP:
+                    finish_reason = "stop"
+                elif candidate.finish_reason == FinishReason.MAX_TOKENS:
+                    finish_reason = "length"
+                elif candidate.finish_reason in [
+                    FinishReason.SAFETY,
+                    FinishReason.RECITATION,
+                ]:
+                    finish_reason = "error"
+                elif tool_calls:
+                    finish_reason = "tool_calls"
+                elif content:
+                    finish_reason = "stop"
             elif tool_calls:
                 finish_reason = "tool_calls"
             elif content:
@@ -236,29 +257,19 @@ class GeminiClient(GenAIClient):
                 "finish_reason": finish_reason,
             }
 
-        except GoogleAPICallError as e:
-            logger.warning("Gemini returned an error: %s", str(e))
+        except errors.APIError as e:
+            logger.warning("Gemini API error during chat_with_tools: %s", str(e))
             return {
                 "content": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
         except Exception as e:
-            logger.warning("Unexpected error in Gemini chat_with_tools: %s", str(e))
+            logger.warning(
+                "Gemini returned an error during chat_with_tools: %s", str(e)
+            )
             return {
                 "content": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
-
-
-def _convert_json_type_to_gemini(json_type: str) -> genai.protos.Type:
-    type_map = {
-        "string": genai.protos.Type.STRING,
-        "integer": genai.protos.Type.INTEGER,
-        "number": genai.protos.Type.NUMBER,
-        "boolean": genai.protos.Type.BOOLEAN,
-        "array": genai.protos.Type.ARRAY,
-        "object": genai.protos.Type.OBJECT,
-    }
-    return type_map.get(json_type, genai.protos.Type.STRING)
