@@ -27,14 +27,7 @@ const snapshots: SectionConfigOverrides = {
     },
   },
   global: {
-    restartRequired: [
-      "enabled",
-      "bounding_box",
-      "crop",
-      "quality",
-      "timestamp",
-      "retain",
-    ],
+    restartRequired: [],
     hiddenFields: ["enabled_in_config", "required_zones"],
   },
   camera: {

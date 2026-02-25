@@ -44,7 +44,7 @@ const review: SectionConfigOverrides = {
     },
   },
   global: {
-    restartRequired: ["alerts", "detections", "genai"],
+    restartRequired: [],
   },
   camera: {
     restartRequired: [],

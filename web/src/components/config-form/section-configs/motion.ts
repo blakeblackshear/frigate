@@ -29,17 +29,7 @@ const motion: SectionConfigOverrides = {
     ],
   },
   global: {
-    restartRequired: [
-      "enabled",
-      "threshold",
-      "lightning_threshold",
-      "improve_contrast",
-      "contour_area",
-      "delta_alpha",
-      "frame_alpha",
-      "frame_height",
-      "mqtt_off_delay",
-    ],
+    restartRequired: ["frame_height"],
   },
   camera: {
     restartRequired: ["frame_height"],
