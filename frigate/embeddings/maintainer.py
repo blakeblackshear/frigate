@@ -102,6 +102,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.face_recognition_config_subscriber = ConfigSubscriber(
             "config/face_recognition", exact=True
         )
+        self.lpr_config_subscriber = ConfigSubscriber("config/lpr", exact=True)
 
         # Configure Frigate DB
         db = SqliteVecQueueDatabase(
@@ -277,6 +278,7 @@ class EmbeddingMaintainer(threading.Thread):
             self.config_updater.check_for_updates()
             self._check_classification_config_updates()
             self._check_face_recognition_config_updates()
+            self._check_lpr_config_updates()
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
@@ -289,6 +291,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.config_updater.stop()
         self.classification_config_subscriber.stop()
         self.face_recognition_config_subscriber.stop()
+        self.lpr_config_subscriber.stop()
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
@@ -380,6 +383,30 @@ class EmbeddingMaintainer(threading.Thread):
                 processor.update_config(face_config)
 
         logger.debug("Applied dynamic face recognition config update")
+
+    def _check_lpr_config_updates(self) -> None:
+        """Check for LPR config updates."""
+        topic, lpr_config = self.lpr_config_subscriber.check_for_update()
+
+        if topic is None:
+            return
+
+        previous_min_area = self.config.lpr.min_area
+        self.config.lpr = lpr_config
+
+        for camera_config in self.config.cameras.values():
+            if camera_config.lpr.min_area == previous_min_area:
+                camera_config.lpr.min_area = lpr_config.min_area
+
+        for processor in self.realtime_processors:
+            if isinstance(processor, LicensePlateRealTimeProcessor):
+                processor.update_config(lpr_config)
+
+        for processor in self.post_processors:
+            if isinstance(processor, LicensePlatePostProcessor):
+                processor.update_config(lpr_config)
+
+        logger.debug("Applied dynamic LPR config update")
 
     def _process_requests(self) -> None:
         """Process embeddings requests"""

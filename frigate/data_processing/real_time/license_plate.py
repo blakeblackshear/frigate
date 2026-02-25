@@ -8,6 +8,7 @@ import numpy as np
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.classification import LicensePlateRecognitionConfig
 from frigate.data_processing.common.license_plate.mixin import (
     LicensePlateProcessingMixin,
 )
@@ -39,6 +40,11 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.sub_label_publisher = sub_label_publisher
         self.camera_current_cars: dict[str, list[str]] = {}
         super().__init__(config, metrics)
+
+    def update_config(self, lpr_config: LicensePlateRecognitionConfig) -> None:
+        """Update LPR config at runtime."""
+        self.lpr_config = lpr_config
+        logger.debug("LPR config updated dynamically")
 
     def process_frame(
         self,
