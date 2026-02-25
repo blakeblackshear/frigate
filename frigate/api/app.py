@@ -589,6 +589,9 @@ def config_set(request: Request, body: AppConfigSetBody):
                 request.app.frigate_config = config
                 request.app.genai_manager.update_config(config)
 
+            if request.app.stats_emitter is not None:
+                request.app.stats_emitter.config = config
+
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):
                         _, _, camera, field = body.update_topic.split("/")
