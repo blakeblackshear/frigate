@@ -99,6 +99,9 @@ class EmbeddingMaintainer(threading.Thread):
         self.classification_config_subscriber = ConfigSubscriber(
             "config/classification/custom/"
         )
+        self.bird_classification_config_subscriber = ConfigSubscriber(
+            "config/classification", exact=True
+        )
         self.face_recognition_config_subscriber = ConfigSubscriber(
             "config/face_recognition", exact=True
         )
@@ -277,6 +280,7 @@ class EmbeddingMaintainer(threading.Thread):
         while not self.stop_event.is_set():
             self.config_updater.check_for_updates()
             self._check_classification_config_updates()
+            self._check_bird_classification_config_updates()
             self._check_face_recognition_config_updates()
             self._check_lpr_config_updates()
             self._process_requests()
@@ -290,6 +294,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.config_updater.stop()
         self.classification_config_subscriber.stop()
+        self.bird_classification_config_subscriber.stop()
         self.face_recognition_config_subscriber.stop()
         self.lpr_config_subscriber.stop()
         self.event_subscriber.stop()
@@ -363,6 +368,18 @@ class EmbeddingMaintainer(threading.Thread):
                 logger.info(
                     f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
                 )
+
+    def _check_bird_classification_config_updates(self) -> None:
+        """Check for bird classification config updates."""
+        topic, classification_config = (
+            self.bird_classification_config_subscriber.check_for_update()
+        )
+
+        if topic is None:
+            return
+
+        self.config.classification = classification_config
+        logger.debug("Applied dynamic bird classification config update")
 
     def _check_face_recognition_config_updates(self) -> None:
         """Check for face recognition config updates."""
