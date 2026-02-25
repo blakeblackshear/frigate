@@ -273,17 +273,13 @@ class BirdsEyeFrameManager:
         stop_event: mp.Event,
     ):
         self.config = config
-        self.mode = config.birdseye.mode
         width, height = get_canvas_shape(config.birdseye.width, config.birdseye.height)
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
-        self.inactivity_threshold = config.birdseye.inactivity_threshold
-
-        if config.birdseye.layout.max_cameras:
-            self.last_refresh_time = 0
+        self.last_refresh_time = 0
 
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
@@ -426,7 +422,7 @@ class BirdsEyeFrameManager:
                 and self.config.cameras[cam].enabled
                 and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame_time"] - cam_data["last_active_frame"]
-                < self.inactivity_threshold
+                < self.config.birdseye.inactivity_threshold
             ]
         )
         logger.debug(f"Active cameras: {active_cameras}")

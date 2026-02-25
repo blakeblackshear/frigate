@@ -15,6 +15,7 @@ from ws4py.server.wsgirefserver import (
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
@@ -138,6 +139,7 @@ class OutputProcess(FrigateProcess):
                 CameraConfigUpdateEnum.record,
             ],
         )
+        birdseye_config_subscriber = ConfigSubscriber("config/birdseye", exact=True)
 
         jsmpeg_cameras: dict[str, JsmpegCamera] = {}
         birdseye: Birdseye | None = None
@@ -167,6 +169,20 @@ class OutputProcess(FrigateProcess):
         websocket_thread.start()
 
         while not self.stop_event.is_set():
+            update_topic, birdseye_config = (
+                birdseye_config_subscriber.check_for_update()
+            )
+
+            if update_topic is not None:
+                previous_global_mode = self.config.birdseye.mode
+                self.config.birdseye = birdseye_config
+
+                for camera_config in self.config.cameras.values():
+                    if camera_config.birdseye.mode == previous_global_mode:
+                        camera_config.birdseye.mode = birdseye_config.mode
+
+                logger.debug("Applied dynamic birdseye config update")
+
             # check if there is an updated config
             updates = config_subscriber.check_for_updates()
 
@@ -297,6 +313,7 @@ class OutputProcess(FrigateProcess):
             birdseye.stop()
 
         config_subscriber.stop()
+        birdseye_config_subscriber.stop()
         websocket_server.manager.close_all()
         websocket_server.manager.stop()
         websocket_server.manager.join()
