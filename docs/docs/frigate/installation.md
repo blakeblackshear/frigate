@@ -56,7 +56,7 @@ services:
     volumes:
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Recommended: 1GB of memory
+      - type: tmpfs # In-memory filesystem for recording segment storage
         target: /tmp/cache
         tmpfs:
           size: 1000000000
@@ -123,7 +123,7 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    :::note
 
    If you are **not** using a Raspberry Pi with **Bookworm OS**, skip this step and proceed directly to step 2.
-   
+
    If you are using Raspberry Pi with **Trixie OS**, also skip this step and proceed directly to step 2.
 
    :::
@@ -133,13 +133,13 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    ```bash
    lsmod | grep hailo
    ```
-   
+
    If it shows `hailo_pci`, unload it:
 
    ```bash
    sudo modprobe -r hailo_pci
    ```
-   
+
    Then locate the built-in kernel driver and rename it so it cannot be loaded.
    Renaming allows the original driver to be restored later if needed.
    First, locate the currently installed kernel module:
@@ -149,28 +149,29 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    ```
 
    Example output:
-   
+
    ```
    /lib/modules/6.6.31+rpt-rpi-2712/kernel/drivers/media/pci/hailo/hailo_pci.ko.xz
    ```
+
    Save the module path to a variable:
-   
+
    ```bash
    BUILTIN=$(modinfo -n hailo_pci)
    ```
 
    And rename the module by appending .bak:
-    
+
    ```bash
    sudo mv "$BUILTIN" "${BUILTIN}.bak"
    ```
-   
+
    Now refresh the kernel module map so the system recognizes the change:
-   
+
    ```bash
    sudo depmod -a
    ```
-   
+
    Reboot your Raspberry Pi:
 
    ```bash
@@ -206,7 +207,6 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    ```
 
    The script will:
-
    - Install necessary build dependencies
    - Clone and build the Hailo driver from the official repository
    - Install the driver
@@ -236,18 +236,18 @@ On Raspberry Pi OS **Trixie**, the Hailo driver is no longer shipped with the ke
    ```
 
    Verify the driver version:
-   
+
    ```bash
    cat /sys/module/hailo_pci/version
    ```
-   
+
    Verify that the firmware was installed correctly:
-   
+
    ```bash
    ls -l /lib/firmware/hailo/hailo8_fw.bin
    ```
 
-  **Optional: Fix PCIe descriptor page size error**
+   **Optional: Fix PCIe descriptor page size error**
 
    If you encounter the following error:
 
@@ -462,7 +462,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Recommended: 1GB of memory
+      - type: tmpfs # In-memory filesystem for recording segment storage
         target: /tmp/cache
         tmpfs:
           size: 1000000000
@@ -694,17 +694,18 @@ Log into QNAP, open Container Station. Frigate docker container should be listed
 
 :::warning
 
-macOS uses port 5000 for its Airplay Receiver service.  If you want to expose port 5000 in Frigate for local app and API access the port will need to be mapped to another port on the host e.g. 5001
+macOS uses port 5000 for its Airplay Receiver service. If you want to expose port 5000 in Frigate for local app and API access the port will need to be mapped to another port on the host e.g. 5001
 
 Failure to remap port 5000 on the host will result in the WebUI and all API endpoints on port 5000 being unreachable, even if port 5000 is exposed correctly in Docker.
 
 :::
 
-Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligable, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application. 
+Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligable, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
 
 To allow Frigate to use the Apple Silicon Neural Engine / Processing Unit (NPU) the host must be running [Apple Silicon Detector](../configuration/object_detectors.md#apple-silicon-detector) on the host (outside Docker)
 
 #### Docker Compose example
+
 ```yaml
 services:
   frigate:
@@ -719,7 +720,7 @@ services:
     ports:
       - "8971:8971"
       # If exposing on macOS map to a diffent host port like 5001 or any orher port with no conflicts
-      # - "5001:5000" # Internal unauthenticated access. Expose carefully. 
+      # - "5001:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
     extra_hosts:
       # This is very important
