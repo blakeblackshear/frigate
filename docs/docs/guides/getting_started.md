@@ -119,7 +119,7 @@ services:
     volumes:
       - ./config:/config
       - ./storage:/media/frigate
-      - type: tmpfs # In-memory filesystem for recording segment storage
+      - type: tmpfs # 1GB In-memory filesystem for recording segment storage
         target: /tmp/cache
         tmpfs:
           size: 1000000000
