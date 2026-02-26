@@ -216,9 +216,15 @@ export default function FrigatePlusSettingsView({
       <div className="mt-2 flex h-full w-full flex-col">
         <div className="scrollbar-container flex-1 overflow-y-auto">
           <div className="w-full max-w-5xl space-y-6">
-            <Heading as="h4" className="mb-2">
-              {t("frigatePlus.title")}
-            </Heading>
+            <div className="flex flex-col gap-0">
+              <Heading as="h4" className="mb-2">
+                {t("frigatePlus.title")}
+              </Heading>
+
+              <p className="text-sm text-muted-foreground">
+                {t("frigatePlus.description")}
+              </p>
+            </div>
 
             <div className="space-y-6">
               <SettingsGroupCard title={t("frigatePlus.cardTitles.api")}>

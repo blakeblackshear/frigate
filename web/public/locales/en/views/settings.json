@@ -986,6 +986,7 @@
   },
   "frigatePlus": {
     "title": "Frigate+ Settings",
+    "description": "Frigate+ is a subscription service that provides access to additional features and capabilities for your Frigate instance, including the ability to use custom object detection models trained on your own data. You can manage your Frigate+ model settings here.",
     "cardTitles": {
       "api": "API",
       "currentModel": "Current Model",
