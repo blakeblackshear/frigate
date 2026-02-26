@@ -226,15 +226,17 @@ class LlamaCppClient(GenAIClient):
             to_encode = jpeg_bytes if jpeg_bytes is not None else img
             encoded = base64.b64encode(to_encode).decode("utf-8")
             # prompt_string must contain <__media__> placeholder for image tokenization
-            content.append({
-                "prompt_string": "<__media__>\n",
-                "multimodal_data": [encoded],
-            })
+            content.append(
+                {
+                    "prompt_string": "<__media__>\n",
+                    "multimodal_data": [encoded],
+                }
+            )
 
         try:
             response = requests.post(
                 f"{self.provider}/embeddings",
-                json={"content": content},
+                json={"model": self.genai_config.model, "content": content},
                 timeout=self.timeout,
             )
             response.raise_for_status()
