@@ -737,6 +737,7 @@ async def event_snapshot(
 ):
     event_complete = False
     jpg_bytes = None
+    frame_time = 0
     try:
         event = Event.get(Event.id == event_id, Event.end_time != None)
         event_complete = True
@@ -790,7 +791,7 @@ async def event_snapshot(
     headers = {
         "Content-Type": "image/jpeg",
         "Cache-Control": "private, max-age=31536000" if event_complete else "no-store",
-        "X-Frame-Time": frame_time,
+        "X-Frame-Time": str(frame_time),
     }
 
     if params.download:
