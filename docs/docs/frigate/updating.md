@@ -20,7 +20,6 @@ Keeping Frigate up to date ensures you benefit from the latest features, perform
 If you’re running Frigate via Docker (recommended method), follow these steps:
 
 1. **Stop the Container**:
-
    - If using Docker Compose:
      ```bash
      docker compose down frigate
@@ -31,9 +30,8 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
      ```
 
 2. **Update and Pull the Latest Image**:
-
    - If using Docker Compose:
-     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.17.0` instead of `0.16.3`). For example:
+     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.17.0` instead of `0.16.4`). For example:
        ```yaml
        services:
          frigate:
@@ -51,7 +49,6 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
        ```
 
 3. **Start the Container**:
-
    - If using Docker Compose:
      ```bash
      docker compose up -d
@@ -75,18 +72,15 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
 For users running Frigate as a Home Assistant Addon:
 
 1. **Check for Updates**:
-
    - Navigate to **Settings > Add-ons** in Home Assistant.
    - Find your installed Frigate addon (e.g., "Frigate NVR" or "Frigate NVR (Full Access)").
    - If an update is available, you’ll see an "Update" button.
 
 2. **Update the Addon**:
-
    - Click the "Update" button next to the Frigate addon.
    - Wait for the process to complete. Home Assistant will handle downloading and installing the new version.
 
 3. **Restart the Addon**:
-
    - After updating, go to the addon’s page and click "Restart" to apply the changes.
 
 4. **Verify the Update**:
@@ -105,8 +99,8 @@ If an update causes issues:
 1. Stop Frigate.
 2. Restore your backed-up config file and database.
 3. Revert to the previous image version:
-   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.16.3`) in your `docker run` command.
-   - For Docker Compose: Edit your `docker-compose.yml`, specify the older version tag (e.g., `ghcr.io/blakeblackshear/frigate:0.16.3`), and re-run `docker compose up -d`.
+   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.16.4`) in your `docker run` command.
+   - For Docker Compose: Edit your `docker-compose.yml`, specify the older version tag (e.g., `ghcr.io/blakeblackshear/frigate:0.16.4`), and re-run `docker compose up -d`.
    - For Home Assistant: Reinstall the previous addon version manually via the repository if needed and restart the addon.
 4. Verify the old version is running again.
 
