@@ -86,7 +86,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Nvidia**
 
-- [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs to provide efficient object detection.
+- [Nvidia GPU](#nvidia-gpus): Nvidia GPUs can provide efficient object detection.
   - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx-supported-models)
   - Runs well with any size models including large
 
@@ -190,7 +190,7 @@ Make sure your host system has the [nvidia-container-runtime](https://docs.docke
 
 [NVIDIA GPU Compute Capability](https://developer.nvidia.com/cuda-gpus)
 
-Inference speeds will vary greatly depending on the GPU and the model used.
+Inference is done with the `onnx` detector type. Speeds will vary greatly depending on the GPU and the model used.
 `tiny (t)` variants are faster than the equivalent non-tiny model, some known examples are below:
 
 ✅ - Accelerated with CUDA Graphs

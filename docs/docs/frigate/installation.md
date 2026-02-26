@@ -502,12 +502,12 @@ The official docker image tags for the current stable version are:
 
 - `stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64. This build includes support for Hailo devices as well.
 - `stable-standard-arm64` - Standard Frigate build for arm64
-- `stable-tensorrt` - Frigate build specific for amd64 devices running an nvidia GPU
+- `stable-tensorrt` - Frigate build specific for amd64 devices running an Nvidia GPU
 - `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
 
 The community supported docker image tags for the current stable version are:
 
-- `stable-tensorrt-jp6` - Frigate build optimized for nvidia Jetson devices running Jetpack 6
+- `stable-tensorrt-jp6` - Frigate build optimized for Nvidia Jetson devices running Jetpack 6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
 
 ## Home Assistant Add-on
@@ -521,7 +521,7 @@ There are important limitations in HA OS to be aware of:
 - Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
 - Intel NPUs are not supported because HA OS does not include the NPU firmware.
-- Nvidia GPUs are not supported because addons do not support the nvidia runtime.
+- Nvidia GPUs are not supported because addons do not support the Nvidia runtime.
 
 :::
 

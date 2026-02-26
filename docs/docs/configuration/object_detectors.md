@@ -34,7 +34,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Nvidia GPU**
 
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
+- [ONNX](#onnx): Nvidia GPUs will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
 
 **Nvidia Jetson** <CommunityBadge />
 
@@ -65,7 +65,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `memryx`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -654,11 +654,9 @@ ONNX is an open format for building machine learning models, Frigate supports ru
 If the correct build is used for your GPU then the GPU will be detected and used automatically.
 
 - **AMD**
-
   - ROCm will automatically be detected and used with the ONNX detector in the `-rocm` Frigate image.
 
 - **Intel**
-
   - OpenVINO will automatically be detected and used with the ONNX detector in the default Frigate image.
 
 - **Nvidia**
