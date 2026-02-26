@@ -48,9 +48,9 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 Most vision-language models are available as **instruct** models, which are fine-tuned to follow instructions and respond concisely to prompts. However, some models (such as certain Qwen-VL or minigpt variants) offer both **instruct** and **thinking** versions.
 
 - **Instruct models** are always recommended for use with Frigate. These models generate direct, relevant, actionable descriptions that best fit Frigate's object and event summary use case.
-- **Thinking models** are fine-tuned for more free-form, open-ended, and speculative outputs, which are typically not concise and may not provide the practical summaries Frigate expects. For this reason, Frigate does **not** recommend or support using thinking models.
+- **Reasoning / Thinking models** are fine-tuned for more free-form, open-ended, and speculative outputs, which are typically not concise and may not provide the practical summaries Frigate expects. For this reason, Frigate does **not** recommend or support using thinking models.
 
-Some models are labeled as **hybrid** (capable of both thinking and instruct tasks). In these cases, Frigate will always use instruct-style prompts and specifically disables thinking-mode behaviors to ensure concise, useful responses.
+Some models are labeled as **hybrid** (capable of both thinking and instruct tasks). In these cases, it is recommended to disable reasoning / thinking, which is generally model specific (see your models documentation).
 
 **Recommendation:**
 Always select the `-instruct` or documented instruct/tagged variant of any model you use in your Frigate configuration. If in doubt, refer to your model provider's documentation or model library for guidance on the correct model variant to use.
