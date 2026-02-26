@@ -119,7 +119,7 @@ services:
     volumes:
       - ./config:/config
       - ./storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # In-memory filesystem for recording segment storage
         target: /tmp/cache
         tmpfs:
           size: 1000000000
