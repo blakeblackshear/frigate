@@ -7,6 +7,7 @@ import axios from "axios";
 import { ChatEventThumbnailsRow } from "@/components/chat/ChatEventThumbnailsRow";
 import { MessageBubble } from "@/components/chat/ChatMessage";
 import { ToolCallBubble } from "@/components/chat/ToolCallBubble";
+import { ChatStartingState } from "@/components/chat/ChatStartingState";
 import type { ChatMessage } from "@/types/chat";
 import {
   getEventIdsFromSearchObjectsToolCalls,
@@ -78,88 +79,101 @@ export default function ChatPage() {
   return (
     <div className="flex size-full justify-center p-2">
       <div className="flex size-full flex-col xl:w-[50%] 3xl:w-[35%]">
-        <div className="scrollbar-container flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto">
-          {messages.map((msg, i) => {
-            const isStreamingPlaceholder =
-              i === messages.length - 1 &&
-              msg.role === "assistant" &&
-              isLoading &&
-              !msg.content?.trim() &&
-              !(msg.toolCalls && msg.toolCalls.length > 0);
-            if (isStreamingPlaceholder) {
-              return <div key={i} />;
-            }
-            return (
-              <div key={i} className="flex flex-col gap-2">
-                {msg.role === "assistant" && msg.toolCalls && (
-                  <>
-                    {msg.toolCalls.map((tc, tcIdx) => (
-                      <div key={tcIdx} className="flex flex-col gap-2">
-                        <ToolCallBubble
-                          name={tc.name}
-                          arguments={tc.arguments}
-                          side="left"
-                        />
-                        {tc.response && (
+        {messages.length === 0 ? (
+          <ChatStartingState
+            onSendMessage={(message) => {
+              setInput("");
+              submitConversation([{ role: "user", content: message }]);
+            }}
+          />
+        ) : (
+          <div className="scrollbar-container flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto">
+            {messages.map((msg, i) => {
+              const isStreamingPlaceholder =
+                i === messages.length - 1 &&
+                msg.role === "assistant" &&
+                isLoading &&
+                !msg.content?.trim() &&
+                !(msg.toolCalls && msg.toolCalls.length > 0);
+              if (isStreamingPlaceholder) {
+                return <div key={i} />;
+              }
+              return (
+                <div key={i} className="flex flex-col gap-2">
+                  {msg.role === "assistant" && msg.toolCalls && (
+                    <>
+                      {msg.toolCalls.map((tc, tcIdx) => (
+                        <div key={tcIdx} className="flex flex-col gap-2">
                           <ToolCallBubble
                             name={tc.name}
-                            response={tc.response}
-                            side="right"
+                            arguments={tc.arguments}
+                            side="left"
                           />
-                        )}
-                      </div>
-                    ))}
-                  </>
-                )}
-                <MessageBubble
-                  role={msg.role}
-                  content={msg.content}
-                  messageIndex={i}
-                  onEditSubmit={
-                    msg.role === "user" ? handleEditSubmit : undefined
-                  }
-                  isComplete={
-                    msg.role === "user" || !isLoading || i < messages.length - 1
-                  }
-                />
-                {msg.role === "assistant" &&
-                  (() => {
-                    const isComplete = !isLoading || i < messages.length - 1;
-                    if (!isComplete) return null;
-                    const events = getEventIdsFromSearchObjectsToolCalls(
-                      msg.toolCalls,
-                    );
-                    return <ChatEventThumbnailsRow events={events} />;
-                  })()}
-              </div>
-            );
-          })}
-          {(() => {
-            const lastMsg = messages[messages.length - 1];
-            const showProcessing =
-              isLoading &&
-              lastMsg?.role === "assistant" &&
-              !lastMsg.content?.trim() &&
-              !(lastMsg.toolCalls && lastMsg.toolCalls.length > 0);
-            return showProcessing ? (
-              <div className="self-start rounded-lg bg-muted px-3 py-2 text-muted-foreground">
-                {t("processing")}
-              </div>
-            ) : null;
-          })()}
-          {error && (
-            <p className="self-start text-sm text-destructive" role="alert">
-              {error}
-            </p>
-          )}
-        </div>
-        <ChatEntry
-          input={input}
-          setInput={setInput}
-          sendMessage={sendMessage}
-          isLoading={isLoading}
-          placeholder={t("placeholder")}
-        />
+                          {tc.response && (
+                            <ToolCallBubble
+                              name={tc.name}
+                              response={tc.response}
+                              side="right"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  <MessageBubble
+                    role={msg.role}
+                    content={msg.content}
+                    messageIndex={i}
+                    onEditSubmit={
+                      msg.role === "user" ? handleEditSubmit : undefined
+                    }
+                    isComplete={
+                      msg.role === "user" ||
+                      !isLoading ||
+                      i < messages.length - 1
+                    }
+                  />
+                  {msg.role === "assistant" &&
+                    (() => {
+                      const isComplete = !isLoading || i < messages.length - 1;
+                      if (!isComplete) return null;
+                      const events = getEventIdsFromSearchObjectsToolCalls(
+                        msg.toolCalls,
+                      );
+                      return <ChatEventThumbnailsRow events={events} />;
+                    })()}
+                </div>
+              );
+            })}
+            {(() => {
+              const lastMsg = messages[messages.length - 1];
+              const showProcessing =
+                isLoading &&
+                lastMsg?.role === "assistant" &&
+                !lastMsg.content?.trim() &&
+                !(lastMsg.toolCalls && lastMsg.toolCalls.length > 0);
+              return showProcessing ? (
+                <div className="self-start rounded-lg bg-muted px-3 py-2 text-muted-foreground">
+                  {t("processing")}
+                </div>
+              ) : null;
+            })()}
+            {error && (
+              <p className="self-start text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            )}
+          </div>
+        )}
+        {messages.length > 0 && (
+          <ChatEntry
+            input={input}
+            setInput={setInput}
+            sendMessage={sendMessage}
+            isLoading={isLoading}
+            placeholder={t("placeholder")}
+          />
+        )}
       </div>
     </div>
   );

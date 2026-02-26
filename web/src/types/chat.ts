@@ -9,3 +9,8 @@ export type ChatMessage = {
   content: string;
   toolCalls?: ToolCall[];
 };
+
+export type StartingRequest = {
+  label: string;
+  prompt: string;
+};
