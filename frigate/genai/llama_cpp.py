@@ -121,7 +121,10 @@ class LlamaCppClient(GenAIClient):
             elif tool_choice == "required":
                 openai_tool_choice = "required"
 
-        payload: dict[str, Any] = {"messages": messages, "model": self.genai_config.model}
+        payload: dict[str, Any] = {
+            "messages": messages,
+            "model": self.genai_config.model,
+        }
         if stream:
             payload["stream"] = True
         if tools:
