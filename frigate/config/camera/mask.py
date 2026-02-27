@@ -14,15 +14,18 @@ class MotionMaskConfig(FrigateBaseModel):
 
     friendly_name: Optional[str] = Field(
         default=None,
-        title="Motion mask friendly name used in the Frigate UI.",
+        title="Friendly name",
+        description="A friendly name for this motion mask used in the Frigate UI",
     )
     enabled: bool = Field(
         default=True,
-        title="Enable this motion mask.",
+        title="Enabled",
+        description="Enable or disable this motion mask",
     )
     coordinates: Union[str, list[str]] = Field(
         default="",
-        title="Coordinates polygon for the motion mask.",
+        title="Coordinates",
+        description="Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas.",
     )
     raw_coordinates: Union[str, list[str]] = ""
     enabled_in_config: Optional[bool] = Field(
@@ -49,15 +52,18 @@ class ObjectMaskConfig(FrigateBaseModel):
 
     friendly_name: Optional[str] = Field(
         default=None,
-        title="Object mask friendly name used in the Frigate UI.",
+        title="Friendly name",
+        description="A friendly name for this object mask used in the Frigate UI",
     )
     enabled: bool = Field(
         default=True,
-        title="Enable this object mask.",
+        title="Enabled",
+        description="Enable or disable this object mask",
     )
     coordinates: Union[str, list[str]] = Field(
         default="",
-        title="Coordinates polygon for the object mask.",
+        title="Coordinates",
+        description="Ordered x,y coordinates defining the object mask polygon used to include/exclude areas.",
     )
     raw_coordinates: Union[str, list[str]] = ""
     enabled_in_config: Optional[bool] = Field(
