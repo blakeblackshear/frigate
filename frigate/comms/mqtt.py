@@ -133,19 +133,19 @@ class MqttClient(Communicator):
                 retain=True,
             )
 
-            for mask_name, mask in camera.motion.mask.items():
-                if mask:
+            for mask_name, motion_mask in camera.motion.mask.items():
+                if motion_mask:
                     self.publish(
                         f"{camera_name}/motion_mask/{mask_name}/state",
-                        "ON" if mask.enabled else "OFF",
+                        "ON" if motion_mask.enabled else "OFF",
                         retain=True,
                     )
 
-            for mask_name, mask in camera.objects.mask.items():
-                if mask:
+            for mask_name, object_mask in camera.objects.mask.items():
+                if object_mask:
                     self.publish(
                         f"{camera_name}/object_mask/{mask_name}/state",
-                        "ON" if mask.enabled else "OFF",
+                        "ON" if object_mask.enabled else "OFF",
                         retain=True,
                     )
 

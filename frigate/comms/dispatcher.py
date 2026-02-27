@@ -108,7 +108,7 @@ class Dispatcher:
             camera_name: str,
             command: str,
             payload: str,
-            sub_command: str = None,
+            sub_command: str | None = None,
         ) -> None:
             try:
                 if command_type == "set":
