@@ -161,7 +161,7 @@ YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are s
 
 :::tip
 
-**Frigate+ Users:** Follow the [instructions](../integrations/plus#use-models) to set a model ID in your config file.
+**Frigate+ Users:** Follow the [instructions](/integrations/plus#use-models) to set a model ID in your config file.
 
 :::
 
