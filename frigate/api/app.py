@@ -433,7 +433,7 @@ def config_set(request: Request, body: AppConfigSetBody):
     if body.requires_restart == 0 or body.update_topic:
         old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
-        request.app.genai_manager = GenAIClientManager(config)
+        request.app.genai_manager.update_config(config)
 
         if body.update_topic:
             if body.update_topic.startswith("config/cameras/"):
