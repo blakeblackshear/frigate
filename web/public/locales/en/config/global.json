@@ -1119,7 +1119,7 @@
     }
   },
   "genai": {
-    "label": "Generative AI",
+    "label": "Generative AI configuration (named providers).",
     "description": "Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
     "api_key": {
       "label": "API key",

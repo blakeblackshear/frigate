@@ -386,10 +386,10 @@ class FrigateConfig(FrigateBaseModel):
         description="Settings to configure a custom object detection model and its input shape.",
     )
 
-    # GenAI config
-    genai: GenAIConfig = Field(
-        default_factory=GenAIConfig,
-        title="Generative AI",
+    # GenAI config (named provider configs: name -> GenAIConfig)
+    genai: Dict[str, GenAIConfig] = Field(
+        default_factory=dict,
+        title="Generative AI configuration (named providers).",
         description="Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
     )
 
