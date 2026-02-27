@@ -787,13 +787,6 @@ export default function Settings() {
           config_data: configData,
         });
 
-        // eslint-disable-next-line no-console
-        console.log("Save All – saved:", {
-          [payload.basePath]: payload.sanitizedOverrides,
-          update_topic: payload.updateTopic,
-          requires_restart: payload.needsRestart ? 1 : 0,
-        });
-
         if (payload.needsRestart) {
           anyNeedsRestart = true;
         }
