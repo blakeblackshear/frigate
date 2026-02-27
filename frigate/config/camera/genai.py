@@ -67,6 +67,3 @@ class GenAIConfig(FrigateBaseModel):
         description="Runtime options passed to the provider for each inference call.",
         json_schema_extra={"additionalProperties": {"type": "string"}},
     )
-    runtime_options: dict[str, Any] = Field(
-        default={}, title="Options to pass during inference calls."
-    )

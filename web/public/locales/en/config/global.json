@@ -1137,6 +1137,10 @@
       "label": "Provider",
       "description": "The GenAI provider to use (for example: ollama, gemini, openai)."
     },
+    "roles": {
+      "label": "Roles",
+      "description": "GenAI roles (tools, vision, embeddings); one provider per role."
+    },
     "provider_options": {
       "label": "Provider options",
       "description": "Additional provider-specific options to pass to the GenAI client."
