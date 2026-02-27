@@ -11,12 +11,12 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useHasFullCameraAccess } from "@/hooks/use-has-full-camera-access";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
-  const isAdmin = useIsAdmin();
+  const hasFullCameraAccess = useHasFullCameraAccess();
 
   // selection
 
@@ -90,8 +90,8 @@ function Live() {
   const allowedCameras = useAllowedCameras();
 
   const includesBirdseye = useMemo(() => {
-    // Restricted users should never have access to birdseye
-    if (!isAdmin) {
+    // Users without access to all cameras should not have access to birdseye
+    if (!hasFullCameraAccess) {
       return false;
     }
 
@@ -106,7 +106,7 @@ function Live() {
     } else {
       return false;
     }
-  }, [config, cameraGroup, isAdmin]);
+  }, [config, cameraGroup, hasFullCameraAccess]);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -151,7 +151,9 @@ function Live() {
 
   return (
     <div className="size-full" ref={mainRef}>
-      {selectedCameraName === "birdseye" ? (
+      {selectedCameraName === "birdseye" &&
+      hasFullCameraAccess &&
+      config?.birdseye?.enabled ? (
         <LiveBirdseyeView
           supportsFullscreen={supportsFullScreen}
           fullscreen={fullscreen}
