@@ -121,6 +121,7 @@ export interface BaseSectionProps {
   onStatusChange?: (status: {
     hasChanges: boolean;
     isOverridden: boolean;
+    hasValidationErrors: boolean;
   }) => void;
   /** Pending form data keyed by "sectionKey" or "cameraName::sectionKey" */
   pendingDataBySection?: Record<string, unknown>;
@@ -371,8 +372,8 @@ export function ConfigSection({
   }, [formData, pendingData, extraHasChanges]);
 
   useEffect(() => {
-    onStatusChange?.({ hasChanges, isOverridden });
-  }, [hasChanges, isOverridden, onStatusChange]);
+    onStatusChange?.({ hasChanges, isOverridden, hasValidationErrors });
+  }, [hasChanges, isOverridden, hasValidationErrors, onStatusChange]);
 
   // Handle form data change
   const handleChange = useCallback(

@@ -31,6 +31,7 @@ export type SettingsPageProps = {
 export type SectionStatus = {
   hasChanges: boolean;
   isOverridden: boolean;
+  hasValidationErrors: boolean;
 };
 
 export type SingleSectionPageOptions = {
@@ -67,6 +68,7 @@ export function SingleSectionPage({
   const [sectionStatus, setSectionStatus] = useState<SectionStatus>({
     hasChanges: false,
     isOverridden: false,
+    hasValidationErrors: false,
   });
   const resolvedSectionConfig = useMemo(
     () => sectionConfig ?? getSectionConfig(sectionKey, level),

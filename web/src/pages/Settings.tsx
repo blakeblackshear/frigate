@@ -668,6 +668,13 @@ export default function Settings() {
   const { data: fullSchema } = useSWR<RJSFSchema>("config/schema.json");
 
   const hasPendingChanges = Object.keys(pendingDataBySection).length > 0;
+  const hasPendingValidationErrors = useMemo(
+    () =>
+      Object.values(sectionStatusByKey).some(
+        (status) => !!status && status.hasChanges && status.hasValidationErrors,
+      ),
+    [sectionStatusByKey],
+  );
   const pendingChangesPreview = useMemo<SaveAllPreviewItem[]>(() => {
     if (!config || !fullSchema) return [];
 
@@ -734,7 +741,13 @@ export default function Settings() {
   );
 
   const handleSaveAll = useCallback(async () => {
-    if (!config || !fullSchema || !hasPendingChanges) return;
+    if (
+      !config ||
+      !fullSchema ||
+      !hasPendingChanges ||
+      hasPendingValidationErrors
+    )
+      return;
 
     setIsSavingAll(true);
     let successCount = 0;
@@ -812,6 +825,7 @@ export default function Settings() {
             updated[menuKey] = {
               ...updated[menuKey],
               hasChanges: false,
+              hasValidationErrors: false,
             };
           }
         }
@@ -865,6 +879,7 @@ export default function Settings() {
     config,
     fullSchema,
     hasPendingChanges,
+    hasPendingValidationErrors,
     pendingDataBySection,
     pendingKeyToMenuKey,
     t,
@@ -885,6 +900,7 @@ export default function Settings() {
           updated[menuKey] = {
             ...updated[menuKey],
             hasChanges: false,
+            hasValidationErrors: false,
           };
         }
       }
@@ -1011,7 +1027,9 @@ export default function Settings() {
   useEffect(() => {
     if (!selectedCamera || !cameraOverrides) return;
 
-    const overrideMap: Partial<Record<SettingsType, SectionStatus>> = {};
+    const overrideMap: Partial<
+      Record<SettingsType, Pick<SectionStatus, "hasChanges" | "isOverridden">>
+    > = {};
 
     // Set override status for all camera sections using the shared mapping
     Object.entries(CAMERA_SECTION_MAPPING).forEach(
@@ -1031,7 +1049,12 @@ export default function Settings() {
       // Merge and update both hasChanges and isOverridden for camera sections
       const merged = { ...prev };
       Object.entries(overrideMap).forEach(([key, status]) => {
-        merged[key as SettingsType] = status;
+        const existingStatus = merged[key as SettingsType];
+        merged[key as SettingsType] = {
+          hasChanges: status.hasChanges,
+          isOverridden: status.isOverridden,
+          hasValidationErrors: existingStatus?.hasValidationErrors ?? false,
+        };
       });
       return merged;
     });
@@ -1164,7 +1187,7 @@ export default function Settings() {
                     onClick={handleSaveAll}
                     variant="select"
                     size="sm"
-                    disabled={isSavingAll}
+                    disabled={isSavingAll || hasPendingValidationErrors}
                     className="flex w-full items-center justify-center gap-2"
                   >
                     {isSavingAll ? (
@@ -1306,7 +1329,7 @@ export default function Settings() {
                 variant="select"
                 size="sm"
                 onClick={handleSaveAll}
-                disabled={isSavingAll}
+                disabled={isSavingAll || hasPendingValidationErrors}
                 className="flex items-center justify-center gap-2"
               >
                 {isSavingAll ? (
