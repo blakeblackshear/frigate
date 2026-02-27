@@ -190,7 +190,7 @@ async def _execute_search_objects(
         return JSONResponse(
             content={
                 "success": False,
-                "message": f"Error searching objects: {str(e)}",
+                "message": "Error searching objects",
             },
             status_code=500,
         )
@@ -279,7 +279,7 @@ async def _execute_get_live_context(
     except Exception as e:
         logger.error(f"Error executing get_live_context: {e}", exc_info=True)
         return {
-            "error": f"Error getting live context: {str(e)}",
+            "error": "Error getting live context",
         }
 
 
@@ -599,9 +599,7 @@ Always be accurate with time calculations based on the current date provided.{ca
                         f"Error executing tool {tool_name} (id: {tool_call_id}): {e}",
                         exc_info=True,
                     )
-                    error_content = json.dumps(
-                        {"error": f"Tool execution failed: {str(e)}"}
-                    )
+                    error_content = json.dumps({"error": "Tool execution failed"})
                     tool_results.append(
                         {
                             "role": "tool",
