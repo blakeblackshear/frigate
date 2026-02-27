@@ -348,6 +348,9 @@
       "label": "Object mask",
       "description": "Mask polygon used to prevent object detection in specified areas."
     },
+    "raw_mask": {
+      "label": "Raw Mask"
+    },
     "genai": {
       "label": "GenAI object config",
       "description": "GenAI options for describing tracked objects and sending frames for generation.",
@@ -859,6 +862,12 @@
     "friendly_name": {
       "label": "Zone name",
       "description": "A user-friendly name for the zone, displayed in the Frigate UI. If not set, a formatted version of the zone name will be used."
+    },
+    "enabled": {
+      "label": "Whether this zone is active. Disabled zones are ignored at runtime."
+    },
+    "enabled_in_config": {
+      "label": "Keep track of original state of zone."
     },
     "filters": {
       "label": "Zone filters",
