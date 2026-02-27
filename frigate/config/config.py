@@ -46,6 +46,7 @@ from .camera.birdseye import BirdseyeConfig
 from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig, GenAIRoleEnum
+from .camera.mask import ObjectMaskConfig
 from .camera.motion import MotionConfig
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
@@ -798,8 +799,6 @@ class FrigateConfig(FrigateBaseModel):
                             coords, camera_config.frame_shape
                         )
                         # Create a new ObjectMaskConfig with raw_coordinates set
-                        from frigate.config.camera.mask import ObjectMaskConfig
-
                         processed_global_masks[mask_id] = ObjectMaskConfig(
                             friendly_name=mask_config.friendly_name,
                             enabled=mask_config.enabled,

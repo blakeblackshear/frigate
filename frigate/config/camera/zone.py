@@ -20,7 +20,8 @@ class ZoneConfig(BaseModel):
     )
     enabled: bool = Field(
         default=True,
-        title="Whether this zone is active. Disabled zones are ignored at runtime.",
+        title="Enabled",
+        description="Enable or disable this zone. Disabled zones are ignored at runtime.",
     )
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Keep track of original state of zone."
