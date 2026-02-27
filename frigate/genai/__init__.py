@@ -9,7 +9,7 @@ from typing import Any, Optional
 
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
+from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
 from frigate.const import CLIPS_DIR
 from frigate.data_processing.post.types import ReviewMetadata
 from frigate.genai.manager import GenAIClientManager
