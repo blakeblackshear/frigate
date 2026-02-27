@@ -157,7 +157,13 @@ A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` 
 
 #### YOLOv9
 
-YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are supported, but not included by default. [Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes.
+YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are supported, but not included by default. [Instructions](#yolov9-for-google-coral-support) for downloading a model with support for the Google Coral.
+
+:::tip
+
+**Frigate+ Users:** Follow the [instructions](../integrations/plus#use-models) to set a model ID in your config file.
+
+:::
 
 <details>
   <summary>YOLOv9 Setup & Config</summary>
@@ -1554,7 +1560,11 @@ cd tensorrt_demos/yolo
 python3 yolo_to_onnx.py -m yolov7-320
 ```
 
-#### YOLOv9
+#### YOLOv9 for Google Coral Support
+
+[Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes.
+
+#### YOLOv9 for other detectors
 
 YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` and `IMG_SIZE=320` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available model sizes are `t`, `s`, `m`, `c`, and `e`, common image sizes are `320` and `640`).
 

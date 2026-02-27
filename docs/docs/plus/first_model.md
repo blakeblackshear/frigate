@@ -24,6 +24,8 @@ You will receive an email notification when your Frigate+ model is ready.
 Models available in Frigate+ can be used with a special model path. No other information needs to be configured because it fetches the remaining config from Frigate+ automatically.
 
 ```yaml
+detectors: ...
+
 model:
   path: plus://<your_model_id>
 ```

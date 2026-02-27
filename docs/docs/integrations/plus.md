@@ -54,6 +54,8 @@ Once you have [requested your first model](../plus/first_model.md) and gotten yo
 You can either choose the new model from the Frigate+ pane in the Settings page of the Frigate UI, or manually set the model at the root level in your config:
 
 ```yaml
+detectors: ...
+
 model:
   path: plus://<your_model_id>
 ```
