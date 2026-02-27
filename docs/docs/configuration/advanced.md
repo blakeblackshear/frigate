@@ -155,32 +155,33 @@ services:
 
 ### Enabling IPv6
 
-IPv6 is disabled by default, to enable IPv6 modify your Frigate configuration as follows:
+IPv6 is disabled by default, to enable IPv6 listen.gotmpl needs to be bind mounted with IPv6 enabled. For example:
 
-```yaml
-networking:
-  ipv6:
-    enabled: True
+```
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen 8971;
+{{ else }}
+# intended for external traffic, protected by auth
+listen 8971 ssl;
+
+# intended for internal traffic, not protected by auth
+listen 5000;
 ```
 
-### Listen on different ports
+becomes
 
-You can change the ports Nginx uses for listening using Frigate's configuration file. The internal port (unauthenticated) and external port (authenticated) can be changed independently. You can also specify an IP address using the format `ip:port` if you wish to bind the port to a specific interface. This may be useful for example to prevent exposing the internal port outside the container.
-
-For example:
-
-```yaml
-networking:
-  listen:
-    internal: 127.0.0.1:5000
-    external: 8971
 ```
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen [::]:8971 ipv6only=off;
+{{ else }}
+# intended for external traffic, protected by auth
+listen [::]:8971 ipv6only=off ssl;
 
-:::warning
-
-This setting is for advanced users. For the majority of use cases it's recommended to change the `ports` section of your Docker compose file or use the Docker `run` `--publish` option instead, e.g. `-p 443:8971`. Changing Frigate's ports may break some integrations.
-
-:::
+# intended for internal traffic, not protected by auth
+listen [::]:5000 ipv6only=off;
+```
 
 ## Base path
 
@@ -233,7 +234,7 @@ To do this:
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.13, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.10, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 

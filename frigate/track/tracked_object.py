@@ -434,7 +434,7 @@ class TrackedObject:
         return count > (self.camera_config.detect.stationary.threshold or 50)
 
     def get_thumbnail(self, ext: str) -> bytes | None:
-        img_bytes, _ = self.get_img_bytes(
+        img_bytes = self.get_img_bytes(
             ext, timestamp=False, bounding_box=False, crop=True, height=175
         )
 
@@ -475,21 +475,20 @@ class TrackedObject:
         crop: bool = False,
         height: int | None = None,
         quality: int | None = None,
-    ) -> tuple[bytes | None, float | None]:
+    ) -> bytes | None:
         if self.thumbnail_data is None:
-            return None, None
+            return None
 
         try:
-            frame_time = self.thumbnail_data["frame_time"]
             best_frame = cv2.cvtColor(
-                self.frame_cache[frame_time]["frame"],
+                self.frame_cache[self.thumbnail_data["frame_time"]]["frame"],
                 cv2.COLOR_YUV2BGR_I420,
             )
         except KeyError:
             logger.warning(
-                f"Unable to create jpg because frame {frame_time} is not in the cache"
+                f"Unable to create jpg because frame {self.thumbnail_data['frame_time']} is not in the cache"
             )
-            return None, None
+            return None
 
         if bounding_box:
             thickness = 2
@@ -571,13 +570,13 @@ class TrackedObject:
         ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
 
         if ret:
-            return jpg.tobytes(), frame_time
+            return jpg.tobytes()
         else:
-            return None, None
+            return None
 
     def write_snapshot_to_disk(self) -> None:
         snapshot_config: SnapshotsConfig = self.camera_config.snapshots
-        jpg_bytes, _ = self.get_img_bytes(
+        jpg_bytes = self.get_img_bytes(
             ext="jpg",
             timestamp=snapshot_config.timestamp,
             bounding_box=snapshot_config.bounding_box,

@@ -417,12 +417,12 @@ def get_openvino_npu_stats() -> Optional[dict[str, str]]:
         else:
             usage = 0.0
 
-        return {"npu": f"{round(usage, 2)}", "mem": "-%"}
+        return {"npu": f"{round(usage, 2)}", "mem": "-"}
     except (FileNotFoundError, PermissionError, ValueError):
         return None
 
 
-def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
+def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
     """Get GPU stats using rk."""
     try:
         with open("/sys/kernel/debug/rkrga/load", "r") as f:
@@ -440,16 +440,7 @@ def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
         return None
 
     average_load = f"{round(sum(load_values) / len(load_values), 2)}%"
-    stats: dict[str, str | float] = {"gpu": average_load, "mem": "-%"}
-
-    try:
-        with open("/sys/class/thermal/thermal_zone5/temp", "r") as f:
-            line = f.readline().strip()
-            stats["temp"] = round(int(line) / 1000, 1)
-    except (FileNotFoundError, OSError, ValueError):
-        pass
-
-    return stats
+    return {"gpu": average_load, "mem": "-"}
 
 
 def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
@@ -472,25 +463,13 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
 
     percentages = [int(load) for load in core_loads]
     mean = round(sum(percentages) / len(percentages), 2)
-    stats: dict[str, float | str] = {"npu": mean, "mem": "-%"}
-
-    try:
-        with open("/sys/class/thermal/thermal_zone6/temp", "r") as f:
-            line = f.readline().strip()
-            stats["temp"] = round(int(line) / 1000, 1)
-    except (FileNotFoundError, OSError, ValueError):
-        pass
-
-    return stats
+    return {"npu": mean, "mem": "-"}
 
 
-def try_get_info(f, h, default="N/A", sensor=None):
+def try_get_info(f, h, default="N/A"):
     try:
         if h:
-            if sensor is not None:
-                v = f(h, sensor)
-            else:
-                v = f(h)
+            v = f(h)
         else:
             v = f()
     except nvml.NVMLError_NotSupported:
@@ -519,9 +498,6 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
             util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
             enc = try_get_info(nvml.nvmlDeviceGetEncoderUtilization, handle)
             dec = try_get_info(nvml.nvmlDeviceGetDecoderUtilization, handle)
-            temp = try_get_info(
-                nvml.nvmlDeviceGetTemperature, handle, default=None, sensor=0
-            )
             pstate = try_get_info(nvml.nvmlDeviceGetPowerState, handle, default=None)
 
             if util != "N/A":
@@ -533,11 +509,6 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 gpu_mem_util = meminfo.used / meminfo.total * 100
             else:
                 gpu_mem_util = -1
-
-            if temp != "N/A" and temp is not None:
-                temp = float(temp)
-            else:
-                temp = None
 
             if enc != "N/A":
                 enc_util = enc[0]
@@ -556,7 +527,6 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 "enc": enc_util,
                 "dec": dec_util,
                 "pstate": pstate or "unknown",
-                "temp": temp,
             }
     except Exception:
         pass
@@ -584,53 +554,6 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
         return None
 
     return results
-
-
-def get_hailo_temps() -> dict[str, float]:
-    """Get temperatures for Hailo devices."""
-    try:
-        from hailo_platform import Device
-    except ModuleNotFoundError:
-        return {}
-
-    temps = {}
-
-    try:
-        device_ids = Device.scan()
-        for i, device_id in enumerate(device_ids):
-            try:
-                with Device(device_id) as device:
-                    temp_info = device.control.get_chip_temperature()
-
-                    # Get board name and normalise it
-                    identity = device.control.identify()
-                    board_name = None
-                    for line in str(identity).split("\n"):
-                        if line.startswith("Board Name:"):
-                            board_name = (
-                                line.split(":", 1)[1].strip().lower().replace("-", "")
-                            )
-                            break
-
-                    if not board_name:
-                        board_name = f"hailo{i}"
-
-                    # Use indexed name if multiple devices, otherwise just the board name
-                    device_name = (
-                        f"{board_name}-{i}" if len(device_ids) > 1 else board_name
-                    )
-
-                    # ts1_temperature is also available, but appeared to be the same as ts0 in testing.
-                    temps[device_name] = round(temp_info.ts0_temperature, 1)
-            except Exception as e:
-                logger.debug(
-                    f"Failed to get temperature for Hailo device {device_id}: {e}"
-                )
-                continue
-    except Exception as e:
-        logger.debug(f"Failed to scan for Hailo devices: {e}")
-
-    return temps
 
 
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
@@ -668,17 +591,12 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
 
 def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     """Run vainfo."""
-    if not device_name:
-        cmd = ["vainfo"]
-    else:
-        if os.path.isabs(device_name) and device_name.startswith("/dev/dri/"):
-            device_path = device_name
-        else:
-            device_path = f"/dev/dri/{device_name}"
-
-        cmd = ["vainfo", "--display", "drm", "--device", device_path]
-
-    return sp.run(cmd, capture_output=True)
+    ffprobe_cmd = (
+        ["vainfo"]
+        if not device_name
+        else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
+    )
+    return sp.run(ffprobe_cmd, capture_output=True)
 
 
 def get_nvidia_driver_info() -> dict[str, Any]:

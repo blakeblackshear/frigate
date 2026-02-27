@@ -127,6 +127,13 @@ export default function GeneralMetrics({
       return undefined;
     }
 
+    if (
+      statsHistory.length > 0 &&
+      Object.keys(statsHistory[0].service.temperatures).length == 0
+    ) {
+      return undefined;
+    }
+
     const series: {
       [key: string]: { name: string; data: { x: number; y: number }[] };
     } = {};
@@ -136,22 +143,22 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.detectors).forEach(([key, detectorStats]) => {
-        if (detectorStats.temperature === undefined) {
+      Object.entries(stats.detectors).forEach(([key], cIdx) => {
+        if (!key.includes("coral")) {
           return;
         }
 
-        if (!(key in series)) {
-          series[key] = {
-            name: key,
-            data: [],
-          };
-        }
+        if (cIdx <= Object.keys(stats.service.temperatures).length) {
+          if (!(key in series)) {
+            series[key] = {
+              name: key,
+              data: [],
+            };
+          }
 
-        series[key].data.push({
-          x: statsIdx + 1,
-          y: Math.round(detectorStats.temperature),
-        });
+          const temp = Object.values(stats.service.temperatures)[cIdx];
+          series[key].data.push({ x: statsIdx + 1, y: Math.round(temp) });
+        }
       });
     });
 
@@ -368,40 +375,6 @@ export default function GeneralMetrics({
     return Object.keys(series).length > 0 ? Object.values(series) : undefined;
   }, [statsHistory]);
 
-  const gpuTempSeries = useMemo(() => {
-    if (!statsHistory) {
-      return [];
-    }
-
-    const series: {
-      [key: string]: { name: string; data: { x: number; y: number }[] };
-    } = {};
-    let hasValidGpu = false;
-
-    statsHistory.forEach((stats, statsIdx) => {
-      if (!stats) {
-        return;
-      }
-
-      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
-        if (!(key in series)) {
-          series[key] = { name: key, data: [] };
-        }
-
-        if (stats.temp !== undefined) {
-          hasValidGpu = true;
-          series[key].data.push({ x: statsIdx + 1, y: stats.temp });
-        }
-      });
-    });
-
-    if (!hasValidGpu) {
-      return [];
-    }
-
-    return Object.keys(series).length > 0 ? Object.values(series) : undefined;
-  }, [statsHistory]);
-
   // Check if Intel GPU has all 0% usage values (known bug)
   const showIntelGpuWarning = useMemo(() => {
     if (!statsHistory || statsHistory.length < 3) {
@@ -480,40 +453,6 @@ export default function GeneralMetrics({
     }
 
     return Object.keys(series).length > 0 ? Object.values(series) : [];
-  }, [statsHistory]);
-
-  const npuTempSeries = useMemo(() => {
-    if (!statsHistory) {
-      return [];
-    }
-
-    const series: {
-      [key: string]: { name: string; data: { x: number; y: number }[] };
-    } = {};
-    let hasValidNpu = false;
-
-    statsHistory.forEach((stats, statsIdx) => {
-      if (!stats) {
-        return;
-      }
-
-      Object.entries(stats.npu_usages || {}).forEach(([key, stats]) => {
-        if (!(key in series)) {
-          series[key] = { name: key, data: [] };
-        }
-
-        if (stats.temp !== undefined) {
-          hasValidNpu = true;
-          series[key].data.push({ x: statsIdx + 1, y: stats.temp });
-        }
-      });
-    });
-
-    if (!hasValidNpu) {
-      return [];
-    }
-
-    return Object.keys(series).length > 0 ? Object.values(series) : undefined;
   }, [statsHistory]);
 
   // other processes stats
@@ -737,11 +676,7 @@ export default function GeneralMetrics({
             <div
               className={cn(
                 "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
-                gpuTempSeries?.length && "md:grid-cols-3",
-                gpuEncSeries?.length && "xl:grid-cols-4",
-                gpuEncSeries?.length &&
-                  gpuTempSeries?.length &&
-                  "3xl:grid-cols-5",
+                gpuEncSeries?.length && "md:grid-cols-4",
               )}
             >
               {statsHistory[0]?.gpu_usages && (
@@ -876,30 +811,6 @@ export default function GeneralMetrics({
                   ) : (
                     <Skeleton className="aspect-video w-full" />
                   )}
-                  {statsHistory.length != 0 ? (
-                    <>
-                      {gpuTempSeries && gpuTempSeries?.length != 0 && (
-                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                          <div className="mb-5">
-                            {t("general.hardwareInfo.gpuTemperature")}
-                          </div>
-                          {gpuTempSeries.map((series) => (
-                            <ThresholdBarGraph
-                              key={series.name}
-                              graphId={`${series.name}-temp`}
-                              name={series.name}
-                              unit="°C"
-                              threshold={DetectorTempThreshold}
-                              updateTimes={updateTimes}
-                              data={[series]}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <Skeleton className="aspect-video w-full" />
-                  )}
 
                   {statsHistory[0]?.npu_usages && (
                     <>
@@ -920,30 +831,6 @@ export default function GeneralMetrics({
                             />
                           ))}
                         </div>
-                      ) : (
-                        <Skeleton className="aspect-video w-full" />
-                      )}
-                      {statsHistory.length != 0 ? (
-                        <>
-                          {npuTempSeries && npuTempSeries?.length != 0 && (
-                            <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                              <div className="mb-5">
-                                {t("general.hardwareInfo.npuTemperature")}
-                              </div>
-                              {npuTempSeries.map((series) => (
-                                <ThresholdBarGraph
-                                  key={series.name}
-                                  graphId={`${series.name}-temp`}
-                                  name={series.name}
-                                  unit="°C"
-                                  threshold={DetectorTempThreshold}
-                                  updateTimes={updateTimes}
-                                  data={[series]}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </>
                       ) : (
                         <Skeleton className="aspect-video w-full" />
                       )}

@@ -1,8 +1,9 @@
 import ActivityIndicator from "../indicators/activity-indicator";
+import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
-import { useCallback, useMemo, useState } from "react";
-import { isMobile } from "react-device-detect";
-import { FiMoreVertical } from "react-icons/fi";
+import { useCallback, useState } from "react";
+import { isDesktop, isMobile } from "react-device-detect";
+import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
 import { Skeleton } from "../ui/skeleton";
 import {
   Dialog,
@@ -13,81 +14,35 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { DeleteClipType, Export, ExportCase } from "@/types/export";
+import { DeleteClipType, Export } from "@/types/export";
+import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
 import { useTranslation } from "react-i18next";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import BlurredIconButton from "../button/BlurredIconButton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { FaFolder } from "react-icons/fa";
 
-type CaseCardProps = {
-  className: string;
-  exportCase: ExportCase;
-  exports: Export[];
-  onSelect: () => void;
-};
-export function CaseCard({
-  className,
-  exportCase,
-  exports,
-  onSelect,
-}: CaseCardProps) {
-  const firstExport = useMemo(
-    () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
-    [exports],
-  );
-
-  return (
-    <div
-      className={cn(
-        "relative flex aspect-video size-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-secondary md:rounded-2xl",
-        className,
-      )}
-      onClick={() => onSelect()}
-    >
-      {firstExport && (
-        <img
-          className="absolute inset-0 size-full object-cover"
-          src={`${baseUrl}${firstExport.thumb_path.replace("/media/frigate/", "")}`}
-          alt=""
-        />
-      )}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute bottom-2 left-2 z-20 flex items-center justify-start gap-2 text-white">
-        <FaFolder />
-        <div className="capitalize">{exportCase.name}</div>
-      </div>
-    </div>
-  );
-}
-
-type ExportCardProps = {
+type ExportProps = {
   className: string;
   exportedRecording: Export;
   onSelect: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
   onDelete: ({ file, exportName }: DeleteClipType) => void;
-  onAssignToCase?: (selected: Export) => void;
 };
-export function ExportCard({
+
+export default function ExportCard({
   className,
   exportedRecording,
   onSelect,
   onRename,
   onDelete,
-  onAssignToCase,
-}: ExportCardProps) {
+}: ExportProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
+  const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
@@ -181,14 +136,12 @@ export function ExportCard({
 
       <div
         className={cn(
-          "relative flex aspect-video cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl",
+          "relative flex aspect-video items-center justify-center rounded-lg bg-black md:rounded-2xl",
           className,
         )}
-        onClick={() => {
-          if (!exportedRecording.in_progress) {
-            onSelect(exportedRecording);
-          }
-        }}
+        onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
+        onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
+        onClick={isDesktop ? undefined : () => setHovered(!hovered)}
       >
         {exportedRecording.in_progress ? (
           <ActivityIndicator />
@@ -205,88 +158,95 @@ export function ExportCard({
             )}
           </>
         )}
-        {!exportedRecording.in_progress && (
-          <div className="absolute bottom-2 right-3 z-40">
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger>
-                <BlurredIconButton
-                  aria-label={t("tooltip.editName")}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <FiMoreVertical className="size-5" />
-                </BlurredIconButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  aria-label={t("tooltip.shareExport")}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    shareOrCopy(
-                      `${baseUrl}export?id=${exportedRecording.id}`,
-                      exportedRecording.name.replaceAll("_", " "),
-                    );
-                  }}
-                >
-                  {t("tooltip.shareExport")}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  aria-label={t("tooltip.downloadVideo")}
-                >
+        {hovered && (
+          <>
+            <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
+            <div className="absolute right-3 top-2">
+              <div className="flex items-center justify-center gap-4">
+                {!exportedRecording.in_progress && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BlurredIconButton
+                        onClick={() =>
+                          shareOrCopy(
+                            `${baseUrl}export?id=${exportedRecording.id}`,
+                            exportedRecording.name.replaceAll("_", " "),
+                          )
+                        }
+                      >
+                        <FaShareAlt className="size-4" />
+                      </BlurredIconButton>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("tooltip.shareExport")}</TooltipContent>
+                  </Tooltip>
+                )}
+                {!exportedRecording.in_progress && (
                   <a
                     download
                     href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
-                    onClick={(e) => e.stopPropagation()}
                   >
-                    {t("tooltip.downloadVideo")}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <BlurredIconButton>
+                          <FaDownload className="size-4" />
+                        </BlurredIconButton>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("tooltip.downloadVideo")}
+                      </TooltipContent>
+                    </Tooltip>
                   </a>
-                </DropdownMenuItem>
-                {isAdmin && onAssignToCase && (
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    aria-label={t("tooltip.assignToCase")}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAssignToCase(exportedRecording);
-                    }}
-                  >
-                    {t("tooltip.assignToCase")}
-                  </DropdownMenuItem>
+                )}
+                {isAdmin && !exportedRecording.in_progress && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BlurredIconButton
+                        onClick={() =>
+                          setEditName({
+                            original: exportedRecording.name,
+                            update: undefined,
+                          })
+                        }
+                      >
+                        <MdEditSquare className="size-4" />
+                      </BlurredIconButton>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("tooltip.editName")}</TooltipContent>
+                  </Tooltip>
                 )}
                 {isAdmin && (
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    aria-label={t("tooltip.editName")}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditName({
-                        original: exportedRecording.name,
-                        update: undefined,
-                      });
-                    }}
-                  >
-                    {t("tooltip.editName")}
-                  </DropdownMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BlurredIconButton
+                        onClick={() =>
+                          onDelete({
+                            file: exportedRecording.id,
+                            exportName: exportedRecording.name,
+                          })
+                        }
+                      >
+                        <LuTrash className="size-4 fill-destructive text-destructive hover:text-white" />
+                      </BlurredIconButton>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("tooltip.deleteExport")}</TooltipContent>
+                  </Tooltip>
                 )}
-                {isAdmin && (
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    aria-label={t("tooltip.deleteExport")}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete({
-                        file: exportedRecording.id,
-                        exportName: exportedRecording.name,
-                      });
-                    }}
-                  >
-                    {t("tooltip.deleteExport")}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              </div>
+            </div>
+
+            {!exportedRecording.in_progress && (
+              <Button
+                className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
+                aria-label={t("button.play", { ns: "common" })}
+                variant="ghost"
+                onClick={() => {
+                  onSelect(exportedRecording);
+                }}
+              >
+                <FaPlay />
+              </Button>
+            )}
+          </>
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />

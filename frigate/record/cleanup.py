@@ -13,8 +13,9 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
+from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink
-from frigate.util.media import remove_empty_directories
+from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class RecordingCleanup(threading.Thread):
             db.execute_sql("PRAGMA wal_checkpoint(TRUNCATE);")
             db.close()
 
-    def expire_review_segments(self, config: CameraConfig, now: datetime) -> set[Path]:
+    def expire_review_segments(self, config: CameraConfig, now: datetime) -> None:
         """Delete review segments that are expired"""
         alert_expire_date = (
             now - datetime.timedelta(days=config.record.alerts.retain.days)
@@ -84,12 +85,9 @@ class RecordingCleanup(threading.Thread):
             .namedtuples()
         )
 
-        maybe_empty_dirs = set()
         thumbs_to_delete = list(map(lambda x: x[1], expired_reviews))
         for thumb_path in thumbs_to_delete:
-            thumb_path = Path(thumb_path)
-            thumb_path.unlink(missing_ok=True)
-            maybe_empty_dirs.add(thumb_path.parent)
+            Path(thumb_path).unlink(missing_ok=True)
 
         max_deletes = 100000
         deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
@@ -102,15 +100,13 @@ class RecordingCleanup(threading.Thread):
                 << deleted_reviews_list[i : i + max_deletes]
             ).execute()
 
-        return maybe_empty_dirs
-
     def expire_existing_camera_recordings(
         self,
         continuous_expire_date: float,
         motion_expire_date: float,
         config: CameraConfig,
         reviews: ReviewSegment,
-    ) -> set[Path]:
+    ) -> None:
         """Delete recordings for existing camera based on retention config."""
         # Get the timestamp for cutoff of retained days
 
@@ -140,8 +136,6 @@ class RecordingCleanup(threading.Thread):
             .namedtuples()
             .iterator()
         )
-
-        maybe_empty_dirs = set()
 
         # loop over recordings and see if they overlap with any non-expired reviews
         # TODO: expire segments based on segment stats according to config
@@ -197,10 +191,8 @@ class RecordingCleanup(threading.Thread):
                 )
                 or (mode == RetainModeEnum.active_objects and recording.objects == 0)
             ):
-                recording_path = Path(recording.path)
-                recording_path.unlink(missing_ok=True)
+                Path(recording.path).unlink(missing_ok=True)
                 deleted_recordings.add(recording.id)
-                maybe_empty_dirs.add(recording_path.parent)
             else:
                 kept_recordings.append((recording.start_time, recording.end_time))
 
@@ -261,10 +253,8 @@ class RecordingCleanup(threading.Thread):
 
             # Delete previews without any relevant recordings
             if not keep:
-                preview_path = Path(preview.path)
-                preview_path.unlink(missing_ok=True)
+                Path(preview.path).unlink(missing_ok=True)
                 deleted_previews.add(preview.id)
-                maybe_empty_dirs.add(preview_path.parent)
 
         # expire previews
         logger.debug(f"Expiring {len(deleted_previews)} previews")
@@ -276,9 +266,7 @@ class RecordingCleanup(threading.Thread):
                 Previews.id << deleted_previews_list[i : i + max_deletes]
             ).execute()
 
-        return maybe_empty_dirs
-
-    def expire_recordings(self) -> set[Path]:
+    def expire_recordings(self) -> None:
         """Delete recordings based on retention config."""
         logger.debug("Start expire recordings.")
         logger.debug("Start deleted cameras.")
@@ -303,14 +291,10 @@ class RecordingCleanup(threading.Thread):
             .iterator()
         )
 
-        maybe_empty_dirs = set()
-
         deleted_recordings = set()
         for recording in no_camera_recordings:
-            recording_path = Path(recording.path)
-            recording_path.unlink(missing_ok=True)
+            Path(recording.path).unlink(missing_ok=True)
             deleted_recordings.add(recording.id)
-            maybe_empty_dirs.add(recording_path.parent)
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
@@ -327,7 +311,7 @@ class RecordingCleanup(threading.Thread):
             logger.debug(f"Start camera: {camera}.")
             now = datetime.datetime.now()
 
-            maybe_empty_dirs |= self.expire_review_segments(config, now)
+            self.expire_review_segments(config, now)
             continuous_expire_date = (
                 now - datetime.timedelta(days=config.record.continuous.days)
             ).timestamp()
@@ -357,7 +341,7 @@ class RecordingCleanup(threading.Thread):
                 .namedtuples()
             )
 
-            maybe_empty_dirs |= self.expire_existing_camera_recordings(
+            self.expire_existing_camera_recordings(
                 continuous_expire_date, motion_expire_date, config, reviews
             )
             logger.debug(f"End camera: {camera}.")
@@ -365,9 +349,12 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End all cameras.")
         logger.debug("End expire recordings.")
 
-        return maybe_empty_dirs
-
     def run(self) -> None:
+        # on startup sync recordings with disk if enabled
+        if self.config.record.sync_recordings:
+            sync_recordings(limited=False)
+            next_sync = get_tomorrow_at_time(3)
+
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
             if self.stop_event.wait(60):
@@ -376,8 +363,16 @@ class RecordingCleanup(threading.Thread):
 
             self.clean_tmp_previews()
 
+            if (
+                self.config.record.sync_recordings
+                and datetime.datetime.now().astimezone(datetime.timezone.utc)
+                > next_sync
+            ):
+                sync_recordings(limited=True)
+                next_sync = get_tomorrow_at_time(3)
+
             if counter == 0:
                 self.clean_tmp_clips()
-                maybe_empty_dirs = self.expire_recordings()
-                remove_empty_directories(Path(RECORD_DIR), maybe_empty_dirs)
+                self.expire_recordings()
+                remove_empty_directories(RECORD_DIR)
                 self.truncate_wal()

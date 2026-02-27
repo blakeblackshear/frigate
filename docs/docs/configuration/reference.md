@@ -73,19 +73,11 @@ tls:
   # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
-# Optional: Networking configuration
+# Optional: IPv6 configuration
 networking:
   # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
   ipv6:
     enabled: False
-  # Optional: Override ports Frigate uses for listening (defaults: shown below)
-  # An IP address may also be provided to bind to a specific interface, e.g. ip:port
-  # NOTE: This setting is for advanced users and may break some integrations. The majority
-  #       of users should change ports in the docker compose file
-  #       or use the docker run `--publish` option to select a different port.
-  listen:
-    internal: 5000
-    external: 8971
 
 # Optional: Proxy configuration
 proxy:
@@ -518,6 +510,8 @@ record:
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
   expire_interval: 60
+  # Optional: Two-way sync recordings database with disk on startup and once a day (default: shown below).
+  sync_recordings: False
   # Optional: Continuous retention settings
   continuous:
     # Optional: Number of days to retain recordings regardless of tracked objects or motion (default: shown below)
@@ -540,8 +534,6 @@ record:
     # The -r (framerate) dictates how smooth the output video is.
     # So the args would be -vf setpts=0.02*PTS -r 30 in that case.
     timelapse_args: "-vf setpts=0.04*PTS -r 30"
-    # Optional: Global hardware acceleration settings for timelapse exports. (default: inherit)
-    hwaccel_args: auto
   # Optional: Recording Preview Settings
   preview:
     # Optional: Quality of recording preview (default: shown below).
@@ -760,7 +752,7 @@ classification:
         interval: None
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.9.13)
+# Uses https://github.com/AlexxIT/go2rtc (v1.9.10)
 # NOTE: The default go2rtc API port (1984) must be used,
 #       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:
@@ -845,11 +837,6 @@ cameras:
       # input_args:
       # Optional: camera specific output args (default: inherit)
       # output_args:
-
-    # Optional: camera specific hwaccel args for timelapse export (default: inherit)
-    # record:
-    #   export:
-    #     hwaccel_args:
 
     # Optional: timeout for highest scoring image before allowing it
     # to be replaced by a newer image. (default: shown below)

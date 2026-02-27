@@ -51,7 +51,6 @@
       "gpuMemory": "GPU Memory",
       "gpuEncoder": "GPU Encoder",
       "gpuDecoder": "GPU Decoder",
-      "gpuTemperature": "GPU Temperature",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Vainfo Output",
@@ -78,7 +77,6 @@
       },
       "npuUsage": "NPU Usage",
       "npuMemory": "NPU Memory",
-      "npuTemperature": "NPU Temperature",
       "intelGpuWarning": {
         "title": "Intel GPU Stats Warning",
         "message": "GPU stats unavailable",
@@ -159,17 +157,6 @@
       "cameraFramesPerSecond": "{{camName}} frames per second",
       "cameraDetectionsPerSecond": "{{camName}} detections per second",
       "cameraSkippedDetectionsPerSecond": "{{camName}} skipped detections per second"
-    },
-    "connectionQuality": {
-      "title": "Connection Quality",
-      "excellent": "Excellent",
-      "fair": "Fair",
-      "poor": "Poor",
-      "unusable": "Unusable",
-      "fps": "FPS",
-      "expectedFps": "Expected FPS",
-      "reconnectsLastHour": "Reconnects (last hour)",
-      "stallsLastHour": "Stalls (last hour)"
     },
     "toast": {
       "success": {

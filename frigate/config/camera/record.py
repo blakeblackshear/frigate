@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional
 
 from pydantic import Field
 
@@ -18,6 +18,8 @@ __all__ = [
     "RecordRetainConfig",
     "RetainModeEnum",
 ]
+
+DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 
 
 class RecordRetainConfig(FrigateBaseModel):
@@ -65,13 +67,16 @@ class RecordPreviewConfig(FrigateBaseModel):
 
 
 class RecordExportConfig(FrigateBaseModel):
-    hwaccel_args: Union[str, list[str]] = Field(
-        default="auto", title="Export-specific FFmpeg hardware acceleration arguments."
+    timelapse_args: str = Field(
+        default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
     )
 
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    sync_recordings: bool = Field(
+        default=False, title="Sync recordings with disk on startup and once a day."
+    )
     expire_interval: int = Field(
         default=60,
         title="Number of minutes to wait between cleanup runs.",

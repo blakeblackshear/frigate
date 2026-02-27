@@ -1067,53 +1067,5 @@
         "deleteTriggerFailed": "Failed to delete trigger: {{errorMessage}}"
       }
     }
-  },
-  "maintenance": {
-    "title": "Maintenance",
-    "sync": {
-      "title": "Media Sync",
-      "desc": "Frigate will periodically clean up media on a regular schedule according to your retention configuration. It is normal to see a few orphaned files as Frigate runs. Use this feature to remove orphaned media files from disk that are no longer referenced in the database.",
-      "started": "Media sync started.",
-      "alreadyRunning": "A sync job is already running",
-      "error": "Failed to start sync",
-      "currentStatus": "Status",
-      "jobId": "Job ID",
-      "startTime": "Start Time",
-      "endTime": "End Time",
-      "statusLabel": "Status",
-      "results": "Results",
-      "errorLabel": "Error",
-      "mediaTypes": "Media Types",
-      "allMedia": "All Media",
-      "dryRun": "Dry Run",
-      "dryRunEnabled": "No files will be deleted",
-      "dryRunDisabled": "Files will be deleted",
-      "force": "Force",
-      "forceDesc": "Bypass safety threshold and complete sync even if more than 50% of the files would be deleted.",
-      "running": "Sync Running...",
-      "start": "Start Sync",
-      "inProgress": "Sync is in progress. This page is disabled.",
-      "status": {
-        "queued": "Queued",
-        "running": "Running",
-        "completed": "Completed",
-        "failed": "Failed",
-        "notRunning": "Not Running"
-      },
-      "resultsFields": {
-        "filesChecked": "Files Checked",
-        "orphansFound": "Orphans Found",
-        "orphansDeleted": "Orphans Deleted",
-        "aborted": "Aborted. Deletion would exceed safety threshold.",
-        "error": "Error",
-        "totals": "Totals"
-      },
-      "event_snapshots": "Tracked Object Snapshots",
-      "event_thumbnails": "Tracked Object Thumbnails",
-      "review_thumbnails": "Review Thumbnails",
-      "previews": "Previews",
-      "exports": "Exports",
-      "recordings": "Recordings"
-    }
   }
 }

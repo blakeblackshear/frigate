@@ -12,7 +12,7 @@ export function useAllowedCameras() {
   if (
     auth.user?.role === "viewer" ||
     auth.user?.role === "admin" ||
-    !auth.isAuthenticated // anonymous internal port
+    !auth.isAuthenticated // anonymous port 5000
   ) {
     // return all cameras
     return config?.cameras ? Object.keys(config.cameras) : [];

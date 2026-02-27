@@ -131,8 +131,10 @@ class ONNXModelRunner(BaseModelRunner):
 
         return model_type in [
             EnrichmentModelTypeEnum.paddleocr.value,
+            EnrichmentModelTypeEnum.yolov9_license_plate.value,
+            EnrichmentModelTypeEnum.jina_v1.value,
             EnrichmentModelTypeEnum.jina_v2.value,
-            EnrichmentModelTypeEnum.arcface.value,
+            EnrichmentModelTypeEnum.facenet.value,
             ModelTypeEnum.rfdetr.value,
             ModelTypeEnum.dfine.value,
         ]

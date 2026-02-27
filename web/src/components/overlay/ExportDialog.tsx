@@ -22,14 +22,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { TimezoneAwareCalendar } from "./ReviewActivityCalendar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { SelectSeparator } from "../ui/select";
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import SaveExportOverlay from "./SaveExportOverlay";
@@ -38,7 +31,6 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { GenericVideoPlayer } from "../player/GenericVideoPlayer";
 import { useTranslation } from "react-i18next";
-import { ExportCase } from "@/types/export";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -75,9 +67,6 @@ export default function ExportDialog({
 }: ExportDialogProps) {
   const { t } = useTranslation(["components/dialog"]);
   const [name, setName] = useState("");
-  const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(
-    undefined,
-  );
 
   const onStartExport = useCallback(() => {
     if (!range) {
@@ -100,7 +89,6 @@ export default function ExportDialog({
         {
           playback: "realtime",
           name,
-          export_case_id: selectedCaseId || undefined,
         },
       )
       .then((response) => {
@@ -114,7 +102,6 @@ export default function ExportDialog({
             ),
           });
           setName("");
-          setSelectedCaseId(undefined);
           setRange(undefined);
           setMode("none");
         }
@@ -131,11 +118,10 @@ export default function ExportDialog({
           { position: "top-center" },
         );
       });
-  }, [camera, name, range, selectedCaseId, setRange, setName, setMode, t]);
+  }, [camera, name, range, setRange, setName, setMode, t]);
 
   const handleCancel = useCallback(() => {
     setName("");
-    setSelectedCaseId(undefined);
     setMode("none");
     setRange(undefined);
   }, [setMode, setRange]);
@@ -204,10 +190,8 @@ export default function ExportDialog({
             currentTime={currentTime}
             range={range}
             name={name}
-            selectedCaseId={selectedCaseId}
             onStartExport={onStartExport}
             setName={setName}
-            setSelectedCaseId={setSelectedCaseId}
             setRange={setRange}
             setMode={setMode}
             onCancel={handleCancel}
@@ -223,10 +207,8 @@ type ExportContentProps = {
   currentTime: number;
   range?: TimeRange;
   name: string;
-  selectedCaseId?: string;
   onStartExport: () => void;
   setName: (name: string) => void;
-  setSelectedCaseId: (caseId: string | undefined) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
   onCancel: () => void;
@@ -236,17 +218,14 @@ export function ExportContent({
   currentTime,
   range,
   name,
-  selectedCaseId,
   onStartExport,
   setName,
-  setSelectedCaseId,
   setRange,
   setMode,
   onCancel,
 }: ExportContentProps) {
   const { t } = useTranslation(["components/dialog"]);
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
-  const { data: cases } = useSWR<ExportCase[]>("cases");
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -341,44 +320,6 @@ export function ExportContent({
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <div className="my-4">
-        <Label className="text-sm text-secondary-foreground">
-          {t("export.case.label", { defaultValue: "Case (optional)" })}
-        </Label>
-        <Select
-          value={selectedCaseId || "none"}
-          onValueChange={(value) =>
-            setSelectedCaseId(value === "none" ? undefined : value)
-          }
-        >
-          <SelectTrigger className="mt-2">
-            <SelectValue
-              placeholder={t("export.case.placeholder", {
-                defaultValue: "Select a case (optional)",
-              })}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              value="none"
-              className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-            >
-              {t("label.none", { ns: "common" })}
-            </SelectItem>
-            {cases
-              ?.sort((a, b) => a.name.localeCompare(b.name))
-              .map((caseItem) => (
-                <SelectItem
-                  key={caseItem.id}
-                  value={caseItem.id}
-                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                >
-                  {caseItem.name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
       <DialogFooter
         className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}

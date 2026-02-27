@@ -14,7 +14,6 @@ class GenAIProviderEnum(str, Enum):
     azure_openai = "azure_openai"
     gemini = "gemini"
     ollama = "ollama"
-    llamacpp = "llamacpp"
 
 
 class GenAIConfig(FrigateBaseModel):

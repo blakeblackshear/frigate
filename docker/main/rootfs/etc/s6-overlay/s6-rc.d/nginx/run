@@ -80,14 +80,14 @@ if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.
 fi
 
 # build templates for optional FRIGATE_BASE_PATH environment variable
-python3 /usr/local/nginx/get_nginx_settings.py | \
+python3 /usr/local/nginx/get_base_path.py | \
     tempio -template /usr/local/nginx/templates/base_path.gotmpl \
-           -out /usr/local/nginx/conf/base_path.conf
+       -out /usr/local/nginx/conf/base_path.conf
 
-# build templates for additional network settings
-python3 /usr/local/nginx/get_nginx_settings.py | \
-    tempio -template /usr/local/nginx/templates/listen.gotmpl \
-           -out /usr/local/nginx/conf/listen.conf
+# build templates for optional TLS support
+python3 /usr/local/nginx/get_listen_settings.py | \
+    tempio  -template /usr/local/nginx/templates/listen.gotmpl \
+            -out /usr/local/nginx/conf/listen.conf
 
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1

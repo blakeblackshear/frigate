@@ -75,9 +75,6 @@ export default function MobileReviewSettingsDrawer({
   // exports
 
   const [name, setName] = useState("");
-  const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(
-    undefined,
-  );
   const onStartExport = useCallback(() => {
     if (!range) {
       toast.error(t("toast.error.noValidTimeSelected"), {
@@ -99,7 +96,6 @@ export default function MobileReviewSettingsDrawer({
         {
           playback: "realtime",
           name,
-          export_case_id: selectedCaseId || undefined,
         },
       )
       .then((response) => {
@@ -118,7 +114,6 @@ export default function MobileReviewSettingsDrawer({
             },
           );
           setName("");
-          setSelectedCaseId(undefined);
           setRange(undefined);
           setMode("none");
         }
@@ -138,7 +133,7 @@ export default function MobileReviewSettingsDrawer({
           },
         );
       });
-  }, [camera, name, range, selectedCaseId, setRange, setName, setMode, t]);
+  }, [camera, name, range, setRange, setName, setMode, t]);
 
   // filters
 
@@ -205,10 +200,8 @@ export default function MobileReviewSettingsDrawer({
         currentTime={currentTime}
         range={range}
         name={name}
-        selectedCaseId={selectedCaseId}
         onStartExport={onStartExport}
         setName={setName}
-        setSelectedCaseId={setSelectedCaseId}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
@@ -220,7 +213,6 @@ export default function MobileReviewSettingsDrawer({
         onCancel={() => {
           setMode("none");
           setRange(undefined);
-          setSelectedCaseId(undefined);
           setDrawerMode("select");
         }}
       />

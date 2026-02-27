@@ -7,7 +7,7 @@ Generative AI can be used to automatically generate structured summaries of revi
 
 Requests for a summary are requested automatically to your AI provider for alert review items when the activity has ended, they can also be optionally enabled for detections as well.
 
-Generative AI review summaries can also be toggled dynamically for a [camera via MQTT](/integrations/mqtt#frigatecamera_namereview_descriptionsset).
+Generative AI review summaries can also be toggled dynamically for a [camera via MQTT](/integrations/mqtt/#frigatecamera_namereviewdescriptionsset).
 
 ## Review Summary Usage and Best Practices
 

@@ -26,15 +26,6 @@ class ModelStatusTypesEnum(str, Enum):
     failed = "failed"
 
 
-class JobStatusTypesEnum(str, Enum):
-    pending = "pending"
-    queued = "queued"
-    running = "running"
-    success = "success"
-    failed = "failed"
-    cancelled = "cancelled"
-
-
 class TrackedObjectUpdateTypesEnum(str, Enum):
     description = "description"
     face = "face"

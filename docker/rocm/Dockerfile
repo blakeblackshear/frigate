@@ -13,7 +13,7 @@ ARG ROCM
 
 RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.2/ubuntu/jammy/amdgpu-install_7.2.70200-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/jammy/amdgpu-install_7.1.1.70101-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
     apt install -qq -y rocm
@@ -56,8 +56,6 @@ FROM scratch AS rocm-dist
 
 ARG ROCM
 
-# Copy HIP headers required for MIOpen JIT (BuildHip) / HIPRTC at runtime
-COPY --from=rocm /opt/rocm-${ROCM}/include/ /opt/rocm-${ROCM}/include/
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
 # Copy MIOpen database files for gfx10xx and gfx11xx only (RDNA2/RDNA3)
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx10* /opt/rocm-$ROCM/share/miopen/db/

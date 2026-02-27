@@ -10,8 +10,7 @@ echo "[INFO] Starting certsync..."
 
 lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
 
-tls_enabled=`python3 /usr/local/nginx/get_nginx_settings.py | jq -r .tls.enabled`
-listen_external_port=`python3 /usr/local/nginx/get_nginx_settings.py | jq -r .listen.external_port`
+tls_enabled=`python3 /usr/local/nginx/get_listen_settings.py | jq -r .tls.enabled`
 
 while true
 do
@@ -35,7 +34,7 @@ do
             ;;
     esac
 
-    liveprint=`echo | openssl s_client -showcerts -connect 127.0.0.1:$listen_external_port 2>&1 | openssl x509 -fingerprint 2>&1 | grep -i fingerprint  || echo 'failed'`
+    liveprint=`echo | openssl s_client -showcerts -connect 127.0.0.1:8971 2>&1 | openssl x509 -fingerprint 2>&1 | grep -i fingerprint  || echo 'failed'`
 
     case "$liveprint" in
         *Fingerprint*)

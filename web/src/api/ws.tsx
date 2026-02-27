@@ -11,7 +11,6 @@ import {
   TrackedObjectUpdateReturnType,
   TriggerStatus,
   FrigateAudioDetections,
-  Job,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 import { createContainer } from "react-tracked";
@@ -651,41 +650,4 @@ export function useTriggers(): { payload: TriggerStatus } {
     ? JSON.parse(payload as string)
     : { name: "", camera: "", event_id: "", type: "", score: 0 };
   return { payload: useDeepMemo(parsed) };
-}
-
-export function useJobStatus(
-  jobType: string,
-  revalidateOnFocus: boolean = true,
-): { payload: Job | null } {
-  const {
-    value: { payload },
-    send: sendCommand,
-  } = useWs("job_state", "jobState");
-
-  const jobData = useDeepMemo(
-    payload && typeof payload === "string" ? JSON.parse(payload) : {},
-  );
-  const currentJob = jobData[jobType] || null;
-
-  useEffect(() => {
-    let listener: (() => void) | undefined;
-    if (revalidateOnFocus) {
-      sendCommand("jobState");
-      listener = () => {
-        if (document.visibilityState === "visible") {
-          sendCommand("jobState");
-        }
-      };
-      addEventListener("visibilitychange", listener);
-    }
-
-    return () => {
-      if (listener) {
-        removeEventListener("visibilitychange", listener);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revalidateOnFocus]);
-
-  return { payload: currentJob as Job | null };
 }

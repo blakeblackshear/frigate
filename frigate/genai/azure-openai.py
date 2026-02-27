@@ -1,9 +1,8 @@
 """Azure OpenAI Provider for Frigate AI."""
 
 import base64
-import json
 import logging
-from typing import Any, Optional
+from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 from openai import AzureOpenAI
@@ -77,93 +76,3 @@ class OpenAIClient(GenAIClient):
     def get_context_size(self) -> int:
         """Get the context window size for Azure OpenAI."""
         return 128000
-
-    def chat_with_tools(
-        self,
-        messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-    ) -> dict[str, Any]:
-        try:
-            openai_tool_choice = None
-            if tool_choice:
-                if tool_choice == "none":
-                    openai_tool_choice = "none"
-                elif tool_choice == "auto":
-                    openai_tool_choice = "auto"
-                elif tool_choice == "required":
-                    openai_tool_choice = "required"
-
-            request_params = {
-                "model": self.genai_config.model,
-                "messages": messages,
-                "timeout": self.timeout,
-            }
-
-            if tools:
-                request_params["tools"] = tools
-                if openai_tool_choice is not None:
-                    request_params["tool_choice"] = openai_tool_choice
-
-            result = self.provider.chat.completions.create(**request_params)
-
-            if (
-                result is None
-                or not hasattr(result, "choices")
-                or len(result.choices) == 0
-            ):
-                return {
-                    "content": None,
-                    "tool_calls": None,
-                    "finish_reason": "error",
-                }
-
-            choice = result.choices[0]
-            message = choice.message
-
-            content = message.content.strip() if message.content else None
-
-            tool_calls = None
-            if message.tool_calls:
-                tool_calls = []
-                for tool_call in message.tool_calls:
-                    try:
-                        arguments = json.loads(tool_call.function.arguments)
-                    except (json.JSONDecodeError, AttributeError) as e:
-                        logger.warning(
-                            f"Failed to parse tool call arguments: {e}, "
-                            f"tool: {tool_call.function.name if hasattr(tool_call.function, 'name') else 'unknown'}"
-                        )
-                        arguments = {}
-
-                    tool_calls.append(
-                        {
-                            "id": tool_call.id if hasattr(tool_call, "id") else "",
-                            "name": tool_call.function.name
-                            if hasattr(tool_call.function, "name")
-                            else "",
-                            "arguments": arguments,
-                        }
-                    )
-
-            finish_reason = "error"
-            if hasattr(choice, "finish_reason") and choice.finish_reason:
-                finish_reason = choice.finish_reason
-            elif tool_calls:
-                finish_reason = "tool_calls"
-            elif content:
-                finish_reason = "stop"
-
-            return {
-                "content": content,
-                "tool_calls": tool_calls,
-                "finish_reason": finish_reason,
-            }
-
-        except Exception as e:
-            logger.warning("Azure OpenAI returned an error: %s", str(e))
-            return {
-                "content": None,
-                "tool_calls": None,
-                "finish_reason": "error",
-            }

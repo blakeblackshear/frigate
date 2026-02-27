@@ -28,7 +28,6 @@ from frigate.const import (
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_EVENT_DESCRIPTION,
-    UPDATE_JOB_STATE,
     UPDATE_MODEL_STATE,
     UPDATE_REVIEW_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
@@ -61,7 +60,6 @@ class Dispatcher:
         self.camera_activity = CameraActivityManager(config, self.publish)
         self.audio_activity = AudioActivityManager(config, self.publish)
         self.model_state: dict[str, ModelStatusTypesEnum] = {}
-        self.job_state: dict[str, dict[str, Any]] = {}  # {job_type: job_data}
         self.embeddings_reindex: dict[str, Any] = {}
         self.birdseye_layout: dict[str, Any] = {}
         self.audio_transcription_state: str = "idle"
@@ -182,19 +180,6 @@ class Dispatcher:
         def handle_model_state() -> None:
             self.publish("model_state", json.dumps(self.model_state.copy()))
 
-        def handle_update_job_state() -> None:
-            if payload and isinstance(payload, dict):
-                job_type = payload.get("job_type")
-                if job_type:
-                    self.job_state[job_type] = payload
-                    self.publish(
-                        "job_state",
-                        json.dumps(self.job_state),
-                    )
-
-        def handle_job_state() -> None:
-            self.publish("job_state", json.dumps(self.job_state.copy()))
-
         def handle_update_audio_transcription_state() -> None:
             if payload:
                 self.audio_transcription_state = payload
@@ -292,7 +277,6 @@ class Dispatcher:
             UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
             UPDATE_REVIEW_DESCRIPTION: handle_update_review_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
-            UPDATE_JOB_STATE: handle_update_job_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
             UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,
             UPDATE_AUDIO_TRANSCRIPTION_STATE: handle_update_audio_transcription_state,
@@ -300,7 +284,6 @@ class Dispatcher:
             "restart": handle_restart,
             "embeddingsReindexProgress": handle_embeddings_reindex_progress,
             "modelState": handle_model_state,
-            "jobState": handle_job_state,
             "audioTranscriptionState": handle_audio_transcription_state,
             "birdseyeLayout": handle_birdseye_layout,
             "onConnect": handle_on_connect,

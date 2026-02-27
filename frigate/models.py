@@ -80,14 +80,6 @@ class Recordings(Model):
     regions = IntegerField(null=True)
 
 
-class ExportCase(Model):
-    id = CharField(null=False, primary_key=True, max_length=30)
-    name = CharField(index=True, max_length=100)
-    description = TextField(null=True)
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
-
-
 class Export(Model):
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)
@@ -96,12 +88,6 @@ class Export(Model):
     video_path = CharField(unique=True)
     thumb_path = CharField(unique=True)
     in_progress = BooleanField()
-    export_case = ForeignKeyField(
-        ExportCase,
-        null=True,
-        backref="exports",
-        column_name="export_case_id",
-    )
 
 
 class ReviewSegment(Model):

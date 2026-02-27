@@ -82,11 +82,6 @@ export default function LivePlayer({
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
   const cameraName = useCameraFriendlyName(cameraConfig);
-
-  // player is showing on a dashboard if containerRef is not provided
-
-  const inDashboard = containerRef?.current == null;
-
   // stats
 
   const [stats, setStats] = useState<PlayerStatsType>({
@@ -420,28 +415,6 @@ export default function LivePlayer({
           periodicCache
         />
       </div>
-
-      {offline && inDashboard && (
-        <>
-          <div className="absolute inset-0 rounded-lg bg-black/50 md:rounded-2xl" />
-          <div className="absolute inset-0 left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-            <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 p-3 text-center">
-              <div className="text-md">{t("streamOffline.title")}</div>
-              <TbExclamationCircle className="size-6" />
-              <p className="text-center text-sm">
-                <Trans
-                  ns="components/player"
-                  values={{
-                    cameraName: cameraName,
-                  }}
-                >
-                  streamOffline.desc
-                </Trans>
-              </p>
-            </div>
-          </div>
-        </>
-      )}
 
       {offline && !showStillWithoutActivity && cameraEnabled && (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">

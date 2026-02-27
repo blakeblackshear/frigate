@@ -47,15 +47,6 @@ PREVIEW_QUALITY_BIT_RATES = {
     RecordQualityEnum.high: 9864,
     RecordQualityEnum.very_high: 10096,
 }
-# the -qmax param for ffmpeg prevents the encoder from overly compressing frames while still trying to hit the bitrate target
-# lower values are higher quality. This is especially important for iniitial frames in the segment
-PREVIEW_QMAX_PARAM = {
-    RecordQualityEnum.very_low: "",
-    RecordQualityEnum.low: "",
-    RecordQualityEnum.medium: "",
-    RecordQualityEnum.high: " -qmax 25",
-    RecordQualityEnum.very_high: " -qmax 25",
-}
 
 
 def get_cache_image_name(camera: str, frame_time: float) -> str:
@@ -64,51 +55,6 @@ def get_cache_image_name(camera: str, frame_time: float) -> str:
         CACHE_DIR,
         f"{FOLDER_PREVIEW_FRAMES}/preview_{camera}-{frame_time}.{PREVIEW_FRAME_TYPE}",
     )
-
-
-def get_most_recent_preview_frame(camera: str, before: float = None) -> str | None:
-    """Get the most recent preview frame for a camera."""
-    if not os.path.exists(PREVIEW_CACHE_DIR):
-        return None
-
-    try:
-        # files are named preview_{camera}-{timestamp}.webp
-        # we want the largest timestamp that is less than or equal to before
-        preview_files = [
-            f
-            for f in os.listdir(PREVIEW_CACHE_DIR)
-            if f.startswith(f"preview_{camera}-")
-            and f.endswith(f".{PREVIEW_FRAME_TYPE}")
-        ]
-
-        if not preview_files:
-            return None
-
-        # sort by timestamp in descending order
-        # filenames are like preview_front-1712345678.901234.webp
-        preview_files.sort(reverse=True)
-
-        if before is None:
-            return os.path.join(PREVIEW_CACHE_DIR, preview_files[0])
-
-        for file_name in preview_files:
-            try:
-                # Extract timestamp: preview_front-1712345678.901234.webp
-                # Split by dash and extension
-                timestamp_part = file_name.split("-")[-1].split(
-                    f".{PREVIEW_FRAME_TYPE}"
-                )[0]
-                timestamp = float(timestamp_part)
-
-                if timestamp <= before:
-                    return os.path.join(PREVIEW_CACHE_DIR, file_name)
-            except (ValueError, IndexError):
-                continue
-
-        return None
-    except Exception as e:
-        logger.error(f"Error searching for most recent preview frame: {e}")
-        return None
 
 
 class FFMpegConverter(threading.Thread):
@@ -134,7 +80,7 @@ class FFMpegConverter(threading.Thread):
             config.ffmpeg.ffmpeg_path,
             "default",
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -threads 1 -i /dev/stdin",
-            output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]}{PREVIEW_QMAX_PARAM[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
