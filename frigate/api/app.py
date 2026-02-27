@@ -38,7 +38,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
-from frigate.genai import GenAIClientManager
 from frigate.jobs.media_sync import (
     get_current_media_sync_job,
     get_media_sync_job_by_id,
