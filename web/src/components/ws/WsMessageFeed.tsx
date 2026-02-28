@@ -19,15 +19,31 @@ import FilterSwitch from "@/components/filter/FilterSwitch";
 import { isMobile } from "react-device-detect";
 import { isReplayCamera } from "@/utils/cameraUtil";
 
-type TopicCategory = "events" | "camera_activity" | "system";
+type TopicCategory =
+  | "events"
+  | "camera_activity"
+  | "system"
+  | "reviews"
+  | "classification"
+  | "face_recognition"
+  | "lpr";
+
 const ALL_TOPIC_CATEGORIES: TopicCategory[] = [
   "events",
+  "reviews",
+  "classification",
+  "face_recognition",
+  "lpr",
   "camera_activity",
   "system",
 ];
 
 const PRESET_TOPICS: Record<TopicCategory, Set<string>> = {
-  events: new Set(["events", "reviews", "tracked_object_update", "triggers"]),
+  events: new Set(["events", "triggers"]),
+  reviews: new Set(["reviews"]),
+  classification: new Set(["tracked_object_update"]),
+  face_recognition: new Set(["tracked_object_update"]),
+  lpr: new Set(["tracked_object_update"]),
   camera_activity: new Set(["camera_activity", "audio_detections"]),
   system: new Set([
     "stats",
@@ -37,6 +53,13 @@ const PRESET_TOPICS: Record<TopicCategory, Set<string>> = {
     "audio_transcription_state",
     "birdseye_layout",
   ]),
+};
+
+// Maps tracked_object_update payload type to TopicCategory
+const TRACKED_UPDATE_TYPE_MAP: Record<string, TopicCategory> = {
+  classification: "classification",
+  face: "face_recognition",
+  lpr: "lpr",
 };
 
 // camera_activity preset also matches topics with camera prefix patterns
@@ -51,11 +74,39 @@ const CAMERA_ACTIVITY_TOPIC_PATTERNS = [
 ];
 
 function matchesCategories(
-  topic: string,
+  msg: WsFeedMessage,
   categories: TopicCategory[] | undefined,
 ): boolean {
   // undefined means all topics
   if (!categories) return true;
+
+  const { topic, payload } = msg;
+
+  // Handle tracked_object_update with payload-based sub-categories
+  if (topic === "tracked_object_update") {
+    // payload might be a JSON string or a parsed object
+    let data: unknown = payload;
+    if (typeof data === "string") {
+      try {
+        data = JSON.parse(data);
+      } catch {
+        // not valid JSON, fall through
+      }
+    }
+
+    const updateType =
+      data && typeof data === "object" && "type" in data
+        ? (data as { type: string }).type
+        : undefined;
+
+    if (updateType && updateType in TRACKED_UPDATE_TYPE_MAP) {
+      const mappedCategory = TRACKED_UPDATE_TYPE_MAP[updateType];
+      return categories.includes(mappedCategory);
+    }
+
+    // tracked_object_update with other types (e.g. "description") falls under "events"
+    return categories.includes("events");
+  }
 
   for (const cat of categories) {
     const topicSet = PRESET_TOPICS[cat];
@@ -123,7 +174,7 @@ export default function WsMessageFeed({
 
   const filteredMessages = useMemo(() => {
     return messages.filter((msg: WsFeedMessage) => {
-      if (!matchesCategories(msg.topic, selectedTopics)) return false;
+      if (!matchesCategories(msg, selectedTopics)) return false;
       return true;
     });
   }, [messages, selectedTopics]);
