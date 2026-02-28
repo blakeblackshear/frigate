@@ -21,13 +21,12 @@ class GenAIClientManager:
     """Manages GenAI provider clients from Frigate config."""
 
     def __init__(self, config: FrigateConfig) -> None:
-        self._config = config
         self._tool_client: Optional[GenAIClient] = None
         self._vision_client: Optional[GenAIClient] = None
         self._embeddings_client: Optional[GenAIClient] = None
-        self._update_config()
+        self.update_config(config)
 
-    def _update_config(self) -> None:
+    def update_config(self, config: FrigateConfig) -> None:
         """Build role clients from current Frigate config.genai.
 
         Called from __init__ and can be called again when config is reloaded.
@@ -40,12 +39,12 @@ class GenAIClientManager:
         self._vision_client = None
         self._embeddings_client = None
 
-        if not self._config.genai:
+        if not config.genai:
             return
 
         load_providers()
 
-        for _name, genai_cfg in self._config.genai.items():
+        for _name, genai_cfg in config.genai.items():
             if not genai_cfg.provider:
                 continue
             provider_cls = PROVIDERS.get(genai_cfg.provider)
