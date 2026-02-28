@@ -693,6 +693,10 @@ class TrackedObjectProcessor(threading.Thread):
                     camera_state = self.camera_states[camera]
                     camera_state.shutdown()
                     self.camera_states.pop(camera)
+                    self.camera_activity.pop(camera, None)
+                    self.last_motion_detected.pop(camera, None)
+
+                self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
 
             # manage camera disabled state
             for camera, config in self.config.cameras.items():
@@ -752,7 +756,11 @@ class TrackedObjectProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if not self.config.cameras[camera].enabled:
+            camera_config = self.config.cameras.get(camera)
+            if camera_config is None:
+                continue
+
+            if not camera_config.enabled:
                 logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 

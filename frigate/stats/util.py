@@ -340,6 +340,9 @@ def stats_snapshot(
 
     stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
+        if name not in config.cameras:
+            continue
+
         total_camera_fps += camera_stats.camera_fps.value
         total_process_fps += camera_stats.process_fps.value
         total_skipped_fps += camera_stats.skipped_fps.value

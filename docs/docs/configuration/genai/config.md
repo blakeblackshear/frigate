@@ -105,6 +105,7 @@ genai:
     keep_alive: -1
     options:
       num_ctx: 8192 # make sure the context matches other services that are using ollama
+      num_ctx: 8192 # make sure the context matches other services that are using ollama
 ```
 
 ### OpenAI-Compatible

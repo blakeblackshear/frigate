@@ -110,6 +110,9 @@ class Dispatcher:
             payload: str,
             sub_command: str | None = None,
         ) -> None:
+            if camera_name not in self.config.cameras:
+                return
+
             try:
                 if command_type == "set":
                     if sub_command:
@@ -131,6 +134,9 @@ class Dispatcher:
 
         def handle_request_region_grid() -> Any:
             camera = payload
+            if camera not in self.config.cameras:
+                return None
+
             grid = get_camera_regions_grid(
                 camera,
                 self.config.cameras[camera].detect,
@@ -243,7 +249,11 @@ class Dispatcher:
             self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
 
         def handle_on_connect() -> None:
-            camera_status = self.camera_activity.last_camera_activity.copy()
+            camera_status = {
+                camera: status
+                for camera, status in self.camera_activity.last_camera_activity.copy().items()
+                if camera in self.config.cameras
+            }
             audio_detections = self.audio_activity.current_audio_detections.copy()
             cameras_with_status = camera_status.keys()
 
@@ -346,7 +356,8 @@ class Dispatcher:
                     # example /cam_name/notifications/suspend payload=duration
                     camera_name = parts[-3]
                     command = parts[-2]
-                    self._on_camera_notification_suspend(camera_name, payload)
+                    if camera_name in self.config.cameras:
+                        self._on_camera_notification_suspend(camera_name, payload)
             except IndexError:
                 logger.error(
                     f"Received invalid {topic.split('/')[-1]} command: {topic}"

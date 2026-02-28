@@ -420,7 +420,8 @@ class BirdsEyeFrameManager:
             [
                 cam
                 for cam, cam_data in self.cameras.items()
-                if self.config.cameras[cam].birdseye.enabled
+                if cam in self.config.cameras
+                and self.config.cameras[cam].birdseye.enabled
                 and self.config.cameras[cam].enabled_in_config
                 and self.config.cameras[cam].enabled
                 and cam_data["last_active_frame"] > 0
@@ -723,8 +724,11 @@ class BirdsEyeFrameManager:
         Update birdseye for a specific camera with new frame data.
         Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
         """
-        # don't process if birdseye is disabled for this camera
-        camera_config = self.config.cameras[camera]
+        # don't process if camera was removed or birdseye is disabled
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return False, False
+
         force_update = False
 
         # disabling birdseye is a little tricky

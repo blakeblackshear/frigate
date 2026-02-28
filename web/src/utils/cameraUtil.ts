@@ -148,3 +148,15 @@ export function detectCameraAudioFeatures(
     audioOutput: !!audioOutput,
   };
 }
+
+const REPLAY_CAMERA_PREFIX = "_replay_";
+
+/**
+ * Check if a camera name is a debug replay camera.
+ *
+ * @param name - The camera name to check
+ * @returns true if the camera is a replay camera
+ */
+export function isReplayCamera(name: string): boolean {
+  return name.startsWith(REPLAY_CAMERA_PREFIX);
+}

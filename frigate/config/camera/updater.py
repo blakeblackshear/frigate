@@ -80,8 +80,8 @@ class CameraConfigUpdateSubscriber:
             self.camera_configs[camera] = updated_config
             return
         elif update_type == CameraConfigUpdateEnum.remove:
-            self.config.cameras.pop(camera)
-            self.camera_configs.pop(camera)
+            self.config.cameras.pop(camera, None)
+            self.camera_configs.pop(camera, None)
             return
 
         config = self.camera_configs.get(camera)

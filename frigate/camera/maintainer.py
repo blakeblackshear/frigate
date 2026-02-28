@@ -55,7 +55,19 @@ class CameraMaintainer(threading.Thread):
         self.shm_count = self.__calculate_shm_frame_count()
         self.camera_processes: dict[str, mp.Process] = {}
         self.capture_processes: dict[str, mp.Process] = {}
+        self.camera_stop_events: dict[str, MpEvent] = {}
         self.metrics_manager = metrics_manager
+
+    def __ensure_camera_stop_event(self, camera: str) -> MpEvent:
+        camera_stop_event = self.camera_stop_events.get(camera)
+
+        if camera_stop_event is None:
+            camera_stop_event = mp.Event()
+            self.camera_stop_events[camera] = camera_stop_event
+        else:
+            camera_stop_event.clear()
+
+        return camera_stop_event
 
     def __init_historical_regions(self) -> None:
         # delete region grids for removed or renamed cameras
@@ -99,6 +111,8 @@ class CameraMaintainer(threading.Thread):
             logger.info(f"Camera processor not started for disabled camera {name}")
             return
 
+        camera_stop_event = self.__ensure_camera_stop_event(name)
+
         if runtime:
             self.camera_metrics[name] = CameraMetrics(self.metrics_manager)
             self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
@@ -135,7 +149,7 @@ class CameraMaintainer(threading.Thread):
             self.camera_metrics[name],
             self.ptz_metrics[name],
             self.region_grids[name],
-            self.stop_event,
+            camera_stop_event,
             self.config.logger,
         )
         self.camera_processes[config.name] = camera_process
@@ -150,6 +164,8 @@ class CameraMaintainer(threading.Thread):
             logger.info(f"Capture process not started for disabled camera {name}")
             return
 
+        camera_stop_event = self.__ensure_camera_stop_event(name)
+
         # pre-create shms
         count = 10 if runtime else self.shm_count
         for i in range(count):
@@ -160,7 +176,7 @@ class CameraMaintainer(threading.Thread):
             config,
             count,
             self.camera_metrics[name],
-            self.stop_event,
+            camera_stop_event,
             self.config.logger,
         )
         capture_process.daemon = True
@@ -170,18 +186,36 @@ class CameraMaintainer(threading.Thread):
         logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def __stop_camera_capture_process(self, camera: str) -> None:
-        capture_process = self.capture_processes[camera]
+        capture_process = self.capture_processes.get(camera)
         if capture_process is not None:
             logger.info(f"Waiting for capture process for {camera} to stop")
-            capture_process.terminate()
-            capture_process.join()
+            camera_stop_event = self.camera_stop_events.get(camera)
+
+            if camera_stop_event is not None:
+                camera_stop_event.set()
+
+            capture_process.join(timeout=10)
+            if capture_process.is_alive():
+                logger.warning(
+                    f"Capture process for {camera} didn't exit, forcing termination"
+                )
+                capture_process.terminate()
+                capture_process.join()
 
     def __stop_camera_process(self, camera: str) -> None:
-        camera_process = self.camera_processes[camera]
+        camera_process = self.camera_processes.get(camera)
         if camera_process is not None:
             logger.info(f"Waiting for process for {camera} to stop")
-            camera_process.terminate()
-            camera_process.join()
+            camera_stop_event = self.camera_stop_events.get(camera)
+
+            if camera_stop_event is not None:
+                camera_stop_event.set()
+
+            camera_process.join(timeout=10)
+            if camera_process.is_alive():
+                logger.warning(f"Process for {camera} didn't exit, forcing termination")
+                camera_process.terminate()
+                camera_process.join()
             logger.info(f"Closing frame queue for {camera}")
             empty_and_close_queue(self.camera_metrics[camera].frame_queue)
 
@@ -199,6 +233,12 @@ class CameraMaintainer(threading.Thread):
             for update_type, updated_cameras in updates.items():
                 if update_type == CameraConfigUpdateEnum.add.name:
                     for camera in updated_cameras:
+                        if (
+                            camera in self.camera_processes
+                            or camera in self.capture_processes
+                        ):
+                            continue
+
                         self.__start_camera_processor(
                             camera,
                             self.update_subscriber.camera_configs[camera],
@@ -210,15 +250,22 @@ class CameraMaintainer(threading.Thread):
                             runtime=True,
                         )
                 elif update_type == CameraConfigUpdateEnum.remove.name:
-                    self.__stop_camera_capture_process(camera)
-                    self.__stop_camera_process(camera)
+                    for camera in updated_cameras:
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
+                        self.capture_processes.pop(camera, None)
+                        self.camera_processes.pop(camera, None)
+                        self.camera_stop_events.pop(camera, None)
+                        self.region_grids.pop(camera, None)
+                        self.camera_metrics.pop(camera, None)
+                        self.ptz_metrics.pop(camera, None)
 
         # ensure the capture processes are done
-        for camera in self.camera_processes.keys():
+        for camera in self.capture_processes.keys():
             self.__stop_camera_capture_process(camera)
 
         # ensure the camera processors are done
-        for camera in self.capture_processes.keys():
+        for camera in self.camera_processes.keys():
             self.__stop_camera_process(camera)
 
         self.update_subscriber.stop()

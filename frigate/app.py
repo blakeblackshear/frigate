@@ -43,6 +43,11 @@ from frigate.const import (
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
+from frigate.debug_replay import (
+    DebugReplayManager,
+    cleanup_replay_cameras,
+    cleanup_replay_cameras_db,
+)
 from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
@@ -531,6 +536,10 @@ class FrigateApp:
         set_file_limit()
 
         # Start frigate services.
+        # Clean up any stale replay cameras before services iterate the cameras dict
+        stale_replay_cameras = cleanup_replay_cameras(self.config)
+        self.replay_manager = DebugReplayManager()
+
         self.init_camera_metrics()
         self.init_queues()
         self.init_database()
@@ -541,6 +550,9 @@ class FrigateApp:
         self.init_embeddings_manager()
         self.bind_database()
         self.check_db_data_migrations()
+
+        # Deferred DB cleanup for replay cameras (database is now bound)
+        cleanup_replay_cameras_db(stale_replay_cameras)
         self.init_inter_process_communicator()
         self.start_detectors()
         self.init_dispatcher()
@@ -572,6 +584,7 @@ class FrigateApp:
                     self.stats_emitter,
                     self.event_metadata_updater,
                     self.inter_config_updater,
+                    self.replay_manager,
                 ),
                 host="127.0.0.1",
                 port=5001,
@@ -637,6 +650,7 @@ class FrigateApp:
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
+        self.camera_maintainer.join()
         self.db.stop()
 
         # Save embeddings stats to disk
