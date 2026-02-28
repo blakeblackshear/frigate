@@ -102,7 +102,7 @@ class LlamaCppClient(GenAIClient):
 
     def get_context_size(self) -> int:
         """Get the context window size for llama.cpp."""
-        return self.provider_options.get("context_size", 4096)
+        return int(self.provider_options.get("context_size", 4096))
 
     def _build_payload(
         self,
