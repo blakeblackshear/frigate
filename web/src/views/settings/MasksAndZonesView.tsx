@@ -64,6 +64,9 @@ export default function MasksAndZonesView({
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
+  const editPaneRef = useRef(editPane);
+  editPaneRef.current = editPane;
+  const prevScaledRef = useRef<{ w: number; h: number } | null>(null);
   const [activeLine, setActiveLine] = useState<number | undefined>();
   const [snapPoints, setSnapPoints] = useState(false);
 
@@ -350,12 +353,36 @@ export default function MasksAndZonesView({
         ...globalObjectMasks,
         ...objectMasks,
       ]);
-      setEditingPolygons([
-        ...zones,
-        ...motionMasks,
-        ...globalObjectMasks,
-        ...objectMasks,
-      ]);
+      // Don't overwrite editingPolygons during editing – layout shifts
+      // from switching to the edit pane can trigger a resize which
+      // recalculates scaledWidth/scaledHeight and would discard the
+      // newly-added polygon. Instead, rescale existing points
+      // proportionally.
+      if (editPaneRef.current === undefined) {
+        setEditingPolygons([
+          ...zones,
+          ...motionMasks,
+          ...globalObjectMasks,
+          ...objectMasks,
+        ]);
+      } else if (
+        prevScaledRef.current &&
+        (prevScaledRef.current.w !== scaledWidth ||
+          prevScaledRef.current.h !== scaledHeight)
+      ) {
+        const prevW = prevScaledRef.current.w;
+        const prevH = prevScaledRef.current.h;
+        setEditingPolygons((prev) =>
+          prev.map((poly) => ({
+            ...poly,
+            points: poly.points.map(([x, y]) => [
+              (x / prevW) * scaledWidth,
+              (y / prevH) * scaledHeight,
+            ]),
+          })),
+        );
+      }
+      prevScaledRef.current = { w: scaledWidth, h: scaledHeight };
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -431,7 +458,7 @@ export default function MasksAndZonesView({
       {cameraConfig && editingPolygons && (
         <div className="flex size-full flex-col md:flex-row">
           <Toaster position="top-center" closeButton={true} />
-          <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
+          <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12 md:min-w-0 md:shrink-0">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={editingPolygons}
@@ -707,7 +734,7 @@ export default function MasksAndZonesView({
           <div
             ref={containerRef}
             className={cn(
-              "flex max-h-[50%] md:h-dvh md:max-h-full md:w-7/12 md:grow",
+              "flex max-h-[50%] min-w-0 md:h-dvh md:max-h-full md:w-7/12 md:grow",
               isDesktop && "md:mr-3",
             )}
           >

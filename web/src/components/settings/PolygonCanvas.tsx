@@ -258,7 +258,7 @@ export function PolygonCanvas({
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
 
-    if (containerRef.current && !activePolygon.isFinished) {
+    if (containerRef.current && activePolygon && !activePolygon.isFinished) {
       containerRef.current.style.cursor = "crosshair";
     }
   };
