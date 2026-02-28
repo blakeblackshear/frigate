@@ -6,6 +6,8 @@ import shutil
 import subprocess as sp
 import threading
 
+from ruamel.yaml import YAML
+
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -20,7 +22,6 @@ from frigate.const import (
     THUMB_DIR,
 )
 from frigate.models import Event, Recordings, ReviewSegment, Timeline
-from frigate.util.builtin import update_yaml_file_bulk
 from frigate.util.config import find_config_file
 
 logger = logging.getLogger(__name__)
@@ -176,22 +177,19 @@ class DebugReplayManager:
             source_config, replay_name, clip_path
         )
 
-        # Write to YAML config
+        # Build an in-memory config with the replay camera added
         config_file = find_config_file()
-        update_yaml_file_bulk(config_file, {f"cameras.{replay_name}": camera_dict})
-
-        # Re-parse the full config to get a fully initialized CameraConfig
+        yaml_parser = YAML()
         with open(config_file, "r") as f:
-            new_raw_config = f.read()
+            config_data = yaml_parser.load(f)
+
+        if "cameras" not in config_data or config_data["cameras"] is None:
+            config_data["cameras"] = {}
+        config_data["cameras"][replay_name] = camera_dict
 
         try:
-            new_config = FrigateConfig.parse(new_raw_config)
+            new_config = FrigateConfig.parse_object(config_data)
         except Exception as e:
-            # Rollback YAML change
-            try:
-                update_yaml_file_bulk(config_file, {f"cameras.{replay_name}": ""})
-            except Exception:
-                logger.warning("Failed to rollback replay camera YAML entry")
             raise RuntimeError(f"Failed to validate replay camera config: {e}")
 
         # Update the running config
@@ -252,13 +250,6 @@ class DebugReplayManager:
 
         # Remove filesystem artifacts
         self._cleanup_files(replay_name)
-
-        # Remove from YAML config
-        config_file = find_config_file()
-        try:
-            update_yaml_file_bulk(config_file, {f"cameras.{replay_name}": ""})
-        except Exception as e:
-            logger.error("Failed to remove replay camera from YAML: %s", e)
 
         # Reset state
         self.replay_camera_name = None
@@ -411,48 +402,38 @@ class DebugReplayManager:
                 logger.error("Failed to remove replay cache: %s", e)
 
 
-def cleanup_replay_cameras(frigate_config: FrigateConfig) -> list[str]:
-    """Remove any stale replay cameras from config and YAML on startup.
+def cleanup_replay_cameras() -> None:
+    """Remove any stale replay camera artifacts on startup.
 
-    This must be called BEFORE services start iterating the cameras dict.
-    DB cleanup is deferred to cleanup_replay_cameras_db() after the database
-    is bound.
+    Since replay cameras are memory-only and never written to YAML, they
+    won't appear in the config after a restart. This function cleans up
+    filesystem and database artifacts from any replay that was running when
+    the process stopped.
 
-    Args:
-        frigate_config: The current Frigate configuration
-
-    Returns:
-        List of removed replay camera names (for deferred DB cleanup)
+    Must be called AFTER the database is bound.
     """
-    replay_cameras = [
-        name
-        for name in list(frigate_config.cameras.keys())
-        if name.startswith(REPLAY_CAMERA_PREFIX)
-    ]
+    stale_cameras: set[str] = set()
 
-    if not replay_cameras:
-        return []
+    # Scan filesystem for leftover replay artifacts to derive camera names
+    for dir_path in [RECORD_DIR, CLIPS_DIR, THUMB_DIR]:
+        if os.path.isdir(dir_path):
+            for entry in os.listdir(dir_path):
+                if entry.startswith(REPLAY_CAMERA_PREFIX):
+                    stale_cameras.add(entry)
 
-    logger.info("Cleaning up stale replay cameras: %s", replay_cameras)
+    if os.path.isdir(REPLAY_DIR):
+        for entry in os.listdir(REPLAY_DIR):
+            if entry.startswith(REPLAY_CAMERA_PREFIX) and entry.endswith(".mp4"):
+                stale_cameras.add(entry.removesuffix(".mp4"))
 
-    config_file = find_config_file()
-    updates = {}
+    if not stale_cameras:
+        return
 
-    for camera_name in replay_cameras:
-        # Remove from running config
-        frigate_config.cameras.pop(camera_name, None)
-        # Mark for YAML removal
-        updates[f"cameras.{camera_name}"] = ""
+    logger.info("Cleaning up stale replay camera artifacts: %s", list(stale_cameras))
 
-    # Remove from YAML
-    try:
-        update_yaml_file_bulk(config_file, updates)
-    except Exception as e:
-        logger.error("Failed to clean up replay cameras from YAML: %s", e)
-
-    # Clean replay directory and files (no DB needed)
     manager = DebugReplayManager()
-    for camera_name in replay_cameras:
+    for camera_name in stale_cameras:
+        manager._cleanup_db(camera_name)
         manager._cleanup_files(camera_name)
 
     if os.path.exists(REPLAY_DIR):
@@ -460,21 +441,3 @@ def cleanup_replay_cameras(frigate_config: FrigateConfig) -> list[str]:
             shutil.rmtree(REPLAY_DIR)
         except Exception as e:
             logger.error("Failed to remove replay cache directory: %s", e)
-
-    return replay_cameras
-
-
-def cleanup_replay_cameras_db(replay_cameras: list[str]) -> None:
-    """Clean up database rows for stale replay cameras.
-
-    Must be called AFTER the database is bound.
-
-    Args:
-        replay_cameras: List of replay camera names from cleanup_replay_cameras()
-    """
-    if not replay_cameras:
-        return
-
-    manager = DebugReplayManager()
-    for camera_name in replay_cameras:
-        manager._cleanup_db(camera_name)
