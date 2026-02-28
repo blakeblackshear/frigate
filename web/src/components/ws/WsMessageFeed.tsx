@@ -5,22 +5,28 @@ import { WsFeedMessage } from "@/api/ws";
 import { useWsMessageBuffer } from "@/hooks/use-ws-message-buffer";
 import WsMessageRow from "./WsMessageRow";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FaEraser, FaPause, FaPlay } from "react-icons/fa";
+import { FaEraser, FaFilter, FaPause, FaPlay, FaVideo } from "react-icons/fa";
 import { FrigateConfig } from "@/types/frigateConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import FilterSwitch from "@/components/filter/FilterSwitch";
+import { isMobile } from "react-device-detect";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
-type TopicPreset = "all" | "events" | "camera_activity" | "system";
+type TopicCategory = "events" | "camera_activity" | "system";
+const ALL_TOPIC_CATEGORIES: TopicCategory[] = [
+  "events",
+  "camera_activity",
+  "system",
+];
 
-const PRESET_TOPICS: Record<TopicPreset, Set<string> | "all"> = {
-  all: "all",
+const PRESET_TOPICS: Record<TopicCategory, Set<string>> = {
   events: new Set(["events", "reviews", "tracked_object_update", "triggers"]),
   camera_activity: new Set(["camera_activity", "audio_detections"]),
   system: new Set([
@@ -44,15 +50,26 @@ const CAMERA_ACTIVITY_TOPIC_PATTERNS = [
   "/ptz",
 ];
 
-function matchesPreset(topic: string, preset: TopicPreset): boolean {
-  const topicSet = PRESET_TOPICS[preset];
-  if (topicSet === "all") return true;
-  if (topicSet.has(topic)) return true;
+function matchesCategories(
+  topic: string,
+  categories: TopicCategory[] | undefined,
+): boolean {
+  // undefined means all topics
+  if (!categories) return true;
 
-  if (preset === "camera_activity") {
-    return CAMERA_ACTIVITY_TOPIC_PATTERNS.some((pattern) =>
-      topic.includes(pattern),
-    );
+  for (const cat of categories) {
+    const topicSet = PRESET_TOPICS[cat];
+    if (topicSet.has(topic)) return true;
+
+    if (cat === "camera_activity") {
+      if (
+        CAMERA_ACTIVITY_TOPIC_PATTERNS.some((pattern) =>
+          topic.includes(pattern),
+        )
+      ) {
+        return true;
+      }
+    }
   }
 
   return false;
@@ -73,30 +90,43 @@ export default function WsMessageFeed({
 }: WsMessageFeedProps) {
   const { t } = useTranslation(["views/system"]);
   const [paused, setPaused] = useState(false);
-  const [topicPreset, setTopicPreset] = useState<TopicPreset>("all");
-  const [cameraFilter, setCameraFilter] = useState<string>(
-    lockedCamera ?? defaultCamera ?? "all",
+  // undefined = all topics
+  const [selectedTopics, setSelectedTopics] = useState<
+    TopicCategory[] | undefined
+  >(undefined);
+  // undefined = all cameras
+  const [selectedCameras, setSelectedCameras] = useState<string[] | undefined>(
+    () => {
+      if (lockedCamera) return [lockedCamera];
+      if (defaultCamera) return [defaultCamera];
+      return undefined;
+    },
   );
 
   const { messages, clear } = useWsMessageBuffer(maxSize, paused, {
-    cameraFilter,
+    cameraFilter: selectedCameras,
   });
 
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
 
-  const cameraNames = useMemo(() => {
+  const availableCameras = useMemo(() => {
     if (!config?.cameras) return [];
-    return Object.keys(config.cameras).sort();
+    return Object.keys(config.cameras)
+      .filter((name) => {
+        const cam = config.cameras[name];
+        return !isReplayCamera(name) && cam.enabled_in_config;
+      })
+      .sort();
   }, [config]);
 
   const filteredMessages = useMemo(() => {
     return messages.filter((msg: WsFeedMessage) => {
-      if (!matchesPreset(msg.topic, topicPreset)) return false;
+      if (!matchesCategories(msg.topic, selectedTopics)) return false;
       return true;
     });
-  }, [messages, topicPreset]);
+  }, [messages, selectedTopics]);
 
   // Auto-scroll logic
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -118,69 +148,23 @@ export default function WsMessageFeed({
   return (
     <div className="flex size-full flex-col">
       {/* Toolbar */}
-      <div className="flex flex-row items-start justify-between gap-2 border-b border-secondary p-2">
-        <div className="flex flex-col flex-wrap items-start gap-2">
-          <ToggleGroup
-            type="single"
-            size="sm"
-            value={topicPreset}
-            onValueChange={(val: string) => {
-              if (val) setTopicPreset(val as TopicPreset);
-            }}
-            className="flex-wrap"
-          >
-            <ToggleGroupItem
-              value="all"
-              className={topicPreset === "all" ? "" : "text-muted-foreground"}
-            >
-              {t("logs.websocket.filter.all")}
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="events"
-              className={
-                topicPreset === "events" ? "" : "text-muted-foreground"
-              }
-            >
-              {t("logs.websocket.filter.events")}
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="camera_activity"
-              className={
-                topicPreset === "camera_activity" ? "" : "text-muted-foreground"
-              }
-            >
-              {t("logs.websocket.filter.camera_activity")}
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="system"
-              className={
-                topicPreset === "system" ? "" : "text-muted-foreground"
-              }
-            >
-              {t("logs.websocket.filter.system")}
-            </ToggleGroupItem>
-          </ToggleGroup>
+      <div className="flex flex-row flex-wrap items-center justify-between gap-2 border-b border-secondary p-2">
+        <div className="flex flex-row flex-wrap items-center gap-1">
+          <TopicFilterButton
+            selectedTopics={selectedTopics}
+            updateTopicFilter={setSelectedTopics}
+          />
 
           {!lockedCamera && (
-            <Select value={cameraFilter} onValueChange={setCameraFilter}>
-              <SelectTrigger className="h-8 w-[140px] text-xs">
-                <SelectValue placeholder={t("logs.websocket.filter.camera")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  {t("logs.websocket.filter.all_cameras")}
-                </SelectItem>
-                {cameraNames.map((cam) => (
-                  <SelectItem key={cam} value={cam}>
-                    {config?.cameras[cam]?.friendly_name || cam}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <WsCamerasFilterButton
+              allCameras={availableCameras}
+              selectedCameras={selectedCameras}
+              updateCameraFilter={setSelectedCameras}
+            />
           )}
         </div>
 
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-row items-center gap-2">
           <Badge variant="secondary" className="text-xs text-primary-variant">
             {t("logs.websocket.count", {
               count: filteredMessages.length,
@@ -240,5 +224,334 @@ export default function WsMessageFeed({
         )}
       </div>
     </div>
+  );
+}
+
+// Topic Filter Button
+
+type TopicFilterButtonProps = {
+  selectedTopics: TopicCategory[] | undefined;
+  updateTopicFilter: (topics: TopicCategory[] | undefined) => void;
+};
+
+function TopicFilterButton({
+  selectedTopics,
+  updateTopicFilter,
+}: TopicFilterButtonProps) {
+  const { t } = useTranslation(["views/system"]);
+  const [open, setOpen] = useState(false);
+  const [currentTopics, setCurrentTopics] = useState<
+    TopicCategory[] | undefined
+  >(selectedTopics);
+
+  useEffect(() => {
+    setCurrentTopics(selectedTopics);
+  }, [selectedTopics]);
+
+  const isFiltered = selectedTopics !== undefined;
+
+  const trigger = (
+    <Button
+      variant={isFiltered ? "select" : "outline"}
+      size="sm"
+      className="h-7 gap-1 px-2 text-xs"
+      aria-label={t("logs.websocket.filter.all")}
+    >
+      <FaFilter
+        className={`size-2.5 ${isFiltered ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <span className={isFiltered ? "text-selected-foreground" : ""}>
+        {t("logs.websocket.filter.topics")}
+      </span>
+    </Button>
+  );
+
+  const content = (
+    <TopicFilterContent
+      currentTopics={currentTopics}
+      setCurrentTopics={setCurrentTopics}
+      onApply={() => {
+        updateTopicFilter(currentTopics);
+        setOpen(false);
+      }}
+      onReset={() => {
+        setCurrentTopics(undefined);
+        updateTopicFilter(undefined);
+      }}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) setCurrentTopics(selectedTopics);
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <DropdownMenu
+      modal={false}
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) setCurrentTopics(selectedTopics);
+        setOpen(open);
+      }}
+    >
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuContent>{content}</DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+type TopicFilterContentProps = {
+  currentTopics: TopicCategory[] | undefined;
+  setCurrentTopics: (topics: TopicCategory[] | undefined) => void;
+  onApply: () => void;
+  onReset: () => void;
+};
+
+function TopicFilterContent({
+  currentTopics,
+  setCurrentTopics,
+  onApply,
+  onReset,
+}: TopicFilterContentProps) {
+  const { t } = useTranslation(["views/system", "common"]);
+
+  return (
+    <>
+      <div className="flex flex-col gap-2.5 p-4">
+        <FilterSwitch
+          isChecked={currentTopics === undefined}
+          label={t("logs.websocket.filter.all")}
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              setCurrentTopics(undefined);
+            }
+          }}
+        />
+        <DropdownMenuSeparator />
+        {ALL_TOPIC_CATEGORIES.map((cat) => (
+          <FilterSwitch
+            key={cat}
+            isChecked={currentTopics?.includes(cat) ?? false}
+            label={t(`logs.websocket.filter.${cat}`)}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updated = currentTopics ? [...currentTopics, cat] : [cat];
+                setCurrentTopics(updated);
+              } else {
+                const updated = currentTopics
+                  ? currentTopics.filter((c) => c !== cat)
+                  : [];
+                if (updated.length === 0) {
+                  setCurrentTopics(undefined);
+                } else {
+                  setCurrentTopics(updated);
+                }
+              }
+            }}
+          />
+        ))}
+      </div>
+      <DropdownMenuSeparator />
+      <div className="flex items-center justify-evenly p-2">
+        <Button
+          aria-label={t("button.apply", { ns: "common" })}
+          variant="select"
+          size="sm"
+          onClick={onApply}
+        >
+          {t("button.apply", { ns: "common" })}
+        </Button>
+        <Button
+          aria-label={t("button.reset", { ns: "common" })}
+          size="sm"
+          onClick={onReset}
+        >
+          {t("button.reset", { ns: "common" })}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+// Camera Filter Button
+
+type WsCamerasFilterButtonProps = {
+  allCameras: string[];
+  selectedCameras: string[] | undefined;
+  updateCameraFilter: (cameras: string[] | undefined) => void;
+};
+
+function WsCamerasFilterButton({
+  allCameras,
+  selectedCameras,
+  updateCameraFilter,
+}: WsCamerasFilterButtonProps) {
+  const { t } = useTranslation(["views/system", "common"]);
+  const [open, setOpen] = useState(false);
+  const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
+    selectedCameras,
+  );
+
+  useEffect(() => {
+    setCurrentCameras(selectedCameras);
+  }, [selectedCameras]);
+
+  const isFiltered = selectedCameras !== undefined;
+
+  const trigger = (
+    <Button
+      variant={isFiltered ? "select" : "outline"}
+      size="sm"
+      className="h-7 gap-1 px-2 text-xs"
+      aria-label={t("logs.websocket.filter.all_cameras")}
+    >
+      <FaVideo
+        className={`size-2.5 ${isFiltered ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <span className={isFiltered ? "text-selected-foreground" : ""}>
+        {!selectedCameras
+          ? t("logs.websocket.filter.all_cameras")
+          : t("logs.websocket.filter.cameras_count", {
+              count: selectedCameras.length,
+            })}
+      </span>
+    </Button>
+  );
+
+  const content = (
+    <WsCamerasFilterContent
+      allCameras={allCameras}
+      currentCameras={currentCameras}
+      setCurrentCameras={setCurrentCameras}
+      onApply={() => {
+        updateCameraFilter(currentCameras);
+        setOpen(false);
+      }}
+      onReset={() => {
+        setCurrentCameras(undefined);
+        updateCameraFilter(undefined);
+      }}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) setCurrentCameras(selectedCameras);
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <DropdownMenu
+      modal={false}
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) setCurrentCameras(selectedCameras);
+        setOpen(open);
+      }}
+    >
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuContent>{content}</DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+type WsCamerasFilterContentProps = {
+  allCameras: string[];
+  currentCameras: string[] | undefined;
+  setCurrentCameras: (cameras: string[] | undefined) => void;
+  onApply: () => void;
+  onReset: () => void;
+};
+
+function WsCamerasFilterContent({
+  allCameras,
+  currentCameras,
+  setCurrentCameras,
+  onApply,
+  onReset,
+}: WsCamerasFilterContentProps) {
+  const { t } = useTranslation(["views/system", "common"]);
+
+  return (
+    <>
+      <div className="scrollbar-container flex max-h-[60dvh] flex-col gap-2.5 overflow-y-auto p-4">
+        <FilterSwitch
+          isChecked={currentCameras === undefined}
+          label={t("logs.websocket.filter.all_cameras")}
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              setCurrentCameras(undefined);
+            }
+          }}
+        />
+        <DropdownMenuSeparator />
+        {allCameras.map((cam) => (
+          <FilterSwitch
+            key={cam}
+            isChecked={currentCameras?.includes(cam) ?? false}
+            label={cam}
+            type="camera"
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updated = currentCameras ? [...currentCameras] : [];
+                if (!updated.includes(cam)) {
+                  updated.push(cam);
+                }
+                setCurrentCameras(updated);
+              } else {
+                const updated = currentCameras ? [...currentCameras] : [];
+                if (updated.length > 1) {
+                  updated.splice(updated.indexOf(cam), 1);
+                  setCurrentCameras(updated);
+                }
+              }
+            }}
+          />
+        ))}
+      </div>
+      <DropdownMenuSeparator />
+      <div className="flex items-center justify-evenly p-2">
+        <Button
+          aria-label={t("button.apply", { ns: "common" })}
+          variant="select"
+          size="sm"
+          disabled={currentCameras?.length === 0}
+          onClick={onApply}
+        >
+          {t("button.apply", { ns: "common" })}
+        </Button>
+        <Button
+          aria-label={t("button.reset", { ns: "common" })}
+          size="sm"
+          onClick={onReset}
+        >
+          {t("button.reset", { ns: "common" })}
+        </Button>
+      </div>
+    </>
   );
 }

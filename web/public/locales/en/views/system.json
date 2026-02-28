@@ -21,11 +21,14 @@
       "clear": "Clear",
       "filter": {
         "all": "All topics",
+        "topics": "Topics",
         "events": "Events",
         "camera_activity": "Camera activity",
         "system": "System",
         "camera": "Camera",
-        "all_cameras": "All cameras"
+        "all_cameras": "All cameras",
+        "cameras_count_one": "{{count}} Camera",
+        "cameras_count_other": "{{count}} Cameras"
       },
       "empty": "No messages captured yet",
       "count": "{{count}} messages",

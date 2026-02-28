@@ -207,7 +207,7 @@ function extractTypeForBadge(payload: unknown): string | null {
   return null;
 }
 
-function shouldShowTypeBadge(topic: string, type: string | null): boolean {
+function shouldShowTypeBadge(type: string | null): boolean {
   if (!type) return false;
   return true;
 }
@@ -307,7 +307,7 @@ const WsMessageRow = memo(function WsMessageRow({
   const cameraName = extractCameraName(message);
 
   const messageType = extractTypeForBadge(message.payload);
-  const showTypeBadge = shouldShowTypeBadge(message.topic, messageType);
+  const showTypeBadge = shouldShowTypeBadge(messageType);
 
   const summary = getPayloadSummary(message.topic, message.payload);
 
@@ -365,13 +365,13 @@ const WsMessageRow = memo(function WsMessageRow({
           )}
         />
 
-        <span className="font-mono shrink-0 text-xs text-muted-foreground">
+        <span className="shrink-0 font-mono text-xs text-muted-foreground">
           {formatTimestamp(message.timestamp)}
         </span>
 
         <span
           className={cn(
-            "font-mono shrink-0 rounded border px-1.5 py-0.5 text-xs",
+            "shrink-0 rounded border px-1.5 py-0.5 font-mono text-xs",
             TOPIC_CATEGORY_COLORS[category],
           )}
         >
@@ -397,7 +397,11 @@ const WsMessageRow = memo(function WsMessageRow({
 
         {eventLabel && (
           <span className="shrink-0">
-            {getIconForLabel(eventLabel, "size-3.5 text-primary-variant")}
+            {getIconForLabel(
+              eventLabel,
+              "object",
+              "size-3.5 text-primary-variant",
+            )}
           </span>
         )}
 
@@ -417,7 +421,7 @@ const WsMessageRow = memo(function WsMessageRow({
             <CopyJsonButton payload={parsedPayload} />
           </div>
           <pre
-            className="font-mono scrollbar-container max-h-[60vh] overflow-auto rounded bg-background p-2 text-[11px] leading-relaxed"
+            className="scrollbar-container max-h-[60vh] overflow-auto rounded bg-background p-2 font-mono text-[11px] leading-relaxed"
             dangerouslySetInnerHTML={{ __html: highlightJson(parsedPayload) }}
           />
         </div>

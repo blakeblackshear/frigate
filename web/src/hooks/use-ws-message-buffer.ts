@@ -8,7 +8,7 @@ type UseWsMessageBufferReturn = {
 };
 
 type MessageFilter = {
-  cameraFilter?: string; // "all" or specific camera name
+  cameraFilter?: string | string[]; // "all", specific camera name, or array of camera names (undefined in array = all)
 };
 
 export function useWsMessageBuffer(
@@ -47,10 +47,20 @@ export function useWsMessageBuffer(
     if (!currentFilter) return true;
 
     // Check camera filter
-    if (currentFilter.cameraFilter && currentFilter.cameraFilter !== "all") {
-      const msgCamera = extractCameraName(msg);
-      if (msgCamera !== currentFilter.cameraFilter) {
-        return false;
+    const cf = currentFilter.cameraFilter;
+    if (cf !== undefined) {
+      if (Array.isArray(cf)) {
+        // Array of cameras: include messages matching any camera in the list
+        const msgCamera = extractCameraName(msg);
+        if (msgCamera && !cf.includes(msgCamera)) {
+          return false;
+        }
+      } else if (cf !== "all") {
+        // Single string camera filter
+        const msgCamera = extractCameraName(msg);
+        if (msgCamera !== cf) {
+          return false;
+        }
       }
     }
 
