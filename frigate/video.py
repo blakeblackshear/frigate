@@ -254,35 +254,6 @@ class CameraWatchdog(threading.Thread):
             self._last_record_status = status
             self._last_status_update_time = now
 
-        # Stall tracking (based on last processed frame)
-        self._stall_timestamps: deque[float] = deque()
-        self._stall_active: bool = False
-
-        # Status caching to reduce message volume
-        self._last_detect_status: str | None = None
-        self._last_record_status: str | None = None
-        self._last_status_update_time: float = 0.0
-
-    def _send_detect_status(self, status: str, now: float) -> None:
-        """Send detect status only if changed or retry_interval has elapsed."""
-        if (
-            status != self._last_detect_status
-            or (now - self._last_status_update_time) >= self.sleeptime
-        ):
-            self.requestor.send_data(f"{self.config.name}/status/detect", status)
-            self._last_detect_status = status
-            self._last_status_update_time = now
-
-    def _send_record_status(self, status: str, now: float) -> None:
-        """Send record status only if changed or retry_interval has elapsed."""
-        if (
-            status != self._last_record_status
-            or (now - self._last_status_update_time) >= self.sleeptime
-        ):
-            self.requestor.send_data(f"{self.config.name}/status/record", status)
-            self._last_record_status = status
-            self._last_status_update_time = now
-
     def _update_enabled_state(self) -> bool:
         """Fetch the latest config and update enabled state."""
         self.config_subscriber.check_for_updates()
