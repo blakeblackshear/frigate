@@ -75,3 +75,4 @@ Many providers also have a public facing chat interface for their models. Downlo
 
 - OpenAI - [ChatGPT](https://chatgpt.com)
 - Gemini - [Google AI Studio](https://aistudio.google.com)
+- Ollama - [Open WebUI](https://docs.openwebui.com/)
