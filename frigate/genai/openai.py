@@ -30,6 +30,10 @@ class OpenAIClient(GenAIClient):
             for k, v in self.genai_config.provider_options.items()
             if k != "context_size"
         }
+
+        if self.genai_config.base_url:
+            provider_opts["base_url"] = self.genai_config.base_url
+
         return OpenAI(api_key=self.genai_config.api_key, **provider_opts)
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
