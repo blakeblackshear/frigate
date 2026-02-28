@@ -294,7 +294,18 @@ class DebugReplayManager:
         # RuntimeFilterConfig ndarray masks back to string coordinates
         objects_dict = {
             "track": source_config.objects.track,
-            "mask": source_config.objects.mask,
+            "mask": {
+                mask_id: (
+                    mask_cfg.model_dump(
+                        exclude={"raw_coordinates", "enabled_in_config"}
+                    )
+                    if mask_cfg is not None
+                    else None
+                )
+                for mask_id, mask_cfg in source_config.objects.mask.items()
+            }
+            if source_config.objects.mask
+            else {},
             "filters": {
                 name: filt.dict() if hasattr(filt, "dict") else filt.model_dump()
                 for name, filt in source_config.objects.filters.items()
@@ -321,6 +332,7 @@ class DebugReplayManager:
                     "raw_mask",
                     "mask",
                     "improved_contrast_enabled",
+                    "rasterized_mask",
                 }
             )
 
