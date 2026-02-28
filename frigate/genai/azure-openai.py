@@ -167,3 +167,123 @@ class OpenAIClient(GenAIClient):
                 "tool_calls": None,
                 "finish_reason": "error",
             }
+
+    async def chat_with_tools_stream(
+        self,
+        messages: list[dict[str, Any]],
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[str] = "auto",
+    ):
+        """
+        Stream chat with tools; yields content deltas then final message.
+
+        Implements streaming function calling/tool usage for Azure OpenAI models.
+        """
+        try:
+            openai_tool_choice = None
+            if tool_choice:
+                if tool_choice == "none":
+                    openai_tool_choice = "none"
+                elif tool_choice == "auto":
+                    openai_tool_choice = "auto"
+                elif tool_choice == "required":
+                    openai_tool_choice = "required"
+
+            request_params = {
+                "model": self.genai_config.model,
+                "messages": messages,
+                "timeout": self.timeout,
+                "stream": True,
+            }
+
+            if tools:
+                request_params["tools"] = tools
+                if openai_tool_choice is not None:
+                    request_params["tool_choice"] = openai_tool_choice
+
+            # Use streaming API
+            content_parts: list[str] = []
+            tool_calls_by_index: dict[int, dict[str, Any]] = {}
+            finish_reason = "stop"
+
+            stream = self.provider.chat.completions.create(**request_params)
+
+            for chunk in stream:
+                if not chunk or not chunk.choices:
+                    continue
+
+                choice = chunk.choices[0]
+                delta = choice.delta
+
+                # Check for finish reason
+                if choice.finish_reason:
+                    finish_reason = choice.finish_reason
+
+                # Extract content deltas
+                if delta.content:
+                    content_parts.append(delta.content)
+                    yield ("content_delta", delta.content)
+
+                # Extract tool calls
+                if delta.tool_calls:
+                    for tc in delta.tool_calls:
+                        idx = tc.index
+                        fn = tc.function
+
+                        if idx not in tool_calls_by_index:
+                            tool_calls_by_index[idx] = {
+                                "id": tc.id or "",
+                                "name": fn.name if fn and fn.name else "",
+                                "arguments": "",
+                            }
+
+                        t = tool_calls_by_index[idx]
+                        if tc.id:
+                            t["id"] = tc.id
+                        if fn and fn.name:
+                            t["name"] = fn.name
+                        if fn and fn.arguments:
+                            t["arguments"] += fn.arguments
+
+            # Build final message
+            full_content = "".join(content_parts).strip() or None
+
+            # Convert tool calls to list format
+            tool_calls_list = None
+            if tool_calls_by_index:
+                tool_calls_list = []
+                for tc in tool_calls_by_index.values():
+                    try:
+                        # Parse accumulated arguments as JSON
+                        parsed_args = json.loads(tc["arguments"])
+                    except (json.JSONDecodeError, Exception):
+                        parsed_args = tc["arguments"]
+
+                    tool_calls_list.append(
+                        {
+                            "id": tc["id"],
+                            "name": tc["name"],
+                            "arguments": parsed_args,
+                        }
+                    )
+                finish_reason = "tool_calls"
+
+            yield (
+                "message",
+                {
+                    "content": full_content,
+                    "tool_calls": tool_calls_list,
+                    "finish_reason": finish_reason,
+                },
+            )
+
+        except Exception as e:
+            logger.warning("Azure OpenAI streaming returned an error: %s", str(e))
+            yield (
+                "message",
+                {
+                    "content": None,
+                    "tool_calls": None,
+                    "finish_reason": "error",
+                },
+            )
