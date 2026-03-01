@@ -49,12 +49,13 @@ from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
     clean_camera_user_pass,
+    deep_merge,
     flatten_config_data,
     load_labels,
     process_config_query_string,
     update_yaml_file_bulk,
 )
-from frigate.util.config import find_config_file
+from frigate.util.config import apply_section_update, find_config_file
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -422,9 +423,100 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
+def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
+    """Apply config changes in-memory only, without writing to YAML.
+
+    Used for temporary config changes like debug replay camera tuning.
+    Updates the in-memory Pydantic config and publishes ZMQ updates,
+    bypassing YAML parsing entirely.
+    """
+    try:
+        updates = {}
+        if body.config_data:
+            updates = flatten_config_data(body.config_data)
+            updates = {k: ("" if v is None else v) for k, v in updates.items()}
+
+        if not updates:
+            return JSONResponse(
+                content={"success": False, "message": "No configuration data provided"},
+                status_code=400,
+            )
+
+        config: FrigateConfig = request.app.frigate_config
+
+        # Group flat key paths into nested per-camera, per-section dicts
+        grouped: dict[str, dict[str, dict]] = {}
+        for key_path, value in updates.items():
+            parts = key_path.split(".")
+            if len(parts) < 3 or parts[0] != "cameras":
+                continue
+
+            cam, section = parts[1], parts[2]
+            grouped.setdefault(cam, {}).setdefault(section, {})
+
+            # Build nested dict from remaining path (e.g. "filters.person.threshold")
+            target = grouped[cam][section]
+            for part in parts[3:-1]:
+                target = target.setdefault(part, {})
+            if len(parts) > 3:
+                target[parts[-1]] = value
+            elif isinstance(value, dict):
+                grouped[cam][section] = deep_merge(
+                    grouped[cam][section], value, override=True
+                )
+            else:
+                grouped[cam][section] = value
+
+        # Apply each section update
+        for cam_name, sections in grouped.items():
+            camera_config = config.cameras.get(cam_name)
+            if not camera_config:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Camera '{cam_name}' not found",
+                    },
+                    status_code=400,
+                )
+
+            for section_name, update in sections.items():
+                err = apply_section_update(camera_config, section_name, update)
+                if err is not None:
+                    return JSONResponse(
+                        content={"success": False, "message": err},
+                        status_code=400,
+                    )
+
+        # Publish ZMQ updates so processing threads pick up changes
+        if body.update_topic and body.update_topic.startswith("config/cameras/"):
+            _, _, camera, field = body.update_topic.split("/")
+            settings = getattr(config.cameras.get(camera, None), field, None)
+
+            if settings is not None:
+                request.app.config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                    settings,
+                )
+
+        return JSONResponse(
+            content={"success": True, "message": "Config applied in-memory"},
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"Error applying config in-memory: {e}")
+        return JSONResponse(
+            content={"success": False, "message": "Error applying config"},
+            status_code=500,
+        )
+
+
 @router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
 def config_set(request: Request, body: AppConfigSetBody):
     config_file = find_config_file()
+
+    if body.skip_save:
+        return _config_set_in_memory(request, body)
+
     lock = FileLock(f"{config_file}.lock", timeout=5)
 
     try:

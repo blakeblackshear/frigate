@@ -48,6 +48,7 @@
     "noActivity": "No activity detected",
     "activeTracking": "Active tracking",
     "noActiveTracking": "No active tracking",
-    "configuration": "Configuration"
+    "configuration": "Configuration",
+    "configurationDesc": "Fine tune motion detection and object tracking settings for the debug replay camera. No changes are saved to your Frigate configuration file."
   }
 }

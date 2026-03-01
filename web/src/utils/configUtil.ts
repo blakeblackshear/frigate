@@ -514,13 +514,18 @@ const mergeSectionConfig = (
 
 export function getSectionConfig(
   sectionKey: string,
-  level: "global" | "camera",
+  level: "global" | "camera" | "replay",
 ): SectionConfig {
   const entry = sectionConfigs[sectionKey];
   if (!entry) {
     return {};
   }
 
-  const overrides = level === "global" ? entry.global : entry.camera;
+  const overrides =
+    level === "global"
+      ? entry.global
+      : level === "replay"
+        ? entry.replay
+        : entry.camera;
   return mergeSectionConfig(entry.base, overrides);
 }

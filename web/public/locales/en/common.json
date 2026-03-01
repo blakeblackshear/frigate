@@ -117,6 +117,7 @@
   "button": {
     "add": "Add",
     "apply": "Apply",
+    "applying": "Applying…",
     "reset": "Reset",
     "undo": "Undo",
     "done": "Done",

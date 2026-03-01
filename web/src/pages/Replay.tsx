@@ -27,6 +27,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
@@ -36,9 +43,13 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { ObjectType } from "@/types/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
+import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
 
-import { LuInfo } from "react-icons/lu";
+import { LuInfo, LuSettings } from "react-icons/lu";
+import { LuSquare } from "react-icons/lu";
 import { MdReplay } from "react-icons/md";
+import { isMobile } from "react-device-detect";
+import Logo from "@/components/Logo";
 
 type DebugReplayStatus = {
   active: boolean;
@@ -121,6 +132,7 @@ export default function Replay() {
 
   const [options, setOptions] = useState<DebugOptions>(DEFAULT_OPTIONS);
   const [isStopping, setIsStopping] = useState(false);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
   const searchParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -238,65 +250,66 @@ export default function Replay() {
       <Toaster position="top-center" closeButton={true} />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between p-2 md:p-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <Heading as="h3">{t("title")}</Heading>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span>
-              {t("page.sourceCamera")}: <strong>{status.source_camera}</strong>
-            </span>
-            {timeRangeDisplay && (
-              <>
-                <span className="hidden md:inline">•</span>
-                <span className="hidden md:inline">{timeRangeDisplay}</span>
-              </>
-            )}
-          </div>
-        </div>
+      <div className="flex min-h-12 items-end justify-end border-b border-secondary px-2 py-2 md:min-h-16 md:px-3 md:py-3">
+        {isMobile && (
+          <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
+        )}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => setConfigDialogOpen(true)}
+          >
+            <LuSettings className="size-4" />
+            <span className="hidden md:inline">{t("page.configuration")}</span>
+          </Button>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="flex items-center gap-2 text-white"
-              disabled={isStopping}
-            >
-              {isStopping && <ActivityIndicator className="size-4" />}
-              {t("page.stopReplay")}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("page.confirmStop.title")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("page.confirmStop.description")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                {t("page.confirmStop.cancel")}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleStop}
-                className={cn(
-                  buttonVariants({ variant: "destructive" }),
-                  "text-white",
-                )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="flex items-center gap-2 text-white"
+                disabled={isStopping}
               >
-                {t("page.confirmStop.confirm")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                {isStopping && <ActivityIndicator className="size-4" />}
+                <span className="hidden md:inline">{t("page.stopReplay")}</span>
+                <LuSquare className="size-4 md:hidden" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("page.confirmStop.title")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("page.confirmStop.description")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  {t("page.confirmStop.cancel")}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleStop}
+                  className={cn(
+                    buttonVariants({ variant: "destructive" }),
+                    "text-white",
+                  )}
+                >
+                  {t("page.confirmStop.confirm")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {/* Main content */}
-      <div className="mt-1 flex flex-1 flex-col overflow-hidden pb-2 md:flex-row">
+      <div className="flex flex-1 flex-col overflow-hidden pb-2 md:flex-row">
         {/* Camera feed */}
-        <div className="flex max-h-[40%] px-2 md:h-dvh md:max-h-full md:w-7/12 md:grow md:px-4">
+        <div className="flex max-h-[40%] px-2 pt-2 md:h-dvh md:max-h-full md:w-7/12 md:grow md:px-4 md:pt-2">
           {isStopping ? (
             <div className="flex size-full items-center justify-center rounded-lg bg-background_alt">
               <div className="flex flex-col items-center justify-center gap-2">
@@ -334,11 +347,22 @@ export default function Replay() {
 
         {/* Side panel */}
         <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-4/12">
-          <Heading as="h4" className="mb-2">
-            {t("title")}
-          </Heading>
-          <div className="mb-5 space-y-3 text-sm text-muted-foreground">
-            <p>{t("description")}</p>
+          <div className="mb-5 flex flex-col space-y-2">
+            <Heading as="h3" className="mb-0">
+              {t("title")}
+            </Heading>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <span className="smart-capitalize">{status.source_camera}</span>
+              {timeRangeDisplay && (
+                <>
+                  <span className="hidden md:inline">•</span>
+                  <span className="hidden md:inline">{timeRangeDisplay}</span>
+                </>
+              )}
+            </div>
+            <div className="mb-5 space-y-3 text-sm text-muted-foreground">
+              <p>{t("description")}</p>
+            </div>
           </div>
           <Tabs defaultValue="debug" className="flex h-full w-full flex-col">
             <TabsList className="grid w-full grid-cols-3">
@@ -444,7 +468,7 @@ export default function Replay() {
             >
               <div className="flex h-full flex-col overflow-hidden rounded-md border border-secondary">
                 <WsMessageFeed
-                  maxSize={200}
+                  maxSize={2000}
                   lockedCamera={status.replay_camera ?? undefined}
                   showCameraBadge={false}
                 />
@@ -453,6 +477,43 @@ export default function Replay() {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={configDialogOpen} onOpenChange={setConfigDialogOpen}>
+        <DialogContent className="scrollbar-container max-h-[90dvh] overflow-y-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{t("page.configuration")}</DialogTitle>
+            <DialogDescription className="mb-5">
+              {t("page.configurationDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <ConfigSectionTemplate
+              sectionKey="motion"
+              level="replay"
+              cameraName={status.replay_camera ?? undefined}
+              skipSave
+              noStickyButtons
+              requiresRestart={false}
+              collapsible
+              defaultCollapsed={false}
+              showTitle
+              showOverrideIndicator={false}
+            />
+            <ConfigSectionTemplate
+              sectionKey="objects"
+              level="replay"
+              cameraName={status.replay_camera ?? undefined}
+              skipSave
+              noStickyButtons
+              requiresRestart={false}
+              collapsible
+              defaultCollapsed={false}
+              showTitle
+              showOverrideIndicator={false}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -507,7 +568,7 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
                     : getColorForObjectName(obj.label),
                 }}
               >
-                {getIconForLabel(obj.label, "size-4 text-white")}
+                {getIconForLabel(obj.label, "object", "size-4 text-white")}
               </div>
               <div className="text-sm font-medium">
                 {getTranslatedLabel(obj.label)}
