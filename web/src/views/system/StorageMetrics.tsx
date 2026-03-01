@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import useSWR from "swr";
 import { CiCircleAlert } from "react-icons/ci";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { FrigateConfig, StorageBreakdown } from "@/types/frigateConfig";
 import { useFormattedTimestamp, useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,9 @@ export default function StorageMetrics({
 }: StorageMetricsProps) {
   const { data: cameraStorage } = useSWR<CameraStorage>("recordings/storage");
   const { data: stats } = useSWR<FrigateStats>("stats");
+  const { data: storageBreakdown } = useSWR<StorageBreakdown>(
+    "recordings/storage/breakdown",
+  );
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -128,6 +131,43 @@ export default function StorageMetrics({
             used={totalStorage.camera}
             total={totalStorage.total}
           />
+          {storageBreakdown && (
+            <div className="mt-3 space-y-1 text-xs">
+              <div className="flex justify-between text-primary-variant">
+                <span>
+                  {t(
+                    "storage.breakdown.overwritable",
+                    "Continuous (overwritable)",
+                  )}
+                </span>
+                <span>
+                  {(storageBreakdown.overwritable / 1024).toFixed(1)} GB
+                </span>
+              </div>
+              <div className="flex justify-between text-primary-variant">
+                <span>
+                  {t(
+                    "storage.breakdown.eventRetention",
+                    "Events (aging out)",
+                  )}
+                </span>
+                <span>
+                  {(storageBreakdown.event_retention / 1024).toFixed(1)} GB
+                </span>
+              </div>
+              <div className="flex justify-between text-primary-variant">
+                <span>
+                  {t(
+                    "storage.breakdown.protected",
+                    "Protected (indefinite)",
+                  )}
+                </span>
+                <span>
+                  {(storageBreakdown.protected / 1024).toFixed(1)} GB
+                </span>
+              </div>
+            </div>
+          )}
           {earliestDate && (
             <div className="mt-2 text-xs text-primary-variant">
               <span className="font-medium">
