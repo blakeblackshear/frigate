@@ -704,6 +704,10 @@ class TrackedObjectProcessor(threading.Thread):
                     continue
 
                 current_enabled = config.enabled
+                camera_state = self.camera_states.get(camera)
+                if camera_state is None:
+                    continue
+
                 camera_state = self.camera_states[camera]
 
                 if camera_state.prev_enabled and not current_enabled:
