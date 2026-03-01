@@ -260,6 +260,31 @@ class TestHttp(unittest.TestCase):
         assert Recordings.get(Recordings.id == rec_k2_id)
         assert Recordings.get(Recordings.id == rec_k3_id)
 
+    def test_storage_cleanup_runs_in_rollover_mode(self):
+        """Ensure StorageMaintainer works correctly in rollover mode."""
+        self.minimal_config["record"] = {
+            "enabled": True,
+            "retain_policy": "continuous_rollover",
+        }
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        # Insert old recordings that should be deleted when space is needed
+        time_old = datetime.datetime.now().timestamp() - 7200
+        for i in range(10):
+            rec_id = f"{100000 + i}.rollover"
+            _insert_mock_recording(
+                rec_id,
+                os.path.join(self.test_dir, f"{rec_id}.tmp"),
+                time_old + (i * 600),
+                time_old + ((i + 1) * 600),
+            )
+
+        storage.calculate_camera_bandwidth()
+        # StorageMaintainer should be able to run reduce_storage_consumption
+        # without errors in rollover mode
+        storage.reduce_storage_consumption()
+
 
 def _insert_mock_event(
     id: str,
