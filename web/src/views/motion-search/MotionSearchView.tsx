@@ -58,6 +58,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFire } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { LuSearch } from "react-icons/lu";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type MotionSearchViewProps = {
   config: FrigateConfig;
@@ -746,7 +747,7 @@ export default function MotionSearchView({
     if (jobId && jobCamera) {
       void cancelMotionSearchJob(jobId, jobCamera);
       if (isSearching) {
-        toast.message(t("searchCanceled"));
+        toast.message(t("searchCancelled"));
       }
     }
     setSearchResults([]);
@@ -905,7 +906,7 @@ export default function MotionSearchView({
       setIsSearching(false);
       setJobId(null);
       setJobCamera(null);
-      toast.message(t("searchCanceled"));
+      toast.message(t("searchCancelled"));
     }
   }, [jobStatus, t]);
 
@@ -1013,17 +1014,21 @@ export default function MotionSearchView({
       <ScrollArea className="flex-1">
         {isSearching && (
           <div className="flex flex-col gap-2 border-b p-3 text-sm text-muted-foreground">
-            <div className="flex items-center justify-between">
-              <span>{t("searching")}</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col gap-1 text-wrap">
+                <ActivityIndicator className="mr-2 size-4" />
+                <div>{t("searching")}</div>
+              </div>
               <Button
                 variant="destructive"
+                className="text-white"
                 size="sm"
                 onClick={() => {
                   void cancelMotionSearchJob(jobId, jobCamera);
                   setIsSearching(false);
                   setJobId(null);
                   setJobCamera(null);
-                  toast.success(t("searchCanceled"));
+                  toast.success(t("searchCancelled"));
                 }}
               >
                 {t("cancelSearch")}

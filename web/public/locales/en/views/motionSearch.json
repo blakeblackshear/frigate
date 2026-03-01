@@ -5,7 +5,7 @@
   "selectCamera": "Motion Search is loading",
   "startSearch": "Start Search",
   "searchStarted": "Search started",
-  "searchCanceled": "Search canceled",
+  "searchCancelled": "Search cancelled",
   "cancelSearch": "Cancel",
   "searching": "Search in progress.",
   "searchComplete": "Search complete",
