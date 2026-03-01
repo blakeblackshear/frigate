@@ -549,7 +549,7 @@ function Logs() {
 
       {isWebsocket ? (
         <div className="my-2 flex size-full flex-col overflow-hidden rounded-md border border-secondary bg-background_alt">
-          <WsMessageFeed />
+          <WsMessageFeed maxSize={2000} />
         </div>
       ) : (
         <div className="relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt font-mono text-xs sm:p-1">
