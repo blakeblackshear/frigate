@@ -84,7 +84,8 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
     """
     :param dct1: First dict to merge
     :param dct2: Second dict to merge
-    :param override: if same key exists in both dictionaries, should override? otherwise ignore. (default=True)
+    :param override: if same key exists in both dictionaries, should override? otherwise ignore.
+    :param merge_lists: if True, lists will be merged.
     :return: The merge dictionary
     """
     merged = copy.deepcopy(dct1)
@@ -96,6 +97,8 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
             elif isinstance(v1, list) and isinstance(v2, list):
                 if merge_lists:
                     merged[k] = v1 + v2
+                elif override:
+                    merged[k] = copy.deepcopy(v2)
             else:
                 if override:
                     merged[k] = copy.deepcopy(v2)
