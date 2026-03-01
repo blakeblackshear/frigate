@@ -26,7 +26,7 @@ from frigate.api.defs.query.recordings_query_parameters import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.const import RECORD_DIR
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, ReviewSegment
 from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
@@ -56,6 +56,117 @@ def get_recordings_storage_usage(request: Request):
             ) * 100
 
     return JSONResponse(content=camera_usages)
+
+
+@router.get(
+    "/recordings/storage/breakdown",
+    dependencies=[Depends(allow_any_authenticated())],
+)
+def get_recordings_storage_breakdown(request: Request):
+    """Return storage usage broken down by category: overwritable, event retention, and protected."""
+
+    now = datetime.now().timestamp()
+
+    # 1. Protected (indefinite): recordings overlapping retain_indefinitely events
+    retained_events = (
+        Event.select(Event.camera, Event.start_time, Event.end_time)
+        .where(Event.retain_indefinitely == True, Event.has_clip == True)
+        .namedtuples()
+    )
+
+    protected_size = 0.0
+    protected_recording_ids = set()
+    for event in retained_events:
+        end_time_clause = (
+            Recordings.start_time < event.end_time
+            if event.end_time is not None
+            else True
+        )
+        overlapping = (
+            Recordings.select(Recordings.id, Recordings.segment_size)
+            .where(
+                Recordings.camera == event.camera,
+                end_time_clause,
+                Recordings.end_time > event.start_time,
+                Recordings.segment_size > 0,
+            )
+            .namedtuples()
+        )
+        for rec in overlapping:
+            if rec.id not in protected_recording_ids:
+                protected_recording_ids.add(rec.id)
+                protected_size += rec.segment_size
+
+    # 2. Event retention (aging out): recordings overlapping non-expired review segments
+    config = request.app.frigate_config
+    alert_expire = now - timedelta(days=config.record.alerts.retain.days).total_seconds()
+    detection_expire = (
+        now - timedelta(days=config.record.detections.retain.days).total_seconds()
+    )
+
+    active_reviews = (
+        ReviewSegment.select(
+            ReviewSegment.camera,
+            ReviewSegment.start_time,
+            ReviewSegment.end_time,
+        )
+        .where(
+            (
+                (ReviewSegment.severity == "alert")
+                & (ReviewSegment.end_time >= alert_expire)
+            )
+            | (
+                (ReviewSegment.severity == "detection")
+                & (ReviewSegment.end_time >= detection_expire)
+            )
+        )
+        .namedtuples()
+    )
+
+    event_size = 0.0
+    event_recording_ids = set()
+    for review in active_reviews:
+        end_time_clause = (
+            Recordings.start_time < review.end_time
+            if review.end_time is not None
+            else True
+        )
+        overlapping = (
+            Recordings.select(Recordings.id, Recordings.segment_size)
+            .where(
+                Recordings.camera == review.camera,
+                end_time_clause,
+                Recordings.end_time > review.start_time,
+                Recordings.segment_size > 0,
+            )
+            .namedtuples()
+        )
+        for rec in overlapping:
+            if (
+                rec.id not in protected_recording_ids
+                and rec.id not in event_recording_ids
+            ):
+                event_recording_ids.add(rec.id)
+                event_size += rec.segment_size
+
+    # 3. Total recordings size
+    total_size = (
+        Recordings.select(fn.SUM(Recordings.segment_size))
+        .where(Recordings.segment_size > 0)
+        .scalar()
+    ) or 0.0
+
+    # Overwritable = total - protected - event
+    overwritable_size = max(0.0, total_size - protected_size - event_size)
+
+    return JSONResponse(
+        content={
+            "total": round(total_size, 2),
+            "overwritable": round(overwritable_size, 2),
+            "event_retention": round(event_size, 2),
+            "protected": round(protected_size, 2),
+        }
+    )
 
 
 @router.get("/recordings/summary", dependencies=[Depends(allow_any_authenticated())])
