@@ -93,7 +93,7 @@ export function AudioLabelSwitchesWidget(props: WidgetProps) {
         getDisplayLabel: getAudioLabelDisplayName,
         i18nKey: "audioLabels",
         listClassName:
-          "max-h-none overflow-visible md:max-h-64 md:overflow-y-auto md:overscroll-contain md:scrollbar-container",
+          "relative max-h-none overflow-visible md:max-h-64 md:overflow-y-auto md:overscroll-contain md:scrollbar-container",
         enableSearch: true,
       }}
     />

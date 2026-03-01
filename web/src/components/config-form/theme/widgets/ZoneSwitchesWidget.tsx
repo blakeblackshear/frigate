@@ -42,7 +42,7 @@ export function ZoneSwitchesWidget(props: WidgetProps) {
         getEntities: getZoneNames,
         getDisplayLabel: getZoneDisplayName,
         i18nKey: "zoneNames",
-        listClassName: "max-h-64 overflow-y-auto scrollbar-container",
+        listClassName: "relative max-h-64 overflow-y-auto scrollbar-container",
       }}
     />
   );
