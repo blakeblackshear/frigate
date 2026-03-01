@@ -10,7 +10,7 @@ from pathlib import Path
 
 from playhouse.sqlite_ext import SqliteExtDatabase
 
-from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
+from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum, RetainPolicyEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.util.builtin import clear_and_unlink
@@ -281,27 +281,45 @@ class RecordingCleanup(threading.Thread):
     def expire_recordings(self) -> set[Path]:
         """Delete recordings based on retention config."""
         logger.debug("Start expire recordings.")
-        logger.debug("Start deleted cameras.")
+
+        is_rollover = (
+            self.config.record.retain_policy == RetainPolicyEnum.continuous_rollover
+        )
 
         # Handle deleted cameras
-        expire_days = max(
-            self.config.record.continuous.days, self.config.record.motion.days
-        )
-        expire_before = (
-            datetime.datetime.now() - datetime.timedelta(days=expire_days)
-        ).timestamp()
-        no_camera_recordings: Recordings = (
-            Recordings.select(
-                Recordings.id,
-                Recordings.path,
+        logger.debug("Start deleted cameras.")
+        if is_rollover:
+            # In rollover mode, delete recordings from removed cameras immediately
+            no_camera_recordings: Recordings = (
+                Recordings.select(
+                    Recordings.id,
+                    Recordings.path,
+                )
+                .where(
+                    Recordings.camera.not_in(list(self.config.cameras.keys())),
+                )
+                .namedtuples()
+                .iterator()
             )
-            .where(
-                Recordings.camera.not_in(list(self.config.cameras.keys())),
-                Recordings.end_time < expire_before,
+        else:
+            expire_days = max(
+                self.config.record.continuous.days, self.config.record.motion.days
             )
-            .namedtuples()
-            .iterator()
-        )
+            expire_before = (
+                datetime.datetime.now() - datetime.timedelta(days=expire_days)
+            ).timestamp()
+            no_camera_recordings: Recordings = (
+                Recordings.select(
+                    Recordings.id,
+                    Recordings.path,
+                )
+                .where(
+                    Recordings.camera.not_in(list(self.config.cameras.keys())),
+                    Recordings.end_time < expire_before,
+                )
+                .namedtuples()
+                .iterator()
+            )
 
         maybe_empty_dirs = set()
 
@@ -313,7 +331,6 @@ class RecordingCleanup(threading.Thread):
             maybe_empty_dirs.add(recording_path.parent)
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-        # delete up to 100,000 at a time
         max_deletes = 100000
         deleted_recordings_list = list(deleted_recordings)
         for i in range(0, len(deleted_recordings_list), max_deletes):
@@ -327,39 +344,41 @@ class RecordingCleanup(threading.Thread):
             logger.debug(f"Start camera: {camera}.")
             now = datetime.datetime.now()
 
+            # Always expire review segments (alerts/detections) regardless of policy
             maybe_empty_dirs |= self.expire_review_segments(config, now)
-            continuous_expire_date = (
-                now - datetime.timedelta(days=config.record.continuous.days)
-            ).timestamp()
-            motion_expire_date = (
-                now
-                - datetime.timedelta(
-                    days=max(
-                        config.record.motion.days, config.record.continuous.days
-                    )  # can't keep motion for less than continuous
-                )
-            ).timestamp()
 
-            # Get all the reviews to check against
-            reviews: ReviewSegment = (
-                ReviewSegment.select(
-                    ReviewSegment.start_time,
-                    ReviewSegment.end_time,
-                    ReviewSegment.severity,
-                )
-                .where(
-                    ReviewSegment.camera == camera,
-                    # need to ensure segments for all reviews starting
-                    # before the expire date are included
-                    ReviewSegment.start_time < motion_expire_date,
-                )
-                .order_by(ReviewSegment.start_time)
-                .namedtuples()
-            )
+            # Skip continuous/motion time-based expiry in rollover mode
+            if not is_rollover:
+                continuous_expire_date = (
+                    now - datetime.timedelta(days=config.record.continuous.days)
+                ).timestamp()
+                motion_expire_date = (
+                    now
+                    - datetime.timedelta(
+                        days=max(
+                            config.record.motion.days, config.record.continuous.days
+                        )
+                    )
+                ).timestamp()
 
-            maybe_empty_dirs |= self.expire_existing_camera_recordings(
-                continuous_expire_date, motion_expire_date, config, reviews
-            )
+                reviews: ReviewSegment = (
+                    ReviewSegment.select(
+                        ReviewSegment.start_time,
+                        ReviewSegment.end_time,
+                        ReviewSegment.severity,
+                    )
+                    .where(
+                        ReviewSegment.camera == camera,
+                        ReviewSegment.start_time < motion_expire_date,
+                    )
+                    .order_by(ReviewSegment.start_time)
+                    .namedtuples()
+                )
+
+                maybe_empty_dirs |= self.expire_existing_camera_recordings(
+                    continuous_expire_date, motion_expire_date, config, reviews
+                )
+
             logger.debug(f"End camera: {camera}.")
 
         logger.debug("End all cameras.")
