@@ -61,5 +61,25 @@
   "detected": "detected",
   "normalActivity": "Normal",
   "needsReview": "Needs review",
-  "securityConcern": "Security concern"
+  "securityConcern": "Security concern",
+  "motionSearch": {
+    "menuItem": "Motion search",
+    "openMenu": "Camera options"
+  },
+  "motionPreviews": {
+    "menuItem": "View motion previews",
+    "title": "Motion previews: {{camera}}",
+    "mobileSettingsTitle": "Motion Preview Settings",
+    "mobileSettingsDesc": "Adjust playback speed and dimming, and choose a date to review motion-only clips.",
+    "dim": "Dim",
+    "dimAria": "Adjust dimming intensity",
+    "dimDesc": "Increase dimming to increase motion area visibility.",
+    "speed": "Speed",
+    "speedAria": "Select preview playback speed",
+    "speedDesc": "Choose how quickly preview clips play.",
+    "back": "Back",
+    "empty": "No previews available",
+    "noPreview": "Preview unavailable",
+    "seekAria": "Seek {{camera}} player to {{time}}"
+  }
 }

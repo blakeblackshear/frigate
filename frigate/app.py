@@ -47,6 +47,7 @@ from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
+from frigate.jobs.motion_search import stop_all_motion_search_jobs
 from frigate.log import _stop_logging
 from frigate.models import (
     Event,
@@ -585,6 +586,9 @@ class FrigateApp:
 
         # used by the docker healthcheck
         Path("/dev/shm/.frigate-is-stopping").touch()
+
+        # Cancel any running motion search jobs before setting stop_event
+        stop_all_motion_search_jobs()
 
         self.stop_event.set()
 
