@@ -17,6 +17,7 @@ __all__ = [
     "ReviewRetainConfig",
     "RecordRetainConfig",
     "RetainModeEnum",
+    "RetainPolicyEnum",
 ]
 
 
@@ -33,6 +34,11 @@ class RetainModeEnum(str, Enum):
     all = "all"
     motion = "motion"
     active_objects = "active_objects"
+
+
+class RetainPolicyEnum(str, Enum):
+    time = "time"
+    continuous_rollover = "continuous_rollover"
 
 
 class ReviewRetainConfig(FrigateBaseModel):
@@ -99,6 +105,11 @@ class RecordConfig(FrigateBaseModel):
         default=False,
         title="Enable recording",
         description="Enable or disable recording for all cameras; can be overridden per-camera.",
+    )
+    retain_policy: RetainPolicyEnum = Field(
+        default=RetainPolicyEnum.time,
+        title="Retention policy",
+        description="Storage retention policy. 'time' expires recordings after configured days. 'continuous_rollover' fills available disk space and overwrites oldest recordings when space is needed.",
     )
     expire_interval: int = Field(
         default=60,
