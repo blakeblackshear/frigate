@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
 import useSWR from "swr";
 import axios from "axios";
@@ -45,11 +45,14 @@ import { ObjectType } from "@/types/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
 import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
 
-import { LuInfo, LuSettings } from "react-icons/lu";
+import { LuExternalLink, LuInfo, LuSettings } from "react-icons/lu";
 import { LuSquare } from "react-icons/lu";
 import { MdReplay } from "react-icons/md";
-import { isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import Logo from "@/components/Logo";
+import { Separator } from "@/components/ui/separator";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 
 type DebugReplayStatus = {
   active: boolean;
@@ -105,6 +108,7 @@ const REPLAY_INIT_SKELETON_TIMEOUT_MS = 8000;
 export default function Replay() {
   const { t } = useTranslation(["views/replay", "views/settings", "common"]);
   const navigate = useNavigate();
+  const { getLocaleDocUrl } = useDocDomain();
 
   const {
     data: status,
@@ -186,6 +190,10 @@ export default function Replay() {
   const { objects } = useCameraActivity(replayCameraConfig);
 
   const [showReplayInitSkeleton, setShowReplayInitSkeleton] = useState(false);
+
+  // debug draw
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [debugDraw, setDebugDraw] = useState(false);
 
   useEffect(() => {
     if (!status?.active || !status.replay_camera) {
@@ -321,7 +329,7 @@ export default function Replay() {
             </div>
           ) : (
             status.replay_camera && (
-              <div className="relative size-full min-h-10">
+              <div className="relative size-full min-h-10" ref={containerRef}>
                 <AutoUpdatingCameraImage
                   className="size-full"
                   cameraClasses="relative w-full h-full flex flex-col justify-start"
@@ -329,6 +337,19 @@ export default function Replay() {
                   camera={status.replay_camera}
                   showFps={false}
                 />
+                {debugDraw && (
+                  <DebugDrawingLayer
+                    containerRef={containerRef}
+                    cameraWidth={
+                      config?.cameras?.[status.source_camera ?? ""]?.detect
+                        .width ?? 1280
+                    }
+                    cameraHeight={
+                      config?.cameras?.[status.source_camera ?? ""]?.detect
+                        .height ?? 720
+                    }
+                  />
+                )}
                 {showReplayInitSkeleton && (
                   <div className="pointer-events-none absolute inset-0 z-10 size-full rounded-lg bg-background">
                     <Skeleton className="size-full rounded-lg" />
@@ -452,6 +473,70 @@ export default function Replay() {
                       </div>
                     );
                   })}
+                  {isDesktop && (
+                    <>
+                      <Separator className="my-2" />
+                      <div className="flex w-full flex-row items-center justify-between">
+                        <div className="mb-2 flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <Label
+                              className="mb-0 cursor-pointer text-primary smart-capitalize"
+                              htmlFor="debugdraw"
+                            >
+                              {t("debug.objectShapeFilterDrawing.title", {
+                                ns: "views/settings",
+                              })}
+                            </Label>
+
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <div className="cursor-pointer p-0">
+                                  <LuInfo className="size-4" />
+                                  <span className="sr-only">
+                                    {t("button.info", { ns: "common" })}
+                                  </span>
+                                </div>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80 text-sm">
+                                {t("debug.objectShapeFilterDrawing.tips", {
+                                  ns: "views/settings",
+                                })}
+                                <div className="mt-2 flex items-center text-primary">
+                                  <Link
+                                    to={getLocaleDocUrl(
+                                      "configuration/object_filters#object-shape",
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline"
+                                  >
+                                    {t("readTheDocumentation", {
+                                      ns: "common",
+                                    })}
+                                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                                  </Link>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {t("debug.objectShapeFilterDrawing.desc", {
+                              ns: "views/settings",
+                            })}
+                          </div>
+                        </div>
+                        <Switch
+                          key={"draw"}
+                          className="ml-1"
+                          id="debug_draw"
+                          checked={debugDraw}
+                          onCheckedChange={(isChecked) => {
+                            setDebugDraw(isChecked);
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </TabsContent>
