@@ -44,6 +44,7 @@ const record: SectionConfigOverrides = {
   },
   camera: {
     restartRequired: [],
+    hiddenFields: ["retain_policy"],
   },
 };
 

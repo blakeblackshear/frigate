@@ -11,6 +11,10 @@ from ..base import FrigateBaseModel
 
 logger = logging.getLogger(__name__)
 
+# Module-level flag to prevent the rollover warning from firing N+1 times
+# (once per camera + once global) during config propagation.
+_rollover_warning_emitted = False
+
 __all__ = [
     "RecordConfig",
     "RecordExportConfig",
@@ -157,8 +161,13 @@ class RecordConfig(FrigateBaseModel):
 
     @model_validator(mode="after")
     def warn_rollover_with_days(self) -> "RecordConfig":
-        if self.retain_policy == RetainPolicyEnum.continuous_rollover:
+        global _rollover_warning_emitted
+        if (
+            not _rollover_warning_emitted
+            and self.retain_policy == RetainPolicyEnum.continuous_rollover
+        ):
             if self.continuous.days > 0 or self.motion.days > 0:
+                _rollover_warning_emitted = True
                 logger.warning(
                     "retain_policy is 'continuous_rollover' - continuous.days and "
                     "motion.days are ignored. Recordings will fill available disk "

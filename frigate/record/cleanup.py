@@ -289,7 +289,11 @@ class RecordingCleanup(threading.Thread):
         # Handle deleted cameras
         logger.debug("Start deleted cameras.")
         if is_rollover:
-            # In rollover mode, delete recordings from removed cameras immediately
+            # In rollover mode, keep a 24-hour grace period for removed cameras
+            # so footage isn't lost if a camera is temporarily removed from config
+            rollover_expire_before = (
+                datetime.datetime.now() - datetime.timedelta(hours=24)
+            ).timestamp()
             no_camera_recordings: Recordings = (
                 Recordings.select(
                     Recordings.id,
@@ -297,6 +301,7 @@ class RecordingCleanup(threading.Thread):
                 )
                 .where(
                     Recordings.camera.not_in(list(self.config.cameras.keys())),
+                    Recordings.end_time < rollover_expire_before,
                 )
                 .namedtuples()
                 .iterator()
@@ -347,8 +352,13 @@ class RecordingCleanup(threading.Thread):
             # Always expire review segments (alerts/detections) regardless of policy
             maybe_empty_dirs |= self.expire_review_segments(config, now)
 
-            # Skip continuous/motion time-based expiry in rollover mode
-            if not is_rollover:
+            # Skip continuous/motion time-based expiry in rollover mode;
+            # StorageMaintainer handles space reclamation by deleting oldest recordings.
+            if is_rollover:
+                logger.debug(
+                    f"Skipping time-based expiry for {camera} (continuous_rollover mode)."
+                )
+            else:
                 continuous_expire_date = (
                     now - datetime.timedelta(days=config.record.continuous.days)
                 ).timestamp()
