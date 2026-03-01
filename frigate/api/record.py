@@ -63,91 +63,90 @@ def get_recordings_storage_usage(request: Request):
     dependencies=[Depends(allow_any_authenticated())],
 )
 def get_recordings_storage_breakdown(request: Request):
-    """Return storage usage broken down by category: overwritable, event retention, and protected."""
+    """Return storage usage in MB broken down by category: overwritable, event retention, and protected."""
 
     now = datetime.now().timestamp()
 
     # 1. Protected (indefinite): recordings overlapping retain_indefinitely events
-    retained_events = (
-        Event.select(Event.camera, Event.start_time, Event.end_time)
-        .where(Event.retain_indefinitely == True, Event.has_clip == True)
+    # Uses a JOIN to avoid N+1 query problem
+    protected_query = (
+        Recordings.select(
+            Recordings.id,
+            Recordings.segment_size,
+        )
+        .join(
+            Event,
+            on=(
+                (Event.camera == Recordings.camera)
+                & (Event.start_time < Recordings.end_time)
+                & (
+                    (Event.end_time.is_null())
+                    | (Event.end_time > Recordings.start_time)
+                )
+            ),
+        )
+        .where(
+            Event.retain_indefinitely == True,
+            Event.has_clip == True,
+            Recordings.segment_size > 0,
+        )
+        .distinct()
         .namedtuples()
     )
 
     protected_size = 0.0
     protected_recording_ids = set()
-    for event in retained_events:
-        end_time_clause = (
-            Recordings.start_time < event.end_time
-            if event.end_time is not None
-            else True
-        )
-        overlapping = (
-            Recordings.select(Recordings.id, Recordings.segment_size)
-            .where(
-                Recordings.camera == event.camera,
-                end_time_clause,
-                Recordings.end_time > event.start_time,
-                Recordings.segment_size > 0,
-            )
-            .namedtuples()
-        )
-        for rec in overlapping:
-            if rec.id not in protected_recording_ids:
-                protected_recording_ids.add(rec.id)
-                protected_size += rec.segment_size
+    for rec in protected_query:
+        protected_recording_ids.add(rec.id)
+        protected_size += rec.segment_size
 
     # 2. Event retention (aging out): recordings overlapping non-expired review segments
+    # Use global config for expiry thresholds
     config = request.app.frigate_config
     alert_expire = now - timedelta(days=config.record.alerts.retain.days).total_seconds()
     detection_expire = (
         now - timedelta(days=config.record.detections.retain.days).total_seconds()
     )
 
-    active_reviews = (
-        ReviewSegment.select(
-            ReviewSegment.camera,
-            ReviewSegment.start_time,
-            ReviewSegment.end_time,
+    # Include in-progress reviews (end_time IS NULL) as they are not overwritable
+    event_query = (
+        Recordings.select(
+            Recordings.id,
+            Recordings.segment_size,
+        )
+        .join(
+            ReviewSegment,
+            on=(
+                (ReviewSegment.camera == Recordings.camera)
+                & (ReviewSegment.start_time < Recordings.end_time)
+                & (
+                    (ReviewSegment.end_time.is_null())
+                    | (ReviewSegment.end_time > Recordings.start_time)
+                )
+            ),
         )
         .where(
+            Recordings.segment_size > 0,
             (
-                (ReviewSegment.severity == "alert")
-                & (ReviewSegment.end_time >= alert_expire)
-            )
-            | (
-                (ReviewSegment.severity == "detection")
-                & (ReviewSegment.end_time >= detection_expire)
-            )
+                (ReviewSegment.end_time.is_null())
+                | (
+                    (ReviewSegment.severity == "alert")
+                    & (ReviewSegment.end_time >= alert_expire)
+                )
+                | (
+                    (ReviewSegment.severity == "detection")
+                    & (ReviewSegment.end_time >= detection_expire)
+                )
+            ),
         )
+        .distinct()
         .namedtuples()
     )
 
     event_size = 0.0
-    event_recording_ids = set()
-    for review in active_reviews:
-        end_time_clause = (
-            Recordings.start_time < review.end_time
-            if review.end_time is not None
-            else True
-        )
-        overlapping = (
-            Recordings.select(Recordings.id, Recordings.segment_size)
-            .where(
-                Recordings.camera == review.camera,
-                end_time_clause,
-                Recordings.end_time > review.start_time,
-                Recordings.segment_size > 0,
-            )
-            .namedtuples()
-        )
-        for rec in overlapping:
-            if (
-                rec.id not in protected_recording_ids
-                and rec.id not in event_recording_ids
-            ):
-                event_recording_ids.add(rec.id)
-                event_size += rec.segment_size
+    for rec in event_query:
+        if rec.id not in protected_recording_ids:
+            event_size += rec.segment_size
 
     # 3. Total recordings size
     total_size = (
@@ -159,12 +158,14 @@ def get_recordings_storage_breakdown(request: Request):
     # Overwritable = total - protected - event
     overwritable_size = max(0.0, total_size - protected_size - event_size)
 
+    # All values are in MB (matching segment_size column units)
     return JSONResponse(
         content={
             "total": round(total_size, 2),
             "overwritable": round(overwritable_size, 2),
             "event_retention": round(event_size, 2),
             "protected": round(protected_size, 2),
+            "units": "MB",
         }
     )
 

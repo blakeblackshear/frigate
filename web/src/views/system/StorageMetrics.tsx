@@ -1,5 +1,6 @@
 import { CombinedStorageGraph } from "@/components/graph/CombinedStorageGraph";
 import { StorageGraph } from "@/components/graph/StorageGraph";
+import { getUnitSize } from "@/utils/storageUtil";
 import { FrigateStats } from "@/types/stats";
 import { useMemo } from "react";
 import {
@@ -35,12 +36,14 @@ export default function StorageMetrics({
 }: StorageMetricsProps) {
   const { data: cameraStorage } = useSWR<CameraStorage>("recordings/storage");
   const { data: stats } = useSWR<FrigateStats>("stats");
-  const { data: storageBreakdown } = useSWR<StorageBreakdown>(
-    "recordings/storage/breakdown",
-  );
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const isRollover =
+    config?.record?.retain_policy === "continuous_rollover";
+  const { data: storageBreakdown } = useSWR<StorageBreakdown>(
+    isRollover ? "recordings/storage/breakdown" : null,
+  );
   const { t } = useTranslation(["views/system"]);
   const timezone = useTimezone(config);
   const { getLocaleDocUrl } = useDocDomain();
@@ -131,7 +134,7 @@ export default function StorageMetrics({
             used={totalStorage.camera}
             total={totalStorage.total}
           />
-          {storageBreakdown && (
+          {storageBreakdown && storageBreakdown.total > 0 && (
             <div className="mt-3 space-y-1 text-xs">
               <div className="flex justify-between text-primary-variant">
                 <span>
@@ -140,9 +143,7 @@ export default function StorageMetrics({
                     "Continuous (overwritable)",
                   )}
                 </span>
-                <span>
-                  {(storageBreakdown.overwritable / 1024).toFixed(1)} GB
-                </span>
+                <span>{getUnitSize(storageBreakdown.overwritable)}</span>
               </div>
               <div className="flex justify-between text-primary-variant">
                 <span>
@@ -151,9 +152,7 @@ export default function StorageMetrics({
                     "Events (aging out)",
                   )}
                 </span>
-                <span>
-                  {(storageBreakdown.event_retention / 1024).toFixed(1)} GB
-                </span>
+                <span>{getUnitSize(storageBreakdown.event_retention)}</span>
               </div>
               <div className="flex justify-between text-primary-variant">
                 <span>
@@ -162,9 +161,7 @@ export default function StorageMetrics({
                     "Protected (indefinite)",
                   )}
                 </span>
-                <span>
-                  {(storageBreakdown.protected / 1024).toFixed(1)} GB
-                </span>
+                <span>{getUnitSize(storageBreakdown.protected)}</span>
               </div>
             </div>
           )}

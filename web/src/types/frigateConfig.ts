@@ -543,6 +543,7 @@ export interface FrigateConfig {
   record: {
     enabled: boolean;
     enabled_in_config: boolean | null;
+    retain_policy: "time" | "continuous_rollover";
     events: {
       objects: string[] | null;
       post_capture: number;

@@ -1,12 +1,15 @@
+import logging
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from frigate.const import MAX_PRE_CAPTURE
 from frigate.review.types import SeverityEnum
 
 from ..base import FrigateBaseModel
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "RecordConfig",
@@ -151,6 +154,17 @@ class RecordConfig(FrigateBaseModel):
         title="Original recording state",
         description="Indicates whether recording was enabled in the original static configuration.",
     )
+
+    @model_validator(mode="after")
+    def warn_rollover_with_days(self) -> "RecordConfig":
+        if self.retain_policy == RetainPolicyEnum.continuous_rollover:
+            if self.continuous.days > 0 or self.motion.days > 0:
+                logger.warning(
+                    "retain_policy is 'continuous_rollover' - continuous.days and "
+                    "motion.days are ignored. Recordings will fill available disk "
+                    "space and oldest footage will be overwritten when needed."
+                )
+        return self
 
     @property
     def event_pre_capture(self) -> int:
