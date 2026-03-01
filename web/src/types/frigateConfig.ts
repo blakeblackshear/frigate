@@ -191,6 +191,7 @@ export interface CameraConfig {
   record: {
     enabled: boolean;
     enabled_in_config: boolean;
+    retain_policy: "time" | "continuous_rollover";
     alerts: {
       post_capture: number;
       pre_capture: number;
@@ -617,3 +618,10 @@ export interface FrigateConfig {
 
   ui: UiConfig;
 }
+
+export type StorageBreakdown = {
+  total: number;
+  overwritable: number;
+  event_retention: number;
+  protected: number;
+};
