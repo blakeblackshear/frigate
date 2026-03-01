@@ -103,7 +103,9 @@ def get_recordings_storage_breakdown(request: Request):
     # 2. Event retention (aging out): recordings overlapping non-expired review segments
     # Use global config for expiry thresholds
     config = request.app.frigate_config
-    alert_expire = now - timedelta(days=config.record.alerts.retain.days).total_seconds()
+    alert_expire = (
+        now - timedelta(days=config.record.alerts.retain.days).total_seconds()
+    )
     detection_expire = (
         now - timedelta(days=config.record.detections.retain.days).total_seconds()
     )
