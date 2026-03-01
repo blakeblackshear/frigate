@@ -6,6 +6,7 @@ const record: SectionConfigOverrides = {
     restartRequired: [],
     fieldOrder: [
       "enabled",
+      "retain_policy",
       "expire_interval",
       "continuous",
       "motion",
@@ -15,7 +16,7 @@ const record: SectionConfigOverrides = {
       "export",
     ],
     fieldGroups: {
-      retention: ["enabled", "continuous", "motion"],
+      retention: ["enabled", "retain_policy", "continuous", "motion"],
       events: ["alerts", "detections"],
     },
     hiddenFields: ["enabled_in_config", "sync_recordings"],
@@ -31,6 +32,7 @@ const record: SectionConfigOverrides = {
   global: {
     restartRequired: [
       "enabled",
+      "retain_policy",
       "expire_interval",
       "continuous",
       "motion",
