@@ -690,8 +690,8 @@ class TrackedObjectProcessor(threading.Thread):
                     self.create_camera_state(camera)
             elif "remove" in updated_topics:
                 for camera in updated_topics["remove"]:
-                    camera_state = self.camera_states[camera]
-                    camera_state.shutdown()
+                    removed_camera_state = self.camera_states[camera]
+                    removed_camera_state.shutdown()
                     self.camera_states.pop(camera)
                     self.camera_activity.pop(camera, None)
                     self.last_motion_detected.pop(camera, None)
