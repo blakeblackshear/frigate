@@ -77,14 +77,22 @@ async def start_debug_replay(request: Request, body: DebugReplayStartBody):
             frigate_config=request.app.frigate_config,
             config_publisher=request.app.config_publisher,
         )
-    except ValueError as e:
+    except ValueError:
+        logger.exception("Invalid parameters for debug replay start request")
         return JSONResponse(
-            content={"success": False, "message": str(e)},
+            content={
+                "success": False,
+                "message": "Invalid debug replay request parameters",
+            },
             status_code=400,
         )
-    except RuntimeError as e:
+    except RuntimeError:
+        logger.exception("Error while starting debug replay session")
         return JSONResponse(
-            content={"success": False, "message": str(e)},
+            content={
+                "success": False,
+                "message": "An internal error occurred while starting debug replay",
+            },
             status_code=500,
         )
 
@@ -158,7 +166,10 @@ async def stop_debug_replay(request: Request):
     except (ValueError, RuntimeError, OSError) as e:
         logger.error("Error stopping replay: %s", e)
         return JSONResponse(
-            content={"success": False, "message": str(e)},
+            content={
+                "success": False,
+                "message": "Failed to stop replay session due to an internal error.",
+            },
             status_code=500,
         )
 

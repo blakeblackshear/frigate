@@ -86,7 +86,6 @@ class TimelineProcessor(threading.Thread):
         event_data: dict[Any, Any],
     ) -> bool:
         """Handle object detection."""
-        save = False
         camera_config = self.config.cameras.get(camera)
         if camera_config is None:
             return False
