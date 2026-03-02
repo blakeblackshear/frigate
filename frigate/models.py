@@ -89,14 +89,6 @@ class ExportCase(Model):
     updated_at = DateTimeField()
 
 
-class ExportCase(Model):
-    id = CharField(null=False, primary_key=True, max_length=30)
-    name = CharField(index=True, max_length=100)
-    description = TextField(null=True)
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
-
-
 class Export(Model):
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)
