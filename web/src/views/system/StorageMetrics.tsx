@@ -138,28 +138,19 @@ export default function StorageMetrics({
             <div className="mt-3 space-y-1 text-xs">
               <div className="flex justify-between text-primary-variant">
                 <span>
-                  {t(
-                    "storage.breakdown.overwritable",
-                    "Continuous (overwritable)",
-                  )}
+                  {t("storage.breakdown.overwritable")}
                 </span>
                 <span>{getUnitSize(storageBreakdown.overwritable)}</span>
               </div>
               <div className="flex justify-between text-primary-variant">
                 <span>
-                  {t(
-                    "storage.breakdown.eventRetention",
-                    "Events (aging out)",
-                  )}
+                  {t("storage.breakdown.eventRetention")}
                 </span>
                 <span>{getUnitSize(storageBreakdown.event_retention)}</span>
               </div>
               <div className="flex justify-between text-primary-variant">
                 <span>
-                  {t(
-                    "storage.breakdown.protected",
-                    "Protected (indefinite)",
-                  )}
+                  {t("storage.breakdown.protected")}
                 </span>
                 <span>{getUnitSize(storageBreakdown.protected)}</span>
               </div>

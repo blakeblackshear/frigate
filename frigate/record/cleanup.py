@@ -356,7 +356,8 @@ class RecordingCleanup(threading.Thread):
             # StorageMaintainer handles space reclamation by deleting oldest recordings.
             if is_rollover:
                 logger.debug(
-                    f"Skipping time-based expiry for {camera} (continuous_rollover mode)."
+                    "Skipping time-based expiry for %s (continuous_rollover mode).",
+                    camera,
                 )
             else:
                 continuous_expire_date = (
