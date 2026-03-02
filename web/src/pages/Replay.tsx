@@ -53,6 +53,7 @@ import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 type DebugReplayStatus = {
   active: boolean;
@@ -258,10 +259,23 @@ export default function Replay() {
       <Toaster position="top-center" closeButton={true} />
 
       {/* Top bar */}
-      <div className="flex min-h-12 items-end justify-end border-b border-secondary px-2 py-2 md:min-h-16 md:px-3 md:py-3">
+      <div className="flex min-h-12 items-center justify-between border-b border-secondary px-2 py-2 md:min-h-16 md:px-3 md:py-3">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
         )}
+        <Button
+          className="flex items-center gap-2.5 rounded-lg"
+          aria-label={t("label.back", { ns: "common" })}
+          size="sm"
+          onClick={() => navigate(-1)}
+        >
+          <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+          {isDesktop && (
+            <div className="text-primary">
+              {t("button.back", { ns: "common" })}
+            </div>
+          )}
+        </Button>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
