@@ -103,7 +103,7 @@ export default function MobileReviewSettingsDrawer({
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
   const [selectedReplayOption, setSelectedReplayOption] = useState<
-    "1" | "4" | "8" | "timeline" | "custom"
+    "1" | "5" | "custom" | "timeline"
   >("1");
   const [isDebugReplayStarting, setIsDebugReplayStarting] = useState(false);
 
@@ -438,7 +438,7 @@ export default function MobileReviewSettingsDrawer({
     );
   } else if (drawerMode == "debug-replay") {
     const handleTimeOptionChange = (
-      option: "1" | "4" | "8" | "timeline" | "custom",
+      option: "1" | "5" | "custom" | "timeline",
     ) => {
       setSelectedReplayOption(option);
 
