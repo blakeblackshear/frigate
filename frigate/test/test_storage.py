@@ -11,7 +11,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, ReviewSegment
 from frigate.storage import StorageMaintainer
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -25,7 +25,7 @@ class TestHttp(unittest.TestCase):
         router.run()
         migrate_db.close()
         self.db = SqliteQueueDatabase(TEST_DB)
-        models = [Event, Recordings]
+        models = [Event, Recordings, ReviewSegment]
         self.db.bind(models)
         self.test_dir = tempfile.mkdtemp()
 
@@ -285,6 +285,198 @@ class TestHttp(unittest.TestCase):
         # without errors in rollover mode
         storage.reduce_storage_consumption()
 
+    def _get_rollover_config(self):
+        """Return a config dict with rollover mode and event retention settings."""
+        config = dict(self.minimal_config)
+        config["record"] = {
+            "enabled": True,
+            "retain_policy": "continuous_rollover",
+            "alerts": {"retain": {"days": 10}},
+            "detections": {"retain": {"days": 5}},
+        }
+        return config
+
+    def test_rollover_deletes_overwritable_before_event_retention(self):
+        """Overwritable recordings are deleted first; event-retention survive."""
+        config = FrigateConfig(**self._get_rollover_config())
+        storage = StorageMaintainer(config, MagicMock())
+
+        now = datetime.datetime.now().timestamp()
+        time_old = now - 7200
+
+        # Insert overwritable recordings (no review overlap) — old, should be deleted
+        for i in range(60):
+            rec_id = f"{200000 + i}.overwritable"
+            _insert_mock_recording(
+                rec_id,
+                os.path.join(self.test_dir, f"{rec_id}.tmp"),
+                time_old + (i * 10),
+                time_old + ((i + 1) * 10),
+            )
+
+        # Insert event-retention recordings (overlap with active review segment)
+        time_event = now - 3600
+        _insert_mock_review_segment(
+            "review_001",
+            time_event,
+            time_event + 30,
+            severity="alert",
+        )
+        rec_event_id = "300000.event_retention"
+        _insert_mock_recording(
+            rec_event_id,
+            os.path.join(self.test_dir, f"{rec_event_id}.tmp"),
+            time_event,
+            time_event + 10,
+        )
+
+        storage.calculate_camera_bandwidth()
+        storage.reduce_storage_consumption()
+
+        # Event-retention recording should survive
+        assert Recordings.get(Recordings.id == rec_event_id)
+
+    def test_rollover_falls_through_to_event_retention(self):
+        """When overwritable is insufficient, event-retention recordings are deleted."""
+        config = FrigateConfig(**self._get_rollover_config())
+        storage = StorageMaintainer(config, MagicMock())
+
+        now = datetime.datetime.now().timestamp()
+        time_old = now - 7200
+
+        # Insert only 1 small overwritable recording (not enough to meet bandwidth)
+        rec_ow_id = "400000.overwritable"
+        _insert_mock_recording(
+            rec_ow_id,
+            os.path.join(self.test_dir, f"{rec_ow_id}.tmp"),
+            time_old,
+            time_old + 10,
+            seg_size=1,
+        )
+
+        # Insert many event-retention recordings
+        time_event = now - 3600
+        _insert_mock_review_segment(
+            "review_002",
+            time_event,
+            time_event + 600,
+            severity="detection",
+        )
+        for i in range(60):
+            rec_id = f"{400100 + i}.event_ret"
+            _insert_mock_recording(
+                rec_id,
+                os.path.join(self.test_dir, f"{rec_id}.tmp"),
+                time_event + (i * 10),
+                time_event + ((i + 1) * 10),
+            )
+
+        storage.calculate_camera_bandwidth()
+        storage.reduce_storage_consumption()
+
+        # Overwritable should be deleted
+        with self.assertRaises(DoesNotExist):
+            Recordings.get(Recordings.id == rec_ow_id)
+
+        # Some event-retention recordings should also be deleted
+        remaining = Recordings.select().count()
+        assert remaining < 61  # started with 61 total
+
+    def test_rollover_protects_retained_events_last(self):
+        """Protected recordings are only deleted as emergency last resort."""
+        config = FrigateConfig(**self._get_rollover_config())
+        storage = StorageMaintainer(config, MagicMock())
+
+        now = datetime.datetime.now().timestamp()
+        time_old = now - 7200
+
+        # Insert protected recording (overlaps with retain_indefinitely event)
+        _insert_mock_event(
+            "evt_protected",
+            time_old,
+            time_old + 30,
+            retain=True,
+        )
+        rec_protected_id = "500000.protected"
+        _insert_mock_recording(
+            rec_protected_id,
+            os.path.join(self.test_dir, f"{rec_protected_id}.tmp"),
+            time_old,
+            time_old + 10,
+        )
+
+        # Insert enough overwritable recordings to satisfy bandwidth
+        for i in range(60):
+            rec_id = f"{500100 + i}.overwritable"
+            _insert_mock_recording(
+                rec_id,
+                os.path.join(self.test_dir, f"{rec_id}.tmp"),
+                time_old + 100 + (i * 10),
+                time_old + 100 + ((i + 1) * 10),
+            )
+
+        storage.calculate_camera_bandwidth()
+        storage.reduce_storage_consumption()
+
+        # Protected recording should survive when overwritable is sufficient
+        assert Recordings.get(Recordings.id == rec_protected_id)
+
+    def test_rollover_keeps_protected_when_overwritable_suffices(self):
+        """Both protected and event-retention survive when overwritable frees enough."""
+        config = FrigateConfig(**self._get_rollover_config())
+        storage = StorageMaintainer(config, MagicMock())
+
+        now = datetime.datetime.now().timestamp()
+        time_old = now - 7200
+
+        # Protected recording
+        _insert_mock_event(
+            "evt_keep",
+            time_old,
+            time_old + 30,
+            retain=True,
+        )
+        rec_prot_id = "600000.protected"
+        _insert_mock_recording(
+            rec_prot_id,
+            os.path.join(self.test_dir, f"{rec_prot_id}.tmp"),
+            time_old,
+            time_old + 10,
+        )
+
+        # Event-retention recording
+        time_event = now - 3600
+        _insert_mock_review_segment(
+            "review_003",
+            time_event,
+            time_event + 30,
+            severity="alert",
+        )
+        rec_evt_id = "600100.event_ret"
+        _insert_mock_recording(
+            rec_evt_id,
+            os.path.join(self.test_dir, f"{rec_evt_id}.tmp"),
+            time_event,
+            time_event + 10,
+        )
+
+        # Plenty of overwritable recordings
+        for i in range(60):
+            rec_id = f"{600200 + i}.overwritable"
+            _insert_mock_recording(
+                rec_id,
+                os.path.join(self.test_dir, f"{rec_id}.tmp"),
+                time_old + 100 + (i * 10),
+                time_old + 100 + ((i + 1) * 10),
+            )
+
+        storage.calculate_camera_bandwidth()
+        storage.reduce_storage_consumption()
+
+        # Both protected and event-retention should survive
+        assert Recordings.get(Recordings.id == rec_prot_id)
+        assert Recordings.get(Recordings.id == rec_evt_id)
+
 
 def _insert_mock_event(
     id: str,
@@ -338,4 +530,23 @@ def _insert_mock_recording(
         motion=True,
         objects=True,
         segment_size=seg_size,
+    ).execute()
+
+
+def _insert_mock_review_segment(
+    id: str,
+    start: float,
+    end: float,
+    severity: str = "alert",
+    camera: str = "front_door",
+) -> None:
+    """Inserts a basic review segment model with a given id."""
+    ReviewSegment.insert(
+        id=id,
+        camera=camera,
+        start_time=start,
+        end_time=end,
+        severity=severity,
+        thumb_path=f"/tmp/{id}.jpg",
+        data={},
     ).execute()
