@@ -1,11 +1,11 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useCallback } from "react";
 import { SearchResult } from "@/types/search";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { baseUrl } from "@/api/baseUrl";
 import { toast } from "sonner";
 import axios from "axios";
 import { FiMoreVertical } from "react-icons/fi";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -32,6 +32,7 @@ import useSWR from "swr";
 import { Trans, useTranslation } from "react-i18next";
 import BlurredIconButton from "../button/BlurredIconButton";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useNavigate } from "react-router-dom";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -52,8 +53,10 @@ export default function SearchResultActions({
   isContextMenu = false,
   children,
 }: SearchResultActionsProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "views/replay", "common"]);
   const isAdmin = useIsAdmin();
+  const navigate = useNavigate();
+  const [isStarting, setIsStarting] = useState(false);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -83,6 +86,59 @@ export default function SearchResultActions({
         );
       });
   };
+
+  const handleDebugReplay = useCallback(
+    (event: SearchResult) => {
+      setIsStarting(true);
+
+      axios
+        .post("debug_replay/start", {
+          camera: event.camera,
+          start_time: event.start_time,
+          end_time: event.end_time,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
+              position: "top-center",
+            });
+            navigate("/replay");
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+
+          if (error.response?.status === 409) {
+            toast.error(
+              t("dialog.toast.alreadyActive", { ns: "views/replay" }),
+              {
+                position: "top-center",
+                closeButton: true,
+                dismissible: false,
+                action: (
+                  <a href="/replay" target="_blank" rel="noopener noreferrer">
+                    <Button>
+                      {t("dialog.toast.goToReplay", { ns: "views/replay" })}
+                    </Button>
+                  </a>
+                ),
+              },
+            );
+          } else {
+            toast.error(t("dialog.toast.error", { error: errorMessage }), {
+              position: "top-center",
+            });
+          }
+        })
+        .finally(() => {
+          setIsStarting(false);
+        });
+    },
+    [navigate, t],
+  );
 
   const MenuItem = isContextMenu ? ContextMenuItem : DropdownMenuItem;
 
@@ -149,6 +205,20 @@ export default function SearchResultActions({
             <span>{t("itemMenu.addTrigger.label")}</span>
           </MenuItem>
         )}
+      {searchResult.has_clip && (
+        <MenuItem
+          className="cursor-pointer"
+          aria-label={t("itemMenu.debugReplay.aria")}
+          disabled={isStarting}
+          onSelect={() => {
+            handleDebugReplay(searchResult);
+          }}
+        >
+          {isStarting
+            ? t("dialog.starting", { ns: "views/replay" })
+            : t("itemMenu.debugReplay.label")}
+        </MenuItem>
+      )}
       {isAdmin && (
         <MenuItem
           aria-label={t("itemMenu.deleteTrackedObject.label")}

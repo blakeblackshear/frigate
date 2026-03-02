@@ -6,7 +6,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { useTranslation } from "react-i18next";
-import { FaEllipsisVertical } from "react-icons/fa6";
+import { FaFilm } from "react-icons/fa6";
 
 type ActionsDropdownProps = {
   onDebugReplayClick: () => void;
@@ -27,7 +27,7 @@ export default function ActionsDropdown({
           aria-label={t("menu.actions", { ns: "common" })}
           size="sm"
         >
-          <FaEllipsisVertical className="size-5 text-secondary-foreground" />
+          <FaFilm className="size-5 text-secondary-foreground" />
           <div className="text-primary">
             {t("menu.actions", { ns: "common" })}
           </div>
