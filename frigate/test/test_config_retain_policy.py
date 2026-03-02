@@ -1,49 +1,47 @@
 import unittest
 
-from frigate.config import FrigateConfig
+from pydantic import ValidationError
+
+from frigate.config.camera.record import RecordConfig, RetainPolicyEnum
 
 
 class TestRetainPolicyConfig(unittest.TestCase):
-    def setUp(self):
-        self.base_config = {
-            "mqtt": {"host": "mqtt"},
-            "cameras": {
-                "front_door": {
-                    "ffmpeg": {
-                        "inputs": [
-                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
-                        ]
-                    },
-                    "detect": {"height": 1080, "width": 1920, "fps": 5},
-                }
-            },
-        }
+    """Tests for the retain_policy field on RecordConfig."""
 
     def test_default_retain_policy_is_time(self):
-        config = FrigateConfig(**self.base_config)
-        assert config.record.retain_policy.value == "time"
+        config = RecordConfig()
+        assert config.retain_policy == RetainPolicyEnum.time
 
     def test_continuous_rollover_policy(self):
-        self.base_config["record"] = {
-            "enabled": True,
-            "retain_policy": "continuous_rollover",
-        }
-        config = FrigateConfig(**self.base_config)
-        assert config.record.retain_policy.value == "continuous_rollover"
+        config = RecordConfig(
+            enabled=True,
+            retain_policy="continuous_rollover",
+        )
+        assert config.retain_policy == RetainPolicyEnum.continuous_rollover
 
     def test_continuous_rollover_ignores_continuous_days(self):
-        self.base_config["record"] = {
-            "enabled": True,
-            "retain_policy": "continuous_rollover",
-            "continuous": {"days": 30},
-        }
-        config = FrigateConfig(**self.base_config)
-        assert config.record.retain_policy.value == "continuous_rollover"
-        assert config.record.continuous.days == 30
+        """continuous.days is preserved even in rollover mode (just unused by cleanup)."""
+        config = RecordConfig(
+            enabled=True,
+            retain_policy="continuous_rollover",
+            continuous={"days": 30},
+        )
+        assert config.retain_policy == RetainPolicyEnum.continuous_rollover
+        assert config.continuous.days == 30
 
     def test_invalid_retain_policy_rejected(self):
-        self.base_config["record"] = {
-            "retain_policy": "invalid_value",
-        }
-        with self.assertRaises(Exception):
-            FrigateConfig(**self.base_config)
+        with self.assertRaises(ValidationError):
+            RecordConfig(retain_policy="invalid_value")
+
+    def test_retain_policy_enum_values(self):
+        """Verify all expected enum values exist."""
+        assert RetainPolicyEnum.time.value == "time"
+        assert RetainPolicyEnum.continuous_rollover.value == "continuous_rollover"
+
+    def test_retain_policy_roundtrip(self):
+        """Config can be serialized and deserialized with retain_policy."""
+        config = RecordConfig(retain_policy="continuous_rollover")
+        dumped = config.model_dump()
+        assert dumped["retain_policy"] == "continuous_rollover"
+        restored = RecordConfig(**dumped)
+        assert restored.retain_policy == RetainPolicyEnum.continuous_rollover
