@@ -254,6 +254,10 @@ class LlamaCppClient(GenAIClient):
                     logger.warning("llama.cpp embeddings item missing embedding field")
                     continue
                 arr = np.array(emb, dtype=np.float32)
+                if arr.ndim > 1:
+                    # llama.cpp can return token-level embeddings; pool per item
+                    arr = arr.mean(axis=0)
+                arr = arr.flatten()
                 orig_dim = arr.size
                 if orig_dim != EMBEDDING_DIM:
                     if orig_dim > EMBEDDING_DIM:

@@ -70,7 +70,11 @@ class GenAIEmbedding:
 
         result = []
         for emb in embeddings:
-            arr = np.asarray(emb, dtype=np.float32).flatten()
+            arr = np.asarray(emb, dtype=np.float32)
+            if arr.ndim > 1:
+                # Some providers return token-level embeddings; pool to one vector.
+                arr = arr.mean(axis=0)
+            arr = arr.flatten()
             if arr.size != EMBEDDING_DIM:
                 if arr.size > EMBEDDING_DIM:
                     arr = arr[:EMBEDDING_DIM]
