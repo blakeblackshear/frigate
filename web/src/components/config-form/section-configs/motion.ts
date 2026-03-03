@@ -8,6 +8,7 @@ const motion: SectionConfigOverrides = {
       "enabled",
       "threshold",
       "lightning_threshold",
+      "skip_motion_threshold",
       "improve_contrast",
       "contour_area",
       "delta_alpha",
@@ -22,6 +23,7 @@ const motion: SectionConfigOverrides = {
     hiddenFields: ["enabled_in_config", "mask", "raw_mask"],
     advancedFields: [
       "lightning_threshold",
+      "skip_motion_threshold",
       "delta_alpha",
       "frame_alpha",
       "frame_height",
@@ -33,6 +35,7 @@ const motion: SectionConfigOverrides = {
       "enabled",
       "threshold",
       "lightning_threshold",
+      "skip_motion_threshold",
       "improve_contrast",
       "contour_area",
       "delta_alpha",

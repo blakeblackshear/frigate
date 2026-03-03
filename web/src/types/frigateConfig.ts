@@ -106,6 +106,7 @@ export interface CameraConfig {
     frame_height: number;
     improve_contrast: boolean;
     lightning_threshold: number;
+    skip_motion_threshold: number;
     mask: {
       [maskId: string]: {
         friendly_name?: string;
