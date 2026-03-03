@@ -92,6 +92,40 @@ motion:
   lightning_threshold: 0.8
 ```
 
+## Skip Motion On Large Scene Changes
+
+```yaml
+# default skip_motion_threshold:
+motion:
+  # Optional: Fraction of the frame that must change in a single update
+  #           before Frigate will completely ignore any motion in that frame.
+  #           Values range between 0.0 and 1.0, where 1.0 (the default) means
+  #           the feature is disabled. Setting this to 0.7 would cause Frigate to
+  #           **skip** reporting motion boxes when more than 70% of the image
+  #           appears to change (e.g. during lightning storms, IR/color mode
+  #           switches, or other sudden lighting events).
+  skip_motion_threshold: 1.0
+```
+
+This option is handy when you want to prevent large transient changes from
+triggering recordings or object detection. It differs from `lightning_threshold`
+because it completely suppresses motion instead of just forcing a recalibration.
+
+> **Note on trade‑offs:** when the skip threshold is exceeded, **no motion is
+> reported** for that frame. That means you can miss something important like
+> a PTZ camera auto‑tracking an object or seeing activity while the camera is
+> moving. If you prefer to guarantee that every frame is saved, leave motion
+> enabled and accept a couple of recordings that may contain mostly scene noise;
+> they typically only take up a few megabytes and are very quick to scan in the
+> timeline UI.
+
+:::note
+
+This setting only affects whether motion boxes are returned; recordings and
+other downstream logic will still use the current warm‑up/calibration state.
+
+:::
+
 :::warning
 
 Some cameras like doorbell cameras may have missed detections when someone walks directly in front of the camera and the lightning_threshold causes motion detection to be re-calibrated. In this case, it may be desirable to increase the `lightning_threshold` to ensure these objects are not missed.
@@ -105,3 +139,5 @@ Lightning threshold does not stop motion based recordings from being saved.
 :::
 
 Large changes in motion like PTZ moves and camera switches between Color and IR mode should result in a pause in object detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
+
+> **Clarification:** the lightning threshold does **not** stop motion from being detected entirely. Instead it prevents the detector from running additional motion analysis after the first frame exceeds the threshold. The goal is to reduce false positive object detections and motion usage during high‑motion periods (e.g. a storm or a PTZ camera sweep) without interfering with recordings; recordings are still saved because users expect their PTZ cameras to record while moving.
