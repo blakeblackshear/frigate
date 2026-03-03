@@ -7,7 +7,7 @@ State classification allows you to train a custom MobileNetV2 classification mod
 
 ## Minimum System Requirements
 
-State classification models are lightweight and run very fast on CPU. Inference should be usable on virtually any machine that can run Frigate.
+State classification models are lightweight and run very fast on CPU.
 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
 
