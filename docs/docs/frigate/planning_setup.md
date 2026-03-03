@@ -38,6 +38,9 @@ There are many different hardware options for object detection depending on prio
 
 Storage is an important consideration when planning a new installation. To get a more precise estimate of your storage requirements, you can use an IP camera storage calculator. Websites like [IPConfigure Storage Calculator](https://calculator.ipconfigure.com/) can help you determine the necessary disk space based on your camera settings.
 
+### CPU
+
+Frigate requires a CPU with AVX instructions. Most modern CPUs (post-2011) support AVX, but it is generally absent in low-power or budget-oriented processors, particularly older Intel Pentium, Celeron, and Atom-based chips. Specifically, Intel Celeron and Pentium models prior to the 2020 Tiger Lake generation typically lack AVX.
 
 #### SSDs (Solid State Drives)
 
