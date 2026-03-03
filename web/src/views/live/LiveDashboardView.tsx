@@ -92,8 +92,15 @@ export default function LiveDashboardView({
   const eventUpdate = useFrigateReviews();
 
   const alertCameras = useMemo(() => {
-    if (!config || cameraGroup == "default") {
+    if (!config) {
       return null;
+    }
+
+    if (cameraGroup == "default") {
+      return Object.values(config.cameras)
+        .filter((cam) => cam.ui.dashboard)
+        .map((cam) => cam.name)
+        .join(",");
     }
 
     if (includeBirdseye && cameras.length == 0) {
