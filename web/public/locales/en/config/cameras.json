@@ -264,7 +264,11 @@
     },
     "lightning_threshold": {
       "label": "Lightning threshold",
-      "description": "Threshold to detect and ignore brief lighting spikes (lower is more sensitive, values between 0.3 and 1.0)."
+      "description": "Threshold to detect and ignore brief lighting spikes (lower is more sensitive, values between 0.3 and 1.0). This does not prevent motion detection entirely; it merely causes the detector to stop analyzing additional frames once the threshold is exceeded. Motion-based recordings are still created during these events."
+    },
+    "skip_motion_threshold": {
+      "label": "Skip motion threshold",
+      "description": "If more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Range 0.0 to 1.0."
     },
     "improve_contrast": {
       "label": "Improve contrast",
@@ -864,7 +868,8 @@
       "description": "A user-friendly name for the zone, displayed in the Frigate UI. If not set, a formatted version of the zone name will be used."
     },
     "enabled": {
-      "label": "Whether this zone is active. Disabled zones are ignored at runtime."
+      "label": "Enabled",
+      "description": "Enable or disable this zone. Disabled zones are ignored at runtime."
     },
     "enabled_in_config": {
       "label": "Keep track of original state of zone."
