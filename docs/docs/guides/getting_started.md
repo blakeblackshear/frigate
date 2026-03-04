@@ -176,7 +176,7 @@ cameras:
 
 By default, Frigate will use a single CPU detector. 
 
-Generally speaking, integrated graphics can meet the needs of most users. Intel integrated graphics users can refer to the following configuration.
+In many cases, the integrated graphics on Intel CPUs provides sufficient performance for typical Frigate setups. If you have an Intel processor, you can follow the configuration below.
 
 <details>
   <summary>Use Intel OpenVINO detector</summary>
