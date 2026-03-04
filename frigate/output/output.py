@@ -8,7 +8,6 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from wsgiref.simple_server import make_server
 
-import cv2
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
     WebSocketWSGIRequestHandler,
@@ -124,15 +123,17 @@ class OutputProcess(FrigateProcess):
         move_preview_frames("cache")
 
         for camera, cam_config in self.config.cameras.items():
-            if not cam_config.enabled_in_config:
+            if not cam_config.enabled_in_config or camera.startswith(
+                REPLAY_CAMERA_PREFIX
+            ):
                 continue
 
             jsmpeg_cameras[camera] = JsmpegCamera(
                 cam_config, self.stop_event, websocket_server
             )
-            if not camera.startswith(REPLAY_CAMERA_PREFIX):
-                preview_recorders[camera] = PreviewRecorder(cam_config)
-                preview_write_times[camera] = 0
+
+            preview_recorders[camera] = PreviewRecorder(cam_config)
+            preview_write_times[camera] = 0
 
         if self.config.birdseye.enabled:
             birdseye = Birdseye(self.config, self.stop_event, websocket_server)
@@ -145,13 +146,15 @@ class OutputProcess(FrigateProcess):
 
             if CameraConfigUpdateEnum.add in updates:
                 for camera in updates["add"]:
+                    if camera.startswith(REPLAY_CAMERA_PREFIX):
+                        continue
+
                     camera_config = self.config.cameras[camera]
                     jsmpeg_cameras[camera] = JsmpegCamera(
                         camera_config, self.stop_event, websocket_server
                     )
-                    if not camera.startswith(REPLAY_CAMERA_PREFIX):
-                        preview_recorders[camera] = PreviewRecorder(camera_config)
-                        preview_write_times[camera] = 0
+                    preview_recorders[camera] = PreviewRecorder(camera_config)
+                    preview_write_times[camera] = 0
 
                     if (
                         self.config.birdseye.enabled
@@ -184,6 +187,7 @@ class OutputProcess(FrigateProcess):
             if (
                 camera not in self.config.cameras
                 or not self.config.cameras[camera].enabled
+                or camera.startswith(REPLAY_CAMERA_PREFIX)
             ):
                 continue
 
@@ -208,22 +212,10 @@ class OutputProcess(FrigateProcess):
                 failed_frame_requests[camera] = 0
 
             # send frames for low fps recording
-            preview_recorder = preview_recorders.get(camera)
-
-            if preview_recorder is not None:
-                try:
-                    preview_recorder.write_data(
-                        current_tracked_objects, motion_boxes, frame_time, frame
-                    )
-                    preview_write_times[camera] = frame_time
-                except cv2.error:
-                    if camera.startswith(REPLAY_CAMERA_PREFIX):
-                        logger.debug(
-                            "Skipping preview frame write for replay camera %s",
-                            camera,
-                        )
-                    else:
-                        raise
+            preview_recorders[camera].write_data(
+                current_tracked_objects, motion_boxes, frame_time, frame
+            )
+            preview_write_times[camera] = frame_time
 
             # send camera frame to ffmpeg process if websockets are connected
             if any(
@@ -241,10 +233,6 @@ class OutputProcess(FrigateProcess):
                     for ws in websocket_server.manager
                 )
             ):
-                if camera.startswith(REPLAY_CAMERA_PREFIX):
-                    frame_manager.close(frame_name)
-                    continue
-
                 birdseye.write_data(
                     camera,
                     current_tracked_objects,
