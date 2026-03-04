@@ -222,27 +222,24 @@ class OllamaClient(GenAIClient):
             )
             content_parts: list[str] = []
             final_message: dict[str, Any] | None = None
-            try:
-                stream = await async_client.chat(**request_params)
-                async for chunk in stream:
-                    if not chunk or "message" not in chunk:
-                        continue
-                    msg = chunk.get("message", {})
-                    delta = msg.get("content") or ""
-                    if delta:
-                        content_parts.append(delta)
-                        yield ("content_delta", delta)
-                    if chunk.get("done"):
-                        full_content = "".join(content_parts).strip() or None
-                        tool_calls = parse_tool_calls_from_message(msg)
-                        final_message = {
-                            "content": full_content,
-                            "tool_calls": tool_calls,
-                            "finish_reason": "tool_calls" if tool_calls else "stop",
-                        }
-                        break
-            finally:
-                await async_client.close()
+            stream = await async_client.chat(**request_params)
+            async for chunk in stream:
+                if not chunk or "message" not in chunk:
+                    continue
+                msg = chunk.get("message", {})
+                delta = msg.get("content") or ""
+                if delta:
+                    content_parts.append(delta)
+                    yield ("content_delta", delta)
+                if chunk.get("done"):
+                    full_content = "".join(content_parts).strip() or None
+                    tool_calls = parse_tool_calls_from_message(msg)
+                    final_message = {
+                        "content": full_content,
+                        "tool_calls": tool_calls,
+                        "finish_reason": "tool_calls" if tool_calls else "stop",
+                    }
+                    break
 
             if final_message is not None:
                 yield ("message", final_message)

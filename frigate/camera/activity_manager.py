@@ -236,6 +236,7 @@ class AudioActivityManager:
                         None,
                         "audio",
                         {},
+                        None,
                     ),
                     EventMetadataTypeEnum.manual_event_create.value,
                 )
