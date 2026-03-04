@@ -475,12 +475,6 @@ const CAMERA_SELECT_BUTTON_PAGES = [
 
 const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 
-const LARGE_BOTTOM_MARGIN_PAGES = [
-  "masksAndZones",
-  "motionTuner",
-  "maintenance",
-];
-
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
   detect: "cameraDetect",
@@ -1355,9 +1349,9 @@ export default function Settings() {
           )}
         </div>
       </div>
-      <SidebarProvider>
-        <Sidebar variant="inset" className="relative mb-8 pl-0 pt-0">
-          <SidebarContent className="scrollbar-container mb-24 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
+      <SidebarProvider className="relative h-full min-h-0 flex-1">
+        <Sidebar variant="inset" className="absolute h-full pl-0 pt-0">
+          <SidebarContent className="scrollbar-container overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
                 const filteredItems = group.items.filter((item) =>
@@ -1445,8 +1439,7 @@ export default function Settings() {
         <SidebarInset>
           <div
             className={cn(
-              "scrollbar-container mb-16 flex-1 overflow-y-auto p-2 pr-0",
-              LARGE_BOTTOM_MARGIN_PAGES.includes(pageToggle) && "mb-24",
+              "scrollbar-container flex-1 overflow-y-auto pl-2 pr-0 pt-2",
             )}
           >
             {(() => {

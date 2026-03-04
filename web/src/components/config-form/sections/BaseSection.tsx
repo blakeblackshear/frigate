@@ -831,7 +831,7 @@ export function ConfigSection({
 
       <div
         className={cn(
-          "w-full border-t border-secondary bg-background pb-5 pt-0",
+          "w-full border-t border-secondary bg-background pt-0",
           !noStickyButtons && "sticky bottom-0 z-50",
         )}
       >
