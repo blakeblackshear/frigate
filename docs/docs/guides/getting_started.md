@@ -179,7 +179,7 @@ By default, Frigate will use a single CPU detector.
 Generally speaking, integrated graphics can meet the needs of most users. Intel integrated graphics users can refer to the following configuration.
 
 <details>
-   <summary>Use Intel openvino detector</summary>
+  <summary>Use Intel OpenVINO detector</summary>
 
 You need to refer to **Configure hardware acceleration** above to enable the container to use the GPU.
 
