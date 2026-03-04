@@ -83,11 +83,14 @@ However, if the preferred day settings do not work well at night it is recommend
 
 ```yaml
 motion:
-  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
-  #           needs to recalibrate. (default: shown below)
-  # Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion.
-  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching
-  # a doorbell camera.
+  # Optional: The percentage of the image used to detect lightning or
+  #           other substantial changes where motion detection needs to
+  #           recalibrate. (default: shown below)
+  #           Increasing this value will make motion detection more likely
+  #           to consider lightning or IR mode changes as valid motion.
+  #           Decreasing this value will make motion detection more likely
+  #           to ignore large amounts of motion such as a person
+  #           approaching a doorbell camera.
   lightning_threshold: 0.8
 ```
 
