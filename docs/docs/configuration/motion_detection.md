@@ -53,7 +53,6 @@ Watching the motion boxes in the debug view, increase the threshold until you on
 ### Contour Area
 
 ```yaml
-# default contour_area value
 motion:
   # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: shown below)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
@@ -82,7 +81,6 @@ However, if the preferred day settings do not work well at night it is recommend
 ## Tuning For Large Changes In Motion
 
 ```yaml
-# default lightning_threshold:
 motion:
   # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
   #           needs to recalibrate. (default: shown below)
@@ -95,7 +93,6 @@ motion:
 ## Skip Motion On Large Scene Changes
 
 ```yaml
-# default skip_motion_threshold:
 motion:
   # Optional: Fraction of the frame that must change in a single update
   #           before Frigate will completely ignore any motion in that frame.
