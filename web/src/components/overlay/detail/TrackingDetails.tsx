@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { TrackingDetailsSequence } from "@/types/timeline";
@@ -243,6 +244,8 @@ export function TrackingDetails({
   }, [manualOverride, currentTime, annotationOffset]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const { fullscreen, toggleFullscreen, supportsFullScreen } =
+    useFullscreen(containerRef);
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [_selectedZone, setSelectedZone] = useState("");
@@ -559,14 +562,15 @@ export function TrackingDetails({
                 visible={true}
                 currentSource={videoSource}
                 hotKeys={false}
-                supportsFullscreen={false}
-                fullscreen={false}
+                supportsFullscreen={supportsFullScreen}
+                fullscreen={fullscreen}
                 frigateControls={true}
                 onTimeUpdate={handleTimeUpdate}
                 onSeekToTime={handleSeekToTime}
                 onUploadFrame={onUploadFrameToPlus}
                 onPlaying={() => setIsVideoLoading(false)}
                 setFullResolution={setFullResolution}
+                toggleFullscreen={toggleFullscreen}
                 isDetailMode={true}
                 camera={event.camera}
                 currentTimeOverride={currentTime}
