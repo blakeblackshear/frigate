@@ -162,17 +162,7 @@ const ffmpeg: SectionConfigOverrides = {
     fieldGroups: {
       cameraFfmpeg: ["input_args", "hwaccel_args", "output_args"],
     },
-    restartRequired: [
-      "inputs",
-      "path",
-      "global_args",
-      "hwaccel_args",
-      "input_args",
-      "output_args",
-      "retry_interval",
-      "apple_compatibility",
-      "gpu",
-    ],
+    restartRequired: [],
   },
 };
 

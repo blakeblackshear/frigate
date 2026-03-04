@@ -17,6 +17,7 @@ class CameraConfigUpdateEnum(str, Enum):
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
+    ffmpeg = "ffmpeg"
     motion = "motion"  # includes motion and motion masks
     notifications = "notifications"
     objects = "objects"
@@ -91,6 +92,9 @@ class CameraConfigUpdateSubscriber:
 
         if update_type == CameraConfigUpdateEnum.audio:
             config.audio = updated_config
+        elif update_type == CameraConfigUpdateEnum.ffmpeg:
+            config.ffmpeg = updated_config
+            config.recreate_ffmpeg_cmds()
         elif update_type == CameraConfigUpdateEnum.audio_transcription:
             config.audio_transcription = updated_config
         elif update_type == CameraConfigUpdateEnum.birdseye:

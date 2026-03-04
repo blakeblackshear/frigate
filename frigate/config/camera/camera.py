@@ -242,6 +242,14 @@ class CameraConfig(FrigateBaseModel):
     def create_ffmpeg_cmds(self):
         if "_ffmpeg_cmds" in self:
             return
+        self._build_ffmpeg_cmds()
+
+    def recreate_ffmpeg_cmds(self):
+        """Force regeneration of ffmpeg commands from current config."""
+        self._build_ffmpeg_cmds()
+
+    def _build_ffmpeg_cmds(self):
+        """Build ffmpeg commands from the current ffmpeg config."""
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
