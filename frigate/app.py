@@ -143,6 +143,9 @@ class FrigateApp:
             else:
                 logger.debug(f"Skipping directory: {d}")
 
+    def init_debug_replay_manager(self) -> None:
+        self.replay_manager = DebugReplayManager()
+
     def init_camera_metrics(self) -> None:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
@@ -535,8 +538,7 @@ class FrigateApp:
         set_file_limit()
 
         # Start frigate services.
-        self.replay_manager = DebugReplayManager()
-
+        self.init_debug_replay_manager()
         self.init_camera_metrics()
         self.init_queues()
         self.init_database()
