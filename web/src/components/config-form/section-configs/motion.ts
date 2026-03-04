@@ -44,6 +44,30 @@ const motion: SectionConfigOverrides = {
   camera: {
     restartRequired: ["frame_height"],
   },
+  replay: {
+    restartRequired: [],
+    fieldOrder: [
+      "threshold",
+      "contour_area",
+      "lightning_threshold",
+      "improve_contrast",
+    ],
+    fieldGroups: {
+      sensitivity: ["threshold", "contour_area"],
+      algorithm: ["improve_contrast"],
+    },
+    hiddenFields: [
+      "enabled",
+      "enabled_in_config",
+      "mask",
+      "raw_mask",
+      "mqtt_off_delay",
+      "delta_alpha",
+      "frame_alpha",
+      "frame_height",
+    ],
+    advancedFields: ["lightning_threshold"],
+  },
 };
 
 export default motion;

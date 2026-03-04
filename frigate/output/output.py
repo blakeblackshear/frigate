@@ -22,7 +22,12 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.const import CACHE_DIR, CLIPS_DIR, PROCESS_PRIORITY_MED
+from frigate.const import (
+    CACHE_DIR,
+    CLIPS_DIR,
+    PROCESS_PRIORITY_MED,
+    REPLAY_CAMERA_PREFIX,
+)
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
@@ -79,6 +84,32 @@ class OutputProcess(FrigateProcess):
         )
         self.config = config
 
+    def is_debug_replay_camera(self, camera: str) -> bool:
+        return camera.startswith(REPLAY_CAMERA_PREFIX)
+
+    def add_camera(
+        self,
+        camera: str,
+        websocket_server: WSGIServer,
+        jsmpeg_cameras: dict[str, JsmpegCamera],
+        preview_recorders: dict[str, PreviewRecorder],
+        preview_write_times: dict[str, float],
+        birdseye: Birdseye | None,
+    ) -> None:
+        camera_config = self.config.cameras[camera]
+        jsmpeg_cameras[camera] = JsmpegCamera(
+            camera_config, self.stop_event, websocket_server
+        )
+        preview_recorders[camera] = PreviewRecorder(camera_config)
+        preview_write_times[camera] = 0
+
+        if (
+            birdseye is not None
+            and self.config.birdseye.enabled
+            and camera_config.birdseye.enabled
+        ):
+            birdseye.add_camera(camera)
+
     def run(self) -> None:
         self.pre_run_setup(self.config.logger)
 
@@ -118,14 +149,17 @@ class OutputProcess(FrigateProcess):
         move_preview_frames("cache")
 
         for camera, cam_config in self.config.cameras.items():
-            if not cam_config.enabled_in_config:
+            if not cam_config.enabled_in_config or self.is_debug_replay_camera(camera):
                 continue
 
-            jsmpeg_cameras[camera] = JsmpegCamera(
-                cam_config, self.stop_event, websocket_server
+            self.add_camera(
+                camera,
+                websocket_server,
+                jsmpeg_cameras,
+                preview_recorders,
+                preview_write_times,
+                birdseye,
             )
-            preview_recorders[camera] = PreviewRecorder(cam_config)
-            preview_write_times[camera] = 0
 
         if self.config.birdseye.enabled:
             birdseye = Birdseye(self.config, self.stop_event, websocket_server)
@@ -138,19 +172,15 @@ class OutputProcess(FrigateProcess):
 
             if CameraConfigUpdateEnum.add in updates:
                 for camera in updates["add"]:
-                    jsmpeg_cameras[camera] = JsmpegCamera(
-                        self.config.cameras[camera], self.stop_event, websocket_server
-                    )
-                    preview_recorders[camera] = PreviewRecorder(
-                        self.config.cameras[camera]
-                    )
-                    preview_write_times[camera] = 0
-
-                    if (
-                        self.config.birdseye.enabled
-                        and self.config.cameras[camera].birdseye.enabled
-                    ):
-                        birdseye.add_camera(camera)
+                    if not self.is_debug_replay_camera(camera):
+                        self.add_camera(
+                            camera,
+                            websocket_server,
+                            jsmpeg_cameras,
+                            preview_recorders,
+                            preview_write_times,
+                            birdseye,
+                        )
 
             (topic, data) = detection_subscriber.check_for_update(timeout=1)
             now = datetime.datetime.now().timestamp()
@@ -174,7 +204,11 @@ class OutputProcess(FrigateProcess):
                 _,
             ) = data
 
-            if not self.config.cameras[camera].enabled:
+            if (
+                camera not in self.config.cameras
+                or not self.config.cameras[camera].enabled
+                or self.is_debug_replay_camera(camera)
+            ):
                 continue
 
             frame = frame_manager.get(

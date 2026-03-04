@@ -86,7 +86,9 @@ class TimelineProcessor(threading.Thread):
         event_data: dict[Any, Any],
     ) -> bool:
         """Handle object detection."""
-        camera_config = self.config.cameras[camera]
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return False
         event_id = event_data["id"]
 
         # Base timeline entry data that all entries will share

@@ -7,6 +7,7 @@ from typing import Dict
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from frigate.config import FrigateConfig
 from frigate.config.classification import ObjectClassificationType
+from frigate.const import REPLAY_CAMERA_PREFIX
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
 from frigate.util.builtin import to_relative_box
@@ -146,7 +147,9 @@ class EventProcessor(threading.Thread):
 
         if should_update_db(self.events_in_process[event_data["id"]], event_data):
             updated_db = True
-            camera_config = self.config.cameras[camera]
+            camera_config = self.config.cameras.get(camera)
+            if camera_config is None:
+                return
             width = camera_config.detect.width
             height = camera_config.detect.height
             first_detector = list(self.config.detectors.values())[0]
@@ -283,6 +286,10 @@ class EventProcessor(threading.Thread):
     def handle_external_detection(
         self, event_type: EventStateEnum, event_data: Event
     ) -> None:
+        # Skip replay cameras
+        if event_data.get("camera", "").startswith(REPLAY_CAMERA_PREFIX):
+            return
+
         if event_type == EventStateEnum.start:
             event = {
                 Event.id: event_data["id"],

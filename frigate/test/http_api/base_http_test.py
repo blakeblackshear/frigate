@@ -13,6 +13,7 @@ from pydantic import Json
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
 from frigate.const import BASE_DIR, CACHE_DIR
+from frigate.debug_replay import DebugReplayManager
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
@@ -141,6 +142,7 @@ class BaseTestHttp(unittest.TestCase):
             stats,
             event_metadata_publisher,
             None,
+            DebugReplayManager(),
             enforce_default_admin=False,
         )
 

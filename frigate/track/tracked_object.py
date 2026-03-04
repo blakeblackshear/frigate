@@ -16,7 +16,7 @@ from frigate.config import (
     SnapshotsConfig,
     UIConfig,
 )
-from frigate.const import CLIPS_DIR, THUMB_DIR
+from frigate.const import CLIPS_DIR, REPLAY_CAMERA_PREFIX, THUMB_DIR
 from frigate.detectors.detector_config import ModelConfig
 from frigate.review.types import SeverityEnum
 from frigate.util.builtin import sanitize_float
@@ -619,6 +619,9 @@ class TrackedObject:
 
     def write_thumbnail_to_disk(self) -> None:
         if not self.camera_config.name:
+            return
+
+        if self.camera_config.name.startswith(REPLAY_CAMERA_PREFIX):
             return
 
         directory = os.path.join(THUMB_DIR, self.camera_config.name)

@@ -12,8 +12,11 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import axios from "axios";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
 
 type EventMenuProps = {
   event: Event;
@@ -34,9 +37,10 @@ export default function EventMenu({
 }: EventMenuProps) {
   const apiHost = useApiHost();
   const navigate = useNavigate();
-  const { t } = useTranslation("views/explore");
+  const { t } = useTranslation(["views/explore", "views/replay"]);
   const [isOpen, setIsOpen] = useState(false);
   const isAdmin = useIsAdmin();
+  const [isStarting, setIsStarting] = useState(false);
 
   const handleObjectSelect = () => {
     if (isSelected) {
@@ -45,6 +49,59 @@ export default function EventMenu({
       onToggleSelection?.(event);
     }
   };
+
+  const handleDebugReplay = useCallback(
+    (event: Event) => {
+      setIsStarting(true);
+
+      axios
+        .post("debug_replay/start", {
+          camera: event.camera,
+          start_time: event.start_time,
+          end_time: event.end_time,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
+              position: "top-center",
+            });
+            navigate("/replay");
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+
+          if (error.response?.status === 409) {
+            toast.error(
+              t("dialog.toast.alreadyActive", { ns: "views/replay" }),
+              {
+                position: "top-center",
+                closeButton: true,
+                dismissible: false,
+                action: (
+                  <a href="/replay" target="_blank" rel="noopener noreferrer">
+                    <Button>
+                      {t("dialog.toast.goToReplay", { ns: "views/replay" })}
+                    </Button>
+                  </a>
+                ),
+              },
+            );
+          } else {
+            toast.error(t("dialog.toast.error", { error: errorMessage }), {
+              position: "top-center",
+            });
+          }
+        })
+        .finally(() => {
+          setIsStarting(false);
+        });
+    },
+    [navigate, t],
+  );
 
   return (
     <>
@@ -115,6 +172,19 @@ export default function EventMenu({
                 }}
               >
                 {t("itemMenu.findSimilar.label")}
+              </DropdownMenuItem>
+            )}
+            {event.has_clip && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                disabled={isStarting}
+                onSelect={() => {
+                  handleDebugReplay(event);
+                }}
+              >
+                {isStarting
+                  ? t("dialog.starting", { ns: "views/replay" })
+                  : t("itemMenu.debugReplay.label")}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

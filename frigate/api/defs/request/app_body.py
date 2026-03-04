@@ -7,6 +7,7 @@ class AppConfigSetBody(BaseModel):
     requires_restart: int = 1
     update_topic: str | None = None
     config_data: Optional[Dict[str, Any]] = None
+    skip_save: bool = False
 
 
 class AppPutPasswordBody(BaseModel):

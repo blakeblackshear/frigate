@@ -99,6 +99,28 @@ const objects: SectionConfigOverrides = {
   camera: {
     restartRequired: [],
   },
+  replay: {
+    restartRequired: [],
+    fieldOrder: ["track", "filters"],
+    fieldGroups: {
+      tracking: ["track"],
+      filtering: ["filters"],
+    },
+    hiddenFields: [
+      "enabled_in_config",
+      "alert",
+      "detect",
+      "mask",
+      "raw_mask",
+      "genai",
+      "genai.enabled_in_config",
+      "filters.*.mask",
+      "filters.*.raw_mask",
+      "filters.mask",
+      "filters.raw_mask",
+    ],
+    advancedFields: [],
+  },
 };
 
 export default objects;

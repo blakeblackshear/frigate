@@ -652,6 +652,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if camera not in self.indefinite_events:
                     self.indefinite_events[camera] = {}
 
+            if camera not in self.config.cameras:
+                continue
+
             if (
                 not self.config.cameras[camera].enabled
                 or not self.config.cameras[camera].record.enabled

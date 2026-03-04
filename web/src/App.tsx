@@ -30,6 +30,7 @@ const Classification = lazy(() => import("@/pages/ClassificationModel"));
 const Chat = lazy(() => import("@/pages/Chat"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
+const Replay = lazy(() => import("@/pages/Replay"));
 
 function App() {
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -108,7 +109,8 @@ function DefaultAppView() {
               <Route path="/faces" element={<FaceLibrary />} />
               <Route path="/classification" element={<Classification />} />
               <Route path="/chat" element={<Chat />} />
-              <Route path="/playground" element={<UIPlayground />} />
+              <Route path="/playground" element={<UIPlayground />} />{" "}
+              <Route path="/replay" element={<Replay />} />{" "}
             </Route>
             <Route path="/unauthorized" element={<AccessDenied />} />
             <Route path="*" element={<Redirect to="/" />} />

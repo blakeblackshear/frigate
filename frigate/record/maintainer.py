@@ -287,11 +287,12 @@ class RecordingMaintainer(threading.Thread):
             )
 
             # publish most recently available recording time and None if disabled
+            camera_cfg = self.config.cameras.get(camera)
             self.recordings_publisher.publish(
                 (
                     camera,
                     recordings[0]["start_time"].timestamp()
-                    if self.config.cameras[camera].record.enabled
+                    if camera_cfg and camera_cfg.record.enabled
                     else None,
                     None,
                 ),
@@ -315,9 +316,8 @@ class RecordingMaintainer(threading.Thread):
     ) -> Optional[Recordings]:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
-        record_config = self.config.cameras[camera].record
 
-        # Just delete files if recordings are turned off
+        # Just delete files if camera removed or recordings are turned off
         if (
             camera not in self.config.cameras
             or not self.config.cameras[camera].record.enabled
