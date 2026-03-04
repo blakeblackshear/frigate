@@ -9,7 +9,7 @@ title: Getting started
 
 If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
 
-If you already have Frigate installed through Docker or through a Home Assistant Add-on, you can continue to [Configuring Frigate](#configuring-frigate) below.
+If you already have Frigate installed through Docker or through a Home Assistant App, you can continue to [Configuring Frigate](#configuring-frigate) below.
 
 :::
 
@@ -81,7 +81,7 @@ Now you have a minimal Debian server that requires very little maintenance.
 
 ## Installing Frigate
 
-This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant Add-on or another way, you can continue to [Configuring Frigate](#configuring-frigate).
+This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant App or another way, you can continue to [Configuring Frigate](#configuring-frigate).
 
 ### Setup directories
 
@@ -174,7 +174,7 @@ cameras:
 
 ### Step 4: Configure detectors
 
-By default, Frigate will use a single CPU detector. 
+By default, Frigate will use a single CPU detector.
 
 In many cases, the integrated graphics on Intel CPUs provides sufficient performance for typical Frigate setups. If you have an Intel processor, you can follow the configuration below.
 
@@ -187,12 +187,12 @@ You need to refer to **Configure hardware acceleration** above to enable the con
 mqtt: ...
 
 detectors: # <---- add detectors
-  ov: 
+  ov:
     type: openvino  # <---- use openvino detector
     device: GPU
 
 # We will use the default MobileNet_v2 model from OpenVINO.
-model: 
+model:
   width: 300
   height: 300
   input_tensor: nhwc
@@ -209,12 +209,12 @@ cameras:
 ```
 
 </details>
-   
+
 If you have a USB Coral, you will need to add a detectors section to your config.
 
 <details>
    <summary>Use USB Coral detector</summary>
-   
+
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
 ```yaml

@@ -17,15 +17,15 @@ From here, follow the guides for:
 - [Web Interface](#web-interface)
 - [Documentation](#documentation)
 
-### Frigate Home Assistant Add-on
+### Frigate Home Assistant App
 
-This repository holds the Home Assistant Add-on, for use with Home Assistant OS and compatible installations. It is the piece that allows you to run Frigate from your Home Assistant Supervisor tab.
+This repository holds the Home Assistant App, for use with Home Assistant OS and compatible installations. It is the piece that allows you to run Frigate from your Home Assistant Supervisor tab.
 
 Fork [blakeblackshear/frigate-hass-addons](https://github.com/blakeblackshear/frigate-hass-addons) to your own Github profile, then clone the forked repo to your local machine.
 
 ### Frigate Home Assistant Integration
 
-This repository holds the custom integration that allows your Home Assistant installation to automatically create entities for your Frigate instance, whether you are running Frigate as a standalone Docker container or as a [Home Assistant Add-on](#frigate-home-assistant-add-on).
+This repository holds the custom integration that allows your Home Assistant installation to automatically create entities for your Frigate instance, whether you are running Frigate as a standalone Docker container or as a [Home Assistant App](#frigate-home-assistant-app).
 
 Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshear/frigate-hass-integration) to your own GitHub profile, then clone the forked repo to your local machine.
 
