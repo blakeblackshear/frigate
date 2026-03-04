@@ -116,16 +116,7 @@ const ffmpeg: SectionConfigOverrides = {
     },
   },
   global: {
-    restartRequired: [
-      "path",
-      "global_args",
-      "hwaccel_args",
-      "input_args",
-      "output_args",
-      "retry_interval",
-      "apple_compatibility",
-      "gpu",
-    ],
+    restartRequired: [],
     fieldOrder: [
       "hwaccel_args",
       "path",

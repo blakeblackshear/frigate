@@ -65,6 +65,7 @@ export const globalCameraDefaultSections = new Set([
   "review",
   "audio",
   "notifications",
+  "ffmpeg",
 ]);
 
 // ---------------------------------------------------------------------------
