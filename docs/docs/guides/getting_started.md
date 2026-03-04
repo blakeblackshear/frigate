@@ -174,8 +174,47 @@ cameras:
 
 ### Step 4: Configure detectors
 
-By default, Frigate will use a single CPU detector. If you have a USB Coral, you will need to add a detectors section to your config.
+By default, Frigate will use a single CPU detector. 
 
+Generally speaking, integrated graphics can meet the needs of most users. Intel integrated graphics users can refer to the following configuration.
+
+<details>
+   <summary>Use Intel openvino detector</summary>
+
+You need to refer to **Configure hardware acceleration** above to enable the container to use the GPU.
+
+```yaml
+mqtt: ...
+
+detectors: # <---- add detectors
+  ov: 
+    type: openvino  # <---- use openvino detector
+    device: GPU
+
+# We will use the default MobileNet_v2 model from OpenVINO.
+model: 
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+cameras:
+  name_of_your_camera:
+    ffmpeg: ...
+    detect:
+      enabled: True # <---- turn on detection
+      ...
+```
+
+</details>
+   
+If you have a USB Coral, you will need to add a detectors section to your config.
+
+<details>
+   <summary>Use USB Coral detector</summary>
+   
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
 ```yaml
@@ -203,6 +242,8 @@ cameras:
       enabled: True # <---- turn on detection
       ...
 ```
+
+</details>
 
 More details on available detectors can be found [here](../configuration/object_detectors.md).
 
