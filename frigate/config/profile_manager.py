@@ -31,7 +31,6 @@ SECTION_TO_UPDATE_ENUM: dict[str, CameraConfigUpdateEnum] = {
     "audio": CameraConfigUpdateEnum.audio,
     "birdseye": CameraConfigUpdateEnum.birdseye,
     "detect": CameraConfigUpdateEnum.detect,
-    "live": CameraConfigUpdateEnum.enabled,
     "motion": CameraConfigUpdateEnum.motion,
     "notifications": CameraConfigUpdateEnum.notifications,
     "objects": CameraConfigUpdateEnum.objects,
@@ -84,14 +83,20 @@ class ProfileManager:
             if not has_profile:
                 return f"Profile '{profile_name}' not found on any camera"
 
+        # Track which camera/section pairs get changed for ZMQ publishing
+        changed: dict[str, set[str]] = {}
+
         # Reset all cameras to base config
-        self._reset_to_base()
+        self._reset_to_base(changed)
 
         # Apply new profile overrides if activating
         if profile_name is not None:
-            err = self._apply_profile_overrides(profile_name)
+            err = self._apply_profile_overrides(profile_name, changed)
             if err:
                 return err
+
+        # Publish ZMQ updates only for sections that actually changed
+        self._publish_updates(changed)
 
         self.config.active_profile = profile_name
         self._persist_active_profile(profile_name)
@@ -101,7 +106,7 @@ class ProfileManager:
         )
         return None
 
-    def _reset_to_base(self) -> None:
+    def _reset_to_base(self, changed: dict[str, set[str]]) -> None:
         """Reset all cameras to their base (no-profile) config."""
         for cam_name, cam_config in self.config.cameras.items():
             base = self._base_configs.get(cam_name, {})
@@ -117,11 +122,13 @@ class ProfileManager:
                         cam_name,
                         err,
                     )
+                else:
+                    changed.setdefault(cam_name, set()).add(section)
 
-    def _apply_profile_overrides(self, profile_name: str) -> Optional[str]:
+    def _apply_profile_overrides(
+        self, profile_name: str, changed: dict[str, set[str]]
+    ) -> Optional[str]:
         """Apply profile overrides for all cameras that have the named profile."""
-        affected_cameras: set[str] = set()
-
         for cam_name, cam_config in self.config.cameras.items():
             profile = cam_config.profiles.get(profile_name)
             if profile is None:
@@ -145,20 +152,21 @@ class ProfileManager:
                 if err:
                     return f"Failed to apply profile '{profile_name}' section '{section}' on camera '{cam_name}': {err}"
 
-                affected_cameras.add(cam_name)
+                changed.setdefault(cam_name, set()).add(section)
 
-        # Publish ZMQ updates for all affected cameras
-        self._publish_updates(affected_cameras)
         return None
 
-    def _publish_updates(self, affected_cameras: set[str]) -> None:
-        """Publish ZMQ config updates for affected cameras."""
-        for cam_name in affected_cameras:
+    def _publish_updates(self, changed: dict[str, set[str]]) -> None:
+        """Publish ZMQ config updates only for sections that changed."""
+        for cam_name, sections in changed.items():
             cam_config = self.config.cameras.get(cam_name)
             if cam_config is None:
                 continue
 
-            for section, update_enum in SECTION_TO_UPDATE_ENUM.items():
+            for section in sections:
+                update_enum = SECTION_TO_UPDATE_ENUM.get(section)
+                if update_enum is None:
+                    continue
                 settings = getattr(cam_config, section, None)
                 if settings is not None:
                     self.config_updater.publish_update(
