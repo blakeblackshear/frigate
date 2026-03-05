@@ -30,6 +30,7 @@ from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
+from frigate.config.profile_manager import ProfileManager
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -349,6 +350,19 @@ class FrigateApp:
             comms,
         )
 
+    def init_profile_manager(self) -> None:
+        self.profile_manager = ProfileManager(
+            self.config, self.inter_config_updater
+        )
+        self.dispatcher.profile_manager = self.profile_manager
+
+        persisted = ProfileManager.load_persisted_profile()
+        if persisted and any(
+            persisted in cam.profiles for cam in self.config.cameras.values()
+        ):
+            logger.info("Restoring persisted profile '%s'", persisted)
+            self.profile_manager.activate_profile(persisted)
+
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
             try:
@@ -557,6 +571,7 @@ class FrigateApp:
         self.init_inter_process_communicator()
         self.start_detectors()
         self.init_dispatcher()
+        self.init_profile_manager()
         self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
@@ -586,6 +601,8 @@ class FrigateApp:
                     self.event_metadata_updater,
                     self.inter_config_updater,
                     self.replay_manager,
+                    self.dispatcher,
+                    self.profile_manager,
                 ),
                 host="127.0.0.1",
                 port=5001,

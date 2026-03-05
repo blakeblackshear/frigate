@@ -69,6 +69,8 @@ def create_fastapi_app(
     event_metadata_updater: EventMetadataPublisher,
     config_publisher: CameraConfigUpdatePublisher,
     replay_manager: DebugReplayManager,
+    dispatcher=None,
+    profile_manager=None,
     enforce_default_admin: bool = True,
 ):
     logger.info("Starting FastAPI app")
@@ -151,6 +153,8 @@ def create_fastapi_app(
     app.event_metadata_updater = event_metadata_updater
     app.config_publisher = config_publisher
     app.replay_manager = replay_manager
+    app.dispatcher = dispatcher
+    app.profile_manager = profile_manager
 
     if frigate_config.auth.enabled:
         secret = get_jwt_secret()
