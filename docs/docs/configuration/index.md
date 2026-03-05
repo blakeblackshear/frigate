@@ -3,7 +3,7 @@ id: index
 title: Frigate Configuration
 ---
 
-For Home Assistant Add-on installations, the config file should be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running. See the list of directories [here](#accessing-add-on-config-dir).
+For Home Assistant App installations, the config file should be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](#accessing-app-config-dir).
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
@@ -25,11 +25,11 @@ cameras:
             - detect
 ```
 
-## Accessing the Home Assistant Add-on configuration directory {#accessing-add-on-config-dir}
+## Accessing the Home Assistant App configuration directory {#accessing-app-config-dir}
 
-When running Frigate through the HA Add-on, the Frigate `/config` directory is mapped to `/addon_configs/<addon_directory>` in the host, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running.
+When running Frigate through the HA App, the Frigate `/config` directory is mapped to `/addon_configs/<addon_directory>` in the host, where `<addon_directory>` is specific to the variant of the Frigate App you are running.
 
-| Add-on Variant             | Configuration directory                   |
+| App Variant                | Configuration directory                   |
 | -------------------------- | ----------------------------------------- |
 | Frigate                    | `/addon_configs/ccab4aaf_frigate`         |
 | Frigate (Full Access)      | `/addon_configs/ccab4aaf_frigate-fa`      |
@@ -38,11 +38,11 @@ When running Frigate through the HA Add-on, the Frigate `/config` directory is m
 
 **Whenever you see `/config` in the documentation, it refers to this directory.**
 
-If for example you are running the standard Add-on variant and use the [VS Code Add-on](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory and edit the `config.yaml` file. You can also use the built-in file editor in the Frigate UI to edit the configuration file.
+If for example you are running the standard App variant and use the [VS Code App](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory and edit the `config.yaml` file. You can also use the built-in file editor in the Frigate UI to edit the configuration file.
 
 ## VS Code Configuration Schema
 
-VS Code supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VS Code and Frigate as an Add-on, you should use `ccab4aaf-frigate` instead. Make sure to expose the internal unauthenticated port `5000` when accessing the config from VS Code on another machine.
+VS Code supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VS Code and Frigate as an App, you should use `ccab4aaf-frigate` instead. Make sure to expose the internal unauthenticated port `5000` when accessing the config from VS Code on another machine.
 
 ## Environment Variable Substitution
 
@@ -82,10 +82,10 @@ genai:
 
 Here are some common starter configuration examples. Refer to the [reference config](./reference.md) for detailed information about all the config values.
 
-### Raspberry Pi Home Assistant Add-on with USB Coral
+### Raspberry Pi Home Assistant App with USB Coral
 
 - Single camera with 720p, 5fps stream for detect
-- MQTT connected to the Home Assistant Mosquitto Add-on
+- MQTT connected to the Home Assistant Mosquitto App
 - Hardware acceleration for decoding video
 - USB Coral detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not

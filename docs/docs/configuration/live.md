@@ -15,7 +15,7 @@ The jsmpeg live view will use more browser and client GPU resources. Using go2rt
 | ------ | ------------------------------------- | ---------- | ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | jsmpeg | same as `detect -> fps`, capped at 10 | 720p       | no                           | no              | Resolution is configurable, but go2rtc is recommended if you want higher resolutions and better frame rates. jsmpeg is Frigate's default without go2rtc configured. |
 | mse    | native                                | native     | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only. This is Frigate's default when go2rtc is configured.                                                              |
-| webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration. Frigate attempts to use WebRTC when MSE fails or when using a camera's two-way talk feature.                   |
+| webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration. Frigate attempts to use WebRTC when MSE fails or when using a camera's two-way talk feature.                                          |
 
 ### Camera Settings Recommendations
 
@@ -114,7 +114,7 @@ cameras:
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
-- For internal/local access, unless you are running through the HA Add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
+- For internal/local access, unless you are running through the HA App, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
 
   ```yaml title="config.yml"
   go2rtc:
@@ -128,13 +128,13 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
 
-- Note that some browsers may not support H.265 (HEVC). You can check your browser's current version for H.265 compatibility [here](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness). 
+- Note that some browsers may not support H.265 (HEVC). You can check your browser's current version for H.265 compatibility [here](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness).
 
 :::tip
 
-This extra configuration may not be required if Frigate has been installed as a Home Assistant Add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
+This extra configuration may not be required if Frigate has been installed as a Home Assistant App, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
 
-However, it is recommended if issues occur to define the candidates manually. You should do this if the Frigate Add-on fails to generate a valid candidate. If an error occurs you will see some warnings like the below in the Add-on logs page during the initialization:
+However, it is recommended if issues occur to define the candidates manually. You should do this if the Frigate App fails to generate a valid candidate. If an error occurs you will see some warnings like the below in the App logs page during the initialization:
 
 ```log
 [WARN] Failed to get IP address from supervisor
@@ -222,34 +222,28 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 When your browser runs into problems playing back your camera streams, it will log short error messages to the browser console. They indicate playback, codec, or network issues on the client/browser side, not something server side with Frigate itself. Below are the common messages you may see and simple actions you can take to try to resolve them.
 
 - **startup**
-
   - What it means: The player failed to initialize or connect to the live stream (network or startup error).
   - What to try: Reload the Live view or click _Reset_. Verify `go2rtc` is running and the camera stream is reachable. Try switching to a different stream from the Live UI dropdown (if available) or use a different browser.
 
   - Possible console messages from the player code:
-
     - `Error opening MediaSource.`
     - `Browser reported a network error.`
     - `Max error count ${errorCount} exceeded.` (the numeric value will vary)
 
 - **mse-decode**
-
   - What it means: The browser reported a decoding error while trying to play the stream, which usually is a result of a codec incompatibility or corrupted frames.
   - What to try: Check the browser console for the supported and negotiated codecs. Ensure your camera/restream is using H.264 video and AAC audio (these are the most compatible). If your camera uses a non-standard audio codec, configure `go2rtc` to transcode the stream to AAC. Try another browser (some browsers have stricter MSE/codec support) and, for iPhone, ensure you're on iOS 17.1 or newer.
 
   - Possible console messages from the player code:
-
     - `Safari cannot open MediaSource.`
     - `Safari reported InvalidStateError.`
     - `Safari reported decoding errors.`
 
 - **stalled**
-
   - What it means: Playback has stalled because the player has fallen too far behind live (extended buffering or no data arriving).
   - What to try: This is usually indicative of the browser struggling to decode too many high-resolution streams at once. Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution. Also check your camera's keyframe (I-frame) interval — shorter intervals make playback start and recover faster. You can also try increasing the timeout value in the UI pane of Frigate's settings.
 
   - Possible console messages from the player code:
-
     - `Buffer time (10 seconds) exceeded, browser may not be playing media correctly.`
     - `Media playback has stalled after <n> seconds due to insufficient buffering or a network interruption.` (the seconds value will vary)
 
@@ -270,21 +264,18 @@ When your browser runs into problems playing back your camera streams, it will l
    If you are using continuous streaming or you are loading more than a few high resolution streams at once on the dashboard, your browser may struggle to begin playback of your streams before the timeout. Frigate always prioritizes showing a live stream as quickly as possible, even if it is a lower quality jsmpeg stream. You can use the "Reset" link/button to try loading your high resolution stream again.
 
    Errors in stream playback (e.g., connection failures, codec issues, or buffering timeouts) that cause the fallback to low bandwidth mode (jsmpeg) are logged to the browser console for easier debugging. These errors may include:
-
    - Network issues (e.g., MSE or WebRTC network connection problems).
    - Unsupported codecs or stream formats (e.g., H.265 in WebRTC, which is not supported in some browsers).
    - Buffering timeouts or low bandwidth conditions causing fallback to jsmpeg.
    - Browser compatibility problems (e.g., iOS Safari limitations with MSE).
 
    To view browser console logs:
-
    1. Open the Frigate Live View in your browser.
    2. Open the browser's Developer Tools (F12 or right-click > Inspect > Console tab).
    3. Reproduce the error (e.g., load a problematic stream or simulate network issues).
    4. Look for messages prefixed with the camera name.
 
    These logs help identify if the issue is player-specific (MSE vs. WebRTC) or related to camera configuration (e.g., go2rtc streams, codecs). If you see frequent errors:
-
    - Verify your camera's H.264/AAC settings (see [Frigate's camera settings recommendations](#camera_settings_recommendations)).
    - Check go2rtc configuration for transcoding (e.g., audio to AAC/OPUS).
    - Test with a different stream via the UI dropdown (if `live -> streams` is configured).
@@ -324,9 +315,7 @@ When your browser runs into problems playing back your camera streams, it will l
    To prevent this, make the `detect` stream match the go2rtc live stream's aspect ratio (resolution does not need to match, just the aspect ratio). You can either adjust the camera's output resolution or set the `width` and `height` values in your config's `detect` section to a resolution with an aspect ratio that matches.
 
    Example: Resolutions from two streams
-
    - Mismatched (may cause aspect ratio switching on the dashboard):
-
      - Live/go2rtc stream: 1920x1080 (16:9)
      - Detect stream: 640x352 (~1.82:1, not 16:9)
 
