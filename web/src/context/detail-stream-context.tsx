@@ -126,9 +126,9 @@ export function DetailStreamProvider({
   };
 
   return (
-    <DetailStreamContext.Provider value={value}>
+    <DetailStreamContext value={value}>
       {children}
-    </DetailStreamContext.Provider>
+    </DetailStreamContext>
   );
 }
 

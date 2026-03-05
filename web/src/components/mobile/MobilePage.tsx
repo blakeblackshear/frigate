@@ -55,9 +55,9 @@ export function MobilePage({
   });
 
   return (
-    <MobilePageContext.Provider value={{ open, onOpenChange: setOpen }}>
+    <MobilePageContext value={{ open, onOpenChange: setOpen }}>
       {children}
-    </MobilePageContext.Provider>
+    </MobilePageContext>
   );
 }
 

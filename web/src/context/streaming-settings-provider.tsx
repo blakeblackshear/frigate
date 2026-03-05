@@ -44,7 +44,7 @@ export function StreamingSettingsProvider({
   }, [allGroupsStreamingSettings, setPersistedGroupStreamingSettings]);
 
   return (
-    <StreamingSettingsContext.Provider
+    <StreamingSettingsContext
       value={{
         allGroupsStreamingSettings,
         setAllGroupsStreamingSettings,
@@ -52,7 +52,7 @@ export function StreamingSettingsProvider({
       }}
     >
       {children}
-    </StreamingSettingsContext.Provider>
+    </StreamingSettingsContext>
   );
 }
 
