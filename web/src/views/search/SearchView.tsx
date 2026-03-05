@@ -619,7 +619,9 @@ export default function SearchView({
                 return (
                   <div
                     key={value.id}
-                    ref={(item) => { itemRefs.current[index] = item; }}
+                    ref={(item) => {
+                      itemRefs.current[index] = item;
+                    }}
                     data-start={value.start_time}
                     className="relative flex flex-col rounded-lg"
                   >

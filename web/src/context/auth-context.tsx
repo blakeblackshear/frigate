@@ -102,9 +102,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     axios.get("/logout", { withCredentials: true });
   };
 
-  return (
-    <AuthContext value={{ auth, login, logout }}>
-      {children}
-    </AuthContext>
-  );
+  return <AuthContext value={{ auth, login, logout }}>{children}</AuthContext>;
 }

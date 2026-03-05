@@ -125,11 +125,7 @@ export function DetailStreamProvider({
     isDetailMode,
   };
 
-  return (
-    <DetailStreamContext value={value}>
-      {children}
-    </DetailStreamContext>
-  );
+  return <DetailStreamContext value={value}>{children}</DetailStreamContext>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

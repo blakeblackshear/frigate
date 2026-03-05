@@ -448,11 +448,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
     );
   };
 
-  const errorsProps = errors?.props as
-    | { errors?: unknown[] }
-    | undefined;
-  const hasFieldErrors =
-    !!errors && (errorsProps?.errors?.length ?? 0) > 0;
+  const errorsProps = errors?.props as { errors?: unknown[] } | undefined;
+  const hasFieldErrors = !!errors && (errorsProps?.errors?.length ?? 0) > 0;
 
   const renderStandardLabel = () => {
     if (!shouldRenderStandardLabel) {
