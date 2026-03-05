@@ -23,21 +23,26 @@ def parse_tool_calls_from_message(
     if not raw or not isinstance(raw, list):
         return None
     result = []
-    for tool_call in raw:
+    for idx, tool_call in enumerate(raw):
         function_data = tool_call.get("function") or {}
-        try:
-            arguments_str = function_data.get("arguments") or "{}"
-            arguments = json.loads(arguments_str)
-        except (json.JSONDecodeError, KeyError, TypeError) as e:
-            logger.warning(
-                "Failed to parse tool call arguments: %s, tool: %s",
-                e,
-                function_data.get("name", "unknown"),
-            )
+        raw_arguments = function_data.get("arguments") or {}
+        if isinstance(raw_arguments, dict):
+            arguments = raw_arguments
+        elif isinstance(raw_arguments, str):
+            try:
+                arguments = json.loads(raw_arguments)
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                logger.warning(
+                    "Failed to parse tool call arguments: %s, tool: %s",
+                    e,
+                    function_data.get("name", "unknown"),
+                )
+                arguments = {}
+        else:
             arguments = {}
         result.append(
             {
-                "id": tool_call.get("id", ""),
+                "id": tool_call.get("id", "") or f"call_{idx}",
                 "name": function_data.get("name", ""),
                 "arguments": arguments,
             }
