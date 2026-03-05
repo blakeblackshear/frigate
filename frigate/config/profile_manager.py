@@ -9,25 +9,13 @@ from frigate.config.camera.updater import (
     CameraConfigUpdatePublisher,
     CameraConfigUpdateTopic,
 )
+from frigate.const import CONFIG_DIR
 from frigate.util.builtin import deep_merge
 from frigate.util.config import apply_section_update
 
 logger = logging.getLogger(__name__)
 
-PROFILE_SECTIONS = {
-    "audio",
-    "birdseye",
-    "detect",
-    "live",
-    "motion",
-    "notifications",
-    "objects",
-    "record",
-    "review",
-    "snapshots",
-}
-
-SECTION_TO_UPDATE_ENUM: dict[str, CameraConfigUpdateEnum] = {
+PROFILE_SECTION_UPDATES: dict[str, CameraConfigUpdateEnum] = {
     "audio": CameraConfigUpdateEnum.audio,
     "birdseye": CameraConfigUpdateEnum.birdseye,
     "detect": CameraConfigUpdateEnum.detect,
@@ -39,7 +27,7 @@ SECTION_TO_UPDATE_ENUM: dict[str, CameraConfigUpdateEnum] = {
     "snapshots": CameraConfigUpdateEnum.snapshots,
 }
 
-PERSISTENCE_FILE = Path("/config/.active_profile")
+PERSISTENCE_FILE = Path(CONFIG_DIR) / ".active_profile"
 
 
 class ProfileManager:
@@ -61,7 +49,7 @@ class ProfileManager:
         """Snapshot each camera's current section configs as the base."""
         for cam_name, cam_config in self.config.cameras.items():
             self._base_configs[cam_name] = {}
-            for section in PROFILE_SECTIONS:
+            for section in PROFILE_SECTION_UPDATES:
                 section_config = getattr(cam_config, section, None)
                 if section_config is not None:
                     self._base_configs[cam_name][section] = section_config.model_dump()
@@ -110,7 +98,7 @@ class ProfileManager:
         """Reset all cameras to their base (no-profile) config."""
         for cam_name, cam_config in self.config.cameras.items():
             base = self._base_configs.get(cam_name, {})
-            for section in PROFILE_SECTIONS:
+            for section in PROFILE_SECTION_UPDATES:
                 base_data = base.get(section)
                 if base_data is None:
                     continue
@@ -136,7 +124,7 @@ class ProfileManager:
 
             base = self._base_configs.get(cam_name, {})
 
-            for section in PROFILE_SECTIONS:
+            for section in PROFILE_SECTION_UPDATES:
                 profile_section = getattr(profile, section, None)
                 if profile_section is None:
                     continue
@@ -164,7 +152,7 @@ class ProfileManager:
                 continue
 
             for section in sections:
-                update_enum = SECTION_TO_UPDATE_ENUM.get(section)
+                update_enum = PROFILE_SECTION_UPDATES.get(section)
                 if update_enum is None:
                     continue
                 settings = getattr(cam_config, section, None)

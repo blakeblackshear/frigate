@@ -6,7 +6,6 @@ from ..base import FrigateBaseModel
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
-from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .notification import NotificationConfig
 from .objects import ObjectConfig
@@ -28,7 +27,6 @@ class CameraProfileConfig(FrigateBaseModel):
     audio: Optional[AudioConfig] = None
     birdseye: Optional[BirdseyeCameraConfig] = None
     detect: Optional[DetectConfig] = None
-    live: Optional[CameraLiveConfig] = None
     motion: Optional[MotionConfig] = None
     notifications: Optional[NotificationConfig] = None
     objects: Optional[ObjectConfig] = None
