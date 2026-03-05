@@ -481,7 +481,12 @@ const CAMERA_SELECT_BUTTON_PAGES = [
 
 const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 
-const LARGE_BOTTOM_MARGIN_PAGES = ["masksAndZones", "motionTuner", "mediaSync"];
+const LARGE_BOTTOM_MARGIN_PAGES = [
+  "masksAndZones",
+  "motionTuner",
+  "mediaSync",
+  "regionGrid",
+];
 
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {

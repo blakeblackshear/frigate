@@ -58,7 +58,7 @@ export default function RegionGridSettingsView({
 
   return (
     <>
-      <div className="flex size-full flex-col pb-12 md:flex-row">
+      <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <Heading as="h4" className="mb-2 hidden md:block">
@@ -80,7 +80,7 @@ export default function RegionGridSettingsView({
             />
           </div>
 
-          <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[50%]">
+          <div className="flex w-full flex-row items-center gap-2 py-2 md:w-[50%]">
             <Button
               onClick={() => setIsConfirmOpen(true)}
               disabled={isClearing}
