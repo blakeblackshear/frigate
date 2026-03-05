@@ -9,6 +9,7 @@ from typing import Any, Optional, Union
 from ruamel.yaml import YAML
 
 from frigate.const import CONFIG_DIR, EXPORT_DIR
+from frigate.util.builtin import deep_merge
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
@@ -688,3 +689,78 @@ class StreamInfoRetriever:
         info = asyncio.run(get_video_properties(ffmpeg, path))
         self.stream_cache[path] = info
         return info
+
+
+def apply_section_update(camera_config, section: str, update: dict) -> Optional[str]:
+    """Merge an update dict into a camera config section and rebuild runtime variants.
+
+    For motion and object filter sections, the plain Pydantic models are rebuilt
+    as RuntimeMotionConfig / RuntimeFilterConfig so that rasterized numpy masks
+    are recomputed.  This mirrors the logic in FrigateConfig.post_validation.
+
+    Args:
+        camera_config: The CameraConfig instance to update.
+        section: Config section name (e.g. "motion", "objects").
+        update: Nested dict of field updates to merge.
+
+    Returns:
+        None on success, or an error message string on failure.
+    """
+    from frigate.config.config import RuntimeFilterConfig, RuntimeMotionConfig
+
+    current = getattr(camera_config, section, None)
+    if current is None:
+        return f"Section '{section}' not found on camera '{camera_config.name}'"
+
+    try:
+        frame_shape = camera_config.frame_shape
+
+        if section == "motion":
+            merged = deep_merge(
+                current.model_dump(exclude_unset=True, exclude={"rasterized_mask"}),
+                update,
+                override=True,
+            )
+            camera_config.motion = RuntimeMotionConfig(
+                frame_shape=frame_shape, **merged
+            )
+
+        elif section == "objects":
+            merged = deep_merge(
+                current.model_dump(
+                    exclude={"filters": {"__all__": {"rasterized_mask"}}}
+                ),
+                update,
+                override=True,
+            )
+            new_objects = current.__class__.model_validate(merged)
+
+            # Preserve private _all_objects from original config
+            try:
+                new_objects._all_objects = current._all_objects
+            except AttributeError:
+                pass
+
+            # Rebuild RuntimeFilterConfig with merged global + per-object masks
+            for obj_name, filt in new_objects.filters.items():
+                merged_mask = dict(filt.mask)
+                if new_objects.mask:
+                    for gid, gmask in new_objects.mask.items():
+                        merged_mask[f"global_{gid}"] = gmask
+
+                new_objects.filters[obj_name] = RuntimeFilterConfig(
+                    frame_shape=frame_shape,
+                    mask=merged_mask,
+                    **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
+                )
+            camera_config.objects = new_objects
+
+        else:
+            merged = deep_merge(current.model_dump(), update, override=True)
+            setattr(camera_config, section, current.__class__.model_validate(merged))
+
+    except Exception:
+        logger.exception("Config validation error")
+        return "Validation error. Check logs for details."
+
+    return None

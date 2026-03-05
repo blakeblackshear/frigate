@@ -83,7 +83,8 @@
     "triggers": "Triggers",
     "debug": "Debug",
     "frigateplus": "Frigate+",
-    "maintenance": "Maintenance"
+    "mediaSync": "Media sync",
+    "regionGrid": "Region grid"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1232,6 +1233,16 @@
       "previews": "Previews",
       "exports": "Exports",
       "recordings": "Recordings"
+    },
+    "regionGrid": {
+      "title": "Region Grid",
+      "desc": "The region grid is an optimization that learns where objects of different sizes typically appear in each camera's field of view. Frigate uses this data to efficiently size detection regions. The grid is automatically built over time from tracked object data.",
+      "clear": "Clear region grid",
+      "clearConfirmTitle": "Clear Region Grid",
+      "clearConfirmDesc": "Clearing the region grid is not recommended unless you have recently changed your detector model size or have changed your camera's physical position and are having object tracking issues. The grid will be automatically rebuilt over time as objects are tracked. A Frigate restart is required for changes to take effect.",
+      "clearSuccess": "Region grid cleared successfully",
+      "clearError": "Failed to clear region grid",
+      "restartRequired": "Restart required for region grid changes to take effect"
     }
   },
   "configForm": {
@@ -1392,6 +1403,7 @@
   },
   "toast": {
     "success": "Settings saved successfully",
+    "applied": "Settings applied successfully",
     "successRestartRequired": "Settings saved successfully. Restart Frigate to apply your changes.",
     "error": "Failed to save settings",
     "validationError": "Validation failed: {{message}}",

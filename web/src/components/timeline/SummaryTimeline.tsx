@@ -14,7 +14,7 @@ import {
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 
 export type SummaryTimelineProps = {
-  reviewTimelineRef: React.RefObject<HTMLDivElement>;
+  reviewTimelineRef: React.RefObject<HTMLDivElement | null>;
   timelineStart: number;
   timelineEnd: number;
   segmentDuration: number;

@@ -7,12 +7,39 @@
     "logs": {
       "frigate": "Frigate Logs - Frigate",
       "go2rtc": "Go2RTC Logs - Frigate",
-      "nginx": "Nginx Logs - Frigate"
+      "nginx": "Nginx Logs - Frigate",
+      "websocket": "Messages Logs - Frigate"
     }
   },
   "title": "System",
   "metrics": "System metrics",
   "logs": {
+    "websocket": {
+      "label": "Messages",
+      "pause": "Pause",
+      "resume": "Resume",
+      "clear": "Clear",
+      "filter": {
+        "all": "All topics",
+        "topics": "Topics",
+        "events": "Events",
+        "reviews": "Reviews",
+        "classification": "Classification",
+        "face_recognition": "Face Recognition",
+        "lpr": "LPR",
+        "camera_activity": "Camera activity",
+        "system": "System",
+        "camera": "Camera",
+        "all_cameras": "All cameras",
+        "cameras_count_one": "{{count}} Camera",
+        "cameras_count_other": "{{count}} Cameras"
+      },
+      "empty": "No messages captured yet",
+      "count": "{{count}} messages",
+      "expanded": {
+        "payload": "Payload"
+      }
+    },
     "download": {
       "label": "Download Logs"
     },
@@ -189,7 +216,8 @@
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
-    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB."
+    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB.",
+    "debugReplayActive": "Debug replay session is active"
   },
   "enrichments": {
     "title": "Enrichments",

@@ -26,8 +26,8 @@ class ConfigPublisher:
 
     def stop(self) -> None:
         self.stop_event.set()
-        self.socket.close()
-        self.context.destroy()
+        self.socket.close(linger=0)
+        self.context.destroy(linger=0)
 
 
 class ConfigSubscriber:
@@ -55,5 +55,5 @@ class ConfigSubscriber:
             return (None, None)
 
     def stop(self) -> None:
-        self.socket.close()
-        self.context.destroy()
+        self.socket.close(linger=0)
+        self.context.destroy(linger=0)

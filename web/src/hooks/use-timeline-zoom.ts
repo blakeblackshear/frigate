@@ -11,7 +11,7 @@ type UseTimelineZoomProps = {
   zoomLevels: ZoomSettings[];
   onZoomChange: (newZoomLevel: number) => void;
   pinchThresholdPercent?: number;
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   timelineDuration: number;
 };
 

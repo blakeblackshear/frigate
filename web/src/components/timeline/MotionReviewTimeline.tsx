@@ -42,8 +42,8 @@ export type MotionReviewTimelineProps = {
   events: ReviewSegment[];
   motion_events: MotionData[];
   noRecordingRanges?: RecordingSegment[];
-  contentRef: RefObject<HTMLDivElement>;
-  timelineRef?: RefObject<HTMLDivElement>;
+  contentRef: RefObject<HTMLDivElement | null>;
+  timelineRef?: RefObject<HTMLDivElement | null>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
   dense?: boolean;
   isZooming: boolean;

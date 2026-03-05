@@ -25,6 +25,15 @@ import {
 import get from "lodash/get";
 import { AddPropertyButton, AdvancedCollapsible } from "../components";
 
+/** Shape of the props that RJSF injects into each property element. */
+interface RjsfElementProps {
+  schema?: { type?: string | string[] };
+  uiSchema?: Record<string, unknown> & {
+    "ui:widget"?: string;
+    "ui:options"?: Record<string, unknown>;
+  };
+}
+
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const {
     title,
@@ -182,16 +191,21 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     uiSchema?.["ui:options"]?.disableNestedCard === true;
 
   const isHiddenProp = (prop: (typeof properties)[number]) =>
-    prop.content.props.uiSchema?.["ui:widget"] === "hidden";
+    (prop.content.props as RjsfElementProps).uiSchema?.["ui:widget"] ===
+    "hidden";
 
   const visibleProps = properties.filter((prop) => !isHiddenProp(prop));
 
   // Check for advanced section grouping
   const advancedProps = visibleProps.filter(
-    (p) => p.content.props.uiSchema?.["ui:options"]?.advanced === true,
+    (p) =>
+      (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
+        ?.advanced === true,
   );
   const regularProps = visibleProps.filter(
-    (p) => p.content.props.uiSchema?.["ui:options"]?.advanced !== true,
+    (p) =>
+      (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
+        ?.advanced !== true,
   );
   const hasModifiedAdvanced = advancedProps.some((prop) =>
     checkSubtreeModified([...fieldPath, prop.name]),
@@ -333,9 +347,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
     const ungrouped = items.filter((item) => !grouped.has(item.name));
     const isObjectLikeField = (item: (typeof properties)[number]) => {
-      const fieldSchema = item.content.props.schema as
-        | { type?: string | string[] }
-        | undefined;
+      const fieldSchema = (item.content.props as RjsfElementProps)?.schema;
       return fieldSchema?.type === "object";
     };
 

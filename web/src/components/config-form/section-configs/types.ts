@@ -4,4 +4,5 @@ export type SectionConfigOverrides = {
   base?: SectionConfig;
   global?: Partial<SectionConfig>;
   camera?: Partial<SectionConfig>;
+  replay?: Partial<SectionConfig>;
 };

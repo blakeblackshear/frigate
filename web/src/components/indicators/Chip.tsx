@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import { LogSeverity } from "@/types/log";
-import { ReactNode, useMemo, useRef } from "react";
+import { ReactNode, useMemo } from "react";
 import { isIOS } from "react-device-detect";
-import { CSSTransition } from "react-transition-group";
+import { AnimatePresence, motion } from "framer-motion";
 
 type ChipProps = {
   className?: string;
@@ -17,39 +17,31 @@ export default function Chip({
   in: inProp = true,
   onClick,
 }: ChipProps) {
-  const nodeRef = useRef(null);
-
   return (
-    <CSSTransition
-      in={inProp}
-      nodeRef={nodeRef}
-      timeout={500}
-      classNames={{
-        enter: "opacity-0",
-        enterActive: "opacity-100 transition-opacity duration-500 ease-in-out",
-        exit: "opacity-100",
-        exitActive: "opacity-0 transition-opacity duration-500 ease-in-out",
-      }}
-      unmountOnExit
-    >
-      <div
-        ref={nodeRef}
-        className={cn(
-          "flex items-center rounded-2xl px-2 py-1.5",
-          className,
-          !isIOS && "z-10",
-        )}
-        onClick={(e) => {
-          e.stopPropagation();
+    <AnimatePresence>
+      {inProp && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className={cn(
+            "flex items-center rounded-2xl px-2 py-1.5",
+            className,
+            !isIOS && "z-10",
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
 
-          if (onClick) {
-            onClick();
-          }
-        }}
-      >
-        {children}
-      </div>
-    </CSSTransition>
+            if (onClick) {
+              onClick();
+            }
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

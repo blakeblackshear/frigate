@@ -10,7 +10,7 @@ import { snapPointToLines } from "@/utils/canvasUtil";
 import { usePolygonStates } from "@/hooks/use-polygon-states";
 
 type PolygonCanvasProps = {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   camera: string;
   width: number;
   height: number;
@@ -258,7 +258,7 @@ export function PolygonCanvas({
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
 
-    if (containerRef.current && !activePolygon.isFinished) {
+    if (containerRef.current && activePolygon && !activePolygon.isFinished) {
       containerRef.current.style.cursor = "crosshair";
     }
   };

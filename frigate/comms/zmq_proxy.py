@@ -43,7 +43,7 @@ class ZmqProxy:
 
     def stop(self) -> None:
         # destroying the context will tell the proxy to stop
-        self.context.destroy()
+        self.context.destroy(linger=0)
         self.runner.join()
 
 
@@ -66,8 +66,8 @@ class Publisher(Generic[T]):
         self.socket.send_string(f"{self.topic}{sub_topic} {json.dumps(payload)}")
 
     def stop(self) -> None:
-        self.socket.close()
-        self.context.destroy()
+        self.socket.close(linger=0)
+        self.context.destroy(linger=0)
 
 
 class Subscriber(Generic[T]):
@@ -96,8 +96,8 @@ class Subscriber(Generic[T]):
         return self._return_object("", None)
 
     def stop(self) -> None:
-        self.socket.close()
-        self.context.destroy()
+        self.socket.close(linger=0)
+        self.context.destroy(linger=0)
 
     def _return_object(self, topic: str, payload: T | None) -> T | None:
         return payload

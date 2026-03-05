@@ -216,6 +216,10 @@
     },
     "hideObjectDetails": {
       "label": "Hide object path"
+    },
+    "debugReplay": {
+      "label": "Debug replay",
+      "aria": "View this tracked object in the debug replay view"
     }
   },
   "dialog": {

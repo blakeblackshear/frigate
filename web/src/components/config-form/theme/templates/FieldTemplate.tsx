@@ -448,6 +448,9 @@ export function FieldTemplate(props: FieldTemplateProps) {
     );
   };
 
+  const errorsProps = errors?.props as { errors?: unknown[] } | undefined;
+  const hasFieldErrors = !!errors && (errorsProps?.errors?.length ?? 0) > 0;
+
   const renderStandardLabel = () => {
     if (!shouldRenderStandardLabel) {
       return null;
@@ -459,7 +462,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
         className={cn(
           "text-sm font-medium",
           isModified && "text-danger",
-          errors && errors.props?.errors?.length > 0 && "text-destructive",
+          hasFieldErrors && "text-destructive",
         )}
       >
         {finalLabel}
@@ -497,7 +500,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
         className={cn(
           "text-sm font-medium",
           isModified && "text-danger",
-          errors && errors.props?.errors?.length > 0 && "text-destructive",
+          hasFieldErrors && "text-destructive",
         )}
       >
         {finalLabel}

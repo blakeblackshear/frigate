@@ -26,7 +26,8 @@ export default function CameraImage({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  const { name } = config ? config.cameras[camera] : "";
+  const cameraConfig = config?.cameras?.[camera];
+  const { name } = cameraConfig ?? { name: camera };
   const { payload: enabledState } = useEnabledState(camera);
   const enabled = enabledState ? enabledState === "ON" : true;
 
@@ -34,15 +35,15 @@ export default function CameraImage({
     useResizeObserver(containerRef);
 
   const requestHeight = useMemo(() => {
-    if (!config || containerHeight == 0) {
+    if (!cameraConfig || containerHeight == 0) {
       return 360;
     }
 
     return Math.min(
-      config.cameras[camera].detect.height,
+      cameraConfig.detect.height,
       Math.round(containerHeight * (isDesktop ? 1.1 : 1.25)),
     );
-  }, [config, camera, containerHeight]);
+  }, [cameraConfig, containerHeight]);
 
   const [isPortraitImage, setIsPortraitImage] = useState(false);
 

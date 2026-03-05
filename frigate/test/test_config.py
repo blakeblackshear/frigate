@@ -151,6 +151,22 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.track
 
+    def test_deep_merge_override_replaces_list_values(self):
+        base = {"objects": {"track": ["person", "face"]}}
+        update = {"objects": {"track": ["person"]}}
+
+        merged = deep_merge(base, update, override=True)
+
+        assert merged["objects"]["track"] == ["person"]
+
+    def test_deep_merge_merge_lists_still_appends(self):
+        base = {"track": ["person"]}
+        update = {"track": ["face"]}
+
+        merged = deep_merge(base, update, override=True, merge_lists=True)
+
+        assert merged["track"] == ["person", "face"]
+
     def test_override_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},

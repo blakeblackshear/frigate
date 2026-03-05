@@ -329,7 +329,7 @@ export default function PolygonItem({
 
       <div
         key={index}
-        className="transition-background my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100"
+        className="transition-background relative my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100"
         data-index={index}
         onMouseEnter={() => setHoveredPolygonIndex(index)}
         onMouseLeave={() => setHoveredPolygonIndex(null)}
@@ -341,7 +341,7 @@ export default function PolygonItem({
         }}
       >
         <div
-          className={`flex items-center ${
+          className={`flex min-w-0 items-center ${
             hoveredPolygonIndex === index
               ? "text-primary"
               : "text-primary-variant"
@@ -359,7 +359,7 @@ export default function PolygonItem({
                     type="button"
                     onClick={handleToggleEnabled}
                     disabled={isLoading || polygon.enabled_in_config === false}
-                    className="mr-2 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mr-2 shrink-0 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PolygonItemIcon
                       className="size-5"
@@ -469,7 +469,15 @@ export default function PolygonItem({
           </>
         )}
         {!isMobile && hoveredPolygonIndex === index && (
-          <div className="flex flex-row items-center gap-2">
+          <div
+            className="absolute inset-y-0 right-0 flex flex-row items-center gap-2 rounded-r-lg pl-8 pr-1"
+            style={{
+              background:
+                polygon.color.length === 3
+                  ? `linear-gradient(to right, transparent 0%, rgba(${polygon.color[2]},${polygon.color[1]},${polygon.color[0]},0.85) 40%)`
+                  : "linear-gradient(to right, transparent 0%, rgba(220,0,0,0.85) 40%)",
+            }}
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <IconWrapper

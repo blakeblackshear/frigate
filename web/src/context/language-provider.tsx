@@ -77,9 +77,9 @@ export function LanguageProvider({
   };
 
   return (
-    <LanguageProviderContext.Provider {...props} value={value}>
+    <LanguageProviderContext {...props} value={value}>
       {children}
-    </LanguageProviderContext.Provider>
+    </LanguageProviderContext>
   );
 }
 

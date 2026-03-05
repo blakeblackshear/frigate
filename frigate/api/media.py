@@ -24,6 +24,7 @@ from tzlocal import get_localzone_name
 from frigate.api.auth import (
     allow_any_authenticated,
     require_camera_access,
+    require_role,
 )
 from frigate.api.defs.query.media_query_parameters import (
     Extension,
@@ -1003,6 +1004,23 @@ def grid_snapshot(
             content={"success": False, "message": "Camera not found"},
             status_code=404,
         )
+
+
+@router.delete(
+    "/{camera_name}/region_grid", dependencies=[Depends(require_role("admin"))]
+)
+def clear_region_grid(request: Request, camera_name: str):
+    """Clear the region grid for a camera."""
+    if camera_name not in request.app.frigate_config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": "Camera not found"},
+            status_code=404,
+        )
+
+    Regions.delete().where(Regions.camera == camera_name).execute()
+    return JSONResponse(
+        content={"success": True, "message": "Region grid cleared"},
+    )
 
 
 @router.get(

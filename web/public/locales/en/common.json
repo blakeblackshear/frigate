@@ -117,6 +117,7 @@
   "button": {
     "add": "Add",
     "apply": "Apply",
+    "applying": "Applying…",
     "reset": "Reset",
     "undo": "Undo",
     "done": "Done",
@@ -252,6 +253,7 @@
     "review": "Review",
     "explore": "Explore",
     "export": "Export",
+    "actions": "Actions",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
     "classification": "Classification",

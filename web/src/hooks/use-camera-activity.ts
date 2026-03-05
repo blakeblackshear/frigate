@@ -31,7 +31,7 @@ type useCameraActivityReturn = {
 };
 
 export function useCameraActivity(
-  camera: CameraConfig,
+  camera: CameraConfig | undefined,
   revalidateOnFocus: boolean = true,
 ): useCameraActivityReturn {
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -52,7 +52,7 @@ export function useCameraActivity(
   // init camera activity
 
   const { payload: updatedCameraState } = useInitialCameraState(
-    camera.name,
+    camera?.name ?? "",
     revalidateOnFocus,
   );
   useEffect(() => {
@@ -65,7 +65,7 @@ export function useCameraActivity(
   const memoizedAudioState = useDeepMemo(updatedAudioState);
 
   useEffect(() => {
-    if (memoizedAudioState) {
+    if (memoizedAudioState && camera?.name) {
       setAudioDetections(memoizedAudioState[camera.name]);
     }
   }, [memoizedAudioState, camera]);
@@ -77,8 +77,8 @@ export function useCameraActivity(
     [objects],
   );
 
-  const { payload: cameraEnabled } = useEnabledState(camera.name);
-  const { payload: detectingMotion } = useMotionActivity(camera.name);
+  const { payload: cameraEnabled } = useEnabledState(camera?.name ?? "");
+  const { payload: detectingMotion } = useMotionActivity(camera?.name ?? "");
   const { payload: event } = useFrigateEvents();
   const updatedEvent = useDeepMemo(event);
 
@@ -96,7 +96,7 @@ export function useCameraActivity(
       return;
     }
 
-    if (updatedEvent.after.camera !== camera.name) {
+    if (!camera?.name || updatedEvent.after.camera !== camera.name) {
       return;
     }
 
@@ -160,6 +160,10 @@ export function useCameraActivity(
     const cameras = stats["cameras"];
 
     if (!cameras) {
+      return false;
+    }
+
+    if (!camera?.name) {
       return false;
     }
 

@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import useDeepMemo from "./use-deep-memo";
 import { capitalizeAll, capitalizeFirstLetter } from "@/utils/stringUtil";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { useFrigateStats } from "@/api/ws";
 
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,9 @@ import { useTranslation } from "react-i18next";
 export default function useStats(stats: FrigateStats | undefined) {
   const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: debugReplayStatus } = useSWR("debug_replay/status", {
+    revalidateOnFocus: false,
+  });
 
   const memoizedStats = useDeepMemo(stats);
 
@@ -74,6 +78,11 @@ export default function useStats(stats: FrigateStats | undefined) {
         return;
       }
 
+      // Skip replay cameras
+      if (isReplayCamera(name)) {
+        return;
+      }
+
       const cameraName = config.cameras?.[name]?.friendly_name ?? name;
       if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
         problems.push({
@@ -96,7 +105,15 @@ export default function useStats(stats: FrigateStats | undefined) {
       );
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
-      if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
+
+      // Skip ffmpeg warnings for replay cameras when debug replay is active
+      if (
+        !isNaN(ffmpegAvg) &&
+        ffmpegAvg >= CameraFfmpegThreshold.error &&
+        !(
+          debugReplayStatus?.active && debugReplayStatus?.replay_camera === name
+        )
+      ) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {
             camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
@@ -119,8 +136,19 @@ export default function useStats(stats: FrigateStats | undefined) {
       }
     });
 
+    // Add message if debug replay is active
+    if (debugReplayStatus?.active) {
+      problems.push({
+        text: t("stats.debugReplayActive", {
+          defaultValue: "Debug replay session is active",
+        }),
+        color: "text-selected",
+        relevantLink: "/replay",
+      });
+    }
+
     return problems;
-  }, [config, memoizedStats, t]);
+  }, [config, memoizedStats, t, debugReplayStatus]);
 
   return { potentialProblems };
 }

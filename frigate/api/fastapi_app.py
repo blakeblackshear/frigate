@@ -18,6 +18,7 @@ from frigate.api import (
     camera,
     chat,
     classification,
+    debug_replay,
     event,
     export,
     media,
@@ -33,6 +34,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
+from frigate.debug_replay import DebugReplayManager
 from frigate.embeddings import EmbeddingsContext
 from frigate.genai import GenAIClientManager
 from frigate.ptz.onvif import OnvifController
@@ -66,6 +68,7 @@ def create_fastapi_app(
     stats_emitter: StatsEmitter,
     event_metadata_updater: EventMetadataPublisher,
     config_publisher: CameraConfigUpdatePublisher,
+    replay_manager: DebugReplayManager,
     enforce_default_admin: bool = True,
 ):
     logger.info("Starting FastAPI app")
@@ -135,6 +138,7 @@ def create_fastapi_app(
     app.include_router(media.router)
     app.include_router(motion_search.router)
     app.include_router(record.router)
+    app.include_router(debug_replay.router)
     # App Properties
     app.frigate_config = frigate_config
     app.genai_manager = GenAIClientManager(frigate_config)
@@ -146,6 +150,7 @@ def create_fastapi_app(
     app.stats_emitter = stats_emitter
     app.event_metadata_updater = event_metadata_updater
     app.config_publisher = config_publisher
+    app.replay_manager = replay_manager
 
     if frigate_config.auth.enabled:
         secret = get_jwt_secret()
