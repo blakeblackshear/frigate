@@ -32,6 +32,12 @@ from frigate.models import User
 
 logger = logging.getLogger(__name__)
 
+# In-memory cache to track which clients we've logged for an anonymous access event.
+# Keyed by a hashed value combining remote address + user-agent. The value is
+# an expiration timestamp (float).
+FIRST_LOAD_TTL_SECONDS = 60 * 60 * 24 * 7  # 7 days
+_first_load_seen: dict[str, float] = {}
+
 
 def require_admin_by_default():
     """
@@ -282,6 +288,15 @@ def get_remote_addr(request: Request):
         remote_addr = request.remote_addr
 
     return remote_addr or "127.0.0.1"
+
+
+def _cleanup_first_load_seen() -> None:
+    """Cleanup expired entries in the in-memory first-load cache."""
+    now = time.time()
+    # Build list for removal to avoid mutating dict during iteration
+    expired = [k for k, exp in _first_load_seen.items() if exp <= now]
+    for k in expired:
+        del _first_load_seen[k]
 
 
 def get_jwt_secret() -> str:
@@ -744,9 +759,29 @@ def profile(request: Request):
     roles_dict = request.app.frigate_config.auth.roles
     allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
 
-    return JSONResponse(
+    response = JSONResponse(
         content={"username": username, "role": role, "allowed_cameras": allowed_cameras}
     )
+
+    if username == "anonymous":
+        try:
+            remote_addr = get_remote_addr(request)
+        except Exception:
+            remote_addr = (
+                request.client.host if hasattr(request, "client") else "unknown"
+            )
+
+        ua = request.headers.get("user-agent", "")
+        key_material = f"{remote_addr}|{ua}"
+        cache_key = hashlib.sha256(key_material.encode()).hexdigest()
+
+        _cleanup_first_load_seen()
+        now = time.time()
+        if cache_key not in _first_load_seen:
+            _first_load_seen[cache_key] = now + FIRST_LOAD_TTL_SECONDS
+            logger.info(f"Anonymous user access from {remote_addr} ua={ua[:200]}")
+
+    return response
 
 
 @router.get(
