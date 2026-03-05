@@ -8,10 +8,10 @@ import { useTranslation } from "react-i18next";
 import useUserInteraction from "./use-user-interaction";
 
 type DraggableElementProps = {
-  contentRef: React.RefObject<HTMLElement>;
-  timelineRef: React.RefObject<HTMLDivElement>;
-  segmentsRef: React.RefObject<HTMLDivElement>;
-  draggableElementRef: React.RefObject<HTMLDivElement>;
+  contentRef: React.RefObject<HTMLElement | null>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
+  segmentsRef: React.RefObject<HTMLDivElement | null>;
+  draggableElementRef: React.RefObject<HTMLDivElement | null>;
   segmentDuration: number;
   showDraggableElement: boolean;
   draggableElementTime?: number;

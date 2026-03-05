@@ -102,7 +102,7 @@ export function MobilePagePortal({
 type MobilePageContentProps = {
   children: React.ReactNode;
   className?: string;
-  scrollerRef?: React.RefObject<HTMLDivElement>;
+  scrollerRef?: React.RefObject<HTMLDivElement | null>;
 };
 
 export function MobilePageContent({

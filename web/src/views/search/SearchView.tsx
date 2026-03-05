@@ -419,7 +419,7 @@ export default function SearchView({
   >();
 
   // keep track of previous ref to outline thumbnail when dialog closes
-  const prevSearchDetailRef = useRef<SearchResult | undefined>();
+  const prevSearchDetailRef = useRef<SearchResult | undefined>(undefined);
 
   useEffect(() => {
     if (searchDetail === undefined && prevSearchDetailRef.current) {

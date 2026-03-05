@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type UseUserInteractionProps = {
-  elementRef: React.RefObject<HTMLElement>;
+  elementRef: React.RefObject<HTMLElement | null>;
 };
 
 function useUserInteraction({ elementRef }: UseUserInteractionProps) {
   const [userInteracting, setUserInteracting] = useState(false);
-  const interactionTimeout = useRef<NodeJS.Timeout>();
+  const interactionTimeout = useRef<NodeJS.Timeout>(undefined);
   const isProgrammaticScroll = useRef(false);
 
   const setProgrammaticScroll = useCallback(() => {

@@ -114,10 +114,17 @@ interface PropertyElement {
   content: React.ReactElement;
 }
 
+/** Shape of the props that RJSF injects into each property element. */
+interface RjsfElementProps {
+  schema?: { type?: string | string[] };
+  uiSchema?: Record<string, unknown> & {
+    "ui:widget"?: string;
+    "ui:options"?: Record<string, unknown>;
+  };
+}
+
 function isObjectLikeElement(item: PropertyElement) {
-  const fieldSchema = item.content.props?.schema as
-    | { type?: string | string[] }
-    | undefined;
+  const fieldSchema = (item.content.props as RjsfElementProps)?.schema;
   return fieldSchema?.type === "object";
 }
 
@@ -163,16 +170,21 @@ function GridLayoutObjectFieldTemplate(
 
   // Override the properties rendering with grid layout
   const isHiddenProp = (prop: (typeof properties)[number]) =>
-    prop.content.props.uiSchema?.["ui:widget"] === "hidden";
+    (prop.content.props as RjsfElementProps).uiSchema?.["ui:widget"] ===
+    "hidden";
 
   const visibleProps = properties.filter((prop) => !isHiddenProp(prop));
 
   // Separate regular and advanced properties
   const advancedProps = visibleProps.filter(
-    (p) => p.content.props.uiSchema?.["ui:options"]?.advanced === true,
+    (p) =>
+      (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
+        ?.advanced === true,
   );
   const regularProps = visibleProps.filter(
-    (p) => p.content.props.uiSchema?.["ui:options"]?.advanced !== true,
+    (p) =>
+      (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
+        ?.advanced !== true,
   );
   const hasModifiedAdvanced = advancedProps.some((prop) =>
     isPathModified([...fieldPath, prop.name]),

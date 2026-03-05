@@ -56,7 +56,7 @@ type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
   cameraGroup: string;
   cameraRef: (node: HTMLElement | null) => void;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   includeBirdseye: boolean;
   onSelectCamera: (camera: string) => void;
   windowVisible: boolean;

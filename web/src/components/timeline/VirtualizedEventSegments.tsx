@@ -10,7 +10,7 @@ import { EventSegment } from "./EventSegment";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 
 type VirtualizedEventSegmentsProps = {
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   segments: number[];
   events: ReviewSegment[];
   segmentDuration: number;
@@ -19,7 +19,7 @@ type VirtualizedEventSegmentsProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   severityType: ReviewSeverity;
-  contentRef: React.RefObject<HTMLDivElement>;
+  contentRef: React.RefObject<HTMLDivElement | null>;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
   alignStartDateToTimeline: (timestamp: number) => number;
