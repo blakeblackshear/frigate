@@ -324,6 +324,12 @@ try:
     value = await sensor.read()
 except Exception:  # ❌ Too broad
     logger.error("Failed")
+
+# Returning exceptions in JSON responses
+except ValueError as e:
+    return JSONResponse(
+        content={"success": False, "message": str(e)},
+    )
 ```
 
 ### ✅ Use These Instead
@@ -353,6 +359,16 @@ try:
     value = await sensor.read()
 except SensorException as err:  # ✅ Specific
     logger.exception("Failed to read sensor")
+
+# Safe error responses
+except ValueError:
+    logger.exception("Invalid parameters for API request")
+    return JSONResponse(
+        content={
+            "success": False,
+            "message": "Invalid request parameters",
+        },
+    )
 ```
 
 ## Project-Specific Conventions
