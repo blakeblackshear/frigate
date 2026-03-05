@@ -51,7 +51,6 @@
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
-    "embla-carousel-react": "^8.2.0",
     "framer-motion": "^12.35.0",
     "hls.js": "^1.5.20",
     "i18next": "^24.2.0",
@@ -83,7 +82,7 @@
     "react-zoom-pan-pinch": "^3.7.0",
     "remark-gfm": "^4.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "sonner": "^1.5.0",
+    "sonner": "^2.0.7",
     "sort-by": "^1.2.0",
     "strftime": "^0.10.3",
     "swr": "^2.3.2",
@@ -102,7 +101,6 @@
     "@types/node": "^20.14.10",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/react-icons": "^3.0.0",
     "@types/strftime": "^0.9.8",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
@@ -132,6 +130,7 @@
   },
   "overrides": {
     "@radix-ui/react-compose-refs": "1.1.2",
+    "@radix-ui/react-popper": "1.2.8",
     "@radix-ui/react-slot": "1.2.4"
   }
 }
