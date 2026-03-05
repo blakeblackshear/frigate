@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { MediaSyncStats } from "@/types/ws";
 
-export default function MaintenanceSettingsView() {
+export default function MediaSyncSettingsView() {
   const { t } = useTranslation("views/settings");
   const [selectedMediaTypes, setSelectedMediaTypes] = useState<string[]>([
     "all",
@@ -103,7 +103,7 @@ export default function MaintenanceSettingsView() {
         <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">
-              <Heading as="h4" className="mb-2">
+              <Heading as="h4" className="mb-2 hidden md:block">
                 {t("maintenance.sync.title")}
               </Heading>
 
