@@ -561,6 +561,13 @@ class FrigateConfig(FrigateBaseModel):
         description="Configuration for named camera groups used to organize cameras in the UI.",
     )
 
+    active_profile: Optional[str] = Field(
+        default=None,
+        title="Active profile",
+        description="Currently active profile name. Runtime-only, not persisted in YAML.",
+        exclude=True,
+    )
+
     _plus_api: PlusApi
 
     @property
