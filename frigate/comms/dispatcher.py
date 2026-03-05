@@ -91,7 +91,9 @@ class Dispatcher:
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_global_notification_command,
+            "profile": self._on_profile_command,
         }
+        self.profile_manager = None
 
         for comm in self.comms:
             comm.subscribe(self._receive)
@@ -298,6 +300,11 @@ class Dispatcher:
             )
             self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
             self.publish("audio_detections", json.dumps(audio_detections))
+            self.publish(
+                "profile/state",
+                self.config.active_profile or "none",
+                retain=True,
+            )
 
         def handle_notification_test() -> None:
             self.publish("notification_test", "Test notification")
@@ -555,6 +562,20 @@ class Dispatcher:
             "config/notifications", notification_settings
         )
         self.publish("notifications/state", payload, retain=True)
+
+    def _on_profile_command(self, payload: str) -> None:
+        """Callback for profile/set topic."""
+        if self.profile_manager is None:
+            logger.error("Profile manager not initialized")
+            return
+
+        profile_name = payload.strip() if payload.strip() not in ("", "none", "None") else None
+        err = self.profile_manager.activate_profile(profile_name)
+        if err:
+            logger.error("Failed to activate profile: %s", err)
+            return
+
+        self.publish("profile/state", payload.strip() or "none", retain=True)
 
     def _on_audio_command(self, camera_name: str, payload: str) -> None:
         """Callback for audio topic."""

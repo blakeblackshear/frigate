@@ -1,3 +1,4 @@
+import json
 import logging
 import threading
 from typing import Any, Callable
@@ -163,6 +164,22 @@ class MqttClient(Communicator):
                 retain=True,
             )
 
+        self.publish(
+            "profile/state",
+            self.config.active_profile or "none",
+            retain=True,
+        )
+        available_profiles: list[str] = []
+        for camera in self.config.cameras.values():
+            for profile_name in camera.profiles:
+                if profile_name not in available_profiles:
+                    available_profiles.append(profile_name)
+        self.publish(
+            "profiles/available",
+            json.dumps(sorted(available_profiles)),
+            retain=True,
+        )
+
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
@@ -288,6 +305,11 @@ class MqttClient(Communicator):
                 f"{self.mqtt_config.topic_prefix}/notifications/set",
                 self.on_mqtt_command,
             )
+
+        self.client.message_callback_add(
+            f"{self.mqtt_config.topic_prefix}/profile/set",
+            self.on_mqtt_command,
+        )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/onConnect", self.on_mqtt_command
