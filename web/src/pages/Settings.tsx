@@ -40,7 +40,8 @@ import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
-import MaintenanceSettingsView from "@/views/settings/MaintenanceSettingsView";
+import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
+import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
 import SystemDetectionModelSettingsView from "@/views/settings/SystemDetectionModelSettingsView";
 import {
   SingleSectionPage,
@@ -154,7 +155,8 @@ const allSettingsViews = [
   "roles",
   "notifications",
   "frigateplus",
-  "maintenance",
+  "mediaSync",
+  "regionGrid",
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
@@ -444,7 +446,10 @@ const settingsGroups = [
   },
   {
     label: "maintenance",
-    items: [{ key: "maintenance", component: MaintenanceSettingsView }],
+    items: [
+      { key: "mediaSync", component: MediaSyncSettingsView },
+      { key: "regionGrid", component: RegionGridSettingsView },
+    ],
   },
 ];
 
@@ -471,15 +476,12 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "masksAndZones",
   "motionTuner",
   "triggers",
+  "regionGrid",
 ];
 
 const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 
-const LARGE_BOTTOM_MARGIN_PAGES = [
-  "masksAndZones",
-  "motionTuner",
-  "maintenance",
-];
+const LARGE_BOTTOM_MARGIN_PAGES = ["masksAndZones", "motionTuner", "mediaSync"];
 
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
