@@ -354,16 +354,12 @@ class TestProfilePersistence(unittest.TestCase):
             temp_path = f.name
 
         try:
-            with patch.object(
-                ProfileManager, "_persist_active_profile"
-            ) as mock_persist:
-                # Simulate writing
-                from pathlib import Path
+            from pathlib import Path
 
-                path = Path(temp_path)
-                path.write_text("armed")
-                loaded = path.read_text().strip()
-                assert loaded == "armed"
+            path = Path(temp_path)
+            path.write_text("armed")
+            loaded = path.read_text().strip()
+            assert loaded == "armed"
         finally:
             os.unlink(temp_path)
 
@@ -374,8 +370,6 @@ class TestProfilePersistence(unittest.TestCase):
             temp_path = f.name
 
         try:
-            from pathlib import Path
-
             with patch.object(type(PERSISTENCE_FILE), "exists", return_value=True):
                 with patch.object(
                     type(PERSISTENCE_FILE), "read_text", return_value=""

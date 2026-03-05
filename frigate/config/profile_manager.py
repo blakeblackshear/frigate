@@ -1,6 +1,5 @@
 """Profile manager for activating/deactivating named config profiles."""
 
-import json
 import logging
 from pathlib import Path
 from typing import Optional
