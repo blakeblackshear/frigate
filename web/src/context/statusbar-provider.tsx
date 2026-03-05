@@ -107,10 +107,10 @@ export function StatusBarMessagesProvider({
   }, []);
 
   return (
-    <StatusBarMessagesContext.Provider
+    <StatusBarMessagesContext
       value={{ messages, addMessage, removeMessage, clearMessages }}
     >
       {children}
-    </StatusBarMessagesContext.Provider>
+    </StatusBarMessagesContext>
   );
 }

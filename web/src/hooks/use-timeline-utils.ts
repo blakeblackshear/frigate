@@ -3,7 +3,7 @@ import { useCallback } from "react";
 export type TimelineUtilsProps = {
   segmentDuration: number;
   timelineDuration?: number;
-  timelineRef?: React.RefObject<HTMLElement>;
+  timelineRef?: React.RefObject<HTMLElement | null>;
 };
 
 export function useTimelineUtils({

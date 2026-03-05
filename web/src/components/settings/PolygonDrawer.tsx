@@ -18,7 +18,7 @@ import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 
 type PolygonDrawerProps = {
-  stageRef: RefObject<Konva.Stage>;
+  stageRef: RefObject<Konva.Stage | null>;
   points: number[][];
   distances: number[];
   isActive: boolean;

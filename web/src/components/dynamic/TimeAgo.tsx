@@ -1,4 +1,5 @@
 import { t } from "i18next";
+import type { JSX } from "react";
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 
 interface IProp {

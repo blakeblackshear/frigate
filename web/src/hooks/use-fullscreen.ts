@@ -78,7 +78,7 @@ function removeEventListeners(
 }
 
 export function useFullscreen<T extends HTMLElement = HTMLElement>(
-  elementRef: RefObject<T>,
+  elementRef: RefObject<T | null>,
 ) {
   const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);

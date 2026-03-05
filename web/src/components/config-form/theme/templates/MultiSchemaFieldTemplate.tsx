@@ -1,6 +1,7 @@
 // Custom MultiSchemaFieldTemplate to handle anyOf [Type, null] fields
 // Renders simple nullable types as single inputs instead of dropdowns
 
+import type { JSX } from "react";
 import {
   MultiSchemaFieldTemplateProps,
   StrictRJSFSchema,
