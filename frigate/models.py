@@ -78,6 +78,7 @@ class Recordings(Model):
     dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB
     regions = IntegerField(null=True)
+    motion_heatmap = JSONField(null=True)  # 16x16 grid, 256 values (0-255)
 
 
 class ExportCase(Model):

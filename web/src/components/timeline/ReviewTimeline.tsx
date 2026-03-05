@@ -343,9 +343,12 @@ export function ReviewTimeline({
 
   useEffect(() => {
     if (onHandlebarDraggingChange) {
-      onHandlebarDraggingChange(isDraggingHandlebar);
+      // Keep existing callback name but treat it as a generic dragging signal.
+      // This allows consumers (e.g. export-handle timelines) to correctly
+      // enable preview scrubbing while dragging export handles.
+      onHandlebarDraggingChange(isDragging);
     }
-  }, [isDraggingHandlebar, onHandlebarDraggingChange]);
+  }, [isDragging, onHandlebarDraggingChange]);
 
   const isHandlebarInNoRecordingPeriod = useMemo(() => {
     if (!getRecordingAvailability || handlebarTime === undefined) return false;
