@@ -870,6 +870,7 @@ async def vod_ts(
     clips = []
     durations = []
     min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
+    min_hls_segment_ms = 2000  # Minimum 2s for HLS playback compatibility
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
 
     recording: Recordings
@@ -899,6 +900,23 @@ async def vod_ts(
         # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
+
+        # if segment is too short and was trimmed by clipFrom, pull clipFrom back
+        # to ensure a minimum playable segment length for HLS compatibility
+        # if segment is too short for reliable HLS playback and was trimmed
+        # by clipFrom, pull clipFrom back to ensure a minimum playable length
+        if duration < min_hls_segment_ms and "clipFrom" in clip:
+            shortage = min_hls_segment_ms - duration
+            new_inpoint = max(0, clip["clipFrom"] - shortage)
+            gained = clip["clipFrom"] - new_inpoint
+            clip["clipFrom"] = new_inpoint
+            duration += gained
+            logger.debug(
+                "VOD: extended clip %s by pulling clipFrom back to %sms, duration now %sms",
+                recording.path,
+                new_inpoint,
+                duration,
+            )
 
         if duration < min_duration_ms:
             # skip if the clip has no valid duration (too short to contain frames)
