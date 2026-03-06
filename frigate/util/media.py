@@ -151,7 +151,9 @@ def sync_recordings(
 
             max_inserts = 1000
             for batch in chunked(recordings_to_delete, max_inserts):
-                RecordingsToDelete.insert_many(batch).execute()
+                RecordingsToDelete.insert_many(
+                    [{"id": r["id"]} for r in batch]
+                ).execute()
 
             try:
                 deleted = (
