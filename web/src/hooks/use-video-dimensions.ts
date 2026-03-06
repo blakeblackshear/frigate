@@ -7,7 +7,7 @@ export type VideoResolutionType = {
 };
 
 export function useVideoDimensions(
-  containerRef: React.RefObject<HTMLDivElement>,
+  containerRef: React.RefObject<HTMLDivElement | null>,
 ) {
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);

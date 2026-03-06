@@ -1,5 +1,6 @@
 """Ollama Provider for Frigate AI."""
 
+import json
 import logging
 from typing import Any, Optional
 
@@ -108,7 +109,22 @@ class OllamaClient(GenAIClient):
             if msg.get("name"):
                 msg_dict["name"] = msg["name"]
             if msg.get("tool_calls"):
-                msg_dict["tool_calls"] = msg["tool_calls"]
+                # Ollama requires tool call arguments as dicts, but the
+                # conversation format (OpenAI-style) stores them as JSON
+                # strings. Convert back to dicts for Ollama.
+                ollama_tool_calls = []
+                for tc in msg["tool_calls"]:
+                    func = tc.get("function") or {}
+                    args = func.get("arguments") or {}
+                    if isinstance(args, str):
+                        try:
+                            args = json.loads(args)
+                        except (json.JSONDecodeError, TypeError):
+                            args = {}
+                    ollama_tool_calls.append(
+                        {"function": {"name": func.get("name", ""), "arguments": args}}
+                    )
+                msg_dict["tool_calls"] = ollama_tool_calls
             request_messages.append(msg_dict)
 
         request_params: dict[str, Any] = {
@@ -120,25 +136,27 @@ class OllamaClient(GenAIClient):
             request_params["stream"] = True
         if tools:
             request_params["tools"] = tools
-            if tool_choice:
-                request_params["tool_choice"] = (
-                    "none"
-                    if tool_choice == "none"
-                    else "required"
-                    if tool_choice == "required"
-                    else "auto"
-                )
         return request_params
 
     def _message_from_response(self, response: dict[str, Any]) -> dict[str, Any]:
         """Parse Ollama chat response into {content, tool_calls, finish_reason}."""
         if not response or "message" not in response:
+            logger.debug("Ollama response empty or missing 'message' key")
             return {
                 "content": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
         message = response["message"]
+        logger.debug(
+            "Ollama response message keys: %s, content_len=%s, thinking_len=%s, "
+            "tool_calls=%s, done=%s",
+            list(message.keys()) if hasattr(message, "keys") else "N/A",
+            len(message.get("content", "") or "") if message.get("content") else 0,
+            len(message.get("thinking", "") or "") if message.get("thinking") else 0,
+            bool(message.get("tool_calls")),
+            response.get("done"),
+        )
         content = message.get("content", "").strip() if message.get("content") else None
         tool_calls = parse_tool_calls_from_message(message)
         finish_reason = "error"
@@ -198,7 +216,13 @@ class OllamaClient(GenAIClient):
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
     ):
-        """Stream chat with tools; yields content deltas then final message."""
+        """Stream chat with tools; yields content deltas then final message.
+
+        When tools are provided, Ollama streaming does not include tool_calls
+        in the response chunks. To work around this, we use a non-streaming
+        call when tools are present to ensure tool calls are captured, then
+        emit the content as a single delta followed by the final message.
+        """
         if self.provider is None:
             logger.warning(
                 "Ollama provider has not been initialized. Check your Ollama configuration."
@@ -213,6 +237,27 @@ class OllamaClient(GenAIClient):
             )
             return
         try:
+            # Ollama does not return tool_calls in streaming mode, so fall
+            # back to a non-streaming call when tools are provided.
+            if tools:
+                logger.debug(
+                    "Ollama: tools provided, using non-streaming call for tool support"
+                )
+                request_params = self._build_request_params(
+                    messages, tools, tool_choice, stream=False
+                )
+                async_client = OllamaAsyncClient(
+                    host=self.genai_config.base_url,
+                    timeout=self.timeout,
+                )
+                response = await async_client.chat(**request_params)
+                result = self._message_from_response(response)
+                content = result.get("content")
+                if content:
+                    yield ("content_delta", content)
+                yield ("message", result)
+                return
+
             request_params = self._build_request_params(
                 messages, tools, tool_choice, stream=True
             )
@@ -222,27 +267,23 @@ class OllamaClient(GenAIClient):
             )
             content_parts: list[str] = []
             final_message: dict[str, Any] | None = None
-            try:
-                stream = await async_client.chat(**request_params)
-                async for chunk in stream:
-                    if not chunk or "message" not in chunk:
-                        continue
-                    msg = chunk.get("message", {})
-                    delta = msg.get("content") or ""
-                    if delta:
-                        content_parts.append(delta)
-                        yield ("content_delta", delta)
-                    if chunk.get("done"):
-                        full_content = "".join(content_parts).strip() or None
-                        tool_calls = parse_tool_calls_from_message(msg)
-                        final_message = {
-                            "content": full_content,
-                            "tool_calls": tool_calls,
-                            "finish_reason": "tool_calls" if tool_calls else "stop",
-                        }
-                        break
-            finally:
-                await async_client.close()
+            stream = await async_client.chat(**request_params)
+            async for chunk in stream:
+                if not chunk or "message" not in chunk:
+                    continue
+                msg = chunk.get("message", {})
+                delta = msg.get("content") or ""
+                if delta:
+                    content_parts.append(delta)
+                    yield ("content_delta", delta)
+                if chunk.get("done"):
+                    full_content = "".join(content_parts).strip() or None
+                    final_message = {
+                        "content": full_content,
+                        "tool_calls": None,
+                        "finish_reason": "stop",
+                    }
+                    break
 
             if final_message is not None:
                 yield ("message", final_message)

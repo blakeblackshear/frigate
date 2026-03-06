@@ -17,7 +17,7 @@ type ObjectPathProps = {
   color?: number[];
   width?: number;
   pointRadius?: number;
-  imgRef: React.RefObject<HTMLImageElement>;
+  imgRef: React.RefObject<HTMLImageElement | null>;
   onPointClick?: (index: number) => void;
   visible?: boolean;
 };

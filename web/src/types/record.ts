@@ -11,6 +11,7 @@ export type Recording = {
   duration: number;
   motion: number;
   objects: number;
+  motion_heatmap?: Record<string, number> | null;
   dBFS: number;
 };
 

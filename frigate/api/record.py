@@ -261,6 +261,7 @@ async def recordings(
             Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
+            Recordings.motion_heatmap,
             Recordings.duration,
         )
         .where(

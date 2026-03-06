@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
+import type { JSX } from "react";
 import { useRef } from "react";
 
 type PlatformAwareDialogProps = {

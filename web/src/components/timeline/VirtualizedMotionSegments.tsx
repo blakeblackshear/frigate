@@ -10,7 +10,7 @@ import MotionSegment from "./MotionSegment";
 import { ReviewSegment, MotionData } from "@/types/review";
 
 type VirtualizedMotionSegmentsProps = {
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   segments: number[];
   events: ReviewSegment[];
   motion_events: MotionData[];
@@ -19,7 +19,7 @@ type VirtualizedMotionSegmentsProps = {
   showMinimap: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
-  contentRef: React.RefObject<HTMLDivElement>;
+  contentRef: React.RefObject<HTMLDivElement | null>;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
   motionOnly: boolean;

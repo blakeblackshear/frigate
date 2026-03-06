@@ -28,7 +28,7 @@ type EventSegmentProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   severityType: ReviewSeverity;
-  contentRef: RefObject<HTMLDivElement>;
+  contentRef: RefObject<HTMLDivElement | null>;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
   dense: boolean;
