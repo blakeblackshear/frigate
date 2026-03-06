@@ -176,11 +176,32 @@ class ImprovedMotionDetector(MotionDetector):
             motion_boxes = []
             pct_motion = 0
 
+        # skip motion entirely if the scene change percentage exceeds configured
+        # threshold. this is useful to ignore lighting storms, IR mode switches,
+        # etc. rather than registering them as brief motion and then recalibrating.
+        # note: skipping means the frame is dropped and **no recording will be
+        # created**, which could hide a legitimate object if the camera is actively
+        # auto‑tracking. the alternative is to allow motion and accept a small
+        # recording that can be reviewed in the timeline. disabled by default (None).
+        if (
+            self.config.skip_motion_threshold is not None
+            and pct_motion > self.config.skip_motion_threshold
+        ):
+            # force a recalibration so we transition to the new background
+            self.calibrating = True
+            return []
+
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated
         if pct_motion < 0.05 and len(motion_boxes) <= 4:
             self.calibrating = False
 
-        # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
+        # if calibrating or the motion contours are > 80% of the image area
+        # (lightning, ir, ptz) recalibrate. the lightning threshold does **not**
+        # stop motion detection entirely; it simply halts additional processing for
+        # the current frame once the percentage crosses the threshold. this helps
+        # reduce false positive object detections and CPU usage during high‑motion
+        # events. recordings continue to be generated because users expect data
+        # while a PTZ camera is moving.
         if self.calibrating or pct_motion > self.config.lightning_threshold:
             self.calibrating = True
 
