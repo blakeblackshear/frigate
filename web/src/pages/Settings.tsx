@@ -479,7 +479,7 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "regionGrid",
 ];
 
-const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
+const ALLOWED_VIEWS_FOR_VIEWER = ["profileSettings", "notifications"];
 
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
