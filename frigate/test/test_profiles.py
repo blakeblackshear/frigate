@@ -53,6 +53,23 @@ class TestCameraProfileConfig(unittest.TestCase):
         assert profile.review is not None
         assert profile.review.alerts.labels == ["person", "car"]
 
+    def test_enabled_field(self):
+        """Profile with enabled set to False."""
+        profile = CameraProfileConfig(enabled=False)
+        assert profile.enabled is False
+        dumped = profile.model_dump(exclude_unset=True)
+        assert dumped == {"enabled": False}
+
+    def test_enabled_field_true(self):
+        """Profile with enabled set to True."""
+        profile = CameraProfileConfig(enabled=True)
+        assert profile.enabled is True
+
+    def test_enabled_default_none(self):
+        """Enabled defaults to None when not set."""
+        profile = CameraProfileConfig()
+        assert profile.enabled is None
+
     def test_none_sections_not_in_dump(self):
         """Sections left as None should not appear in exclude_unset dump."""
         profile = CameraProfileConfig(detect={"enabled": False})
@@ -329,6 +346,66 @@ class TestProfileManager(unittest.TestCase):
 
         # Back camera has no "disarmed" profile, should be unchanged
         assert self.config.cameras["back"].notifications.enabled == back_base_notifications
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_activate_profile_disables_camera(self, mock_persist):
+        """Profile with enabled=false disables the camera."""
+        # Add a profile that disables the front camera
+        from frigate.config.camera.profile import CameraProfileConfig
+
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            enabled=False
+        )
+        # Re-create manager to pick up new profile
+        self.manager = ProfileManager(self.config, self.mock_updater)
+
+        assert self.config.cameras["front"].enabled is True
+        err = self.manager.activate_profile("away")
+        assert err is None
+        assert self.config.cameras["front"].enabled is False
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_deactivate_restores_enabled(self, mock_persist):
+        """Deactivating a profile restores the camera's base enabled state."""
+        from frigate.config.camera.profile import CameraProfileConfig
+
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            enabled=False
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+
+        self.manager.activate_profile("away")
+        assert self.config.cameras["front"].enabled is False
+
+        self.manager.activate_profile(None)
+        assert self.config.cameras["front"].enabled is True
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_enabled_zmq_published(self, mock_persist):
+        """ZMQ update is published for enabled state change."""
+        from frigate.config.camera.profile import CameraProfileConfig
+        from frigate.config.camera.updater import (
+            CameraConfigUpdateEnum,
+            CameraConfigUpdateTopic,
+        )
+
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            enabled=False
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+        self.mock_updater.reset_mock()
+
+        self.manager.activate_profile("away")
+
+        # Find the enabled update call
+        enabled_calls = [
+            call
+            for call in self.mock_updater.publish_update.call_args_list
+            if call[0][0]
+            == CameraConfigUpdateTopic(CameraConfigUpdateEnum.enabled, "front")
+        ]
+        assert len(enabled_calls) == 1
+        assert enabled_calls[0][0][1] is False
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_zmq_updates_published(self, mock_persist):

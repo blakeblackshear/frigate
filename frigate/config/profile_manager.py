@@ -43,12 +43,14 @@ class ProfileManager:
         self.config: FrigateConfig = config
         self.config_updater = config_updater
         self._base_configs: dict[str, dict[str, dict]] = {}
+        self._base_enabled: dict[str, bool] = {}
         self._snapshot_base_configs()
 
     def _snapshot_base_configs(self) -> None:
-        """Snapshot each camera's current section configs as the base."""
+        """Snapshot each camera's current section configs and enabled state."""
         for cam_name, cam_config in self.config.cameras.items():
             self._base_configs[cam_name] = {}
+            self._base_enabled[cam_name] = cam_config.enabled
             for section in PROFILE_SECTION_UPDATES:
                 section_config = getattr(cam_config, section, None)
                 if section_config is not None:
@@ -97,6 +99,13 @@ class ProfileManager:
     def _reset_to_base(self, changed: dict[str, set[str]]) -> None:
         """Reset all cameras to their base (no-profile) config."""
         for cam_name, cam_config in self.config.cameras.items():
+            # Restore enabled state
+            base_enabled = self._base_enabled.get(cam_name)
+            if base_enabled is not None and cam_config.enabled != base_enabled:
+                cam_config.enabled = base_enabled
+                changed.setdefault(cam_name, set()).add("enabled")
+
+            # Restore section configs
             base = self._base_configs.get(cam_name, {})
             for section in PROFILE_SECTION_UPDATES:
                 base_data = base.get(section)
@@ -121,6 +130,11 @@ class ProfileManager:
             profile = cam_config.profiles.get(profile_name)
             if profile is None:
                 continue
+
+            # Apply enabled override
+            if profile.enabled is not None and cam_config.enabled != profile.enabled:
+                cam_config.enabled = profile.enabled
+                changed.setdefault(cam_name, set()).add("enabled")
 
             base = self._base_configs.get(cam_name, {})
 
@@ -152,6 +166,15 @@ class ProfileManager:
                 continue
 
             for section in sections:
+                if section == "enabled":
+                    self.config_updater.publish_update(
+                        CameraConfigUpdateTopic(
+                            CameraConfigUpdateEnum.enabled, cam_name
+                        ),
+                        cam_config.enabled,
+                    )
+                    continue
+
                 update_enum = PROFILE_SECTION_UPDATES.get(section)
                 if update_enum is None:
                     continue

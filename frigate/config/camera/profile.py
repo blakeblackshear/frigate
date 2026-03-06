@@ -24,6 +24,7 @@ class CameraProfileConfig(FrigateBaseModel):
     explicitly-set fields are used as overrides via exclude_unset.
     """
 
+    enabled: Optional[bool] = None
     audio: Optional[AudioConfig] = None
     birdseye: Optional[BirdseyeCameraConfig] = None
     detect: Optional[DetectConfig] = None
