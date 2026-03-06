@@ -25,7 +25,6 @@ from frigate.api.defs.query.recordings_query_parameters import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
-from frigate.const import RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.util.time import get_dst_transitions
 
@@ -36,14 +35,14 @@ router = APIRouter(tags=[Tags.recordings])
 
 @router.get("/recordings/storage", dependencies=[Depends(allow_any_authenticated())])
 def get_recordings_storage_usage(request: Request):
-    recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
-        "storage"
-    ][RECORD_DIR]
+    storage_stats = request.app.stats_emitter.get_latest_stats()["service"]["storage"]
 
-    if not recording_stats:
+    recording_paths = request.app.frigate_config.get_recordings_paths()
+    recording_stats = [storage_stats.get(path, {}) for path in recording_paths]
+    total_mb = sum(stat.get("total", 0) for stat in recording_stats)
+
+    if total_mb == 0:
         return JSONResponse({})
-
-    total_mb = recording_stats["total"]
 
     camera_usages: dict[str, dict] = (
         request.app.storage_maintainer.calculate_camera_usages()

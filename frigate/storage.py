@@ -8,7 +8,7 @@ from pathlib import Path
 from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR, REPLAY_CAMERA_PREFIX
+from frigate.const import REPLAY_CAMERA_PREFIX
 from frigate.models import Event, Recordings
 from frigate.util.builtin import clear_and_unlink
 
@@ -103,26 +103,41 @@ class StorageMaintainer(threading.Thread):
 
         return usages
 
-    def check_storage_needs_cleanup(self) -> bool:
-        """Return if storage needs cleanup."""
+    def _get_path_bandwidths(self) -> dict[str, float]:
+        bandwidth_per_path: dict[str, float] = {}
+
+        for camera, stats in self.camera_storage_stats.items():
+            path = self.config.get_camera_recordings_path(camera)
+            bandwidth_per_path[path] = bandwidth_per_path.get(path, 0) + stats.get(
+                "bandwidth", 0
+            )
+
+        return bandwidth_per_path
+
+    def check_storage_needs_cleanup(self) -> str | None:
+        """Return recordings root path that needs cleanup, if any."""
         # currently runs cleanup if less than 1 hour of space is left
         # disk_usage should not spin up disks
-        hourly_bandwidth = sum(
-            [b["bandwidth"] for b in self.camera_storage_stats.values()]
-        )
-        remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / pow(2, 20), 1)
-        logger.debug(
-            f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage}."
-        )
-        return remaining_storage < hourly_bandwidth
+        for path, hourly_bandwidth in self._get_path_bandwidths().items():
+            try:
+                remaining_storage = round(shutil.disk_usage(path).free / pow(2, 20), 1)
+            except (FileNotFoundError, OSError):
+                continue
 
-    def reduce_storage_consumption(self) -> None:
+            logger.debug(
+                f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage} for path {path}."
+            )
+
+            if remaining_storage < hourly_bandwidth:
+                return path
+
+        return None
+
+    def reduce_storage_consumption(self, recordings_root: str) -> None:
         """Remove oldest hour of recordings."""
         logger.debug("Starting storage cleanup.")
         deleted_segments_size = 0
-        hourly_bandwidth = sum(
-            [b["bandwidth"] for b in self.camera_storage_stats.values()]
-        )
+        hourly_bandwidth = self._get_path_bandwidths().get(recordings_root, 0)
 
         recordings: Recordings = (
             Recordings.select(
@@ -133,6 +148,7 @@ class StorageMaintainer(threading.Thread):
                 Recordings.segment_size,
                 Recordings.path,
             )
+            .where(Recordings.path.startswith(f"{recordings_root}/"))
             .order_by(Recordings.start_time.asc())
             .namedtuples()
             .iterator()
@@ -207,6 +223,7 @@ class StorageMaintainer(threading.Thread):
                     Recordings.path,
                     Recordings.segment_size,
                 )
+                .where(Recordings.path.startswith(f"{recordings_root}/"))
                 .order_by(Recordings.start_time.asc())
                 .namedtuples()
                 .iterator()
@@ -288,10 +305,11 @@ class StorageMaintainer(threading.Thread):
                 self.calculate_camera_bandwidth()
                 logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
 
-            if self.check_storage_needs_cleanup():
+            cleanup_root = self.check_storage_needs_cleanup()
+            if cleanup_root:
                 logger.info(
-                    "Less than 1 hour of recording space left, running storage maintenance..."
+                    f"Less than 1 hour of recording space left for {cleanup_root}, running storage maintenance..."
                 )
-                self.reduce_storage_consumption()
+                self.reduce_storage_consumption(cleanup_root)
 
         logger.info("Exiting storage maintainer...")

@@ -788,7 +788,7 @@ def restart():
     description="""Start an asynchronous media sync job to find and (optionally) remove orphaned media files.
     Returns 202 with job details when queued, or 409 if a job is already running.""",
 )
-def sync_media(body: MediaSyncBody = Body(...)):
+def sync_media(request: Request, body: MediaSyncBody = Body(...)):
     """Start async media sync job - remove orphaned files.
 
     Syncs specified media types: event snapshots, event thumbnails, review thumbnails,
@@ -804,7 +804,10 @@ def sync_media(body: MediaSyncBody = Body(...)):
         202 Accepted with job_id, or 409 Conflict if job already running.
     """
     job_id = start_media_sync_job(
-        dry_run=body.dry_run, media_types=body.media_types, force=body.force
+        dry_run=body.dry_run,
+        media_types=body.media_types,
+        force=body.force,
+        recordings_roots=request.app.frigate_config.get_recordings_paths(),
     )
 
     if job_id is None:

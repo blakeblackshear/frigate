@@ -29,6 +29,7 @@ class MediaSyncJob(Job):
     dry_run: bool = False
     media_types: list[str] = field(default_factory=lambda: ["all"])
     force: bool = False
+    recordings_roots: list[str] = field(default_factory=list)
 
 
 class MediaSyncRunner(threading.Thread):
@@ -59,6 +60,7 @@ class MediaSyncRunner(threading.Thread):
                 dry_run=self.job.dry_run,
                 media_types=self.job.media_types,
                 force=self.job.force,
+                recordings_roots=self.job.recordings_roots,
             )
 
             # Store results and mark as complete
@@ -95,6 +97,7 @@ def start_media_sync_job(
     dry_run: bool = False,
     media_types: Optional[list[str]] = None,
     force: bool = False,
+    recordings_roots: Optional[list[str]] = None,
 ) -> Optional[str]:
     """Start a new media sync job if none is currently running.
 
@@ -113,6 +116,7 @@ def start_media_sync_job(
         dry_run=dry_run,
         media_types=media_types or ["all"],
         force=force,
+        recordings_roots=recordings_roots or [],
     )
 
     logger.debug(f"Creating new media sync job: {job.id}")

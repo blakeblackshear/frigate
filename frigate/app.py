@@ -131,6 +131,8 @@ class FrigateApp:
             EXPORT_DIR,
         ]
 
+        dirs.extend(self.config.get_recordings_paths())
+
         if self.config.face_recognition.enabled:
             dirs.append(FACE_DIR)
 

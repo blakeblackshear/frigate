@@ -19,7 +19,7 @@ from pydantic import (
 from ruamel.yaml import YAML
 from typing_extensions import Self
 
-from frigate.const import REGEX_JSON
+from frigate.const import RECORD_DIR, REGEX_JSON
 from frigate.detectors import DetectorConfig, ModelConfig
 from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.plus import PlusApi
@@ -941,6 +941,12 @@ class FrigateConfig(FrigateBaseModel):
             if zone in v.keys():
                 raise ValueError("Zones cannot share names with cameras")
         return v
+
+    def get_camera_recordings_path(self, camera: str) -> str:
+        return self.cameras[camera].path
+
+    def get_recordings_paths(self) -> list[str]:
+        return sorted({camera.path for camera in self.cameras.values()})
 
     @classmethod
     def load(cls, **kwargs):

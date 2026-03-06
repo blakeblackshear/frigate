@@ -34,7 +34,6 @@ from frigate.const import (
     INSERT_MANY_RECORDINGS,
     MAX_SEGMENT_DURATION,
     MAX_SEGMENTS_IN_CACHE,
-    RECORD_DIR,
 )
 from frigate.models import Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
@@ -585,7 +584,7 @@ class RecordingMaintainer(threading.Thread):
 
         # directory will be in utc due to start_time being in utc
         directory = os.path.join(
-            RECORD_DIR,
+            self.config.get_camera_recordings_path(camera),
             start_time.strftime("%Y-%m-%d/%H"),
             camera,
         )
