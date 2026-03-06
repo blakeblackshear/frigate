@@ -131,12 +131,10 @@ export default function MotionSearchView({
   );
 
   // Camera previews – defer until dialog is closed
-  const allPreviews = useCameraPreviews(
-    isSearchDialogOpen ? { after: 0, before: 0 } : timeRange,
-    {
-      camera: selectedCamera ?? undefined,
-    },
-  );
+  const allPreviews = useCameraPreviews(timeRange, {
+    camera: selectedCamera ?? undefined,
+    fetchPreviews: !isSearchDialogOpen,
+  });
 
   // ROI state
   const [polygonPoints, setPolygonPoints] = useState<number[][]>([]);
