@@ -901,8 +901,6 @@ async def vod_ts(
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-        # if segment is too short and was trimmed by clipFrom, pull clipFrom back
-        # to ensure a minimum playable segment length for HLS compatibility
         # if segment is too short for reliable HLS playback and was trimmed
         # by clipFrom, pull clipFrom back to ensure a minimum playable length
         if duration < min_hls_segment_ms and "clipFrom" in clip:
