@@ -72,6 +72,7 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             None,
             None,
             mock_publisher,
+            None,
             enforce_default_admin=False,
         )
 
