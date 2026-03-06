@@ -200,7 +200,7 @@ class TestHttp(unittest.TestCase):
         )
 
         storage.calculate_camera_bandwidth()
-        storage.reduce_storage_consumption()
+        storage.reduce_storage_consumption(config.get_camera_recordings_path("front_door"))
         with self.assertRaises(DoesNotExist):
             assert Recordings.get(Recordings.id == rec_k_id)
             assert Recordings.get(Recordings.id == rec_k2_id)
@@ -255,11 +255,78 @@ class TestHttp(unittest.TestCase):
             )
 
         storage.calculate_camera_bandwidth()
-        storage.reduce_storage_consumption()
+        storage.reduce_storage_consumption(config.get_camera_recordings_path("front_door"))
         assert Recordings.get(Recordings.id == rec_k_id)
         assert Recordings.get(Recordings.id == rec_k2_id)
         assert Recordings.get(Recordings.id == rec_k3_id)
 
+
+
+    def test_storage_cleanup_only_for_overflowed_root(self):
+        """Ensure cleanup removes recordings only from the targeted recordings root."""
+        root_a = tempfile.mkdtemp()
+        root_b = tempfile.mkdtemp()
+
+        config = FrigateConfig(
+            **{
+                "mqtt": {"host": "mqtt"},
+                "cameras": {
+                    "front_door": {
+                        "path": root_a,
+                        "ffmpeg": {
+                            "inputs": [
+                                {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                            ]
+                        },
+                        "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    },
+                    "back_door": {
+                        "path": root_b,
+                        "ffmpeg": {
+                            "inputs": [
+                                {"path": "rtsp://10.0.0.2:554/video", "roles": ["detect"]}
+                            ]
+                        },
+                        "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    },
+                },
+            }
+        )
+        storage = StorageMaintainer(config, MagicMock())
+
+        t0 = datetime.datetime.now().timestamp()
+        delete_a = "a.delete"
+        keep_b = "b.keep"
+        _insert_mock_recording(
+            delete_a,
+            os.path.join(root_a, f"{delete_a}.tmp"),
+            t0 - 100,
+            t0 - 90,
+            camera="front_door",
+            seg_size=8,
+            seg_dur=10,
+        )
+        _insert_mock_recording(
+            keep_b,
+            os.path.join(root_b, f"{keep_b}.tmp"),
+            t0 - 80,
+            t0 - 70,
+            camera="back_door",
+            seg_size=8,
+            seg_dur=10,
+        )
+
+        storage.camera_storage_stats = {
+            "front_door": {"bandwidth": 4, "needs_refresh": False},
+            "back_door": {"bandwidth": 0, "needs_refresh": False},
+        }
+
+        storage.reduce_storage_consumption(root_a)
+
+        with self.assertRaises(DoesNotExist):
+            Recordings.get(Recordings.id == delete_a)
+
+        assert Recordings.get(Recordings.id == keep_b)
 
 def _insert_mock_event(
     id: str,

@@ -84,7 +84,10 @@ def remove_empty_directories(root: Path, paths: Iterable[Path]) -> None:
 
 
 def sync_recordings(
-    limited: bool = False, dry_run: bool = False, force: bool = False
+    limited: bool = False,
+    dry_run: bool = False,
+    force: bool = False,
+    recordings_roots: list[str] | None = None,
 ) -> SyncResult:
     """Sync recordings between the database and disk using the SyncResult format."""
 
@@ -110,6 +113,7 @@ def sync_recordings(
         page_size = 1000
         num_pages = (recordings_count + page_size - 1) // page_size
         recordings_to_delete: list[dict] = []
+        configured_roots = set(recordings_roots or [RECORD_DIR])
 
         for page in range(num_pages):
             for recording in recordings_query.paginate(page, page_size):
@@ -175,22 +179,19 @@ def sync_recordings(
             return result
 
         # Only try to cleanup files if db cleanup was successful or dry_run
-        if limited:
-            # get recording files from last 36 hours
-            hour_check = f"{RECORD_DIR}/{check_point.strftime('%Y-%m-%d/%H')}"
-            files_on_disk = {
-                os.path.join(root, file)
-                for root, _, files in os.walk(RECORD_DIR)
-                for file in files
-                if root > hour_check
-            }
-        else:
-            # get all recordings files on disk and put them in a set
-            files_on_disk = {
-                os.path.join(root, file)
-                for root, _, files in os.walk(RECORD_DIR)
-                for file in files
-            }
+        # get recording files on disk and put them in a set
+        files_on_disk = set()
+        for recordings_root in configured_roots:
+            for root, _, files in os.walk(recordings_root):
+                for file in files:
+                    file_path = os.path.join(root, file)
+
+                    if limited:
+                        file_mtime = os.path.getmtime(file_path)
+                        if file_mtime < check_point.timestamp():
+                            continue
+
+                    files_on_disk.add(file_path)
 
         result.files_checked = len(files_on_disk)
 
@@ -759,7 +760,10 @@ class MediaSyncResults:
 
 
 def sync_all_media(
-    dry_run: bool = False, media_types: list[str] = ["all"], force: bool = False
+    dry_run: bool = False,
+    media_types: list[str] = ["all"],
+    force: bool = False,
+    recordings_roots: list[str] | None = None,
 ) -> MediaSyncResults:
     """Sync specified media types with the database.
 
@@ -797,7 +801,9 @@ def sync_all_media(
         results.exports = sync_exports(dry_run=dry_run, force=force)
 
     if sync_all or "recordings" in media_types:
-        results.recordings = sync_recordings(dry_run=dry_run, force=force)
+        results.recordings = sync_recordings(
+            dry_run=dry_run, force=force, recordings_roots=recordings_roots
+        )
 
     logger.info(
         f"Media sync complete: checked {results.total_files_checked} files, "

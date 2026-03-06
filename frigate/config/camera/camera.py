@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from typing import Optional
 
-from pydantic import Field, PrivateAttr, model_validator
+from pydantic import Field, PrivateAttr, field_validator, model_validator
 
 from frigate.const import CACHE_DIR, CACHE_SEGMENT_FORMAT, REGEX_CAMERA_NAME
 from frigate.ffmpeg_presets import (
@@ -71,6 +71,20 @@ class CameraConfig(FrigateBaseModel):
         return values
 
     enabled: bool = Field(default=True, title="Enabled", description="Enabled")
+
+    path: str = Field(
+        default="/media/frigate/recordings",
+        title="Recordings path",
+        description="Absolute base path for this camera's recordings. Recordings are stored in camera/date subdirectories under this path.",
+    )
+
+    @field_validator("path")
+    @classmethod
+    def validate_path(cls, value: str) -> str:
+        if not os.path.isabs(value):
+            raise ValueError("Camera path must be an absolute path.")
+
+        return value.rstrip("/") or "/"
 
     # Options with global fallback
     audio: AudioConfig = Field(
