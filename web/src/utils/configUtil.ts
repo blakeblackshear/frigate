@@ -54,6 +54,20 @@ export const cameraUpdateTopicMap: Record<string, string> = {
   ui: "ui",
 };
 
+// Sections where global config serves as the default for per-camera config.
+// Global updates to these sections are fanned out to all cameras via wildcard.
+export const globalCameraDefaultSections = new Set([
+  "detect",
+  "objects",
+  "motion",
+  "record",
+  "snapshots",
+  "review",
+  "audio",
+  "notifications",
+  "ffmpeg",
+]);
+
 // ---------------------------------------------------------------------------
 // buildOverrides — pure recursive diff of current vs stored config & defaults
 // ---------------------------------------------------------------------------
@@ -476,6 +490,9 @@ export function prepareSectionSavePayload(opts: {
   if (level === "camera" && cameraName) {
     const topic = cameraUpdateTopicMap[sectionPath];
     updateTopic = topic ? `config/cameras/${cameraName}/${topic}` : undefined;
+  } else if (globalCameraDefaultSections.has(sectionPath)) {
+    const topic = cameraUpdateTopicMap[sectionPath];
+    updateTopic = topic ? `config/cameras/*/${topic}` : `config/${sectionPath}`;
   } else {
     updateTopic = `config/${sectionPath}`;
   }

@@ -589,23 +589,38 @@ def config_set(request: Request, body: AppConfigSetBody):
                 request.app.frigate_config = config
                 request.app.genai_manager.update_config(config)
 
+                if request.app.stats_emitter is not None:
+                    request.app.stats_emitter.config = config
+
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):
                         _, _, camera, field = body.update_topic.split("/")
 
-                        if field == "add":
-                            settings = config.cameras[camera]
-                        elif field == "remove":
-                            settings = old_config.cameras[camera]
+                        if camera == "*":
+                            # Wildcard: fan out update to all cameras
+                            enum_value = CameraConfigUpdateEnum[field]
+                            for camera_name in config.cameras:
+                                settings = config.get_nested_object(
+                                    f"config/cameras/{camera_name}/{field}"
+                                )
+                                request.app.config_publisher.publish_update(
+                                    CameraConfigUpdateTopic(enum_value, camera_name),
+                                    settings,
+                                )
                         else:
-                            settings = config.get_nested_object(body.update_topic)
+                            if field == "add":
+                                settings = config.cameras[camera]
+                            elif field == "remove":
+                                settings = old_config.cameras[camera]
+                            else:
+                                settings = config.get_nested_object(body.update_topic)
 
-                        request.app.config_publisher.publish_update(
-                            CameraConfigUpdateTopic(
-                                CameraConfigUpdateEnum[field], camera
-                            ),
-                            settings,
-                        )
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum[field], camera
+                                ),
+                                settings,
+                            )
                     else:
                         # Generic handling for global config updates
                         settings = config.get_nested_object(body.update_topic)

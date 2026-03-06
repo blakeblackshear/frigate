@@ -29,16 +29,7 @@ const record: SectionConfigOverrides = {
     },
   },
   global: {
-    restartRequired: [
-      "enabled",
-      "expire_interval",
-      "continuous",
-      "motion",
-      "alerts",
-      "detections",
-      "preview",
-      "export",
-    ],
+    restartRequired: [],
   },
   camera: {
     restartRequired: [],

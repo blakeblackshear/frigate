@@ -83,7 +83,7 @@ const objects: SectionConfigOverrides = {
     },
   },
   global: {
-    restartRequired: ["track", "alert", "detect", "filters", "genai"],
+    restartRequired: [],
     hiddenFields: [
       "enabled_in_config",
       "mask",
