@@ -907,9 +907,7 @@ async def vod_ts(
         # segment. Snap clipFrom back to the preceding keyframe so the
         # segment always starts with a decodable frame.
         if "clipFrom" in clip:
-            keyframe_ms = get_keyframe_before(
-                recording.path, clip["clipFrom"]
-            )
+            keyframe_ms = get_keyframe_before(recording.path, clip["clipFrom"])
             if keyframe_ms is not None:
                 gained = clip["clipFrom"] - keyframe_ms
                 clip["clipFrom"] = keyframe_ms
