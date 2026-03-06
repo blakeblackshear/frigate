@@ -182,8 +182,11 @@ class ImprovedMotionDetector(MotionDetector):
         # note: skipping means the frame is dropped and **no recording will be
         # created**, which could hide a legitimate object if the camera is actively
         # auto‑tracking. the alternative is to allow motion and accept a small
-        # recording that can be reviewed in the timeline.
-        if pct_motion > self.config.skip_motion_threshold:
+        # recording that can be reviewed in the timeline. disabled by default (None).
+        if (
+            self.config.skip_motion_threshold is not None
+            and pct_motion > self.config.skip_motion_threshold
+        ):
             # force a recalibration so we transition to the new background
             self.calibrating = True
             return []

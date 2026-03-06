@@ -485,10 +485,11 @@ motion:
   # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
   # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
   lightning_threshold: 0.8
-  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate
-  # When this threshold is exceeded the frame is entirely skipped for motion processing and **no motion recording** is retained.
-  # Use with care on PTZ cameras or other situations where you require guaranteed frame capture.
-  skip_motion_threshold: 1.0
+  # Optional: Fraction of the frame that must change in a single update before motion boxes are completely
+  # ignored. Values range between 0.0 and 1.0. When exceeded, no motion boxes are reported and **no motion
+  # recording** is created for that frame. Leave unset (null) to disable this feature. Use with care on PTZ
+  # cameras or other situations where you require guaranteed frame capture.
+  skip_motion_threshold: None
   # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: shown below)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
   # make motion detection more sensitive to smaller moving objects.

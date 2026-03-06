@@ -28,10 +28,10 @@ class MotionConfig(FrigateBaseModel):
         ge=0.3,
         le=1.0,
     )
-    skip_motion_threshold: float = Field(
-        default=1.0,
+    skip_motion_threshold: Optional[float] = Field(
+        default=None,
         title="Skip motion threshold",
-        description="If more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Range 0.0 to 1.0.",
+        description="If set to a value between 0.0 and 1.0, and more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Leave unset (None) to disable this feature.",
         ge=0.0,
         le=1.0,
     )

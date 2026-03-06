@@ -110,18 +110,18 @@ Some cameras, like doorbell cameras, may have missed detections when someone wal
 motion:
   # Optional: Fraction of the frame that must change in a single update
   #           before Frigate will completely ignore any motion in that frame.
-  #           Values range between 0.0 and 1.0, where 1.0 (the default) means
-  #           the feature is disabled. Setting this to 0.7 would cause Frigate to
-  #           **skip** reporting motion boxes when more than 70% of the image
-  #           appears to change (e.g. during lightning storms, IR/color mode
-  #           switches, or other sudden lighting events).
-  skip_motion_threshold: 1.0
+  #           Values range between 0.0 and 1.0, leave unset (null) to disable.
+  #           Setting this to 0.7 would cause Frigate to **skip** reporting
+  #           motion boxes when more than 70% of the image appears to change
+  #           (e.g. during lightning storms, IR/color mode switches, or other
+  #           sudden lighting events).
+  skip_motion_threshold: 0.7
 ```
 
 This option is handy when you want to prevent large transient changes from triggering recordings or object detection. It differs from `lightning_threshold` because it completely suppresses motion instead of just forcing a recalibration.
 
 :::warning
 
-When the skip threshold is exceeded, **no motion is reported** for that frame. That means you can miss something important, like a PTZ camera auto-tracking an object or activity while the camera is moving. If you prefer to guarantee that every frame is saved, leave motion enabled and accept occasional recordings containing scene noise — they typically only take up a few megabytes and are quick to scan in the timeline UI.
+When the skip threshold is exceeded, **no motion is reported** for that frame, meaning **nothing is recorded** for that frame. That means you can miss something important, like a PTZ camera auto-tracking an object or activity while the camera is moving. If you prefer to guarantee that every frame is saved, leave this unset and accept occasional recordings containing scene noise — they typically only take up a few megabytes and are quick to scan in the timeline UI.
 
 :::

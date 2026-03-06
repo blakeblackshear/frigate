@@ -51,11 +51,11 @@ class TestImprovedMotionDetector(unittest.TestCase):
         return frame
 
     def test_skip_motion_threshold_default(self):
-        """With the default (1.0) setting, motion should still be reported."""
+        """With the default (None) setting, motion should always be reported."""
         frame = self._half_change_frame()
         boxes = self.detector.detect(frame)
         self.assertTrue(
-            boxes, "Expected motion boxes when skip threshold is at default"
+            boxes, "Expected motion boxes when skip threshold is unset (disabled)"
         )
 
     def test_skip_motion_threshold_applied(self):
