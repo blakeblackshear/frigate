@@ -50,9 +50,11 @@ from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
+from frigate.util.media import get_keyframe_before
 from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
+
 
 router = APIRouter(tags=[Tags.media])
 
@@ -870,7 +872,6 @@ async def vod_ts(
     clips = []
     durations = []
     min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
-    min_hls_segment_ms = 2000  # Minimum 2s for HLS playback compatibility
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
 
     recording: Recordings
@@ -901,20 +902,34 @@ async def vod_ts(
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-        # if segment is too short for reliable HLS playback and was trimmed
-        # by clipFrom, pull clipFrom back to ensure a minimum playable length
-        if duration < min_hls_segment_ms and "clipFrom" in clip:
-            shortage = min_hls_segment_ms - duration
-            new_inpoint = max(0, clip["clipFrom"] - shortage)
-            gained = clip["clipFrom"] - new_inpoint
-            clip["clipFrom"] = new_inpoint
-            duration += gained
-            logger.debug(
-                "VOD: extended clip %s by pulling clipFrom back to %sms, duration now %sms",
-                recording.path,
-                new_inpoint,
-                duration,
+        # nginx-vod-module pushes clipFrom forward to the next keyframe,
+        # which can leave too few frames and produce an empty/unplayable
+        # segment. Snap clipFrom back to the preceding keyframe so the
+        # segment always starts with a decodable frame.
+        if "clipFrom" in clip:
+            keyframe_ms = get_keyframe_before(
+                recording.path, clip["clipFrom"]
             )
+            if keyframe_ms is not None:
+                gained = clip["clipFrom"] - keyframe_ms
+                clip["clipFrom"] = keyframe_ms
+                duration += gained
+                logger.debug(
+                    "VOD: snapped clipFrom to keyframe at %sms for %s, duration now %sms",
+                    keyframe_ms,
+                    recording.path,
+                    duration,
+                )
+            else:
+                # could not read keyframes, remove clipFrom to use full recording
+                logger.debug(
+                    "VOD: no keyframe info for %s, removing clipFrom to use full recording",
+                    recording.path,
+                )
+                del clip["clipFrom"]
+                duration = int(recording.duration * 1000)
+                if recording.end_time > end_ts:
+                    duration -= int((recording.end_time - end_ts) * 1000)
 
         if duration < min_duration_ms:
             # skip if the clip has no valid duration (too short to contain frames)
