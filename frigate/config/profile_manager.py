@@ -1,5 +1,6 @@
 """Profile manager for activating/deactivating named config profiles."""
 
+import copy
 import logging
 from pathlib import Path
 from typing import Optional
@@ -9,6 +10,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdatePublisher,
     CameraConfigUpdateTopic,
 )
+from frigate.config.camera.zone import ZoneConfig
 from frigate.const import CONFIG_DIR
 from frigate.util.builtin import deep_merge
 from frigate.util.config import apply_section_update
@@ -44,13 +46,15 @@ class ProfileManager:
         self.config_updater = config_updater
         self._base_configs: dict[str, dict[str, dict]] = {}
         self._base_enabled: dict[str, bool] = {}
+        self._base_zones: dict[str, dict[str, ZoneConfig]] = {}
         self._snapshot_base_configs()
 
     def _snapshot_base_configs(self) -> None:
-        """Snapshot each camera's current section configs and enabled state."""
+        """Snapshot each camera's current section configs, enabled, and zones."""
         for cam_name, cam_config in self.config.cameras.items():
             self._base_configs[cam_name] = {}
             self._base_enabled[cam_name] = cam_config.enabled
+            self._base_zones[cam_name] = copy.deepcopy(cam_config.zones)
             for section in PROFILE_SECTION_UPDATES:
                 section_config = getattr(cam_config, section, None)
                 if section_config is not None:
@@ -105,6 +109,12 @@ class ProfileManager:
                 cam_config.enabled = base_enabled
                 changed.setdefault(cam_name, set()).add("enabled")
 
+            # Restore zones
+            base_zones = self._base_zones.get(cam_name)
+            if base_zones is not None and cam_config.zones != base_zones:
+                cam_config.zones = copy.deepcopy(base_zones)
+                changed.setdefault(cam_name, set()).add("zones")
+
             # Restore section configs
             base = self._base_configs.get(cam_name, {})
             for section in PROFILE_SECTION_UPDATES:
@@ -135,6 +145,14 @@ class ProfileManager:
             if profile.enabled is not None and cam_config.enabled != profile.enabled:
                 cam_config.enabled = profile.enabled
                 changed.setdefault(cam_name, set()).add("enabled")
+
+            # Apply zones override — merge profile zones into base zones
+            if profile.zones is not None:
+                base_zones = self._base_zones.get(cam_name, {})
+                merged_zones = copy.deepcopy(base_zones)
+                merged_zones.update(profile.zones)
+                cam_config.zones = merged_zones
+                changed.setdefault(cam_name, set()).add("zones")
 
             base = self._base_configs.get(cam_name, {})
 
@@ -172,6 +190,15 @@ class ProfileManager:
                             CameraConfigUpdateEnum.enabled, cam_name
                         ),
                         cam_config.enabled,
+                    )
+                    continue
+
+                if section == "zones":
+                    self.config_updater.publish_update(
+                        CameraConfigUpdateTopic(
+                            CameraConfigUpdateEnum.zones, cam_name
+                        ),
+                        cam_config.zones,
                     )
                     continue
 

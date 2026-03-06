@@ -70,6 +70,24 @@ class TestCameraProfileConfig(unittest.TestCase):
         profile = CameraProfileConfig()
         assert profile.enabled is None
 
+    def test_zones_field(self):
+        """Profile with zones override."""
+        profile = CameraProfileConfig(
+            zones={
+                "driveway": {
+                    "coordinates": "0.1,0.1,0.9,0.1,0.9,0.9,0.1,0.9",
+                    "objects": ["car"],
+                }
+            }
+        )
+        assert profile.zones is not None
+        assert "driveway" in profile.zones
+
+    def test_zones_default_none(self):
+        """Zones defaults to None when not set."""
+        profile = CameraProfileConfig()
+        assert profile.zones is None
+
     def test_none_sections_not_in_dump(self):
         """Sections left as None should not appear in exclude_unset dump."""
         profile = CameraProfileConfig(detect={"enabled": False})
@@ -379,6 +397,81 @@ class TestProfileManager(unittest.TestCase):
 
         self.manager.activate_profile(None)
         assert self.config.cameras["front"].enabled is True
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_activate_profile_adds_zone(self, mock_persist):
+        """Profile with zones adds/overrides zones on camera."""
+        from frigate.config.camera.profile import CameraProfileConfig
+        from frigate.config.camera.zone import ZoneConfig
+
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            zones={
+                "driveway": ZoneConfig(
+                    coordinates="0.1,0.1,0.9,0.1,0.9,0.9,0.1,0.9",
+                    objects=["car"],
+                )
+            }
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+
+        assert "driveway" not in self.config.cameras["front"].zones
+
+        err = self.manager.activate_profile("away")
+        assert err is None
+        assert "driveway" in self.config.cameras["front"].zones
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_deactivate_restores_zones(self, mock_persist):
+        """Deactivating a profile restores base zones."""
+        from frigate.config.camera.profile import CameraProfileConfig
+        from frigate.config.camera.zone import ZoneConfig
+
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            zones={
+                "driveway": ZoneConfig(
+                    coordinates="0.1,0.1,0.9,0.1,0.9,0.9,0.1,0.9",
+                    objects=["car"],
+                )
+            }
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+
+        self.manager.activate_profile("away")
+        assert "driveway" in self.config.cameras["front"].zones
+
+        self.manager.activate_profile(None)
+        assert "driveway" not in self.config.cameras["front"].zones
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_zones_zmq_published(self, mock_persist):
+        """ZMQ update is published for zones change."""
+        from frigate.config.camera.profile import CameraProfileConfig
+        from frigate.config.camera.updater import (
+            CameraConfigUpdateEnum,
+            CameraConfigUpdateTopic,
+        )
+        from frigate.config.camera.zone import ZoneConfig
+
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            zones={
+                "driveway": ZoneConfig(
+                    coordinates="0.1,0.1,0.9,0.1,0.9,0.9,0.1,0.9",
+                    objects=["car"],
+                )
+            }
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+        self.mock_updater.reset_mock()
+
+        self.manager.activate_profile("away")
+
+        zones_calls = [
+            call
+            for call in self.mock_updater.publish_update.call_args_list
+            if call[0][0]
+            == CameraConfigUpdateTopic(CameraConfigUpdateEnum.zones, "front")
+        ]
+        assert len(zones_calls) == 1
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_enabled_zmq_published(self, mock_persist):

@@ -12,6 +12,7 @@ from .objects import ObjectConfig
 from .record import RecordConfig
 from .review import ReviewConfig
 from .snapshots import SnapshotsConfig
+from .zone import ZoneConfig
 
 __all__ = ["CameraProfileConfig"]
 
@@ -34,3 +35,4 @@ class CameraProfileConfig(FrigateBaseModel):
     record: Optional[RecordConfig] = None
     review: Optional[ReviewConfig] = None
     snapshots: Optional[SnapshotsConfig] = None
+    zones: Optional[dict[str, ZoneConfig]] = None
