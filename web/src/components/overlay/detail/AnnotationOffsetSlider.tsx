@@ -7,10 +7,12 @@ import axios from "axios";
 import { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { Trans, useTranslation } from "react-i18next";
-import { LuInfo, LuMinus, LuPlus } from "react-icons/lu";
+import { LuExternalLink, LuInfo, LuMinus, LuPlus } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { Link } from "react-router-dom";
 
 const OFFSET_MIN = -2500;
 const OFFSET_MAX = 2500;
@@ -23,6 +25,7 @@ type Props = {
 export default function AnnotationOffsetSlider({ className }: Props) {
   const { annotationOffset, setAnnotationOffset, camera } = useDetailStream();
   const isAdmin = useIsAdmin();
+  const { getLocaleDocUrl } = useDocDomain();
   const { mutate } = useSWRConfig();
   const { t } = useTranslation(["views/explore"]);
   const [isSaving, setIsSaving] = useState(false);
@@ -152,6 +155,19 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           </PopoverTrigger>
           <PopoverContent className="w-80 text-sm">
             {t("trackingDetails.annotationSettings.offset.tips")}
+            <div className="mt-2 flex items-center text-primary-variant">
+              <Link
+                to={getLocaleDocUrl(
+                  "troubleshooting/dummy-camera#annotation-offset",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                {t("readTheDocumentation", { ns: "common" })}
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
           </PopoverContent>
         </Popover>
       </div>

@@ -168,7 +168,9 @@ export function AnnotationSettingsPane({
           {t("trackingDetails.annotationSettings.offset.tips")}
           <div className="mt-2 flex items-center text-primary-variant">
             <Link
-              to={getLocaleDocUrl("configuration/reference")}
+              to={getLocaleDocUrl(
+                "troubleshooting/dummy-camera#annotation-offset",
+              )}
               target="_blank"
               rel="noopener noreferrer"
               className="inline"
