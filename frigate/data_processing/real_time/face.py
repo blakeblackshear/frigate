@@ -19,7 +19,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.config.classification import FaceRecognitionConfig
+from frigate.config.enrichment_updater import EnrichmentConfigEnum
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.data_processing.common.face.model import (
     ArcFaceRecognizer,
@@ -96,9 +96,12 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         self.recognizer.build()
 
-    def update_config(self, face_config: FaceRecognitionConfig) -> None:
+    def update_config(self, update_type: EnrichmentConfigEnum, payload: Any) -> None:
         """Update face recognition config at runtime."""
-        self.face_config = face_config
+        if update_type != EnrichmentConfigEnum.face_recognition:
+            return
+
+        self.face_config = payload
         logger.debug("Face recognition config updated dynamically")
 
     def __download_models(self, path: str) -> None:
