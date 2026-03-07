@@ -39,8 +39,13 @@ from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     INSTALL_DIR,
-    MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
+)
+from frigate.api.vod import (
+    _build_vod_mapping_payload,
+    _get_recordings_for_vod,
+    _normalize_recordings_to_vod_clips,
+    vod_mapping_cache,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
@@ -454,11 +459,10 @@ async def recording_clip(
             Recordings.end_time,
         )
         .where(
-            (Recordings.start_time.between(start_ts, end_ts))
-            | (Recordings.end_time.between(start_ts, end_ts))
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+            (Recordings.camera == camera_name)
+            & (Recordings.end_time > start_ts)
+            & (Recordings.start_time < end_ts)
         )
-        .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.asc())
     )
 
@@ -542,77 +546,23 @@ async def vod_ts(
         end_ts,
         force_discontinuity,
     )
-    recordings = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.duration,
-            Recordings.end_time,
-            Recordings.start_time,
-        )
-        .where(
-            Recordings.start_time.between(start_ts, end_ts)
-            | Recordings.end_time.between(start_ts, end_ts)
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.asc())
-        .iterator()
-    )
 
-    clips = []
-    durations = []
-    min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
-    max_duration_ms = MAX_SEGMENT_DURATION * 1000
+    hour_ago = datetime.now() - timedelta(hours=1)
+    is_cacheable = hour_ago.timestamp() > start_ts
 
-    recording: Recordings
-    for recording in recordings:
-        logger.debug(
-            "VOD: processing recording: %s start=%s end=%s duration=%s",
-            recording.path,
-            recording.start_time,
-            recording.end_time,
-            recording.duration,
-        )
+    # Check in-process cache for historical (cacheable) ranges
+    cache_key = (camera_name, int(start_ts), int(end_ts), force_discontinuity)
+    if is_cacheable:
+        cached = vod_mapping_cache.get(cache_key)
+        if cached is not None:
+            logger.debug("VOD: cache hit for %s", cache_key)
+            return JSONResponse(content=cached)
 
-        clip = {"type": "source", "path": recording.path}
-        duration = int(recording.duration * 1000)
+    # A1: canonical overlap query via helper
+    recordings = _get_recordings_for_vod(camera_name, start_ts, end_ts)
 
-        # adjust start offset if start_ts is after recording.start_time
-        if start_ts > recording.start_time:
-            inpoint = int((start_ts - recording.start_time) * 1000)
-            clip["clipFrom"] = inpoint
-            duration -= inpoint
-            logger.debug(
-                "VOD: applied clipFrom %sms to %s",
-                inpoint,
-                recording.path,
-            )
-
-        # adjust end if recording.end_time is after end_ts
-        if recording.end_time > end_ts:
-            duration -= int((recording.end_time - end_ts) * 1000)
-
-        if duration < min_duration_ms:
-            # skip if the clip has no valid duration (too short to contain frames)
-            logger.debug(
-                "VOD: skipping recording %s - resulting duration %sms too short",
-                recording.path,
-                duration,
-            )
-            continue
-
-        if min_duration_ms <= duration < max_duration_ms:
-            clip["keyFrameDurations"] = [duration]
-            clips.append(clip)
-            durations.append(duration)
-            logger.debug(
-                "VOD: added clip %s duration_ms=%s clipFrom=%s",
-                recording.path,
-                duration,
-                clip.get("clipFrom"),
-            )
-        else:
-            logger.warning(f"Recording clip is missing or empty: {recording.path}")
+    # A4: normalize into clips via helper
+    clips, durations = _normalize_recordings_to_vod_clips(recordings, start_ts, end_ts)
 
     if not clips:
         logger.error(
@@ -626,17 +576,16 @@ async def vod_ts(
             status_code=404,
         )
 
-    hour_ago = datetime.now() - timedelta(hours=1)
-    return JSONResponse(
-        content={
-            "cache": hour_ago.timestamp() > start_ts,
-            "discontinuity": force_discontinuity,
-            "consistentSequenceMediaInfo": True,
-            "durations": durations,
-            "segment_duration": max(durations),
-            "sequences": [{"clips": clips}],
-        }
+    # A4: build payload via helper
+    payload = _build_vod_mapping_payload(
+        clips, durations, start_ts, force_discontinuity, is_cacheable
     )
+
+    # A3: cache historical payloads
+    if is_cacheable:
+        vod_mapping_cache.put(cache_key, payload)
+
+    return JSONResponse(content=payload)
 
 
 @router.get(
