@@ -1,6 +1,7 @@
 """Handle storage retention and usage."""
 
 import logging
+import re
 import shutil
 import threading
 from pathlib import Path
@@ -177,6 +178,22 @@ class StorageMaintainer(threading.Thread):
 
         if camera_segment in recording_path:
             return recording_path.split(camera_segment, 1)[0].rstrip("/") or "/"
+
+        # Prefer configured recording roots when available.
+        for configured_root in sorted(
+            self.config.get_recordings_paths(), key=len, reverse=True
+        ):
+            if recording_path == configured_root or recording_path.startswith(
+                f"{configured_root}/"
+            ):
+                return configured_root.rstrip("/") or "/"
+
+        # Support layouts like /root/YYYY-MM-DD/HH/... and normalize to /root.
+        date_hour_match = re.match(
+            r"^(?P<root>.+?)/\d{4}-\d{2}-\d{2}/\d{2}(?:/|$)", recording_path
+        )
+        if date_hour_match:
+            return date_hour_match.group("root").rstrip("/") or "/"
 
         # Fallback for unexpected path layouts; expected format is root/camera/date/file
         path = Path(recording_path)
