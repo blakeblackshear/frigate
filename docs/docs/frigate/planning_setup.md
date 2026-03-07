@@ -36,7 +36,7 @@ There are many different hardware options for object detection depending on prio
 
 ### CPU
 
-Frigate requires a CPU with AVX instructions. Most modern CPUs (post-2011) support AVX, but it is generally absent in low-power or budget-oriented processors, particularly older Intel Pentium, Celeron, and Atom-based chips. Specifically, Intel Celeron and Pentium models prior to the 2020 Tiger Lake generation typically lack AVX.
+Frigate requires a CPU with AVX + AVX2 instructions. Most modern CPUs (post-2011) support AVX and AVX2, but it is generally absent in low-power or budget-oriented processors, particularly older Intel Pentium, Celeron, and Atom-based chips. Specifically, Intel Celeron and Pentium models prior to the 2020 Tiger Lake generation typically lack AVX. Older Intel Xeon models may have AVX, but may lack AVX2.
 
 ### Storage
 
