@@ -137,42 +137,35 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           <LuPlus className="size-4" />
         </Button>
       </div>
-      <div className="flex items-center justify-between">
-        <div
-          className={cn(
-            "flex items-center gap-2 text-xs text-muted-foreground",
-            isMobile && "landscape:flex-col landscape:items-start",
-          )}
-        >
-          <Trans ns="views/explore">
-            trackingDetails.annotationSettings.offset.millisecondsToOffset
-          </Trans>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                className="focus:outline-none"
-                aria-label={t("trackingDetails.annotationSettings.offset.tips")}
-              >
-                <LuInfo className="size-4" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 text-sm">
-              {t("trackingDetails.annotationSettings.offset.tips")}
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="ghost" onClick={reset}>
-            {t("button.reset", { ns: "common" })}
+      <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+        <Trans ns="views/explore">
+          trackingDetails.annotationSettings.offset.millisecondsToOffset
+        </Trans>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="mt-px shrink-0 focus:outline-none"
+              aria-label={t("trackingDetails.annotationSettings.offset.tips")}
+            >
+              <LuInfo className="size-3.5" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 text-sm">
+            {t("trackingDetails.annotationSettings.offset.tips")}
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="flex items-center justify-end gap-2">
+        <Button size="sm" variant="ghost" onClick={reset}>
+          {t("button.reset", { ns: "common" })}
+        </Button>
+        {isAdmin && (
+          <Button size="sm" onClick={save} disabled={isSaving}>
+            {isSaving
+              ? t("button.saving", { ns: "common" })
+              : t("button.save", { ns: "common" })}
           </Button>
-          {isAdmin && (
-            <Button size="sm" onClick={save} disabled={isSaving}>
-              {isSaving
-                ? t("button.saving", { ns: "common" })
-                : t("button.save", { ns: "common" })}
-            </Button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
