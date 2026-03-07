@@ -174,11 +174,6 @@ class StorageMaintainer(threading.Thread):
         return root_usages
 
     def _get_recordings_root_from_path(self, recording_path: str, camera: str) -> str:
-        camera_segment = f"/{camera}/"
-
-        if camera_segment in recording_path:
-            return recording_path.split(camera_segment, 1)[0].rstrip("/") or "/"
-
         # Prefer configured recording roots when available.
         for configured_root in sorted(
             self.config.get_recordings_paths(), key=len, reverse=True
@@ -194,6 +189,10 @@ class StorageMaintainer(threading.Thread):
         )
         if date_hour_match:
             return date_hour_match.group("root").rstrip("/") or "/"
+
+        camera_segment = f"/{camera}/"
+        if camera_segment in recording_path:
+            return recording_path.split(camera_segment, 1)[0].rstrip("/") or "/"
 
         # Fallback for unexpected path layouts; expected format is root/camera/date/file
         path = Path(recording_path)

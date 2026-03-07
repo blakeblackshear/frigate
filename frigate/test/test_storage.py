@@ -261,6 +261,49 @@ class TestHttp(unittest.TestCase):
         assert Recordings.get(Recordings.id == rec_k3_id)
 
 
+    def test_get_recordings_root_from_date_hour_layout(self):
+        """Ensure date/hour recording paths resolve to configured roots."""
+        config = FrigateConfig(
+            **{
+                "mqtt": {"host": "mqtt"},
+                "record": {"enabled": True, "path": "/media/frigate/recordings"},
+                "cameras": {
+                    "cam2_sub": {
+                        "ffmpeg": {
+                            "inputs": [
+                                {"path": "rtsp://10.0.0.2:554/video", "roles": ["detect"]}
+                            ]
+                        },
+                        "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    },
+                    "cam1_sub": {
+                        "path": "/video1",
+                        "ffmpeg": {
+                            "inputs": [
+                                {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                            ]
+                        },
+                        "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    },
+                },
+            }
+        )
+        storage = StorageMaintainer(config, MagicMock())
+
+        assert (
+            storage._get_recordings_root_from_path(
+                "/media/frigate/recordings/2026-03-07/11/cam2_sub/20.59.mp4",
+                "cam2_sub",
+            )
+            == "/media/frigate/recordings"
+        )
+        assert (
+            storage._get_recordings_root_from_path(
+                "/video1/2026-03-07/11/cam1_sub/13.07.mp4",
+                "cam1_sub",
+            )
+            == "/video1"
+        )
 
     def test_storage_cleanup_only_for_overflowed_root(self):
         """Ensure cleanup removes recordings only from the targeted recordings root."""
