@@ -227,3 +227,83 @@ class TestHttpRecordingsStorage(BaseTestHttp):
         # Config metadata still reflects current root assignment.
         assert roots["/media/frigate/recordings"]["configured_cameras"] == []
         assert roots["/mnt/new-root"]["configured_cameras"] == ["front_door"]
+
+    def test_recordings_storage_normalizes_date_hour_paths_to_configured_roots(self):
+        self.minimal_config["cameras"]["front_door"]["path"] = "/media/frigate/recordings"
+        self.minimal_config["cameras"]["back_yard"] = {
+            "ffmpeg": {
+                "inputs": [{"path": "rtsp://10.0.0.2:554/video", "roles": ["detect"]}]
+            },
+            "detect": {"height": 1080, "width": 1920, "fps": 5},
+            "path": "/video1",
+        }
+
+        self.test_stats["service"]["storage"]["/video1"] = {
+            "free": 600,
+            "mount_type": "ext4",
+            "total": 1000,
+            "used": 400,
+        }
+
+        app = self._build_app()
+
+        Recordings.insert_many(
+            [
+                {
+                    "id": "front_08",
+                    "path": "/media/frigate/recordings/2026-03-07/08/seg1.mp4",
+                    "camera": "front_door",
+                    "start_time": 100,
+                    "end_time": 110,
+                    "duration": 10,
+                    "motion": 1,
+                    "segment_size": 100,
+                },
+                {
+                    "id": "front_09",
+                    "path": "/media/frigate/recordings/2026-03-07/09/seg1.mp4",
+                    "camera": "front_door",
+                    "start_time": 120,
+                    "end_time": 130,
+                    "duration": 10,
+                    "motion": 1,
+                    "segment_size": 150,
+                },
+                {
+                    "id": "video1_08",
+                    "path": "/video1/2026-03-07/08/seg1.mp4",
+                    "camera": "back_yard",
+                    "start_time": 140,
+                    "end_time": 150,
+                    "duration": 10,
+                    "motion": 1,
+                    "segment_size": 200,
+                },
+                {
+                    "id": "video1_09",
+                    "path": "/video1/2026-03-07/09/seg1.mp4",
+                    "camera": "back_yard",
+                    "start_time": 160,
+                    "end_time": 170,
+                    "duration": 10,
+                    "motion": 1,
+                    "segment_size": 50,
+                },
+            ]
+        ).execute()
+
+        with AuthTestClient(app) as client:
+            payload = client.get("/recordings/storage").json()
+
+        roots = {root["path"]: root for root in payload["recording_roots"]}
+
+        assert set(roots.keys()) == {"/media/frigate/recordings", "/video1"}
+        assert roots["/media/frigate/recordings"]["recordings_size"] == 250
+        assert roots["/video1"]["recordings_size"] == 250
+
+        # Ensure date/hour pseudo-roots are not emitted.
+        assert "/media/frigate/recordings/2026-03-07/08" not in roots
+        assert "/media/frigate/recordings/2026-03-07/09" not in roots
+        assert "/video1/2026-03-07/08" not in roots
+        assert "/video1/2026-03-07/09" not in roots
+
