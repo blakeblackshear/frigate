@@ -11,7 +11,7 @@ Object classification models are lightweight and run very fast on CPU.
 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
 
-A CPU with AVX instructions is required for training and inference.
+A CPU with AVX + AVX2 instructions is required for training and inference.
 
 ## Classes
 
@@ -27,7 +27,6 @@ For object classification:
 ### Classification Type
 
 - **Sub label**:
-
   - Applied to the object’s `sub_label` field.
   - Ideal for a single, more specific identity or type.
   - Example: `cat` → `Leo`, `Charlie`, `None`.

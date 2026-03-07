@@ -13,7 +13,7 @@ Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
 Semantic Search works by running a large AI model locally on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.
 
-A minimum of 8GB of RAM is required to use Semantic Search. A CPU with AVX instructions is required to run Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
+A minimum of 8GB of RAM is required to use Semantic Search. A CPU with AVX + AVX2 instructions is required to run Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
 
 For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
 
