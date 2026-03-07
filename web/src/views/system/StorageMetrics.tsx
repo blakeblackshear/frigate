@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { LuExternalLink } from "react-icons/lu";
 import { FaExclamationTriangle } from "react-icons/fa";
+import { aggregateRecordingRoots } from "./storageMetricsUtil";
 
 type CameraStorage = {
   [key: string]: {
@@ -40,12 +41,12 @@ type RecordingsStorageResponse = CameraStorage & {
 type StorageMetricsProps = {
   setLastUpdated: (last: number) => void;
 };
+
 export default function StorageMetrics({
   setLastUpdated,
 }: StorageMetricsProps) {
-  const { data: recordingsStorage } = useSWR<RecordingsStorageResponse>(
-    "recordings/storage",
-  );
+  const { data: recordingsStorage } =
+    useSWR<RecordingsStorageResponse>("recordings/storage");
   const { data: stats } = useSWR<FrigateStats>("stats");
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -71,8 +72,16 @@ export default function StorageMetrics({
   }, [recordingsStorage]);
 
   const recordingRoots = useMemo(
-    () => recordingsStorage?.recording_roots ?? recordingsStorage?.__recording_roots ?? [],
+    () =>
+      recordingsStorage?.recording_roots ??
+      recordingsStorage?.__recording_roots ??
+      [],
     [recordingsStorage],
+  );
+
+  const overviewRecordingStorage = useMemo(
+    () => aggregateRecordingRoots(recordingRoots),
+    [recordingRoots],
   );
 
   const totalStorage = useMemo(() => {
@@ -158,8 +167,8 @@ export default function StorageMetrics({
           </div>
           <StorageGraph
             graphId="general-recordings"
-            used={totalStorage.camera}
-            total={totalStorage.total}
+            used={overviewRecordingStorage.used}
+            total={overviewRecordingStorage.total}
           />
           {earliestDate && (
             <div className="mt-2 text-xs text-primary-variant">
@@ -227,6 +236,10 @@ export default function StorageMetrics({
         </div>
       </div>
       <div className="mt-4 text-sm font-medium text-muted-foreground">
+        {t("storage.recordings.roots")}
+      </div>
+      <RecordingsRoots roots={recordingRoots} />
+      <div className="mt-4 text-sm font-medium text-muted-foreground">
         {t("storage.cameraStorage.title")}
       </div>
       <div className="mt-4 bg-background_alt p-2.5 md:rounded-2xl">
@@ -236,10 +249,6 @@ export default function StorageMetrics({
           totalStorage={totalStorage}
         />
       </div>
-      <div className="mt-4 text-sm font-medium text-muted-foreground">
-        {t("storage.recordings.roots")}
-      </div>
-      <RecordingsRoots roots={recordingRoots} />
     </div>
   );
 }
