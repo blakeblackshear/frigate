@@ -37,8 +37,40 @@ router = APIRouter(tags=[Tags.recordings])
 def get_recordings_storage_usage(request: Request):
     storage_stats = request.app.stats_emitter.get_latest_stats()["service"]["storage"]
 
-    configured_recording_paths = request.app.frigate_config.get_recordings_paths()
-    recording_stats = [storage_stats.get(path, {}) for path in configured_recording_paths]
+    def normalize_storage_path(path: str) -> str:
+        return str(Path(path)).rstrip("/") or "/"
+
+    def resolve_root_storage_stats(root_path: str) -> dict:
+        normalized_root = normalize_storage_path(root_path)
+
+        direct_stats = storage_stats.get(normalized_root, {})
+        if direct_stats:
+            return direct_stats
+
+        # Some stats payloads include date/hour pseudo-paths under a configured
+        # recordings root. In that case, use a descendant stat for the owning root
+        # without exposing the pseudo-path as a separate root entry.
+        descendant_candidates = [
+            (normalize_storage_path(path), stats)
+            for path, stats in storage_stats.items()
+            if normalize_storage_path(path).startswith(f"{normalized_root}/") and stats
+        ]
+
+        if not descendant_candidates:
+            return {}
+
+        descendant_candidates.sort(key=lambda item: len(item[0]))
+        return descendant_candidates[0][1]
+
+    configured_recording_paths = sorted(
+        {
+            normalize_storage_path(path)
+            for path in request.app.frigate_config.get_recordings_paths()
+        }
+    )
+    recording_stats = [
+        resolve_root_storage_stats(path) for path in configured_recording_paths
+    ]
     total_mb = sum(stat.get("total", 0) for stat in recording_stats)
 
     if total_mb == 0:
@@ -57,11 +89,13 @@ def get_recordings_storage_usage(request: Request):
 
     recording_roots = []
     all_recording_roots = sorted(
-        set(configured_recording_paths).union(root_camera_usages.keys())
+        set(configured_recording_paths).union(
+            normalize_storage_path(path) for path in root_camera_usages.keys()
+        )
     )
 
     for root_path in all_recording_roots:
-        root_stats = storage_stats.get(root_path, {})
+        root_stats = resolve_root_storage_stats(root_path)
         total = root_stats.get("total", 0)
         used = root_stats.get("used", 0)
         free = root_stats.get("free", 0)
