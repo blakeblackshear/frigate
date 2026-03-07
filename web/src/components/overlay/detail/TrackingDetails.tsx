@@ -47,12 +47,14 @@ type TrackingDetailsProps = {
   event: Event;
   fullscreen?: boolean;
   tabs?: React.ReactNode;
+  isAnnotationSettingsOpen?: boolean;
 };
 
 export function TrackingDetails({
   className,
   event,
   tabs,
+  isAnnotationSettingsOpen = false,
 }: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
@@ -68,6 +70,14 @@ export function TrackingDetails({
   // manualOverride holds a record-stream timestamp explicitly chosen by the
   // user (eg, clicking a lifecycle row). When null we display `currentTime`.
   const [manualOverride, setManualOverride] = useState<number | null>(null);
+
+  // Capture the annotation offset used for building the video source URL.
+  // This only updates when the event changes, NOT on every slider drag,
+  // so the HLS player doesn't reload while the user is adjusting the offset.
+  const sourceOffsetRef = useRef(annotationOffset);
+  useEffect(() => {
+    sourceOffsetRef.current = annotationOffset;
+  }, [event.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // event.start_time is detect time, convert to record, then subtract padding
   const [currentTime, setCurrentTime] = useState(
@@ -90,14 +100,19 @@ export function TrackingDetails({
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // Fetch recording segments for the event's time range to handle motion-only gaps
+  // Fetch recording segments for the event's time range to handle motion-only gaps.
+  // Use the source offset (stable per event) so recordings don't refetch on every
+  // slider drag while adjusting annotation offset.
   const eventStartRecord = useMemo(
-    () => (event.start_time ?? 0) + annotationOffset / 1000,
-    [event.start_time, annotationOffset],
+    () => (event.start_time ?? 0) + sourceOffsetRef.current / 1000,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [event.start_time, event.id],
   );
   const eventEndRecord = useMemo(
-    () => (event.end_time ?? Date.now() / 1000) + annotationOffset / 1000,
-    [event.end_time, annotationOffset],
+    () =>
+      (event.end_time ?? Date.now() / 1000) + sourceOffsetRef.current / 1000,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [event.end_time, event.id],
   );
 
   const { data: recordings } = useSWR<Recording[]>(
@@ -298,6 +313,53 @@ export function TrackingDetails({
     setSelectedObjectIds([event.id]);
   }, [event.id, setSelectedObjectIds]);
 
+  // When the annotation settings popover is open, pin the video to a specific
+  // lifecycle event (detect-stream timestamp). As the user drags the offset
+  // slider, the video re-seeks to show the recording frame at
+  // pinnedTimestamp + newOffset, while the bounding box stays fixed at the
+  // pinned detect timestamp. This lets the user visually align the box to
+  // the car in the video.
+  const pinnedDetectTimestampRef = useRef<number | null>(null);
+  const wasAnnotationOpenRef = useRef(false);
+
+  // On popover open: pause, pin first lifecycle item, and seek.
+  useEffect(() => {
+    if (isAnnotationSettingsOpen && !wasAnnotationOpenRef.current) {
+      if (videoRef.current && displaySource === "video") {
+        videoRef.current.pause();
+      }
+      if (eventSequence && eventSequence.length > 0) {
+        pinnedDetectTimestampRef.current = eventSequence[0].timestamp;
+      }
+    }
+    if (!isAnnotationSettingsOpen) {
+      pinnedDetectTimestampRef.current = null;
+    }
+    wasAnnotationOpenRef.current = isAnnotationSettingsOpen;
+  }, [isAnnotationSettingsOpen, displaySource, eventSequence]);
+
+  // When the pinned timestamp or offset changes, re-seek the video and
+  // explicitly update currentTime so the overlay shows the pinned event's box.
+  useEffect(() => {
+    const pinned = pinnedDetectTimestampRef.current;
+    if (!isAnnotationSettingsOpen || pinned == null) return;
+    if (!videoRef.current || displaySource !== "video") return;
+
+    const targetTimeRecord = pinned + annotationOffset / 1000;
+    const relativeTime = timestampToVideoTime(targetTimeRecord);
+    videoRef.current.currentTime = relativeTime;
+
+    // Explicitly update currentTime state so the overlay's effectiveCurrentTime
+    // resolves back to the pinned detect timestamp:
+    //   effectiveCurrentTime = targetTimeRecord - annotationOffset/1000 = pinned
+    setCurrentTime(targetTimeRecord);
+  }, [
+    isAnnotationSettingsOpen,
+    annotationOffset,
+    displaySource,
+    timestampToVideoTime,
+  ]);
+
   const handleLifecycleClick = useCallback(
     (item: TrackingDetailsSequence) => {
       if (!videoRef.current && !imgRef.current) return;
@@ -453,19 +515,23 @@ export function TrackingDetails({
 
   const videoSource = useMemo(() => {
     // event.start_time and event.end_time are in DETECT stream time
-    // Convert to record stream time, then create video clip with padding
-    const eventStartRecord = event.start_time + annotationOffset / 1000;
-    const eventEndRecord =
-      (event.end_time ?? Date.now() / 1000) + annotationOffset / 1000;
-    const startTime = eventStartRecord - REVIEW_PADDING;
-    const endTime = eventEndRecord + REVIEW_PADDING;
+    // Convert to record stream time, then create video clip with padding.
+    // Use sourceOffsetRef (stable per event) so the HLS player doesn't
+    // reload while the user is dragging the annotation offset slider.
+    const sourceOffset = sourceOffsetRef.current;
+    const eventStartRec = event.start_time + sourceOffset / 1000;
+    const eventEndRec =
+      (event.end_time ?? Date.now() / 1000) + sourceOffset / 1000;
+    const startTime = eventStartRec - REVIEW_PADDING;
+    const endTime = eventEndRec + REVIEW_PADDING;
     const playlist = `${baseUrl}vod/clip/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
 
     return {
       playlist,
       startPosition: 0,
     };
-  }, [event, annotationOffset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event]);
 
   // Determine camera aspect ratio category
   const cameraAspect = useMemo(() => {
