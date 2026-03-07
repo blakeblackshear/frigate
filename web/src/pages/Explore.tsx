@@ -39,7 +39,17 @@ const SEARCH_FILTER_ARRAY_KEYS = [
 export default function Explore() {
   // search field handler
 
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation([
+    "views/explore",
+    "views/search",
+    "components/filter",
+    "views/events",
+    "components/camera",
+    "components/dialog",
+    "views/faceLibrary",
+    "views/settings",
+    "components/player",
+  ]);
   const { getLocaleDocUrl } = useDocDomain();
 
   const { data: config } = useSWR<FrigateConfig>("config", {
