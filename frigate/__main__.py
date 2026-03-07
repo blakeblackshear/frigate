@@ -1,6 +1,7 @@
 import argparse
 import faulthandler
 import multiprocessing as mp
+import platform
 import signal
 import sys
 import threading
@@ -15,7 +16,44 @@ from frigate.log import setup_logging
 from frigate.util.config import find_config_file
 
 
+def check_cpu_flags() -> None:
+    """Check that the CPU supports required instruction sets on x86_64."""
+    if platform.machine() not in ("x86_64", "AMD64"):
+        return
+
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            cpuinfo = f.read()
+    except OSError:
+        return
+
+    flags = set()
+    for line in cpuinfo.splitlines():
+        if line.startswith("flags"):
+            flags = set(line.split(":")[1].split())
+            break
+
+    if "avx" in flags and "avx2" not in flags:
+        print(
+            "Your CPU supports AVX but not AVX2. "
+            "Frigate requires AVX2 when running on x86_64 systems. "
+            "Detected CPU flags include 'avx' but not 'avx2'."
+        )
+        sys.exit(1)
+
+    if "avx" not in flags:
+        print(
+            "Your CPU does not support AVX instructions. "
+            "Frigate requires AVX when running on x86_64 systems. "
+            "Detected CPU flags do not include 'avx'."
+        )
+        sys.exit(1)
+
+
 def main() -> None:
+    # Check CPU compatibility before importing any compiled dependencies
+    check_cpu_flags()
+
     manager = mp.Manager()
     faulthandler.enable()
 
