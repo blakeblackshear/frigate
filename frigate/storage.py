@@ -8,7 +8,7 @@ from pathlib import Path
 from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
-from frigate.const import REPLAY_CAMERA_PREFIX
+from frigate.const import RECORD_DIR, REPLAY_CAMERA_PREFIX
 from frigate.models import Event, Recordings
 from frigate.util.builtin import clear_and_unlink
 
@@ -102,6 +102,88 @@ class StorageMaintainer(threading.Thread):
             }
 
         return usages
+
+    def calculate_camera_usages_by_root(self) -> dict[str, dict]:
+        """Calculate camera storage usage grouped by recordings root."""
+        root_usages: dict[str, dict] = {}
+
+        root_camera_stats = (
+            Recordings.select(
+                Recordings.camera,
+                Recordings.path,
+                fn.SUM(Recordings.segment_size).alias("usage"),
+            )
+            .where(Recordings.segment_size != 0)
+            .group_by(Recordings.camera, Recordings.path)
+            .namedtuples()
+            .iterator()
+        )
+
+        for stat in root_camera_stats:
+            camera = stat.camera
+
+            # Skip replay cameras
+            if camera.startswith(REPLAY_CAMERA_PREFIX):
+                continue
+
+            root_path = self._get_recordings_root_from_path(stat.path, camera)
+            if not root_path:
+                continue
+
+            camera_usage = stat.usage or 0
+            camera_config = self.config.cameras.get(camera)
+            camera_friendly_name = (
+                getattr(camera_config, "friendly_name", None) if camera_config else None
+            )
+
+            if root_path not in root_usages:
+                root_usages[root_path] = {
+                    "path": root_path,
+                    "is_default": root_path == RECORD_DIR,
+                    "recordings_size": 0,
+                    "cameras": [],
+                    "configured_cameras": [],
+                    "camera_usages": {},
+                }
+
+            root_usages[root_path]["recordings_size"] += camera_usage
+
+            if camera not in root_usages[root_path]["camera_usages"]:
+                root_usages[root_path]["cameras"].append(camera)
+                root_usages[root_path]["camera_usages"][camera] = {
+                    "usage": 0,
+                    "bandwidth": self.camera_storage_stats.get(camera, {}).get(
+                        "bandwidth", 0
+                    ),
+                    "friendly_name": camera_friendly_name,
+                }
+
+            root_usages[root_path]["camera_usages"][camera]["usage"] += camera_usage
+
+        for root_path, root in root_usages.items():
+            root["cameras"] = sorted(root["cameras"])
+            root["configured_cameras"] = sorted(
+                [
+                    camera
+                    for camera in self.config.cameras.keys()
+                    if self.config.get_camera_recordings_path(camera) == root_path
+                ]
+            )
+
+        return root_usages
+
+    def _get_recordings_root_from_path(self, recording_path: str, camera: str) -> str:
+        camera_segment = f"/{camera}/"
+
+        if camera_segment in recording_path:
+            return recording_path.split(camera_segment, 1)[0].rstrip("/") or "/"
+
+        # Fallback for unexpected path layouts; expected format is root/camera/date/file
+        path = Path(recording_path)
+        if len(path.parents) >= 3:
+            return str(path.parents[2]).rstrip("/") or "/"
+
+        return str(path.parent).rstrip("/") or "/"
 
     def _get_path_bandwidths(self) -> dict[str, float]:
         bandwidth_per_path: dict[str, float] = {}
