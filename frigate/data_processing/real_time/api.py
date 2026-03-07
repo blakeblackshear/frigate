@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 
 from frigate.config import FrigateConfig
+from frigate.config.enrichment_updater import EnrichmentConfigEnum
 
 from ..types import DataProcessorMetrics
 
@@ -59,5 +60,20 @@ class RealTimeProcessorApi(ABC):
 
         Returns:
             None.
+        """
+        pass
+
+    def update_config(
+        self, update_type: EnrichmentConfigEnum, payload: Any
+    ) -> None:
+        """Handle a config change notification.
+
+        Called for every config update published under ``config/``.
+        Processors should override this to check the update type and act
+        only on changes relevant to them. Default is a no-op.
+
+        Args:
+            update_type: The enrichment config type that changed.
+            payload: The updated configuration object.
         """
         pass
