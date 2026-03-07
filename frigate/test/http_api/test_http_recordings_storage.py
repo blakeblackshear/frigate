@@ -307,3 +307,39 @@ class TestHttpRecordingsStorage(BaseTestHttp):
         assert "/video1/2026-03-07/08" not in roots
         assert "/video1/2026-03-07/09" not in roots
 
+    def test_recordings_storage_ignores_pseudo_root_storage_stat_entries(self):
+        self.minimal_config["cameras"]["back_yard"] = {
+            "ffmpeg": {
+                "inputs": [{"path": "rtsp://10.0.0.2:554/video", "roles": ["detect"]}]
+            },
+            "detect": {"height": 1080, "width": 1920, "fps": 5},
+            "path": "/video1",
+        }
+
+        self.test_stats["service"]["storage"]["/video1"] = {
+            "free": 600,
+            "mount_type": "ext4",
+            "total": 1000,
+            "used": 400,
+        }
+        self.test_stats["service"]["storage"]["/media/frigate/recordings/2026-03-07/10"] = {
+            "free": 700,
+            "mount_type": "ext4",
+            "total": 1000,
+            "used": 300,
+        }
+        self.test_stats["service"]["storage"]["/video1/2026-03-07/10"] = {
+            "free": 500,
+            "mount_type": "ext4",
+            "total": 1000,
+            "used": 500,
+        }
+
+        app = self._build_app()
+
+        with AuthTestClient(app) as client:
+            payload = client.get("/recordings/storage").json()
+
+        root_paths = {root["path"] for root in payload["recording_roots"]}
+
+        assert root_paths == {"/media/frigate/recordings", "/video1"}
