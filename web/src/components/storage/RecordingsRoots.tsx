@@ -20,6 +20,7 @@ export type RecordingRootStorage = {
   cameras: string[];
   camera_usages: RootCameraStorage;
   is_default: boolean;
+  filesystem?: string;
 };
 
 export function RecordingsRoots({ roots }: { roots: RecordingRootStorage[] }) {
@@ -36,15 +37,15 @@ export function RecordingsRoots({ roots }: { roots: RecordingRootStorage[] }) {
         >
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="break-all text-sm font-medium">{root.path}</div>
-            {!root.is_default && (
+            {root.filesystem && (
               <div className="rounded-md bg-primary/15 px-2 py-1 text-xs text-primary">
-                {t("storage.recordings.nonDefault")}
+                {root.filesystem}
               </div>
             )}
           </div>
           <StorageGraph
             graphId={`recordings-root-${root.path}`}
-            used={root.recordings_size}
+            used={root.used}
             total={root.total}
           />
           <div className="mt-2 text-xs text-primary-variant">
@@ -52,6 +53,11 @@ export function RecordingsRoots({ roots }: { roots: RecordingRootStorage[] }) {
               used: root.used,
               free: root.free,
               usage_percent: root.usage_percent.toFixed(2),
+            })}
+          </div>
+          <div className="mt-2 text-xs text-primary-variant">
+            {t("storage.recordings.recordingsTracked", {
+              recordings_size: root.recordings_size,
             })}
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
