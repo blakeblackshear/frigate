@@ -56,6 +56,7 @@ i18n
       "views/faceLibrary",
       "views/live",
       "views/motionSearch",
+      "views/recording",
       "views/replay",
       "views/search",
       "views/settings",
