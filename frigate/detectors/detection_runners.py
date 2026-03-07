@@ -534,7 +534,9 @@ class RKNNModelRunner(BaseModelRunner):
                         if len(face_data.shape) == 4 and face_data.shape[1] == 3:
                             # Transpose from NCHW to NHWC
                             face_data = np.transpose(face_data, (0, 2, 3, 1))
-                        face_data = ((face_data + 1.0) * 127.5).clip(0, 255).astype(np.uint8)
+                        face_data = (
+                            ((face_data + 1.0) * 127.5).clip(0, 255).astype(np.uint8)
+                        )
                         rknn_inputs.append(face_data)
                     else:
                         rknn_inputs.append(inputs[name])
