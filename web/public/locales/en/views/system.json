@@ -128,11 +128,15 @@
   "storage": {
     "title": "Storage",
     "overview": "Overview",
-    "recordings": {
-      "title": "Recordings",
-      "tips": "This value represents the total storage used by the recordings in Frigate's database. Frigate does not track storage usage for all files on your disk.",
-      "earliestRecording": "Earliest recording available:"
-    },
+  "recordings": {
+    "title": "Recordings",
+    "tips": "This value represents the total storage used by the recordings in Frigate's database. Frigate does not track storage usage for all files on your disk.",
+    "earliestRecording": "Earliest recording available:",
+    "roots": "Recording Roots",
+    "nonDefault": "Non-default root",
+    "rootSummary": "Disk used: {{used}} MiB • Free: {{free}} MiB • Usage: {{usage_percent}}%",
+    "rootCameras": "Cameras: {{cameras}}"
+  },
     "shm": {
       "title": "SHM (shared memory) allocation",
       "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB."
