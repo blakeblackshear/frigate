@@ -1186,11 +1186,12 @@ async def event_thumbnail(
             status_code=404,
         )
 
+    img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
+    img = cv2.imdecode(img_as_np, flags=1)
+
     # android notifications prefer a 2:1 ratio
     if format == "android":
-        img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
-        img = cv2.imdecode(img_as_np, flags=1)
-        thumbnail = cv2.copyMakeBorder(
+        img = cv2.copyMakeBorder(
             img,
             0,
             0,
@@ -1200,14 +1201,14 @@ async def event_thumbnail(
             (0, 0, 0),
         )
 
-        quality_params = None
-        if extension in (Extension.jpg, Extension.jpeg):
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == Extension.webp:
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+    quality_params = None
+    if extension in (Extension.jpg, Extension.jpeg):
+        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+    elif extension == Extension.webp:
+        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
-        thumbnail_bytes = img.tobytes()
+    _, encoded = cv2.imencode(f".{extension.value}", img, quality_params)
+    thumbnail_bytes = encoded.tobytes()
 
     return Response(
         thumbnail_bytes,
