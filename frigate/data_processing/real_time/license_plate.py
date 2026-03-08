@@ -8,7 +8,6 @@ import numpy as np
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.config.enrichment_updater import EnrichmentConfigEnum
 from frigate.data_processing.common.license_plate.mixin import (
     LicensePlateProcessingMixin,
 )
@@ -41,12 +40,21 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.camera_current_cars: dict[str, list[str]] = {}
         super().__init__(config, metrics)
 
-    def update_config(self, update_type: EnrichmentConfigEnum, payload: Any) -> None:
+    CONFIG_UPDATE_TOPIC = "config/lpr"
+
+    def update_config(self, topic: str, payload: Any) -> None:
         """Update LPR config at runtime."""
-        if update_type != EnrichmentConfigEnum.lpr:
+        if topic != self.CONFIG_UPDATE_TOPIC:
             return
 
+        previous_min_area = self.config.lpr.min_area
+        self.config.lpr = payload
         self.lpr_config = payload
+
+        for camera_config in self.config.cameras.values():
+            if camera_config.lpr.min_area == previous_min_area:
+                camera_config.lpr.min_area = payload.min_area
+
         logger.debug("LPR config updated dynamically")
 
     def process_frame(

@@ -169,6 +169,16 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         )
         self.detected_birds[obj_data["id"]] = score
 
+    CONFIG_UPDATE_TOPIC = "config/classification"
+
+    def update_config(self, topic: str, payload: Any) -> None:
+        """Update bird classification config at runtime."""
+        if topic != self.CONFIG_UPDATE_TOPIC:
+            return
+
+        self.config.classification = payload
+        logger.debug("Bird classification config updated dynamically")
+
     def handle_request(self, topic, request_data):
         return None
 

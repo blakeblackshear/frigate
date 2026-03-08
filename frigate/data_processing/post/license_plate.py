@@ -12,7 +12,6 @@ from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.config.enrichment_updater import EnrichmentConfigEnum
 from frigate.data_processing.common.license_plate.mixin import (
     WRITE_DEBUG_IMAGES,
     LicensePlateProcessingMixin,
@@ -48,13 +47,15 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         self.sub_label_publisher = sub_label_publisher
         super().__init__(config, metrics, model_runner)
 
-    def update_config(self, update_type: EnrichmentConfigEnum, payload: Any) -> None:
+    CONFIG_UPDATE_TOPIC = "config/lpr"
+
+    def update_config(self, topic: str, payload: Any) -> None:
         """Update LPR config at runtime."""
-        if update_type != EnrichmentConfigEnum.lpr:
+        if topic != self.CONFIG_UPDATE_TOPIC:
             return
 
         self.lpr_config = payload
-        logger.debug("LPR config updated dynamically")
+        logger.debug("LPR post-processor config updated dynamically")
 
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum

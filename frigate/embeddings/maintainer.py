@@ -9,6 +9,7 @@ from typing import Any
 
 from peewee import DoesNotExist
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.embeddings_updater import (
     EmbeddingsRequestEnum,
@@ -31,10 +32,6 @@ from frigate.config.camera.camera import CameraTypeEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
-)
-from frigate.config.enrichment_updater import (
-    EnrichmentConfigEnum,
-    EnrichmentConfigSubscriber,
 )
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
@@ -99,7 +96,7 @@ class EmbeddingMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.semantic_search,
             ],
         )
-        self.enrichment_config_subscriber = EnrichmentConfigSubscriber()
+        self.enrichment_config_subscriber = ConfigSubscriber("config/")
 
         # Configure Frigate DB
         db = SqliteVecQueueDatabase(
@@ -297,43 +294,22 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _check_enrichment_config_updates(self) -> None:
         """Check for enrichment config updates and delegate to processors."""
-        update_type, topic, payload = (
-            self.enrichment_config_subscriber.check_for_update()
-        )
+        topic, payload = self.enrichment_config_subscriber.check_for_update()
 
-        if update_type is None:
+        if topic is None:
             return
 
         # Custom classification add/remove requires managing the processor list
-        if update_type == EnrichmentConfigEnum.classification_custom:
+        if topic.startswith("config/classification/custom/"):
             self._handle_custom_classification_update(topic, payload)
             return
 
-        # Apply global config updates before notifying processors
-        if update_type == EnrichmentConfigEnum.classification:
-            self.config.classification = payload
-            logger.debug("Applied dynamic bird classification config update")
-        elif update_type == EnrichmentConfigEnum.face_recognition:
-            previous_min_area = self.config.face_recognition.min_area
-            self.config.face_recognition = payload
-
-            for camera_config in self.config.cameras.values():
-                if camera_config.face_recognition.min_area == previous_min_area:
-                    camera_config.face_recognition.min_area = payload.min_area
-        elif update_type == EnrichmentConfigEnum.lpr:
-            previous_min_area = self.config.lpr.min_area
-            self.config.lpr = payload
-
-            for camera_config in self.config.cameras.values():
-                if camera_config.lpr.min_area == previous_min_area:
-                    camera_config.lpr.min_area = payload.min_area
-
-        # Broadcast to all processors — each decides if the update is relevant
+        # Broadcast to all processors — each decides if the topic is relevant
         for processor in self.realtime_processors:
-            processor.update_config(update_type, payload)
+            processor.update_config(topic, payload)
 
         for processor in self.post_processors:
-            processor.update_config(update_type, payload)
+            processor.update_config(topic, payload)
 
     def _handle_custom_classification_update(
         self, topic: str, model_config: Any
