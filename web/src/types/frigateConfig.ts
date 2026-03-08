@@ -8,6 +8,7 @@ export interface UiConfig {
   time_style?: "full" | "long" | "medium" | "short";
   dashboard: boolean;
   order: number;
+  rotate: boolean;
   unit_system?: "metric" | "imperial";
 }
 

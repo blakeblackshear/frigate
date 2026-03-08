@@ -16,3 +16,8 @@ class CameraUiConfig(FrigateBaseModel):
         title="Show in UI",
         description="Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again.",
     )
+    rotate: bool = Field(
+        default=False,
+        title="Rotate in grid",
+        description="Rotate this camera 90 degrees clockwise in multi-camera dashboard/grid views.",
+    )
