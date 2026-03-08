@@ -3,6 +3,12 @@ import type { SectionConfigOverrides } from "./types";
 const motion: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/motion_detection",
+    fieldDocs: {
+      lightning_threshold:
+        "/configuration/motion_detection#lightning_threshold",
+      skip_motion_threshold:
+        "/configuration/motion_detection#skip_motion_on_large_scene_changes",
+    },
     restartRequired: [],
     fieldOrder: [
       "enabled",
@@ -19,6 +25,16 @@ const motion: SectionConfigOverrides = {
     fieldGroups: {
       sensitivity: ["enabled", "threshold", "contour_area"],
       algorithm: ["improve_contrast", "delta_alpha", "frame_alpha"],
+    },
+    uiSchema: {
+      skip_motion_threshold: {
+        "ui:widget": "optionalField",
+        "ui:options": {
+          innerWidget: "range",
+          step: 0.05,
+          suppressMultiSchema: true,
+        },
+      },
     },
     hiddenFields: ["enabled_in_config", "mask", "raw_mask"],
     advancedFields: [
@@ -58,7 +74,7 @@ const motion: SectionConfigOverrides = {
       "frame_alpha",
       "frame_height",
     ],
-    advancedFields: ["lightning_threshold"],
+    advancedFields: ["lightning_threshold", "skip_motion_threshold"],
   },
 };
 

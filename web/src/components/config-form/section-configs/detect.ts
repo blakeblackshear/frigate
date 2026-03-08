@@ -30,10 +30,22 @@ const detect: SectionConfigOverrides = {
     ],
   },
   global: {
-    restartRequired: ["width", "height", "min_initialized", "max_disappeared"],
+    restartRequired: [
+      "fps",
+      "width",
+      "height",
+      "min_initialized",
+      "max_disappeared",
+    ],
   },
   camera: {
-    restartRequired: ["width", "height", "min_initialized", "max_disappeared"],
+    restartRequired: [
+      "fps",
+      "width",
+      "height",
+      "min_initialized",
+      "max_disappeared",
+    ],
   },
 };
 
