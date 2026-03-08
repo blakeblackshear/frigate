@@ -44,13 +44,21 @@ go2rtc:
 
 ### `environment_vars`
 
-This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS.
+This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS. Docker users should set environment variables in their `docker run` command (`-e FRIGATE_MQTT_PASSWORD=secret`) or `docker-compose.yml` file (`environment:` section) instead. Note that values set here are stored in plain text in your config file, so if the goal is to keep credentials out of your configuration, use Docker environment variables or Docker secrets instead.
+
+Variables prefixed with `FRIGATE_` can be referenced in config fields that support environment variable substitution (such as MQTT host and credentials, camera stream URLs, and ONVIF host and credentials) using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
 Example:
 
 ```yaml
 environment_vars:
-  VARIABLE_NAME: variable_value
+  FRIGATE_MQTT_USER: my_mqtt_user
+  FRIGATE_MQTT_PASSWORD: my_mqtt_password
+
+mqtt:
+  host: "{FRIGATE_MQTT_HOST}"
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
 ```
 
 #### TensorFlow Thread Configuration

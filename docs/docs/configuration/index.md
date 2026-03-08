@@ -50,6 +50,7 @@ Frigate supports the use of environment variables starting with `FRIGATE_` **onl
 
 ```yaml
 mqtt:
+  host: "{FRIGATE_MQTT_HOST}"
   user: "{FRIGATE_MQTT_USER}"
   password: "{FRIGATE_MQTT_PASSWORD}"
 ```
@@ -60,7 +61,7 @@ mqtt:
 
 ```yaml
 onvif:
-  host: 10.0.10.10
+  host: "{FRIGATE_ONVIF_HOST}"
   port: 8000
   user: "{FRIGATE_RTSP_USER}"
   password: "{FRIGATE_RTSP_PASSWORD}"
