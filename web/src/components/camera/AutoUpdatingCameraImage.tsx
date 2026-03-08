@@ -9,6 +9,7 @@ type AutoUpdatingCameraImageProps = {
   cameraClasses?: string;
   reloadInterval?: number;
   periodicCache?: boolean;
+  fit?: "contain" | "cover";
 };
 
 const MIN_LOAD_TIMEOUT_MS = 200;
@@ -21,6 +22,7 @@ export default function AutoUpdatingCameraImage({
   cameraClasses,
   reloadInterval = MIN_LOAD_TIMEOUT_MS,
   periodicCache = false,
+  fit = "contain",
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState<string>("0");
@@ -96,6 +98,7 @@ export default function AutoUpdatingCameraImage({
         onload={handleLoad}
         searchParams={cacheKey}
         className={cameraClasses}
+        fit={fit}
       />
       {showFps ? <span className="text-xs">Displaying at {fps}fps</span> : null}
     </div>
