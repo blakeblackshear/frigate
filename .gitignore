@@ -3,6 +3,7 @@ __pycache__
 .mypy_cache
 *.swp
 debug
+.claude/*
 .vscode/*
 !.vscode/launch.json
 config/*
