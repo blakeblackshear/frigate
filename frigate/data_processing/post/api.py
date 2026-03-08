@@ -52,9 +52,7 @@ class PostProcessorApi(ABC):
         """
         pass
 
-    def update_config(
-        self, update_type: EnrichmentConfigEnum, payload: Any
-    ) -> None:
+    def update_config(self, update_type: EnrichmentConfigEnum, payload: Any) -> None:
         """Handle a config change notification.
 
         Called for every config update published under ``config/``.
