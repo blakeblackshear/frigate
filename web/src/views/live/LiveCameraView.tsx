@@ -88,7 +88,11 @@ import {
   MdPhotoCamera,
 } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import {
+  TransformWrapper,
+  TransformComponent,
+  ReactZoomPanPinchRef,
+} from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { useSessionPersistence } from "@/hooks/use-session-persistence";
@@ -124,7 +128,11 @@ import {
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
   createLiveZoomWrapperProps,
+  getCursorRelativeZoomTransform,
   getLiveZoomTransformStyles,
+  LIVE_ZOOM_MAX_SCALE,
+  LIVE_ZOOM_MIN_SCALE,
+  LIVE_ZOOM_SHIFT_WHEEL_STEP,
 } from "@/views/live/liveZoom";
 
 type LiveCameraViewProps = {
@@ -146,6 +154,7 @@ export default function LiveCameraView({
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
 
@@ -440,8 +449,47 @@ export default function LiveCameraView({
     [config, webRTC],
   );
 
+  const handlePlayerWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      if (!e.shiftKey || !zoomRef.current) {
+        return;
+      }
+
+      const transformState = zoomRef.current.instance.transformState;
+      const zoomStep =
+        e.deltaY < 0 ? LIVE_ZOOM_SHIFT_WHEEL_STEP : -LIVE_ZOOM_SHIFT_WHEEL_STEP;
+      const nextScale = Math.min(
+        LIVE_ZOOM_MAX_SCALE,
+        Math.max(LIVE_ZOOM_MIN_SCALE, transformState.scale + zoomStep),
+      );
+
+      if (nextScale === transformState.scale) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const nextTransform = getCursorRelativeZoomTransform(
+        transformState,
+        {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        },
+        nextScale,
+      );
+
+      zoomRef.current.setTransform(
+        nextTransform.positionX,
+        nextTransform.positionY,
+        nextTransform.scale,
+      );
+    },
+    [],
+  );
+
   return (
-    <TransformWrapper {...createLiveZoomWrapperProps(debug)}>
+    <TransformWrapper ref={zoomRef} {...createLiveZoomWrapperProps(debug)}>
       <Toaster position="top-center" closeButton={true} />
       <div
         ref={mainRef}
@@ -621,7 +669,12 @@ export default function LiveCameraView({
         </div>
         {!debug ? (
           <div id="player-container" className="size-full" ref={containerRef}>
-            <TransformComponent {...getLiveZoomTransformStyles("player")}>
+            <TransformComponent
+              {...getLiveZoomTransformStyles("player")}
+              wrapperProps={{
+                onWheel: handlePlayerWheel,
+              }}
+            >
               <div
                 className={`flex flex-col items-center justify-center ${growClassName}`}
                 ref={clickOverlayRef}
