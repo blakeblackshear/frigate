@@ -80,6 +80,9 @@
     "back": "Back",
     "empty": "No previews available",
     "noPreview": "Preview unavailable",
-    "seekAria": "Seek {{camera}} player to {{time}}"
+    "seekAria": "Seek {{camera}} player to {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Select areas to only show clips with motion in those regions.",
+    "filterClear": "Clear"
   }
 }
