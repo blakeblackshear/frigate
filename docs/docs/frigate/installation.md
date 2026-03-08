@@ -3,7 +3,7 @@ id: installation
 title: Installation
 ---
 
-Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/addons/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
+Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/apps/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
 
 :::tip
 
