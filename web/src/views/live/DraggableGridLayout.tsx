@@ -27,7 +27,6 @@ import {
   StatsState,
   VolumeState,
 } from "@/types/live";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
@@ -203,9 +202,7 @@ export default function DraggableGridLayout({
             (birdseyeConfig?.width || 1) / (birdseyeConfig?.height || 1);
           col = 0; // Set birdseye camera in the first column
         } else {
-          const camera = cameras.find((cam) => cam.name === cameraName);
-          aspectRatio =
-            (camera && camera?.detect.width / camera?.detect.height) || 16 / 9;
+          aspectRatio = 16 / 9;
           col = index % 3; // Regular cameras distributed across columns
         }
 
@@ -606,15 +603,6 @@ export default function DraggableGridLayout({
               </BirdseyeLivePlayerGridItem>
             )}
             {cameras.map((camera) => {
-              let grow;
-              const aspectRatio = camera.detect.width / camera.detect.height;
-              if (aspectRatio > ASPECT_WIDE_LAYOUT) {
-                grow = `aspect-wide w-full`;
-              } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
-                grow = `aspect-tall h-full`;
-              } else {
-                grow = "aspect-video";
-              }
               const availableStreams = camera.live.streams || {};
               const firstStreamEntry = Object.values(availableStreams)[0] || "";
 
@@ -643,7 +631,7 @@ export default function DraggableGridLayout({
                   ?.compatibilityMode || false;
               return (
                 <GridLiveContextMenu
-                  className={grow}
+                  className="size-full"
                   key={camera.name}
                   camera={camera.name}
                   streamName={streamName}
@@ -681,8 +669,7 @@ export default function DraggableGridLayout({
                     useWebGL={useWebGL}
                     cameraRef={cameraRef}
                     className={cn(
-                      "rounded-lg bg-black md:rounded-2xl",
-                      grow,
+                      "size-full rounded-lg bg-black md:rounded-2xl",
                       isEditMode &&
                         showCircles &&
                         "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
