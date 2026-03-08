@@ -1225,6 +1225,8 @@ class LicensePlateProcessingMixin:
                 logger.debug(f"{camera}: License plate area below minimum threshold.")
                 return
 
+            plate_box = license_plate
+
             license_plate_frame = rgb[
                 license_plate[1] : license_plate[3],
                 license_plate[0] : license_plate[2],
@@ -1341,6 +1343,20 @@ class LicensePlateProcessingMixin:
                     logger.debug(f"{camera}: License plate is less than min_area")
                     return
 
+                # Scale back to original car coordinates and then to frame
+                plate_box_in_car = (
+                    license_plate[0] // 2,
+                    license_plate[1] // 2,
+                    license_plate[2] // 2,
+                    license_plate[3] // 2,
+                )
+                plate_box = (
+                    left + plate_box_in_car[0],
+                    top + plate_box_in_car[1],
+                    left + plate_box_in_car[2],
+                    top + plate_box_in_car[3],
+                )
+
                 license_plate_frame = car[
                     license_plate[1] : license_plate[3],
                     license_plate[0] : license_plate[2],
@@ -1403,6 +1419,8 @@ class LicensePlateProcessingMixin:
                 ).clip(
                     0, [license_plate_frame.shape[1], license_plate_frame.shape[0]] * 2
                 )
+
+                plate_box = tuple(int(x) for x in expanded_box)
 
                 # Crop using the expanded box
                 license_plate_frame = license_plate_frame[
@@ -1611,6 +1629,7 @@ class LicensePlateProcessingMixin:
                     "id": id,
                     "camera": camera,
                     "timestamp": start,
+                    "plate_box": plate_box,
                 }
             ),
         )
