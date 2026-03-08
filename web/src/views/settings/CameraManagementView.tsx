@@ -13,7 +13,8 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
 import CameraEditForm from "@/components/settings/CameraEditForm";
 import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
-import { LuPlus } from "react-icons/lu";
+import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
+import { LuPlus, LuTrash2 } from "react-icons/lu";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
@@ -45,6 +46,7 @@ export default function CameraManagementView({
     undefined,
   ); // Track camera being edited
   const [showWizard, setShowWizard] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // State for restart dialog when enabling a disabled camera
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
@@ -98,14 +100,26 @@ export default function CameraManagementView({
               </Heading>
 
               <div className="w-full max-w-5xl space-y-6">
-                <Button
-                  variant="select"
-                  onClick={() => setShowWizard(true)}
-                  className="mb-2 flex max-w-48 items-center gap-2"
-                >
-                  <LuPlus className="h-4 w-4" />
-                  {t("cameraManagement.addCamera")}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="select"
+                    onClick={() => setShowWizard(true)}
+                    className="mb-2 flex max-w-48 items-center gap-2"
+                  >
+                    <LuPlus className="h-4 w-4" />
+                    {t("cameraManagement.addCamera")}
+                  </Button>
+                  {enabledCameras.length + disabledCameras.length > 0 && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="mb-2 flex max-w-48 items-center gap-2 text-white"
+                    >
+                      <LuTrash2 className="h-4 w-4" />
+                      {t("cameraManagement.deleteCamera")}
+                    </Button>
+                  )}
+                </div>
 
                 {enabledCameras.length > 0 && (
                   <SettingsGroupCard
@@ -220,6 +234,15 @@ export default function CameraManagementView({
       <CameraWizardDialog
         open={showWizard}
         onClose={() => setShowWizard(false)}
+      />
+      <DeleteCameraDialog
+        show={showDeleteDialog}
+        cameras={[...enabledCameras, ...disabledCameras]}
+        onClose={() => setShowDeleteDialog(false)}
+        onDeleted={() => {
+          setShowDeleteDialog(false);
+          updateConfig();
+        }}
       />
       <RestartDialog
         isOpen={restartDialogOpen}
