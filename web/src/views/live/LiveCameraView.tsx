@@ -122,6 +122,10 @@ import {
   SnapshotResult,
 } from "@/utils/snapshotUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import {
+  createLiveZoomWrapperProps,
+  getLiveZoomTransformStyles,
+} from "@/views/live/liveZoom";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -437,11 +441,7 @@ export default function LiveCameraView({
   );
 
   return (
-    <TransformWrapper
-      minScale={1.0}
-      wheel={{ smoothStep: 0.005 }}
-      disabled={debug}
-    >
+    <TransformWrapper {...createLiveZoomWrapperProps(debug)}>
       <Toaster position="top-center" closeButton={true} />
       <div
         ref={mainRef}
@@ -621,18 +621,7 @@ export default function LiveCameraView({
         </div>
         {!debug ? (
           <div id="player-container" className="size-full" ref={containerRef}>
-            <TransformComponent
-              wrapperStyle={{
-                width: "100%",
-                height: "100%",
-              }}
-              contentStyle={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                padding: "8px",
-              }}
-            >
+            <TransformComponent {...getLiveZoomTransformStyles("player")}>
               <div
                 className={`flex flex-col items-center justify-center ${growClassName}`}
                 ref={clickOverlayRef}
@@ -675,17 +664,7 @@ export default function LiveCameraView({
               )}
           </div>
         ) : (
-          <TransformComponent
-            wrapperStyle={{
-              width: "100%",
-              height: "100%",
-            }}
-            contentStyle={{
-              position: "relative",
-              width: "100%",
-              height: "100%",
-            }}
-          >
+          <TransformComponent {...getLiveZoomTransformStyles("debug")}>
             <ObjectSettingsView selectedCamera={camera.name} />
           </TransformComponent>
         )}
