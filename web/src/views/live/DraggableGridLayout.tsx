@@ -49,6 +49,13 @@ import { Toaster } from "@/components/ui/sonner";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
+import {
+  CAMERA_ZOOM_MIN_SCALE,
+  CameraZoomRuntimeTransform,
+  clampScale,
+  getCursorRelativeZoomTransform,
+  getNextScaleFromWheelDelta,
+} from "@/utils/cameraZoom";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -424,6 +431,51 @@ export default function DraggableGridLayout({
   const [audioStates, setAudioStates] = useState<AudioState>({});
   const [volumeStates, setVolumeStates] = useState<VolumeState>({});
   const [statsStates, setStatsStates] = useState<StatsState>({});
+  const [cameraZoomStates, setCameraZoomStates] = useState<
+    Record<string, CameraZoomRuntimeTransform>
+  >({});
+
+  const getDefaultZoomTransform = useCallback(
+    (): CameraZoomRuntimeTransform => ({
+      scale: CAMERA_ZOOM_MIN_SCALE,
+      positionX: 0,
+      positionY: 0,
+    }),
+    [],
+  );
+
+  const handleCardWheelZoom = useCallback(
+    (cameraName: string, event: React.WheelEvent<HTMLDivElement>) => {
+      if (!event.shiftKey) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const bounds = event.currentTarget.getBoundingClientRect();
+      const cursorX = event.clientX - bounds.left;
+      const cursorY = event.clientY - bounds.top;
+
+      setCameraZoomStates((prev) => {
+        const current = prev[cameraName] ?? getDefaultZoomTransform();
+        const nextScale = clampScale(
+          getNextScaleFromWheelDelta(current.scale, event.deltaY),
+        );
+        const next = getCursorRelativeZoomTransform(
+          current,
+          nextScale,
+          cursorX,
+          cursorY,
+        );
+
+        return {
+          ...prev,
+          [cameraName]: next,
+        };
+      });
+    },
+    [getDefaultZoomTransform],
+  );
 
   useEffect(() => {
     const initialStreamStatsState = getStreamStatsFromStorage();
@@ -629,6 +681,8 @@ export default function DraggableGridLayout({
               const useWebGL =
                 currentGroupStreamingSettings?.[camera.name]
                   ?.compatibilityMode || false;
+              const zoomTransform =
+                cameraZoomStates[camera.name] ?? getDefaultZoomTransform();
               return (
                 <GridLiveContextMenu
                   className="size-full"
@@ -660,45 +714,64 @@ export default function DraggableGridLayout({
                   config={config}
                   streamMetadata={streamMetadata}
                 >
-                  <LivePlayer
-                    key={camera.name}
-                    streamName={streamName}
-                    autoLive={autoLive ?? globalAutoLive}
-                    showStillWithoutActivity={showStillWithoutActivity ?? true}
-                    alwaysShowCameraName={displayCameraNames}
-                    useWebGL={useWebGL}
-                    cameraRef={cameraRef}
-                    className={cn(
-                      "draggable-live-grid-mse-cover size-full rounded-lg bg-black md:rounded-2xl",
-                      camera.ui?.rotate &&
-                        "draggable-live-grid-rotated [--frigate-mse-grid-rotated:1] [--frigate-mse-grid-rotation:rotate(90deg)]",
-                      isEditMode &&
-                        showCircles &&
-                        "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
-                    )}
-                    windowVisible={
-                      windowVisible && visibleCameras.includes(camera.name)
-                    }
-                    cameraConfig={camera}
-                    preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                    playInBackground={false}
-                    showStats={statsStates[camera.name] ?? true}
-                    onClick={() => {
-                      !isEditMode && onSelectCamera(camera.name);
-                    }}
-                    onError={(e) => {
-                      setPreferredLiveModes((prevModes) => {
-                        const newModes = { ...prevModes };
-                        if (e === "mse-decode") {
-                          delete newModes[camera.name];
+                  <div
+                    className="size-full overflow-hidden rounded-lg md:rounded-2xl"
+                    onWheel={(event) => handleCardWheelZoom(camera.name, event)}
+                  >
+                    <div
+                      className="size-full"
+                      style={{
+                        transform: `translate(${zoomTransform.positionX}px, ${zoomTransform.positionY}px) scale(${zoomTransform.scale})`,
+                        transformOrigin: "0 0",
+                      }}
+                    >
+                      <LivePlayer
+                        key={camera.name}
+                        streamName={streamName}
+                        autoLive={autoLive ?? globalAutoLive}
+                        showStillWithoutActivity={
+                          showStillWithoutActivity ?? true
                         }
-                        return newModes;
-                      });
-                    }}
-                    onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
-                    playAudio={audioStates[camera.name]}
-                    volume={volumeStates[camera.name]}
-                  />
+                        alwaysShowCameraName={displayCameraNames}
+                        useWebGL={useWebGL}
+                        cameraRef={cameraRef}
+                        className={cn(
+                          "draggable-live-grid-mse-cover size-full rounded-lg bg-black md:rounded-2xl",
+                          camera.ui?.rotate &&
+                            "draggable-live-grid-rotated [--frigate-mse-grid-rotated:1] [--frigate-mse-grid-rotation:rotate(90deg)]",
+                          isEditMode &&
+                            showCircles &&
+                            "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
+                        )}
+                        windowVisible={
+                          windowVisible && visibleCameras.includes(camera.name)
+                        }
+                        cameraConfig={camera}
+                        preferredLiveMode={
+                          preferredLiveModes[camera.name] ?? "mse"
+                        }
+                        playInBackground={false}
+                        showStats={statsStates[camera.name] ?? true}
+                        onClick={() => {
+                          !isEditMode && onSelectCamera(camera.name);
+                        }}
+                        onError={(e) => {
+                          setPreferredLiveModes((prevModes) => {
+                            const newModes = { ...prevModes };
+                            if (e === "mse-decode") {
+                              delete newModes[camera.name];
+                            }
+                            return newModes;
+                          });
+                        }}
+                        onResetLiveMode={() =>
+                          resetPreferredLiveMode(camera.name)
+                        }
+                        playAudio={audioStates[camera.name]}
+                        volume={volumeStates[camera.name]}
+                      />
+                    </div>
+                  </div>
                   {isEditMode && showCircles && <CornerCircles />}
                 </GridLiveContextMenu>
               );
