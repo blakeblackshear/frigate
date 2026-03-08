@@ -4,7 +4,6 @@ import asyncio
 import json
 import logging
 import re
-import traceback
 from importlib.util import find_spec
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -1086,10 +1085,9 @@ async def delete_camera(
                 except Exception:
                     with open(config_file, "w") as f:
                         f.write(old_raw_config)
-                    logger.error(
-                        "Config error after removing camera %s:\n%s",
+                    logger.exception(
+                        "Config error after removing camera %s",
                         camera_name,
-                        traceback.format_exc(),
                     )
                     return JSONResponse(
                         content={
