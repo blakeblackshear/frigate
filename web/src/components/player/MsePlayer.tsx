@@ -803,6 +803,10 @@ function MSEPlayer({
       style={{
         objectFit:
           "var(--frigate-mse-object-fit, fill)" as CSSProperties["objectFit"],
+        transform:
+          "var(--frigate-mse-grid-rotation, none)" as CSSProperties["transform"],
+        transformOrigin:
+          "var(--frigate-mse-grid-rotation-origin, center center)" as CSSProperties["transformOrigin"],
       }}
       playsInline
       preload="auto"
