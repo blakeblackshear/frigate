@@ -27,6 +27,7 @@ import {
   StatsState,
   VolumeState,
 } from "@/types/live";
+import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
@@ -193,20 +194,38 @@ export default function DraggableGridLayout({
           return;
         }
 
-        // Keep birdseye aspect-aware sizing, while camera tiles use a stable size.
-        const columnsPerPlayer = 4;
-        const col = index % 3;
-        let width = columnsPerPlayer;
-        let height = columnsPerPlayer;
+        let aspectRatio;
+        let col;
 
+        // Handle "birdseye" camera as a special case
         if (cameraName === "birdseye") {
-          const aspectRatio =
+          aspectRatio =
             (birdseyeConfig?.width || 1) / (birdseyeConfig?.height || 1);
-          if (aspectRatio < 1) {
-            height = 2 * columnsPerPlayer;
-          } else if (aspectRatio > 2) {
-            width = 2 * columnsPerPlayer;
-          }
+          col = 0; // Set birdseye camera in the first column
+        } else {
+          const camera = cameras.find((cam) => cam.name === cameraName);
+          aspectRatio =
+            (camera && camera?.detect.width / camera?.detect.height) || 16 / 9;
+          col = index % 3; // Regular cameras distributed across columns
+        }
+
+        // Calculate layout options based on aspect ratio
+        const columnsPerPlayer = 4;
+        let height;
+        let width;
+
+        if (aspectRatio < 1) {
+          // Portrait
+          height = 2 * columnsPerPlayer;
+          width = columnsPerPlayer;
+        } else if (aspectRatio > 2) {
+          // Wide
+          height = 1 * columnsPerPlayer;
+          width = 2 * columnsPerPlayer;
+        } else {
+          // Landscape
+          height = 1 * columnsPerPlayer;
+          width = columnsPerPlayer;
         }
 
         const options = {
@@ -587,7 +606,15 @@ export default function DraggableGridLayout({
               </BirdseyeLivePlayerGridItem>
             )}
             {cameras.map((camera) => {
-              const grow = "size-full";
+              let grow;
+              const aspectRatio = camera.detect.width / camera.detect.height;
+              if (aspectRatio > ASPECT_WIDE_LAYOUT) {
+                grow = `aspect-wide w-full`;
+              } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
+                grow = `aspect-tall h-full`;
+              } else {
+                grow = "aspect-video";
+              }
               const availableStreams = camera.live.streams || {};
               const firstStreamEntry = Object.values(availableStreams)[0] || "";
 
@@ -654,7 +681,8 @@ export default function DraggableGridLayout({
                     useWebGL={useWebGL}
                     cameraRef={cameraRef}
                     className={cn(
-                      "size-full overflow-hidden rounded-lg bg-black md:rounded-2xl",
+                      "rounded-lg bg-black md:rounded-2xl",
+                      grow,
                       isEditMode &&
                         showCircles &&
                         "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
@@ -681,9 +709,6 @@ export default function DraggableGridLayout({
                     onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                     playAudio={audioStates[camera.name]}
                     volume={volumeStates[camera.name]}
-                    rotateClockwise={camera.ui.rotate}
-                    fillContainer
-                    applyDashboardTransforms
                   />
                   {isEditMode && showCircles && <CornerCircles />}
                 </GridLiveContextMenu>

@@ -27,7 +27,6 @@ import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { formatList } from "@/utils/stringUtil";
-import { useResizeObserver } from "@/hooks/resize-observer";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -48,9 +47,6 @@ type LivePlayerProps = {
   pip?: boolean;
   autoLive?: boolean;
   showStats?: boolean;
-  rotateClockwise?: boolean;
-  fillContainer?: boolean;
-  applyDashboardTransforms?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -76,9 +72,6 @@ export default function LivePlayer({
   pip,
   autoLive = true,
   showStats = false,
-  rotateClockwise = false,
-  fillContainer = false,
-  applyDashboardTransforms = false,
   onClick,
   setFullResolution,
   onError,
@@ -90,31 +83,10 @@ export default function LivePlayer({
 
   const cameraName = useCameraFriendlyName(cameraConfig);
 
-  const shouldFillContainer = applyDashboardTransforms && fillContainer;
-  const shouldRotateClockwise = applyDashboardTransforms && rotateClockwise;
+  // player is showing on a dashboard if containerRef is not provided
 
-  const mediaViewportRef = useRef<HTMLDivElement | null>(null);
-  const [{ width: viewportWidth, height: viewportHeight }] =
-    useResizeObserver(mediaViewportRef);
+  const inDashboard = containerRef?.current == null;
 
-  const mediaTransformStyle = useMemo(() => {
-    const transforms = ["translate(-50%, -50%)"];
-
-    if (shouldRotateClockwise) {
-      transforms.push("rotate(90deg)");
-    }
-
-    // For a 90° rotation, the media box must use swapped viewport dimensions
-    // before rotating, otherwise the rotated content can under-fill one axis.
-    const rotatedWidth = viewportHeight ? `${viewportHeight}px` : "100%";
-    const rotatedHeight = viewportWidth ? `${viewportWidth}px` : "100%";
-
-    return {
-      transform: transforms.join(" "),
-      width: shouldRotateClockwise ? rotatedWidth : "100%",
-      height: shouldRotateClockwise ? rotatedHeight : "100%",
-    };
-  }, [shouldRotateClockwise, viewportHeight, viewportWidth]);
   // stats
 
   const [stats, setStats] = useState<PlayerStatsType>({
@@ -307,11 +279,7 @@ export default function LivePlayer({
     player = (
       <WebRtcPlayer
         key={"webrtc_" + key}
-        className={cn(
-          "size-full rounded-lg md:rounded-2xl",
-          shouldFillContainer && "object-cover",
-          liveReady ? "" : "hidden",
-        )}
+        className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
         getStats={showStats}
@@ -330,11 +298,7 @@ export default function LivePlayer({
       player = (
         <MSEPlayer
           key={"mse_" + key}
-          className={cn(
-            "size-full rounded-lg md:rounded-2xl",
-            shouldFillContainer && "object-cover",
-            liveReady ? "" : "hidden",
-          )}
+          className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
@@ -360,11 +324,7 @@ export default function LivePlayer({
       player = (
         <JSMpegPlayer
           key={"jsmpeg_" + key}
-          className={cn(
-            "flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl",
-            shouldFillContainer &&
-              "[&_.internal-jsmpeg-container]:size-full [&_.jsmpeg]:size-full",
-          )}
+          className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
           camera={cameraConfig.name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
@@ -375,7 +335,6 @@ export default function LivePlayer({
           setStats={setStats}
           containerRef={containerRef ?? internalContainerRef}
           onPlaying={playerIsPlaying}
-          fit={shouldFillContainer ? "cover" : "contain"}
         />
       );
     } else {
@@ -412,17 +371,7 @@ export default function LivePlayer({
             lowerClassName="md:rounded-2xl"
           />
         )}
-      <div
-        ref={mediaViewportRef}
-        className={cn(
-          "absolute inset-0",
-          shouldFillContainer && "overflow-hidden",
-        )}
-      >
-        <div className="absolute left-1/2 top-1/2" style={mediaTransformStyle}>
-          {player}
-        </div>
-      </div>
+      {player}
       {cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
@@ -492,15 +441,8 @@ export default function LivePlayer({
         )}
       >
         <AutoUpdatingCameraImage
-          className={cn(
-            "pointer-events-none size-full",
-            shouldFillContainer && "overflow-hidden",
-          )}
-          cameraClasses={cn(
-            "relative size-full",
-            shouldFillContainer && "overflow-hidden",
-          )}
-          fit={shouldFillContainer ? "cover" : "contain"}
+          className="pointer-events-none size-full"
+          cameraClasses="relative size-full flex justify-center"
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
@@ -508,7 +450,7 @@ export default function LivePlayer({
         />
       </div>
 
-      {offline && applyDashboardTransforms && (
+      {offline && inDashboard && (
         <>
           <div className="absolute inset-0 rounded-lg bg-black/50 md:rounded-2xl" />
           <div className="absolute inset-0 left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
