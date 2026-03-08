@@ -670,6 +670,8 @@ export default function DraggableGridLayout({
                     cameraRef={cameraRef}
                     className={cn(
                       "draggable-live-grid-mse-cover size-full rounded-lg bg-black md:rounded-2xl",
+                      camera.ui?.rotate &&
+                        "draggable-live-grid-rotated [--frigate-mse-grid-rotation:rotate(90deg)]",
                       isEditMode &&
                         showCircles &&
                         "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
