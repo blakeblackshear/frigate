@@ -72,7 +72,7 @@ class PtzAutotrackConfig(FrigateBaseModel):
 
 
 class OnvifConfig(FrigateBaseModel):
-    host: str = Field(default="", title="Onvif Host")
+    host: EnvString = Field(default="", title="Onvif Host")
     port: int = Field(default=8000, title="Onvif Port")
     user: Optional[EnvString] = Field(default=None, title="Onvif Username")
     password: Optional[EnvString] = Field(default=None, title="Onvif Password")

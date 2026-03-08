@@ -13,7 +13,7 @@ __all__ = ["MqttConfig"]
 
 class MqttConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable MQTT Communication.")
-    host: str = Field(default="", title="MQTT Host")
+    host: EnvString = Field(default="", title="MQTT Host")
     port: int = Field(default=1883, title="MQTT Port")
     topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
     client_id: str = Field(default="frigate", title="MQTT Client ID")
