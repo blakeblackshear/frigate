@@ -669,7 +669,7 @@ export default function DraggableGridLayout({
                     useWebGL={useWebGL}
                     cameraRef={cameraRef}
                     className={cn(
-                      "size-full rounded-lg bg-black md:rounded-2xl",
+                      "draggable-live-grid-mse-cover size-full rounded-lg bg-black [--frigate-mse-object-fit:cover] md:rounded-2xl",
                       isEditMode &&
                         showCircles &&
                         "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
