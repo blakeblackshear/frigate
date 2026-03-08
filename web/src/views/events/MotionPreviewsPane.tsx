@@ -624,6 +624,9 @@ export default function MotionPreviewsPane({
   const [hasVisibilityData, setHasVisibilityData] = useState(false);
   const clipObserver = useRef<IntersectionObserver | null>(null);
 
+  const [mountedClips, setMountedClips] = useState<Set<string>>(new Set());
+  const mountObserver = useRef<IntersectionObserver | null>(null);
+
   const recordingTimeRange = useMemo(() => {
     if (!motionRanges.length) {
       return null;
@@ -788,15 +791,56 @@ export default function MotionPreviewsPane({
     };
   }, [scrollContainer]);
 
+  useEffect(() => {
+    if (!scrollContainer) {
+      return;
+    }
+
+    const nearClipIds = new Set<string>();
+    mountObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const clipId = (entry.target as HTMLElement).dataset.clipId;
+
+          if (!clipId) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            nearClipIds.add(clipId);
+          } else {
+            nearClipIds.delete(clipId);
+          }
+        });
+
+        setMountedClips(new Set(nearClipIds));
+      },
+      {
+        root: scrollContainer,
+        rootMargin: "200% 0px",
+        threshold: 0,
+      },
+    );
+
+    scrollContainer
+      .querySelectorAll<HTMLElement>("[data-clip-id]")
+      .forEach((node) => {
+        mountObserver.current?.observe(node);
+      });
+
+    return () => {
+      mountObserver.current?.disconnect();
+    };
+  }, [scrollContainer]);
+
   const clipRef = useCallback((node: HTMLElement | null) => {
-    if (!clipObserver.current) {
+    if (!node) {
       return;
     }
 
     try {
-      if (node) {
-        clipObserver.current.observe(node);
-      }
+      clipObserver.current?.observe(node);
+      mountObserver.current?.observe(node);
     } catch {
       // no op
     }
@@ -864,31 +908,38 @@ export default function MotionPreviewsPane({
         ) : (
           <div className="grid grid-cols-1 gap-2 pb-2 sm:grid-cols-2 md:gap-4 xl:grid-cols-4">
             {clipData.map(
-              ({ range, preview, fallbackFrameTimes, motionHeatmap }, idx) => (
-                <div
-                  key={`${camera.name}-${range.start_time}-${range.end_time}-${preview?.src ?? "none"}-${idx}`}
-                  data-clip-id={`${camera.name}-${range.start_time}-${range.end_time}-${idx}`}
-                  ref={clipRef}
-                >
-                  <MotionPreviewClip
-                    cameraName={camera.name}
-                    range={range}
-                    playbackRate={playbackRate}
-                    preview={preview}
-                    fallbackFrameTimes={fallbackFrameTimes}
-                    motionHeatmap={motionHeatmap}
-                    nonMotionAlpha={nonMotionAlpha}
-                    isVisible={
-                      windowVisible &&
-                      (visibleClips.includes(
-                        `${camera.name}-${range.start_time}-${range.end_time}-${idx}`,
-                      ) ||
-                        (!hasVisibilityData && idx < 8))
-                    }
-                    onSeek={onSeek}
-                  />
-                </div>
-              ),
+              ({ range, preview, fallbackFrameTimes, motionHeatmap }, idx) => {
+                const clipId = `${camera.name}-${range.start_time}-${range.end_time}-${idx}`;
+                const isMounted = mountedClips.has(clipId);
+
+                return (
+                  <div
+                    key={`${camera.name}-${range.start_time}-${range.end_time}-${preview?.src ?? "none"}-${idx}`}
+                    data-clip-id={clipId}
+                    ref={clipRef}
+                  >
+                    {isMounted ? (
+                      <MotionPreviewClip
+                        cameraName={camera.name}
+                        range={range}
+                        playbackRate={playbackRate}
+                        preview={preview}
+                        fallbackFrameTimes={fallbackFrameTimes}
+                        motionHeatmap={motionHeatmap}
+                        nonMotionAlpha={nonMotionAlpha}
+                        isVisible={
+                          windowVisible &&
+                          (visibleClips.includes(clipId) ||
+                            (!hasVisibilityData && idx < 8))
+                        }
+                        onSeek={onSeek}
+                      />
+                    ) : (
+                      <div className="aspect-video rounded-lg bg-black md:rounded-2xl" />
+                    )}
+                  </div>
+                );
+              },
             )}
           </div>
         )}
