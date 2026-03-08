@@ -16,6 +16,8 @@ mqtt:
   # Optional: Enable mqtt server (default: shown below)
   enabled: True
   # Required: host name
+  # NOTE: MQTT host can be specified with an environment variable or docker secrets that must begin with 'FRIGATE_'.
+  #       e.g. host: '{FRIGATE_MQTT_HOST}'
   host: mqtt.server.com
   # Optional: port (default: shown below)
   port: 1883
@@ -906,6 +908,8 @@ cameras:
     onvif:
       # Required: host of the camera being connected to.
       # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
+      # NOTE: ONVIF host, user, and password can be specified with environment variables or docker secrets
+      #       that must begin with 'FRIGATE_'. e.g. host: '{FRIGATE_ONVIF_HOST}'
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
       port: 8000
