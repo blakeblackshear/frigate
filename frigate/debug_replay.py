@@ -21,7 +21,8 @@ from frigate.const import (
     REPLAY_DIR,
     THUMB_DIR,
 )
-from frigate.models import Event, Recordings, ReviewSegment, Timeline
+from frigate.models import Recordings
+from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 
 logger = logging.getLogger(__name__)
@@ -357,43 +358,13 @@ class DebugReplayManager:
 
     def _cleanup_db(self, camera_name: str) -> None:
         """Defensively remove any database rows for the replay camera."""
-        try:
-            Event.delete().where(Event.camera == camera_name).execute()
-        except Exception as e:
-            logger.error("Failed to delete replay events: %s", e)
-
-        try:
-            Timeline.delete().where(Timeline.camera == camera_name).execute()
-        except Exception as e:
-            logger.error("Failed to delete replay timeline: %s", e)
-
-        try:
-            Recordings.delete().where(Recordings.camera == camera_name).execute()
-        except Exception as e:
-            logger.error("Failed to delete replay recordings: %s", e)
-
-        try:
-            ReviewSegment.delete().where(ReviewSegment.camera == camera_name).execute()
-        except Exception as e:
-            logger.error("Failed to delete replay review segments: %s", e)
+        cleanup_camera_db(camera_name)
 
     def _cleanup_files(self, camera_name: str) -> None:
         """Remove filesystem artifacts for the replay camera."""
-        dirs_to_clean = [
-            os.path.join(RECORD_DIR, camera_name),
-            os.path.join(CLIPS_DIR, camera_name),
-            os.path.join(THUMB_DIR, camera_name),
-        ]
+        cleanup_camera_files(camera_name)
 
-        for dir_path in dirs_to_clean:
-            if os.path.exists(dir_path):
-                try:
-                    shutil.rmtree(dir_path)
-                    logger.debug("Removed replay directory: %s", dir_path)
-                except Exception as e:
-                    logger.error("Failed to remove %s: %s", dir_path, e)
-
-        # Remove replay clip and any related files
+        # Remove replay-specific cache directory
         if os.path.exists(REPLAY_DIR):
             try:
                 shutil.rmtree(REPLAY_DIR)
