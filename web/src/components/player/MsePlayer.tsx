@@ -6,6 +6,7 @@ import {
   VideoResolutionType,
 } from "@/types/live";
 import {
+  CSSProperties,
   SetStateAction,
   useCallback,
   useEffect,
@@ -799,6 +800,10 @@ function MSEPlayer({
     <video
       ref={videoRef}
       className={className}
+      style={{
+        objectFit:
+          "var(--frigate-mse-object-fit, fill)" as CSSProperties["objectFit"],
+      }}
       playsInline
       preload="auto"
       onLoadedData={() => {
