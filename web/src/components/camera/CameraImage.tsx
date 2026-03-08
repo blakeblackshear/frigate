@@ -12,6 +12,7 @@ type CameraImageProps = {
   camera: string;
   onload?: () => void;
   searchParams?: string;
+  fit?: "contain" | "cover";
 };
 
 export default function CameraImage({
@@ -19,6 +20,7 @@ export default function CameraImage({
   camera,
   onload,
   searchParams = "",
+  fit = "contain",
 }: CameraImageProps) {
   const { data: config } = useSWR("config");
   const apiHost = useApiHost();
@@ -87,12 +89,16 @@ export default function CameraImage({
         <img
           ref={imgRef}
           className={cn(
-            "object-contain",
-            imageLoaded
-              ? isPortraitImage
-                ? "h-full w-auto"
-                : "h-auto w-full"
-              : "invisible",
+            fit == "cover" ? "size-full object-cover" : "object-contain",
+            fit == "cover"
+              ? imageLoaded
+                ? "visible"
+                : "invisible"
+              : imageLoaded
+                ? isPortraitImage
+                  ? "h-full w-auto"
+                  : "h-auto w-full"
+                : "invisible",
             "rounded-lg md:rounded-2xl",
           )}
           onLoad={handleImageLoad}

@@ -16,6 +16,7 @@ type JSMpegPlayerProps = {
   useWebGL: boolean;
   setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
+  fit?: "contain" | "cover";
 };
 
 export default function JSMpegPlayer({
@@ -28,6 +29,7 @@ export default function JSMpegPlayer({
   useWebGL = false,
   setStats,
   onPlaying,
+  fit = "contain",
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const videoRef = useRef<HTMLDivElement>(null);
@@ -60,8 +62,28 @@ export default function JSMpegPlayer({
     [containerWidth, containerHeight],
   );
 
-  const scaledHeight = useMemo(() => {
-    if (selectedContainerRef?.current && width && height) {
+  const scaledDimensions = useMemo(() => {
+    if (!width || !height || !containerWidth || !containerHeight) {
+      return { width: undefined, height: undefined };
+    }
+
+    if (fit == "cover") {
+      if (aspectRatio < fitAspect) {
+        const coverWidth = Math.ceil(containerWidth);
+        return {
+          width: coverWidth,
+          height: Math.ceil(coverWidth / aspectRatio),
+        };
+      }
+
+      const coverHeight = Math.ceil(containerHeight);
+      return {
+        width: Math.ceil(coverHeight * aspectRatio),
+        height: coverHeight,
+      };
+    }
+
+    if (selectedContainerRef?.current) {
       const scaledHeight =
         aspectRatio < (fitAspect ?? 0)
           ? Math.floor(
@@ -78,33 +100,31 @@ export default function JSMpegPlayer({
         : Math.min(scaledHeight, height);
 
       if (finalHeight > 0) {
-        return finalHeight;
+        return {
+          width: Math.ceil(finalHeight * aspectRatio),
+          height: finalHeight,
+        };
       }
     }
-    return undefined;
+
+    return { width: undefined, height: undefined };
   }, [
     aspectRatio,
     containerWidth,
     containerHeight,
     fitAspect,
+    fit,
     height,
     width,
     stretch,
     selectedContainerRef,
   ]);
 
-  const scaledWidth = useMemo(() => {
-    if (aspectRatio && scaledHeight) {
-      return Math.ceil(scaledHeight * aspectRatio);
-    }
-    return undefined;
-  }, [scaledHeight, aspectRatio]);
-
   useEffect(() => {
-    if (scaledWidth && scaledHeight) {
+    if (scaledDimensions.width && scaledDimensions.height) {
       setDimensionsReady(true);
     }
-  }, [scaledWidth, scaledHeight]);
+  }, [scaledDimensions]);
 
   useEffect(() => {
     onPlayingRef.current = onPlaying;
@@ -242,7 +262,7 @@ export default function JSMpegPlayer({
         <div
           ref={videoRef}
           className={cn(
-            "jsmpeg flex h-full w-auto items-center justify-center",
+            "jsmpeg flex size-full items-center justify-center overflow-hidden",
             !showCanvas && "hidden",
           )}
         >
@@ -250,8 +270,8 @@ export default function JSMpegPlayer({
             ref={canvasRef}
             className="rounded-lg md:rounded-2xl"
             style={{
-              width: scaledWidth,
-              height: scaledHeight,
+              width: scaledDimensions.width,
+              height: scaledDimensions.height,
             }}
           ></canvas>
         </div>
