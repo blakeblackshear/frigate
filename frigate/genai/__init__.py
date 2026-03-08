@@ -7,6 +7,7 @@ import os
 import re
 from typing import Any, Optional
 
+import numpy as np
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
@@ -303,6 +304,25 @@ Guidelines:
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
         return 4096
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Generate embeddings for text and/or images.
+
+        Returns list of numpy arrays (one per input). Expected dimension is 768
+        for Frigate semantic search compatibility.
+
+        Providers that support embeddings should override this method.
+        """
+        logger.warning(
+            "%s does not support embeddings. "
+            "This method should be overridden by the provider implementation.",
+            self.__class__.__name__,
+        )
+        return []
 
     def chat_with_tools(
         self,

@@ -76,6 +76,40 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 :::
 
+### GenAI Provider
+
+Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. Currently, only **llama.cpp** supports multimodal embeddings (both text and images).
+
+To use llama.cpp for semantic search:
+
+1. Configure a GenAI provider in your config with `embeddings` in its `roles`.
+2. Set `semantic_search.model` to the GenAI config key (e.g. `default`).
+3. Start the llama.cpp server with `--embeddings` and `--mmproj` for image support:
+
+```yaml
+genai:
+  default:
+    provider: llamacpp
+    base_url: http://localhost:8080
+    model: your-model-name
+    roles:
+      - embeddings
+      - vision
+      - tools
+
+semantic_search:
+  enabled: True
+  model: default
+```
+
+The llama.cpp server must be started with `--embeddings` for the embeddings API, and a multi-modal embeddings model. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
+
+:::note
+
+Switching between Jina models and a GenAI provider requires reindexing. Embeddings from different backends are incompatible.
+
+:::
+
 ### GPU Acceleration
 
 The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used. You can also target a specific device in a multi-GPU installation.

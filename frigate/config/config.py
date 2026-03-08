@@ -61,6 +61,7 @@ from .classification import (
     FaceRecognitionConfig,
     LicensePlateRecognitionConfig,
     SemanticSearchConfig,
+    SemanticSearchModelEnum,
 )
 from .database import DatabaseConfig
 from .env import EnvVars
@@ -591,6 +592,24 @@ class FrigateConfig(FrigateBaseModel):
                         "exactly one provider."
                     )
                 role_to_name[role] = name
+
+        # validate semantic_search.model when it is a GenAI provider name
+        if (
+            self.semantic_search.enabled
+            and isinstance(self.semantic_search.model, str)
+            and not isinstance(self.semantic_search.model, SemanticSearchModelEnum)
+        ):
+            if self.semantic_search.model not in self.genai:
+                raise ValueError(
+                    f"semantic_search.model '{self.semantic_search.model}' is not a "
+                    "valid GenAI config key. Must match a key in genai config."
+                )
+            genai_cfg = self.genai[self.semantic_search.model]
+            if GenAIRoleEnum.embeddings not in genai_cfg.roles:
+                raise ValueError(
+                    f"GenAI provider '{self.semantic_search.model}' must have "
+                    "'embeddings' in its roles for semantic search."
+                )
 
         # set default min_score for object attributes
         for attribute in self.model.all_attributes:

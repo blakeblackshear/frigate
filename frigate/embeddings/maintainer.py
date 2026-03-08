@@ -123,8 +123,10 @@ class EmbeddingMaintainer(threading.Thread):
         models = [Event, Recordings, ReviewSegment, Trigger]
         db.bind(models)
 
+        self.genai_manager = GenAIClientManager(config)
+
         if config.semantic_search.enabled:
-            self.embeddings = Embeddings(config, db, metrics)
+            self.embeddings = Embeddings(config, db, metrics, self.genai_manager)
 
             # Check if we need to re-index events
             if config.semantic_search.reindex:
@@ -151,7 +153,6 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
-        self.genai_manager = GenAIClientManager(config)
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
