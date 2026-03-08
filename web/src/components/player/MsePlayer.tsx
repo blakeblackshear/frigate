@@ -79,6 +79,9 @@ function MSEPlayer({
   );
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [isRotatedGrid, setIsRotatedGrid] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTIDRef = useRef<number | null>(null);
   const intentionalDisconnectRef = useRef<boolean>(false);
@@ -796,7 +799,51 @@ function MSEPlayer({
     };
   }, [setStats, getStats]);
 
-  return (
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      setIsRotatedGrid(false);
+      return;
+    }
+
+    const rotatedMarker = window
+      .getComputedStyle(video)
+      .getPropertyValue("--frigate-mse-grid-rotated")
+      .trim();
+
+    setIsRotatedGrid(rotatedMarker === "1");
+  }, [className]);
+
+  useEffect(() => {
+    if (!isRotatedGrid) {
+      return;
+    }
+
+    const container = playerContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const updateSize = () => {
+      setContainerSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    updateSize();
+
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isRotatedGrid]);
+
+  const videoElement = (
     <video
       ref={videoRef}
       className={className}
@@ -807,6 +854,8 @@ function MSEPlayer({
           "var(--frigate-mse-grid-rotation, none)" as CSSProperties["transform"],
         transformOrigin:
           "var(--frigate-mse-grid-rotation-origin, center center)" as CSSProperties["transformOrigin"],
+        width: isRotatedGrid ? "100%" : undefined,
+        height: isRotatedGrid ? "100%" : undefined,
       }}
       playsInline
       preload="auto"
@@ -854,6 +903,35 @@ function MSEPlayer({
         }
       }}
     />
+  );
+
+  return (
+    <div
+      ref={playerContainerRef}
+      className="size-full"
+      style={
+        isRotatedGrid
+          ? ({ position: "relative", overflow: "hidden" } as CSSProperties)
+          : undefined
+      }
+    >
+      <div
+        style={
+          isRotatedGrid
+            ? ({
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: containerSize.height || "100%",
+                height: containerSize.width || "100%",
+                transform: "translate(-50%, -50%)",
+              } as CSSProperties)
+            : ({ width: "100%", height: "100%" } as CSSProperties)
+        }
+      >
+        {videoElement}
+      </div>
+    </div>
   );
 }
 
