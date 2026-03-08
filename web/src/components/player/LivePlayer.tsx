@@ -412,24 +412,17 @@ export default function LivePlayer({
             lowerClassName="md:rounded-2xl"
           />
         )}
-      {applyDashboardTransforms ? (
-        <div
-          ref={mediaViewportRef}
-          className={cn(
-            "absolute inset-0",
-            shouldFillContainer && "overflow-hidden",
-          )}
-        >
-          <div
-            className="absolute left-1/2 top-1/2"
-            style={mediaTransformStyle}
-          >
-            {player}
-          </div>
+      <div
+        ref={mediaViewportRef}
+        className={cn(
+          "absolute inset-0",
+          shouldFillContainer && "overflow-hidden",
+        )}
+      >
+        <div className="absolute left-1/2 top-1/2" style={mediaTransformStyle}>
+          {player}
         </div>
-      ) : (
-        player
-      )}
+      </div>
       {cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
@@ -487,63 +480,33 @@ export default function LivePlayer({
           </div>
         )}
 
-      {applyDashboardTransforms ? (
-        <div
+      <div
+        className={cn(
+          "absolute inset-0 w-full",
+          showStillWithoutActivity &&
+            !liveReady &&
+            !isReEnabling &&
+            cameraEnabled
+            ? "visible"
+            : "invisible",
+        )}
+      >
+        <AutoUpdatingCameraImage
           className={cn(
-            "absolute inset-0",
-            showStillWithoutActivity &&
-              !liveReady &&
-              !isReEnabling &&
-              cameraEnabled
-              ? "visible"
-              : "invisible",
+            "pointer-events-none size-full",
             shouldFillContainer && "overflow-hidden",
           )}
-        >
-          <div
-            className="absolute left-1/2 top-1/2"
-            style={mediaTransformStyle}
-          >
-            <AutoUpdatingCameraImage
-              className={cn(
-                "pointer-events-none size-full",
-                shouldFillContainer && "overflow-hidden",
-              )}
-              cameraClasses={cn(
-                "relative size-full",
-                shouldFillContainer && "overflow-hidden",
-              )}
-              fit={shouldFillContainer ? "cover" : "contain"}
-              camera={cameraConfig.name}
-              showFps={false}
-              reloadInterval={stillReloadInterval}
-              periodicCache
-            />
-          </div>
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "absolute inset-0 w-full",
-            showStillWithoutActivity &&
-              !liveReady &&
-              !isReEnabling &&
-              cameraEnabled
-              ? "visible"
-              : "invisible",
+          cameraClasses={cn(
+            "relative size-full",
+            shouldFillContainer && "overflow-hidden",
           )}
-        >
-          <AutoUpdatingCameraImage
-            className="pointer-events-none size-full"
-            cameraClasses="relative size-full"
-            fit="contain"
-            camera={cameraConfig.name}
-            showFps={false}
-            reloadInterval={stillReloadInterval}
-            periodicCache
-          />
-        </div>
-      )}
+          fit={shouldFillContainer ? "cover" : "contain"}
+          camera={cameraConfig.name}
+          showFps={false}
+          reloadInterval={stillReloadInterval}
+          periodicCache
+        />
+      </div>
 
       {offline && applyDashboardTransforms && (
         <>
