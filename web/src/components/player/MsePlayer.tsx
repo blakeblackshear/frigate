@@ -465,11 +465,11 @@ function MSEPlayer({
             bufLen = 0;
             sb.appendBuffer(data);
           } else if (sb.buffered && sb.buffered.length) {
-            const end = sb.buffered.end(sb.buffered.length - 1) - 15;
+            const end = sb.buffered.end(sb.buffered.length - 1) - 10;
             const start = sb.buffered.start(0);
             if (end > start) {
               sb.remove(start, end);
-              msRef.current?.setLiveSeekableRange(end, end + 15);
+              msRef.current?.setLiveSeekableRange(end, end + 10);
             }
           }
         } catch (e) {
@@ -511,7 +511,7 @@ function MSEPlayer({
     if (buffered.length > 0) {
       const liveEdge = buffered.end(buffered.length - 1);
       // Jump to the live edge
-      videoRef.current.currentTime = liveEdge - 0.75;
+      videoRef.current.currentTime = liveEdge - 0.45;
       lastJumpTimeRef.current = Date.now();
     }
   };
@@ -520,21 +520,21 @@ function MSEPlayer({
     const filledEntries = bufferTimes.current.length;
     const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
     const averageBufferTime = filledEntries ? sum / filledEntries : 0;
-    return averageBufferTime * (isSafari || isIOS ? 3 : 1.5);
+    return averageBufferTime * (isSafari || isIOS ? 3 : 0.6);
   };
 
   const calculateAdaptivePlaybackRate = (
     bufferTime: number,
     bufferThreshold: number,
   ) => {
-    const alpha = 0.2; // aggressiveness of playback rate increase
-    const beta = 0.5; // steepness of exponential growth
+    const alpha = 0.1; // aggressiveness of playback rate increase
+    const beta = 0.3; // steepness of exponential growth
 
     // don't adjust playback rate if we're close enough to live
     // or if we just started streaming
     if (
-      ((bufferTime <= bufferThreshold && bufferThreshold < 3) ||
-        bufferTime < 3) &&
+      ((bufferTime <= bufferThreshold && bufferThreshold < 1) ||
+        bufferTime < 1) &&
       bufferTimes.current.length <= MAX_BUFFER_ENTRIES
     ) {
       return 1;
@@ -548,7 +548,7 @@ function MSEPlayer({
 
     if (
       videoRef.current &&
-      (videoRef.current.playbackRate === 1 || bufferTime < 3)
+      (videoRef.current.playbackRate === 1 || bufferTime < 1)
     ) {
       if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
         bufferTimes.current.push(bufferTime);
@@ -563,7 +563,7 @@ function MSEPlayer({
     // if we have > 3 seconds of buffered data and we're still not playing,
     // something might be wrong - maybe codec issue, no audio, etc
     // so mark the player as playing so that error handlers will fire
-    if (!isPlaying && playbackEnabled && bufferTime > 3) {
+    if (!isPlaying && playbackEnabled && bufferTime > 1) {
       setIsPlaying(true);
       lastJumpTimeRef.current = Date.now();
       onPlaying?.();
@@ -592,8 +592,7 @@ function MSEPlayer({
     // time
     if (videoRef.current && isPlaying && playbackEnabled) {
       if (
-        (isSafari || isIOS) &&
-        bufferTime > 3 &&
+        bufferTime > 0.4 &&
         Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
       ) {
         // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering

@@ -109,12 +109,41 @@ export default function LivePlayer({
     offline,
   } = useCameraActivity(cameraConfig);
 
-  const cameraActive = useMemo(
-    () =>
-      !showStillWithoutActivity ||
-      (windowVisible && (activeMotion || activeTracking)),
-    [activeMotion, activeTracking, showStillWithoutActivity, windowVisible],
-  );
+  const [stickyActive, setStickyActive] = useState(false);
+
+  useEffect(() => {
+    if (showStillWithoutActivity) {
+      setStickyActive(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (activeMotion || activeTracking) {
+      setStickyActive(true);
+    }
+  }, [activeMotion, activeTracking]);
+
+  const cameraActive = useMemo(() => {
+    // continuous: всегда активна
+    if (!showStillWithoutActivity) {
+      return true;
+    }
+
+    // smart, но уже "залипла" → ведём себя как continuous
+    if (stickyActive) {
+      return true;
+    }
+
+    // обычный smart до первого движения
+    return windowVisible && (activeMotion || activeTracking);
+  }, [
+    activeMotion,
+    activeTracking,
+    showStillWithoutActivity,
+    windowVisible,
+    stickyActive,
+  ]);
 
   // camera live state
 
