@@ -1284,7 +1284,7 @@ function MotionReview({
 
   return (
     <>
-      {motionPreviewsCamera && selectedMotionPreviewCamera ? (
+      {selectedMotionPreviewCamera && (
         <>
           <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:px-3">
             <Button
@@ -1465,104 +1465,108 @@ function MotionReview({
             }}
           />
         </>
-      ) : (
-        <div className="no-scrollbar flex min-w-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-          <div
-            ref={contentRef}
-            className={cn(
-              "no-scrollbar grid w-full grid-cols-1",
-              isMobile && "landscape:grid-cols-2",
-              reviewCameras.length > 3 &&
-                isMobile &&
-                "portrait:md:grid-cols-2 landscape:md:grid-cols-3",
-              isDesktop && "grid-cols-2 lg:grid-cols-3",
-              "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4",
-            )}
-          >
-            {reviewCameras.map((camera) => {
-              let grow;
-              let spans;
-              const aspectRatio = camera.detect.width / camera.detect.height;
-              if (aspectRatio > 2) {
-                grow = "aspect-wide";
-                spans = "sm:col-span-2";
-              } else if (aspectRatio < 1) {
-                grow = "h-full aspect-tall";
-                spans = "md:row-span-2";
-              } else {
-                grow = "aspect-video";
-              }
-              const detectionType = getDetectionType(camera.name);
-              return (
-                <div key={camera.name} className={`relative ${spans}`}>
-                  {motionData ? (
-                    <>
-                      <PreviewPlayer
-                        className={`rounded-lg md:rounded-2xl ${spans} ${grow}`}
-                        camera={camera.name}
-                        timeRange={currentTimeRange}
-                        startTime={previewStart}
-                        cameraPreviews={relevantPreviews}
-                        isScrubbing={scrubbing}
-                        onControllerReady={(controller) => {
-                          videoPlayersRef.current[camera.name] = controller;
-                        }}
-                        onClick={() =>
-                          onOpenRecording({
-                            camera: camera.name,
-                            startTime: Math.min(
-                              currentTime,
-                              Date.now() / 1000 - 30,
-                            ),
-                            severity: "significant_motion",
-                          })
-                        }
-                      />
-                      <div
-                        className={`review-item-ring pointer-events-none absolute inset-0 z-20 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
-                      />
-                      <div className="absolute bottom-2 right-2 z-30">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <BlurredIconButton
-                              aria-label={t("motionSearch.openMenu")}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <FiMoreVertical className="size-5" />
-                            </BlurredIconButton>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setMotionPreviewsCamera(camera.name);
-                              }}
-                            >
-                              {t("motionPreviews.menuItem")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setMotionSearchCamera(camera.name);
-                              }}
-                            >
-                              {t("motionSearch.menuItem")}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </>
-                  ) : (
-                    <Skeleton
-                      className={`size-full rounded-lg md:rounded-2xl ${spans} ${grow}`}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
       )}
+      <div
+        className={cn(
+          "no-scrollbar flex min-w-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4",
+          selectedMotionPreviewCamera && "hidden",
+        )}
+      >
+        <div
+          ref={selectedMotionPreviewCamera ? undefined : contentRef}
+          className={cn(
+            "no-scrollbar grid w-full grid-cols-1",
+            isMobile && "landscape:grid-cols-2",
+            reviewCameras.length > 3 &&
+              isMobile &&
+              "portrait:md:grid-cols-2 landscape:md:grid-cols-3",
+            isDesktop && "grid-cols-2 lg:grid-cols-3",
+            "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4",
+          )}
+        >
+          {reviewCameras.map((camera) => {
+            let grow;
+            let spans;
+            const aspectRatio = camera.detect.width / camera.detect.height;
+            if (aspectRatio > 2) {
+              grow = "aspect-wide";
+              spans = "sm:col-span-2";
+            } else if (aspectRatio < 1) {
+              grow = "h-full aspect-tall";
+              spans = "md:row-span-2";
+            } else {
+              grow = "aspect-video";
+            }
+            const detectionType = getDetectionType(camera.name);
+            return (
+              <div key={camera.name} className={`relative ${spans}`}>
+                {motionData ? (
+                  <>
+                    <PreviewPlayer
+                      className={`rounded-lg md:rounded-2xl ${spans} ${grow}`}
+                      camera={camera.name}
+                      timeRange={currentTimeRange}
+                      startTime={previewStart}
+                      cameraPreviews={relevantPreviews}
+                      isScrubbing={scrubbing}
+                      onControllerReady={(controller) => {
+                        videoPlayersRef.current[camera.name] = controller;
+                      }}
+                      onClick={() =>
+                        onOpenRecording({
+                          camera: camera.name,
+                          startTime: Math.min(
+                            currentTime,
+                            Date.now() / 1000 - 30,
+                          ),
+                          severity: "significant_motion",
+                        })
+                      }
+                    />
+                    <div
+                      className={`review-item-ring pointer-events-none absolute inset-0 z-20 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
+                    />
+                    <div className="absolute bottom-2 right-2 z-30">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <BlurredIconButton
+                            aria-label={t("motionSearch.openMenu")}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FiMoreVertical className="size-5" />
+                          </BlurredIconButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMotionPreviewsCamera(camera.name);
+                            }}
+                          >
+                            {t("motionPreviews.menuItem")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMotionSearchCamera(camera.name);
+                            }}
+                          >
+                            {t("motionSearch.menuItem")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </>
+                ) : (
+                  <Skeleton
+                    className={`size-full rounded-lg md:rounded-2xl ${spans} ${grow}`}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
       {!selectedMotionPreviewCamera && (
         <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
           {motionData ? (
