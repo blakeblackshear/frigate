@@ -76,7 +76,7 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 :::
 
-### GenAI Provider (llama.cpp)
+### GenAI Provider
 
 Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. Currently, only **llama.cpp** supports multimodal embeddings (both text and images).
 
@@ -102,7 +102,7 @@ semantic_search:
   model: default
 ```
 
-The llama.cpp server must be started with `--embeddings` for the embeddings API, and `--mmproj <mmproj.gguf>` when using image embeddings. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
+The llama.cpp server must be started with `--embeddings` for the embeddings API, and a multi-modal embeddings model. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
 
 :::note
 
