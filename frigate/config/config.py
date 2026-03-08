@@ -61,6 +61,7 @@ from .classification import (
     FaceRecognitionConfig,
     LicensePlateRecognitionConfig,
     SemanticSearchConfig,
+    SemanticSearchModelEnum,
 )
 from .database import DatabaseConfig
 from .env import EnvVars
@@ -595,7 +596,7 @@ class FrigateConfig(FrigateBaseModel):
         # validate semantic_search.model when it is a GenAI provider name
         if self.semantic_search.enabled and isinstance(
             self.semantic_search.model, str
-        ):
+        ) and not isinstance(self.semantic_search.model, SemanticSearchModelEnum):
             if self.semantic_search.model not in self.genai:
                 raise ValueError(
                     f"semantic_search.model '{self.semantic_search.model}' is not a "

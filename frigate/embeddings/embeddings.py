@@ -80,7 +80,6 @@ class Embeddings:
         self.db = db
         self.metrics = metrics
         self.requestor = InterProcessRequestor()
-        self.genai_manager = genai_manager
 
         self.image_inference_speed = InferenceSpeed(self.metrics.image_embeddings_speed)
         self.image_eps = EventsPerSecond()
@@ -108,9 +107,9 @@ class Embeddings:
             )
 
         model_cfg = self.config.semantic_search.model
-        is_genai_model = isinstance(model_cfg, str)
 
-        if is_genai_model:
+        if not isinstance(model_cfg, SemanticSearchModelEnum):
+            # GenAI provider
             embeddings_client = (
                 genai_manager.embeddings_client if genai_manager else None
             )
@@ -161,7 +160,7 @@ class Embeddings:
 
     def get_model_definitions(self):
         model_cfg = self.config.semantic_search.model
-        if isinstance(model_cfg, str):
+        if not isinstance(model_cfg, SemanticSearchModelEnum):
             # GenAI provider: no ONNX models to download
             models = []
         elif model_cfg == SemanticSearchModelEnum.jinav2:
@@ -251,14 +250,6 @@ class Embeddings:
 
         embeddings = self.vision_embedding(valid_thumbs)
 
-        if len(embeddings) != len(valid_ids):
-            logger.warning(
-                "Batch embed returned %d embeddings for %d thumbnails; skipping batch",
-                len(embeddings),
-                len(valid_ids),
-            )
-            return []
-
         if upsert:
             items = []
             for i in range(len(valid_ids)):
@@ -281,15 +272,9 @@ class Embeddings:
 
     def embed_description(
         self, event_id: str, description: str, upsert: bool = True
-    ) -> np.ndarray | None:
+    ) -> np.ndarray:
         start = datetime.datetime.now().timestamp()
-        embeddings = self.text_embedding([description])
-        if not embeddings:
-            logger.warning(
-                "Failed to generate description embedding for event %s", event_id
-            )
-            return None
-        embedding = embeddings[0]
+        embedding = self.text_embedding([description])[0]
 
         if upsert:
             self.db.execute_sql(
@@ -312,32 +297,8 @@ class Embeddings:
         # upsert embeddings one by one to avoid token limit
         embeddings = []
 
-        for eid, desc in event_descriptions.items():
-            result = self.text_embedding([desc])
-            if not result:
-                logger.warning(
-                    "Failed to generate description embedding for event %s", eid
-                )
-                continue
-            embeddings.append(result[0])
-
-        if not embeddings:
-            logger.warning("No description embeddings generated in batch")
-            return np.array([])
-
-        # Build ids list for only successful embeddings - we need to track which succeeded
-        ids = list(event_descriptions.keys())
-        if len(embeddings) != len(ids):
-            # Rebuild ids/embeddings for only successful ones (match by order)
-            ids = []
-            embeddings_filtered = []
-            for eid, desc in event_descriptions.items():
-                result = self.text_embedding([desc])
-                if result:
-                    ids.append(eid)
-                    embeddings_filtered.append(result[0])
-            ids = ids
-            embeddings = embeddings_filtered
+        for desc in event_descriptions.values():
+            embeddings.append(self.text_embedding([desc])[0])
 
         if upsert:
             ids = list(event_descriptions.keys())
@@ -377,14 +338,12 @@ class Embeddings:
         # Get total count of events to process
         total_events = Event.select().count()
 
-        batch_size = (
-            4
-            if (
-                isinstance(self.config.semantic_search.model, str)
-                or self.config.semantic_search.model == SemanticSearchModelEnum.jinav2
-            )
-            else 32
-        )
+        if not isinstance(self.config.semantic_search.model, SemanticSearchModelEnum):
+            batch_size = 1
+        elif self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            batch_size = 4
+        else:
+            batch_size = 32
         current_page = 1
 
         totals = {
@@ -669,8 +628,6 @@ class Embeddings:
         if trigger.type == "description":
             logger.debug(f"Generating embedding for trigger description {trigger_name}")
             embedding = self.embed_description(None, trigger.data, upsert=False)
-            if embedding is None:
-                return b""
             return embedding.astype(np.float32).tobytes()
 
         elif trigger.type == "thumbnail":
@@ -706,8 +663,6 @@ class Embeddings:
                 embedding = self.embed_thumbnail(
                     str(trigger.data), thumbnail, upsert=False
                 )
-                if embedding is None:
-                    return b""
                 return embedding.astype(np.float32).tobytes()
 
         else:
