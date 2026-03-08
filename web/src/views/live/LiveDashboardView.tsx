@@ -566,7 +566,7 @@ export default function LiveDashboardView({
                       }
                       audioState={audioStates[camera.name]}
                       toggleAudio={() => toggleAudio(camera.name)}
-                      statsState={statsStates[camera.name]}
+                      statsState={statsStates[camera.name] ?? true}
                       toggleStats={() => toggleStats(camera.name)}
                       volumeState={volumeStates[camera.name] ?? 1}
                       setVolumeState={(value) =>
@@ -599,7 +599,7 @@ export default function LiveDashboardView({
                         alwaysShowCameraName={displayCameraNames}
                         useWebGL={useWebGL}
                         playInBackground={false}
-                        showStats={statsStates[camera.name]}
+                        showStats={statsStates[camera.name] ?? true}
                         streamName={streamName}
                         onClick={() => onSelectCamera(camera.name)}
                         onError={(e) => handleError(camera.name, e)}

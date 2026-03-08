@@ -35,7 +35,7 @@ import useSWR from "swr";
 import { isDesktop, isMobile } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoStatsChart } from "react-icons/io5";
 import { LuLayoutDashboard, LuPencil } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
@@ -404,16 +404,44 @@ export default function DraggableGridLayout({
   };
 
   // audio and stats states
+  const [globalStreamStatsEnabled, setGlobalStreamStatsEnabled] =
+    useState(false);
+
+  const getStreamStatsFromStorage = (): boolean => {
+    const storedValue = localStorage.getItem("globalStreamStatsEnabled");
+    return storedValue === "true";
+  };
+
+  const setStreamStatsToStorage = (value: boolean): void => {
+    localStorage.setItem("globalStreamStatsEnabled", value.toString());
+  };
+
+  const toggleGlobalStreamStats = () => {
+    setGlobalStreamStatsEnabled((prevState) => {
+      const newState = !prevState;
+      setStreamStatsToStorage(newState);
+      return newState;
+    });
+  };
 
   const [audioStates, setAudioStates] = useState<AudioState>({});
   const [volumeStates, setVolumeStates] = useState<VolumeState>({});
-  const [statsStates, setStatsStates] = useState<StatsState>(() => {
-    const initialStates: StatsState = {};
+  const [statsStates, setStatsStates] = useState<StatsState>({});
+
+  useEffect(() => {
+    const initialStreamStatsState = getStreamStatsFromStorage();
+    setGlobalStreamStatsEnabled(initialStreamStatsState);
+  }, []);
+
+  useEffect(() => {
+    const updatedStatsState: StatsState = {};
+
     cameras.forEach((camera) => {
-      initialStates[camera.name] = false;
+      updatedStatsState[camera.name] = globalStreamStatsEnabled;
     });
-    return initialStates;
-  });
+
+    setStatsStates(updatedStatsState);
+  }, [globalStreamStatsEnabled, cameras]);
 
   const toggleStats = (cameraName: string): void => {
     setStatsStates((prev) => ({
@@ -628,7 +656,7 @@ export default function DraggableGridLayout({
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}
-                  statsState={statsStates[camera.name]}
+                  statsState={statsStates[camera.name] ?? true}
                   toggleStats={() => toggleStats(camera.name)}
                   volumeState={volumeStates[camera.name]}
                   setVolumeState={(value) =>
@@ -665,7 +693,7 @@ export default function DraggableGridLayout({
                     cameraConfig={camera}
                     preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                     playInBackground={false}
-                    showStats={statsStates[camera.name]}
+                    showStats={statsStates[camera.name] ?? true}
                     onClick={() => {
                       !isEditMode && onSelectCamera(camera.name);
                     }}
@@ -673,9 +701,7 @@ export default function DraggableGridLayout({
                       setPreferredLiveModes((prevModes) => {
                         const newModes = { ...prevModes };
                         if (e === "mse-decode") {
-                          newModes[camera.name] = "webrtc";
-                        } else {
-                          newModes[camera.name] = "jsmpeg";
+                          delete newModes[camera.name];
                         }
                         return newModes;
                       });
@@ -699,6 +725,21 @@ export default function DraggableGridLayout({
                 "z-50 flex flex-row gap-2",
               )}
             >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
+                    onClick={toggleGlobalStreamStats}
+                  >
+                    <IoStatsChart className="size-5 md:m-[6px]" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {globalStreamStatsEnabled
+                    ? t("streamStats.disable")
+                    : t("streamStats.enable")}
+                </TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div

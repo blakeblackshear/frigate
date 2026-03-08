@@ -150,7 +150,7 @@ export default function LiveCameraView({
   const [streamName, setStreamName, streamNameLoaded] =
     useUserPersistence<string>(
       `${camera.name}-stream`,
-      Object.values(camera.live.streams)[0],
+      Object.values(camera.live.streams)[1],
     );
 
   const isRestreamed = useMemo(
@@ -273,7 +273,7 @@ export default function LiveCameraView({
     false,
   );
 
-  const [showStats, setShowStats] = useState(false);
+  const [showStats, setShowStats] = useState(true);
   const [debug, setDebug] = useState(false);
 
   useSearchEffect("debug", (value: string) => {
