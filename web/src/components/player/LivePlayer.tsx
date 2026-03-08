@@ -94,6 +94,7 @@ export default function LivePlayer({
   const shouldRotateClockwise = applyDashboardTransforms && rotateClockwise;
 
   const mediaViewportRef = useRef<HTMLDivElement | null>(null);
+  const mediaContentRef = useRef<HTMLDivElement | null>(null);
   const [{ width: viewportWidth, height: viewportHeight }] =
     useResizeObserver(mediaViewportRef);
 
@@ -104,17 +105,54 @@ export default function LivePlayer({
       transforms.push("rotate(90deg)");
     }
 
-    // For a 90° rotation, the media box must use swapped viewport dimensions
-    // before rotating, otherwise the rotated content can under-fill one axis.
-    const rotatedWidth = viewportHeight ? `${viewportHeight}px` : "100%";
-    const rotatedHeight = viewportWidth ? `${viewportWidth}px` : "100%";
+    if (!shouldRotateClockwise || !viewportWidth || !viewportHeight) {
+      return {
+        transform: transforms.join(" "),
+        width: "100%",
+        height: "100%",
+      };
+    }
+
+    const sourceWidth = cameraConfig.detect.width || 1;
+    const sourceHeight = cameraConfig.detect.height || 1;
+    const rotatedAspect = sourceHeight / sourceWidth;
+    const containerAspect = viewportWidth / viewportHeight;
+
+    let renderedWidth = viewportWidth;
+    let renderedHeight = viewportHeight;
+
+    if (shouldFillContainer) {
+      if (rotatedAspect > containerAspect) {
+        renderedHeight = viewportHeight;
+        renderedWidth = renderedHeight * rotatedAspect;
+      } else {
+        renderedWidth = viewportWidth;
+        renderedHeight = renderedWidth / rotatedAspect;
+      }
+    } else if (rotatedAspect > containerAspect) {
+      renderedWidth = viewportWidth;
+      renderedHeight = renderedWidth / rotatedAspect;
+    } else {
+      renderedHeight = viewportHeight;
+      renderedWidth = renderedHeight * rotatedAspect;
+    }
+
+    const rotatedWidth = `${Math.ceil(renderedHeight)}px`;
+    const rotatedHeight = `${Math.ceil(renderedWidth)}px`;
 
     return {
       transform: transforms.join(" "),
       width: shouldRotateClockwise ? rotatedWidth : "100%",
       height: shouldRotateClockwise ? rotatedHeight : "100%",
     };
-  }, [shouldRotateClockwise, viewportHeight, viewportWidth]);
+  }, [
+    cameraConfig.detect.height,
+    cameraConfig.detect.width,
+    shouldFillContainer,
+    shouldRotateClockwise,
+    viewportHeight,
+    viewportWidth,
+  ]);
   // stats
 
   const [stats, setStats] = useState<PlayerStatsType>({
@@ -310,7 +348,7 @@ export default function LivePlayer({
         className={cn(
           "size-full rounded-lg md:rounded-2xl",
           shouldFillContainer && "object-cover",
-          liveReady ? "" : "hidden",
+          liveReady ? "opacity-100" : "opacity-0",
         )}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
@@ -333,7 +371,7 @@ export default function LivePlayer({
           className={cn(
             "size-full rounded-lg md:rounded-2xl",
             shouldFillContainer && "object-cover",
-            liveReady ? "" : "hidden",
+            liveReady ? "opacity-100" : "opacity-0",
           )}
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
@@ -373,7 +411,11 @@ export default function LivePlayer({
           }
           useWebGL={useWebGL}
           setStats={setStats}
-          containerRef={containerRef ?? internalContainerRef}
+          containerRef={
+            applyDashboardTransforms
+              ? mediaContentRef
+              : (containerRef ?? internalContainerRef)
+          }
           onPlaying={playerIsPlaying}
           fit={shouldFillContainer ? "cover" : "contain"}
         />
@@ -421,6 +463,7 @@ export default function LivePlayer({
           )}
         >
           <div
+            ref={mediaContentRef}
             className="absolute left-1/2 top-1/2"
             style={mediaTransformStyle}
           >
