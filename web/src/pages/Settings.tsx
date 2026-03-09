@@ -1571,6 +1571,7 @@ export default function Settings() {
                   onSectionStatusChange={handleSectionStatusChange}
                   pendingDataBySection={pendingDataBySection}
                   onPendingDataChange={handlePendingDataChange}
+                  profileState={profileState}
                 />
               );
             })()}
