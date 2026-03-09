@@ -51,11 +51,6 @@ type LivePlayerProps = {
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
   onResetLiveMode?: () => void;
-  contentTransform?: {
-    scale: number;
-    positionX: number;
-    positionY: number;
-  };
 };
 
 export default function LivePlayer({
@@ -81,7 +76,6 @@ export default function LivePlayer({
   setFullResolution,
   onError,
   onResetLiveMode,
-  contentTransform,
 }: LivePlayerProps) {
   const { t } = useTranslation(["components/player"]);
 
@@ -377,39 +371,27 @@ export default function LivePlayer({
             lowerClassName="md:rounded-2xl"
           />
         )}
-      <div
-        className="absolute inset-0"
-        style={
-          contentTransform
-            ? {
-                transform: `translate(${contentTransform.positionX}px, ${contentTransform.positionY}px) scale(${contentTransform.scale})`,
-                transformOrigin: "0 0",
-              }
-            : undefined
-        }
-      >
-        {player}
+      {player}
 
-        <div
-          className={cn(
-            "absolute inset-0 w-full",
-            showStillWithoutActivity &&
-              !liveReady &&
-              !isReEnabling &&
-              cameraEnabled
-              ? "visible"
-              : "invisible",
-          )}
-        >
-          <AutoUpdatingCameraImage
-            className="pointer-events-none size-full"
-            cameraClasses="relative size-full flex justify-center"
-            camera={cameraConfig.name}
-            showFps={false}
-            reloadInterval={stillReloadInterval}
-            periodicCache
-          />
-        </div>
+      <div
+        className={cn(
+          "absolute inset-0 w-full",
+          showStillWithoutActivity &&
+            !liveReady &&
+            !isReEnabling &&
+            cameraEnabled
+            ? "visible"
+            : "invisible",
+        )}
+      >
+        <AutoUpdatingCameraImage
+          className="pointer-events-none size-full"
+          cameraClasses="relative size-full flex justify-center"
+          camera={cameraConfig.name}
+          showFps={false}
+          reloadInterval={stillReloadInterval}
+          periodicCache
+        />
       </div>
 
       {cameraEnabled &&
