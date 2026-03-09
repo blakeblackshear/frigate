@@ -77,6 +77,10 @@
     "select": "Seleziona",
     "name": {
       "placeholder": "Assegna un nome all'esportazione"
+    },
+    "case": {
+      "label": "Caso",
+      "placeholder": "Seleziona un caso"
     }
   },
   "streaming": {
