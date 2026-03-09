@@ -92,6 +92,8 @@ import {
   prepareSectionSavePayload,
 } from "@/utils/configUtil";
 import type { ProfileState } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { Badge } from "@/components/ui/badge";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import SaveAllPreviewPopover, {
@@ -609,6 +611,10 @@ export default function Settings() {
   >({});
 
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: profilesData } = useSWR<{
+    profiles: string[];
+    active_profile: string | null;
+  }>("profiles");
 
   const [searchParams] = useSearchParams();
 
@@ -1217,10 +1223,27 @@ export default function Settings() {
                   />
                 </div>
               </div>
-              <div className="flex flex-row text-center">
+              <div className="flex flex-row items-center">
                 <h2 className="ml-2 text-lg">
                   {t("menu.settings", { ns: "common" })}
                 </h2>
+                {profilesData?.active_profile && (
+                  <Badge
+                    className={cn(
+                      "ml-2 cursor-pointer text-white",
+                      getProfileColor(
+                        profilesData.active_profile,
+                        allProfileNames,
+                      ).bg,
+                    )}
+                    onClick={() => {
+                      setPage("profiles");
+                      setContentMobileOpen(true);
+                    }}
+                  >
+                    {profilesData.active_profile}
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -1405,9 +1428,23 @@ export default function Settings() {
     <div className="flex h-full flex-col">
       <Toaster position="top-center" />
       <div className="flex min-h-16 items-center justify-between border-b border-secondary p-3">
-        <Heading as="h3" className="mb-0">
-          {t("menu.settings", { ns: "common" })}
-        </Heading>
+        <div className="mr-2 flex w-full items-center justify-between gap-3">
+          <Heading as="h3" className="mb-0">
+            {t("menu.settings", { ns: "common" })}
+          </Heading>
+          {profilesData?.active_profile && (
+            <Badge
+              className={cn(
+                "cursor-pointer text-white",
+                getProfileColor(profilesData.active_profile, allProfileNames)
+                  .bg,
+              )}
+              onClick={() => setPage("profiles")}
+            >
+              {profilesData.active_profile}
+            </Badge>
+          )}
+        </div>
         <div className="flex items-center gap-5">
           {hasPendingChanges && (
             <div
