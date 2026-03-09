@@ -61,6 +61,21 @@ export function clampScale(
   return clamp(scale, minScale, maxScale);
 }
 
+export function normalizeMinScaleTransform(
+  transform: CameraZoomRuntimeTransform,
+  minScale: number = CAMERA_ZOOM_MIN_SCALE,
+): CameraZoomRuntimeTransform {
+  if (transform.scale <= minScale) {
+    return {
+      scale: minScale,
+      positionX: 0,
+      positionY: 0,
+    };
+  }
+
+  return transform;
+}
+
 export function normalizeScale(
   scale: number,
   minScale: number = CAMERA_ZOOM_MIN_SCALE,
@@ -110,11 +125,14 @@ export function getCursorRelativeZoomTransform(
   const contentX = (cursorX - current.positionX) / safeCurrentScale;
   const contentY = (cursorY - current.positionY) / safeCurrentScale;
 
-  return {
-    scale: nextScale,
-    positionX: cursorX - contentX * nextScale,
-    positionY: cursorY - contentY * nextScale,
-  };
+  return normalizeMinScaleTransform(
+    {
+      scale: nextScale,
+      positionX: cursorX - contentX * nextScale,
+      positionY: cursorY - contentY * nextScale,
+    },
+    minScale,
+  );
 }
 
 export function toPersistedCameraZoomState(
@@ -123,19 +141,24 @@ export function toPersistedCameraZoomState(
   minScale: number = CAMERA_ZOOM_MIN_SCALE,
   maxScale: number = CAMERA_ZOOM_MAX_SCALE,
 ): CameraZoomPersistedState {
+  const normalizedRuntime = normalizeMinScaleTransform(runtime, minScale);
   const safeContentWidth = dimensions.contentWidth || 1;
   const safeContentHeight = dimensions.contentHeight || 1;
   const safeScale =
-    Number.isFinite(runtime.scale) && runtime.scale > 0
-      ? runtime.scale
+    Number.isFinite(normalizedRuntime.scale) && normalizedRuntime.scale > 0
+      ? normalizedRuntime.scale
       : CAMERA_ZOOM_MIN_SCALE;
   const centerContentX =
-    (dimensions.viewportWidth / 2 - runtime.positionX) / safeScale;
+    (dimensions.viewportWidth / 2 - normalizedRuntime.positionX) / safeScale;
   const centerContentY =
-    (dimensions.viewportHeight / 2 - runtime.positionY) / safeScale;
+    (dimensions.viewportHeight / 2 - normalizedRuntime.positionY) / safeScale;
 
   return {
-    normalizedScale: normalizeScale(runtime.scale, minScale, maxScale),
+    normalizedScale: normalizeScale(
+      normalizedRuntime.scale,
+      minScale,
+      maxScale,
+    ),
     focusX: clamp(centerContentX / safeContentWidth, 0, 1),
     focusY: clamp(centerContentY / safeContentHeight, 0, 1),
   };
@@ -153,11 +176,14 @@ export function fromPersistedCameraZoomState(
   const contentX = clamp(persisted.focusX, 0, 1) * safeContentWidth;
   const contentY = clamp(persisted.focusY, 0, 1) * safeContentHeight;
 
-  return {
-    scale,
-    positionX: dimensions.viewportWidth / 2 - contentX * scale,
-    positionY: dimensions.viewportHeight / 2 - contentY * scale,
-  };
+  return normalizeMinScaleTransform(
+    {
+      scale,
+      positionX: dimensions.viewportWidth / 2 - contentX * scale,
+      positionY: dimensions.viewportHeight / 2 - contentY * scale,
+    },
+    minScale,
+  );
 }
 
 export function getNextScaleFromWheelDelta(
@@ -200,5 +226,8 @@ export function savePersistedCameraZoomState(
   cameraName: string,
   state: CameraZoomPersistedState,
 ): void {
-  localStorage.setItem(getCameraZoomStorageKey(cameraName), JSON.stringify(state));
+  localStorage.setItem(
+    getCameraZoomStorageKey(cameraName),
+    JSON.stringify(state),
+  );
 }
