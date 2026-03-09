@@ -1,5 +1,6 @@
 """Camera apis."""
 
+import asyncio
 import json
 import logging
 import re
@@ -11,7 +12,9 @@ import httpx
 import requests
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import JSONResponse
+from filelock import FileLock, Timeout
 from onvif import ONVIFCamera, ONVIFError
+from ruamel.yaml import YAML
 from zeep.exceptions import Fault, TransportError
 from zeep.transports import AsyncTransport
 
@@ -21,8 +24,14 @@ from frigate.api.auth import (
     require_role,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config.config import FrigateConfig
+from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateTopic,
+)
 from frigate.util.builtin import clean_camera_user_pass
+from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
+from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
 from frigate.util.services import ffprobe_stream
 
@@ -995,3 +1004,154 @@ async def onvif_probe(
                     await onvif_camera.close()
             except Exception as e:
                 logger.debug(f"Error closing ONVIF camera session: {e}")
+
+
+@router.delete(
+    "/cameras/{camera_name}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+async def delete_camera(
+    request: Request,
+    camera_name: str,
+    delete_exports: bool = Query(default=False),
+):
+    """Delete a camera and all its associated data.
+
+    Removes the camera from config, stops processes, and cleans up
+    all database entries and media files.
+
+    Args:
+        camera_name: Name of the camera to delete
+        delete_exports: Whether to also delete exports for this camera
+    """
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera {camera_name} not found",
+            },
+            status_code=404,
+        )
+
+    old_camera_config = frigate_config.cameras[camera_name]
+    config_file = find_config_file()
+    lock = FileLock(f"{config_file}.lock", timeout=5)
+
+    try:
+        with lock:
+            with open(config_file, "r") as f:
+                old_raw_config = f.read()
+
+            try:
+                yaml = YAML()
+                yaml.indent(mapping=2, sequence=4, offset=2)
+
+                with open(config_file, "r") as f:
+                    data = yaml.load(f)
+
+                # Remove camera from config
+                if "cameras" in data and camera_name in data["cameras"]:
+                    del data["cameras"][camera_name]
+
+                # Remove camera from auth roles
+                auth = data.get("auth", {})
+                if auth and "roles" in auth:
+                    empty_roles = []
+                    for role_name, cameras_list in auth["roles"].items():
+                        if (
+                            isinstance(cameras_list, list)
+                            and camera_name in cameras_list
+                        ):
+                            cameras_list.remove(camera_name)
+                            # Custom roles can't be empty; mark for removal
+                            if not cameras_list and role_name not in (
+                                "admin",
+                                "viewer",
+                            ):
+                                empty_roles.append(role_name)
+                    for role_name in empty_roles:
+                        del auth["roles"][role_name]
+
+                with open(config_file, "w") as f:
+                    yaml.dump(data, f)
+
+                with open(config_file, "r") as f:
+                    new_raw_config = f.read()
+
+                try:
+                    config = FrigateConfig.parse(new_raw_config)
+                except Exception:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                    logger.exception(
+                        "Config error after removing camera %s",
+                        camera_name,
+                    )
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Error parsing config after camera removal",
+                        },
+                        status_code=400,
+                    )
+            except Exception as e:
+                logger.error(
+                    "Error updating config to remove camera %s: %s", camera_name, e
+                )
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": "Error updating config",
+                    },
+                    status_code=500,
+                )
+
+            # Update runtime config
+            request.app.frigate_config = config
+            request.app.genai_manager.update_config(config)
+
+            # Publish removal to stop ffmpeg processes and clean up runtime state
+            request.app.config_publisher.publish_update(
+                CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, camera_name),
+                old_camera_config,
+            )
+
+    except Timeout:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Another process is currently updating the config",
+            },
+            status_code=409,
+        )
+
+    # Clean up database entries
+    counts, export_paths = await asyncio.to_thread(
+        cleanup_camera_db, camera_name, delete_exports
+    )
+
+    # Clean up media files in background thread
+    await asyncio.to_thread(
+        cleanup_camera_files, camera_name, export_paths if delete_exports else None
+    )
+
+    # Best-effort go2rtc stream removal
+    try:
+        requests.delete(
+            "http://127.0.0.1:1984/api/streams",
+            params={"src": camera_name},
+            timeout=5,
+        )
+    except Exception:
+        logger.debug("Failed to remove go2rtc stream for %s", camera_name)
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Camera {camera_name} has been deleted",
+            "cleanup": counts,
+        },
+        status_code=200,
+    )

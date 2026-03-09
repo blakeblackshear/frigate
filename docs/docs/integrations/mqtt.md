@@ -159,7 +159,8 @@ Published when a license plate is recognized on a car object. See the [License P
   "plate": "123ABC",
   "score": 0.95,
   "camera": "driveway_cam",
-  "timestamp": 1607123958.748393
+  "timestamp": 1607123958.748393,
+  "plate_box": [917, 487, 1029, 529] // box coordinates of the detected license plate in the frame
 }
 ```
 
