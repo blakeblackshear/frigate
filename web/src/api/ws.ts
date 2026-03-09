@@ -521,7 +521,6 @@ export function useInitialCameraState(
   // every component mount.  Components read cached wsState immediately via
   // useSyncExternalStore.  Only re-request when the user tabs back in.
   useEffect(() => {
-    sendCommand("onConnect");
     if (!revalidateOnFocus) return;
 
     const listener = () => {
