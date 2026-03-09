@@ -13,11 +13,25 @@
     "shareExport": "Jaga eksporditud sisu",
     "downloadVideo": "Laadi video alla",
     "editName": "Muuda nime",
-    "deleteExport": "Kustuta eksporditud sisu"
+    "deleteExport": "Kustuta eksporditud sisu",
+    "assignToCase": "Lisa juhtumile"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Eksporditud sisu nime muutmine ei õnnestunud: {{errorMessage}}"
+      "renameExportFailed": "Eksporditud sisu nime muutmine ei õnnestunud: {{errorMessage}}",
+      "assignCaseFailed": "Juhtumiga seose uuendamine ei õnnestunud: {{errorMessage}}"
     }
+  },
+  "headings": {
+    "cases": "Juhtumid",
+    "uncategorizedExports": "Kategooriata eksportimised"
+  },
+  "caseDialog": {
+    "title": "Lisa juhtumile",
+    "selectLabel": "Juhtum",
+    "newCaseOption": "Lisa uus juhtum",
+    "nameLabel": "Juhtumi nimi",
+    "descriptionLabel": "Kirjeldus",
+    "description": "Vali olemasolev juhtum või lisa uus."
   }
 }

@@ -172,7 +172,7 @@
     "default": "Seadistused - Frigate",
     "authentication": "Autentimise seadistused - Frigate",
     "cameraReview": "Kaamerate kordusvaatuste seadistused - Frigate",
-    "general": "Kasutajaliidese seadistused - Frigate",
+    "general": "Profiili seadistused - Frigate",
     "frigatePlus": "Frigate+ seadistused - Frigate",
     "notifications": "Teavituste seadistused - Frigate",
     "cameraManagement": "Kaamerate haldus - Frigate",
@@ -180,7 +180,7 @@
     "object": "Silumine ja veaotsing - Frigate"
   },
   "general": {
-    "title": "Kasutajaliidese seadistused",
+    "title": "Profiili seadistused",
     "cameraGroupStreaming": {
       "clearAll": "Kustuta kõik voogedastuse seadistused"
     },
