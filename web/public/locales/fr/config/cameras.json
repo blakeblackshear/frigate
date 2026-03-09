@@ -1,0 +1,320 @@
+{
+    "name": {
+        "label": "Nom de la caméra",
+        "description": "Le nom de la caméra est requis"
+    },
+    "friendly_name": {
+        "label": "Nom convivial",
+        "description": "Nom convivial de la caméra utilisé dans l'IU Frigate"
+    },
+    "enabled": {
+        "label": "Activé",
+        "description": "Activé"
+    },
+    "audio": {
+        "label": "Événements audio",
+        "description": "Réglages pour la détection des événements audio de cette caméra.",
+        "enabled": {
+            "label": "Activer la détection audio",
+            "description": "Activer ou désactiver la détection des événements audio pour cette caméra."
+        },
+        "max_not_heard": {
+            "description": "Nombre de secondes sans le type audio configuré avant que l'événement audio se termine.",
+            "label": "Délai d'inactivité"
+        },
+        "min_volume": {
+            "label": "Volume minimal",
+            "description": "Seuil minimal d'activation du volume en moyenne quadratique requis pour exécuter la détection audio. Des valeurs plus faibles augmentent la sensibilité (p. ex. 200 est élevé, 500 est moyen et 1000 est faible)."
+        },
+        "listen": {
+            "label": "Types d'écoute",
+            "description": "Liste des types d'événements audio à détecter (p. ex. bark, fire_alarm, scream, speech, yell)."
+        },
+        "filters": {
+            "label": "Filtres audio",
+            "description": "Réglages des filtres par type audio, tels que seuils de confiance utilisé afin de réduire les faux positifs."
+        },
+        "enabled_in_config": {
+            "label": "État audio original",
+            "description": "Indique si la détection audio était initialement activée dans le fichier de configuration statique."
+        },
+        "num_threads": {
+            "label": "Fils d'exécution pour la détection",
+            "description": "Nombre de fils d'éxécution à utiliser pour le traitement de la détection audio."
+        }
+    },
+    "audio_transcription": {
+        "label": "Transcription audio",
+        "description": "Réglages pour la transcription audio et vocale utilisée pour les événements et les sous-titres en temps réel.",
+        "enabled": {
+            "label": "Activer la transcription",
+            "description": "Activer ou désactiver le déclenchement manuel de la transcription des événements audio."
+        },
+        "enabled_in_config": {
+            "label": "État original de la transcription"
+        },
+        "live_enabled": {
+            "label": "Transcription en temps réel",
+            "description": "Activer la diffusion de la transcription en temps réel pour le flux sonore dès sa réception."
+        }
+    },
+    "birdseye": {
+        "label": "À vol d'oiseau",
+        "description": "Réglages pour la vue composée à vol d'oiseau qui combine plusieurs flux de caméras dans une simple disposition.",
+        "enabled": {
+            "label": "Activer la vue à vol d'oiseau",
+            "description": "Activer ou désactiver la fonctionalité de vue à vol d'oiseau."
+        },
+        "mode": {
+            "label": "Mode de suivi",
+            "description": "Mode pour l'inclusion des caméras dans la vue à vol d'oiseau: 'objects', 'motion', ou 'continuous'."
+        },
+        "order": {
+            "label": "Emplacement",
+            "description": "Emplacement numérique contrôlant l'ordre de la caméra dans la disposition en vue à vol d'oiseau."
+        }
+    },
+    "detect": {
+        "label": "Détection d'objets",
+        "description": "Réglages pour la détection ou le rôle de détection utilisé pour exécuter la détection des objets et initialiser les traceurs.",
+        "enabled": {
+            "label": "Détection activée",
+            "description": "Activer ou désactiver la détection des objets pour cette caméra. La détection doit être activée pour que le suivi des objets fonctionne."
+        },
+        "height": {
+            "label": "Hauteur de détection",
+            "description": "Hauteur (en pixels) des images utilisées pour le flux de détection ; garder vide pour utiliser la résolution native du flux."
+        },
+        "width": {
+            "label": "Largeur de détection",
+            "description": "Largeur (en pixels) des images utilisées pour le flux de détection ; garder vide pour utiliser la résolution native du flux."
+        },
+        "fps": {
+            "label": "IPS de la détection",
+            "description": "Nombre cible d'images par seconde à utiliser pour la détection ; des valeurs plus faibles réduisent l'utilisation de l'UCT (la valeur recommandée est 5, ne la définir à une valeur supérieure - au maximum 10, uniquement lors du suivi d'objets se déplaçant extrêmement rapidement)."
+        },
+        "min_initialized": {
+            "label": "Minimum d'images d'initialisation",
+            "description": "Nombre de détections consécutives requises avant de créer un objet suivi. Augmenter pour réduire les initialisations erronées. La valeur par défaut est fps divisé par 2."
+        },
+        "max_disappeared": {
+            "label": "Nombre maximal d'images disparues",
+            "description": "Nombre d'images sans détection avant qu'un objet suivi est considéré comme étant disparu."
+        },
+        "stationary": {
+            "label": "Configuration des objets stationnaires",
+            "description": "Réglages pour la détection et la gestion des objets qui restent stationnaires pendant un certain temps.",
+            "interval": {
+                "label": "Intervalle stationnaire",
+                "description": "À quelle fréquence (en images) effectuer une détection pour la confirmation d'un objet stationnaire."
+            },
+            "threshold": {
+                "label": "Seuil d'activation stationnaire",
+                "description": "Nombre d'images sans changement d'emplacement requis pour marquer un objet en tant que stationnaire."
+            },
+            "max_frames": {
+                "label": "Nombre max. d'images",
+                "description": "Limite le temps pour lequel les objets stationnaires sont suivis avant d'être supprimés.",
+                "default": {
+                    "label": "Nombre max. d'images par défaut",
+                    "description": "Nombre maximal d'images pour suivre un objet stationnaire avant d'arrêter."
+                },
+                "objects": {
+                    "label": "Nombre max. d'images pour l'objet",
+                    "description": "Remplacement des réglages par défaut par objet pour le nombre maximal d'images requis pour suivre les objets stationnaires."
+                }
+            },
+            "classifier": {
+                "label": "Activer le classificateur visuel",
+                "description": "Utiliser un classificateur visuel pour détecter les objets véritablement stationnaires même lorsque les boîtes englobantes tremblent."
+            }
+        },
+        "annotation_offset": {
+            "label": "Décalage de l'annotation",
+            "description": "Millisecondes pour le décalage des annotations afin de mieux aligner les boîtes englobantes de la ligne du temps avec les enregistrements ; peut être positif ou négatif."
+        }
+    },
+    "face_recognition": {
+        "label": "Reconnaissance faciale",
+        "description": "Réglages pour la détection et reconnaissance faciale pour cette caméra.",
+        "enabled": {
+            "label": "Activer la reconnaissance faciale",
+            "description": "Activer ou désactiver la reconnaissance faciale."
+        },
+        "min_area": {
+            "label": "Surface minimale du visage",
+            "description": "Surface minimale (en pixels) d'une boîte faciale détectée requise pour tenter la reconnaissance."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "Réglages de FFmpeg incluant l'emplacement du fichier binaire, les arguments, les options pour hwaccel et les arguments de sortie par rôle.",
+        "path": {
+            "label": "Emplacement de FFmpeg",
+            "description": "Emplacement du fichier binaire de FFmpeg à utiliser ou un alias de version (peut être «5.0» ou «7.0»)."
+        },
+        "global_args": {
+            "label": "Arguments globaux de FFmpeg",
+            "description": "Arguments globaux transmis aux processus de FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Arguments pour l'accélération matérielle",
+            "description": "Arguments de l'accélération matérielle pour FFmpeg. Les préréglages spécifiques au fournisseur sont recommandés."
+        },
+        "input_args": {
+            "label": "Arguments d'entrée",
+            "description": "Arguments d'entrée appliqués aux flux d'entrée FFmpeg."
+        },
+        "output_args": {
+            "label": "Arguments de sortie",
+            "description": "Arguments de sortie par défaut utilisés pour les différents rôles FFmpeg, tels que detect et record.",
+            "detect": {
+                "label": "Détecter les arguments de sortie",
+                "description": "Arguments de sortie par défaut pour les flux du rôle detect."
+            },
+            "record": {
+                "label": "Arguments de sortie pour l'enregistrement",
+                "description": "Arguments de sortie par défaut pour les flux du rôle record."
+            }
+        },
+        "retry_interval": {
+            "label": "Temps de réessai FFmpeg",
+            "description": "Nombre de secondes à attendre avant de tenter de reconnecter un flux de caméra après un échec. La valeur par défaut est 10."
+        },
+        "apple_compatibility": {
+            "label": "Compatibilité avec Apple",
+            "description": "Activer l'étiquetage HEVC pour une meilleure compatibilité avec les lecteurs Apple lors de l'enregistrement H.265."
+        },
+        "gpu": {
+            "label": "Index de l'UTG",
+            "description": "Index par défaut de l'UTG utilisé pour l'accélération matérielle si disponible."
+        },
+        "inputs": {
+            "label": "Entrées des caméras",
+            "description": "Liste des définitions des flux entrants (emplacements et rôles) pour cette caméra.",
+            "path": {
+                "label": "Emplacement d'entrée",
+                "description": "URL ou emplacement du flux d'entrée de la caméra."
+            },
+            "roles": {
+                "label": "Rôles d'entrée",
+                "description": "Rôles pour ce flux entrant."
+            },
+            "global_args": {
+                "label": "Arguments globaux de FFmpeg",
+                "description": "Arguments globaux de FFmpeg pour ce flux entrant."
+            },
+            "hwaccel_args": {
+                "label": "Arguments pour l'accélération matérielle",
+                "description": "Arguments de l'accélération matérielle pour ce flux entrant."
+            },
+            "input_args": {
+                "label": "Arguments d'entrée",
+                "description": "Arguments d'entrée spéficiques à ce flux."
+            }
+        }
+    },
+    "live": {
+        "label": "Lecture en direct",
+        "description": "Réglages utilisés par l'IU Web afin de contrôler la sélection, la résolution et la qualité des flux en direct.",
+        "streams": {
+            "label": "Nom des flux en direct",
+            "description": "Mappage des noms des flux configurés vers les noms de restream et go2rtc utilisés pour la lecture en direct."
+        },
+        "height": {
+            "label": "Hauteur de la diffusion en direct",
+            "description": "Hauteur (en pixels) à laquelle afficher le flux en direct jsmpeg dans l'IU Web ; doit être inférieure ou égale à la hauteur détectée du flux."
+        },
+        "quality": {
+            "label": "Qualité de la diffusion en direct",
+            "description": "Qualité de l'encodage pour le flux jsmpeg (1 étant la plus élevée, 31 la plus faible)."
+        }
+    },
+    "lpr": {
+        "label": "Reconnaissance des plaques d'immatriculation",
+        "description": "Réglages de la reconnaissance des plaques d'immatriculation incluant les seuils de détection, le formatage et les plaques connues.",
+        "enabled": {
+            "label": "Activer la RPI",
+            "description": "Activer ou désactiver la RPI sur cette caméra."
+        },
+        "expire_time": {
+            "label": "Expiration en secondes",
+            "description": "Temps en secondes après lequel une plaque non vue expire du système de suivi (seulement pour les caméras dédiées à la RPI)."
+        },
+        "min_area": {
+            "label": "Surface minimale de la plaque",
+            "description": "Surface minimale de la plaque (en pixels) requise pour tenter la reconnaissance."
+        },
+        "enhancement": {
+            "label": "Niveau de l'enrichissement",
+            "description": "Niveau de l'enrichissement (de 0 à 10) à appliquer aux recadrages des plaques avant la ROC. Des valeurs plus élevées n'améliorent pas nécessairement les résultats, les niveaux supérieurs à 5 peuvent ne fonctionner qu'avec des plaques la nuit et doivent être utilisés avec prudence."
+        }
+    },
+    "motion": {
+        "label": "Détection du mouvement",
+        "description": "Réglages par défaut de la détection de mouvement pour cette caméra.",
+        "enabled": {
+            "label": "Activer la détection de mouvement",
+            "description": "Activer ou désactiver la détection de mouvement pour cette caméra."
+        },
+        "threshold": {
+            "label": "Seuil de détection du mouvement",
+            "description": "Seuil de différence de pixels utilisé par le détecteur de mouvement ; les valeurs plus élevées réduisent la sensibilité (plage de 1 à 255)."
+        },
+        "lightning_threshold": {
+            "label": "Seuil d'éclairage",
+            "description": "Seuil permettant de détecter et d'ignorer les brusques pointes d'éclairage (plus la valeur est faible, plus la sensibilité est élevée, valeurs comprises entre 0.3 et 1.0)."
+        },
+        "improve_contrast": {
+            "label": "Améliorer le contraste",
+            "description": "Appliquer les amélioration du contraste aux images avant l'analyse de mouvement afin d'améliorer la détection."
+        },
+        "contour_area": {
+            "label": "Zone de contour",
+            "description": "Aire de la zone de contour minimale en pixels requise pour qu'un contour de mouvement soit comptabilisé."
+        },
+        "delta_alpha": {
+            "label": "Delta pour alpha",
+            "description": "Facteur de mélange alpha utilisé dans la différenciation d'images pour le calcul du mouvement."
+        },
+        "frame_alpha": {
+            "label": "Alpha pour l'image",
+            "description": "Valeur alpha utilisée lors du mélange d'images pour le prétraitement du mouvement."
+        },
+        "frame_height": {
+            "label": "Hauteur de l'image",
+            "description": "Hauteur en pixels à laquelle mettre à l'échelle les images lors du traitement du mouvement."
+        },
+        "mask": {
+            "label": "Moordonnées du masque",
+            "description": "Coordonnées ordonnés x et y définissant le polygone du masque de mouvement utilisé pour inclure ou exclure des aires."
+        },
+        "mqtt_off_delay": {
+            "label": "Délai de désactivation de MQTT",
+            "description": "Nombre de secondes à attendre après le dernier mouvement avant de publier un état « off » MQTT."
+        },
+        "enabled_in_config": {
+            "label": "État original du mouvement",
+            "description": "Indique si la détection de mouvement a été activée dans la configuration originale statique."
+        },
+        "raw_mask": {
+            "label": "Masque brut"
+        }
+    },
+    "objects": {
+        "label": "Objets",
+        "description": "Réglages par défaut pour le suivi des objets incluant les étiquettes à suivre et les filtres par objets.",
+        "track": {
+            "label": "Objets à suivre",
+            "description": "Liste des étiquettes d'objets à suivre pour cette caméra."
+        },
+        "filters": {
+            "label": "Filtres d'objets",
+            "description": "Filtres appliqués aux objets détectés afin de réduire les faux positifs (aire, rapport, facteur de confiance).",
+            "min_area": {
+                "label": "Aire minimal de l'objet"
+            }
+        }
+    },
+    "label": "ConfigurationCamera"
+}
