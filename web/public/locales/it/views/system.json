@@ -70,7 +70,9 @@
         "title": "Avviso statistiche GPU Intel",
         "message": "Statistiche GPU non disponibili",
         "description": "Si tratta di un problema noto negli strumenti di reportistica delle statistiche GPU di Intel (intel_gpu_top), che si interrompe e restituisce ripetutamente un utilizzo della GPU pari a 0% anche nei casi in cui l'accelerazione hardware e il rilevamento degli oggetti funzionano correttamente sulla (i)GPU. Non si tratta di un problema di Frigate. È possibile riavviare il sistema per risolvere temporaneamente il problema e verificare che la GPU funzioni correttamente. Ciò non influisce sulle prestazioni."
-      }
+      },
+      "gpuTemperature": "Temperatura GPU",
+      "npuTemperature": "Temperatura NPU"
     },
     "detector": {
       "inferenceSpeed": "Velocità inferenza rilevatore",
@@ -165,6 +167,17 @@
       "error": {
         "unableToProbeCamera": "Impossibile analizzare la telecamera: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Qualità connessione",
+      "excellent": "Ottima",
+      "fair": "Discreta",
+      "poor": "Scarsa",
+      "unusable": "Inutilizzabile",
+      "fps": "FPS",
+      "expectedFps": "FPS previsti",
+      "reconnectsLastHour": "Riconnessioni (ultima ora)",
+      "stallsLastHour": "Blocchi (ultima ora)"
     }
   },
   "stats": {

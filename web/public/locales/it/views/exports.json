@@ -11,13 +11,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Impossibile rinominare l'esportazione: {{errorMessage}}"
+      "renameExportFailed": "Impossibile rinominare l'esportazione: {{errorMessage}}",
+      "assignCaseFailed": "Impossibile aggiornare l'assegnazione del caso: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Condividi esportazione",
     "downloadVideo": "Scarica video",
     "editName": "Modifica nome",
-    "deleteExport": "Elimina esportazione"
+    "deleteExport": "Elimina esportazione",
+    "assignToCase": "Aggiungi al caso"
+  },
+  "headings": {
+    "cases": "Casi",
+    "uncategorizedExports": "Esportazioni non categorizzate"
+  },
+  "caseDialog": {
+    "title": "Aggiungi al caso",
+    "description": "Scegli un caso esistente o creane uno nuovo.",
+    "selectLabel": "Caso",
+    "newCaseOption": "Crea un nuovo caso",
+    "nameLabel": "Nome del caso",
+    "descriptionLabel": "Descrizione"
   }
 }
