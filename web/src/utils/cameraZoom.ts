@@ -31,6 +31,24 @@ export type CameraZoomPersistedState = {
   focusY: number;
 };
 
+export function isCameraZoomPersistedState(
+  value: unknown,
+): value is CameraZoomPersistedState {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Partial<CameraZoomPersistedState>;
+  return (
+    typeof candidate.normalizedScale === "number" &&
+    Number.isFinite(candidate.normalizedScale) &&
+    typeof candidate.focusX === "number" &&
+    Number.isFinite(candidate.focusX) &&
+    typeof candidate.focusY === "number" &&
+    Number.isFinite(candidate.focusY)
+  );
+}
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -159,4 +177,28 @@ export function getNextScaleFromWheelDelta(
 
 export function getCameraZoomStorageKey(cameraName: string): string {
   return `live:grid-card:zoom:${cameraName}`;
+}
+
+export function loadPersistedCameraZoomState(
+  cameraName: string,
+): CameraZoomPersistedState | undefined {
+  const serialized = localStorage.getItem(getCameraZoomStorageKey(cameraName));
+
+  if (!serialized) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(serialized);
+    return isCameraZoomPersistedState(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function savePersistedCameraZoomState(
+  cameraName: string,
+  state: CameraZoomPersistedState,
+): void {
+  localStorage.setItem(getCameraZoomStorageKey(cameraName), JSON.stringify(state));
 }
