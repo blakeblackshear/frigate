@@ -34,6 +34,7 @@ import Heading from "@/components/ui/heading";
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
+import merge from "lodash/merge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -136,6 +137,8 @@ export interface BaseSectionProps {
     cameraName: string | undefined,
     data: ConfigSectionData | null,
   ) => void;
+  /** When set, editing this profile's overrides instead of the base config */
+  profileName?: string;
 }
 
 export interface CreateSectionOptions {
@@ -166,6 +169,7 @@ export function ConfigSection({
   onStatusChange,
   pendingDataBySection,
   onPendingDataChange,
+  profileName,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -181,12 +185,17 @@ export function ConfigSection({
   const statusBar = useContext(StatusBarMessagesContext);
 
   // Create a key for this section's pending data
+  // When editing a profile, use "cameraName::profiles.profileName.sectionPath"
+  const effectiveSectionPath = profileName
+    ? `profiles.${profileName}.${sectionPath}`
+    : sectionPath;
+
   const pendingDataKey = useMemo(
     () =>
       effectiveLevel === "camera" && cameraName
-        ? `${cameraName}::${sectionPath}`
-        : sectionPath,
-    [effectiveLevel, cameraName, sectionPath],
+        ? `${cameraName}::${effectiveSectionPath}`
+        : effectiveSectionPath,
+    [effectiveLevel, cameraName, effectiveSectionPath],
   );
 
   // Use pending data from parent if available, otherwise use local state
@@ -213,12 +222,12 @@ export function ConfigSection({
   const setPendingData = useCallback(
     (data: ConfigSectionData | null) => {
       if (onPendingDataChange) {
-        onPendingDataChange(sectionPath, cameraName, data);
+        onPendingDataChange(effectiveSectionPath, cameraName, data);
       } else {
         setLocalPendingData(data);
       }
     },
-    [onPendingDataChange, sectionPath, cameraName],
+    [onPendingDataChange, effectiveSectionPath, cameraName],
   );
   const [isSaving, setIsSaving] = useState(false);
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
@@ -230,8 +239,10 @@ export function ConfigSection({
   const isInitializingRef = useRef(true);
   const lastPendingDataKeyRef = useRef<string | null>(null);
 
-  const updateTopic =
-    effectiveLevel === "camera" && cameraName
+  // Profile definitions don't hot-reload — only PUT /api/profile/set applies them
+  const updateTopic = profileName
+    ? undefined
+    : effectiveLevel === "camera" && cameraName
       ? cameraUpdateTopicMap[sectionPath]
         ? `config/cameras/${cameraName}/${cameraUpdateTopicMap[sectionPath]}`
         : undefined
@@ -265,15 +276,27 @@ export function ConfigSection({
   });
 
   // Get current form data
+  // When editing a profile, show base camera config deep-merged with profile overrides
   const rawSectionValue = useMemo(() => {
     if (!config) return undefined;
 
     if (effectiveLevel === "camera" && cameraName) {
-      return get(config.cameras?.[cameraName], sectionPath);
+      const baseValue = get(config.cameras?.[cameraName], sectionPath);
+      if (profileName) {
+        const profileOverrides = get(
+          config.cameras?.[cameraName],
+          `profiles.${profileName}.${sectionPath}`,
+        );
+        if (profileOverrides && typeof profileOverrides === "object") {
+          return merge(cloneDeep(baseValue ?? {}), cloneDeep(profileOverrides));
+        }
+        return baseValue;
+      }
+      return baseValue;
     }
 
     return get(config, sectionPath);
-  }, [config, cameraName, sectionPath, effectiveLevel]);
+  }, [config, cameraName, sectionPath, effectiveLevel, profileName]);
 
   const rawFormData = useMemo(() => {
     if (!config) return {};
@@ -499,8 +522,8 @@ export function ConfigSection({
     try {
       const basePath =
         effectiveLevel === "camera" && cameraName
-          ? `cameras.${cameraName}.${sectionPath}`
-          : sectionPath;
+          ? `cameras.${cameraName}.${effectiveSectionPath}`
+          : effectiveSectionPath;
       const rawData = sanitizeSectionData(rawFormData);
       const overrides = buildOverrides(
         pendingData,
@@ -522,9 +545,11 @@ export function ConfigSection({
         return;
       }
 
-      const needsRestart = skipSave
-        ? false
-        : requiresRestartForOverrides(sanitizedOverrides);
+      // Profile definition edits never require restart
+      const needsRestart =
+        skipSave || profileName
+          ? false
+          : requiresRestartForOverrides(sanitizedOverrides);
 
       const configData = buildConfigDataForPath(basePath, sanitizedOverrides);
       await axios.put("config/set", {
@@ -619,6 +644,8 @@ export function ConfigSection({
     }
   }, [
     sectionPath,
+    effectiveSectionPath,
+    profileName,
     pendingData,
     effectiveLevel,
     cameraName,
@@ -642,8 +669,8 @@ export function ConfigSection({
     try {
       const basePath =
         effectiveLevel === "camera" && cameraName
-          ? `cameras.${cameraName}.${sectionPath}`
-          : sectionPath;
+          ? `cameras.${cameraName}.${effectiveSectionPath}`
+          : effectiveSectionPath;
 
       const configData = buildConfigDataForPath(basePath, "");
 
@@ -675,7 +702,7 @@ export function ConfigSection({
       );
     }
   }, [
-    sectionPath,
+    effectiveSectionPath,
     effectiveLevel,
     cameraName,
     requiresRestart,
@@ -855,7 +882,8 @@ export function ConfigSection({
             {((effectiveLevel === "camera" && isOverridden) ||
               effectiveLevel === "global") &&
               !hasChanges &&
-              !skipSave && (
+              !skipSave &&
+              !profileName && (
                 <Button
                   onClick={() => setIsResetDialogOpen(true)}
                   variant="outline"
