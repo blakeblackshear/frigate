@@ -146,7 +146,27 @@ Each line represents a detection state, not necessarily unique individuals. Pare
             ) as f:
                 f.write(context_prompt)
 
-        response = self._send(context_prompt, thumbnails)
+        # Build JSON schema for structured output from ReviewMetadata model
+        schema = ReviewMetadata.model_json_schema()
+        schema.get("properties", {}).pop("time", None)
+
+        if "time" in schema.get("required", []):
+            schema["required"].remove("time")
+        if not concerns:
+            schema.get("properties", {}).pop("other_concerns", None)
+            if "other_concerns" in schema.get("required", []):
+                schema["required"].remove("other_concerns")
+
+        response_format = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "review_metadata",
+                "strict": True,
+                "schema": schema,
+            },
+        }
+
+        response = self._send(context_prompt, thumbnails, response_format)
 
         if debug_save and response:
             with open(
@@ -290,7 +310,12 @@ Guidelines:
         """Initialize the client."""
         return None
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self,
+        prompt: str,
+        images: list[bytes],
+        response_format: Optional[dict] = None,
+    ) -> Optional[str]:
         """Submit a request to the provider."""
         return None
 

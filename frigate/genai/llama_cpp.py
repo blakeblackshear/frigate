@@ -57,7 +57,12 @@ class LlamaCppClient(GenAIClient):
             else None
         )
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self,
+        prompt: str,
+        images: list[bytes],
+        response_format: Optional[dict] = None,
+    ) -> Optional[str]:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
             logger.warning(
@@ -95,6 +100,9 @@ class LlamaCppClient(GenAIClient):
                 ],
                 **self.provider_options,
             }
+
+            if response_format:
+                payload["response_format"] = response_format
 
             response = requests.post(
                 f"{self.provider}/v1/chat/completions",
