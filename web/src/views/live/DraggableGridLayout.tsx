@@ -435,7 +435,7 @@ export default function DraggableGridLayout({
   const [audioStates, setAudioStates] = useState<AudioState>({});
   const [volumeStates, setVolumeStates] = useState<VolumeState>({});
   const [statsStates, setStatsStates] = useState<StatsState>({});
-  const [_cameraZoomStates, setCameraZoomStates] = useState<
+  const [cameraZoomStates, setCameraZoomStates] = useState<
     Record<string, CameraZoomRuntimeTransform>
   >({});
   const cameraZoomViewportRefs = useRef<Record<string, HTMLDivElement | null>>(
@@ -779,6 +779,9 @@ export default function DraggableGridLayout({
               const useWebGL =
                 currentGroupStreamingSettings?.[camera.name]
                   ?.compatibilityMode || false;
+              const cameraZoomTransform =
+                cameraZoomStates[camera.name] ?? getDefaultZoomTransform();
+
               return (
                 <GridLiveContextMenu
                   className="size-full"
@@ -825,51 +828,59 @@ export default function DraggableGridLayout({
                       hydrateCameraZoomFromStorage(camera.name);
                     }}
                   >
-                    <LivePlayer
-                      key={camera.name}
-                      streamName={streamName}
-                      autoLive={autoLive ?? globalAutoLive}
-                      showStillWithoutActivity={
-                        showStillWithoutActivity ?? true
-                      }
-                      alwaysShowCameraName={displayCameraNames}
-                      useWebGL={useWebGL}
-                      cameraRef={cameraRef}
-                      className={cn(
-                        "draggable-live-grid-mse-cover size-full rounded-lg bg-black md:rounded-2xl",
-                        camera.ui?.rotate &&
-                          "draggable-live-grid-rotated [--frigate-mse-grid-rotated:1] [--frigate-mse-grid-rotation:rotate(90deg)]",
-                        isEditMode &&
-                          showCircles &&
-                          "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
-                      )}
-                      windowVisible={
-                        windowVisible && visibleCameras.includes(camera.name)
-                      }
-                      cameraConfig={camera}
-                      preferredLiveMode={
-                        preferredLiveModes[camera.name] ?? "mse"
-                      }
-                      playInBackground={false}
-                      showStats={statsStates[camera.name] ?? true}
-                      onClick={() => {
-                        !isEditMode && onSelectCamera(camera.name);
+                    <div
+                      className="size-full"
+                      style={{
+                        transform: `translate3d(${cameraZoomTransform.positionX}px, ${cameraZoomTransform.positionY}px, 0) scale(${cameraZoomTransform.scale})`,
+                        transformOrigin: "top left",
                       }}
-                      onError={(e) => {
-                        setPreferredLiveModes((prevModes) => {
-                          const newModes = { ...prevModes };
-                          if (e === "mse-decode") {
-                            delete newModes[camera.name];
-                          }
-                          return newModes;
-                        });
-                      }}
-                      onResetLiveMode={() =>
-                        resetPreferredLiveMode(camera.name)
-                      }
-                      playAudio={audioStates[camera.name]}
-                      volume={volumeStates[camera.name]}
-                    />
+                    >
+                      <LivePlayer
+                        key={camera.name}
+                        streamName={streamName}
+                        autoLive={autoLive ?? globalAutoLive}
+                        showStillWithoutActivity={
+                          showStillWithoutActivity ?? true
+                        }
+                        alwaysShowCameraName={displayCameraNames}
+                        useWebGL={useWebGL}
+                        cameraRef={cameraRef}
+                        className={cn(
+                          "draggable-live-grid-mse-cover size-full rounded-lg bg-black md:rounded-2xl",
+                          camera.ui?.rotate &&
+                            "draggable-live-grid-rotated [--frigate-mse-grid-rotated:1] [--frigate-mse-grid-rotation:rotate(90deg)]",
+                          isEditMode &&
+                            showCircles &&
+                            "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
+                        )}
+                        windowVisible={
+                          windowVisible && visibleCameras.includes(camera.name)
+                        }
+                        cameraConfig={camera}
+                        preferredLiveMode={
+                          preferredLiveModes[camera.name] ?? "mse"
+                        }
+                        playInBackground={false}
+                        showStats={statsStates[camera.name] ?? true}
+                        onClick={() => {
+                          !isEditMode && onSelectCamera(camera.name);
+                        }}
+                        onError={(e) => {
+                          setPreferredLiveModes((prevModes) => {
+                            const newModes = { ...prevModes };
+                            if (e === "mse-decode") {
+                              delete newModes[camera.name];
+                            }
+                            return newModes;
+                          });
+                        }}
+                        onResetLiveMode={() =>
+                          resetPreferredLiveMode(camera.name)
+                        }
+                        playAudio={audioStates[camera.name]}
+                        volume={volumeStates[camera.name]}
+                      />
+                    </div>
                   </div>
                   {isEditMode && showCircles && <CornerCircles />}
                 </GridLiveContextMenu>
