@@ -3,7 +3,8 @@
   "search": "Zoek",
   "toast": {
     "error": {
-      "renameExportFailed": "Het is niet gelukt om de export te hernoemen: {{errorMessage}}"
+      "renameExportFailed": "Het is niet gelukt om de export te hernoemen: {{errorMessage}}",
+      "assignCaseFailed": "Kan toewijzing aan dossier niet bijwerken: {{errorMessage}}"
     }
   },
   "editExport": {
@@ -18,6 +19,19 @@
     "shareExport": "Deel export",
     "downloadVideo": "Download video",
     "editName": "Naam bewerken",
-    "deleteExport": "Verwijder export"
+    "deleteExport": "Verwijder export",
+    "assignToCase": "Toevoegen aan dossier"
+  },
+  "headings": {
+    "cases": "Gevallen",
+    "uncategorizedExports": "Ongecategoriseerde exporten"
+  },
+  "caseDialog": {
+    "title": "Toevoegen aan dossier",
+    "description": "Kies een bestaand dossier of maak een nieuw dossier aan.",
+    "selectLabel": "Dossier",
+    "newCaseOption": "Nieuw dossier aanmaken",
+    "nameLabel": "Dossiernaam",
+    "descriptionLabel": "Beschrijving"
   }
 }

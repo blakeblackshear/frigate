@@ -1,0 +1,130 @@
+{
+    "label": "Camera Config",
+    "name": {
+        "label": "Camera naam",
+        "description": "Camera naam is verplicht"
+    },
+    "friendly_name": {
+        "description": "Camera naam te gebruiken in de Frigate UI",
+        "label": "Herkenbare naam"
+    },
+    "enabled": {
+        "label": "Geactiveerd",
+        "description": "Geactiveerd"
+    },
+    "audio": {
+        "label": "Audiogebeurtenissen",
+        "description": "Audio-instellingen voor gebeurtenisdetectie van deze camera.",
+        "enabled": {
+            "label": "Geluiddetectie inschakelen",
+            "description": "Audio‑gebeurtenisdetectie voor deze camera in- of uitschakelen."
+        },
+        "max_not_heard": {
+            "label": "Einde timeout",
+            "description": "Hoeveelheid secondes zonder de geconfigureerde audio soort, voordat de geluids gebeurtenis is beindigd."
+        },
+        "min_volume": {
+            "label": "Minimale volume",
+            "description": "Minimale RMS-volumedrempel die nodig is om audiodetectie te starten; Hoe lager de waarde, hoe gevoeliger de detectie (bijvoorbeeld, 200 hoog, 500 gemiddeld, 1000 laag)."
+        },
+        "listen": {
+            "label": "Luistercategorieën",
+            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, schreeuw, praten, roepen)."
+        },
+        "filters": {
+            "label": "Geluids filters",
+            "description": "Instellingen per audiotype, waaronder betrouwbaarheidsdrempels, ter vermindering van foutieve detecties."
+        },
+        "enabled_in_config": {
+            "label": "Originele audio-instelling",
+            "description": "Geeft aan of audiodetectie oorspronkelijk was geactiveerd in het statische configuratiebestand."
+        },
+        "num_threads": {
+            "label": "Detectiethreads",
+            "description": "Aantal threads voor audiodetectieverwerking."
+        }
+    },
+    "audio_transcription": {
+        "label": "Audio‑transcriptie",
+        "description": "Instellingen voor live en spraakgestuurde audiotranscriptie voor gebeurtenissen en live ondertitels.",
+        "enabled": {
+            "label": "Spraaktranscriptie inschakelen",
+            "description": "Schakel transcriptie van handmatig getriggerde audiogebeurtenissen in of uit."
+        },
+        "enabled_in_config": {
+            "label": "Originele transcriptiestatus"
+        },
+        "live_enabled": {
+            "label": "Live transcriptie",
+            "description": "Live streaming‑transcriptie van audio inschakelen tijdens ontvangst."
+        }
+    },
+    "birdseye": {
+        "label": "Overzichtsweergave",
+        "description": "Instellingen voor de overzichtsweergave die meerdere camerafeeds combineert tot één lay‑out.",
+        "enabled": {
+            "label": "Activeer overzichtsweergave",
+            "description": "De overzichtsweergavefunctie in- of uitschakelen."
+        },
+        "mode": {
+            "label": "Volgmodus",
+            "description": "Modus voor het opnemen van camera’s in overzichtsweergave: ‘objecten’, ‘beweging’ of ‘continu’."
+        },
+        "order": {
+            "label": "Positie",
+            "description": "Numerieke positie die de volgorde van de camera in de overzichtsweergave lay-out bepaalt."
+        }
+    },
+    "detect": {
+        "label": "Detectie object",
+        "description": "Instellingen voor de detectierol om objecten te detecteren en trackers te starten.",
+        "enabled": {
+            "label": "Detectie aan",
+            "description": "Objectdetectie voor deze camera in- of uitschakelen. Detectie moet zijn ingeschakeld om objecttracking te laten werken."
+        },
+        "height": {
+            "label": "Detectie hoogte",
+            "description": "De hoogte in pixels van frames voor de detectiestream. Laat dit veld leeg om de standaardresolutie te gebruiken."
+        },
+        "width": {
+            "label": "Detectie breedte",
+            "description": "De breedte in pixels van frames voor de detectiestream. Laat dit veld leeg om de standaardresolutie te gebruiken."
+        },
+        "fps": {
+            "label": "Detectie‑FPS",
+            "description": "Gewenst aantal frames per seconde waarop detectie wordt uitgevoerd; lagere waarden verlagen het CPU‑gebruik (aanbevolen waarde is 5, stel alleen hoger in — maximaal 10 — bij het volgen van extreem snel bewegende objecten)."
+        },
+        "min_initialized": {
+            "label": "Minimale initialisatieframes",
+            "description": "Aantal opeenvolgende detectieresultaten dat vereist is voordat een gevolgd object wordt aangemaakt. Verhoog deze waarde om valse initialisaties te verminderen. De standaardwaarde is FPS gedeeld door 2."
+        },
+        "max_disappeared": {
+            "label": "Maximaal aantal verdwenen frames",
+            "description": "Aantal frames zonder detectie voordat een gevolgd object als verdwenen wordt beschouwd."
+        },
+        "stationary": {
+            "label": "Instellingen voor stilstaande objecten",
+            "description": "Instellingen voor het detecteren en beheren van objecten die gedurende een bepaalde tijd stil blijven staan.",
+            "interval": {
+                "label": "Interval voor stilstaande objecten",
+                "description": "Frequentie (in frames) waarmee detectie wordt gecontroleerd om stilstaande objecten te bevestigen."
+            },
+            "threshold": {
+                "label": "Drempel voor stilstaande objecten",
+                "description": "Het aantal frames waarin geen positieverandering wordt gedetecteerd voordat een object als stilstaand wordt beschouwd."
+            },
+            "max_frames": {
+                "label": "Maximaal aantal frames",
+                "description": "Stelt een limiet aan de duur van tracking van stilstaande objecten.",
+                "default": {
+                    "label": "Standaard maximaal aantal frames",
+                    "description": "Standaardlimiet voor het aantal frames dat een stilstaand object wordt gevolgd voordat wordt gestopt."
+                },
+                "objects": {
+                    "label": "Object‑maximum aantal frames",
+                    "description": "Per‑object overschrijden voor het maximum aantal frames voor tracking van stationaire objecten."
+                }
+            }
+        }
+    }
+}
