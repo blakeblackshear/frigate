@@ -435,7 +435,7 @@ export default function DraggableGridLayout({
   const [audioStates, setAudioStates] = useState<AudioState>({});
   const [volumeStates, setVolumeStates] = useState<VolumeState>({});
   const [statsStates, setStatsStates] = useState<StatsState>({});
-  const [cameraZoomStates, setCameraZoomStates] = useState<
+  const [_cameraZoomStates, setCameraZoomStates] = useState<
     Record<string, CameraZoomRuntimeTransform>
   >({});
   const cameraZoomViewportRefs = useRef<Record<string, HTMLDivElement | null>>(
@@ -779,8 +779,6 @@ export default function DraggableGridLayout({
               const useWebGL =
                 currentGroupStreamingSettings?.[camera.name]
                   ?.compatibilityMode || false;
-              const zoomTransform =
-                cameraZoomStates[camera.name] ?? getDefaultZoomTransform();
               return (
                 <GridLiveContextMenu
                   className="size-full"
@@ -837,7 +835,6 @@ export default function DraggableGridLayout({
                       alwaysShowCameraName={displayCameraNames}
                       useWebGL={useWebGL}
                       cameraRef={cameraRef}
-                      contentTransform={zoomTransform}
                       className={cn(
                         "draggable-live-grid-mse-cover size-full rounded-lg bg-black md:rounded-2xl",
                         camera.ui?.rotate &&
