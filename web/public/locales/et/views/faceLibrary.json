@@ -6,7 +6,8 @@
   "description": {
     "placeholder": "Sisesta nimi selle kogumiku jaoks",
     "invalidName": "Vigane nimi. Nimed võivad sisaldada ainult tähti, numbreid, tühikuid, ülakomasid, alakriipse ja sidekriipse.",
-    "addFace": "Laadides üles oma esimese pildi saad lisada uue kogumiku Näoteeki."
+    "addFace": "Laadides üles oma esimese pildi saad lisada uue kogumiku Näoteeki.",
+    "nameCannotContainHash": "Nimi ei saa sisaldada # märki."
   },
   "documentTitle": "Näoteek - Frigate",
   "createFaceLibrary": {
