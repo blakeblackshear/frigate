@@ -4,21 +4,23 @@
     "authentication": "Autentifikavimo Nustatymai - Frigate",
     "camera": "Kameros Nustatymai - Frigate",
     "object": "Debug - Frigate",
-    "general": "Vizualiniai Nustatymai - Frigate",
+    "general": "Išvaizdos Parametrai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
     "motionTuner": "Judesio Derinimas - Frigate",
     "enrichments": "Patobulinimų Nustatymai - Frigate",
     "masksAndZones": "Maskavimo ir Zonų redaktorius - Frigate",
     "cameraManagement": "Valdyti Kameras - Frigate",
-    "cameraReview": "Kameros Peržiūros Nustatymai - Frigate"
+    "cameraReview": "Kameros Peržiūros Nustatymai - Frigate",
+    "globalConfig": "Visuotiniai Parametrai — Frigate",
+    "cameraConfig": "Kameros Parametrai — Frigate"
   },
   "menu": {
     "ui": "UI",
     "enrichments": "Patobulinimai",
     "cameras": "Kameros Nustatymai",
     "masksAndZones": "Maskavimai / Zonos",
-    "motionTuner": "Judesio Derintojas",
+    "motionTuner": "Judesio Derinimas",
     "debug": "Debug",
     "users": "Vartotojai",
     "notifications": "Pranešimai",
@@ -345,7 +347,7 @@
       }
     },
     "motionMaskLabel": "Judesio Maskuotė {{number}}",
-    "objectMaskLabel": "Obejkto Maskuotė {{number}} {{label}}",
+    "objectMaskLabel": "Obejkto Maskuotė {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -440,7 +442,7 @@
       "desc": "Rodyti apribojančius stačiakampius aplink sekamus objektus",
       "colors": {
         "label": "Objektus Apribojančių Stačiakampių Spalvos",
-        "info": "<li>Pradžioje, skirtingos spalvos bus priskirtos kiekvienai objekto etiketei</li><li>Tamsiai mėlyna plona linija simbolizuoja, kad objektas esamu momentu dar nėra aptiktas</li><li>Pilka linija nurodo kad objektas yra aptiktas kaip nejudantis</li><li> Stora linija nurodo kad objektas yra automatiškai sekamas (kai įjungta)</li>"
+        "info": "<li>Pradžioje, skirtingos spalvos bus priskirtos kiekvienai objekto etiketei</li><li>Tamsiai mėlyna plona linija simbolizuoja, kad objektas esamu momentu dar nėra aptiktas</li><li>Pilka linija nurodo kad objektas yra aptiktas kaip nejudantis</li><li>Stora linija nurodo kad objektas yra automatiškai sekamas (kai įjungta)</li>"
       }
     },
     "timestamp": {

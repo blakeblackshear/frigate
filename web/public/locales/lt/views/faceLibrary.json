@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Pridėkite naują kolekciją į Veidų Kolekciją įkeldami savo pirmą nuotrauką.",
     "placeholder": "Įveskite pavadinimą šiai kolekcijai",
-    "invalidName": "Netinkamas vardas. Vardas gali būti sudarytas tik iš raidžiū, skaičių, tarpų, apostrofų, pabraukimų ar brūkšnelių."
+    "invalidName": "Netinkamas vardas. Vardas gali būti sudarytas tik iš raidžiū, skaičių, tarpų, apostrofų, pabraukimų ar brūkšnelių.",
+    "nameCannotContainHash": "Pavadinime negali būti #."
   },
   "details": {
     "person": "Žmogus",

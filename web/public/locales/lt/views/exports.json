@@ -11,13 +11,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Nepavyko pervadinti eksportuojamo įrašo: {{errorMessage}}"
+      "renameExportFailed": "Nepavyko pervadinti eksportuojamo įrašo: {{errorMessage}}",
+      "assignCaseFailed": "Nepavyko atnaujinti atvėjo užduoties: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Pasidalinti įrašu",
     "downloadVideo": "Atsisiųsti video",
     "editName": "Koreguoti pavadinimą",
-    "deleteExport": "Ištrinti eksportus"
+    "deleteExport": "Ištrinti eksportus",
+    "assignToCase": "Pridėti prie atvėjo"
+  },
+  "headings": {
+    "cases": "Atvėjai",
+    "uncategorizedExports": "Nekategorizuoti eksportai"
+  },
+  "caseDialog": {
+    "title": "Pridėti prie atvėjo",
+    "selectLabel": "Atvėjis",
+    "newCaseOption": "Sukurti naują atvėjį",
+    "descriptionLabel": "Aprašymas",
+    "nameLabel": "Atvėjo pavadinimas",
+    "description": "Pasirinkite jau egzisutojantį atvėjį arba sukurkite naują."
   }
 }
