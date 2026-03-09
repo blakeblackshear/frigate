@@ -2,7 +2,7 @@ import { baseUrl } from "./baseUrl";
 import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { WsSendContext } from "./wsContext";
 import type { Update } from "./wsContext";
-import { bufferRawMessage, resetWsStore } from "./ws";
+import { processWsMessage, resetWsStore } from "./ws";
 
 export function WsProvider({ children }: { children: ReactNode }) {
   const wsUrl = `${baseUrl.replace(/^http/, "ws")}ws`;
@@ -33,11 +33,8 @@ export function WsProvider({ children }: { children: ReactNode }) {
         );
       };
 
-      // Near-zero-cost handler: just buffer the raw string.
-      // All JSON.parse + state updates happen in a single rAF in ws.ts,
-      // giving React uninterrupted CPU time between frames.
       ws.onmessage = (event: MessageEvent) => {
-        bufferRawMessage(event.data as string);
+        processWsMessage(event.data as string);
       };
 
       ws.onclose = () => {
