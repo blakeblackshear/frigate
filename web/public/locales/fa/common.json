@@ -75,7 +75,8 @@
     },
     "inProgress": "در حال انجام",
     "invalidStartTime": "زمان شروع نامعتبر است",
-    "invalidEndTime": "زمان پایان نامعتبر است"
+    "invalidEndTime": "زمان پایان نامعتبر است",
+    "never": "هرگز"
   },
   "unit": {
     "length": {
