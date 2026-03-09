@@ -26,13 +26,25 @@ import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
+import type { ProfileState } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type CameraManagementViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  profileState?: ProfileState;
 };
 
 export default function CameraManagementView({
   setUnsavedChanges,
+  profileState,
 }: CameraManagementViewProps) {
   const { t } = useTranslation(["views/settings"]);
 
@@ -200,6 +212,17 @@ export default function CameraManagementView({
                     )}
                   </SettingsGroupCard>
                 )}
+
+                {profileState &&
+                  profileState.allProfileNames.length > 0 &&
+                  enabledCameras.length > 0 && (
+                    <ProfileCameraEnableSection
+                      profileState={profileState}
+                      cameras={enabledCameras}
+                      config={config}
+                      onConfigChanged={updateConfig}
+                    />
+                  )}
               </div>
             </>
           ) : (
@@ -362,5 +385,204 @@ function CameraConfigEnableSwitch({
         />
       )}
     </div>
+  );
+}
+
+type ProfileCameraEnableSectionProps = {
+  profileState: ProfileState;
+  cameras: string[];
+  config: FrigateConfig | undefined;
+  onConfigChanged: () => Promise<unknown>;
+};
+
+function ProfileCameraEnableSection({
+  profileState,
+  cameras,
+  config,
+  onConfigChanged,
+}: ProfileCameraEnableSectionProps) {
+  const { t } = useTranslation(["views/settings", "common"]);
+  const [selectedProfile, setSelectedProfile] = useState<string>(
+    profileState.allProfileNames[0] ?? "",
+  );
+  const [savingCamera, setSavingCamera] = useState<string | null>(null);
+  // Optimistic local state: the parsed config API doesn't reflect profile
+  // enabled changes until Frigate restarts, so we track saved values locally.
+  const [localOverrides, setLocalOverrides] = useState<
+    Record<string, Record<string, string>>
+  >({});
+
+  const handleEnabledChange = useCallback(
+    async (camera: string, value: string) => {
+      setSavingCamera(camera);
+      try {
+        const enabledValue =
+          value === "enabled" ? true : value === "disabled" ? false : null;
+        const configData =
+          enabledValue === null
+            ? {
+                cameras: {
+                  [camera]: {
+                    profiles: { [selectedProfile]: { enabled: "" } },
+                  },
+                },
+              }
+            : {
+                cameras: {
+                  [camera]: {
+                    profiles: { [selectedProfile]: { enabled: enabledValue } },
+                  },
+                },
+              };
+
+        await axios.put("config/set", { config_data: configData });
+        await onConfigChanged();
+
+        setLocalOverrides((prev) => ({
+          ...prev,
+          [selectedProfile]: {
+            ...prev[selectedProfile],
+            [camera]: value,
+          },
+        }));
+
+        toast.success(t("toast.save.success", { ns: "common" }), {
+          position: "top-center",
+        });
+      } catch {
+        toast.error(t("toast.save.error.title", { ns: "common" }), {
+          position: "top-center",
+        });
+      } finally {
+        setSavingCamera(null);
+      }
+    },
+    [selectedProfile, onConfigChanged, t],
+  );
+
+  const getEnabledState = useCallback(
+    (camera: string): string => {
+      // Check optimistic local state first
+      const localValue = localOverrides[selectedProfile]?.[camera];
+      if (localValue) return localValue;
+
+      const profileData =
+        config?.cameras?.[camera]?.profiles?.[selectedProfile];
+      if (!profileData || profileData.enabled === undefined) return "inherit";
+      return profileData.enabled ? "enabled" : "disabled";
+    },
+    [config, selectedProfile, localOverrides],
+  );
+
+  const profileColor = selectedProfile
+    ? getProfileColor(selectedProfile, profileState.allProfileNames)
+    : null;
+
+  if (!selectedProfile) return null;
+
+  return (
+    <SettingsGroupCard
+      title={t("cameraManagement.profiles.title", {
+        ns: "views/settings",
+      })}
+    >
+      <div className={SPLIT_ROW_CLASS_NAME}>
+        <div className="space-y-1.5">
+          <Label>
+            {t("cameraManagement.profiles.selectLabel", {
+              ns: "views/settings",
+            })}
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            {t("cameraManagement.profiles.description", {
+              ns: "views/settings",
+            })}
+          </p>
+        </div>
+        <div className={`${CONTROL_COLUMN_CLASS_NAME} space-y-4`}>
+          <Select value={selectedProfile} onValueChange={setSelectedProfile}>
+            <SelectTrigger className="w-full max-w-[200px]">
+              <div className="flex items-center gap-2">
+                {profileColor && (
+                  <span
+                    className={cn(
+                      "h-2 w-2 shrink-0 rounded-full",
+                      profileColor.dot,
+                    )}
+                  />
+                )}
+                <SelectValue />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {profileState.allProfileNames.map((profile) => {
+                const color = getProfileColor(
+                  profile,
+                  profileState.allProfileNames,
+                );
+                return (
+                  <SelectItem key={profile} value={profile}>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "h-2 w-2 shrink-0 rounded-full",
+                          color.dot,
+                        )}
+                      />
+                      {profile}
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+
+          <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+            {cameras.map((camera) => {
+              const state = getEnabledState(camera);
+              const isSaving = savingCamera === camera;
+
+              return (
+                <div
+                  key={camera}
+                  className="flex flex-row items-center justify-between"
+                >
+                  <CameraNameLabel camera={camera} />
+                  {isSaving ? (
+                    <ActivityIndicator className="h-5 w-20" size={16} />
+                  ) : (
+                    <Select
+                      value={state}
+                      onValueChange={(v) => handleEnabledChange(camera, v)}
+                    >
+                      <SelectTrigger className="h-7 w-[120px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="inherit">
+                          {t("cameraManagement.profiles.inherit", {
+                            ns: "views/settings",
+                          })}
+                        </SelectItem>
+                        <SelectItem value="enabled">
+                          {t("cameraManagement.profiles.enabled", {
+                            ns: "views/settings",
+                          })}
+                        </SelectItem>
+                        <SelectItem value="disabled">
+                          {t("cameraManagement.profiles.disabled", {
+                            ns: "views/settings",
+                          })}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </SettingsGroupCard>
   );
 }

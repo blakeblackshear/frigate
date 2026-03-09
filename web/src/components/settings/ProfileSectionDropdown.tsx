@@ -65,13 +65,11 @@ export function ProfileSectionDropdown({
       if (!/^[a-z0-9_]+$/.test(name)) {
         return t("profiles.nameInvalid", {
           ns: "views/settings",
-          defaultValue: "Only lowercase letters, numbers, and underscores",
         });
       }
       if (allProfileNames.includes(name)) {
         return t("profiles.nameDuplicate", {
           ns: "views/settings",
-          defaultValue: "Profile already exists",
         });
       }
       return null;
@@ -132,10 +130,7 @@ export function ProfileSectionDropdown({
                 {editingProfile}
               </>
             ) : (
-              t("profiles.baseConfig", {
-                ns: "views/settings",
-                defaultValue: "Base Config",
-              })
+              t("profiles.baseConfig", { ns: "views/settings" })
             )}
             <ChevronDown className="h-3 w-3 opacity-50" />
           </Button>
@@ -147,10 +142,7 @@ export function ProfileSectionDropdown({
                 <Check className="h-3.5 w-3.5 shrink-0" />
               )}
               <span className={editingProfile === null ? "" : "pl-[22px]"}>
-                {t("profiles.baseConfig", {
-                  ns: "views/settings",
-                  defaultValue: "Base Config",
-                })}
+                {t("profiles.baseConfig", { ns: "views/settings" })}
               </span>
             </div>
           </DropdownMenuItem>
@@ -180,10 +172,7 @@ export function ProfileSectionDropdown({
                   <span>{profile}</span>
                   {!hasData && (
                     <span className="text-xs text-muted-foreground">
-                      {t("profiles.noOverrides", {
-                        ns: "views/settings",
-                        defaultValue: "no overrides",
-                      })}
+                      {t("profiles.noOverrides", { ns: "views/settings" })}
                     </span>
                   )}
                 </div>
@@ -211,10 +200,7 @@ export function ProfileSectionDropdown({
             }}
           >
             <Plus className="mr-2 h-3.5 w-3.5" />
-            {t("profiles.addProfile", {
-              ns: "views/settings",
-              defaultValue: "Add Profile...",
-            })}
+            {t("profiles.addProfile", { ns: "views/settings" })}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -223,17 +209,13 @@ export function ProfileSectionDropdown({
         <DialogContent className="sm:max-w-[360px]">
           <DialogHeader>
             <DialogTitle>
-              {t("profiles.newProfile", {
-                ns: "views/settings",
-                defaultValue: "New Profile",
-              })}
+              {t("profiles.newProfile", { ns: "views/settings" })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
             <Input
               placeholder={t("profiles.profileNamePlaceholder", {
                 ns: "views/settings",
-                defaultValue: "e.g., armed, away, night",
               })}
               value={newProfileName}
               onChange={(e) => {
@@ -261,7 +243,7 @@ export function ProfileSectionDropdown({
               onClick={handleAddSubmit}
               disabled={!newProfileName.trim() || !!nameError}
             >
-              {t("button.create", { ns: "common", defaultValue: "Create" })}
+              {t("button.create", { ns: "common" })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -276,16 +258,11 @@ export function ProfileSectionDropdown({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t("profiles.deleteSection", {
-                ns: "views/settings",
-                defaultValue: "Delete Section Overrides",
-              })}
+              {t("profiles.deleteSection", { ns: "views/settings" })}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t("profiles.deleteSectionConfirm", {
                 ns: "views/settings",
-                defaultValue:
-                  "Remove {{profile}}'s overrides for {{section}} on {{camera}}?",
                 profile: deleteConfirmProfile,
                 section: sectionKey,
                 camera: cameraName,
@@ -300,7 +277,7 @@ export function ProfileSectionDropdown({
               className="bg-destructive text-white hover:bg-destructive/90"
               onClick={handleDeleteConfirm}
             >
-              {t("button.delete", { ns: "common", defaultValue: "Delete" })}
+              {t("button.delete", { ns: "common" })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
