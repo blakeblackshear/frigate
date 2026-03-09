@@ -6,7 +6,8 @@
       "content": "Esta página será recarregada em {{countdown}} segundos.",
       "button": "Forçar Recarregar Agora"
     },
-    "title": "Tem a certeza que deseja reiniciar o Frigate?"
+    "title": "Tem a certeza que deseja reiniciar o Frigate?",
+    "description": "Isto irá parar brevemente o Frigate enquanto reinicia."
   },
   "explore": {
     "plus": {

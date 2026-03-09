@@ -47,5 +47,8 @@
     "minClassesTitle": "Não é possível excluir a classe",
     "minClassesDesc": "Um modelo de classificação deve ter pelo menos duas classes. Adicione outra classe antes de excluir esta."
   },
-  "documentTitle": "Modelos de Classificação – Frigate"
+  "documentTitle": "Modelos de Classificação – Frigate",
+  "description": {
+    "invalidName": "Nome inválido. Os nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífens."
+  }
 }
