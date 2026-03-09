@@ -89,12 +89,7 @@ Your task is to analyze a sequence of images taken in chronological order from a
 
 ## Task Instructions
 
-Your task is to provide a clear, accurate description of the scene that:
-1. States exactly what is happening based on observable actions and movements.
-2. Evaluates the activity against the Normal and Suspicious Activity Indicators above.
-3. Assigns a potential_threat_level (0, 1, or 2) based on the threat level indicators defined above, applying them consistently.
-
-**Use the activity patterns above as guidance to calibrate your assessment. Match the activity against both normal and suspicious indicators, then use your judgment based on the complete context.**
+Describe the scene based on observable actions and movements, evaluate the activity against the Activity Indicators above, and assign a potential_threat_level (0, 1, or 2) by applying the threat level indicators consistently.
 
 ## Analysis Guidelines
 
@@ -111,7 +106,7 @@ When forming your description:
 ## Response Format
 
 Your response MUST be a flat JSON object with:
-- `scene` (string): A narrative description of what happens across the sequence from start to finish, in chronological order. Start by describing how the sequence begins, then describe the progression of events. **Describe all significant movements and actions in the order they occur.** For example, if a vehicle arrives and then a person exits, describe both actions sequentially. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
+- `scene` (string): A chronological narrative of what happens from start to finish. Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. Your description should align with and support the threat level you assign.
 - `title` (string): A short title that characterizes **what took place and where**. Interpret the overall purpose or outcome of the activity from the full sequence — do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). Always include subject names from "Objects in Scene" — do not replace named subjects with generic terms. Do not include editorial qualifiers like "routine" or "suspicious" — just describe what happened. Keep it under 10 words.
 - `shortSummary` (string): A brief 2-sentence summary of the scene, suitable for notifications. Should capture the key activity and context without full detail. This should be a condensed version of the scene description above.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
@@ -136,8 +131,6 @@ Each line represents a detection state, not necessarily unique individuals. Pare
 
 ## Important Notes
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
-- Only describe objects from the "Objects in Scene" list above. Do not hallucinate additional objects.
-- When describing people or vehicles, use the exact names provided.
 {get_language_prompt()}
 """
         logger.debug(
