@@ -174,7 +174,21 @@
   "noCameras": {
     "title": "Nenhuma Câmera Configurada",
     "description": "Inicie conectando uma câmera ao Frigate.",
-    "buttonText": "Adicionar Câmera"
+    "buttonText": "Adicionar Câmera",
+    "restricted": {
+      "title": "Nenhuma Câmera Disponível",
+      "description": "Você não tem permissão para ver quaisquer câmeras neste grupo."
+    },
+    "default": {
+      "title": "Nenhuma Câmera Configurada",
+      "description": "Comece conectando uma câmera ao Frigate.",
+      "buttonText": "Adicionar Câmera"
+    },
+    "group": {
+      "title": "Nenhuma Câmera no Grupo",
+      "description": "Este grupo de câmeras não tem nenhuma câmera atribuída ou habilitada.",
+      "buttonText": "Gerenciar Grupos"
+    }
   },
   "snapshot": {
     "takeSnapshot": "Baixar captura de imagem instantânea",

@@ -79,7 +79,10 @@
       "12hour": "dd-MM-yy-hh-mm-ss",
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
-    "never": "Nunca"
+    "never": "Nunca",
+    "inProgress": "Em progresso",
+    "invalidStartTime": "Horário de início inválido",
+    "invalidEndTime": "Horário de término inválido"
   },
   "selectItem": "Selecionar {{item}}",
   "unit": {
@@ -101,7 +104,13 @@
     }
   },
   "label": {
-    "back": "Voltar"
+    "back": "Voltar",
+    "hide": "Esconder {{item}}",
+    "show": "Mostrar {{item}}",
+    "ID": "ID",
+    "none": "Nenhum",
+    "all": "Todos",
+    "other": "Outros"
   },
   "button": {
     "apply": "Aplicar",
@@ -138,7 +147,18 @@
     "unselect": "Deselecionar",
     "export": "Exportar",
     "deleteNow": "Deletar Agora",
-    "next": "Próximo"
+    "next": "Próximo",
+    "add": "Adicionar",
+    "undo": "Desfazer",
+    "copiedToClipboard": "Copiado para a área de transferência",
+    "continue": "Continuar",
+    "modified": "Modificado",
+    "overridden": "Substituído",
+    "resetToGlobal": "Redefinir para o Global",
+    "resetToDefault": "Redefinir para o Padrão",
+    "saveAll": "Salvar Tudo",
+    "savingAll": "Salvando Tudo…",
+    "undoAll": "Desfazer Tudo"
   },
   "menu": {
     "system": "Sistema",
@@ -186,7 +206,8 @@
       "bg": "Български (Búlgaro)",
       "gl": "Galego (Galego)",
       "id": "Bahasa Indonesia (Indonésio)",
-      "ur": "اردو (Urdu)"
+      "ur": "اردو (Urdu)",
+      "hr": "Hrvatski (Croata)"
     },
     "systemLogs": "Logs de sistema",
     "settings": "Configurações",
@@ -239,7 +260,9 @@
       "anonymous": "anônimo",
       "logout": "Sair",
       "setPassword": "Definir Senha"
-    }
+    },
+    "classification": "Classificação",
+    "chat": "Chat"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada para a área de transferência.",
@@ -282,5 +305,14 @@
   "readTheDocumentation": "Leia a documentação",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} e {{1}}",
+    "many": "{{items}} e {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opcional",
+    "internalID": "O ID interno que o Frigate usa na configuração e banco de dados"
   }
 }
