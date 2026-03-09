@@ -100,7 +100,9 @@ class OutputProcess(FrigateProcess):
         jsmpeg_cameras[camera] = JsmpegCamera(
             camera_config, self.stop_event, websocket_server
         )
-        preview_recorders[camera] = PreviewRecorder(camera_config)
+        preview_recorders[camera] = PreviewRecorder(
+            camera_config, self.config.get_camera_recordings_path(camera)
+        )
         preview_write_times[camera] = 0
 
         if (

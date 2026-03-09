@@ -15,7 +15,7 @@ import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW, PREVIEW_FRAME_TYPE
+from frigate.const import CACHE_DIR, INSERT_PREVIEW, PREVIEW_FRAME_TYPE
 from frigate.ffmpeg_presets import (
     FPS_VFR_PARAM,
     EncodeTypeEnum,
@@ -56,6 +56,11 @@ PREVIEW_QMAX_PARAM = {
     RecordQualityEnum.high: " -qmax 25",
     RecordQualityEnum.very_high: " -qmax 25",
 }
+
+
+def get_preview_dir(recordings_root: str, camera: str) -> str:
+    """Get the output directory for generated preview mp4 files."""
+    return os.path.join(recordings_root, "preview", camera)
 
 
 def get_cache_image_name(camera: str, frame_time: float) -> str:
@@ -119,14 +124,15 @@ class FFMpegConverter(threading.Thread):
         config: CameraConfig,
         frame_times: list[float],
         requestor: InterProcessRequestor,
+        preview_dir: str,
     ):
         super().__init__(name=f"{config.name}_preview_converter")
         self.config = config
         self.frame_times = frame_times
         self.requestor = requestor
         self.path = os.path.join(
-            CLIPS_DIR,
-            f"previews/{self.config.name}/{self.frame_times[0]}-{self.frame_times[-1]}.mp4",
+            preview_dir,
+            f"{self.frame_times[0]}-{self.frame_times[-1]}.mp4",
         )
 
         # write a PREVIEW at fps and 1 key frame per clip
@@ -203,12 +209,13 @@ class FFMpegConverter(threading.Thread):
 
 
 class PreviewRecorder:
-    def __init__(self, config: CameraConfig) -> None:
+    def __init__(self, config: CameraConfig, recordings_root: str) -> None:
         self.config = config
         self.start_time = 0
         self.last_output_time = 0
         self.offline = False
         self.output_frames = []
+        self.preview_dir = get_preview_dir(recordings_root, config.name)
 
         if config.detect.width > config.detect.height:
             self.out_height = PREVIEW_HEIGHT
@@ -254,9 +261,7 @@ class PreviewRecorder:
         )
 
         Path(PREVIEW_CACHE_DIR).mkdir(exist_ok=True)
-        Path(os.path.join(CLIPS_DIR, f"previews/{config.name}")).mkdir(
-            parents=True, exist_ok=True
-        )
+        Path(self.preview_dir).mkdir(parents=True, exist_ok=True)
 
         # check for existing items in cache
         start_ts = (
@@ -393,6 +398,7 @@ class PreviewRecorder:
                     self.config,
                     self.output_frames,
                     self.requestor,
+                    self.preview_dir,
                 ).start()
             else:
                 logger.debug(
@@ -442,6 +448,7 @@ class PreviewRecorder:
                 self.config,
                 self.output_frames,
                 self.requestor,
+                self.preview_dir,
             ).start()
 
             self.reset_frame_cache(frame_time)

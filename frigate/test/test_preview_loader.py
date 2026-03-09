@@ -1,11 +1,18 @@
 import os
 import shutil
 import unittest
+import sys
+import types
+
+# Allow importing preview module in environments without opencv installed
+sys.modules.setdefault("cv2", types.SimpleNamespace())
+sys.modules.setdefault("numpy", types.SimpleNamespace(ndarray=object))
 
 from frigate.output.preview import (
     PREVIEW_CACHE_DIR,
     PREVIEW_FRAME_TYPE,
     get_most_recent_preview_frame,
+    get_preview_dir,
 )
 
 
@@ -78,3 +85,15 @@ class TestPreviewLoader(unittest.TestCase):
     def test_get_most_recent_preview_frame_no_directory(self):
         shutil.rmtree(PREVIEW_CACHE_DIR)
         self.assertIsNone(get_most_recent_preview_frame("test_camera"))
+
+    def test_get_preview_dir_with_explicit_camera_path(self):
+        self.assertEqual(
+            get_preview_dir("/video2", "front"),
+            "/video2/preview/front",
+        )
+
+    def test_get_preview_dir_with_default_recordings_path(self):
+        self.assertEqual(
+            get_preview_dir("/media/frigate/recordings", "front"),
+            "/media/frigate/recordings/preview/front",
+        )
