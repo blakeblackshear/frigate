@@ -98,8 +98,6 @@ def all_recordings_summary(
     days: dict[str, bool] = {}
 
     for period_start, period_end, period_offset in dst_periods:
-        # Use integer division instead of strftime(datetime(...)) — orders of
-        # magnitude cheaper per row and avoids a temp B-tree for GROUP BY.
         day_expr = ((Recordings.start_time + period_offset) / 86400).cast("int")
 
         period_query = (
