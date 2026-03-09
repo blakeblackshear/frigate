@@ -80,7 +80,9 @@
         "title": "Intel GPU 狀態警告",
         "message": "GPU 狀態不可用",
         "description": "這是 Intel GPU 統計工具已知問題，可能顯示 0% 使用率，但不影響效能。可重新啟動主機暫時修復。"
-      }
+      },
+      "gpuTemperature": "GPU 溫度",
+      "npuTemperature": "NPU 溫度"
     },
     "otherProcesses": {
       "title": "其他程序",
@@ -165,6 +167,17 @@
       "error": {
         "unableToProbeCamera": "無法取得鏡頭資料：{{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "連線品質",
+      "excellent": "極佳",
+      "fair": "一般",
+      "poor": "差",
+      "unusable": "無法使用",
+      "fps": "每秒幀數",
+      "expectedFps": "預期每秒幀數",
+      "reconnectsLastHour": "重新連線次數（過去一小時）",
+      "stallsLastHour": "卡頓次數（過去一小時）"
     }
   },
   "lastRefreshed": "最後更新： ",
