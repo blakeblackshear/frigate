@@ -19,6 +19,7 @@ import { isIOS, isSafari } from "react-device-detect";
 type MSEPlayerProps = {
   camera: string;
   className?: string;
+  style?: CSSProperties;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
   volume?: number;
@@ -34,6 +35,7 @@ type MSEPlayerProps = {
 function MSEPlayer({
   camera,
   className,
+  style,
   playbackEnabled = true,
   audioEnabled = false,
   volume,
@@ -843,15 +845,21 @@ function MSEPlayer({
     };
   }, [isRotatedGrid]);
 
+  const rotationTransform =
+    "var(--frigate-mse-grid-rotation, none)" as CSSProperties["transform"];
+  const combinedTransform = style?.transform
+    ? `${style.transform} ${rotationTransform}`
+    : rotationTransform;
+
   const videoElement = (
     <video
       ref={videoRef}
       className={className}
       style={{
+        ...style,
         objectFit:
           "var(--frigate-mse-object-fit, fill)" as CSSProperties["objectFit"],
-        transform:
-          "var(--frigate-mse-grid-rotation, none)" as CSSProperties["transform"],
+        transform: combinedTransform,
         transformOrigin:
           "var(--frigate-mse-grid-rotation-origin, center center)" as CSSProperties["transformOrigin"],
         width: isRotatedGrid ? "100%" : undefined,
