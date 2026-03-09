@@ -441,6 +441,7 @@ export default function DraggableGridLayout({
   const cameraZoomViewportRefs = useRef<Record<string, HTMLDivElement | null>>(
     {},
   );
+  const cameraZoomWheelCleanupRefs = useRef<Record<string, () => void>>({});
 
   const getCardZoomDimensions = useCallback((cameraName: string) => {
     const viewport = cameraZoomViewportRefs.current[cameraName];
@@ -492,14 +493,18 @@ export default function DraggableGridLayout({
   );
 
   const handleCardWheelZoom = useCallback(
-    (cameraName: string, event: React.WheelEvent<HTMLDivElement>) => {
+    (
+      cameraName: string,
+      event: WheelEvent,
+      viewportElement: HTMLDivElement,
+    ) => {
       if (!event.shiftKey) {
         return;
       }
 
       event.preventDefault();
 
-      const bounds = event.currentTarget.getBoundingClientRect();
+      const bounds = viewportElement.getBoundingClientRect();
       const cursorX = event.clientX - bounds.left;
       const cursorY = event.clientY - bounds.top;
 
@@ -514,8 +519,7 @@ export default function DraggableGridLayout({
           cursorX,
           cursorY,
         );
-        const content = event.currentTarget
-          .firstElementChild as HTMLElement | null;
+        const content = viewportElement.firstElementChild as HTMLElement | null;
         const persisted = toPersistedCameraZoomState(next, {
           viewportWidth: bounds.width,
           viewportHeight: bounds.height,
@@ -533,6 +537,37 @@ export default function DraggableGridLayout({
     },
     [getDefaultZoomTransform],
   );
+
+  const detachCardZoomWheelListener = useCallback((cameraName: string) => {
+    cameraZoomWheelCleanupRefs.current[cameraName]?.();
+    delete cameraZoomWheelCleanupRefs.current[cameraName];
+  }, []);
+
+  const attachCardZoomWheelListener = useCallback(
+    (cameraName: string, viewportElement: HTMLDivElement) => {
+      detachCardZoomWheelListener(cameraName);
+
+      const listener = (event: WheelEvent) => {
+        handleCardWheelZoom(cameraName, event, viewportElement);
+      };
+
+      viewportElement.addEventListener("wheel", listener, { passive: false });
+
+      cameraZoomWheelCleanupRefs.current[cameraName] = () => {
+        viewportElement.removeEventListener("wheel", listener);
+      };
+    },
+    [detachCardZoomWheelListener, handleCardWheelZoom],
+  );
+
+  useEffect(() => {
+    return () => {
+      Object.values(cameraZoomWheelCleanupRefs.current).forEach((cleanup) =>
+        cleanup(),
+      );
+      cameraZoomWheelCleanupRefs.current = {};
+    };
+  }, []);
 
   useEffect(() => {
     cameras.forEach((camera) => {
@@ -782,11 +817,15 @@ export default function DraggableGridLayout({
                     ref={(node) => {
                       cameraZoomViewportRefs.current[camera.name] = node;
 
-                      if (node) {
-                        hydrateCameraZoomFromStorage(camera.name);
+                      if (!node) {
+                        detachCardZoomWheelListener(camera.name);
+                        return;
                       }
+
+                      attachCardZoomWheelListener(camera.name, node);
+
+                      hydrateCameraZoomFromStorage(camera.name);
                     }}
-                    onWheel={(event) => handleCardWheelZoom(camera.name, event)}
                   >
                     <LivePlayer
                       key={camera.name}
