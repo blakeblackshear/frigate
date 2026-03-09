@@ -1,0 +1,165 @@
+{
+    "objects": {
+        "genai": {
+            "required_zones": {
+                "label": "Wymagane strefy",
+                "description": "Strefy, które należy wprowadzić, aby obiekty kwalifikowały się do generowania opisu GenAI."
+            },
+            "debug_save_thumbnails": {
+                "label": "Zapisz miniatury",
+                "description": "Zapisz miniatury wysłane do GenAI w celu debugowania i przeglądu."
+            },
+            "send_triggers": {
+                "label": "Wyzwalacze GenAI",
+                "description": "Określa, kiedy ramki powinny być wysyłane do GenAI (na końcu, po aktualizacjach itp.).",
+                "tracked_object_end": {
+                    "label": "Wyślij na koniec",
+                    "description": "Wyślij żądanie do GenAI, gdy śledzony obiekt się zakończy."
+                },
+                "after_significant_updates": {
+                    "label": "Wczesny wyzwalacz GenAI",
+                    "description": "Wyślij żądanie do GenAI po określonej liczbie istotnych aktualizacji dla śledzonego obiektu."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Oryginalny stan GenAI",
+                "description": "Wskazuje, czy GenAI było włączone w oryginalnej konfiguracji statycznej."
+            }
+        }
+    },
+    "record": {
+        "label": "Nagrywanie",
+        "enabled": {
+            "label": "Włącz nagrywanie"
+        },
+        "expire_interval": {
+            "label": "Częstotliwość usuwania nagrań",
+            "description": "Minuty między kolejnymi operacjami czyszczenia, które usuwają nieaktualne segmenty nagrań."
+        },
+        "continuous": {
+            "label": "Ciągłe przechowywanie",
+            "description": "Liczba dni przechowywania nagrań niezależnie od śledzonych obiektów lub ruchu. Ustaw wartość 0, jeśli chcesz przechowywać tylko nagrania alertów i wykrytych zdarzeń.",
+            "days": {
+                "label": "Ilość dni przechowywania",
+                "description": "Dni przechowywania nagrań."
+            }
+        },
+        "motion": {
+            "label": "Przechowywanie ruchu",
+            "description": "Liczba dni przechowywania nagrań wywołanych ruchem, niezależnie od śledzonych obiektów. Ustaw wartość 0, jeśli chcesz przechowywać tylko nagrania alertów i wykrytych zdarzeń.",
+            "days": {
+                "label": "Dni przechowywania",
+                "description": "Dni przechowywania nagrań."
+            }
+        },
+        "detections": {
+            "label": "Przechowywanie detekcji",
+            "description": "Ustawienia przechowywania nagrań dla zdarzeń wykrywania, w tym czas przed i po przechwyceniu.",
+            "pre_capture": {
+                "label": "Sekundy pre-alarmu",
+                "description": "Liczba sekund przed zdarzeniem wykrycia, które ma zostać uwzględnione w nagraniu."
+            },
+            "post_capture": {
+                "label": "Sekundy post-alarmu",
+                "description": "Liczba sekund po wykryciu zdarzenia, które ma zostać uwzględnione w nagraniu."
+            },
+            "retain": {
+                "label": "Przechowywanie zdarzeń",
+                "description": "Ustawienia przechowywania nagrań zdarzeń wykrytych.",
+                "days": {
+                    "label": "Dni przechowywania",
+                    "description": "Liczba dni przechowywania nagrań zdarzeń wykrytych."
+                },
+                "mode": {
+                    "label": "Tryb przechowywania",
+                    "description": "Tryb przechowywania: wszystkie (zapisz wszystkie segmenty), ruch (zapisz segmenty z ruchem) lub aktywne obiekty (zapisz segmenty z aktywnymi obiektami)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Przechowywanie alarmów",
+            "description": "Ustawienia przechowywania nagrań dla zdarzeń alarmowych, w tym czas przed i po przechwyceniu.",
+            "pre_capture": {
+                "label": "Długość pre-alarmu",
+                "description": "Liczba sekund przed zdarzeniem wykrycia, które ma zostać uwzględnione w nagraniu."
+            },
+            "post_capture": {
+                "label": "Długość post-alarmu",
+                "description": "Liczba sekund po wykryciu zdarzenia, które ma zostać uwzględnione w nagraniu."
+            },
+            "retain": {
+                "label": "Przechowywanie zdarzeń",
+                "description": "Ustawienia przechowywania nagrań zdarzeń wykrytych.",
+                "days": {
+                    "label": "Dni przechowywania",
+                    "description": "Liczba dni przechowywania nagrań zdarzeń wykrytych."
+                },
+                "mode": {
+                    "label": "Tryb przechowywania",
+                    "description": "Tryb przechowywania: wszystkie (zapisz wszystkie segmenty), ruch (zapisz segmenty z ruchem) lub aktywne obiekty (zapisz segmenty z aktywnymi obiektami)."
+                }
+            }
+        },
+        "export": {
+            "label": "Eksport konfiguracji",
+            "description": "Ustawienia używane podczas eksportowania nagrań, takie jak przyspieszenie czasu i przyspieszenie sprzętowe.",
+            "hwaccel_args": {
+                "label": "Eksportuj argumenty akceleracji sprzętowej",
+                "description": "Argumenty przyspieszenia sprzętowego do wykorzystania podczas operacji eksportu/transkodowania."
+            }
+        },
+        "preview": {
+            "label": "Podgląd konfiguracji",
+            "description": "Ustawienia kontrolujące jakość podglądu nagrań wyświetlanych w interfejsie użytkownika.",
+            "quality": {
+                "label": "Jakość podglądu",
+                "description": "Poziom jakości podglądu (bardzo_niski, niski, średni, wysoki, bardzo_wysoki)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Oryginalny stan nagrania",
+            "description": "Wskazuje, czy nagrywanie było włączone w oryginalnej konfiguracji statycznej."
+        }
+    },
+    "review": {
+        "label": "Recenzja",
+        "alerts": {
+            "label": "Konfiguracja alarmów",
+            "description": "Ustawienia dotyczące obiektów śledzonych, które generują alerty, oraz sposobu przechowywania alertów.",
+            "enabled": {
+                "label": "Włącz alarmy"
+            },
+            "labels": {
+                "label": "Etykiety alarmów",
+                "description": "Lista etykiet obiektów, które kwalifikują się jako alerty (na przykład: samochód, osoba)."
+            },
+            "required_zones": {
+                "label": "Wymagane strefy",
+                "description": "Strefy, do których obiekt musi wejść, aby zostać uznanym za alarm; pozostaw puste, aby zezwolić na dowolną strefę."
+            },
+            "enabled_in_config": {
+                "label": "Oryginalny stan alarmów",
+                "description": "Śledzi, czy alarmy były pierwotnie włączone w konfiguracji statycznej."
+            },
+            "cutoff_time": {
+                "label": "Czas wyłączenia alarmów",
+                "description": "Sekundy, które należy odczekać po zakończeniu czynności powodującej alarm, zanim alarm zostanie wyłączony."
+            }
+        },
+        "detections": {
+            "label": "Konfiguracja detekcji",
+            "description": "Ustawienia dotyczące tworzenia zdarzeń wykrywania (niebędących alertami) oraz czasu ich przechowywania.",
+            "enabled": {
+                "label": "Włącz detekcje"
+            },
+            "labels": {
+                "label": "Etykiety detekcji",
+                "description": "Lista etykiet(klas) obiektów, które kwalifikują się jako zdarzenia wykrycia."
+            },
+            "required_zones": {
+                "label": "Wymagane strefy",
+                "description": "Strefy, do których obiekt musi wejść, aby zostać wykryty; pozostaw puste, aby zezwolić na dowolną strefę."
+            }
+        }
+    }
+}
