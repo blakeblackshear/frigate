@@ -5,14 +5,17 @@
     "camera": "Kameraeinstellungen - Frigate",
     "masksAndZones": "Masken- und Zoneneditor – Frigate",
     "object": "Debug - Frigate",
-    "general": "UI-Einstellungen - Frigate",
+    "general": "Profileinstellungen - Frigate",
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
     "classification": "Klassifizierungseinstellungen – Frigate",
     "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
     "notifications": "Benachrichtigungseinstellungen",
     "enrichments": "Erweiterte Statistiken - Frigate",
     "cameraManagement": "Kameras verwalten - Frigate",
-    "cameraReview": "Kameraeinstellungen prüfen - Frigate"
+    "cameraReview": "Kameraeinstellungen prüfen - Frigate",
+    "globalConfig": "Globale Konfiguration - Frigate",
+    "cameraConfig": "Kamera Konfiguration - Frigate",
+    "maintenance": "Wartung - Frigate"
   },
   "menu": {
     "ui": "Benutzeroberfläche",
@@ -28,7 +31,31 @@
     "triggers": "Auslöser",
     "roles": "Rollen",
     "cameraManagement": "Verwaltung",
-    "cameraReview": "Überprüfung"
+    "cameraReview": "Überprüfung",
+    "system": "System",
+    "general": "allgemein",
+    "globalConfig": "Globale Konfiguration",
+    "integrations": "Integrationen",
+    "profileSettings": "Profil Einstellung",
+    "globalDetect": "Objekterkennung",
+    "globalRecording": "Aufnahme",
+    "globalSnapshots": "Schnappschüsse",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Bewegungserkennung",
+    "globalObjects": "Objekte",
+    "globalReview": "Überprüfung",
+    "globalAudioEvents": "Audio Events",
+    "globalLivePlayback": "Live Wiedergabe",
+    "globalTimestampStyle": "Zeitstempelformat",
+    "systemDatabase": "Datenbank",
+    "systemTls": "TLS",
+    "systemAuthentication": "Authentifizierung",
+    "systemNetworking": "Netzwerk",
+    "systemProxy": "Proxy",
+    "systemUi": "UI",
+    "systemLogging": "Log",
+    "systemEnvironmentVariables": "Umgebungsvariablen",
+    "systemTelemetry": "Telemetrie"
   },
   "dialog": {
     "unsavedChanges": {
@@ -41,7 +68,7 @@
     "noCamera": "Keine Kamera"
   },
   "general": {
-    "title": "Einstellungen der Benutzeroberfläche",
+    "title": "Profileinstellungen",
     "liveDashboard": {
       "title": "Live Übersicht",
       "playAlertVideos": {
@@ -408,7 +435,7 @@
       }
     },
     "motionMaskLabel": "Bewegungsmaske {{number}}",
-    "objectMaskLabel": "Objektmaske {{number}} ({{label}})"
+    "objectMaskLabel": "Objektmaske {{number}}"
   },
   "debug": {
     "objectShapeFilterDrawing": {
