@@ -305,7 +305,22 @@ export interface CameraConfig {
       friendly_name?: string;
     };
   };
+  profiles?: Record<string, CameraProfileConfig>;
 }
+
+export type CameraProfileConfig = {
+  enabled?: boolean;
+  audio?: Partial<CameraConfig["audio"]>;
+  birdseye?: Partial<CameraConfig["birdseye"]>;
+  detect?: Partial<CameraConfig["detect"]>;
+  motion?: Partial<CameraConfig["motion"]>;
+  notifications?: Partial<CameraConfig["notifications"]>;
+  objects?: Partial<CameraConfig["objects"]>;
+  record?: Partial<CameraConfig["record"]>;
+  review?: Partial<CameraConfig["review"]>;
+  snapshots?: Partial<CameraConfig["snapshots"]>;
+  zones?: Partial<CameraConfig["zones"]>;
+};
 
 export type CameraGroupConfig = {
   cameras: string[];

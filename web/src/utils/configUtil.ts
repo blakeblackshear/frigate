@@ -69,6 +69,42 @@ export const globalCameraDefaultSections = new Set([
 ]);
 
 // ---------------------------------------------------------------------------
+// Profile helpers
+// ---------------------------------------------------------------------------
+
+/** Sections that can appear inside a camera profile definition. */
+export const PROFILE_ELIGIBLE_SECTIONS = new Set([
+  "audio",
+  "birdseye",
+  "detect",
+  "motion",
+  "notifications",
+  "objects",
+  "record",
+  "review",
+  "snapshots",
+]);
+
+/**
+ * Parse a section path that may encode a profile reference.
+ *
+ * Examples:
+ *   "detect"                 → { isProfile: false, actualSection: "detect" }
+ *   "profiles.armed.detect"  → { isProfile: true, profileName: "armed", actualSection: "detect" }
+ */
+export function parseProfileFromSectionPath(sectionPath: string): {
+  isProfile: boolean;
+  profileName?: string;
+  actualSection: string;
+} {
+  const match = sectionPath.match(/^profiles\.([^.]+)\.(.+)$/);
+  if (match) {
+    return { isProfile: true, profileName: match[1], actualSection: match[2] };
+  }
+  return { isProfile: false, actualSection: sectionPath };
+}
+
+// ---------------------------------------------------------------------------
 // buildOverrides — pure recursive diff of current vs stored config & defaults
 // ---------------------------------------------------------------------------
 
@@ -421,15 +457,19 @@ export function prepareSectionSavePayload(opts: {
     level = "global";
   }
 
-  // Resolve section config
-  const sectionConfig = getSectionConfig(sectionPath, level);
+  // Detect profile-encoded section paths (e.g., "profiles.armed.detect")
+  const profileInfo = parseProfileFromSectionPath(sectionPath);
+  const schemaSection = profileInfo.actualSection;
 
-  // Resolve section schema
-  const sectionSchema = extractSectionSchema(fullSchema, sectionPath, level);
+  // Resolve section config using the actual section name (not the profile path)
+  const sectionConfig = getSectionConfig(schemaSection, level);
+
+  // Resolve section schema using the actual section name
+  const sectionSchema = extractSectionSchema(fullSchema, schemaSection, level);
   if (!sectionSchema) return null;
 
   const modifiedSchema = modifySchemaForSection(
-    sectionPath,
+    schemaSection,
     level,
     sectionSchema,
   );
@@ -457,7 +497,7 @@ export function prepareSectionSavePayload(opts: {
     ? applySchemaDefaults(modifiedSchema, {})
     : {};
   const effectiveDefaults = getEffectiveDefaultsForSection(
-    sectionPath,
+    schemaSection,
     level,
     modifiedSchema ?? undefined,
     schemaDefaults,
@@ -466,7 +506,7 @@ export function prepareSectionSavePayload(opts: {
   // Build overrides
   const overrides = buildOverrides(pendingData, rawData, effectiveDefaults);
   const sanitizedOverrides = sanitizeOverridesForSection(
-    sectionPath,
+    schemaSection,
     level,
     overrides,
   );
@@ -485,9 +525,11 @@ export function prepareSectionSavePayload(opts: {
       ? `cameras.${cameraName}.${sectionPath}`
       : sectionPath;
 
-  // Compute updateTopic
+  // Compute updateTopic — profile definitions don't trigger hot-reload
   let updateTopic: string | undefined;
-  if (level === "camera" && cameraName) {
+  if (profileInfo.isProfile) {
+    updateTopic = undefined;
+  } else if (level === "camera" && cameraName) {
     const topic = cameraUpdateTopicMap[sectionPath];
     updateTopic = topic ? `config/cameras/${cameraName}/${topic}` : undefined;
   } else if (globalCameraDefaultSections.has(sectionPath)) {
@@ -497,12 +539,14 @@ export function prepareSectionSavePayload(opts: {
     updateTopic = `config/${sectionPath}`;
   }
 
-  // Restart detection
-  const needsRestart = requiresRestartForOverrides(
-    sanitizedOverrides,
-    sectionConfig.restartRequired,
-    true,
-  );
+  // Restart detection — profile definitions never need restart
+  const needsRestart = profileInfo.isProfile
+    ? false
+    : requiresRestartForOverrides(
+        sanitizedOverrides,
+        sectionConfig.restartRequired,
+        true,
+      );
 
   return {
     basePath,
