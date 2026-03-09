@@ -1,0 +1,2192 @@
+{
+    "audio": {
+        "label": "Evenimente audio",
+        "enabled": {
+            "label": "Activare detecție audio",
+            "description": "Activează sau dezactivează detecția audio pentru toate camerele."
+        },
+        "max_not_heard": {
+            "label": "Timeout final",
+            "description": "Secunde fără tipul audio configurat înainte ca evenimentul să fie încheiat."
+        },
+        "min_volume": {
+            "label": "Volum minim",
+            "description": "Pragul minim de volum RMS; valorile mici cresc sensibilitatea (ex: 200 ridicată, 500 medie, 1000 scăzută)."
+        },
+        "listen": {
+            "label": "Tipuri ascultate",
+            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, țipăt, vorbire)."
+        },
+        "filters": {
+            "label": "Filtre audio",
+            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere."
+        },
+        "enabled_in_config": {
+            "label": "Stare audio originală",
+            "description": "Indică dacă detecția audio a fost activată inițial în fișierul de configurare static."
+        },
+        "num_threads": {
+            "label": "Thread-uri detecție",
+            "description": "Numărul de thread-uri pentru procesarea detecției audio."
+        },
+        "description": "Setări pentru detecția evenimentelor audio; pot fi suprascrise per cameră."
+    },
+    "audio_transcription": {
+        "label": "Transcriere audio",
+        "description": "Setări pentru transcrierea audio live și a vorbirii pentru evenimente.",
+        "live_enabled": {
+            "label": "Transcriere live",
+            "description": "Activează streaming-ul de transcriere live pe măsură ce sunetul e recepționat."
+        },
+        "enabled": {
+            "label": "Activare transcriere audio",
+            "description": "Activează transcrierea automată pentru toate camerele."
+        },
+        "language": {
+            "label": "Limbă transcriere",
+            "description": "Codul de limbă (ex: 'ro' pentru română)."
+        },
+        "device": {
+            "label": "Dispozitiv transcriere",
+            "description": "CPU/GPU pentru modelul de transcriere. Momentan sunt suportate doar plăcile NVIDIA CUDA."
+        },
+        "model_size": {
+            "label": "Mărime model",
+            "description": "Mărimea modelului pentru transcrierea offline a evenimentelor."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Setări pentru vizualizarea compusă Birdseye care combină mai multe stream-uri într-un singur layout.",
+        "enabled": {
+            "label": "Activare Birdseye",
+            "description": "Activează sau dezactivează funcția Birdseye."
+        },
+        "mode": {
+            "label": "Mod urmărire",
+            "description": "Modul de includere a camerelor în Birdseye: 'objects', 'motion' sau 'continuous'."
+        },
+        "order": {
+            "label": "Poziție",
+            "description": "Poziția numerică ce controlează ordinea camerei în layout-ul Birdseye."
+        },
+        "restream": {
+            "label": "Restream-uri RTSP",
+            "description": "Redifuzează ieșirea Birdseye ca stream RTSP; activarea va menține Birdseye pornit continuu."
+        },
+        "width": {
+            "label": "Lățime",
+            "description": "Lățimea de ieșire în pixeli a cadrului Birdseye."
+        },
+        "height": {
+            "label": "Înălțime",
+            "description": "Înălțimea de ieșire în pixeli a cadrului Birdseye."
+        },
+        "quality": {
+            "label": "Calitate encodare",
+            "description": "Calitatea encodării pentru feed-ul mpeg1 Birdseye (1 maxim, 31 minim)."
+        },
+        "inactivity_threshold": {
+            "label": "Prag inactivitate",
+            "description": "Secunde de inactivitate după care o cameră nu mai este afișată în Birdseye."
+        },
+        "layout": {
+            "label": "Layout",
+            "description": "Opțiuni de layout pentru compoziția Birdseye.",
+            "scaling_factor": {
+                "label": "Factor scalare",
+                "description": "Factorul de scalare folosit de calculatorul de layout (între 1.0 și 5.0)."
+            },
+            "max_cameras": {
+                "label": "Nr. maxim camere",
+                "description": "Numărul maxim de camere afișate simultan în Birdseye."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "FPS heartbeat inactiv",
+            "description": "Cadre pe secundă pentru re-trimiterea ultimului cadru Birdseye când e inactiv; 0 pentru dezactivare."
+        }
+    },
+    "detect": {
+        "label": "Detecție obiecte",
+        "description": "Setări pentru rolul de detecție folosit pentru a rula recunoașterea obiectelor și trackerele.",
+        "enabled": {
+            "label": "Detecție activată",
+            "description": "Activează detecția pentru toate camerele. Trebuie să fie activă pentru ca urmărirea obiectelor să funcționeze."
+        },
+        "height": {
+            "label": "Înălțime detect",
+            "description": "Înălțimea cadrelor pentru stream-ul de detect; lasă gol pentru rezoluția nativă."
+        },
+        "width": {
+            "label": "Lățime detect",
+            "description": "Lățimea cadrelor pentru stream-ul de detect; lasă gol pentru rezoluția nativă."
+        },
+        "fps": {
+            "label": "FPS detect",
+            "description": "FPS-ul dorit pentru detecție; valori mici reduc consumul CPU (recomandat 5, max 10 pentru obiecte foarte rapide)."
+        },
+        "min_initialized": {
+            "label": "Cadre minime inițializare",
+            "description": "Numărul de detecții consecutive necesare înainte de a crea un obiect urmărit. Crește valoarea pentru a reduce alarmele false."
+        },
+        "max_disappeared": {
+            "label": "Cadre maxime dispariție",
+            "description": "Numărul de cadre fără detecție înainte ca un obiect urmărit să fie considerat dispărut."
+        },
+        "stationary": {
+            "label": "Configurație obiecte staționare",
+            "description": "Setări pentru gestionarea obiectelor care rămân nemișcate o perioadă.",
+            "interval": {
+                "label": "Interval staționar",
+                "description": "Cât de des (în cadre) se verifică prezența unui obiect staționar."
+            },
+            "threshold": {
+                "label": "Prag staționar",
+                "description": "Numărul de cadre fără schimbare de poziție pentru a marca un obiect ca staționar."
+            },
+            "max_frames": {
+                "label": "Cadre maxime",
+                "description": "Limitează cât timp sunt urmărite obiectele staționare înainte de a fi ignorate.",
+                "default": {
+                    "label": "Cadre maxime implicit",
+                    "description": "Valoarea implicită pentru urmărirea obiectelor staționare."
+                },
+                "objects": {
+                    "label": "Cadre maxime per obiect",
+                    "description": "Suprascrieri per obiect pentru durata urmăririi staționare."
+                }
+            },
+            "classifier": {
+                "label": "Activare clasificator vizual",
+                "description": "Folosește un clasificator vizual pentru a detecta obiectele cu adevărat staționare, chiar dacă chenarul oscilează."
+            }
+        },
+        "annotation_offset": {
+            "label": "Offset adnotare",
+            "description": "Milisecunde pentru a decala adnotările de detecție pentru a alinia mai bine chenarele cu înregistrarea."
+        }
+    },
+    "face_recognition": {
+        "label": "Recunoaștere facială",
+        "enabled": {
+            "label": "Activare recunoaștere facială",
+            "description": "Activează sau dezactivează recunoașterea facială."
+        },
+        "min_area": {
+            "label": "Arie minimă față",
+            "description": "Aria minimă (pixeli) pentru a încerca recunoașterea."
+        },
+        "description": "Setări pentru detecția și recunoașterea fețelor.",
+        "model_size": {
+            "label": "Mărime model",
+            "description": "Mărimea modelului pentru înglobări faciale; cel mare poate cere GPU."
+        },
+        "unknown_score": {
+            "label": "Prag scor necunoscut",
+            "description": "Pragul de distanță sub care o față e considerată potrivire (mai mare = mai strict)."
+        },
+        "detection_threshold": {
+            "label": "Prag detecție",
+            "description": "Încrederea minimă pentru o detecție facială validă."
+        },
+        "recognition_threshold": {
+            "label": "Prag recunoaștere",
+            "description": "Distanța de înglobare pentru a considera că două fețe se potrivesc."
+        },
+        "min_faces": {
+            "label": "Nr. minim fețe",
+            "description": "Numărul de recunoașteri necesare înainte de a aplica o sub-etichetă persoanei."
+        },
+        "save_attempts": {
+            "label": "Salvează încercările",
+            "description": "Numărul de încercări păstrate pentru interfața de recunoașteri recente."
+        },
+        "blur_confidence_filter": {
+            "label": "Filtru încredere blur",
+            "description": "Ajustează scorul în funcție de claritate pentru a reduce rezultatele false la fețele de slabă calitate."
+        },
+        "device": {
+            "label": "Dispozitiv",
+            "description": "Aceasta este o suprascriere pentru a viza un anumit dispozitiv. Consultă https://onnxruntime.ai/docs/execution-providers/ pentru mai multe informații"
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "Setări FFmpeg: cale binar, argumente, accelerare hardware și ieșiri per rol.",
+        "path": {
+            "label": "Cale FFmpeg",
+            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"5.0\" sau \"7.0\")."
+        },
+        "global_args": {
+            "label": "Argumente globale FFmpeg",
+            "description": "Argumente globale pasate proceselor FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumente accelerare hardware",
+            "description": "Argumente pentru accelerarea hardware. Se recomandă presetările specifice furnizorului."
+        },
+        "input_args": {
+            "label": "Argumente intrare",
+            "description": "Argumente aplicate stream-urilor de intrare FFmpeg."
+        },
+        "output_args": {
+            "label": "Argumente ieșire",
+            "description": "Argumente de ieșire implicite pentru diverse roluri (detect, record).",
+            "detect": {
+                "label": "Argumente ieșire detect",
+                "description": "Argumente implicite pentru stream-urile cu rol detect."
+            },
+            "record": {
+                "label": "Argumente ieșire record",
+                "description": "Argumente implicite pentru stream-urile cu rol record."
+            }
+        },
+        "retry_interval": {
+            "label": "Timp reîncercare FFmpeg",
+            "description": "Secunde de așteptare înainte de reconectarea unui stream după o eroare. Implicit 10."
+        },
+        "apple_compatibility": {
+            "label": "Compatibilitate Apple",
+            "description": "Activează tag-ul HEVC pentru compatibilitate mai bună cu playerele Apple la înregistrările H.265."
+        },
+        "gpu": {
+            "label": "Index GPU",
+            "description": "Indexul GPU implicit folosit pentru accelerarea hardware."
+        },
+        "inputs": {
+            "label": "Intrări cameră",
+            "description": "Listă de definiții pentru stream-urile de intrare (căi și roluri).",
+            "path": {
+                "label": "Cale intrare",
+                "description": "URL-ul sau calea stream-ului de intrare al camerei."
+            },
+            "roles": {
+                "label": "Roluri intrare",
+                "description": "Rolurile atribuite acestui stream de intrare."
+            },
+            "global_args": {
+                "label": "Argumente globale FFmpeg",
+                "description": "Argumente globale pentru acest stream de intrare."
+            },
+            "hwaccel_args": {
+                "label": "Argumente accelerare hardware",
+                "description": "Argumente de accelerare hardware pentru acest stream."
+            },
+            "input_args": {
+                "label": "Argumente intrare",
+                "description": "Argumente specifice acestui stream."
+            }
+        }
+    },
+    "live": {
+        "label": "Redare live",
+        "streams": {
+            "label": "Nume stream-uri live",
+            "description": "Maparea numelor de stream-uri configurate către numele restream/go2rtc folosite live."
+        },
+        "height": {
+            "label": "Înălțime live",
+            "description": "Înălțimea (pixeli) pentru redarea jsmpeg în UI; trebuie să fie <= înălțimea stream-ului de detect."
+        },
+        "quality": {
+            "label": "Calitate live",
+            "description": "Calitatea encodării pentru stream-ul jsmpeg (1 maxim, 31 minim)."
+        },
+        "description": "Setări folosite de interfața web pentru a controla rezoluția și calitatea stream-ului live."
+    },
+    "lpr": {
+        "label": "Recunoaștere numere înmatriculare",
+        "description": "Setări pentru recunoașterea numerelor de înmatriculare, inclusiv praguri de detecție, formatare și numere cunoscute.",
+        "enabled": {
+            "label": "Activare LPR",
+            "description": "Activează sau dezactivează recunoașterea numerelor de înmatriculare."
+        },
+        "expire_time": {
+            "label": "Secunde expirare",
+            "description": "Timpul în secunde după care un număr nevăzut este expirat din tracker (doar pentru camerele LPR dedicate)."
+        },
+        "min_area": {
+            "label": "Arie minimă plăcuță",
+            "description": "Aria minimă (pixeli) pentru a încerca recunoașterea."
+        },
+        "enhancement": {
+            "label": "Nivel îmbunătățire",
+            "description": "Nivelul de îmbunătățire (0-10) aplicat decupajelor cu numere înainte de OCR; valorile mai mari nu îmbunătățesc mereu rezultatele, iar nivelurile peste 5 pot funcționa doar cu numerele pe timp de noapte și trebuie folosite cu atenție."
+        },
+        "model_size": {
+            "label": "Mărime model",
+            "description": "Mărimea modelului pentru text. Majoritatea ar trebui să folosească 'small'."
+        },
+        "detection_threshold": {
+            "label": "Prag detecție",
+            "description": "Încrederea necesară pentru a începe scanarea OCR pe o plăcuță suspectă."
+        },
+        "recognition_threshold": {
+            "label": "Prag recunoaștere",
+            "description": "Încrederea necesară pentru a atașa textul recunoscut ca sub-etichetă."
+        },
+        "min_plate_length": {
+            "label": "Lungime minimă plăcuță",
+            "description": "Numărul minim de caractere pentru ca un număr să fie considerat valid."
+        },
+        "format": {
+            "label": "Regex format număr",
+            "description": "Regex opțional pentru validarea șirurilor de numere recunoscute față de un format așteptat."
+        },
+        "match_distance": {
+            "label": "Distanță de potrivire",
+            "description": "Numărul de nepotriviri de caractere permise la compararea numerelor detectate cu cele cunoscute."
+        },
+        "known_plates": {
+            "label": "Numere cunoscute",
+            "description": "Listă de numere sau regex-uri pentru monitorizare specială sau alerte."
+        },
+        "debug_save_plates": {
+            "label": "Salvare numere pentru debug",
+            "description": "Salvează imaginile decupate cu numere pentru depanarea performanței LPR."
+        },
+        "device": {
+            "label": "Dispozitiv",
+            "description": "Aceasta este o suprascriere pentru a viza un anumit dispozitiv. Consultă https://onnxruntime.ai/docs/execution-providers/ pentru mai multe informații"
+        },
+        "replace_rules": {
+            "label": "Reguli de înlocuire",
+            "description": "Reguli de înlocuire regex folosite pentru a normaliza șirurile numerelor detectate înainte de potrivire.",
+            "pattern": {
+                "label": "Model regex"
+            },
+            "replacement": {
+                "label": "Șir de înlocuire"
+            }
+        }
+    },
+    "motion": {
+        "label": "Detecție mișcare",
+        "enabled": {
+            "label": "Activare detecție mișcare",
+            "description": "Activează sau dezactivează detecția mișcării pentru toate camerele."
+        },
+        "threshold": {
+            "label": "Prag mișcare",
+            "description": "Pragul de diferență între pixeli; valorile mari reduc sensibilitatea (1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Prag fulger/lumină",
+            "description": "Prag pentru detectarea și ignorarea vârfurilor scurte de lumină (o valoare mai mică este mai sensibilă, valori între 0.3 și 1.0). Acest lucru nu oprește complet detecția mișcării; doar determină detectorul să nu mai analizeze cadre suplimentare odată ce pragul este depășit. Înregistrările bazate pe mișcare sunt create în continuare în timpul acestor evenimente."
+        },
+        "improve_contrast": {
+            "label": "Îmbunătățire contrast",
+            "description": "Aplică o îmbunătățire a contrastului înainte de analiza mișcării pentru a ajuta detecția."
+        },
+        "contour_area": {
+            "label": "Arie contur",
+            "description": "Aria minimă a conturului în pixeli pentru a fi considerat mișcare."
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "Factor de blending alpha folosit în diferențierea cadrelor."
+        },
+        "frame_alpha": {
+            "label": "Cadru alfa",
+            "description": "Valoarea alpha pentru amestecarea cadrelor la preprocesarea mișcării."
+        },
+        "frame_height": {
+            "label": "Înălțime cadru",
+            "description": "Înălțimea la care sunt scalate cadrele pentru calculul mișcării."
+        },
+        "mask": {
+            "label": "Coordonate mască",
+            "description": "Coordonate x,y care definesc poligonul măștii de mișcare."
+        },
+        "mqtt_off_delay": {
+            "label": "Întârziere MQTT off",
+            "description": "Secunde de așteptare după ultima mișcare înainte de a trimite starea 'off' prin MQTT."
+        },
+        "enabled_in_config": {
+            "label": "Stare mișcare originală",
+            "description": "Indică dacă detecția mișcării a fost activă în configurația inițială."
+        },
+        "raw_mask": {
+            "label": "Mască brută"
+        },
+        "description": "Setări implicite pentru detecția mișcării, aplicate dacă nu sunt suprascrise per cameră.",
+        "skip_motion_threshold": {
+            "label": "Ignoră pragul de mișcare",
+            "description": "Dacă se schimbă mai mult de această fracțiune din imagine într-un singur cadru, detectorul nu va returna nicio casetă de mișcare și se va recalibra imediat. Acest lucru poate economisi CPU și reduce alertele false în timpul fulgerelor, furtunilor etc., dar poate rata evenimente reale, cum ar fi o cameră PTZ care urmărește automat un obiect. Compromisul este între a pierde câțiva megaocteți de înregistrări versus a revizui câteva clipuri scurte. Interval 0.0 - 1.0."
+        }
+    },
+    "objects": {
+        "label": "Obiecte",
+        "description": "Setări implicite pentru urmărire, inclusiv ce etichete se urmăresc și filtrele per obiect.",
+        "track": {
+            "label": "Obiecte de urmărit",
+            "description": "Lista etichetelor de obiecte urmărite global."
+        },
+        "filters": {
+            "label": "Filtre obiecte",
+            "description": "Filtre pentru a reduce alarmele false (arie, raport, încredere).",
+            "min_area": {
+                "label": "Arie minimă obiect",
+                "description": "Aria minimă a chenarului (pixeli sau procent)."
+            },
+            "max_area": {
+                "label": "Arie maximă obiect",
+                "description": "Aria maximă a chenarului (pixeli sau procent)."
+            },
+            "min_ratio": {
+                "label": "Raport aspect minim",
+                "description": "Raportul minim lățime/înălțime pentru chenar."
+            },
+            "max_ratio": {
+                "label": "Raport aspect maxim",
+                "description": "Raportul maxim lățime/înălțime pentru chenar."
+            },
+            "threshold": {
+                "label": "Prag încredere",
+                "description": "Încrederea medie necesară pentru a considera obiectul valid."
+            },
+            "min_score": {
+                "label": "Scor minim",
+                "description": "Încrederea minimă la un singur cadru pentru a număra obiectul."
+            },
+            "mask": {
+                "label": "Mască filtru",
+                "description": "Poligonul unde se aplică acest filtru în cadru."
+            },
+            "raw_mask": {
+                "label": "Mască brută"
+            }
+        },
+        "mask": {
+            "label": "Mască obiect",
+            "description": "Mască pentru a preveni detecția obiectelor în anumite zone."
+        },
+        "raw_mask": {
+            "label": "Mască brută"
+        },
+        "genai": {
+            "label": "Configurație obiecte GenAI",
+            "description": "Opțiuni GenAI pentru descrierea obiectelor urmărite și trimiterea cadrelor.",
+            "enabled": {
+                "label": "Activare GenAI",
+                "description": "Activează generarea de descrieri prin GenAI pentru obiectele urmărite."
+            },
+            "use_snapshot": {
+                "label": "Folosește snapshot-uri",
+                "description": "Folosește snapshot-urile obiectelor în loc de miniaturi pentru GenAI."
+            },
+            "prompt": {
+                "label": "Prompt descriere",
+                "description": "Șablonul de prompt implicit pentru descrierile GenAI."
+            },
+            "object_prompts": {
+                "label": "Prompt-uri per obiect",
+                "description": "Prompt-uri personalizate pentru anumite etichete de obiecte."
+            },
+            "objects": {
+                "label": "Obiecte GenAI",
+                "description": "Lista etichetelor de obiecte care vor fi trimise la GenAI."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Zonele prin care trebuie să treacă obiectele pentru a genera descrieri."
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvează miniaturile",
+                "description": "Salvează miniaturile trimise la GenAI pentru depanare."
+            },
+            "send_triggers": {
+                "label": "Trigger-e GenAI",
+                "description": "Definește când sunt trimise cadrele la GenAI (la final, după actualizări etc.).",
+                "tracked_object_end": {
+                    "label": "Trimite la final",
+                    "description": "Trimite cererea la GenAI când urmărirea obiectului s-a terminat."
+                },
+                "after_significant_updates": {
+                    "label": "Trigger GenAI timpuriu",
+                    "description": "Trimite la GenAI după un număr de actualizări semnificative ale obiectului."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Stare GenAI originală",
+                "description": "Indică dacă GenAI a fost activat în configurația inițială."
+            }
+        }
+    },
+    "record": {
+        "label": "Înregistrare",
+        "enabled": {
+            "label": "Activare înregistrare",
+            "description": "Activează sau dezactivează înregistrarea global."
+        },
+        "expire_interval": {
+            "label": "Interval curățare înregistrări",
+            "description": "Minute între trecerile de curățare a segmentelor expirate."
+        },
+        "continuous": {
+            "label": "Retenție continuă",
+            "description": "Zile de păstrare a înregistrărilor indiferent de obiecte sau mișcare. Pune 0 pentru a păstra doar alerte/detecții.",
+            "days": {
+                "label": "Zile retenție",
+                "description": "Numărul de zile pentru păstrare."
+            }
+        },
+        "motion": {
+            "label": "Retenție mișcare",
+            "description": "Zile de păstrare pentru înregistrările declanșate de mișcare.",
+            "days": {
+                "label": "Zile retenție",
+                "description": "Numărul de zile pentru păstrare."
+            }
+        },
+        "detections": {
+            "label": "Retenție detecții",
+            "description": "Setări pentru evenimentele de detecție, inclusiv duratele pre/post captură.",
+            "pre_capture": {
+                "label": "Secunde pre-captură",
+                "description": "Secunde incluse înainte de evenimentul detectat."
+            },
+            "post_capture": {
+                "label": "Secunde post-captură",
+                "description": "Secunde incluse după încheierea evenimentului."
+            },
+            "retain": {
+                "label": "Retenție eveniment",
+                "description": "Setări de retenție pentru clipurile cu detecții.",
+                "days": {
+                    "label": "Zile retenție",
+                    "description": "Numărul de zile de păstrare."
+                },
+                "mode": {
+                    "label": "Mod retenție",
+                    "description": "Mod: 'all' (tot), 'motion' (doar segmente cu mișcare) sau 'active_objects' (doar cu obiecte active)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Retenție alerte",
+            "description": "Setări de retenție pentru evenimentele de tip alertă.",
+            "pre_capture": {
+                "label": "Secunde pre-captură",
+                "description": "Secunde incluse înainte de alertă."
+            },
+            "post_capture": {
+                "label": "Secunde post-captură",
+                "description": "Secunde incluse după alertă."
+            },
+            "retain": {
+                "label": "Retenție eveniment",
+                "description": "Setări de păstrare pentru alerte.",
+                "days": {
+                    "label": "Zile retenție",
+                    "description": "Numărul de zile pentru păstrare."
+                },
+                "mode": {
+                    "label": "Mod retenție",
+                    "description": "Modul de păstrare a segmentelor."
+                }
+            }
+        },
+        "export": {
+            "label": "Configurație export",
+            "description": "Setări pentru exportul înregistrărilor (timelapse, accelerare hardware).",
+            "hwaccel_args": {
+                "label": "Argumente hwaccel export",
+                "description": "Argumente de accelerare hardware pentru operațiunile de export/transcodare."
+            }
+        },
+        "preview": {
+            "label": "Configurație preview",
+            "description": "Setări pentru calitatea preview-urilor din interfață.",
+            "quality": {
+                "label": "Calitate preview",
+                "description": "Nivel calitate (foarte_scăzută, scăzută, medie, ridicată, foarte ridicată)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Stare înregistrare originală",
+            "description": "Indică dacă înregistrarea a fost activă în configurația inițială."
+        },
+        "description": "Setări de înregistrare și retenție aplicate camerelor."
+    },
+    "review": {
+        "label": "Revizuire",
+        "alerts": {
+            "label": "Configurație alerte",
+            "description": "Setări pentru obiectele care generează alerte și modul lor de retenție.",
+            "enabled": {
+                "label": "Activare alerte",
+                "description": "Activează sau dezactivează generarea alertelor."
+            },
+            "labels": {
+                "label": "Etichete alerte",
+                "description": "Obiecte care sunt considerate alerte (ex: om, mașină)."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Zonele necesare pentru a declanșa o alertă."
+            },
+            "enabled_in_config": {
+                "label": "Stare alerte originală",
+                "description": "Dacă alertele au fost active inițial în fișierul de config."
+            },
+            "cutoff_time": {
+                "label": "Timp limită alerte",
+                "description": "Secunde de așteptare după încetarea activității înainte de a încheia alerta."
+            }
+        },
+        "detections": {
+            "label": "Configurație detecții",
+            "description": "Setări pentru evenimentele de detecție (non-alertă).",
+            "enabled": {
+                "label": "Activare detecții",
+                "description": "Activează sau dezactivează evenimentele de detecție."
+            },
+            "labels": {
+                "label": "Etichete detecții",
+                "description": "Obiecte care se consideră detecții."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Zonele necesare pentru o detecție."
+            },
+            "cutoff_time": {
+                "label": "Timp limită detecții",
+                "description": "Secunde de așteptare înainte de a încheia o detecție."
+            },
+            "enabled_in_config": {
+                "label": "Stare detecții originală",
+                "description": "Dacă detecțiile au fost active în configurația inițială."
+            }
+        },
+        "genai": {
+            "label": "Configurație GenAI",
+            "description": "Controlul AI-ului generativ pentru descrieri și rezumate în review.",
+            "enabled": {
+                "label": "Activare descrieri GenAI",
+                "description": "Activează descrierile și rezumatele generate de AI pentru elementele de review."
+            },
+            "alerts": {
+                "label": "GenAI pentru alerte",
+                "description": "Folosește GenAI pentru descrierea alertelor."
+            },
+            "detections": {
+                "label": "GenAI pentru detecții",
+                "description": "Folosește GenAI pentru descrierea detecțiilor."
+            },
+            "image_source": {
+                "label": "Sursă imagine review",
+                "description": "Sursa imaginilor ('preview' sau 'recordings'); 'recordings' e mai calitativ dar consumă mai multe token-uri."
+            },
+            "additional_concerns": {
+                "label": "Preocupări suplimentare",
+                "description": "Listă de note sau griji pe care GenAI să le considere când evaluează activitatea pe cameră."
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvează miniaturile",
+                "description": "Salvează miniaturile trimise la furnizorul GenAI pentru depanare."
+            },
+            "enabled_in_config": {
+                "label": "Stare GenAI originală",
+                "description": "Dacă review-ul GenAI a fost activ inițial."
+            },
+            "preferred_language": {
+                "label": "Limbă preferată",
+                "description": "Limba în care vrei ca GenAI să genereze răspunsurile."
+            },
+            "activity_context_prompt": {
+                "label": "Prompt context activitate",
+                "description": "Prompt personalizat care descrie ce este suspect și ce nu pentru rezumatele GenAI."
+            }
+        },
+        "description": "Setări pentru alerte, detecții și rezumate GenAI folosite în UI și stocare."
+    },
+    "semantic_search": {
+        "label": "Căutare semantică",
+        "triggers": {
+            "label": "Trigger-e",
+            "description": "Acțiuni și criterii pentru trigger-ele de căutare semantică specifice camerelor.",
+            "friendly_name": {
+                "label": "Nume sugestiv",
+                "description": "Nume opțional afișat în UI pentru acest trigger."
+            },
+            "enabled": {
+                "label": "Activare trigger",
+                "description": "Activează sau dezactivează acest trigger."
+            },
+            "type": {
+                "label": "Tip trigger",
+                "description": "Tip: 'thumbnail' (compară cu imagine) sau 'description' (compară cu text)."
+            },
+            "data": {
+                "label": "Conținut trigger",
+                "description": "Textul sau ID-ul miniaturii de comparat cu obiectele urmărite."
+            },
+            "threshold": {
+                "label": "Prag trigger",
+                "description": "Scorul minim de similitudine (0-1) pentru activare."
+            },
+            "actions": {
+                "label": "Acțiuni trigger",
+                "description": "Lista de acțiuni (notificare, sub_label, atribut) la activare."
+            }
+        },
+        "description": "Setări pentru căutarea semantică, care creează și caută în înglobări de obiecte pentru a găsi elemente similare.",
+        "enabled": {
+            "label": "Activare căutare semantică",
+            "description": "Activează sau dezactivează funcția de căutare semantică."
+        },
+        "reindex": {
+            "label": "Reindexare la pornire",
+            "description": "Declanșează o reindexare completă a obiectelor istorice în baza de date de înglobări."
+        },
+        "model": {
+            "label": "Model căutare semantică",
+            "description": "Modelul de înglobări folosit (ex: 'jinav1')."
+        },
+        "model_size": {
+            "label": "Mărime model",
+            "description": "Alege mărimea; 'small' rulează pe CPU, 'large' cere de regulă GPU."
+        },
+        "device": {
+            "label": "Dispozitiv",
+            "description": "Aceasta este o suprascriere pentru a viza un anumit dispozitiv. Consultă https://onnxruntime.ai/docs/execution-providers/ pentru mai multe informații"
+        }
+    },
+    "snapshots": {
+        "label": "Snapshot-uri",
+        "enabled": {
+            "label": "Snapshot-uri activate",
+            "description": "Activează sau dezactivează salvarea de snapshot-uri."
+        },
+        "clean_copy": {
+            "label": "Salvează copie curată",
+            "description": "Salvează și o copie fără adnotări a snapshot-ului."
+        },
+        "timestamp": {
+            "label": "Overlay timestamp",
+            "description": "Pune data și ora pe snapshot-urile salvate."
+        },
+        "bounding_box": {
+            "label": "Overlay chenar",
+            "description": "Desenează chenarele obiectelor pe snapshot-uri."
+        },
+        "crop": {
+            "label": "Decupează snapshot-ul",
+            "description": "Decupează snapshot-ul pe mărimea obiectului detectat."
+        },
+        "required_zones": {
+            "label": "Zone obligatorii",
+            "description": "Zonele prin care trebuie să treacă un obiect pentru a salva un snapshot."
+        },
+        "height": {
+            "label": "Înălțime snapshot",
+            "description": "Înălțimea la care se redimensionează snapshot-ul; lasă gol pentru dimensiunea originală."
+        },
+        "retain": {
+            "label": "Retenție snapshot-uri",
+            "description": "Setări pentru păstrarea snapshot-urilor.",
+            "default": {
+                "label": "Retenție implicită",
+                "description": "Numărul implicit de zile pentru păstrare."
+            },
+            "mode": {
+                "label": "Mod retenție",
+                "description": "Mod retenție: 'all', 'motion' sau 'active_objects'."
+            },
+            "objects": {
+                "label": "Retenție per obiect",
+                "description": "Suprascrieri pentru zilele de retenție ale snapshot-urilor per obiect."
+            }
+        },
+        "quality": {
+            "label": "Calitate JPEG",
+            "description": "Calitatea encodării JPEG pentru snapshot-uri (0-100)."
+        },
+        "description": "Setări pentru snapshot-urile JPEG ale obiectelor urmărite."
+    },
+    "timestamp_style": {
+        "label": "Stil timestamp",
+        "position": {
+            "label": "Poziție timestamp",
+            "description": "Unde apare data/ora pe imagine (stânga-sus/dreapta-sus etc.)."
+        },
+        "format": {
+            "label": "Format timestamp",
+            "description": "Formatul datei (coduri Python datetime)."
+        },
+        "color": {
+            "label": "Culoare timestamp",
+            "description": "Valori RGB pentru textul datei.",
+            "red": {
+                "label": "Roșu",
+                "description": "Componenta roșie (0-255)."
+            },
+            "green": {
+                "label": "Verde",
+                "description": "Componenta verde (0-255)."
+            },
+            "blue": {
+                "label": "Albastru",
+                "description": "Componenta albastră (0-255)."
+            }
+        },
+        "thickness": {
+            "label": "Grosime timestamp",
+            "description": "Grosimea liniei textului."
+        },
+        "effect": {
+            "label": "Efect timestamp",
+            "description": "Efect vizual pentru text (fără, solid, umbră)."
+        },
+        "description": "Opțiuni de stilizare pentru data și ora din feed-ul de debug și snapshot-uri."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Setări pentru conectarea și publicarea telemetriei, snapshot-urilor și detaliilor despre evenimente către un broker MQTT.",
+        "enabled": {
+            "label": "Activează MQTT",
+            "description": "Activează sau dezactivează integrarea MQTT pentru stare, evenimente și snapshot-uri."
+        },
+        "host": {
+            "label": "Host MQTT",
+            "description": "Numele de gazdă sau adresa IP a brokerului MQTT."
+        },
+        "port": {
+            "label": "Port MQTT",
+            "description": "Portul brokerului MQTT (de obicei 1883 pentru MQTT simplu)."
+        },
+        "topic_prefix": {
+            "label": "Prefix topic",
+            "description": "Prefixul topicului MQTT pentru toate subiectele Frigate; trebuie să fie unic dacă rulezi mai multe instanțe."
+        },
+        "client_id": {
+            "label": "ID client",
+            "description": "Identificatorul de client folosit la conectarea la brokerul MQTT; ar trebui să fie unic pe instanță."
+        },
+        "stats_interval": {
+            "label": "Interval statistici",
+            "description": "Intervalul în secunde pentru publicarea statisticilor de sistem și de cameră către MQTT."
+        },
+        "user": {
+            "label": "Utilizator MQTT",
+            "description": "Utilizator MQTT opțional; poate fi furnizat prin variabile de mediu sau secrete."
+        },
+        "password": {
+            "label": "Parolă MQTT",
+            "description": "Parolă MQTT opțională; poate fi furnizată prin variabile de mediu sau secrete."
+        },
+        "tls_ca_certs": {
+            "label": "Certificate CA TLS",
+            "description": "Calea către certificatul CA pentru conexiuni TLS la broker (pentru certificate auto-semnate)."
+        },
+        "tls_client_cert": {
+            "label": "Certificat client",
+            "description": "Calea certificatului de client pentru autentificare reciprocă TLS; nu seta utilizator/parolă când folosești certificate de client."
+        },
+        "tls_client_key": {
+            "label": "Cheie client",
+            "description": "Calea cheii private pentru certificatul de client."
+        },
+        "tls_insecure": {
+            "label": "TLS nesecurizat",
+            "description": "Permite conexiuni TLS nesecurizate prin săritura verificării numelui de gazdă (nu este recomandat)."
+        },
+        "qos": {
+            "label": "QoS MQTT",
+            "description": "Nivelul de calitate a serviciului pentru publicările/abonările MQTT (0, 1 sau 2)."
+        }
+    },
+    "notifications": {
+        "label": "Notificări",
+        "enabled": {
+            "label": "Activează notificările",
+            "description": "Activează sau dezactivează notificările pentru toate camerele; pot fi suprascrise per cameră."
+        },
+        "email": {
+            "label": "Email notificare",
+            "description": "Adresa de email folosită pentru notificări push sau cerută de anumiți furnizori de notificări."
+        },
+        "cooldown": {
+            "label": "Perioadă de răcire",
+            "description": "Timpul de așteptare (secunde) între notificări pentru a evita spamarea destinatarilor."
+        },
+        "enabled_in_config": {
+            "label": "Stare originală notificări",
+            "description": "Indică dacă notificările au fost activate în configurația statică originală."
+        },
+        "description": "Setări pentru a activa și controla notificările pentru toate camerele; pot fi suprascrise per cameră."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Setări pentru conexiunea ONVIF și autotracking PTZ pentru această cameră.",
+        "host": {
+            "label": "Gazdă ONVIF",
+            "description": "Gazda (și schema opțională) pentru serviciul ONVIF al acestei camere."
+        },
+        "port": {
+            "label": "Port ONVIF",
+            "description": "Numărul portului pentru serviciul ONVIF."
+        },
+        "user": {
+            "label": "Utilizator ONVIF",
+            "description": "Utilizator pentru autentificarea ONVIF; unele dispozitive necesită un utilizator administrator pentru ONVIF."
+        },
+        "password": {
+            "label": "Parolă ONVIF",
+            "description": "Parola pentru autentificarea ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Dezactivează verificare TLS",
+            "description": "Sari peste verificarea TLS și dezactivează autentificarea digest pentru ONVIF (nesigur; a se utiliza doar în rețele sigure)."
+        },
+        "autotracking": {
+            "label": "Urmărire automată",
+            "description": "Urmărește automat obiectele în mișcare și menține-le centrate în cadru folosind mișcările camerei PTZ.",
+            "enabled": {
+                "label": "Activează Autotracking",
+                "description": "Activează sau dezactivează urmărirea automată PTZ a obiectelor detectate."
+            },
+            "calibrate_on_startup": {
+                "label": "Calibrare la pornire",
+                "description": "Măsoară vitezele motorului PTZ la pornire pentru a îmbunătăți precizia urmăririi. Frigate va actualiza config-ul cu movement_weights după calibrare."
+            },
+            "zooming": {
+                "label": "Mod zoom",
+                "description": "Controlează comportamentul zoom-ului: dezactivat (doar pan/tilt), absolut (cel mai compatibil) sau relativ (pan/tilt/zoom concurent)."
+            },
+            "zoom_factor": {
+                "label": "Factor zoom",
+                "description": "Controlează nivelul de zoom pe obiectele urmărite. Valorile mai mici păstrează mai mult din scenă; valorile mai mari fac zoom mai aproape, dar pot pierde urmărirea. Valori între 0.1 și 0.75."
+            },
+            "track": {
+                "label": "Obiecte urmărite",
+                "description": "Listă de tipuri de obiecte care ar trebui să declanșeze autotracking-ul."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Obiectele trebuie să intre în una dintre aceste zone înainte ca autotracking-ul să înceapă."
+            },
+            "return_preset": {
+                "label": "Preset de întoarcere",
+                "description": "Numele preset-ului ONVIF configurat în firmware-ul camerei pentru întoarcere după ce urmărirea se termină."
+            },
+            "timeout": {
+                "label": "Timeout întoarcere",
+                "description": "Așteaptă acest număr de secunde după pierderea urmăririi înainte de a returna camera la poziția presetată."
+            },
+            "movement_weights": {
+                "label": "Ponderi mișcare",
+                "description": "Valori de calibrare generate automat de calibrarea camerei. Nu modifica manual."
+            },
+            "enabled_in_config": {
+                "label": "Stare originală autotrack",
+                "description": "Câmp intern pentru a urmări dacă autotracking-ul a fost activat în configurație."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignoră decalaj timp",
+            "description": "Ignoră diferențele de sincronizare a timpului între cameră și serverul Frigate pentru comunicarea ONVIF."
+        }
+    },
+    "version": {
+        "label": "Versiunea actuală a configurării",
+        "description": "Versiunea numerică sau de tip text a configurării active pentru a ajuta la detectarea migrărilor sau a schimbărilor de format."
+    },
+    "safe_mode": {
+        "label": "Mod de siguranță",
+        "description": "Când este activat, pornește Frigate în mod de siguranță, cu funcții reduse, pentru depanare."
+    },
+    "environment_vars": {
+        "label": "Variabile de mediu",
+        "description": "Perechi cheie/valoare ale variabilelor de mediu de setat pentru procesul Frigate în Home Assistant OS. Utilizatorii care nu folosesc HAOS trebuie să folosească configurarea variabilelor de mediu din Docker."
+    },
+    "logger": {
+        "label": "Jurnalizare",
+        "description": "Controlează nivelul de detaliu implicit al jurnalului și suprascrierile pentru fiecare componentă.",
+        "default": {
+            "label": "Nivel de jurnalizare",
+            "description": "Nivelul global implicit de detaliu al jurnalului (debug, info, warning, error)."
+        },
+        "logs": {
+            "label": "Nivel jurnalizare pe proces",
+            "description": "Suprascrieri ale nivelului de jurnalizare pe componentă pentru a crește sau descrește detaliile pentru module specifice."
+        }
+    },
+    "auth": {
+        "label": "Autentificare",
+        "description": "Setări de autentificare și sesiune, inclusiv opțiuni pentru cookie-uri și limite de viteză.",
+        "enabled": {
+            "label": "Activează autentificarea",
+            "description": "Activează autentificarea nativă pentru interfața Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Resetează parola de admin",
+            "description": "Dacă este setat pe true, resetează parola administratorului la pornire și afișează noua parolă în jurnale."
+        },
+        "cookie_name": {
+            "label": "Nume cookie JWT",
+            "description": "Numele cookie-ului folosit pentru a stoca token-ul JWT pentru autentificarea nativă."
+        },
+        "cookie_secure": {
+            "label": "Flag de cookie securizat",
+            "description": "Setează flag-ul secure pe cookie-ul de autentificare; ar trebui să fie true când se folosește TLS."
+        },
+        "session_length": {
+            "label": "Durata sesiunii",
+            "description": "Durata sesiunii în secunde pentru sesiunile bazate pe JWT."
+        },
+        "refresh_time": {
+            "label": "Fereastră reîmprospătare sesiune",
+            "description": "Când o sesiune este la acest număr de secunde de expirare, se reîmprospătează la durata maximă."
+        },
+        "failed_login_rate_limit": {
+            "label": "Limite login eșuat",
+            "description": "Reguli de limitare a încercărilor de autentificare eșuate pentru a reduce atacurile de tip brute-force."
+        },
+        "trusted_proxies": {
+            "label": "Proxy-uri de încredere",
+            "description": "Listă de IP-uri proxy de încredere folosite pentru a determina IP-ul clientului pentru limitarea vitezei."
+        },
+        "hash_iterations": {
+            "label": "Iterații hash",
+            "description": "Numărul de iterații PBKDF2-SHA256 de folosit la hashing-ul parolelor utilizatorilor."
+        },
+        "roles": {
+            "label": "Mapări roluri",
+            "description": "Mapează rolurile la liste de camere. O listă goală oferă acces la toate camerele pentru acel rol."
+        },
+        "admin_first_time_login": {
+            "label": "Flag prima autentificare admin",
+            "description": "Când este true, interfața poate afișa un link de ajutor pe pagina de login, informând utilizatorii cum să se autentifice după o resetare a parolei de admin. "
+        }
+    },
+    "database": {
+        "label": "Bază de date",
+        "description": "Setări pentru baza de date SQLite folosită de Frigate pentru a stoca obiectele urmărite și metadatele înregistrărilor.",
+        "path": {
+            "label": "Cale bază de date",
+            "description": "Calea în sistemul de fișiere unde va fi stocat fișierul bazei de date SQLite."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Setări pentru serviciul integrat de restreaming go2rtc, folosit pentru releul și translatarea stream-urilor live."
+    },
+    "networking": {
+        "label": "Rețea",
+        "description": "Setări legate de rețea, cum ar fi activarea IPv6 pentru endpoint-urile Frigate.",
+        "ipv6": {
+            "label": "Configurare IPv6",
+            "description": "Setări specifice IPv6 pentru serviciile de rețea Frigate.",
+            "enabled": {
+                "label": "Activează IPv6",
+                "description": "Activează suportul IPv6 pentru serviciile Frigate (API și interfață) acolo unde este cazul."
+            }
+        },
+        "listen": {
+            "label": "Configurare porturi ascultare",
+            "description": "Configurare pentru porturile de ascultare interne și externe. Aceasta este pentru utilizatori avansați. Pentru majoritatea cazurilor, se recomandă schimbarea secțiunii de porturi din fișierul Docker compose.",
+            "internal": {
+                "label": "Port intern",
+                "description": "Portul de ascultare intern pentru Frigate (implicit 5000)."
+            },
+            "external": {
+                "label": "Port extern",
+                "description": "Portul de ascultare extern pentru Frigate (implicit 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "description": "Setări pentru integrarea Frigate în spatele unui reverse proxy care transmite headere de utilizator autentificat.",
+        "header_map": {
+            "label": "Mapare headere",
+            "description": "Mapează headerele proxy primite către câmpurile de utilizator și rol din Frigate pentru autentificarea bazată pe proxy.",
+            "user": {
+                "label": "Header utilizator",
+                "description": "Header care conține numele de utilizator autentificat furnizat de proxy-ul amonte."
+            },
+            "role": {
+                "label": "Header rol",
+                "description": "Header care conține rolul sau grupurile utilizatorului autentificat din proxy-ul amonte."
+            },
+            "role_map": {
+                "label": "Mapare roluri",
+                "description": "Mapează valorile grupurilor din amonte la rolurile Frigate (de exemplu, mapează grupurile de admin la rolul de admin)."
+            }
+        },
+        "logout_url": {
+            "label": "URL deconectare",
+            "description": "URL-ul către care sunt redirecționați utilizatorii la deconectarea prin proxy."
+        },
+        "auth_secret": {
+            "label": "Secret proxy",
+            "description": "Secret opțional verificat împotriva header-ului X-Proxy-Secret pentru a verifica proxy-urile de încredere."
+        },
+        "default_role": {
+            "label": "Rol implicit",
+            "description": "Rolul implicit atribuit utilizatorilor autentificați prin proxy când nu se aplică nicio mapare de rol (admin sau viewer)."
+        },
+        "separator": {
+            "label": "Caracter separator",
+            "description": "Caracterul folosit pentru a separa mai multe valori furnizate în headerele proxy."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetrie",
+        "description": "Opțiuni pentru telemetria sistemului și statistici, inclusiv monitorizarea GPU și a lățimii de bandă a rețelei.",
+        "network_interfaces": {
+            "label": "Interfețe de rețea",
+            "description": "Listă de prefixe de nume pentru interfețele de rețea de monitorizat pentru statistici de lățime de bandă."
+        },
+        "stats": {
+            "label": "Statistici sistem",
+            "description": "Opțiuni pentru a activa/dezactiva colectarea diverselor statistici de sistem și GPU.",
+            "amd_gpu_stats": {
+                "label": "Statistici GPU AMD",
+                "description": "Activează colectarea statisticilor pentru GPU AMD, dacă acesta este prezent."
+            },
+            "intel_gpu_stats": {
+                "label": "Statistici GPU Intel",
+                "description": "Activează colectarea statisticilor pentru GPU Intel, dacă acesta este prezent."
+            },
+            "network_bandwidth": {
+                "label": "Lățime de bandă rețea",
+                "description": "Activează monitorizarea lățimii de bandă a rețelei pe proces pentru procesele ffmpeg ale camerelor și detectoare (necesită capabilități)."
+            },
+            "intel_gpu_device": {
+                "label": "Dispozitiv SR-IOV",
+                "description": "Identificator de dispozitiv folosit când GPU-urile Intel sunt tratate ca SR-IOV pentru a repara statisticile GPU."
+            }
+        },
+        "version_check": {
+            "label": "Verificare versiune",
+            "description": "Activează o verificare externă pentru a detecta dacă este disponibilă o versiune Frigate mai nouă."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Setări TLS pentru endpoint-urile web Frigate (port 8971).",
+        "enabled": {
+            "label": "Activează TLS",
+            "description": "Activează TLS pentru interfața web și API-ul Frigate pe portul TLS configurat."
+        }
+    },
+    "ui": {
+        "label": "UI",
+        "description": "Preferințe pentru interfața de utilizator, cum ar fi fusul orar, formatarea orei/datei și unitățile de măsură.",
+        "timezone": {
+            "label": "Fus orar",
+            "description": "Fus orar opțional de afișat în interfață (implicit se folosește ora locală a browserului)."
+        },
+        "time_format": {
+            "label": "Format oră",
+            "description": "Formatul orei de utilizat în interfață (browser, 12 ore sau 24 ore)."
+        },
+        "date_style": {
+            "label": "Stil dată",
+            "description": "Stilul datei de utilizat în interfață (full, long, medium, short)."
+        },
+        "time_style": {
+            "label": "Stil oră",
+            "description": "Stilul orei de utilizat în interfață (full, long, medium, short)."
+        },
+        "unit_system": {
+            "label": "Sistem de unități",
+            "description": "Sistemul de unități pentru afișare (metric sau imperial) folosit în interfață și MQTT."
+        }
+    },
+    "detectors": {
+        "label": "Hardware detector",
+        "description": "Configurare pentru detectoarele de obiecte (CPU, GPU, backend-uri ONNX) și orice setări de model specifice detectorului.",
+        "type": {
+            "label": "Tip detector",
+            "description": "Tipul de detector de folosit pentru detecția obiectelor (de exemplu, 'cpu', 'edgetpu', 'openvino')."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "Detector TFLite pentru CPU care rulează modele TensorFlow Lite pe procesorul gazdă fără accelerare hardware. Nu este recomandat.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "num_threads": {
+                "label": "Număr fire detecție",
+                "description": "Numărul de fire (threads) folosite pentru inferența bazată pe CPU."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "Detector DeepStack/CodeProject.AI care trimite imagini către un API HTTP DeepStack la distanță pentru inferență. Nu este recomandat.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "api_url": {
+                "label": "URL API DeepStack",
+                "description": "URL-ul API-ului DeepStack."
+            },
+            "api_timeout": {
+                "label": "Timeout API DeepStack (în secunde)",
+                "description": "Timpul maxim permis pentru o cerere la API-ul DeepStack."
+            },
+            "api_key": {
+                "label": "Cheie API DeepStack (dacă e necesară)",
+                "description": "Cheie API opțională pentru serviciile DeepStack autentificate."
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "Detector DeGirum pentru rularea modelelor prin cloud-ul DeGirum sau servicii locale de inferență.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "location": {
+                "label": "Locație inferență",
+                "description": "Locația motorului de inferență DeGirum (ex. '@cloud', '127.0.0.1')."
+            },
+            "zoo": {
+                "label": "Model Zoo",
+                "description": "Calea sau URL-ul către model zoo DeGirum."
+            },
+            "token": {
+                "label": "Token Cloud DeGirum",
+                "description": "Token pentru accesul la Cloud-ul DeGirum."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "Detector EdgeTPU care rulează modele TensorFlow Lite compilate pentru Coral EdgeTPU folosind delegatul EdgeTPU.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "device": {
+                "label": "Tip dispozitiv",
+                "description": "Dispozitivul de folosit pentru inferența EdgeTPU (ex. 'usb', 'pci')."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Detector Hailo-8/Hailo-8L care folosește modele HEF și HailoRT SDK pentru inferență pe hardware Hailo.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "device": {
+                "label": "Tip dispozitiv",
+                "description": "Dispozitivul de folosit pentru inferența Hailo (ex. 'PCIe', 'M.2')."
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "Detector MemryX MX3 care rulează modele DFP compilate pe acceleratoare MemryX.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "device": {
+                "label": "Cale dispozitiv",
+                "description": "Dispozitivul de folosit pentru inferența MemryX (ex. 'PCIe')."
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "Detector ONNX pentru rularea modelelor ONNX; va folosi backend-urile de accelerare disponibile (CUDA/ROCm/OpenVINO) atunci când sunt prezente.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "device": {
+                "label": "Tip dispozitiv",
+                "description": "Dispozitivul de folosit pentru inferența ONNX (ex. 'AUTO', 'CPU', 'GPU')."
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "Detector OpenVINO pentru procesoare AMD și Intel, GPU-uri Intel și hardware Intel VPU.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "device": {
+                "label": "Tip dispozitiv",
+                "description": "Dispozitivul de folosit pentru inferența OpenVINO (ex. 'CPU', 'GPU', 'NPU')."
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "Detector RKNN pentru NPU-uri Rockchip; rulează modele RKNN compilate pe hardware Rockchip.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "num_cores": {
+                "label": "Număr de nuclee NPU de folosit.",
+                "description": "Numărul de nuclee NPU de folosit (0 pentru auto)."
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "Detector Synaptics NPU pentru modele în format .synap folosind Synap SDK pe hardware Synaptics.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            }
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "Detector cu delegat Teflon pentru TFLite care folosește biblioteca Mesa Teflon pentru a accelera inferența pe GPU-urile suportate.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            }
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "Detector TensorRT pentru dispozitive Nvidia Jetson care folosește motoare TensorRT serializate pentru inferență accelerată.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurare model specific detectorului",
+                "description": "Opțiuni de configurare specifice modelului detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale labelmap pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice la etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau reamapări de intrări pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Mapare de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu, 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu, 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unele detectoare pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specific detectorului",
+                "description": "Calea către binarul modelului detectorului, dacă este cerut de detectorul ales."
+            },
+            "device": {
+                "label": "Index dispozitiv GPU",
+                "description": "Indexul dispozitivului GPU de folosit."
+            }
+        },
+        "zmq": {
+            "label": "Detector ZMQ IPC",
+            "description": "Detector ZMQ IPC care trimite procesul de inferență către un proces extern printr-un endpoint ZeroMQ IPC.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurație model specifică detectorului",
+                "description": "Opțiuni de configurare specifice modelului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Cale model personalizat detecție obiecte",
+                    "description": "Calea către un fișier de model personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Cale label map pentru detector personalizat",
+                    "description": "Calea către un fișier labelmap care mapează clasele numerice în etichete text pentru detector."
+                },
+                "width": {
+                    "label": "Lățime intrare model detecție obiecte",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțime intrare model detecție obiecte",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizare labelmap",
+                    "description": "Suprascrieri sau intrări de re-mapare pentru a fi îmbinate în labelmap-ul standard."
+                },
+                "attributes_map": {
+                    "label": "Mapare etichete obiecte la etichete atribute",
+                    "description": "Maparea de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu 'mașină' -> ['număr_înmatriculare'])."
+                },
+                "input_tensor": {
+                    "label": "Formă tensor intrare model",
+                    "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format pixeli intrare model",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip date intrare model",
+                    "description": "Tipul de date al tensorului de intrare (de exemplu 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului (ssd, yolox, yolonas) utilizat de unii detectori pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specifică detectorului",
+                "description": "Calea către binarul modelului, dacă este cerut de detectorul ales."
+            },
+            "endpoint": {
+                "label": "Endpoint ZMQ IPC",
+                "description": "Endpoint-ul ZMQ la care se face conexiunea."
+            },
+            "request_timeout_ms": {
+                "label": "Timeout cerere ZMQ (ms)",
+                "description": "Timpul de expirare pentru cererile ZMQ în milisecunde."
+            },
+            "linger_ms": {
+                "label": "Linger socket ZMQ (ms)",
+                "description": "Perioada de tip 'linger' a socket-ului în milisecunde."
+            }
+        }
+    },
+    "model": {
+        "label": "Model detecție",
+        "description": "Setări pentru configurarea unui model personalizat de detecție și a formei intrării acestuia.",
+        "path": {
+            "label": "Cale model personalizat detecție obiecte",
+            "description": "Calea către un fișier de model personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Cale label map pentru detector personalizat",
+            "description": "Calea către un fișier labelmap care mapează clasele numerice în etichete text."
+        },
+        "width": {
+            "label": "Lățime intrare model detecție",
+            "description": "Lățimea tensorului de intrare în pixeli."
+        },
+        "height": {
+            "label": "Înălțime intrare model detecție",
+            "description": "Înălțimea tensorului de intrare în pixeli."
+        },
+        "labelmap": {
+            "label": "Personalizare labelmap",
+            "description": "Suprascrieri pentru a fi îmbinate în labelmap-ul standard."
+        },
+        "attributes_map": {
+            "label": "Mapare etichete obiecte la atribute",
+            "description": "Asocierea obiectelor cu atributele lor pentru metadate."
+        },
+        "input_tensor": {
+            "label": "Formă tensor intrare",
+            "description": "Formatul tensorului: 'nhwc' sau 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Format pixeli intrare",
+            "description": "Spațiul de culoare: 'rgb', 'bgr' sau 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Tip date intrare",
+            "description": "Tipul de date (ex: 'float32')."
+        },
+        "model_type": {
+            "label": "Tip model detecție",
+            "description": "Arhitectura modelului (ssd, yolox, yolonas)."
+        }
+    },
+    "genai": {
+        "label": "Configurație GenAI (furnizori numiți)",
+        "description": "Setări pentru furnizorii de AI generativ folosiți pentru descrieri de obiecte și rezumate.",
+        "api_key": {
+            "label": "Cheie API",
+            "description": "Cheia API necesară (poate fi setată și prin variabile de mediu)."
+        },
+        "base_url": {
+            "label": "URL de bază",
+            "description": "URL-ul de bază pentru furnizori self-hosted (ex: o instanță Ollama)."
+        },
+        "model": {
+            "label": "Model",
+            "description": "Modelul utilizat pentru descrieri sau rezumate."
+        },
+        "provider": {
+            "label": "Furnizor",
+            "description": "Furnizorul GenAI (ex: ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "Roluri",
+            "description": "Roluri GenAI (unelte, viziune, înglobări); un furnizor per rol."
+        },
+        "provider_options": {
+            "label": "Opțiuni furnizor",
+            "description": "Opțiuni suplimentare trimise către clientul GenAI."
+        },
+        "runtime_options": {
+            "label": "Opțiuni runtime",
+            "description": "Opțiuni trimise furnizorului la fiecare apel de inferență."
+        }
+    },
+    "classification": {
+        "label": "Clasificare obiecte",
+        "description": "Setări pentru modelele de clasificare folosite pentru a rafina etichetele sau stările.",
+        "bird": {
+            "label": "Configurație clasificare păsări",
+            "description": "Setări specifice pentru modelele de clasificare a păsărilor.",
+            "enabled": {
+                "label": "Clasificare păsări",
+                "description": "Activează sau dezactivează clasificarea păsărilor."
+            },
+            "threshold": {
+                "label": "Scor minim",
+                "description": "Scorul minim pentru a accepta clasificarea unei păsări."
+            }
+        },
+        "custom": {
+            "label": "Modele de clasificare personalizate",
+            "description": "Configurarea modelelor personalizate pentru obiecte sau stări.",
+            "enabled": {
+                "label": "Activare model",
+                "description": "Activează sau dezactivează modelul personalizat."
+            },
+            "name": {
+                "label": "Nume model",
+                "description": "Identificatorul modelului de clasificare."
+            },
+            "threshold": {
+                "label": "Prag scor",
+                "description": "Pragul folosit pentru a schimba starea de clasificare."
+            },
+            "save_attempts": {
+                "label": "Salvează încercările",
+                "description": "Câte încercări de clasificare să fie păstrate pentru interfața de istoric."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Clasifică obiecte",
+                    "description": "Lista de tipuri de obiecte pe care se face clasificare."
+                },
+                "classification_type": {
+                    "label": "Tip clasificare",
+                    "description": "Tipul aplicat: 'sub_label' (adaugă o sub-etichetă) sau altele."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Camere clasificare",
+                    "description": "Decupaj și setări per cameră pentru clasificarea stărilor.",
+                    "crop": {
+                        "label": "Crop clasificare",
+                        "description": "Coordonatele de crop folosite pentru clasificare pe această cameră."
+                    }
+                },
+                "motion": {
+                    "label": "Rulează la mișcare",
+                    "description": "Dacă e activ, rulează clasificarea când se detectează mișcare în zona de crop."
+                },
+                "interval": {
+                    "label": "Interval clasificare",
+                    "description": "Intervalul (secunde) între rulările periodice pentru clasificarea stărilor."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "label": "Grupuri camere",
+        "description": "Configurație pentru grupuri de camere denumite, folosite pentru a organiza camerele în interfață.",
+        "cameras": {
+            "label": "Listă camere",
+            "description": "Listă de nume de camere incluse în acest grup."
+        },
+        "icon": {
+            "label": "Pictogramă grup",
+            "description": "Pictogramă folosită pentru a reprezenta grupul de camere în interfață."
+        },
+        "order": {
+            "label": "Ordine sortare",
+            "description": "Ordinea numerică folosită pentru sortarea grupurilor de camere în interfață; numerele mai mari apar mai târziu."
+        }
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Setări pentru publicarea imaginilor prin MQTT.",
+        "enabled": {
+            "label": "Trimite imaginea",
+            "description": "Activează publicarea de snapshot-uri cu obiecte către subiectele MQTT pentru această cameră."
+        },
+        "timestamp": {
+            "label": "Adaugă timestamp",
+            "description": "Suprapune un timestamp pe imaginile publicate prin MQTT."
+        },
+        "bounding_box": {
+            "label": "Adaugă bounding box",
+            "description": "Desenază bounding box-uri pe imaginile publicate prin MQTT."
+        },
+        "crop": {
+            "label": "Decupează imaginea",
+            "description": "Decupează imaginile publicate prin MQTT la bounding box-ul obiectului detectat."
+        },
+        "height": {
+            "label": "Înălțime imagine",
+            "description": "Înălțimea (pixeli) pentru redimensionarea imaginilor publicate prin MQTT."
+        },
+        "required_zones": {
+            "label": "Zone obligatorii",
+            "description": "Zonele în care trebuie să intre un obiect pentru ca un snapshot prin MQTT să fie publicat."
+        },
+        "quality": {
+            "label": "Calitate JPEG",
+            "description": "Calitatea JPEG pentru imaginile publicate prin MQTT (0-100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Interfață cameră",
+        "description": "Ordinea de afișare și vizibilitatea pentru această cameră în interfață. Ordinea afectează dashboard-ul implicit. Pentru un control mai detaliat, folosește grupurile de camere.",
+        "order": {
+            "label": "Ordine interfață",
+            "description": "Ordinea numerică folosită pentru sortarea camerei în interfață (dashboard-ul implicit și liste); numerele mai mari apar mai târziu."
+        },
+        "dashboard": {
+            "label": "Arată în interfață",
+            "description": "Comută dacă această cameră este vizibilă peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a config-ului pentru a vedea din nou camera în interfață."
+        }
+    }
+}
