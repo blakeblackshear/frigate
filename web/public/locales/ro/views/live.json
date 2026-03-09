@@ -71,7 +71,7 @@
   },
   "snapshots": {
     "disable": "Dezactivează snapshoturile",
-    "enable": "Activează snapshoturile"
+    "enable": "Activează snapshot-urile"
   },
   "audioDetect": {
     "enable": "Activează detectarea audio",

@@ -1,0 +1,32 @@
+{
+    "minimum": "Trebuie să fie cel puțin {{limit}}",
+    "maximum": "Trebuie să fie cel mult {{limit}}",
+    "exclusiveMinimum": "Trebuie să fie mai mare de {{limit}}",
+    "exclusiveMaximum": "Trebuie să fie mai mic de {{limit}}",
+    "minLength": "Trebuie să aibă cel puțin {{limit}} caracter(e)",
+    "maxLength": "Trebuie să aibă cel mult {{limit}} caracter(e)",
+    "minItems": "Trebuie să conțină cel puțin {{limit}} elemente",
+    "maxItems": "Trebuie să conțină cel mult {{limit}} elemente",
+    "pattern": "Format nevalid",
+    "required": "Acest câmp este obligatoriu",
+    "type": "Tip de valoare nevalid",
+    "enum": "Trebuie să fie una dintre valorile permise",
+    "const": "Valoarea nu corespunde constantei așteptate",
+    "uniqueItems": "Toate elementele trebuie să fie unice",
+    "format": "Format nevalid",
+    "additionalProperties": "Proprietatea necunoscută nu este permisă",
+    "oneOf": "Trebuie să corespundă exact uneia dintre schemele permise",
+    "anyOf": "Trebuie să corespundă cel puțin uneia dintre schemele permise",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Header-ul de rol este obligatoriu atunci când sunt configurate mapări de roluri."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Fiecare rol poate fi atribuit unui singur stream.",
+            "detectRequired": "Cel puțin un stream trebuie să aibă atribuit rolul 'detect'.",
+            "hwaccelDetectOnly": "Doar stream-ul cu rolul 'detect' poate defini argumente pentru accelerare hardware."
+        }
+    }
+}

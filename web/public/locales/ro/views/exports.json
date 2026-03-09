@@ -1,23 +1,37 @@
 {
-  "search": "Caută",
-  "documentTitle": "Export - Frigate",
-  "noExports": "Nu au fost gasite exporturi",
+  "search": "Căutare",
+  "documentTitle": "Exporturi - Frigate",
+  "noExports": "Nu s-au găsit exporturi",
   "deleteExport": "Șterge exportul",
-  "deleteExport.desc": "Ești sigur că vrei să ștergi {{exportName}}?",
+  "deleteExport.desc": "Sigur vrei să ștergi {{exportName}}?",
   "editExport": {
-    "title": "Redenumeste Exportul",
-    "saveExport": "Salveaza Export",
-    "desc": "Introdu un nume nou pentru acest Export."
+    "title": "Redenumire export",
+    "saveExport": "Salvează exportul",
+    "desc": "Introdu un nume nou pentru acest export."
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Eroare redenumire export: {{errorMessage}}"
+      "renameExportFailed": "Redenumirea exportului a eșuat: {{errorMessage}}",
+      "assignCaseFailed": "Actualizarea atribuirii cazului a eșuat: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Partajează exportul",
-    "downloadVideo": "Descarcă videoclipul",
+    "downloadVideo": "Descarcă video",
     "editName": "Editează numele",
-    "deleteExport": "Șterge exportul"
+    "deleteExport": "Șterge exportul",
+    "assignToCase": "Adaugă la un caz"
+  },
+  "headings": {
+    "cases": "Cazuri",
+    "uncategorizedExports": "Exporturi necategorizate"
+  },
+  "caseDialog": {
+    "title": "Adaugă la un caz",
+    "description": "Alege un caz existent sau creează unul nou.",
+    "selectLabel": "Caz",
+    "newCaseOption": "Creează un caz nou",
+    "nameLabel": "Numele cazului",
+    "descriptionLabel": "Descriere"
   }
 }
