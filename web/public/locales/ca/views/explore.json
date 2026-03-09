@@ -234,6 +234,10 @@
     "downloadCleanSnapshot": {
       "label": "Descarrega la instantània neta",
       "aria": "Descarrega la instantània neta"
+    },
+    "debugReplay": {
+      "label": "Depura la repetició",
+      "aria": "Mostra aquest objecte rastrejat a la vista de reproducció de depuració"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
@@ -285,7 +289,7 @@
       "title": "Configuració d'anotacions",
       "showAllZones": {
         "title": "Mostra totes les Zones",
-        "desc": "Mostra sempre les zones amb marcs on els objectes hagin entrat a la zona."
+        "desc": "Mostra sempre les zones amb fotogrames on els objectes hagin entrat a la zona."
       },
       "offset": {
         "label": "Òfset d'Anotació",

@@ -106,7 +106,9 @@
       "logout": "Tanca la sessió",
       "current": "Usuari actual: {{user}}"
     },
-    "classification": "Classificació"
+    "classification": "Classificació",
+    "chat": "Xat",
+    "actions": "Accions"
   },
   "pagination": {
     "previous": {
@@ -268,7 +270,18 @@
     "unselect": "Desseleccionar",
     "enable": "Habilitar",
     "enabled": "Habilitat",
-    "continue": "Continua"
+    "continue": "Continua",
+    "add": "Afegeix",
+    "undo": "Desfés",
+    "copiedToClipboard": "S'ha copiat al porta-retalls",
+    "modified": "Modificat",
+    "overridden": "Sobreescrit",
+    "resetToGlobal": "Restableix a global",
+    "resetToDefault": "Restableix al valor predeterminat",
+    "saveAll": "Desa-ho tot",
+    "savingAll": "S'està desant tot…",
+    "undoAll": "Desfés-ho tot",
+    "applying": "S'està aplicant…"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada al porta-retalls.",

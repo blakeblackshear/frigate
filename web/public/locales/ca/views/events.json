@@ -63,5 +63,25 @@
   "normalActivity": "Normal",
   "needsReview": "Necessita revisió",
   "securityConcern": "Preocupació per la seguretat",
-  "select_all": "Tots"
+  "select_all": "Tots",
+  "motionSearch": {
+    "menuItem": "Cerca de moviment",
+    "openMenu": "Opcions de la càmera"
+  },
+  "motionPreviews": {
+    "menuItem": "Visualitza les vistes prèvies del moviment",
+    "title": "Vista prèvia del moviment: {{camera}}",
+    "mobileSettingsTitle": "Configuració de la vista prèvia del moviment",
+    "mobileSettingsDesc": "Ajusteu la velocitat de reproducció i l'enfosquiment, i trieu una data per a revisar clips només en moviment.",
+    "dim": "Atenuar",
+    "dimAria": "Ajusta la intensitat de l'enfosquiment",
+    "dimDesc": "Incrementa l'enfosquiment per augmentar la visibilitat de l'àrea de moviment.",
+    "speed": "Velocitat",
+    "speedAria": "Selecciona la velocitat de reproducció de la vista prèvia",
+    "speedDesc": "Trieu la rapidesa amb què es reprodueixen els clips de vista prèvia.",
+    "back": "Enrere",
+    "empty": "No hi ha cap vista prèvia disponible",
+    "noPreview": "Vista prèvia no disponible",
+    "seekAria": "Cerca el reproductor {{camera}} a {{time}}"
+  }
 }

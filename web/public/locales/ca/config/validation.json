@@ -1,0 +1,32 @@
+{
+    "minimum": "Ha de ser com a mínim {{limit}}",
+    "maximum": "Ha de ser com a màxim {{limit}}",
+    "exclusiveMinimum": "Ha de ser més gran que {{limit}}",
+    "exclusiveMaximum": "Ha de ser inferior a {{limit}}",
+    "minLength": "Ha de tenir com a mínim {{limit}} caràcters",
+    "maxLength": "Ha de tenir com a màxim {{limit}} caràcters",
+    "minItems": "Ha de tenir com a mínim {{limit}} elements",
+    "maxItems": "Ha de tenir com a màxim {{limit}} elements",
+    "pattern": "Format no vàlid",
+    "required": "Aquest camp és obligatori",
+    "type": "Tipus de valor no vàlid",
+    "enum": "Ha de ser un dels valors permesos",
+    "const": "El valor no coincideix amb la constant esperada",
+    "uniqueItems": "Tots els elements han de ser únics",
+    "format": "Format no vàlid",
+    "additionalProperties": "No es permet la propietat desconeguda",
+    "oneOf": "Ha de coincidir exactament amb un dels esquemes permesos",
+    "anyOf": "Ha de coincidir almenys amb un dels esquemes permesos",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Es requereix la capçalera del rol quan es configuren els mapes de rols."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Cada rol només es pot assignar a un flux d'entrada.",
+            "detectRequired": "Almenys un flux d'entrada ha de tenir assignat el rol «detecta».",
+            "hwaccelDetectOnly": "Només el flux d'entrada amb el rol detect pot definir arguments d'acceleració del maquinari."
+        }
+    }
+}

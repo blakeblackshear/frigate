@@ -6,7 +6,8 @@
     "logs": {
       "frigate": "Registres de Frigate - Frigate",
       "go2rtc": "Registres de Go2RTC - Frigate",
-      "nginx": "Registres de Nginix - Frigate"
+      "nginx": "Registres de Nginix - Frigate",
+      "websocket": "Registres de missatges - Frigate"
     },
     "enrichments": "Estadístiques complementàries - Frigate"
   },
@@ -32,6 +33,32 @@
       "error": {
         "fetchingLogsFailed": "Error al obtenir els registres: {{errorMessage}}",
         "whileStreamingLogs": "Error en la transmissió dels registres: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "Missatges",
+      "pause": "Pausa",
+      "resume": "Reprèn",
+      "clear": "Neteja",
+      "filter": {
+        "all": "Tots els temes",
+        "topics": "Temes",
+        "events": "Esdeveniment",
+        "reviews": "Revisions",
+        "classification": "Classificació",
+        "face_recognition": "Reconeixement facial",
+        "lpr": "LPR",
+        "camera_activity": "Activitat de la càmera",
+        "system": "Sistema",
+        "camera": "Càmara",
+        "all_cameras": "Totes les càmeres",
+        "cameras_count_one": "{{count}} càmera",
+        "cameras_count_other": "{{count}} Càmeres"
+      },
+      "empty": "Encara no s'ha capturat cap missatge",
+      "count": "{{count}} missatges",
+      "expanded": {
+        "payload": "Payload"
       }
     }
   },
@@ -80,8 +107,10 @@
       "intelGpuWarning": {
         "title": "Avís d'estadístiques de la GPU d'Intel",
         "message": "Estadístiques de GPU no disponibles",
-        "description": "Aquest és un error conegut en les eines d'informació de les estadístiques de GPU d'Intel (intel.gpu.top) on es trencarà i retornarà repetidament un ús de GPU del 0% fins i tot en els casos en què l'acceleració del maquinari i la detecció d'objectes s'executen correctament a la (i)GPU. Això no és un error de fragata. Podeu reiniciar l'amfitrió per a corregir temporalment el problema i confirmar que la GPU funciona correctament. Això no afecta el rendiment."
-      }
+        "description": "Aquest és un error conegut en les eines d'informació de les estadístiques de GPU d'Intel (intel.gpu.top) on es trencarà i retornarà repetidament un ús de GPU del 0% fins i tot en els casos en què l'acceleració del maquinari i la detecció d'objectes s'executen correctament a la (i)GPU. Això no és un error de Frigate. Podeu reiniciar l'amfitrió per a corregir temporalment el problema i confirmar que la GPU funciona correctament. Això no afecta el rendiment."
+      },
+      "gpuTemperature": "Temperatura de la GPU",
+      "npuTemperature": "Temperatura NPU"
     },
     "otherProcesses": {
       "title": "Altres processos",
@@ -165,6 +194,17 @@
       "error": {
         "unableToProbeCamera": "No s'ha pogut sondejar la càmera: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Qualitat de la connexió",
+      "excellent": "Excel·lent",
+      "fair": "Fira",
+      "poor": "Pobre",
+      "unusable": "No utilitzable",
+      "fps": "FPS",
+      "expectedFps": "FPS esperat",
+      "reconnectsLastHour": "Reconnecta (última hora)",
+      "stallsLastHour": "Parades (última hora)"
     }
   },
   "lastRefreshed": "Darrera actualització: ",
@@ -176,7 +216,8 @@
     "detectHighCpuUsage": "{{camera}} te un ús elevat de CPU per la detecció ({{detectAvg}}%)",
     "detectIsVerySlow": "{{detect}} és molt lent ({{speed}} ms)",
     "detectIsSlow": "{{detect}} és lent ({{speed}} ms)",
-    "shmTooLow": "/dev/shm directori ({{total}} MB) hauria de ser incrementat com a mínim {{min}} MB."
+    "shmTooLow": "/dev/shm directori ({{total}} MB) hauria de ser incrementat com a mínim {{min}} MB.",
+    "debugReplayActive": "La sessió de repetició de depuració està activa"
   },
   "enrichments": {
     "title": "Enriquiments",
