@@ -589,6 +589,7 @@ type MotionPreviewsPaneProps = {
   isLoadingMotionRanges?: boolean;
   playbackRate: number;
   nonMotionAlpha: number;
+  motionFilterCells?: Set<number>;
   onSeek: (timestamp: number) => void;
 };
 
@@ -600,6 +601,7 @@ export default function MotionPreviewsPane({
   isLoadingMotionRanges = false,
   playbackRate,
   nonMotionAlpha,
+  motionFilterCells,
   onSeek,
 }: MotionPreviewsPaneProps) {
   const { t } = useTranslation(["views/events"]);
@@ -879,6 +881,26 @@ export default function MotionPreviewsPane({
     ],
   );
 
+  const filteredClipData = useMemo(() => {
+    if (!motionFilterCells || motionFilterCells.size === 0) {
+      return clipData;
+    }
+
+    return clipData.filter(({ motionHeatmap }) => {
+      if (!motionHeatmap) {
+        return false;
+      }
+
+      for (const cellIndex of motionFilterCells) {
+        if ((motionHeatmap[cellIndex.toString()] ?? 0) > 0) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }, [clipData, motionFilterCells]);
+
   const hasCurrentHourRanges = useMemo(
     () => motionRanges.some((range) => isCurrentHour(range.end_time)),
     [motionRanges],
@@ -901,13 +923,13 @@ export default function MotionPreviewsPane({
         ref={setContentNode}
         className="no-scrollbar min-h-0 flex-1 overflow-y-auto"
       >
-        {clipData.length === 0 ? (
+        {filteredClipData.length === 0 ? (
           <div className="flex h-full items-center justify-center text-lg text-primary">
             {t("motionPreviews.empty")}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2 pb-2 sm:grid-cols-2 md:gap-4 xl:grid-cols-4">
-            {clipData.map(
+            {filteredClipData.map(
               ({ range, preview, fallbackFrameTimes, motionHeatmap }, idx) => {
                 const clipId = `${camera.name}-${range.start_time}-${range.end_time}-${idx}`;
                 const isMounted = mountedClips.has(clipId);
