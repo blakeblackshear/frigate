@@ -43,7 +43,7 @@
     "minute_other": "{{time}} minuter",
     "s": "{{time}}s",
     "formattedTimestamp": {
-      "12hour": "d MMM, kl. h:mm:ss a",
+      "12hour": "d MMM, 'kl.' h:mm:ss a",
       "24hour": "d MMM, HH:mm:ss"
     },
     "formattedTimestamp2": {
@@ -51,7 +51,7 @@
       "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
-      "12hour": "kl. h:mm a",
+      "12hour": "'kl.' h:mm a",
       "24hour": "HH:mm"
     },
     "formattedTimestampHourMinuteSecond": {
