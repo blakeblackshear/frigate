@@ -59,7 +59,8 @@
   "description": {
     "placeholder": "Informe um nome para esta coleção",
     "addFace": "Adicione uma nova coleção à Biblioteca Facial subindo a sua primeira imagem.",
-    "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens."
+    "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens.",
+    "nameCannotContainHash": "Nome não pode conter #."
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {
