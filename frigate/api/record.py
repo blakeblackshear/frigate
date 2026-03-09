@@ -1,5 +1,6 @@
 """Recording APIs."""
 
+import datetime as dt
 import logging
 from datetime import datetime, timedelta
 from functools import reduce
@@ -97,45 +98,22 @@ def all_recordings_summary(
     days: dict[str, bool] = {}
 
     for period_start, period_end, period_offset in dst_periods:
-        hours_offset = int(period_offset / 60 / 60)
-        minutes_offset = int(period_offset / 60 - hours_offset * 60)
-        period_hour_modifier = f"{hours_offset} hour"
-        period_minute_modifier = f"{minutes_offset} minute"
+        day_expr = ((Recordings.start_time + period_offset) / 86400).cast("int")
 
         period_query = (
-            Recordings.select(
-                fn.strftime(
-                    "%Y-%m-%d",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("day")
-            )
+            Recordings.select(day_expr.alias("day_idx"))
             .where(
                 (Recordings.camera << camera_list)
                 & (Recordings.end_time >= period_start)
                 & (Recordings.start_time <= period_end)
             )
-            .group_by(
-                fn.strftime(
-                    "%Y-%m-%d",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                )
-            )
-            .order_by(Recordings.start_time.desc())
+            .distinct()
             .namedtuples()
         )
 
         for g in period_query:
-            days[g.day] = True
+            day_str = (dt.date(1970, 1, 1) + dt.timedelta(days=g.day_idx)).isoformat()
+            days[day_str] = True
 
     return JSONResponse(content=dict(sorted(days.items())))
 
