@@ -39,10 +39,10 @@
     "title": "Generellt",
     "detector": {
       "title": "Detektorer",
-      "inferenceSpeed": "Detektorns inferenshastighet",
+      "inferenceSpeed": "Detektorns inferenstid",
       "temperature": "Detektor temperatur",
       "cpuUsage": "Detektorns CPU-användning",
-      "memoryUsage": "Detektor minnes användning",
+      "memoryUsage": "Detektorns minnesanvändning",
       "cpuUsageInformation": "CPU som används för att förbereda in- och utdata till/från detekteringsmodeller. Detta värde mäter inte inferensanvändning, även om en GPU eller accelerator används."
     },
     "hardwareInfo": {
