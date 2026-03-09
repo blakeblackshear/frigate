@@ -1,0 +1,138 @@
+{
+    "version": {
+        "label": "Aktuelle Version der Konfiguration",
+        "description": "Die Version Numerisch oder als Zeichenketten der aktiven Konfiguration, um Migrationen oder Formatänderungen zu erkennen."
+    },
+    "safe_mode": {
+        "label": "abgesicherter Modus",
+        "description": "Wenn aktiviert, starte Frigate im abgesicherten Modus mit reduzierten Features für die Fehlersuche."
+    },
+    "audio": {
+        "label": "Audioereignisse",
+        "enabled": {
+            "label": "Aktivieren der Audioerkennung"
+        },
+        "min_volume": {
+            "label": "Mindestlautstärke",
+            "description": "Mindest-RMS-Lautstärkeschwelle, die für die Audioerkennung erforderlich ist; niedrigere Werte erhöhen die Empfindlichkeit (z. B. 200 hoch, 500 mittel, 1000 niedrig)."
+        },
+        "listen": {
+            "description": "Liste der zu erkennenden Audioereignisse (z.B: bellen, Feueralarm, schreien, sprechen, rufen).",
+            "label": "Hörtypen"
+        },
+        "filters": {
+            "label": "Audiofilter",
+            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden."
+        },
+        "max_not_heard": {
+            "label": "Zeitüberschreitung beendet",
+            "description": "Anzahl der Sekunden ohne den konfigurierten Audiotyp, bevor das Audioereignis beendet wird."
+        },
+        "enabled_in_config": {
+            "label": "Ursprünglicher Audiozustand",
+            "description": "Gibt an, ob die Audioerkennung ursprünglich in der statischen Konfigurationsdatei aktiviert war."
+        },
+        "num_threads": {
+            "label": "Erkennungsthreads",
+            "description": "Anzahl der Threads, die für die Audioerkennungsverarbeitung verwendet werden sollen."
+        }
+    },
+    "environment_vars": {
+        "label": "Umgebungsvariablen",
+        "description": "Schlüssel-/Wertpaare für Umgebungsvariablen des Frigate-Prozesses in Home Assistant OS. Nicht-HAOS Benutzer müssen anstatt dessen Docker Umgebungsvariablen nutzen."
+    },
+    "logger": {
+        "label": "Protokollierung",
+        "description": "Steuert die Standard-Protokollierungsausführlichkeit und Überschreibungen der Protokollierungsstufe pro Komponente.",
+        "default": {
+            "label": "Loglevel",
+            "description": "Standardmäßiges globales Log Level (Debug, Info, Warnung, Fehler)."
+        },
+        "logs": {
+            "label": "Prozessspezifisches Log Level",
+            "description": "Überschreiben der Protokollierungsstufe pro Komponente, um die Ausführlichkeit für bestimmte Module zu erhöhen oder zu verringern."
+        }
+    },
+    "auth": {
+        "label": "Authentifizierung",
+        "description": "Einstellungen für die Authentifizierung und Sitzungen, einschließlich Optionen für Cookies und Limits.",
+        "enabled": {
+            "label": "Authentifizierung aktivieren",
+            "description": "Aktivierung native Authentifizierung für Frigate UI."
+        },
+        "reset_admin_password": {
+            "label": "Zurücksetzen vom Admin Passwort",
+            "description": "Wenn wahr, wird das Passwort beim nächsten start zurückgesetzt und das neue Passwort steht in den Logs."
+        },
+        "cookie_name": {
+            "label": "JWT cookie Name",
+            "description": "Name des Cookies, das zum Speichern des JWT-Tokens für die native Authentifizierung verwendet wird."
+        },
+        "cookie_secure": {
+            "label": "Sicheres Cookie-Flag",
+            "description": "Setzen Sie das Sicherheitsflag im Authentifizierungs-Cookie; sollte bei Verwendung von TLS auf „true“ gesetzt sein."
+        },
+        "session_length": {
+            "label": "Sitzungssdauer",
+            "description": "Sitzungsdauer in Sekunden für JWT-basierte Sitzungen."
+        },
+        "refresh_time": {
+            "label": "Sitzung aktualisieren",
+            "description": "Wenn eine Sitzung innerhalb dieser Sekunden abläuft, aktualisieren Sie sie wieder auf ihre volle Länge."
+        },
+        "failed_login_rate_limit": {
+            "label": "Fehlgeschlagene Anmeldeversuche",
+            "description": "Begrenzungsregeln für fehlgeschlagene Anmeldeversuche zur Reduzierung von Brute-Force-Angriffen."
+        },
+        "trusted_proxies": {
+            "label": "Vertrauenswürdige Proxys",
+            "description": "Liste vertrauenswürdiger Proxy-IPs, die bei der Ermittlung der Client-IP für die Ratenbegrenzung verwendet werden."
+        },
+        "hash_iterations": {
+            "label": "Hash-Iterationen",
+            "description": "Anzahl der PBKDF2-SHA256-Iterationen, die beim Hashing von Benutzerkennwörtern verwendet werden sollen."
+        },
+        "roles": {
+            "label": "Rollen zuweisen",
+            "description": "Ordnen Sie Rollen zu Kameralisten zu. Eine leere Liste gewährt der Rolle Zugriff auf alle Kameras."
+        },
+        "admin_first_time_login": {
+            "label": "Erstmalige Admin-Markierung",
+            "description": "Wenn dies zutrifft, zeigt die Benutzeroberfläche möglicherweise einen Hilfe-Link auf der Anmeldeseite an, der Benutzer darüber informiert, wie sie sich nach einer Zurücksetzung des Administratorpassworts anmelden können. "
+        }
+    },
+    "audio_transcription": {
+        "label": "Audio-Transkription",
+        "description": "Einstellungen für Live- und Sprach-Audio-Transkription, die für Veranstaltungen und Live-Untertitel verwendet werden.",
+        "live_enabled": {
+            "label": "Live-Transkription",
+            "description": "Aktivieren Sie die Live-Transkription für Audio, sobald es empfangen wird."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Einstellungen für die Birdseye-Kompositansicht, die mehrere Kamerafeeds zu einem einzigen Layout zusammenfasst.",
+        "enabled": {
+            "label": "Birdseye aktivieren",
+            "description": "Aktivieren oder deaktivieren der Birdseye-Funktion."
+        },
+        "mode": {
+            "label": "Verfolgungsmodus",
+            "description": "Modus zum Einbeziehen von Kameras in Birdseye: „Objekte“, „Bewegung“ oder „kontinuierlich“."
+        },
+        "order": {
+            "label": "Position",
+            "description": "Numerische Position, die die Reihenfolge der Kamera im Birdseye-Layout steuert."
+        }
+    },
+    "database": {
+        "label": "Datenbank",
+        "description": "Einstellungen für die SQLite-Datenbank, die von Frigate zum Speichern von verfolgten Objekten und Aufzeichnungsmetadaten verwendet wird.",
+        "path": {
+            "label": "Pfad zur Datenbank"
+        }
+    },
+    "detect": {
+        "label": "Objekterkennung"
+    }
+}

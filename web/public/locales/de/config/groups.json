@@ -1,0 +1,73 @@
+{
+    "audio": {
+        "global": {
+            "detection": "Globale Erkennung",
+            "sensitivity": "Globale Empfindlichkeit"
+        },
+        "cameras": {
+            "detection": "Erkennung",
+            "sensitivity": "Empfindlichkeit"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globale Darstellung"
+        },
+        "cameras": {
+            "appearance": "Erscheinungsbild"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Globale Empfindlichkeit",
+            "algorithm": "Globaler Algorithmus"
+        },
+        "cameras": {
+            "sensitivity": "Genauhigkeit",
+            "algorithm": "Algorithmus"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Globale Anzeige"
+        },
+        "cameras": {
+            "display": "Anzeige"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Globale Auflösung",
+            "tracking": "Globale Verfolgung"
+        },
+        "cameras": {
+            "resolution": "Auflösung",
+            "tracking": "Verfolgung"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Globale Verfolgung",
+            "filtering": "Globaler Filter"
+        },
+        "cameras": {
+            "tracking": "Verfolgung",
+            "filtering": "Filtern"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Globale Bindung",
+            "events": "Globale Ereignisse"
+        },
+        "cameras": {
+            "retention": "Bindung",
+            "events": "Events"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Kameraspezifische FFmpeg-Argumente"
+        }
+    }
+}
