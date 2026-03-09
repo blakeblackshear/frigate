@@ -509,8 +509,10 @@ def sync_review_thumbnails(dry_run: bool = False, force: bool = False) -> SyncRe
 def sync_previews(dry_run: bool = False, force: bool = False) -> SyncResult:
     """Sync preview files - delete files not referenced by any preview record.
 
-    Previews are stored at: CLIPS_DIR/previews/{camera}/*.mp4
-    The full path is stored in Previews.path
+    Preview files can exist in camera-specific recording roots at:
+    <recordings_root>/preview/{camera}/*.mp4
+    Legacy installs may also still have files in: CLIPS_DIR/previews/{camera}/*.mp4
+    The full path is stored in Previews.path.
     """
     result = SyncResult(media_type="previews")
 
@@ -518,18 +520,30 @@ def sync_previews(dry_run: bool = False, force: bool = False) -> SyncResult:
         # Get all preview paths from DB
         preview_paths = set(p.path for p in Previews.select(Previews.path) if p.path)
 
-        # Find preview files on disk
-        previews_dir = os.path.join(CLIPS_DIR, "previews")
+        # Find preview files on disk.
+        # Build candidate preview roots from DB paths (new storage layout)
+        # and include the legacy CLIPS_DIR location for backward compatibility.
+        preview_dirs = {
+            os.path.dirname(path)
+            for path in preview_paths
+            if path and path.endswith(".mp4")
+        }
+        preview_dirs.add(os.path.join(CLIPS_DIR, "previews"))
+
         preview_files: list[str] = []
-        if os.path.isdir(previews_dir):
-            for camera_dir in os.listdir(previews_dir):
-                camera_path = os.path.join(previews_dir, camera_dir)
-                if not os.path.isdir(camera_path):
-                    continue
-                for file in os.listdir(camera_path):
-                    if file.endswith(".mp4"):
-                        file_path = os.path.join(camera_path, file)
-                        preview_files.append(file_path)
+        for previews_dir in preview_dirs:
+            if not os.path.isdir(previews_dir):
+                continue
+
+            for file in os.listdir(previews_dir):
+                file_path = os.path.join(previews_dir, file)
+                if os.path.isfile(file_path) and file.endswith(".mp4"):
+                    preview_files.append(file_path)
+                elif os.path.isdir(file_path):
+                    for nested_file in os.listdir(file_path):
+                        nested_path = os.path.join(file_path, nested_file)
+                        if os.path.isfile(nested_path) and nested_file.endswith(".mp4"):
+                            preview_files.append(nested_path)
 
         result.files_checked = len(preview_files)
 
