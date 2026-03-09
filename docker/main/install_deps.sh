@@ -105,9 +105,9 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     # install legacy and standard intel icd and level-zero-gpu
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
     # needed core package
-    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/libigdgmm12_22.5.5_amd64.deb
-    dpkg -i libigdgmm12_22.5.5_amd64.deb
-    rm libigdgmm12_22.5.5_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/libigdgmm12_22.7.0_amd64.deb
+    dpkg -i libigdgmm12_22.7.0_amd64.deb
+    rm libigdgmm12_22.7.0_amd64.deb
 
     # legacy packages
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.36/intel-opencl-icd-legacy1_24.35.30872.36_amd64.deb
@@ -115,18 +115,19 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-opencl_1.0.17537.24_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-core_1.0.17537.24_amd64.deb
     # standard packages
-    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-opencl-icd_24.52.32224.5_amd64.deb
-    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-level-zero-gpu_1.6.32224.5_amd64.deb
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-opencl-2_2.5.6+18417_amd64.deb
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-core-2_2.5.6+18417_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/intel-opencl-icd_25.13.33276.19_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/intel-level-zero-gpu_1.6.33276.19_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.10.10/intel-igc-opencl-2_2.10.10+18926_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.10.10/intel-igc-core-2_2.10.10+18926_amd64.deb
     # npu packages
-    wget https://github.com/oneapi-src/level-zero/releases/download/v1.21.9/level-zero_1.21.9+u22.04_amd64.deb
-    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-driver-compiler-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
-    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-fw-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
-    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-level-zero-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
+    wget https://github.com/oneapi-src/level-zero/releases/download/v1.28.2/level-zero_1.28.2+u22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.19.0/intel-driver-compiler-npu_1.19.0.20250707-16111289554_ubuntu22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.19.0/intel-fw-npu_1.19.0.20250707-16111289554_ubuntu22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.19.0/intel-level-zero-npu_1.19.0.20250707-16111289554_ubuntu22.04_amd64.deb
 
     dpkg -i *.deb
     rm *.deb
+    apt-get -qq install -f -y
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
