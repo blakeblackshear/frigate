@@ -11,13 +11,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Error al canviar el nom de l’exportació: {{errorMessage}}"
+      "renameExportFailed": "Error al canviar el nom de l’exportació: {{errorMessage}}",
+      "assignCaseFailed": "No s'ha pogut actualitzar l'assignació de cas:{{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Comparteix l'exportació",
     "downloadVideo": "Baixa el vídeo",
     "editName": "Edita el nom",
-    "deleteExport": "Suprimeix l'exportació"
+    "deleteExport": "Suprimeix l'exportació",
+    "assignToCase": "Afegeix al cas"
+  },
+  "headings": {
+    "cases": "Casos",
+    "uncategorizedExports": "Exportacions sense categoria"
+  },
+  "caseDialog": {
+    "title": "Afegeix al cas",
+    "description": "Trieu un cas existent o creeu-ne un de nou.",
+    "selectLabel": "Cas",
+    "newCaseOption": "Crea un cas nou",
+    "nameLabel": "Nom del cas",
+    "descriptionLabel": "Descripció"
   }
 }
