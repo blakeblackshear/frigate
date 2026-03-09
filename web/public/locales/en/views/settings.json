@@ -13,7 +13,8 @@
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
     "notifications": "Notification Settings - Frigate",
-    "maintenance": "Maintenance - Frigate"
+    "maintenance": "Maintenance - Frigate",
+    "profiles": "Profiles - Frigate"
   },
   "menu": {
     "general": "General",
@@ -23,6 +24,7 @@
     "cameras": "Camera configuration",
     "ui": "UI",
     "profileSettings": "Profile settings",
+    "profiles": "Profiles",
     "globalDetect": "Object detection",
     "globalRecording": "Recording",
     "globalSnapshots": "Snapshots",
@@ -100,6 +102,9 @@
       "label": "Scope",
       "global": "Global",
       "camera": "Camera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profile"
     },
     "field": {
       "label": "Field"
@@ -473,6 +478,14 @@
       "toast": {
         "success": "Camera {{cameraName}} saved successfully"
       }
+    },
+    "profiles": {
+      "title": "Profile Camera Overrides",
+      "selectLabel": "Select profile",
+      "description": "Configure which cameras are enabled or disabled when a profile is activated. Cameras set to \"Inherit\" keep their base enabled state.",
+      "inherit": "Inherit",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
     }
   },
   "cameraReview": {
@@ -1426,6 +1439,27 @@
     "saveAllPartial_one": "{{successCount}} of {{totalCount}} section saved. {{failCount}} failed.",
     "saveAllPartial_other": "{{successCount}} of {{totalCount}} sections saved. {{failCount}} failed.",
     "saveAllFailure": "Failed to save all sections."
+  },
+  "profiles": {
+    "title": "Profiles",
+    "activeProfile": "Active Profile",
+    "noActiveProfile": "No active profile",
+    "active": "Active",
+    "activated": "Profile '{{profile}}' activated",
+    "deactivated": "Profile deactivated",
+    "noProfiles": "No profiles defined. Add a profile from any camera section.",
+    "noOverrides": "No overrides",
+    "baseConfig": "Base Config",
+    "addProfile": "Add Profile",
+    "newProfile": "New Profile",
+    "profileNamePlaceholder": "e.g., armed, away, night",
+    "nameInvalid": "Only lowercase letters, numbers, and underscores allowed",
+    "nameDuplicate": "A profile with this name already exists",
+    "deleteProfile": "Delete Profile",
+    "deleteProfileConfirm": "Delete profile \"{{profile}}\" from all cameras? This cannot be undone.",
+    "deleteSuccess": "Profile '{{profile}}' deleted",
+    "deleteSection": "Delete Section Overrides",
+    "deleteSectionConfirm": "Remove {{profile}}'s overrides for {{section}} on {{camera}}?"
   },
   "unsavedChanges": "You have unsaved changes",
   "confirmReset": "Confirm Reset",
