@@ -90,7 +90,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import ReviewActivityCalendar from "@/components/overlay/ReviewActivityCalendar";
 import PlatformAwareDialog from "@/components/overlay/dialog/PlatformAwareDialog";
 import MotionPreviewsPane from "./MotionPreviewsPane";
@@ -1332,135 +1331,68 @@ function MotionReview({
                   updateSelectedDay={onUpdateSelectedDay}
                 />
               )}
-              {isDesktop ? (
-                <Dialog
-                  open={isRegionFilterOpen}
-                  onOpenChange={(open) => {
-                    if (open) {
-                      setPendingFilterCells(new Set(motionFilterCells));
-                    }
-                    setIsRegionFilterOpen(open);
-                  }}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      className="flex items-center gap-2"
-                      size="sm"
-                      variant={
-                        motionFilterCells.size > 0 ? "select" : "default"
+              <Dialog
+                open={isRegionFilterOpen}
+                onOpenChange={(open) => {
+                  if (open) {
+                    setPendingFilterCells(new Set(motionFilterCells));
+                  }
+                  setIsRegionFilterOpen(open);
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                    className={cn(
+                      isDesktop ? "flex items-center gap-2" : "rounded-lg",
+                    )}
+                    size="sm"
+                    variant={motionFilterCells.size > 0 ? "select" : "default"}
+                    aria-label={t("motionPreviews.filter")}
+                  >
+                    <FaFilter
+                      className={
+                        motionFilterCells.size > 0
+                          ? "text-selected-foreground"
+                          : "text-secondary-foreground"
                       }
-                      aria-label={t("motionPreviews.filter")}
-                    >
-                      <FaFilter
-                        className={
-                          motionFilterCells.size > 0
-                            ? "text-selected-foreground"
-                            : "text-secondary-foreground"
-                        }
-                      />
-                      {t("motionPreviews.filter")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[85%] md:max-w-[70%] lg:max-w-[60%]">
-                    <DialogHeader>
-                      <DialogTitle>{t("motionPreviews.filter")}</DialogTitle>
-                      <DialogDescription>
-                        {t("motionPreviews.filterDesc")}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <MotionRegionFilterGrid
-                      cameraName={selectedMotionPreviewCamera.name}
-                      selectedCells={pendingFilterCells}
-                      onCellsChange={setPendingFilterCells}
                     />
-                    <DialogFooter className="justify-end gap-1">
-                      <Button
-                        variant="outline"
-                        disabled={pendingFilterCells.size === 0}
-                        onClick={() => {
-                          setPendingFilterCells(new Set());
-                        }}
-                      >
-                        {t("motionPreviews.filterClear")}
-                      </Button>
-                      <Button
-                        variant="select"
-                        onClick={() => {
-                          setMotionFilterCells(new Set(pendingFilterCells));
-                          setIsRegionFilterOpen(false);
-                        }}
-                      >
-                        {t("button.apply", { ns: "common" })}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              ) : (
-                <Drawer
-                  open={isRegionFilterOpen}
-                  onOpenChange={(open) => {
-                    if (open) {
-                      setPendingFilterCells(new Set(motionFilterCells));
-                    }
-                    setIsRegionFilterOpen(open);
-                  }}
-                >
-                  <DrawerTrigger asChild>
+                    {isDesktop && t("motionPreviews.filter")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[85%] md:max-w-[70%] lg:max-w-[60%]">
+                  <DialogHeader>
+                    <DialogTitle>{t("motionPreviews.filter")}</DialogTitle>
+                    <DialogDescription>
+                      {t("motionPreviews.filterDesc")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <MotionRegionFilterGrid
+                    cameraName={selectedMotionPreviewCamera.name}
+                    selectedCells={pendingFilterCells}
+                    onCellsChange={setPendingFilterCells}
+                  />
+                  <DialogFooter className="justify-end gap-1">
                     <Button
-                      className="rounded-lg"
-                      size="sm"
-                      variant={
-                        motionFilterCells.size > 0 ? "select" : "default"
-                      }
-                      aria-label={t("motionPreviews.filter")}
+                      variant="outline"
+                      disabled={pendingFilterCells.size === 0}
+                      onClick={() => {
+                        setPendingFilterCells(new Set());
+                      }}
                     >
-                      <FaFilter
-                        className={
-                          motionFilterCells.size > 0
-                            ? "text-selected-foreground"
-                            : "text-secondary-foreground"
-                        }
-                      />
+                      {t("motionPreviews.filterClear")}
                     </Button>
-                  </DrawerTrigger>
-                  <DrawerContent className="max-h-[75dvh] overflow-hidden px-4 pb-4">
-                    <div className="space-y-4 py-2">
-                      <div className="space-y-0.5">
-                        <div className="text-md">
-                          {t("motionPreviews.filter")}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {t("motionPreviews.filterDesc")}
-                        </div>
-                      </div>
-                      <MotionRegionFilterGrid
-                        cameraName={selectedMotionPreviewCamera.name}
-                        selectedCells={pendingFilterCells}
-                        onCellsChange={setPendingFilterCells}
-                      />
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          disabled={pendingFilterCells.size === 0}
-                          onClick={() => {
-                            setPendingFilterCells(new Set());
-                          }}
-                        >
-                          {t("motionPreviews.filterClear")}
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setMotionFilterCells(new Set(pendingFilterCells));
-                            setIsRegionFilterOpen(false);
-                          }}
-                        >
-                          {t("button.apply", { ns: "common" })}
-                        </Button>
-                      </div>
-                    </div>
-                  </DrawerContent>
-                </Drawer>
-              )}
+                    <Button
+                      variant="select"
+                      onClick={() => {
+                        setMotionFilterCells(new Set(pendingFilterCells));
+                        setIsRegionFilterOpen(false);
+                      }}
+                    >
+                      {t("button.apply", { ns: "common" })}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               <PlatformAwareDialog
                 trigger={
                   <Button

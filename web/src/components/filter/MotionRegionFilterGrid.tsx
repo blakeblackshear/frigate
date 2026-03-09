@@ -18,6 +18,8 @@ export default function MotionRegionFilterGrid({
     active: false,
     adding: true,
   });
+  const lastCellRef = useRef<number>(-1);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const toggleCell = useCallback(
     (index: number, forceAdd?: boolean) => {
@@ -40,28 +42,68 @@ export default function MotionRegionFilterGrid({
     [selectedCells, onCellsChange],
   );
 
-  const handlePointerDown = useCallback(
-    (index: number) => {
-      const adding = !selectedCells.has(index);
-      paintingRef.current = { active: true, adding };
-      toggleCell(index, adding);
+  const getCellFromPoint = useCallback(
+    (clientX: number, clientY: number): number | null => {
+      const grid = gridRef.current;
+
+      if (!grid) {
+        return null;
+      }
+
+      const rect = grid.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      if (x < 0 || y < 0 || x >= rect.width || y >= rect.height) {
+        return null;
+      }
+
+      const col = Math.floor((x / rect.width) * GRID_SIZE);
+      const row = Math.floor((y / rect.height) * GRID_SIZE);
+
+      return row * GRID_SIZE + col;
     },
-    [selectedCells, toggleCell],
+    [],
   );
 
-  const handlePointerEnter = useCallback(
-    (index: number) => {
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      const index = getCellFromPoint(e.clientX, e.clientY);
+
+      if (index === null) {
+        return;
+      }
+
+      const adding = !selectedCells.has(index);
+      paintingRef.current = { active: true, adding };
+      lastCellRef.current = index;
+      toggleCell(index, adding);
+    },
+    [selectedCells, toggleCell, getCellFromPoint],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
       if (!paintingRef.current.active) {
         return;
       }
 
+      const index = getCellFromPoint(e.clientX, e.clientY);
+
+      if (index === null || index === lastCellRef.current) {
+        return;
+      }
+
+      lastCellRef.current = index;
       toggleCell(index, paintingRef.current.adding);
     },
-    [toggleCell],
+    [toggleCell, getCellFromPoint],
   );
 
   const handlePointerUp = useCallback(() => {
     paintingRef.current.active = false;
+    lastCellRef.current = -1;
   }, []);
 
   return (
@@ -79,11 +121,14 @@ export default function MotionRegionFilterGrid({
           alt=""
         />
         <div
+          ref={gridRef}
           className="absolute inset-0 grid"
           style={{
             gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
             gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`,
           }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
         >
           {Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => {
             const isSelected = selectedCells.has(index);
@@ -95,11 +140,6 @@ export default function MotionRegionFilterGrid({
                     ? "border border-severity_alert/60 bg-severity_alert/40"
                     : "border border-transparent hover:bg-white/20"
                 }
-                onPointerDown={(e) => {
-                  e.preventDefault();
-                  handlePointerDown(index);
-                }}
-                onPointerEnter={() => handlePointerEnter(index)}
               />
             );
           })}
