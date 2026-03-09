@@ -6,9 +6,9 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.models import Recordings, RecordingsToDelete
+from frigate.models import Previews, Recordings, RecordingsToDelete
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
-from frigate.util.media import sync_recordings
+from frigate.util.media import sync_previews, sync_recordings
 
 
 class TestMediaSync(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestMediaSync(unittest.TestCase):
         migrate_db.close()
 
         self.db = SqliteQueueDatabase(TEST_DB)
-        models = [Recordings, RecordingsToDelete]
+        models = [Previews, Recordings, RecordingsToDelete]
         self.db.bind(models)
 
         self.root_a = tempfile.mkdtemp()
@@ -80,6 +80,24 @@ class TestMediaSync(unittest.TestCase):
 
         assert result.files_checked == 0
         assert result.orphans_found == 0
+
+    def test_sync_previews_scans_configured_recording_roots(self):
+        preview_dir = os.path.join(self.root_b, "preview", "front_door")
+        os.makedirs(preview_dir, exist_ok=True)
+        orphan_path = os.path.join(preview_dir, "100-200.mp4")
+
+        with open(orphan_path, "w"):
+            pass
+
+        result = sync_previews(
+            dry_run=True,
+            force=True,
+            recordings_roots=[self.root_a, self.root_b],
+        )
+
+        assert result.files_checked == 1
+        assert result.orphans_found == 1
+        assert orphan_path in result.orphan_paths
 
 
 if __name__ == "__main__":

@@ -506,7 +506,11 @@ def sync_review_thumbnails(dry_run: bool = False, force: bool = False) -> SyncRe
     return result
 
 
-def sync_previews(dry_run: bool = False, force: bool = False) -> SyncResult:
+def sync_previews(
+    dry_run: bool = False,
+    force: bool = False,
+    recordings_roots: list[str] | None = None,
+) -> SyncResult:
     """Sync preview files - delete files not referenced by any preview record.
 
     Preview files can exist in camera-specific recording roots at:
@@ -528,6 +532,12 @@ def sync_previews(dry_run: bool = False, force: bool = False) -> SyncResult:
             for path in preview_paths
             if path and path.endswith(".mp4")
         }
+
+        # Include configured recordings roots so orphaned previews are found even
+        # when they are not referenced by any DB row.
+        for root in recordings_roots or [RECORD_DIR]:
+            preview_dirs.add(os.path.join(root, "preview"))
+
         preview_dirs.add(os.path.join(CLIPS_DIR, "previews"))
 
         preview_files: list[str] = []
@@ -809,7 +819,11 @@ def sync_all_media(
         results.review_thumbnails = sync_review_thumbnails(dry_run=dry_run, force=force)
 
     if sync_all or "previews" in media_types:
-        results.previews = sync_previews(dry_run=dry_run, force=force)
+        results.previews = sync_previews(
+            dry_run=dry_run,
+            force=force,
+            recordings_roots=recordings_roots,
+        )
 
     if sync_all or "exports" in media_types:
         results.exports = sync_exports(dry_run=dry_run, force=force)
