@@ -205,13 +205,7 @@ function applyCameraActivity(payload: string) {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Hooks
-// ---------------------------------------------------------------------------
-
-/**
- * Get the send function for publishing WS messages.
- */
 export function useWsUpdate(): WsSend {
   const send = useContext(WsSendContext);
   if (!send) {
@@ -220,12 +214,10 @@ export function useWsUpdate(): WsSend {
   return send;
 }
 
-/**
- * Subscribe to a single WS topic with proper bail-out.
- * Only re-renders when the topic's value changes (Object.is comparison).
- * Uses useSyncExternalStore — zero useEffect, so no PassiveMask flags
- * propagate through the fiber tree.
- */
+// Subscribe to a single WS topic with proper bail-out.
+// Only re-renders when the topic's value changes (Object.is comparison).
+// Uses useSyncExternalStore — zero useEffect, so no PassiveMask flags
+// propagate through the fiber tree.
 export function useWs(watchTopic: string, publishTopic: string) {
   const payload = useSyncExternalStore(
     useCallback(
