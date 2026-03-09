@@ -12,7 +12,10 @@
     "notifications": "Configuración de Notificaciones - Frigate",
     "enrichments": "Configuración de Análisis Avanzado - Frigate",
     "cameraManagement": "Administrar Cámaras - Frigate",
-    "cameraReview": "Revisar Configuración de Cámaras - Frigate"
+    "cameraReview": "Revisar Configuración de Cámaras - Frigate",
+    "globalConfig": "Configuración Global - Frigate",
+    "cameraConfig": "Configuración de Cámara - Frigate",
+    "maintenance": "Mantenimiento - Frigate"
   },
   "menu": {
     "cameras": "Configuración de Cámara",
@@ -28,7 +31,10 @@
     "triggers": "Disparadores",
     "roles": "Rols",
     "cameraManagement": "Administración",
-    "cameraReview": "Revisar"
+    "cameraReview": "Revisar",
+    "general": "General",
+    "globalConfig": "Configuración Global",
+    "system": "Sistema"
   },
   "dialog": {
     "unsavedChanges": {
@@ -411,7 +417,7 @@
     },
     "restart_required": "Es necesario reiniciar (se han cambiado las máscaras/zonas)",
     "motionMaskLabel": "Máscara de movimiento {{number}}",
-    "objectMaskLabel": "Máscara de objeto {{number}} ({{label}})"
+    "objectMaskLabel": "Máscara de objeto {{number}}"
   },
   "motionDetectionTuner": {
     "title": "Sintonizador de Detección de Movimiento",
@@ -731,7 +737,7 @@
         "alreadyInProgress": "El proceso de re-indexado ya se está ejecutando.",
         "error": "Ha ocurrido un error al intentar iniciar el proceso de re-indexado: {{errorMessage}}",
         "label": "Re-indexar Ahora",
-        "desc": "La re-indexación regenerará las embeddings para todos los objetos rastreados. Este proceso se ejecuta en segundo plano y puede utilizar al máximo tu CPU, además de tomar una cantidad considerable de tiempo dependiendo de la cantidad de objetos rastreados que tengas."
+        "desc": "La re-indexación regenerará las incrustaciones para todos los objetos rastreados. Este proceso se ejecuta en segundo plano y puede utilizar al máximo tu CPU, además de tomar una cantidad considerable de tiempo dependiendo de la cantidad de objetos rastreados que tengas."
       },
       "modelSize": {
         "label": "Tamaño del Modelo",

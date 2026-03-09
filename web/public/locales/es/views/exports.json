@@ -10,7 +10,8 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "No se pudo renombrar la exportación: {{errorMessage}}"
+      "renameExportFailed": "No se pudo renombrar la exportación: {{errorMessage}}",
+      "assignCaseFailed": "Fallo en la actualización de la asignación de caso: {{errorMessage}}"
     }
   },
   "deleteExport.desc": "¿Estás seguro de que quieres eliminar {{exportName}}?",
@@ -18,6 +19,11 @@
     "shareExport": "Compartir exportación",
     "downloadVideo": "Descargar video",
     "editName": "Editar nombre",
-    "deleteExport": "Eliminar exportación"
+    "deleteExport": "Eliminar exportación",
+    "assignToCase": "Añadir al caso"
+  },
+  "headings": {
+    "cases": "Casos",
+    "uncategorizedExports": "Exportaciones sin categorizar"
   }
 }

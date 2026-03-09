@@ -1,0 +1,43 @@
+{
+    "version": {
+        "label": "Versión de configuración actual",
+        "description": "Versión numérica o de cadena de la configuración activa para ayudar a detectar migraciones o cambios de formato."
+    },
+    "safe_mode": {
+        "label": "Modo seguro",
+        "description": "Cuando está habilitado, inicia Frigate en modo seguro con funciones reducidas para la solución de problemas."
+    },
+    "environment_vars": {
+        "label": "Variables de entorno",
+        "description": "Pares clave/valor de variables de entorno para establecer para el proceso de Frigate en el sistema operativo Home Assistant. Los usuarios que no son de HAOS deben usar la configuración de variables de entorno de Docker."
+    },
+    "logger": {
+        "label": "Registro",
+        "description": "Controla la verbosidad de registro predeterminada y la sobre-escritura de nivel de registro por componente.",
+        "default": {
+            "label": "Nivel de registro",
+            "description": "Nivel de detalle global predeterminada del registro (depuración, información, advertencia, error)."
+        },
+        "logs": {
+            "label": "Nivel de registro por proceso",
+            "description": "Sobre-escribir el nivel de registro por componente para aumentar o disminuir el nivel de detalle de módulos específicos."
+        }
+    },
+    "audio": {
+        "label": "Eventos de audio",
+        "enabled": {
+            "label": "Habilitar la detección de audio"
+        },
+        "max_not_heard": {
+            "label": "Finalizar el tiempo de espera",
+            "description": "Cantidad de segundos sin el tipo de audio configurado antes de que finalice el evento de audio."
+        },
+        "min_volume": {
+            "label": "Volumen mínimo"
+        }
+    },
+    "auth": {
+        "label": "Autenticación",
+        "description": "Configuración relacionada con la autenticación y la sesión, incluidas las opciones de cookies y límite de peticiones."
+    }
+}

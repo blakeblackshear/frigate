@@ -5,7 +5,8 @@
     "logs": {
       "frigate": "Registros de Frigate - Frigate",
       "go2rtc": "Registros de Go2RTC - Frigate",
-      "nginx": "Registros de Nginx - Frigate"
+      "nginx": "Registros de Nginx - Frigate",
+      "websocket": "Mensajes Logs - Frigata"
     },
     "cameras": "Estadísticas de cámaras - Frigate",
     "enrichments": "Estadísticas de Enriquecimientos - Frigate"
@@ -31,6 +32,12 @@
     },
     "download": {
       "label": "Descargar registros"
+    },
+    "websocket": {
+      "label": "Mensajes",
+      "pause": "Pausar",
+      "resume": "Continuar",
+      "clear": "Limpiar"
     }
   },
   "title": "Sistema",
