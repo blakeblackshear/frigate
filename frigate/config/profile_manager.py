@@ -71,8 +71,7 @@ class ProfileManager:
         """
         if profile_name is not None:
             has_profile = any(
-                profile_name in cam.profiles
-                for cam in self.config.cameras.values()
+                profile_name in cam.profiles for cam in self.config.cameras.values()
             )
             if not has_profile:
                 return f"Profile '{profile_name}' not found on any camera"
@@ -109,9 +108,10 @@ class ProfileManager:
                 cam_config.enabled = base_enabled
                 changed.setdefault(cam_name, set()).add("enabled")
 
-            # Restore zones
+            # Restore zones (always restore from snapshot; direct Pydantic
+            # comparison fails when ZoneConfig contains numpy arrays)
             base_zones = self._base_zones.get(cam_name)
-            if base_zones is not None and cam_config.zones != base_zones:
+            if base_zones is not None:
                 cam_config.zones = copy.deepcopy(base_zones)
                 changed.setdefault(cam_name, set()).add("zones")
 
@@ -195,9 +195,7 @@ class ProfileManager:
 
                 if section == "zones":
                     self.config_updater.publish_update(
-                        CameraConfigUpdateTopic(
-                            CameraConfigUpdateEnum.zones, cam_name
-                        ),
+                        CameraConfigUpdateTopic(CameraConfigUpdateEnum.zones, cam_name),
                         cam_config.zones,
                     )
                     continue

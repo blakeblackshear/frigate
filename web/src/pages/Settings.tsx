@@ -39,6 +39,7 @@ import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import ProfilesView from "@/views/settings/ProfilesView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
 import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
@@ -100,6 +101,7 @@ import { useRestart } from "@/api/ws";
 
 const allSettingsViews = [
   "profileSettings",
+  "profiles",
   "globalDetect",
   "globalRecording",
   "globalSnapshots",
@@ -310,7 +312,10 @@ const CameraTimestampStyleSettingsPage = createSectionPage(
 const settingsGroups = [
   {
     label: "general",
-    items: [{ key: "profileSettings", component: UiSettingsView }],
+    items: [
+      { key: "profileSettings", component: UiSettingsView },
+      { key: "profiles", component: ProfilesView },
+    ],
   },
   {
     label: "globalConfig",
