@@ -125,6 +125,10 @@ export type CameraAudioFeatures = {
  * @param streamHeight - Native stream height in pixels
  * @returns Detect dimensions with even values, or null if inputs are invalid
  */
+
+// Target size for the smaller dimension (width or height) for detect streams
+export const DETECT_TARGET_PX = 720;
+
 export function calculateDetectDimensions(
   streamWidth: number,
   streamHeight: number,
@@ -139,7 +143,7 @@ export function calculateDetectDimensions(
   }
 
   const smallerDim = Math.min(streamWidth, streamHeight);
-  const target = Math.min(720, smallerDim);
+  const target = Math.min(DETECT_TARGET_PX, smallerDim);
   const scale = target / smallerDim;
 
   let width = Math.round(streamWidth * scale);
