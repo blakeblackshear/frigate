@@ -127,7 +127,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
 
     dpkg -i *.deb
     rm *.deb
-    apt-get install -f -y
+    apt-get -qq install -f -y
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
