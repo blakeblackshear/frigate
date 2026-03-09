@@ -87,8 +87,10 @@ import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
 import {
   buildConfigDataForPath,
+  parseProfileFromSectionPath,
   prepareSectionSavePayload,
 } from "@/utils/configUtil";
+import type { ProfileState } from "@/types/profile";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import SaveAllPreviewPopover, {
@@ -621,6 +623,22 @@ export default function Settings() {
     Record<string, unknown>
   >({});
 
+  // Profile editing state
+  const [editingProfile, setEditingProfile] = useState<
+    Record<string, string | null>
+  >({});
+  const [newProfiles, setNewProfiles] = useState<string[]>([]);
+
+  const allProfileNames = useMemo(() => {
+    if (!config) return [];
+    const names = new Set<string>();
+    Object.values(config.cameras).forEach((cam) => {
+      Object.keys(cam.profiles ?? {}).forEach((p) => names.add(p));
+    });
+    newProfiles.forEach((p) => names.add(p));
+    return [...names].sort();
+  }, [config, newProfiles]);
+
   const navigate = useNavigate();
 
   const cameras = useMemo(() => {
@@ -692,11 +710,20 @@ export default function Settings() {
 
         const { scope, cameraName, sectionPath } =
           parsePendingDataKey(pendingDataKey);
+        const { isProfile, profileName, actualSection } =
+          parseProfileFromSectionPath(sectionPath);
         const flattened = flattenOverrides(payload.sanitizedOverrides);
+        const displaySection = isProfile ? actualSection : sectionPath;
 
         flattened.forEach(({ path, value }) => {
-          const fieldPath = path ? `${sectionPath}.${path}` : sectionPath;
-          items.push({ scope, cameraName, fieldPath, value });
+          const fieldPath = path ? `${displaySection}.${path}` : displaySection;
+          items.push({
+            scope,
+            cameraName,
+            profileName: isProfile ? profileName : undefined,
+            fieldPath,
+            value,
+          });
         });
       },
     );
@@ -726,15 +753,20 @@ export default function Settings() {
         level = "global";
       }
 
+      // For profile keys like "profiles.armed.detect", extract the actual section
+      const { actualSection } = parseProfileFromSectionPath(sectionPath);
+
       if (level === "camera") {
-        return CAMERA_SECTION_MAPPING[sectionPath] as SettingsType | undefined;
+        return CAMERA_SECTION_MAPPING[actualSection] as
+          | SettingsType
+          | undefined;
       }
       return (
-        (GLOBAL_SECTION_MAPPING[sectionPath] as SettingsType | undefined) ??
-        (ENRICHMENTS_SECTION_MAPPING[sectionPath] as
+        (GLOBAL_SECTION_MAPPING[actualSection] as SettingsType | undefined) ??
+        (ENRICHMENTS_SECTION_MAPPING[actualSection] as
           | SettingsType
           | undefined) ??
-        (SYSTEM_SECTION_MAPPING[sectionPath] as SettingsType | undefined)
+        (SYSTEM_SECTION_MAPPING[actualSection] as SettingsType | undefined)
       );
     },
     [],
@@ -884,6 +916,16 @@ export default function Settings() {
 
     setPendingDataBySection({});
     setUnsavedChanges(false);
+    setEditingProfile({});
+
+    // Clear new profiles that don't exist in saved config
+    if (config) {
+      const savedNames = new Set<string>();
+      Object.values(config.cameras).forEach((cam) => {
+        Object.keys(cam.profiles ?? {}).forEach((p) => savedNames.add(p));
+      });
+      setNewProfiles((prev) => prev.filter((p) => savedNames.has(p)));
+    }
 
     setSectionStatusByKey((prev) => {
       const updated = { ...prev };
@@ -899,7 +941,7 @@ export default function Settings() {
       }
       return updated;
     });
-  }, [pendingDataBySection, pendingKeyToMenuKey]);
+  }, [pendingDataBySection, pendingKeyToMenuKey, config]);
 
   const handleDialog = useCallback(
     (save: boolean) => {
@@ -969,6 +1011,75 @@ export default function Settings() {
       document.title = t("documentTitle.default");
     }
   }, [t, contentMobileOpen]);
+
+  // Profile state handlers
+  const handleSelectProfile = useCallback(
+    (camera: string, section: string, profile: string | null) => {
+      const key = `${camera}::${section}`;
+      setEditingProfile((prev) => {
+        if (profile === null) {
+          const { [key]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [key]: profile };
+      });
+    },
+    [],
+  );
+
+  const handleAddProfile = useCallback((name: string) => {
+    setNewProfiles((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  }, []);
+
+  const handleDeleteProfileSection = useCallback(
+    async (camera: string, section: string, profile: string) => {
+      try {
+        await axios.put("config/set", {
+          config_data: {
+            cameras: {
+              [camera]: {
+                profiles: {
+                  [profile]: {
+                    [section]: "",
+                  },
+                },
+              },
+            },
+          },
+        });
+        await mutate("config");
+        // Switch back to base config
+        handleSelectProfile(camera, section, null);
+        toast.success(
+          t("toast.save.success", {
+            ns: "common",
+          }),
+        );
+      } catch {
+        toast.error(t("toast.save.error.title", { ns: "common" }));
+      }
+    },
+    [handleSelectProfile, t],
+  );
+
+  const profileState: ProfileState = useMemo(
+    () => ({
+      editingProfile,
+      newProfiles,
+      allProfileNames,
+      onSelectProfile: handleSelectProfile,
+      onAddProfile: handleAddProfile,
+      onDeleteProfileSection: handleDeleteProfileSection,
+    }),
+    [
+      editingProfile,
+      newProfiles,
+      allProfileNames,
+      handleSelectProfile,
+      handleAddProfile,
+      handleDeleteProfileSection,
+    ],
+  );
 
   const handleSectionStatusChange = useCallback(
     (sectionKey: string, level: "global" | "camera", status: SectionStatus) => {
@@ -1244,6 +1355,7 @@ export default function Settings() {
                     onSectionStatusChange={handleSectionStatusChange}
                     pendingDataBySection={pendingDataBySection}
                     onPendingDataChange={handlePendingDataChange}
+                    profileState={profileState}
                   />
                 );
               })()}

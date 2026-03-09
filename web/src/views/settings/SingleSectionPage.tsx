@@ -5,6 +5,7 @@ import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
 import type { ConfigSectionData } from "@/types/configForm";
+import type { ProfileState } from "@/types/profile";
 import { getSectionConfig } from "@/utils/configUtil";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
@@ -26,6 +27,7 @@ export type SettingsPageProps = {
     cameraName: string | undefined,
     data: ConfigSectionData | null,
   ) => void;
+  profileState?: ProfileState;
 };
 
 export type SectionStatus = {
