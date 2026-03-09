@@ -3,7 +3,7 @@ import { Calendar } from "../ui/calendar";
 import { ButtonHTMLAttributes, useEffect, useMemo, useRef } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
-import { type DayButtonProps, TZDate } from "react-day-picker";
+import { type DayButtonProps } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
 import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { cn } from "@/lib/utils";
@@ -38,60 +38,46 @@ export default function ReviewActivityCalendar({
   }, []);
 
   const modifiers = useMemo(() => {
-    const recordings: Date[] = [];
-    const alerts: Date[] = [];
-    const detections: Date[] = [];
+    const recordingsSet = new Set<string>();
+    const alertsSet = new Set<string>();
+    const detectionsSet = new Set<string>();
 
-    // Handle recordings
     if (recordingsSummary) {
-      Object.keys(recordingsSummary).forEach((date) => {
-        if (date === LAST_24_HOURS_KEY) {
-          return;
+      for (const date of Object.keys(recordingsSummary)) {
+        if (date !== LAST_24_HOURS_KEY) {
+          recordingsSet.add(date);
         }
-
-        const parts = date.split("-");
-        const cal = new TZDate(date + "T00:00:00", timezone);
-
-        cal.setFullYear(
-          parseInt(parts[0]),
-          parseInt(parts[1]) - 1,
-          parseInt(parts[2]),
-        );
-
-        recordings.push(cal);
-      });
+      }
     }
 
-    // Handle reviews if present
     if (reviewSummary) {
-      Object.entries(reviewSummary).forEach(([date, data]) => {
-        if (date === LAST_24_HOURS_KEY) {
-          return;
-        }
-
-        const parts = date.split("-");
-        const cal = new TZDate(date + "T00:00:00", timezone);
-
-        cal.setFullYear(
-          parseInt(parts[0]),
-          parseInt(parts[1]) - 1,
-          parseInt(parts[2]),
-        );
+      for (const [date, data] of Object.entries(reviewSummary)) {
+        if (date === LAST_24_HOURS_KEY) continue;
 
         if (data.total_alert > data.reviewed_alert) {
-          alerts.push(cal);
+          alertsSet.add(date);
         } else if (data.total_detection > data.reviewed_detection) {
-          detections.push(cal);
+          detectionsSet.add(date);
         }
-      });
+      }
     }
 
-    return { alerts, detections, recordings };
-  }, [reviewSummary, recordingsSummary, timezone]);
+    const formatDay = (day: Date) => {
+      const y = day.getFullYear();
+      const m = String(day.getMonth() + 1).padStart(2, "0");
+      const d = String(day.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+
+    return {
+      recordings: (day: Date) => recordingsSet.has(formatDay(day)),
+      alerts: (day: Date) => alertsSet.has(formatDay(day)),
+      detections: (day: Date) => detectionsSet.has(formatDay(day)),
+    };
+  }, [reviewSummary, recordingsSummary]);
 
   return (
     <Calendar
-      key={selectedDay ? selectedDay.toISOString() : "reset"}
       mode="single"
       disabled={disabledDates}
       showOutsideDays={false}
@@ -223,7 +209,6 @@ export function TimezoneAwareCalendar({
 
   return (
     <Calendar
-      key={selectedDay ? selectedDay.toISOString() : "reset"}
       mode="single"
       disabled={disabledDates}
       showOutsideDays={false}
