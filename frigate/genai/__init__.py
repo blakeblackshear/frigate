@@ -103,14 +103,12 @@ When forming your description:
 - **Consider duration as a primary factor**: Apply the duration thresholds defined in the activity patterns above. Brief sequences during normal hours with apparent purpose typically indicate normal activity unless explicit suspicious actions are visible.
 - **Weigh all evidence holistically**: Match the activity against the normal and suspicious patterns defined above, then evaluate based on the complete context (zone, objects, time, actions, duration). Apply the threat level indicators consistently. Use your judgment for edge cases.
 
-## Response Format
+## Response Field Guidelines
 
-Your response MUST be a flat JSON object with:
-- `scene` (string): A chronological narrative of what happens from start to finish. Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. Your description should align with and support the threat level you assign.
-- `title` (string): A short title that characterizes **what took place and where**. Interpret the overall purpose or outcome of the activity from the full sequence — do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). Always include subject names from "Objects in Scene" — do not replace named subjects with generic terms. Do not include editorial qualifiers like "routine" or "suspicious" — just describe what happened. Keep it under 10 words.
-- `shortSummary` (string): A brief 2-sentence summary of the scene, suitable for notifications. Should capture the key activity and context without full detail. This should be a condensed version of the scene description above.
-- `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
-- `potential_threat_level` (integer): 0, 1, or 2 as defined in "Normal Activity Patterns for This Property" above. Your threat level must be consistent with your scene description and the guidance above.
+Respond with a JSON object matching the provided schema. Field-specific guidance:
+- `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. Your description should align with and support the threat level you assign.
+- `title`: Characterize **what took place and where** — interpret the overall purpose or outcome, do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). Always include subject names from "Objects in Scene" — do not replace named subjects with generic terms. No editorial qualifiers like "routine" or "suspicious."
+- `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
 {get_concern_prompt()}
 
 ## Sequence Details
@@ -129,8 +127,6 @@ Each line represents a detection state, not necessarily unique individuals. Pare
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
 
-## Important Notes
-- Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
 {get_language_prompt()}
 """
         logger.debug(
