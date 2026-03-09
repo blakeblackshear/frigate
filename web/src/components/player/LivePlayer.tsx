@@ -3,7 +3,6 @@ import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
@@ -49,7 +48,6 @@ type LivePlayerProps = {
   autoLive?: boolean;
   showStats?: boolean;
   onClick?: () => void;
-  mediaContentStyle?: CSSProperties;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
   onResetLiveMode?: () => void;
@@ -75,7 +73,6 @@ export default function LivePlayer({
   autoLive = true,
   showStats = false,
   onClick,
-  mediaContentStyle,
   setFullResolution,
   onError,
   onResetLiveMode,
@@ -302,7 +299,6 @@ export default function LivePlayer({
         <MSEPlayer
           key={"mse_" + key}
           className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
-          style={mediaContentStyle}
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
@@ -387,7 +383,6 @@ export default function LivePlayer({
             ? "visible"
             : "invisible",
         )}
-        style={mediaContentStyle}
       >
         <AutoUpdatingCameraImage
           className="pointer-events-none size-full"
