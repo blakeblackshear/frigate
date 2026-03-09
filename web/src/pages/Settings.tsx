@@ -1146,15 +1146,22 @@ export default function Settings() {
       Record<SettingsType, Pick<SectionStatus, "hasChanges" | "isOverridden">>
     > = {};
 
+    // Build a set of menu keys that have pending changes for this camera
+    const pendingMenuKeys = new Set<string>();
+    const cameraPrefix = `${selectedCamera}::`;
+    for (const key of Object.keys(pendingDataBySection)) {
+      if (key.startsWith(cameraPrefix)) {
+        const menuKey = pendingKeyToMenuKey(key);
+        if (menuKey) pendingMenuKeys.add(menuKey);
+      }
+    }
+
     // Set override status for all camera sections using the shared mapping
     Object.entries(CAMERA_SECTION_MAPPING).forEach(
       ([sectionKey, settingsKey]) => {
         const isOverridden = cameraOverrides.includes(sectionKey);
-        // Check if there are pending changes for this camera and section
-        const pendingDataKey = `${selectedCamera}::${sectionKey}`;
-        const hasChanges = pendingDataKey in pendingDataBySection;
         overrideMap[settingsKey] = {
-          hasChanges,
+          hasChanges: pendingMenuKeys.has(settingsKey),
           isOverridden,
         };
       },
@@ -1173,7 +1180,12 @@ export default function Settings() {
       });
       return merged;
     });
-  }, [selectedCamera, cameraOverrides, pendingDataBySection]);
+  }, [
+    selectedCamera,
+    cameraOverrides,
+    pendingDataBySection,
+    pendingKeyToMenuKey,
+  ]);
 
   const renderMenuItemLabel = useCallback(
     (key: SettingsType) => {
