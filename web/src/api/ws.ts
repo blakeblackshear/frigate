@@ -42,10 +42,8 @@ type Listener = () => void;
 const wsState: WsState = {};
 const wsTopicListeners = new Map<string, Set<Listener>>();
 
-/**
- * Reset all module-level state. Called on WsProvider unmount to prevent
- * stale data from leaking across mount/unmount cycles (e.g. HMR, logout).
- */
+// Reset all module-level state. Called on WsProvider unmount to prevent
+// stale data from leaking across mount/unmount cycles (e.g. HMR, logout)
 export function resetWsStore() {
   for (const key of Object.keys(wsState)) {
     delete wsState[key];
@@ -56,10 +54,8 @@ export function resetWsStore() {
   wsMessageIdCounter = 0;
 }
 
-/**
- * Parse and apply a raw WS message synchronously.
- * Called directly from WsProvider's onmessage handler.
- */
+// Parse and apply a raw WS message synchronously.
+// Called directly from WsProvider's onmessage handler.
 export function processWsMessage(raw: string) {
   const data: Update = JSON.parse(raw);
   if (!data) return;
@@ -101,7 +97,7 @@ function applyTopicUpdate(topic: string, newVal: unknown) {
   }
 }
 
-// --- Subscriptions ---
+// Subscriptions
 
 export function subscribeWsTopic(
   topic: string,
@@ -123,17 +119,12 @@ export function getWsTopicValue(topic: string): unknown {
   return wsState[topic];
 }
 
-// ---------------------------------------------------------------------------
 // Feed message subscribers
-// ---------------------------------------------------------------------------
-
 const wsMessageSubscribers = new Set<(msg: WsFeedMessage) => void>();
 let wsMessageIdCounter = 0;
 
-// ---------------------------------------------------------------------------
 // Camera activity expansion
-// ---------------------------------------------------------------------------
-
+//
 // Cache the last raw camera_activity JSON string so we can skip JSON.parse
 // and the entire expansion when nothing has changed. This avoids creating
 // fresh objects (which defeat Object.is and force expensive isEqual deep
@@ -262,9 +253,7 @@ export function useWs(watchTopic: string, publishTopic: string) {
   return { value, send };
 }
 
-// ---------------------------------------------------------------------------
 // Convenience hooks
-// ---------------------------------------------------------------------------
 
 export function useEnabledState(camera: string): {
   payload: ToggleableSetting;
