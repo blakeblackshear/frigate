@@ -53,8 +53,12 @@ import {
   CAMERA_ZOOM_MIN_SCALE,
   CameraZoomRuntimeTransform,
   clampScale,
+  fromPersistedCameraZoomState,
   getCursorRelativeZoomTransform,
   getNextScaleFromWheelDelta,
+  loadPersistedCameraZoomState,
+  savePersistedCameraZoomState,
+  toPersistedCameraZoomState,
 } from "@/utils/cameraZoom";
 
 type DraggableGridLayoutProps = {
@@ -434,6 +438,49 @@ export default function DraggableGridLayout({
   const [cameraZoomStates, setCameraZoomStates] = useState<
     Record<string, CameraZoomRuntimeTransform>
   >({});
+  const cameraZoomViewportRefs = useRef<Record<string, HTMLDivElement | null>>(
+    {},
+  );
+
+  const getCardZoomDimensions = useCallback((cameraName: string) => {
+    const viewport = cameraZoomViewportRefs.current[cameraName];
+    const content = viewport?.firstElementChild as HTMLElement | null;
+    const viewportWidth = viewport?.clientWidth ?? 0;
+    const viewportHeight = viewport?.clientHeight ?? 0;
+
+    return {
+      viewportWidth,
+      viewportHeight,
+      contentWidth: content?.clientWidth ?? viewportWidth,
+      contentHeight: content?.clientHeight ?? viewportHeight,
+    };
+  }, []);
+
+  const hydrateCameraZoomFromStorage = useCallback(
+    (cameraName: string) => {
+      setCameraZoomStates((prev) => {
+        if (prev[cameraName]) {
+          return prev;
+        }
+
+        const persisted = loadPersistedCameraZoomState(cameraName);
+        if (!persisted) {
+          return prev;
+        }
+
+        const dimensions = getCardZoomDimensions(cameraName);
+        if (!dimensions.viewportWidth || !dimensions.viewportHeight) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [cameraName]: fromPersistedCameraZoomState(persisted, dimensions),
+        };
+      });
+    },
+    [getCardZoomDimensions],
+  );
 
   const getDefaultZoomTransform = useCallback(
     (): CameraZoomRuntimeTransform => ({
@@ -467,6 +514,15 @@ export default function DraggableGridLayout({
           cursorX,
           cursorY,
         );
+        const content = event.currentTarget.firstElementChild as HTMLElement | null;
+        const persisted = toPersistedCameraZoomState(next, {
+          viewportWidth: bounds.width,
+          viewportHeight: bounds.height,
+          contentWidth: content?.clientWidth ?? bounds.width,
+          contentHeight: content?.clientHeight ?? bounds.height,
+        });
+
+        savePersistedCameraZoomState(cameraName, persisted);
 
         return {
           ...prev,
@@ -476,6 +532,12 @@ export default function DraggableGridLayout({
     },
     [getDefaultZoomTransform],
   );
+
+  useEffect(() => {
+    cameras.forEach((camera) => {
+      hydrateCameraZoomFromStorage(camera.name);
+    });
+  }, [cameras, hydrateCameraZoomFromStorage]);
 
   useEffect(() => {
     const initialStreamStatsState = getStreamStatsFromStorage();
@@ -716,6 +778,13 @@ export default function DraggableGridLayout({
                 >
                   <div
                     className="size-full overflow-hidden rounded-lg md:rounded-2xl"
+                    ref={(node) => {
+                      cameraZoomViewportRefs.current[camera.name] = node;
+
+                      if (node) {
+                        hydrateCameraZoomFromStorage(camera.name);
+                      }
+                    }}
                     onWheel={(event) => handleCardWheelZoom(camera.name, event)}
                   >
                     <div
