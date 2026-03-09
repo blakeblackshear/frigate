@@ -5,20 +5,23 @@
     "camera": "Paramètres des caméras - Frigate",
     "classification": "Paramètres de classification - Frigate",
     "motionTuner": "Réglage de la détection de mouvement - Frigate",
-    "general": "Paramètres de l'interface utilisateur - Frigate",
+    "general": "Paramètres du profil - Frigate",
     "masksAndZones": "Éditeur de masques et de zones - Frigate",
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
     "enrichments": "Paramètres d'enrichissements - Frigate",
     "cameraManagement": "Gestion des caméras - Frigate",
-    "cameraReview": "Paramètres des activités caméra - Frigate"
+    "cameraReview": "Paramètres des activités caméra - Frigate",
+    "globalConfig": "Configuration globale - Frigate",
+    "cameraConfig": "Configuration de la caméra - Frigate",
+    "maintenance": "Maintenance - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
     "classification": "Classification",
     "masksAndZones": "Masques / Zones",
-    "motionTuner": "Réglage de la détection de mouvement",
+    "motionTuner": "Ajusteur de la détection de mouvement",
     "debug": "Débogage",
     "cameras": "Paramètres des caméras",
     "users": "Utilisateurs",
@@ -28,7 +31,62 @@
     "triggers": "Déclencheurs",
     "roles": "Rôles",
     "cameraManagement": "Gestion",
-    "cameraReview": "Activités"
+    "cameraReview": "Activités",
+    "general": "Général",
+    "globalConfig": "Configuration globale",
+    "system": "Système",
+    "integrations": "Intégrations",
+    "profileSettings": "Paramètres du profil",
+    "globalDetect": "Détection d'objets",
+    "globalRecording": "Enregistrement",
+    "globalSnapshots": "Instantanés",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Détection de mouvement",
+    "globalObjects": "Objets",
+    "globalReview": "Activités",
+    "globalAudioEvents": "Événements audio",
+    "globalLivePlayback": "Lecture en direct",
+    "globalTimestampStyle": "Format d'horodatage",
+    "systemDatabase": "Base de données",
+    "systemTls": "TLS",
+    "systemAuthentication": "Authentification",
+    "systemNetworking": "Réseau",
+    "systemProxy": "Proxy",
+    "systemUi": "Interface",
+    "systemLogging": "Journalisation",
+    "systemEnvironmentVariables": "Variables d'environnement",
+    "systemTelemetry": "Télémétrie",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "Matériel de détection",
+    "systemDetectionModel": "Modèle de détection",
+    "systemMqtt": "MQTT",
+    "integrationSemanticSearch": "Recherche sémantique",
+    "integrationGenerativeAi": "IA générative",
+    "integrationFaceRecognition": "Reconnaissance faciale",
+    "integrationLpr": "Lecture de plaques d'immatriculation",
+    "integrationObjectClassification": "Classification d'objets",
+    "integrationAudioTranscription": "Transcription audio",
+    "cameraDetect": "Détection d'objets",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Enregistrement",
+    "cameraSnapshots": "Instantanés",
+    "cameraMotion": "Détection de mouvement",
+    "cameraObjects": "Objets",
+    "cameraConfigReview": "Activités",
+    "cameraAudioEvents": "Évènements audio",
+    "cameraAudioTranscription": "Transcription audio",
+    "cameraNotifications": "Notifications",
+    "cameraLivePlayback": "Lecture en direct",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Reconnaissance faciale",
+    "cameraLpr": "Lecture de plaques d'immatriculation",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "Interface de la caméra",
+    "cameraTimestampStyle": "Style d'horodatage",
+    "cameraMqtt": "MQTT de la caméra",
+    "maintenance": "Maintenance"
   },
   "dialog": {
     "unsavedChanges": {
@@ -41,7 +99,7 @@
     "noCamera": "Aucune caméra"
   },
   "general": {
-    "title": "Paramètres de l'interface utilisateur",
+    "title": "Paramètres du profil",
     "liveDashboard": {
       "title": "Tableau de bord en direct",
       "automaticLiveView": {
@@ -723,7 +781,7 @@
       "readTheDocumentation": "Lire la documentation",
       "reindexNow": {
         "label": "Réindexer maintenant",
-        "desc": "La réindexation va régénérer les embeddings pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un temps considérable en fonction du nombre d'objets suivis.",
+        "desc": "La réindexation va régénérer les intégrations pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un temps considérable en fonction du nombre d'objets suivis.",
         "confirmTitle": "Confirmer la réindexation",
         "confirmButton": "Réindexer",
         "success": "La réindexation a démarré avec succès.",
@@ -1314,6 +1372,23 @@
       "toast": {
         "success": "La configuration de la classification des activités a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
       }
+    }
+  },
+  "saveAllPreview": {
+    "title": "Modifications à enregistrer",
+    "triggerLabel": "Examiner les modifications en attente",
+    "empty": "Aucune modification en attente",
+    "scope": {
+      "label": "Portée",
+      "global": "Global",
+      "camera": "Caméra : {{cameraName}}"
+    },
+    "field": {
+      "label": "Champ"
+    },
+    "value": {
+      "label": "Nouvelle valeur",
+      "reset": "Réinitialiser"
     }
   }
 }

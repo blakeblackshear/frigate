@@ -11,13 +11,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Échec du renommage de l'exportation : {{errorMessage}}"
+      "renameExportFailed": "Échec du renommage de l'exportation : {{errorMessage}}",
+      "assignCaseFailed": "Échec de la mise à jour de l'affectation au dossier : {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Partager l'exportation",
     "downloadVideo": "Télécharger la vidéo",
     "editName": "Modifier le nom",
-    "deleteExport": "Supprimer l'exportation"
+    "deleteExport": "Supprimer l'exportation",
+    "assignToCase": "Ajouter à un dossier"
+  },
+  "headings": {
+    "cases": "Dossiers",
+    "uncategorizedExports": "Exportations non classées"
+  },
+  "caseDialog": {
+    "title": "Ajouter à un dossier",
+    "description": "Choisissez un dossier existant ou créez en un nouveau.",
+    "selectLabel": "Dossier",
+    "newCaseOption": "Créer un nouveau dossier",
+    "nameLabel": "Nom du dossier",
+    "descriptionLabel": "Description"
   }
 }
