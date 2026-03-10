@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import List
 from urllib.parse import unquote
 
-import cv2
 import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
