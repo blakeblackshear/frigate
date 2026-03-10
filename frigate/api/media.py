@@ -37,7 +37,6 @@ from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
-    CLIPS_DIR,
     INSTALL_DIR,
     MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
