@@ -463,6 +463,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         thumbs = []
         for idx, thumb_path in enumerate(frame_paths):
             thumb_data = cv2.imread(thumb_path)
+
+            if thumb_data is None:
+                logger.warning(
+                    "Could not read preview frame at %s, skipping", thumb_path
+                )
+                continue
+
             ret, jpg = cv2.imencode(
                 ".jpg", thumb_data, [int(cv2.IMWRITE_JPEG_QUALITY), 100]
             )
