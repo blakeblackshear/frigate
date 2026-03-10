@@ -15,7 +15,6 @@ class ReviewMetadata(BaseModel):
     )
     confidence: float = Field(
         ge=0.0,
-        le=1.0,
         description="Confidence in the analysis, from 0 to 1.",
     )
     potential_threat_level: int = Field(
