@@ -22,9 +22,7 @@ from frigate.review.types import SeverityEnum
 from frigate.util.builtin import sanitize_float
 from frigate.util.image import (
     area,
-    calculate_region,
-    draw_box_with_label,
-    draw_timestamp,
+    get_snapshot_bytes,
     is_better_thumbnail,
 )
 from frigate.util.object import box_inside
@@ -495,89 +493,24 @@ class TrackedObject:
             )
             return None, None
 
-        if bounding_box:
-            thickness = 2
-            color = self.colormap.get(self.obj_data["label"], (255, 255, 255))
-
-            # draw the bounding boxes on the frame
-            box = self.thumbnail_data["box"]
-            draw_box_with_label(
-                best_frame,
-                box[0],
-                box[1],
-                box[2],
-                box[3],
-                self.obj_data["label"],
-                f"{int(self.thumbnail_data['score'] * 100)}% {int(self.thumbnail_data['area'])}"
-                + (
-                    f" {self.thumbnail_data['current_estimated_speed']:.1f}"
-                    if self.thumbnail_data["current_estimated_speed"] != 0
-                    else ""
-                ),
-                thickness=thickness,
-                color=color,
-            )
-
-            # draw any attributes
-            for attribute in self.thumbnail_data["attributes"]:
-                box = attribute["box"]
-                box_area = int((box[2] - box[0]) * (box[3] - box[1]))
-                draw_box_with_label(
-                    best_frame,
-                    box[0],
-                    box[1],
-                    box[2],
-                    box[3],
-                    attribute["label"],
-                    f"{attribute['score']:.0%} {str(box_area)}",
-                    thickness=thickness,
-                    color=color,
-                )
-
-        if crop:
-            box = self.thumbnail_data["box"]
-            box_size = 300
-            region = calculate_region(
-                best_frame.shape,
-                box[0],
-                box[1],
-                box[2],
-                box[3],
-                box_size,
-                multiplier=1.1,
-            )
-            best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
-
-        if height:
-            width = int(height * best_frame.shape[1] / best_frame.shape[0])
-            best_frame = cv2.resize(
-                best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
-            )
-        if timestamp:
-            colors = self.camera_config.timestamp_style.color
-            draw_timestamp(
-                best_frame,
-                self.thumbnail_data["frame_time"],
-                self.camera_config.timestamp_style.format,
-                font_effect=self.camera_config.timestamp_style.effect,
-                font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=(colors.blue, colors.green, colors.red),
-                position=self.camera_config.timestamp_style.position,
-            )
-
-        quality_params = []
-
-        if ext == "jpg":
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
-        elif ext == "webp":
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
-
-        ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
-
-        if ret:
-            return jpg.tobytes(), frame_time
-        else:
-            return None, None
+        return get_snapshot_bytes(
+            best_frame,
+            frame_time,
+            ext=ext,
+            timestamp=timestamp,
+            bounding_box=bounding_box,
+            crop=crop,
+            height=height,
+            quality=quality,
+            label=self.obj_data["label"],
+            box=self.thumbnail_data["box"],
+            score=self.thumbnail_data["score"],
+            area=self.thumbnail_data["area"],
+            attributes=self.thumbnail_data["attributes"],
+            color=self.colormap.get(self.obj_data["label"], (255, 255, 255)),
+            timestamp_style=self.camera_config.timestamp_style,
+            estimated_speed=self.thumbnail_data["current_estimated_speed"],
+        )
 
     def write_snapshot_to_disk(self) -> None:
         snapshot_config: SnapshotsConfig = self.camera_config.snapshots

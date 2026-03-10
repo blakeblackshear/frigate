@@ -45,8 +45,8 @@ from frigate.const import (
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
-from frigate.util.file import get_event_thumbnail_bytes
-from frigate.util.image import get_image_from_recording
+from frigate.util.file import get_event_snapshot_bytes, get_event_thumbnail_bytes
+from frigate.util.image import get_image_from_recording, get_image_quality_params
 
 logger = logging.getLogger(__name__)
 
@@ -147,14 +147,7 @@ async def latest_frame(
         "paths": params.paths,
         "regions": params.regions,
     }
-    quality = params.quality
-
-    if extension == Extension.png:
-        quality_params = None
-    elif extension == Extension.webp:
-        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-    else:  # jpg or jpeg
-        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+    quality_params = get_image_quality_params(extension.value, params.quality)
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -729,7 +722,7 @@ async def vod_clip(
 
 @router.get(
     "/events/{event_id}/snapshot.jpg",
-    description="Returns a snapshot image for the specified object id. NOTE: The query params only take affect while the event is in-progress. Once the event has ended the snapshot configuration is used.",
+    description="Returns a snapshot image for the specified object id.",
 )
 async def event_snapshot(
     request: Request,
@@ -748,11 +741,19 @@ async def event_snapshot(
                 content={"success": False, "message": "Snapshot not available"},
                 status_code=404,
             )
-        # read snapshot from disk
-        with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
-        ) as image_file:
-            jpg_bytes = image_file.read()
+        jpg_bytes, frame_time = get_event_snapshot_bytes(
+            event,
+            ext="jpg",
+            timestamp=params.timestamp,
+            bounding_box=params.bbox,
+            crop=params.crop,
+            height=params.height,
+            quality=params.quality,
+            timestamp_style=request.app.frigate_config.cameras[
+                event.camera
+            ].timestamp_style,
+            colormap=request.app.frigate_config.model.colormap,
+        )
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
@@ -865,13 +866,11 @@ async def event_thumbnail(
             (0, 0, 0),
         )
 
-        quality_params = None
-        if extension in (Extension.jpg, Extension.jpeg):
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == Extension.webp:
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-
-        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
+        _, img = cv2.imencode(
+            f".{extension.value}",
+            thumbnail,
+            get_image_quality_params(extension.value, None),
+        )
         thumbnail_bytes = img.tobytes()
 
     return Response(
