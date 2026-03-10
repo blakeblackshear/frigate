@@ -109,7 +109,7 @@ genai:
 
 To use a different Gemini-compatible API endpoint, set the `provider_options` with the `base_url` key to your provider's API URL. For example:
 
-```
+```yaml {4,5}
 genai:
   provider: gemini
   ...
@@ -152,7 +152,7 @@ To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` env
 
 For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
 
-```yaml
+```yaml {5,6}
 genai:
   provider: openai
   base_url: http://your-llama-server

@@ -77,7 +77,7 @@ Configure the `streams` option with a "friendly name" for your stream followed b
 
 Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the `streams` configuration, only go2rtc stream names.
 
-```yaml
+```yaml {3,6,8,25-29}
 go2rtc:
   streams:
     test_cam:
@@ -116,7 +116,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
 - For internal/local access, unless you are running through the HA App, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
 
-  ```yaml title="config.yml"
+  ```yaml title="config.yml" {4-7}
   go2rtc:
     streams:
       test_cam: ...
@@ -154,7 +154,7 @@ If not running in host mode, port 8555 will need to be mapped for the container:
 
 docker-compose.yml
 
-```yaml
+```yaml {4-6}
 services:
   frigate:
     ...

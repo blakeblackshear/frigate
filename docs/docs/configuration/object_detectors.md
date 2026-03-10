@@ -572,7 +572,7 @@ $ docker run --device=/dev/kfd --device=/dev/dri  \
 
 When using Docker Compose:
 
-```yaml
+```yaml {4-6}
 services:
   frigate:
     ...
@@ -603,7 +603,7 @@ $ docker run -e HSA_OVERRIDE_GFX_VERSION=10.0.0 \
 
 When using Docker Compose:
 
-```yaml
+```yaml {4-5}
 services:
   frigate:
     ...

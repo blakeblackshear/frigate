@@ -117,12 +117,13 @@ services:
   frigate:
     ...
     image: ghcr.io/blakeblackshear/frigate:stable
+    # highlight-next-line
     privileged: true
 ```
 
 ##### Docker Run CLI - Privileged
 
-```bash
+```bash {4}
 docker run -d \
   --name frigate \
   ...
@@ -136,7 +137,7 @@ Only recent versions of Docker support the `CAP_PERFMON` capability. You can tes
 
 ##### Docker Compose - CAP_PERFMON
 
-```yaml
+```yaml {5,6}
 services:
   frigate:
     ...
@@ -147,7 +148,7 @@ services:
 
 ##### Docker Run CLI - CAP_PERFMON
 
-```bash
+```bash {4}
 docker run -d \
   --name frigate \
   ...
@@ -214,7 +215,7 @@ Additional configuration is needed for the Docker container to be able to access
 
 #### Docker Compose - Nvidia GPU
 
-```yaml
+```yaml {5-12}
 services:
   frigate:
     ...
@@ -231,7 +232,7 @@ services:
 
 #### Docker Run CLI - Nvidia GPU
 
-```bash
+```bash {4}
 docker run -d \
   --name frigate \
   ...
@@ -310,7 +311,7 @@ ffmpeg:
 If running Frigate through Docker, you either need to run in privileged mode or
 map the `/dev/video*` devices to Frigate. With Docker Compose add:
 
-```yaml
+```yaml {4-5}
 services:
   frigate:
     ...
@@ -320,7 +321,7 @@ services:
 
 Or with `docker run`:
 
-```bash
+```bash {4}
 docker run -d \
   --name frigate \
   ...
@@ -352,7 +353,7 @@ You will need to use the image with the nvidia container runtime:
 
 ### Docker Run CLI - Jetson
 
-```bash
+```bash {3}
 docker run -d \
   ...
   --runtime nvidia
@@ -361,7 +362,7 @@ docker run -d \
 
 ### Docker Compose - Jetson
 
-```yaml
+```yaml {5}
 services:
   frigate:
     ...
@@ -452,14 +453,14 @@ Restarting ffmpeg...
 
 you should try to uprade to FFmpeg 7. This can be done using this config option:
 
-```
+```yaml
 ffmpeg:
   path: "7.0"
 ```
 
 You can set this option globally to use FFmpeg 7 for all cameras or on camera level to use it only for specific cameras. Do not confuse this option with:
 
-```
+```yaml
 cameras:
   name:
     ffmpeg:
@@ -481,7 +482,7 @@ Make sure to follow the [Synaptics specific installation instructions](/frigate/
 
 Add one of the following FFmpeg presets to your `config.yml` to enable hardware video processing:
 
-```yaml
+```yaml {2}
 ffmpeg:
   hwaccel_args: -c:v h264_v4l2m2m
   input_args: preset-rtsp-restream

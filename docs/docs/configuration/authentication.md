@@ -232,7 +232,7 @@ The viewer role provides read-only access to all cameras in the UI and API. Cust
 
 ### Role Configuration Example
 
-```yaml
+```yaml {11-16}
 cameras:
   front_door:
     # ... camera config
