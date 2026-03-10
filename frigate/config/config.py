@@ -933,11 +933,6 @@ class FrigateConfig(FrigateBaseModel):
                         f"Camera {camera.name} has audio transcription enabled, but audio detection is not enabled for this camera. Audio detection must be enabled for cameras with audio transcription when it is disabled globally."
                     )
 
-        if self.plus_api and not self.snapshots.clean_copy:
-            logger.warning(
-                "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
-            )
-
         # Validate auth roles against cameras
         camera_names = set(self.cameras.keys())
 

@@ -32,11 +32,6 @@ class SnapshotsConfig(FrigateBaseModel):
         title="Enable snapshots",
         description="Enable or disable saving snapshots for all cameras; can be overridden per-camera.",
     )
-    clean_copy: bool = Field(
-        default=True,
-        title="Save clean copy",
-        description="Save an unannotated clean copy of snapshots in addition to annotated ones.",
-    )
     timestamp: bool = Field(
         default=False,
         title="Timestamp overlay",
@@ -68,9 +63,9 @@ class SnapshotsConfig(FrigateBaseModel):
         description="Retention settings for saved snapshots including default days and per-object overrides.",
     )
     quality: int = Field(
-        default=70,
-        title="JPEG quality",
-        description="JPEG encode quality for saved snapshots (0-100).",
+        default=60,
+        title="Snapshot quality",
+        description="Encode quality for saved snapshots (0-100).",
         ge=0,
         le=100,
     )

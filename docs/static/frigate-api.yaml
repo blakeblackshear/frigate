@@ -4929,10 +4929,7 @@ paths:
       tags:
         - Media
       summary: Event Snapshot
-      description: >-
-        Returns a snapshot image for the specified object id. NOTE: The query
-        params only take affect while the event is in-progress. Once the event
-        has ended the snapshot configuration is used.
+      description: Returns a snapshot image for the specified object id.
       operationId: event_snapshot_events__event_id__snapshot_jpg_get
       parameters:
         - name: event_id
@@ -4989,7 +4986,6 @@ paths:
             anyOf:
               - type: integer
               - type: "null"
-            default: 70
             title: Quality
       responses:
         "200":

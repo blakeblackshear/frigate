@@ -1208,7 +1208,7 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert frigate_config.cameras["back"].snapshots.bounding_box
-        assert frigate_config.cameras["back"].snapshots.quality == 70
+        assert frigate_config.cameras["back"].snapshots.quality == 60
 
     def test_global_snapshots_merge(self):
         config = {

@@ -547,7 +547,9 @@ class TrackedObjectProcessor(threading.Thread):
                     "has_clip": self.config.cameras[camera_name].record.enabled
                     and include_recording,
                     "has_snapshot": True,
+                    "snapshot_clean": True,
                     "type": source_type,
+                    "draw": draw,
                 },
             )
         )
@@ -603,6 +605,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "has_clip": self.config.cameras[camera_name].record.enabled
                     and include_recording,
                     "has_snapshot": True,
+                    "snapshot_clean": True,
                     "type": "api",
                     "recognized_license_plate": plate,
                     "recognized_license_plate_score": score,

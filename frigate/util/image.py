@@ -270,6 +270,229 @@ def draw_box_with_label(
     )
 
 
+def get_image_quality_params(ext: str, quality: Optional[int]) -> list[int]:
+    if ext in ("jpg", "jpeg"):
+        return [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
+
+    if ext == "webp":
+        return [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
+
+    return []
+
+
+def relative_box_to_absolute(
+    frame_shape: tuple[int, ...], box: list[float] | tuple[float, ...] | None
+) -> tuple[int, int, int, int] | None:
+    if box is None or len(box) != 4:
+        return None
+
+    frame_height = frame_shape[0]
+    frame_width = frame_shape[1]
+    x_min = int(box[0] * frame_width)
+    y_min = int(box[1] * frame_height)
+    x_max = x_min + int(box[2] * frame_width)
+    y_max = y_min + int(box[3] * frame_height)
+
+    x_min = max(0, min(frame_width - 1, x_min))
+    y_min = max(0, min(frame_height - 1, y_min))
+    x_max = max(x_min + 1, min(frame_width - 1, x_max))
+    y_max = max(y_min + 1, min(frame_height - 1, y_max))
+
+    return (x_min, y_min, x_max, y_max)
+
+
+def _format_snapshot_label(
+    score: float | None,
+    area: int | None,
+    box: tuple[int, int, int, int] | None,
+    estimated_speed: float = 0,
+) -> str:
+    score_value = score or 0
+    score_text = (
+        f"{int(score_value * 100)}%" if score_value <= 1 else f"{int(score_value)}%"
+    )
+
+    if area is None and box is not None:
+        area = int((box[2] - box[0]) * (box[3] - box[1]))
+
+    label = f"{score_text} {int(area or 0)}"
+    if estimated_speed:
+        label = f"{label} {estimated_speed:.1f}"
+
+    return label
+
+
+def draw_snapshot_bounding_boxes(
+    frame: np.ndarray,
+    label: str,
+    box: tuple[int, int, int, int] | None,
+    score: float | None,
+    area: int | None,
+    attributes: list[dict[str, Any]] | None,
+    color: tuple[int, int, int],
+    estimated_speed: float = 0,
+) -> None:
+    if box is None:
+        return
+
+    draw_box_with_label(
+        frame,
+        box[0],
+        box[1],
+        box[2],
+        box[3],
+        label,
+        _format_snapshot_label(score, area, box, estimated_speed),
+        thickness=2,
+        color=color,
+    )
+
+    for attribute in attributes or []:
+        attribute_box = attribute.get("box")
+        if attribute_box is None:
+            continue
+
+        box_area = int(
+            (attribute_box[2] - attribute_box[0])
+            * (attribute_box[3] - attribute_box[1])
+        )
+        draw_box_with_label(
+            frame,
+            attribute_box[0],
+            attribute_box[1],
+            attribute_box[2],
+            attribute_box[3],
+            attribute.get("label", "attribute"),
+            f"{attribute.get('score', 0):.0%} {box_area}",
+            thickness=2,
+            color=color,
+        )
+
+
+def _get_snapshot_overlay_box_label(
+    score: float | int | None, box: tuple[int, int, int, int]
+) -> str:
+    area = int((box[2] - box[0]) * (box[3] - box[1]))
+
+    if score is None:
+        return f"- {area}"
+
+    score_value = float(score)
+    score_text = (
+        f"{int(score_value * 100)}%" if score_value <= 1 else f"{int(score_value)}%"
+    )
+    return f"{score_text} {area}"
+
+
+def draw_snapshot_overlay_boxes(
+    frame: np.ndarray,
+    overlay_boxes: list[dict[str, Any]] | None,
+    default_label: str,
+    default_color: tuple[int, int, int],
+) -> None:
+    for overlay_box in overlay_boxes or []:
+        box = overlay_box.get("box")
+        if box is None:
+            continue
+
+        box_color = overlay_box.get("color", default_color)
+        color = (
+            tuple(box_color) if isinstance(box_color, (list, tuple)) else default_color
+        )
+        draw_box_with_label(
+            frame,
+            box[0],
+            box[1],
+            box[2],
+            box[3],
+            overlay_box.get("label", default_label),
+            _get_snapshot_overlay_box_label(overlay_box.get("score"), box),
+            thickness=2,
+            color=color,
+        )
+
+
+def get_snapshot_bytes(
+    frame: np.ndarray,
+    frame_time: float,
+    ext: str,
+    *,
+    timestamp: bool = False,
+    bounding_box: bool = False,
+    crop: bool = False,
+    height: int | None = None,
+    quality: int | None = None,
+    label: str,
+    box: tuple[int, int, int, int] | None,
+    score: float | None,
+    area: int | None,
+    attributes: list[dict[str, Any]] | None,
+    color: tuple[int, int, int],
+    overlay_boxes: list[dict[str, Any]] | None = None,
+    timestamp_style: Any | None = None,
+    estimated_speed: float = 0,
+) -> tuple[bytes | None, float]:
+    best_frame = frame.copy()
+    crop_box = box
+
+    if crop_box is None and overlay_boxes and len(overlay_boxes) == 1:
+        crop_box = overlay_boxes[0].get("box")
+
+    if bounding_box and box:
+        draw_snapshot_bounding_boxes(
+            best_frame,
+            label,
+            box,
+            score,
+            area,
+            attributes,
+            color,
+            estimated_speed,
+        )
+
+    if bounding_box and overlay_boxes:
+        draw_snapshot_overlay_boxes(best_frame, overlay_boxes, label, color)
+
+    if crop and crop_box:
+        region = calculate_region(
+            best_frame.shape,
+            crop_box[0],
+            crop_box[1],
+            crop_box[2],
+            crop_box[3],
+            300,
+            multiplier=1.1,
+        )
+        best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
+
+    if height:
+        width = int(height * best_frame.shape[1] / best_frame.shape[0])
+        best_frame = cv2.resize(
+            best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
+        )
+
+    if timestamp and timestamp_style is not None:
+        colors = timestamp_style.color
+        draw_timestamp(
+            best_frame,
+            frame_time,
+            timestamp_style.format,
+            font_effect=timestamp_style.effect,
+            font_thickness=timestamp_style.thickness,
+            font_color=(colors.blue, colors.green, colors.red),
+            position=timestamp_style.position,
+        )
+
+    ret, img = cv2.imencode(
+        f".{ext}", best_frame, get_image_quality_params(ext, quality)
+    )
+
+    if ret:
+        return img.tobytes(), frame_time
+
+    return None, frame_time
+
+
 def grab_cv2_contours(cnts):
     # if the length the contours tuple returned by cv2.findContours
     # is '2' then we are using either OpenCV v2.4, v4-beta, or
