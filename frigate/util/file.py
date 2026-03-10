@@ -55,36 +55,41 @@ def _event_snapshot_is_clean(event: Event) -> bool:
     return bool(event.data and event.data.get("snapshot_clean"))
 
 
-def load_event_snapshot_image(
+def get_event_snapshot_path(
     event: Event, *, clean_only: bool = False
-) -> tuple[ndarray | None, bool]:
+) -> tuple[str | None, bool]:
     clean_snapshot_paths = [
         os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"),
         os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"),
     ]
 
     for image_path in clean_snapshot_paths:
-        if not os.path.exists(image_path):
-            continue
-
-        image = _load_snapshot_image(image_path)
-        if image is None:
-            logger.warning("Unable to load clean snapshot from %s", image_path)
-            continue
-
-        return image, True
+        if os.path.exists(image_path):
+            return image_path, True
 
     snapshot_path = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
     if not os.path.exists(snapshot_path):
         return None, False
 
-    image = _load_snapshot_image(snapshot_path)
-    if image is None:
-        logger.warning("Unable to load snapshot from %s", snapshot_path)
-        return None, False
-
     is_clean_snapshot = _event_snapshot_is_clean(event)
     if clean_only and not is_clean_snapshot:
+        return None, False
+
+    return snapshot_path, is_clean_snapshot
+
+
+def load_event_snapshot_image(
+    event: Event, *, clean_only: bool = False
+) -> tuple[ndarray | None, bool]:
+    image_path, is_clean_snapshot = get_event_snapshot_path(
+        event, clean_only=clean_only
+    )
+    if image_path is None:
+        return None, False
+
+    image = _load_snapshot_image(image_path)
+    if image is None:
+        logger.warning("Unable to load snapshot from %s", image_path)
         return None, False
 
     return image, is_clean_snapshot
