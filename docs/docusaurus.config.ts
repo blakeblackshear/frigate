@@ -83,6 +83,17 @@ const config: Config = {
       },
     },
     prism: {
+      magicComments:[
+        {
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {start: 'highlight-start', end: 'highlight-end'},
+        },
+        {
+          className: 'code-block-error-line',
+          line: 'highlight-error-line',
+        },
+      ],
       additionalLanguages: ["bash", "json"],
     },
     languageTabs: [

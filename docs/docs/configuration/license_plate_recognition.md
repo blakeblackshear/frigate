@@ -43,7 +43,7 @@ lpr:
 
 Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You should disable it for specific cameras at the camera level if you don't want to run LPR on cars on those cameras:
 
-```yaml
+```yaml {4,5}
 cameras:
   garage:
     ...
@@ -391,6 +391,7 @@ Start with ["Why isn't my license plate being detected and recognized?"](#why-is
      logger:
        default: info
        logs:
+        # highlight-next-line
          frigate.data_processing.common.license_plate: debug
      ```
 

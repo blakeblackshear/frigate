@@ -118,6 +118,7 @@ Enable debug logs for classification models by adding `frigate.data_processing.r
 logger:
   default: info
   logs:
+    # highlight-next-line
     frigate.data_processing.real_time.custom_classification: debug
 ```
 

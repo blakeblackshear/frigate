@@ -150,7 +150,7 @@ Here is an example configuration with hardware acceleration configured to work w
 
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
-```yaml
+```yaml {4,5}
 services:
   frigate:
     ...
@@ -168,6 +168,7 @@ cameras:
   name_of_your_camera:
     ffmpeg:
       inputs: ...
+      # highlight-next-line
       hwaccel_args: preset-vaapi
     detect: ...
 ```
@@ -183,7 +184,7 @@ In many cases, the integrated graphics on Intel CPUs provides sufficient perform
 
 You need to refer to **Configure hardware acceleration** above to enable the container to use the GPU.
 
-```yaml
+```yaml {3-6,9-15,20-21}
 mqtt: ...
 
 detectors: # <---- add detectors
@@ -217,7 +218,7 @@ If you have a USB Coral, you will need to add a detectors section to your config
 
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
-```yaml
+```yaml {4-6}
 services:
   frigate:
     ...
@@ -227,7 +228,7 @@ services:
     ...
 ```
 
-```yaml
+```yaml {3-6,11-12}
 mqtt: ...
 
 detectors: # <---- add detectors
@@ -263,7 +264,7 @@ Note that motion masks should not be used to mark out areas where you do not wan
 
 Your configuration should look similar to this now.
 
-```yaml
+```yaml {16-18}
 mqtt:
   enabled: False
 
@@ -290,7 +291,7 @@ In order to review activity in the Frigate UI, recordings need to be enabled.
 
 To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, it won't be possible to enable it in the UI.
 
-```yaml
+```yaml {16-17}
 mqtt: ...
 
 detectors: ...
