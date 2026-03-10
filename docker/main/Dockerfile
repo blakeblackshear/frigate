@@ -266,11 +266,7 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
 
-####
-#
-# AXEngine Support
-#
-####
+# Install Axera Engine
 RUN pip3 install https://github.com/AXERA-TECH/pyaxengine/releases/download/0.1.3-frigate/axengine-0.1.3-py3-none-any.whl
 
 ENV PATH="${PATH}:/usr/bin/axcl"
