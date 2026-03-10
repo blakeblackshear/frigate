@@ -181,6 +181,10 @@ Each line represents a detection state, not necessarily unique individuals. Pare
             try:
                 metadata = ReviewMetadata.model_validate_json(clean_json)
 
+                # Normalize confidence if model returned a percentage (e.g. 85 instead of 0.85)
+                if metadata.confidence > 1.0:
+                    metadata.confidence = min(metadata.confidence / 100.0, 1.0)
+
                 # If any verified objects (contain parentheses with name), set to 0
                 if any("(" in obj for obj in review_data["unified_objects"]):
                     metadata.potential_threat_level = 0
