@@ -1500,7 +1500,7 @@ When configuring the AXEngine detector, you have to specify the model name.
 
 #### yolov9
 
-A yolov9 model is provided in the container at /axmodels and is used by this detector type by default.
+A yolov9 model is provided in the container at `/axmodels` and is used by this detector type by default.
 
 Use the model configuration shown below when using the axengine detector with the default axmodel:
 
