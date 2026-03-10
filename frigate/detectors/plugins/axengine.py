@@ -69,9 +69,9 @@ class Axengine(DetectionApi):
         if not os.path.isdir(model_cache_dir):
             os.mkdir(model_cache_dir)
 
-        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
+        HF_ENDPOINT = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
         urllib.request.urlretrieve(
-            f"{GITHUB_ENDPOINT}/ivanshi1108/assets/releases/download/v0.16.2/{filename}",
+            f"{HF_ENDPOINT}/AXERA-TECH/frigate-resource/resolve/axmodel/{filename}",
             model_cache_dir + filename,
         )
 
