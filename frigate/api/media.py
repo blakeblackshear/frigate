@@ -45,8 +45,12 @@ from frigate.const import (
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
-from frigate.util.file import get_event_thumbnail_bytes
-from frigate.util.image import get_image_from_recording
+from frigate.util.file import (
+    get_event_snapshot_bytes,
+    get_event_thumbnail_bytes,
+    load_event_snapshot_image,
+)
+from frigate.util.image import get_image_from_recording, get_image_quality_params
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +114,24 @@ def imagestream(
         )
 
 
+def _resolve_snapshot_settings(
+    snapshot_config: Any, params: MediaEventsSnapshotQueryParams
+) -> dict[str, Any]:
+    return {
+        "timestamp": snapshot_config.timestamp
+        if params.timestamp is None
+        else bool(params.timestamp),
+        "bounding_box": snapshot_config.bounding_box
+        if params.bbox is None
+        else bool(params.bbox),
+        "crop": snapshot_config.crop if params.crop is None else bool(params.crop),
+        "height": snapshot_config.height if params.height is None else params.height,
+        "quality": snapshot_config.quality
+        if params.quality is None
+        else params.quality,
+    }
+
+
 @router.get("/{camera_name}/ptz/info", dependencies=[Depends(require_camera_access)])
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
@@ -147,14 +169,7 @@ async def latest_frame(
         "paths": params.paths,
         "regions": params.regions,
     }
-    quality = params.quality
-
-    if extension == Extension.png:
-        quality_params = None
-    elif extension == Extension.webp:
-        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-    else:  # jpg or jpeg
-        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+    quality_params = get_image_quality_params(extension.value, params.quality)
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -729,7 +744,7 @@ async def vod_clip(
 
 @router.get(
     "/events/{event_id}/snapshot.jpg",
-    description="Returns a snapshot image for the specified object id. NOTE: The query params only take affect while the event is in-progress. Once the event has ended the snapshot configuration is used.",
+    description="Returns a snapshot image for the specified object id.",
 )
 async def event_snapshot(
     request: Request,
@@ -748,11 +763,22 @@ async def event_snapshot(
                 content={"success": False, "message": "Snapshot not available"},
                 status_code=404,
             )
-        # read snapshot from disk
-        with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
-        ) as image_file:
-            jpg_bytes = image_file.read()
+        snapshot_settings = _resolve_snapshot_settings(
+            request.app.frigate_config.cameras[event.camera].snapshots, params
+        )
+        jpg_bytes, frame_time = get_event_snapshot_bytes(
+            event,
+            ext="jpg",
+            timestamp=snapshot_settings["timestamp"],
+            bounding_box=snapshot_settings["bounding_box"],
+            crop=snapshot_settings["crop"],
+            height=snapshot_settings["height"],
+            quality=snapshot_settings["quality"],
+            timestamp_style=request.app.frigate_config.cameras[
+                event.camera
+            ].timestamp_style,
+            colormap=request.app.frigate_config.model.colormap,
+        )
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
@@ -763,13 +789,16 @@ async def event_snapshot(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
+                        snapshot_settings = _resolve_snapshot_settings(
+                            camera_state.camera_config.snapshots, params
+                        )
                         jpg_bytes, frame_time = tracked_obj.get_img_bytes(
                             ext="jpg",
-                            timestamp=params.timestamp,
-                            bounding_box=params.bbox,
-                            crop=params.crop,
-                            height=params.height,
-                            quality=params.quality,
+                            timestamp=snapshot_settings["timestamp"],
+                            bounding_box=snapshot_settings["bounding_box"],
+                            crop=snapshot_settings["crop"],
+                            height=snapshot_settings["height"],
+                            quality=snapshot_settings["quality"],
                         )
                         await require_camera_access(camera_state.name, request=request)
         except Exception:
@@ -865,13 +894,11 @@ async def event_thumbnail(
             (0, 0, 0),
         )
 
-        quality_params = None
-        if extension in (Extension.jpg, Extension.jpeg):
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == Extension.webp:
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-
-        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
+        _, img = cv2.imencode(
+            f".{extension.value}",
+            thumbnail,
+            get_image_quality_params(extension.value, None),
+        )
         thumbnail_bytes = img.tobytes()
 
     return Response(
@@ -1036,7 +1063,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": "Snapshots and clean_copy must be enabled in the config",
+                    "message": "Snapshots must be enabled in the config",
                 },
                 status_code=404,
             )
@@ -1068,54 +1095,8 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
         )
     if webp_bytes is None:
         try:
-            # webp
-            clean_snapshot_path_webp = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"
-            )
-            # png (legacy)
-            clean_snapshot_path_png = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
-            )
-
-            if os.path.exists(clean_snapshot_path_webp):
-                with open(clean_snapshot_path_webp, "rb") as image_file:
-                    webp_bytes = image_file.read()
-            elif os.path.exists(clean_snapshot_path_png):
-                # convert png to webp and save for future use
-                png_image = cv2.imread(clean_snapshot_path_png, cv2.IMREAD_UNCHANGED)
-                if png_image is None:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": "Invalid png snapshot",
-                        },
-                        status_code=400,
-                    )
-
-                ret, webp_data = cv2.imencode(
-                    ".webp", png_image, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-                )
-                if not ret:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": "Unable to convert png to webp",
-                        },
-                        status_code=400,
-                    )
-
-                webp_bytes = webp_data.tobytes()
-
-                # save the converted webp for future requests
-                try:
-                    with open(clean_snapshot_path_webp, "wb") as f:
-                        f.write(webp_bytes)
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to save converted webp for event {event.id}: {e}"
-                    )
-                    # continue since we now have the data to return
-            else:
+            image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
+            if not is_clean_snapshot or image is None:
                 return JSONResponse(
                     content={
                         "success": False,
@@ -1123,6 +1104,20 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     },
                     status_code=404,
                 )
+
+            ret, webp_data = cv2.imencode(
+                ".webp", image, get_image_quality_params("webp", None)
+            )
+            if not ret:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": "Unable to convert snapshot to webp",
+                    },
+                    status_code=400,
+                )
+
+            webp_bytes = webp_data.tobytes()
         except Exception:
             logger.error(f"Unable to load clean snapshot for event: {event.id}")
             return JSONResponse(
