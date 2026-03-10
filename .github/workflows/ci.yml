@@ -67,7 +67,7 @@ jobs:
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           source: .
           push: true
@@ -96,7 +96,7 @@ jobs:
           BASE_IMAGE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
           SLIM_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
           TRT_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           source: .
           push: true
@@ -124,7 +124,7 @@ jobs:
       - name: Build and push TensorRT (x86 GPU)
         env:
           COMPUTE_LEVEL: "50 60 70 80 90"
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           source: .
           push: true
@@ -137,7 +137,7 @@ jobs:
       - name: AMD/ROCm general build
         env:
           HSA_OVERRIDE: 0
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           source: .
           push: true
@@ -163,7 +163,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Rockchip build
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           source: .
           push: true
@@ -188,7 +188,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Synaptics build
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           source: .
           push: true
