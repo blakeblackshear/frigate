@@ -45,6 +45,7 @@ from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.file import (
+    get_event_snapshot_path,
     get_event_snapshot_bytes,
     get_event_thumbnail_bytes,
     load_event_snapshot_image,
@@ -1055,8 +1056,10 @@ def clear_region_grid(request: Request, camera_name: str):
 )
 def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
     webp_bytes = None
+    event_complete = False
     try:
         event = Event.get(Event.id == event_id)
+        event_complete = event.end_time is not None
         snapshot_config = request.app.frigate_config.cameras[event.camera].snapshots
         if not (snapshot_config.enabled and event.has_snapshot):
             return JSONResponse(
@@ -1094,8 +1097,10 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
         )
     if webp_bytes is None:
         try:
-            image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
-            if not is_clean_snapshot or image is None:
+            image_path, is_clean_snapshot = get_event_snapshot_path(
+                event, clean_only=True
+            )
+            if not is_clean_snapshot or image_path is None:
                 return JSONResponse(
                     content={
                         "success": False,
@@ -1104,19 +1109,33 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     status_code=404,
                 )
 
-            ret, webp_data = cv2.imencode(
-                ".webp", image, get_image_quality_params("webp", None)
-            )
-            if not ret:
-                return JSONResponse(
-                    content={
-                        "success": False,
-                        "message": "Unable to convert snapshot to webp",
-                    },
-                    status_code=400,
-                )
+            if image_path.endswith(".webp"):
+                with open(image_path, "rb") as image_file:
+                    webp_bytes = image_file.read()
+            else:
+                image = load_event_snapshot_image(event, clean_only=True)[0]
+                if image is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to load clean snapshot for event",
+                        },
+                        status_code=400,
+                    )
 
-            webp_bytes = webp_data.tobytes()
+                ret, webp_data = cv2.imencode(
+                    ".webp", image, get_image_quality_params("webp", None)
+                )
+                if not ret:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to convert snapshot to webp",
+                        },
+                        status_code=400,
+                    )
+
+                webp_bytes = webp_data.tobytes()
         except Exception:
             logger.error(f"Unable to load clean snapshot for event: {event.id}")
             return JSONResponse(
@@ -1129,7 +1148,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
     headers = {
         "Content-Type": "image/webp",
-        "Cache-Control": "private, max-age=31536000",
+        "Cache-Control": "private, max-age=31536000" if event_complete else "no-cache",
     }
 
     if download:
