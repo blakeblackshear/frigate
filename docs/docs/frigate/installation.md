@@ -441,9 +441,6 @@ Next, you should configure [hardware object detection](/configuration/object_det
 
 ### AXERA
 
-<details>
-  <summary>AXERA accelerators</summary>
-  
 AXERA accelerators are available in an M.2 form factor, compatible with both Raspberry Pi and Orange Pi. This form factor has also been successfully tested on x86 platforms, making it a versatile choice for various computing environments.
 
 #### Installation
@@ -474,7 +471,6 @@ If you are using `docker run`, add this option to your command `--device /dev/ax
 #### Configuration
 
 Finally, configure [hardware object detection](/configuration/object_detectors#axera) to complete the setup.
-</details>
 
 ## Docker
 
