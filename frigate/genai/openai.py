@@ -36,7 +36,12 @@ class OpenAIClient(GenAIClient):
 
         return OpenAI(api_key=self.genai_config.api_key, **provider_opts)
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self,
+        prompt: str,
+        images: list[bytes],
+        response_format: Optional[dict] = None,
+    ) -> Optional[str]:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
         messages_content = []
@@ -57,17 +62,20 @@ class OpenAIClient(GenAIClient):
             }
         )
         try:
-            result = self.provider.chat.completions.create(
-                model=self.genai_config.model,
-                messages=[
+            request_params = {
+                "model": self.genai_config.model,
+                "messages": [
                     {
                         "role": "user",
                         "content": messages_content,
                     },
                 ],
-                timeout=self.timeout,
+                "timeout": self.timeout,
                 **self.genai_config.runtime_options,
-            )
+            }
+            if response_format:
+                request_params["response_format"] = response_format
+            result = self.provider.chat.completions.create(**request_params)
             if (
                 result is not None
                 and hasattr(result, "choices")
