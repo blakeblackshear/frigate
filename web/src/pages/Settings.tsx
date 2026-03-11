@@ -515,9 +515,13 @@ const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
 };
 
 // Reverse mapping: page key → config section key
-const REVERSE_CAMERA_SECTION_MAPPING: Record<string, string> = Object.fromEntries(
-  Object.entries(CAMERA_SECTION_MAPPING).map(([section, page]) => [page, section]),
-);
+const REVERSE_CAMERA_SECTION_MAPPING: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(CAMERA_SECTION_MAPPING).map(([section, page]) => [
+      page,
+      section,
+    ]),
+  );
 // masksAndZones is a composite page, not in CAMERA_SECTION_MAPPING
 REVERSE_CAMERA_SECTION_MAPPING["masksAndZones"] = "masksAndZones";
 
@@ -1153,9 +1157,7 @@ export default function Settings() {
         return !!(hasZones || hasMotionMasks || hasObjectMasks);
       }
 
-      return !!profileData[
-        currentSectionKey as keyof typeof profileData
-      ];
+      return !!profileData[currentSectionKey as keyof typeof profileData];
     },
     [config, selectedCamera, currentSectionKey],
   );

@@ -566,9 +566,7 @@ function removePropertyBySegments(
   if (segments.length === 0 || !isSchemaObject(schema)) return;
 
   const [head, ...rest] = segments;
-  const props = schema.properties as
-    | Record<string, RJSFSchema>
-    | undefined;
+  const props = schema.properties as Record<string, RJSFSchema> | undefined;
 
   if (rest.length === 0) {
     // Terminal segment — delete the property
@@ -594,10 +592,7 @@ function removePropertyBySegments(
   if (head === "*") {
     // Wildcard segment — descend into additionalProperties
     if (isSchemaObject(schema.additionalProperties)) {
-      removePropertyBySegments(
-        schema.additionalProperties as RJSFSchema,
-        rest,
-      );
+      removePropertyBySegments(schema.additionalProperties as RJSFSchema, rest);
     }
   } else if (props && head in props && isSchemaObject(props[head])) {
     removePropertyBySegments(props[head], rest);

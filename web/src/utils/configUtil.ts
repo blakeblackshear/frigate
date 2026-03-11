@@ -208,10 +208,7 @@ export function buildOverrides(
 
 // lodash `unset` treats `*` as a literal key.  This helper expands wildcard
 // segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
-function unsetWithWildcard(
-  obj: Record<string, unknown>,
-  path: string,
-): void {
+function unsetWithWildcard(obj: Record<string, unknown>, path: string): void {
   if (!path.includes("*")) {
     unset(obj, path);
     return;
@@ -224,10 +221,7 @@ function unsetWithWildcard(
   if (parent && typeof parent === "object") {
     for (const key of Object.keys(parent as Record<string, unknown>)) {
       const fullPath = suffix ? `${key}.${suffix}` : key;
-      unsetWithWildcard(
-        parent as Record<string, unknown>,
-        fullPath,
-      );
+      unsetWithWildcard(parent as Record<string, unknown>, fullPath);
     }
   }
 }
