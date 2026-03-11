@@ -28,6 +28,8 @@ export type SettingsPageProps = {
     data: ConfigSectionData | null,
   ) => void;
   profileState?: ProfileState;
+  profilesUIEnabled?: boolean;
+  setProfilesUIEnabled?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type SectionStatus = {

@@ -29,6 +29,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type ProfilesApiResponse = {
   profiles: string[];
@@ -38,9 +40,15 @@ type ProfilesApiResponse = {
 type ProfilesViewProps = {
   setUnsavedChanges?: React.Dispatch<React.SetStateAction<boolean>>;
   profileState?: ProfileState;
+  profilesUIEnabled?: boolean;
+  setProfilesUIEnabled?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function ProfilesView({ profileState }: ProfilesViewProps) {
+export default function ProfilesView({
+  profileState,
+  profilesUIEnabled,
+  setProfilesUIEnabled,
+}: ProfilesViewProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -182,68 +190,95 @@ export default function ProfilesView({ profileState }: ProfilesViewProps) {
     return null;
   }
 
+  const hasProfiles = allProfileNames.length > 0;
+
   return (
     <div className="flex size-full flex-col lg:pr-2">
       <Heading as="h4" className="mb-5">
         {t("profiles.title", { ns: "views/settings" })}
       </Heading>
 
-      {/* Active Profile Section */}
-      <div className="mb-6 rounded-lg border border-border/70 bg-card/30 p-4">
-        <div className="mb-3 text-sm font-semibold text-primary-variant">
-          {t("profiles.activeProfile", { ns: "views/settings" })}
+      {/* Enable Profiles Toggle — shown only when no profiles exist */}
+      {!hasProfiles && setProfilesUIEnabled && (
+        <div className="mb-6 rounded-lg border border-border/70 bg-card/30 p-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="profiles-toggle" className="cursor-pointer">
+              {t("profiles.enableSwitch", { ns: "views/settings" })}
+            </Label>
+            <Switch
+              id="profiles-toggle"
+              checked={profilesUIEnabled ?? false}
+              onCheckedChange={setProfilesUIEnabled}
+            />
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {profilesUIEnabled
+              ? t("profiles.enabledDescription", { ns: "views/settings" })
+              : t("profiles.disabledDescription", { ns: "views/settings" })}
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Select
-            value={activeProfile ?? "__none__"}
-            onValueChange={(v) =>
-              handleActivateProfile(v === "__none__" ? null : v)
-            }
-            disabled={activating}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none__">
-                {t("profiles.noActiveProfile", { ns: "views/settings" })}
-              </SelectItem>
-              {allProfileNames.map((profile) => {
-                const color = getProfileColor(profile, allProfileNames);
-                return (
-                  <SelectItem key={profile} value={profile}>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "h-2 w-2 shrink-0 rounded-full",
-                          color.dot,
-                        )}
-                      />
-                      {profile}
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-          {activeProfile && (
-            <Badge
-              className={cn(
-                "cursor-default",
-                getProfileColor(activeProfile, allProfileNames).bg,
-                "text-white",
-              )}
+      )}
+
+      {/* Active Profile Section — only when profiles exist */}
+      {hasProfiles && (
+        <div className="mb-6 rounded-lg border border-border/70 bg-card/30 p-4">
+          <div className="mb-3 text-sm font-semibold text-primary-variant">
+            {t("profiles.activeProfile", { ns: "views/settings" })}
+          </div>
+          <div className="flex items-center gap-3">
+            <Select
+              value={activeProfile ?? "__none__"}
+              onValueChange={(v) =>
+                handleActivateProfile(v === "__none__" ? null : v)
+              }
+              disabled={activating}
             >
-              {t("profiles.active", { ns: "views/settings" })}
-            </Badge>
-          )}
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">
+                  {t("profiles.noActiveProfile", { ns: "views/settings" })}
+                </SelectItem>
+                {allProfileNames.map((profile) => {
+                  const color = getProfileColor(profile, allProfileNames);
+                  return (
+                    <SelectItem key={profile} value={profile}>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "h-2 w-2 shrink-0 rounded-full",
+                            color.dot,
+                          )}
+                        />
+                        {profile}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+            {activeProfile && (
+              <Badge
+                className={cn(
+                  "cursor-default",
+                  getProfileColor(activeProfile, allProfileNames).bg,
+                  "text-white",
+                )}
+              >
+                {t("profiles.active", { ns: "views/settings" })}
+              </Badge>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Profile Cards */}
-      {allProfileNames.length === 0 ? (
+      {!hasProfiles ? (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <p>{t("profiles.noProfiles", { ns: "views/settings" })}</p>
+          {!profilesUIEnabled && (
+            <p>{t("profiles.noProfiles", { ns: "views/settings" })}</p>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-3">

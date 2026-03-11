@@ -659,6 +659,7 @@ export default function Settings() {
     Record<string, string | null>
   >({});
   const [newProfiles, setNewProfiles] = useState<string[]>([]);
+  const [profilesUIEnabled, setProfilesUIEnabled] = useState(false);
 
   const allProfileNames = useMemo(() => {
     if (!config) return [];
@@ -1127,7 +1128,7 @@ export default function Settings() {
   const showProfileDropdown =
     PROFILE_DROPDOWN_PAGES.has(pageToggle) &&
     !!selectedCamera &&
-    allProfileNames.length > 0;
+    (allProfileNames.length > 0 || profilesUIEnabled);
 
   const headerHasProfileData = useCallback(
     (profileName: string): boolean => {
@@ -1527,6 +1528,8 @@ export default function Settings() {
                     pendingDataBySection={pendingDataBySection}
                     onPendingDataChange={handlePendingDataChange}
                     profileState={profileState}
+                    profilesUIEnabled={profilesUIEnabled}
+                    setProfilesUIEnabled={setProfilesUIEnabled}
                   />
                 );
               })()}
