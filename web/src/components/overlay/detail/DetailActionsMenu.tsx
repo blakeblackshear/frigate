@@ -94,8 +94,7 @@ export default function DetailActionsMenu({
               </a>
             </DropdownMenuItem>
           )}
-          {search.has_snapshot &&
-            config?.cameras[search.camera].snapshots.clean_copy && (
+          {search.has_snapshot && (
               <DropdownMenuItem>
                 <a
                   className="w-full"
