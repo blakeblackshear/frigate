@@ -532,6 +532,8 @@
     },
     "restart_required": "Restart required (masks/zones changed)",
     "disabledInConfig": "Item is disabled in the config file",
+    "profileBase": "(base)",
+    "profileOverride": "(override)",
     "toast": {
       "success": {
         "copyCoordinates": "Copied coordinates for {{polyName}} to clipboard."

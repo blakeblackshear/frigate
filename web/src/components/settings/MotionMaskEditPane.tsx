@@ -44,6 +44,7 @@ type MotionMaskEditPaneProps = {
   onCancel?: () => void;
   snapPoints: boolean;
   setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
+  editingProfile?: string | null;
 };
 
 export default function MotionMaskEditPane({
@@ -58,6 +59,7 @@ export default function MotionMaskEditPane({
   onCancel,
   snapPoints,
   setSnapPoints,
+  editingProfile,
 }: MotionMaskEditPaneProps) {
   const { t } = useTranslation(["views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -192,16 +194,28 @@ export default function MotionMaskEditPane({
         coordinates: coordinates,
       };
 
+      // Build config path based on profile mode
+      const motionMaskPath = editingProfile
+        ? {
+            profiles: {
+              [editingProfile]: {
+                motion: { mask: { [maskId]: maskConfig } },
+              },
+            },
+          }
+        : { motion: { mask: { [maskId]: maskConfig } } };
+
       // If renaming, we need to delete the old mask first
       if (renamingMask) {
+        const deleteQueryPath = editingProfile
+          ? `cameras.${polygon.camera}.profiles.${editingProfile}.motion.mask.${polygon.name}`
+          : `cameras.${polygon.camera}.motion.mask.${polygon.name}`;
+
         try {
-          await axios.put(
-            `config/set?cameras.${polygon.camera}.motion.mask.${polygon.name}`,
-            {
-              requires_restart: 0,
-            },
-          );
-        } catch (error) {
+          await axios.put(`config/set?${deleteQueryPath}`, {
+            requires_restart: 0,
+          });
+        } catch {
           toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
             position: "top-center",
           });
@@ -210,22 +224,20 @@ export default function MotionMaskEditPane({
         }
       }
 
+      const updateTopic = editingProfile
+        ? undefined
+        : `config/cameras/${polygon.camera}/motion`;
+
       // Save the new/updated mask using JSON body
       axios
         .put("config/set", {
           config_data: {
             cameras: {
-              [polygon.camera]: {
-                motion: {
-                  mask: {
-                    [maskId]: maskConfig,
-                  },
-                },
-              },
+              [polygon.camera]: motionMaskPath,
             },
           },
           requires_restart: 0,
-          update_topic: `config/cameras/${polygon.camera}/motion`,
+          update_topic: updateTopic,
         })
         .then((res) => {
           if (res.status === 200) {
@@ -238,8 +250,10 @@ export default function MotionMaskEditPane({
               },
             );
             updateConfig();
-            // Publish the enabled state through websocket
-            sendMotionMaskState(enabled ? "ON" : "OFF");
+            // Only publish WS state for base config
+            if (!editingProfile) {
+              sendMotionMaskState(enabled ? "ON" : "OFF");
+            }
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -277,6 +291,7 @@ export default function MotionMaskEditPane({
       cameraConfig,
       t,
       sendMotionMaskState,
+      editingProfile,
     ],
   );
 

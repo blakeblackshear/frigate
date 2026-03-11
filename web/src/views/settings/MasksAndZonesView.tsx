@@ -1,4 +1,4 @@
-import { FrigateConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -35,21 +35,28 @@ import { useTranslation } from "react-i18next";
 
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
+import { ProfileState } from "@/types/profile";
+import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
+import axios from "axios";
+import { useSWRConfig } from "swr";
 
 type MasksAndZoneViewProps = {
   selectedCamera: string;
   selectedZoneMask?: PolygonType[];
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  profileState?: ProfileState;
 };
 
 export default function MasksAndZonesView({
   selectedCamera,
   selectedZoneMask,
   setUnsavedChanges,
+  profileState,
 }: MasksAndZoneViewProps) {
   const { t } = useTranslation(["views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { mutate } = useSWRConfig();
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +76,63 @@ export default function MasksAndZonesView({
   const prevScaledRef = useRef<{ w: number; h: number } | null>(null);
   const [activeLine, setActiveLine] = useState<number | undefined>();
   const [snapPoints, setSnapPoints] = useState(false);
+
+  // Profile state
+  const profileSectionKey = `${selectedCamera}::masksAndZones`;
+  const currentEditingProfile =
+    profileState?.editingProfile[profileSectionKey] ?? null;
+
+  const hasProfileData = useCallback(
+    (profileName: string) => {
+      if (!config || !selectedCamera) return false;
+      const profileData =
+        config.cameras[selectedCamera]?.profiles?.[profileName];
+      if (!profileData) return false;
+      const hasZones =
+        profileData.zones && Object.keys(profileData.zones).length > 0;
+      const hasMotionMasks =
+        profileData.motion?.mask &&
+        Object.keys(profileData.motion.mask).length > 0;
+      const hasObjectMasks =
+        (profileData.objects?.mask &&
+          Object.keys(profileData.objects.mask).length > 0) ||
+        (profileData.objects?.filters &&
+          Object.values(profileData.objects.filters).some(
+            (f) => f.mask && Object.keys(f.mask).length > 0,
+          ));
+      return !!(hasZones || hasMotionMasks || hasObjectMasks);
+    },
+    [config, selectedCamera],
+  );
+
+  const handleDeleteProfileMasksAndZones = useCallback(
+    async (profileName: string) => {
+      try {
+        // Delete zones, motion masks, and object masks from the profile
+        await axios.put("config/set", {
+          config_data: {
+            cameras: {
+              [selectedCamera]: {
+                profiles: {
+                  [profileName]: {
+                    zones: "",
+                    motion: { mask: "" },
+                    objects: { mask: "", filters: "" },
+                  },
+                },
+              },
+            },
+          },
+        });
+        await mutate("config");
+        profileState?.onSelectProfile(selectedCamera, "masksAndZones", null);
+        toast.success(t("toast.save.success", { ns: "common" }));
+      } catch {
+        toast.error(t("toast.save.error.noMessage", { ns: "common" }));
+      }
+    },
+    [selectedCamera, mutate, profileState, t],
+  );
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -228,18 +292,84 @@ export default function MasksAndZonesView({
     [allPolygons, scaledHeight, scaledWidth, t],
   );
 
+  // Helper to dim colors for base polygons in profile mode
+  const dimColor = useCallback(
+    (color: number[]): number[] => {
+      if (!currentEditingProfile) return color;
+      return color.map((c) => Math.round(c * 0.4 + 153 * 0.6));
+    },
+    [currentEditingProfile],
+  );
+
   useEffect(() => {
     if (cameraConfig && containerRef.current && scaledWidth && scaledHeight) {
-      const zones = Object.entries(cameraConfig.zones).map(
-        ([name, zoneData], index) => ({
+      const profileData = currentEditingProfile
+        ? cameraConfig.profiles?.[currentEditingProfile]
+        : undefined;
+
+      // Build base zone names set for source tracking
+      const baseZoneNames = new Set(Object.keys(cameraConfig.zones));
+      const profileZoneNames = new Set(Object.keys(profileData?.zones ?? {}));
+      const baseMotionMaskNames = new Set(
+        Object.keys(cameraConfig.motion.mask || {}),
+      );
+      const profileMotionMaskNames = new Set(
+        Object.keys(profileData?.motion?.mask ?? {}),
+      );
+      const baseGlobalObjectMaskNames = new Set(
+        Object.keys(cameraConfig.objects.mask || {}),
+      );
+      const profileGlobalObjectMaskNames = new Set(
+        Object.keys(profileData?.objects?.mask ?? {}),
+      );
+
+      // Merge zones: profile zones override base zones with same name
+      const mergedZones = new Map<
+        string,
+        {
+          data: CameraConfig["zones"][string];
+          source: "base" | "profile" | "override";
+        }
+      >();
+
+      for (const [name, zoneData] of Object.entries(cameraConfig.zones)) {
+        if (currentEditingProfile && profileZoneNames.has(name)) {
+          // Profile overrides this base zone
+          mergedZones.set(name, {
+            data: profileData!.zones![name]!,
+            source: "override",
+          });
+        } else {
+          mergedZones.set(name, {
+            data: zoneData,
+            source: currentEditingProfile ? "base" : "base",
+          });
+        }
+      }
+
+      // Add profile-only zones
+      if (profileData?.zones) {
+        for (const [name, zoneData] of Object.entries(profileData.zones)) {
+          if (!baseZoneNames.has(name)) {
+            mergedZones.set(name, { data: zoneData!, source: "profile" });
+          }
+        }
+      }
+
+      let zoneIndex = 0;
+      const zones: Polygon[] = [];
+      for (const [name, { data: zoneData, source }] of mergedZones) {
+        const isBase = source === "base" && !!currentEditingProfile;
+        const baseColor = zoneData.color ?? [128, 128, 0];
+        zones.push({
           type: "zone" as PolygonType,
-          typeIndex: index,
+          typeIndex: zoneIndex,
           camera: cameraConfig.name,
           name,
           friendly_name: zoneData.friendly_name,
           enabled: zoneData.enabled,
           enabled_in_config: zoneData.enabled_in_config,
-          objects: zoneData.objects,
+          objects: zoneData.objects ?? [],
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),
             1,
@@ -248,21 +378,62 @@ export default function MasksAndZonesView({
             scaledHeight,
           ),
           distances:
-            zoneData.distances?.map((distance) => parseFloat(distance)) ?? [],
+            zoneData.distances?.map((distance: string) =>
+              parseFloat(distance),
+            ) ?? [],
           isFinished: true,
-          color: zoneData.color,
-        }),
-      );
+          color: isBase ? dimColor(baseColor) : baseColor,
+          polygonSource: currentEditingProfile ? source : undefined,
+        });
+        zoneIndex++;
+      }
 
-      let motionMasks: Polygon[] = [];
-      let globalObjectMasks: Polygon[] = [];
-      let objectMasks: Polygon[] = [];
+      // Merge motion masks
+      const mergedMotionMasks = new Map<
+        string,
+        {
+          data: CameraConfig["motion"]["mask"][string];
+          source: "base" | "profile" | "override";
+        }
+      >();
 
-      // Motion masks are a dict with mask_id as key
-      motionMasks = Object.entries(cameraConfig.motion.mask || {}).map(
-        ([maskId, maskData], index) => ({
+      for (const [maskId, maskData] of Object.entries(
+        cameraConfig.motion.mask || {},
+      )) {
+        if (currentEditingProfile && profileMotionMaskNames.has(maskId)) {
+          mergedMotionMasks.set(maskId, {
+            data: profileData!.motion!.mask![maskId],
+            source: "override",
+          });
+        } else {
+          mergedMotionMasks.set(maskId, {
+            data: maskData,
+            source: currentEditingProfile ? "base" : "base",
+          });
+        }
+      }
+
+      if (profileData?.motion?.mask) {
+        for (const [maskId, maskData] of Object.entries(
+          profileData.motion.mask,
+        )) {
+          if (!baseMotionMaskNames.has(maskId)) {
+            mergedMotionMasks.set(maskId, {
+              data: maskData,
+              source: "profile",
+            });
+          }
+        }
+      }
+
+      let motionMaskIndex = 0;
+      const motionMasks: Polygon[] = [];
+      for (const [maskId, { data: maskData, source }] of mergedMotionMasks) {
+        const isBase = source === "base" && !!currentEditingProfile;
+        const baseColor = [0, 0, 255];
+        motionMasks.push({
           type: "motion_mask" as PolygonType,
-          typeIndex: index,
+          typeIndex: motionMaskIndex,
           camera: cameraConfig.name,
           name: maskId,
           friendly_name: maskData.friendly_name,
@@ -278,15 +449,61 @@ export default function MasksAndZonesView({
           ),
           distances: [],
           isFinished: true,
-          color: [0, 0, 255],
-        }),
-      );
+          color: isBase ? dimColor(baseColor) : baseColor,
+          polygonSource: currentEditingProfile ? source : undefined,
+        });
+        motionMaskIndex++;
+      }
 
-      // Global object masks are a dict with mask_id as key
-      globalObjectMasks = Object.entries(cameraConfig.objects.mask || {}).map(
-        ([maskId, maskData], index) => ({
+      // Merge global object masks
+      const mergedGlobalObjectMasks = new Map<
+        string,
+        {
+          data: CameraConfig["objects"]["mask"][string];
+          source: "base" | "profile" | "override";
+        }
+      >();
+
+      for (const [maskId, maskData] of Object.entries(
+        cameraConfig.objects.mask || {},
+      )) {
+        if (currentEditingProfile && profileGlobalObjectMaskNames.has(maskId)) {
+          mergedGlobalObjectMasks.set(maskId, {
+            data: profileData!.objects!.mask![maskId],
+            source: "override",
+          });
+        } else {
+          mergedGlobalObjectMasks.set(maskId, {
+            data: maskData,
+            source: currentEditingProfile ? "base" : "base",
+          });
+        }
+      }
+
+      if (profileData?.objects?.mask) {
+        for (const [maskId, maskData] of Object.entries(
+          profileData.objects.mask,
+        )) {
+          if (!baseGlobalObjectMaskNames.has(maskId)) {
+            mergedGlobalObjectMasks.set(maskId, {
+              data: maskData,
+              source: "profile",
+            });
+          }
+        }
+      }
+
+      let objectMaskIndex = 0;
+      const globalObjectMasks: Polygon[] = [];
+      for (const [
+        maskId,
+        { data: maskData, source },
+      ] of mergedGlobalObjectMasks) {
+        const isBase = source === "base" && !!currentEditingProfile;
+        const baseColor = [128, 128, 128];
+        globalObjectMasks.push({
           type: "object_mask" as PolygonType,
-          typeIndex: index,
+          typeIndex: objectMaskIndex,
           camera: cameraConfig.name,
           name: maskId,
           friendly_name: maskData.friendly_name,
@@ -302,13 +519,43 @@ export default function MasksAndZonesView({
           ),
           distances: [],
           isFinished: true,
-          color: [128, 128, 128],
-        }),
-      );
+          color: isBase ? dimColor(baseColor) : baseColor,
+          polygonSource: currentEditingProfile ? source : undefined,
+        });
+        objectMaskIndex++;
+      }
 
-      let objectMaskIndex = globalObjectMasks.length;
+      objectMaskIndex = globalObjectMasks.length;
 
-      objectMasks = Object.entries(cameraConfig.objects.filters)
+      // Build per-object filter mask names for profile tracking
+      const baseFilterMaskNames = new Set<string>();
+      for (const [, filterConfig] of Object.entries(
+        cameraConfig.objects.filters,
+      )) {
+        for (const maskId of Object.keys(filterConfig.mask || {})) {
+          if (!maskId.startsWith("global_")) {
+            baseFilterMaskNames.add(maskId);
+          }
+        }
+      }
+
+      const profileFilterMaskNames = new Set<string>();
+      if (profileData?.objects?.filters) {
+        for (const [, filterConfig] of Object.entries(
+          profileData.objects.filters,
+        )) {
+          if (filterConfig?.mask) {
+            for (const maskId of Object.keys(filterConfig.mask)) {
+              profileFilterMaskNames.add(maskId);
+            }
+          }
+        }
+      }
+
+      // Per-object filter masks (base)
+      const objectMasks: Polygon[] = Object.entries(
+        cameraConfig.objects.filters,
+      )
         .filter(
           ([, filterConfig]) =>
             filterConfig.mask && Object.keys(filterConfig.mask).length > 0,
@@ -316,22 +563,36 @@ export default function MasksAndZonesView({
         .flatMap(([objectName, filterConfig]): Polygon[] => {
           return Object.entries(filterConfig.mask || {}).flatMap(
             ([maskId, maskData]) => {
-              // Skip if this mask is a global mask (prefixed with "global_")
               if (maskId.startsWith("global_")) {
                 return [];
               }
 
-              const newMask = {
+              const source: "base" | "override" = currentEditingProfile
+                ? profileFilterMaskNames.has(maskId)
+                  ? "override"
+                  : "base"
+                : "base";
+              const isBase = source === "base" && !!currentEditingProfile;
+
+              // If override, use profile data
+              const finalData =
+                source === "override" && profileData?.objects?.filters
+                  ? (profileData.objects.filters[objectName]?.mask?.[maskId] ??
+                    maskData)
+                  : maskData;
+
+              const baseColor = [128, 128, 128];
+              const newMask: Polygon = {
                 type: "object_mask" as PolygonType,
                 typeIndex: objectMaskIndex,
                 camera: cameraConfig.name,
                 name: maskId,
-                friendly_name: maskData.friendly_name,
-                enabled: maskData.enabled,
-                enabled_in_config: maskData.enabled_in_config,
+                friendly_name: finalData.friendly_name,
+                enabled: finalData.enabled,
+                enabled_in_config: finalData.enabled_in_config,
                 objects: [objectName],
                 points: interpolatePoints(
-                  parseCoordinates(maskData.coordinates),
+                  parseCoordinates(finalData.coordinates),
                   1,
                   1,
                   scaledWidth,
@@ -339,13 +600,53 @@ export default function MasksAndZonesView({
                 ),
                 distances: [],
                 isFinished: true,
-                color: [128, 128, 128],
+                color: isBase ? dimColor(baseColor) : baseColor,
+                polygonSource: currentEditingProfile ? source : undefined,
               };
               objectMaskIndex++;
               return [newMask];
             },
           );
         });
+
+      // Add profile-only per-object filter masks
+      if (profileData?.objects?.filters) {
+        for (const [objectName, filterConfig] of Object.entries(
+          profileData.objects.filters,
+        )) {
+          if (filterConfig?.mask) {
+            for (const [maskId, maskData] of Object.entries(
+              filterConfig.mask,
+            )) {
+              if (!baseFilterMaskNames.has(maskId) && maskData) {
+                const baseColor = [128, 128, 128];
+                objectMasks.push({
+                  type: "object_mask" as PolygonType,
+                  typeIndex: objectMaskIndex,
+                  camera: cameraConfig.name,
+                  name: maskId,
+                  friendly_name: maskData.friendly_name,
+                  enabled: maskData.enabled,
+                  enabled_in_config: maskData.enabled_in_config,
+                  objects: [objectName],
+                  points: interpolatePoints(
+                    parseCoordinates(maskData.coordinates),
+                    1,
+                    1,
+                    scaledWidth,
+                    scaledHeight,
+                  ),
+                  distances: [],
+                  isFinished: true,
+                  color: baseColor,
+                  polygonSource: "profile",
+                });
+                objectMaskIndex++;
+              }
+            }
+          }
+        }
+      }
 
       setAllPolygons([
         ...zones,
@@ -386,7 +687,14 @@ export default function MasksAndZonesView({
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraConfig, containerRef, scaledHeight, scaledWidth]);
+  }, [
+    cameraConfig,
+    containerRef,
+    scaledHeight,
+    scaledWidth,
+    currentEditingProfile,
+    dimColor,
+  ]);
 
   useEffect(() => {
     if (editPane === undefined) {
@@ -402,6 +710,15 @@ export default function MasksAndZonesView({
       setEditPane(undefined);
     }
   }, [selectedCamera]);
+
+  // Cancel editing when profile selection changes
+  useEffect(() => {
+    if (editPaneRef.current !== undefined) {
+      handleCancel();
+    }
+    // we only want to react to profile changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentEditingProfile]);
 
   useSearchEffect("object_mask", (coordinates: string) => {
     if (!scaledWidth || !scaledHeight || isLoading) {
@@ -473,6 +790,7 @@ export default function MasksAndZonesView({
                 setActiveLine={setActiveLine}
                 snapPoints={snapPoints}
                 setSnapPoints={setSnapPoints}
+                editingProfile={currentEditingProfile}
               />
             )}
             {editPane == "motion_mask" && (
@@ -488,6 +806,7 @@ export default function MasksAndZonesView({
                 onSave={handleSave}
                 snapPoints={snapPoints}
                 setSnapPoints={setSnapPoints}
+                editingProfile={currentEditingProfile}
               />
             )}
             {editPane == "object_mask" && (
@@ -503,13 +822,34 @@ export default function MasksAndZonesView({
                 onSave={handleSave}
                 snapPoints={snapPoints}
                 setSnapPoints={setSnapPoints}
+                editingProfile={currentEditingProfile}
               />
             )}
             {editPane === undefined && (
               <>
-                <Heading as="h4" className="mb-2">
-                  {t("menu.masksAndZones")}
-                </Heading>
+                <div className="mb-2 flex items-center justify-between">
+                  <Heading as="h4">{t("menu.masksAndZones")}</Heading>
+                  {profileState && selectedCamera && (
+                    <ProfileSectionDropdown
+                      cameraName={selectedCamera}
+                      sectionKey="masksAndZones"
+                      allProfileNames={profileState.allProfileNames}
+                      editingProfile={currentEditingProfile}
+                      hasProfileData={hasProfileData}
+                      onSelectProfile={(profile) =>
+                        profileState.onSelectProfile(
+                          selectedCamera,
+                          "masksAndZones",
+                          profile,
+                        )
+                      }
+                      onAddProfile={profileState.onAddProfile}
+                      onDeleteProfileSection={(profileName) =>
+                        handleDeleteProfileMasksAndZones(profileName)
+                      }
+                    />
+                  )}
+                </div>
                 <div className="flex w-full flex-col">
                   {(selectedZoneMask === undefined ||
                     selectedZoneMask.includes("zone" as PolygonType)) && (
@@ -575,6 +915,8 @@ export default function MasksAndZonesView({
                             setIsLoading={setIsLoading}
                             loadingPolygonIndex={loadingPolygonIndex}
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
+                            editingProfile={currentEditingProfile}
+                            allProfileNames={profileState?.allProfileNames}
                           />
                         ))}
                     </div>
@@ -649,6 +991,8 @@ export default function MasksAndZonesView({
                             setIsLoading={setIsLoading}
                             loadingPolygonIndex={loadingPolygonIndex}
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
+                            editingProfile={currentEditingProfile}
+                            allProfileNames={profileState?.allProfileNames}
                           />
                         ))}
                     </div>
@@ -723,6 +1067,8 @@ export default function MasksAndZonesView({
                             setIsLoading={setIsLoading}
                             loadingPolygonIndex={loadingPolygonIndex}
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
+                            editingProfile={currentEditingProfile}
+                            allProfileNames={profileState?.allProfileNames}
                           />
                         ))}
                     </div>
