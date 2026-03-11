@@ -62,6 +62,38 @@ class ProfileManager:
                 if section_config is not None:
                     self._base_configs[cam_name][section] = section_config.model_dump()
 
+    def update_config(self, new_config) -> None:
+        """Update config reference after config/set replaces the in-memory config.
+
+        Preserves active profile state: re-snapshots base configs from the new
+        (freshly parsed) config, then re-applies profile overrides if a profile
+        was active.
+        """
+        current_active = self.config.active_profile
+        self.config = new_config
+
+        # Re-snapshot base configs from the new config (which has base values)
+        self._base_configs.clear()
+        self._base_enabled.clear()
+        self._base_zones.clear()
+        self._snapshot_base_configs()
+
+        # Re-apply profile overrides without publishing ZMQ updates
+        # (the config/set caller handles its own ZMQ publishing)
+        if current_active is not None:
+            has_profile = any(
+                current_active in cam.profiles
+                for cam in self.config.cameras.values()
+            )
+            if has_profile:
+                changed: dict[str, set[str]] = {}
+                self._apply_profile_overrides(current_active, changed)
+                self.config.active_profile = current_active
+            else:
+                # Profile was deleted — deactivate
+                self.config.active_profile = None
+                self._persist_active_profile(None)
+
     def activate_profile(self, profile_name: Optional[str]) -> Optional[str]:
         """Activate a profile by name, or deactivate if None.
 

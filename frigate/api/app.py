@@ -629,7 +629,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                 request.app.genai_manager.update_config(config)
 
                 if request.app.profile_manager is not None:
-                    request.app.profile_manager.config = config
+                    request.app.profile_manager.update_config(config)
 
                 if request.app.stats_emitter is not None:
                     request.app.stats_emitter.config = config
