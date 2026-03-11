@@ -49,6 +49,11 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
 
+**AXERA** <CommunityBadge />
+
+- [AXEngine](#axera): axmodels can run on AXERA AI acceleration.
+
+
 **For Testing**
 
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
@@ -1478,6 +1483,41 @@ model:
   input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
 ```
 
+## AXERA
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- AX650N
+- AX8850N
+
+This implementation uses the [AXera Pulsar2 Toolchain](https://huggingface.co/AXERA-TECH/Pulsar2).
+
+See the [installation docs](../frigate/installation.md#axera) for information on configuring the AXEngine hardware.
+
+### Configuration
+
+When configuring the AXEngine detector, you have to specify the model name.
+
+#### yolov9
+
+A yolov9 model is provided in the container at `/axmodels` and is used by this detector type by default.
+
+Use the model configuration shown below when using the axengine detector with the default axmodel:
+
+```yaml
+detectors:
+  axengine:
+    type: axengine
+
+model:
+  path: frigate-yolov9-tiny
+  model_type: yolo-generic
+  width: 320
+  height: 320
+  tensor_format: bgr
+  labelmap_path: /labelmap/coco-80.txt
+```
+
 # Models
 
 Some model types are not included in Frigate by default.
@@ -1571,12 +1611,12 @@ YOLOv9 model can be exported as ONNX using the command below. You can copy and p
 ```sh
 docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
 FROM python:3.11 AS build
-RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
-COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
 WORKDIR /yolov9
 ADD https://github.com/WongKinYiu/yolov9.git .
 RUN uv pip install --system -r requirements.txt
-RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier>=0.4.1 onnxscript
+RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier==0.4.* onnxscript
 ARG MODEL_SIZE
 ARG IMG_SIZE
 ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt
