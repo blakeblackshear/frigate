@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getProfileColor } from "@/utils/profileColors";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,11 @@ export function ProfileSectionDropdown({
   onDeleteProfileSection,
 }: ProfileSectionDropdownProps) {
   const { t } = useTranslation(["views/settings", "common"]);
+  const friendlyCameraName = useCameraFriendlyName(cameraName);
+  const friendlySectionName = t(`configForm.sections.${sectionKey}`, {
+    ns: "views/settings",
+    defaultValue: sectionKey,
+  });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [deleteConfirmProfile, setDeleteConfirmProfile] = useState<
     string | null
@@ -153,21 +159,23 @@ export function ProfileSectionDropdown({
             return (
               <DropdownMenuItem
                 key={profile}
-                className="group flex items-center justify-between gap-2"
+                className="group flex items-start justify-between gap-2"
                 onClick={() => onSelectProfile(profile)}
               >
-                <div className="flex items-center gap-2">
-                  {isActive && <Check className="h-3.5 w-3.5 shrink-0" />}
-                  <span
-                    className={cn(
-                      "h-2 w-2 shrink-0 rounded-full",
-                      color.dot,
-                      !isActive && "ml-[22px]",
-                    )}
-                  />
-                  <span>{profile}</span>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex w-full flex-row items-center justify-start gap-2">
+                    {isActive && <Check className="h-3.5 w-3.5 shrink-0" />}
+                    <span
+                      className={cn(
+                        "h-2 w-2 shrink-0 rounded-full",
+                        color.dot,
+                        !isActive && "ml-[22px]",
+                      )}
+                    />
+                    <span>{profile}</span>
+                  </div>
                   {!hasData && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="ml-[22px] text-xs text-muted-foreground">
                       {t("profiles.noOverrides", { ns: "views/settings" })}
                     </span>
                   )}
@@ -260,8 +268,8 @@ export function ProfileSectionDropdown({
               {t("profiles.deleteSectionConfirm", {
                 ns: "views/settings",
                 profile: deleteConfirmProfile,
-                section: sectionKey,
-                camera: cameraName,
+                section: friendlySectionName,
+                camera: friendlyCameraName,
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>

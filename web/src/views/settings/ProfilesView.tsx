@@ -8,6 +8,7 @@ import type { FrigateConfig } from "@/types/frigateConfig";
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { PROFILE_ELIGIBLE_SECTIONS } from "@/utils/configUtil";
+import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
@@ -129,10 +130,15 @@ export default function ProfilesView({
             : t("profiles.deactivated", { ns: "views/settings" }),
           { position: "top-center" },
         );
-      } catch {
-        toast.error(t("toast.save.error.title", { ns: "common" }), {
-          position: "top-center",
-        });
+      } catch (err) {
+        const message =
+          axios.isAxiosError(err) && err.response?.data?.message
+            ? String(err.response.data.message)
+            : undefined;
+        toast.error(
+          message || t("profiles.activateFailed", { ns: "views/settings" }),
+          { position: "top-center" },
+        );
       } finally {
         setActivating(false);
       }
@@ -186,10 +192,15 @@ export default function ProfilesView({
         }),
         { position: "top-center" },
       );
-    } catch {
-      toast.error(t("toast.save.error.title", { ns: "common" }), {
-        position: "top-center",
-      });
+    } catch (err) {
+      const errorMessage =
+        axios.isAxiosError(err) && err.response?.data?.message
+          ? String(err.response.data.message)
+          : undefined;
+      toast.error(
+        errorMessage || t("toast.save.error.noMessage", { ns: "common" }),
+        { position: "top-center" },
+      );
     } finally {
       setDeleting(false);
       setDeleteProfile(null);
@@ -371,7 +382,7 @@ export default function ProfilesView({
                           <Camera className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           <div className="min-w-0">
                             <div className="truncate text-xs font-medium">
-                              {camera}
+                              {resolveCameraName(config, camera)}
                             </div>
                             <div className="mt-1 flex flex-wrap gap-1">
                               {sections.map((section) => (
@@ -382,7 +393,10 @@ export default function ProfilesView({
                                     color.bg,
                                   )}
                                 >
-                                  {section}
+                                  {t(`configForm.sections.${section}`, {
+                                    ns: "views/settings",
+                                    defaultValue: section,
+                                  })}
                                 </span>
                               ))}
                             </div>

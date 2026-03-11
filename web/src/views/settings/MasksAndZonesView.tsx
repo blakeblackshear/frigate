@@ -73,9 +73,8 @@ export default function MasksAndZonesView({
   const [snapPoints, setSnapPoints] = useState(false);
 
   // Profile state
-  const profileSectionKey = `${selectedCamera}::masksAndZones`;
   const currentEditingProfile =
-    profileState?.editingProfile[profileSectionKey] ?? null;
+    profileState?.editingProfile[selectedCamera] ?? null;
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {

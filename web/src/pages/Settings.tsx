@@ -1050,14 +1050,13 @@ export default function Settings() {
 
   // Profile state handlers
   const handleSelectProfile = useCallback(
-    (camera: string, section: string, profile: string | null) => {
-      const key = `${camera}::${section}`;
+    (camera: string, _section: string, profile: string | null) => {
       setEditingProfile((prev) => {
         if (profile === null) {
-          const { [key]: _, ...rest } = prev;
+          const { [camera]: _, ...rest } = prev;
           return rest;
         }
-        return { ...prev, [key]: profile };
+        return { ...prev, [camera]: profile };
       });
     },
     [],
@@ -1115,8 +1114,13 @@ export default function Settings() {
         // Switch back to base config
         handleSelectProfile(camera, section, null);
         toast.success(
-          t("toast.save.success", {
-            ns: "common",
+          t("profiles.deleteSectionSuccess", {
+            ns: "views/settings",
+            section: t(`configForm.sections.${section}`, {
+              ns: "views/settings",
+              defaultValue: section,
+            }),
+            profile,
           }),
         );
       } catch {
@@ -1155,8 +1159,7 @@ export default function Settings() {
 
   const headerEditingProfile = useMemo(() => {
     if (!selectedCamera || !currentSectionKey) return null;
-    const key = `${selectedCamera}::${currentSectionKey}`;
-    return editingProfile[key] ?? null;
+    return editingProfile[selectedCamera] ?? null;
   }, [selectedCamera, currentSectionKey, editingProfile]);
 
   const showProfileDropdown =
@@ -1230,7 +1233,15 @@ export default function Settings() {
           });
           await mutate("config");
           handleSelectProfile(selectedCamera, "masksAndZones", null);
-          toast.success(t("toast.save.success", { ns: "common" }));
+          toast.success(
+            t("profiles.deleteSectionSuccess", {
+              ns: "views/settings",
+              section: t("configForm.sections.masksAndZones", {
+                ns: "views/settings",
+              }),
+              profile: profileName,
+            }),
+          );
         } catch {
           toast.error(t("toast.save.error.title", { ns: "common" }));
         }
@@ -1639,7 +1650,7 @@ export default function Settings() {
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-2">
           {hasPendingChanges && (
             <div
               className={cn(

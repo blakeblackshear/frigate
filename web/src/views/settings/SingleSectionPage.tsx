@@ -83,11 +83,8 @@ export function SingleSectionPage({
     ? getLocaleDocUrl(resolvedSectionConfig.sectionDocs)
     : undefined;
 
-  const profileKey = selectedCamera
-    ? `${selectedCamera}::${sectionKey}`
-    : undefined;
-  const currentEditingProfile = profileKey
-    ? (profileState?.editingProfile[profileKey] ?? null)
+  const currentEditingProfile = selectedCamera
+    ? (profileState?.editingProfile[selectedCamera] ?? null)
     : null;
 
   const handleSectionStatusChange = useCallback(
