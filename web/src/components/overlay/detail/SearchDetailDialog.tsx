@@ -495,6 +495,15 @@ export default function SearchDetailDialog({
     }
   }, [search]);
 
+  useEffect(() => {
+    if (!isDesktop || !onPrevious || !onNext) {
+      setShowNavigationButtons(false);
+      return;
+    }
+
+    setShowNavigationButtons(isOpen);
+  }, [isOpen, onNext, onPrevious]);
+
   // show/hide annotation settings is handled inside TabsWithActions
 
   const searchTabs = useMemo(() => {
