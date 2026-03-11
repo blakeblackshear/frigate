@@ -142,6 +142,15 @@ export default function ProfilesView({
 
   const handleDeleteProfile = useCallback(async () => {
     if (!deleteProfile || !config) return;
+
+    // If this is an unsaved (new) profile, just remove it from local state
+    const isNewProfile = profileState?.newProfiles.includes(deleteProfile);
+    if (isNewProfile) {
+      profileState?.onRemoveNewProfile(deleteProfile);
+      setDeleteProfile(null);
+      return;
+    }
+
     setDeleting(true);
 
     try {
@@ -184,7 +193,15 @@ export default function ProfilesView({
       setDeleting(false);
       setDeleteProfile(null);
     }
-  }, [deleteProfile, activeProfile, config, updateConfig, updateProfiles, t]);
+  }, [
+    deleteProfile,
+    activeProfile,
+    config,
+    profileState,
+    updateConfig,
+    updateProfiles,
+    t,
+  ]);
 
   if (!config || !profilesData) {
     return null;
@@ -193,14 +210,15 @@ export default function ProfilesView({
   const hasProfiles = allProfileNames.length > 0;
 
   return (
-    <div className="flex size-full flex-col lg:pr-2">
-      <Heading as="h4" className="mb-5">
-        {t("profiles.title", { ns: "views/settings" })}
-      </Heading>
+    <div className="flex size-full max-w-5xl flex-col lg:pr-2">
+      <Heading as="h4">{t("profiles.title", { ns: "views/settings" })}</Heading>
+      <div className="my-1 text-sm text-muted-foreground">
+        {t("profiles.disabledDescription", { ns: "views/settings" })}
+      </div>
 
       {/* Enable Profiles Toggle — shown only when no profiles exist */}
       {!hasProfiles && setProfilesUIEnabled && (
-        <div className="mb-6 rounded-lg border border-border/70 bg-card/30 p-4">
+        <div className="my-6 max-w-xl rounded-lg border border-border/70 bg-card/30 p-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="profiles-toggle" className="cursor-pointer">
               {t("profiles.enableSwitch", { ns: "views/settings" })}
@@ -211,12 +229,13 @@ export default function ProfilesView({
               onCheckedChange={setProfilesUIEnabled}
             />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            {profilesUIEnabled
-              ? t("profiles.enabledDescription", { ns: "views/settings" })
-              : t("profiles.disabledDescription", { ns: "views/settings" })}
-          </p>
         </div>
+      )}
+
+      {profilesUIEnabled && (
+        <p className="mb-5 max-w-xl text-sm text-primary-variant">
+          {t("profiles.enabledDescription", { ns: "views/settings" })}
+        </p>
       )}
 
       {/* Active Profile Section — only when profiles exist */}
@@ -275,11 +294,13 @@ export default function ProfilesView({
 
       {/* Profile Cards */}
       {!hasProfiles ? (
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          {!profilesUIEnabled && (
-            <p>{t("profiles.noProfiles", { ns: "views/settings" })}</p>
-          )}
-        </div>
+        profilesUIEnabled ? (
+          <p className="text-sm text-muted-foreground">
+            {t("profiles.noProfiles", { ns: "views/settings" })}
+          </p>
+        ) : (
+          <div />
+        )
       ) : (
         <div className="flex flex-col gap-3">
           {allProfileNames.map((profile) => {

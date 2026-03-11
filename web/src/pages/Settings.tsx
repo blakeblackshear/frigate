@@ -1067,6 +1067,33 @@ export default function Settings() {
     setNewProfiles((prev) => (prev.includes(name) ? prev : [...prev, name]));
   }, []);
 
+  const handleRemoveNewProfile = useCallback((name: string) => {
+    setNewProfiles((prev) => prev.filter((p) => p !== name));
+    // Clear any editing state for this profile
+    setEditingProfile((prev) => {
+      const updated = { ...prev };
+      for (const key of Object.keys(updated)) {
+        if (updated[key] === name) {
+          delete updated[key];
+        }
+      }
+      return updated;
+    });
+    // Clear any pending data for this profile
+    setPendingDataBySection((prev) => {
+      const profileSegment = `profiles.${name}.`;
+      const updated = { ...prev };
+      let changed = false;
+      for (const key of Object.keys(updated)) {
+        if (key.includes(profileSegment)) {
+          delete updated[key];
+          changed = true;
+        }
+      }
+      return changed ? updated : prev;
+    });
+  }, []);
+
   const handleDeleteProfileSection = useCallback(
     async (camera: string, section: string, profile: string) => {
       try {
@@ -1105,6 +1132,7 @@ export default function Settings() {
       allProfileNames,
       onSelectProfile: handleSelectProfile,
       onAddProfile: handleAddProfile,
+      onRemoveNewProfile: handleRemoveNewProfile,
       onDeleteProfileSection: handleDeleteProfileSection,
     }),
     [
@@ -1113,6 +1141,7 @@ export default function Settings() {
       allProfileNames,
       handleSelectProfile,
       handleAddProfile,
+      handleRemoveNewProfile,
       handleDeleteProfileSection,
     ],
   );
@@ -1780,6 +1809,8 @@ export default function Settings() {
                   pendingDataBySection={pendingDataBySection}
                   onPendingDataChange={handlePendingDataChange}
                   profileState={profileState}
+                  profilesUIEnabled={profilesUIEnabled}
+                  setProfilesUIEnabled={setProfilesUIEnabled}
                 />
               );
             })()}

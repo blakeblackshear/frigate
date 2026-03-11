@@ -15,6 +15,7 @@ export type ProfileState = {
     profile: string | null,
   ) => void;
   onAddProfile: (name: string) => void;
+  onRemoveNewProfile: (name: string) => void;
   onDeleteProfileSection: (
     camera: string,
     section: string,
