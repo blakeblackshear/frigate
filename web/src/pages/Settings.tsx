@@ -1205,16 +1205,39 @@ export default function Settings() {
             config?.cameras?.[selectedCamera]?.profiles?.[profileName];
           if (!profileData) return;
 
-          // Only delete top-level keys that exist in the profile
-          const deletePayload: Record<string, string> = {};
+          // Build a targeted delete payload that only removes mask-related
+          // sub-keys, not the entire motion/objects sections
+          const deletePayload: Record<string, unknown> = {};
+
           if (profileData.zones !== undefined) {
             deletePayload.zones = "";
           }
-          if (profileData.motion !== undefined) {
-            deletePayload.motion = "";
+
+          if (profileData.motion?.mask !== undefined) {
+            deletePayload.motion = { mask: "" };
           }
-          if (profileData.objects !== undefined) {
-            deletePayload.objects = "";
+
+          if (profileData.objects) {
+            const objDelete: Record<string, unknown> = {};
+            if (profileData.objects.mask !== undefined) {
+              objDelete.mask = "";
+            }
+            if (profileData.objects.filters) {
+              const filtersDelete: Record<string, unknown> = {};
+              for (const [filterName, filterVal] of Object.entries(
+                profileData.objects.filters,
+              )) {
+                if (filterVal.mask !== undefined) {
+                  filtersDelete[filterName] = { mask: "" };
+                }
+              }
+              if (Object.keys(filtersDelete).length > 0) {
+                objDelete.filters = filtersDelete;
+              }
+            }
+            if (Object.keys(objDelete).length > 0) {
+              deletePayload.objects = objDelete;
+            }
           }
 
           if (Object.keys(deletePayload).length === 0) return;
