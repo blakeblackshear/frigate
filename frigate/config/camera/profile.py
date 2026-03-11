@@ -3,6 +3,10 @@
 from typing import Optional
 
 from ..base import FrigateBaseModel
+from ..classification import (
+    CameraFaceRecognitionConfig,
+    CameraLicensePlateRecognitionConfig,
+)
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
@@ -29,6 +33,8 @@ class CameraProfileConfig(FrigateBaseModel):
     audio: Optional[AudioConfig] = None
     birdseye: Optional[BirdseyeCameraConfig] = None
     detect: Optional[DetectConfig] = None
+    face_recognition: Optional[CameraFaceRecognitionConfig] = None
+    lpr: Optional[CameraLicensePlateRecognitionConfig] = None
     motion: Optional[MotionConfig] = None
     notifications: Optional[NotificationConfig] = None
     objects: Optional[ObjectConfig] = None

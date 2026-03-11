@@ -313,6 +313,8 @@ export type CameraProfileConfig = {
   audio?: Partial<CameraConfig["audio"]>;
   birdseye?: Partial<CameraConfig["birdseye"]>;
   detect?: Partial<CameraConfig["detect"]>;
+  face_recognition?: Partial<CameraConfig["face_recognition"]>;
+  lpr?: Partial<CameraConfig["lpr"]>;
   motion?: Partial<CameraConfig["motion"]>;
   notifications?: Partial<CameraConfig["notifications"]>;
   objects?: Partial<CameraConfig["objects"]>;

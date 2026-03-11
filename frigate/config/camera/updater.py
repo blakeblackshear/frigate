@@ -27,6 +27,8 @@ class CameraConfigUpdateEnum(str, Enum):
     review = "review"
     review_genai = "review_genai"
     semantic_search = "semantic_search"  # for semantic search triggers
+    face_recognition = "face_recognition"
+    lpr = "lpr"
     snapshots = "snapshots"
     zones = "zones"
 
@@ -119,6 +121,10 @@ class CameraConfigUpdateSubscriber:
             config.review.genai = updated_config
         elif update_type == CameraConfigUpdateEnum.semantic_search:
             config.semantic_search = updated_config
+        elif update_type == CameraConfigUpdateEnum.face_recognition:
+            config.face_recognition = updated_config
+        elif update_type == CameraConfigUpdateEnum.lpr:
+            config.lpr = updated_config
         elif update_type == CameraConfigUpdateEnum.snapshots:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:
