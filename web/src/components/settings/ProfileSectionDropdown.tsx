@@ -112,7 +112,7 @@ export function ProfileSectionDropdown({
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="h-9 gap-2 font-normal">
             {editingProfile ? (

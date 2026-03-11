@@ -171,6 +171,7 @@ export default function ProfilesView({
 
       if (Object.keys(configData).length > 0) {
         await axios.put("config/set", {
+          requires_restart: 0,
           config_data: { cameras: configData },
         });
       }

@@ -1098,6 +1098,7 @@ export default function Settings() {
     async (camera: string, section: string, profile: string) => {
       try {
         await axios.put("config/set", {
+          requires_restart: 0,
           config_data: {
             cameras: {
               [camera]: {
@@ -1197,16 +1198,31 @@ export default function Settings() {
 
       if (currentSectionKey === "masksAndZones") {
         try {
+          const profileData =
+            config?.cameras?.[selectedCamera]?.profiles?.[profileName];
+          if (!profileData) return;
+
+          // Only delete top-level keys that exist in the profile
+          const deletePayload: Record<string, string> = {};
+          if (profileData.zones !== undefined) {
+            deletePayload.zones = "";
+          }
+          if (profileData.motion !== undefined) {
+            deletePayload.motion = "";
+          }
+          if (profileData.objects !== undefined) {
+            deletePayload.objects = "";
+          }
+
+          if (Object.keys(deletePayload).length === 0) return;
+
           await axios.put("config/set", {
+            requires_restart: 0,
             config_data: {
               cameras: {
                 [selectedCamera]: {
                   profiles: {
-                    [profileName]: {
-                      zones: "",
-                      motion: { mask: "" },
-                      objects: { mask: "", filters: "" },
-                    },
+                    [profileName]: deletePayload,
                   },
                 },
               },
@@ -1229,6 +1245,7 @@ export default function Settings() {
     [
       selectedCamera,
       currentSectionKey,
+      config,
       handleSelectProfile,
       handleDeleteProfileSection,
       t,

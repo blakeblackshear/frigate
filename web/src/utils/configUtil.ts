@@ -6,6 +6,7 @@
 
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
+import merge from "lodash/merge";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
@@ -497,9 +498,33 @@ export function prepareSectionSavePayload(opts: {
   );
 
   // Compute rawFormData (the current stored value for this section)
+  // For profiles, merge base camera config with profile overrides (matching
+  // what BaseSection displays in the form) so the diff only contains actual
+  // user changes, not every field from the merged view.
   let rawSectionValue: unknown;
   if (level === "camera" && cameraName) {
-    rawSectionValue = get(config.cameras?.[cameraName], sectionPath);
+    if (profileInfo.isProfile) {
+      const baseValue = get(
+        config.cameras?.[cameraName],
+        profileInfo.actualSection,
+      );
+      const profileOverrides = get(config.cameras?.[cameraName], sectionPath);
+      if (
+        profileOverrides &&
+        typeof profileOverrides === "object" &&
+        baseValue &&
+        typeof baseValue === "object"
+      ) {
+        rawSectionValue = merge(
+          cloneDeep(baseValue),
+          cloneDeep(profileOverrides),
+        );
+      } else {
+        rawSectionValue = baseValue;
+      }
+    } else {
+      rawSectionValue = get(config.cameras?.[cameraName], sectionPath);
+    }
   } else {
     rawSectionValue = get(config, sectionPath);
   }
