@@ -17,6 +17,7 @@ from titlecase import titlecase
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import FrigateConfig
+from frigate.config.auth import AuthConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -174,7 +175,7 @@ class WebPushClient(Communicator):
             if config_topic == "config/notifications" and config_payload:
                 self.config.notifications = config_payload
             elif config_topic == "config/auth":
-                if config_payload:
+                if isinstance(config_payload, AuthConfig):
                     self.config.auth = config_payload
                 self._refresh_user_cameras()
 
@@ -301,17 +302,16 @@ class WebPushClient(Communicator):
         """Rebuild the user-to-cameras access cache from the database."""
         all_camera_names = set(self.config.cameras.keys())
         roles_dict = self.config.auth.roles
-        users: list[dict[str, Any]] = (
-            User.select(User.username, User.role).dicts().iterator()
-        )
         updated: dict[str, set[str]] = {}
-        for user in users:
+        for user in User.select(User.username, User.role).dicts().iterator():
             allowed = User.get_allowed_cameras(
                 user["role"], roles_dict, all_camera_names
             )
             updated[user["username"]] = set(allowed)
             logger.debug(
-                f"User {user['username']} has access to cameras: {', '.join(allowed)}"
+                "User %s has access to cameras: %s",
+                user["username"],
+                ", ".join(allowed),
             )
         self.user_cameras = updated
 
