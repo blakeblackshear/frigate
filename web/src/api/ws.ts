@@ -1,6 +1,11 @@
-import { baseUrl } from "./baseUrl";
-import { useCallback, useEffect, useRef, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   EmbeddingsReindexProgressType,
   FrigateCameraState,
@@ -14,8 +19,11 @@ import {
   Job,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
-import { createContainer } from "react-tracked";
-import useDeepMemo from "@/hooks/use-deep-memo";
+import { isEqual } from "lodash";
+import { WsSendContext } from "./wsContext";
+import type { Update, WsSend } from "./wsContext";
+
+export type { Update };
 
 export type WsFeedMessage = {
   topic: string;
@@ -24,170 +32,204 @@ export type WsFeedMessage = {
   id: string;
 };
 
-type Update = {
-  topic: string;
-  payload: unknown;
-  retain: boolean;
-};
-
 type WsState = {
   [topic: string]: unknown;
 };
 
-type useValueReturn = [WsState, (update: Update) => void];
+// External store for WebSocket state using useSyncExternalStore
+type Listener = () => void;
 
+const wsState: WsState = {};
+const wsTopicListeners = new Map<string, Set<Listener>>();
+
+// Reset all module-level state. Called on WsProvider unmount to prevent
+// stale data from leaking across mount/unmount cycles (e.g. HMR, logout)
+export function resetWsStore() {
+  for (const key of Object.keys(wsState)) {
+    delete wsState[key];
+  }
+  wsTopicListeners.clear();
+  lastCameraActivityPayload = null;
+  wsMessageSubscribers.clear();
+  wsMessageIdCounter = 0;
+}
+
+// Parse and apply a raw WS message synchronously.
+// Called directly from WsProvider's onmessage handler.
+export function processWsMessage(raw: string) {
+  const data: Update = JSON.parse(raw);
+  if (!data) return;
+
+  const { topic, payload } = data;
+
+  if (topic === "camera_activity") {
+    applyCameraActivity(payload as string);
+  } else {
+    applyTopicUpdate(topic, payload);
+  }
+
+  if (wsMessageSubscribers.size > 0) {
+    wsMessageSubscribers.forEach((cb) =>
+      cb({
+        topic,
+        payload,
+        timestamp: Date.now(),
+        id: String(wsMessageIdCounter++),
+      }),
+    );
+  }
+}
+
+function applyTopicUpdate(topic: string, newVal: unknown) {
+  const oldVal = wsState[topic];
+  // Fast path: === for primitives ("ON"/"OFF", numbers).
+  // Fall back to isEqual for objects/arrays.
+  const unchanged =
+    oldVal === newVal ||
+    (typeof newVal === "object" && newVal !== null && isEqual(oldVal, newVal));
+  if (unchanged) return;
+
+  wsState[topic] = newVal;
+  // Snapshot the Set — a listener may trigger unmount that modifies it.
+  const listeners = wsTopicListeners.get(topic);
+  if (listeners) {
+    for (const l of Array.from(listeners)) l();
+  }
+}
+
+// Subscriptions
+
+export function subscribeWsTopic(
+  topic: string,
+  listener: Listener,
+): () => void {
+  let set = wsTopicListeners.get(topic);
+  if (!set) {
+    set = new Set();
+    wsTopicListeners.set(topic, set);
+  }
+  set.add(listener);
+  return () => {
+    set!.delete(listener);
+    if (set!.size === 0) wsTopicListeners.delete(topic);
+  };
+}
+
+export function getWsTopicValue(topic: string): unknown {
+  return wsState[topic];
+}
+
+// Feed message subscribers
 const wsMessageSubscribers = new Set<(msg: WsFeedMessage) => void>();
 let wsMessageIdCounter = 0;
 
-function useValue(): useValueReturn {
-  const wsUrl = `${baseUrl.replace(/^http/, "ws")}ws`;
+// Camera activity expansion
+//
+// Cache the last raw camera_activity JSON string so we can skip JSON.parse
+// and the entire expansion when nothing has changed. This avoids creating
+// fresh objects (which defeat Object.is and force expensive isEqual deep
+// traversals) on every flush — critical with many cameras.
+let lastCameraActivityPayload: string | null = null;
 
-  // main state
+function applyCameraActivity(payload: string) {
+  // Fast path: if the raw JSON string is identical, nothing changed.
+  if (payload === lastCameraActivityPayload) return;
+  lastCameraActivityPayload = payload;
 
-  const [wsState, setWsState] = useState<WsState>({});
+  let activity: { [key: string]: Partial<FrigateCameraState> };
 
-  useEffect(() => {
-    const activityValue: string = wsState["camera_activity"] as string;
+  try {
+    activity = JSON.parse(payload);
+  } catch {
+    return;
+  }
 
-    if (!activityValue) {
-      return;
-    }
+  if (Object.keys(activity).length === 0) return;
 
-    let cameraActivity: { [key: string]: Partial<FrigateCameraState> };
+  for (const [name, state] of Object.entries(activity)) {
+    applyTopicUpdate(`camera_activity/${name}`, state);
 
-    try {
-      cameraActivity = JSON.parse(activityValue);
-    } catch {
-      return;
-    }
+    const cameraConfig = state?.config;
+    if (!cameraConfig) continue;
 
-    if (Object.keys(cameraActivity).length === 0) {
-      return;
-    }
+    const {
+      record,
+      detect,
+      enabled,
+      snapshots,
+      audio,
+      audio_transcription,
+      notifications,
+      notifications_suspended,
+      autotracking,
+      alerts,
+      detections,
+      object_descriptions,
+      review_descriptions,
+    } = cameraConfig;
 
-    const cameraStates: WsState = {};
-
-    Object.entries(cameraActivity).forEach(([name, state]) => {
-      const cameraConfig = state?.config;
-
-      if (!cameraConfig) {
-        return;
-      }
-
-      const {
-        record,
-        detect,
-        enabled,
-        snapshots,
-        audio,
-        audio_transcription,
-        notifications,
-        notifications_suspended,
-        autotracking,
-        alerts,
-        detections,
-        object_descriptions,
-        review_descriptions,
-      } = cameraConfig;
-      cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
-      cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
-      cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
-      cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
-      cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
-      cameraStates[`${name}/audio_transcription/state`] = audio_transcription
-        ? "ON"
-        : "OFF";
-      cameraStates[`${name}/notifications/state`] = notifications
-        ? "ON"
-        : "OFF";
-      cameraStates[`${name}/notifications/suspended`] =
-        notifications_suspended || 0;
-      cameraStates[`${name}/ptz_autotracker/state`] = autotracking
-        ? "ON"
-        : "OFF";
-      cameraStates[`${name}/review_alerts/state`] = alerts ? "ON" : "OFF";
-      cameraStates[`${name}/review_detections/state`] = detections
-        ? "ON"
-        : "OFF";
-      cameraStates[`${name}/object_descriptions/state`] = object_descriptions
-        ? "ON"
-        : "OFF";
-      cameraStates[`${name}/review_descriptions/state`] = review_descriptions
-        ? "ON"
-        : "OFF";
-    });
-
-    setWsState((prevState) => ({
-      ...prevState,
-      ...cameraStates,
-    }));
-
-    // we only want this to run initially when the config is loaded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wsState["camera_activity"]]);
-
-  // ws handler
-  const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
-    onMessage: (event) => {
-      const data: Update = JSON.parse(event.data);
-
-      if (data) {
-        setWsState((prevState) => ({
-          ...prevState,
-          [data.topic]: data.payload,
-        }));
-
-        // Notify feed subscribers
-        if (wsMessageSubscribers.size > 0) {
-          const feedMsg: WsFeedMessage = {
-            topic: data.topic,
-            payload: data.payload,
-            timestamp: Date.now(),
-            id: String(wsMessageIdCounter++),
-          };
-          wsMessageSubscribers.forEach((cb) => cb(feedMsg));
-        }
-      }
-    },
-    onOpen: () => {
-      sendJsonMessage({
-        topic: "onConnect",
-        message: "",
-        retain: false,
-      });
-    },
-    onClose: () => {},
-    shouldReconnect: () => true,
-    retryOnError: true,
-  });
-
-  const setState = useCallback(
-    (message: Update) => {
-      if (readyState === ReadyState.OPEN) {
-        sendJsonMessage({
-          topic: message.topic,
-          payload: message.payload,
-          retain: message.retain,
-        });
-      }
-    },
-    [readyState, sendJsonMessage],
-  );
-
-  return [wsState, setState];
+    applyTopicUpdate(`${name}/recordings/state`, record ? "ON" : "OFF");
+    applyTopicUpdate(`${name}/enabled/state`, enabled ? "ON" : "OFF");
+    applyTopicUpdate(`${name}/detect/state`, detect ? "ON" : "OFF");
+    applyTopicUpdate(`${name}/snapshots/state`, snapshots ? "ON" : "OFF");
+    applyTopicUpdate(`${name}/audio/state`, audio ? "ON" : "OFF");
+    applyTopicUpdate(
+      `${name}/audio_transcription/state`,
+      audio_transcription ? "ON" : "OFF",
+    );
+    applyTopicUpdate(
+      `${name}/notifications/state`,
+      notifications ? "ON" : "OFF",
+    );
+    applyTopicUpdate(
+      `${name}/notifications/suspended`,
+      notifications_suspended || 0,
+    );
+    applyTopicUpdate(
+      `${name}/ptz_autotracker/state`,
+      autotracking ? "ON" : "OFF",
+    );
+    applyTopicUpdate(`${name}/review_alerts/state`, alerts ? "ON" : "OFF");
+    applyTopicUpdate(
+      `${name}/review_detections/state`,
+      detections ? "ON" : "OFF",
+    );
+    applyTopicUpdate(
+      `${name}/object_descriptions/state`,
+      object_descriptions ? "ON" : "OFF",
+    );
+    applyTopicUpdate(
+      `${name}/review_descriptions/state`,
+      review_descriptions ? "ON" : "OFF",
+    );
+  }
 }
 
-export const {
-  Provider: WsProvider,
-  useTrackedState: useWsState,
-  useUpdate: useWsUpdate,
-} = createContainer(useValue, { defaultState: {}, concurrentMode: true });
+// Hooks
+export function useWsUpdate(): WsSend {
+  const send = useContext(WsSendContext);
+  if (!send) {
+    throw new Error("useWsUpdate must be used within WsProvider");
+  }
+  return send;
+}
 
+// Subscribe to a single WS topic with proper bail-out.
+// Only re-renders when the topic's value changes (Object.is comparison).
+// Uses useSyncExternalStore — zero useEffect, so no PassiveMask flags
+// propagate through the fiber tree.
 export function useWs(watchTopic: string, publishTopic: string) {
-  const state = useWsState();
+  const payload = useSyncExternalStore(
+    useCallback(
+      (listener: Listener) => subscribeWsTopic(watchTopic, listener),
+      [watchTopic],
+    ),
+    useCallback(() => wsState[watchTopic], [watchTopic]),
+  );
+
   const sendJsonMessage = useWsUpdate();
 
-  const value = { payload: state[watchTopic] || null };
+  const value = { payload: payload ?? null };
 
   const send = useCallback(
     (payload: unknown, retain = false) => {
@@ -202,6 +244,8 @@ export function useWs(watchTopic: string, publishTopic: string) {
 
   return { value, send };
 }
+
+// Convenience hooks
 
 export function useEnabledState(camera: string): {
   payload: ToggleableSetting;
@@ -413,28 +457,42 @@ export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
   } = useWs("events", "");
-  return { payload: JSON.parse(payload as string) };
+  const parsed = useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
+  return { payload: parsed };
 }
 
 export function useAudioDetections(): { payload: FrigateAudioDetections } {
   const {
     value: { payload },
   } = useWs("audio_detections", "");
-  return { payload: JSON.parse(payload as string) };
+  const parsed = useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
+  return { payload: parsed };
 }
 
 export function useFrigateReviews(): FrigateReview {
   const {
     value: { payload },
   } = useWs("reviews", "");
-  return useDeepMemo(JSON.parse(payload as string));
+  return useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
 }
 
 export function useFrigateStats(): FrigateStats {
   const {
     value: { payload },
   } = useWs("stats", "");
-  return useDeepMemo(JSON.parse(payload as string));
+  return useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
 }
 
 export function useInitialCameraState(
@@ -446,32 +504,31 @@ export function useInitialCameraState(
   const {
     value: { payload },
     send: sendCommand,
-  } = useWs("camera_activity", "onConnect");
+  } = useWs(`camera_activity/${camera}`, "onConnect");
 
-  const data = useDeepMemo(JSON.parse(payload as string));
+  // camera_activity sub-topic payload is already parsed by expandCameraActivity
+  const data = payload as FrigateCameraState | undefined;
 
+  // onConnect is sent once in WsProvider.onopen — no need to re-request on
+  // every component mount.  Components read cached wsState immediately via
+  // useSyncExternalStore.  Only re-request when the user tabs back in.
   useEffect(() => {
-    let listener = undefined;
-    if (revalidateOnFocus) {
-      sendCommand("onConnect");
-      listener = () => {
-        if (document.visibilityState == "visible") {
-          sendCommand("onConnect");
-        }
-      };
-      addEventListener("visibilitychange", listener);
-    }
+    if (!revalidateOnFocus) return;
 
-    return () => {
-      if (listener) {
-        removeEventListener("visibilitychange", listener);
+    const listener = () => {
+      if (document.visibilityState === "visible") {
+        sendCommand("onConnect");
       }
     };
-    // only refresh when onRefresh value changes
+    addEventListener("visibilitychange", listener);
+
+    return () => {
+      removeEventListener("visibilitychange", listener);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revalidateOnFocus]);
 
-  return { payload: data ? data[camera] : undefined };
+  return { payload: data as FrigateCameraState };
 }
 
 export function useModelState(
@@ -483,7 +540,10 @@ export function useModelState(
     send: sendCommand,
   } = useWs("model_state", "modelState");
 
-  const data = useDeepMemo(JSON.parse(payload as string));
+  const data = useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
 
   useEffect(() => {
     let listener = undefined;
@@ -519,7 +579,10 @@ export function useEmbeddingsReindexProgress(
     send: sendCommand,
   } = useWs("embeddings_reindex_progress", "embeddingsReindexProgress");
 
-  const data = useDeepMemo(JSON.parse(payload as string));
+  const data = useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
 
   useEffect(() => {
     let listener = undefined;
@@ -553,8 +616,9 @@ export function useAudioTranscriptionProcessState(
     send: sendCommand,
   } = useWs("audio_transcription_state", "audioTranscriptionState");
 
-  const data = useDeepMemo(
-    payload ? (JSON.parse(payload as string) as string) : "idle",
+  const data = useMemo(
+    () => (payload ? (JSON.parse(payload as string) as string) : "idle"),
+    [payload],
   );
 
   useEffect(() => {
@@ -587,7 +651,10 @@ export function useBirdseyeLayout(revalidateOnFocus: boolean = true): {
     send: sendCommand,
   } = useWs("birdseye_layout", "birdseyeLayout");
 
-  const data = useDeepMemo(JSON.parse(payload as string));
+  const data = useMemo(
+    () => (payload ? JSON.parse(payload as string) : undefined),
+    [payload],
+  );
 
   useEffect(() => {
     let listener = undefined;
@@ -684,10 +751,14 @@ export function useTrackedObjectUpdate(): {
   const {
     value: { payload },
   } = useWs("tracked_object_update", "");
-  const parsed = payload
-    ? JSON.parse(payload as string)
-    : { type: "", id: "", camera: "" };
-  return { payload: useDeepMemo(parsed) };
+  const parsed = useMemo(
+    () =>
+      payload
+        ? JSON.parse(payload as string)
+        : { type: "", id: "", camera: "" },
+    [payload],
+  );
+  return { payload: parsed };
 }
 
 export function useNotifications(camera: string): {
@@ -730,10 +801,14 @@ export function useTriggers(): { payload: TriggerStatus } {
   const {
     value: { payload },
   } = useWs("triggers", "");
-  const parsed = payload
-    ? JSON.parse(payload as string)
-    : { name: "", camera: "", event_id: "", type: "", score: 0 };
-  return { payload: useDeepMemo(parsed) };
+  const parsed = useMemo(
+    () =>
+      payload
+        ? JSON.parse(payload as string)
+        : { name: "", camera: "", event_id: "", type: "", score: 0 },
+    [payload],
+  );
+  return { payload: parsed };
 }
 
 export function useJobStatus(
@@ -745,8 +820,9 @@ export function useJobStatus(
     send: sendCommand,
   } = useWs("job_state", "jobState");
 
-  const jobData = useDeepMemo(
-    payload && typeof payload === "string" ? JSON.parse(payload) : {},
+  const jobData = useMemo(
+    () => (payload && typeof payload === "string" ? JSON.parse(payload) : {}),
+    [payload],
   );
   const currentJob = jobData[jobType] || null;
 
