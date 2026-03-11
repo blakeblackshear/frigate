@@ -45,8 +45,8 @@ from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.file import (
-    get_event_snapshot_path,
     get_event_snapshot_bytes,
+    get_event_snapshot_path,
     get_event_thumbnail_bytes,
     load_event_snapshot_image,
 )
