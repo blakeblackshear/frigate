@@ -77,6 +77,8 @@ export const PROFILE_ELIGIBLE_SECTIONS = new Set([
   "audio",
   "birdseye",
   "detect",
+  "face_recognition",
+  "lpr",
   "motion",
   "notifications",
   "objects",
@@ -204,6 +206,32 @@ export function buildOverrides(
 // Normalize raw config data (strip internal fields) and remove any paths
 // listed in `hiddenFields` so they are not included in override computation.
 
+// lodash `unset` treats `*` as a literal key.  This helper expands wildcard
+// segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
+function unsetWithWildcard(
+  obj: Record<string, unknown>,
+  path: string,
+): void {
+  if (!path.includes("*")) {
+    unset(obj, path);
+    return;
+  }
+  const segments = path.split(".");
+  const starIndex = segments.indexOf("*");
+  const prefix = segments.slice(0, starIndex).join(".");
+  const suffix = segments.slice(starIndex + 1).join(".");
+  const parent = prefix ? get(obj, prefix) : obj;
+  if (parent && typeof parent === "object") {
+    for (const key of Object.keys(parent as Record<string, unknown>)) {
+      const fullPath = suffix ? `${key}.${suffix}` : key;
+      unsetWithWildcard(
+        parent as Record<string, unknown>,
+        fullPath,
+      );
+    }
+  }
+}
+
 export function sanitizeSectionData(
   data: ConfigSectionData,
   hiddenFields?: string[],
@@ -215,7 +243,7 @@ export function sanitizeSectionData(
   const cleaned = cloneDeep(normalized) as ConfigSectionData;
   hiddenFields.forEach((path) => {
     if (!path) return;
-    unset(cleaned, path);
+    unsetWithWildcard(cleaned as Record<string, unknown>, path);
   });
   return cleaned;
 }
