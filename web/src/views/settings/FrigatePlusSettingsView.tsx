@@ -8,7 +8,6 @@ import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
-import { IoIosWarning } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
@@ -196,15 +195,6 @@ export default function FrigatePlusSettingsView({
   useEffect(() => {
     document.title = t("documentTitle.frigatePlus");
   }, [t]);
-
-  const needCleanSnapshots = () => {
-    if (!config) {
-      return false;
-    }
-    return Object.values(config.cameras).some(
-      (camera) => camera.snapshots.enabled && !camera.snapshots.clean_copy,
-    );
-  };
 
   if (!config) {
     return <ActivityIndicator />;
@@ -440,8 +430,7 @@ export default function FrigatePlusSettingsView({
                                     )}
                                   </td>
                                   <td className="px-4 py-2 text-center">
-                                    {camera.snapshots?.enabled &&
-                                    camera.snapshots?.clean_copy ? (
+                                    {camera.snapshots?.enabled ? (
                                       <CheckCircle2 className="mx-auto size-5 text-green-500" />
                                     ) : (
                                       <XCircle className="mx-auto size-5 text-danger" />
@@ -453,18 +442,6 @@ export default function FrigatePlusSettingsView({
                           </tbody>
                         </table>
                       </div>
-                      {needCleanSnapshots() && (
-                        <div className="rounded-lg border border-secondary-foreground bg-secondary p-4 text-sm text-danger">
-                          <div className="flex items-center gap-2">
-                            <IoIosWarning className="mr-2 size-5 text-danger" />
-                            <div className="max-w-[85%] text-sm">
-                              <Trans ns="views/settings">
-                                frigatePlus.snapshotConfig.cleanCopyWarning
-                              </Trans>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   }
                 />
