@@ -2,6 +2,7 @@ export type ProfileColor = {
   bg: string;
   text: string;
   dot: string;
+  border: string;
   bgMuted: string;
 };
 

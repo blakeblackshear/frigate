@@ -4,9 +4,16 @@ import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ConfigSectionData } from "@/types/configForm";
 import type { ProfileState } from "@/types/profile";
 import { getSectionConfig } from "@/utils/configUtil";
+import { getProfileColor } from "@/utils/profileColors";
+import { cn } from "@/lib/utils";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
@@ -35,6 +42,8 @@ export type SettingsPageProps = {
 export type SectionStatus = {
   hasChanges: boolean;
   isOverridden: boolean;
+  /** Where the override comes from: "global" = camera overrides global, "profile" = profile overrides base */
+  overrideSource?: "global" | "profile";
   hasValidationErrors: boolean;
 };
 
@@ -87,6 +96,14 @@ export function SingleSectionPage({
     ? (profileState?.editingProfile[selectedCamera] ?? null)
     : null;
 
+  const profileColor = useMemo(
+    () =>
+      currentEditingProfile && profileState?.allProfileNames
+        ? getProfileColor(currentEditingProfile, profileState.allProfileNames)
+        : undefined,
+    [currentEditingProfile, profileState?.allProfileNames],
+  );
+
   const handleSectionStatusChange = useCallback(
     (status: SectionStatus) => {
       setSectionStatus(status);
@@ -136,15 +153,40 @@ export function SingleSectionPage({
             {level === "camera" &&
               showOverrideIndicator &&
               sectionStatus.isOverridden && (
-                <Badge
-                  variant="secondary"
-                  className="cursor-default border-2 border-selected text-xs text-primary-variant"
-                >
-                  {t("button.overridden", {
-                    ns: "common",
-                    defaultValue: "Overridden",
-                  })}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "cursor-default border-2 text-xs text-primary-variant",
+                        sectionStatus.overrideSource === "profile" &&
+                          profileColor
+                          ? profileColor.border
+                          : "border-selected",
+                      )}
+                    >
+                      {sectionStatus.overrideSource === "profile"
+                        ? t("button.overriddenBaseConfig", {
+                            ns: "views/settings",
+                            defaultValue: "Overridden (Base Config)",
+                          })
+                        : t("button.overriddenGlobal", {
+                            ns: "views/settings",
+                            defaultValue: "Overridden (Global)",
+                          })}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {sectionStatus.overrideSource === "profile"
+                      ? t("button.overriddenBaseConfigTooltip", {
+                          ns: "common",
+                          profile: currentEditingProfile,
+                        })
+                      : t("button.overriddenGlobalTooltip", {
+                          ns: "views/settings",
+                        })}
+                  </TooltipContent>
+                </Tooltip>
               )}
             {sectionStatus.hasChanges && (
               <Badge
@@ -170,6 +212,7 @@ export function SingleSectionPage({
         requiresRestart={requiresRestart}
         onStatusChange={handleSectionStatusChange}
         profileName={currentEditingProfile ?? undefined}
+        profileBorderColor={profileColor?.border}
       />
     </div>
   );

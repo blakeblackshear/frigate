@@ -28,6 +28,11 @@ import { useConfigOverride } from "@/hooks/use-config-override";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
@@ -127,6 +132,7 @@ export interface BaseSectionProps {
   onStatusChange?: (status: {
     hasChanges: boolean;
     isOverridden: boolean;
+    overrideSource?: "global" | "profile";
     hasValidationErrors: boolean;
   }) => void;
   /** Pending form data keyed by "sectionKey" or "cameraName::sectionKey" */
@@ -139,6 +145,8 @@ export interface BaseSectionProps {
   ) => void;
   /** When set, editing this profile's overrides instead of the base config */
   profileName?: string;
+  /** Border color class for profile override badge (e.g., "border-amber-500") */
+  profileBorderColor?: string;
 }
 
 export interface CreateSectionOptions {
@@ -170,6 +178,7 @@ export function ConfigSection({
   pendingDataBySection,
   onPendingDataChange,
   profileName,
+  profileBorderColor,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -267,13 +276,23 @@ export function ConfigSection({
     [sectionPath, level, sectionSchema],
   );
 
-  // Get override status
+  // Get override status (camera vs global)
   const { isOverridden, globalValue, cameraValue } = useConfigOverride({
     config,
     cameraName: effectiveLevel === "camera" ? cameraName : undefined,
     sectionPath,
     compareFields: sectionConfig.overrideFields,
   });
+
+  // Check if the active profile overrides the base config for this section
+  const profileOverridesSection = useMemo(() => {
+    if (!profileName || !cameraName || !config) return false;
+    const profileData = config.cameras?.[cameraName]?.profiles?.[profileName];
+    return !!profileData?.[sectionPath as keyof typeof profileData];
+  }, [profileName, cameraName, config, sectionPath]);
+
+  const overrideSource: "global" | "profile" | undefined =
+    profileOverridesSection ? "profile" : isOverridden ? "global" : undefined;
 
   // Get current form data
   // When editing a profile, show base camera config deep-merged with profile overrides
@@ -409,8 +428,20 @@ export function ConfigSection({
   }, [formData, pendingData, extraHasChanges]);
 
   useEffect(() => {
-    onStatusChange?.({ hasChanges, isOverridden, hasValidationErrors });
-  }, [hasChanges, isOverridden, hasValidationErrors, onStatusChange]);
+    onStatusChange?.({
+      hasChanges,
+      isOverridden: profileOverridesSection || isOverridden,
+      overrideSource,
+      hasValidationErrors,
+    });
+  }, [
+    hasChanges,
+    isOverridden,
+    profileOverridesSection,
+    overrideSource,
+    hasValidationErrors,
+    onStatusChange,
+  ]);
 
   // Handle form data change
   const handleChange = useCallback(
@@ -991,13 +1022,32 @@ export function ConfigSection({
                   <Heading as="h4">{title}</Heading>
                   {showOverrideIndicator &&
                     effectiveLevel === "camera" &&
-                    isOverridden && (
-                      <Badge variant="secondary" className="text-xs">
-                        {t("button.overridden", {
-                          ns: "common",
-                          defaultValue: "Overridden",
-                        })}
-                      </Badge>
+                    (profileOverridesSection || isOverridden) && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="secondary" className="text-xs">
+                            {overrideSource === "profile"
+                              ? t("button.overriddenBaseConfig", {
+                                  ns: "common",
+                                  defaultValue: "Overridden (Base Config)",
+                                })
+                              : t("button.overriddenGlobal", {
+                                  ns: "views/settings",
+                                  defaultValue: "Overridden (Global)",
+                                })}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {overrideSource === "profile"
+                            ? t("button.overriddenBaseConfigTooltip", {
+                                ns: "common",
+                                profile: profileName,
+                              })
+                            : t("button.overriddenGlobalTooltip", {
+                                ns: "views/settings",
+                              })}
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   {hasChanges && (
                     <Badge variant="outline" className="text-xs">
@@ -1035,16 +1085,40 @@ export function ConfigSection({
                 <Heading as="h4">{title}</Heading>
                 {showOverrideIndicator &&
                   effectiveLevel === "camera" &&
-                  isOverridden && (
-                    <Badge
-                      variant="secondary"
-                      className="cursor-default border-2 border-selected text-xs text-primary-variant"
-                    >
-                      {t("button.overridden", {
-                        ns: "common",
-                        defaultValue: "Overridden",
-                      })}
-                    </Badge>
+                  (profileOverridesSection || isOverridden) && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "cursor-default border-2 text-xs text-primary-variant",
+                            overrideSource === "profile" && profileBorderColor
+                              ? profileBorderColor
+                              : "border-selected",
+                          )}
+                        >
+                          {overrideSource === "profile"
+                            ? t("button.overriddenBaseConfig", {
+                                ns: "common",
+                                defaultValue: "Overridden (Base Config)",
+                              })
+                            : t("button.overriddenGlobal", {
+                                ns: "views/settings",
+                                defaultValue: "Overridden (Global)",
+                              })}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {overrideSource === "profile"
+                          ? t("button.overriddenBaseConfigTooltip", {
+                              ns: "common",
+                              profile: profileName,
+                            })
+                          : t("button.overriddenGlobalTooltip", {
+                              ns: "views/settings",
+                            })}
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 {hasChanges && (
                   <Badge

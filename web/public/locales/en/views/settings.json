@@ -16,6 +16,12 @@
     "maintenance": "Maintenance - Frigate",
     "profiles": "Profiles - Frigate"
   },
+  "button": {
+    "overriddenGlobal": "Overridden (Global)",
+    "overriddenGlobalTooltip": "This camera overrides global configuration settings in this section",
+    "overriddenBaseConfig": "Overridden (Base Config)",
+    "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section"
+  },
   "menu": {
     "general": "General",
     "globalConfig": "Global configuration",
@@ -1453,6 +1459,8 @@
     "deactivated": "Profile deactivated",
     "noProfiles": "No profiles defined. Add a profile from any camera section.",
     "noOverrides": "No overrides",
+    "cameraCount_one": "{{count}} camera",
+    "cameraCount_other": "{{count}} cameras",
     "baseConfig": "Base Config",
     "addProfile": "Add Profile",
     "newProfile": "New Profile",

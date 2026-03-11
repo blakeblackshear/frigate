@@ -1309,12 +1309,29 @@ export default function Settings() {
     [],
   );
 
+  // The active profile being edited for the selected camera
+  const activeEditingProfile = selectedCamera
+    ? (editingProfile[selectedCamera] ?? null)
+    : null;
+
+  // Profile color for the active editing profile
+  const activeProfileColor = useMemo(
+    () =>
+      activeEditingProfile
+        ? getProfileColor(activeEditingProfile, allProfileNames)
+        : undefined,
+    [activeEditingProfile, allProfileNames],
+  );
+
   // Initialize override status for all camera sections
   useEffect(() => {
     if (!selectedCamera || !cameraOverrides) return;
 
     const overrideMap: Partial<
-      Record<SettingsType, Pick<SectionStatus, "hasChanges" | "isOverridden">>
+      Record<
+        SettingsType,
+        Pick<SectionStatus, "hasChanges" | "isOverridden" | "overrideSource">
+      >
     > = {};
 
     // Build a set of menu keys that have pending changes for this camera
@@ -1327,13 +1344,29 @@ export default function Settings() {
       }
     }
 
+    // Get profile data if a profile is being edited
+    const profileData = activeEditingProfile
+      ? config?.cameras?.[selectedCamera]?.profiles?.[activeEditingProfile]
+      : undefined;
+
     // Set override status for all camera sections using the shared mapping
     Object.entries(CAMERA_SECTION_MAPPING).forEach(
       ([sectionKey, settingsKey]) => {
-        const isOverridden = cameraOverrides.includes(sectionKey);
+        const globalOverridden = cameraOverrides.includes(sectionKey);
+
+        // Check if the active profile overrides this section
+        const profileOverrides = profileData
+          ? !!profileData[sectionKey as keyof typeof profileData]
+          : false;
+
         overrideMap[settingsKey] = {
           hasChanges: pendingMenuKeys.has(settingsKey),
-          isOverridden,
+          isOverridden: profileOverrides || globalOverridden,
+          overrideSource: profileOverrides
+            ? "profile"
+            : globalOverridden
+              ? "global"
+              : undefined,
         };
       },
     );
@@ -1346,6 +1379,7 @@ export default function Settings() {
         merged[key as SettingsType] = {
           hasChanges: status.hasChanges,
           isOverridden: status.isOverridden,
+          overrideSource: status.overrideSource,
           hasValidationErrors: existingStatus?.hasValidationErrors ?? false,
         };
       });
@@ -1356,6 +1390,8 @@ export default function Settings() {
     cameraOverrides,
     pendingDataBySection,
     pendingKeyToMenuKey,
+    activeEditingProfile,
+    config,
   ]);
 
   const renderMenuItemLabel = useCallback(
@@ -1365,13 +1401,20 @@ export default function Settings() {
         CAMERA_SECTION_KEYS.has(key) && status?.isOverridden;
       const showUnsavedDot = status?.hasChanges;
 
+      const dotColor =
+        status?.overrideSource === "profile" && activeProfileColor
+          ? activeProfileColor.dot
+          : "bg-selected";
+
       return (
         <div className="flex w-full items-center justify-between pr-4 md:pr-0">
           <div>{t("menu." + key)}</div>
           {(showOverrideDot || showUnsavedDot) && (
             <div className="ml-2 flex items-center gap-2">
               {showOverrideDot && (
-                <span className="inline-block size-2 rounded-full bg-selected" />
+                <span
+                  className={cn("inline-block size-2 rounded-full", dotColor)}
+                />
               )}
               {showUnsavedDot && (
                 <span className="inline-block size-2 rounded-full bg-danger" />
@@ -1381,7 +1424,7 @@ export default function Settings() {
         </div>
       );
     },
-    [sectionStatusByKey, t],
+    [sectionStatusByKey, t, activeProfileColor],
   );
 
   if (isMobile) {

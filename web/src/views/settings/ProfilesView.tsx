@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
-import { Camera, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,6 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +46,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type ProfilesApiResponse = {
   profiles: string[];
@@ -59,6 +74,12 @@ export default function ProfilesView({
   const [activating, setActivating] = useState(false);
   const [deleteProfile, setDeleteProfile] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(
+    new Set(),
+  );
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newProfileName, setNewProfileName] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = t("documentTitle.profiles", {
@@ -105,13 +126,33 @@ export default function ProfilesView({
     return data;
   }, [config, allProfileNames]);
 
-  const cameraCount = useMemo(() => {
-    if (!config) return 0;
-    return Object.keys(profileOverviewData).reduce((max, profile) => {
-      const count = Object.keys(profileOverviewData[profile] ?? {}).length;
-      return Math.max(max, count);
-    }, 0);
-  }, [config, profileOverviewData]);
+  const validateName = useCallback(
+    (name: string): string | null => {
+      if (!name.trim()) return null;
+      if (!/^[a-z0-9_]+$/.test(name)) {
+        return t("profiles.nameInvalid", { ns: "views/settings" });
+      }
+      if (allProfileNames.includes(name)) {
+        return t("profiles.nameDuplicate", { ns: "views/settings" });
+      }
+      return null;
+    },
+    [allProfileNames, t],
+  );
+
+  const handleAddSubmit = useCallback(() => {
+    const name = newProfileName.trim();
+    if (!name) return;
+    const error = validateName(name);
+    if (error) {
+      setNameError(error);
+      return;
+    }
+    profileState?.onAddProfile(name);
+    setAddDialogOpen(false);
+    setNewProfileName("");
+    setNameError(null);
+  }, [newProfileName, validateName, profileState]);
 
   const handleActivateProfile = useCallback(
     async (profile: string | null) => {
@@ -215,6 +256,18 @@ export default function ProfilesView({
     t,
   ]);
 
+  const toggleExpanded = useCallback((profile: string) => {
+    setExpandedProfiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(profile)) {
+        next.delete(profile);
+      } else {
+        next.add(profile);
+      }
+      return next;
+    });
+  }, []);
+
   if (!config || !profilesData) {
     return null;
   }
@@ -244,67 +297,67 @@ export default function ProfilesView({
         </div>
       )}
 
-      {profilesUIEnabled && (
+      {profilesUIEnabled && !hasProfiles && (
         <p className="mb-5 max-w-xl text-sm text-primary-variant">
           {t("profiles.enabledDescription", { ns: "views/settings" })}
         </p>
       )}
 
-      {/* Active Profile Section — only when profiles exist */}
-      {hasProfiles && (
-        <div className="mb-6 rounded-lg border border-border/70 bg-card/30 p-4">
-          <div className="mb-3 text-sm font-semibold text-primary-variant">
-            {t("profiles.activeProfile", { ns: "views/settings" })}
-          </div>
-          <div className="flex items-center gap-3">
-            <Select
-              value={activeProfile ?? "__none__"}
-              onValueChange={(v) =>
-                handleActivateProfile(v === "__none__" ? null : v)
-              }
-              disabled={activating}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">
-                  {t("profiles.noActiveProfile", { ns: "views/settings" })}
-                </SelectItem>
-                {allProfileNames.map((profile) => {
-                  const color = getProfileColor(profile, allProfileNames);
-                  return (
-                    <SelectItem key={profile} value={profile}>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "h-2 w-2 shrink-0 rounded-full",
-                            color.dot,
-                          )}
-                        />
-                        {profile}
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            {activeProfile && (
-              <Badge
-                className={cn(
-                  "cursor-default",
-                  getProfileColor(activeProfile, allProfileNames).bg,
-                  "text-white",
-                )}
+      {/* Active Profile + Add Profile bar */}
+      {(hasProfiles || profilesUIEnabled) && (
+        <div className="my-4 flex items-center justify-between rounded-lg border border-border/70 bg-card/30 p-4">
+          {hasProfiles && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-primary-variant">
+                {t("profiles.activeProfile", { ns: "views/settings" })}
+              </span>
+              <Select
+                value={activeProfile ?? "__none__"}
+                onValueChange={(v) =>
+                  handleActivateProfile(v === "__none__" ? null : v)
+                }
+                disabled={activating}
               >
-                {t("profiles.active", { ns: "views/settings" })}
-              </Badge>
-            )}
-          </div>
+                <SelectTrigger className="">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">
+                    {t("profiles.noActiveProfile", { ns: "views/settings" })}
+                  </SelectItem>
+                  {allProfileNames.map((profile) => {
+                    const color = getProfileColor(profile, allProfileNames);
+                    return (
+                      <SelectItem key={profile} value={profile}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              "h-2 w-2 shrink-0 rounded-full",
+                              color.dot,
+                            )}
+                          />
+                          {profile}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              {activating && <ActivityIndicator className="w-auto" size={18} />}
+            </div>
+          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <LuPlus className="mr-1.5 size-4" />
+            {t("profiles.addProfile", { ns: "views/settings" })}
+          </Button>
         </div>
       )}
 
-      {/* Profile Cards */}
+      {/* Profile List */}
       {!hasProfiles ? (
         profilesUIEnabled ? (
           <p className="text-sm text-muted-foreground">
@@ -314,103 +367,170 @@ export default function ProfilesView({
           <div />
         )
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {allProfileNames.map((profile) => {
             const color = getProfileColor(profile, allProfileNames);
             const isActive = activeProfile === profile;
             const cameraData = profileOverviewData[profile] ?? {};
             const cameras = Object.keys(cameraData).sort();
+            const isExpanded = expandedProfiles.has(profile);
 
             return (
-              <div
+              <Collapsible
                 key={profile}
-                className={cn(
-                  "rounded-lg border p-4",
-                  isActive
-                    ? "border-selected bg-selected/5"
-                    : "border-border/70 bg-card/30",
-                )}
+                open={isExpanded}
+                onOpenChange={() => toggleExpanded(profile)}
               >
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "h-2.5 w-2.5 shrink-0 rounded-full",
-                        color.dot,
-                      )}
-                    />
-                    <span className="font-medium">{profile}</span>
-                    {isActive && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs text-primary-variant"
-                      >
-                        {t("profiles.active", { ns: "views/settings" })}
-                      </Badge>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                    onClick={() => setDeleteProfile(profile)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {cameras.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">
-                    {t("profiles.noOverrides", { ns: "views/settings" })}
-                  </p>
-                ) : (
-                  <div
-                    className={cn(
-                      "grid gap-2",
-                      cameraCount <= 3
-                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-                    )}
-                  >
-                    {cameras.map((camera) => {
-                      const sections = cameraData[camera];
-                      return (
-                        <div
-                          key={camera}
-                          className="flex items-start gap-2 rounded-md bg-secondary/40 px-3 py-2"
+                <div
+                  className={cn(
+                    "rounded-lg border",
+                    isActive
+                      ? "border-selected bg-selected/5"
+                      : "border-border/70",
+                  )}
+                >
+                  <CollapsibleTrigger asChild>
+                    <div className="flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-secondary/30">
+                      <div className="flex items-center gap-3">
+                        {isExpanded ? (
+                          <LuChevronDown className="size-4 text-muted-foreground" />
+                        ) : (
+                          <LuChevronRight className="size-4 text-muted-foreground" />
+                        )}
+                        <span
+                          className={cn(
+                            "size-2.5 shrink-0 rounded-full",
+                            color.dot,
+                          )}
+                        />
+                        <span className="font-medium">{profile}</span>
+                        {isActive && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs text-primary-variant"
+                          >
+                            {t("profiles.active", { ns: "views/settings" })}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-muted-foreground">
+                          {cameras.length > 0
+                            ? t("profiles.cameraCount", {
+                                ns: "views/settings",
+                                count: cameras.length,
+                              })
+                            : t("profiles.noOverrides", {
+                                ns: "views/settings",
+                              })}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 text-muted-foreground hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteProfile(profile);
+                          }}
                         >
-                          <Camera className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                          <div className="min-w-0">
-                            <div className="truncate text-xs font-medium">
-                              {resolveCameraName(config, camera)}
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    {cameras.length > 0 ? (
+                      <div className="mx-4 mb-3 ml-11 border-l border-border/50 pl-4">
+                        {cameras.map((camera) => {
+                          const sections = cameraData[camera];
+                          return (
+                            <div
+                              key={camera}
+                              className="flex items-baseline gap-3 py-1.5"
+                            >
+                              <span className="min-w-[120px] shrink-0 truncate text-sm font-medium">
+                                {resolveCameraName(config, camera)}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {sections
+                                  .map((section) =>
+                                    t(`configForm.sections.${section}`, {
+                                      ns: "views/settings",
+                                      defaultValue: section,
+                                    }),
+                                  )
+                                  .join(", ")}
+                              </span>
                             </div>
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {sections.map((section) => (
-                                <span
-                                  key={section}
-                                  className={cn(
-                                    "rounded px-1.5 py-0.5 text-[10px] leading-tight text-white",
-                                    color.bg,
-                                  )}
-                                >
-                                  {t(`configForm.sections.${section}`, {
-                                    ns: "views/settings",
-                                    defaultValue: section,
-                                  })}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="mx-4 mb-3 ml-11 text-sm text-muted-foreground">
+                        {t("profiles.noOverrides", { ns: "views/settings" })}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
             );
           })}
         </div>
       )}
+
+      {/* Add Profile Dialog */}
+      <Dialog
+        open={addDialogOpen}
+        onOpenChange={(open) => {
+          setAddDialogOpen(open);
+          if (!open) {
+            setNewProfileName("");
+            setNameError(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle>
+              {t("profiles.newProfile", { ns: "views/settings" })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Input
+              placeholder={t("profiles.profileNamePlaceholder", {
+                ns: "views/settings",
+              })}
+              value={newProfileName}
+              onChange={(e) => {
+                setNewProfileName(e.target.value);
+                setNameError(validateName(e.target.value));
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddSubmit();
+                }
+              }}
+              autoFocus
+            />
+            {nameError && (
+              <p className="text-xs text-destructive">{nameError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
+              {t("button.cancel", { ns: "common" })}
+            </Button>
+            <Button
+              variant="select"
+              onClick={handleAddSubmit}
+              disabled={!newProfileName.trim() || !!nameError}
+            >
+              {t("button.add", { ns: "common" })}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Profile Confirmation */}
       <AlertDialog
