@@ -36,10 +36,6 @@ import { useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
 import { ProfileState } from "@/types/profile";
-import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
-import axios from "axios";
-import { useSWRConfig } from "swr";
-
 type MasksAndZoneViewProps = {
   selectedCamera: string;
   selectedZoneMask?: PolygonType[];
@@ -56,7 +52,6 @@ export default function MasksAndZonesView({
   const { t } = useTranslation(["views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { mutate } = useSWRConfig();
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -81,58 +76,6 @@ export default function MasksAndZonesView({
   const profileSectionKey = `${selectedCamera}::masksAndZones`;
   const currentEditingProfile =
     profileState?.editingProfile[profileSectionKey] ?? null;
-
-  const hasProfileData = useCallback(
-    (profileName: string) => {
-      if (!config || !selectedCamera) return false;
-      const profileData =
-        config.cameras[selectedCamera]?.profiles?.[profileName];
-      if (!profileData) return false;
-      const hasZones =
-        profileData.zones && Object.keys(profileData.zones).length > 0;
-      const hasMotionMasks =
-        profileData.motion?.mask &&
-        Object.keys(profileData.motion.mask).length > 0;
-      const hasObjectMasks =
-        (profileData.objects?.mask &&
-          Object.keys(profileData.objects.mask).length > 0) ||
-        (profileData.objects?.filters &&
-          Object.values(profileData.objects.filters).some(
-            (f) => f.mask && Object.keys(f.mask).length > 0,
-          ));
-      return !!(hasZones || hasMotionMasks || hasObjectMasks);
-    },
-    [config, selectedCamera],
-  );
-
-  const handleDeleteProfileMasksAndZones = useCallback(
-    async (profileName: string) => {
-      try {
-        // Delete zones, motion masks, and object masks from the profile
-        await axios.put("config/set", {
-          config_data: {
-            cameras: {
-              [selectedCamera]: {
-                profiles: {
-                  [profileName]: {
-                    zones: "",
-                    motion: { mask: "" },
-                    objects: { mask: "", filters: "" },
-                  },
-                },
-              },
-            },
-          },
-        });
-        await mutate("config");
-        profileState?.onSelectProfile(selectedCamera, "masksAndZones", null);
-        toast.success(t("toast.save.success", { ns: "common" }));
-      } catch {
-        toast.error(t("toast.save.error.noMessage", { ns: "common" }));
-      }
-    },
-    [selectedCamera, mutate, profileState, t],
-  );
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -829,26 +772,6 @@ export default function MasksAndZonesView({
               <>
                 <div className="mb-2 flex items-center justify-between">
                   <Heading as="h4">{t("menu.masksAndZones")}</Heading>
-                  {profileState && selectedCamera && (
-                    <ProfileSectionDropdown
-                      cameraName={selectedCamera}
-                      sectionKey="masksAndZones"
-                      allProfileNames={profileState.allProfileNames}
-                      editingProfile={currentEditingProfile}
-                      hasProfileData={hasProfileData}
-                      onSelectProfile={(profile) =>
-                        profileState.onSelectProfile(
-                          selectedCamera,
-                          "masksAndZones",
-                          profile,
-                        )
-                      }
-                      onAddProfile={profileState.onAddProfile}
-                      onDeleteProfileSection={(profileName) =>
-                        handleDeleteProfileMasksAndZones(profileName)
-                      }
-                    />
-                  )}
                 </div>
                 <div className="flex w-full flex-col">
                   {(selectedZoneMask === undefined ||

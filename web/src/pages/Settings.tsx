@@ -90,9 +90,11 @@ import {
   buildConfigDataForPath,
   parseProfileFromSectionPath,
   prepareSectionSavePayload,
+  PROFILE_ELIGIBLE_SECTIONS,
 } from "@/utils/configUtil";
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
+import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
 import { Badge } from "@/components/ui/badge";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
@@ -511,6 +513,24 @@ const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
   ui: "cameraUi",
   timestamp_style: "cameraTimestampStyle",
 };
+
+// Reverse mapping: page key → config section key
+const REVERSE_CAMERA_SECTION_MAPPING: Record<string, string> = Object.fromEntries(
+  Object.entries(CAMERA_SECTION_MAPPING).map(([section, page]) => [page, section]),
+);
+// masksAndZones is a composite page, not in CAMERA_SECTION_MAPPING
+REVERSE_CAMERA_SECTION_MAPPING["masksAndZones"] = "masksAndZones";
+
+// Pages where the profile dropdown should appear
+const PROFILE_DROPDOWN_PAGES = new Set(
+  Object.entries(REVERSE_CAMERA_SECTION_MAPPING)
+    .filter(
+      ([, sectionKey]) =>
+        PROFILE_ELIGIBLE_SECTIONS.has(sectionKey) ||
+        sectionKey === "masksAndZones",
+    )
+    .map(([pageKey]) => pageKey),
+);
 
 // keys for global sections
 const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
@@ -1092,6 +1112,97 @@ export default function Settings() {
     ],
   );
 
+  // Header profile dropdown: derive section key from current page
+  const currentSectionKey = useMemo(
+    () => REVERSE_CAMERA_SECTION_MAPPING[pageToggle] ?? null,
+    [pageToggle],
+  );
+
+  const headerEditingProfile = useMemo(() => {
+    if (!selectedCamera || !currentSectionKey) return null;
+    const key = `${selectedCamera}::${currentSectionKey}`;
+    return editingProfile[key] ?? null;
+  }, [selectedCamera, currentSectionKey, editingProfile]);
+
+  const showProfileDropdown =
+    PROFILE_DROPDOWN_PAGES.has(pageToggle) &&
+    !!selectedCamera &&
+    allProfileNames.length > 0;
+
+  const headerHasProfileData = useCallback(
+    (profileName: string): boolean => {
+      if (!config || !selectedCamera || !currentSectionKey) return false;
+      const profileData =
+        config.cameras[selectedCamera]?.profiles?.[profileName];
+      if (!profileData) return false;
+
+      if (currentSectionKey === "masksAndZones") {
+        const hasZones =
+          profileData.zones && Object.keys(profileData.zones).length > 0;
+        const hasMotionMasks =
+          profileData.motion?.mask &&
+          Object.keys(profileData.motion.mask).length > 0;
+        const hasObjectMasks =
+          (profileData.objects?.mask &&
+            Object.keys(profileData.objects.mask).length > 0) ||
+          (profileData.objects?.filters &&
+            Object.values(profileData.objects.filters).some(
+              (f) => f.mask && Object.keys(f.mask).length > 0,
+            ));
+        return !!(hasZones || hasMotionMasks || hasObjectMasks);
+      }
+
+      return !!profileData[
+        currentSectionKey as keyof typeof profileData
+      ];
+    },
+    [config, selectedCamera, currentSectionKey],
+  );
+
+  const handleDeleteProfileForCurrentSection = useCallback(
+    async (profileName: string) => {
+      if (!selectedCamera || !currentSectionKey) return;
+
+      if (currentSectionKey === "masksAndZones") {
+        try {
+          await axios.put("config/set", {
+            config_data: {
+              cameras: {
+                [selectedCamera]: {
+                  profiles: {
+                    [profileName]: {
+                      zones: "",
+                      motion: { mask: "" },
+                      objects: { mask: "", filters: "" },
+                    },
+                  },
+                },
+              },
+            },
+          });
+          await mutate("config");
+          handleSelectProfile(selectedCamera, "masksAndZones", null);
+          toast.success(t("toast.save.success", { ns: "common" }));
+        } catch {
+          toast.error(t("toast.save.error.title", { ns: "common" }));
+        }
+      } else {
+        await handleDeleteProfileSection(
+          selectedCamera,
+          currentSectionKey,
+          profileName,
+        );
+      }
+    },
+    [
+      selectedCamera,
+      currentSectionKey,
+      handleSelectProfile,
+      handleDeleteProfileSection,
+      t,
+    ],
+  );
+
   const handleSectionStatusChange = useCallback(
     (sectionKey: string, level: "global" | "camera", status: SectionStatus) => {
       // Map section keys to menu keys based on level
@@ -1368,6 +1479,26 @@ export default function Settings() {
                           updateZoneMaskFilter={setFilterZoneMask}
                         />
                       )}
+                      {showProfileDropdown && currentSectionKey && (
+                        <ProfileSectionDropdown
+                          cameraName={selectedCamera}
+                          sectionKey={currentSectionKey}
+                          allProfileNames={allProfileNames}
+                          editingProfile={headerEditingProfile}
+                          hasProfileData={headerHasProfileData}
+                          onSelectProfile={(profile) =>
+                            handleSelectProfile(
+                              selectedCamera,
+                              currentSectionKey,
+                              profile,
+                            )
+                          }
+                          onAddProfile={handleAddProfile}
+                          onDeleteProfileSection={
+                            handleDeleteProfileForCurrentSection
+                          }
+                        />
+                      )}
                       <CameraSelectButton
                         allCameras={cameras}
                         selectedCamera={selectedCamera}
@@ -1508,6 +1639,24 @@ export default function Settings() {
                 <ZoneMaskFilterButton
                   selectedZoneMask={filterZoneMask}
                   updateZoneMaskFilter={setFilterZoneMask}
+                />
+              )}
+              {showProfileDropdown && currentSectionKey && (
+                <ProfileSectionDropdown
+                  cameraName={selectedCamera}
+                  sectionKey={currentSectionKey}
+                  allProfileNames={allProfileNames}
+                  editingProfile={headerEditingProfile}
+                  hasProfileData={headerHasProfileData}
+                  onSelectProfile={(profile) =>
+                    handleSelectProfile(
+                      selectedCamera,
+                      currentSectionKey,
+                      profile,
+                    )
+                  }
+                  onAddProfile={handleAddProfile}
+                  onDeleteProfileSection={handleDeleteProfileForCurrentSection}
                 />
               )}
               <CameraSelectButton

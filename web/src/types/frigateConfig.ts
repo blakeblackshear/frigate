@@ -72,6 +72,10 @@ export interface CameraConfig {
   };
   enabled: boolean;
   enabled_in_config: boolean;
+  face_recognition: {
+    enabled: boolean;
+    min_area: number;
+  };
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -98,6 +102,12 @@ export interface CameraConfig {
     height: number;
     quality: number;
     streams: { [key: string]: string };
+  };
+  lpr: {
+    enabled: boolean;
+    expire_time: number;
+    min_area: number;
+    enhancement: number;
   };
   motion: {
     contour_area: number;

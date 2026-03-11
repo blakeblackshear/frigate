@@ -1,22 +1,16 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import useSWR from "swr";
 import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
-import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
 import type { ConfigSectionData } from "@/types/configForm";
 import type { ProfileState } from "@/types/profile";
-import {
-  getSectionConfig,
-  PROFILE_ELIGIBLE_SECTIONS,
-} from "@/utils/configUtil";
+import { getSectionConfig } from "@/utils/configUtil";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
-import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
 
 export type SettingsPageProps = {
   selectedCamera?: string;
@@ -74,7 +68,6 @@ export function SingleSectionPage({
     "common",
   ]);
   const { getLocaleDocUrl } = useDocDomain();
-  const { data: config } = useSWR<FrigateConfig>("config");
   const [sectionStatus, setSectionStatus] = useState<SectionStatus>({
     hasChanges: false,
     isOverridden: false,
@@ -87,13 +80,6 @@ export function SingleSectionPage({
   const sectionDocsUrl = resolvedSectionConfig.sectionDocs
     ? getLocaleDocUrl(resolvedSectionConfig.sectionDocs)
     : undefined;
-
-  // Profile support: determine if this section supports profiles
-  const isProfileEligible =
-    level === "camera" &&
-    selectedCamera &&
-    profileState &&
-    PROFILE_ELIGIBLE_SECTIONS.has(sectionKey);
 
   const profileKey = selectedCamera
     ? `${selectedCamera}::${sectionKey}`
@@ -148,36 +134,6 @@ export function SingleSectionPage({
         </div>
         <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
           <div className="flex flex-wrap items-center justify-end gap-2">
-            {isProfileEligible && selectedCamera && profileState && (
-              <ProfileSectionDropdown
-                cameraName={selectedCamera}
-                sectionKey={sectionKey}
-                allProfileNames={profileState.allProfileNames}
-                editingProfile={currentEditingProfile}
-                hasProfileData={(profile) => {
-                  const profileData =
-                    config?.cameras?.[selectedCamera]?.profiles?.[profile];
-                  return !!profileData?.[
-                    sectionKey as keyof typeof profileData
-                  ];
-                }}
-                onSelectProfile={(profile) =>
-                  profileState.onSelectProfile(
-                    selectedCamera,
-                    sectionKey,
-                    profile,
-                  )
-                }
-                onAddProfile={profileState.onAddProfile}
-                onDeleteProfileSection={(profile) =>
-                  profileState.onDeleteProfileSection(
-                    selectedCamera,
-                    sectionKey,
-                    profile,
-                  )
-                }
-              />
-            )}
             {level === "camera" &&
               showOverrideIndicator &&
               sectionStatus.isOverridden && (
