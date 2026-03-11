@@ -2,18 +2,6 @@ import type { ProfileColor } from "@/types/profile";
 
 const PROFILE_COLORS: ProfileColor[] = [
   {
-    bg: "bg-blue-500",
-    text: "text-blue-500",
-    dot: "bg-blue-500",
-    bgMuted: "bg-blue-500/20",
-  },
-  {
-    bg: "bg-emerald-500",
-    text: "text-emerald-500",
-    dot: "bg-emerald-500",
-    bgMuted: "bg-emerald-500/20",
-  },
-  {
     bg: "bg-amber-500",
     text: "text-amber-500",
     dot: "bg-amber-500",
@@ -48,6 +36,18 @@ const PROFILE_COLORS: ProfileColor[] = [
     text: "text-teal-500",
     dot: "bg-teal-500",
     bgMuted: "bg-teal-500/20",
+  },
+  {
+    bg: "bg-emerald-500",
+    text: "text-emerald-500",
+    dot: "bg-emerald-500",
+    bgMuted: "bg-emerald-500/20",
+  },
+  {
+    bg: "bg-blue-500",
+    text: "text-blue-500",
+    dot: "bg-blue-500",
+    bgMuted: "bg-blue-500/20",
   },
 ];
 

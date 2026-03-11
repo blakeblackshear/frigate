@@ -114,11 +114,7 @@ export function ProfileSectionDropdown({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 gap-1.5 text-xs font-normal"
-          >
+          <Button variant="outline" className="h-9 gap-2 font-normal">
             {editingProfile ? (
               <>
                 <span

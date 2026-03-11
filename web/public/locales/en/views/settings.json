@@ -1464,7 +1464,7 @@
     "deleteSectionConfirm": "Remove {{profile}}'s overrides for {{section}} on {{camera}}?",
     "enableSwitch": "Enable Profiles",
     "enabledDescription": "Profiles are enabled. Navigate to a camera config section, create a new profile from the dropdown in the header, and save for changes to take effect.",
-    "disabledDescription": "Profiles allow you to define named sets of camera config overrides (e.g., armed, away, night) that can be activated on demand. Enable profiles to get started."
+    "disabledDescription": "Profiles allow you to define named sets of camera config overrides (e.g., armed, away, night) that can be activated on demand."
   },
   "unsavedChanges": "You have unsaved changes",
   "confirmReset": "Confirm Reset",
