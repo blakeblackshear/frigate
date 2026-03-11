@@ -212,10 +212,10 @@ export default function UiSettingsView() {
   return (
     <div className="flex size-full flex-col">
       <Toaster position="top-center" closeButton={true} />
-      <Heading as="h4" className="mb-3">
-        {t("general.title")}
-      </Heading>
       <div className="scrollbar-container mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2">
+        <Heading as="h4" className="mb-3">
+          {t("general.title")}
+        </Heading>
         <div className="w-full max-w-5xl space-y-6">
           <SettingsGroupCard title={t("general.liveDashboard.title")}>
             <div className="space-y-6">

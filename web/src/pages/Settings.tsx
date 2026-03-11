@@ -104,7 +104,7 @@ import SaveAllPreviewPopover, {
 import { useRestart } from "@/api/ws";
 
 const allSettingsViews = [
-  "profileSettings",
+  "uiSettings",
   "profiles",
   "globalDetect",
   "globalRecording",
@@ -317,7 +317,7 @@ const settingsGroups = [
   {
     label: "general",
     items: [
-      { key: "profileSettings", component: UiSettingsView },
+      { key: "uiSettings", component: UiSettingsView },
       { key: "profiles", component: ProfilesView },
     ],
   },
@@ -490,7 +490,7 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "regionGrid",
 ];
 
-const ALLOWED_VIEWS_FOR_VIEWER = ["profileSettings", "notifications"];
+const ALLOWED_VIEWS_FOR_VIEWER = ["uiSettings", "notifications"];
 
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
@@ -627,7 +627,7 @@ function MobileMenuItem({
 
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
-  const [page, setPage] = useState<SettingsType>("profileSettings");
+  const [page, setPage] = useState<SettingsType>("uiSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [contentMobileOpen, setContentMobileOpen] = useState(false);
   const [sectionStatusByKey, setSectionStatusByKey] = useState<
@@ -1018,7 +1018,7 @@ export default function Settings() {
         !isAdmin &&
         !ALLOWED_VIEWS_FOR_VIEWER.includes(page as SettingsType)
       ) {
-        setPageToggle("profileSettings");
+        setPageToggle("uiSettings");
       } else {
         setPageToggle(page as SettingsType);
       }
@@ -1456,7 +1456,7 @@ export default function Settings() {
                               key as SettingsType,
                             )
                           ) {
-                            setPageToggle("profileSettings");
+                            setPageToggle("uiSettings");
                           } else {
                             setPageToggle(key as SettingsType);
                           }
@@ -1756,7 +1756,7 @@ export default function Settings() {
                                   filteredItems[0].key as SettingsType,
                                 )
                               ) {
-                                setPageToggle("profileSettings");
+                                setPageToggle("uiSettings");
                               } else {
                                 setPageToggle(
                                   filteredItems[0].key as SettingsType,
@@ -1796,7 +1796,7 @@ export default function Settings() {
                                       item.key as SettingsType,
                                     )
                                   ) {
-                                    setPageToggle("profileSettings");
+                                    setPageToggle("uiSettings");
                                   } else {
                                     setPageToggle(item.key as SettingsType);
                                   }

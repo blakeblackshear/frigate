@@ -8,7 +8,7 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
-    "general": "Profile Settings - Frigate",
+    "general": "UI Settings - Frigate",
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
@@ -23,7 +23,7 @@
     "integrations": "Integrations",
     "cameras": "Camera configuration",
     "ui": "UI",
-    "profileSettings": "Profile settings",
+    "uiSettings": "UI settings",
     "profiles": "Profiles",
     "globalDetect": "Object detection",
     "globalRecording": "Recording",
@@ -119,7 +119,7 @@
     "noCamera": "No Camera"
   },
   "general": {
-    "title": "Profile Settings",
+    "title": "UI Settings",
     "liveDashboard": {
       "title": "Live Dashboard",
       "automaticLiveView": {
