@@ -837,6 +837,7 @@ def create_user(
             User.notification_tokens: [],
         }
     ).execute()
+    request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"username": body.username})
 
 
@@ -854,6 +855,7 @@ def delete_user(request: Request, username: str):
         )
 
     User.delete_by_id(username)
+    request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"success": True})
 
 
@@ -973,6 +975,7 @@ async def update_role(
         )
 
     User.set_by_id(username, {User.role: body.role})
+    request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"success": True})
 
 
