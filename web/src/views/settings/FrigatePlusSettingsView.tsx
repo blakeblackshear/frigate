@@ -405,11 +405,6 @@ export default function FrigatePlusSettingsView({
                                   "frigatePlus.snapshotConfig.table.snapshots",
                                 )}
                               </th>
-                              <th className="px-4 py-2 text-center">
-                                <Trans ns="views/settings">
-                                  frigatePlus.snapshotConfig.table.cleanCopySnapshots
-                                </Trans>
-                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -424,13 +419,6 @@ export default function FrigatePlusSettingsView({
                                   </td>
                                   <td className="px-4 py-2 text-center">
                                     {camera.snapshots.enabled ? (
-                                      <CheckCircle2 className="mx-auto size-5 text-green-500" />
-                                    ) : (
-                                      <XCircle className="mx-auto size-5 text-danger" />
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-2 text-center">
-                                    {camera.snapshots?.enabled ? (
                                       <CheckCircle2 className="mx-auto size-5 text-green-500" />
                                     ) : (
                                       <XCircle className="mx-auto size-5 text-danger" />

@@ -141,7 +141,7 @@ class CameraConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig,
         title="Snapshots",
-        description="Settings for saved JPEG snapshots of tracked objects for this camera.",
+        description="Settings for API-generated snapshots of tracked objects for this camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,

@@ -498,7 +498,7 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig,
         title="Snapshots",
-        description="Settings for saved JPEG snapshots of tracked objects for all cameras; can be overridden per-camera.",
+        description="Settings for API-generated snapshots of tracked objects for all cameras; can be overridden per-camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,

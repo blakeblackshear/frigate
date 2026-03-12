@@ -626,14 +626,10 @@
   },
   "snapshots": {
     "label": "Snapshots",
-    "description": "Settings for saved JPEG snapshots of tracked objects for this camera.",
+    "description": "Settings for API-generated snapshots of tracked objects for this camera.",
     "enabled": {
       "label": "Enable snapshots",
       "description": "Enable or disable saving snapshots for this camera."
-    },
-    "clean_copy": {
-      "label": "Save clean copy",
-      "description": "Save an unannotated clean copy of snapshots in addition to annotated ones."
     },
     "timestamp": {
       "label": "Timestamp overlay",
@@ -672,8 +668,8 @@
       }
     },
     "quality": {
-      "label": "JPEG quality",
-      "description": "JPEG encode quality for saved snapshots (0-100)."
+      "label": "WEBP quality",
+      "description": "WEBP encode quality for saved snapshots (0-100)."
     }
   },
   "timestamp_style": {
