@@ -2,25 +2,18 @@ import type { ProfileColor } from "@/types/profile";
 
 const PROFILE_COLORS: ProfileColor[] = [
   {
+    bg: "bg-pink-400",
+    text: "text-pink-400",
+    dot: "bg-pink-400",
+    border: "border-pink-400",
+    bgMuted: "bg-pink-400/20",
+  },
+  {
     bg: "bg-violet-500",
     text: "text-violet-500",
     dot: "bg-violet-500",
     border: "border-violet-500",
     bgMuted: "bg-violet-500/20",
-  },
-  {
-    bg: "bg-teal-400",
-    text: "text-teal-400",
-    dot: "bg-teal-400",
-    border: "border-teal-400",
-    bgMuted: "bg-teal-400/20",
-  },
-  {
-    bg: "bg-fuchsia-500",
-    text: "text-fuchsia-500",
-    dot: "bg-fuchsia-500",
-    border: "border-fuchsia-500",
-    bgMuted: "bg-fuchsia-500/20",
   },
   {
     bg: "bg-lime-500",
@@ -30,18 +23,18 @@ const PROFILE_COLORS: ProfileColor[] = [
     bgMuted: "bg-lime-500/20",
   },
   {
+    bg: "bg-teal-400",
+    text: "text-teal-400",
+    dot: "bg-teal-400",
+    border: "border-teal-400",
+    bgMuted: "bg-teal-400/20",
+  },
+  {
     bg: "bg-sky-400",
     text: "text-sky-400",
     dot: "bg-sky-400",
     border: "border-sky-400",
     bgMuted: "bg-sky-400/20",
-  },
-  {
-    bg: "bg-pink-400",
-    text: "text-pink-400",
-    dot: "bg-pink-400",
-    border: "border-pink-400",
-    bgMuted: "bg-pink-400/20",
   },
   {
     bg: "bg-emerald-400",
