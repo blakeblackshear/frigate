@@ -135,7 +135,11 @@
     },
     "shm": {
       "title": "SHM (shared memory) allocation",
-      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB."
+      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Frame lifetime",
+        "description": "Each camera has {{frames}} frame slots in shared memory. At the fastest camera's frame rate, each frame is available for approximately {{lifetime}}s before being overwritten."
+      }
     },
     "cameraStorage": {
       "title": "Camera Storage",

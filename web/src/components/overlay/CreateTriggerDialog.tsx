@@ -454,7 +454,7 @@ export default function CreateTriggerDialog({
                   >
                     {isLoading ? (
                       <div className="flex flex-row items-center gap-2">
-                        <ActivityIndicator className="size-5" />
+                        <ActivityIndicator className="size-4" />
                         <span>{t("button.saving", { ns: "common" })}</span>
                       </div>
                     ) : (

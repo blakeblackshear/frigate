@@ -990,7 +990,7 @@ export function CameraGroupEdit({
           >
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
-                <ActivityIndicator />
+                <ActivityIndicator className="size-4" />
                 <span>{t("button.saving", { ns: "common" })}</span>
               </div>
             ) : (
