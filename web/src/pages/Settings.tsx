@@ -99,7 +99,6 @@ import {
 import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
-import { Badge } from "@/components/ui/badge";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import SaveAllPreviewPopover, {
@@ -1524,24 +1523,6 @@ export default function Settings() {
                 <h2 className="ml-2 text-lg">
                   {t("menu.settings", { ns: "common" })}
                 </h2>
-                {profilesData?.active_profile && (
-                  <Badge
-                    className={cn(
-                      "ml-2 cursor-pointer text-white",
-                      getProfileColor(
-                        profilesData.active_profile,
-                        allProfileNames,
-                      ).bg,
-                    )}
-                    onClick={() => {
-                      setPage("profiles");
-                      setContentMobileOpen(true);
-                    }}
-                  >
-                    {profileFriendlyNames.get(profilesData.active_profile) ??
-                      profilesData.active_profile}
-                  </Badge>
-                )}
               </div>
             </div>
 
@@ -1750,18 +1731,6 @@ export default function Settings() {
           <Heading as="h3" className="mb-0">
             {t("menu.settings", { ns: "common" })}
           </Heading>
-          {profilesData?.active_profile && (
-            <Badge
-              className={cn(
-                "cursor-pointer text-white",
-                getProfileColor(profilesData.active_profile, allProfileNames)
-                  .bg,
-              )}
-              onClick={() => setPage("profiles")}
-            >
-              {profilesData.active_profile}
-            </Badge>
-          )}
         </div>
         <div className="flex items-center gap-2">
           {hasPendingChanges && (
