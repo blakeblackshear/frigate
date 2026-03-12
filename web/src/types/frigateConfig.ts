@@ -9,6 +9,10 @@ export interface UiConfig {
   dashboard: boolean;
   order: number;
   unit_system?: "metric" | "imperial";
+  inference_threshold?: {
+    warning: number;
+    error: number;
+  };
 }
 
 export interface BirdseyeConfig {

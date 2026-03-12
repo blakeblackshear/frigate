@@ -1052,6 +1052,12 @@ ui:
   # Optional: Set the unit system to either "imperial" or "metric" (default: metric)
   # Used in the UI and in MQTT topics
   unit_system: metric
+  # Optional: Thresholds in ms for detector inference speed warnings in the UI
+  inference_threshold:
+    # Optional: Inference speed in ms above which a warning is shown (default: shown below)
+    warning: 50
+    # Optional: Inference speed in ms above which an error is shown (default: shown below)
+    error: 100
 
 # Optional: Telemetry configuration
 telemetry:
