@@ -779,7 +779,7 @@ async def get_video_properties(
             duration = float(duration_str) if duration_str else -1.0
 
             return True, width, height, codec, duration
-        except (json.JSONDecodeError, ValueError, KeyError, asyncio.SubprocessError):
+        except (json.JSONDecodeError, ValueError, KeyError, sp.SubprocessError):
             return False, 0, 0, None, -1
 
     def probe_with_cv2(url: str) -> tuple[bool, int, int, Optional[str], float]:
