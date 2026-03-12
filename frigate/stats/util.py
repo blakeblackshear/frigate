@@ -234,7 +234,7 @@ async def set_gpu_stats(
         if args in hwaccel_errors:
             # known erroring args should automatically return as error
             stats["error-gpu"] = {"gpu": "", "mem": ""}
-        elif "cuvid" in args or "nvidia" in args:
+        elif "cuvid" in args or "nvidia" in args or "cuda" in args or "nvdec" in args:
             # nvidia GPU
             nvidia_usage = get_nvidia_gpu_stats()
 
