@@ -68,6 +68,7 @@ from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .network import NetworkingConfig
+from .profile import ProfileDefinitionConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
@@ -561,6 +562,12 @@ class FrigateConfig(FrigateBaseModel):
         description="Configuration for named camera groups used to organize cameras in the UI.",
     )
 
+    profiles: Dict[str, ProfileDefinitionConfig] = Field(
+        default_factory=dict,
+        title="Profiles",
+        description="Named profile definitions with friendly names. Camera profiles must reference names defined here.",
+    )
+
     active_profile: Optional[str] = Field(
         default=None,
         title="Active profile",
@@ -916,6 +923,15 @@ class FrigateConfig(FrigateBaseModel):
             verify_motion_and_detect(camera_config)
             verify_objects_track(camera_config, labelmap_objects)
             verify_lpr_and_face(self, camera_config)
+
+        # Validate camera profiles reference top-level profile definitions
+        for cam_name, cam_config in self.cameras.items():
+            for profile_name in cam_config.profiles:
+                if profile_name not in self.profiles:
+                    raise ValueError(
+                        f"Camera '{cam_name}' references profile '{profile_name}' "
+                        f"which is not defined in the top-level 'profiles' section"
+                    )
 
         # set names on classification configs
         for name, config in self.classification.custom.items():

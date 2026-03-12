@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from frigate.config import FrigateConfig
 from frigate.config.camera.profile import CameraProfileConfig
+from frigate.config.profile import ProfileDefinitionConfig
 from frigate.config.profile_manager import PERSISTENCE_FILE, ProfileManager
 from frigate.const import MODEL_CACHE_DIR
 
@@ -125,6 +126,9 @@ class TestCameraProfileConfig(unittest.TestCase):
 
         config_data = {
             "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+            },
             "cameras": {
                 "front": {
                     "ffmpeg": {
@@ -147,6 +151,37 @@ class TestCameraProfileConfig(unittest.TestCase):
         with self.assertRaises(ValidationError):
             FrigateConfig(**config_data)
 
+    def test_undefined_profile_reference_rejected(self):
+        """Camera referencing a profile not defined in top-level profiles is rejected."""
+        from pydantic import ValidationError
+
+        config_data = {
+            "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+            },
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            }
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "profiles": {
+                        "nonexistent": {
+                            "detect": {"enabled": False},
+                        },
+                    },
+                },
+            },
+        }
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**config_data)
+
 
 class TestProfileInConfig(unittest.TestCase):
     """Test that profiles parse correctly in FrigateConfig."""
@@ -154,6 +189,10 @@ class TestProfileInConfig(unittest.TestCase):
     def setUp(self):
         self.base_config = {
             "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+                "disarmed": {"friendly_name": "Disarmed"},
+            },
             "cameras": {
                 "front": {
                     "ffmpeg": {
@@ -244,6 +283,10 @@ class TestProfileManager(unittest.TestCase):
     def setUp(self):
         self.config_data = {
             "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+                "disarmed": {"friendly_name": "Disarmed"},
+            },
             "cameras": {
                 "front": {
                     "ffmpeg": {
@@ -295,17 +338,21 @@ class TestProfileManager(unittest.TestCase):
         self.manager = ProfileManager(self.config, self.mock_updater)
 
     def test_get_available_profiles(self):
-        """Available profiles are collected from all cameras."""
+        """Available profiles come from top-level profile definitions."""
         profiles = self.manager.get_available_profiles()
-        assert "armed" in profiles
-        assert "disarmed" in profiles
         assert len(profiles) == 2
+        names = [p["name"] for p in profiles]
+        assert "armed" in names
+        assert "disarmed" in names
+        # Verify friendly_name is included
+        armed = next(p for p in profiles if p["name"] == "armed")
+        assert armed["friendly_name"] == "Armed"
 
     def test_activate_invalid_profile(self):
         """Activating non-existent profile returns error."""
         err = self.manager.activate_profile("nonexistent")
         assert err is not None
-        assert "not found" in err
+        assert "not defined" in err
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_activate_profile(self, mock_persist):
@@ -368,13 +415,12 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_activate_profile_disables_camera(self, mock_persist):
         """Profile with enabled=false disables the camera."""
-        # Add a profile that disables the front camera
-        from frigate.config.camera.profile import CameraProfileConfig
-
+        self.config.profiles["away"] = ProfileDefinitionConfig(
+            friendly_name="Away"
+        )
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             enabled=False
         )
-        # Re-create manager to pick up new profile
         self.manager = ProfileManager(self.config, self.mock_updater)
 
         assert self.config.cameras["front"].enabled is True
@@ -385,8 +431,9 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_deactivate_restores_enabled(self, mock_persist):
         """Deactivating a profile restores the camera's base enabled state."""
-        from frigate.config.camera.profile import CameraProfileConfig
-
+        self.config.profiles["away"] = ProfileDefinitionConfig(
+            friendly_name="Away"
+        )
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             enabled=False
         )
@@ -401,9 +448,11 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_activate_profile_adds_zone(self, mock_persist):
         """Profile with zones adds/overrides zones on camera."""
-        from frigate.config.camera.profile import CameraProfileConfig
         from frigate.config.camera.zone import ZoneConfig
 
+        self.config.profiles["away"] = ProfileDefinitionConfig(
+            friendly_name="Away"
+        )
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             zones={
                 "driveway": ZoneConfig(
@@ -423,9 +472,11 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_deactivate_restores_zones(self, mock_persist):
         """Deactivating a profile restores base zones."""
-        from frigate.config.camera.profile import CameraProfileConfig
         from frigate.config.camera.zone import ZoneConfig
 
+        self.config.profiles["away"] = ProfileDefinitionConfig(
+            friendly_name="Away"
+        )
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             zones={
                 "driveway": ZoneConfig(
@@ -445,13 +496,15 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_zones_zmq_published(self, mock_persist):
         """ZMQ update is published for zones change."""
-        from frigate.config.camera.profile import CameraProfileConfig
         from frigate.config.camera.updater import (
             CameraConfigUpdateEnum,
             CameraConfigUpdateTopic,
         )
         from frigate.config.camera.zone import ZoneConfig
 
+        self.config.profiles["away"] = ProfileDefinitionConfig(
+            friendly_name="Away"
+        )
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             zones={
                 "driveway": ZoneConfig(
@@ -476,12 +529,14 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_enabled_zmq_published(self, mock_persist):
         """ZMQ update is published for enabled state change."""
-        from frigate.config.camera.profile import CameraProfileConfig
         from frigate.config.camera.updater import (
             CameraConfigUpdateEnum,
             CameraConfigUpdateTopic,
         )
 
+        self.config.profiles["away"] = ProfileDefinitionConfig(
+            friendly_name="Away"
+        )
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             enabled=False
         )
@@ -507,12 +562,14 @@ class TestProfileManager(unittest.TestCase):
         assert self.mock_updater.publish_update.called
 
     def test_get_profile_info(self):
-        """Profile info returns correct structure."""
+        """Profile info returns correct structure with friendly names."""
         info = self.manager.get_profile_info()
         assert "profiles" in info
         assert "active_profile" in info
         assert info["active_profile"] is None
-        assert "armed" in info["profiles"]
+        names = [p["name"] for p in info["profiles"]]
+        assert "armed" in names
+        assert "disarmed" in names
 
 
 class TestProfilePersistence(unittest.TestCase):

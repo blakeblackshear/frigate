@@ -81,11 +81,7 @@ class ProfileManager:
         # Re-apply profile overrides without publishing ZMQ updates
         # (the config/set caller handles its own ZMQ publishing)
         if current_active is not None:
-            has_profile = any(
-                current_active in cam.profiles
-                for cam in self.config.cameras.values()
-            )
-            if has_profile:
+            if current_active in self.config.profiles:
                 changed: dict[str, set[str]] = {}
                 self._apply_profile_overrides(current_active, changed)
                 self.config.active_profile = current_active
@@ -104,11 +100,8 @@ class ProfileManager:
             None on success, or an error message string on failure.
         """
         if profile_name is not None:
-            has_profile = any(
-                profile_name in cam.profiles for cam in self.config.cameras.values()
-            )
-            if not has_profile:
-                return f"Profile '{profile_name}' not found on any camera"
+            if profile_name not in self.config.profiles:
+                return f"Profile '{profile_name}' is not defined in the profiles section"
 
         # Track which camera/section pairs get changed for ZMQ publishing
         changed: dict[str, set[str]] = {}
@@ -265,12 +258,12 @@ class ProfileManager:
             logger.exception("Failed to load persisted profile")
         return None
 
-    def get_available_profiles(self) -> list[str]:
-        """Get a deduplicated list of all profile names across cameras."""
-        profiles: set[str] = set()
-        for cam_config in self.config.cameras.values():
-            profiles.update(cam_config.profiles.keys())
-        return sorted(profiles)
+    def get_available_profiles(self) -> list[dict[str, str]]:
+        """Get list of all profile definitions from the top-level config."""
+        return [
+            {"name": name, "friendly_name": defn.friendly_name}
+            for name, defn in sorted(self.config.profiles.items())
+        ]
 
     def get_profile_info(self) -> dict:
         """Get profile state info for API responses."""

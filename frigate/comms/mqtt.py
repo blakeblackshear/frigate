@@ -169,14 +169,13 @@ class MqttClient(Communicator):
             self.config.active_profile or "none",
             retain=True,
         )
-        available_profiles: list[str] = []
-        for camera in self.config.cameras.values():
-            for profile_name in camera.profiles:
-                if profile_name not in available_profiles:
-                    available_profiles.append(profile_name)
+        available_profiles = [
+            {"name": name, "friendly_name": defn.friendly_name}
+            for name, defn in sorted(self.config.profiles.items())
+        ]
         self.publish(
             "profiles/available",
-            json.dumps(sorted(available_profiles)),
+            json.dumps(available_profiles),
             retain=True,
         )
 
