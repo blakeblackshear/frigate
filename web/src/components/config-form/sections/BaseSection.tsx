@@ -335,10 +335,20 @@ export function ConfigSection({
     return rawSectionValue;
   }, [config, rawSectionValue]);
 
+  // When editing a profile, hide fields that require a restart since they
+  // cannot take effect via profile switching alone.
+  const effectiveHiddenFields = useMemo(() => {
+    if (!profileName || !sectionConfig.restartRequired?.length) {
+      return sectionConfig.hiddenFields;
+    }
+    const base = sectionConfig.hiddenFields ?? [];
+    return [...new Set([...base, ...sectionConfig.restartRequired])];
+  }, [profileName, sectionConfig.hiddenFields, sectionConfig.restartRequired]);
+
   const sanitizeSectionData = useCallback(
     (data: ConfigSectionData) =>
-      sharedSanitizeSectionData(data, sectionConfig.hiddenFields),
-    [sectionConfig.hiddenFields],
+      sharedSanitizeSectionData(data, effectiveHiddenFields),
+    [effectiveHiddenFields],
   );
 
   const formData = useMemo(() => {
@@ -850,7 +860,7 @@ export function ConfigSection({
         onValidationChange={setHasValidationErrors}
         fieldOrder={sectionConfig.fieldOrder}
         fieldGroups={sectionConfig.fieldGroups}
-        hiddenFields={sectionConfig.hiddenFields}
+        hiddenFields={effectiveHiddenFields}
         advancedFields={sectionConfig.advancedFields}
         liveValidate={sectionConfig.liveValidate}
         uiSchema={sectionConfig.uiSchema}
@@ -889,7 +899,7 @@ export function ConfigSection({
           renderers: wrappedRenderers,
           sectionDocs: sectionConfig.sectionDocs,
           fieldDocs: sectionConfig.fieldDocs,
-          hiddenFields: sectionConfig.hiddenFields,
+          hiddenFields: effectiveHiddenFields,
           restartRequired: sectionConfig.restartRequired,
           requiresRestart,
         }}
