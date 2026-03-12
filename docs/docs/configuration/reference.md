@@ -617,6 +617,7 @@ record:
       mode: motion
 
 # Optional: Configuration for the snapshots written to the clips directory for each tracked object
+# Timestamp, bounding_box, crop and height settings are applied by default to API requests for snapshots.
 # NOTE: Can be overridden at the camera level
 snapshots:
   # Optional: Enable writing snapshot images to /media/frigate/clips (default: shown below)
