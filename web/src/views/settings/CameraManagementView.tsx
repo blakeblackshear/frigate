@@ -474,10 +474,6 @@ function ProfileCameraEnableSection({
     [config, selectedProfile, localOverrides],
   );
 
-  const profileColor = selectedProfile
-    ? getProfileColor(selectedProfile, profileState.allProfileNames)
-    : null;
-
   if (!selectedProfile) return null;
 
   return (
@@ -502,17 +498,7 @@ function ProfileCameraEnableSection({
         <div className={`${CONTROL_COLUMN_CLASS_NAME} space-y-4`}>
           <Select value={selectedProfile} onValueChange={setSelectedProfile}>
             <SelectTrigger className="w-full max-w-[200px]">
-              <div className="flex items-center gap-2">
-                {profileColor && (
-                  <span
-                    className={cn(
-                      "h-2 w-2 shrink-0 rounded-full",
-                      profileColor.dot,
-                    )}
-                  />
-                )}
-                <SelectValue />
-              </div>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {profileState.allProfileNames.map((profile) => {
@@ -529,7 +515,8 @@ function ProfileCameraEnableSection({
                           color.dot,
                         )}
                       />
-                      {profile}
+                      {profileState.profileFriendlyNames.get(profile) ??
+                        profile}
                     </div>
                   </SelectItem>
                 );

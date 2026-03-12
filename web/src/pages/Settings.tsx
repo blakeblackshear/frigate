@@ -28,7 +28,11 @@ import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
-import type { ConfigSectionData } from "@/types/configForm";
+import type {
+  ConfigSectionData,
+  JsonObject,
+  JsonValue,
+} from "@/types/configForm";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
@@ -92,7 +96,7 @@ import {
   prepareSectionSavePayload,
   PROFILE_ELIGIBLE_SECTIONS,
 } from "@/utils/configUtil";
-import type { ProfileState } from "@/types/profile";
+import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
 import { Badge } from "@/components/ui/badge";
@@ -186,15 +190,15 @@ const parsePendingDataKey = (pendingDataKey: string) => {
 };
 
 const flattenOverrides = (
-  value: unknown,
+  value: JsonValue | undefined,
   path: string[] = [],
-): Array<{ path: string; value: unknown }> => {
+): Array<{ path: string; value: JsonValue }> => {
   if (value === undefined) return [];
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return [{ path: path.join("."), value }];
   }
 
-  const entries = Object.entries(value as Record<string, unknown>);
+  const entries = Object.entries(value);
   if (entries.length === 0) {
     return [{ path: path.join("."), value: {} }];
   }
@@ -316,10 +320,7 @@ const CameraTimestampStyleSettingsPage = createSectionPage(
 const settingsGroups = [
   {
     label: "general",
-    items: [
-      { key: "uiSettings", component: UiSettingsView },
-      { key: "profiles", component: ProfilesView },
-    ],
+    items: [{ key: "uiSettings", component: UiSettingsView }],
   },
   {
     label: "globalConfig",
@@ -345,6 +346,7 @@ const settingsGroups = [
   {
     label: "cameras",
     items: [
+      { key: "profiles", component: ProfilesView },
       { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraDetect", component: CameraDetectSettingsPage },
       { key: "cameraObjects", component: CameraObjectsSettingsPage },
@@ -635,10 +637,7 @@ export default function Settings() {
   >({});
 
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { data: profilesData } = useSWR<{
-    profiles: string[];
-    active_profile: string | null;
-  }>("profiles");
+  const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
 
   const [searchParams] = useSearchParams();
 
@@ -655,7 +654,7 @@ export default function Settings() {
 
   // Store pending form data keyed by "sectionKey" or "cameraName::sectionKey"
   const [pendingDataBySection, setPendingDataBySection] = useState<
-    Record<string, unknown>
+    Record<string, ConfigSectionData>
   >({});
 
   // Profile editing state
@@ -666,14 +665,28 @@ export default function Settings() {
   const [profilesUIEnabled, setProfilesUIEnabled] = useState(false);
 
   const allProfileNames = useMemo(() => {
-    if (!config) return [];
     const names = new Set<string>();
-    Object.values(config.cameras).forEach((cam) => {
-      Object.keys(cam.profiles ?? {}).forEach((p) => names.add(p));
-    });
+    if (config?.profiles) {
+      Object.keys(config.profiles).forEach((p) => names.add(p));
+    }
     newProfiles.forEach((p) => names.add(p));
     return [...names].sort();
   }, [config, newProfiles]);
+
+  const profileFriendlyNames = useMemo(() => {
+    const map = new Map<string, string>();
+    if (profilesData?.profiles) {
+      profilesData.profiles.forEach((p) => map.set(p.name, p.friendly_name));
+    }
+    // Include pending (unsaved) profile definitions
+    for (const [key, data] of Object.entries(pendingDataBySection)) {
+      if (key.startsWith("__profile_def__.") && data?.friendly_name) {
+        const id = key.slice("__profile_def__.".length);
+        map.set(id, String(data.friendly_name));
+      }
+    }
+    return map;
+  }, [profilesData, pendingDataBySection]);
 
   const navigate = useNavigate();
 
@@ -756,7 +769,9 @@ export default function Settings() {
           items.push({
             scope,
             cameraName,
-            profileName: isProfile ? profileName : undefined,
+            profileName: isProfile
+              ? (profileFriendlyNames.get(profileName!) ?? profileName)
+              : undefined,
             fieldPath,
             value,
           });
@@ -773,7 +788,7 @@ export default function Settings() {
       if (cameraCompare !== 0) return cameraCompare;
       return left.fieldPath.localeCompare(right.fieldPath);
     });
-  }, [config, fullSchema, pendingDataBySection]);
+  }, [config, fullSchema, pendingDataBySection, profileFriendlyNames]);
 
   // Map a pendingDataKey to SettingsType menu key for clearing section status
   const pendingKeyToMenuKey = useCallback(
@@ -827,6 +842,28 @@ export default function Settings() {
 
     for (const key of pendingKeys) {
       const pendingData = pendingDataBySection[key];
+
+      // Handle top-level profile definition saves
+      if (key.startsWith("__profile_def__.")) {
+        const profileId = key.replace("__profile_def__.", "");
+        try {
+          const configData = { profiles: { [profileId]: pendingData } };
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: configData,
+          });
+          setPendingDataBySection((prev) => {
+            const { [key]: _, ...rest } = prev;
+            return rest;
+          });
+          savedKeys.push(key);
+          successCount++;
+        } catch {
+          failCount++;
+        }
+        continue;
+      }
+
       try {
         const payload = prepareSectionSavePayload({
           pendingDataKey: key,
@@ -875,6 +912,11 @@ export default function Settings() {
 
     // Refresh config from server once
     await mutate("config");
+
+    // If any profile definitions were saved, refresh profiles data too
+    if (savedKeys.some((key) => key.startsWith("__profile_def__."))) {
+      await mutate("profiles");
+    }
 
     // Clear hasChanges in sidebar for all successfully saved sections
     if (savedKeys.length > 0) {
@@ -954,13 +996,10 @@ export default function Settings() {
     setUnsavedChanges(false);
     setEditingProfile({});
 
-    // Clear new profiles that don't exist in saved config
+    // Clear new profiles that now exist in top-level config
     if (config) {
-      const savedNames = new Set<string>();
-      Object.values(config.cameras).forEach((cam) => {
-        Object.keys(cam.profiles ?? {}).forEach((p) => savedNames.add(p));
-      });
-      setNewProfiles((prev) => prev.filter((p) => savedNames.has(p)));
+      const savedNames = new Set<string>(Object.keys(config.profiles ?? {}));
+      setNewProfiles((prev) => prev.filter((p) => !savedNames.has(p)));
     }
 
     setSectionStatusByKey((prev) => {
@@ -1062,8 +1101,14 @@ export default function Settings() {
     [],
   );
 
-  const handleAddProfile = useCallback((name: string) => {
-    setNewProfiles((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  const handleAddProfile = useCallback((id: string, friendlyName: string) => {
+    setNewProfiles((prev) => (prev.includes(id) ? prev : [...prev, id]));
+
+    // Stage the top-level profile definition for saving
+    setPendingDataBySection((prev) => ({
+      ...prev,
+      [`__profile_def__.${id}`]: { friendly_name: friendlyName },
+    }));
   }, []);
 
   const handleRemoveNewProfile = useCallback((name: string) => {
@@ -1120,14 +1165,14 @@ export default function Settings() {
               ns: "views/settings",
               defaultValue: section,
             }),
-            profile,
+            profile: profileFriendlyNames.get(profile) ?? profile,
           }),
         );
       } catch {
         toast.error(t("toast.save.error.title", { ns: "common" }));
       }
     },
-    [handleSelectProfile, t],
+    [handleSelectProfile, profileFriendlyNames, t],
   );
 
   const profileState: ProfileState = useMemo(
@@ -1135,6 +1180,7 @@ export default function Settings() {
       editingProfile,
       newProfiles,
       allProfileNames,
+      profileFriendlyNames,
       onSelectProfile: handleSelectProfile,
       onAddProfile: handleAddProfile,
       onRemoveNewProfile: handleRemoveNewProfile,
@@ -1144,6 +1190,7 @@ export default function Settings() {
       editingProfile,
       newProfiles,
       allProfileNames,
+      profileFriendlyNames,
       handleSelectProfile,
       handleAddProfile,
       handleRemoveNewProfile,
@@ -1207,7 +1254,7 @@ export default function Settings() {
 
           // Build a targeted delete payload that only removes mask-related
           // sub-keys, not the entire motion/objects sections
-          const deletePayload: Record<string, unknown> = {};
+          const deletePayload: JsonObject = {};
 
           if (profileData.zones !== undefined) {
             deletePayload.zones = "";
@@ -1218,12 +1265,12 @@ export default function Settings() {
           }
 
           if (profileData.objects) {
-            const objDelete: Record<string, unknown> = {};
+            const objDelete: JsonObject = {};
             if (profileData.objects.mask !== undefined) {
               objDelete.mask = "";
             }
             if (profileData.objects.filters) {
-              const filtersDelete: Record<string, unknown> = {};
+              const filtersDelete: JsonObject = {};
               for (const [filterName, filterVal] of Object.entries(
                 profileData.objects.filters,
               )) {
@@ -1262,7 +1309,7 @@ export default function Settings() {
               section: t("configForm.sections.masksAndZones", {
                 ns: "views/settings",
               }),
-              profile: profileName,
+              profile: profileFriendlyNames.get(profileName) ?? profileName,
             }),
           );
         } catch {
@@ -1282,6 +1329,7 @@ export default function Settings() {
       config,
       handleSelectProfile,
       handleDeleteProfileSection,
+      profileFriendlyNames,
       t,
     ],
   );
@@ -1490,7 +1538,8 @@ export default function Settings() {
                       setContentMobileOpen(true);
                     }}
                   >
-                    {profilesData.active_profile}
+                    {profileFriendlyNames.get(profilesData.active_profile) ??
+                      profilesData.active_profile}
                   </Badge>
                 )}
               </div>
@@ -1607,9 +1656,8 @@ export default function Settings() {
                       )}
                       {showProfileDropdown && currentSectionKey && (
                         <ProfileSectionDropdown
-                          cameraName={selectedCamera}
-                          sectionKey={currentSectionKey}
                           allProfileNames={allProfileNames}
+                          profileFriendlyNames={profileFriendlyNames}
                           editingProfile={headerEditingProfile}
                           hasProfileData={headerHasProfileData}
                           onSelectProfile={(profile) =>
@@ -1618,10 +1666,6 @@ export default function Settings() {
                               currentSectionKey,
                               profile,
                             )
-                          }
-                          onAddProfile={handleAddProfile}
-                          onDeleteProfileSection={
-                            handleDeleteProfileForCurrentSection
                           }
                         />
                       )}
@@ -1653,6 +1697,9 @@ export default function Settings() {
                     pendingDataBySection={pendingDataBySection}
                     onPendingDataChange={handlePendingDataChange}
                     profileState={profileState}
+                    onDeleteProfileSection={
+                      handleDeleteProfileForCurrentSection
+                    }
                     profilesUIEnabled={profilesUIEnabled}
                     setProfilesUIEnabled={setProfilesUIEnabled}
                   />
@@ -1771,9 +1818,8 @@ export default function Settings() {
               )}
               {showProfileDropdown && currentSectionKey && (
                 <ProfileSectionDropdown
-                  cameraName={selectedCamera}
-                  sectionKey={currentSectionKey}
                   allProfileNames={allProfileNames}
+                  profileFriendlyNames={profileFriendlyNames}
                   editingProfile={headerEditingProfile}
                   hasProfileData={headerHasProfileData}
                   onSelectProfile={(profile) =>
@@ -1783,8 +1829,6 @@ export default function Settings() {
                       profile,
                     )
                   }
-                  onAddProfile={handleAddProfile}
-                  onDeleteProfileSection={handleDeleteProfileForCurrentSection}
                 />
               )}
               <CameraSelectButton
@@ -1903,6 +1947,7 @@ export default function Settings() {
                   pendingDataBySection={pendingDataBySection}
                   onPendingDataChange={handlePendingDataChange}
                   profileState={profileState}
+                  onDeleteProfileSection={handleDeleteProfileForCurrentSection}
                   profilesUIEnabled={profilesUIEnabled}
                   setProfilesUIEnabled={setProfilesUIEnabled}
                 />

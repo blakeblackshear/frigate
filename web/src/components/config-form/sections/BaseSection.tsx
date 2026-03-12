@@ -136,7 +136,7 @@ export interface BaseSectionProps {
     hasValidationErrors: boolean;
   }) => void;
   /** Pending form data keyed by "sectionKey" or "cameraName::sectionKey" */
-  pendingDataBySection?: Record<string, unknown>;
+  pendingDataBySection?: Record<string, ConfigSectionData>;
   /** Callback to update pending data for a section */
   onPendingDataChange?: (
     sectionKey: string,
@@ -145,8 +145,12 @@ export interface BaseSectionProps {
   ) => void;
   /** When set, editing this profile's overrides instead of the base config */
   profileName?: string;
+  /** Display name for the profile (friendly name) */
+  profileFriendlyName?: string;
   /** Border color class for profile override badge (e.g., "border-amber-500") */
   profileBorderColor?: string;
+  /** Callback to delete the current profile's overrides for this section */
+  onDeleteProfileSection?: () => void;
 }
 
 export interface CreateSectionOptions {
@@ -178,7 +182,9 @@ export function ConfigSection({
   pendingDataBySection,
   onPendingDataChange,
   profileName,
+  profileFriendlyName,
   profileBorderColor,
+  onDeleteProfileSection,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -243,6 +249,8 @@ export function ConfigSection({
   const [extraHasChanges, setExtraHasChanges] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [isDeleteProfileDialogOpen, setIsDeleteProfileDialogOpen] =
+    useState(false);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const isResettingRef = useRef(false);
   const isInitializingRef = useRef(true);
@@ -932,6 +940,23 @@ export function ConfigSection({
                       })}
                 </Button>
               )}
+            {profileName &&
+              profileOverridesSection &&
+              !hasChanges &&
+              !skipSave &&
+              onDeleteProfileSection && (
+                <Button
+                  onClick={() => setIsDeleteProfileDialogOpen(true)}
+                  variant="outline"
+                  disabled={isSaving || disabled}
+                  className="flex flex-1 gap-2"
+                >
+                  {t("profiles.removeOverride", {
+                    ns: "views/settings",
+                    defaultValue: "Remove Profile Override",
+                  })}
+                </Button>
+              )}
             {hasChanges && (
               <Button
                 onClick={handleReset}
@@ -1003,6 +1028,47 @@ export function ConfigSection({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog
+        open={isDeleteProfileDialogOpen}
+        onOpenChange={setIsDeleteProfileDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("profiles.deleteSection", { ns: "views/settings" })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("profiles.deleteSectionConfirm", {
+                ns: "views/settings",
+                profile: profileFriendlyName ?? profileName,
+                section: t(`${sectionPath}.label`, {
+                  ns:
+                    effectiveLevel === "camera"
+                      ? "config/cameras"
+                      : "config/global",
+                  defaultValue: sectionPath,
+                }),
+                camera: cameraName ?? "",
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => {
+                onDeleteProfileSection?.();
+                setIsDeleteProfileDialogOpen(false);
+              }}
+            >
+              {t("button.delete", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 
@@ -1028,7 +1094,7 @@ export function ConfigSection({
                           <Badge variant="secondary" className="text-xs">
                             {overrideSource === "profile"
                               ? t("button.overriddenBaseConfig", {
-                                  ns: "common",
+                                  ns: "views/settings",
                                   defaultValue: "Overridden (Base Config)",
                                 })
                               : t("button.overriddenGlobal", {
@@ -1040,8 +1106,8 @@ export function ConfigSection({
                         <TooltipContent>
                           {overrideSource === "profile"
                             ? t("button.overriddenBaseConfigTooltip", {
-                                ns: "common",
-                                profile: profileName,
+                                ns: "views/settings",
+                                profile: profileFriendlyName ?? profileName,
                               })
                             : t("button.overriddenGlobalTooltip", {
                                 ns: "views/settings",
@@ -1099,7 +1165,7 @@ export function ConfigSection({
                         >
                           {overrideSource === "profile"
                             ? t("button.overriddenBaseConfig", {
-                                ns: "common",
+                                ns: "views/settings",
                                 defaultValue: "Overridden (Base Config)",
                               })
                             : t("button.overriddenGlobal", {
@@ -1111,8 +1177,8 @@ export function ConfigSection({
                       <TooltipContent>
                         {overrideSource === "profile"
                           ? t("button.overriddenBaseConfigTooltip", {
-                              ns: "common",
-                              profile: profileName,
+                              ns: "views/settings",
+                              profile: profileFriendlyName ?? profileName,
                             })
                           : t("button.overriddenGlobalTooltip", {
                               ns: "views/settings",

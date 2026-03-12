@@ -334,6 +334,10 @@ export type CameraProfileConfig = {
   zones?: Partial<CameraConfig["zones"]>;
 };
 
+export type ProfileDefinitionConfig = {
+  friendly_name: string;
+};
+
 export type CameraGroupConfig = {
   cameras: string[];
   icon: IconName;
@@ -487,6 +491,8 @@ export interface FrigateConfig {
   };
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
+
+  profiles: { [profileName: string]: ProfileDefinitionConfig };
 
   lpr: {
     enabled: boolean;

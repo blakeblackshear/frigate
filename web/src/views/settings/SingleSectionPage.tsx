@@ -28,13 +28,15 @@ export type SettingsPageProps = {
     level: "global" | "camera",
     status: SectionStatus,
   ) => void;
-  pendingDataBySection?: Record<string, unknown>;
+  pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,
     cameraName: string | undefined,
     data: ConfigSectionData | null,
   ) => void;
   profileState?: ProfileState;
+  /** Callback to delete the current profile's overrides for the current section */
+  onDeleteProfileSection?: (profileName: string) => void;
   profilesUIEnabled?: boolean;
   setProfilesUIEnabled?: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -70,6 +72,7 @@ export function SingleSectionPage({
   pendingDataBySection,
   onPendingDataChange,
   profileState,
+  onDeleteProfileSection,
 }: SingleSectionPageProps) {
   const sectionNamespace =
     level === "camera" ? "config/cameras" : "config/global";
@@ -103,6 +106,12 @@ export function SingleSectionPage({
         : undefined,
     [currentEditingProfile, profileState?.allProfileNames],
   );
+
+  const handleDeleteProfileSection = useCallback(() => {
+    if (currentEditingProfile && onDeleteProfileSection) {
+      onDeleteProfileSection(currentEditingProfile);
+    }
+  }, [currentEditingProfile, onDeleteProfileSection]);
 
   const handleSectionStatusChange = useCallback(
     (status: SectionStatus) => {
@@ -179,8 +188,12 @@ export function SingleSectionPage({
                   <TooltipContent>
                     {sectionStatus.overrideSource === "profile"
                       ? t("button.overriddenBaseConfigTooltip", {
-                          ns: "common",
-                          profile: currentEditingProfile,
+                          ns: "views/settings",
+                          profile: currentEditingProfile
+                            ? (profileState?.profileFriendlyNames.get(
+                                currentEditingProfile,
+                              ) ?? currentEditingProfile)
+                            : "",
                         })
                       : t("button.overriddenGlobalTooltip", {
                           ns: "views/settings",
@@ -212,7 +225,16 @@ export function SingleSectionPage({
         requiresRestart={requiresRestart}
         onStatusChange={handleSectionStatusChange}
         profileName={currentEditingProfile ?? undefined}
+        profileFriendlyName={
+          currentEditingProfile
+            ? (profileState?.profileFriendlyNames.get(currentEditingProfile) ??
+              currentEditingProfile)
+            : undefined
+        }
         profileBorderColor={profileColor?.border}
+        onDeleteProfileSection={
+          currentEditingProfile ? handleDeleteProfileSection : undefined
+        }
       />
     </div>
   );

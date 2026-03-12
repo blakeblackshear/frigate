@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
 import type { FrigateConfig } from "@/types/frigateConfig";
-import type { ProfileState } from "@/types/profile";
+import type { JsonObject } from "@/types/configForm";
+import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { PROFILE_ELIGIBLE_SECTIONS } from "@/utils/configUtil";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
@@ -15,6 +19,7 @@ import Heading from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import NameAndIdFields from "@/components/input/NameAndIdFields";
 import {
   Select,
   SelectContent,
@@ -48,11 +53,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 
-type ProfilesApiResponse = {
-  profiles: string[];
-  active_profile: string | null;
-};
-
 type ProfilesViewProps = {
   setUnsavedChanges?: React.Dispatch<React.SetStateAction<boolean>>;
   profileState?: ProfileState;
@@ -74,12 +74,55 @@ export default function ProfilesView({
   const [activating, setActivating] = useState(false);
   const [deleteProfile, setDeleteProfile] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [renameProfile, setRenameProfile] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renaming, setRenaming] = useState(false);
   const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(
     new Set(),
   );
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newProfileName, setNewProfileName] = useState("");
-  const [nameError, setNameError] = useState<string | null>(null);
+
+  const allProfileNames = useMemo(
+    () => profileState?.allProfileNames ?? [],
+    [profileState?.allProfileNames],
+  );
+
+  const addProfileSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(2, {
+            message: t("profiles.error.mustBeAtLeastTwoCharacters", {
+              ns: "views/settings",
+            }),
+          })
+          .refine((value) => !value.includes("."), {
+            message: t("profiles.error.mustNotContainPeriod", {
+              ns: "views/settings",
+            }),
+          })
+          .refine((value) => !allProfileNames.includes(value), {
+            message: t("profiles.error.alreadyExists", {
+              ns: "views/settings",
+            }),
+          }),
+        friendly_name: z.string().min(2, {
+          message: t("profiles.error.mustBeAtLeastTwoCharacters", {
+            ns: "views/settings",
+          }),
+        }),
+      }),
+    [t, allProfileNames],
+  );
+
+  type AddProfileForm = z.infer<typeof addProfileSchema>;
+  const addForm = useForm<AddProfileForm>({
+    resolver: zodResolver(addProfileSchema),
+    defaultValues: { friendly_name: "", name: "" },
+  });
+
+  const profileFriendlyNames = profileState?.profileFriendlyNames;
 
   useEffect(() => {
     document.title = t("documentTitle.profiles", {
@@ -87,10 +130,6 @@ export default function ProfilesView({
     });
   }, [t]);
 
-  const allProfileNames = useMemo(
-    () => profileState?.allProfileNames ?? [],
-    [profileState?.allProfileNames],
-  );
   const activeProfile = profilesData?.active_profile ?? null;
 
   // Build overview data: for each profile, which cameras have which sections
@@ -126,33 +165,17 @@ export default function ProfilesView({
     return data;
   }, [config, allProfileNames]);
 
-  const validateName = useCallback(
-    (name: string): string | null => {
-      if (!name.trim()) return null;
-      if (!/^[a-z0-9_]+$/.test(name)) {
-        return t("profiles.nameInvalid", { ns: "views/settings" });
-      }
-      if (allProfileNames.includes(name)) {
-        return t("profiles.nameDuplicate", { ns: "views/settings" });
-      }
-      return null;
+  const handleAddSubmit = useCallback(
+    (data: AddProfileForm) => {
+      const id = data.name.trim();
+      const friendlyName = data.friendly_name.trim();
+      if (!id || !friendlyName) return;
+      profileState?.onAddProfile(id, friendlyName);
+      setAddDialogOpen(false);
+      addForm.reset();
     },
-    [allProfileNames, t],
+    [profileState, addForm],
   );
-
-  const handleAddSubmit = useCallback(() => {
-    const name = newProfileName.trim();
-    if (!name) return;
-    const error = validateName(name);
-    if (error) {
-      setNameError(error);
-      return;
-    }
-    profileState?.onAddProfile(name);
-    setAddDialogOpen(false);
-    setNewProfileName("");
-    setNameError(null);
-  }, [newProfileName, validateName, profileState]);
 
   const handleActivateProfile = useCallback(
     async (profile: string | null) => {
@@ -166,7 +189,7 @@ export default function ProfilesView({
           profile
             ? t("profiles.activated", {
                 ns: "views/settings",
-                profile,
+                profile: profileFriendlyNames?.get(profile) ?? profile,
               })
             : t("profiles.deactivated", { ns: "views/settings" }),
           { position: "top-center" },
@@ -184,7 +207,7 @@ export default function ProfilesView({
         setActivating(false);
       }
     },
-    [updateProfiles, t],
+    [updateProfiles, profileFriendlyNames, t],
   );
 
   const handleDeleteProfile = useCallback(async () => {
@@ -206,30 +229,38 @@ export default function ProfilesView({
         await axios.put("profile/set", { profile: null });
       }
 
-      // Remove the profile from all cameras via config/set
-      const configData: Record<string, unknown> = {};
+      // Remove the profile from all cameras and the top-level definition
+      const cameraData: JsonObject = {};
       for (const camera of Object.keys(config.cameras)) {
         if (config.cameras[camera]?.profiles?.[deleteProfile]) {
-          configData[camera] = {
+          cameraData[camera] = {
             profiles: { [deleteProfile]: "" },
           };
         }
       }
 
-      if (Object.keys(configData).length > 0) {
-        await axios.put("config/set", {
-          requires_restart: 0,
-          config_data: { cameras: configData },
-        });
+      const configData: JsonObject = {
+        profiles: { [deleteProfile]: "" },
+      };
+      if (Object.keys(cameraData).length > 0) {
+        configData.cameras = cameraData;
       }
+
+      await axios.put("config/set", {
+        requires_restart: 0,
+        config_data: configData,
+      });
 
       await updateConfig();
       await updateProfiles();
 
+      // Also clean up local newProfiles state if this profile was in it
+      profileState?.onRemoveNewProfile(deleteProfile);
+
       toast.success(
         t("profiles.deleteSuccess", {
           ns: "views/settings",
-          profile: deleteProfile,
+          profile: profileFriendlyNames?.get(deleteProfile) ?? deleteProfile,
         }),
         { position: "top-center" },
       );
@@ -251,6 +282,7 @@ export default function ProfilesView({
     activeProfile,
     config,
     profileState,
+    profileFriendlyNames,
     updateConfig,
     updateProfiles,
     t,
@@ -267,6 +299,40 @@ export default function ProfilesView({
       return next;
     });
   }, []);
+
+  const handleRename = useCallback(async () => {
+    if (!renameProfile || !renameValue.trim()) return;
+
+    setRenaming(true);
+    try {
+      await axios.put("config/set", {
+        requires_restart: 0,
+        config_data: {
+          profiles: {
+            [renameProfile]: { friendly_name: renameValue.trim() },
+          },
+        },
+      });
+
+      await updateConfig();
+      await updateProfiles();
+
+      toast.success(
+        t("profiles.renameSuccess", {
+          ns: "views/settings",
+          profile: renameValue.trim(),
+        }),
+        { position: "top-center" },
+      );
+    } catch {
+      toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+        position: "top-center",
+      });
+    } finally {
+      setRenaming(false);
+      setRenameProfile(null);
+    }
+  }, [renameProfile, renameValue, updateConfig, updateProfiles, t]);
 
   if (!config || !profilesData) {
     return null;
@@ -336,7 +402,7 @@ export default function ProfilesView({
                               color.dot,
                             )}
                           />
-                          {profile}
+                          {profileFriendlyNames?.get(profile) ?? profile}
                         </div>
                       </SelectItem>
                     );
@@ -403,7 +469,23 @@ export default function ProfilesView({
                             color.dot,
                           )}
                         />
-                        <span className="font-medium">{profile}</span>
+                        <span className="font-medium">
+                          {profileFriendlyNames?.get(profile) ?? profile}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-6 text-muted-foreground hover:text-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRenameProfile(profile);
+                            setRenameValue(
+                              profileFriendlyNames?.get(profile) ?? profile,
+                            );
+                          }}
+                        >
+                          <Pencil className="size-3" />
+                        </Button>
                         {isActive && (
                           <Badge
                             variant="secondary"
@@ -484,51 +566,60 @@ export default function ProfilesView({
         onOpenChange={(open) => {
           setAddDialogOpen(open);
           if (!open) {
-            setNewProfileName("");
-            setNameError(null);
+            addForm.reset();
           }
         }}
       >
-        <DialogContent className="sm:max-w-[360px]">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle>
               {t("profiles.newProfile", { ns: "views/settings" })}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 py-2">
-            <Input
-              placeholder={t("profiles.profileNamePlaceholder", {
-                ns: "views/settings",
-              })}
-              value={newProfileName}
-              onChange={(e) => {
-                setNewProfileName(e.target.value);
-                setNameError(validateName(e.target.value));
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddSubmit();
-                }
-              }}
-              autoFocus
-            />
-            {nameError && (
-              <p className="text-xs text-destructive">{nameError}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
-              {t("button.cancel", { ns: "common" })}
-            </Button>
-            <Button
-              variant="select"
-              onClick={handleAddSubmit}
-              disabled={!newProfileName.trim() || !!nameError}
+          <FormProvider {...addForm}>
+            <form
+              onSubmit={addForm.handleSubmit(handleAddSubmit)}
+              className="space-y-4 py-2"
             >
-              {t("button.add", { ns: "common" })}
-            </Button>
-          </DialogFooter>
+              <NameAndIdFields<AddProfileForm>
+                control={addForm.control}
+                type="profile"
+                nameField="friendly_name"
+                idField="name"
+                nameLabel={t("profiles.friendlyNameLabel", {
+                  ns: "views/settings",
+                })}
+                idLabel={t("profiles.profileIdLabel", {
+                  ns: "views/settings",
+                })}
+                idDescription={t("profiles.profileIdDescription", {
+                  ns: "views/settings",
+                })}
+                placeholderName={t("profiles.profileNamePlaceholder", {
+                  ns: "views/settings",
+                })}
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAddDialogOpen(false)}
+                >
+                  {t("button.cancel", { ns: "common" })}
+                </Button>
+                <Button
+                  type="submit"
+                  variant="select"
+                  disabled={
+                    !addForm.watch("friendly_name").trim() ||
+                    !addForm.watch("name").trim()
+                  }
+                >
+                  {t("button.add", { ns: "common" })}
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
         </DialogContent>
       </Dialog>
 
@@ -547,7 +638,9 @@ export default function ProfilesView({
             <AlertDialogDescription>
               {t("profiles.deleteProfileConfirm", {
                 ns: "views/settings",
-                profile: deleteProfile,
+                profile: deleteProfile
+                  ? (profileFriendlyNames?.get(deleteProfile) ?? deleteProfile)
+                  : "",
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -560,11 +653,54 @@ export default function ProfilesView({
               onClick={handleDeleteProfile}
               disabled={deleting}
             >
+              {deleting && <ActivityIndicator className="mr-2 size-4" />}
               {t("button.delete", { ns: "common" })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Rename Profile Dialog */}
+      <Dialog
+        open={!!renameProfile}
+        onOpenChange={(open) => {
+          if (!open) setRenameProfile(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>
+              {t("profiles.renameProfile", { ns: "views/settings" })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <Input
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              placeholder={t("profiles.profileNamePlaceholder", {
+                ns: "views/settings",
+              })}
+            />
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setRenameProfile(null)}
+                disabled={renaming}
+              >
+                {t("button.cancel", { ns: "common" })}
+              </Button>
+              <Button
+                variant="select"
+                onClick={handleRename}
+                disabled={renaming || !renameValue.trim()}
+              >
+                {renaming && <ActivityIndicator className="mr-2 size-4" />}
+                {t("button.save", { ns: "common" })}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

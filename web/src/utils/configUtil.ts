@@ -374,7 +374,7 @@ export function requiresRestartForFieldPath(
 
 export interface SectionSavePayload {
   basePath: string;
-  sanitizedOverrides: Record<string, unknown>;
+  sanitizedOverrides: JsonObject;
   updateTopic: string | undefined;
   needsRestart: boolean;
   pendingDataKey: string;
@@ -561,7 +561,7 @@ export function prepareSectionSavePayload(opts: {
   if (
     !sanitizedOverrides ||
     typeof sanitizedOverrides !== "object" ||
-    Object.keys(sanitizedOverrides as Record<string, unknown>).length === 0
+    Object.keys(sanitizedOverrides as JsonObject).length === 0
   ) {
     return null;
   }
@@ -597,7 +597,7 @@ export function prepareSectionSavePayload(opts: {
 
   return {
     basePath,
-    sanitizedOverrides: sanitizedOverrides as Record<string, unknown>,
+    sanitizedOverrides: sanitizedOverrides as JsonObject,
     updateTopic,
     needsRestart,
     pendingDataKey,

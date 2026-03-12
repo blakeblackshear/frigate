@@ -1,9 +1,7 @@
-import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getProfileColor } from "@/utils/profileColors";
-import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,281 +9,100 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type ProfileSectionDropdownProps = {
-  cameraName: string;
-  sectionKey: string;
   allProfileNames: string[];
+  profileFriendlyNames: Map<string, string>;
   editingProfile: string | null;
   hasProfileData: (profileName: string) => boolean;
   onSelectProfile: (profileName: string | null) => void;
-  onAddProfile: (name: string) => void;
-  onDeleteProfileSection: (profileName: string) => void;
 };
 
 export function ProfileSectionDropdown({
-  cameraName,
-  sectionKey,
   allProfileNames,
+  profileFriendlyNames,
   editingProfile,
   hasProfileData,
   onSelectProfile,
-  onAddProfile,
-  onDeleteProfileSection,
 }: ProfileSectionDropdownProps) {
-  const { t } = useTranslation(["views/settings", "common"]);
-  const friendlyCameraName = useCameraFriendlyName(cameraName);
-  const friendlySectionName = t(`configForm.sections.${sectionKey}`, {
-    ns: "views/settings",
-    defaultValue: sectionKey,
-  });
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [deleteConfirmProfile, setDeleteConfirmProfile] = useState<
-    string | null
-  >(null);
-  const [newProfileName, setNewProfileName] = useState("");
-  const [nameError, setNameError] = useState<string | null>(null);
-
-  const validateName = useCallback(
-    (name: string): string | null => {
-      if (!name.trim()) return null;
-      if (!/^[a-z0-9_]+$/.test(name)) {
-        return t("profiles.nameInvalid", {
-          ns: "views/settings",
-        });
-      }
-      if (allProfileNames.includes(name)) {
-        return t("profiles.nameDuplicate", {
-          ns: "views/settings",
-        });
-      }
-      return null;
-    },
-    [allProfileNames, t],
-  );
-
-  const handleAddSubmit = useCallback(() => {
-    const name = newProfileName.trim();
-    if (!name) return;
-    const error = validateName(name);
-    if (error) {
-      setNameError(error);
-      return;
-    }
-    onAddProfile(name);
-    onSelectProfile(name);
-    setAddDialogOpen(false);
-    setNewProfileName("");
-    setNameError(null);
-  }, [newProfileName, validateName, onAddProfile, onSelectProfile]);
-
-  const handleDeleteConfirm = useCallback(() => {
-    if (!deleteConfirmProfile) return;
-    onDeleteProfileSection(deleteConfirmProfile);
-    if (editingProfile === deleteConfirmProfile) {
-      onSelectProfile(null);
-    }
-    setDeleteConfirmProfile(null);
-  }, [
-    deleteConfirmProfile,
-    editingProfile,
-    onDeleteProfileSection,
-    onSelectProfile,
-  ]);
+  const { t } = useTranslation(["views/settings"]);
 
   const activeColor = editingProfile
     ? getProfileColor(editingProfile, allProfileNames)
     : null;
 
+  const editingFriendlyName = editingProfile
+    ? (profileFriendlyNames.get(editingProfile) ?? editingProfile)
+    : null;
+
   return (
-    <>
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-9 gap-2 font-normal">
-            {editingProfile ? (
-              <>
-                <span
-                  className={cn(
-                    "h-2 w-2 shrink-0 rounded-full",
-                    activeColor?.dot,
-                  )}
-                />
-                {editingProfile}
-              </>
-            ) : (
-              t("profiles.baseConfig", { ns: "views/settings" })
-            )}
-            <ChevronDown className="h-3 w-3 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[180px]">
-          <DropdownMenuItem onClick={() => onSelectProfile(null)}>
-            <div className="flex w-full items-center gap-2">
-              {editingProfile === null && (
-                <Check className="h-3.5 w-3.5 shrink-0" />
-              )}
-              <span className={editingProfile === null ? "" : "pl-[22px]"}>
-                {t("profiles.baseConfig", { ns: "views/settings" })}
-              </span>
-            </div>
-          </DropdownMenuItem>
-
-          {allProfileNames.length > 0 && <DropdownMenuSeparator />}
-
-          {allProfileNames.map((profile) => {
-            const color = getProfileColor(profile, allProfileNames);
-            const hasData = hasProfileData(profile);
-            const isActive = editingProfile === profile;
-
-            return (
-              <DropdownMenuItem
-                key={profile}
-                className="group flex items-start justify-between gap-2"
-                onClick={() => onSelectProfile(profile)}
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex w-full flex-row items-center justify-start gap-2">
-                    {isActive && <Check className="h-3.5 w-3.5 shrink-0" />}
-                    <span
-                      className={cn(
-                        "h-2 w-2 shrink-0 rounded-full",
-                        color.dot,
-                        !isActive && "ml-[22px]",
-                      )}
-                    />
-                    <span>{profile}</span>
-                  </div>
-                  {!hasData && (
-                    <span className="ml-[22px] text-xs text-muted-foreground">
-                      {t("profiles.noOverrides", { ns: "views/settings" })}
-                    </span>
-                  )}
-                </div>
-                {hasData && (
-                  <button
-                    className="invisible rounded p-0.5 text-muted-foreground group-hover:visible hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirmProfile(profile);
-                    }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="h-9 gap-2 font-normal">
+          {editingProfile ? (
+            <>
+              <span
+                className={cn(
+                  "h-2 w-2 shrink-0 rounded-full",
+                  activeColor?.dot,
                 )}
-              </DropdownMenuItem>
-            );
-          })}
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setNewProfileName("");
-              setNameError(null);
-              setAddDialogOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-3.5 w-3.5" />
-            {t("profiles.addProfile", { ns: "views/settings" })}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-[360px]">
-          <DialogHeader>
-            <DialogTitle>
-              {t("profiles.newProfile", { ns: "views/settings" })}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2 py-2">
-            <Input
-              placeholder={t("profiles.profileNamePlaceholder", {
-                ns: "views/settings",
-              })}
-              value={newProfileName}
-              onChange={(e) => {
-                setNewProfileName(e.target.value);
-                setNameError(validateName(e.target.value));
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddSubmit();
-                }
-              }}
-              autoFocus
-            />
-            {nameError && (
-              <p className="text-xs text-destructive">{nameError}</p>
+              />
+              {editingFriendlyName}
+            </>
+          ) : (
+            t("profiles.baseConfig", { ns: "views/settings" })
+          )}
+          <ChevronDown className="h-3 w-3 opacity-50" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[180px]">
+        <DropdownMenuItem onClick={() => onSelectProfile(null)}>
+          <div className="flex w-full items-center gap-2">
+            {editingProfile === null && (
+              <Check className="h-3.5 w-3.5 shrink-0" />
             )}
+            <span className={editingProfile === null ? "" : "pl-[22px]"}>
+              {t("profiles.baseConfig", { ns: "views/settings" })}
+            </span>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
-              {t("button.cancel", { ns: "common" })}
-            </Button>
-            <Button
-              variant="select"
-              onClick={handleAddSubmit}
-              disabled={!newProfileName.trim() || !!nameError}
-            >
-              {t("button.create", { ns: "common" })}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </DropdownMenuItem>
 
-      <AlertDialog
-        open={!!deleteConfirmProfile}
-        onOpenChange={(open) => {
-          if (!open) setDeleteConfirmProfile(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("profiles.deleteSection", { ns: "views/settings" })}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("profiles.deleteSectionConfirm", {
-                ns: "views/settings",
-                profile: deleteConfirmProfile,
-                section: friendlySectionName,
-                camera: friendlyCameraName,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t("button.cancel", { ns: "common" })}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={handleDeleteConfirm}
+        {allProfileNames.length > 0 && <DropdownMenuSeparator />}
+
+        {allProfileNames.map((profile) => {
+          const color = getProfileColor(profile, allProfileNames);
+          const hasData = hasProfileData(profile);
+          const isActive = editingProfile === profile;
+
+          return (
+            <DropdownMenuItem
+              key={profile}
+              className="group flex items-start justify-between gap-2"
+              onClick={() => onSelectProfile(profile)}
             >
-              {t("button.delete", { ns: "common" })}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex w-full flex-row items-center justify-start gap-2">
+                  {isActive && <Check className="h-3.5 w-3.5 shrink-0" />}
+                  <span
+                    className={cn(
+                      "h-2 w-2 shrink-0 rounded-full",
+                      color.dot,
+                      !isActive && "ml-[22px]",
+                    )}
+                  />
+                  <span>{profileFriendlyNames.get(profile) ?? profile}</span>
+                </div>
+                {!hasData && (
+                  <span className="ml-[22px] text-xs text-muted-foreground">
+                    {t("profiles.noOverrides", { ns: "views/settings" })}
+                  </span>
+                )}
+              </div>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
