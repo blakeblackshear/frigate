@@ -158,6 +158,18 @@ def config(request: Request):
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
+        # Re-dump profile overrides with exclude_unset so that only
+        # explicitly-set fields are returned (not Pydantic defaults).
+        # Without this, the frontend merges defaults (e.g. threshold=30)
+        # over the camera's actual base values (e.g. threshold=20).
+        if camera.profiles:
+            for profile_name, profile_config in camera.profiles.items():
+                camera_dict.setdefault("profiles", {})[profile_name] = (
+                    profile_config.model_dump(
+                        mode="json", warnings="none", exclude_unset=True
+                    )
+                )
+
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
         mode="json", warnings="none", exclude_none=True
@@ -229,9 +241,7 @@ def set_profile(request: Request, body: ProfileSetBody):
             content={"success": False, "message": err},
             status_code=400,
         )
-    request.app.dispatcher.publish(
-        "profile/state", body.profile or "none", retain=True
-    )
+    request.app.dispatcher.publish("profile/state", body.profile or "none", retain=True)
     return JSONResponse(
         content={
             "success": True,

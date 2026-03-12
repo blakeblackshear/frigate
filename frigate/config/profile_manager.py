@@ -101,7 +101,9 @@ class ProfileManager:
         """
         if profile_name is not None:
             if profile_name not in self.config.profiles:
-                return f"Profile '{profile_name}' is not defined in the profiles section"
+                return (
+                    f"Profile '{profile_name}' is not defined in the profiles section"
+                )
 
         # Track which camera/section pairs get changed for ZMQ publishing
         changed: dict[str, set[str]] = {}

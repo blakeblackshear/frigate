@@ -533,10 +533,21 @@ export function prepareSectionSavePayload(opts: {
       ? {}
       : rawSectionValue;
 
+  // For profile sections, also hide restart-required fields to match
+  // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
+  // for fields that are hidden from the form during profile editing).
+  let hiddenFieldsForSanitize = sectionConfig.hiddenFields;
+  if (profileInfo.isProfile && sectionConfig.restartRequired?.length) {
+    const base = sectionConfig.hiddenFields ?? [];
+    hiddenFieldsForSanitize = [
+      ...new Set([...base, ...sectionConfig.restartRequired]),
+    ];
+  }
+
   // Sanitize raw form data
   const rawData = sanitizeSectionData(
     rawFormData as ConfigSectionData,
-    sectionConfig.hiddenFields,
+    hiddenFieldsForSanitize,
   );
 
   // Compute schema defaults
