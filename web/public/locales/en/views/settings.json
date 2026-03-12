@@ -1457,7 +1457,7 @@
     "activated": "Profile '{{profile}}' activated",
     "activateFailed": "Failed to set profile",
     "deactivated": "Profile deactivated",
-    "noProfiles": "No profiles defined. Add a profile from any camera section.",
+    "noProfiles": "No profiles defined.",
     "noOverrides": "No overrides",
     "cameraCount_one": "{{count}} camera",
     "cameraCount_other": "{{count}} cameras",
@@ -1485,7 +1485,7 @@
     "deleteSectionConfirm": "Remove the {{section}} overrides for profile {{profile}} on {{camera}}?",
     "deleteSectionSuccess": "Removed {{section}} overrides for {{profile}}",
     "enableSwitch": "Enable Profiles",
-    "enabledDescription": "Profiles are enabled. Navigate to a camera config section, create a new profile from the dropdown in the header, and save for changes to take effect.",
+    "enabledDescription": "Profiles are enabled. Create a new profile below, navigate to a camera config section to make your changes, and save for changes to take effect.",
     "disabledDescription": "Profiles allow you to define named sets of camera config overrides (e.g., armed, away, night) that can be activated on demand."
   },
   "unsavedChanges": "You have unsaved changes",

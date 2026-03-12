@@ -1769,7 +1769,7 @@ export default function Settings() {
               >
                 {isSavingAll ? (
                   <>
-                    <ActivityIndicator className="mr-2" />
+                    <ActivityIndicator className="mr-2 size-4" />
                     {t("button.savingAll", { ns: "common" })}
                   </>
                 ) : (
