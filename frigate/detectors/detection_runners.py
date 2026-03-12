@@ -1,5 +1,6 @@
 """Base runner implementation for ONNX models."""
 
+import json
 import logging
 import os
 import platform
@@ -9,6 +10,11 @@ from typing import Any
 
 import numpy as np
 import onnxruntime as ort
+
+try:
+    import zmq as _zmq
+except ImportError:
+    _zmq = None
 
 from frigate.util.model import get_ort_providers
 from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
@@ -546,11 +552,212 @@ class RKNNModelRunner(BaseModelRunner):
                 pass
 
 
+class ZmqEmbeddingRunner(BaseModelRunner):
+    """Send preprocessed embedding tensors over ZMQ to an external inference service.
+
+    This enables offloading ONNX embedding inference (e.g. ArcFace face recognition,
+    Jina semantic search) to a native host process that has access to hardware
+    acceleration unavailable inside Docker, such as CoreML/ANE on Apple Silicon.
+
+    Protocol:
+    - Request is a multipart message: [ header_json_bytes, tensor_bytes ]
+      where header is:
+        {
+          "shape": List[int],       # e.g. [1, 3, 112, 112]
+          "dtype": str,             # numpy dtype, e.g. "float32"
+          "model_type": str,        # e.g. "arcface"
+        }
+      tensor_bytes are the raw C-order bytes of the input tensor.
+
+    - Response is either:
+        a) Multipart [ header_json_bytes, embedding_bytes ] with header specifying
+           shape and dtype of the returned embedding; or
+        b) Single frame of raw float32 bytes (embedding vector, batch-first).
+
+    On timeout or error, a zero embedding is returned so the caller can degrade
+    gracefully (the face will simply not be recognized for that frame).
+
+    Configuration example (face_recognition.device):
+        face_recognition:
+          enabled: true
+          model_size: large
+          device: "zmq://host.docker.internal:5556"
+    """
+
+    # Model type → primary input name (used to answer get_input_names())
+    _INPUT_NAMES: dict[str, list[str]] = {}
+
+    # Model type → model input spatial width
+    _INPUT_WIDTHS: dict[str, int] = {}
+
+    # Model type → embedding output dimensionality (used for zero-fallback shape)
+    _OUTPUT_DIMS: dict[str, int] = {}
+
+    @classmethod
+    def _init_model_maps(cls) -> None:
+        """Populate the model maps lazily to avoid circular imports at module load."""
+        if cls._INPUT_NAMES:
+            return
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        cls._INPUT_NAMES = {
+            EnrichmentModelTypeEnum.arcface.value: ["data"],
+            EnrichmentModelTypeEnum.facenet.value: ["data"],
+            EnrichmentModelTypeEnum.jina_v1.value: ["pixel_values"],
+            EnrichmentModelTypeEnum.jina_v2.value: ["pixel_values"],
+        }
+        cls._INPUT_WIDTHS = {
+            EnrichmentModelTypeEnum.arcface.value: 112,
+            EnrichmentModelTypeEnum.facenet.value: 160,
+            EnrichmentModelTypeEnum.jina_v1.value: 224,
+            EnrichmentModelTypeEnum.jina_v2.value: 224,
+        }
+        cls._OUTPUT_DIMS = {
+            EnrichmentModelTypeEnum.arcface.value: 512,
+            EnrichmentModelTypeEnum.facenet.value: 128,
+            EnrichmentModelTypeEnum.jina_v1.value: 768,
+            EnrichmentModelTypeEnum.jina_v2.value: 768,
+        }
+
+    def __init__(
+        self,
+        endpoint: str,
+        model_type: str,
+        request_timeout_ms: int = 60000,
+        linger_ms: int = 0,
+    ):
+        if _zmq is None:
+            raise ImportError(
+                "pyzmq is required for ZmqEmbeddingRunner. Install it with: pip install pyzmq"
+            )
+        self._init_model_maps()
+        # "zmq://host:port" is the Frigate config sentinel; ZMQ sockets need "tcp://host:port"
+        self._endpoint = endpoint.replace("zmq://", "tcp://", 1)
+        self._model_type = model_type
+        self._request_timeout_ms = request_timeout_ms
+        self._linger_ms = linger_ms
+        self._context = _zmq.Context()
+        self._socket = None
+        self._needs_reset = False
+        self._lock = threading.Lock()
+        self._create_socket()
+        logger.info(
+            f"ZmqEmbeddingRunner({model_type}): connected to {endpoint}"
+        )
+
+    def _create_socket(self) -> None:
+        if self._socket is not None:
+            try:
+                self._socket.close(linger=self._linger_ms)
+            except Exception:
+                pass
+        self._socket = self._context.socket(_zmq.REQ)
+        self._socket.setsockopt(_zmq.RCVTIMEO, self._request_timeout_ms)
+        self._socket.setsockopt(_zmq.SNDTIMEO, self._request_timeout_ms)
+        self._socket.setsockopt(_zmq.LINGER, self._linger_ms)
+        self._socket.connect(self._endpoint)
+
+    def get_input_names(self) -> list[str]:
+        return self._INPUT_NAMES.get(self._model_type, ["data"])
+
+    def get_input_width(self) -> int:
+        return self._INPUT_WIDTHS.get(self._model_type, -1)
+
+    def run(self, inputs: dict[str, Any]) -> list[np.ndarray]:
+        """Send the primary input tensor over ZMQ and return the embedding.
+
+        For single-input models (ArcFace, FaceNet) the entire inputs dict maps to
+        one tensor.  For multi-input models only the first tensor is sent; those
+        models are not yet supported for ZMQ offload.
+        """
+        tensor_input = np.ascontiguousarray(next(iter(inputs.values())))
+        batch_size = tensor_input.shape[0]
+
+        with self._lock:
+            # Lazy reset: if a previous call errored, reset the socket now — before any
+            # ZMQ operations — so we don't manipulate sockets inside an error handler where
+            # Frigate's own ZMQ threads may be polling and could hit a libzmq assertion.
+            # The lock ensures only one thread touches the socket at a time (ZMQ REQ
+            # sockets are not thread-safe; concurrent calls from the reindex thread and
+            # the normal embedding maintainer thread would corrupt the socket state).
+            if self._needs_reset:
+                self._reset_socket()
+                self._needs_reset = False
+
+            try:
+                header = {
+                    "shape": list(tensor_input.shape),
+                    "dtype": str(tensor_input.dtype.name),
+                    "model_type": self._model_type,
+                }
+                header_bytes = json.dumps(header).encode("utf-8")
+                payload_bytes = memoryview(tensor_input.tobytes(order="C"))
+
+                self._socket.send_multipart([header_bytes, payload_bytes])
+                reply_frames = self._socket.recv_multipart()
+                return self._decode_response(reply_frames)
+
+            except _zmq.Again:
+                logger.warning(
+                    f"ZmqEmbeddingRunner({self._model_type}): request timed out, will reset socket before next call"
+                )
+                self._needs_reset = True
+                return [np.zeros((batch_size, self._get_output_dim()), dtype=np.float32)]
+            except _zmq.ZMQError as exc:
+                logger.error(f"ZmqEmbeddingRunner({self._model_type}) ZMQError: {exc}, will reset socket before next call")
+                self._needs_reset = True
+                return [np.zeros((batch_size, self._get_output_dim()), dtype=np.float32)]
+            except Exception as exc:
+                logger.error(f"ZmqEmbeddingRunner({self._model_type}) unexpected error: {exc}")
+                return [np.zeros((batch_size, self._get_output_dim()), dtype=np.float32)]
+
+    def _reset_socket(self) -> None:
+        try:
+            self._create_socket()
+        except Exception:
+            pass
+
+    def _decode_response(self, frames: list[bytes]) -> list[np.ndarray]:
+        try:
+            if len(frames) >= 2:
+                header = json.loads(frames[0].decode("utf-8"))
+                shape = tuple(header.get("shape", []))
+                dtype = np.dtype(header.get("dtype", "float32"))
+                return [np.frombuffer(frames[1], dtype=dtype).reshape(shape)]
+            elif len(frames) == 1:
+                # Raw float32 bytes — reshape to (1, embedding_dim)
+                arr = np.frombuffer(frames[0], dtype=np.float32)
+                return [arr.reshape((1, -1))]
+            else:
+                logger.warning(f"ZmqEmbeddingRunner({self._model_type}): empty reply")
+                return [np.zeros((1, self._get_output_dim()), dtype=np.float32)]
+        except Exception as exc:
+            logger.error(
+                f"ZmqEmbeddingRunner({self._model_type}): failed to decode response: {exc}"
+            )
+            return [np.zeros((1, self._get_output_dim()), dtype=np.float32)]
+
+    def _get_output_dim(self) -> int:
+        return self._OUTPUT_DIMS.get(self._model_type, 512)
+
+    def __del__(self) -> None:
+        try:
+            if self._socket is not None:
+                self._socket.close(linger=self._linger_ms)
+        except Exception:
+            pass
+
+
 def get_optimized_runner(
     model_path: str, device: str | None, model_type: str, **kwargs
 ) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
     device = device or "AUTO"
+
+    # ZMQ embedding runner — offloads ONNX inference to a native host process.
+    # Triggered when device is a ZMQ endpoint, e.g. "zmq://host.docker.internal:5556".
+    if device.startswith("zmq://"):
+        return ZmqEmbeddingRunner(endpoint=device, model_type=model_type)
 
     if device != "CPU" and is_rknn_compatible(model_path):
         rknn_path = auto_convert_model(model_path)
