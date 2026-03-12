@@ -275,6 +275,25 @@ Same data available at `/api/stats` published at a configurable interval.
 
 Returns data about each camera, its current features, and if it is detecting motion, objects, etc. Can be triggered by publising to `frigate/onConnect`
 
+### `frigate/profile/set`
+
+Topic to activate or deactivate a [profile](/configuration/profiles). Publish a profile name to activate it, or `none` to deactivate the current profile.
+
+### `frigate/profile/state`
+
+Topic with the currently active profile name. Published value is the profile name or `none` if no profile is active. This topic is retained.
+
+### `frigate/profiles/available`
+
+Topic with a JSON array of all available profile definitions. Published on startup as a retained message.
+
+```json
+[
+  { "name": "away", "friendly_name": "Away" },
+  { "name": "home", "friendly_name": "Home" }
+]
+```
+
 ### `frigate/notifications/set`
 
 Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
