@@ -18,7 +18,6 @@ export type ProfilesApiResponse = {
 
 export type ProfileState = {
   editingProfile: Record<string, string | null>;
-  newProfiles: string[];
   allProfileNames: string[];
   profileFriendlyNames: Map<string, string>;
   onSelectProfile: (
@@ -26,8 +25,6 @@ export type ProfileState = {
     section: string,
     profile: string | null,
   ) => void;
-  onAddProfile: (id: string, friendlyName: string) => void;
-  onRemoveNewProfile: (name: string) => void;
   onDeleteProfileSection: (
     camera: string,
     section: string,

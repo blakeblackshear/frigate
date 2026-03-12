@@ -1480,6 +1480,7 @@
     "deleteProfile": "Delete Profile",
     "deleteProfileConfirm": "Delete profile \"{{profile}}\" from all cameras? This cannot be undone.",
     "deleteSuccess": "Profile '{{profile}}' deleted",
+    "createSuccess": "Profile '{{profile}}' created",
     "removeOverride": "Remove Profile Override",
     "deleteSection": "Delete Section Overrides",
     "deleteSectionConfirm": "Remove the {{section}} overrides for profile {{profile}} on {{camera}}?",

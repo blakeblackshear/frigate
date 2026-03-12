@@ -660,32 +660,20 @@ export default function Settings() {
   const [editingProfile, setEditingProfile] = useState<
     Record<string, string | null>
   >({});
-  const [newProfiles, setNewProfiles] = useState<string[]>([]);
   const [profilesUIEnabled, setProfilesUIEnabled] = useState(false);
 
   const allProfileNames = useMemo(() => {
-    const names = new Set<string>();
-    if (config?.profiles) {
-      Object.keys(config.profiles).forEach((p) => names.add(p));
-    }
-    newProfiles.forEach((p) => names.add(p));
-    return [...names].sort();
-  }, [config, newProfiles]);
+    if (!config?.profiles) return [];
+    return Object.keys(config.profiles).sort();
+  }, [config]);
 
   const profileFriendlyNames = useMemo(() => {
     const map = new Map<string, string>();
     if (profilesData?.profiles) {
       profilesData.profiles.forEach((p) => map.set(p.name, p.friendly_name));
     }
-    // Include pending (unsaved) profile definitions
-    for (const [key, data] of Object.entries(pendingDataBySection)) {
-      if (key.startsWith("__profile_def__.") && data?.friendly_name) {
-        const id = key.slice("__profile_def__.".length);
-        map.set(id, String(data.friendly_name));
-      }
-    }
     return map;
-  }, [profilesData, pendingDataBySection]);
+  }, [profilesData]);
 
   const navigate = useNavigate();
 
@@ -842,27 +830,6 @@ export default function Settings() {
     for (const key of pendingKeys) {
       const pendingData = pendingDataBySection[key];
 
-      // Handle top-level profile definition saves
-      if (key.startsWith("__profile_def__.")) {
-        const profileId = key.replace("__profile_def__.", "");
-        try {
-          const configData = { profiles: { [profileId]: pendingData } };
-          await axios.put("config/set", {
-            requires_restart: 0,
-            config_data: configData,
-          });
-          setPendingDataBySection((prev) => {
-            const { [key]: _, ...rest } = prev;
-            return rest;
-          });
-          savedKeys.push(key);
-          successCount++;
-        } catch {
-          failCount++;
-        }
-        continue;
-      }
-
       try {
         const payload = prepareSectionSavePayload({
           pendingDataKey: key,
@@ -911,11 +878,6 @@ export default function Settings() {
 
     // Refresh config from server once
     await mutate("config");
-
-    // If any profile definitions were saved, refresh profiles data too
-    if (savedKeys.some((key) => key.startsWith("__profile_def__."))) {
-      await mutate("profiles");
-    }
 
     // Clear hasChanges in sidebar for all successfully saved sections
     if (savedKeys.length > 0) {
@@ -995,12 +957,6 @@ export default function Settings() {
     setUnsavedChanges(false);
     setEditingProfile({});
 
-    // Clear new profiles that now exist in top-level config
-    if (config) {
-      const savedNames = new Set<string>(Object.keys(config.profiles ?? {}));
-      setNewProfiles((prev) => prev.filter((p) => !savedNames.has(p)));
-    }
-
     setSectionStatusByKey((prev) => {
       const updated = { ...prev };
       for (const key of pendingKeys) {
@@ -1015,7 +971,7 @@ export default function Settings() {
       }
       return updated;
     });
-  }, [pendingDataBySection, pendingKeyToMenuKey, config]);
+  }, [pendingDataBySection, pendingKeyToMenuKey]);
 
   const handleDialog = useCallback(
     (save: boolean) => {
@@ -1100,43 +1056,6 @@ export default function Settings() {
     [],
   );
 
-  const handleAddProfile = useCallback((id: string, friendlyName: string) => {
-    setNewProfiles((prev) => (prev.includes(id) ? prev : [...prev, id]));
-
-    // Stage the top-level profile definition for saving
-    setPendingDataBySection((prev) => ({
-      ...prev,
-      [`__profile_def__.${id}`]: { friendly_name: friendlyName },
-    }));
-  }, []);
-
-  const handleRemoveNewProfile = useCallback((name: string) => {
-    setNewProfiles((prev) => prev.filter((p) => p !== name));
-    // Clear any editing state for this profile
-    setEditingProfile((prev) => {
-      const updated = { ...prev };
-      for (const key of Object.keys(updated)) {
-        if (updated[key] === name) {
-          delete updated[key];
-        }
-      }
-      return updated;
-    });
-    // Clear any pending data for this profile
-    setPendingDataBySection((prev) => {
-      const profileSegment = `profiles.${name}.`;
-      const updated = { ...prev };
-      let changed = false;
-      for (const key of Object.keys(updated)) {
-        if (key.includes(profileSegment)) {
-          delete updated[key];
-          changed = true;
-        }
-      }
-      return changed ? updated : prev;
-    });
-  }, []);
-
   const handleDeleteProfileSection = useCallback(
     async (camera: string, section: string, profile: string) => {
       try {
@@ -1177,22 +1096,16 @@ export default function Settings() {
   const profileState: ProfileState = useMemo(
     () => ({
       editingProfile,
-      newProfiles,
       allProfileNames,
       profileFriendlyNames,
       onSelectProfile: handleSelectProfile,
-      onAddProfile: handleAddProfile,
-      onRemoveNewProfile: handleRemoveNewProfile,
       onDeleteProfileSection: handleDeleteProfileSection,
     }),
     [
       editingProfile,
-      newProfiles,
       allProfileNames,
       profileFriendlyNames,
       handleSelectProfile,
-      handleAddProfile,
-      handleRemoveNewProfile,
       handleDeleteProfileSection,
     ],
   );

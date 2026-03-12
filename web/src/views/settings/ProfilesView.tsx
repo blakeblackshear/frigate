@@ -165,16 +165,42 @@ export default function ProfilesView({
     return data;
   }, [config, allProfileNames]);
 
+  const [addingProfile, setAddingProfile] = useState(false);
+
   const handleAddSubmit = useCallback(
-    (data: AddProfileForm) => {
+    async (data: AddProfileForm) => {
       const id = data.name.trim();
       const friendlyName = data.friendly_name.trim();
       if (!id || !friendlyName) return;
-      profileState?.onAddProfile(id, friendlyName);
-      setAddDialogOpen(false);
-      addForm.reset();
+
+      setAddingProfile(true);
+      try {
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: {
+            profiles: { [id]: { friendly_name: friendlyName } },
+          },
+        });
+        await updateConfig();
+        await updateProfiles();
+        toast.success(
+          t("profiles.createSuccess", {
+            ns: "views/settings",
+            profile: friendlyName,
+          }),
+          { position: "top-center" },
+        );
+        setAddDialogOpen(false);
+        addForm.reset();
+      } catch {
+        toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+          position: "top-center",
+        });
+      } finally {
+        setAddingProfile(false);
+      }
     },
-    [profileState, addForm],
+    [updateConfig, updateProfiles, addForm, t],
   );
 
   const handleActivateProfile = useCallback(
@@ -213,14 +239,6 @@ export default function ProfilesView({
   const handleDeleteProfile = useCallback(async () => {
     if (!deleteProfile || !config) return;
 
-    // If this is an unsaved (new) profile, just remove it from local state
-    const isNewProfile = profileState?.newProfiles.includes(deleteProfile);
-    if (isNewProfile) {
-      profileState?.onRemoveNewProfile(deleteProfile);
-      setDeleteProfile(null);
-      return;
-    }
-
     setDeleting(true);
 
     try {
@@ -254,9 +272,6 @@ export default function ProfilesView({
       await updateConfig();
       await updateProfiles();
 
-      // Also clean up local newProfiles state if this profile was in it
-      profileState?.onRemoveNewProfile(deleteProfile);
-
       toast.success(
         t("profiles.deleteSuccess", {
           ns: "views/settings",
@@ -281,7 +296,6 @@ export default function ProfilesView({
     deleteProfile,
     activeProfile,
     config,
-    profileState,
     profileFriendlyNames,
     updateConfig,
     updateProfiles,
@@ -609,6 +623,7 @@ export default function ProfilesView({
                   type="button"
                   variant="outline"
                   onClick={() => setAddDialogOpen(false)}
+                  disabled={addingProfile}
                 >
                   {t("button.cancel", { ns: "common" })}
                 </Button>
@@ -616,10 +631,14 @@ export default function ProfilesView({
                   type="submit"
                   variant="select"
                   disabled={
+                    addingProfile ||
                     !addForm.watch("friendly_name").trim() ||
                     !addForm.watch("name").trim()
                   }
                 >
+                  {addingProfile && (
+                    <ActivityIndicator className="mr-2 size-4" />
+                  )}
                   {t("button.add", { ns: "common" })}
                 </Button>
               </DialogFooter>
