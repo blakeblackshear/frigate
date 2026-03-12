@@ -409,7 +409,7 @@ export default function ProfilesView({
                   })}
                 </SelectContent>
               </Select>
-              {activating && <ActivityIndicator className="w-auto" size={18} />}
+              {activating && <ActivityIndicator className="size-4" />}
             </div>
           )}
           <Button

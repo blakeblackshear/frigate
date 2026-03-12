@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Check, ChevronDown } from "lucide-react";
+import { LuLayers } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { getProfileColor } from "@/utils/profileColors";
 import {
@@ -17,6 +18,8 @@ type ProfileSectionDropdownProps = {
   editingProfile: string | null;
   hasProfileData: (profileName: string) => boolean;
   onSelectProfile: (profileName: string | null) => void;
+  /** When true, show only an icon as the trigger (for mobile) */
+  iconOnly?: boolean;
 };
 
 export function ProfileSectionDropdown({
@@ -25,6 +28,7 @@ export function ProfileSectionDropdown({
   editingProfile,
   hasProfileData,
   onSelectProfile,
+  iconOnly = false,
 }: ProfileSectionDropdownProps) {
   const { t } = useTranslation(["views/settings"]);
 
@@ -39,22 +43,28 @@ export function ProfileSectionDropdown({
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-9 gap-2 font-normal">
-          {editingProfile ? (
-            <>
-              <span
-                className={cn(
-                  "h-2 w-2 shrink-0 rounded-full",
-                  activeColor?.dot,
-                )}
-              />
-              {editingFriendlyName}
-            </>
-          ) : (
-            t("profiles.baseConfig", { ns: "views/settings" })
-          )}
-          <ChevronDown className="h-3 w-3 opacity-50" />
-        </Button>
+        {iconOnly ? (
+          <Button variant="outline" size="sm">
+            <LuLayers className="size-4" />
+          </Button>
+        ) : (
+          <Button variant="outline" className="h-9 gap-2 font-normal">
+            {editingProfile ? (
+              <>
+                <span
+                  className={cn(
+                    "h-2 w-2 shrink-0 rounded-full",
+                    activeColor?.dot,
+                  )}
+                />
+                {editingFriendlyName}
+              </>
+            ) : (
+              t("profiles.baseConfig", { ns: "views/settings" })
+            )}
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[180px]">
         <DropdownMenuItem onClick={() => onSelectProfile(null)}>

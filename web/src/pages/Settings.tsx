@@ -1648,6 +1648,7 @@ export default function Settings() {
                               profile,
                             )
                           }
+                          iconOnly
                         />
                       )}
                       <CameraSelectButton

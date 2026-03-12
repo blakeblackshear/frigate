@@ -167,7 +167,7 @@ export function SingleSectionPage({
                     <Badge
                       variant="secondary"
                       className={cn(
-                        "cursor-default border-2 text-xs text-primary-variant",
+                        "cursor-default border-2 text-center text-xs text-primary-variant",
                         sectionStatus.overrideSource === "profile" &&
                           profileColor
                           ? profileColor.border
