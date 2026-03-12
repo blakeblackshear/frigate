@@ -510,12 +510,17 @@ export default function ProfilesView({
                           variant="ghost"
                           size="icon"
                           className="size-7 text-muted-foreground hover:text-destructive"
+                          disabled={deleting && deleteProfile === profile}
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteProfile(profile);
                           }}
                         >
-                          <Trash2 className="size-4" />
+                          {deleting && deleteProfile === profile ? (
+                            <ActivityIndicator className="size-4" />
+                          ) : (
+                            <Trash2 className="size-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -650,7 +655,10 @@ export default function ProfilesView({
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90"
-              onClick={handleDeleteProfile}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteProfile();
+              }}
               disabled={deleting}
             >
               {deleting && <ActivityIndicator className="mr-2 size-4" />}
