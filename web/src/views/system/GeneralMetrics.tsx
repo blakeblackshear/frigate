@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats, GpuInfo } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
@@ -34,6 +35,12 @@ export default function GeneralMetrics({
   // extra info
   const { t } = useTranslation(["views/system"]);
   const [showVainfo, setShowVainfo] = useState(false);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const inferenceThreshold = {
+    warning:
+      config?.ui?.inference_threshold?.warning ?? InferenceThreshold.warning,
+    error: config?.ui?.inference_threshold?.error ?? InferenceThreshold.error,
+  };
 
   // stats
 
@@ -626,7 +633,7 @@ export default function GeneralMetrics({
                   graphId={`${series.name}-inference`}
                   name={series.name}
                   unit="ms"
-                  threshold={InferenceThreshold}
+                  threshold={inferenceThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
                 />

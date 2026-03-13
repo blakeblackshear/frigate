@@ -50,8 +50,14 @@ export default function useStats(stats: FrigateStats | undefined) {
     }
 
     // check detectors for high inference speeds
+    const inferenceThreshold = {
+      warning:
+        config?.ui?.inference_threshold?.warning ?? InferenceThreshold.warning,
+      error:
+        config?.ui?.inference_threshold?.error ?? InferenceThreshold.error,
+    };
     Object.entries(memoizedStats["detectors"]).forEach(([key, det]) => {
-      if (det["inference_speed"] > InferenceThreshold.error) {
+      if (det["inference_speed"] > inferenceThreshold.error) {
         problems.push({
           text: t("stats.detectIsVerySlow", {
             detect: capitalizeFirstLetter(key),
@@ -60,7 +66,7 @@ export default function useStats(stats: FrigateStats | undefined) {
           color: "text-danger",
           relevantLink: "/system#general",
         });
-      } else if (det["inference_speed"] > InferenceThreshold.warning) {
+      } else if (det["inference_speed"] > inferenceThreshold.warning) {
         problems.push({
           text: t("stats.detectIsSlow", {
             detect: capitalizeFirstLetter(key),
