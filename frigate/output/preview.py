@@ -201,6 +201,7 @@ class FFMpegConverter(threading.Thread):
             )
         else:
             logger.error(f"Error saving preview for {self.config.name} :: {p.stderr}")
+            Path(self.path).unlink(missing_ok=True)
 
         # unlink files from cache
         # don't delete last frame as it will be used as first frame in next segment
@@ -345,7 +346,7 @@ class PreviewRecorder:
 
         return False
 
-    def write_frame_to_cache(self, frame_time: float, frame: np.ndarray) -> None:
+    def write_frame_to_cache(self, frame_time: float, frame: np.ndarray) -> bool:
         # resize yuv frame
         small_frame = np.zeros((self.out_height * 3 // 2, self.out_width), np.uint8)
         copy_yuv_to_position(
@@ -360,7 +361,7 @@ class PreviewRecorder:
             small_frame,
             cv2.COLOR_YUV2BGR_I420,
         )
-        cv2.imwrite(
+        result = cv2.imwrite(
             get_cache_image_name(self.config.name, frame_time),
             small_frame,
             [
@@ -368,6 +369,11 @@ class PreviewRecorder:
                 PREVIEW_QUALITY_WEBP[self.config.record.preview.quality],
             ],
         )
+        if not result:
+            logger.warning(
+                f"Failed to write preview frame for {self.config.name} at {frame_time}, likely no space in cache"
+            )
+        return result
 
     def write_data(
         self,
@@ -381,8 +387,8 @@ class PreviewRecorder:
         # always write the first frame
         if self.start_time == 0:
             self.start_time = frame_time
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
+            if self.write_frame_to_cache(frame_time, frame):
+                self.output_frames.append(frame_time)
             return
 
         # check if PREVIEW clip should be generated and cached frames reset
@@ -390,8 +396,8 @@ class PreviewRecorder:
             if len(self.output_frames) > 0:
                 # save last frame to ensure consistent duration
                 if self.config.record:
-                    self.output_frames.append(frame_time)
-                    self.write_frame_to_cache(frame_time, frame)
+                    if self.write_frame_to_cache(frame_time, frame):
+                        self.output_frames.append(frame_time)
 
                 # write the preview if any frames exist for this hour
                 FFMpegConverter(
@@ -409,13 +415,13 @@ class PreviewRecorder:
 
             # include first frame to ensure consistent duration
             if self.config.record.enabled:
-                self.output_frames.append(frame_time)
-                self.write_frame_to_cache(frame_time, frame)
+                if self.write_frame_to_cache(frame_time, frame):
+                    self.output_frames.append(frame_time)
 
             return
         elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
+            if self.write_frame_to_cache(frame_time, frame):
+                self.output_frames.append(frame_time)
             return
 
     def flag_offline(self, frame_time: float) -> None:

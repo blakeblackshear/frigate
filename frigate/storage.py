@@ -10,7 +10,7 @@ from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, REPLAY_CAMERA_PREFIX
-from frigate.models import Event, Recordings
+from frigate.models import Event, Previews, Recordings
 from frigate.util.builtin import clear_and_unlink
 
 logger = logging.getLogger(__name__)
@@ -389,6 +389,32 @@ class StorageMaintainer(threading.Thread):
                 logger.debug(
                     f"Updated has_clip to False for {len(events_to_update)} events"
                 )
+
+        # Also delete preview files that overlap with deleted recordings so they
+        # don't continue to consume space on the same disk after the recordings
+        # are gone (especially important for multi-path setups where preview and
+        # recordings share the same disk).
+        if deleted_recordings:
+            deleted_previews = []
+            for camera, time_range in camera_recordings.items():
+                overlapping_previews = (
+                    Previews.select(Previews.id, Previews.path)
+                    .where(
+                        Previews.camera == camera,
+                        Previews.start_time < time_range["max_end"],
+                        Previews.end_time > time_range["min_start"],
+                    )
+                    .namedtuples()
+                )
+                for preview in overlapping_previews:
+                    clear_and_unlink(Path(preview.path), missing_ok=True)
+                    deleted_previews.append(preview.id)
+
+            logger.debug(f"Expiring {len(deleted_previews)} previews")
+            for i in range(0, len(deleted_previews), max_deletes):
+                Previews.delete().where(
+                    Previews.id << deleted_previews[i : i + max_deletes]
+                ).execute()
 
         deleted_recordings_list = [r.id for r in deleted_recordings]
         for i in range(0, len(deleted_recordings_list), max_deletes):

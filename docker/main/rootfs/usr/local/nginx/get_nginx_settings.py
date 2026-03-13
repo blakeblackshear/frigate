@@ -52,11 +52,22 @@ listen_config["external_port"] = external_port
 
 base_path = os.environ.get("FRIGATE_BASE_PATH", "")
 
+# Collect recording roots that are outside the default /media/frigate tree.
+# Nginx needs an explicit location block for each such root to serve preview files.
+_default_recordings = "/media/frigate"
+_extra_roots: set[str] = set()
+for _cam_cfg in config.get("cameras", {}).values():
+    if isinstance(_cam_cfg, dict):
+        _path = _cam_cfg.get("path", "")
+        if _path and not _path.startswith(_default_recordings):
+            _extra_roots.add(_path.rstrip("/"))
+
 result: dict[str, Any] = {
     "tls": tls_config,
     "ipv6": ipv6_config,
     "listen": listen_config,
     "base_path": base_path,
+    "extra_recording_roots": sorted(_extra_roots),
 }
 
 print(json.dumps(result))
