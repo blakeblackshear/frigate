@@ -598,18 +598,18 @@ function LibrarySelector({
           {Object.values(faces).map((face) => (
             <DropdownMenuItem
               key={face}
-              className="group flex items-center justify-between"
+              className="group flex items-center justify-between p-0"
             >
               <div
                 className="flex-grow cursor-pointer"
                 onClick={() => setPageToggle(face)}
               >
                 {face}
-                <span className="ml-2 text-muted-foreground">
+                <span className="ml-2 px-2 py-1.5 text-muted-foreground">
                   ({faceData?.[face].length})
                 </span>
               </div>
-              <div className="flex gap-0.5">
+              <div className="flex gap-0.5 px-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
