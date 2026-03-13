@@ -67,7 +67,7 @@ future==0.18.*
 importlib-metadata==5.1.*
 importlib-resources==5.1.*
 netaddr==0.8.*
-netifaces==0.10.*
+netifaces==0.11.*
 verboselogs==1.7.*
 virtualenv==20.17.*
 prometheus-client == 0.21.*
