@@ -89,6 +89,14 @@ After closing VS Code, you may still have containers running. To close everythin
 
 ### Testing
 
+#### Unit Tests
+
+GitHub will execute unit tests on new PRs. You must ensure that all tests pass.
+
+```shell
+python3 -u -m unittest
+```
+
 #### FFMPEG Hardware Acceleration
 
 The following commands are used inside the container to ensure hardware acceleration is working properly.
@@ -123,6 +131,28 @@ ffmpeg -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format
 
 ```shell
 ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
+### Submitting a pull request
+
+Code must be formatted, linted and type-tested. GitHub will run these checks on pull requests, so it is advised to run them yourself prior to opening.
+
+**Formatting**
+
+```shell
+ruff format frigate migrations docker *.py
+```
+
+**Linting**
+
+```shell
+ruff check frigate migrations docker *.py
+```
+
+**MyPy Static Typing**
+
+```shell
+python3 -u -m mypy --config-file frigate/mypy.ini frigate
 ```
 
 ## Web Interface
