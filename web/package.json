@@ -120,7 +120,7 @@
     "msw": "^2.3.5",
     "patch-package": "^8.0.1",
     "postcss": "^8.4.47",
-    "prettier": "^3.3.3",
+    "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "tailwindcss": "^3.4.9",
     "typescript": "^5.9.3",
