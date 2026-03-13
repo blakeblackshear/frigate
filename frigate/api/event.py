@@ -11,6 +11,7 @@ from functools import reduce
 from pathlib import Path
 from typing import List
 from urllib.parse import unquote
+import asyncio
 
 import cv2
 import numpy as np
@@ -1124,7 +1125,7 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         )
 
     try:
-        plus_id = request.app.frigate_config.plus_api.upload_image(image, event.camera)
+        plus_id = await asyncio.to_thread(request.app.frigate_config.plus_api.upload_image, image, event.camera)
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse(
@@ -1140,7 +1141,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         box = event.data["box"]
 
         try:
-            request.app.frigate_config.plus_api.add_annotation(
+            await asyncio.to_thread(
+                request.app.frigate_config.plus_api.add_annotation,
                 event.plus_id,
                 box,
                 event.label,
