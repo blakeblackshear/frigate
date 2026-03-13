@@ -231,7 +231,7 @@ export function VideoPreview({
     <div className="relative aspect-video size-full bg-black">
       <video
         ref={playerRef}
-        className="pointer-events-none aspect-video size-full bg-black"
+        className="pointer-events-none aspect-video size-full bg-black object-contain"
         autoPlay
         playsInline
         preload="auto"
