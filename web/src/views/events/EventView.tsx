@@ -849,7 +849,14 @@ function DetectionReview({
                     }
                     className="review-item relative rounded-lg"
                   >
-                    <div className="aspect-video overflow-hidden rounded-lg">
+                    <div
+                      className="overflow-hidden rounded-lg"
+                      style={{
+                        aspectRatio: config?.cameras[value.camera]
+                          ? `${config.cameras[value.camera].detect.width}/${config.cameras[value.camera].detect.height}`
+                          : "16/9",
+                      }}
+                    >
                       <PreviewThumbnailPlayer
                         review={value}
                         allPreviews={relevantPreviews}
