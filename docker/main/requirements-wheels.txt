@@ -19,7 +19,7 @@ tensorflow-cpu == 2.19.* ; platform_machine == 'x86_64'
 mypy == 1.6.1
 onvif-zeep-async == 4.0.*
 paho-mqtt == 2.1.*
-pandas == 2.2.*
+pandas == 2.3.*
 peewee == 3.17.*
 peewee_migrate == 1.14.*
 psutil == 7.1.*
