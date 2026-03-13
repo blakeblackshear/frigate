@@ -709,10 +709,10 @@ function LibrarySelector({
             .map((id) => (
               <DropdownMenuItem
                 key={id}
-                className="group flex items-center justify-between"
+                className="group flex items-center justify-between p-0"
               >
                 <div
-                  className="flex-grow cursor-pointer capitalize"
+                  className="flex-grow cursor-pointer px-2 py-1.5 capitalize"
                   onClick={() => setPageToggle(id)}
                 >
                   {id === "none" ? t("details.none") : id.replaceAll("_", " ")}
@@ -721,7 +721,7 @@ function LibrarySelector({
                   </span>
                 </div>
                 {id != "none" && (
-                  <div className="flex gap-0.5">
+                  <div className="flex gap-0.5 px-2">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
