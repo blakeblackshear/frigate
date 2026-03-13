@@ -620,6 +620,7 @@ class RecordingMaintainer(threading.Thread):
                 if p.returncode != 0:
                     logger.error(f"Unable to convert {cache_path} to {file_path}")
                     logger.error((await p.stderr.read()).decode("ascii"))
+                    Path(file_path).unlink(missing_ok=True)
                     return None
                 else:
                     logger.debug(
