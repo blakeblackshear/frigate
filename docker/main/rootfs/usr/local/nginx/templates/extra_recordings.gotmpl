@@ -1,0 +1,12 @@
+{{ range .extra_recording_roots }}
+location {{ . }}/preview/ {
+    include auth_request.conf;
+    types {
+        video/mp4 mp4;
+    }
+
+    expires 7d;
+    add_header Cache-Control "public";
+    alias {{ . }}/preview/;
+}
+{{ end }}
