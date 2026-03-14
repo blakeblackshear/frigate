@@ -753,15 +753,15 @@ export default function LiveCameraView({
               }}
             >
               <div
-                className={`flex flex-col items-center justify-center ${growClassName}`}
+                className={`relative flex flex-col items-center justify-center ${growClassName}`}
                 ref={clickOverlayRef}
                 style={{
                   aspectRatio: constrainedAspectRatio,
-                  position: "relative",
                 }}
               >
                 {clickOverlay && (
                   <div
+                    className="absolute inset-0 z-40 cursor-crosshair select-none"
                     onMouseDown={handleOverlayMouseDown}
                     onMouseMove={handleOverlayMouseMove}
                     onMouseUp={handleOverlayMouseUp}
@@ -769,30 +769,16 @@ export default function LiveCameraView({
                     onTouchMove={handleOverlayMouseMove}
                     onTouchEnd={handleOverlayMouseUp}
                     onDragStart={(e) => e.preventDefault()}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      zIndex: 40,
-                      cursor: "crosshair",
-                      userSelect: "none",
-                    }}
                   />
                 )}
                 {isDragging && dragRect && clickOverlay && (
                   <div
+                    className="pointer-events-none absolute z-50 border-2 border-blue-500/80 bg-blue-500/15"
                     style={{
-                      position: "absolute",
                       left: dragRect.left,
                       top: dragRect.top,
                       width: dragRect.width,
                       height: dragRect.height,
-                      border: "2px solid rgba(59, 130, 246, 0.8)",
-                      backgroundColor: "rgba(59, 130, 246, 0.15)",
-                      pointerEvents: "none",
-                      zIndex: 50,
                     }}
                   />
                 )}
