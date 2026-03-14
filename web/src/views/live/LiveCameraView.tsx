@@ -213,44 +213,155 @@ export default function LiveCameraView({
     };
   }, [audioTranscriptionState, sendTranscription]);
 
-  // click overlay for ptzs
+  // click/drag overlay for ptzs
 
   const [clickOverlay, setClickOverlay] = useState(false);
   const clickOverlayRef = useRef<HTMLDivElement>(null);
   const { send: sendPtz } = usePtzCommand(camera.name);
 
-  const handleOverlayClick = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
-      if (!clickOverlay) {
+  // Drag-to-zoom state
+  const [dragStart, setDragStart] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [dragCurrent, setDragCurrent] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const isDragging = dragStart !== null && dragCurrent !== null;
+
+  const getClientPos = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+  ): { x: number; y: number } | null => {
+    if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
+      const touch = e.nativeEvent.touches[0] || e.nativeEvent.changedTouches[0];
+      if (touch) return { x: touch.clientX, y: touch.clientY };
+    } else if (e.nativeEvent instanceof MouseEvent) {
+      return { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
+    }
+    return null;
+  };
+
+  const handleOverlayMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+      if (!clickOverlay || !clickOverlayRef.current) return;
+      e.preventDefault();
+      const pos = getClientPos(e);
+      if (pos) {
+        setDragStart(pos);
+        setDragCurrent(pos);
+      }
+    },
+    [clickOverlay],
+  );
+
+  const handleOverlayMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+      if (!dragStart) return;
+      e.preventDefault();
+      const pos = getClientPos(e);
+      if (pos) {
+        setDragCurrent(pos);
+      }
+    },
+    [dragStart],
+  );
+
+  const handleOverlayMouseUp = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+      if (!clickOverlay || !clickOverlayRef.current || !dragStart) {
+        setDragStart(null);
+        setDragCurrent(null);
         return;
       }
 
-      let clientX;
-      let clientY;
-      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
-        clientX = e.nativeEvent.touches[0].clientX;
-        clientY = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        clientX = e.nativeEvent.clientX;
-        clientY = e.nativeEvent.clientY;
+      const pos = getClientPos(e);
+      if (!pos) {
+        setDragStart(null);
+        setDragCurrent(null);
+        return;
       }
 
-      if (clickOverlayRef.current && clientX && clientY) {
-        const rect = clickOverlayRef.current.getBoundingClientRect();
+      const rect = clickOverlayRef.current.getBoundingClientRect();
+      const dx = Math.abs(pos.x - dragStart.x);
+      const dy = Math.abs(pos.y - dragStart.y);
 
-        const normalizedX = (clientX - rect.left) / rect.width;
-        const normalizedY = (clientY - rect.top) / rect.height;
-
+      // Minimum drag distance of 20px to distinguish from click
+      if (dx < 20 && dy < 20) {
+        // Click (not drag) — move to point without zoom
+        const normalizedX = (pos.x - rect.left) / rect.width;
+        const normalizedY = (pos.y - rect.top) / rect.height;
         const pan = (normalizedX - 0.5) * 2;
         const tilt = (0.5 - normalizedY) * 2;
-
         sendPtz(`move_relative_${pan}_${tilt}`);
+      } else {
+        // Drag — zoom to rectangle
+        const x1 = Math.min(dragStart.x, pos.x);
+        const y1 = Math.min(dragStart.y, pos.y);
+        const x2 = Math.max(dragStart.x, pos.x);
+        const y2 = Math.max(dragStart.y, pos.y);
+
+        // Normalize to 0-1 within the overlay
+        const normX1 = (x1 - rect.left) / rect.width;
+        const normY1 = (y1 - rect.top) / rect.height;
+        const normX2 = (x2 - rect.left) / rect.width;
+        const normY2 = (y2 - rect.top) / rect.height;
+
+        let boxW = normX2 - normX1;
+        let boxH = normY2 - normY1;
+
+        // Expand box to match camera aspect ratio
+        const frameAspect = rect.width / rect.height;
+        const boxAspect = boxW / boxH;
+        if (boxAspect > frameAspect) {
+          // Box is wider than frame aspect — expand height
+          boxH = boxW / frameAspect;
+        } else {
+          // Box is taller — expand width
+          boxW = boxH * frameAspect;
+        }
+
+        // Center of the box
+        const centerX = (normX1 + normX2) / 2;
+        const centerY = (normY1 + normY2) / 2;
+        const pan = (centerX - 0.5) * 2;
+        const tilt = (0.5 - centerY) * 2;
+
+        // Zoom: ratio of box to frame (smaller box = more zoom)
+        const zoom = 1 - Math.max(boxW, boxH);
+        const clampedZoom = Math.max(0, Math.min(1, zoom));
+
+        // Send single command with pan, tilt, and zoom.
+        // The proxy translates this to a Set3DPos command for
+        // atomic pan+tilt+zoom in one camera movement.
+        sendPtz(`move_relative_${pan}_${tilt}_${clampedZoom}`);
       }
+
+      setDragStart(null);
+      setDragCurrent(null);
     },
-    [clickOverlayRef, clickOverlay, sendPtz],
+    [clickOverlayRef, clickOverlay, dragStart, sendPtz],
   );
+
+  // Calculate drag rectangle for rendering
+  const dragRect = React.useMemo(() => {
+    if (!isDragging || !clickOverlayRef.current) return null;
+    const dx = Math.abs(dragCurrent.x - dragStart.x);
+    const dy = Math.abs(dragCurrent.y - dragStart.y);
+    if (dx < 20 && dy < 20) return null; // Don't show rectangle for small movements
+
+    const rect = clickOverlayRef.current.getBoundingClientRect();
+    const x1 = Math.min(dragStart.x, dragCurrent.x) - rect.left;
+    const y1 = Math.min(dragStart.y, dragCurrent.y) - rect.top;
+    const x2 = Math.max(dragStart.x, dragCurrent.x) - rect.left;
+    const y2 = Math.max(dragStart.y, dragCurrent.y) - rect.top;
+    return {
+      left: x1,
+      top: y1,
+      width: x2 - x1,
+      height: y2 - y1,
+    };
+  }, [isDragging, dragStart, dragCurrent]);
 
   // pip state
 
@@ -440,7 +551,8 @@ export default function LiveCameraView({
     <TransformWrapper
       minScale={1.0}
       wheel={{ smoothStep: 0.005 }}
-      disabled={debug}
+      disabled={debug || clickOverlay}
+      panning={{ disabled: clickOverlay }}
     >
       <Toaster position="top-center" closeButton={true} />
       <div
@@ -636,11 +748,47 @@ export default function LiveCameraView({
               <div
                 className={`flex flex-col items-center justify-center ${growClassName}`}
                 ref={clickOverlayRef}
-                onClick={handleOverlayClick}
                 style={{
                   aspectRatio: constrainedAspectRatio,
+                  position: "relative",
                 }}
               >
+                {clickOverlay && (
+                  <div
+                    onMouseDown={handleOverlayMouseDown}
+                    onMouseMove={handleOverlayMouseMove}
+                    onMouseUp={handleOverlayMouseUp}
+                    onTouchStart={handleOverlayMouseDown}
+                    onTouchMove={handleOverlayMouseMove}
+                    onTouchEnd={handleOverlayMouseUp}
+                    onDragStart={(e) => e.preventDefault()}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      zIndex: 40,
+                      cursor: "crosshair",
+                      userSelect: "none",
+                    }}
+                  />
+                )}
+                {isDragging && dragRect && clickOverlay && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: dragRect.left,
+                      top: dragRect.top,
+                      width: dragRect.width,
+                      height: dragRect.height,
+                      border: "2px solid rgba(59, 130, 246, 0.8)",
+                      backgroundColor: "rgba(59, 130, 246, 0.15)",
+                      pointerEvents: "none",
+                      zIndex: 50,
+                    }}
+                  />
+                )}
                 <LivePlayer
                   key={camera.name}
                   className={`${fullscreen ? "*:rounded-none" : ""}`}
