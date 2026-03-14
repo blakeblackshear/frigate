@@ -243,7 +243,9 @@ export default function LiveCameraView({
   };
 
   const handleOverlayMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
       if (!clickOverlay || !clickOverlayRef.current) return;
       e.preventDefault();
       const pos = getClientPos(e);
@@ -256,7 +258,9 @@ export default function LiveCameraView({
   );
 
   const handleOverlayMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
       if (!dragStart) return;
       e.preventDefault();
       const pos = getClientPos(e);
@@ -268,7 +272,9 @@ export default function LiveCameraView({
   );
 
   const handleOverlayMouseUp = useCallback(
-    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
       if (!clickOverlay || !clickOverlayRef.current || !dragStart) {
         setDragStart(null);
         setDragCurrent(null);
