@@ -570,6 +570,7 @@ function DetectionReview({
   pullLatestData,
 }: DetectionReviewProps) {
   const { t } = useTranslation(["views/events"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
 
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
