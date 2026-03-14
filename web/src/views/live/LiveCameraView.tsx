@@ -130,6 +130,19 @@ type LiveCameraViewProps = {
   fullscreen: boolean;
   toggleFullscreen: () => void;
 };
+
+function getClientPos(
+  e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+): { x: number; y: number } | null {
+  if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
+    const touch = e.nativeEvent.touches[0] || e.nativeEvent.changedTouches[0];
+    if (touch) return { x: touch.clientX, y: touch.clientY };
+  } else if (e.nativeEvent instanceof MouseEvent) {
+    return { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
+  }
+  return null;
+}
+
 export default function LiveCameraView({
   config,
   camera,
@@ -229,18 +242,6 @@ export default function LiveCameraView({
     y: number;
   } | null>(null);
   const isDragging = dragStart !== null && dragCurrent !== null;
-
-  const getClientPos = (
-    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-  ): { x: number; y: number } | null => {
-    if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
-      const touch = e.nativeEvent.touches[0] || e.nativeEvent.changedTouches[0];
-      if (touch) return { x: touch.clientX, y: touch.clientY };
-    } else if (e.nativeEvent instanceof MouseEvent) {
-      return { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY };
-    }
-    return null;
-  };
 
   const handleOverlayMouseDown = useCallback(
     (
