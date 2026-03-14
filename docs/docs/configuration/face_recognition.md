@@ -5,6 +5,18 @@ title: Face Recognition
 
 Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
+## Alerts and Notifications
+
+Face recognition does not affect whether an alert is created — alerts are based on tracked objects like `person` in your `review.alerts.labels` and your [zone requirements](./review). The `face` label is an [attribute label](/plus/#available-label-types), not a tracked object, so it cannot trigger alerts on its own.
+
+When a face is recognized, the person's name is added as a `sub_label` on the tracked object. This name appears in the Frigate UI, in [built-in notifications](/configuration/notifications), and is published via [MQTT](/integrations/mqtt).
+
+:::note
+
+There is no built-in way to only create alerts for specific recognized faces. Neither `face`, `person-verified`, nor specific person names can be used in `review.alerts.labels`. To trigger automations based on face recognition results, use the [official Frigate integration's sensors](/integrations/home-assistant) and/or the [MQTT data](/integrations/mqtt) Frigate publishes.
+
+:::
+
 ## Model Requirements
 
 ### Face Detection
@@ -69,9 +81,9 @@ Fine-tune face recognition with these optional parameters at the global level of
   - Default: `0.9`.
 - `min_faces`: Min face recognitions for the sub label to be applied to the person object.
   - Default: `1`
-- `save_attempts`: Number of images of recognized faces to save for training.
+- `save_attempts`: Maximum number of face attempt images to keep in the training folder. Frigate saves a face image after each recognition attempt; when the limit is reached, the oldest image is deleted. These images are displayed in the Face Library's Recent Recognitions tab.
   - Default: `200`.
-- `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
+- `blur_confidence_filter`: Enables a filter that measures face image blurriness (using Laplacian variance) and reduces the recognition confidence score accordingly. Blurrier images receive a larger penalty (up to -0.06 for very blurry, down to 0 for clear images), making it harder for blurry faces to meet the `recognition_threshold`.
   - Default: `True`.
 - `device`: Target a specific device to run the face recognition model on (multi-GPU installation).
   - Default: `None`.
@@ -118,9 +130,19 @@ When choosing images to include in the face training set it is recommended to al
 
 The Recent Recognitions tab in the face library displays recent face recognition attempts. Detected face images are grouped according to the person they were identified as potentially matching.
 
-Each face image is labeled with a name (or `Unknown`) along with the confidence score of the recognition attempt. While each image can be used to train the system for a specific person, not all images are suitable for training.
+Each face image is labeled with a name (or `Unknown`) along with the confidence score of the recognition attempt. The score is color-coded based on your configured thresholds:
 
-Refer to the guidelines below for best practices on selecting images for training.
+- **Green**: score >= `recognition_threshold` (default `0.9`) — a confident match
+- **Orange**: score >= `unknown_score` (default `0.8`) — a potential match
+- **Red**: score < `unknown_score` — unknown or no match
+
+When an event has multiple recognition attempts, the face cards are displayed within a group. The group shows the recognized person's name if one was identified, or "Unknown" if not. Within the group, each individual face card shows its own recognition score. Frigate uses a weighted average across all attempts for a person object to determine whether to assign a name (`sub_label`) — so a single high-scoring card does not guarantee the person will be identified (see the [FAQ](#i-see-scores-above-the-threshold-in-the-recent-recognitions-tab-but-a-sub-label-wasnt-assigned) for more details).
+
+If the weighted average did not meet the `recognition_threshold`, there is no place in the UI to see it. The weighted average is published in the `score` field of the [`frigate/tracked_object_update`](/integrations/mqtt.md#face-recognition-update) MQTT topic after each recognition attempt, regardless of whether it meets the threshold. This is the most useful tool for debugging why a sub label was or wasn't assigned.
+
+Clicking a face card navigates to the Tracked Object Details for the associated event. To select face cards for deletion, right-click (or Ctrl/Cmd+click) individual cards, or use Ctrl+A to select all. A delete button will appear in the toolbar once cards are selected. Removing cards from the Recent Recognitions tab only removes the saved attempt images — it does not affect recognition accuracy or training data.
+
+While each image can be used to train the system for a specific person, not all images are suitable for training. Refer to the guidelines below for best practices on selecting images for training.
 
 ### Step 1 - Building a Strong Foundation
 
@@ -157,6 +179,8 @@ Start with the [Usage](#usage) section and re-read the [Model Requirements](#mod
    - Make sure you have trained at least one face per the recommendations above.
    - Adjust `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
 
+3. To see recognition scores for an event, check the **Face Library** > **Recent Recognitions** tab. Face cards from the same event are grouped together, with the group header showing the combined result. Each card within the group shows its individual recognition score with [color coding](#understanding-the-recent-recognitions-tab). The **Tracked Object Details** view only shows the final weighted average score (in parentheses next to the top score) if a `sub_label` was assigned.
+
 ### Detection does not work well with blurry images?
 
 Accuracy is definitely a going to be improved with higher quality cameras / streams. It is important to look at the DORI (Detection Observation Recognition Identification) range of your camera, if that specification is posted. This specification explains the distance from the camera that a person can be detected, observed, recognized, and identified. The identification range is the most relevant here, and the distance listed by the camera is the furthest that face recognition will realistically work.
@@ -190,7 +214,15 @@ For more guidance, refer to the section above on improving recognition accuracy.
 
 ### I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?
 
-The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
+Frigate considers recognition scores across all attempts for each person object. The score shown in the UI is the final weighted average across all attempts, while MQTT publishes a running weighted average that updates after each attempt. The weighting favors larger faces (by pixel area, capped at 4000px) and higher-confidence detections. Attempts scored at or below `unknown_score` are excluded from the average.
+
+A sub label will only be assigned if:
+
+- At least `min_faces` recognition attempts have been recorded.
+- A single person name has the most detections (no ties).
+- The weighted average score meets the `recognition_threshold`.
+
+This avoids cases where a single high-confidence recognition would throw off the results.
 
 ### Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?
 

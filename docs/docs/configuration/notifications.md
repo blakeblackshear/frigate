@@ -49,7 +49,7 @@ Once notifications are enabled, press the `Register for Notifications` button on
 
 ## Supported Notifications
 
-Currently notifications are only supported for review alerts. More notifications will be supported in the future.
+Currently notifications are only supported for review alerts. More notifications will be supported in the future. If [face recognition](/configuration/face_recognition) identifies a person during the alert, their name will be included in the notification. However, built-in notifications cannot be configured to only fire for specific recognized faces.
 
 :::note
 
