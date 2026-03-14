@@ -338,9 +338,6 @@ export default function LiveCameraView({
         const zoom = 1 - Math.max(boxW, boxH);
         const clampedZoom = Math.max(0, Math.min(1, zoom));
 
-        // Send single command with pan, tilt, and zoom.
-        // The proxy translates this to a Set3DPos command for
-        // atomic pan+tilt+zoom in one camera movement.
         sendPtz(`move_relative_${pan}_${tilt}_${clampedZoom}`);
       }
 
