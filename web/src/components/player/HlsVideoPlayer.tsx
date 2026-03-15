@@ -352,7 +352,7 @@ export default function HlsVideoPlayer({
       >
         {isDetailMode &&
           camera &&
-          currentTime &&
+          currentTime != null &&
           loadedMetadata &&
           videoDimensions.width > 0 &&
           videoDimensions.height > 0 && (
