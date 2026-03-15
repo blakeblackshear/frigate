@@ -1,1 +1,6 @@
-{}
+{
+    "minimum": "Phải có giá trị tối thiểu là {{limit}}",
+    "maximum": "Tối đa phải là {{limit}}",
+    "exclusiveMinimum": "Phải lớn hơn {{limit}}",
+    "exclusiveMaximum": "Phải nhỏ hơn {{limit}}"
+}
