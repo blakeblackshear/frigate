@@ -5,8 +5,8 @@
   "filters": "Filtri",
   "toast": {
     "error": {
-      "noValidTimeSelected": "Izbrano časovno obdobje ni veljavno",
-      "endTimeMustAfterStartTime": "Končen čas mora biti po začetnem času"
+      "noValidTimeSelected": "Izbrano ni nobeno veljavno časovno obdobje",
+      "endTimeMustAfterStartTime": "Čas konca mora biti po času začetka"
     }
   }
 }

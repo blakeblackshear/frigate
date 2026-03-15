@@ -1,1 +1,32 @@
-{}
+{
+    "minimum": "Vrednost mora biti vsaj {{limit}}",
+    "maximum": "Vrednost je lahko največ {{limit}}",
+    "exclusiveMinimum": "Vrednost mora biti večja od {{limit}}",
+    "exclusiveMaximum": "Vrednost mora biti manjša od {{limit}}",
+    "minLength": "Vsebovati mora vsaj {{limit}} znakov",
+    "maxLength": "Vsebovati mora največ {{limit}} znakov",
+    "minItems": "Vsebovati mora vsaj {{limit}} elementov",
+    "maxItems": "Vsebovati mora največ {{limit}} elementov",
+    "pattern": "Neveljaven format",
+    "required": "To polje je obvezno",
+    "type": "Neveljavna vrsta vrednosti",
+    "enum": "Izbrati moraš eno izmed dovoljenih vrednosti",
+    "const": "Vrednost se ne ujema s pričakovano konstanto",
+    "uniqueItems": "Vsi elementi morajo biti edinstveni",
+    "format": "Neveljaven format",
+    "additionalProperties": "Neznana lastnost ni dovoljena",
+    "oneOf": "Ujemati se mora z natanko eno od dovoljenih shem",
+    "anyOf": "Ujemati se mora z vsaj eno od dovoljenih shem",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Glava vloge (role header) je obvezna, ko so nastavljene preslikave vlog."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Vsaka vloga je lahko dodeljena le enemu vhodnemu toku.",
+            "detectRequired": "Vsaj enemu vhodnemu toku mora biti dodeljena vloga 'detect' (zaznavanje).",
+            "hwaccelDetectOnly": "Argumente za strojno pospeševanje lahko določiš samo za vhodni tok z vlogo 'detect'."
+        }
+    }
+}
