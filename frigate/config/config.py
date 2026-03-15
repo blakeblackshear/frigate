@@ -520,7 +520,7 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig,
         title="Snapshots",
-        description="Settings for saved JPEG snapshots of tracked objects for all cameras; can be overridden per-camera.",
+        description="Settings for API-generated snapshots of tracked objects for all cameras; can be overridden per-camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
@@ -932,11 +932,6 @@ class FrigateConfig(FrigateBaseModel):
                     raise ValueError(
                         f"Camera {camera.name} has audio transcription enabled, but audio detection is not enabled for this camera. Audio detection must be enabled for cameras with audio transcription when it is disabled globally."
                     )
-
-        if self.plus_api and not self.snapshots.clean_copy:
-            logger.warning(
-                "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
-            )
 
         # Validate auth roles against cameras
         camera_names = set(self.cameras.keys())

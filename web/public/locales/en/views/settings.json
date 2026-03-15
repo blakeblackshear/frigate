@@ -1037,12 +1037,11 @@
     },
     "snapshotConfig": {
       "title": "Snapshot Configuration",
-      "desc": "Submitting to Frigate+ requires both snapshots and <code>clean_copy</code> snapshots to be enabled in your config.",
-      "cleanCopyWarning": "Some cameras have snapshots enabled but have the clean copy disabled. You need to enable <code>clean_copy</code> in your snapshot config to be able to submit images from these cameras to Frigate+.",
+      "desc": "Submitting to Frigate+ requires snapshots  to be enabled in your config.",
+      "cleanCopyWarning": "Some cameras have snapshots disabled",
       "table": {
         "camera": "Camera",
-        "snapshots": "Snapshots",
-        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+        "snapshots": "Snapshots"
       }
     },
     "modelInfo": {

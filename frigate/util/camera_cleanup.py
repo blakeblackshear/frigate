@@ -133,6 +133,18 @@ def cleanup_camera_files(
         except Exception as e:
             logger.error("Failed to remove snapshot %s: %s", snapshot, e)
 
+    for snapshot in glob.glob(os.path.join(CLIPS_DIR, f"{camera_name}-*-clean.webp")):
+        try:
+            os.remove(snapshot)
+        except Exception as e:
+            logger.error("Failed to remove snapshot %s: %s", snapshot, e)
+
+    for snapshot in glob.glob(os.path.join(CLIPS_DIR, f"{camera_name}-*-clean.png")):
+        try:
+            os.remove(snapshot)
+        except Exception as e:
+            logger.error("Failed to remove snapshot %s: %s", snapshot, e)
+
     # Remove review thumbnail files
     for thumb in glob.glob(
         os.path.join(CLIPS_DIR, "review", f"thumb-{camera_name}-*.webp")

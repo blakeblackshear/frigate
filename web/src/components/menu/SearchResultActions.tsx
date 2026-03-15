@@ -166,8 +166,7 @@ export default function SearchResultActions({
           </a>
         </MenuItem>
       )}
-      {searchResult.has_snapshot &&
-        config?.cameras[searchResult.camera].snapshots.clean_copy && (
+      {searchResult.has_snapshot && (
           <MenuItem aria-label={t("itemMenu.downloadCleanSnapshot.aria")}>
             <a
               className="flex items-center"

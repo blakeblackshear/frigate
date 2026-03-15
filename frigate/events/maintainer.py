@@ -158,36 +158,33 @@ class EventProcessor(threading.Thread):
             end_time = (
                 None if event_data["end_time"] is None else event_data["end_time"]
             )
+            snapshot = event_data["snapshot"]
             # score of the snapshot
-            score = (
-                None
-                if event_data["snapshot"] is None
-                else event_data["snapshot"]["score"]
-            )
+            score = None if snapshot is None else snapshot["score"]
             # detection region in the snapshot
             region = (
                 None
-                if event_data["snapshot"] is None
+                if snapshot is None
                 else to_relative_box(
                     width,
                     height,
-                    event_data["snapshot"]["region"],
+                    snapshot["region"],
                 )
             )
             # bounding box for the snapshot
             box = (
                 None
-                if event_data["snapshot"] is None
+                if snapshot is None
                 else to_relative_box(
                     width,
                     height,
-                    event_data["snapshot"]["box"],
+                    snapshot["box"],
                 )
             )
 
             attributes = (
                 None
-                if event_data["snapshot"] is None
+                if snapshot is None
                 else [
                     {
                         "box": to_relative_box(
@@ -198,8 +195,13 @@ class EventProcessor(threading.Thread):
                         "label": a["label"],
                         "score": a["score"],
                     }
-                    for a in event_data["snapshot"]["attributes"]
+                    for a in snapshot["attributes"]
                 ]
+            )
+            snapshot_frame_time = None if snapshot is None else snapshot["frame_time"]
+            snapshot_area = None if snapshot is None else snapshot["area"]
+            snapshot_estimated_speed = (
+                None if snapshot is None else snapshot["current_estimated_speed"]
             )
 
             # keep these from being set back to false because the event
@@ -229,6 +231,10 @@ class EventProcessor(threading.Thread):
                     "score": score,
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
+                    "snapshot_clean": event_data.get("snapshot_clean", False),
+                    "snapshot_frame_time": snapshot_frame_time,
+                    "snapshot_area": snapshot_area,
+                    "snapshot_estimated_speed": snapshot_estimated_speed,
                     "average_estimated_speed": event_data["average_estimated_speed"],
                     "velocity_angle": event_data["velocity_angle"],
                     "type": "object",
@@ -306,8 +312,11 @@ class EventProcessor(threading.Thread):
                     "type": event_data["type"],
                     "score": event_data["score"],
                     "top_score": event_data["score"],
+                    "snapshot_clean": event_data.get("snapshot_clean", False),
                 },
             }
+            if event_data.get("draw") is not None:
+                event[Event.data]["draw"] = event_data["draw"]
             if event_data.get("recognized_license_plate") is not None:
                 event[Event.data]["recognized_license_plate"] = event_data[
                     "recognized_license_plate"

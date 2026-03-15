@@ -532,21 +532,19 @@ class CameraState:
     ) -> None:
         img_frame = frame if frame is not None else self.get_current_frame()
 
-        # write clean snapshot if enabled
-        if self.camera_config.snapshots.clean_copy:
-            ret, webp = cv2.imencode(
-                ".webp", img_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 80]
-            )
+        ret, webp = cv2.imencode(
+            ".webp", img_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 80]
+        )
 
-            if ret:
-                with open(
-                    os.path.join(
-                        CLIPS_DIR,
-                        f"{self.camera_config.name}-{event_id}-clean.webp",
-                    ),
-                    "wb",
-                ) as p:
-                    p.write(webp.tobytes())
+        if ret:
+            with open(
+                os.path.join(
+                    CLIPS_DIR,
+                    f"{self.camera_config.name}-{event_id}-clean.webp",
+                ),
+                "wb",
+            ) as p:
+                p.write(webp.tobytes())
 
         # write jpg snapshot with optional annotations
         if draw.get("boxes") and isinstance(draw.get("boxes"), list):

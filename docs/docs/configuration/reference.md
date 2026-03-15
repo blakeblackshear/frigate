@@ -616,13 +616,12 @@ record:
       #       never stored, so setting the mode to "all" here won't bring them back.
       mode: motion
 
-# Optional: Configuration for the jpg snapshots written to the clips directory for each tracked object
+# Optional: Configuration for the snapshots written to the clips directory for each tracked object
+# Timestamp, bounding_box, crop and height settings are applied by default to API requests for snapshots.
 # NOTE: Can be overridden at the camera level
 snapshots:
-  # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
+  # Optional: Enable writing snapshot images to /media/frigate/clips (default: shown below)
   enabled: False
-  # Optional: save a clean copy of the snapshot image (default: shown below)
-  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
@@ -640,8 +639,8 @@ snapshots:
     # Optional: Per object retention days
     objects:
       person: 15
-  # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
-  quality: 70
+  # Optional: quality of the encoded snapshot image, 0-100 (default: shown below)
+  quality: 60
 
 # Optional: Configuration for semantic search capability
 semantic_search:

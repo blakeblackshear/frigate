@@ -35,7 +35,7 @@ class MediaEventsSnapshotQueryParams(BaseModel):
     bbox: Optional[int] = None
     crop: Optional[int] = None
     height: Optional[int] = None
-    quality: Optional[int] = 70
+    quality: Optional[int] = None
 
 
 class MediaMjpegFeedQueryParams(BaseModel):

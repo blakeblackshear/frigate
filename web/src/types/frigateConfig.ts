@@ -263,7 +263,6 @@ export interface CameraConfig {
   };
   snapshots: {
     bounding_box: boolean;
-    clean_copy: boolean;
     crop: boolean;
     enabled: boolean;
     height: number | null;
@@ -580,7 +579,6 @@ export interface FrigateConfig {
 
   snapshots: {
     bounding_box: boolean;
-    clean_copy: boolean;
     crop: boolean;
     enabled: boolean;
     height: number | null;
