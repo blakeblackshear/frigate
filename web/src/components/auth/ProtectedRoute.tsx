@@ -10,7 +10,7 @@ import {
 export default function ProtectedRoute({
   requiredRoles,
 }: {
-  requiredRoles: string[];
+  requiredRoles?: string[];
 }) {
   const { auth } = useContext(AuthContext);
 
@@ -31,6 +31,13 @@ export default function ProtectedRoute({
   // Show loading indicator during redirect to prevent React from attempting to render
   // lazy components, which would cause error #426 (suspension during synchronous navigation)
   if (isRedirectingToLogin()) {
+    return (
+      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
+  // Wait for config to provide required roles
+  if (!requiredRoles) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
     );

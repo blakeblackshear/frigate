@@ -214,7 +214,11 @@ class CameraWatchdog(threading.Thread):
         self.config_subscriber = CameraConfigUpdateSubscriber(
             None,
             {config.name: config},
-            [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.record],
+            [
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.ffmpeg,
+                CameraConfigUpdateEnum.record,
+            ],
         )
         self.requestor = InterProcessRequestor()
         self.was_enabled = self.config.enabled
@@ -254,9 +258,13 @@ class CameraWatchdog(threading.Thread):
             self._last_record_status = status
             self._last_status_update_time = now
 
+    def _check_config_updates(self) -> dict[str, list[str]]:
+        """Check for config updates and return the update dict."""
+        return self.config_subscriber.check_for_updates()
+
     def _update_enabled_state(self) -> bool:
         """Fetch the latest config and update enabled state."""
-        self.config_subscriber.check_for_updates()
+        self._check_config_updates()
         return self.config.enabled
 
     def reset_capture_thread(
@@ -317,7 +325,24 @@ class CameraWatchdog(threading.Thread):
 
         # 1 second watchdog loop
         while not self.stop_event.wait(1):
-            enabled = self._update_enabled_state()
+            updates = self._check_config_updates()
+
+            # Handle ffmpeg config changes by restarting all ffmpeg processes
+            if "ffmpeg" in updates and self.config.enabled:
+                self.logger.debug(
+                    "FFmpeg config updated for %s, restarting ffmpeg processes",
+                    self.config.name,
+                )
+                self.stop_all_ffmpeg()
+                self.start_all_ffmpeg()
+                self.latest_valid_segment_time = 0
+                self.latest_invalid_segment_time = 0
+                self.latest_cache_segment_time = 0
+                self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                last_restart_time = datetime.now().timestamp()
+                continue
+
+            enabled = self.config.enabled
             if enabled != self.was_enabled:
                 if enabled:
                     self.logger.debug(f"Enabling camera {self.config.name}")

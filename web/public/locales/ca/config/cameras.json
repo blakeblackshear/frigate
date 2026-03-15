@@ -1,0 +1,941 @@
+{
+    "label": "ConfiguracióDeLaCcàmera",
+    "name": {
+        "label": "Nom de la càmera",
+        "description": "Es requereix el nom de la càmera"
+    },
+    "friendly_name": {
+        "label": "Nom amistós",
+        "description": "Nom amigable de la càmera utilitzat a la interfície d'usuari de la Frigate"
+    },
+    "enabled": {
+        "label": "Habilitat",
+        "description": "Habilitat"
+    },
+    "audio": {
+        "label": "Esdeveniments d'àudio",
+        "description": "Configuració per a la detecció d'esdeveniments basats en àudio per a aquesta càmera.",
+        "enabled": {
+            "label": "Habilita la detecció d'àudio",
+            "description": "Activa o desactiva la detecció d'esdeveniments d'àudio per a aquesta càmera."
+        },
+        "max_not_heard": {
+            "label": "Temps d'espera final",
+            "description": "Quantitat de segons sense el tipus d'àudio configurat abans que acabi l'esdeveniment d'àudio."
+        },
+        "min_volume": {
+            "label": "Volum mínim",
+            "description": "Llindar mínim de volum RMS necessari per executar la detecció d'àudio; els valors més baixos augmenten la sensibilitat (p. ex., 200 alta, 500 mitjana, 1000 baixa)."
+        },
+        "listen": {
+            "label": "Tipus d'escoltes",
+            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, crit, parla, crida)."
+        },
+        "filters": {
+            "label": "Filtres d'àudio",
+            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius."
+        },
+        "enabled_in_config": {
+            "label": "Estat d'àudio original",
+            "description": "Indica si la detecció d'àudio s'ha activat originalment al fitxer de configuració estàtic."
+        },
+        "num_threads": {
+            "label": "Fils de detecció",
+            "description": "Nombre de fils a utilitzar per al processament de detecció d'àudio."
+        }
+    },
+    "audio_transcription": {
+        "label": "Transcripció d'àudio",
+        "description": "Configuració per a la transcripció d'àudio en viu i de veu utilitzada per a esdeveniments i llegendes en directe.",
+        "enabled": {
+            "label": "Habilita la transcripció",
+            "description": "Activa o desactiva la transcripció d'esdeveniments d'àudio activada manualment."
+        },
+        "enabled_in_config": {
+            "label": "Estat de transcripció original"
+        },
+        "live_enabled": {
+            "label": "Transcripció en viu",
+            "description": "Habilita la transcripció en directe per a l'àudio a mesura que es rep."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Arranjament per a la vista composta Birdseye que compon múltiples canals de càmera en una única disposició.",
+        "enabled": {
+            "label": "Habilita Birdseye",
+            "description": "Activa o desactiva la funció de vista Birdseye."
+        },
+        "mode": {
+            "label": "Mode de seguiment",
+            "description": "Mode per a incloure càmeres en Birdseye: 'objectes', 'motion' o 'continuous'."
+        },
+        "order": {
+            "label": "Posició",
+            "description": "Posició numèrica que controla l'ordenació de la càmera en la disposició Birdseye."
+        }
+    },
+    "detect": {
+        "label": "Detecció d'objectes",
+        "description": "Configuració del rol de detecció utilitzat per executar la detecció d'objectes i inicialitzar els rastrejadors.",
+        "enabled": {
+            "label": "Detecció activada",
+            "description": "Activa o desactiva la detecció d'objectes per a aquesta càmera. La detecció s'ha d'activar perquè s'executi el seguiment d'objectes."
+        },
+        "height": {
+            "label": "Detecta l'alçada",
+            "description": "Alçada (píxels) dels fotogrames utilitzats per al flux de detecció; deixeu-ho buit per a utilitzar la resolució nativa del flux."
+        },
+        "width": {
+            "label": "Detecta l'amplada",
+            "description": "Amplada (píxels) dels fotogrames utilitzats per al flux de detecció; deixeu-ho buit per a utilitzar la resolució nativa del flux."
+        },
+        "fps": {
+            "label": "Detecta FPS",
+            "description": "Fotogrames desitjats per segon per executar la detecció; els valors més baixos redueixen l'ús de la CPU (el valor recomanat és 5, només estableix més alt - com a màxim 10 - si el seguiment d'objectes en moviment extremadament ràpid)."
+        },
+        "min_initialized": {
+            "label": "Fotogrames d'inicialització mínims",
+            "description": "Nombre d'incidències de detecció consecutives necessàries abans de crear un objecte rastrejat. Incrementa per a reduir les falses inicialitzacions. El valor per defecte és fps dividit per 2."
+        },
+        "max_disappeared": {
+            "label": "Màxim de fotogrames desapareguts",
+            "description": "Nombre de fotogrames sense detecció abans que es consideri que un objecte rastrejat ha desaparegut."
+        },
+        "stationary": {
+            "label": "Configuració d'objectes estacionaris",
+            "description": "Configuració per detectar i gestionar objectes que romanen estacionaris durant un període de temps.",
+            "interval": {
+                "label": "Interval estacionari",
+                "description": "Amb quina freqüència (en fotogrames) s'executa una comprovació de detecció per confirmar un objecte estacionari."
+            },
+            "threshold": {
+                "label": "Llindar estacionari",
+                "description": "Nombre de fotogrames sense cap canvi de posició necessari per a marcar un objecte com a estacionari."
+            },
+            "max_frames": {
+                "label": "Fotogrames màxims",
+                "description": "Limita quant de temps es segueixen els objectes estacionaris abans de descartar-los.",
+                "default": {
+                    "label": "Fotogrames màxims predeterminats",
+                    "description": "Fotogrames màxims predeterminats per a fer el seguiment d'un objecte estacionari abans d'aturar-se."
+                },
+                "objects": {
+                    "label": "Fotogrames màxims de l'objecte",
+                    "description": "Sobreescriu l'objecte per als fotogrames màxims per fer un seguiment dels objectes estacionaris."
+                }
+            },
+            "classifier": {
+                "label": "Habilita el classificador visual",
+                "description": "Utilitzeu un classificador visual per detectar objectes realment estacionaris, fins i tot quan les caixes contenidores tremolen."
+            }
+        },
+        "annotation_offset": {
+            "label": "Desplaçament de l'anotació",
+            "description": "Mil·lisegons per a desplaçar detecta anotacions per a alinear millor els límits de la línia de temps amb els enregistraments; pot ser positiu o negatiu."
+        }
+    },
+    "face_recognition": {
+        "label": "Reconeixement de cares",
+        "description": "Configuració per a la detecció de la cara i el reconeixement d'aquesta càmera.",
+        "enabled": {
+            "label": "Habilita el reconeixement facial",
+            "description": "Activa o desactiva el reconeixement facial."
+        },
+        "min_area": {
+            "label": "Àrea mínima de la cara",
+            "description": "Àrea mínima (píxels) d'un quadre facial detectat requerit per intentar el reconeixement."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "Paràmetres del FFmpeg que inclouen camins binaris, args, opcions de hwaccel i args de sortida per rol.",
+        "path": {
+            "label": "Ruta FFmpeg",
+            "description": "Ruta al binari FFmpeg a usar o un àlies de versió («5.0» o «7.0»)."
+        },
+        "global_args": {
+            "label": "Arguments globals del FFmpeg",
+            "description": "Arguments globals passats als processos FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Arguments d'acceleració del maquinari",
+            "description": "Arguments d'acceleració de maquinari per a FFmpeg. Es recomanen predefinits específics del proveïdor."
+        },
+        "input_args": {
+            "label": "Arguments d'entrada",
+            "description": "Arguments d'entrada aplicats als fluxos d'entrada del FFmpeg."
+        },
+        "output_args": {
+            "label": "Arguments de sortida",
+            "description": "Arguments de sortida predeterminats utilitzats per a diferents rols FFmpeg com detecta i registra.",
+            "detect": {
+                "label": "Detecta els arguments de sortida",
+                "description": "Arguments de sortida predeterminats per a detectar fluxos de rol."
+            },
+            "record": {
+                "label": "Registra els arguments de sortida",
+                "description": "Arguments de sortida predeterminats per a enregistrar fluxos de rols."
+            }
+        },
+        "retry_interval": {
+            "label": "Temps de reintent del FFmpeg",
+            "description": "Segons a esperar abans d'intentar tornar a connectar un flux de càmera després d'un error. Per defecte és 10."
+        },
+        "apple_compatibility": {
+            "label": "Compatibilitat d'Apple",
+            "description": "Activa l'etiquetatge HEVC per a una millor compatibilitat amb el reproductor d'Apple en gravar H.265."
+        },
+        "gpu": {
+            "label": "Índex de GPU",
+            "description": "Índex de GPU predeterminat utilitzat per a l'acceleració de maquinari si està disponible."
+        },
+        "inputs": {
+            "label": "Entrada de la càmera",
+            "description": "Llista de definicions de flux d'entrada (camins i rols) per a aquesta càmera.",
+            "path": {
+                "label": "Ruta d'entrada",
+                "description": "URL o camí del flux d'entrada de la càmera."
+            },
+            "roles": {
+                "label": "Rols d'entrada",
+                "description": "Rols per a aquest flux d'entrada."
+            },
+            "global_args": {
+                "label": "Arguments globals del FFmpeg",
+                "description": "Arguments globals del FFmpeg per a aquest flux d'entrada."
+            },
+            "hwaccel_args": {
+                "label": "Arguments d'acceleració del maquinari",
+                "description": "Arguments d'acceleració del maquinari per a aquest flux d'entrada."
+            },
+            "input_args": {
+                "label": "Arguments d'entrada",
+                "description": "Arguments d'entrada específics d'aquest flux."
+            }
+        }
+    },
+    "live": {
+        "label": "Reproducció en directe",
+        "description": "Configuració utilitzada per la interfície d'usuari web per controlar la selecció, resolució i qualitat del flux en viu.",
+        "streams": {
+            "label": "Noms de flux en viu",
+            "description": "Assignació de noms de flux configurats per a restream/go2rtc noms utilitzats per a la reproducció en viu."
+        },
+        "height": {
+            "label": "Alçada del directe",
+            "description": "Alçada (píxels) per a renderitzar el flux en viu jsmpeg a la interfície d'usuari web; ha de ser . detecta l'alçada del flux."
+        },
+        "quality": {
+            "label": "Qualitat del directe",
+            "description": "Qualitat de codificació per al flux jsmpeg (1 més alt, 31 més baix)."
+        }
+    },
+    "lpr": {
+        "label": "Reconeixement de la placa de llicència",
+        "description": "Paràmetres de reconeixement de la matrícula de la llicència, inclosos els llindars de detecció, el format i les plaques conegudes.",
+        "enabled": {
+            "label": "Habilita el LPR",
+            "description": "Activa o desactiva LPR en aquesta càmera."
+        },
+        "expire_time": {
+            "label": "Caduca els segons",
+            "description": "Temps en segons després del qual una placa no vista expira del rastrejador (només per a càmeres LPR dedicades)."
+        },
+        "min_area": {
+            "label": "Àrea mínima de la placa",
+            "description": "Àrea mínima de placa (píxels) necessària per intentar el reconeixement."
+        },
+        "enhancement": {
+            "label": "Nivell de millora",
+            "description": "Nivell de millora (0-10) per aplicar als cultius de plaques abans de l'OCR; els valors més alts no sempre poden millorar els resultats, els nivells superiors a 5 només poden funcionar amb plaques nocturnes i s'han d'utilitzar amb precaució."
+        }
+    },
+    "motion": {
+        "label": "Detecció de moviment",
+        "enabled": {
+            "label": "Habilita la detecció de moviment",
+            "description": "Activa o desactiva la detecció de moviment d'aquesta càmera."
+        },
+        "description": "Configuració predeterminada de detecció de moviment per a aquesta càmera.",
+        "threshold": {
+            "label": "Llindar del moviment",
+            "description": "Llindar de diferència de píxels utilitzat pel detector de moviment; els valors més alts redueixen la sensibilitat (interval 1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Llindar del llamp",
+            "description": "Llindar per detectar i ignorar les puntes d'il·luminació breu (més baixes són més sensibles, valors entre 0,3 i 1,0). Això no impedeix la detecció de moviment per complet; simplement fa que el detector deixi d'analitzar fotogrames addicionals una vegada que el llindar s'excedeix. Els enregistraments basats en moviment encara es creen durant aquests esdeveniments."
+        },
+        "improve_contrast": {
+            "label": "Millora el contrast",
+            "description": "Aplicar la millora del contrast als fotogrames abans de l'anàlisi del moviment per ajudar a la detecció."
+        },
+        "contour_area": {
+            "label": "Àrea de la vora",
+            "description": "Àrea mínima de contorn en píxels necessària per a comptar un contorn de moviment."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Factor de barreja alfa utilitzat en la diferència de fotogrames per al càlcul del moviment."
+        },
+        "frame_alpha": {
+            "label": "Alfa del fotograma",
+            "description": "Valor alfa utilitzat en la barreja de fotogrames per al preprocessament del moviment."
+        },
+        "frame_height": {
+            "label": "Alçada del marc",
+            "description": "Alçada en píxels per a escalar els fotogrames quan es computa el moviment."
+        },
+        "mask": {
+            "label": "Coordenades de la màscara",
+            "description": "Coordenades x,y que defineixen el polígon de màscara de moviment utilitzat per incloure/excloure àrees."
+        },
+        "mqtt_off_delay": {
+            "label": "Retard MQTT desactivat",
+            "description": "Segons a esperar després de l'última moció abans de publicar un estat MQTT 'off'."
+        },
+        "enabled_in_config": {
+            "label": "Estat del moviment original",
+            "description": "Indica si la detecció de moviment s'ha activat en la configuració estàtica original."
+        },
+        "raw_mask": {
+            "label": "Màscara en brut"
+        },
+        "skip_motion_threshold": {
+            "label": "Omet el llindar de moviment",
+            "description": "Si més d'aquesta fracció de la imatge canvia en un sol fotograma, el detector no retornarà cap caixa de moviment i recalibrarà immediatament. Això pot estalviar CPU i reduir falsos positius durant el llamp, tempestes, etc., però pot perdre esdeveniments reals com una càmera PTZ que fa un seguiment automàtic d'un objecte. La compensació es troba entre deixar caure uns quants megabytes d'enregistraments versus revisar un parell de clips curts. Interval de 0,0 a 1,0."
+        }
+    },
+    "objects": {
+        "label": "Objectes",
+        "description": "Object tracking defaults incloent quines etiquetes rastrejar i per objecte filtres.",
+        "track": {
+            "label": "Objectes a seguir",
+            "description": "Llista d'etiquetes d'objectes a seguir per a aquesta càmera."
+        },
+        "filters": {
+            "label": "Filtres d'objectes",
+            "description": "Filtres aplicats als objectes detectats per reduir falsos positius (àrea, relació, confiança).",
+            "min_area": {
+                "label": "Àrea mínima de l'objecte",
+                "description": "Es requereix una àrea de caixa contenidora mínima (píxels o percentatge) per a aquest tipus d'objecte. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "max_area": {
+                "label": "Àrea màxima de l'objecte",
+                "description": "Es permet l'àrea màxima de la caixa contenidora (píxels o percentatge) per a aquest tipus d'objecte. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "min_ratio": {
+                "label": "Relació mínima d'aspecte",
+                "description": "Relació mínima d'amplada/alçada requerida per a la casella contenidora a qualificar."
+            },
+            "max_ratio": {
+                "description": "Es permet la relació màxima d'amplada/alçada per a la casella contenidora a qualificar.",
+                "label": "Relació màxima d'aspecte"
+            },
+            "threshold": {
+                "label": "Llindar de confiança",
+                "description": "Es requereix un llindar de confiança mitjà per a la detecció perquè l'objecte es consideri un veritable positiu."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Es requereix una confiança mínima de detecció d'un sol fotograma per a comptar l'objecte."
+            },
+            "mask": {
+                "label": "Màscara de filtre",
+                "description": "Coordenades de polígon que defineixen on s'aplica aquest filtre dins del marc."
+            },
+            "raw_mask": {
+                "label": "Màscara en brut"
+            }
+        },
+        "mask": {
+            "label": "Màscara d'objecte",
+            "description": "Polígon de màscara utilitzat per evitar la detecció d'objectes en àrees especificades."
+        },
+        "raw_mask": {
+            "label": "Màscara en brut"
+        },
+        "genai": {
+            "label": "Configuració de l'objecte GenAI",
+            "description": "Opcions de GenAI per descriure objectes rastrejats i enviar fotogrames per a la generació.",
+            "enabled": {
+                "label": "Habilita el GenAI",
+                "description": "Habilita la generació de descripcions de GenAI per als objectes rastrejats de manera predeterminada."
+            },
+            "use_snapshot": {
+                "label": "Utilitza instantànies",
+                "description": "Usa instantànies d'objecte en lloc de miniatures per a la generació de descripcions de GenAI."
+            },
+            "prompt": {
+                "label": "Indicació de la llegenda",
+                "description": "Plantilla de pregunta predeterminada utilitzada en generar descripcions amb GenAI."
+            },
+            "object_prompts": {
+                "label": "Peticions d'objecte",
+                "description": "Per objecte demana personalitzar les sortides de GenAI per a etiquetes específiques."
+            },
+            "objects": {
+                "label": "Objectes GenAI",
+                "description": "Llista d'etiquetes d'objectes a enviar a GenAI per defecte."
+            },
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Zones que s'han d'introduir perquè els objectes es puguin classificar per a la generació de descripcions de GenAI."
+            },
+            "debug_save_thumbnails": {
+                "label": "Desa les miniatures",
+                "description": "Desa les miniatures enviades a GenAI per a la depuració i la revisió."
+            },
+            "send_triggers": {
+                "label": "Activadors de GenAI",
+                "description": "Defineix quan s'han d'enviar fotogrames a GenAI (al final, després de les actualitzacions, etc.).",
+                "tracked_object_end": {
+                    "label": "Envia al final",
+                    "description": "Envia una sol·licitud a GenAI quan acabi l'objecte rastrejat."
+                },
+                "after_significant_updates": {
+                    "label": "Activador de GenAI primerenc",
+                    "description": "Envia una sol·licitud a GenAI després d'un nombre especificat d'actualitzacions significatives per a l'objecte rastrejat."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Estat original de GenAI",
+                "description": "Indica si el GenAI s'ha activat a la configuració estàtica original."
+            }
+        }
+    },
+    "record": {
+        "label": "Enregistrament",
+        "description": "Configuració d'enregistrament i retenció d'aquesta càmera.",
+        "enabled": {
+            "label": "Habilita l'enregistrament",
+            "description": "Activa o desactiva l'enregistrament d'aquesta càmera."
+        },
+        "expire_interval": {
+            "label": "Interval de neteja de l'enregistrament",
+            "description": "Minuts entre passades de neteja que eliminen segments d'enregistrament caducats."
+        },
+        "continuous": {
+            "label": "Retenció contínua",
+            "description": "Nombre de dies per a retenir els enregistraments independentment dels objectes rastrejats o del moviment. Establiu-ho a 0 si només voleu retenir enregistraments d'alertes i deteccions.",
+            "days": {
+                "label": "Dies de retenció",
+                "description": "Dies per retenir enregistraments."
+            }
+        },
+        "motion": {
+            "label": "Retenció del moviment",
+            "description": "Nombre de dies per a retenir els enregistraments activats pel moviment independentment dels objectes rastrejats. Establiu-ho a 0 si només voleu retenir enregistraments d'alertes i deteccions.",
+            "days": {
+                "label": "Dies de retenció",
+                "description": "Dies per retenir enregistraments."
+            }
+        },
+        "detections": {
+            "label": "Retenció de detecció",
+            "description": "Configuració de retenció de l'enregistrament per a esdeveniments de detecció, incloent-hi la durada de la captura anterior a la publicació.",
+            "pre_capture": {
+                "label": "Segons de precaptura",
+                "description": "Nombre de segons abans de l'esdeveniment de detecció a incloure en l'enregistrament."
+            },
+            "post_capture": {
+                "label": "Segons de postcaptura",
+                "description": "Nombre de segons després de l'esdeveniment de detecció que s'inclourà a l'enregistrament."
+            },
+            "retain": {
+                "label": "Retenció d'esdeveniments",
+                "description": "Configuració de retenció per a enregistraments d'esdeveniments de detecció.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Retenció d'alerta",
+            "description": "Configuració de retenció de l'enregistrament per a esdeveniments d'alerta, incloses les durades de captura anteriors a la publicació.",
+            "pre_capture": {
+                "label": "Segons de precaptura",
+                "description": "Nombre de segons abans de l'esdeveniment de detecció a incloure en l'enregistrament."
+            },
+            "post_capture": {
+                "label": "Segons de postcaptura",
+                "description": "Nombre de segons després de l'esdeveniment de detecció que s'inclourà a l'enregistrament."
+            },
+            "retain": {
+                "label": "Retenció d'esdeveniments",
+                "description": "Configuració de retenció per a enregistraments d'esdeveniments de detecció.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            }
+        },
+        "export": {
+            "label": "Exporta la configuració",
+            "description": "Paràmetres utilitzats en exportar enregistraments com el timelapse i l'acceleració del maquinari.",
+            "hwaccel_args": {
+                "label": "Exporta els arguments de l'hwaccel",
+                "description": "Args d'acceleració de maquinari a utilitzar per a operacions d'exportació/transcodificació."
+            }
+        },
+        "preview": {
+            "label": "Configuració de la vista prèvia",
+            "description": "Paràmetres que controlen la qualitat de les vistes prèvies de l'enregistrament que es mostren a la interfície d'usuari.",
+            "quality": {
+                "label": "Qualitat de la vista prèvia",
+                "description": "Nivell de qualitat de la vista prèvia (moltlowbaix, baix, mitjà, alt, molt).alt)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Estat de l'enregistrament original",
+            "description": "Indica si l'enregistrament s'ha activat en la configuració estàtica original."
+        }
+    },
+    "review": {
+        "label": "Revisió",
+        "description": "Configuració que controla les alertes, les deteccions i els resums de revisió de GenAI utilitzats per la interfície d'usuari i l'emmagatzematge d'aquesta càmera.",
+        "alerts": {
+            "label": "Configuració d'alertes",
+            "description": "Paràmetres per als quals els objectes rastrejats generen alertes i com es mantenen les alertes",
+            "enabled": {
+                "label": "Habilita les alertes",
+                "description": "Activa o desactiva la generació d'alertes per a aquesta càmera."
+            },
+            "labels": {
+                "label": "Etiquetes d'alerta",
+                "description": "Llista d'etiquetes d'objectes que qualifiquen d'alertes (per exemple: cotxe, persona)."
+            },
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Zones que un objecte ha d'introduir per a ser considerat una alerta; deixeu-ho buit per a permetre qualsevol zona."
+            },
+            "enabled_in_config": {
+                "label": "Estat de les alertes originals",
+                "description": "Fa un seguiment de si les alertes es van habilitar originalment a la configuració estàtica."
+            },
+            "cutoff_time": {
+                "label": "Temps de tall d'alertes",
+                "description": "Segons a esperar després de no provocar activitat d'alerta abans de tallar una alerta."
+            }
+        },
+        "detections": {
+            "label": "Configuració de les deteccions",
+            "description": "Paràmetres per a crear esdeveniments de detecció (no-alerta) i quant de temps conservar-los.",
+            "enabled": {
+                "label": "Habilita les deteccions",
+                "description": "Activa o desactiva els esdeveniments de detecció d'aquesta càmera."
+            },
+            "labels": {
+                "label": "Etiquetes de detecció",
+                "description": "Llista d'etiquetes d'objectes que es qualifiquen com a esdeveniments de detecció."
+            },
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Zones que un objecte ha d'introduir per a ser considerat una detecció; deixeu-ho buit per a permetre qualsevol zona."
+            },
+            "cutoff_time": {
+                "label": "Temps de tall de detecció",
+                "description": "Segons a esperar després de no haver-hi activitat de detecció abans de tallar una detecció"
+            },
+            "enabled_in_config": {
+                "label": "Estat de les deteccions originals",
+                "description": "Fa un seguiment de si les deteccions es van habilitar originalment a la configuració estàtica."
+            }
+        },
+        "genai": {
+            "label": "Configuració del GenAI",
+            "description": "Controla l'ús de la IA generativa per a la producció de descripcions i resums d'articles de revisió.",
+            "enabled": {
+                "label": "Habilita les descripcions del GenAI",
+                "description": "Activa o desactiva les descripcions i resums generats per GenAI per als elements de revisió."
+            },
+            "alerts": {
+                "label": "Habilita el GenAI per a alertes",
+                "description": "Utilitzeu GenAI per a generar descripcions per als elements d'alerta."
+            },
+            "detections": {
+                "label": "Habilita el GenAI per a les deteccions",
+                "description": "Utilitzeu GenAI per generar descripcions per als elements de detecció."
+            },
+            "image_source": {
+                "label": "Revisa l'origen de la imatge",
+                "description": "Font d'imatges enviades a GenAI ('previsualització' o 'enregistraments'); 'enregistraments' utilitza Fotogrames de més qualitat però més tokens."
+            },
+            "additional_concerns": {
+                "label": "Altres preocupacions",
+                "description": "Una llista de preocupacions o notes addicionals que el GenAI ha de tenir en compte a l'hora d'avaluar l'activitat en aquesta càmera."
+            },
+            "debug_save_thumbnails": {
+                "label": "Desa les miniatures",
+                "description": "Desa les miniatures que s'envien al proveïdor GenAI per a la depuració i la revisió."
+            },
+            "enabled_in_config": {
+                "label": "Estat original de GenAI",
+                "description": "Fa un seguiment de si la revisió de GenAI es va habilitar originalment a la configuració estàtica."
+            },
+            "preferred_language": {
+                "label": "Idioma preferit",
+                "description": "Idioma preferit per sol·licitar al proveïdor GenAI respostes generades."
+            },
+            "activity_context_prompt": {
+                "label": "Indicador de context de l'activitat",
+                "description": "Pregunta personalitzada que descriu el que és i no és una activitat sospitosa per proporcionar context per als resums de GenAI."
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Cerca semàntica",
+        "description": "Paràmetres per a la cerca semàntica que construeix i consulta incrustacions d'objectes per a trobar elements similars.",
+        "triggers": {
+            "label": "Activadors",
+            "description": "Accions i criteris coincidents per als desencadenants de cerca semàntica específics de la càmera.",
+            "friendly_name": {
+                "label": "Nom amistós",
+                "description": "Nom opcional amistós que es mostra a la interfície d'usuari per a aquest activador."
+            },
+            "enabled": {
+                "label": "Habilita aquest activador",
+                "description": "Activa o desactiva aquest activador de cerca semàntica."
+            },
+            "type": {
+                "label": "Tipus d'activador",
+                "description": "Tipus d'activador: «miniatures» (match contra imatge) o «descripció» (match contra text)."
+            },
+            "data": {
+                "label": "Contingut del disparador",
+                "description": "Frase de text o ID de miniatures per a coincidir amb els objectes rastrejats."
+            },
+            "threshold": {
+                "label": "Llindar d'activació",
+                "description": "Puntuació mínima de similitud (0-1) necessària per activar aquest activador."
+            },
+            "actions": {
+                "label": "Accions d'activació",
+                "description": "Llista d'accions a executar quan coincideixi l'activador (notificació, sublabeletiqueta, atribut)."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Instantànies",
+        "description": "Configuració per a les instantànies JPEG desades dels objectes seguits per a aquesta càmera.",
+        "enabled": {
+            "label": "Instantànies habilitades",
+            "description": "Activa o desactiva el desament de les instantànies d'aquesta càmera."
+        },
+        "clean_copy": {
+            "label": "Desa la còpia neta",
+            "description": "Desa una còpia neta no anotada de les instantànies a més de les anotades."
+        },
+        "timestamp": {
+            "label": "Superposició de marca horària",
+            "description": "Superposa una marca horària a les instantànies desades."
+        },
+        "bounding_box": {
+            "label": "Superposició de la caixa contenidora",
+            "description": "Dibuixa caixes contenidores per als objectes seguits en les instantànies desades."
+        },
+        "crop": {
+            "label": "Retalla la instantània",
+            "description": "Retalla les instantànies desades a la caixa contenidora de l'objecte detectat."
+        },
+        "required_zones": {
+            "label": "Zones requerides",
+            "description": "Zones que ha d'introduir un objecte perquè es desi una instantània."
+        },
+        "height": {
+            "label": "Alçada de la instantània",
+            "description": "Alçada (píxels) per a canviar la mida de les instantànies desades; deixeu-ho buit per a preservar la mida original."
+        },
+        "retain": {
+            "label": "Retenció de la instantània",
+            "description": "Paràmetres de retenció per a les instantànies desades, inclosos els dies predeterminats i les anul·lacions per objecte.",
+            "default": {
+                "label": "Retenció predeterminada",
+                "description": "Nombre predeterminat de dies per a retenir les instantànies."
+            },
+            "mode": {
+                "label": "Mode de retenció",
+                "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+            },
+            "objects": {
+                "label": "Retenció d'objectes",
+                "description": "Anul·lació per objecte per dies de retenció d'instantànies."
+            }
+        },
+        "quality": {
+            "label": "Qualitat JPEG",
+            "description": "Qualitat del codi JPEG per a les instantànies desades (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "label": "Estil de la marca horària",
+        "description": "Opcions d'estilització per a marques de temps d'alimentació aplicades a enregistraments i instantànies.",
+        "position": {
+            "label": "Posició de la marca horària",
+            "description": "Posició de la marca horària a la imatge (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Format de la marca horària",
+            "description": "Cadena de format de data i hora utilitzada per a marques horàries (codis de format de data i hora de Python)."
+        },
+        "color": {
+            "label": "Color de la marca horària",
+            "description": "Valors de color RGB per al text de la marca de temps (tots els valors 0-255).",
+            "red": {
+                "label": "Vermell",
+                "description": "Component vermell (0-255) per al color de la marca horària."
+            },
+            "green": {
+                "label": "Verd",
+                "description": "Component verd (0-255) per al color de la marca horària."
+            },
+            "blue": {
+                "label": "Blau",
+                "description": "Component blau (0-255) per al color de la marca horària."
+            }
+        },
+        "thickness": {
+            "label": "Gruix de la marca de temps",
+            "description": "Gruix de la línia del text de la marca de temps."
+        },
+        "effect": {
+            "label": "Efecte de marca horària",
+            "description": "Efecte visual per al text de la marca de temps (cap, sòlid, ombra)."
+        }
+    },
+    "best_image_timeout": {
+        "label": "Temps d'espera de la millor imatge",
+        "description": "Quant de temps s'espera per a la imatge amb la puntuació de confiança més alta."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Configuració de la publicació d'imatges MQTT.",
+        "enabled": {
+            "label": "Envia la imatge",
+            "description": "Habilita la publicació d'instantànies d'imatges per a objectes als temes MQTT d'aquesta càmera."
+        },
+        "timestamp": {
+            "label": "Afegeix una marca horària",
+            "description": "Superposa una marca horària a les imatges publicades a MQTT."
+        },
+        "bounding_box": {
+            "label": "Afegeix el quadre de delimitació",
+            "description": "Dibuixa caixes delimitadores en imatges publicades sobre MQTT."
+        },
+        "crop": {
+            "label": "Retalla la imatge",
+            "description": "Retalla les imatges publicades a MQTT a la caixa contenidora de l'objecte detectat."
+        },
+        "height": {
+            "label": "Alçada de la imatge",
+            "description": "Alçada (píxels) per a canviar la mida de les imatges publicades sobre MQTT."
+        },
+        "required_zones": {
+            "label": "Zones requerides",
+            "description": "Zones que ha d'introduir un objecte perquè es publiqui una imatge MQTT."
+        },
+        "quality": {
+            "label": "Qualitat JPEG",
+            "description": "Qualitat JPEG per a les imatges publicades a MQTT (0-100)."
+        }
+    },
+    "notifications": {
+        "label": "Notificacions",
+        "description": "Configuració per a habilitar i controlar les notificacions d'aquesta càmera.",
+        "enabled": {
+            "label": "Habilita les notificacions",
+            "description": "Activa o desactiva les notificacions d'aquesta càmera."
+        },
+        "email": {
+            "label": "Correu electrònic de notificació",
+            "description": "Adreça de correu electrònic utilitzada per a notificacions push o requerides per determinats proveïdors de notificacions."
+        },
+        "cooldown": {
+            "label": "Període de reducció",
+            "description": "Retirada (segons) entre notificacions per evitar els destinataris de correu brossa."
+        },
+        "enabled_in_config": {
+            "label": "Estat de les notificacions originals",
+            "description": "Indica si les notificacions s'han activat en la configuració estàtica original."
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Connexió ONVIF i configuració de seguiment automàtic PTZ per a aquesta càmera.",
+        "host": {
+            "label": "Servidor ONVIF",
+            "description": "Host (i esquema opcional) per al servei ONVIF per a aquesta càmera."
+        },
+        "port": {
+            "label": "Port ONVIF",
+            "description": "Número de port del servei ONVIF."
+        },
+        "user": {
+            "label": "Nom d'usuari ONVIF",
+            "description": "Nom d'usuari per a l'autenticació ONVIF; alguns dispositius requereixen l'usuari administrador per a ONVIF."
+        },
+        "password": {
+            "label": "Contrasenya ONVIF",
+            "description": "Contrasenya per a l'autenticació ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Inhabilita la verificació TLS",
+            "description": "Omet la verificació TLS i desactiva l'autenticació de resum per a ONVIF (no segur; només s'utilitza en xarxes segures)."
+        },
+        "autotracking": {
+            "label": "Aeguiment automàtic",
+            "description": "Segueix automàticament els objectes en moviment i els manté centrats en el marc utilitzant els moviments de la càmera PTZ.",
+            "enabled": {
+                "label": "Habilita el seguiment automàtic",
+                "description": "Activa o desactiva el seguiment automàtic de la càmera PTZ dels objectes detectats."
+            },
+            "calibrate_on_startup": {
+                "label": "Calibra a l'inici",
+                "description": "Mesura les velocitats del motor PTZ a l'inici per millorar la precisió del seguiment. Frigate actualitzarà la configuració amb «movtion.weights» després del calibratge."
+            },
+            "zooming": {
+                "label": "Mode de zoom",
+                "description": "Comportament de zoom de control: desactivat (només pan/tilt), absolut (més compatible) o relatiu (pa/tilt/zoom concurrent)."
+            },
+            "zoom_factor": {
+                "label": "Factor de zoom",
+                "description": "Controla el nivell d'ampliació dels objectes rastrejats. Els valors més baixos mantenen més escena a la vista; els valors més alts s'apropen, però poden perdre el seguiment. Valors entre 0,1 i 0,75."
+            },
+            "track": {
+                "label": "Objectes rastrejats",
+                "description": "Llista de tipus d'objectes que haurien d'activar el seguiment automàtic."
+            },
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Els objectes han d'entrar en una d'aquestes zones abans que comenci el seguiment automàtic."
+            },
+            "return_preset": {
+                "label": "Retorna la predefinició",
+                "description": "Nom predefinit ONVIF configurat al microprogramari de la càmera per tornar després de finalitzar el seguiment."
+            },
+            "timeout": {
+                "label": "Temps d'espera de retorn",
+                "description": "Espereu tants segons després de perdre el seguiment abans de tornar la càmera a la posició preestablerta."
+            },
+            "movement_weights": {
+                "label": "Pes del moviment",
+                "description": "Valors de calibratge generats automàticament pel calibratge de la càmera. No modifiquis manualment."
+            },
+            "enabled_in_config": {
+                "label": "Estat de la pista automàtica original",
+                "description": "Camp intern per a fer el seguiment de si s'ha habilitat el seguiment automàtic a la configuració."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignora el desajust de temps",
+            "description": "Ignora les diferències de sincronització de temps entre càmera i servidor Frigate per a la comunicació ONVIF."
+        }
+    },
+    "type": {
+        "label": "Tipus de càmera",
+        "description": "Tipus de càmera"
+    },
+    "ui": {
+        "label": "Interfície d'usuari de la càmera",
+        "description": "Mostra l'ordre i la visibilitat d'aquesta càmera a la interfície d'usuari. La comanda afecta el tauler predeterminat. Per a un control més granular, utilitzeu grups de càmera.",
+        "order": {
+            "label": "Ordre de la interfície",
+            "description": "Ordre numèric utilitzat per ordenar la càmera a la interfície d'usuari (taulell de control i llistes per defecte); els nombres més grans apareixen més tard."
+        },
+        "dashboard": {
+            "label": "Mostra a l'interfície d'usuari",
+            "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de la Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+        }
+    },
+    "webui_url": {
+        "label": "URL de la càmera",
+        "description": "URL per visitar la càmera directament des de la pàgina del sistema"
+    },
+    "zones": {
+        "label": "Zones",
+        "description": "Les zones permeten definir una àrea específica del marc perquè pugueu determinar si un objecte es troba dins d'una àrea determinada.",
+        "friendly_name": {
+            "label": "Nom de la zona",
+            "description": "Un nom fàcil d'utilitzar per a la zona, que es mostra a la interfície d'usuari de la fragata. Si no s'estableix, s'utilitzarà una versió amb format del nom de la zona."
+        },
+        "enabled": {
+            "label": "Habilitat",
+            "description": "Activa o desactiva aquesta zona. Les zones inhabilitades s'ignoren en temps d'execució."
+        },
+        "enabled_in_config": {
+            "label": "Feu un seguiment de l'estat original de la zona."
+        },
+        "filters": {
+            "label": "Filtres de zona",
+            "description": "Filtres que s'aplicaran als objectes d'aquesta zona. S'utilitza per reduir falsos positius o restringir quins objectes es consideren presents a la zona.",
+            "min_area": {
+                "label": "Àrea mínima de l'objecte",
+                "description": "Es requereix una àrea de caixa contenidora mínima (píxels o percentatge) per a aquest tipus d'objecte. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "max_area": {
+                "label": "Àrea màxima de l'objecte",
+                "description": "Es permet l'àrea màxima de la caixa contenidora (píxels o percentatge) per a aquest tipus d'objecte. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "min_ratio": {
+                "label": "Relació mínima d'aspecte",
+                "description": "Relació mínima d'amplada/alçada requerida per a la casella contenidora a qualificar."
+            },
+            "max_ratio": {
+                "label": "Relació màxima d'aspecte",
+                "description": "Es permet la relació màxima d'amplada/alçada per a la casella contenidora a qualificar."
+            },
+            "threshold": {
+                "label": "Llindar de confiança",
+                "description": "Es requereix un llindar de confiança mitjà per a la detecció perquè l'objecte es consideri un veritable positiu."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Es requereix una confiança mínima de detecció d'un sol fotograma per a comptar l'objecte."
+            },
+            "mask": {
+                "label": "Màscara de filtre",
+                "description": "Coordenades de polígon que defineixen on s'aplica aquest filtre dins del marc."
+            },
+            "raw_mask": {
+                "label": "Màscara en brut"
+            }
+        },
+        "objects": {
+            "description": "Llista de tipus d'objectes (des del mapa d'etiquetes) que poden activar aquesta zona. Pot ser una cadena o una llista de cadenes. Si està buit, es consideraran tots els objectes.",
+            "label": "Objectes d'activació"
+        },
+        "coordinates": {
+            "label": "Coordenades",
+            "description": "Coordenades de polígon que defineixen l'àrea de zona. Pot ser una cadena separada per comes o una llista de cadenes de coordenades. Les coordenades han de ser relatives (0-1) o absolutes (antic)."
+        },
+        "distances": {
+            "label": "Distàncies del món real",
+            "description": "Distàncies opcionals del món real per a cada costat del quadrilàter de la zona, utilitzades per a càlculs de velocitat o distància. Si s'estableix, ha de tenir exactament 4 valors."
+        },
+        "inertia": {
+            "label": "Fotogrames d'inèrcia",
+            "description": "Nombre de fotogrames consecutius que s'ha de detectar un objecte a la zona abans de considerar-lo present. Ajuda a filtrar les deteccions transitòries."
+        },
+        "loitering_time": {
+            "label": "Segons flotants",
+            "description": "Nombre de segons que un objecte ha de romandre a la zona a considerar com a errant. Establiu-ho a 0 per a desactivar la detecció de la itinerància."
+        },
+        "speed_threshold": {
+            "label": "Velocitat mínima",
+            "description": "Velocitat mínima (en unitats del món real si s'estableixen distàncies) necessària perquè un objecte es consideri present a la zona. S'utilitza per a activadors de zona basats en velocitat."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Estat original de la càmera",
+        "description": "Feu un seguiment de l'estat original de la càmera."
+    }
+}

@@ -47,6 +47,16 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         self.sub_label_publisher = sub_label_publisher
         super().__init__(config, metrics, model_runner)
 
+    CONFIG_UPDATE_TOPIC = "config/lpr"
+
+    def update_config(self, topic: str, payload: Any) -> None:
+        """Update LPR config at runtime."""
+        if topic != self.CONFIG_UPDATE_TOPIC:
+            return
+
+        self.lpr_config = payload
+        logger.debug("LPR post-processor config updated dynamically")
+
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:

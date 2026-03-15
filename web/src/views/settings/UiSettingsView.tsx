@@ -210,7 +210,7 @@ export default function UiSettingsView() {
   ];
 
   return (
-    <div className="flex size-full flex-col md:pb-8">
+    <div className="flex size-full flex-col">
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h4" className="mb-3">
         {t("general.title")}

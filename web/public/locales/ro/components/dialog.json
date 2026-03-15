@@ -95,6 +95,10 @@
     "fromTimeline": {
       "saveExport": "Salvează exportul",
       "previewExport": "Previzualizează exportul"
+    },
+    "case": {
+      "label": "Caz",
+      "placeholder": "Selectează caz"
     }
   },
   "streaming": {

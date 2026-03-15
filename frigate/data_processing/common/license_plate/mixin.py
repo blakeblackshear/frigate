@@ -401,35 +401,10 @@ class LicensePlateProcessingMixin:
             all_confidences.append(flat_confidences)
             all_areas.append(combined_area)
 
-        # Step 3: Filter and sort the combined plates
+        # Step 3: Sort the combined plates
         if all_license_plates:
-            filtered_data = []
-            for plate, conf_list, area in zip(
-                all_license_plates, all_confidences, all_areas
-            ):
-                if len(plate) < self.lpr_config.min_plate_length:
-                    logger.debug(
-                        f"{camera}: Filtered out '{plate}' due to length ({len(plate)} < {self.lpr_config.min_plate_length})"
-                    )
-                    continue
-
-                if self.lpr_config.format:
-                    try:
-                        if not re.fullmatch(self.lpr_config.format, plate):
-                            logger.debug(
-                                f"{camera}: Filtered out '{plate}' due to format mismatch"
-                            )
-                            continue
-                    except re.error:
-                        # Skip format filtering if regex is invalid
-                        logger.error(
-                            f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
-                        )
-
-                filtered_data.append((plate, conf_list, area))
-
             sorted_data = sorted(
-                filtered_data,
+                zip(all_license_plates, all_confidences, all_areas),
                 key=lambda x: (x[2], len(x[0]), sum(x[1]) / len(x[1]) if x[1] else 0),
                 reverse=True,
             )
@@ -1250,6 +1225,8 @@ class LicensePlateProcessingMixin:
                 logger.debug(f"{camera}: License plate area below minimum threshold.")
                 return
 
+            plate_box = license_plate
+
             license_plate_frame = rgb[
                 license_plate[1] : license_plate[3],
                 license_plate[0] : license_plate[2],
@@ -1366,6 +1343,20 @@ class LicensePlateProcessingMixin:
                     logger.debug(f"{camera}: License plate is less than min_area")
                     return
 
+                # Scale back to original car coordinates and then to frame
+                plate_box_in_car = (
+                    license_plate[0] // 2,
+                    license_plate[1] // 2,
+                    license_plate[2] // 2,
+                    license_plate[3] // 2,
+                )
+                plate_box = (
+                    left + plate_box_in_car[0],
+                    top + plate_box_in_car[1],
+                    left + plate_box_in_car[2],
+                    top + plate_box_in_car[3],
+                )
+
                 license_plate_frame = car[
                     license_plate[1] : license_plate[3],
                     license_plate[0] : license_plate[2],
@@ -1428,6 +1419,8 @@ class LicensePlateProcessingMixin:
                 ).clip(
                     0, [license_plate_frame.shape[1], license_plate_frame.shape[0]] * 2
                 )
+
+                plate_box = tuple(int(x) for x in expanded_box)
 
                 # Crop using the expanded box
                 license_plate_frame = license_plate_frame[
@@ -1557,6 +1550,27 @@ class LicensePlateProcessingMixin:
                 f"{camera}: Clustering changed top plate '{top_plate}' (conf: {avg_confidence:.3f}) to rep '{rep_plate}' (conf: {rep_conf:.3f})"
             )
 
+        # Apply length and format filters to the clustered representative
+        # rather than individual OCR readings, so noisy variants still
+        # contribute to clustering even when they don't pass on their own.
+        if len(rep_plate) < self.lpr_config.min_plate_length:
+            logger.debug(
+                f"{camera}: Filtered out clustered plate '{rep_plate}' due to length ({len(rep_plate)} < {self.lpr_config.min_plate_length})"
+            )
+            return
+
+        if self.lpr_config.format:
+            try:
+                if not re.fullmatch(self.lpr_config.format, rep_plate):
+                    logger.debug(
+                        f"{camera}: Filtered out clustered plate '{rep_plate}' due to format mismatch"
+                    )
+                    return
+            except re.error:
+                logger.error(
+                    f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
+                )
+
         # Update stored rep
         self.detected_license_plates[id].update(
             {
@@ -1615,6 +1629,7 @@ class LicensePlateProcessingMixin:
                     "id": id,
                     "camera": camera,
                     "timestamp": start,
+                    "plate_box": plate_box,
                 }
             ),
         )

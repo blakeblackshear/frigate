@@ -50,3 +50,16 @@ class PostProcessorApi(ABC):
             None if request was not handled, otherwise return response.
         """
         pass
+
+    def update_config(self, topic: str, payload: Any) -> None:
+        """Handle a config change notification.
+
+        Called for every config update published under ``config/``.
+        Processors should override this to check the topic and act only
+        on changes relevant to them. Default is a no-op.
+
+        Args:
+            topic: The config topic that changed.
+            payload: The updated configuration object.
+        """
+        pass

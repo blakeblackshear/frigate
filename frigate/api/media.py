@@ -1281,6 +1281,13 @@ def preview_gif(
     else:
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+
+        if not os.path.isdir(preview_dir):
+            return JSONResponse(
+                content={"success": False, "message": "Preview not found"},
+                status_code=404,
+            )
+
         file_start = f"preview_{camera_name}"
         start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
         end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
@@ -1456,6 +1463,13 @@ def preview_mp4(
     else:
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+
+        if not os.path.isdir(preview_dir):
+            return JSONResponse(
+                content={"success": False, "message": "Preview not found"},
+                status_code=404,
+            )
+
         file_start = f"preview_{camera_name}"
         start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
         end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"

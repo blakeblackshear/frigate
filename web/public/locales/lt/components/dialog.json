@@ -6,7 +6,8 @@
       "title": "Frigate Persikrauna",
       "content": "Šis puslapis persikraus už {{countdown}} sekundžių.",
       "button": "Priverstinai Perkrauti Dabar"
-    }
+    },
+    "description": "Frigate laikinai sustabdoma, iki kol programa persikraus."
   },
   "explore": {
     "plus": {

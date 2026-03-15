@@ -7,17 +7,20 @@
     "authentication": "Configuració d'autenticació - Frigate",
     "camera": "Paràmetres de càmera - Frigate",
     "masksAndZones": "Editor de màscares i zones - Frigate",
-    "general": "Configuració de la interfície d'usuari - Fragata",
+    "general": "Configuració del perfil - Frigate",
     "frigatePlus": "Paràmetres de Frigate+ - Frigate",
     "notifications": "Paràmetres de notificació - Frigate",
     "cameraManagement": "Gestionar càmeres - Frigate",
-    "cameraReview": "Configuració Revisió de Càmeres - Frigate"
+    "cameraReview": "Configuració Revisió de Càmeres - Frigate",
+    "globalConfig": "Configuració global - Frigate",
+    "cameraConfig": "Configuració de la càmera - Frigate",
+    "maintenance": "Manteniment - Frigate"
   },
   "menu": {
     "ui": "Interfície d'usuari",
     "cameras": "Paràmetres de la càmera",
     "masksAndZones": "Màscares / Zones",
-    "motionTuner": "Ajust de detecció de moviment",
+    "motionTuner": "Afinador de moviment",
     "users": "Usuaris",
     "notifications": "Notificacions",
     "debug": "Depuració",
@@ -26,7 +29,64 @@
     "triggers": "Disparadors",
     "cameraManagement": "Gestió",
     "cameraReview": "Revisió",
-    "roles": "Rols"
+    "roles": "Rols",
+    "general": "General",
+    "globalConfig": "Configuració global",
+    "system": "Sistema",
+    "integrations": "Integracions",
+    "profileSettings": "Configuració del perfil",
+    "globalDetect": "Detecció d'objectes",
+    "globalRecording": "Enregistrament",
+    "globalSnapshots": "Instantànies",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Detecció de moviment",
+    "globalObjects": "Objectes",
+    "globalReview": "Revisió",
+    "globalAudioEvents": "Esdeveniments d'àudio",
+    "globalLivePlayback": "Reproducció en directe",
+    "globalTimestampStyle": "Estil de la marca horària",
+    "systemDatabase": "Base de dades",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autenticació",
+    "systemNetworking": "Xarxa",
+    "systemProxy": "Proxy",
+    "systemUi": "UI",
+    "systemLogging": "Registre",
+    "systemEnvironmentVariables": "Variables d'entorn",
+    "systemTelemetry": "Telemetria",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "Hardware del detector",
+    "systemDetectionModel": "Model de detecció",
+    "systemMqtt": "MQTT",
+    "integrationSemanticSearch": "Cerca semàntica",
+    "integrationGenerativeAi": "IA generativa",
+    "integrationFaceRecognition": "Reconeixement de cares",
+    "integrationLpr": "Reconeixement de la matrícula",
+    "integrationObjectClassification": "Classificació de l'objecte",
+    "integrationAudioTranscription": "Transcripció d'àudio",
+    "cameraDetect": "Detecció d'objectes",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Enregistrament",
+    "cameraSnapshots": "Instantànies",
+    "cameraMotion": "Detecció de moviment",
+    "cameraObjects": "Objectes",
+    "cameraConfigReview": "Revisió",
+    "cameraAudioEvents": "Esdeveniments d'àudio",
+    "cameraAudioTranscription": "Transcripció d'àudio",
+    "cameraNotifications": "Notificacions",
+    "cameraLivePlayback": "Reproducció en directe",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Reconeixement de cares",
+    "cameraLpr": "Reconeixement de la matrícula",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "UI de la càmera",
+    "cameraTimestampStyle": "Estil de la marca horària",
+    "cameraMqtt": "Càmera MQTT",
+    "maintenance": "Manteniment",
+    "mediaSync": "Sincronització multimèdia",
+    "regionGrid": "Quadrícula de la regió"
   },
   "dialog": {
     "unsavedChanges": {
@@ -39,7 +99,7 @@
     "noCamera": "Cap càmera"
   },
   "general": {
-    "title": "Paràmetres de la interfície d'usuari",
+    "title": "Configuració del perfil",
     "liveDashboard": {
       "title": "Panell en directe",
       "automaticLiveView": {
@@ -205,6 +265,10 @@
       "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
       "toast": {
         "success": "S'ha desat la zona ({{zoneName}})."
+      },
+      "enabled": {
+        "title": "Habilitat",
+        "description": "Si aquesta zona està activa i activada al fitxer de configuració. Si està desactivat, no pot ser habilitat per MQTT. Les zones inhabilitades s'ignoren en temps d'execució."
       }
     },
     "filter": {
@@ -237,6 +301,12 @@
           "title": "{{polygonName}} s'ha desat.",
           "noName": "La màscara de moviment ha estat desada."
         }
+      },
+      "defaultName": "Màscara de moviment {{number}}",
+      "name": {
+        "title": "Nom",
+        "description": "Un nom opcional per a aquesta màscara de moviment.",
+        "placeholder": "Introduïu un nom..."
       }
     },
     "objectMasks": {
@@ -263,17 +333,29 @@
           "noName": "La màscara d'objectes ha estat desada."
         }
       },
-      "context": "Les màscares de filtratge d’objectes s’utilitzen per descartar falsos positius d’un tipus d’objecte concret segons la seva ubicació."
+      "context": "Les màscares de filtratge d’objectes s’utilitzen per descartar falsos positius d’un tipus d’objecte concret segons la seva ubicació.",
+      "name": {
+        "title": "Nom",
+        "description": "Un nom opcional per a aquesta màscara d'objecte.",
+        "placeholder": "Introduïu un nom..."
+      }
     },
     "restart_required": "Reinici necessari (canvi de màscares o zones)",
     "motionMaskLabel": "Màscara de moviment {{number}}",
-    "objectMaskLabel": "Màscara d'objecte {{number}} ({{label}})",
+    "objectMaskLabel": "Màscara d'objecte {{number}}",
     "toast": {
       "success": {
         "copyCoordinates": "S'han copiat les coordenades per a {{polyName}} al porta-retalls."
       },
       "error": {
         "copyCoordinatesFailed": "No s'han pogut copiar les coordenades al porta-retalls."
+      }
+    },
+    "disabledInConfig": "L'element està desactivat al fitxer de configuració",
+    "masks": {
+      "enabled": {
+        "title": "Habilitat",
+        "description": "Si aquesta màscara està activada al fitxer de configuració. Si està desactivat, no pot ser habilitat per MQTT. Les màscares desactivades s'ignoren en temps d'execució."
       }
     }
   },
@@ -644,7 +726,14 @@
       "error": "No s'han pogut guardar els canvis de configuració: {{errorMessage}}",
       "success": "Els paràmetres de Frigate+ han estat desats. Reincia Frigate per aplicar els canvis."
     },
-    "restart_required": "Es necessari un reinici (El model de Frigate+ ha cambiat)"
+    "restart_required": "Es necessari un reinici (El model de Frigate+ ha cambiat)",
+    "description": "Frigate+ és un servei de subscripció que proporciona accés a funcions i capacitats addicionals per a la vostra instància de Frigate, inclosa la capacitat d'utilitzar models de detecció d'objectes personalitzats entrenats en les vostres pròpies dades. Podeu gestionar la configuració del model Frigate+ aquí.",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "Model actual",
+      "otherModels": "Altres models",
+      "configuration": "Configuració"
+    }
   },
   "enrichments": {
     "semanticSearch": {
@@ -665,7 +754,7 @@
         "success": "La reindexació ha començat amb èxit.",
         "label": "Reindexar ara",
         "confirmTitle": "Confirmar la reindexació",
-        "desc": "La reindexació regenerarà les incrustacions (embeddings) de tots els objectes seguits. Aquest procés s’executa en segon pla i pot arribar a saturar la CPU, així com trigar una bona estona depenent del nombre d’objectes seguits que tinguis.",
+        "desc": "La reindexació regenerarà les incrustacions per a tots els objectes rastrejats. Aquest procés s'executa en segon pla i pot treure el màxim de la CPU i prendre una quantitat de temps raonable depenent del nombre d'objectes rastrejats que tingueu.",
         "confirmDesc": "Estàs segur que vols reindexar totes les incrustacions (embeddings) dels objectes seguits? Aquest procés s’executarà en segon pla, però pot arribar a saturar la CPU i trigar bastant temps. Pots seguir-ne el progrés a la pàgina d’Explora.",
         "alreadyInProgress": "La reindexació ja està en curs.",
         "error": "Error en iniciar la reindexació: {{errorMessage}}"
@@ -1181,7 +1270,12 @@
     "backToSettings": "Torna a la configuració de la càmera",
     "streams": {
       "title": "Habilita / Inhabilita les càmeres",
-      "desc": "Inhabilita temporalment una càmera fins que es reiniciï la fragata. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>"
+      "desc": "Inhabilita temporalment una càmera fins que es reiniciï la fragata. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>",
+      "enableLabel": "Càmeres habilitades",
+      "enableDesc": "Inhabilita temporalment una càmera habilitada fins que es reiniciï Frigate. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>",
+      "disableLabel": "Càmeres inhabilitades",
+      "disableDesc": "Habilita una càmera que actualment no és visible a la interfície d'usuari i està desactivada a la configuració. Es requereix un reinici de Frigate després d'activar-la.",
+      "enableSuccess": "{{cameraName}} activat a la configuració. Reinicia Frigate per aplicar els canvis."
     },
     "cameraConfig": {
       "add": "Afegeix una càmera",
@@ -1211,6 +1305,18 @@
       "toast": {
         "success": "La càmera {{cameraName}} s'ha desat correctament"
       }
+    },
+    "deleteCamera": "Suprimeix la càmera",
+    "deleteCameraDialog": {
+      "title": "Suprimeix la càmera",
+      "description": "Suprimir una càmera eliminarà permanentment tots els enregistraments, els objectes rastrejats i la configuració d'aquesta càmera. Qualsevol flux go2rtc associat amb aquesta càmera encara pot haver de ser eliminat manualment.",
+      "selectPlaceholder": "Trieu la càmera...",
+      "confirmTitle": "N'estàs segur?",
+      "confirmWarning": "Suprimir <strong>{{cameraName}}</strong> no es pot desfer.",
+      "deleteExports": "Elimina també les exportacions d'aquesta càmera",
+      "confirmButton": "Suprimeix permanentment",
+      "success": "La càmera {{cameraName}} s'ha suprimit correctament",
+      "error": "No s'ha pogut suprimir la càmera {{cameraName}}"
     }
   },
   "cameraReview": {
@@ -1236,7 +1342,7 @@
       "selectDetectionsZones": "Selecció de zones per a les deteccions",
       "limitDetections": "Limita les deteccions a zones específiques",
       "toast": {
-        "success": "S'ha desat la configuració de la classificació de la revisió. Reinicia la fragata per aplicar canvis."
+        "success": "S'ha desat la configuració de la classificació de la revisió. Reinicia Frigate per aplicar canvis."
       },
       "unsavedChanges": "Paràmetres de classificació de revisions sense desar per {{camera}}",
       "objectAlertsTips": "Totes els objectes {{alertsLabels}} de {{cameraName}} es mostraran com avisos.",
@@ -1249,5 +1355,265 @@
       }
     },
     "title": "Paràmetres de Revisió de la Càmera"
-  }
+  },
+  "saveAllPreview": {
+    "title": "Canvis a desar",
+    "triggerLabel": "Revisa els canvis pendents",
+    "empty": "No hi ha canvis pendents.",
+    "scope": {
+      "label": "Àmbit",
+      "global": "Global",
+      "camera": "Càmara:{{cameraName}}"
+    },
+    "field": {
+      "label": "Camp"
+    },
+    "value": {
+      "label": "Valor nou",
+      "reset": "Restableix"
+    }
+  },
+  "detectionModel": {
+    "plusActive": {
+      "title": "Gestió del model Frigate+",
+      "label": "Font del model actual",
+      "description": "Aquesta instància està executant un model Frigate+. Seleccioneu o canvieu el vostre model a la configuració de Frigate+.",
+      "goToFrigatePlus": "Ves a la configuració de Frigate+",
+      "showModelForm": "Configuració manual d'un model"
+    }
+  },
+  "maintenance": {
+    "title": "Manteniment",
+    "sync": {
+      "title": "Sincronització multimèdia",
+      "desc": "Frigate netejarà periòdicament els mitjans en un horari regular segons la configuració de la seva retenció. És normal veure alguns arxius orfes mentre corre Frigate. Utilitzeu aquesta característica per eliminar fitxers multimèdia orfes del disc que ja no estan referenciats a la base de dades.",
+      "started": "S'ha iniciat la sincronització del mitjà.",
+      "alreadyRunning": "Ja s'està executant una tasca de sincronització",
+      "error": "No s'ha pogut iniciar la sincronització",
+      "currentStatus": "Estat",
+      "jobId": "ID de la tasca",
+      "startTime": "Hora d'inici",
+      "endTime": "Hora final",
+      "statusLabel": "Estat",
+      "results": "Resultats",
+      "errorLabel": "Error",
+      "mediaTypes": "Tipus de suport",
+      "allMedia": "Tots els suports",
+      "dryRun": "Executa en sec",
+      "dryRunEnabled": "No s'eliminarà cap fitxer",
+      "dryRunDisabled": "S'eliminaran els fitxers",
+      "force": "Força",
+      "forceDesc": "Evita el llindar de seguretat i completa la sincronització fins i tot si més del 50% dels fitxers s'eliminarien.",
+      "running": "Sincronització en execució...",
+      "start": "Inicia la sincronització",
+      "inProgress": "La sincronització està en curs. Aquesta pàgina està desactivada.",
+      "status": {
+        "queued": "En cua",
+        "running": "En execució",
+        "completed": "Completat",
+        "failed": "Ha fallat",
+        "notRunning": "No s'està executant"
+      },
+      "resultsFields": {
+        "filesChecked": "Fitxers comprovats",
+        "orphansFound": "Orfes trobades",
+        "orphansDeleted": "Orfes eliminats",
+        "aborted": "Avortat. La supressió superaria el llindar de seguretat.",
+        "error": "Error",
+        "totals": "Totals"
+      },
+      "event_snapshots": "Instantànies de l'objecte rastrejat",
+      "event_thumbnails": "Miniatures d'objecte rastrejat",
+      "review_thumbnails": "Revisa les miniatures",
+      "previews": "Previsualitzacions",
+      "exports": "Exporta",
+      "recordings": "Enregistraments"
+    },
+    "regionGrid": {
+      "title": "Quadrícula de la regió",
+      "desc": "La quadrícula de regions és una optimització que aprèn on solen aparèixer objectes de diferents mides en el camp de visió de cada càmera. Frigate utilitza aquestes dades per detectar regions de mida eficient. La quadrícula es construeix automàticament amb el temps a partir de dades d'objectes rastrejats.",
+      "clear": "Neteja la quadrícula de la regió",
+      "clearConfirmTitle": "Neteja la quadrícula de la regió",
+      "clearConfirmDesc": "No es recomana netejar la quadrícula de la regió tret que hagi canviat recentment la mida del model del detector o hagi canviat la posició física de la càmera i tingui problemes de seguiment d'objectes. La quadrícula es reconstruirà automàticament amb el temps a mesura que els objectes siguin rastrejats. Es requereix un reinici de la fragata perquè els canvis tinguin efecte.",
+      "clearSuccess": "La quadrícula de la regió s'ha netejat correctament",
+      "clearError": "Ha fallat en netejar la graella de la regió",
+      "restartRequired": "Cal reiniciar per a que els canvis de la quadrícula de la regió tinguin efecte"
+    }
+  },
+  "configForm": {
+    "global": {
+      "title": "Configuració global",
+      "description": "Aquestes opcions de configuració s'apliquen a totes les càmeres, llevat que se substitueixin en la configuració específica de la càmera."
+    },
+    "camera": {
+      "title": "Configuració de la càmera",
+      "description": "Aquests paràmetres només s'apliquen a aquesta càmera i substitueixen els paràmetres globals."
+    },
+    "advancedSettingsCount": "Configuració avançada ({{count}})",
+    "advancedCount": "Avançat ({{count}})",
+    "showAdvanced": "Mostra la configuració avançada",
+    "tabs": {
+      "sharedDefaults": "Per defecte compartit",
+      "system": "Sistema",
+      "integrations": "Integracions"
+    },
+    "additionalProperties": {
+      "keyLabel": "Clau",
+      "valueLabel": "Valor",
+      "keyPlaceholder": "Nou valor",
+      "remove": "Elimina"
+    },
+    "timezone": {
+      "defaultOption": "Utilitza la zona horària del navegador"
+    },
+    "roleMap": {
+      "empty": "No hi ha assignacions de rols",
+      "roleLabel": "Rol",
+      "groupsLabel": "Grups",
+      "addMapping": "Afegeix un mapatge de rol",
+      "remove": "Elimina"
+    },
+    "ffmpegArgs": {
+      "preset": "Predefinit",
+      "manual": "Arguments manuals",
+      "inherit": "Hereta de la configuració de la càmera",
+      "selectPreset": "Selecció de valors predefinits",
+      "manualPlaceholder": "ntroduïu els arguments FFmpeg"
+    },
+    "cameraInputs": {
+      "itemTitle": "Flux {{index}}"
+    },
+    "restartRequiredField": "Reinicia requerit",
+    "restartRequiredFooter": "S'ha canviat la configuració - es requereix reiniciar",
+    "sections": {
+      "detect": "Detecció",
+      "record": "Enregistrament",
+      "snapshots": "Instantànies",
+      "motion": "Moviment",
+      "objects": "Objectes",
+      "review": "Revisió",
+      "audio": "Àudio",
+      "notifications": "Notificacions",
+      "live": "Vista en viu",
+      "timestamp_style": "Marques temporals",
+      "mqtt": "MQTT",
+      "database": "Base de dades",
+      "telemetry": "Telemetria",
+      "auth": "Autenticació",
+      "tls": "TLS",
+      "proxy": "Proxy",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "Detectors",
+      "model": "Model",
+      "semantic_search": "Cerca semàntica",
+      "genai": "GenAI",
+      "face_recognition": "Reconeixement de cares",
+      "lpr": "Reconeixement de matrícules",
+      "birdseye": "Birdseye"
+    },
+    "detect": {
+      "title": "Configuració de detecció"
+    },
+    "detectors": {
+      "title": "Configuració del detector",
+      "singleType": "Només es permet un detector {{type}}.",
+      "keyRequired": "Es requereix el nom del detector.",
+      "keyDuplicate": "El nom del detector ja existeix.",
+      "noSchema": "No hi ha esquemes de detector disponibles.",
+      "none": "No s'ha configurat cap instància de detector.",
+      "add": "Afegeix un detector"
+    },
+    "record": {
+      "title": "Configuració de l'enregistrament"
+    },
+    "snapshots": {
+      "title": "Configuració de la instantània"
+    },
+    "motion": {
+      "title": "Configuració del moviment"
+    },
+    "objects": {
+      "title": "Configuració de l'objecte"
+    },
+    "audioLabels": {
+      "summary": "{{count}} etiquetes d'àudio seleccionades",
+      "empty": "No hi ha etiquetes d'àudio disponibles"
+    },
+    "objectLabels": {
+      "summary": "{{count}} tipus d'objectes seleccionats",
+      "empty": "No hi ha cap etiqueta d'objecte disponible"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} per {{label}}"
+    },
+    "zoneNames": {
+      "summary": "{{count}} seleccionats",
+      "empty": "No hi ha zones disponibles"
+    },
+    "inputRoles": {
+      "summary": "{{count}} rols seleccionats",
+      "empty": "No hi ha cap rol disponible",
+      "options": {
+        "detect": "Detecta",
+        "record": "Enregistrament",
+        "audio": "Àudio"
+      }
+    },
+    "review": {
+      "title": "Configuració de la revisió"
+    },
+    "audio": {
+      "title": "Configuració de l'àudio"
+    },
+    "notifications": {
+      "title": "Configuració de notificacions"
+    },
+    "live": {
+      "title": "Configuració de la vista en viu"
+    },
+    "timestamp_style": {
+      "title": "Configuració de la marca horària"
+    },
+    "searchPlaceholder": "Cerca..."
+  },
+  "globalConfig": {
+    "title": "Configuració global",
+    "description": "Configura la configuració global que s'aplica a totes les càmeres llevat que se sobreescriti.",
+    "toast": {
+      "success": "La configuració global s'ha desat correctament",
+      "error": "No s'ha pogut desar la configuració global",
+      "validationError": "Ha fallat la validació"
+    }
+  },
+  "cameraConfig": {
+    "title": "Configuració de la càmera",
+    "description": "Configura la configuració per a les càmeres individuals. La configuració substitueix els valors predeterminats globals.",
+    "overriddenBadge": "Sobreescrit",
+    "resetToGlobal": "Restableix a global",
+    "toast": {
+      "success": "La configuració de la càmera s'ha desat correctament",
+      "error": "Ha fallat en desar la configuració de la càmera"
+    }
+  },
+  "toast": {
+    "success": "La configuració s'ha desat correctament",
+    "successRestartRequired": "La configuració s'ha desat correctament. Reinicia Frigate per aplicar els canvis.",
+    "error": "No s'ha pogut desar la configuració",
+    "validationError": "Ha fallat la validació: {{message}}",
+    "resetSuccess": "Restableix als valors predeterminats globals",
+    "resetError": "No s'ha pogut restablir la configuració",
+    "saveAllSuccess_one": "S'ha desat la secció {{count}} correctament.",
+    "saveAllSuccess_many": "Totes les {{count}} seccions s'han desat correctament.",
+    "saveAllSuccess_other": "Totes les {{count}} seccions s'han desat correctament.",
+    "saveAllPartial_one": "{{successCount}} de la secció {{totalCount}} desada. {{failCount}} ha fallat.",
+    "saveAllPartial_many": "{{successCount}} de {{totalCount}} seccions desades. {{failCount}} ha fallat.",
+    "saveAllPartial_other": "{{successCount}} de {{totalCount}} seccions desades. {{failCount}} ha fallat.",
+    "saveAllFailure": "Ha fallat en desar totes les seccions.",
+    "applied": "La configuració s'ha aplicat correctament"
+  },
+  "unsavedChanges": "Teniu canvis sense desar",
+  "confirmReset": "Confirma el restabliment",
+  "resetToDefaultDescription": "Això restablirà tots els paràmetres d'aquesta secció als seus valors predeterminats. Aquesta acció no es pot desfer.",
+  "resetToGlobalDescription": "Això restablirà la configuració d'aquesta secció als valors predeterminats globals. Aquesta acció no es pot desfer."
 }

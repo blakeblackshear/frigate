@@ -1,0 +1,23 @@
+{
+    "name": {
+        "label": "Nome da câmera",
+        "description": "Nome da câmera é obrigatório"
+    },
+    "friendly_name": {
+        "label": "Nome amigável",
+        "description": "Nome amigável da câmera utilizado na Interface de Usuário do Frigate"
+    },
+    "enabled": {
+        "label": "Habilitado",
+        "description": "Habilitado"
+    },
+    "audio": {
+        "label": "Eventos de áudio",
+        "description": "Configurações para detecção de eventos baseados em áudio para esta câmera.",
+        "enabled": {
+            "label": "Habilitar detecção de áudio",
+            "description": "Habilitar ou desabilitar o evento de detecção de áudio para esta câmera."
+        }
+    },
+    "label": "Configuração da Câmera"
+}

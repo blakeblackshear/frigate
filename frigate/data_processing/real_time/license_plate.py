@@ -40,6 +40,23 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.camera_current_cars: dict[str, list[str]] = {}
         super().__init__(config, metrics)
 
+    CONFIG_UPDATE_TOPIC = "config/lpr"
+
+    def update_config(self, topic: str, payload: Any) -> None:
+        """Update LPR config at runtime."""
+        if topic != self.CONFIG_UPDATE_TOPIC:
+            return
+
+        previous_min_area = self.config.lpr.min_area
+        self.config.lpr = payload
+        self.lpr_config = payload
+
+        for camera_config in self.config.cameras.values():
+            if camera_config.lpr.min_area == previous_min_area:
+                camera_config.lpr.min_area = payload.min_area
+
+        logger.debug("LPR config updated dynamically")
+
     def process_frame(
         self,
         obj_data: dict[str, Any],

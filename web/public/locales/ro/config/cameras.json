@@ -1,0 +1,941 @@
+{
+    "label": "Configurație Cameră",
+    "name": {
+        "label": "Nume cameră",
+        "description": "Numele camerei este obligatoriu"
+    },
+    "friendly_name": {
+        "label": "Nume prietenos",
+        "description": "Numele camerei afișat în interfața Frigate"
+    },
+    "enabled": {
+        "label": "Activată",
+        "description": "Activată"
+    },
+    "audio": {
+        "label": "Evenimente audio",
+        "description": "Setări pentru detectarea evenimentelor bazate pe sunet pentru această cameră.",
+        "enabled": {
+            "label": "Activare detecție audio",
+            "description": "Activează sau dezactivează detecția evenimentelor audio pentru această cameră."
+        },
+        "max_not_heard": {
+            "label": "Timeout final",
+            "description": "Secunde fără tipul audio configurat înainte ca evenimentul să fie încheiat."
+        },
+        "min_volume": {
+            "label": "Volum minim",
+            "description": "Pragul minim de volum RMS; valorile mici cresc sensibilitatea (ex: 200 ridicată, 500 medie, 1000 scăzută)."
+        },
+        "listen": {
+            "label": "Tipuri ascultate",
+            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, țipăt, vorbire)."
+        },
+        "filters": {
+            "label": "Filtre audio",
+            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere."
+        },
+        "enabled_in_config": {
+            "label": "Stare audio originală",
+            "description": "Indică dacă detecția audio a fost activată inițial în fișierul de configurare static."
+        },
+        "num_threads": {
+            "label": "Thread-uri detecție",
+            "description": "Numărul de thread-uri pentru procesarea detecției audio."
+        }
+    },
+    "audio_transcription": {
+        "label": "Transcriere audio",
+        "description": "Setări pentru transcrierea audio live și a vorbirii pentru evenimente.",
+        "enabled": {
+            "label": "Activare transcriere",
+            "description": "Activează sau dezactivează transcrierea declanșată manual pentru evenimentele audio."
+        },
+        "enabled_in_config": {
+            "label": "Stare transcriere originală"
+        },
+        "live_enabled": {
+            "label": "Transcriere live",
+            "description": "Activează streaming-ul de transcriere live pe măsură ce sunetul e recepționat."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Setări pentru vizualizarea compusă Birdseye care combină mai multe stream-uri într-un singur layout.",
+        "enabled": {
+            "label": "Activare Birdseye",
+            "description": "Activează sau dezactivează funcția Birdseye."
+        },
+        "mode": {
+            "label": "Mod urmărire",
+            "description": "Modul de includere a camerelor în Birdseye: 'objects', 'motion' sau 'continuous'."
+        },
+        "order": {
+            "label": "Poziție",
+            "description": "Poziția numerică ce controlează ordinea camerei în layout-ul Birdseye."
+        }
+    },
+    "detect": {
+        "label": "Detecție obiecte",
+        "description": "Setări pentru rolul de detecție folosit pentru a rula recunoașterea obiectelor și trackerele.",
+        "enabled": {
+            "label": "Detecție activată",
+            "description": "Activează sau dezactivează detecția obiectelor pentru această cameră. Detecția trebuie să fie activă pentru ca urmărirea obiectelor să funcționeze."
+        },
+        "height": {
+            "label": "Înălțime detect",
+            "description": "Înălțimea cadrelor pentru stream-ul de detect; lasă gol pentru rezoluția nativă."
+        },
+        "width": {
+            "label": "Lățime detect",
+            "description": "Lățimea cadrelor pentru stream-ul de detect; lasă gol pentru rezoluția nativă."
+        },
+        "fps": {
+            "label": "FPS detect",
+            "description": "FPS-ul dorit pentru detecție; valori mici reduc consumul CPU (recomandat 5, max 10 pentru obiecte foarte rapide)."
+        },
+        "min_initialized": {
+            "label": "Cadre minime inițializare",
+            "description": "Numărul de detecții consecutive necesare înainte de a crea un obiect urmărit. Crește valoarea pentru a reduce alarmele false."
+        },
+        "max_disappeared": {
+            "label": "Cadre maxime dispariție",
+            "description": "Numărul de cadre fără detecție înainte ca un obiect urmărit să fie considerat dispărut."
+        },
+        "stationary": {
+            "label": "Configurație obiecte staționare",
+            "description": "Setări pentru gestionarea obiectelor care rămân nemișcate o perioadă.",
+            "interval": {
+                "label": "Interval staționar",
+                "description": "Cât de des (în cadre) se verifică prezența unui obiect staționar."
+            },
+            "threshold": {
+                "label": "Prag staționar",
+                "description": "Numărul de cadre fără schimbare de poziție pentru a marca un obiect ca staționar."
+            },
+            "max_frames": {
+                "label": "Cadre maxime",
+                "description": "Limitează cât timp sunt urmărite obiectele staționare înainte de a fi ignorate.",
+                "default": {
+                    "label": "Cadre maxime implicit",
+                    "description": "Valoarea implicită pentru urmărirea obiectelor staționare."
+                },
+                "objects": {
+                    "label": "Cadre maxime per obiect",
+                    "description": "Suprascrieri per obiect pentru durata urmăririi staționare."
+                }
+            },
+            "classifier": {
+                "label": "Activare clasificator vizual",
+                "description": "Folosește un clasificator vizual pentru a detecta obiectele cu adevărat staționare, chiar dacă chenarul oscilează."
+            }
+        },
+        "annotation_offset": {
+            "label": "Offset adnotare",
+            "description": "Milisecunde pentru a decala adnotările de detecție pentru a alinia mai bine chenarele cu înregistrarea."
+        }
+    },
+    "face_recognition": {
+        "label": "Recunoaștere facială",
+        "description": "Setări pentru detecția și recunoașterea fețelor pentru această cameră.",
+        "enabled": {
+            "label": "Activare recunoaștere facială",
+            "description": "Activează sau dezactivează recunoașterea facială."
+        },
+        "min_area": {
+            "label": "Arie minimă față",
+            "description": "Aria minimă (pixeli) pentru a încerca recunoașterea."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "Setări FFmpeg: cale binar, argumente, accelerare hardware și ieșiri per rol.",
+        "path": {
+            "label": "Cale FFmpeg",
+            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"5.0\" sau \"7.0\")."
+        },
+        "global_args": {
+            "label": "Argumente globale FFmpeg",
+            "description": "Argumente globale pasate proceselor FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumente accelerare hardware",
+            "description": "Argumente pentru accelerarea hardware. Se recomandă presetările specifice furnizorului."
+        },
+        "input_args": {
+            "label": "Argumente intrare",
+            "description": "Argumente aplicate stream-urilor de intrare FFmpeg."
+        },
+        "output_args": {
+            "label": "Argumente ieșire",
+            "description": "Argumente de ieșire implicite pentru diverse roluri (detect, record).",
+            "detect": {
+                "label": "Argumente ieșire detect",
+                "description": "Argumente implicite pentru stream-urile cu rol detect."
+            },
+            "record": {
+                "label": "Argumente ieșire record",
+                "description": "Argumente implicite pentru stream-urile cu rol record."
+            }
+        },
+        "retry_interval": {
+            "label": "Timp reîncercare FFmpeg",
+            "description": "Secunde de așteptare înainte de reconectarea unui stream după o eroare. Implicit 10."
+        },
+        "apple_compatibility": {
+            "label": "Compatibilitate Apple",
+            "description": "Activează tag-ul HEVC pentru compatibilitate mai bună cu playerele Apple la înregistrările H.265."
+        },
+        "gpu": {
+            "label": "Index GPU",
+            "description": "Indexul GPU implicit folosit pentru accelerarea hardware."
+        },
+        "inputs": {
+            "label": "Intrări cameră",
+            "description": "Listă de definiții pentru stream-urile de intrare (căi și roluri).",
+            "path": {
+                "label": "Cale intrare",
+                "description": "URL-ul sau calea stream-ului de intrare al camerei."
+            },
+            "roles": {
+                "label": "Roluri intrare",
+                "description": "Rolurile atribuite acestui stream de intrare."
+            },
+            "global_args": {
+                "label": "Argumente globale FFmpeg",
+                "description": "Argumente globale pentru acest stream de intrare."
+            },
+            "hwaccel_args": {
+                "label": "Argumente accelerare hardware",
+                "description": "Argumente de accelerare hardware pentru acest stream."
+            },
+            "input_args": {
+                "label": "Argumente intrare",
+                "description": "Argumente specifice acestui stream."
+            }
+        }
+    },
+    "live": {
+        "label": "Redare live",
+        "description": "Setări folosite de interfața web pentru a controla selecția, rezoluția și calitatea stream-ului live.",
+        "streams": {
+            "label": "Nume stream-uri live",
+            "description": "Maparea numelor de stream-uri configurate către numele restream/go2rtc folosite live."
+        },
+        "height": {
+            "label": "Înălțime live",
+            "description": "Înălțimea (pixeli) pentru redarea jsmpeg în UI; trebuie să fie <= înălțimea stream-ului de detect."
+        },
+        "quality": {
+            "label": "Calitate live",
+            "description": "Calitatea encodării pentru stream-ul jsmpeg (1 maxim, 31 minim)."
+        }
+    },
+    "lpr": {
+        "label": "Recunoaștere numere înmatriculare",
+        "description": "Setări pentru recunoașterea numerelor de înmatriculare, inclusiv praguri de detecție, formatare și numere cunoscute.",
+        "enabled": {
+            "label": "Activare LPR",
+            "description": "Activează sau dezactivează LPR pe această cameră."
+        },
+        "expire_time": {
+            "label": "Secunde expirare",
+            "description": "Timpul în secunde după care un număr nevăzut este expirat din tracker (doar pentru camerele LPR dedicate)."
+        },
+        "min_area": {
+            "label": "Arie minimă plăcuță",
+            "description": "Aria minimă (pixeli) pentru a încerca recunoașterea."
+        },
+        "enhancement": {
+            "label": "Nivel îmbunătățire",
+            "description": "Nivelul de îmbunătățire (0-10) aplicat decupajelor cu numere înainte de OCR; valorile mai mari nu îmbunătățesc mereu rezultatele, iar nivelurile peste 5 pot funcționa doar cu numerele pe timp de noapte și trebuie folosite cu atenție."
+        }
+    },
+    "motion": {
+        "label": "Detecție mișcare",
+        "description": "Setări implicite pentru detecția mișcării pentru această cameră.",
+        "enabled": {
+            "label": "Activare detecție mișcare",
+            "description": "Activează sau dezactivează detecția mișcării pentru această cameră."
+        },
+        "threshold": {
+            "label": "Prag mișcare",
+            "description": "Pragul de diferență între pixeli; valorile mari reduc sensibilitatea (1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Prag fulger/lumină",
+            "description": "Prag pentru detectarea și ignorarea vârfurilor scurte de lumină (o valoare mai mică este mai sensibilă, valori între 0.3 și 1.0). Acest lucru nu oprește complet detecția mișcării; doar determină detectorul să nu mai analizeze cadre suplimentare odată ce pragul este depășit. Înregistrările bazate pe mișcare sunt create în continuare în timpul acestor evenimente."
+        },
+        "improve_contrast": {
+            "label": "Îmbunătățire contrast",
+            "description": "Aplică o îmbunătățire a contrastului înainte de analiza mișcării pentru a ajuta detecția."
+        },
+        "contour_area": {
+            "label": "Arie contur",
+            "description": "Aria minimă a conturului în pixeli pentru a fi considerat mișcare."
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "Factor de blending alpha folosit în diferențierea cadrelor."
+        },
+        "frame_alpha": {
+            "label": "Cadru alfa",
+            "description": "Valoarea alpha pentru amestecarea cadrelor la preprocesarea mișcării."
+        },
+        "frame_height": {
+            "label": "Înălțime cadru",
+            "description": "Înălțimea la care sunt scalate cadrele pentru calculul mișcării."
+        },
+        "mask": {
+            "label": "Coordonate mască",
+            "description": "Coordonate x,y care definesc poligonul măștii de mișcare."
+        },
+        "mqtt_off_delay": {
+            "label": "Întârziere MQTT off",
+            "description": "Secunde de așteptare după ultima mișcare înainte de a trimite starea 'off' prin MQTT."
+        },
+        "enabled_in_config": {
+            "label": "Stare mișcare originală",
+            "description": "Indică dacă detecția mișcării a fost activă în configurația inițială."
+        },
+        "raw_mask": {
+            "label": "Mască brută"
+        },
+        "skip_motion_threshold": {
+            "label": "Ignoră pragul de mișcare",
+            "description": "Dacă se schimbă mai mult de această fracțiune din imagine într-un singur cadru, detectorul nu va returna nicio casetă de mișcare și se va recalibra imediat. Acest lucru poate economisi CPU și reduce alertele false în timpul fulgerelor, furtunilor etc., dar poate rata evenimente reale, cum ar fi o cameră PTZ care urmărește automat un obiect. Compromisul este între a pierde câțiva megaocteți de înregistrări versus a revizui câteva clipuri scurte. Interval 0.0 - 1.0."
+        }
+    },
+    "objects": {
+        "label": "Obiecte",
+        "description": "Setări implicite pentru urmărire, inclusiv ce etichete se urmăresc și filtrele per obiect.",
+        "track": {
+            "label": "Obiecte de urmărit",
+            "description": "Lista etichetelor de obiecte de urmărit pentru această cameră."
+        },
+        "filters": {
+            "label": "Filtre obiecte",
+            "description": "Filtre pentru a reduce alarmele false (arie, raport, încredere).",
+            "min_area": {
+                "label": "Arie minimă obiect",
+                "description": "Aria minimă a chenarului (pixeli sau procent)."
+            },
+            "max_area": {
+                "label": "Arie maximă obiect",
+                "description": "Aria maximă a chenarului (pixeli sau procent)."
+            },
+            "min_ratio": {
+                "label": "Raport aspect minim",
+                "description": "Raportul minim lățime/înălțime pentru chenar."
+            },
+            "max_ratio": {
+                "label": "Raport aspect maxim",
+                "description": "Raportul maxim lățime/înălțime pentru chenar."
+            },
+            "threshold": {
+                "label": "Prag încredere",
+                "description": "Încrederea medie necesară pentru a considera obiectul valid."
+            },
+            "min_score": {
+                "label": "Scor minim",
+                "description": "Încrederea minimă la un singur cadru pentru a număra obiectul."
+            },
+            "mask": {
+                "label": "Mască filtru",
+                "description": "Poligonul unde se aplică acest filtru în cadru."
+            },
+            "raw_mask": {
+                "label": "Mască brută"
+            }
+        },
+        "mask": {
+            "label": "Mască obiect",
+            "description": "Mască pentru a preveni detecția obiectelor în anumite zone."
+        },
+        "raw_mask": {
+            "label": "Mască brută"
+        },
+        "genai": {
+            "label": "Configurație obiecte GenAI",
+            "description": "Opțiuni GenAI pentru descrierea obiectelor urmărite și trimiterea cadrelor.",
+            "enabled": {
+                "label": "Activare GenAI",
+                "description": "Activează generarea de descrieri prin GenAI pentru obiectele urmărite."
+            },
+            "use_snapshot": {
+                "label": "Folosește snapshot-uri",
+                "description": "Folosește snapshot-urile obiectelor în loc de miniaturi pentru GenAI."
+            },
+            "prompt": {
+                "label": "Prompt descriere",
+                "description": "Șablonul de prompt implicit pentru descrierile GenAI."
+            },
+            "object_prompts": {
+                "label": "Prompt-uri per obiect",
+                "description": "Prompt-uri personalizate pentru anumite etichete de obiecte."
+            },
+            "objects": {
+                "label": "Obiecte GenAI",
+                "description": "Lista etichetelor de obiecte care vor fi trimise la GenAI."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Zonele prin care trebuie să treacă obiectele pentru a genera descrieri."
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvează miniaturile",
+                "description": "Salvează miniaturile trimise la GenAI pentru depanare."
+            },
+            "send_triggers": {
+                "label": "Trigger-e GenAI",
+                "description": "Definește când sunt trimise cadrele la GenAI (la final, după actualizări etc.).",
+                "tracked_object_end": {
+                    "label": "Trimite la final",
+                    "description": "Trimite cererea la GenAI când urmărirea obiectului s-a terminat."
+                },
+                "after_significant_updates": {
+                    "label": "Trigger GenAI timpuriu",
+                    "description": "Trimite la GenAI după un număr de actualizări semnificative ale obiectului."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Stare GenAI originală",
+                "description": "Indică dacă GenAI a fost activat în configurația inițială."
+            }
+        }
+    },
+    "record": {
+        "label": "Înregistrare",
+        "description": "Setări de înregistrare și retenție pentru această cameră.",
+        "enabled": {
+            "label": "Activare înregistrare",
+            "description": "Activează sau dezactivează înregistrarea pentru această cameră."
+        },
+        "expire_interval": {
+            "label": "Interval curățare înregistrări",
+            "description": "Minute între trecerile de curățare a segmentelor expirate."
+        },
+        "continuous": {
+            "label": "Retenție continuă",
+            "description": "Zile de păstrare a înregistrărilor indiferent de obiecte sau mișcare. Pune 0 pentru a păstra doar alerte/detecții.",
+            "days": {
+                "label": "Zile retenție",
+                "description": "Numărul de zile pentru păstrare."
+            }
+        },
+        "motion": {
+            "label": "Retenție mișcare",
+            "description": "Zile de păstrare pentru înregistrările declanșate de mișcare.",
+            "days": {
+                "label": "Zile retenție",
+                "description": "Numărul de zile pentru păstrare."
+            }
+        },
+        "detections": {
+            "label": "Retenție detecții",
+            "description": "Setări pentru evenimentele de detecție, inclusiv duratele pre/post captură.",
+            "pre_capture": {
+                "label": "Secunde pre-captură",
+                "description": "Secunde incluse înainte de evenimentul detectat."
+            },
+            "post_capture": {
+                "label": "Secunde post-captură",
+                "description": "Secunde incluse după încheierea evenimentului."
+            },
+            "retain": {
+                "label": "Retenție eveniment",
+                "description": "Setări de retenție pentru clipurile cu detecții.",
+                "days": {
+                    "label": "Zile retenție",
+                    "description": "Numărul de zile de păstrare."
+                },
+                "mode": {
+                    "label": "Mod retenție",
+                    "description": "Mod: 'all' (tot), 'motion' (doar segmente cu mișcare) sau 'active_objects' (doar cu obiecte active)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Retenție alerte",
+            "description": "Setări de retenție pentru evenimentele de tip alertă.",
+            "pre_capture": {
+                "label": "Secunde pre-captură",
+                "description": "Secunde incluse înainte de alertă."
+            },
+            "post_capture": {
+                "label": "Secunde post-captură",
+                "description": "Secunde incluse după alertă."
+            },
+            "retain": {
+                "label": "Retenție eveniment",
+                "description": "Setări de păstrare pentru alerte.",
+                "days": {
+                    "label": "Zile retenție",
+                    "description": "Numărul de zile pentru păstrare."
+                },
+                "mode": {
+                    "label": "Mod retenție",
+                    "description": "Modul de păstrare a segmentelor."
+                }
+            }
+        },
+        "export": {
+            "label": "Configurație export",
+            "description": "Setări pentru exportul înregistrărilor (timelapse, accelerare hardware).",
+            "hwaccel_args": {
+                "label": "Argumente hwaccel export",
+                "description": "Argumente de accelerare hardware pentru operațiunile de export/transcodare."
+            }
+        },
+        "preview": {
+            "label": "Configurație preview",
+            "description": "Setări pentru calitatea preview-urilor din interfață.",
+            "quality": {
+                "label": "Calitate preview",
+                "description": "Nivel calitate (foarte_scăzută, scăzută, medie, ridicată, foarte ridicată)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Stare înregistrare originală",
+            "description": "Indică dacă înregistrarea a fost activă în configurația inițială."
+        }
+    },
+    "review": {
+        "label": "Revizuire",
+        "description": "Setări care controlează alertele, detecțiile și rezumatele de tip GenAI folosite de interfață și stocare pentru această cameră.",
+        "alerts": {
+            "label": "Configurație alerte",
+            "description": "Setări pentru obiectele care generează alerte și modul lor de retenție.",
+            "enabled": {
+                "label": "Activare alerte",
+                "description": "Activează sau dezactivează generarea de alerte pentru această cameră."
+            },
+            "labels": {
+                "label": "Etichete alerte",
+                "description": "Obiecte care sunt considerate alerte (ex: om, mașină)."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Zonele necesare pentru a declanșa o alertă."
+            },
+            "enabled_in_config": {
+                "label": "Stare alerte originală",
+                "description": "Dacă alertele au fost active inițial în fișierul de config."
+            },
+            "cutoff_time": {
+                "label": "Timp limită alerte",
+                "description": "Secunde de așteptare după încetarea activității înainte de a încheia alerta."
+            }
+        },
+        "detections": {
+            "label": "Configurație detecții",
+            "description": "Setări pentru evenimentele de detecție (non-alertă).",
+            "enabled": {
+                "label": "Activare detecții",
+                "description": "Activează sau dezactivează evenimentele de detecție pentru această cameră."
+            },
+            "labels": {
+                "label": "Etichete detecții",
+                "description": "Obiecte care se consideră detecții."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Zonele necesare pentru o detecție."
+            },
+            "cutoff_time": {
+                "label": "Timp limită detecții",
+                "description": "Secunde de așteptare înainte de a încheia o detecție."
+            },
+            "enabled_in_config": {
+                "label": "Stare detecții originală",
+                "description": "Dacă detecțiile au fost active în configurația inițială."
+            }
+        },
+        "genai": {
+            "label": "Configurație GenAI",
+            "description": "Controlul AI-ului generativ pentru descrieri și rezumate în review.",
+            "enabled": {
+                "label": "Activare descrieri GenAI",
+                "description": "Activează descrierile și rezumatele generate de AI pentru elementele de review."
+            },
+            "alerts": {
+                "label": "GenAI pentru alerte",
+                "description": "Folosește GenAI pentru descrierea alertelor."
+            },
+            "detections": {
+                "label": "GenAI pentru detecții",
+                "description": "Folosește GenAI pentru descrierea detecțiilor."
+            },
+            "image_source": {
+                "label": "Sursă imagine review",
+                "description": "Sursa imaginilor ('preview' sau 'recordings'); 'recordings' e mai calitativ dar consumă mai multe token-uri."
+            },
+            "additional_concerns": {
+                "label": "Preocupări suplimentare",
+                "description": "Listă de note sau griji pe care GenAI să le considere când evaluează activitatea pe cameră."
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvează miniaturile",
+                "description": "Salvează miniaturile trimise la furnizorul GenAI pentru depanare."
+            },
+            "enabled_in_config": {
+                "label": "Stare GenAI originală",
+                "description": "Dacă review-ul GenAI a fost activ inițial."
+            },
+            "preferred_language": {
+                "label": "Limbă preferată",
+                "description": "Limba în care vrei ca GenAI să genereze răspunsurile."
+            },
+            "activity_context_prompt": {
+                "label": "Prompt context activitate",
+                "description": "Prompt personalizat care descrie ce este suspect și ce nu pentru rezumatele GenAI."
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Căutare semantică",
+        "description": "Setări pentru căutarea semantică care construiește și interoghează înglobări de obiecte pentru a găsi elemente similare.",
+        "triggers": {
+            "label": "Trigger-e",
+            "description": "Acțiuni și criterii pentru trigger-ele de căutare semantică specifice camerelor.",
+            "friendly_name": {
+                "label": "Nume sugestiv",
+                "description": "Nume opțional afișat în UI pentru acest trigger."
+            },
+            "enabled": {
+                "label": "Activare trigger",
+                "description": "Activează sau dezactivează acest trigger."
+            },
+            "type": {
+                "label": "Tip trigger",
+                "description": "Tip: 'thumbnail' (compară cu imagine) sau 'description' (compară cu text)."
+            },
+            "data": {
+                "label": "Conținut trigger",
+                "description": "Textul sau ID-ul miniaturii de comparat cu obiectele urmărite."
+            },
+            "threshold": {
+                "label": "Prag trigger",
+                "description": "Scorul minim de similitudine (0-1) pentru activare."
+            },
+            "actions": {
+                "label": "Acțiuni trigger",
+                "description": "Lista de acțiuni (notificare, sub_label, atribut) la activare."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Snapshot-uri",
+        "description": "Setări pentru snapshot-urile JPEG salvate ale obiectelor monitorizate de această cameră.",
+        "enabled": {
+            "label": "Snapshot-uri activate",
+            "description": "Activează sau dezactivează salvarea de snapshots pentru această cameră."
+        },
+        "clean_copy": {
+            "label": "Salvează copie curată",
+            "description": "Salvează și o copie fără adnotări a snapshot-ului."
+        },
+        "timestamp": {
+            "label": "Overlay timestamp",
+            "description": "Pune data și ora pe snapshot-urile salvate."
+        },
+        "bounding_box": {
+            "label": "Overlay chenar",
+            "description": "Desenează chenarele obiectelor pe snapshot-uri."
+        },
+        "crop": {
+            "label": "Decupează snapshot-ul",
+            "description": "Decupează snapshot-ul pe mărimea obiectului detectat."
+        },
+        "required_zones": {
+            "label": "Zone obligatorii",
+            "description": "Zonele prin care trebuie să treacă un obiect pentru a salva un snapshot."
+        },
+        "height": {
+            "label": "Înălțime snapshot",
+            "description": "Înălțimea la care se redimensionează snapshot-ul; lasă gol pentru dimensiunea originală."
+        },
+        "retain": {
+            "label": "Retenție snapshot-uri",
+            "description": "Setări pentru păstrarea snapshot-urilor.",
+            "default": {
+                "label": "Retenție implicită",
+                "description": "Numărul implicit de zile pentru păstrare."
+            },
+            "mode": {
+                "label": "Mod retenție",
+                "description": "Mod retenție: 'all', 'motion' sau 'active_objects'."
+            },
+            "objects": {
+                "label": "Retenție per obiect",
+                "description": "Suprascrieri pentru zilele de retenție ale snapshot-urilor per obiect."
+            }
+        },
+        "quality": {
+            "label": "Calitate JPEG",
+            "description": "Calitatea encodării JPEG pentru snapshot-uri (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "label": "Stil timestamp",
+        "description": "Opțiuni de stilizare pentru timestamp-ul din flux, aplicate înregistrărilor și snapshot-urilor.",
+        "position": {
+            "label": "Poziție timestamp",
+            "description": "Unde apare data/ora pe imagine (stânga-sus/dreapta-sus etc.)."
+        },
+        "format": {
+            "label": "Format timestamp",
+            "description": "Formatul datei (coduri Python datetime)."
+        },
+        "color": {
+            "label": "Culoare timestamp",
+            "description": "Valori RGB pentru textul datei.",
+            "red": {
+                "label": "Roșu",
+                "description": "Componenta roșie (0-255)."
+            },
+            "green": {
+                "label": "Verde",
+                "description": "Componenta verde (0-255)."
+            },
+            "blue": {
+                "label": "Albastru",
+                "description": "Componenta albastră (0-255)."
+            }
+        },
+        "thickness": {
+            "label": "Grosime timestamp",
+            "description": "Grosimea liniei textului."
+        },
+        "effect": {
+            "label": "Efect timestamp",
+            "description": "Efect vizual pentru text (fără, solid, umbră)."
+        }
+    },
+    "best_image_timeout": {
+        "label": "Timp limită cea mai bună imagine",
+        "description": "Cât timp să se aștepte pentru imaginea cu cel mai mare scor de încredere."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Setări de publicare a imaginilor prin MQTT.",
+        "enabled": {
+            "label": "Trimite imagine",
+            "description": "Activează publicarea de snapshot-uri cu imagini pentru obiecte pe topic-urile MQTT pentru această cameră."
+        },
+        "timestamp": {
+            "label": "Adaugă timestamp",
+            "description": "Suprapune un timestamp pe imaginile publicate pe MQTT."
+        },
+        "bounding_box": {
+            "label": "Adaugă bounding box",
+            "description": "Desenează chenare pe imaginile publicate prin MQTT."
+        },
+        "crop": {
+            "label": "Decupează imaginea",
+            "description": "Decupează imaginile publicate pe MQTT la dimensiunea chenarului obiectului detectat."
+        },
+        "height": {
+            "label": "Înălțime imagine",
+            "description": "Înălțimea (pixeli) la care să fie redimensionate imaginile publicate prin MQTT."
+        },
+        "required_zones": {
+            "label": "Zone obligatorii",
+            "description": "Zonele în care trebuie să intre un obiect pentru ca o imagine MQTT să fie publicată."
+        },
+        "quality": {
+            "label": "Calitate JPEG",
+            "description": "Calitatea JPEG pentru imaginile publicate pe MQTT (0-100)."
+        }
+    },
+    "notifications": {
+        "label": "Notificări",
+        "description": "Setări pentru activarea și controlul notificărilor pentru această cameră.",
+        "enabled": {
+            "label": "Activează notificările",
+            "description": "Activează sau dezactivează notificările pentru această cameră."
+        },
+        "email": {
+            "label": "Email notificare",
+            "description": "Adresa de email folosită pentru notificări push sau cerută de anumiți furnizori de notificări."
+        },
+        "cooldown": {
+            "label": "Perioadă de răcire",
+            "description": "Timpul de așteptare (secunde) între notificări pentru a evita spamarea destinatarilor."
+        },
+        "enabled_in_config": {
+            "label": "Stare originală notificări",
+            "description": "Indică dacă notificările au fost activate în configurația statică originală."
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Setări pentru conexiunea ONVIF și autotracking PTZ pentru această cameră.",
+        "host": {
+            "label": "Gazdă ONVIF",
+            "description": "Gazda (și schema opțională) pentru serviciul ONVIF al acestei camere."
+        },
+        "port": {
+            "label": "Port ONVIF",
+            "description": "Numărul portului pentru serviciul ONVIF."
+        },
+        "user": {
+            "label": "Utilizator ONVIF",
+            "description": "Utilizator pentru autentificarea ONVIF; unele dispozitive necesită un utilizator administrator pentru ONVIF."
+        },
+        "password": {
+            "label": "Parolă ONVIF",
+            "description": "Parola pentru autentificarea ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Dezactivează verificare TLS",
+            "description": "Sari peste verificarea TLS și dezactivează autentificarea digest pentru ONVIF (nesigur; a se utiliza doar în rețele sigure)."
+        },
+        "autotracking": {
+            "label": "Urmărire automată",
+            "description": "Urmărește automat obiectele în mișcare și menține-le centrate în cadru folosind mișcările camerei PTZ.",
+            "enabled": {
+                "label": "Activează Autotracking",
+                "description": "Activează sau dezactivează urmărirea automată PTZ a obiectelor detectate."
+            },
+            "calibrate_on_startup": {
+                "label": "Calibrare la pornire",
+                "description": "Măsoară vitezele motorului PTZ la pornire pentru a îmbunătăți precizia urmăririi. Frigate va actualiza config-ul cu movement_weights după calibrare."
+            },
+            "zooming": {
+                "label": "Mod zoom",
+                "description": "Controlează comportamentul zoom-ului: dezactivat (doar pan/tilt), absolut (cel mai compatibil) sau relativ (pan/tilt/zoom concurent)."
+            },
+            "zoom_factor": {
+                "label": "Factor zoom",
+                "description": "Controlează nivelul de zoom pe obiectele urmărite. Valorile mai mici păstrează mai mult din scenă; valorile mai mari fac zoom mai aproape, dar pot pierde urmărirea. Valori între 0.1 și 0.75."
+            },
+            "track": {
+                "label": "Obiecte urmărite",
+                "description": "Listă de tipuri de obiecte care ar trebui să declanșeze autotracking-ul."
+            },
+            "required_zones": {
+                "label": "Zone obligatorii",
+                "description": "Obiectele trebuie să intre în una dintre aceste zone înainte ca autotracking-ul să înceapă."
+            },
+            "return_preset": {
+                "label": "Preset de întoarcere",
+                "description": "Numele preset-ului ONVIF configurat în firmware-ul camerei pentru întoarcere după ce urmărirea se termină."
+            },
+            "timeout": {
+                "label": "Timeout întoarcere",
+                "description": "Așteaptă acest număr de secunde după pierderea urmăririi înainte de a returna camera la poziția presetată."
+            },
+            "movement_weights": {
+                "label": "Ponderi mișcare",
+                "description": "Valori de calibrare generate automat de calibrarea camerei. Nu modifica manual."
+            },
+            "enabled_in_config": {
+                "label": "Stare originală autotrack",
+                "description": "Câmp intern pentru a urmări dacă autotracking-ul a fost activat în configurație."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignoră decalaj timp",
+            "description": "Ignoră diferențele de sincronizare a timpului între cameră și serverul Frigate pentru comunicarea ONVIF."
+        }
+    },
+    "type": {
+        "label": "Tip cameră",
+        "description": "Tipul Camerei"
+    },
+    "ui": {
+        "label": "Interfață cameră",
+        "description": "Ordinea de afișare și vizibilitatea pentru această cameră în interfață. Ordinea afectează dashboard-ul implicit. Pentru control mai granular, folosește grupuri de camere.",
+        "order": {
+            "label": "Ordine interfață",
+            "description": "Ordine numerică folosită pentru sortarea camerei în interfață (dashboard și liste); numerele mai mari apar mai târziu."
+        },
+        "dashboard": {
+            "label": "Arată în interfață",
+            "description": "Comută vizibilitatea acestei camere peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a configurației pentru a vedea din nou camera în interfață."
+        }
+    },
+    "webui_url": {
+        "label": "URL cameră",
+        "description": "URL pentru a vizita camera direct din pagina de sistem"
+    },
+    "zones": {
+        "label": "Zone",
+        "description": "Zonele îți permit să definești o arie specifică în cadru pentru a determina dacă un obiect se află sau nu într-un anumit loc.",
+        "friendly_name": {
+            "label": "Nume zonă",
+            "description": "Un nume ușor de recunoscut pentru zonă, afișat în interfața Frigate. Dacă nu este setat, se va folosi o versiune formatată a numelui zonei."
+        },
+        "enabled": {
+            "label": "Activat",
+            "description": "Activează sau dezactivează această zonă. Zonele dezactivate sunt ignorate în timpul funcționării."
+        },
+        "enabled_in_config": {
+            "label": "Păstrează starea originală a zonei."
+        },
+        "filters": {
+            "label": "Filtre zonă",
+            "description": "Filtre aplicate obiectelor din această zonă. Folosite pentru a reduce alarmele false sau pentru a restricționa ce obiecte sunt considerate prezente în zonă.",
+            "min_area": {
+                "label": "Aria minimă obiect",
+                "description": "Aria minimă a chenarului (pixeli sau procentaj) necesară pentru acest tip de obiect. Poate fi în pixeli (int) sau procentaj (float între 0.000001 și 0.99)."
+            },
+            "max_area": {
+                "label": "Aria maximă obiect",
+                "description": "Aria maximă a chenarului (pixeli sau procentaj) permisă pentru acest tip de obiect. Poate fi în pixeli (int) sau procentaj (float între 0.000001 și 0.99)."
+            },
+            "min_ratio": {
+                "label": "Raport aspect minim",
+                "description": "Raportul minim lățime/înălțime cerut pentru ca chenarul să se califice."
+            },
+            "max_ratio": {
+                "label": "Raport aspect maxim",
+                "description": "Raportul maxim lățime/înălțime permis pentru ca chenarul să se califice."
+            },
+            "threshold": {
+                "label": "Prag de încredere",
+                "description": "Pragul mediu de încredere a detecției necesar pentru ca obiectul să fie considerat un rezultat real."
+            },
+            "min_score": {
+                "label": "Încredere minimă",
+                "description": "Încrederea minimă a detecției pe un singur cadru necesară pentru ca obiectul să fie numărat."
+            },
+            "mask": {
+                "label": "Mască filtru",
+                "description": "Coordonatele poligonului care definesc unde se aplică acest filtru în cadrul imaginii."
+            },
+            "raw_mask": {
+                "label": "Mască brută"
+            }
+        },
+        "coordinates": {
+            "label": "Coordonate",
+            "description": "Coordonatele poligonului care definesc aria zonei. Poate fi un șir separat prin virgule sau o listă de șiruri de coordonate. Coordonatele trebuie să fie relative (0-1) sau absolute (legacy)."
+        },
+        "distances": {
+            "label": "Distanțe reale",
+            "description": "Distanțe reale opționale pentru fiecare latură a patrulaterului zonei, folosite pentru calcule de viteză sau distanță. Trebuie să aibă exact 4 valori dacă este setat."
+        },
+        "inertia": {
+            "label": "Cadre de inerție",
+            "description": "Numărul de cadre consecutive în care un obiect trebuie detectat în zonă înainte de a fi considerat prezent. Ajută la filtrarea detecțiilor trecătoare."
+        },
+        "loitering_time": {
+            "label": "Secunde staționare",
+            "description": "Numărul de secunde în care un obiect trebuie să rămână în zonă pentru a fi considerat în staționare (loitering). Setează pe 0 pentru a dezactiva detecția staționării."
+        },
+        "speed_threshold": {
+            "label": "Viteză minimă",
+            "description": "Viteza minimă (în unități reale dacă distanțele sunt setate) necesară pentru ca un obiect să fie considerat prezent în zonă. Folosit pentru trigger-e de zonă bazate pe viteză."
+        },
+        "objects": {
+            "label": "Obiecte trigger",
+            "description": "Lista tipurilor de obiecte (din labelmap) care pot declanșa această zonă. Poate fi un șir sau o listă de șiruri. Dacă este gol, toate obiectele sunt luate în considerare."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Stare inițială cameră",
+        "description": "Păstrează starea originală a camerei."
+    }
+}

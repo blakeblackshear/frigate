@@ -67,7 +67,8 @@
     "logs": {
       "frigate": "Frigate Protokolle – Frigate",
       "go2rtc": "Go2RTC Protokolle - Frigate",
-      "nginx": "Nginx Protokolle - Frigate"
+      "nginx": "Nginx Protokolle - Frigate",
+      "websocket": "Nachrichten Logs- Frigate"
     },
     "enrichments": "Erweiterte Statistiken - Frigate"
   },
@@ -93,7 +94,32 @@
         "whileStreamingLogs": "Beim Übertragen der Protokolle ist ein Fehler aufgetreten: {{errorMessage}}"
       }
     },
-    "tips": "Protokolle werden in Echtzeit vom Server übertragen"
+    "tips": "Protokolle werden in Echtzeit vom Server übertragen",
+    "websocket": {
+      "label": "Nachrichten",
+      "pause": "Pause",
+      "clear": "Säubern",
+      "filter": {
+        "all": "alle Themen",
+        "topics": "Themen",
+        "events": "Event",
+        "reviews": "Bewertungen",
+        "classification": "Klassifizierung",
+        "face_recognition": "Gesichtserkennung",
+        "lpr": "LPR",
+        "camera_activity": "Kameraaktivität",
+        "system": "System",
+        "camera": "Kamera",
+        "all_cameras": "Alle Kameras",
+        "cameras_count_one": "{{count}} Kamera",
+        "cameras_count_other": "{{count}} Kameras"
+      },
+      "empty": "Noch keine Nachrichten erfasst",
+      "count": "{{count}} Nachrichten",
+      "expanded": {
+        "payload": "Nutzlast"
+      }
+    }
   },
   "metrics": "Systemmetriken",
   "storage": {

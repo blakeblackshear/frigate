@@ -801,9 +801,10 @@ export default function DraggableGridLayout({
                   toggleStats={() => toggleStats(camera.name)}
                   volumeState={volumeStates[camera.name]}
                   setVolumeState={(value) =>
-                    setVolumeStates({
+                    setVolumeStates((prev) => ({
+                      ...prev,
                       [camera.name]: value,
-                    })
+                    }))
                   }
                   muteAll={muteAll}
                   unmuteAll={unmuteAll}

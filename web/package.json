@@ -78,8 +78,6 @@
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.30.3",
     "react-swipeable": "^7.0.2",
-    "react-tracked": "^2.0.1",
-    "react-use-websocket": "^4.8.1",
     "react-zoom-pan-pinch": "^3.7.0",
     "remark-gfm": "^4.0.0",
     "scroll-into-view-if-needed": "^3.1.0",

@@ -1,3 +1,6 @@
+/** ONNX embedding models that require local model downloads. GenAI providers are not in this list. */
+export const JINA_EMBEDDING_MODELS = ["jinav1", "jinav2"] as const;
+
 export const supportedLanguageKeys = [
   "en",
   "es",

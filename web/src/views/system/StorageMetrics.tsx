@@ -131,6 +131,35 @@ export default function StorageMetrics({
     timezone,
   );
 
+  const shmFrameLifetime = useMemo(() => {
+    if (!stats || !config) {
+      return undefined;
+    }
+
+    const shmFrameCount = stats.service.storage["/dev/shm"]?.shm_frame_count;
+
+    if (!shmFrameCount || shmFrameCount <= 0) {
+      return undefined;
+    }
+
+    let maxCameraFps = 0;
+
+    for (const [name, camStats] of Object.entries(stats.cameras)) {
+      if (config.cameras[name]?.enabled && camStats.camera_fps > 0) {
+        maxCameraFps = Math.max(maxCameraFps, camStats.camera_fps);
+      }
+    }
+
+    if (maxCameraFps === 0) {
+      return undefined;
+    }
+
+    return {
+      frames: shmFrameCount,
+      lifetime: Math.round((shmFrameCount / maxCameraFps) * 10) / 10,
+    };
+  }, [stats, config]);
+
   if (!cameraStorage || !stats || !totalStorage || !config) {
     return;
   }
@@ -190,43 +219,68 @@ export default function StorageMetrics({
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5 flex flex-row items-center justify-between">
             /dev/shm
-            {stats.service.storage["/dev/shm"]["total"] <
-              (stats.service.storage["/dev/shm"]["min_shm"] ?? 0) && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    className="focus:outline-none"
-                    aria-label={t("storage.shm.title")}
-                  >
-                    <FaExclamationTriangle
-                      className="size-5 text-danger"
-                      aria-label={t("storage.shm.title")}
-                    />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-2">
-                    {t("storage.shm.warning", {
-                      total: stats.service.storage["/dev/shm"]["total"],
-                      min_shm: stats.service.storage["/dev/shm"]["min_shm"],
-                    })}
-                    <div className="mt-2 flex items-center text-primary">
-                      <Link
-                        to={getLocaleDocUrl(
-                          "frigate/installation#calculating-required-shm-size",
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline"
-                      >
-                        {t("readTheDocumentation", { ns: "common" })}
-                        <LuExternalLink className="ml-2 inline-flex size-3" />
-                      </Link>
+            <div className="flex flex-row items-center gap-2">
+              {shmFrameLifetime && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="focus:outline-none"
+                      aria-label={t("storage.shm.frameLifetime.title")}
+                    >
+                      <CiCircleAlert
+                        className="size-5"
+                        aria-label={t("storage.shm.frameLifetime.title")}
+                      />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-2">
+                      {t("storage.shm.frameLifetime.description", {
+                        frames: shmFrameLifetime.frames,
+                        lifetime: shmFrameLifetime.lifetime,
+                      })}
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
+                  </PopoverContent>
+                </Popover>
+              )}
+              {stats.service.storage["/dev/shm"]["total"] <
+                (stats.service.storage["/dev/shm"]["min_shm"] ?? 0) && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="focus:outline-none"
+                      aria-label={t("storage.shm.title")}
+                    >
+                      <FaExclamationTriangle
+                        className="size-5 text-danger"
+                        aria-label={t("storage.shm.title")}
+                      />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-2">
+                      {t("storage.shm.warning", {
+                        total: stats.service.storage["/dev/shm"]["total"],
+                        min_shm: stats.service.storage["/dev/shm"]["min_shm"],
+                      })}
+                      <div className="mt-2 flex items-center text-primary">
+                        <Link
+                          to={getLocaleDocUrl(
+                            "frigate/installation#calculating-required-shm-size",
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline"
+                        >
+                          {t("readTheDocumentation", { ns: "common" })}
+                          <LuExternalLink className="ml-2 inline-flex size-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
           </div>
           <StorageGraph
             graphId="general-shared-memory"

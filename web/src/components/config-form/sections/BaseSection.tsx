@@ -56,6 +56,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
   cameraUpdateTopicMap,
+  globalCameraDefaultSections,
   buildOverrides,
   buildConfigDataForPath,
   sanitizeSectionData as sharedSanitizeSectionData,
@@ -234,7 +235,10 @@ export function ConfigSection({
       ? cameraUpdateTopicMap[sectionPath]
         ? `config/cameras/${cameraName}/${cameraUpdateTopicMap[sectionPath]}`
         : undefined
-      : `config/${sectionPath}`;
+      : globalCameraDefaultSections.has(sectionPath) &&
+          cameraUpdateTopicMap[sectionPath]
+        ? `config/cameras/*/${cameraUpdateTopicMap[sectionPath]}`
+        : `config/${sectionPath}`;
   // Default: show title for camera level (since it might be collapsible), hide for global
   const shouldShowTitle = showTitle ?? effectiveLevel === "camera";
 
@@ -827,7 +831,7 @@ export function ConfigSection({
 
       <div
         className={cn(
-          "w-full border-t border-secondary bg-background pb-5 pt-0",
+          "w-full border-t border-secondary bg-background pt-0",
           !noStickyButtons && "sticky bottom-0 z-50",
         )}
       >

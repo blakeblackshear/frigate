@@ -98,10 +98,10 @@ const TimeAgo: FunctionComponent<IProp> = ({
       return manualRefreshInterval;
     }
 
-    const currentTs = currentTime.getTime() / 1000;
-    if (currentTs - time < 60) {
+    const elapsedMs = currentTime.getTime() - time;
+    if (elapsedMs < 60000) {
       return 1000; // refresh every second
-    } else if (currentTs - time < 3600) {
+    } else if (elapsedMs < 3600000) {
       return 60000; // refresh every minute
     } else {
       return 3600000; // refresh every hour

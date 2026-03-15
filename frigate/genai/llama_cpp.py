@@ -1,18 +1,35 @@
 """llama.cpp Provider for Frigate AI."""
 
 import base64
+import io
 import json
 import logging
 from typing import Any, Optional
 
 import httpx
+import numpy as np
 import requests
+from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
 from frigate.genai.utils import parse_tool_calls_from_message
 
 logger = logging.getLogger(__name__)
+
+
+def _to_jpeg(img_bytes: bytes) -> bytes | None:
+    """Convert image bytes to JPEG. llama.cpp/STB does not support WebP."""
+    try:
+        img = Image.open(io.BytesIO(img_bytes))
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85)
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning("Failed to convert image to JPEG: %s", e)
+        return None
 
 
 @register_genai_provider(GenAIProviderEnum.llamacpp)
@@ -40,7 +57,12 @@ class LlamaCppClient(GenAIClient):
             else None
         )
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self,
+        prompt: str,
+        images: list[bytes],
+        response_format: Optional[dict] = None,
+    ) -> Optional[str]:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
             logger.warning(
@@ -78,6 +100,9 @@ class LlamaCppClient(GenAIClient):
                 ],
                 **self.provider_options,
             }
+
+            if response_format:
+                payload["response_format"] = response_format
 
             response = requests.post(
                 f"{self.provider}/v1/chat/completions",
@@ -175,6 +200,110 @@ class LlamaCppClient(GenAIClient):
                 }
             )
         return result if result else None
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Generate embeddings via llama.cpp /embeddings endpoint.
+
+        Supports batch requests. Uses content format with prompt_string and
+        multimodal_data for images (PR #15108). Server must be started with
+        --embeddings and --mmproj for multimodal support.
+        """
+        if self.provider is None:
+            logger.warning(
+                "llama.cpp provider has not been initialized. Check your llama.cpp configuration."
+            )
+            return []
+
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        EMBEDDING_DIM = 768
+
+        content = []
+        for text in texts:
+            content.append({"prompt_string": text})
+        for img in images:
+            # llama.cpp uses STB which does not support WebP; convert to JPEG
+            jpeg_bytes = _to_jpeg(img)
+            to_encode = jpeg_bytes if jpeg_bytes is not None else img
+            encoded = base64.b64encode(to_encode).decode("utf-8")
+            # prompt_string must contain <__media__> placeholder for image tokenization
+            content.append(
+                {
+                    "prompt_string": "<__media__>\n",
+                    "multimodal_data": [encoded],
+                }
+            )
+
+        try:
+            response = requests.post(
+                f"{self.provider}/embeddings",
+                json={"model": self.genai_config.model, "content": content},
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            items = result.get("data", result) if isinstance(result, dict) else result
+            if not isinstance(items, list):
+                logger.warning("llama.cpp embeddings returned unexpected format")
+                return []
+
+            embeddings = []
+            for item in items:
+                emb = item.get("embedding") if isinstance(item, dict) else None
+                if emb is None:
+                    logger.warning("llama.cpp embeddings item missing embedding field")
+                    continue
+                arr = np.array(emb, dtype=np.float32)
+                if arr.ndim > 1:
+                    # llama.cpp can return token-level embeddings; pool per item
+                    arr = arr.mean(axis=0)
+                arr = arr.flatten()
+                orig_dim = arr.size
+                if orig_dim != EMBEDDING_DIM:
+                    if orig_dim > EMBEDDING_DIM:
+                        arr = arr[:EMBEDDING_DIM]
+                        logger.debug(
+                            "Truncated llama.cpp embedding from %d to %d dimensions",
+                            orig_dim,
+                            EMBEDDING_DIM,
+                        )
+                    else:
+                        arr = np.pad(
+                            arr,
+                            (0, EMBEDDING_DIM - orig_dim),
+                            mode="constant",
+                            constant_values=0,
+                        )
+                        logger.debug(
+                            "Padded llama.cpp embedding from %d to %d dimensions",
+                            orig_dim,
+                            EMBEDDING_DIM,
+                        )
+                embeddings.append(arr)
+            return embeddings
+        except requests.exceptions.Timeout:
+            logger.warning("llama.cpp embeddings request timed out")
+            return []
+        except requests.exceptions.RequestException as e:
+            error_detail = str(e)
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    error_detail = f"{str(e)} - Response: {e.response.text[:500]}"
+                except Exception:
+                    pass
+            logger.warning("llama.cpp embeddings error: %s", error_detail)
+            return []
+        except Exception as e:
+            logger.warning("Unexpected error in llama.cpp embeddings: %s", str(e))
+            return []
 
     def chat_with_tools(
         self,

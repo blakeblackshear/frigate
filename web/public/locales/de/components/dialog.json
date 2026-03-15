@@ -74,7 +74,11 @@
       "saveExport": "Export speichern",
       "previewExport": "Exportvorschau"
     },
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "case": {
+      "label": "Fall",
+      "placeholder": "Einen Fall auswählen"
+    }
   },
   "streaming": {
     "restreaming": {

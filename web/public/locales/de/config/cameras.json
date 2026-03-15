@@ -1,0 +1,81 @@
+{
+    "label": "KameraEinstellungen",
+    "name": {
+        "label": "Name der Kamera",
+        "description": "Kameraname ist erforderlich"
+    },
+    "enabled": {
+        "label": "Aktiviert",
+        "description": "Aktiviert"
+    },
+    "audio": {
+        "label": "Audioereignisse",
+        "description": "Einstellungen für audiobasierte Ereigniserkennung für diese Kamera.",
+        "enabled": {
+            "label": "Aktivieren der Audioerkennung",
+            "description": "Aktivieren / Deaktivieren der audiobasierten Ereigniserkennung für diese Kamera."
+        },
+        "min_volume": {
+            "label": "Mindestlautstärke",
+            "description": "Mindest-RMS-Lautstärkeschwelle, die für die Audioerkennung erforderlich ist; niedrigere Werte erhöhen die Empfindlichkeit (z. B. 200 hoch, 500 mittel, 1000 niedrig)."
+        },
+        "listen": {
+            "description": "Liste der zu erkennenden Audioereignisse (z.B: bellen, Feueralarm, schreien, sprechen, rufen).",
+            "label": "Hörtypen"
+        },
+        "filters": {
+            "label": "Audiofilter",
+            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden."
+        },
+        "max_not_heard": {
+            "label": "Zeitüberschreitung beendet",
+            "description": "Anzahl der Sekunden ohne den konfigurierten Audiotyp, bevor das Audioereignis beendet wird."
+        },
+        "enabled_in_config": {
+            "label": "Ursprünglicher Audiozustand",
+            "description": "Gibt an, ob die Audioerkennung ursprünglich in der statischen Konfigurationsdatei aktiviert war."
+        },
+        "num_threads": {
+            "label": "Erkennungsthreads",
+            "description": "Anzahl der Threads, die für die Audioerkennungsverarbeitung verwendet werden sollen."
+        }
+    },
+    "friendly_name": {
+        "label": "Anzeigename",
+        "description": "Kamera-Anzeigename in der Frigate-Benutzeroberfläche"
+    },
+    "audio_transcription": {
+        "label": "Audio-Transkription",
+        "description": "Einstellungen für Live- und Sprach-Audio-Transkription, die für Veranstaltungen und Live-Untertitel verwendet werden.",
+        "enabled": {
+            "label": "Transkription aktivieren",
+            "description": "Aktivieren oder deaktivieren Sie die manuell ausgelöste Transkription von Audioereignissen."
+        },
+        "enabled_in_config": {
+            "label": "Ursprünglicher Transkriptionszustand"
+        },
+        "live_enabled": {
+            "label": "Live-Transkription",
+            "description": "Aktivieren Sie die Live-Transkription für Audio, sobald es empfangen wird."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Einstellungen für die Birdseye-Kompositansicht, die mehrere Kamerafeeds zu einem einzigen Layout zusammenfasst.",
+        "enabled": {
+            "label": "Birdseye aktivieren",
+            "description": "Aktivieren oder deaktivieren der Birdseye-Funktion."
+        },
+        "mode": {
+            "label": "Verfolgungsmodus",
+            "description": "Modus zum Einbeziehen von Kameras in Birdseye: „Objekte“, „Bewegung“ oder „kontinuierlich“."
+        },
+        "order": {
+            "label": "Position",
+            "description": "Numerische Position, die die Reihenfolge der Kamera im Birdseye-Layout steuert."
+        }
+    },
+    "detect": {
+        "label": "Objekterkennung"
+    }
+}

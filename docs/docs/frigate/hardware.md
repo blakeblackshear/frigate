@@ -103,6 +103,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
 
+**AXERA** <CommunityBadge />
+
+- [AXEngine](#axera): axera models can run on AXERA NPUs via AXEngine, delivering highly efficient object detection.
+
 :::
 
 ### Hailo-8
@@ -196,13 +200,14 @@ Inference is done with the `onnx` detector type. Speeds will vary greatly depend
 ✅ - Accelerated with CUDA Graphs
 ❌ - Not accelerated with CUDA Graphs
 
-| Name      | ✅ YOLOv9 Inference Time              | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
-| --------- | ------------------------------------- | ------------------------- | -------------------------- |
-| GTX 1070  | s-320: 16 ms                          |                           | 320: 14 ms                 |
-| RTX 3050  | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
-| RTX 3070  | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
-| RTX A4000 |                                       |                           | 320: ~ 15 ms               |
-| Tesla P40 |                                       |                           | 320: ~ 105 ms              |
+| Name        | ✅ YOLOv9 Inference Time              | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
+| ----------- | ------------------------------------- | ------------------------- | -------------------------- |
+| GTX 1070    | s-320: 16 ms                          |                           | 320: 14 ms                 |
+| RTX 3050    | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
+| RTX 3070    | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
+| RTX 5060 Ti | t-320: 5 ms s-320: 7 ms s-640: 22 ms  | Nano-320: ~ 6 ms          |                            |
+| RTX A4000   |                                       |                           | 320: ~ 15 ms               |
+| Tesla P40   |                                       |                           | 320: ~ 105 ms              |
 
 ### Apple Silicon
 
@@ -287,6 +292,14 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 | ------------- | ------------------------------- |
 | ssd mobilenet | ~ 25 ms                         |
 | yolov5m       | ~ 118 ms                        |
+
+### AXERA
+
+- **AXEngine** Default model is **yolov9**
+
+| Name             | AXERA AX650N/AX8850N Inference Time |
+| ---------------- | ----------------------------------- |
+| yolov9-tiny      | ~ 4 ms                              |
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

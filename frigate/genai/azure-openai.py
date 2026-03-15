@@ -42,13 +42,18 @@ class OpenAIClient(GenAIClient):
             azure_endpoint=azure_endpoint,
         )
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self,
+        prompt: str,
+        images: list[bytes],
+        response_format: Optional[dict] = None,
+    ) -> Optional[str]:
         """Submit a request to Azure OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
         try:
-            result = self.provider.chat.completions.create(
-                model=self.genai_config.model,
-                messages=[
+            request_params = {
+                "model": self.genai_config.model,
+                "messages": [
                     {
                         "role": "user",
                         "content": [{"type": "text", "text": prompt}]
@@ -64,9 +69,12 @@ class OpenAIClient(GenAIClient):
                         ],
                     },
                 ],
-                timeout=self.timeout,
+                "timeout": self.timeout,
                 **self.genai_config.runtime_options,
-            )
+            }
+            if response_format:
+                request_params["response_format"] = response_format
+            result = self.provider.chat.completions.create(**request_params)
         except Exception as e:
             logger.warning("Azure OpenAI returned an error: %s", str(e))
             return None

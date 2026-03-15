@@ -5,19 +5,33 @@
   "deleteExport": "Deletar Exportação",
   "deleteExport.desc": "Você tem certeza que quer apagar {{exportName}}?",
   "editExport": {
-    "title": "Exportar Renomear",
+    "title": "Renomear Exportação",
     "desc": "Entre um novo nome para essa exportação.",
     "saveExport": "Salvar exportação"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Falha ao renomear exportação: {{errorMessage}}"
+      "renameExportFailed": "Falha ao renomear exportação: {{errorMessage}}",
+      "assignCaseFailed": "Falha ao atualizar atribuição ao caso: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Compartilhar exportação",
     "downloadVideo": "Baixar vídeo",
     "editName": "Editar nome",
-    "deleteExport": "Apagar exportação"
+    "deleteExport": "Apagar exportação",
+    "assignToCase": "Adicionar ao caso"
+  },
+  "headings": {
+    "uncategorizedExports": "Exportações não categorizadas",
+    "cases": "Casos"
+  },
+  "caseDialog": {
+    "title": "Adicionar ao caso",
+    "description": "Escolha um caso existente ou crie um novo.",
+    "selectLabel": "Caso",
+    "newCaseOption": "Criar novo caso",
+    "nameLabel": "Nome do caso",
+    "descriptionLabel": "Descrição"
   }
 }

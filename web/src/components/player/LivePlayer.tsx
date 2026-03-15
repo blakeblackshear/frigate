@@ -3,6 +3,7 @@ import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
@@ -80,12 +81,17 @@ export default function LivePlayer({
   const { t } = useTranslation(["components/player"]);
 
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   const cameraName = useCameraFriendlyName(cameraConfig);
 
   // player is showing on a dashboard if containerRef is not provided
 
   const inDashboard = containerRef?.current == null;
+
+  const [overlayDimensions] = useResizeObserver(overlayRef);
+  const isCompact =
+    overlayDimensions.width > 0 && overlayDimensions.width < 280;
 
   // stats
 
@@ -346,7 +352,14 @@ export default function LivePlayer({
 
   return (
     <div
-      ref={cameraRef ?? internalContainerRef}
+      ref={(node) => {
+        overlayRef.current = node;
+        if (cameraRef) {
+          cameraRef(node);
+        } else {
+          internalContainerRef.current = node;
+        }
+      }}
       data-camera={cameraConfig.name}
       className={cn(
         "relative flex w-full cursor-pointer justify-center outline",
@@ -458,16 +471,18 @@ export default function LivePlayer({
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 p-3 text-center">
               <div className="text-md">{t("streamOffline.title")}</div>
               <TbExclamationCircle className="size-6" />
-              <p className="text-center text-sm">
-                <Trans
-                  ns="components/player"
-                  values={{
-                    cameraName: cameraName,
-                  }}
-                >
-                  streamOffline.desc
-                </Trans>
-              </p>
+              {!isCompact && (
+                <p className="text-center text-sm">
+                  <Trans
+                    ns="components/player"
+                    values={{
+                      cameraName: cameraName,
+                    }}
+                  >
+                    streamOffline.desc
+                  </Trans>
+                </p>
+              )}
             </div>
           </div>
         </>
@@ -478,16 +493,18 @@ export default function LivePlayer({
           <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
             <p className="my-5 text-lg">{t("streamOffline.title")}</p>
             <TbExclamationCircle className="mb-3 size-10" />
-            <p className="max-w-96 text-center">
-              <Trans
-                ns="components/player"
-                values={{
-                  cameraName: cameraName,
-                }}
-              >
-                streamOffline.desc
-              </Trans>
-            </p>
+            {!isCompact && (
+              <p className="max-w-96 text-center">
+                <Trans
+                  ns="components/player"
+                  values={{
+                    cameraName: cameraName,
+                  }}
+                >
+                  streamOffline.desc
+                </Trans>
+              </p>
+            )}
           </div>
         </div>
       )}

@@ -11,7 +11,6 @@ import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { AuthProvider } from "@/context/auth-context";
 import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -39,13 +38,11 @@ function App() {
 
   return (
     <Providers>
-      <AuthProvider>
-        <BrowserRouter basename={window.baseUrl}>
-          <Wrapper>
-            {config?.safe_mode ? <SafeAppView /> : <DefaultAppView />}
-          </Wrapper>
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter basename={window.baseUrl}>
+        <Wrapper>
+          {config?.safe_mode ? <SafeAppView /> : <DefaultAppView />}
+        </Wrapper>
+      </BrowserRouter>
     </Providers>
   );
 }
@@ -85,17 +82,13 @@ function DefaultAppView() {
             : "bottom-8 left-[52px]",
         )}
       >
-        <Suspense>
+        <Suspense
+          fallback={
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          }
+        >
           <Routes>
-            <Route
-              element={
-                mainRouteRoles ? (
-                  <ProtectedRoute requiredRoles={mainRouteRoles} />
-                ) : (
-                  <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                )
-              }
-            >
+            <Route element={<ProtectedRoute requiredRoles={mainRouteRoles} />}>
               <Route index element={<Live />} />
               <Route path="/review" element={<Events />} />
               <Route path="/explore" element={<Explore />} />

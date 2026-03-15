@@ -1,0 +1,32 @@
+{
+    "maximum": "Darf nicht größer sein als {{limit}}",
+    "minimum": "Darf nicht kleiner sein als {{limit}}",
+    "exclusiveMinimum": "Muss größer sein als {{limit}}",
+    "minLength": "Muss mindestens {{limit}} Zeichen lang sein",
+    "maxLength": "Muss maximal {{limit}} Zeichen lang sein",
+    "minItems": "Muss mindestens {{limit}} mal vorkommen",
+    "exclusiveMaximum": "Muss kleiner sein als {{limit}}",
+    "maxItems": "Muss maximal {{limit}} mal vorkommen",
+    "pattern": "Ungültiges Format",
+    "required": "Pflichtfeld",
+    "type": "Ungültiger Wertetyp",
+    "enum": "Muss einer der erlaubten Werte sein",
+    "const": "Wert stimmt nicht mit erwarteter Konstante überein",
+    "uniqueItems": "Alle Einträge müssen eindeutig sein",
+    "format": "Ungültiges Format",
+    "additionalProperties": "Unbekannte Eigenschaft ist nicht erlaubt",
+    "oneOf": "Muss exakt mit einem der erlaubten Schemas übereinstimmen",
+    "anyOf": "Muss mindestens mit einem der erlaubten Schemas übereinstimmen",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Rollen-Header muss angegeben werden, wenn Rollen-Zuordnungen konfiguriert sind."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Jede Rolle kann nur einem input stream zugeteilt werden.",
+            "detectRequired": "Es muss mindestens ein input stream die Rolle 'erkennen' tragen.",
+            "hwaccelDetectOnly": "Nur der input-stream mit der Rolle 'erkennen' kann Hardwarebeschleunigungs Argumente definieren."
+        }
+    }
+}

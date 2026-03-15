@@ -1,8 +1,9 @@
 {
   "description": {
-    "placeholder": "Digite um nome para esta coleção",
+    "placeholder": "Introduza um nome para esta coleção",
     "addFace": "Veja como adicionar uma nova coleção à biblioteca de rostos.",
-    "invalidName": "Nome inválido. Os nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífens."
+    "invalidName": "Nome inválido. Os nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífens.",
+    "nameCannotContainHash": "O nome não pode conter #."
   },
   "details": {
     "person": "Pessoa",

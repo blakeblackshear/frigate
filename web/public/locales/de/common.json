@@ -123,7 +123,18 @@
     "on": "AN",
     "suspended": "Pausierte",
     "unsuspended": "fortsetzen",
-    "continue": "Weiter"
+    "continue": "Weiter",
+    "add": "Hinzufügen",
+    "applying": "Wird angewendet…",
+    "undo": "Rückgängig",
+    "copiedToClipboard": "In die Zwischenablage kopiert",
+    "modified": "Verändert",
+    "overridden": "Überschrieben",
+    "resetToGlobal": "Auf Global zurückgesetzen",
+    "resetToDefault": "Auf Werkseinstellungen zurücksetzten",
+    "saveAll": "Alle speichern",
+    "savingAll": "Alle werden gespeichert…",
+    "undoAll": "Alle rückgängig"
   },
   "label": {
     "back": "Zurück",

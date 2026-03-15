@@ -74,7 +74,11 @@
       "previewExport": "Export vooraf bekijken"
     },
     "export": "Exporteren",
-    "selectOrExport": "Selecteren of exporteren"
+    "selectOrExport": "Selecteren of exporteren",
+    "case": {
+      "label": "Dossier",
+      "placeholder": "Selecteer een dossier"
+    }
   },
   "streaming": {
     "label": "Stream",

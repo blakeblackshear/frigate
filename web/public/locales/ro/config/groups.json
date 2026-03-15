@@ -1,0 +1,73 @@
+{
+    "audio": {
+        "global": {
+            "detection": "Detectare globală",
+            "sensitivity": "Sensibilitate globală"
+        },
+        "cameras": {
+            "detection": "Detectare",
+            "sensitivity": "Sensibilitate"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Aspect global"
+        },
+        "cameras": {
+            "appearance": "Aspect"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Sensibilitate globală",
+            "algorithm": "Algoritm global"
+        },
+        "cameras": {
+            "sensitivity": "Sensibilitate",
+            "algorithm": "Algoritm"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Afișare snapshot-uri globală"
+        },
+        "cameras": {
+            "display": "Afișare snapshot-uri"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Rezoluție globală",
+            "tracking": "Urmărire globală"
+        },
+        "cameras": {
+            "resolution": "Rezoluție",
+            "tracking": "Urmărire"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Urmărire globală",
+            "filtering": "Filtrare globală"
+        },
+        "cameras": {
+            "tracking": "Urmărire",
+            "filtering": "Filtrare"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Păstrare globală",
+            "events": "Evenimente globale"
+        },
+        "cameras": {
+            "retention": "Păstrare",
+            "events": "Evenimente"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Argumente FFmpeg specifice camerei"
+        }
+    }
+}
