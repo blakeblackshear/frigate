@@ -28,7 +28,7 @@ import {
   VolumeState,
 } from "@/types/live";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useResizeObserver } from "@/hooks/resize-observer";
+
 import { isEqual } from "lodash";
 import useSWR from "swr";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -329,22 +329,24 @@ export default function DraggableGridLayout({
 
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(gridContainerRef);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
 
-  // useResizeObserver reads ref.current at render time, so it may miss the
-  // initial mount when ref.current is null (e.g. on page refresh with cached
-  // SWR data). Measure the container synchronously in useLayoutEffect as a
-  // reliable seed value; containerWidth from ResizeObserver takes over once
-  // it fires.
-  const [initialWidth, setInitialWidth] = useState(0);
+  // useLayoutEffect reads ref.current after commit (refs are set before layout
+  // effects run), so this reliably fires before the first paint regardless of
+  // whether SWR triggers subsequent re-renders or not.
   useLayoutEffect(() => {
-    if (gridContainerRef.current) {
-      setInitialWidth(gridContainerRef.current.offsetWidth);
-    }
+    const el = gridContainerRef.current;
+    if (!el) return;
+    setContainerWidth(el.clientWidth);
+    setContainerHeight(el.clientHeight);
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+      setContainerHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
-
-  const effectiveWidth = containerWidth || initialWidth;
 
   const scrollBarWidth = useMemo(() => {
     if (containerWidth && containerHeight && containerRef.current) {
@@ -356,8 +358,8 @@ export default function DraggableGridLayout({
   }, [containerRef, containerHeight, containerWidth]);
 
   const availableWidth = useMemo(
-    () => (scrollBarWidth ? effectiveWidth + scrollBarWidth : effectiveWidth),
-    [effectiveWidth, scrollBarWidth],
+    () => (scrollBarWidth ? containerWidth + scrollBarWidth : containerWidth),
+    [containerWidth, scrollBarWidth],
   );
 
   const hasScrollbar = useMemo(() => {
@@ -373,7 +375,7 @@ export default function DraggableGridLayout({
     // subtract container margin, 1 camera takes up at least 4 rows
     // account for additional margin on bottom of each row
     return (
-      ((availableWidth || window.innerWidth) - 2 * marginValue) /
+      (availableWidth - 2 * marginValue) /
         12 /
         aspectRatio -
       marginValue +
@@ -724,7 +726,7 @@ export default function DraggableGridLayout({
             currentGroups={groups}
             activeGroup={group}
           />
-          {effectiveWidth > 0 && <Responsive
+          {containerWidth > 0 && <Responsive
             className="grid-layout"
             width={availableWidth}
             layouts={{
