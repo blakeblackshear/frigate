@@ -282,7 +282,7 @@ for cam in json.load(sys.stdin):
 "
 ```
 
-Look for cameras where `speaker=True`. Save the `id` value — this is the camera ID needed for the talkback script. Camera IDs are hex strings like `65d8aa4001945203e70003ea`.
+Look for cameras where `speaker=True`. Save the `id` value — this is the camera ID needed for the talkback script. Camera IDs are hex strings like `6abc12340056789003e700def`.
 
 ### Step 3: Find the Camera IP Address
 
@@ -452,13 +452,13 @@ go2rtc:
     front_door:
       - "rtspx://192.168.1.50:7441/abc123streamkey#backchannel=0"
       - "ffmpeg:front_door#audio=opus"
-      - "exec:bash /config/talkback.sh 65d8aa4001945203e70003ea 192.168.1.60#backchannel=1#audio=pcma/8000"
+      - "exec:bash /config/talkback.sh 6abc12340056789003e700def 192.168.1.60#backchannel=1#audio=pcma/8000"
 ```
 
 Where:
 - `192.168.1.50` — UNVR IP address
 - `abc123streamkey` — RTSP stream key from Protect camera settings
-- `65d8aa4001945203e70003ea` — camera ID from the Protect API (Step 2)
+- `6abc12340056789003e700def` — camera ID from the Protect API (Step 2)
 - `192.168.1.60` — camera's direct IP address (Step 3)
 
 Docker-compose environment:
