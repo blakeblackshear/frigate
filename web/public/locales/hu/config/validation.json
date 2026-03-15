@@ -1,1 +1,6 @@
-{}
+{
+    "minimum": "Legalább {{limit}} kell",
+    "maximum": "Legfeljebb {{limit}} lehet",
+    "exclusiveMinimum": "Nagyobbnak kell lennie, mint {{limit}}",
+    "exclusiveMaximum": "Kevesebbnek kell lennie, mint {{limit}}"
+}
