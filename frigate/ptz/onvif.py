@@ -542,14 +542,25 @@ class OnvifController:
                 == ZoomingModeEnum.relative
             )
         ):
-            move_request.Speed = {
-                "PanTilt": {
-                    "x": speed,
-                    "y": speed,
-                },
-                "Zoom": {"x": speed},
-            }
-            move_request.Translation.Zoom.x = zoom
+            try:
+                move_request.Speed = {
+                    "PanTilt": {
+                        "x": speed,
+                        "y": speed,
+                    },
+                    "Zoom": {"x": speed},
+                }
+                move_request.Translation.Zoom.x = zoom
+            except (AttributeError, KeyError):
+                logger.warning(
+                    f"{camera_name}: zoom translation not available, sending pan/tilt only"
+                )
+                move_request.Speed = {
+                    "PanTilt": {
+                        "x": speed,
+                        "y": speed,
+                    },
+                }
         else:
             move_request.Speed = {
                 "PanTilt": {
