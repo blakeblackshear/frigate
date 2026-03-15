@@ -134,7 +134,9 @@ export function TrackingDetails({
   );
 
   // Convert a timeline timestamp to actual video player time, accounting for
-  // motion-only recording gaps. Uses the same algorithm as DynamicVideoController.
+  // motion-only recording gaps. The VOD start time is aligned to
+  // recordings[0].start_time (see videoSource), so video position 0
+  // corresponds to the start of the first recording segment.
   const timestampToVideoTime = useCallback(
     (timestamp: number): number => {
       if (!recordings || recordings.length === 0) {
@@ -142,48 +144,20 @@ export function TrackingDetails({
         return timestamp - (eventStartRecord - REVIEW_PADDING);
       }
 
-      const videoStartTime = eventStartRecord - REVIEW_PADDING;
-
-      // If timestamp is before video start, return 0
-      if (timestamp < videoStartTime) return 0;
-
       // Check if timestamp is before the first recording or after the last
-      if (
-        timestamp < recordings[0].start_time ||
-        timestamp > recordings[recordings.length - 1].end_time
-      ) {
-        // No recording available at this timestamp
+      if (timestamp <= recordings[0].start_time) {
         return 0;
       }
-
-      // Calculate the inpoint offset - the HLS video may start partway through the first segment
-      let inpointOffset = 0;
-      if (
-        videoStartTime > recordings[0].start_time &&
-        videoStartTime < recordings[0].end_time
-      ) {
-        inpointOffset = videoStartTime - recordings[0].start_time;
+      if (timestamp > recordings[recordings.length - 1].end_time) {
+        return 0;
       }
 
       let seekSeconds = 0;
       for (const segment of recordings) {
-        // Skip segments that end before our timestamp
         if (segment.end_time <= timestamp) {
-          // Add this segment's duration, but subtract inpoint offset from first segment
-          if (segment === recordings[0]) {
-            seekSeconds += segment.duration - inpointOffset;
-          } else {
-            seekSeconds += segment.duration;
-          }
+          seekSeconds += segment.duration;
         } else if (segment.start_time <= timestamp) {
-          // The timestamp is within this segment
-          if (segment === recordings[0]) {
-            // For the first segment, account for the inpoint offset
-            seekSeconds +=
-              timestamp - Math.max(segment.start_time, videoStartTime);
-          } else {
-            seekSeconds += timestamp - segment.start_time;
-          }
+          seekSeconds += timestamp - segment.start_time;
           break;
         }
       }
@@ -194,7 +168,8 @@ export function TrackingDetails({
   );
 
   // Convert video player time back to timeline timestamp, accounting for
-  // motion-only recording gaps. Reverse of timestampToVideoTime.
+  // motion-only recording gaps. Reverse of timestampToVideoTime. Video
+  // position 0 corresponds to recordings[0].start_time (see videoSource).
   const videoTimeToTimestamp = useCallback(
     (playerTime: number): number => {
       if (!recordings || recordings.length === 0) {
@@ -203,39 +178,15 @@ export function TrackingDetails({
         return playerTime + videoStartTime;
       }
 
-      const videoStartTime = eventStartRecord - REVIEW_PADDING;
-
-      // Calculate the inpoint offset - the video may start partway through the first segment
-      let inpointOffset = 0;
-      if (
-        videoStartTime > recordings[0].start_time &&
-        videoStartTime < recordings[0].end_time
-      ) {
-        inpointOffset = videoStartTime - recordings[0].start_time;
-      }
-
-      let timestamp = 0;
+      let timestamp = recordings[0].start_time;
       let totalTime = 0;
 
       for (const segment of recordings) {
-        const segmentDuration =
-          segment === recordings[0]
-            ? segment.duration - inpointOffset
-            : segment.duration;
-
-        if (totalTime + segmentDuration > playerTime) {
-          // The player time is within this segment
-          if (segment === recordings[0]) {
-            // For the first segment, add the inpoint offset
-            timestamp =
-              Math.max(segment.start_time, videoStartTime) +
-              (playerTime - totalTime);
-          } else {
-            timestamp = segment.start_time + (playerTime - totalTime);
-          }
+        if (totalTime + segment.duration > playerTime) {
+          timestamp = segment.start_time + (playerTime - totalTime);
           break;
         } else {
-          totalTime += segmentDuration;
+          totalTime += segment.duration;
         }
       }
 
@@ -522,16 +473,23 @@ export function TrackingDetails({
     const eventStartRec = event.start_time + sourceOffset / 1000;
     const eventEndRec =
       (event.end_time ?? Date.now() / 1000) + sourceOffset / 1000;
-    const startTime = eventStartRec - REVIEW_PADDING;
+    // Use the first recording's start_time when available so the VOD
+    // request aligns to a recording boundary. This prevents clipFrom
+    // from trimming past keyframes in the first segment, which causes
+    // hls.js to stall on short clips.
+    const startTime =
+      recordings && recordings.length > 0
+        ? Math.min(recordings[0].start_time, eventStartRec - REVIEW_PADDING)
+        : eventStartRec - REVIEW_PADDING;
     const endTime = eventEndRec + REVIEW_PADDING;
-    const playlist = `${baseUrl}vod/clip/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
+    const playlist = `${baseUrl}vod/${event.camera}/start/${startTime}/end/${endTime}/master.m3u8`;
 
     return {
       playlist,
       startPosition: 0,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event]);
+  }, [event, recordings]);
 
   // Determine camera aspect ratio category
   const cameraAspect = useMemo(() => {
@@ -620,7 +578,7 @@ export function TrackingDetails({
             cameraAspect === "tall" ? "h-full" : "w-full",
           )}
         >
-          {displaySource == "video" && (
+          {displaySource == "video" && recordings && (
             <>
               <HlsVideoPlayer
                 videoRef={videoRef}
@@ -634,6 +592,24 @@ export function TrackingDetails({
                 onTimeUpdate={handleTimeUpdate}
                 onSeekToTime={handleSeekToTime}
                 onUploadFrame={onUploadFrameToPlus}
+                onPlayerLoaded={() => {
+                  if (videoRef.current) {
+                    const video = videoRef.current;
+                    // The VOD starts at recordings[0].start_time (see
+                    // videoSource), so seek to the desired start position
+                    // within that segment, wait for the seek to complete,
+                    // then play. Mirrors DynamicVideoController's waitAndPlay.
+                    const startPos = timestampToVideoTime(
+                      eventStartRecord - REVIEW_PADDING,
+                    );
+                    const onSeeked = () => {
+                      video.removeEventListener("seeked", onSeeked);
+                      video.play();
+                    };
+                    video.addEventListener("seeked", onSeeked, { once: true });
+                    video.currentTime = startPos;
+                  }
+                }}
                 onPlaying={() => setIsVideoLoading(false)}
                 setFullResolution={setFullResolution}
                 toggleFullscreen={toggleFullscreen}

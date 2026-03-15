@@ -357,7 +357,7 @@ export default function HlsVideoPlayer({
           {transformedOverlay}
           {isDetailMode &&
             camera &&
-            currentTime &&
+            currentTime != null &&
             loadedMetadata &&
             videoDimensions.width > 0 &&
             videoDimensions.height > 0 && (
