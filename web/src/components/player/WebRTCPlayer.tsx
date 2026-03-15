@@ -56,8 +56,15 @@ export default function WebRtcPlayer({
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
   const videoLoadTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
+  // microphone state: track is obtained once and reused across connection rebuilds
+  const micTrackRef = useRef<MediaStreamTrack | null>(null);
+  const [micArmed, setMicArmed] = useState(false);
+
   const PeerConnection = useCallback(
-    async (media: string) => {
+    async (
+      media: string,
+      existingMicTrack?: MediaStreamTrack | null,
+    ) => {
       if (!videoRef.current) {
         return;
       }
@@ -69,7 +76,10 @@ export default function WebRtcPlayer({
 
       const localTracks = [];
 
-      if (/camera|microphone/.test(media)) {
+      if (existingMicTrack && /microphone/.test(media)) {
+        // Reuse existing mic track (no new getUserMedia call)
+        pc.addTransceiver(existingMicTrack, { direction: "sendonly" });
+      } else if (/camera|microphone/.test(media)) {
         const tracks = await getMediaTracks("user", {
           video: media.indexOf("camera") >= 0,
           audio: media.indexOf("microphone") >= 0,
@@ -168,6 +178,9 @@ export default function WebRtcPlayer({
     [wsURL],
   );
 
+  // Main connection effect.
+  // Depends on micArmed (not microphoneEnabled) so the connection only rebuilds
+  // once when the mic is first obtained, not on every mic toggle.
   useEffect(() => {
     if (!videoRef.current) {
       return;
@@ -177,9 +190,8 @@ export default function WebRtcPlayer({
       return;
     }
 
-    const aPc = PeerConnection(
-      microphoneEnabled ? "video+audio+microphone" : "video+audio",
-    );
+    const media = micArmed ? "video+audio+microphone" : "video+audio";
+    const aPc = PeerConnection(media, micTrackRef.current);
     connect(aPc);
 
     return () => {
@@ -195,8 +207,60 @@ export default function WebRtcPlayer({
     pcRef,
     videoRef,
     playbackEnabled,
-    microphoneEnabled,
+    micArmed,
   ]);
+
+  // Microphone handling: obtain track once, then toggle enabled/muted.
+  // This avoids rebuilding the PeerConnection on every mic toggle, which
+  // prevents iOS from switching audio routing and causing echo feedback.
+  useEffect(() => {
+    if (!microphoneEnabled) {
+      // Mic toggled off: disable send track + restore receive audio
+      if (micTrackRef.current) {
+        micTrackRef.current.enabled = false;
+      }
+      return;
+    }
+
+    if (!micArmed) {
+      // First mic activation: request permission (requires user gesture,
+      // which the mic button click provides) and arm the mic track.
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          const track = stream.getAudioTracks()[0];
+          track.enabled = true;
+          micTrackRef.current = track;
+          // Listen for track ending (e.g., OS revokes permission)
+          track.addEventListener("ended", () => {
+            micTrackRef.current = null;
+            setMicArmed(false);
+          });
+          // This state change triggers the main connection effect to
+          // rebuild once with the mic track included in the SDP offer.
+          setMicArmed(true);
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error("Microphone permission denied:", e);
+        });
+    } else {
+      // Already armed: just enable the existing track (no rebuild)
+      if (micTrackRef.current) {
+        micTrackRef.current.enabled = true;
+      }
+    }
+  }, [microphoneEnabled, micArmed]);
+
+  // Clean up mic track on unmount
+  useEffect(() => {
+    return () => {
+      if (micTrackRef.current) {
+        micTrackRef.current.stop();
+        micTrackRef.current = null;
+      }
+    };
+  }, []);
 
   // ios compat
 
@@ -312,6 +376,12 @@ export default function WebRtcPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pcRef, pcRef.current, getStats]);
 
+  // Echo suppression: mute receive audio while mic is active.
+  // Camera mic picks up speaker audio → RTSP → go2rtc → WebRTC → phone
+  // speaker, creating a feedback loop. Half-duplex (mute during talk) is
+  // the standard approach used by camera talkback implementations.
+  const echoMuted = microphoneEnabled && micArmed;
+
   return (
     <video
       ref={videoRef}
@@ -319,7 +389,7 @@ export default function WebRtcPlayer({
       controls={iOSCompatControls}
       autoPlay
       playsInline
-      muted={!audioEnabled}
+      muted={!audioEnabled || echoMuted}
       onLoadedData={handleLoadedData}
       onProgress={
         onError != undefined
