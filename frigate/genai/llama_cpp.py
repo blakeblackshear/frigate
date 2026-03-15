@@ -36,19 +36,12 @@ def _to_jpeg(img_bytes: bytes) -> bytes | None:
 class LlamaCppClient(GenAIClient):
     """Generative AI client for Frigate using llama.cpp server."""
 
-    LOCAL_OPTIMIZED_OPTIONS = {
-        "temperature": 0.7,
-        "repeat_penalty": 1.05,
-        "top_p": 0.8,
-    }
-
     provider: str  # base_url
     provider_options: dict[str, Any]
 
     def _init_provider(self):
         """Initialize the client."""
         self.provider_options = {
-            **self.LOCAL_OPTIMIZED_OPTIONS,
             **self.genai_config.provider_options,
         }
         return (
