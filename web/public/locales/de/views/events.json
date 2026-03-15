@@ -63,5 +63,28 @@
   "normalActivity": "normal",
   "needsReview": "benötigt Überprüfung",
   "securityConcern": "Sicherheitsbedenken",
-  "select_all": "alle"
+  "select_all": "alle",
+  "motionSearch": {
+    "menuItem": "Bewegungssuche",
+    "openMenu": "Kamera Optionen"
+  },
+  "motionPreviews": {
+    "menuItem": "Bewegungsvorschau anzeigen",
+    "title": "Bewegungsvorschau: {{camera}}",
+    "mobileSettingsTitle": "Einstellungen für die Bewegungsvorschau",
+    "mobileSettingsDesc": "Passen Sie die Wiedergabegeschwindigkeit und die Dimmung an und wählen Sie ein Datum aus, um Clips mit nur Bewegungen anzusehen.",
+    "dim": "düster",
+    "dimAria": "Dimmintensität einstellen",
+    "dimDesc": "Erhöhen Sie die Dimmung, um die Sichtbarkeit des Bewegungsbereichs zu verbessern.",
+    "speed": "Geschwindigkeit",
+    "speedAria": "Vorschau-Wiedergabegeschwindigkeit auswählen",
+    "speedDesc": "Wählen Sie aus, wie schnell die Vorschau-Clips abgespielt werden sollen.",
+    "back": "zurück",
+    "empty": "Keine Vorschau verfügbar",
+    "noPreview": "Vorschau nicht verfügbar",
+    "seekAria": "{{camera}} Player suchen bis {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Wählen Sie Bereiche aus, um nur Clips mit Bewegungen in diesen Regionen anzuzeigen.",
+    "filterClear": "Säubern"
+  }
 }

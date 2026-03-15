@@ -36,7 +36,9 @@
         "title": "Intel GPU Statistik Warnung",
         "message": "GPU stats nicht verfügbar",
         "description": "Dies ist ein bekannter Fehler in den GPU-Statistik-Tools von Intel (intel_gpu_top), bei dem das Tool ausfällt und wiederholt eine GPU-Auslastung von 0 % anzeigt, selbst wenn die Hardwarebeschleunigung und die Objekterkennung auf der (i)GPU korrekt funktionieren. Dies ist kein Fehler von Frigate. Du kannst den Host neu starten, um das Problem vorübergehend zu beheben und zu prüfen, ob die GPU korrekt funktioniert. Dies hat keine Auswirkungen auf die Leistung."
-      }
+      },
+      "gpuTemperature": "GPU Temperatur",
+      "npuTemperature": "NPU Temperatur"
     },
     "title": "Allgemein",
     "detector": {
@@ -98,7 +100,7 @@
     "websocket": {
       "label": "Nachrichten",
       "pause": "Pause",
-      "clear": "Säubern",
+      "clear": "reinigen",
       "filter": {
         "all": "alle Themen",
         "topics": "Themen",
@@ -118,7 +120,8 @@
       "count": "{{count}} Nachrichten",
       "expanded": {
         "payload": "Nutzlast"
-      }
+      },
+      "resume": "fortsetzen"
     }
   },
   "metrics": "Systemmetriken",
@@ -191,6 +194,17 @@
       "error": {
         "unableToProbeCamera": "Die Kamera kann nicht getestet werden: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Verbindungsqualität",
+      "excellent": "Ausgezeichnet",
+      "fair": "Fair",
+      "poor": "arm",
+      "unusable": "Unbrauchbar",
+      "fps": "FPS",
+      "expectedFps": "Erwartete FPS",
+      "reconnectsLastHour": "Wiederverbindungen (letzte Stunde)",
+      "stallsLastHour": "Stände (letzte Stunde)"
     }
   },
   "enrichments": {
@@ -228,7 +242,8 @@
     "detectIsSlow": "{{detect}} ist langsam ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} ist sehr langsam ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} ist offline",
-    "shmTooLow": "Die Zuweisung für /dev/shm ({{total}} MB) sollte auf mindestens {{min}} MB erhöht werden."
+    "shmTooLow": "Die Zuweisung für /dev/shm ({{total}} MB) sollte auf mindestens {{min}} MB erhöht werden.",
+    "debugReplayActive": "Debug-Wiederholungssitzung ist aktiv"
   },
   "lastRefreshed": "Zuletzt aktualisiert: "
 }
