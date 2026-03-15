@@ -332,6 +332,20 @@ export default function DraggableGridLayout({
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(gridContainerRef);
 
+  // useResizeObserver reads ref.current at render time, so it may miss the
+  // initial mount when ref.current is null (e.g. on page refresh with cached
+  // SWR data). Measure the container synchronously in useLayoutEffect as a
+  // reliable seed value; containerWidth from ResizeObserver takes over once
+  // it fires.
+  const [initialWidth, setInitialWidth] = useState(0);
+  useLayoutEffect(() => {
+    if (gridContainerRef.current) {
+      setInitialWidth(gridContainerRef.current.offsetWidth);
+    }
+  }, []);
+
+  const effectiveWidth = containerWidth || initialWidth;
+
   const scrollBarWidth = useMemo(() => {
     if (containerWidth && containerHeight && containerRef.current) {
       return (
@@ -342,8 +356,8 @@ export default function DraggableGridLayout({
   }, [containerRef, containerHeight, containerWidth]);
 
   const availableWidth = useMemo(
-    () => (scrollBarWidth ? containerWidth + scrollBarWidth : containerWidth),
-    [containerWidth, scrollBarWidth],
+    () => (scrollBarWidth ? effectiveWidth + scrollBarWidth : effectiveWidth),
+    [effectiveWidth, scrollBarWidth],
   );
 
   const hasScrollbar = useMemo(() => {
@@ -710,7 +724,7 @@ export default function DraggableGridLayout({
             currentGroups={groups}
             activeGroup={group}
           />
-          {containerWidth > 0 && <Responsive
+          {effectiveWidth > 0 && <Responsive
             className="grid-layout"
             width={availableWidth}
             layouts={{
