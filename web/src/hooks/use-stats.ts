@@ -106,13 +106,11 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
 
-      // Skip ffmpeg warnings for replay cameras when debug replay is active
+      // Skip ffmpeg warnings for replay cameras
       if (
         !isNaN(ffmpegAvg) &&
         ffmpegAvg >= CameraFfmpegThreshold.error &&
-        !(
-          debugReplayStatus?.active && debugReplayStatus?.replay_camera === name
-        )
+        !isReplayCamera(name)
       ) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {

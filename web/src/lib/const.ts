@@ -26,6 +26,7 @@ export const supportedLanguageKeys = [
   "pl",
   "hr",
   "sk",
+  "sl",
   "lt",
   "uk",
   "cs",
