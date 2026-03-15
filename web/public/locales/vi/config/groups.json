@@ -1,1 +1,12 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Phát hiện toàn cục",
+            "sensitivity": "Độ nhạy toàn cục"
+        },
+        "cameras": {
+            "detection": "Phát hiện",
+            "sensitivity": "Độ nhạy"
+        }
+    }
+}

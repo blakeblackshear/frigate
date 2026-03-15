@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "全局检测",
+            "sensitivity": "全局灵敏度"
+        },
+        "cameras": {
+            "detection": "检测",
+            "sensitivity": "灵敏度"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "全局外观"
+        },
+        "cameras": {
+            "appearance": "外观"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "全局灵敏度",
+            "algorithm": "全局算法"
+        },
+        "cameras": {
+            "sensitivity": "灵敏度",
+            "algorithm": "算法"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "全局显示"
+        },
+        "cameras": {
+            "display": "显示"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "全局保留",
+            "events": "全局事件"
+        },
+        "cameras": {
+            "retention": "保留",
+            "events": "事件"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "全局分辨率",
+            "tracking": "全局追踪"
+        },
+        "cameras": {
+            "resolution": "分辨率",
+            "tracking": "追踪"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "全局追踪",
+            "filtering": "全局筛选"
+        },
+        "cameras": {
+            "tracking": "追踪",
+            "filtering": "筛选"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "摄像头特定的 FFmpeg 参数"
+        }
+    }
+}

@@ -82,6 +82,9 @@
     "back": "Enrere",
     "empty": "No hi ha cap vista prèvia disponible",
     "noPreview": "Vista prèvia no disponible",
-    "seekAria": "Cerca el reproductor {{camera}} a {{time}}"
+    "seekAria": "Cerca el reproductor {{camera}} a {{time}}",
+    "filter": "Filtre",
+    "filterDesc": "Seleccioneu àrees per a mostrar només clips amb moviment en aquestes regions.",
+    "filterClear": "Neteja"
   }
 }

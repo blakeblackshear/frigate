@@ -1,26 +1,26 @@
 {
   "documentTitle": "V živo - Frigate",
-  "documentTitle.withCamera": "{{camera}} - v živo - Frigate",
-  "lowBandwidthMode": "Nizkopasovni način",
+  "documentTitle.withCamera": "{{camera}} - V živo - Frigate",
+  "lowBandwidthMode": "Način nizke pasovne širine",
   "twoWayTalk": {
     "enable": "Omogoči dvosmerni pogovor",
-    "disable": "Onemogoči Obojesmerni Pogovor"
+    "disable": "Onemogoči dvosmerni pogovor"
   },
   "ptz": {
     "move": {
       "clickMove": {
-        "disable": "Onemogoči funkcijo klikni in premakni",
-        "label": "Kliknite v okvir, da postavite kamero na sredino",
+        "disable": "Onemogoči premik s klikom",
+        "label": "Klikni v okvir, da usrediniš kamero",
         "enable": "Omogoči premik s klikom"
       },
       "left": {
-        "label": "Premakni PTZ kamero v levo"
+        "label": "Premakni PTZ kamero levo"
       },
       "up": {
         "label": "Premakni PTZ kamero gor"
       },
       "down": {
-        "label": "Premakni PTZ kamero navzdol"
+        "label": "Premakni PTZ kamero dol"
       },
       "right": {
         "label": "Premakni PTZ kamero desno"
@@ -28,144 +28,172 @@
     },
     "zoom": {
       "in": {
-        "label": "Povečaj PTZ kamero"
+        "label": "Povečaj (zoom in)"
       },
       "out": {
-        "label": "Pomanjšaj PTZ kamero"
+        "label": "Pomanjšaj (zoom out)"
       }
     },
     "focus": {
       "in": {
-        "label": "Izostri PTZ kamero"
+        "label": "Fokusiraj bližje"
       },
       "out": {
-        "label": "Razostri PTZ kamero"
+        "label": "Fokusiraj dlje"
       }
     },
     "frame": {
       "center": {
-        "label": "Kliknite v okvir, da postavite PTZ kamero na sredino"
+        "label": "Klikni v okvir, da usrediniš PTZ kamero"
       }
     },
     "presets": "Prednastavitve PTZ kamere"
   },
   "cameraAudio": {
-    "enable": "Omogoči Zvok Kamere",
-    "disable": "Onemogoči Zvok Kamere"
+    "enable": "Omogoči zvok kamere",
+    "disable": "Onemogoči zvok kamere"
   },
   "camera": {
-    "enable": "Omogoči Kamero",
-    "disable": "Onemogoči Kamero"
+    "enable": "Omogoči kamero",
+    "disable": "Onemogoči kamero"
   },
   "muteCameras": {
-    "enable": "Utišaj vse kamere",
-    "disable": "Vklopi Zvok Vsem Kameram"
+    "enable": "Utihni vse kamere",
+    "disable": "Vklopi zvok vseh kamer"
   },
   "detect": {
-    "enable": "Omogoči Detekcijo",
-    "disable": "Onemogoči Detekcijo"
+    "enable": "Omogoči zaznavanje",
+    "disable": "Onemogoči zaznavanje"
   },
   "recording": {
-    "enable": "Omogoči Snemanje",
-    "disable": "Onemogoči Snemanje"
+    "enable": "Omogoči snemanje",
+    "disable": "Onemogoči snemanje"
   },
   "snapshots": {
-    "enable": "Omogoči Slike",
-    "disable": "Onemogoči Slike"
+    "enable": "Omogoči posnetke",
+    "disable": "Onemogoči posnetke"
   },
   "audioDetect": {
-    "enable": "Omogoči Zvočno Detekcijo",
-    "disable": "Onemogoči Zvočno Detekcijo"
+    "enable": "Omogoči zaznavanje zvoka",
+    "disable": "Onemogoči zaznavanje zvoka"
   },
   "transcription": {
-    "enable": "Omogoči Prepisovanje Zvoka v Živo",
-    "disable": "Onemogoči Prepisovanje Zvoka v Živo"
+    "enable": "Omogoči transkripcijo zvoka v živo",
+    "disable": "Onemogoči transkripcijo zvoka v živo"
   },
   "autotracking": {
-    "enable": "Omogoči Samodejno Sledenje",
-    "disable": "Onemogoči Samodejno Sledenje"
+    "enable": "Omogoči samodejno sledenje",
+    "disable": "Onemogoči samodejno sledenje"
   },
   "streamStats": {
-    "enable": "Prikaži Statistiko Pretočnega Predvajanja",
-    "disable": "Skrij Statistiko Pretočnega Predvajanja"
+    "enable": "Prikaži statistiko pretoka",
+    "disable": "Skrij statistiko pretoka"
   },
   "manualRecording": {
-    "title": "Snemanje na Zahtevo",
-    "tips": "Začni ročni dogodek na podlagi nastavitev hranjenja posnetkov te kamere.",
+    "title": "Na zahtevo",
+    "tips": "Prenesi takojšen posnetek ali začni ročni dogodek na podlagi nastavitev hrambe te kamere.",
     "playInBackground": {
       "label": "Predvajaj v ozadju",
-      "desc": "Omogočite to možnost, če želite nadaljevati s pretakanjem, ko je predvajalnik skrit."
+      "desc": "Omogoči to možnost za nadaljevanje pretakanja, ko je predvajalnik skrit."
     },
     "showStats": {
-      "label": "Prikaži Statistiko",
-      "desc": "Omogočite to možnost, če želite statistiko pretoka prikazati kot prekrivni sloj na viru kamere."
+      "label": "Prikaži statistiko",
+      "desc": "Omogoči to možnost za prikaz statistike pretoka kot prekrivni element na viru kamere."
     },
-    "debugView": "Pogled za Odpravljanje Napak",
+    "debugView": "Pogled za razhroščevanje",
     "start": "Začni snemanje na zahtevo",
-    "started": "Začelo se je ročno snemanje na zahtevo.",
-    "failedToStart": "Ročnega snemanja na zahtevo ni bilo mogoče začeti.",
-    "recordDisabledTips": "Ker je snemanje v nastavitvah te kamere onemogočeno ali omejeno, bo shranjena samo slika.",
+    "started": "Ročno snemanje na zahtevo se je začelo.",
+    "failedToStart": "Začetek ročnega snemanja na zahtevo ni uspel.",
+    "recordDisabledTips": "Ker je snemanje v konfiguraciji za to kamero onemogočeno ali omejeno, bo shranjen le posnetek (snapshot).",
     "end": "Končaj snemanje na zahtevo",
-    "ended": "Ročno snemanje na zahtevo je končano.",
-    "failedToEnd": "Ročnega snemanja na zahtevo ni bilo mogoče končati."
+    "ended": "Ročno snemanje na zahtevo se je končalo.",
+    "failedToEnd": "Končanje ročnega snemanja na zahtevo ni uspelo."
   },
-  "streamingSettings": "Nastavitve Pretakanja",
+  "streamingSettings": "Nastavitve pretakanja",
   "notifications": "Obvestila",
   "audio": "Zvok",
   "suspend": {
-    "forTime": "Začasno ustavi za: "
+    "forTime": "Prekini za: "
   },
   "stream": {
     "title": "Pretok",
     "audio": {
       "tips": {
-        "title": "Zvok mora biti predvajan iz vaše kamere in konfiguriran v go2rtc za ta pretok.",
+        "title": "Zvok mora priti iz tvoje kamere in biti nastavljen v go2rtc za ta pretok.",
         "documentation": "Preberi Dokumentacijo "
       },
-      "available": "Za ta pretok je na voljo zvok",
-      "unavailable": "Zvok za ta pretok ni na voljo"
+      "available": "Zvok je na voljo za ta pretok",
+      "unavailable": "Zvok ni na voljo za ta pretok"
     },
     "twoWayTalk": {
-      "tips": "Vaša naprava mora podpirati to funkcijo, WebRTC pa mora biti konfiguriran za dvosmerni pogovor.",
+      "tips": "Tvoja naprava mora podpirati to funkcijo, WebRTC pa mora biti nastavljen za dvosmerni pogovor.",
       "tips.documentation": "Preberi dokumentacijo ",
-      "available": "Za ta tok je na voljo dvosmerni pogovor",
+      "available": "Dvosmerni pogovor je na voljo za ta pretok",
       "unavailable": "Dvosmerni pogovor ni na voljo za ta pretok"
     },
     "lowBandwidth": {
-      "tips": "Pogled v živo je v načinu nizke pasovne širine zaradi napak v nalaganju ali pretoku.",
+      "tips": "Pogled v živo je v načinu nizke pasovne širine zaradi medpomnjenja ali napak v pretoku.",
       "resetStream": "Ponastavi pretok"
     },
     "playInBackground": {
       "label": "Predvajaj v ozadju",
-      "tips": "Omogočite to možnost, če želite nadaljevati s pretakanjem, ko je predvajalnik skrit."
+      "tips": "Omogoči to možnost za nadaljevanje pretakanja, ko je predvajalnik skrit."
+    },
+    "debug": {
+      "picker": "Izbira pretoka v načinu razhroščevanja ni na voljo. Ta pogled vedno uporablja pretok z vlogo 'detect'."
     }
   },
   "cameraSettings": {
-    "title": "{{camera}} Nastavitve",
-    "cameraEnabled": "Kamera Omogočena",
-    "objectDetection": "Zaznavanje Objektov",
+    "title": "Nastavitve kamere {{camera}}",
+    "cameraEnabled": "Kamera omogočena",
+    "objectDetection": "Zaznavanje objektov",
     "recording": "Snemanje",
-    "snapshots": "Slike",
-    "audioDetection": "Zvočna Detekcija",
-    "transcription": "Zvočni Prepis",
-    "autotracking": "Samodejno Sledenje"
+    "snapshots": "Posnetki",
+    "audioDetection": "Zaznavanje zvoka",
+    "transcription": "Transkripcija zvoka",
+    "autotracking": "Samodejno sledenje"
   },
   "history": {
-    "label": "Prikaži stare posnetke"
+    "label": "Prikaži zgodovinske posnetke"
   },
   "effectiveRetainMode": {
     "modes": {
       "all": "Vse",
       "motion": "Gibanje",
-      "active_objects": "Aktivni Objekti"
+      "active_objects": "Aktivni objekti"
     },
     "notAllTips": "Vaša konfiguracija hranjenja posnetkov {{source}} je nastavljena na način <code>: {{effectiveRetainMode}}</code>, zato bo ta posnetek na zahtevo hranil samo segmente z {{effectiveRetainModeName}}."
   },
   "editLayout": {
-    "label": "Uredi Postavitev",
+    "label": "Uredi postavitev",
     "group": {
-      "label": "Uredi Skupino Kamere"
+      "label": "Uredi skupino kamer"
     },
-    "exitEdit": "Izhod iz Urejanja"
+    "exitEdit": "Izhod iz urejanja"
+  },
+  "snapshot": {
+    "takeSnapshot": "Prenesi takojšen posnetek",
+    "noVideoSource": "Vir videa za posnetek ni na voljo.",
+    "captureFailed": "Zajem posnetka ni uspel.",
+    "downloadStarted": "Prenos posnetka se je začel."
+  },
+  "noCameras": {
+    "title": "Ni nastavljenih kamer",
+    "description": "Začni tako, da povežeš kamero s Frigate.",
+    "buttonText": "Dodaj kamero",
+    "restricted": {
+      "title": "Ni razpoložljivih kamer",
+      "description": "Nimaš dovoljenja za ogled kamer v tej skupini."
+    },
+    "default": {
+      "title": "Ni nastavljenih kamer",
+      "description": "Začni tako, da povežeš kamero s Frigate.",
+      "buttonText": "Dodaj kamero"
+    },
+    "group": {
+      "title": "V skupini ni kamer",
+      "description": "Ta skupina kamer nima dodeljenih ali omogočenih kamer.",
+      "buttonText": "Upravljaj skupine"
+    }
   }
 }

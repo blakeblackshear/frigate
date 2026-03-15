@@ -147,7 +147,11 @@
     "overview": "Visió general",
     "shm": {
       "title": "Ubicació de SHM (memória compartida)",
-      "warning": "El tamany de la SHM oh {{total}}MB es massa petita. Augmenta almenys fins a {{min_shm}}MB."
+      "warning": "El tamany de la SHM oh {{total}}MB es massa petita. Augmenta almenys fins a {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Temps de vida del fotograma",
+        "description": "Cada càmera té {{frames}} ranures de fotogrames en memòria compartida. A la velocitat de fotogrames més ràpida de la càmera, cada fotograma està disponible per aproximadament {{lifetime}}s abans de ser sobreescrit."
+      }
     }
   },
   "cameras": {

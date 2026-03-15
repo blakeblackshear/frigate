@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Frigate 日志 - Frigate",
       "go2rtc": "Go2RTC 日志 - Frigate",
-      "nginx": "Nginx 日志 - Frigate"
+      "nginx": "Nginx 日志 - Frigate",
+      "websocket": "消息日志 - Frigate"
     }
   },
   "title": "系统",
@@ -32,6 +33,32 @@
       "error": {
         "fetchingLogsFailed": "获取日志出错：{{errorMessage}}",
         "whileStreamingLogs": "流式传输日志时出错：{{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "消息",
+      "pause": "暂停",
+      "filter": {
+        "lpr": "车牌识别",
+        "all": "全部主题",
+        "topics": "主题",
+        "events": "事件",
+        "reviews": "核查",
+        "classification": "分类",
+        "face_recognition": "人脸识别",
+        "camera_activity": "摄像头活动",
+        "system": "系统",
+        "camera": "摄像头",
+        "all_cameras": "所有摄像头",
+        "cameras_count_one": "{{count}} 个摄像头",
+        "cameras_count_other": "{{count}} 个摄像头"
+      },
+      "resume": "继续",
+      "clear": "清除",
+      "empty": "未捕获到消息",
+      "count": "{{count}} 条消息",
+      "expanded": {
+        "payload": "Payload"
       }
     }
   },
@@ -81,7 +108,9 @@
         "title": "Intel GPU 处于警告状态",
         "message": "GPU 状态不可用",
         "description": "这是 Intel 的 GPU 状态报告工具（intel_gpu_top）的已知问题：该工具会失效并反复返回 GPU 使用率为 0%，即使在硬件加速和目标检测已在 (i)GPU 上正常运行的情况下也是如此，这并不是 Frigate 的 bug。你可以通过重启主机来临时修复该问题，并确认 GPU 正常工作。该问题并不会影响性能。"
-      }
+      },
+      "gpuTemperature": "GPU 温度",
+      "npuTemperature": "NPU 温度"
     },
     "otherProcesses": {
       "title": "其他进程",
@@ -118,7 +147,11 @@
     },
     "shm": {
       "title": "共享内存（SHM）分配",
-      "warning": "当前共享内存（SHM）容量过小（ {{total}}MB），请将其至少增加到 {{min_shm}}MB。"
+      "warning": "当前共享内存（SHM）容量过小（ {{total}}MB），请将其至少增加到 {{min_shm}}MB。",
+      "frameLifetime": {
+        "title": "帧保留时间",
+        "description": "每个摄像头在共享内存中拥有 {{frames}} 个帧槽位。在最快摄像头的帧率下，每一帧在被覆盖前大约可保留 {{lifetime}} 秒。"
+      }
     }
   },
   "cameras": {
@@ -165,6 +198,17 @@
       "error": {
         "unableToProbeCamera": "无法检测到摄像头：{{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "连接质量",
+      "excellent": "优秀",
+      "fair": "一般",
+      "poor": "较差",
+      "unusable": "不可用",
+      "fps": "帧率",
+      "expectedFps": "预期帧率",
+      "reconnectsLastHour": "最近一小时重连次数",
+      "stallsLastHour": "最近一小时卡顿次数"
     }
   },
   "lastRefreshed": "最后刷新时间： ",
@@ -176,7 +220,8 @@
     "detectIsSlow": "{{detect}} 运行缓慢（{{speed}}毫秒）",
     "detectIsVerySlow": "{{detect}} 运行非常缓慢（{{speed}}毫秒）",
     "cameraIsOffline": "{{camera}} 已离线",
-    "shmTooLow": "/dev/shm 的分配空间过低（当前 {{total}} MB），应至少增加到 {{min}} MB。"
+    "shmTooLow": "/dev/shm 的分配空间过低（当前 {{total}} MB），应至少增加到 {{min}} MB。",
+    "debugReplayActive": "调试回放会话正在进行"
   },
   "enrichments": {
     "title": "增强功能",
