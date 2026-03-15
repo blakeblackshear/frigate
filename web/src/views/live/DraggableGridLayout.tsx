@@ -359,7 +359,7 @@ export default function DraggableGridLayout({
     // subtract container margin, 1 camera takes up at least 4 rows
     // account for additional margin on bottom of each row
     return (
-      ((availableWidth ?? window.innerWidth) - 2 * marginValue) /
+      ((availableWidth || window.innerWidth) - 2 * marginValue) /
         12 /
         aspectRatio -
       marginValue +
@@ -712,7 +712,7 @@ export default function DraggableGridLayout({
           />
           <Responsive
             className="grid-layout"
-            width={availableWidth ?? window.innerWidth}
+            width={availableWidth || window.innerWidth}
             layouts={{
               lg: currentGridLayout,
               md: currentGridLayout,
