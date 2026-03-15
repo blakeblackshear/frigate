@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Registros Frigate - Frigate",
       "go2rtc": "Registros GoRTC - Frigate",
-      "nginx": "Registros Nginx - Frigate"
+      "nginx": "Registros Nginx - Frigate",
+      "websocket": "Registros de Mensagem - Frigate"
     }
   },
   "title": "Sistema",
@@ -33,6 +34,12 @@
         "fetchingLogsFailed": "Erro ao buscar registros: {{errorMessage}}",
         "whileStreamingLogs": "Erro ao transmitir registros: {{errorMessage}}"
       }
+    },
+    "websocket": {
+      "label": "Mensagens",
+      "pause": "Pausar",
+      "resume": "Resumir",
+      "clear": "Limpar"
     }
   },
   "general": {
