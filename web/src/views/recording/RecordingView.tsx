@@ -418,7 +418,7 @@ export function RecordingView({
         return "size-full";
       }
     } else {
-      return "size-full";
+      return "w-full aspect-video";
     }
   }, [mainCameraAspect]);
 
