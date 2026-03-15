@@ -710,9 +710,9 @@ export default function DraggableGridLayout({
             currentGroups={groups}
             activeGroup={group}
           />
-          <Responsive
+          {containerWidth > 0 && <Responsive
             className="grid-layout"
-            width={availableWidth || window.innerWidth}
+            width={availableWidth}
             layouts={{
               lg: currentGridLayout,
               md: currentGridLayout,
@@ -887,7 +887,7 @@ export default function DraggableGridLayout({
                 </GridLiveContextMenu>
               );
             })}
-          </Responsive>
+          </Responsive>}
           {isDesktop && (
             <div
               className={cn(
