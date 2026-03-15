@@ -1,1 +1,936 @@
-{}
+{
+    "label": "摄像头配置",
+    "name": {
+        "label": "摄像头名称",
+        "description": "必须填写摄像头名称"
+    },
+    "friendly_name": {
+        "label": "别名",
+        "description": "摄像头别名将用于展示在页面中"
+    },
+    "enabled": {
+        "label": "开启",
+        "description": "开启"
+    },
+    "audio": {
+        "label": "音频事件",
+        "description": "此摄像头的音频事件检测设置。",
+        "enabled": {
+            "label": "开启音频检测",
+            "description": "开启或禁用此摄像头的音频事件检测。"
+        },
+        "max_not_heard": {
+            "label": "结束超时",
+            "description": "在结束音频事件之前，未检测到配置的音频类型的秒数。"
+        },
+        "num_threads": {
+            "label": "检测线程",
+            "description": "用于音频检测处理的线程数量。"
+        },
+        "min_volume": {
+            "label": "最小音量",
+            "description": "运行音频检测所需的最小 RMS 音量阈值；数值越低灵敏度越高（例如 200 高灵敏度，500 中等，1000 低灵敏度）。"
+        },
+        "listen": {
+            "label": "监听类型",
+            "description": "要检测的音频事件类型列表（例如：bark、fire_alarm、scream、speech、yell）。"
+        },
+        "filters": {
+            "label": "音频过滤器",
+            "description": "按音频类型的过滤器设置，如用于减少误报的置信度阈值。"
+        },
+        "enabled_in_config": {
+            "label": "原始音频状态",
+            "description": "指示原始静态配置文件中是否启用了音频检测。"
+        }
+    },
+    "audio_transcription": {
+        "label": "音频转录",
+        "description": "用于事件和实时字幕的实时和语音音频转录设置。",
+        "enabled": {
+            "label": "开启转录",
+            "description": "开启或关闭手动触发的音频事件转写。"
+        },
+        "enabled_in_config": {
+            "label": "原始转写状态"
+        },
+        "live_enabled": {
+            "label": "实时监控转写",
+            "description": "在接收到音频时开启实时监控持续转写。"
+        }
+    },
+    "birdseye": {
+        "label": "鸟瞰图",
+        "description": "将多路摄像头画面合并为统一布局的鸟瞰合成视图设置。",
+        "enabled": {
+            "label": "开启鸟瞰图",
+            "description": "开启或关闭鸟瞰图功能。"
+        },
+        "mode": {
+            "label": "追踪模式",
+            "description": "在鸟瞰视图中包含摄像头的模式：'objects'（目标）、'motion'（动作）或 'continuous'（持续）。"
+        },
+        "order": {
+            "label": "排序位置",
+            "description": "用于控制摄像头在鸟瞰视图布局中排序位置的数值。"
+        }
+    },
+    "detect": {
+        "label": "目标检测",
+        "description": "用于运行目标检测、初始化追踪器的检测模块设置。",
+        "enabled": {
+            "label": "开启检测",
+            "description": "开启或关闭该摄像头的目标检测。如需运行目标追踪，必须先开启检测。"
+        },
+        "height": {
+            "label": "检测画面高度",
+            "description": "用于配置检测流的画面高度（像素）；留空则使用原始视频流分辨率。"
+        },
+        "width": {
+            "label": "检测画面宽度",
+            "description": "用于配置检测流的画面宽度（像素）；留空则使用原始视频流分辨率。"
+        },
+        "fps": {
+            "label": "检测帧率",
+            "description": "检测时希望使用的帧率；数值越低，CPU 占用越小（推荐值为 5，仅在追踪极高速运动的目标时才设置更高数值，最高不建议超过 10）。"
+        },
+        "min_initialized": {
+            "label": "最小初始化帧数",
+            "description": "创建追踪目标前，需要连续检测到目标的次数。数值越大，错误触发的追踪越少。默认值为帧率除以 2。"
+        },
+        "max_disappeared": {
+            "label": "最大消失帧数",
+            "description": "追踪目标在连续多少帧未被检测到时，将被判定为已消失。"
+        },
+        "stationary": {
+            "label": "静止目标配置",
+            "description": "用于检测和管理长时间静止目标的相关设置。",
+            "interval": {
+                "label": "静止间隔",
+                "description": "设置每隔多少帧执行一次检测，用于确认目标是否处于静止状态。"
+            },
+            "threshold": {
+                "label": "静止阈值",
+                "description": "目标需要连续多少帧位置不变，才会被标记为静止状态。"
+            },
+            "max_frames": {
+                "label": "最大帧数",
+                "description": "限制静止目标最大追踪时长（以帧数为单位），超过将会停止追踪。",
+                "default": {
+                    "label": "默认最大帧数",
+                    "description": "停止追踪前，用于追踪静止目标的默认最大帧数。"
+                },
+                "objects": {
+                    "label": "目标最大帧数",
+                    "description": "可对不同类型目标分别设置静止追踪的最大帧数（覆盖全局设置）。"
+                }
+            },
+            "classifier": {
+                "label": "开启视觉分类器",
+                "description": "使用视觉分类器，即使检测框有轻微抖动，也能准确判断物体是真的静止。"
+            }
+        },
+        "annotation_offset": {
+            "label": "标记偏移量",
+            "description": "检测标记的时间偏移量（毫秒），用于让时间轴上的检测框与录像画面更精准对齐；可设置为正数或负数。"
+        }
+    },
+    "face_recognition": {
+        "label": "人脸识别",
+        "description": "该摄像头的人脸检测与识别设置。",
+        "enabled": {
+            "label": "开启人脸识别",
+            "description": "开启或关闭人脸识别。"
+        },
+        "min_area": {
+            "label": "最小人脸区域",
+            "description": "需要尝试进行人脸识别的人脸检测框最小大小（像素）。"
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg 编解码相关设置，包含可执行文件路径、命令行参数、硬件加速选项，以及按不同功能划分的输出参数。",
+        "path": {
+            "label": "FFmpeg 路径",
+            "description": "要使用的 FFmpeg 可执行文件路径，或版本别名（如 \"5.0\" 或 \"7.0\"）。"
+        },
+        "global_args": {
+            "label": "FFmpeg 全局参数",
+            "description": "传递给 FFmpeg 进程的全局参数。"
+        },
+        "hwaccel_args": {
+            "label": "硬件加速参数",
+            "description": "用于 FFmpeg 的硬件加速参数。建议使用对应硬件厂商的预设配置。"
+        },
+        "input_args": {
+            "label": "输入参数",
+            "description": "应用于 FFmpeg 输入视频流的输入参数。"
+        },
+        "output_args": {
+            "label": "输出参数",
+            "description": "用于不同 FFmpeg 功能（如检测、录制）的默认输出参数。",
+            "detect": {
+                "label": "检测输出参数",
+                "description": "检测功能视频流的默认输出参数。"
+            },
+            "record": {
+                "label": "录制输出参数",
+                "description": "录制功能视频流的默认输出参数。"
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg 重试时间",
+            "description": "摄像头视频流异常断开后，重新连接前的等待时间。默认为 10 秒。"
+        },
+        "apple_compatibility": {
+            "label": "Apple 兼容性",
+            "description": "录制 H.265 视频时启用 HEVC 标记，以提升对 Apple 设备播放的兼容性。"
+        },
+        "gpu": {
+            "label": "GPU 索引",
+            "description": "在启用硬件加速时，默认使用的 GPU 索引。"
+        },
+        "inputs": {
+            "label": "摄像头输入视频流",
+            "description": "该摄像头的所有输入流配置列表（包含路径和功能）。",
+            "path": {
+                "label": "输入路径",
+                "description": "摄像头输入视频流的地址或路径。"
+            },
+            "roles": {
+                "label": "输入流功能",
+                "description": "定义该视频流的功能。"
+            },
+            "global_args": {
+                "label": "FFmpeg 全局参数",
+                "description": "该输入视频流使用的 FFmpeg 全局通用参数。"
+            },
+            "hwaccel_args": {
+                "label": "硬件加速参数",
+                "description": "该输入视频流的硬件加速参数。"
+            },
+            "input_args": {
+                "label": "输入参数",
+                "description": "该视频流特定的输入参数。"
+            }
+        }
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "MQTT 图像发布设置。",
+        "enabled": {
+            "label": "发送图像",
+            "description": "为此摄像头启用向 MQTT 主题发布目标图像快照。"
+        },
+        "timestamp": {
+            "label": "添加时间戳",
+            "description": "在发布到 MQTT 的图像上叠加时间戳。"
+        },
+        "bounding_box": {
+            "label": "添加边界框",
+            "description": "在通过 MQTT 发布的图像上绘制边界框。"
+        },
+        "crop": {
+            "label": "裁剪图像",
+            "description": "将发布到 MQTT 的图像裁剪到检测到的目标边界框。"
+        },
+        "height": {
+            "label": "图像高度",
+            "description": "通过 MQTT 发布的图像的调整高度（像素）。"
+        },
+        "required_zones": {
+            "label": "必需区域",
+            "description": "目标必须进入才能发布 MQTT 图像的区域。"
+        },
+        "quality": {
+            "label": "JPEG 质量",
+            "description": "发布到 MQTT 的图像的 JPEG 质量（0-100）。"
+        }
+    },
+    "notifications": {
+        "label": "通知",
+        "enabled": {
+            "label": "开启通知"
+        },
+        "email": {
+            "label": "通知邮箱",
+            "description": "用于推送通知或某些通知提供商要求的邮箱地址。"
+        },
+        "cooldown": {
+            "label": "冷却时间",
+            "description": "通知之间的冷却时间（秒），以避免向收件人发送垃圾信息。"
+        },
+        "enabled_in_config": {
+            "label": "原始通知状态",
+            "description": "指示原始静态配置中是否启用了通知。"
+        }
+    },
+    "live": {
+        "label": "实时回放",
+        "streams": {
+            "label": "实时监控流名称",
+            "description": "配置的流名称到用于实时监控播放的 restream/go2rtc 名称的映射。"
+        },
+        "height": {
+            "label": "实时监控高度",
+            "description": "在 Web UI 中渲染 jsmpeg 实时监控流的高度（像素）；必须小于等于检测流高度。"
+        },
+        "quality": {
+            "label": "实时监控质量",
+            "description": "jsmpeg 流的编码质量（1 最高，31 最低）。"
+        }
+    },
+    "motion": {
+        "label": "画面变动检测",
+        "enabled": {
+            "label": "开启画面变动检测",
+            "description": "开启或关闭此摄像头的画面变动检测。"
+        },
+        "threshold": {
+            "label": "画面变动阈值",
+            "description": "画面变动检测器使用的像素差异阈值；数值越高灵敏度越低（范围 1-255）。"
+        },
+        "lightning_threshold": {
+            "label": "闪电阈值",
+            "description": "用于检测和忽略短暂闪电闪烁的阈值（数值越低越敏感，范围 0.3 到 1.0）。这不会完全阻止画面变动检测；只是当超过阈值时检测器会停止分析额外的帧。在此类事件期间仍会创建基于画面变动的录像。"
+        },
+        "skip_motion_threshold": {
+            "label": "跳过画面变动阈值",
+            "description": "如果单帧中图像变化超过此比例，检测器将返回无画面变动框并立即重新校准。这可以节省 CPU 并减少闪电、风暴等情况下的误报，但可能会错过真实事件，如 PTZ 摄像头自动追踪目标。权衡的是丢弃几兆字节的录像与查看几个短片之间的取舍。范围 0.0 到 1.0。"
+        },
+        "improve_contrast": {
+            "label": "改善对比度",
+            "description": "在画面变动分析之前对帧应用对比度改善以帮助检测。"
+        },
+        "contour_area": {
+            "label": "轮廓区域",
+            "description": "画面变动轮廓被计入所需的最小轮廓区域（像素）。"
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "用于画面变动计算的帧差异中使用的 alpha 混合因子。"
+        },
+        "frame_alpha": {
+            "label": "画面 alpha 通道",
+            "description": "画面变动预处理时混合画面所使用的 alpha 值。"
+        },
+        "frame_height": {
+            "label": "画面高度",
+            "description": "计算画面变动时缩放画面的高度（像素）。"
+        },
+        "mask": {
+            "label": "遮罩坐标",
+            "description": "定义用于包含/排除区域的画面变动遮罩多边形的有序 x,y 坐标。"
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT 关闭延迟",
+            "description": "在发布 MQTT 'off' 状态之前，最后一次画面变动后等待的秒数。"
+        },
+        "enabled_in_config": {
+            "label": "原始画面变动状态",
+            "description": "指示原始静态配置中是否启用了画面变动检测。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        },
+        "description": "此摄像头的默认画面变动检测设置。"
+    },
+    "objects": {
+        "label": "目标",
+        "description": "目标追踪默认设置，包括要追踪的标签和按目标的过滤器。",
+        "track": {
+            "label": "要追踪的目标"
+        },
+        "filters": {
+            "label": "目标过滤器",
+            "description": "应用于检测到的目标以减少误报的过滤器（区域、比例、置信度）。",
+            "min_area": {
+                "label": "最小目标区域",
+                "description": "此目标类型所需的最小边界框区域（像素或百分比）。可以是像素（整数）或百分比（0.000001 到 0.99 之间的浮点数）。"
+            },
+            "max_area": {
+                "label": "最大目标区域",
+                "description": "此目标类型允许的最大边界框区域（像素或百分比）。可以是像素（整数）或百分比（0.000001 到 0.99 之间的浮点数）。"
+            },
+            "min_ratio": {
+                "label": "最小纵横比",
+                "description": "边界框所需的最小宽高比。"
+            },
+            "max_ratio": {
+                "label": "最大纵横比",
+                "description": "边界框允许的最大宽高比。"
+            },
+            "threshold": {
+                "label": "置信度阈值",
+                "description": "目标被视为真正阳性所需的平均检测置信度阈值。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "目标被计入所需的最小单帧检测置信度。"
+            },
+            "mask": {
+                "label": "过滤器遮罩",
+                "description": "定义此过滤器在帧内应用位置的多边形坐标。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
+        },
+        "mask": {
+            "label": "目标遮罩",
+            "description": "用于防止在指定区域进行目标检测的遮罩多边形。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        },
+        "genai": {
+            "label": "GenAI 目标配置",
+            "description": "用于描述追踪目标和发送帧进行生成的 GenAI 选项。",
+            "enabled": {
+                "label": "开启 GenAI",
+                "description": "默认启用 GenAI 生成追踪目标的描述。"
+            },
+            "use_snapshot": {
+                "label": "使用快照",
+                "description": "使用目标快照而不是缩略图进行 GenAI 描述生成。"
+            },
+            "prompt": {
+                "label": "字幕提示",
+                "description": "使用 GenAI 生成描述时使用的默认提示模板。"
+            },
+            "object_prompts": {
+                "label": "目标提示",
+                "description": "用于自定义特定标签的 GenAI 输出的按目标提示。"
+            },
+            "objects": {
+                "label": "GenAI 目标",
+                "description": "默认发送给 GenAI 的目标标签列表。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入才能符合 GenAI 描述生成条件的区域。"
+            },
+            "debug_save_thumbnails": {
+                "label": "保存缩略图",
+                "description": "保存发送给 GenAI 的缩略图用于调试和核查。"
+            },
+            "send_triggers": {
+                "label": "GenAI 触发器",
+                "description": "定义何时应将帧发送给 GenAI（结束时、更新后等）。",
+                "tracked_object_end": {
+                    "label": "结束时发送",
+                    "description": "当追踪目标结束时向 GenAI 发送请求。"
+                },
+                "after_significant_updates": {
+                    "label": "早期 GenAI 触发器",
+                    "description": "在追踪目标进行指定次数的重大更新后向 GenAI 发送请求。"
+                }
+            },
+            "enabled_in_config": {
+                "label": "原始 GenAI 状态",
+                "description": "指示原始静态配置中是否启用了 GenAI。"
+            }
+        }
+    },
+    "record": {
+        "label": "录像",
+        "enabled": {
+            "label": "开启录像",
+            "description": "开启或关闭此摄像头的录像。"
+        },
+        "expire_interval": {
+            "label": "录像清理间隔",
+            "description": "清理过期录像片段的间隔分钟数。"
+        },
+        "continuous": {
+            "label": "持续保留",
+            "description": "无论是否有追踪目标或动作，保留录像的天数。如果只想保留警报和检测的录像，请设置为 0。",
+            "days": {
+                "label": "保留天数",
+                "description": "保留录像的天数。"
+            }
+        },
+        "motion": {
+            "label": "动作保留",
+            "description": "无论是否有追踪目标，由动作触发的录像保留天数。如果只想保留警报和检测的录像，请设置为 0。",
+            "days": {
+                "label": "保留天数",
+                "description": "保留录像的天数。"
+            }
+        },
+        "detections": {
+            "label": "检测保留",
+            "description": "检测事件的录像保留设置，包括前后捕获时长。",
+            "pre_capture": {
+                "label": "前捕获秒数",
+                "description": "检测事件之前包含在录像中的秒数。"
+            },
+            "post_capture": {
+                "label": "后捕获秒数",
+                "description": "检测事件之后包含在录像中的秒数。"
+            },
+            "retain": {
+                "label": "事件保留",
+                "description": "检测事件录像的保留设置。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留检测事件录像的天数。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
+                }
+            }
+        },
+        "alerts": {
+            "label": "警报保留",
+            "description": "警报事件的录像保留设置，包括前后捕获时长。",
+            "pre_capture": {
+                "label": "前捕获秒数",
+                "description": "检测事件之前包含在录像中的秒数。"
+            },
+            "post_capture": {
+                "label": "后捕获秒数",
+                "description": "检测事件之后包含在录像中的秒数。"
+            },
+            "retain": {
+                "label": "事件保留",
+                "description": "检测事件录像的保留设置。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留检测事件录像的天数。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
+                }
+            }
+        },
+        "export": {
+            "label": "导出配置",
+            "description": "导出录像时使用的设置，如延时摄影和硬件加速。",
+            "hwaccel_args": {
+                "label": "导出硬件加速参数",
+                "description": "用于导出/转码操作的硬件加速参数。"
+            }
+        },
+        "preview": {
+            "label": "预览配置",
+            "description": "控制 UI 中显示的录像预览质量的设置。",
+            "quality": {
+                "label": "预览质量",
+                "description": "预览质量级别（very_low、low、medium、high、very_high）。"
+            }
+        },
+        "enabled_in_config": {
+            "label": "原始录像状态",
+            "description": "指示原始静态配置中是否启用了录像。"
+        },
+        "description": "此摄像头的录像和保留设置。"
+    },
+    "review": {
+        "label": "核查",
+        "alerts": {
+            "label": "警报配置",
+            "description": "哪些追踪目标生成警报以及如何保留警报的设置。",
+            "enabled": {
+                "label": "开启警报",
+                "description": "开启或关闭此摄像头的警报生成。"
+            },
+            "labels": {
+                "label": "警报标签",
+                "description": "符合警报条件的目标标签列表（例如：car、person）。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入才能被视为警报的区域；留空则允许任何区域。"
+            },
+            "enabled_in_config": {
+                "label": "原始警报状态",
+                "description": "追踪原始静态配置中是否启用了警报。"
+            },
+            "cutoff_time": {
+                "label": "警报截止时间",
+                "description": "在没有引起警报的活动后等待多少秒后截止警报。"
+            }
+        },
+        "detections": {
+            "label": "检测配置",
+            "description": "创建检测事件（非警报）以及保留多长时间的设置。",
+            "enabled": {
+                "label": "开启检测",
+                "description": "开启或关闭此摄像头的检测事件。"
+            },
+            "labels": {
+                "label": "检测标签",
+                "description": "符合检测事件条件的目标标签列表。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入才能被视为检测的区域；留空则允许任何区域。"
+            },
+            "cutoff_time": {
+                "label": "检测截止时间",
+                "description": "在没有引起检测的活动后等待多少秒后截止检测。"
+            },
+            "enabled_in_config": {
+                "label": "原始检测状态",
+                "description": "追踪原始静态配置中是否启用了检测。"
+            }
+        },
+        "genai": {
+            "label": "GenAI 配置",
+            "description": "控制使用生成式 AI 为核查项生成描述和摘要。",
+            "enabled": {
+                "label": "开启 GenAI 描述",
+                "description": "为核查项启用或禁用 GenAI 生成的描述和摘要。"
+            },
+            "alerts": {
+                "label": "为警报开启 GenAI",
+                "description": "使用 GenAI 为警报项生成描述。"
+            },
+            "detections": {
+                "label": "为检测开启 GenAI",
+                "description": "使用 GenAI 为检测项生成描述。"
+            },
+            "image_source": {
+                "label": "核查图像来源",
+                "description": "发送给 GenAI 的图像来源（'preview' 或 'recordings'）；'recordings' 使用更高质量的帧但消耗更多 token。"
+            },
+            "additional_concerns": {
+                "label": "额外关注事项",
+                "description": "GenAI 在评估此摄像头活动时应考虑的额外关注事项或备注列表。"
+            },
+            "debug_save_thumbnails": {
+                "label": "保存缩略图",
+                "description": "保存发送给 GenAI 提供商的缩略图用于调试和核查。"
+            },
+            "enabled_in_config": {
+                "label": "原始 GenAI 状态",
+                "description": "追踪原始静态配置中是否启用了 GenAI 核查。"
+            },
+            "preferred_language": {
+                "label": "首选语言",
+                "description": "向 GenAI 提供商请求生成响应的首选语言。"
+            },
+            "activity_context_prompt": {
+                "label": "活动上下文提示",
+                "description": "描述什么是和什么不是可疑活动的自定义提示，为 GenAI 摘要提供上下文。"
+            }
+        },
+        "description": "控制此摄像头的警报、检测和 GenAI 核查摘要的设置，用于 UI 和存储。"
+    },
+    "snapshots": {
+        "label": "快照",
+        "enabled": {
+            "label": "开启快照",
+            "description": "开启或关闭此摄像头的快照保存。"
+        },
+        "clean_copy": {
+            "label": "保存干净副本",
+            "description": "除了带注释的快照外，还保存一份不带注释的干净快照副本。"
+        },
+        "timestamp": {
+            "label": "时间戳叠加",
+            "description": "在保存的快照上叠加时间戳。"
+        },
+        "bounding_box": {
+            "label": "边界框叠加",
+            "description": "在保存的快照上绘制追踪目标的边界框。"
+        },
+        "crop": {
+            "label": "裁剪快照",
+            "description": "将保存的快照裁剪到检测到的目标边界框。"
+        },
+        "required_zones": {
+            "label": "必需区域",
+            "description": "目标必须进入才能保存快照的区域。"
+        },
+        "height": {
+            "label": "快照高度",
+            "description": "将保存的快照调整到的目标高度（像素）；留空则保持原始大小。"
+        },
+        "retain": {
+            "label": "快照保留",
+            "description": "保存快照的保留设置，包括默认天数和按目标覆盖。",
+            "default": {
+                "label": "默认保留",
+                "description": "保留快照的默认天数。"
+            },
+            "mode": {
+                "label": "保留模式",
+                "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
+            },
+            "objects": {
+                "label": "目标保留",
+                "description": "按目标覆盖的快照保留天数。"
+            }
+        },
+        "quality": {
+            "label": "JPEG 质量",
+            "description": "保存快照的 JPEG 编码质量（0-100）。"
+        },
+        "description": "此摄像头保存的追踪目标 JPEG 快照设置。"
+    },
+    "timestamp_style": {
+        "label": "时间戳样式",
+        "position": {
+            "label": "时间戳位置",
+            "description": "时间戳在图像上的位置（tl/tr/bl/br）。"
+        },
+        "format": {
+            "label": "时间戳格式",
+            "description": "用于时间戳的日期时间格式字符串（Python 日期时间格式代码）。"
+        },
+        "color": {
+            "label": "时间戳颜色",
+            "description": "时间戳文本的 RGB 颜色值（所有值 0-255）。",
+            "red": {
+                "label": "红色",
+                "description": "时间戳颜色的红色分量（0-255）。"
+            },
+            "green": {
+                "label": "绿色",
+                "description": "时间戳颜色的绿色分量（0-255）。"
+            },
+            "blue": {
+                "label": "蓝色",
+                "description": "时间戳颜色的蓝色分量（0-255）。"
+            }
+        },
+        "thickness": {
+            "label": "时间戳粗细",
+            "description": "时间戳文本的线条粗细。"
+        },
+        "effect": {
+            "label": "时间戳效果",
+            "description": "时间戳文本的视觉效果（none、solid、shadow）。"
+        },
+        "description": "应用于录像和快照的实时监控流中时间戳的样式选项。"
+    },
+    "semantic_search": {
+        "label": "语义搜索",
+        "triggers": {
+            "label": "触发器",
+            "description": "摄像头特定语义搜索触发器的操作和匹配条件。",
+            "friendly_name": {
+                "label": "友好名称",
+                "description": "在 UI 中为此触发器显示的可选友好名称。"
+            },
+            "enabled": {
+                "label": "开启此触发器",
+                "description": "启用或禁用此语义搜索触发器。"
+            },
+            "type": {
+                "label": "触发器类型",
+                "description": "触发器类型：'thumbnail'（与图像匹配）或 'description'（与文本匹配）。"
+            },
+            "data": {
+                "label": "触发器内容",
+                "description": "要与追踪目标匹配的文本短语或缩略图 ID。"
+            },
+            "threshold": {
+                "label": "触发器阈值",
+                "description": "激活此触发器所需的最小相似度分数（0-1）。"
+            },
+            "actions": {
+                "label": "触发器操作",
+                "description": "触发器匹配时要执行的操作列表（通知、sub_label、属性）。"
+            }
+        },
+        "description": "语义搜索设置，用于构建和查询目标嵌入以查找相似项目。"
+    },
+    "lpr": {
+        "label": "车牌识别",
+        "description": "车牌识别设置，包括检测阈值、格式化和已知车牌。",
+        "enabled": {
+            "label": "开启 LPR"
+        },
+        "min_area": {
+            "label": "最小车牌区域",
+            "description": "尝试识别所需的最小车牌区域（像素）。"
+        },
+        "enhancement": {
+            "label": "增强级别",
+            "description": "在 OCR 之前应用于车牌裁剪的增强级别（0-10）；较高的值可能不总是改善结果，5 以上的级别可能仅适用于夜间车牌，应谨慎使用。"
+        },
+        "expire_time": {
+            "label": "过期秒数",
+            "description": "未见到的车牌从追踪器中过期的时间（秒）（仅适用于专用 LPR 摄像头）。"
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "此摄像头的 ONVIF 连接和 PTZ 自动追踪设置。",
+        "host": {
+            "label": "ONVIF 主机",
+            "description": "此摄像头 ONVIF 服务的主机（和可选协议）。"
+        },
+        "port": {
+            "label": "ONVIF 端口",
+            "description": "ONVIF 服务的端口号。"
+        },
+        "user": {
+            "label": "ONVIF 用户名",
+            "description": "ONVIF 身份验证的用户名；某些设备需要管理员用户才能使用 ONVIF。"
+        },
+        "password": {
+            "label": "ONVIF 密码",
+            "description": "ONVIF 身份验证的密码。"
+        },
+        "tls_insecure": {
+            "label": "禁用 TLS 验证",
+            "description": "跳过 TLS 验证并禁用 ONVIF 的摘要认证（不安全；仅用于安全网络）。"
+        },
+        "autotracking": {
+            "label": "自动追踪",
+            "description": "使用 PTZ 摄像头移动自动追踪移动目标并使其保持在画面中心。",
+            "enabled": {
+                "label": "开启自动追踪",
+                "description": "启用或禁用检测目标的自动 PTZ 摄像头追踪。"
+            },
+            "calibrate_on_startup": {
+                "label": "启动时校准",
+                "description": "在启动时测量 PTZ 电机速度以提高追踪精度。Frigate 将在校准后用 movement_weights 更新配置。"
+            },
+            "zooming": {
+                "label": "变焦模式",
+                "description": "控制变焦行为：disabled（仅平移/倾斜）、absolute（最兼容）或 relative（同时平移/倾斜/变焦）。"
+            },
+            "zoom_factor": {
+                "label": "变焦因子",
+                "description": "控制追踪目标的变焦级别。数值越低保持更多场景可见；数值越高放大更近但可能丢失追踪。数值范围 0.1 到 0.75。"
+            },
+            "track": {
+                "label": "追踪目标",
+                "description": "应触发自动追踪的目标类型列表。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入这些区域之一才能开始自动追踪。"
+            },
+            "return_preset": {
+                "label": "返回预设",
+                "description": "追踪结束后返回的摄像头固件中配置的 ONVIF 预设名称。"
+            },
+            "timeout": {
+                "label": "返回超时",
+                "description": "失去追踪后等待多少秒后将摄像头返回到预设位置。"
+            },
+            "movement_weights": {
+                "label": "移动权重",
+                "description": "由摄像头校准自动生成的校准值。请勿手动修改。"
+            },
+            "enabled_in_config": {
+                "label": "原始自动追踪状态",
+                "description": "用于追踪配置中是否启用自动追踪的内部字段。"
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "忽略时间不匹配",
+            "description": "忽略 ONVIF 通信中摄像头和 Frigate 服务器之间的时间同步差异。"
+        }
+    },
+    "ui": {
+        "label": "摄像头 UI",
+        "description": "此摄像头在 UI 中的显示顺序和可见性。顺序影响默认仪表板。如需更精细的控制，请使用摄像头组。",
+        "order": {
+            "label": "UI 顺序",
+            "description": "用于在 UI 中排序摄像头的数值顺序（默认仪表板和列表）；数值越大出现越晚。"
+        },
+        "dashboard": {
+            "label": "在 UI 中显示",
+            "description": "切换此摄像头在 Frigate UI 的所有位置是否可见。禁用此项将需要手动编辑配置才能在 UI 中再次查看此摄像头。"
+        }
+    },
+    "best_image_timeout": {
+        "label": "最佳图像超时",
+        "description": "等待具有最高置信度分数的图像的时间。"
+    },
+    "type": {
+        "label": "摄像头类型",
+        "description": "摄像头类型"
+    },
+    "webui_url": {
+        "label": "摄像头 URL",
+        "description": "从系统页面直接访问摄像头的 URL"
+    },
+    "zones": {
+        "label": "区域",
+        "description": "区域允许您定义帧的特定区域，以便确定目标是否在特定区域内。",
+        "friendly_name": {
+            "label": "区域名称",
+            "description": "区域的友好名称，显示在 Frigate UI 中。如果未设置，将使用区域名称的格式化版本。"
+        },
+        "enabled": {
+            "label": "开启",
+            "description": "开启或关闭此区域。禁用的区域在运行时将被忽略。"
+        },
+        "enabled_in_config": {
+            "label": "保持区域原始状态的跟踪。"
+        },
+        "filters": {
+            "label": "区域过滤器",
+            "description": "应用于此区域内目标的过滤器。用于减少误报或限制哪些目标被认为存在于区域内。",
+            "min_area": {
+                "label": "最小目标区域",
+                "description": "此目标类型所需的最小边界框区域（像素或百分比）。可以是像素（整数）或百分比（0.000001 到 0.99 之间的浮点数）。"
+            },
+            "max_area": {
+                "label": "最大目标区域",
+                "description": "此目标类型允许的最大边界框区域（像素或百分比）。可以是像素（整数）或百分比（0.000001 到 0.99 之间的浮点数）。"
+            },
+            "min_ratio": {
+                "label": "最小纵横比",
+                "description": "边界框所需的最小宽高比。"
+            },
+            "max_ratio": {
+                "label": "最大纵横比",
+                "description": "边界框允许的最大宽高比。"
+            },
+            "threshold": {
+                "label": "置信度阈值",
+                "description": "目标被视为真正阳性所需的平均检测置信度阈值。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "目标被计入所需的最小单帧检测置信度。"
+            },
+            "mask": {
+                "label": "过滤器遮罩",
+                "description": "定义此过滤器在帧内应用位置的多边形坐标。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
+        },
+        "coordinates": {
+            "label": "坐标",
+            "description": "定义区域区域的多边形坐标。可以是逗号分隔的字符串或坐标字符串列表。坐标应该是相对的（0-1）或绝对的（传统）。"
+        },
+        "distances": {
+            "label": "真实世界距离",
+            "description": "区域四边形每边的可选真实世界距离，用于速度或距离计算。如果设置，必须恰好有 4 个值。"
+        },
+        "inertia": {
+            "label": "惯性帧数",
+            "description": "目标必须在区域内被连续检测多少帧才能被认为存在。有助于过滤掉短暂检测。"
+        },
+        "loitering_time": {
+            "label": "徘徊秒数",
+            "description": "目标必须在区域内停留多少秒才能被视为徘徊。设置为 0 可禁用徘徊检测。"
+        },
+        "speed_threshold": {
+            "label": "最小速度",
+            "description": "目标被认为存在于区域所需的最小速度（如果设置了距离，则为真实世界单位）。用于基于速度的区域触发器。"
+        },
+        "objects": {
+            "label": "触发目标",
+            "description": "可以触发此区域的目标类型列表（来自标签映射）。可以是字符串或字符串列表。如果为空，则考虑所有目标。"
+        }
+    },
+    "enabled_in_config": {
+        "label": "原始摄像头状态",
+        "description": "保持摄像头的原始状态跟踪。"
+    }
+}
