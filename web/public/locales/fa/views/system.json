@@ -142,7 +142,7 @@
       "cameraDetectionsPerSecond": "تشخیص‌ها در ثانیهٔ {{camName}}",
       "camera": "دوربین",
       "skipped": "رد شد",
-      "ffmpeg": "FFmpeg",
+      "ffmpeg": "کدک FFmpeg",
       "overallFramesPerSecond": "نرخ کلی فریم بر ثانیه",
       "overallSkippedDetectionsPerSecond": "نرخ کلی تشخیص‌های ردشده بر ثانیه",
       "cameraDetect": "تشخیص {{camName}}",
