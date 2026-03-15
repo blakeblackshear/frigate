@@ -3,7 +3,7 @@
     "downloadVideo": {
       "label": "Prenesi video",
       "toast": {
-        "success": "Izbrani posnetek se je začel prenašati."
+        "success": "Prenos videa za izbrani element se je začel."
       }
     }
   }

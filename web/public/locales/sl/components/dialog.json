@@ -1,21 +1,22 @@
 {
   "restart": {
-    "title": "Ali ste prepričani, da želite ponovno zagnati Frigate?",
+    "title": "Ali si prepričan, da želiš ponovno zagnati Frigate?",
     "button": "Ponovni zagon",
     "restarting": {
       "title": "Frigate se ponovno zaganja",
-      "content": "Ta stran se bo osvežila čez {{countdown}}.",
-      "button": "Osveži zdaj"
-    }
+      "content": "Stran se bo osvežila čez {{countdown}} sekund.",
+      "button": "Prisili osvežitev zdaj"
+    },
+    "description": "To bo za kratek čas ustavilo delovanje programa."
   },
   "explore": {
     "plus": {
       "review": {
         "question": {
-          "ask_full": "Ali je ta objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "ask_full": "Je ta predmet <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
           "label": "Potrdi to oznako za Frigate Plus",
-          "ask_a": "Ali je ta objekt <code>{{label}}</code>?",
-          "ask_an": "Ali je ta objekt <code>{{label}}</code>?"
+          "ask_a": "Je ta predmet <code>{{label}}</code>?",
+          "ask_an": "Je ta predmet <code>{{label}}</code>?"
         },
         "state": {
           "submitted": "Oddano"
@@ -23,71 +24,75 @@
       },
       "submitToPlus": {
         "label": "Pošlji v Frigate+",
-        "desc": "Predmeti na lokacijah, ki se jim želite izogniti, niso lažni alarmi. Če jih označite kot lažne alarme, boste zmedli model."
+        "desc": "Predmeti na lokacijah, ki se jim želiš izogniti, niso lažni zadetki. Če jih pošlješ kot lažne zadetke, boš zmedli model."
       }
     },
     "video": {
-      "viewInHistory": "Poglej zgodovino"
+      "viewInHistory": "Poglej v zgodovini"
     }
   },
   "export": {
     "time": {
-      "lastHour_one": "Zadnja {{count}} ura",
-      "lastHour_two": "Zadnji {{count}} uri",
-      "lastHour_few": "Zadnje {{count}} ure",
+      "lastHour_one": "Zadnja ura",
+      "lastHour_two": "",
+      "lastHour_few": "",
       "lastHour_other": "Zadnjih {{count}} ur",
-      "fromTimeline": "Izberi s Časovnice",
+      "fromTimeline": "Izberi s časovnice",
       "custom": "Po meri",
       "start": {
-        "title": "Začetni čas",
-        "label": "Izberi Začetni Čas"
+        "title": "Čas začetka",
+        "label": "Izberi čas začetka"
       },
       "end": {
-        "title": "Končni Čas",
-        "label": "Izberi Končni Čas"
+        "title": "Čas konca",
+        "label": "Izberi čas konca"
       }
     },
     "name": {
-      "placeholder": "Poimenujte Izvoz"
+      "placeholder": "Poimenuj izvoz"
     },
     "select": "Izberi",
-    "export": "Izvoz",
-    "selectOrExport": "Izberi ali Izvozi",
+    "export": "Izvozi",
+    "selectOrExport": "Izberi ali izvozi",
     "toast": {
-      "success": "Izvoz se je uspešno začel. Datoteko si oglejte v izvozih.",
+      "success": "Izvoz se je uspešno začel. Datoteko si lahko ogledaš na strani z izvozi.",
       "error": {
-        "failed": "Npaka pri začetku izvoza: {{error}}",
-        "endTimeMustAfterStartTime": "Končni čas mora biti po začetnem čase",
+        "failed": "Napaka pri izvozu: {{error}}",
+        "endTimeMustAfterStartTime": "Čas konca mora biti po času začetka",
         "noVaildTimeSelected": "Ni izbranega veljavnega časovnega obdobja"
       },
-      "view": "Pregled"
+      "view": "Poglej"
     },
     "fromTimeline": {
-      "saveExport": "Shrani Izvoz",
-      "previewExport": "Predogled Izvoza"
+      "saveExport": "Shrani izvoz",
+      "previewExport": "Predogled izvoza"
+    },
+    "case": {
+      "label": "Primer",
+      "placeholder": "Izberi primer"
     }
   },
   "streaming": {
-    "label": "Pretakanje",
+    "label": "Pretok",
     "restreaming": {
       "disabled": "Ponovno pretakanje za to kamero ni omogočeno.",
       "desc": {
-        "title": "Za dodatne možnosti ogleda v živo in zvoka za to kamero nastavite go2rtc.",
+        "title": "Nastavi go2rtc za dodatne možnosti ogleda v živo in zvok za to kamero.",
         "readTheDocumentation": "Preberi dokumentacijo"
       }
     },
     "showStats": {
-      "label": "Prikaži statistiko pretoka",
-      "desc": "Omogočite to možnost, če želite prikazati statistiko pretoka videa kamere."
+      "label": "Pokaži statistiko pretoka",
+      "desc": "Omogoči to možnost za prikaz statistike pretoka kot prekrivno plast na sliki kamere."
     },
-    "debugView": "Pogled za Odpravljanje Napak"
+    "debugView": "Razhroščevalni pogled"
   },
   "search": {
     "saveSearch": {
       "label": "Shrani iskanje",
-      "desc": "Vnesite ime za to shranjeno iskanje.",
-      "placeholder": "Vnesite ime za iskanje",
-      "overwrite": "{{searchName}} že obstaja. Shranjevanje bo prepisalo obstoječo vrednost.",
+      "desc": "Vnesi ime za to shranjeno iskanje.",
+      "placeholder": "Vnesi ime iskanja",
+      "overwrite": "{{searchName}} že obstaja. Shranjevanje bo povozilo obstoječo vrednost.",
       "success": "Iskanje ({{searchName}}) je bilo shranjeno.",
       "button": {
         "save": {
@@ -98,28 +103,28 @@
   },
   "recording": {
     "confirmDelete": {
-      "title": "Potrdi Brisanje",
+      "title": "Potrdi brisanje",
       "desc": {
-        "selected": "Ali ste prepričani, da želite izbrisati vse posnete videoposnetke, povezane s tem elementom pregleda?<br /><br />Držite tipko <em>Shift</em>, da se v prihodnje izognete temu pogovornemu oknu."
+        "selected": "Ali si prepričan, da želiš izbrisati vse posnetke, povezane s tem elementom pregleda?<br /><br />Drži tipko <em>Shift</em>, da v prihodnje preskočiš to okno."
       },
       "toast": {
-        "success": "Videoposnetek, povezan z izbranimi elementi pregleda, je bil uspešno izbrisan.",
-        "error": "Brisanje ni uspelo: {{error}}"
+        "success": "Posnetki, povezani z izbranimi elementi pregleda, so bili uspešno izbrisani.",
+        "error": "Napaka pri brisanju: {{error}}"
       }
     },
     "button": {
-      "export": "Izvoz",
+      "export": "Izvozi",
       "markAsReviewed": "Označi kot pregledano",
-      "deleteNow": "Izbriši Zdaj",
+      "deleteNow": "Izbriši zdaj",
       "markAsUnreviewed": "Označi kot nepregledano"
     }
   },
   "imagePicker": {
-    "selectImage": "Izberite sličico sledenega predmeta",
+    "selectImage": "Izberi sličico sledenega objekta",
     "search": {
-      "placeholder": "Iskanje po oznaki ali podoznaki..."
+      "placeholder": "Išči po oznaki ali podoznaki..."
     },
     "noImages": "Za to kamero ni bilo najdenih sličic",
-    "unknownLabel": "Shranjena slika prožilca"
+    "unknownLabel": "Shranjena sprožilna slika"
   }
 }
