@@ -76,6 +76,310 @@
         }
     },
     "detect": {
-        "label": "Objekterkennung"
+        "label": "Objekterkennung",
+        "description": "Einstellungen für die Erkennungs-/Detektionsrolle, die zum Ausführen der Objekterkennung und zum Initialisieren von Trackern verwendet wird.",
+        "enabled": {
+            "label": "Erkennung aktiviert",
+            "description": "Aktivieren oder deaktivieren Sie die Objekterkennung für diese Kamera. Die Erkennung muss aktiviert sein, damit die Objektverfolgung ausgeführt werden kann."
+        },
+        "height": {
+            "label": "Höhe erkennen",
+            "description": "Höhe (Pixel) der für den Erkennungsstrom verwendeten Frames; leer lassen, um die native Stream-Auflösung zu verwenden."
+        },
+        "width": {
+            "label": "Breite erkennen",
+            "description": "Breite (Pixel) der für den Erkennungsstrom verwendeten Frames; leer lassen, um die native Stream-Auflösung zu verwenden."
+        },
+        "fps": {
+            "label": "FPS erkennen",
+            "description": "Gewünschte Bilder pro Sekunde für die Erkennung; niedrigere Werte reduzieren die CPU-Auslastung (empfohlener Wert ist 5, höhere Werte – maximal 10 – nur bei der Verfolgung extrem schnell bewegter Objekte einstellen)."
+        },
+        "min_initialized": {
+            "label": "Mindestanzahl an Initialisierungsframes",
+            "description": "Anzahl der aufeinanderfolgenden Erkennungserfolge, die vor der Erstellung eines verfolgten Objekts erforderlich sind. Erhöhen Sie diesen Wert, um Fehlinitialisierungen zu reduzieren. Der Standardwert ist fps geteilt durch 2."
+        },
+        "max_disappeared": {
+            "label": "Maximale Anzahl fehlender Frames",
+            "description": "Anzahl der Frames ohne Erkennung, bevor ein verfolgtes Objekt als verschwunden gilt."
+        },
+        "stationary": {
+            "label": "Konfiguration stationärer Objekte",
+            "description": "Einstellungen zum Erkennen und Verwalten von Objekten, die über einen bestimmten Zeitraum hinweg unbeweglich bleiben.",
+            "interval": {
+                "label": "Stationäres Intervall",
+                "description": "Wie oft (in Frames) soll eine Erkennungsprüfung durchgeführt werden, um ein stationäres Objekt zu bestätigen?"
+            },
+            "threshold": {
+                "label": "Stationäre Schwelle",
+                "description": "Anzahl der Frames ohne Positionsänderung, die erforderlich sind, um ein Objekt als stationär zu markieren."
+            },
+            "max_frames": {
+                "label": "Maximale Bildanzahl",
+                "description": "Begrenzt, wie lange stationäre Objekte verfolgt werden, bevor sie verworfen werden.",
+                "default": {
+                    "label": "Standardmäßige maximale Frames",
+                    "description": "Standardmäßige maximale Anzahl von Frames, die ein stationäres Objekt verfolgt werden sollen, bevor die Verfolgung beendet wird."
+                },
+                "objects": {
+                    "label": "Objekt max Rahmen",
+                    "description": "Objektbezogene Überschreibungen für maximale Frames zur Verfolgung stationärer Objekte."
+                }
+            },
+            "classifier": {
+                "description": "Verwenden Sie einen visuellen Klassifikator, um wirklich stationäre Objekte auch dann zu erkennen, wenn die Begrenzungsrahmen flackern.",
+                "label": "Visuellen Klassifikator aktivieren"
+            }
+        },
+        "annotation_offset": {
+            "label": "Anmerkung Offset",
+            "description": "Millisekunden zur Verschiebung der Anmerkungen, um die Begrenzungsrahmen der Zeitleiste besser an die Aufnahmen anzupassen; kann positiv oder negativ sein."
+        }
+    },
+    "mqtt": {
+        "label": "mqtt"
+    },
+    "face_recognition": {
+        "label": "Gesichtserkennung",
+        "description": "Einstellungen für die Gesichtserkennung und -identifizierung dieser Kamera.",
+        "enabled": {
+            "label": "Gesichtserkennung aktivieren",
+            "description": "Gesichtserkennung aktivieren oder deaktivieren."
+        },
+        "min_area": {
+            "label": "Mindestfläche der Stirnseite",
+            "description": "Mindestfläche (Pixel) eines erkannten Gesichtsrahmens, die für einen Erkennungsversuch erforderlich ist."
+        }
+    },
+    "notifications": {
+        "label": "Benachrichtigung",
+        "enabled": {
+            "label": "Benachrichtigungen aktivieren"
+        },
+        "email": {
+            "label": "Benachrichtigungs-E-Mail",
+            "description": "E-Mail-Adresse, die für Push-Benachrichtigungen verwendet wird oder von bestimmten Benachrichtigungsanbietern verlangt wird."
+        },
+        "cooldown": {
+            "label": "Abkühlungsphase",
+            "description": "Abkühlungszeit (Sekunden) zwischen Benachrichtigungen, um Spam an Empfänger zu vermeiden."
+        },
+        "enabled_in_config": {
+            "label": "Ursprüngliche Meldungen geben an",
+            "description": "Gibt an, ob Benachrichtigungen in der ursprünglichen statischen Konfiguration aktiviert waren."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg-Einstellungen, einschließlich Binärpfad, Argumente, hwaccel-Optionen und rollenspezifische Ausgabeargumente.",
+        "path": {
+            "label": "FFmpeg-Pfad",
+            "description": "Pfad zur zu verwendenden FFmpeg-Binärdatei oder ein Versionsalias („5.0” oder „7.0”)."
+        },
+        "global_args": {
+            "label": "Globale Argumente von FFmpeg",
+            "description": "An FFmpeg-Prozesse übergebene globale Argumente."
+        },
+        "hwaccel_args": {
+            "label": "Argumente für Hardwarebeschleunigung",
+            "description": "Hardwarebeschleunigungsargumente für FFmpeg. Es werden providerspezifische Voreinstellungen empfohlen."
+        },
+        "input_args": {
+            "label": "Eingabeargumente",
+            "description": "Eingabeargumente, die auf FFmpeg-Eingabestreams angewendet werden."
+        },
+        "output_args": {
+            "label": "Ausgabeargumente",
+            "description": "Standardausgabeargumente, die für verschiedene FFmpeg-Rollen wie „detect“ und „record“ verwendet werden.",
+            "detect": {
+                "label": "Ausgabeargumente erkennen",
+                "description": "Standardausgabeargumente für das Erkennen von Rollenströmen."
+            },
+            "record": {
+                "label": "Ausgabeargumente aufzeichnen",
+                "description": "Standardausgabeargumente für Datensatzrollen-Streams."
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg-Wiederholungszeit",
+            "description": "Sekunden, die gewartet werden sollen, bevor nach einem Fehler erneut versucht wird, eine Kamera-Übertragung herzustellen. Der Standardwert ist 10."
+        },
+        "apple_compatibility": {
+            "label": "Apple-Kompatibilität",
+            "description": "Aktivieren Sie die HEVC-Kennzeichnung für eine bessere Kompatibilität mit Apple-Playern bei der Aufnahme von H.265."
+        },
+        "gpu": {
+            "label": "GPU-Index",
+            "description": "Standard-GPU-Index, der für die Hardwarebeschleunigung verwendet wird, sofern verfügbar."
+        },
+        "inputs": {
+            "label": "Kameraeingänge",
+            "description": "Liste der Eingangsstromdefinitionen (Pfade und Rollen) für diese Kamera.",
+            "path": {
+                "label": "Eingabepfad",
+                "description": "URL oder Pfad des Kameraeingangsstroms."
+            },
+            "roles": {
+                "label": "Eingangsrollen",
+                "description": "Rollen für diesen Eingabestrom."
+            },
+            "global_args": {
+                "label": "Globale Argumente von FFmpeg",
+                "description": "Globale Argumente von FFmpeg für diesen Eingabestrom."
+            },
+            "hwaccel_args": {
+                "label": "Argumente für Hardwarebeschleunigung",
+                "description": "Hardwarebeschleunigungsargumente für diesen Eingabestrom."
+            },
+            "input_args": {
+                "label": "Eingabeargumente",
+                "description": "Für diesen Stream spezifische Eingabeargumente."
+            }
+        }
+    },
+    "live": {
+        "label": "Live Wiedergabe",
+        "description": "Einstellungen, die von der Web-Benutzeroberfläche zur Steuerung der Auswahl, Auflösung und Qualität von Live-Streams verwendet werden.",
+        "streams": {
+            "label": "Live Stream Bezeichnung",
+            "description": "Zuordnung der konfigurierten Stream-Namen zu den für die Live-Wiedergabe verwendeten Restream-/Go2rtc-Namen."
+        },
+        "height": {
+            "label": "Live-Höhe",
+            "description": "Höhe (Pixel) zum Rendern des jsmpeg-Livestreams in der Web-Benutzeroberfläche; muss <= Stream-Höhe sein."
+        },
+        "quality": {
+            "label": "Live Qualität",
+            "description": "Kodierungsqualität für den jsmpeg-Stream (1 = höchst, 31 = niedrigst)."
+        }
+    },
+    "lpr": {
+        "label": "Kennzeichenerkennung",
+        "description": "Einstellungen für die Kennzeichenerkennung, einschließlich Erkennungsschwellen, Formatierung und bekannte Kennzeichen.",
+        "enabled": {
+            "label": "LPR aktivieren",
+            "description": "LPR auf dieser Kamera aktivieren oder deaktivieren."
+        },
+        "expire_time": {
+            "label": "Sekunden bis zum Ablauf",
+            "description": "Zeit in Sekunden, nach der ein nicht erkanntes Kennzeichen aus dem Tracker gelöscht wird (nur für dedizierte LPR-Kameras)."
+        },
+        "min_area": {
+            "label": "Mindestplattenfläche",
+            "description": "Mindestplattenfläche (Pixel), die für einen Erkennungsversuch erforderlich ist."
+        },
+        "enhancement": {
+            "label": "Verbesserungsgrad",
+            "description": "Verstärkungsstufe (0-10) zur Anwendung auf Plattenaufnahmen vor der OCR; höhere Werte führen nicht immer zu besseren Ergebnissen, Stufen über 5 funktionieren möglicherweise nur bei Nachtaufnahmen und sollten mit Vorsicht verwendet werden."
+        }
+    },
+    "motion": {
+        "label": "Bewegungserkennung",
+        "description": "Standardmäßige Einstellungen für die Bewegungserkennung dieser Kamera.",
+        "enabled": {
+            "label": "Bewegungserkennung aktivieren",
+            "description": "Aktivieren oder deaktivieren Sie die Bewegungserkennung für diese Kamera."
+        },
+        "threshold": {
+            "label": "Bewegungsschwelle",
+            "description": "Vom Bewegungsmelder verwendeter Schwellenwert für Pixelunterschiede; höhere Werte verringern die Empfindlichkeit (Bereich 1–255)."
+        },
+        "lightning_threshold": {
+            "label": "Blitzschwelle",
+            "description": "Schwellenwert zum Erkennen und Ignorieren kurzer Beleuchtungsspitzen (niedrigerer Wert bedeutet höhere Empfindlichkeit, Werte zwischen 0,3 und 1,0). Dadurch wird die Bewegungserkennung nicht vollständig verhindert, sondern lediglich die Analyse weiterer Bilder durch den Detektor unterbrochen, sobald der Schwellenwert überschritten wird. Bewegungsbasierte Aufzeichnungen werden während dieser Ereignisse weiterhin erstellt."
+        },
+        "skip_motion_threshold": {
+            "label": "Schwellenwert für Bewegungsüberspringen",
+            "description": "Wenn sich mehr als dieser Anteil des Bildes in einem einzelnen Frame ändert, gibt der Detektor keine Bewegungsfelder zurück und kalibriert sich sofort neu. Dies kann CPU-Leistung sparen und Fehlalarme bei Blitzschlag, Gewittern usw. reduzieren, aber auch echte Ereignisse übersehen, wie z. B. eine PTZ-Kamera, die ein Objekt automatisch verfolgt. Der Kompromiss besteht darin, entweder einige Megabyte an Aufzeichnungen zu verlieren oder ein paar kurze Clips zu überprüfen. Bereich 0,0 bis 1,0."
+        },
+        "improve_contrast": {
+            "label": "Kontrast verbessern",
+            "description": "Wenden Sie vor der Bewegungsanalyse eine Kontrastverbesserung auf die Bilder an, um die Erkennung zu erleichtern."
+        },
+        "contour_area": {
+            "label": "Konturbereich",
+            "description": "Mindestkonturfläche in Pixeln, die erforderlich ist, damit eine Bewegungskontur gezählt wird."
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "Alpha-Blending-Faktor, der bei der Frame-Differenzierung für die Bewegungsberechnung verwendet wird."
+        },
+        "frame_alpha": {
+            "label": "Rahmen Alpha",
+            "description": "Alpha-Wert, der beim Mischen von Frames für die Bewegungsvorverarbeitung verwendet wird."
+        },
+        "frame_height": {
+            "label": "Rahmenhöhe",
+            "description": "Höhe in Pixeln, auf die Frames bei der Berechnung von Bewegungen skaliert werden sollen."
+        },
+        "mask": {
+            "label": "Maskenkoordinaten",
+            "description": "Geordnete x-, y-Koordinaten, die das Bewegungsmaskenpolygon definieren, das zum Einbeziehen/Ausschließen von Bereichen verwendet wird."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT-Ausschaltverzögerung",
+            "description": "Sekunden, die nach der letzten Bewegung gewartet werden müssen, bevor ein MQTT-„Aus”-Status veröffentlicht wird."
+        },
+        "enabled_in_config": {
+            "label": "Ursprünglicher Bewegungszustand",
+            "description": "Gibt an, ob die Bewegungserkennung in der ursprünglichen statischen Konfiguration aktiviert war."
+        },
+        "raw_mask": {
+            "label": "Maskierung"
+        }
+    },
+    "objects": {
+        "label": "Objekte",
+        "description": "Standardeinstellungen für die Objektverfolgung, einschließlich der zu verfolgenden Labels und Filter pro Objekt.",
+        "track": {
+            "label": "Zu verfolgende Objekte",
+            "description": "Liste der Objektbeschriftungen, die für diese Kamera verfolgt werden sollen."
+        },
+        "filters": {
+            "label": "Objektfilter",
+            "description": "Filter, die auf erkannte Objekte angewendet werden, um Fehlalarme zu reduzieren (Fläche, Verhältnis, Konfidenz).",
+            "min_area": {
+                "label": "Mindestobjektfläche",
+                "description": "Mindestfläche der Begrenzungsbox (Pixel oder Prozentangabe), die für diesen Objekttyp erforderlich ist. Kann in Pixel (int) oder Prozentangabe (Float zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "max_area": {
+                "label": "Maximale Objektfläche",
+                "description": "Maximal zulässige Begrenzungsrahmenfläche (Pixel oder Prozent) für diesen Objekttyp. Kann in Pixel (int) oder Prozent (Float zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "min_ratio": {
+                "label": "Mindestseitenverhältnis",
+                "description": "Mindestverhältnis von Breite zu Höhe, das für die Begrenzungsbox erforderlich ist, damit diese gültig ist."
+            },
+            "max_ratio": {
+                "label": "Maximales Seitenverhältnis",
+                "description": "Maximal zulässiges Verhältnis von Breite zu Höhe für die Begrenzungsbox, damit diese gültig ist."
+            },
+            "threshold": {
+                "label": "Konfidenzschwelle",
+                "description": "Durchschnittlicher Schwellenwert für die Erkennungssicherheit, der erforderlich ist, damit das Objekt als echt positiv eingestuft wird."
+            },
+            "min_score": {
+                "label": "Mindestvertrauen",
+                "description": "Mindestkonfidenz für die Einzelbilderkennung, die für die Zählung des Objekts erforderlich ist."
+            },
+            "mask": {
+                "label": "Filter Maske",
+                "description": "Polygonkoordinaten, die definieren, wo dieser Filter innerhalb des Rahmens angewendet wird."
+            }
+        },
+        "mask": {
+            "label": "Objekt Maskierung",
+            "description": "Maskenpolygon, das verwendet wird, um die Objekterkennung in bestimmten Bereichen zu verhindern."
+        },
+        "genai": {
+            "label": "GenAI-Objektkonfiguration",
+            "description": "GenAI-Optionen zum Beschreiben verfolgter Objekte und zum Senden von Frames zur Generierung.",
+            "enabled": {
+                "label": "Aktivieren GenAI",
+                "description": "Enable GenAI generation of descriptions for tracked objects by default."
+            },
+            "use_snapshot": {
+                "label": "Verwenden Sie Momentaufnahmen"
+            }
+        }
     }
 }

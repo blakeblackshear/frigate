@@ -55,7 +55,39 @@
     "systemUi": "UI",
     "systemLogging": "Log",
     "systemEnvironmentVariables": "Umgebungsvariablen",
-    "systemTelemetry": "Telemetrie"
+    "systemTelemetry": "Telemetrie",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "Erkannte Hardware",
+    "systemDetectionModel": "Erkennungsmodell",
+    "systemMqtt": "mqtt",
+    "integrationSemanticSearch": "Semantische Suche",
+    "integrationGenerativeAi": "Generative KI",
+    "integrationFaceRecognition": "Gesichtserkennung",
+    "integrationLpr": "Kennzeichenerkennung",
+    "integrationObjectClassification": "Objekt Klassifizierung",
+    "integrationAudioTranscription": "Audio-Transkription",
+    "cameraDetect": "Objekterkennung",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Aufnahme",
+    "cameraSnapshots": "Momentaufnahme",
+    "cameraMotion": "Bewegungserkennung",
+    "cameraObjects": "Objekte",
+    "cameraConfigReview": "Überprüfung",
+    "cameraAudioEvents": "Audio Evente",
+    "cameraAudioTranscription": "Audio-Transkription",
+    "cameraNotifications": "Benachrichtigung",
+    "cameraLivePlayback": "Live-Wiedergabe",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Gesichtserkennung",
+    "cameraLpr": "Kennzeichenerkennung",
+    "cameraMqttConfig": "mqtt",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "Kamera UI",
+    "cameraTimestampStyle": "Zeitstempel Stil",
+    "cameraMqtt": "Kamera mqtt",
+    "mediaSync": "Medien-Synchronisierung",
+    "regionGrid": "Regionsraster"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1328,6 +1360,23 @@
       "toast": {
         "success": "Die Konfiguration der Bewertungsklassifizierung wurde gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
       }
+    }
+  },
+  "saveAllPreview": {
+    "title": "Änderungen speichern",
+    "triggerLabel": "Änderungen überprüfen",
+    "empty": "Keine ausstehenden Änderungen.",
+    "scope": {
+      "label": "Umfang",
+      "global": "Global",
+      "camera": "kamera: {{cameraName}}"
+    },
+    "field": {
+      "label": "Feld"
+    },
+    "value": {
+      "label": "Neuer Wert",
+      "reset": "Zurücksetzen"
     }
   }
 }
