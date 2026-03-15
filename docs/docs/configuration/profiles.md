@@ -30,7 +30,7 @@ To create and manage profiles from the UI, open **Settings**. From there you can
 
 1. **Create a profile** — Navigate to **Profiles**. Click the **Add Profile** button, enter a name (and optionally a profile ID).
 2. **Configure overrides** — Navigate to a camera configuration section (e.g. Motion detection, Record, Notifications). In the top right, two buttons will appear - choose a camera and a profile from the profile selector to edit overrides for that camera and section. Only the fields you change will be stored as overrides — fields that require a restart are hidden since profiles are applied at runtime. You can click the **Remove Profile Override** button
-3. **Activate a profile** — Navigate to **Profiles**, then choose a profile in the Active Profile dropdown to activate it. The active profile is also shown in the status bar at the bottom of the screen on desktop browsers.
+3. **Activate a profile** — Use the **Profiles** option in Frigate's main menu to choose a profile. Alternatively, in Settings, navigate to **Profiles**, then choose a profile in the Active Profile dropdown to activate it. The active profile is also shown in the status bar at the bottom of the screen on desktop browsers.
 4. **Delete a profile** — Navigate to **Profiles**, then click the trash icon for a profile. This removes the profile definition and all camera overrides associated with it.
 
 ### Defining Profiles in YAML
