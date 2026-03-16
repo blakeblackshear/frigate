@@ -285,7 +285,7 @@ export default function LivePlayer({
     player = (
       <WebRtcPlayer
         key={"webrtc_" + key}
-        className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
+        className={`size-full ${liveReady ? "" : "hidden"}`}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
         getStats={showStats}
@@ -304,7 +304,7 @@ export default function LivePlayer({
       player = (
         <MSEPlayer
           key={"mse_" + key}
-          className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
+          className={`size-full ${liveReady ? "" : "hidden"}`}
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
@@ -330,7 +330,7 @@ export default function LivePlayer({
       player = (
         <JSMpegPlayer
           key={"jsmpeg_" + key}
-          className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
+          className="flex justify-center overflow-hidden"
           camera={cameraConfig.name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
@@ -365,7 +365,7 @@ export default function LivePlayer({
         "relative flex w-full cursor-pointer justify-center outline",
         activeTracking &&
           ((showStillWithoutActivity && !liveReady) || liveReady)
-          ? "outline-3 rounded-lg shadow-severity_alert outline-severity_alert md:rounded-2xl"
+          ? "outline-3 shadow-severity_alert outline-severity_alert"
           : "outline-0 outline-background",
         "transition-all duration-500",
         className,
@@ -380,8 +380,8 @@ export default function LivePlayer({
       {cameraEnabled &&
         ((showStillWithoutActivity && !liveReady) || liveReady) && (
           <ImageShadowOverlay
-            upperClassName="md:rounded-2xl"
-            lowerClassName="md:rounded-2xl"
+            upperClassName=""
+            lowerClassName=""
           />
         )}
       {player}
@@ -466,7 +466,7 @@ export default function LivePlayer({
 
       {offline && inDashboard && (
         <>
-          <div className="absolute inset-0 rounded-lg bg-black/50 md:rounded-2xl" />
+          <div className="absolute inset-0 bg-black/50" />
           <div className="absolute inset-0 left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 p-3 text-center">
               <div className="text-md">{t("streamOffline.title")}</div>
