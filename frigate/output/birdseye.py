@@ -753,7 +753,7 @@ class BirdsEyeFrameManager:
             frame_changed, layout_changed = self.update_frame(frame)
         except Exception:
             frame_changed, layout_changed = False, False
-            self.active_cameras = []
+            self.active_cameras = set()
             self.camera_layout = []
             print(traceback.format_exc())
 
