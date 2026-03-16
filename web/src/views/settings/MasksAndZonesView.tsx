@@ -311,8 +311,8 @@ export default function MasksAndZonesView({
       const zones: Polygon[] = [];
       for (const [name, { data: zoneData, source }] of mergedZones) {
         const isBase = source === "base" && !!currentEditingProfile;
-        const baseColor =
-          zoneData.color ?? baseZones[name]?.color ?? [128, 128, 0];
+        const baseColor = zoneData.color ??
+          baseZones[name]?.color ?? [128, 128, 0];
         zones.push({
           type: "zone" as PolygonType,
           typeIndex: zoneIndex,
