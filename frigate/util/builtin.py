@@ -116,7 +116,7 @@ def clean_camera_user_pass(line: str) -> str:
 def escape_special_characters(path: str) -> str:
     """Cleans reserved characters to encodings for ffmpeg."""
     if len(path) > 1000:
-        return ValueError("Input too long to check")
+        raise ValueError("Input too long to check")
 
     try:
         found = re.search(REGEX_RTSP_CAMERA_USER_PASS, path).group(0)[3:-1]
