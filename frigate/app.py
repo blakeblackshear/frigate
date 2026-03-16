@@ -119,6 +119,7 @@ class FrigateApp:
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
+        self.profile_manager: Optional[ProfileManager] = None
         self.config = config
 
     def ensure_dirs(self) -> None:

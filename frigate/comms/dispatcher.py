@@ -16,6 +16,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.config.config import RuntimeFilterConfig, RuntimeMotionConfig
+from frigate.config.profile_manager import ProfileManager
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     EXPIRE_AUDIO_ACTIVITY,
@@ -93,7 +94,7 @@ class Dispatcher:
             "notifications": self._on_global_notification_command,
             "profile": self._on_profile_command,
         }
-        self.profile_manager = None
+        self.profile_manager: Optional[ProfileManager] = None
 
         for comm in self.comms:
             comm.subscribe(self._receive)
