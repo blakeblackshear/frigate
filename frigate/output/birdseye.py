@@ -854,7 +854,7 @@ class Birdseye:
                 coordinates = self.birdseye_manager.get_camera_coordinates()
                 self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
         if self._idle_interval:
-            now = time.monotonic()
+            now = datetime.datetime.now().timestamp()
             is_idle = len(self.birdseye_manager.camera_layout) == 0
             if (
                 is_idle
