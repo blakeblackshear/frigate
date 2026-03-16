@@ -307,8 +307,8 @@ class BirdsEyeFrameManager:
             y_offset = height // 2 - transparent_layer.shape[0] // 2
             x_offset = width // 2 - transparent_layer.shape[1] // 2
             self.blank_frame[
-                y_offset : y_offset + transparent_layer.shape[1],
-                x_offset : x_offset + transparent_layer.shape[0],
+                y_offset : y_offset + transparent_layer.shape[0],
+                x_offset : x_offset + transparent_layer.shape[1],
             ] = transparent_layer
         else:
             logger.warning("Unable to read Frigate logo")
