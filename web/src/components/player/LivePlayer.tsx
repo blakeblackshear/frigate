@@ -325,7 +325,7 @@ export default function LivePlayer({
         className={`size-full ${liveReady ? "" : "hidden"}`}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
-        getStats={showStats}
+        getStats={showStats || !!onStatsUpdate}
         setStats={setStats}
         audioEnabled={playAudio}
         volume={volume}
@@ -347,7 +347,7 @@ export default function LivePlayer({
           audioEnabled={playAudio}
           volume={volume}
           playInBackground={playInBackground}
-          getStats={showStats}
+          getStats={showStats || !!onStatsUpdate}
           setStats={setStats}
           onPlaying={playerIsPlaying}
           pip={pip}
