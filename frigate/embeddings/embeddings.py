@@ -266,7 +266,7 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.text_inference_speed.update(duration / len(valid_ids))
+        self.image_inference_speed.update(duration / len(valid_ids))
 
         return embeddings
 
