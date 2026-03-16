@@ -350,6 +350,10 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End expire recordings.")
 
     def run(self) -> None:
+        if self.config.safe_mode:
+            logger.info("Safe mode enabled, skipping recording cleanup")
+            return
+
         # on startup sync recordings with disk if enabled
         if self.config.record.sync_recordings:
             sync_recordings(limited=False)
