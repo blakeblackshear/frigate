@@ -199,6 +199,7 @@ class MqttClient(Communicator):
                     "Unable to connect to MQTT server: Connection refused. Error code: "
                     + reason_code.getName()
                 )
+            return
 
         self.connected = True
         logger.debug("MQTT connected")
