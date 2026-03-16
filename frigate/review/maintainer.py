@@ -642,7 +642,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     _,
                     audio_detections,
                 ) = data
-            elif topic == DetectionTypeEnum.api.value or DetectionTypeEnum.lpr.value:
+            elif topic == DetectionTypeEnum.api.value or topic == DetectionTypeEnum.lpr.value:
                 (
                     camera,
                     frame_time,
