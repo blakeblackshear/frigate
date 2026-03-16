@@ -8,7 +8,6 @@ import {
 import React, {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -313,19 +312,6 @@ export default function DraggableGridLayout({
     setGridLayout,
     isGridLayoutLoaded,
   ]);
-
-  const [marginValue, setMarginValue] = useState(16);
-
-  // calculate margin value for browsers that don't have default font size of 16px
-  useLayoutEffect(() => {
-    const calculateRemValue = () => {
-      const htmlElement = document.documentElement;
-      const fontSize = window.getComputedStyle(htmlElement).fontSize;
-      setMarginValue(parseFloat(fontSize));
-    };
-
-    calculateRemValue();
-  }, []);
 
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
