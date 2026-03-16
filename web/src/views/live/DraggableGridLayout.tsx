@@ -23,9 +23,13 @@ import {
   AudioState,
   LivePlayerMode,
   LiveStreamMetadata,
+  PlayerStatsType,
   StatsState,
   VolumeState,
 } from "@/types/live";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { PlayerStats } from "@/components/player/PlayerStats";
+import { MdCircle } from "react-icons/md";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { isEqual } from "lodash";
@@ -431,6 +435,15 @@ export default function DraggableGridLayout({
   const [cameraZoomStates, setCameraZoomStates] = useState<
     Record<string, CameraZoomRuntimeTransform>
   >({});
+  const [cameraStatsData, setCameraStatsData] = useState<
+    Record<string, PlayerStatsType>
+  >({});
+  const [cameraLoadingStates, setCameraLoadingStates] = useState<
+    Record<string, boolean>
+  >({});
+  const [cameraMotionStates, setCameraMotionStates] = useState<
+    Record<string, boolean>
+  >({});
   const cameraZoomViewportRefs = useRef<Record<string, HTMLDivElement | null>>(
     {},
   );
@@ -808,7 +821,7 @@ export default function DraggableGridLayout({
                   streamMetadata={streamMetadata}
                 >
                   <div
-                    className="size-full overflow-hidden"
+                    className="relative size-full overflow-hidden"
                     ref={(node) => {
                       cameraZoomViewportRefs.current[camera.name] = node;
 
@@ -855,7 +868,25 @@ export default function DraggableGridLayout({
                           preferredLiveModes[camera.name] ?? "mse"
                         }
                         playInBackground={false}
-                        showStats={statsStates[camera.name] ?? true}
+                        showStats={false}
+                        onStatsUpdate={(stats) =>
+                          setCameraStatsData((prev) => ({
+                            ...prev,
+                            [camera.name]: stats,
+                          }))
+                        }
+                        onLoadingChange={(loading) =>
+                          setCameraLoadingStates((prev) => ({
+                            ...prev,
+                            [camera.name]: loading,
+                          }))
+                        }
+                        onActiveMotionChange={(active) =>
+                          setCameraMotionStates((prev) => ({
+                            ...prev,
+                            [camera.name]: active,
+                          }))
+                        }
                         onClick={() => {
                           !isEditMode && onSelectCamera(camera.name);
                         }}
@@ -875,6 +906,23 @@ export default function DraggableGridLayout({
                         volume={volumeStates[camera.name]}
                       />
                     </div>
+                    {cameraLoadingStates[camera.name] && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ActivityIndicator />
+                      </div>
+                    )}
+                    {statsStates[camera.name] &&
+                      cameraStatsData[camera.name] && (
+                        <PlayerStats
+                          stats={cameraStatsData[camera.name]}
+                          minimal={true}
+                        />
+                      )}
+                    {cameraMotionStates[camera.name] && (
+                      <div className="absolute right-2 top-2 z-40">
+                        <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
+                      </div>
+                    )}
                   </div>
                   {isEditMode && showCircles && <CornerCircles />}
                 </GridLiveContextMenu>

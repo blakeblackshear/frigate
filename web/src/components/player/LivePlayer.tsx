@@ -48,6 +48,9 @@ type LivePlayerProps = {
   pip?: boolean;
   autoLive?: boolean;
   showStats?: boolean;
+  onStatsUpdate?: (stats: PlayerStatsType) => void;
+  onLoadingChange?: (loading: boolean) => void;
+  onActiveMotionChange?: (active: boolean) => void;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -73,6 +76,9 @@ export default function LivePlayer({
   pip,
   autoLive = true,
   showStats = false,
+  onStatsUpdate,
+  onLoadingChange,
+  onActiveMotionChange,
   onClick,
   setFullResolution,
   onError,
@@ -104,6 +110,10 @@ export default function LivePlayer({
     decodedFrames: 0,
     droppedFrameRate: 0, // percentage
   });
+
+  useEffect(() => {
+    onStatsUpdate?.(stats);
+  }, [stats, onStatsUpdate]);
 
   // camera activity
 
@@ -274,6 +284,42 @@ export default function LivePlayer({
     }
   }, [liveReady, isReEnabling]);
 
+  useEffect(() => {
+    if (!onLoadingChange) return;
+    const loading = !!(
+      cameraEnabled &&
+      !offline &&
+      (!showStillWithoutActivity || isReEnabling) &&
+      !liveReady
+    );
+    onLoadingChange(loading);
+  }, [
+    onLoadingChange,
+    cameraEnabled,
+    offline,
+    showStillWithoutActivity,
+    isReEnabling,
+    liveReady,
+  ]);
+
+  useEffect(() => {
+    if (!onActiveMotionChange) return;
+    const motionVisible = !!(
+      autoLive &&
+      !offline &&
+      activeMotion &&
+      ((showStillWithoutActivity && !liveReady) || liveReady)
+    );
+    onActiveMotionChange(motionVisible);
+  }, [
+    onActiveMotionChange,
+    autoLive,
+    offline,
+    activeMotion,
+    showStillWithoutActivity,
+    liveReady,
+  ]);
+
   if (!cameraConfig) {
     return <ActivityIndicator />;
   }
@@ -407,7 +453,8 @@ export default function LivePlayer({
         />
       </div>
 
-      {cameraEnabled &&
+      {!onLoadingChange &&
+        cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
         !liveReady && <ActivityIndicator />}
@@ -530,14 +577,15 @@ export default function LivePlayer({
             {cameraName}
           </Chip>
         )}
-        {autoLive &&
+        {!onActiveMotionChange &&
+          autoLive &&
           !offline &&
           activeMotion &&
           ((showStillWithoutActivity && !liveReady) || liveReady) && (
             <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
           )}
       </div>
-      {showStats && (
+      {showStats && !onStatsUpdate && (
         <PlayerStats stats={stats} minimal={cameraRef !== undefined} />
       )}
     </div>
