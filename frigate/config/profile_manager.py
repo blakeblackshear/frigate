@@ -70,8 +70,7 @@ class ProfileManager:
                 if section == "zones":
                     # zones is a dict of ZoneConfig models
                     self._base_configs[cam_name][section] = {
-                        name: zone.model_dump()
-                        for name, zone in section_value.items()
+                        name: zone.model_dump() for name, zone in section_value.items()
                     }
                     self._base_api_configs[cam_name][section] = {
                         name: {
@@ -85,9 +84,7 @@ class ProfileManager:
                         for name, zone in section_value.items()
                     }
                 else:
-                    self._base_configs[cam_name][section] = (
-                        section_value.model_dump()
-                    )
+                    self._base_configs[cam_name][section] = section_value.model_dump()
                     self._base_api_configs[cam_name][section] = (
                         section_value.model_dump(
                             mode="json",

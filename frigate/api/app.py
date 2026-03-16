@@ -177,10 +177,8 @@ def config(request: Request):
             config_obj.active_profile is not None
             and request.app.profile_manager is not None
         ):
-            base_sections = (
-                request.app.profile_manager.get_base_configs_for_api(
-                    camera_name
-                )
+            base_sections = request.app.profile_manager.get_base_configs_for_api(
+                camera_name
             )
             if base_sections:
                 camera_dict["base_config"] = base_sections
