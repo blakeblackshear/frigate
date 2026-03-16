@@ -304,11 +304,12 @@ class StorageMaintainer(threading.Thread):
             if not keep:
                 try:
                     clear_and_unlink(Path(recording.path), missing_ok=False)
-                    deleted_recordings.append(recording)
                     deleted_segments_size += recording.segment_size
                 except FileNotFoundError:
-                    # this file was not found so we must assume no space was cleaned up
+                    # File is missing from disk but the DB entry is stale; remove it
+                    # without counting freed space since nothing was actually freed.
                     pass
+                deleted_recordings.append(recording)
 
         # check if need to delete retained segments
         if deleted_segments_size < hourly_bandwidth:
@@ -337,10 +338,11 @@ class StorageMaintainer(threading.Thread):
                 try:
                     clear_and_unlink(Path(recording.path), missing_ok=False)
                     deleted_segments_size += recording.segment_size
-                    deleted_recordings.append(recording)
                 except FileNotFoundError:
-                    # this file was not found so we must assume no space was cleaned up
+                    # File is missing from disk but the DB entry is stale; remove it
+                    # without counting freed space since nothing was actually freed.
                     pass
+                deleted_recordings.append(recording)
         else:
             logger.info(f"Cleaned up {deleted_segments_size} MB of recordings")
 
