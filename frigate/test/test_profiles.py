@@ -48,9 +48,7 @@ class TestCameraProfileConfig(unittest.TestCase):
 
     def test_partial_review(self):
         """Profile with nested review.alerts.labels."""
-        profile = CameraProfileConfig(
-            review={"alerts": {"labels": ["person", "car"]}}
-        )
+        profile = CameraProfileConfig(review={"alerts": {"labels": ["person", "car"]}})
         assert profile.review is not None
         assert profile.review.alerts.labels == ["person", "car"]
 
@@ -116,9 +114,7 @@ class TestCameraProfileConfig(unittest.TestCase):
         from pydantic import ValidationError
 
         with self.assertRaises(ValidationError):
-            CameraProfileConfig(
-                review={"alerts": {"labels": "not_a_list"}}
-            )
+            CameraProfileConfig(review={"alerts": {"labels": "not_a_list"}})
 
     def test_invalid_profile_in_camera_config(self):
         """Invalid profile section in full config is caught at parse time."""
@@ -410,14 +406,14 @@ class TestProfileManager(unittest.TestCase):
         self.manager.activate_profile("disarmed")
 
         # Back camera has no "disarmed" profile, should be unchanged
-        assert self.config.cameras["back"].notifications.enabled == back_base_notifications
+        assert (
+            self.config.cameras["back"].notifications.enabled == back_base_notifications
+        )
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_activate_profile_disables_camera(self, mock_persist):
         """Profile with enabled=false disables the camera."""
-        self.config.profiles["away"] = ProfileDefinitionConfig(
-            friendly_name="Away"
-        )
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             enabled=False
         )
@@ -431,9 +427,7 @@ class TestProfileManager(unittest.TestCase):
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_deactivate_restores_enabled(self, mock_persist):
         """Deactivating a profile restores the camera's base enabled state."""
-        self.config.profiles["away"] = ProfileDefinitionConfig(
-            friendly_name="Away"
-        )
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             enabled=False
         )
@@ -450,9 +444,7 @@ class TestProfileManager(unittest.TestCase):
         """Profile with zones adds/overrides zones on camera."""
         from frigate.config.camera.zone import ZoneConfig
 
-        self.config.profiles["away"] = ProfileDefinitionConfig(
-            friendly_name="Away"
-        )
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             zones={
                 "driveway": ZoneConfig(
@@ -474,9 +466,7 @@ class TestProfileManager(unittest.TestCase):
         """Deactivating a profile restores base zones."""
         from frigate.config.camera.zone import ZoneConfig
 
-        self.config.profiles["away"] = ProfileDefinitionConfig(
-            friendly_name="Away"
-        )
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             zones={
                 "driveway": ZoneConfig(
@@ -502,9 +492,7 @@ class TestProfileManager(unittest.TestCase):
         )
         from frigate.config.camera.zone import ZoneConfig
 
-        self.config.profiles["away"] = ProfileDefinitionConfig(
-            friendly_name="Away"
-        )
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             zones={
                 "driveway": ZoneConfig(
@@ -534,9 +522,7 @@ class TestProfileManager(unittest.TestCase):
             CameraConfigUpdateTopic,
         )
 
-        self.config.profiles["away"] = ProfileDefinitionConfig(
-            friendly_name="Away"
-        )
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
         self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
             enabled=False
         )
@@ -598,9 +584,7 @@ class TestProfilePersistence(unittest.TestCase):
 
         try:
             with patch.object(type(PERSISTENCE_FILE), "exists", return_value=True):
-                with patch.object(
-                    type(PERSISTENCE_FILE), "read_text", return_value=""
-                ):
+                with patch.object(type(PERSISTENCE_FILE), "read_text", return_value=""):
                     result = ProfileManager.load_persisted_profile()
                     assert result is None
         finally:
