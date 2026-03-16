@@ -12,7 +12,6 @@ from pydantic import (
     Field,
     TypeAdapter,
     ValidationInfo,
-    field_serializer,
     field_validator,
     model_validator,
 )
@@ -98,8 +97,7 @@ stream_info_retriever = StreamInfoRetriever()
 class RuntimeMotionConfig(MotionConfig):
     """Runtime version of MotionConfig with rasterized masks."""
 
-    # The rasterized numpy mask (combination of all enabled masks)
-    rasterized_mask: np.ndarray = None
+    rasterized_mask: np.ndarray = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
@@ -145,24 +143,13 @@ class RuntimeMotionConfig(MotionConfig):
             empty_mask[:] = 255
             self.rasterized_mask = empty_mask
 
-    def dict(self, **kwargs):
-        ret = super().model_dump(**kwargs)
-        if "rasterized_mask" in ret:
-            ret.pop("rasterized_mask")
-        return ret
-
-    @field_serializer("rasterized_mask", when_used="json")
-    def serialize_rasterized_mask(self, value: Any, info):
-        return None
-
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
 
 class RuntimeFilterConfig(FilterConfig):
     """Runtime version of FilterConfig with rasterized masks."""
 
-    # The rasterized numpy mask (combination of all enabled masks)
-    rasterized_mask: Optional[np.ndarray] = None
+    rasterized_mask: Optional[np.ndarray] = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
@@ -225,16 +212,6 @@ class RuntimeFilterConfig(FilterConfig):
             self.rasterized_mask = create_mask(frame_shape, enabled_coords)
         else:
             self.rasterized_mask = None
-
-    def dict(self, **kwargs):
-        ret = super().model_dump(**kwargs)
-        if "rasterized_mask" in ret:
-            ret.pop("rasterized_mask")
-        return ret
-
-    @field_serializer("rasterized_mask", when_used="json")
-    def serialize_rasterized_mask(self, value: Any, info):
-        return None
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
