@@ -42,11 +42,13 @@ class ProfileManager:
         self,
         config,
         config_updater: CameraConfigUpdatePublisher,
+        dispatcher=None,
     ):
         from frigate.config.config import FrigateConfig
 
         self.config: FrigateConfig = config
         self.config_updater = config_updater
+        self.dispatcher = dispatcher
         self._base_configs: dict[str, dict[str, dict]] = {}
         self._base_api_configs: dict[str, dict[str, dict]] = {}
         self._base_enabled: dict[str, bool] = {}
@@ -266,6 +268,12 @@ class ProfileManager:
                         ),
                         cam_config.enabled,
                     )
+                    if self.dispatcher is not None:
+                        self.dispatcher.publish(
+                            f"{cam_name}/enabled/state",
+                            "ON" if cam_config.enabled else "OFF",
+                            retain=True,
+                        )
                     continue
 
                 if section == "zones":

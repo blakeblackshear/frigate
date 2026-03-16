@@ -352,7 +352,9 @@ class FrigateApp:
         )
 
     def init_profile_manager(self) -> None:
-        self.profile_manager = ProfileManager(self.config, self.inter_config_updater)
+        self.profile_manager = ProfileManager(
+            self.config, self.inter_config_updater, self.dispatcher
+        )
         self.dispatcher.profile_manager = self.profile_manager
 
         persisted = ProfileManager.load_persisted_profile()
