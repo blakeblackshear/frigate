@@ -435,7 +435,10 @@ function ProfileCameraEnableSection({
                 },
               };
 
-        await axios.put("config/set", { config_data: configData });
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: configData,
+        });
         await onConfigChanged();
 
         setLocalOverrides((prev) => ({
