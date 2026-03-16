@@ -63,7 +63,7 @@ class LibvaGpuSelector:
         if not self._valid_gpus:
             return ""
 
-        if gpu <= len(self._valid_gpus):
+        if gpu < len(self._valid_gpus):
             return self._valid_gpus[gpu]
         else:
             logger.warning(f"Invalid GPU index {gpu}, using first valid GPU")
