@@ -55,6 +55,7 @@ export default function WebRtcPlayer({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
   const videoLoadTimeoutRef = useRef<NodeJS.Timeout>(undefined);
+  const [awaitingPlayback, setAwaitingPlayback] = useState(true);
 
   const PeerConnection = useCallback(
     async (media: string) => {
@@ -177,6 +178,8 @@ export default function WebRtcPlayer({
       return;
     }
 
+    setAwaitingPlayback(true);
+
     const aPc = PeerConnection(
       microphoneEnabled ? "video+audio+microphone" : "video+audio",
     );
@@ -241,6 +244,19 @@ export default function WebRtcPlayer({
       clearTimeout(videoLoadTimeoutRef.current);
     }
     onPlaying?.();
+
+    // Start muted so autoplay isn't blocked when the user gesture has
+    // expired (e.g. mic toggle). Cleared on the "playing" event.
+    // https://github.com/blakeblackshear/frigate-hass-addons/issues/274
+    if (awaitingPlayback && videoRef.current) {
+      videoRef.current.addEventListener(
+        "playing",
+        () => {
+          setAwaitingPlayback(false);
+        },
+        { once: true },
+      );
+    }
   };
 
   // stats
@@ -319,7 +335,7 @@ export default function WebRtcPlayer({
       controls={iOSCompatControls}
       autoPlay
       playsInline
-      muted={!audioEnabled}
+      muted={awaitingPlayback || !audioEnabled}
       onLoadedData={handleLoadedData}
       onProgress={
         onError != undefined
