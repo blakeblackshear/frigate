@@ -727,7 +727,7 @@ class RecordingMaintainer(threading.Thread):
                             )
                         )
                 elif (
-                    topic == DetectionTypeEnum.api.value or DetectionTypeEnum.lpr.value
+                    topic == DetectionTypeEnum.api.value or topic == DetectionTypeEnum.lpr.value
                 ):
                     continue
 
