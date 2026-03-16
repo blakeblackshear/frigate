@@ -327,16 +327,15 @@ export default function DraggableGridLayout({
     calculateRemValue();
   }, []);
 
-  const gridContainerRef = useRef<HTMLDivElement>(null);
-
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
+  const roRef = useRef<ResizeObserver | null>(null);
 
-  // useLayoutEffect reads ref.current after commit (refs are set before layout
-  // effects run), so this reliably fires before the first paint regardless of
-  // whether SWR triggers subsequent re-renders or not.
-  useLayoutEffect(() => {
-    const el = gridContainerRef.current;
+  // Callback ref fires whenever the element mounts/unmounts, so containerWidth
+  // is always set immediately when the grid div first appears (after skeleton).
+  const gridContainerRef = useCallback((el: HTMLDivElement | null) => {
+    roRef.current?.disconnect();
+    roRef.current = null;
     if (!el) return;
     setContainerWidth(el.clientWidth);
     setContainerHeight(el.clientHeight);
@@ -345,7 +344,7 @@ export default function DraggableGridLayout({
       setContainerHeight(entry.contentRect.height);
     });
     ro.observe(el);
-    return () => ro.disconnect();
+    roRef.current = ro;
   }, []);
 
   const scrollBarWidth = useMemo(() => {
