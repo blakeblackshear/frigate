@@ -28,7 +28,7 @@ import {
   VolumeState,
 } from "@/types/live";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useResizeObserver } from "@/hooks/resize-observer";
+
 import { isEqual } from "lodash";
 import useSWR from "swr";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -329,8 +329,24 @@ export default function DraggableGridLayout({
 
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(gridContainerRef);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+
+  // useLayoutEffect reads ref.current after commit (refs are set before layout
+  // effects run), so this reliably fires before the first paint regardless of
+  // whether SWR triggers subsequent re-renders or not.
+  useLayoutEffect(() => {
+    const el = gridContainerRef.current;
+    if (!el) return;
+    setContainerWidth(el.clientWidth);
+    setContainerHeight(el.clientHeight);
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+      setContainerHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const scrollBarWidth = useMemo(() => {
     if (containerWidth && containerHeight && containerRef.current) {
@@ -359,7 +375,7 @@ export default function DraggableGridLayout({
     // subtract container margin, 1 camera takes up at least 4 rows
     // account for additional margin on bottom of each row
     return (
-      ((availableWidth ?? window.innerWidth) - 2 * marginValue) /
+      (availableWidth - 2 * marginValue) /
         12 /
         aspectRatio -
       marginValue +
@@ -710,9 +726,9 @@ export default function DraggableGridLayout({
             currentGroups={groups}
             activeGroup={group}
           />
-          <Responsive
+          {containerWidth > 0 && <Responsive
             className="grid-layout"
-            width={availableWidth ?? window.innerWidth}
+            width={availableWidth}
             layouts={{
               lg: currentGridLayout,
               md: currentGridLayout,
@@ -887,7 +903,7 @@ export default function DraggableGridLayout({
                 </GridLiveContextMenu>
               );
             })}
-          </Responsive>
+          </Responsive>}
           {isDesktop && (
             <div
               className={cn(
