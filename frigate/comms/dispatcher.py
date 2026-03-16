@@ -569,7 +569,9 @@ class Dispatcher:
             logger.error("Profile manager not initialized")
             return
 
-        profile_name = payload.strip() if payload.strip() not in ("", "none", "None") else None
+        profile_name = (
+            payload.strip() if payload.strip() not in ("", "none", "None") else None
+        )
         err = self.profile_manager.activate_profile(profile_name)
         if err:
             logger.error("Failed to activate profile: %s", err)
