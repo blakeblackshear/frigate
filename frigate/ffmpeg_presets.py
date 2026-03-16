@@ -278,7 +278,7 @@ def parse_preset_hardware_acceleration_encode(
         arg_map = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE
 
     if not isinstance(arg, str):
-        return arg_map["default"].format(input, output)
+        return arg_map["default"].format(ffmpeg_path, input, output)
 
     # Not all jetsons have HW encoders, so fall back to default SW encoder if not
     if arg.startswith("preset-jetson-") and not os.path.exists("/dev/nvhost-msenc"):
