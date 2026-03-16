@@ -324,6 +324,10 @@ class EventCleanup(threading.Thread):
         return events_to_update
 
     def run(self) -> None:
+        if self.config.safe_mode:
+            logger.info("Safe mode enabled, skipping event cleanup")
+            return
+
         # only expire events every 5 minutes
         while not self.stop_event.wait(300):
             events_with_expired_clips = self.expire_clips()
