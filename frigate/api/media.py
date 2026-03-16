@@ -195,14 +195,14 @@ async def latest_frame(
 
                 frame = request.app.camera_error_image
 
-        height = int(params.height or str(frame.shape[0]))
-        width = int(height * frame.shape[1] / frame.shape[0])
-
         if frame is None:
             return JSONResponse(
                 content={"success": False, "message": "Unable to get valid frame"},
                 status_code=500,
             )
+
+        height = int(params.height or str(frame.shape[0]))
+        width = int(height * frame.shape[1] / frame.shape[0])
 
         if height < 1 or width < 1:
             return JSONResponse(
