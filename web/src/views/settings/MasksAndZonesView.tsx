@@ -249,17 +249,26 @@ export default function MasksAndZonesView({
         ? cameraConfig.profiles?.[currentEditingProfile]
         : undefined;
 
+      // When a profile is active, the top-level sections contain
+      // effective (profile-merged) values.  Use base_config for the
+      // original base values so the "Base Config" view is accurate and
+      // the base layer for profile merging is correct.
+      const baseMotion = (cameraConfig.base_config?.motion ??
+        cameraConfig.motion) as typeof cameraConfig.motion;
+      const baseObjects = (cameraConfig.base_config?.objects ??
+        cameraConfig.objects) as typeof cameraConfig.objects;
+      const baseZones = (cameraConfig.base_config?.zones ??
+        cameraConfig.zones) as typeof cameraConfig.zones;
+
       // Build base zone names set for source tracking
-      const baseZoneNames = new Set(Object.keys(cameraConfig.zones));
+      const baseZoneNames = new Set(Object.keys(baseZones));
       const profileZoneNames = new Set(Object.keys(profileData?.zones ?? {}));
-      const baseMotionMaskNames = new Set(
-        Object.keys(cameraConfig.motion.mask || {}),
-      );
+      const baseMotionMaskNames = new Set(Object.keys(baseMotion.mask || {}));
       const profileMotionMaskNames = new Set(
         Object.keys(profileData?.motion?.mask ?? {}),
       );
       const baseGlobalObjectMaskNames = new Set(
-        Object.keys(cameraConfig.objects.mask || {}),
+        Object.keys(baseObjects.mask || {}),
       );
       const profileGlobalObjectMaskNames = new Set(
         Object.keys(profileData?.objects?.mask ?? {}),
@@ -274,7 +283,7 @@ export default function MasksAndZonesView({
         }
       >();
 
-      for (const [name, zoneData] of Object.entries(cameraConfig.zones)) {
+      for (const [name, zoneData] of Object.entries(baseZones)) {
         if (currentEditingProfile && profileZoneNames.has(name)) {
           // Profile overrides this base zone
           mergedZones.set(name, {
@@ -302,7 +311,8 @@ export default function MasksAndZonesView({
       const zones: Polygon[] = [];
       for (const [name, { data: zoneData, source }] of mergedZones) {
         const isBase = source === "base" && !!currentEditingProfile;
-        const baseColor = zoneData.color ?? [128, 128, 0];
+        const baseColor =
+          zoneData.color ?? baseZones[name]?.color ?? [128, 128, 0];
         zones.push({
           type: "zone" as PolygonType,
           typeIndex: zoneIndex,
@@ -339,9 +349,7 @@ export default function MasksAndZonesView({
         }
       >();
 
-      for (const [maskId, maskData] of Object.entries(
-        cameraConfig.motion.mask || {},
-      )) {
+      for (const [maskId, maskData] of Object.entries(baseMotion.mask || {})) {
         if (currentEditingProfile && profileMotionMaskNames.has(maskId)) {
           mergedMotionMasks.set(maskId, {
             data: profileData!.motion!.mask![maskId],
@@ -406,9 +414,7 @@ export default function MasksAndZonesView({
         }
       >();
 
-      for (const [maskId, maskData] of Object.entries(
-        cameraConfig.objects.mask || {},
-      )) {
+      for (const [maskId, maskData] of Object.entries(baseObjects.mask || {})) {
         if (currentEditingProfile && profileGlobalObjectMaskNames.has(maskId)) {
           mergedGlobalObjectMasks.set(maskId, {
             data: profileData!.objects!.mask![maskId],
@@ -472,7 +478,7 @@ export default function MasksAndZonesView({
       // Build per-object filter mask names for profile tracking
       const baseFilterMaskNames = new Set<string>();
       for (const [, filterConfig] of Object.entries(
-        cameraConfig.objects.filters,
+        baseObjects.filters || {},
       )) {
         for (const maskId of Object.keys(filterConfig.mask || {})) {
           if (!maskId.startsWith("global_")) {
@@ -495,9 +501,7 @@ export default function MasksAndZonesView({
       }
 
       // Per-object filter masks (base)
-      const objectMasks: Polygon[] = Object.entries(
-        cameraConfig.objects.filters,
-      )
+      const objectMasks: Polygon[] = Object.entries(baseObjects.filters || {})
         .filter(
           ([, filterConfig]) =>
             filterConfig.mask && Object.keys(filterConfig.mask).length > 0,

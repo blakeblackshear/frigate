@@ -29,6 +29,7 @@ PROFILE_SECTION_UPDATES: dict[str, CameraConfigUpdateEnum] = {
     "record": CameraConfigUpdateEnum.record,
     "review": CameraConfigUpdateEnum.review,
     "snapshots": CameraConfigUpdateEnum.snapshots,
+    "zones": CameraConfigUpdateEnum.zones,
 }
 
 PERSISTENCE_FILE = Path(CONFIG_DIR) / ".active_profile"
@@ -60,14 +61,36 @@ class ProfileManager:
             self._base_enabled[cam_name] = cam_config.enabled
             self._base_zones[cam_name] = copy.deepcopy(cam_config.zones)
             for section in PROFILE_SECTION_UPDATES:
-                section_config = getattr(cam_config, section, None)
-                if section_config is not None:
+                section_value = getattr(cam_config, section, None)
+                if section_value is None:
+                    continue
+
+                if section == "zones":
+                    # zones is a dict of ZoneConfig models
+                    self._base_configs[cam_name][section] = {
+                        name: zone.model_dump()
+                        for name, zone in section_value.items()
+                    }
+                    self._base_api_configs[cam_name][section] = {
+                        name: {
+                            **zone.model_dump(
+                                mode="json",
+                                warnings="none",
+                                exclude_none=True,
+                            ),
+                            "color": zone.color,
+                        }
+                        for name, zone in section_value.items()
+                    }
+                else:
                     self._base_configs[cam_name][section] = (
-                        section_config.model_dump()
+                        section_value.model_dump()
                     )
                     self._base_api_configs[cam_name][section] = (
-                        section_config.model_dump(
-                            mode="json", warnings="none", exclude_none=True
+                        section_value.model_dump(
+                            mode="json",
+                            warnings="none",
+                            exclude_none=True,
                         )
                     )
 
@@ -154,9 +177,11 @@ class ProfileManager:
                 cam_config.zones = copy.deepcopy(base_zones)
                 changed.setdefault(cam_name, set()).add("zones")
 
-            # Restore section configs
+            # Restore section configs (zones handled above)
             base = self._base_configs.get(cam_name, {})
             for section in PROFILE_SECTION_UPDATES:
+                if section == "zones":
+                    continue
                 base_data = base.get(section)
                 if base_data is None:
                     continue
@@ -190,12 +215,23 @@ class ProfileManager:
                 base_zones = self._base_zones.get(cam_name, {})
                 merged_zones = copy.deepcopy(base_zones)
                 merged_zones.update(profile.zones)
+                # Profile zone objects are parsed without colors or contours
+                # (those are set during CameraConfig init / post-validation).
+                # Inherit the base zone's color when available, and ensure
+                # every zone has a valid contour for rendering.
+                for name, zone in merged_zones.items():
+                    if zone.contour.size == 0:
+                        zone.generate_contour(cam_config.frame_shape)
+                    if zone.color == (0, 0, 0) and name in base_zones:
+                        zone._color = base_zones[name].color
                 cam_config.zones = merged_zones
                 changed.setdefault(cam_name, set()).add("zones")
 
             base = self._base_configs.get(cam_name, {})
 
             for section in PROFILE_SECTION_UPDATES:
+                if section == "zones":
+                    continue
                 profile_section = getattr(profile, section, None)
                 if profile_section is None:
                     continue
