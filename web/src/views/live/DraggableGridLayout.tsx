@@ -371,16 +371,8 @@ export default function DraggableGridLayout({
 
   const cellHeight = useMemo(() => {
     const aspectRatio = 16 / 9;
-    // subtract container margin, 1 camera takes up at least 4 rows
-    // account for additional margin on bottom of each row
-    return (
-      (availableWidth - 2 * marginValue) /
-        12 /
-        aspectRatio -
-      marginValue +
-      marginValue / 4
-    );
-  }, [availableWidth, marginValue]);
+    return availableWidth / 12 / aspectRatio;
+  }, [availableWidth]);
 
   const handleResize = (
     _layout: Layout,
@@ -716,7 +708,7 @@ export default function DraggableGridLayout({
         </div>
       ) : (
         <div
-          className="no-scrollbar my-2 select-none overflow-x-hidden px-2 pb-8"
+          className="no-scrollbar select-none overflow-x-hidden"
           ref={gridContainerRef}
         >
           <EditGroupDialog
@@ -738,8 +730,8 @@ export default function DraggableGridLayout({
             rowHeight={cellHeight}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-            margin={[marginValue, marginValue]}
-            containerPadding={[0, isEditMode ? 6 : 3]}
+            margin={[0, 0]}
+            containerPadding={[0, 0]}
             resizeConfig={{
               enabled: isEditMode,
               handles: isEditMode ? ["sw", "nw", "se", "ne"] : [],
