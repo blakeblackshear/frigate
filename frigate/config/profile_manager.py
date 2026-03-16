@@ -47,6 +47,7 @@ class ProfileManager:
         self.config: FrigateConfig = config
         self.config_updater = config_updater
         self._base_configs: dict[str, dict[str, dict]] = {}
+        self._base_api_configs: dict[str, dict[str, dict]] = {}
         self._base_enabled: dict[str, bool] = {}
         self._base_zones: dict[str, dict[str, ZoneConfig]] = {}
         self._snapshot_base_configs()
@@ -55,12 +56,20 @@ class ProfileManager:
         """Snapshot each camera's current section configs, enabled, and zones."""
         for cam_name, cam_config in self.config.cameras.items():
             self._base_configs[cam_name] = {}
+            self._base_api_configs[cam_name] = {}
             self._base_enabled[cam_name] = cam_config.enabled
             self._base_zones[cam_name] = copy.deepcopy(cam_config.zones)
             for section in PROFILE_SECTION_UPDATES:
                 section_config = getattr(cam_config, section, None)
                 if section_config is not None:
-                    self._base_configs[cam_name][section] = section_config.model_dump()
+                    self._base_configs[cam_name][section] = (
+                        section_config.model_dump()
+                    )
+                    self._base_api_configs[cam_name][section] = (
+                        section_config.model_dump(
+                            mode="json", warnings="none", exclude_none=True
+                        )
+                    )
 
     def update_config(self, new_config) -> None:
         """Update config reference after config/set replaces the in-memory config.
@@ -74,6 +83,7 @@ class ProfileManager:
 
         # Re-snapshot base configs from the new config (which has base values)
         self._base_configs.clear()
+        self._base_api_configs.clear()
         self._base_enabled.clear()
         self._base_zones.clear()
         self._snapshot_base_configs()
@@ -259,6 +269,14 @@ class ProfileManager:
         except OSError:
             logger.exception("Failed to load persisted profile")
         return None
+
+    def get_base_configs_for_api(self, camera_name: str) -> dict[str, dict]:
+        """Return base (pre-profile) section configs for a camera.
+
+        These are JSON-serializable dicts suitable for direct inclusion in
+        the /api/config response, with None values already excluded.
+        """
+        return self._base_api_configs.get(camera_name, {})
 
     def get_available_profiles(self) -> list[dict[str, str]]:
         """Get list of all profile definitions from the top-level config."""

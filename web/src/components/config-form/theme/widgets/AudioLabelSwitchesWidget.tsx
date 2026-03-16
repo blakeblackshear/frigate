@@ -7,41 +7,35 @@ import type { FormContext } from "./SwitchesWidget";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { JsonObject } from "@/types/configForm";
 
+function extractListenLabels(value: unknown): string[] {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const listenValue = (value as JsonObject).listen;
+    if (Array.isArray(listenValue)) {
+      return listenValue.filter(
+        (item): item is string => typeof item === "string",
+      );
+    }
+  }
+  return [];
+}
+
 function getEnabledAudioLabels(context: FormContext): string[] {
   let cameraLabels: string[] = [];
   let globalLabels: string[] = [];
+  let formDataLabels: string[] = [];
 
   if (context) {
     // context.cameraValue and context.globalValue should be the entire audio section
-    if (
-      context.cameraValue &&
-      typeof context.cameraValue === "object" &&
-      !Array.isArray(context.cameraValue)
-    ) {
-      const listenValue = (context.cameraValue as JsonObject).listen;
-      if (Array.isArray(listenValue)) {
-        cameraLabels = listenValue.filter(
-          (item): item is string => typeof item === "string",
-        );
-      }
-    }
+    cameraLabels = extractListenLabels(context.cameraValue);
+    globalLabels = extractListenLabels(context.globalValue);
 
-    if (
-      context.globalValue &&
-      typeof context.globalValue === "object" &&
-      !Array.isArray(context.globalValue)
-    ) {
-      const globalListenValue = (context.globalValue as JsonObject).listen;
-      if (Array.isArray(globalListenValue)) {
-        globalLabels = globalListenValue.filter(
-          (item): item is string => typeof item === "string",
-        );
-      }
-    }
+    // Include labels from the current form data so that labels added via
+    // profile overrides (or user edits) are always visible as switches.
+    formDataLabels = extractListenLabels(context.formData);
   }
 
   const sourceLabels = cameraLabels.length > 0 ? cameraLabels : globalLabels;
-  return [...sourceLabels].sort();
+  return [...new Set([...sourceLabels, ...formDataLabels])].sort();
 }
 
 function getAudioLabelDisplayName(label: string): string {

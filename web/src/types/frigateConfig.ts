@@ -316,6 +316,8 @@ export interface CameraConfig {
     };
   };
   profiles?: Record<string, CameraProfileConfig>;
+  /** Pre-profile base section configs, present only when a profile is active */
+  base_config?: Record<string, Record<string, unknown>>;
 }
 
 export type CameraProfileConfig = {

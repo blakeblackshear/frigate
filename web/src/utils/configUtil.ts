@@ -73,6 +73,25 @@ export const globalCameraDefaultSections = new Set([
 // Profile helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Get the base (pre-profile) value for a camera section.
+ *
+ * When a profile is active the API populates `base_config` with original
+ * section values.  This helper returns that value when available, falling
+ * back to the top-level (effective) value otherwise.
+ */
+export function getBaseCameraSectionValue(
+  config: FrigateConfig | undefined,
+  cameraName: string | undefined,
+  sectionPath: string,
+): unknown {
+  if (!config || !cameraName) return undefined;
+  const cam = config.cameras?.[cameraName];
+  if (!cam) return undefined;
+  const base = cam.base_config?.[sectionPath];
+  return base !== undefined ? base : get(cam, sectionPath);
+}
+
 /** Sections that can appear inside a camera profile definition. */
 export const PROFILE_ELIGIBLE_SECTIONS = new Set([
   "audio",
@@ -504,8 +523,9 @@ export function prepareSectionSavePayload(opts: {
   let rawSectionValue: unknown;
   if (level === "camera" && cameraName) {
     if (profileInfo.isProfile) {
-      const baseValue = get(
-        config.cameras?.[cameraName],
+      const baseValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
         profileInfo.actualSection,
       );
       const profileOverrides = get(config.cameras?.[cameraName], sectionPath);
@@ -523,7 +543,12 @@ export function prepareSectionSavePayload(opts: {
         rawSectionValue = baseValue;
       }
     } else {
-      rawSectionValue = get(config.cameras?.[cameraName], sectionPath);
+      // Use base (pre-profile) value so the diff matches what the form shows
+      rawSectionValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
+        sectionPath,
+      );
     }
   } else {
     rawSectionValue = get(config, sectionPath);

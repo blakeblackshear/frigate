@@ -65,6 +65,7 @@ import {
   globalCameraDefaultSections,
   buildOverrides,
   buildConfigDataForPath,
+  getBaseCameraSectionValue,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
 } from "@/utils/configUtil";
@@ -303,12 +304,20 @@ export function ConfigSection({
     profileOverridesSection ? "profile" : isOverridden ? "global" : undefined;
 
   // Get current form data
-  // When editing a profile, show base camera config deep-merged with profile overrides
+  // When a profile is active the top-level camera sections contain the
+  // effective (profile-merged) values.  For the base-config view we read
+  // from `base_config` (original values before the profile was applied).
+  // When editing a profile, we merge the base value with profile overrides.
   const rawSectionValue = useMemo(() => {
     if (!config) return undefined;
 
     if (effectiveLevel === "camera" && cameraName) {
-      const baseValue = get(config.cameras?.[cameraName], sectionPath);
+      // Base value: prefer base_config (pre-profile) over effective value
+      const baseValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
+        sectionPath,
+      );
       if (profileName) {
         const profileOverrides = get(
           config.cameras?.[cameraName],

@@ -170,6 +170,21 @@ def config(request: Request):
                     )
                 )
 
+        # When a profile is active, the top-level camera sections contain
+        # profile-merged (effective) values.  Include the original base
+        # configs so the frontend settings can display them separately.
+        if (
+            config_obj.active_profile is not None
+            and request.app.profile_manager is not None
+        ):
+            base_sections = (
+                request.app.profile_manager.get_base_configs_for_api(
+                    camera_name
+                )
+            )
+            if base_sections:
+                camera_dict["base_config"] = base_sections
+
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
         mode="json", warnings="none", exclude_none=True

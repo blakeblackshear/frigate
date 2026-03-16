@@ -557,6 +557,34 @@ class TestProfileManager(unittest.TestCase):
         assert "armed" in names
         assert "disarmed" in names
 
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_base_configs_for_api_unchanged_after_activation(self, mock_persist):
+        """API base configs reflect pre-profile values after activation."""
+        base_track = self.config.cameras["front"].objects.track[:]
+        assert base_track == ["person"]
+
+        self.manager.activate_profile("armed")
+
+        # In-memory config has the profile-merged values
+        assert self.config.cameras["front"].objects.track == [
+            "person",
+            "car",
+            "package",
+        ]
+
+        # But the API base configs still return the original base values
+        api_base = self.manager.get_base_configs_for_api("front")
+        assert "objects" in api_base
+        assert api_base["objects"]["track"] == ["person"]
+
+    def test_base_configs_for_api_are_json_serializable(self):
+        """API base configs are JSON-serializable (mode='json')."""
+        import json
+
+        api_base = self.manager.get_base_configs_for_api("front")
+        # Should not raise
+        json.dumps(api_base)
+
 
 class TestProfilePersistence(unittest.TestCase):
     """Test profile persistence to disk."""
