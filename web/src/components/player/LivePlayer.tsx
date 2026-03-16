@@ -111,9 +111,16 @@ export default function LivePlayer({
     droppedFrameRate: 0, // percentage
   });
 
+  const onStatsUpdateRef = useRef(onStatsUpdate);
+  const onLoadingChangeRef = useRef(onLoadingChange);
+  const onActiveMotionChangeRef = useRef(onActiveMotionChange);
+  onStatsUpdateRef.current = onStatsUpdate;
+  onLoadingChangeRef.current = onLoadingChange;
+  onActiveMotionChangeRef.current = onActiveMotionChange;
+
   useEffect(() => {
-    onStatsUpdate?.(stats);
-  }, [stats, onStatsUpdate]);
+    onStatsUpdateRef.current?.(stats);
+  }, [stats]);
 
   // camera activity
 
@@ -285,40 +292,24 @@ export default function LivePlayer({
   }, [liveReady, isReEnabling]);
 
   useEffect(() => {
-    if (!onLoadingChange) return;
     const loading = !!(
       cameraEnabled &&
       !offline &&
       (!showStillWithoutActivity || isReEnabling) &&
       !liveReady
     );
-    onLoadingChange(loading);
-  }, [
-    onLoadingChange,
-    cameraEnabled,
-    offline,
-    showStillWithoutActivity,
-    isReEnabling,
-    liveReady,
-  ]);
+    onLoadingChangeRef.current?.(loading);
+  }, [cameraEnabled, offline, showStillWithoutActivity, isReEnabling, liveReady]);
 
   useEffect(() => {
-    if (!onActiveMotionChange) return;
     const motionVisible = !!(
       autoLive &&
       !offline &&
       activeMotion &&
       ((showStillWithoutActivity && !liveReady) || liveReady)
     );
-    onActiveMotionChange(motionVisible);
-  }, [
-    onActiveMotionChange,
-    autoLive,
-    offline,
-    activeMotion,
-    showStillWithoutActivity,
-    liveReady,
-  ]);
+    onActiveMotionChangeRef.current?.(motionVisible);
+  }, [autoLive, offline, activeMotion, showStillWithoutActivity, liveReady]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -453,7 +444,7 @@ export default function LivePlayer({
         />
       </div>
 
-      {!onLoadingChange &&
+      {!onLoadingChangeRef.current &&
         cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
@@ -577,7 +568,7 @@ export default function LivePlayer({
             {cameraName}
           </Chip>
         )}
-        {!onActiveMotionChange &&
+        {!onActiveMotionChangeRef.current &&
           autoLive &&
           !offline &&
           activeMotion &&
@@ -585,7 +576,7 @@ export default function LivePlayer({
             <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
           )}
       </div>
-      {showStats && !onStatsUpdate && (
+      {showStats && !onStatsUpdateRef.current && (
         <PlayerStats stats={stats} minimal={cameraRef !== undefined} />
       )}
     </div>
