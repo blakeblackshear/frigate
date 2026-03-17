@@ -3,6 +3,7 @@ import os.path
 import re
 import urllib.request
 from typing import Literal
+from pydantic import ConfigDict, Field
 
 import axengine as axe
 
@@ -23,6 +24,12 @@ model_cache_dir = os.path.join(MODEL_CACHE_DIR, "axengine_cache/")
 
 
 class AxengineDetectorConfig(BaseDetectorConfig):
+    """AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime."""
+
+    model_config = ConfigDict(
+        title="AXEngine NPU",
+    )
+    
     type: Literal[DETECTOR_KEY]
 
 
