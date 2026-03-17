@@ -301,15 +301,13 @@ export default function LivePlayer({
     onLoadingChangeRef.current?.(loading);
   }, [cameraEnabled, offline, showStillWithoutActivity, isReEnabling, liveReady]);
 
+  // When the parent manages the dot via callback (grid view), show motion
+  // without gating on liveReady — the dot should reflect actual motion state
+  // regardless of stream load status to avoid the dot not appearing for
+  // cameras in continuous mode while the stream is reconnecting.
   useEffect(() => {
-    const motionVisible = !!(
-      autoLive &&
-      !offline &&
-      activeMotion &&
-      ((showStillWithoutActivity && !liveReady) || liveReady)
-    );
-    onActiveMotionChangeRef.current?.(motionVisible);
-  }, [autoLive, offline, activeMotion, showStillWithoutActivity, liveReady]);
+    onActiveMotionChangeRef.current?.(!!(autoLive && !offline && activeMotion));
+  }, [autoLive, offline, activeMotion]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
