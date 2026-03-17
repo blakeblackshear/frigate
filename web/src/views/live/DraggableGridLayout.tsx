@@ -1089,10 +1089,10 @@ function CameraMotionDot({
   autoLive,
 }: {
   camera: CameraConfig;
-  autoLive: boolean;
+  autoLive?: boolean;
 }) {
   const { activeMotion, offline } = useCameraActivity(camera);
-  if (!autoLive || offline || !activeMotion) return null;
+  if (autoLive === false || offline || !activeMotion) return null;
   return (
     <div className="absolute right-2 top-2 z-40">
       <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
