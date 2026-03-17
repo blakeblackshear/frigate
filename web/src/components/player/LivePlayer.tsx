@@ -50,7 +50,7 @@ type LivePlayerProps = {
   showStats?: boolean;
   onStatsUpdate?: (stats: PlayerStatsType) => void;
   onLoadingChange?: (loading: boolean) => void;
-  onActiveMotionChange?: (active: boolean) => void;
+  showMotionDot?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -78,7 +78,7 @@ export default function LivePlayer({
   showStats = false,
   onStatsUpdate,
   onLoadingChange,
-  onActiveMotionChange,
+  showMotionDot = true,
   onClick,
   setFullResolution,
   onError,
@@ -113,10 +113,8 @@ export default function LivePlayer({
 
   const onStatsUpdateRef = useRef(onStatsUpdate);
   const onLoadingChangeRef = useRef(onLoadingChange);
-  const onActiveMotionChangeRef = useRef(onActiveMotionChange);
   onStatsUpdateRef.current = onStatsUpdate;
   onLoadingChangeRef.current = onLoadingChange;
-  onActiveMotionChangeRef.current = onActiveMotionChange;
 
   useEffect(() => {
     onStatsUpdateRef.current?.(stats);
@@ -300,14 +298,6 @@ export default function LivePlayer({
     );
     onLoadingChangeRef.current?.(loading);
   }, [cameraEnabled, offline, showStillWithoutActivity, isReEnabling, liveReady]);
-
-  // When the parent manages the dot via callback (grid view), show motion
-  // without gating on liveReady — the dot should reflect actual motion state
-  // regardless of stream load status to avoid the dot not appearing for
-  // cameras in continuous mode while the stream is reconnecting.
-  useEffect(() => {
-    onActiveMotionChangeRef.current?.(!!(autoLive && !offline && activeMotion));
-  }, [autoLive, offline, activeMotion]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -566,7 +556,7 @@ export default function LivePlayer({
             {cameraName}
           </Chip>
         )}
-        {!onActiveMotionChangeRef.current &&
+        {showMotionDot &&
           autoLive &&
           !offline &&
           activeMotion &&
