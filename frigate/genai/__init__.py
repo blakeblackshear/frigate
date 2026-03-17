@@ -188,8 +188,8 @@ Each line represents a detection state, not necessarily unique individuals. Pare
                 if metadata.confidence > 1.0:
                     metadata.confidence = min(metadata.confidence / 100.0, 1.0)
 
-                # If any verified objects (contain parentheses with name), set to 0
-                if any("(" in obj for obj in review_data["unified_objects"]):
+                # If any verified objects (contain ← separator), set to 0
+                if any("←" in obj for obj in review_data["unified_objects"]):
                     metadata.potential_threat_level = 0
 
                 metadata.time = review_data["start"]

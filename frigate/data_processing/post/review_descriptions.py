@@ -521,7 +521,7 @@ def run_analysis(
     for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
         object_type = verified_label.replace("-verified", "").replace("_", " ")
         name = titlecase(sub_labels_list[i].replace("_", " "))
-        unified_objects.append(f"{name} ({object_type})")
+        unified_objects.append(f"{name} ← {object_type}")
 
     for label in objects_list:
         if "-verified" in label:
