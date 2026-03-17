@@ -1,0 +1,24 @@
+# Example: Frigate with in-container transcode proxy (single image).
+#
+# 1. Build Frigate from this repo (on Ubuntu recommended):
+#    make version && make local-trt && docker tag frigate:latest-tensorrt frigate-dev
+#
+# 2. Use image: frigate-dev and publish port 5010 for the transcode proxy.
+# 3. In Frigate config (config.yml), set:
+#    transcode_proxy:
+#      enabled: true
+#      vod_proxy_url: "http://YOUR_HOST:5010"
+
+services:
+  frigate:
+    container_name: frigate
+    restart: unless-stopped
+    image: frigate-dev
+    # ... your existing frigate config (gpus, shm_size, devices, volumes) ...
+    ports:
+      - "5000:5000"   # or 8971:8971 depending on your setup
+      - "5010:5010"   # transcode proxy (only needed if transcode_proxy.enabled is true)
+    # Optional: override proxy defaults
+    # environment:
+    #   TRANSCODE_PROXY_PORT: "5010"
+    #   TRANSCODE_PROXY_CACHE_MB: "500"

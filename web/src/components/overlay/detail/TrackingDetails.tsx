@@ -41,6 +41,7 @@ import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { VideoResolutionType } from "@/types/live";
+import useRecordingPlaybackSource from "@/hooks/use-recording-playback-source";
 
 type TrackingDetailsProps = {
   className?: string;
@@ -513,25 +514,36 @@ export function TrackingDetails({
     setBlueLineHeightPx(bluePx);
   }, [eventSequence, timelineSize.width, timelineSize.height, effectiveTime]);
 
-  const videoSource = useMemo(() => {
-    // event.start_time and event.end_time are in DETECT stream time
-    // Convert to record stream time, then create video clip with padding.
-    // Use sourceOffsetRef (stable per event) so the HLS player doesn't
-    // reload while the user is dragging the annotation offset slider.
+  const videoWindow = useMemo(() => {
     const sourceOffset = sourceOffsetRef.current;
     const eventStartRec = event.start_time + sourceOffset / 1000;
     const eventEndRec =
       (event.end_time ?? Date.now() / 1000) + sourceOffset / 1000;
     const startTime = eventStartRec - REVIEW_PADDING;
     const endTime = eventEndRec + REVIEW_PADDING;
-    const playlist = `${baseUrl}vod/clip/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
+
+    return {
+      startTime,
+      endTime,
+      vodPath: `/vod/clip/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event]);
+  const playbackSource = useRecordingPlaybackSource({
+    camera: event.camera,
+    after: videoWindow.startTime,
+    before: videoWindow.endTime,
+    vodPath: videoWindow.vodPath,
+  });
+  const videoSource = useMemo(() => {
+    const playlist = playbackSource ?? `${baseUrl}${videoWindow.vodPath}`;
 
     return {
       playlist,
       startPosition: 0,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event]);
+  }, [playbackSource, videoWindow]);
 
   // Determine camera aspect ratio category
   const cameraAspect = useMemo(() => {

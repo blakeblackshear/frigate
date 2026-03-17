@@ -21,8 +21,31 @@ function set_libva_version() {
     export LIBAVFORMAT_VERSION_MAJOR
 }
 
+function start_transcode_proxy() {
+    (
+        export TRANSCODE_PROXY_UPSTREAM="${TRANSCODE_PROXY_UPSTREAM:-http://127.0.0.1:5000}"
+        export PYTHONPATH="/opt/frigate:${PYTHONPATH:-}"
+
+        if [[ -z "${TRANSCODE_PROXY_FFMPEG:-}" ]]; then
+            TRANSCODE_PROXY_FFMPEG=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
+            export TRANSCODE_PROXY_FFMPEG
+        fi
+
+        until curl -sf -o /dev/null "${TRANSCODE_PROXY_UPSTREAM}/api/version"; do
+            sleep 1
+        done
+
+        echo "[INFO] Starting transcode proxy..."
+        exec python3 -m uvicorn transcode_proxy.main:app \
+            --host "${TRANSCODE_PROXY_HOST:-0.0.0.0}" \
+            --port "${TRANSCODE_PROXY_PORT:-5010}"
+    ) &
+}
+
 echo "[INFO] Preparing Frigate..."
 set_libva_version
+
+start_transcode_proxy
 
 echo "[INFO] Starting Frigate..."
 

@@ -101,6 +101,29 @@ class RecordingMaintainer(threading.Thread):
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
         self.unexpected_cache_files_logged: bool = False
 
+    def _parse_cache_segment(self, cache_name: str) -> Optional[dict[str, Any]]:
+        basename = os.path.splitext(cache_name)[0]
+        parts = basename.rsplit("@", maxsplit=2)
+
+        if len(parts) == 2:
+            camera, date = parts
+            variant = "main"
+        elif len(parts) == 3:
+            camera, variant, date = parts
+        else:
+            return None
+
+        start_time = datetime.datetime.strptime(
+            date, CACHE_SEGMENT_FORMAT
+        ).astimezone(datetime.timezone.utc)
+
+        return {
+            "camera": camera,
+            "variant": variant,
+            "start_time": start_time,
+            "cache_path": os.path.join(CACHE_DIR, cache_name),
+        }
+
     async def move_files(self) -> None:
         cache_files = [
             d
@@ -113,26 +136,22 @@ class RecordingMaintainer(threading.Thread):
         # publish newest cached segment per camera (including in use files)
         newest_cache_segments: dict[str, dict[str, Any]] = {}
         for cache in cache_files:
-            cache_path = os.path.join(CACHE_DIR, cache)
-            basename = os.path.splitext(cache)[0]
-            try:
-                camera, date = basename.rsplit("@", maxsplit=1)
-            except ValueError:
+            parsed = self._parse_cache_segment(cache)
+            if parsed is None:
                 if not self.unexpected_cache_files_logged:
                     logger.warning("Skipping unexpected files in cache")
                     self.unexpected_cache_files_logged = True
                 continue
 
-            start_time = datetime.datetime.strptime(
-                date, CACHE_SEGMENT_FORMAT
-            ).astimezone(datetime.timezone.utc)
+            camera = parsed["camera"]
+            start_time = parsed["start_time"]
             if (
                 camera not in newest_cache_segments
                 or start_time > newest_cache_segments[camera]["start_time"]
             ):
                 newest_cache_segments[camera] = {
                     "start_time": start_time,
-                    "cache_path": cache_path,
+                    "cache_path": parsed["cache_path"],
                 }
 
         for camera, newest in newest_cache_segments.items():
@@ -172,27 +191,14 @@ class RecordingMaintainer(threading.Thread):
             if cache in files_in_use:
                 continue
 
-            cache_path = os.path.join(CACHE_DIR, cache)
-            basename = os.path.splitext(cache)[0]
-            try:
-                camera, date = basename.rsplit("@", maxsplit=1)
-            except ValueError:
+            parsed = self._parse_cache_segment(cache)
+            if parsed is None:
                 if not self.unexpected_cache_files_logged:
                     logger.warning("Skipping unexpected files in cache")
                     self.unexpected_cache_files_logged = True
                 continue
 
-            # important that start_time is utc because recordings are stored and compared in utc
-            start_time = datetime.datetime.strptime(
-                date, CACHE_SEGMENT_FORMAT
-            ).astimezone(datetime.timezone.utc)
-
-            grouped_recordings[camera].append(
-                {
-                    "cache_path": cache_path,
-                    "start_time": start_time,
-                }
-            )
+            grouped_recordings[parsed["camera"]].append(parsed)
 
         # delete all cached files past the most recent MAX_SEGMENTS_IN_CACHE
         keep_count = MAX_SEGMENTS_IN_CACHE
@@ -318,6 +324,7 @@ class RecordingMaintainer(threading.Thread):
     ) -> Optional[Recordings]:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
+        variant: str = recording.get("variant", "main")
 
         # Just delete files if camera removed or recordings are turned off
         if (
@@ -327,8 +334,12 @@ class RecordingMaintainer(threading.Thread):
             self.drop_segment(cache_path)
             return None
 
+        segment_info: dict[str, Any]
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
+            segment_info = await get_video_properties(
+                self.config.ffmpeg, cache_path, get_duration=False
+            )
         else:
             segment_info = await get_video_properties(
                 self.config.ffmpeg, cache_path, get_duration=True
@@ -400,7 +411,14 @@ class RecordingMaintainer(threading.Thread):
                     else RetainModeEnum.motion
                 )
                 return await self.move_segment(
-                    camera, start_time, end_time, duration, cache_path, record_mode
+                    camera,
+                    variant,
+                    start_time,
+                    end_time,
+                    duration,
+                    cache_path,
+                    record_mode,
+                    segment_info,
                 )
 
         # we fell through the continuous / motion check, so we need to check the review items
@@ -436,11 +454,13 @@ class RecordingMaintainer(threading.Thread):
             # move from cache to recordings immediately
             return await self.move_segment(
                 camera,
+                variant,
                 start_time,
                 end_time,
                 duration,
                 cache_path,
                 record_mode,
+                segment_info,
             )
         # if it doesn't overlap with an review item, go ahead and drop the segment
         # if it ends more than the configured pre_capture for the camera
@@ -570,11 +590,13 @@ class RecordingMaintainer(threading.Thread):
     async def move_segment(
         self,
         camera: str,
+        variant: str,
         start_time: datetime.datetime,
         end_time: datetime.datetime,
         duration: float,
         cache_path: str,
         store_mode: RetainModeEnum,
+        media_info: Optional[dict[str, Any]] = None,
     ) -> Optional[Recordings]:
         segment_info = self.segment_stats(camera, start_time, end_time)
 
@@ -588,6 +610,7 @@ class RecordingMaintainer(threading.Thread):
             RECORD_DIR,
             start_time.strftime("%Y-%m-%d/%H"),
             camera,
+            variant,
         )
 
         if not os.path.exists(directory):
@@ -646,6 +669,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.id.name: f"{start_time.timestamp()}-{rand_id}",
                     Recordings.camera.name: camera,
                     Recordings.path.name: file_path,
+                    Recordings.variant.name: variant,
                     Recordings.start_time.name: start_time.timestamp(),
                     Recordings.end_time.name: end_time.timestamp(),
                     Recordings.duration.name: duration,
@@ -655,6 +679,16 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.regions.name: segment_info.region_count,
                     Recordings.dBFS.name: segment_info.average_dBFS,
                     Recordings.segment_size.name: segment_size,
+                    Recordings.codec_name.name: (
+                        media_info.get("codec_name") if media_info else None
+                    ),
+                    Recordings.width.name: media_info.get("width") if media_info else None,
+                    Recordings.height.name: media_info.get("height") if media_info else None,
+                    Recordings.bitrate.name: (
+                        int((segment_size * pow(2, 20) * 8) / duration)
+                        if duration > 0 and segment_size > 0
+                        else None
+                    ),
                     Recordings.motion_heatmap.name: segment_info.motion_heatmap,
                 }
         except Exception as e:

@@ -9,7 +9,10 @@ import {
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Recording } from "@/types/record";
+import {
+  Recording,
+  RecordingPlaybackPreference,
+} from "@/types/record";
 import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
@@ -21,11 +24,21 @@ import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
+import usePlaybackCapabilities from "@/hooks/use-playback-capabilities";
+import { chooseRecordingPlayback } from "@/utils/recordingPlayback";
 import {
   calculateInpointOffset,
   calculateSeekPosition,
 } from "@/utils/videoUtil";
 import { isFirefox } from "react-device-detect";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -121,6 +134,11 @@ export default function DynamicVideoPlayer({
   const [isLoading, setIsLoading] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
+  const [playbackPreference, setPlaybackPreference] =
+    useUserPersistence<RecordingPlaybackPreference>(
+      `${camera}-recording-playback-v2`,
+      "sub",
+    );
 
   // Don't set source until recordings load - we need accurate startPosition
   // to avoid hls.js clamping to video end when startPosition exceeds duration
@@ -190,10 +208,29 @@ export default function DynamicVideoPlayer({
     }),
     [timeRange],
   );
-  const { data: recordings } = useSWR<Recording[]>(
-    [`${camera}/recordings`, recordingParams],
+  const { data: allRecordings } = useSWR<Recording[]>(
+    [`${camera}/recordings`, { ...recordingParams, variant: "all" }],
     { revalidateOnFocus: false },
   );
+  const recordings = useMemo(() => {
+    if (!allRecordings?.length) {
+      return allRecordings;
+    }
+
+    const mainRecordings = allRecordings.filter(
+      (recording) => (recording.variant || "main") === "main",
+    );
+
+    return mainRecordings.length > 0 ? mainRecordings : allRecordings;
+  }, [allRecordings]);
+  const codecNames = useMemo(
+    () =>
+      Array.from(
+        new Set((allRecordings ?? []).map((recording) => recording.codec_name)),
+      ),
+    [allRecordings],
+  );
+  const playbackCapabilities = usePlaybackCapabilities(codecNames);
 
   useEffect(() => {
     if (!recordings?.length) {
@@ -219,13 +256,34 @@ export default function DynamicVideoPlayer({
       );
     }
 
+    const vodPath = `/vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`;
+    const decision = chooseRecordingPlayback({
+      apiHost,
+      config,
+      recordings: allRecordings ?? recordings,
+      preference: playbackPreference ?? "sub",
+      vodPath,
+      capabilities: playbackCapabilities,
+    });
     setSource({
-      playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
+      playlist: decision.url,
       startPosition,
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recordings]);
+  }, [
+    apiHost,
+    camera,
+    recordingParams.after,
+    recordingParams.before,
+    allRecordings,
+    recordings,
+    startTimestamp,
+    playbackPreference,
+    playbackCapabilities,
+    config?.transcode_proxy?.enabled,
+    config?.transcode_proxy?.vod_proxy_url,
+  ]);
 
   useEffect(() => {
     if (!controller || !recordings?.length) {
@@ -323,6 +381,26 @@ export default function DynamicVideoPlayer({
           currentTimeOverride={currentTime}
           transformedOverlay={transformedOverlay}
         />
+      )}
+      {!isScrubbing && source && (
+        <div className="absolute right-3 top-3 z-50">
+          <Select
+            value={playbackPreference ?? "sub"}
+            onValueChange={(value) =>
+              setPlaybackPreference(value as RecordingPlaybackPreference)
+            }
+          >
+            <SelectTrigger className="h-8 w-32 bg-background/90 text-xs backdrop-blur">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto</SelectItem>
+              <SelectItem value="main">Main</SelectItem>
+              <SelectItem value="sub">Sub</SelectItem>
+              <SelectItem value="transcoded">Transcoded</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       )}
       <PreviewPlayer
         className={cn(

@@ -820,6 +820,7 @@ async def get_video_properties(
         result.update({"width": width, "height": height})
         if fourcc:
             result["fourcc"] = fourcc
+            result["codec_name"] = fourcc
     if get_duration:
         result["duration"] = duration
 

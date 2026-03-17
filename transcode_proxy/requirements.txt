@@ -1,0 +1,5 @@
+# Dependencies for running the transcode proxy standalone (e.g. in a separate container).
+# Frigate's main container may already have these; the proxy can share the same env.
+fastapi>=0.100.0
+uvicorn>=0.22.0
+httpx>=0.24.0

@@ -71,6 +71,7 @@ from .network import NetworkingConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
+from .transcode_proxy import TranscodeProxyConfig
 from .ui import UIConfig
 
 __all__ = ["FrigateConfig"]
@@ -449,6 +450,11 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=UIConfig,
         title="UI",
         description="User interface preferences such as timezone, time/date formatting, and units.",
+    )
+    transcode_proxy: TranscodeProxyConfig = Field(
+        default_factory=TranscodeProxyConfig,
+        title="Transcode proxy",
+        description="Optional proxy for transcoding VOD playback to H.264 on the fly (e.g. for HEVC compatibility).",
     )
 
     # Detector config

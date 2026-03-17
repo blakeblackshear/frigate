@@ -426,6 +426,7 @@ async def recording_clip(
     camera_name: str,
     start_ts: float,
     end_ts: float,
+    variant: str = Query("main", description="Recording variant to use for playback."),
 ):
     def run_download(ffmpeg_cmd: list[str], file_path: str):
         with sp.Popen(
@@ -459,6 +460,7 @@ async def recording_clip(
             | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
         .where(Recordings.camera == camera_name)
+        .where(Recordings.variant == variant)
         .order_by(Recordings.start_time.asc())
     )
 
@@ -534,13 +536,15 @@ async def vod_ts(
     start_ts: float,
     end_ts: float,
     force_discontinuity: bool = False,
+    variant: str = "main",
 ):
     logger.debug(
-        "VOD: Generating VOD for %s from %s to %s with force_discontinuity=%s",
+        "VOD: Generating VOD for %s from %s to %s with force_discontinuity=%s variant=%s",
         camera_name,
         start_ts,
         end_ts,
         force_discontinuity,
+        variant,
     )
     recordings = (
         Recordings.select(
@@ -555,6 +559,7 @@ async def vod_ts(
             | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
         .where(Recordings.camera == camera_name)
+        .where(Recordings.variant == variant)
         .order_by(Recordings.start_time.asc())
         .iterator()
     )
@@ -644,10 +649,17 @@ async def vod_ts(
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-async def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str):
+async def vod_hour_no_timezone(
+    year_month: str, day: int, hour: int, camera_name: str, variant: str = "main"
+):
     """VOD for specific hour. Uses the default timezone (UTC)."""
     return await vod_hour(
-        year_month, day, hour, camera_name, get_localzone_name().replace("/", ",")
+        year_month,
+        day,
+        hour,
+        camera_name,
+        get_localzone_name().replace("/", ","),
+        variant,
     )
 
 
@@ -657,7 +669,12 @@ async def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name
     description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_hour(
-    year_month: str, day: int, hour: int, camera_name: str, tz_name: str
+    year_month: str,
+    day: int,
+    hour: int,
+    camera_name: str,
+    tz_name: str,
+    variant: str = "main",
 ):
     parts = year_month.split("-")
     start_date = (
@@ -668,7 +685,7 @@ async def vod_hour(
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
 
-    return await vod_ts(camera_name, start_ts, end_ts)
+    return await vod_ts(camera_name, start_ts, end_ts, variant=variant)
 
 
 @router.get(
@@ -680,6 +697,7 @@ async def vod_event(
     request: Request,
     event_id: str,
     padding: int = Query(0, description="Padding to apply to the vod."),
+    variant: str = Query("main", description="Recording variant to use for playback."),
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -700,7 +718,9 @@ async def vod_event(
         if event.end_time is None
         else (event.end_time + padding)
     )
-    vod_response = await vod_ts(event.camera, event.start_time - padding, end_ts)
+    vod_response = await vod_ts(
+        event.camera, event.start_time - padding, end_ts, variant=variant
+    )
 
     # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
     if (
@@ -723,8 +743,11 @@ async def vod_clip(
     camera_name: str,
     start_ts: float,
     end_ts: float,
+    variant: str = Query("main", description="Recording variant to use for playback."),
 ):
-    return await vod_ts(camera_name, start_ts, end_ts, force_discontinuity=True)
+    return await vod_ts(
+        camera_name, start_ts, end_ts, force_discontinuity=True, variant=variant
+    )
 
 
 @router.get(

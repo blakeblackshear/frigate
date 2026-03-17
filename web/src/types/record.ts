@@ -7,12 +7,17 @@ export type Recording = {
   start_time: number;
   end_time: number;
   path: string;
+  variant?: string;
   segment_size: number;
   duration: number;
   motion: number;
   objects: number;
   motion_heatmap?: Record<string, number> | null;
   dBFS: number;
+  codec_name?: string | null;
+  width?: number | null;
+  height?: number | null;
+  bitrate?: number | null;
 };
 
 export type RecordingSegment = {
@@ -43,6 +48,12 @@ export type RecordingStartingPoint = {
 };
 
 export type RecordingPlayerError = "stalled" | "startup";
+
+export type RecordingPlaybackPreference =
+  | "auto"
+  | "main"
+  | "sub"
+  | "transcoded";
 
 export const ASPECT_VERTICAL_LAYOUT = 1.5;
 export const ASPECT_PORTRAIT_LAYOUT = 1.333;

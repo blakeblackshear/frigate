@@ -256,7 +256,13 @@ class CameraConfig(FrigateBaseModel):
             if ffmpeg_cmd is None:
                 continue
 
-            ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
+            ffmpeg_cmds.append(
+                {
+                    "roles": ffmpeg_input.roles,
+                    "cmd": ffmpeg_cmd,
+                    "record_variant": ffmpeg_input.record_variant,
+                }
+            )
         self._ffmpeg_cmds = ffmpeg_cmds
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
@@ -281,10 +287,13 @@ class CameraConfig(FrigateBaseModel):
                 )
                 or self.ffmpeg.output_args.record
             )
+            record_variant = ffmpeg_input.record_variant or "main"
+            cache_prefix = os.path.join(CACHE_DIR, self.name)
+            cache_path = f"{cache_prefix}@{record_variant}@{CACHE_SEGMENT_FORMAT}.mp4"
 
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}@{CACHE_SEGMENT_FORMAT}.mp4"]
+                + [cache_path]
                 + ffmpeg_output_args
             )
 

@@ -122,6 +122,8 @@ import {
   SnapshotResult,
 } from "@/utils/snapshotUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import usePlaybackCapabilities from "@/hooks/use-playback-capabilities";
+import { chooseAutoLiveStream } from "@/utils/liveStreamSelection";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -144,13 +146,23 @@ export default function LiveCameraView({
   const containerRef = useRef<HTMLDivElement>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
+  const playbackCapabilities = usePlaybackCapabilities([]);
+  const autoStreamName = useMemo(
+    () =>
+      chooseAutoLiveStream(
+        camera.live.streams,
+        playbackCapabilities.estimatedBandwidthBps,
+        playbackCapabilities.saveData,
+      ),
+    [camera.live.streams, playbackCapabilities],
+  );
 
   // supported features
 
   const [streamName, setStreamName, streamNameLoaded] =
     useUserPersistence<string>(
       `${camera.name}-stream`,
-      Object.values(camera.live.streams)[0],
+      autoStreamName || Object.values(camera.live.streams)[0],
     );
 
   const isRestreamed = useMemo(

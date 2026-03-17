@@ -540,6 +540,11 @@ export interface FrigateConfig {
     logout_url?: string;
   };
 
+  transcode_proxy?: {
+    enabled: boolean;
+    vod_proxy_url: string;
+  };
+
   record: {
     enabled: boolean;
     enabled_in_config: boolean | null;

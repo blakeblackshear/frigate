@@ -229,28 +229,38 @@ async def recordings(
     camera_name: str,
     after: float = (datetime.now() - timedelta(hours=1)).timestamp(),
     before: float = datetime.now().timestamp(),
+    variant: str = "main",
 ):
     """Return specific camera recordings between the given 'after'/'end' times. If not provided the last hour will be used"""
-    recordings = (
+    query = (
         Recordings.select(
             Recordings.id,
+            Recordings.camera,
             Recordings.start_time,
             Recordings.end_time,
+            Recordings.path,
+            Recordings.variant,
             Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
             Recordings.motion_heatmap,
             Recordings.duration,
+            Recordings.codec_name,
+            Recordings.width,
+            Recordings.height,
+            Recordings.bitrate,
         )
         .where(
             Recordings.camera == camera_name,
             Recordings.end_time >= after,
             Recordings.start_time <= before,
         )
-        .order_by(Recordings.start_time)
-        .dicts()
-        .iterator()
     )
+
+    if variant != "all":
+        query = query.where(Recordings.variant == variant)
+
+    recordings = query.order_by(Recordings.start_time).dicts().iterator()
 
     return JSONResponse(content=list(recordings))
 

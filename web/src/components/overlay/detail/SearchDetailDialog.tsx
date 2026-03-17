@@ -80,6 +80,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import useRecordingPlaybackSource from "@/hooks/use-recording-playback-source";
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
@@ -1866,8 +1867,16 @@ export function VideoTab({ search }: VideoTabProps) {
     const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
     return `start/${startTime}/end/${endTime}`;
   }, [search]);
-
-  const source = `${baseUrl}vod/${search.camera}/${clipTimeRange}/index.m3u8`;
+  const startTime = search.start_time - REVIEW_PADDING;
+  const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
+  const vodPath = `/vod/${search.camera}/${clipTimeRange}/index.m3u8`;
+  const playbackSource = useRecordingPlaybackSource({
+    camera: search.camera,
+    after: startTime,
+    before: endTime,
+    vodPath,
+  });
+  const source = playbackSource ?? `${baseUrl}${vodPath}`;
 
   return (
     <>

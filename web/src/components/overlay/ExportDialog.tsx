@@ -35,6 +35,7 @@ import { GenericVideoPlayer } from "../player/GenericVideoPlayer";
 import { useTranslation } from "react-i18next";
 import { ExportCase } from "@/types/export";
 import { CustomTimeSelector } from "./CustomTimeSelector";
+import useRecordingPlaybackSource from "@/hooks/use-recording-playback-source";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -428,11 +429,22 @@ export function ExportPreviewDialog({
   setShowPreview,
 }: ExportPreviewDialogProps) {
   const { t } = useTranslation(["components/dialog"]);
+  const vodPath = range
+    ? `/vod/${camera}/start/${range.after}/end/${range.before}/index.m3u8`
+    : `/vod/${camera}/start/0/end/0/index.m3u8`;
+  const playbackSource = useRecordingPlaybackSource({
+    camera,
+    after: range?.after ?? 0,
+    before: range?.before ?? 0,
+    vodPath,
+    enabled: !!range,
+  });
+
   if (!range) {
     return null;
   }
 
-  const source = `${baseUrl}vod/${camera}/start/${range.after}/end/${range.before}/index.m3u8`;
+  const source = playbackSource ?? `${baseUrl}${vodPath}`;
 
   return (
     <Dialog open={showPreview} onOpenChange={setShowPreview}>

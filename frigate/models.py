@@ -70,6 +70,7 @@ class Recordings(Model):
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)
     path = CharField(unique=True)
+    variant = CharField(default="main", index=True, max_length=20)
     start_time = DateTimeField()
     end_time = DateTimeField()
     duration = FloatField()
@@ -77,6 +78,10 @@ class Recordings(Model):
     objects = IntegerField(null=True)
     dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB
+    codec_name = CharField(null=True, max_length=32)
+    width = IntegerField(null=True)
+    height = IntegerField(null=True)
+    bitrate = IntegerField(null=True)
     regions = IntegerField(null=True)
     motion_heatmap = JSONField(null=True)  # 16x16 grid, 256 values (0-255)
 

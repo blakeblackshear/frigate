@@ -25,6 +25,7 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
     && pip3 install -U /deps/trt-wheels/*.whl
 
 COPY --from=rootfs / /
+RUN pip3 install --no-cache-dir -r /opt/frigate/transcode_proxy/requirements.txt
 COPY docker/tensorrt/detector/rootfs/etc/ld.so.conf.d /etc/ld.so.conf.d
 RUN ldconfig
 

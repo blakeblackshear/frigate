@@ -16,7 +16,9 @@ FROM ${BASE_IMAGE} AS base
 ARG PIP_BREAK_SYSTEM_PACKAGES
 ARG BASE_HOOK
 
-RUN sh -c "$BASE_HOOK"
+RUN if [ -n "$BASE_HOOK" ]; then \
+        printf '%s\n' "$BASE_HOOK" | tr -d '\r' >/tmp/base_hook.sh && sh /tmp/base_hook.sh && rm -f /tmp/base_hook.sh; \
+    fi
 
 FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
 ARG PIP_BREAK_SYSTEM_PACKAGES
@@ -25,7 +27,9 @@ FROM ${SLIM_BASE} AS slim-base
 ARG PIP_BREAK_SYSTEM_PACKAGES
 ARG BASE_HOOK
 
-RUN sh -c "$BASE_HOOK"
+RUN if [ -n "$BASE_HOOK" ]; then \
+        printf '%s\n' "$BASE_HOOK" | tr -d '\r' >/tmp/base_hook.sh && sh /tmp/base_hook.sh && rm -f /tmp/base_hook.sh; \
+    fi
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -40,7 +44,8 @@ ENV CCACHE_DIR /root/.ccache
 ENV CCACHE_MAXSIZE 2G
 
 RUN --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
-    /deps/build_nginx.sh
+    tr -d '\r' </deps/build_nginx.sh >/tmp/build_nginx.sh \
+    && bash /tmp/build_nginx.sh
 
 FROM wget AS sqlite-vec
 ARG DEBIAN_FRONTEND
@@ -50,7 +55,8 @@ COPY docker/main/build_sqlite_vec.sh /deps/build_sqlite_vec.sh
 RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=docker/main/build_sqlite_vec.sh,target=/deps/build_sqlite_vec.sh \
     --mount=type=cache,target=/root/.ccache \
-    /deps/build_sqlite_vec.sh
+    tr -d '\r' </deps/build_sqlite_vec.sh >/tmp/build_sqlite_vec.sh \
+    && bash /tmp/build_sqlite_vec.sh
 
 FROM scratch AS go2rtc
 ARG TARGETARCH
@@ -60,7 +66,8 @@ ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9
 FROM wget AS tempio
 ARG TARGETARCH
 RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_tempio.sh \
-    /deps/install_tempio.sh
+    tr -d '\r' </deps/install_tempio.sh >/tmp/install_tempio.sh \
+    && bash /tmp/install_tempio.sh
 
 ####
 #
@@ -142,7 +149,8 @@ COPY audio-labelmap.txt .
 FROM wget AS s6-overlay
 ARG TARGETARCH
 RUN --mount=type=bind,source=docker/main/install_s6_overlay.sh,target=/deps/install_s6_overlay.sh \
-    /deps/install_s6_overlay.sh
+    tr -d '\r' </deps/install_s6_overlay.sh >/tmp/install_s6_overlay.sh \
+    && bash /tmp/install_s6_overlay.sh
 
 
 FROM base AS wheels
@@ -184,7 +192,8 @@ RUN pip3 install -r /requirements.txt
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
-RUN /build_pysqlite3.sh
+RUN tr -d '\r' </build_pysqlite3.sh >/tmp/build_pysqlite3.sh \
+    && bash /tmp/build_pysqlite3.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
@@ -194,7 +203,8 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
 
 # Install HailoRT & Wheels
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
-    /deps/install_hailort.sh
+    tr -d '\r' </deps/install_hailort.sh >/tmp/install_hailort.sh \
+    && bash /tmp/install_hailort.sh
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
@@ -254,7 +264,8 @@ ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PA
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
-    /deps/install_deps.sh
+    tr -d '\r' </deps/install_deps.sh >/tmp/install_deps.sh \
+    && bash /tmp/install_deps.sh
 
 ENV DEFAULT_FFMPEG_VERSION="7.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
@@ -274,13 +285,21 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/axcl"
 
 # Install MemryX runtime (requires libgomp (OpenMP) in the final docker image)
 RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_memryx.sh \
-    bash -c "bash /deps/install_memryx.sh"
+    tr -d '\r' </deps/install_memryx.sh >/tmp/install_memryx.sh \
+    && bash /tmp/install_memryx.sh
 
 COPY --from=deps-rootfs / /
+
+RUN find /etc/s6-overlay/s6-rc.d -type f -exec sed -i 's/\r$//' {} +
+
+RUN find /etc/s6-overlay/s6-rc.d -type f \
+    \( -name run -o -name up \) \
+    -exec chmod +x {} +
 
 RUN ldconfig
 
 EXPOSE 5000
+EXPOSE 5010
 EXPOSE 8554
 EXPOSE 8555/tcp 8555/udp
 
@@ -347,6 +366,7 @@ FROM scratch AS rootfs
 WORKDIR /opt/frigate/
 COPY frigate frigate/
 COPY migrations migrations/
+COPY transcode_proxy transcode_proxy/
 COPY --from=web-build /work/dist/ web/
 
 # Frigate final container
@@ -354,3 +374,4 @@ FROM deps AS frigate
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+RUN pip3 install --no-cache-dir -r /opt/frigate/transcode_proxy/requirements.txt

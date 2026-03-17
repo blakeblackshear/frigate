@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Union
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
-from frigate.const import DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS
+from frigate.const import DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS, REGEX_CAMERA_NAME
 
 from ..base import FrigateBaseModel
 from ..env import EnvString
@@ -137,6 +137,22 @@ class CameraInput(FrigateBaseModel):
         title="Input arguments",
         description="Input arguments specific to this stream.",
     )
+    record_variant: str | None = Field(
+        default=None,
+        title="Recording variant",
+        description="Optional recording variant label for record role inputs such as main or sub.",
+        pattern=REGEX_CAMERA_NAME,
+    )
+
+    @model_validator(mode="after")
+    def validate_record_variant(self):
+        if CameraRoleEnum.record in self.roles:
+            if not self.record_variant:
+                self.record_variant = "main"
+        else:
+            self.record_variant = None
+
+        return self
 
 
 class CameraFfmpegConfig(FfmpegConfig):
@@ -148,12 +164,29 @@ class CameraFfmpegConfig(FfmpegConfig):
     @field_validator("inputs")
     @classmethod
     def validate_roles(cls, v):
-        roles = [role for input in v for role in input.roles]
+        detect_inputs = 0
+        audio_inputs = 0
+        record_variants: set[str] = set()
 
-        if len(roles) != len(set(roles)):
-            raise ValueError("Each input role may only be used once.")
+        for camera_input in v:
+            if CameraRoleEnum.detect in camera_input.roles:
+                detect_inputs += 1
 
-        if "detect" not in roles:
+            if CameraRoleEnum.audio in camera_input.roles:
+                audio_inputs += 1
+
+            if CameraRoleEnum.record in camera_input.roles:
+                record_variant = camera_input.record_variant or "main"
+                if record_variant in record_variants:
+                    raise ValueError(
+                        f"Record variant '{record_variant}' may only be used once."
+                    )
+                record_variants.add(record_variant)
+
+        if detect_inputs != 1:
             raise ValueError("The detect role is required.")
+
+        if audio_inputs > 1:
+            raise ValueError("Each input role may only be used once.")
 
         return v

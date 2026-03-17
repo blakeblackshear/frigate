@@ -55,6 +55,8 @@ import { EmptyCard } from "@/components/card/EmptyCard";
 import { BsFillCameraVideoOffFill } from "react-icons/bs";
 import { AuthContext } from "@/context/auth-context";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import usePlaybackCapabilities from "@/hooks/use-playback-capabilities";
+import { chooseAutoLiveStream } from "@/utils/liveStreamSelection";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -190,6 +192,7 @@ export default function LiveDashboardView({
   }, [visibilityListener]);
 
   const [visibleCameras, setVisibleCameras] = useState<string[]>([]);
+  const playbackCapabilities = usePlaybackCapabilities([]);
   const visibleCameraObserver = useRef<IntersectionObserver | null>(null);
   useEffect(() => {
     const visibleCameras = new Set<string>();
@@ -260,12 +263,16 @@ export default function LiveDashboardView({
 
       const streamName = streamExists
         ? streamNameFromSettings
-        : Object.values(availableStreams)[0] || "";
+        : chooseAutoLiveStream(
+            availableStreams,
+            playbackCapabilities.estimatedBandwidthBps,
+            playbackCapabilities.saveData,
+          );
 
       streams[camera.name] = streamName;
     });
     return streams;
-  }, [cameras, currentGroupStreamingSettings]);
+  }, [cameras, currentGroupStreamingSettings, playbackCapabilities]);
 
   const {
     preferredLiveModes,

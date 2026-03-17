@@ -16,7 +16,7 @@ variable "COMPUTE_LEVEL" {
 variable "BASE_HOOK" {
   # Ensure an up-to-date python 3.11 is available in jetson images
   default = <<EOT
-if grep -iq \"ubuntu\" /etc/os-release; then
+if grep -iq "ubuntu" /etc/os-release; then
   . /etc/os-release
 
   # Add the deadsnakes PPA repository

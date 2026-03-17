@@ -44,6 +44,59 @@ class TestHttpMedia(BaseTestHttp):
         self.app.dependency_overrides.clear()
         super().tearDown()
 
+    def test_camera_recordings_variant_filter(self):
+        start_ts = datetime(2024, 3, 9, 12, 0, 0, tzinfo=timezone.utc).timestamp()
+        end_ts = start_ts + 3600
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="recording_main",
+                path="/media/recordings/front/main.mp4",
+                camera="front_door",
+                variant="main",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=3600,
+                motion=100,
+                objects=5,
+                codec_name="h264",
+                width=1920,
+                height=1080,
+                bitrate=4_000_000,
+            ).execute()
+            Recordings.insert(
+                id="recording_sub",
+                path="/media/recordings/front/sub.mp4",
+                camera="front_door",
+                variant="sub",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=3600,
+                motion=100,
+                objects=5,
+                codec_name="h264",
+                width=640,
+                height=360,
+                bitrate=512_000,
+            ).execute()
+
+            default_response = client.get(
+                "/front_door/recordings",
+                params={"after": start_ts, "before": end_ts},
+            )
+            assert default_response.status_code == 200
+            default_recordings = default_response.json()
+            assert len(default_recordings) == 1
+            assert default_recordings[0]["variant"] == "main"
+
+            all_response = client.get(
+                "/front_door/recordings",
+                params={"after": start_ts, "before": end_ts, "variant": "all"},
+            )
+            assert all_response.status_code == 200
+            variants = {recording["variant"] for recording in all_response.json()}
+            assert variants == {"main", "sub"}
+
     def test_recordings_summary_across_dst_spring_forward(self):
         """
         Test recordings summary across spring DST transition (spring forward).

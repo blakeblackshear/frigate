@@ -14,6 +14,18 @@ from frigate.record.maintainer import RecordingMaintainer  # noqa: E402
 
 
 class TestMaintainer(unittest.IsolatedAsyncioTestCase):
+    async def test_parse_cache_segment_supports_variant(self):
+        config = MagicMock(spec=FrigateConfig)
+        config.cameras = {}
+        stop_event = MagicMock()
+
+        maintainer = RecordingMaintainer(config, stop_event)
+        parsed = maintainer._parse_cache_segment("front@sub@20210101000000+0000.mp4")
+
+        self.assertIsNotNone(parsed)
+        self.assertEqual("front", parsed["camera"])
+        self.assertEqual("sub", parsed["variant"])
+
     async def test_move_files_survives_bad_filename(self):
         config = MagicMock(spec=FrigateConfig)
         config.cameras = {}

@@ -50,6 +50,8 @@ import { Toaster } from "@/components/ui/sonner";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
+import usePlaybackCapabilities from "@/hooks/use-playback-capabilities";
+import { chooseAutoLiveStream } from "@/utils/liveStreamSelection";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -96,6 +98,7 @@ export default function DraggableGridLayout({
   streamMetadata,
 }: DraggableGridLayoutProps) {
   const { t } = useTranslation(["views/live"]);
+  const playbackCapabilities = usePlaybackCapabilities([]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -588,7 +591,11 @@ export default function DraggableGridLayout({
                 grow = "aspect-video";
               }
               const availableStreams = camera.live.streams || {};
-              const firstStreamEntry = Object.values(availableStreams)[0] || "";
+              const firstStreamEntry = chooseAutoLiveStream(
+                availableStreams,
+                playbackCapabilities.estimatedBandwidthBps,
+                playbackCapabilities.saveData,
+              );
 
               const streamNameFromSettings =
                 currentGroupStreamingSettings?.[camera.name]?.streamName || "";
