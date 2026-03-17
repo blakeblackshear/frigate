@@ -122,7 +122,7 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 
 Each line represents a detection state, not necessarily unique individuals. Parentheses indicate object type or category, use only the name/label in your response, not the parentheses.
 
-**CRITICAL: When you see both recognized and unrecognized entries of the same type (e.g., "Joe (person)" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name (e.g., "Joe"). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
+**CRITICAL: When you see both recognized and unrecognized entries of the same type (e.g., "Joe ← person" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name (e.g., "Joe"). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
 
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
