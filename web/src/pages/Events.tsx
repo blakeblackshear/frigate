@@ -21,16 +21,24 @@ import {
   getBeginningOfDayTimestamp,
   getEndOfDayTimestamp,
 } from "@/utils/dateUtil";
+import {
+  parseRecordingReviewLink,
+  RECORDING_REVIEW_START_PARAM,
+} from "@/utils/recordingReviewUrl";
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 
 export default function Events() {
   const { t } = useTranslation(["views/events"]);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -127,6 +135,14 @@ export default function Events() {
   const [notificationTab, setNotificationTab] =
     useState<TimelineType>("timeline");
 
+  const getReviewDayBounds = useCallback((date: Date) => {
+    const now = Date.now() / 1000;
+    return {
+      after: getBeginningOfDayTimestamp(date),
+      before: Math.min(getEndOfDayTimestamp(date), now),
+    };
+  }, []);
+
   useSearchEffect("tab", (tab: string) => {
     if (tab === "timeline" || tab === "events" || tab === "detail") {
       setNotificationTab(tab as TimelineType);
@@ -142,10 +158,7 @@ export default function Events() {
           const startTime = resp.data.start_time - REVIEW_PADDING;
           const date = new Date(startTime * 1000);
 
-          setReviewFilter({
-            after: getBeginningOfDayTimestamp(date),
-            before: getEndOfDayTimestamp(date),
-          });
+          setReviewFilter(getReviewDayBounds(date));
           setRecording(
             {
               camera: resp.data.camera,
@@ -232,6 +245,56 @@ export default function Events() {
     },
     [recording, setRecording, setReviewFilter],
   );
+
+  useEffect(() => {
+    const timestamp = searchParams.get(RECORDING_REVIEW_START_PARAM);
+
+    if (!timestamp) {
+      return;
+    }
+
+    const camera = location.hash
+      ? decodeURIComponent(location.hash.substring(1))
+      : null;
+
+    const reviewLink = parseRecordingReviewLink(camera, timestamp);
+
+    if (!reviewLink) {
+      navigate(location.pathname + location.hash, {
+        state: location.state,
+        replace: true,
+      });
+      return;
+    }
+
+    const nextRecording = {
+      camera: reviewLink.camera,
+      startTime: reviewLink.timestamp,
+      severity: "alert" as const,
+    };
+
+    setReviewFilter({
+      ...reviewFilter,
+      ...getReviewDayBounds(new Date(reviewLink.timestamp * 1000)),
+    });
+
+    navigate(location.pathname + location.hash, {
+      state: {
+        ...location.state,
+        recording: nextRecording,
+      },
+      replace: true,
+    });
+  }, [
+    location.hash,
+    location.pathname,
+    location.state,
+    navigate,
+    getReviewDayBounds,
+    reviewFilter,
+    searchParams,
+    setReviewFilter,
+  ]);
 
   // review paging
 

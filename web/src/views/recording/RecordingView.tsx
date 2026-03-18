@@ -42,7 +42,8 @@ import {
   isTablet,
 } from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { LuCopy } from "react-icons/lu";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import { TimeRange, TimelineType } from "@/types/timeline";
@@ -77,6 +78,9 @@ import {
   GenAISummaryDialog,
   GenAISummaryChip,
 } from "@/components/overlay/chip/GenAISummaryChip";
+import copy from "copy-to-clipboard";
+import { toast } from "sonner";
+import { createRecordingReviewUrl } from "@/utils/recordingReviewUrl";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
 
@@ -107,6 +111,7 @@ export function RecordingView({
   const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
+  const location = useLocation();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // recordings summary
@@ -141,6 +146,7 @@ export function RecordingView({
       ? startTime
       : timeRange.before - 60,
   );
+  const lastAppliedStartTimeRef = useRef(startTime);
 
   const mainCameraReviewItems = useMemo(
     () => reviewItems?.filter((cam) => cam.camera == mainCamera) ?? [],
@@ -316,6 +322,28 @@ export function RecordingView({
     },
     [currentTimeRange, updateSelectedSegment],
   );
+
+  useEffect(() => {
+    if (lastAppliedStartTimeRef.current === startTime) {
+      return;
+    }
+
+    lastAppliedStartTimeRef.current = startTime;
+    setPlayerTime(startTime);
+    manuallySetCurrentTime(startTime);
+  }, [startTime, manuallySetCurrentTime]);
+
+  const onCopyReviewLink = useCallback(() => {
+    const reviewUrl = createRecordingReviewUrl(location.pathname, {
+      camera: mainCamera,
+      timestamp: Math.floor(currentTime),
+    });
+
+    copy(reviewUrl);
+    toast.success(t("toast.copyUrlToClipboard", { ns: "common" }), {
+      position: "top-center",
+    });
+  }, [location.pathname, mainCamera, currentTime, t]);
 
   useEffect(() => {
     if (!scrubbing) {
@@ -663,6 +691,19 @@ export function RecordingView({
                 setMotionOnly={() => {}}
               />
             )}
+            <Button
+              className="flex items-center gap-2.5 rounded-lg"
+              aria-label={t("button.copy", { ns: "common" })}
+              size="sm"
+              onClick={onCopyReviewLink}
+            >
+              <LuCopy className="size-4 text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {t("button.copy", { ns: "common" })}
+                </div>
+              )}
+            </Button>
             {isDesktop && (
               <ActionsDropdown
                 onDebugReplayClick={() => {
