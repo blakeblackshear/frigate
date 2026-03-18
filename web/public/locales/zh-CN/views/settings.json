@@ -7,12 +7,15 @@
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
     "motionTuner": "画面变动调整 - Frigate",
     "object": "调试 - Frigate",
-    "general": "页面设置 - Frigate",
+    "general": "配置文件设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
     "notifications": "通知设置 - Frigate",
     "enrichments": "增强功能设置 - Frigate",
     "cameraManagement": "管理摄像头 - Frigate",
-    "cameraReview": "摄像头核查设置 - Frigate"
+    "cameraReview": "摄像头核查设置 - Frigate",
+    "globalConfig": "全局配置 - Frigate",
+    "cameraConfig": "摄像头配置 - Frigate",
+    "maintenance": "维护 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -28,7 +31,63 @@
     "triggers": "触发器",
     "roles": "权限组",
     "cameraManagement": "管理",
-    "cameraReview": "核查"
+    "cameraReview": "核查",
+    "globalDetect": "目标检测",
+    "general": "常规",
+    "globalConfig": "全局配置",
+    "system": "系统",
+    "integrations": "集成",
+    "profileSettings": "配置文件设置",
+    "globalRecording": "录制",
+    "globalSnapshots": "快照",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "画面变动检测",
+    "globalObjects": "目标",
+    "globalReview": "核查",
+    "globalAudioEvents": "音频事件",
+    "globalLivePlayback": "实时回放",
+    "globalTimestampStyle": "时间戳样式",
+    "systemDatabase": "数据库",
+    "systemTls": "TLS加密链接",
+    "systemAuthentication": "验证",
+    "systemNetworking": "网络",
+    "systemProxy": "代理",
+    "systemUi": "界面",
+    "systemLogging": "日志",
+    "systemEnvironmentVariables": "环境变量",
+    "systemTelemetry": "遥测",
+    "systemBirdseye": "鸟瞰图",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "检测器硬件",
+    "systemDetectionModel": "检测模型",
+    "systemMqtt": "MQTT",
+    "integrationSemanticSearch": "语义搜索",
+    "integrationGenerativeAi": "生成式 AI",
+    "integrationFaceRecognition": "人脸识别",
+    "integrationLpr": "车牌识别",
+    "integrationObjectClassification": "目标分类",
+    "integrationAudioTranscription": "音频转录",
+    "cameraDetect": "目标检测",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "录制",
+    "cameraSnapshots": "快照",
+    "cameraMotion": "画面变动检测",
+    "cameraObjects": "目标",
+    "cameraConfigReview": "核查",
+    "cameraAudioEvents": "音频事件",
+    "cameraAudioTranscription": "音频转录",
+    "cameraNotifications": "通知",
+    "cameraLivePlayback": "实时回放",
+    "cameraBirdseye": "鸟瞰图",
+    "cameraFaceRecognition": "人脸识别",
+    "cameraLpr": "车牌识别",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "摄像头管理页面",
+    "cameraTimestampStyle": "时间戳样式",
+    "cameraMqtt": "摄像头 MQTT",
+    "mediaSync": "媒体同步",
+    "regionGrid": "区域网格"
   },
   "dialog": {
     "unsavedChanges": {
@@ -41,7 +100,7 @@
     "noCamera": "没有摄像头"
   },
   "general": {
-    "title": "页面设置",
+    "title": "配置文件设置",
     "liveDashboard": {
       "title": "实时监控面板",
       "automaticLiveView": {
@@ -350,6 +409,10 @@
       },
       "toast": {
         "success": "区域 ({{zoneName}}) 已保存。"
+      },
+      "enabled": {
+        "title": "开启",
+        "description": "指示该区域在配置文件中是否处于激活并启用的状态。若被停用，则无法通过 MQTT 启用。禁用的区域在运行时会被忽略。"
       }
     },
     "motionMasks": {
@@ -377,6 +440,12 @@
           "title": "{{polygonName}} 已保存。",
           "noName": "画面变动遮罩已保存。"
         }
+      },
+      "defaultName": "画面变动遮罩 {{number}}",
+      "name": {
+        "title": "名称",
+        "description": "为该画面变动遮罩设置别名（可选）。",
+        "placeholder": "输入名称…"
       }
     },
     "objectMasks": {
@@ -401,11 +470,23 @@
           "title": "{{polygonName}} 已保存。",
           "noName": "目标遮罩已保存。"
         }
+      },
+      "name": {
+        "title": "名称",
+        "description": "为该目标遮罩设置别名（可选）。",
+        "placeholder": "输入名称…"
       }
     },
     "restart_required": "需要重启（遮罩与区域已修改）",
     "motionMaskLabel": "画面变动遮罩 {{number}}",
-    "objectMaskLabel": "目标/物体遮罩 {{number}}（{{label}}）"
+    "objectMaskLabel": "目标/物体遮罩 {{number}}",
+    "disabledInConfig": "该项目已在配置文件中被禁用",
+    "masks": {
+      "enabled": {
+        "title": "开启",
+        "description": "指示该遮罩在配置文件中是否处于激活并启用的状态。若被禁用，则无法通过 MQTT 启用。禁用的遮罩在运行时会被忽略。"
+      }
+    }
   },
   "motionDetectionTuner": {
     "title": "画面变动检测调整",
@@ -517,7 +598,7 @@
       "actions": "操作",
       "role": "权限组",
       "noUsers": "未找到用户。",
-      "changeRole": "更改用户角色",
+      "changeRole": "更改用户权限组",
       "password": "修改密码",
       "deleteUser": "删除用户"
     },
@@ -570,7 +651,7 @@
       },
       "createUser": {
         "title": "创建新用户",
-        "desc": "创建一个新用户账户，并指定一个角色以控制访问 Frigate UI 的权限。",
+        "desc": "创建一个新用户账户，并指定一个权限组以控制访问 Frigate 页面的权限。",
         "usernameOnlyInclude": "用户名只能包含字母、数字和 _",
         "confirmPassword": "请确认你的密码"
       },
@@ -704,7 +785,14 @@
       "error": "配置更改保存失败：{{errorMessage}}"
     },
     "restart_required": "需要重启（Frigate+模型已修改）",
-    "unsavedChanges": "未保存Frigate+变更设置"
+    "unsavedChanges": "未保存Frigate+变更设置",
+    "description": "Frigate+ 是一项订阅服务，可为你的 Frigate 实例提供额外的功能和能力，包括使用基于你自己的数据训练的自定义目标检测模型。你可以在此管理 Frigate+ 的模型设置。",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "当前模型",
+      "otherModels": "其他模型",
+      "configuration": "配置"
+    }
   },
   "enrichments": {
     "title": "增强功能设置",
@@ -934,7 +1022,7 @@
       },
       "deleteRole": {
         "title": "删除权限组",
-        "desc": "此操作无法撤销。这将永久删除该权限组，并将所有拥有此角色的用户分配到 “成员” 权限组，该权限组将赋予用户查看所有摄像头的权限。",
+        "desc": "此操作无法撤销。这将永久删除该权限组，并将所有拥有此权限组的用户分配到 “成员” （view）权限组，该权限组将赋予用户查看所有摄像头的权限。",
         "warn": "你确定要删除权限组 <strong>{{role}}</strong> 吗？",
         "deleting": "删除中…"
       },
@@ -1050,8 +1138,8 @@
         "audio": "音频"
       },
       "testStream": "测试连接",
-      "testSuccess": "连接测试通过！",
-      "testFailed": "连接测试失败，请检查输入项后重试。",
+      "testSuccess": "视频流测试成功！",
+      "testFailed": "视频流测试失败",
       "testFailedTitle": "测试失败",
       "connected": "已连接",
       "notConnected": "未连接",
@@ -1239,7 +1327,12 @@
     "backToSettings": "返回摄像头设置",
     "streams": {
       "title": "开启或关闭摄像头",
-      "desc": "将临时禁用摄像头，直到 Frigate 重启。禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：go2rtc 的转流服务不受影响。</em>"
+      "desc": "将临时禁用摄像头，直到 Frigate 重启。禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：go2rtc 的转流服务不受影响。</em>",
+      "enableLabel": "开启摄像头",
+      "enableDesc": "暂时禁用已开启的摄像头，直到 Frigate 重启。禁用摄像头会完全停止 Frigate 对该摄像头视频流的处理。检测、录像和调试功能将不可用。<br /> <em>注意：这不会禁用 go2rtc 的转推流。</em>",
+      "disableLabel": "关闭摄像头",
+      "disableDesc": "开启在当前在界面中不可见且在配置中被禁用的摄像头。启用后需要重启 Frigate 才能生效。",
+      "enableSuccess": "已在配置中启用 {{cameraName}}。请重启 Frigate 以应用更改。"
     },
     "cameraConfig": {
       "add": "添加摄像头",
@@ -1269,6 +1362,18 @@
       "toast": {
         "success": "摄像头 {{cameraName}} 已保存"
       }
+    },
+    "deleteCamera": "删除摄像头",
+    "deleteCameraDialog": {
+      "title": "删除摄像头",
+      "description": "删除摄像头将永久移除该摄像头的所有录像、跟踪目标以及配置。任何与该摄像头关联的 go2rtc 流可能仍需手动删除。",
+      "selectPlaceholder": "选择摄像头…",
+      "confirmTitle": "你确定吗？",
+      "confirmWarning": "删除 <strong>{{cameraName}}</strong> 后将无法撤销。",
+      "deleteExports": "同时删除该摄像头导出的视频",
+      "confirmButton": "永久删除",
+      "success": "摄像头 {{cameraName}} 删除完成",
+      "error": "删除摄像头 {{cameraName}} 失败"
     }
   },
   "cameraReview": {
@@ -1307,5 +1412,261 @@
         "success": "核查分类设置已保存，重启后生效。"
       }
     }
-  }
+  },
+  "saveAllPreview": {
+    "title": "未保存的更改",
+    "triggerLabel": "查看待处理的更改",
+    "empty": "没有待处理的更改。",
+    "scope": {
+      "label": "作用范围",
+      "global": "全局",
+      "camera": "摄像头：{{cameraName}}"
+    },
+    "field": {
+      "label": "字段"
+    },
+    "value": {
+      "label": "新值",
+      "reset": "重置"
+    }
+  },
+  "detectionModel": {
+    "plusActive": {
+      "title": "Frigate+ 模型管理",
+      "label": "当前模型来源",
+      "description": "此实例正在运行 Frigate+ 模型。请在 Frigate+ 设置中选择或更改您的模型。",
+      "goToFrigatePlus": "前往 Frigate+ 设置",
+      "showModelForm": "手动配置模型"
+    }
+  },
+  "configForm": {
+    "sections": {
+      "semantic_search": "语义搜索",
+      "model": "模型",
+      "detect": "检测",
+      "record": "录制",
+      "snapshots": "快照",
+      "motion": "画面变动",
+      "objects": "目标",
+      "review": "核查",
+      "audio": "音频",
+      "notifications": "通知",
+      "live": "实时查看",
+      "timestamp_style": "时间戳",
+      "mqtt": "MQTT",
+      "database": "数据库",
+      "telemetry": "遥测",
+      "auth": "身份验证",
+      "tls": "TLS",
+      "proxy": "代理",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "检测器",
+      "genai": "生成式 AI",
+      "face_recognition": "人脸识别",
+      "lpr": "车牌识别",
+      "birdseye": "鸟瞰图"
+    },
+    "global": {
+      "title": "全局设置",
+      "description": "这些设置适用于所有摄像头，除非在摄像头特定设置中被覆盖。"
+    },
+    "camera": {
+      "title": "摄像头设置",
+      "description": "这些设置仅适用于此摄像头，并会覆盖全局设置。"
+    },
+    "advancedSettingsCount": "高级设置 ({{count}})",
+    "advancedCount": "高级选项 ({{count}})",
+    "additionalProperties": {
+      "keyLabel": "键",
+      "valueLabel": "值",
+      "keyPlaceholder": "新键名",
+      "remove": "移除"
+    },
+    "roleMap": {
+      "empty": "未配置角色映射。",
+      "addMapping": "添加角色映射",
+      "roleLabel": "角色",
+      "groupsLabel": "用户组",
+      "remove": "移除"
+    },
+    "ffmpegArgs": {
+      "preset": "预设",
+      "manual": "手动参数",
+      "inherit": "继承摄像头设置",
+      "selectPreset": "选择预设",
+      "manualPlaceholder": "输入 FFmpeg 参数"
+    },
+    "cameraInputs": {
+      "itemTitle": "视频流 {{index}}"
+    },
+    "restartRequiredField": "需要重启",
+    "restartRequiredFooter": "配置已更改 - 需要重启",
+    "detect": {
+      "title": "检测设置"
+    },
+    "detectors": {
+      "title": "检测器设置",
+      "singleType": "只允许一个 {{type}} 检测器。",
+      "keyRequired": "检测器名称为必填项。",
+      "keyDuplicate": "检测器名称已存在。",
+      "noSchema": "没有可用的检测器架构。",
+      "none": "未配置检测器实例。",
+      "add": "添加检测器"
+    },
+    "record": {
+      "title": "录制设置"
+    },
+    "snapshots": {
+      "title": "快照设置"
+    },
+    "motion": {
+      "title": "画面变动设置"
+    },
+    "objects": {
+      "title": "目标设置"
+    },
+    "audioLabels": {
+      "summary": "已选择 {{count}} 个音频标签",
+      "empty": "无可用音频标签"
+    },
+    "objectLabels": {
+      "summary": "已选择 {{count}} 个目标类型",
+      "empty": "无可用目标标签"
+    },
+    "filters": {
+      "objectFieldLabel": "{{label}} 的 {{field}}"
+    },
+    "inputRoles": {
+      "summary": "已选择 {{count}} 个功能",
+      "empty": "无可用功能",
+      "options": {
+        "detect": "检测",
+        "record": "录制",
+        "audio": "音频"
+      }
+    },
+    "review": {
+      "title": "核查设置"
+    },
+    "audio": {
+      "title": "音频设置"
+    },
+    "notifications": {
+      "title": "通知设置"
+    },
+    "live": {
+      "title": "实时查看设置"
+    },
+    "showAdvanced": "显示高级设置",
+    "tabs": {
+      "sharedDefaults": "共享默认值",
+      "system": "系统",
+      "integrations": "集成"
+    },
+    "timezone": {
+      "defaultOption": "使用浏览器时区"
+    },
+    "zoneNames": {
+      "summary": "已选择 {{count}} 个",
+      "empty": "没有可用的区域"
+    },
+    "timestamp_style": {
+      "title": "时间戳设置"
+    },
+    "searchPlaceholder": "搜索…"
+  },
+  "cameraConfig": {
+    "title": "摄像头配置",
+    "description": "配置单个摄像头的设置。这些设置会覆盖全局默认值。",
+    "overriddenBadge": "已覆盖",
+    "resetToGlobal": "重置为全局设置",
+    "toast": {
+      "success": "摄像头设置保存成功",
+      "error": "保存摄像头设置失败"
+    }
+  },
+  "maintenance": {
+    "title": "维护",
+    "sync": {
+      "title": "媒体同步",
+      "desc": "Frigate 会根据您的保留配置定期清理媒体文件。出现少量孤立文件是正常现象。使用此功能可以删除磁盘上不再被数据库引用的孤立媒体文件。",
+      "started": "媒体同步已启动。",
+      "alreadyRunning": "同步任务已在运行中",
+      "error": "启动同步失败",
+      "currentStatus": "状态",
+      "jobId": "任务 ID",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "statusLabel": "状态",
+      "results": "结果",
+      "errorLabel": "错误",
+      "mediaTypes": "媒体类型",
+      "allMedia": "所有媒体",
+      "dryRun": "试运行",
+      "dryRunEnabled": "不会删除任何文件",
+      "dryRunDisabled": "将删除文件",
+      "force": "强制执行",
+      "forceDesc": "绕过安全阈值，即使删除超过 50% 的文件也完成同步。",
+      "running": "同步运行中…",
+      "start": "开始同步",
+      "inProgress": "同步正在进行中。此页面已禁用。",
+      "status": {
+        "queued": "已排队",
+        "running": "运行中",
+        "completed": "已完成",
+        "failed": "失败",
+        "notRunning": "未运行"
+      },
+      "resultsFields": {
+        "filesChecked": "已检查文件",
+        "orphansFound": "发现孤立文件",
+        "orphansDeleted": "已删除孤立文件",
+        "aborted": "已中止。删除操作将超过安全阈值。",
+        "error": "错误",
+        "totals": "总计"
+      },
+      "event_snapshots": "追踪目标快照",
+      "event_thumbnails": "追踪目标缩略图",
+      "review_thumbnails": "核查缩略图",
+      "previews": "预览",
+      "exports": "导出",
+      "recordings": "录像"
+    },
+    "regionGrid": {
+      "title": "区域网格",
+      "desc": "区域网格是一种优化功能，它会学习不同大小的目标通常出现在每个摄像头视野中的位置。Frigate 利用这些数据来高效地确定检测区域的大小。该网格会根据追踪目标数据自动构建。",
+      "clear": "清除区域网格",
+      "clearConfirmTitle": "清除区域网格",
+      "clearConfirmDesc": "除非您最近更改了检测器模型大小或摄像头的物理位置，并且遇到了目标追踪问题，否则不建议清除区域网格。网格会随着目标的追踪自动重建。更改需要重启 Frigate 才能生效。",
+      "clearSuccess": "区域网格清除成功",
+      "clearError": "清除区域网格失败",
+      "restartRequired": "需要重启以使区域网格更改生效"
+    }
+  },
+  "globalConfig": {
+    "title": "全局配置",
+    "description": "配置适用于所有摄像头的全局设置，除非被单独覆盖。",
+    "toast": {
+      "success": "全局设置保存成功",
+      "error": "保存全局设置失败",
+      "validationError": "验证失败"
+    }
+  },
+  "toast": {
+    "success": "设置保存成功",
+    "applied": "设置应用成功",
+    "successRestartRequired": "设置保存成功。请重启 Frigate 以应用更改。",
+    "error": "保存设置失败",
+    "validationError": "验证失败：{{message}}",
+    "resetSuccess": "已重置为全局默认值",
+    "resetError": "重置设置失败",
+    "saveAllSuccess_other": "所有 {{count}} 个部分保存成功。",
+    "saveAllPartial_other": "已保存 {{successCount}} / {{totalCount}} 个部分。{{failCount}} 个失败。",
+    "saveAllFailure": "保存所有部分失败。"
+  },
+  "unsavedChanges": "您有未保存的更改",
+  "confirmReset": "确认重置",
+  "resetToDefaultDescription": "这将把此部分的所有设置重置为默认值。此操作无法撤销。",
+  "resetToGlobalDescription": "这将把此部分的设置重置为全局默认值。此操作无法撤销。"
 }

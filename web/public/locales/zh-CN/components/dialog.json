@@ -71,6 +71,10 @@
     "fromTimeline": {
       "saveExport": "保存导出",
       "previewExport": "预览导出"
+    },
+    "case": {
+      "label": "合集",
+      "placeholder": "选择合集"
     }
   },
   "streaming": {
