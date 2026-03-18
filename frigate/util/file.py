@@ -37,10 +37,6 @@ def get_event_snapshot(event: Event) -> ndarray | None:
     return image
 
 
-def _event_snapshot_is_clean(event: Event) -> bool:
-    return bool(event.data and event.data.get("snapshot_clean"))
-
-
 def get_event_snapshot_path(
     event: Event, *, clean_only: bool = False
 ) -> tuple[str | None, bool]:
@@ -57,11 +53,12 @@ def get_event_snapshot_path(
     if not os.path.exists(snapshot_path):
         return None, False
 
-    is_clean_snapshot = _event_snapshot_is_clean(event)
-    if clean_only and not is_clean_snapshot:
+    # Legacy JPG snapshots may already include overlays, so they should never
+    # be treated as clean input for additional rendering.
+    if clean_only:
         return None, False
 
-    return snapshot_path, is_clean_snapshot
+    return snapshot_path, False
 
 
 def load_event_snapshot_image(
