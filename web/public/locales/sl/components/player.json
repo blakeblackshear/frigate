@@ -1,15 +1,15 @@
 {
-  "noRecordingsFoundForThisTime": "Posnetki niso bili najdeni",
-  "noPreviewFound": "Predogled ni bil najden",
-  "noPreviewFoundFor": "Predogled za {{cameraName}} ni na voljo",
+  "noRecordingsFoundForThisTime": "Za ta čas ni bilo najdenih posnetkov",
+  "noPreviewFound": "Predogleda ni mogoče najti",
+  "noPreviewFoundFor": "Za kamero {{cameraName}} ni predogleda",
   "submitFrigatePlus": {
-    "title": "Želite poslati ta okvir na Frigate+?",
+    "title": "Želiš poslati ta okvir v Frigate+?",
     "submit": "Pošlji"
   },
   "stats": {
     "streamType": {
-      "title": "Tip pretoka:",
-      "short": "Tip"
+      "title": "Vrsta toka:",
+      "short": "Vrsta"
     },
     "bandwidth": {
       "title": "Pasovna širina:",
@@ -23,29 +23,29 @@
         "title": "Zakasnitev"
       }
     },
-    "totalFrames": "Skupno število sličic:",
+    "totalFrames": "Skupno število slik:",
     "droppedFrames": {
-      "title": "Izpuščene sličice:",
+      "title": "Izpuščene slike:",
       "short": {
         "title": "Izpuščeno",
-        "value": "{{droppedFrames}} sličic"
+        "value": "{{droppedFrames}} slik"
       }
     },
-    "decodedFrames": "Dekodirane sličice:",
-    "droppedFrameRate": "Stopnja izpuščenih sličic:"
+    "decodedFrames": "Dekodirane slike:",
+    "droppedFrameRate": "Stopnja izpuščenih slik:"
   },
-  "livePlayerRequiredIOSVersion": "iOS 17.1 je zahteven za ta tip pretoka.",
+  "livePlayerRequiredIOSVersion": "Za to vrsto prenosa v živo potrebuješ iOS 17.1 ali novejši.",
   "streamOffline": {
-    "title": "Pretok ni na voljo",
-    "desc": "Na toku <code>detect</code> kamere {{cameraName}} ni bilo prejetih nobenih sličic, preverite dnevnik napak"
+    "title": "Tok ni povezan",
+    "desc": "Pretok <code>detect</code> za kamero {{cameraName}} ne prejema slik, preveri dnevnike napak."
   },
   "cameraDisabled": "Kamera je onemogočena",
   "toast": {
     "success": {
-      "submittedFrigatePlus": "Sličica je bila uspešno poslana v Frigate+"
+      "submittedFrigatePlus": "Okvir je bil uspešno poslan v Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Pošiljanje sličice v Frigate+ ni uspelo"
+      "submitFrigatePlusFailed": "Napaka pri pošiljanju okvirja v Frigate+"
     }
   }
 }
