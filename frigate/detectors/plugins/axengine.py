@@ -3,7 +3,7 @@ import os.path
 import re
 import urllib.request
 from typing import Literal
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict
 
 import axengine as axe
 
