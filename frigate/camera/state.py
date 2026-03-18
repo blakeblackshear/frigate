@@ -546,33 +546,6 @@ class CameraState:
             ) as p:
                 p.write(webp.tobytes())
 
-        # write jpg snapshot with optional annotations
-        if draw.get("boxes") and isinstance(draw.get("boxes"), list):
-            for box in draw.get("boxes"):
-                x = int(box["box"][0] * self.camera_config.detect.width)
-                y = int(box["box"][1] * self.camera_config.detect.height)
-                width = int(box["box"][2] * self.camera_config.detect.width)
-                height = int(box["box"][3] * self.camera_config.detect.height)
-
-                draw_box_with_label(
-                    img_frame,
-                    x,
-                    y,
-                    x + width,
-                    y + height,
-                    label,
-                    f"{box.get('score', '-')}% {int(width * height)}",
-                    thickness=2,
-                    color=box.get("color", (255, 0, 0)),
-                )
-
-        ret, jpg = cv2.imencode(".jpg", img_frame)
-        with open(
-            os.path.join(CLIPS_DIR, f"{self.camera_config.name}-{event_id}.jpg"),
-            "wb",
-        ) as j:
-            j.write(jpg.tobytes())
-
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)

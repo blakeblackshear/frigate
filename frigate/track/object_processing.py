@@ -548,6 +548,7 @@ class TrackedObjectProcessor(threading.Thread):
                     and include_recording,
                     "has_snapshot": True,
                     "snapshot_clean": True,
+                    "snapshot_frame_time": frame_time,
                     "type": source_type,
                     "draw": draw,
                 },
