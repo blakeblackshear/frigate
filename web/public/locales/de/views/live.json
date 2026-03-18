@@ -74,7 +74,7 @@
     "disable": "Stream-Statistiken ausblenden"
   },
   "manualRecording": {
-    "title": "On-Demand",
+    "title": "auf Verlangen",
     "showStats": {
       "label": "Statistiken anzeigen",
       "desc": "Aktivieren Sie diese Option, um Stream-Statistiken als Overlay über dem Kamera-Feed anzuzeigen."

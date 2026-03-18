@@ -2,7 +2,7 @@
   "time": {
     "untilForTime": "Bis {{time}}",
     "last7": "Letzte 7 Tage",
-    "untilForRestart": "Bis Frigate neu startet.",
+    "untilForRestart": "Bis Frigate neu startet ist.",
     "today": "Heute",
     "yesterday": "Gestern",
     "thisWeek": "Diese Woche",
@@ -42,7 +42,7 @@
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
-    "mo": "{{time}} Mon.",
+    "mo": "{{time}} Mon",
     "formattedTimestamp": {
       "12hour": "d. MMM, hh:mm:ss aaa",
       "24hour": "dd. MMM, hh:mm:ss aaa"
@@ -100,7 +100,7 @@
     "back": "Zurück",
     "history": "Historie",
     "cameraAudio": "Kamera Ton",
-    "yes": "JA",
+    "yes": "Ja",
     "info": "Info",
     "play": "Abspielen",
     "export": "Exportieren",
@@ -246,7 +246,9 @@
     },
     "uiPlayground": "Testgebiet für Benutzeroberfläche",
     "export": "Exportieren",
-    "classification": "Klassifizierung"
+    "classification": "Klassifizierung",
+    "actions": "Aktion",
+    "chat": "Chat"
   },
   "unit": {
     "speed": {
