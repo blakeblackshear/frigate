@@ -319,7 +319,9 @@ class OnvifController:
             self.cams[camera_name]["absolute_move_request"] = move_request
 
         except (Fault, ONVIFError, TransportError, Exception) as e:
-            logger.debug(f"PTZ configuration options not available for {camera_name}: {e}")
+            logger.debug(
+                f"PTZ configuration options not available for {camera_name}: {e}"
+            )
 
         # setup existing presets
         try:
@@ -541,13 +543,10 @@ class OnvifController:
         move_request.Translation.PanTilt.x = pan
         move_request.Translation.PanTilt.y = tilt
 
-        if (
-            "zoom-r" in self.cams[camera_name]["features"]
-            and (
-                zoom != 0
-                or self.config.cameras[camera_name].onvif.autotracking.zooming
-                == ZoomingModeEnum.relative
-            )
+        if "zoom-r" in self.cams[camera_name]["features"] and (
+            zoom != 0
+            or self.config.cameras[camera_name].onvif.autotracking.zooming
+            == ZoomingModeEnum.relative
         ):
             try:
                 move_request.Speed = {
