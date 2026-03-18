@@ -1,1 +1,11 @@
-{}
+{
+    "label": "CameraConfig",
+    "name": {
+        "label": "Tên máy ảnh",
+        "description": "Tên camera là bắt buộc"
+    },
+    "friendly_name": {
+        "label": "Tên thân thiện",
+        "description": "Tên hiển thị thân thiện với camera được sử dụng trong giao diện người dùng Frigate"
+    }
+}

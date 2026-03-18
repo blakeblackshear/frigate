@@ -3,11 +3,12 @@
   "description": {
     "addFace": "Thêm một bộ sưu tập mới vào Thư viện Khuôn Mặt bằng cách tải lên hình ảnh đầu tiên của bạn.",
     "invalidName": "Tên không hợp lệ. Tên chỉ được phép chứa chữ cái, số, khoảng trắng, dấu nháy đơn, dấu gạch dưới và dấu gạch ngang.",
-    "placeholder": "Nhập tên cho bộ sưu tập này"
+    "placeholder": "Nhập tên cho bộ sưu tập này",
+    "nameCannotContainHash": "Tên không được chứa ký tự #."
   },
   "details": {
     "person": "Người",
-    "unknown": "Không xác định",
+    "unknown": "Không rõ",
     "subLabelScore": "Điểm nhãn phụ",
     "scoreInfo": "Điểm nhãn phụ là điểm số có trọng số cho tất cả các độ tin cậy của khuôn mặt được nhận dạng, vì vậy điểm này có thể khác với điểm hiển thị trên ảnh chụp nhanh.",
     "timestamp": "Dấu thời gian",
