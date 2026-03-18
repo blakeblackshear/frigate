@@ -37,20 +37,6 @@ def get_event_snapshot(event: Event) -> ndarray | None:
     return image
 
 
-def _load_snapshot_image(image_path: str) -> ndarray | None:
-    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-    if image is None:
-        return None
-
-    if len(image.shape) == 2:
-        return cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-
-    if len(image.shape) == 3 and image.shape[2] == 4:
-        return cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
-
-    return image
-
-
 def _event_snapshot_is_clean(event: Event) -> bool:
     return bool(event.data and event.data.get("snapshot_clean"))
 
@@ -87,7 +73,7 @@ def load_event_snapshot_image(
     if image_path is None:
         return None, False
 
-    image = _load_snapshot_image(image_path)
+    image = cv2.imread(image_path)
     if image is None:
         logger.warning("Unable to load snapshot from %s", image_path)
         return None, False
