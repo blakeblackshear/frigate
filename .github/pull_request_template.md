@@ -1,7 +1,9 @@
-*Please read the [contributing guidelines](https://github.com/blakeblackshear/frigate/blob/dev/CONTRIBUTING.md) before submitting a PR.*
+_Please read the [contributing guidelines](https://github.com/blakeblackshear/frigate/blob/dev/CONTRIBUTING.md) before submitting a PR._
 
 ## Proposed change
 <!--
+  Thank you!
+
   Describe what this pull request does and how it will benefit users of Frigate.
   Please describe in detail any considerations, breaking changes, etc.
 
@@ -9,7 +11,6 @@
   we encourage you to start a discussion first. This helps ensure your idea aligns with
   Frigate's development goals.
 -->
-
 
 ## Type of change
 
