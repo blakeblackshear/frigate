@@ -1,3 +1,11 @@
 {
-    "minimum": "Doit être au minimum {{limit}}"
+    "minimum": "Doit être au minimum {{limit}}",
+    "maximum": "Ne doit pas dépasser {{limit}}",
+    "exclusiveMinimum": "Doit être supérieur à {{limit}}",
+    "exclusiveMaximum": "Doit être inférieur à {{limit}}",
+    "minLength": "Doit contenir au moins {{limit}} caractère(s)",
+    "maxLength": "Doit contenir au maximum {{limit}} caractère(s)",
+    "minItems": "Doit contenir au moins {{limit}} élément(s)",
+    "maxItems": "Doit contenir au maximum {{limit}} élément(s)",
+    "pattern": "Format incorrect"
 }
