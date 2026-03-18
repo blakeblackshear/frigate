@@ -3,7 +3,7 @@
     "cameras": "카메라 통계 - Frigate",
     "storage": "저장소 통계 - Frigate",
     "general": "기본 통계 - Frigate",
-    "enrichments": "고급 통계 - Frigate",
+    "enrichments": "데이터 보강 통계 - Frigate",
     "logs": {
       "frigate": "Frigate 로그 -Frigate",
       "go2rtc": "Go2RTC 로그 - Frigate",
@@ -160,14 +160,14 @@
     "ffmpegHighCpuUsage": "{{camera}} FFmpeg CPU 사용량이 높습니다 ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} 감지 CPU 사용량이 높습니다 ({{detectAvg}}%)",
     "healthy": "시스템 정상",
-    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
+    "reindexingEmbeddings": "검색 데이터 재정리 중 ({{processed}}% 완료)",
     "cameraIsOffline": "{{camera}} 오프라인입니다",
     "detectIsSlow": "{{detect}} (이/가) 느립니다 ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} (이/가) 매우 느립니다 ({{speed}} ms)",
     "shmTooLow": "/dev/shm 할당량을 ({{total}} MB) 최소 {{min}} MB 이상 증가시켜야합니다."
   },
   "enrichments": {
-    "title": "추가 분석 정보",
+    "title": "데이터 보강",
     "infPerSecond": "초당 추론 속도",
     "embeddings": {
       "image_embedding": "이미지 임베딩",

@@ -2,14 +2,16 @@
   "description": {
     "placeholder": "이 모음집의 이름을 입력해주세요",
     "addFace": "안면인식 라이브러리에서 첫 사진을 업로드해 새로운 컬렉션을 만들어보세요.",
-    "invalidName": "잘못된 이름입니다. 이름은 문자, 숫자, 공백, 따옴표 ('), 밑줄 (_), 그리고 붙임표 (-)만 포함이 가능합니다."
+    "invalidName": "잘못된 이름입니다. 이름은 문자, 숫자, 공백, 따옴표 ('), 밑줄 (_), 그리고 붙임표 (-)만 포함이 가능합니다.",
+    "nameCannotContainHash": "이름에 #을 포함할 수 없습니다."
   },
   "details": {
     "person": "사람",
     "subLabelScore": "보조 레이블 신뢰도",
     "face": "얼굴 상세정보",
     "timestamp": "시간 기록",
-    "unknown": "알 수 없음"
+    "unknown": "알 수 없음",
+    "scoreInfo": "점수는 각 이미지에서 얼굴의 크기를 가중치로 적용하여 모든 얼굴 점수의 평균을 낸 값입니다."
   },
   "selectItem": "{{item}} 선택",
   "documentTitle": "얼굴 라이브러리 - Frigate",
@@ -69,7 +71,7 @@
       "deletedFace_other": "{{count}} 얼굴을 성공적으로 삭제했습니다.",
       "renamedFace": "얼굴 이름을 {{name}} 으로 성공적으로 바꿨습니다",
       "trainedFace": "얼굴 훈련을 성공적으로 마쳤습니다.",
-      "updatedFaceScore": "얼굴 신뢰도를 성공적으로 업데이트 했습니다."
+      "updatedFaceScore": "{{name}} 얼굴 점수 업데이트 성공 {{score}}."
     },
     "error": {
       "uploadingImageFailed": "이미지 업로드 실패:{{errorMessage}}",

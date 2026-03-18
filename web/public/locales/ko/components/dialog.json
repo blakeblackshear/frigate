@@ -12,7 +12,8 @@
   "explore": {
     "plus": {
       "submitToPlus": {
-        "label": "Frigate+에 등록하기"
+        "label": "Frigate+에 등록하기",
+        "desc": "제외하려는 위치에서 감지된 객체는 '오감지(False Positive)'가 아닙니다. 이를 오감지로 제출하면 모델 학습에 혼선을 줄 수 있습니다."
       },
       "review": {
         "question": {
@@ -62,6 +63,10 @@
     "fromTimeline": {
       "saveExport": "내보내기 저장",
       "previewExport": "내보내기 미리보기"
+    },
+    "case": {
+      "label": "유형",
+      "placeholder": "유형 선택"
     }
   },
   "streaming": {
@@ -106,7 +111,16 @@
     "button": {
       "export": "내보내기",
       "markAsReviewed": "검토 완료로 표시",
-      "markAsUnreviewed": "검토 안 함 표시"
+      "markAsUnreviewed": "검토 안 함 표시",
+      "deleteNow": "지금 삭제"
     }
+  },
+  "imagePicker": {
+    "selectImage": "추적된 객체의 썸네일을 선택하세요",
+    "unknownLabel": "저장된 트리거 이미지",
+    "search": {
+      "placeholder": "레이블 또는 서브 레이블로 검색..."
+    },
+    "noImages": "표시할 썸네일이 없습니다"
   }
 }
