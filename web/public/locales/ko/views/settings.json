@@ -25,15 +25,18 @@
     "default": "설정 - Frigate",
     "authentication": "인증 설정 - Frigate",
     "camera": "카메라 설정 - Frigate",
-    "enrichments": "고급 설정 - Frigate",
+    "enrichments": "데이터 보강 설정 - Frigate",
     "masksAndZones": "마스크와 구역 편집기 - Frigate",
     "motionTuner": "움직임 감지 조정 - Frigate",
     "object": "디버그 - Frigate",
-    "general": "일반 설정 - Frigate",
+    "general": "프로필 설정 - Frigate",
     "frigatePlus": "Frigate+ 설정 - Frigate",
     "notifications": "알림 설정 - Frigate",
     "cameraManagement": "카메라 관리 - Frigate",
-    "cameraReview": "카메라 다시보기 설정 - Frigate"
+    "cameraReview": "카메라 다시보기 설정 - Frigate",
+    "globalConfig": "전체 설정 - Frigate",
+    "cameraConfig": "카메라 설정 - Frigate",
+    "maintenance": "유지 관리 - Frigate"
   },
   "users": {
     "table": {
@@ -42,7 +45,7 @@
   },
   "menu": {
     "ui": "UI",
-    "enrichments": "고급",
+    "enrichments": "데이터 보강",
     "cameras": "카메라 설정",
     "masksAndZones": "마스크 / 구역",
     "motionTuner": "움직임 감지 조정",
@@ -53,7 +56,63 @@
     "notifications": "알림",
     "frigateplus": "Frigate+",
     "cameraManagement": "관리",
-    "cameraReview": "다시보기"
+    "cameraReview": "다시보기",
+    "general": "일반",
+    "globalConfig": "전체 설정",
+    "system": "시스템",
+    "integrations": "연동",
+    "profileSettings": "프로필 설정",
+    "globalDetect": "객체 감지",
+    "globalRecording": "녹화",
+    "globalSnapshots": "스냅샷",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "동적 감지",
+    "globalObjects": "객체",
+    "globalReview": "리뷰",
+    "globalAudioEvents": "오디오 이벤트",
+    "globalLivePlayback": "실시간 재생",
+    "globalTimestampStyle": "타임스탬프 스타일",
+    "systemDatabase": "데이터베이스",
+    "systemTls": "TLS",
+    "systemAuthentication": "인증",
+    "systemNetworking": "네트워크",
+    "systemProxy": "프록시",
+    "systemUi": "UI",
+    "systemLogging": "로그",
+    "systemEnvironmentVariables": "환경 변수",
+    "systemTelemetry": "시스템 통계",
+    "systemBirdseye": "전체 상황 보기",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "감지기 하드웨어",
+    "systemDetectionModel": "감지 모델",
+    "systemMqtt": "MQTT",
+    "integrationSemanticSearch": "의미론적 검색",
+    "integrationGenerativeAi": "생성형 AI",
+    "integrationFaceRecognition": "얼굴 인식",
+    "integrationLpr": "번호판 인식",
+    "integrationObjectClassification": "객체 분류",
+    "integrationAudioTranscription": "오디오 전사",
+    "cameraDetect": "객체 감지",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "녹화",
+    "cameraSnapshots": "스냅샷",
+    "cameraMotion": "동적 감지",
+    "cameraObjects": "객체",
+    "cameraConfigReview": "리뷰",
+    "cameraAudioEvents": "오디오 이벤트",
+    "cameraAudioTranscription": "오디오 전사",
+    "cameraNotifications": "알림",
+    "cameraLivePlayback": "실시간 재생",
+    "cameraBirdseye": "전체 상황",
+    "cameraFaceRecognition": "얼굴 인식",
+    "cameraLpr": "번호판 인식",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "카메라 UI",
+    "cameraTimestampStyle": "타임스탬프 스타일",
+    "cameraMqtt": "카메라 MQTT",
+    "mediaSync": "미디어 동기화",
+    "regionGrid": "영역 격자"
   },
   "dialog": {
     "unsavedChanges": {
@@ -66,16 +125,24 @@
     "noCamera": "카메라 없음"
   },
   "general": {
-    "title": "일반 세팅",
+    "title": "프로필 설정",
     "liveDashboard": {
-      "title": "실시간 보기 대시보드",
+      "title": "실시간 대시보드",
       "automaticLiveView": {
-        "label": "자동으로 실시간 보기 전환",
-        "desc": "활동이 감지되면 자동으로 실시간 보기로 전환합니다. 이 옵션을 끄면 대시보드의 카메라 화면은 1분마다 한 번만 갱신됩니다."
+        "label": "실시간 화면 자동 전환",
+        "desc": "활동이 감지되면 해당 카메라의 실시간 화면으로 자동 전환합니다. 이 옵션을 비활성화하면 실시간 대시보드의 정지된 카메라 이미지가 1분마다 한 번씩만 업데이트됩니다."
       },
       "playAlertVideos": {
-        "label": "경보 영상 보기",
-        "desc": "기본적으로 실시간 보기 대시보드의 최근 경보 영상을 작은 반복 영상으로 재생됩니다. 이 옵션을 끄면 이 기기(또는 브라우저)에서는 정적 이미지로만 표시됩니다."
+        "label": "알림 영상 재생",
+        "desc": "기본적으로 실시간 대시보드의 최근 알림은 작은 반복 재생 영상으로 표시됩니다. 이 옵션을 비활성화하면 현재 기기나 브라우저에서 최근 알림을 정지된 이미지로만 보여줍니다."
+      },
+      "displayCameraNames": {
+        "label": "카메라 이름 항상 표시",
+        "desc": "다중 카메라 실시간 대시보드에서 카메라 이름을 항상 칩 형태로 표시합니다."
+      },
+      "liveFallbackTimeout": {
+        "label": "실시간 재생 대기 시간",
+        "desc": "카메라의 고화질 실시간 스트리밍을 사용할 수 없을 때, 지정된 시간이 지나면 저대역폭 모드로 전환합니다. 기본값: 3초."
       }
     },
     "storedLayouts": {
@@ -116,7 +183,40 @@
     }
   },
   "enrichments": {
-    "title": "고급 설정",
-    "unsavedChanges": "변경된 고급 설정을 저장하지 않았습니다"
+    "title": "데이터 보강 설정",
+    "unsavedChanges": "변경된 데이터 보강 설정을 저장하지 않았습니다",
+    "birdClassification": {
+      "title": "조류 분류",
+      "desc": "조류 분류 기능은 양자화된 TensorFlow 모델을 사용하여 알려진 새를 식별합니다. 알려진 새가 인식되면 해당 새의 일반적인 이름이 하위 분류로 추가됩니다. 이 정보는 사용자 인터페이스, 필터 및 알림에 포함됩니다."
+    },
+    "semanticSearch": {
+      "reindexNow": {
+        "label": "색인 재구성 시작",
+        "desc": "색인을 재구성하면 모든 추적된 객체의 임베딩을 다시 생성합니다. 이 작업은 백그라운드에서 실행되며, 추적된 객체의 수에 따라 CPU 점유율이 최대치에 도달하거나 상당한 시간이 소요될 수 있습니다.",
+        "confirmTitle": "색인 재구성 확인",
+        "confirmDesc": "정말로 모든 추적된 객체의 임베딩 색인을 재구성하시겠습니까? 이 작업은 백그라운드에서 실행되지만, CPU 점유율이 최대치에 도달하거나 상당한 시간이 소요될 수 있습니다. 진행 상황은 '탐색' 페이지에서 확인하실 수 있습니다.",
+        "confirmButton": "색인 재구성",
+        "success": "색인 재구성이 정상적으로 시작되었습니다.",
+        "alreadyInProgress": "색인 재구성이 이미 진행 중입니다.",
+        "error": "색인 재구성을 시작하지 못했습니다: {{errorMessage}}"
+      }
+    }
+  },
+  "saveAllPreview": {
+    "title": "저장할 변경 사항",
+    "triggerLabel": "대기 중인 변경 사항 검토",
+    "empty": "대기 중인 변경 사항 없음.",
+    "scope": {
+      "label": "적용 범위",
+      "global": "전체",
+      "camera": "카메라: {{cameraName}}"
+    },
+    "field": {
+      "label": "항목"
+    },
+    "value": {
+      "label": "새 값",
+      "reset": "초기화"
+    }
   }
 }

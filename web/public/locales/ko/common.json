@@ -183,7 +183,8 @@
     "uiPlayground": "UI 실험실",
     "faceLibrary": "얼굴 라이브러리",
     "classification": "분류",
-    "chat": "채팅"
+    "chat": "채팅",
+    "actions": "작업"
   },
   "unit": {
     "speed": {
@@ -258,7 +259,8 @@
     "resetToDefault": "기본값으로 재설정",
     "saveAll": "모두 저장",
     "savingAll": "모두 저장 중. …",
-    "undoAll": "모두 실행 취소"
+    "undoAll": "모두 실행 취소",
+    "applying": "적용 중…"
   },
   "toast": {
     "copyUrlToClipboard": "클립보드에 URL이 복사되었습니다.",
@@ -277,7 +279,7 @@
     "desc": "관리자는 Frigate UI에 모든 접근 권한이 있습니다. 감시자는 카메라 감시, 돌아보기, 과거 영상 조회만 가능합니다."
   },
   "pagination": {
-    "label": "나눠보기",
+    "label": "페이지 번호",
     "previous": {
       "title": "이전",
       "label": "이전 페이지"
