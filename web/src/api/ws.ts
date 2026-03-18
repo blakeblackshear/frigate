@@ -149,6 +149,12 @@ function applyCameraActivity(payload: string) {
   for (const [name, state] of Object.entries(activity)) {
     applyTopicUpdate(`camera_activity/${name}`, state);
 
+    // Sync motion state so {camera}/motion topic stays up-to-date with
+    // camera_activity and doesn't remain stale from a retained MQTT value.
+    if (state.motion !== undefined) {
+      applyTopicUpdate(`${name}/motion`, state.motion ? "ON" : "OFF");
+    }
+
     const cameraConfig = state?.config;
     if (!cameraConfig) continue;
 
