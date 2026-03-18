@@ -570,9 +570,10 @@ export default function LiveDashboardView({
                       toggleStats={() => toggleStats(camera.name)}
                       volumeState={volumeStates[camera.name] ?? 1}
                       setVolumeState={(value) =>
-                        setVolumeStates({
+                        setVolumeStates((prev) => ({
+                          ...prev,
                           [camera.name]: value,
-                        })
+                        }))
                       }
                       muteAll={muteAll}
                       unmuteAll={unmuteAll}
