@@ -17,6 +17,12 @@
         "enabled": {
             "label": "Habilitar detecção de áudio",
             "description": "Habilitar ou desabilitar o evento de detecção de áudio para esta câmera."
+        },
+        "max_not_heard": {
+            "label": "Tempo limite final"
+        },
+        "min_volume": {
+            "label": "Volume mínimo"
         }
     },
     "label": "Configuração da Câmera"
