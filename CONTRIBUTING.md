@@ -66,7 +66,7 @@ Some honest context: when we review a PR, we're not just evaluating whether the 
 
 ### Python (backend)
 
-- **Python 3.13+** — use modern language features (type hints, pattern matching, f-strings, dataclasses)
+- **Python** — use modern language features (type hints, pattern matching, f-strings, dataclasses)
 - **Formatting**: Ruff (configured in `pyproject.toml`)
 - **Linting**: Ruff
 - **Testing**: `python3 -u -m unittest`
@@ -81,7 +81,7 @@ Some honest context: when we review a PR, we're not just evaluating whether the 
 - **Formatting**: Prettier (`npm run prettier:write` from `web/`)
 - **Type safety**: TypeScript strict mode. Avoid `any`.
 - **i18n**: All user-facing strings must use `react-i18next`. Never hardcode display text in components. Add English strings to the appropriate files in `web/public/locales/en/`.
-- **Components**: Use Radix UI primitives and TailwindCSS with the `cn()` utility.
+- **Components**: Use Radix UI/shadcn primitives and TailwindCSS with the `cn()` utility.
 
 ### Development commands
 
