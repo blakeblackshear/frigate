@@ -20,7 +20,12 @@ class OnvifCommandEnum(str, Enum):
 
 
 class TestMoveRelativeParsing(TestCase):
-    """Test the move_relative command parameter parsing logic."""
+    """Test the move_relative command parameter parsing logic.
+
+    NOTE: _parse_move_relative replicates logic from
+    OnvifController.handle_command_async (frigate/ptz/onvif.py).
+    If that parsing changes, this helper must be updated to match.
+    """
 
     def _parse_move_relative(self, param: str):
         """Replicate the parsing logic from OnvifController.handle_command_async."""
@@ -57,8 +62,10 @@ class TestMoveRelativeParsing(TestCase):
 class TestDispatcherPtzParsing(TestCase):
     """Test the dispatcher's _on_ptz_command parsing pipeline.
 
-    Replicates the logic from FrigateDispatcher._on_ptz_command to verify
-    that MQTT payloads are correctly decomposed into command + param.
+    Replicates the logic from FrigateDispatcher._on_ptz_command
+    (frigate/comms/dispatcher.py) to verify that MQTT payloads are
+    correctly decomposed into command + param.
+    If that parsing changes, this helper must be updated to match.
     """
 
     def _parse_ptz_payload(self, payload: str):

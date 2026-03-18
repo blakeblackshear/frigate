@@ -131,6 +131,9 @@ type LiveCameraViewProps = {
   toggleFullscreen: () => void;
 };
 
+/** Minimum drag distance (px) to distinguish a drag-to-zoom from a click-to-move. */
+const MIN_DRAG_DISTANCE = 20;
+
 function getClientPos(
   e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
 ): { x: number; y: number } | null {
@@ -293,8 +296,7 @@ export default function LiveCameraView({
       const dx = Math.abs(pos.x - dragStart.x);
       const dy = Math.abs(pos.y - dragStart.y);
 
-      // Minimum drag distance of 20px to distinguish from click
-      if (dx < 20 && dy < 20) {
+      if (dx < MIN_DRAG_DISTANCE && dy < MIN_DRAG_DISTANCE) {
         // Click (not drag) — move to point without zoom
         const normalizedX = (pos.x - rect.left) / rect.width;
         const normalizedY = (pos.y - rect.top) / rect.height;
@@ -352,7 +354,7 @@ export default function LiveCameraView({
     if (!isDragging || !clickOverlayRef.current) return null;
     const dx = Math.abs(dragCurrent.x - dragStart.x);
     const dy = Math.abs(dragCurrent.y - dragStart.y);
-    if (dx < 20 && dy < 20) return null; // Don't show rectangle for small movements
+    if (dx < MIN_DRAG_DISTANCE && dy < MIN_DRAG_DISTANCE) return null;
 
     const rect = clickOverlayRef.current.getBoundingClientRect();
     const x1 = Math.min(dragStart.x, dragCurrent.x) - rect.left;
@@ -762,6 +764,10 @@ export default function LiveCameraView({
                     onMouseDown={handleOverlayMouseDown}
                     onMouseMove={handleOverlayMouseMove}
                     onMouseUp={handleOverlayMouseUp}
+                    onMouseLeave={() => {
+                      setDragStart(null);
+                      setDragCurrent(null);
+                    }}
                     onTouchStart={handleOverlayMouseDown}
                     onTouchMove={handleOverlayMouseMove}
                     onTouchEnd={handleOverlayMouseUp}

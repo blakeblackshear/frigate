@@ -295,6 +295,13 @@ class OnvifController:
                         ):
                             del move_request["Speed"]["Zoom"]
                 except Exception as e:
+                    if (
+                        self.config.cameras[camera_name].onvif.autotracking.zooming
+                        == ZoomingModeEnum.relative
+                    ):
+                        self.config.cameras[
+                            camera_name
+                        ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
                     logger.warning(
                         f"Relative zoom not supported for {camera_name}: {e}"
                     )
