@@ -5,7 +5,7 @@
     },
     "safe_mode": {
         "label": "abgesicherter Modus",
-        "description": "Wenn aktiviert, starte Frigate im abgesicherten Modus mit reduzierten Features für die Fehlersuche."
+        "description": "Wenn aktiviert, startet Frigate im abgesicherten Modus mit reduzierten Features für die Fehlersuche."
     },
     "audio": {
         "label": "Audioereignisse",
@@ -25,7 +25,7 @@
             "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden."
         },
         "max_not_heard": {
-            "label": "Zeitüberschreitung beendet",
+            "label": "Ende Timeout",
             "description": "Anzahl der Sekunden ohne den konfigurierten Audiotyp, bevor das Audioereignis beendet wird."
         },
         "enabled_in_config": {
@@ -45,11 +45,11 @@
         "label": "Protokollierung",
         "description": "Steuert die Standard-Protokollierungsausführlichkeit und Überschreibungen der Protokollierungsstufe pro Komponente.",
         "default": {
-            "label": "Loglevel",
-            "description": "Standardmäßiges globales Log Level (Debug, Info, Warnung, Fehler)."
+            "label": "Protokollierungsstufe",
+            "description": "Standardmäßige globale Log-Ausführlichkeit (Debug, Info, Warnung, Fehler)."
         },
         "logs": {
-            "label": "Prozessspezifisches Log Level",
+            "label": "Prozessspezifische Log-Stufe",
             "description": "Überschreiben der Protokollierungsstufe pro Komponente, um die Ausführlichkeit für bestimmte Module zu erhöhen oder zu verringern."
         }
     },
@@ -107,6 +107,9 @@
         "live_enabled": {
             "label": "Live-Transkription",
             "description": "Aktivieren Sie die Live-Transkription für Audio, sobald es empfangen wird."
+        },
+        "enabled": {
+            "label": "Audio-Transkription aktivieren"
         }
     },
     "birdseye": {
@@ -122,17 +125,1151 @@
         },
         "order": {
             "label": "Position",
-            "description": "Numerische Position, die die Reihenfolge der Kamera im Birdseye-Layout steuert."
+            "description": "Numerische Position, die Reihenfolge der Kamera im Birdseye-Layout steuert."
         }
     },
     "database": {
         "label": "Datenbank",
         "description": "Einstellungen für die SQLite-Datenbank, die von Frigate zum Speichern von verfolgten Objekten und Aufzeichnungsmetadaten verwendet wird.",
         "path": {
-            "label": "Pfad zur Datenbank"
+            "label": "Pfad zur Datenbank",
+            "description": "Dateisystempfad, in dem die Frigate-SQLite-Datenbankdatei gespeichert wird."
         }
     },
     "detect": {
-        "label": "Objekterkennung"
+        "label": "Objekterkennung",
+        "description": "Einstellungen für die Erkennungs-/Detektionsrolle, die zum Ausführen der Objekterkennung und zum Initialisieren von Trackern verwendet wird.",
+        "enabled": {
+            "label": "Erkennung aktiviert"
+        },
+        "height": {
+            "label": "Höhe erkennen",
+            "description": "Höhe (Pixel) der für den Erkennungsstrom verwendeten Frames; leer lassen, um die native Stream-Auflösung zu verwenden."
+        },
+        "width": {
+            "label": "Breite erkennen",
+            "description": "Breite (Pixel) der für den Erkennungsstrom verwendeten Frames; leer lassen, um die native Stream-Auflösung zu verwenden."
+        },
+        "fps": {
+            "label": "FPS erkennen",
+            "description": "Gewünschte Bilder pro Sekunde für die Erkennung; niedrigere Werte reduzieren die CPU-Auslastung (empfohlener Wert ist 5, höhere Werte – maximal 10 – nur bei der Verfolgung extrem schnell bewegter Objekte einstellen)."
+        },
+        "min_initialized": {
+            "label": "Mindestanzahl an Initialisierungsframes",
+            "description": "Anzahl der aufeinanderfolgenden Erkennungserfolge, die vor der Erstellung eines verfolgten Objekts erforderlich sind. Erhöhen Sie diesen Wert, um Fehlinitialisierungen zu reduzieren. Der Standardwert ist fps geteilt durch 2."
+        },
+        "max_disappeared": {
+            "label": "Maximale Anzahl fehlender Frames",
+            "description": "Anzahl der Frames ohne Erkennung, bevor ein verfolgtes Objekt als verschwunden gilt."
+        },
+        "stationary": {
+            "label": "Konfiguration stationärer Objekte",
+            "description": "Einstellungen zum Erkennen und Verwalten von Objekten, die über einen bestimmten Zeitraum hinweg unbeweglich bleiben.",
+            "interval": {
+                "label": "Stationäres Intervall",
+                "description": "Wie oft (in Frames) soll eine Erkennungsprüfung durchgeführt werden, um ein stationäres Objekt zu bestätigen."
+            },
+            "threshold": {
+                "label": "Stationäre Schwelle",
+                "description": "Anzahl der Frames ohne Positionsänderung, die erforderlich sind, um ein Objekt als stationär zu markieren."
+            },
+            "max_frames": {
+                "label": "Maximale Bildanzahl",
+                "description": "Begrenzt, wie lange stationäre Objekte verfolgt werden, bevor sie verworfen werden.",
+                "default": {
+                    "label": "Standardmäßige maximale Frames",
+                    "description": "Standardmäßige maximale Anzahl von Frames, die ein stationäres Objekt verfolgt werden sollen, bevor die Verfolgung beendet wird."
+                },
+                "objects": {
+                    "label": "Objekt max Rahmen",
+                    "description": "Objektbezogene Überschreibungen für maximale Frames zur Verfolgung stationärer Objekte."
+                }
+            },
+            "classifier": {
+                "description": "Verwenden Sie einen visuellen Klassifikator, um wirklich stationäre Objekte auch dann zu erkennen, wenn die Begrenzungsrahmen flackern.",
+                "label": "Visuellen Klassifikator aktivieren"
+            }
+        },
+        "annotation_offset": {
+            "label": "Anmerkung Offset",
+            "description": "Millisekunden zur Verschiebung der Anmerkungen, um die Begrenzungsrahmen der Zeitleiste besser an die Aufnahmen anzupassen; kann positiv oder negativ sein."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Einstellungen für den integrierten go2rtc-Restreaming-Dienst, der für die Weiterleitung und Übersetzung von Live-Streams verwendet wird."
+    },
+    "mqtt": {
+        "label": "mqtt",
+        "description": "Einstellungen für die Verbindung und Veröffentlichung von Telemetriedaten, Momentaufnahmen und Ereignisdetails an einen MQTT-Broker.",
+        "enabled": {
+            "label": "mqtt aktiviert",
+            "description": "Aktivieren oder deaktivieren Sie die MQTT-Integration für Status, Ereignisse und Momentaufnahmen."
+        },
+        "host": {
+            "label": "mqtt Host",
+            "description": "Hostname oder IP-Adresse des MQTT-Brokers."
+        },
+        "port": {
+            "label": "mqtt Port",
+            "description": "Port des MQTT-Brokers (normalerweise 1883 für einfaches MQTT)."
+        },
+        "topic_prefix": {
+            "label": "Themenpräfix",
+            "description": "MQTT-Themenpräfix für alle Frigate-Themen; muss bei Ausführung mehrerer Instanzen eindeutig sein."
+        },
+        "client_id": {
+            "label": "Klient ID",
+            "description": "Klient-Kennung, die bei der Verbindung mit dem MQTT-Broker verwendet wird; sollte pro Instanz eindeutig sein."
+        },
+        "stats_interval": {
+            "label": "Statistikintervall",
+            "description": "Intervall in Sekunden für die Veröffentlichung von System- und Kamerastatistiken an MQTT."
+        },
+        "user": {
+            "label": "mqtt Benutzername",
+            "description": "Optionaler MQTT-Benutzername; kann über Umgebungsvariablen oder Geheimnisse bereitgestellt werden."
+        },
+        "password": {
+            "label": "mqtt Passwort",
+            "description": "Optionales MQTT-Passwort; kann über Umgebungsvariablen oder Geheimnisse bereitgestellt werden."
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA certs",
+            "description": "Pfad zum CA-Zertifikat für TLS-Verbindungen zum Broker (für selbstsignierte Zertifikate)."
+        },
+        "tls_client_cert": {
+            "label": "Klient Zertifikat",
+            "description": "Client-Zertifikatpfad für die gegenseitige TLS-Authentifizierung; bei Verwendung von Client-Zertifikaten keine Benutzerdaten/Passwörter festlegen."
+        },
+        "tls_client_key": {
+            "label": "Klient Schlüssel",
+            "description": "Pfad zum privaten Schlüssel für das Client-Zertifikat."
+        },
+        "tls_insecure": {
+            "label": "TLS unsicher",
+            "description": "Unsichere TLS-Verbindungen zulassen, indem die Hostnamenüberprüfung übersprungen wird (nicht empfohlen)."
+        },
+        "qos": {
+            "label": "mqtt Qos",
+            "description": "Servicequalitätsstufe für MQTT-Veröffentlichungen/Abonnements (0, 1 oder 2)."
+        }
+    },
+    "face_recognition": {
+        "label": "Gesichtserkennung",
+        "enabled": {
+            "label": "Gesichtserkennung aktivieren"
+        },
+        "min_area": {
+            "label": "Mindestfläche der Stirnseite",
+            "description": "Mindestfläche (Pixel) eines erkannten Gesichtsrahmens, die für einen Erkennungsversuch erforderlich ist."
+        }
+    },
+    "notifications": {
+        "label": "Benachrichtigung",
+        "description": "Einstellungen zum Aktivieren und Steuern von Benachrichtigungen für alle Kameras; können pro Kamera überschrieben werden.",
+        "enabled": {
+            "label": "Benachrichtigungen aktivieren",
+            "description": "Benachrichtigungen für alle Kameras aktivieren oder deaktivieren; kann pro Kamera überschrieben werden."
+        },
+        "email": {
+            "label": "Benachrichtigungs-E-Mail",
+            "description": "E-Mail-Adresse, die für Push-Benachrichtigungen verwendet wird oder von bestimmten Benachrichtigungsanbietern verlangt wird."
+        },
+        "cooldown": {
+            "label": "Abkühlungsphase",
+            "description": "Abkühlungszeit (Sekunden) zwischen Benachrichtigungen, um Spam an Empfänger zu vermeiden."
+        },
+        "enabled_in_config": {
+            "label": "Ursprüngliche Meldungen geben an",
+            "description": "Gibt an, ob Benachrichtigungen in der ursprünglichen statischen Konfiguration aktiviert waren."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg-Einstellungen, einschließlich Binärpfad, Argumente, hwaccel-Optionen und rollenspezifische Ausgabeargumente.",
+        "path": {
+            "label": "FFmpeg-Pfad",
+            "description": "Pfad zur zu verwendenden FFmpeg-Binärdatei oder ein Versionsalias („5.0” oder „7.0”)."
+        },
+        "global_args": {
+            "label": "Globale Argumente von FFmpeg",
+            "description": "An FFmpeg-Prozesse übergebene globale Argumente."
+        },
+        "hwaccel_args": {
+            "label": "Argumente für Hardwarebeschleunigung",
+            "description": "Hardwarebeschleunigungsargumente für FFmpeg. Es werden providerspezifische Voreinstellungen empfohlen."
+        },
+        "input_args": {
+            "label": "Eingabeargumente",
+            "description": "Eingabeargumente, die auf FFmpeg-Eingabestreams angewendet werden."
+        },
+        "output_args": {
+            "label": "Ausgabeargumente",
+            "description": "Standardausgabeargumente, die für verschiedene FFmpeg-Rollen wie „detect“ und „record“ verwendet werden.",
+            "detect": {
+                "label": "Ausgabeargumente erkennen",
+                "description": "Standardausgabeargumente für das Erkennen von Rollenströmen."
+            },
+            "record": {
+                "label": "Ausgabeargumente aufzeichnen",
+                "description": "Standardausgabeargumente für Datensatzrollen-Streams."
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg-Wiederholungszeit",
+            "description": "Sekunden, die gewartet werden sollen, bevor nach einem Fehler erneut versucht wird, eine Kamera-Übertragung herzustellen. Der Standardwert ist 10."
+        },
+        "apple_compatibility": {
+            "label": "Apple-Kompatibilität",
+            "description": "Aktivieren Sie die HEVC-Kennzeichnung für eine bessere Kompatibilität mit Apple-Playern bei der Aufnahme von H.265."
+        },
+        "gpu": {
+            "label": "GPU-Index",
+            "description": "Standard-GPU-Index, der für die Hardwarebeschleunigung verwendet wird, sofern verfügbar."
+        },
+        "inputs": {
+            "label": "Kameraeingänge",
+            "description": "Liste der Eingangsstromdefinitionen (Pfade und Rollen) für diese Kamera.",
+            "path": {
+                "label": "Eingabepfad",
+                "description": "URL oder Pfad des Kameraeingangsstroms."
+            },
+            "roles": {
+                "label": "Eingangsrollen",
+                "description": "Rollen für diesen Eingabestrom."
+            },
+            "global_args": {
+                "label": "Globale Argumente von FFmpeg",
+                "description": "Globale Argumente von FFmpeg für diesen Eingabestrom."
+            },
+            "hwaccel_args": {
+                "label": "Argumente für Hardwarebeschleunigung",
+                "description": "Hardwarebeschleunigungsargumente für diesen Eingabestrom."
+            },
+            "input_args": {
+                "label": "Eingabeargumente",
+                "description": "Für diesen Stream spezifische Eingabeargumente."
+            }
+        }
+    },
+    "networking": {
+        "label": "Vernetzung",
+        "description": "Netzwerkbezogene Einstellungen wie die Aktivierung von IPv6 für Frigate-Endpunkte.",
+        "ipv6": {
+            "label": "IPv6-Konfiguration",
+            "description": "IPv6-spezifische Einstellungen für Frigate-Netzwerkdienste.",
+            "enabled": {
+                "label": "IPv6 aktivieren",
+                "description": "Aktivieren Sie die IPv6-Unterstützung für Frigate-Dienste (API und Benutzeroberfläche), wo dies möglich ist."
+            }
+        },
+        "listen": {
+            "label": "Konfiguration der Listening-Ports",
+            "description": "Konfiguration für interne und externe Listening-Ports. Dies ist für fortgeschrittene Benutzer gedacht. Für die meisten Anwendungsfälle wird empfohlen, den Abschnitt „Ports“ Ihrer Docker-Compose-Datei zu ändern.",
+            "internal": {
+                "label": "interne port",
+                "description": "Interner Listening-Port für Frigate (Standard 5000)."
+            },
+            "external": {
+                "label": "Externer Anschluss",
+                "description": "Externer Listening-Port für Frigate (Standard 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "description": "Einstellungen für die Integration von Frigate hinter einem Reverse-Proxy, der authentifizierte Benutzer-Header weiterleitet.",
+        "header_map": {
+            "label": "Header-Zuordnung",
+            "description": "Ordnen Sie eingehende Proxy-Header den Frigate-Benutzer- und Rollenfeldern für die proxybasierte Authentifizierung zu.",
+            "user": {
+                "label": "Benutzerkopfzeile",
+                "description": "Header, der den vom Upstream-Proxy bereitgestellten authentifizierten Benutzernamen enthält."
+            },
+            "role": {
+                "label": "Rollenüberschrift",
+                "description": "Header, der die Rolle oder Gruppen des authentifizierten Benutzers aus dem Upstream-Proxy enthält."
+            },
+            "role_map": {
+                "label": "Rollenabbildung",
+                "description": "Ordnen Sie die Werte der Upstream-Gruppe den Frigate-Rollen zu (z. B. ordnen Sie Admin-Gruppen der Admin-Rolle zu)."
+            }
+        },
+        "logout_url": {
+            "label": "Abmelde-URL",
+            "description": "URL, zu der Benutzer beim Abmelden über den Proxy weitergeleitet werden sollen."
+        },
+        "auth_secret": {
+            "label": "Proxy-Geheimnis",
+            "description": "Optionales Geheimnis, das anhand des X-Proxy-Secret-Headers überprüft wird, um vertrauenswürdige Proxys zu verifizieren."
+        },
+        "default_role": {
+            "label": "Standardrolle",
+            "description": "Standardrolle, die proxy-authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung gilt (Admin oder Betrachter)."
+        },
+        "separator": {
+            "label": "Trennzeichen",
+            "description": "Zeichen, das zum Trennen mehrerer Werte in Proxy-Headern verwendet wird."
+        }
+    },
+    "live": {
+        "label": "Live-Wiedergabe",
+        "streams": {
+            "label": "Live-Stream Namen",
+            "description": "Zuordnung der konfigurierten Stream-Namen zu den für die Live-Wiedergabe verwendeten Restream-/Go2rtc-Namen."
+        },
+        "height": {
+            "label": "Live-Höhe",
+            "description": "Höhe (Pixel) zum Rendern des jsmpeg-Livestreams in der Web-Benutzeroberfläche; muss <= Stream-Höhe sein."
+        },
+        "quality": {
+            "label": "Live Qualität",
+            "description": "Kodierungsqualität für den jsmpeg-Stream (1 = höchst, 31 = niedrigst)."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetrie",
+        "description": "Systemtelemetrie- und Statistikoptionen, einschließlich Überwachung der GPU- und Netzwerkbandbreite.",
+        "network_interfaces": {
+            "label": "Netzwerkschnittstellen",
+            "description": "Liste der Präfixe für Netzwerkschnittstellennamen, die für Bandbreitenstatistiken überwacht werden sollen."
+        },
+        "stats": {
+            "label": "Systemstatistiken",
+            "description": "Optionen zum Aktivieren/Deaktivieren der Erfassung verschiedener System- und GPU-Statistiken.",
+            "amd_gpu_stats": {
+                "label": "AMD GPU Statistik",
+                "description": "Aktivieren Sie die Erfassung von AMD-GPU-Statistiken, wenn eine AMD-GPU vorhanden ist."
+            },
+            "intel_gpu_stats": {
+                "label": "Intel GPU Statistik",
+                "description": "Aktivieren Sie die Erfassung von Intel-GPU-Statistiken, wenn eine Intel-GPU vorhanden ist."
+            },
+            "network_bandwidth": {
+                "label": "Netzwerk Bandbreite",
+                "description": "Aktivieren Sie die prozessbezogene Überwachung der Netzwerkbandbreite für Kamera-FFmpeg-Prozesse und Detektoren (erfordert entsprechende Funktionen)."
+            },
+            "intel_gpu_device": {
+                "label": "SR-IOV-Gerät",
+                "description": "Gerätekennung, die verwendet wird, wenn Intel-GPUs als SR-IOV behandelt werden, um die GPU-Statistiken zu korrigieren."
+            }
+        },
+        "version_check": {
+            "label": "Versionscheck",
+            "description": "Aktivieren Sie eine Outbound-Prüfung, um festzustellen, ob eine neuere Version von Frigate verfügbar ist."
+        }
+    },
+    "lpr": {
+        "label": "Kennzeichenerkennung",
+        "description": "Einstellungen für die Kennzeichenerkennung, einschließlich Erkennungsschwellen, Formatierung und bekannte Kennzeichen.",
+        "enabled": {
+            "label": "LPR aktivieren"
+        },
+        "expire_time": {
+            "label": "Sekunden bis zum Ablauf",
+            "description": "Zeit in Sekunden, nach der ein nicht erkanntes Kennzeichen aus dem Tracker gelöscht wird (nur für dedizierte LPR-Kameras)."
+        },
+        "min_area": {
+            "label": "Mindestplattenfläche",
+            "description": "Mindestplattenfläche (Pixel), die für einen Erkennungsversuch erforderlich ist."
+        },
+        "enhancement": {
+            "label": "Verbesserungsgrad",
+            "description": "Verstärkungsstufe (0-10) zur Anwendung auf Plattenaufnahmen vor der OCR; höhere Werte führen nicht immer zu besseren Ergebnissen, Stufen über 5 funktionieren möglicherweise nur bei Nachtaufnahmen und sollten mit Vorsicht verwendet werden."
+        }
+    },
+    "motion": {
+        "label": "Bewegungserkennung",
+        "enabled": {
+            "label": "Bewegungserkennung aktivieren"
+        },
+        "threshold": {
+            "label": "Bewegungsschwelle",
+            "description": "Vom Bewegungsmelder verwendeter Schwellenwert für Pixelunterschiede; höhere Werte verringern die Empfindlichkeit (Bereich 1–255)."
+        },
+        "lightning_threshold": {
+            "label": "Blitzschwelle",
+            "description": "Schwellenwert zum Erkennen und Ignorieren kurzer Beleuchtungsspitzen (niedrigerer Wert bedeutet höhere Empfindlichkeit, Werte zwischen 0,3 und 1,0). Dadurch wird die Bewegungserkennung nicht vollständig verhindert, sondern lediglich die Analyse weiterer Bilder durch den Detektor unterbrochen, sobald der Schwellenwert überschritten wird. Bewegungsbasierte Aufzeichnungen werden während dieser Ereignisse weiterhin erstellt."
+        },
+        "skip_motion_threshold": {
+            "label": "Schwellenwert für Bewegungsüberspringen",
+            "description": "Wenn sich mehr als dieser Anteil des Bildes in einem einzelnen Frame ändert, gibt der Detektor keine Bewegungsfelder zurück und kalibriert sich sofort neu. Dies kann CPU-Leistung sparen und Fehlalarme bei Blitzschlag, Gewittern usw. reduzieren, aber auch echte Ereignisse übersehen, wie z. B. eine PTZ-Kamera, die ein Objekt automatisch verfolgt. Der Kompromiss besteht darin, entweder einige Megabyte an Aufzeichnungen zu verlieren oder ein paar kurze Clips zu überprüfen. Bereich 0,0 bis 1,0."
+        },
+        "improve_contrast": {
+            "label": "Kontrast verbessern",
+            "description": "Wenden Sie vor der Bewegungsanalyse eine Kontrastverbesserung auf die Bilder an, um die Erkennung zu erleichtern."
+        },
+        "contour_area": {
+            "label": "Konturbereich",
+            "description": "Mindestkonturfläche in Pixeln, die erforderlich ist, damit eine Bewegungskontur gezählt wird."
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "Alpha-Blending-Faktor, der bei der Frame-Differenzierung für die Bewegungsberechnung verwendet wird."
+        },
+        "frame_alpha": {
+            "label": "Rahmen Alpha",
+            "description": "Alpha-Wert, der beim Mischen von Frames für die Bewegungsvorverarbeitung verwendet wird."
+        },
+        "frame_height": {
+            "label": "Rahmenhöhe",
+            "description": "Höhe in Pixeln, auf die Frames bei der Berechnung von Bewegungen skaliert werden sollen."
+        },
+        "mask": {
+            "label": "Maskenkoordinaten",
+            "description": "Geordnete x-, y-Koordinaten, die das Bewegungsmaskenpolygon definieren, das zum Einbeziehen/Ausschließen von Bereichen verwendet wird."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT-Ausschaltverzögerung",
+            "description": "Sekunden, die nach der letzten Bewegung gewartet werden müssen, bevor ein MQTT-„Aus”-Status veröffentlicht wird."
+        },
+        "enabled_in_config": {
+            "label": "Ursprünglicher Bewegungszustand",
+            "description": "Gibt an, ob die Bewegungserkennung in der ursprünglichen statischen Konfiguration aktiviert war."
+        },
+        "raw_mask": {
+            "label": "Maskierung"
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "TLS-Einstellungen für die Website von Frigate (Port 8971).",
+        "enabled": {
+            "label": "Aktivieren TLS",
+            "description": "Aktivieren Sie TLS für die Web-Benutzeroberfläche und die API von Frigate auf dem konfigurierten TLS-Port."
+        }
+    },
+    "ui": {
+        "label": "UI",
+        "description": "Benutzeroberflächen-Einstellungen wie Zeitzone, Zeit-/Datumsformatierung und Einheiten.",
+        "timezone": {
+            "label": "Zeitzone",
+            "description": "Optionale Zeitzone, die in der Benutzeroberfläche angezeigt werden soll (Standardmäßig wird die lokale Zeit des Browsers angezeigt, wenn keine Zeitzone festgelegt ist)."
+        },
+        "time_format": {
+            "label": "Zeitformat",
+            "description": "In der Benutzeroberfläche zu verwendendes Zeitformat (Browser, 12-Stunden- oder 24-Stunden-Format)."
+        },
+        "date_style": {
+            "label": "Datumsformat",
+            "description": "In der Benutzeroberfläche zu verwendendes Datumsformat (vollständig, lang, mittel, kurz)."
+        },
+        "time_style": {
+            "label": "Zeitstil",
+            "description": "In der Benutzeroberfläche zu verwendender Zeitstil (vollständig, lang, mittel, kurz)."
+        },
+        "unit_system": {
+            "label": "Einheitensystem",
+            "description": "Einheitensystem für die Anzeige (metrisch oder imperial), das in der Benutzeroberfläche und MQTT verwendet wird."
+        }
+    },
+    "detectors": {
+        "label": "Detektor-Hardware",
+        "description": "Konfiguration für Objektdetektoren (CPU, GPU, ONNX-Backends) und alle detektorspezifischen Modelleinstellungen.",
+        "type": {
+            "label": "Detektortyp",
+            "description": "Art des für die Objekterkennung zu verwendenden Detektors (z. B. „cpu“, „edgetpu“, „openvino“)."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "CPU-TFLite-Detektor, der TensorFlow Lite-Modelle ohne Hardwarebeschleunigung auf der Host-CPU ausführt. Nicht empfohlen.",
+            "type": {
+                "label": "Type"
+            },
+            "model": {
+                "label": "Detektorspezifische Modellkonfiguration",
+                "description": "Detektorspezifische Modellkonfigurationsoptionen (Pfad, Eingabegröße usw.).",
+                "path": {
+                    "label": "Pfad zum benutzerdefinierten Objekterkennungsmodell",
+                    "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+                },
+                "labelmap_path": {
+                    "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                    "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen für den Detektor String-Labels zuordnet."
+                },
+                "width": {
+                    "label": "Eingabebreite des Objekterkennungsmodells",
+                    "description": "Breite des Modell-Eingabetensors in Pixeln."
+                },
+                "height": {
+                    "label": "Eingabehöhe des Objekterkennungsmodells",
+                    "description": "Höhe des Modell-Eingabetensors in Pixeln."
+                },
+                "labelmap": {
+                    "label": "Anpassung der Labelmap",
+                    "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+                },
+                "attributes_map": {
+                    "label": "Zuordnung von Objektbezeichnungen zu ihren Attributbezeichnungen",
+                    "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Anhängen von Metadaten verwendet werden (z. B. „Auto“ -> „[Kennzeichen]“)."
+                },
+                "input_tensor": {
+                    "label": "Form des Eingabetensors des Modells",
+                    "description": "Vom Modell erwartetes Tensorformat: „nhwc” oder „nchw”."
+                },
+                "input_pixel_format": {
+                    "label": "Modell-Eingabe-Pixel-Farbformat",
+                    "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+                },
+                "input_dtype": {
+                    "label": "Modell-Eingabe D Typ",
+                    "description": "Datentyp des Modelleingabetensors (z. B. „float32“)."
+                },
+                "model_type": {
+                    "label": "Objekterkennungsmodelltyp",
+                    "description": "Detektormodellarchitekturtyp (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+                }
+            },
+            "model_path": {
+                "label": "Detektorspezifischer Modellpfad",
+                "description": "Dateipfad zum Binärcode des Detektormodells, falls vom ausgewählten Detektor benötigt."
+            },
+            "num_threads": {
+                "label": "Anzahl der Erkennungs-Threads",
+                "description": "Die Anzahl der Threads, die für die CPU-basierte Inferenz verwendet werden."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "DeepStack/CodeProject.AI-Detektor, der Bilder zur Inferenz an eine entfernte DeepStack-HTTP-API sendet. Nicht empfohlen.",
+            "type": {
+                "label": "Type"
+            },
+            "model": {
+                "label": "Detektorspezifische Modellkonfiguration",
+                "description": "Detektorspezifische Modellkonfigurationsoptionen (Pfad, Eingabegröße usw.).",
+                "path": {
+                    "label": "Pfad zum benutzerdefinierten Objekterkennungsmodell",
+                    "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+                },
+                "labelmap_path": {
+                    "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                    "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+                },
+                "width": {
+                    "label": "Eingabebreite des Objekterkennungsmodells",
+                    "description": "Breite des Modell-Eingabetensors in Pixeln."
+                },
+                "height": {
+                    "label": "Eingabehöhe für das Objekt-Erkennungsmodell",
+                    "description": "Höhe des Modell-Eingabetensors in Pixeln."
+                },
+                "labelmap": {
+                    "label": "Anpassung der Labelmap",
+                    "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+                },
+                "attributes_map": {
+                    "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+                    "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+                },
+                "input_tensor": {
+                    "label": "Form des Modell-Eingabetensors",
+                    "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+                },
+                "input_pixel_format": {
+                    "label": "Standard-Pixel-Farbformat",
+                    "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+                },
+                "input_dtype": {
+                    "label": "Modell-Eingangs-D-Typ",
+                    "description": "Datentyp des Modell-Eingabetensors (z. B. „float32“)."
+                },
+                "model_type": {
+                    "label": "Typ des Objekterkennungsmodells",
+                    "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+                }
+            },
+            "model_path": {
+                "label": "Detektorspezifischer Modellpfad",
+                "description": "Dateipfad zur Binärdatei des Detektormodells, falls dies für den ausgewählten Detektor erforderlich ist."
+            },
+            "api_url": {
+                "label": "DeepStack-API-URL",
+                "description": "Die URL der DeepStack-API."
+            },
+            "api_timeout": {
+                "label": "DeepStack-API-Zeitlimit (in Sekunden)",
+                "description": "Maximum time allowed for a DeepStack API request."
+            },
+            "api_key": {
+                "label": "DeepStack-API-Schlüssel (falls erforderlich)",
+                "description": "Optionaler API-Schlüssel für authentifizierte DeepStack-Dienste."
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "DeGirum-Detektor zum Ausführen von Modellen über die DeGirum-Cloud oder lokale Inferenzdienste.",
+            "type": {
+                "label": "Type"
+            },
+            "model": {
+                "label": "Detektorspezifische Modellkonfiguration",
+                "description": "Detektorspezifische Optionen zur Modellkonfiguration (Pfad, Eingabegröße usw.).",
+                "path": {
+                    "label": "Pfad zum benutzerdefinierten Objekt-Erkennungsmodell",
+                    "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+                },
+                "labelmap_path": {
+                    "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                    "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+                },
+                "width": {
+                    "label": "Eingabebreite des Objekterkennungsmodells",
+                    "description": "Breite des Modell-Eingabetensors in Pixeln."
+                },
+                "height": {
+                    "label": "Eingabehöhe des Objekterkennungsmodells",
+                    "description": "Höhe des Modell-Eingabetensors in Pixeln."
+                },
+                "labelmap": {
+                    "label": "Anpassung der Labelmap",
+                    "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+                },
+                "attributes_map": {
+                    "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+                    "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+                },
+                "input_tensor": {
+                    "label": "Form des Modell-Eingabetensors",
+                    "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+                },
+                "input_pixel_format": {
+                    "label": "Standard-Pixel-Farbformat",
+                    "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+                },
+                "input_dtype": {
+                    "label": "Modell-Eingangs-D-Typ",
+                    "description": "Datentyp des Modell-Eingabetensors (z. B. „float32“)."
+                },
+                "model_type": {
+                    "label": "Typ des Objekterkennungsmodells",
+                    "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+                }
+            },
+            "model_path": {
+                "label": "Detektorspezifischer Modellpfad",
+                "description": "Dateipfad zur Binärdatei des Detektormodells, falls dies für den ausgewählten Detektor erforderlich ist."
+            },
+            "location": {
+                "label": "Ort der Schlussfolgerung",
+                "description": "Standort der DeGirim-Inferenzmaschine (z. B. „@cloud“, „127.0.0.1“)."
+            },
+            "zoo": {
+                "label": "Modellzoo",
+                "description": "Pfad oder URL zum DeGirum-Modellzoo."
+            },
+            "token": {
+                "label": "DeGirum Cloud Token",
+                "description": "Zugangs-Token für DeGirum Cloud."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "EdgeTPU-Detektor, der TensorFlow Lite-Modelle ausführt, die mithilfe des EdgeTPU-Delegates für Coral EdgeTPU kompiliert wurden.",
+            "type": {
+                "label": "Type"
+            },
+            "model": {
+                "label": "Detektorspezifische Modellkonfiguration",
+                "description": "Detektorspezifische Optionen zur Modellkonfiguration (Pfad, Eingabegröße usw.).",
+                "path": {
+                    "label": "Pfad zum benutzerdefinierten Objekt-Erkennungsmodell",
+                    "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+                },
+                "labelmap_path": {
+                    "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                    "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+                },
+                "width": {
+                    "label": "Eingabebreite des Objekterkennungsmodells",
+                    "description": "Breite des Modell-Eingabetensors in Pixeln."
+                },
+                "height": {
+                    "label": "Eingabehöhe für das Objekt-Erkennungsmodell",
+                    "description": "Höhe des Modell-Eingabetensors in Pixeln."
+                },
+                "labelmap": {
+                    "label": "Anpassung der Labelmap",
+                    "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+                },
+                "attributes_map": {
+                    "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+                    "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+                },
+                "input_tensor": {
+                    "label": "Form des Modell-Eingabetensors",
+                    "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+                },
+                "input_pixel_format": {
+                    "label": "Standard-Pixel-Farbformat",
+                    "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+                },
+                "input_dtype": {
+                    "label": "Modell-Eingabe Typ D",
+                    "description": "Datentyp des Modell-Eingabetensors (z. B. „float32“)."
+                },
+                "model_type": {
+                    "label": "Typ des Objekterkennungsmodells",
+                    "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+                }
+            },
+            "model_path": {
+                "label": "Detektorspezifischer Modellpfad",
+                "description": "Dateipfad zur Binärdatei des Detektormodells, falls dies für den ausgewählten Detektor erforderlich ist."
+            },
+            "device": {
+                "label": "Gerätetyp",
+                "description": "Das für die EdgeTPU-Inferenz zu verwendende Gerät (z. B. „usb“, „pci“)."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Hailo-8/Hailo-8L-Detektor unter Verwendung von HEF-Modellen und dem HailoRT SDK für die Inferenz auf Hailo-Hardware.",
+            "type": {
+                "label": "Type"
+            },
+            "model": {
+                "label": "Detektorspezifische Modellkonfiguration",
+                "description": "Detektorspezifische Optionen zur Modellkonfiguration (Pfad, Eingabegröße usw.).",
+                "path": {
+                    "label": "Pfad zum benutzerdefinierten Objekterkennungsmodell",
+                    "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+                },
+                "labelmap_path": {
+                    "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                    "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+                },
+                "width": {
+                    "label": "Eingabebreite des Objekterkennungsmodells",
+                    "description": "Breite des Modell-Eingabetensors in Pixeln."
+                },
+                "height": {
+                    "label": "Eingabehöhe für das Objekt-Erkennungsmodell",
+                    "description": "Höhe des Modell-Eingabetensors in Pixeln."
+                },
+                "labelmap": {
+                    "label": "Anpassung der Labelmap",
+                    "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+                },
+                "attributes_map": {
+                    "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+                    "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+                },
+                "input_tensor": {
+                    "label": "Form des Modell-Eingabetensors",
+                    "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+                },
+                "input_pixel_format": {
+                    "label": "Standard-Pixel-Farbformat",
+                    "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+                },
+                "input_dtype": {
+                    "label": "Modell-Eingangs-D-Typ",
+                    "description": "Datentyp des Modell-Eingabetensors (z. B. „float32“)."
+                },
+                "model_type": {
+                    "label": "Typ des Objekterkennungsmodells",
+                    "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+                }
+            },
+            "model_path": {
+                "label": "Detektorspezifischer Modellpfad",
+                "description": "Dateipfad zur Binärdatei des Detektormodells, falls dies für den ausgewählten Detektor erforderlich ist."
+            },
+            "device": {
+                "label": "Geräte Type",
+                "description": "Das für die Hailo-Verbindung zu verwendende Gerät (z. B. „PCIe“, „M.2“)."
+            }
+        },
+        "rknn": {
+            "model": {
+                "input_dtype": {
+                    "label": "Modell-Eingangs-D-Typ"
+                }
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "MemryX MX3-Detektor, der kompilierte DFP-Modelle auf MemryX-Beschleunigern ausführt.",
+            "type": {
+                "label": "Type"
+            },
+            "model": {
+                "label": "Detektorspezifische Modellkonfiguration",
+                "description": "Detektorspezifische Optionen zur Modellkonfiguration (Pfad, Eingabegröße usw.).",
+                "path": {
+                    "label": "Pfad zum benutzerdefinierten Objekterkennungsmodell",
+                    "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+                },
+                "labelmap_path": {
+                    "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                    "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+                },
+                "width": {
+                    "label": "Eingabebreite des Objekterkennungsmodells",
+                    "description": "Breite des Modell-Eingabetensors in Pixeln."
+                },
+                "height": {
+                    "label": "Eingabehöhe für das Objekterkennungsmodell",
+                    "description": "Höhe des Modell-Eingabetensors in Pixeln."
+                },
+                "labelmap": {
+                    "label": "Anpassung der Labelmap",
+                    "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+                },
+                "attributes_map": {
+                    "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+                    "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+                },
+                "input_tensor": {
+                    "label": "Form des Modell-Eingabetensors",
+                    "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+                },
+                "input_pixel_format": {
+                    "label": "Standard-Pixel-Farbformat",
+                    "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+                }
+            }
+        }
+    },
+    "objects": {
+        "label": "Objekte",
+        "description": "Standardeinstellungen für die Objektverfolgung, einschließlich der zu verfolgenden Labels und Filter pro Objekt.",
+        "track": {
+            "label": "Zu verfolgende Objekte"
+        },
+        "filters": {
+            "label": "Objektfilter",
+            "description": "Filter, die auf erkannte Objekte angewendet werden, um Fehlalarme zu reduzieren (Fläche, Verhältnis, Konfidenz).",
+            "min_area": {
+                "label": "Mindestobjektfläche",
+                "description": "Mindestfläche der Begrenzungsbox (Pixel oder Prozentangabe), die für diesen Objekttyp erforderlich ist. Kann in Pixel (int) oder Prozentangabe (Float zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "max_area": {
+                "label": "Maximale Objektfläche",
+                "description": "Maximal zulässige Begrenzungsrahmenfläche (Pixel oder Prozent) für diesen Objekttyp. Kann in Pixel (int) oder Prozent (Float zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "min_ratio": {
+                "label": "Mindestseitenverhältnis",
+                "description": "Mindestverhältnis von Breite zu Höhe, das für die Begrenzungsbox erforderlich ist, damit diese gültig ist."
+            },
+            "max_ratio": {
+                "label": "Maximales Seitenverhältnis",
+                "description": "Maximal zulässiges Verhältnis von Breite zu Höhe für die Begrenzungsbox, damit diese gültig ist."
+            },
+            "threshold": {
+                "label": "Konfidenzschwelle",
+                "description": "Durchschnittlicher Schwellenwert für die Erkennungssicherheit, der erforderlich ist, damit das Objekt als echt positiv eingestuft wird."
+            },
+            "min_score": {
+                "label": "Mindestvertrauen",
+                "description": "Mindestkonfidenz für die Einzelbilderkennung, die für die Zählung des Objekts erforderlich ist."
+            },
+            "mask": {
+                "label": "Filter Maske",
+                "description": "Polygonkoordinaten, die definieren, wo dieser Filter innerhalb des Rahmens angewendet wird."
+            },
+            "raw_mask": {
+                "label": "Rohmaske"
+            }
+        },
+        "mask": {
+            "label": "Objekt Maskierung",
+            "description": "Maskenpolygon, das verwendet wird, um die Objekterkennung in bestimmten Bereichen zu verhindern."
+        },
+        "genai": {
+            "label": "GenAI-Objektkonfiguration",
+            "description": "GenAI-Optionen zum Beschreiben verfolgter Objekte und zum Senden von Frames zur Generierung.",
+            "enabled": {
+                "label": "Aktivieren GenAI",
+                "description": "Die Erstellung von Beschreibungen für verfolgte Objekte durch GenAI standardmäßig aktivieren."
+            },
+            "use_snapshot": {
+                "label": "Verwenden Sie Momentaufnahmen",
+                "description": "Verwenden Sie für die Erstellung von Beschreibungen durch GenAI Objektsnapshots anstelle von Miniaturansichten."
+            },
+            "prompt": {
+                "label": "Aufforderung zur Bildunterschrift",
+                "description": "Standardvorlage für Eingabeaufforderungen, die bei der Erstellung von Beschreibungen mit GenAI verwendet wird."
+            },
+            "object_prompts": {
+                "label": "Objekt-Eingabeaufforderungen",
+                "description": "Objektbezogene Eingabeaufforderungen zur Anpassung der GenAI-Ausgaben an bestimmte Labels."
+            },
+            "objects": {
+                "label": "GenAI-Objekte",
+                "description": "Liste der Objektbezeichnungen, die standardmäßig an GenAI gesendet werden sollen."
+            },
+            "required_zones": {
+                "label": "Erforderliche Zonen",
+                "description": "Felder, die ausgefüllt werden müssen, damit Objekte für die Erstellung einer GenAI-Beschreibung in Frage kommen."
+            },
+            "debug_save_thumbnails": {
+                "label": "Miniaturansichten speichern",
+                "description": "Speichere die an GenAI gesendeten Miniaturansichten zur Fehlerbehebung und Überprüfung."
+            },
+            "send_triggers": {
+                "label": "GenAI-Auslöser",
+                "description": "Legt fest, wann Frames an GenAI gesendet werden sollen (am Ende, nach Aktualisierungen usw.).",
+                "tracked_object_end": {
+                    "label": "weiterleiten",
+                    "description": "Sende eine Anfrage an GenAI, sobald das verfolgte Objekt sein Ziel erreicht hat."
+                },
+                "after_significant_updates": {
+                    "label": "Früher GenAI-Auslöser",
+                    "description": "Sende eine Anfrage an GenAI, nachdem eine bestimmte Anzahl bedeutender Aktualisierungen für das verfolgte Objekt erfolgt ist."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Ursprünglicher GenAI-Zustand",
+                "description": "Gibt an, ob GenAI in der ursprünglichen statischen Konfiguration aktiviert war."
+            }
+        },
+        "raw_mask": {
+            "label": "Rohmaske"
+        }
+    },
+    "record": {
+        "label": "Aufnahme",
+        "enabled": {
+            "label": "Aufnahme aktivieren"
+        },
+        "expire_interval": {
+            "label": "Bereinigungsintervall festlegen",
+            "description": "Minuten zwischen den Bereinigungsdurchläufen, bei denen abgelaufene Aufzeichnungssegmente entfernt werden."
+        },
+        "continuous": {
+            "label": "Dauerhafte Aufbewahrung",
+            "description": "Anzahl der Tage, für die Aufzeichnungen unabhängig von verfolgten Objekten oder Bewegungen aufbewahrt werden sollen. Setzen Sie diesen Wert auf 0, wenn Sie nur Aufzeichnungen von Warnmeldungen und Erkennungen aufbewahren möchten.",
+            "days": {
+                "label": "Aufbewahrungsfristen",
+                "description": "Aufbewahrungsdauer der Aufzeichnungen."
+            }
+        },
+        "motion": {
+            "label": "Bewegungsnachlauf",
+            "description": "Anzahl der Tage, für die durch Bewegung ausgelöste Aufzeichnungen unabhängig von den verfolgten Objekten aufbewahrt werden sollen. Setzen Sie diesen Wert auf 0, wenn Sie nur Aufzeichnungen von Warnmeldungen und Erkennungen aufbewahren möchten.",
+            "days": {
+                "label": "Aufbewahrungsfristen",
+                "description": "Aufbewahrungsdauer der Aufzeichnungen."
+            }
+        },
+        "detections": {
+            "label": "Nachweis und Aufbewahrung",
+            "description": "Einstellungen zur Aufbewahrungsdauer von Aufzeichnungen für Erkennungsereignisse, einschließlich der Dauer vor und nach der Aufzeichnung.",
+            "pre_capture": {
+                "label": "Sekunden vor der Aufnahme",
+                "description": "Anzahl der Sekunden vor dem Erkennungsereignis, die in die Aufzeichnung aufgenommen werden sollen."
+            },
+            "post_capture": {
+                "label": "Sekunden nach der Aufnahme",
+                "description": "Anzahl der Sekunden nach dem Erkennungsereignis, die in die Aufzeichnung aufgenommen werden sollen."
+            },
+            "retain": {
+                "label": "Ereignisspeicherung",
+                "description": "Aufbewahrungsdauer für Aufzeichnungen von Erkennungsereignissen.",
+                "days": {
+                    "label": "Aufbewahrungsfristen",
+                    "description": "Anzahl der Tage, für die Aufzeichnungen von Erkennungsereignissen aufbewahrt werden sollen."
+                },
+                "mode": {
+                    "label": "Speichermodus",
+                    "description": "Speichermodus: „all“ (alle Segmente speichern), „motion“ (Segmente mit Bewegung speichern) oder „active_objects“ (Segmente mit aktiven Objekten speichern)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Aufbewahrungsfrist für Benachrichtigungen",
+            "description": "Einstellungen zur Aufbewahrungsdauer von Aufzeichnungen für Alarmereignisse, einschließlich der Dauer vor und nach dem Aufzeichnungsstart.",
+            "pre_capture": {
+                "label": "Sekunden vor der Aufnahme",
+                "description": "Anzahl der Sekunden vor dem Erkennungsereignis, die in die Aufzeichnung aufgenommen werden sollen."
+            },
+            "post_capture": {
+                "label": "Sekunden nach der Aufnahme",
+                "description": "Anzahl der Sekunden nach dem Erkennungsereignis, die in die Aufzeichnung aufgenommen werden sollen."
+            },
+            "retain": {
+                "label": "Ereignisspeicherung",
+                "description": "Aufbewahrungsdauer für Aufzeichnungen von Erkennungsereignissen.",
+                "days": {
+                    "label": "Aufbewahrungsfrist",
+                    "description": "Anzahl der Tage, für die Aufzeichnungen von Erkennungsereignissen aufbewahrt werden sollen."
+                },
+                "mode": {
+                    "label": "Speichermodus",
+                    "description": "Speichermodus: „all“ (alle Segmente speichern), „motion“ (Segmente mit Bewegung speichern) oder „active_objects“ (Segmente mit aktiven Objekten speichern)."
+                }
+            }
+        },
+        "export": {
+            "label": "Konfiguration exportieren",
+            "description": "Einstellungen, die beim Exportieren von Aufzeichnungen wie Zeitrafferaufnahmen und bei der Hardwarebeschleunigung verwendet werden.",
+            "hwaccel_args": {
+                "label": "hwaccel-Argumente exportieren",
+                "description": "Argumente für die Hardwarebeschleunigung bei Export- und Transkodierungsvorgängen."
+            }
+        },
+        "preview": {
+            "label": "Konfigurationsvorschau",
+            "description": "Einstellungen zur Steuerung der Qualität der in der Benutzeroberfläche angezeigten Aufnahmevorschauen.",
+            "quality": {
+                "label": "Vorschauqualität",
+                "description": "Qualitätsstufe der Vorschau (sehr_niedrig, niedrig, mittel, hoch, sehr_hoch)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Ursprünglicher Aufnahmestatus",
+            "description": "Gibt an, ob die Aufzeichnung in der ursprünglichen statischen Konfiguration aktiviert war."
+        }
+    },
+    "review": {
+        "label": "Rezension",
+        "alerts": {
+            "label": "Benachrichtigungseinstellungen",
+            "description": "Einstellungen dazu, bei welchen überwachten Objekten Warnmeldungen generiert werden und wie lange diese aufbewahrt werden.",
+            "enabled": {
+                "label": "Benachrichtigungen aktivieren"
+            },
+            "labels": {
+                "label": "Warnhinweise",
+                "description": "Liste der Objektbezeichnungen, die als Warnmeldungen gelten (zum Beispiel: Auto, Person)."
+            },
+            "required_zones": {
+                "label": "Erforderliche Zonen",
+                "description": "Zonen, die ein Objekt betreten muss, damit ein Alarm ausgelöst wird; lassen Sie das Feld leer, wenn alle Zonen zulässig sein sollen."
+            },
+            "enabled_in_config": {
+                "label": "Ursprünglicher Alarmstatus",
+                "description": "Zeigt an, ob Warnmeldungen ursprünglich in der statischen Konfiguration aktiviert waren."
+            },
+            "cutoff_time": {
+                "label": "Annahmeschluss für Benachrichtigungen",
+                "description": "Sekunden, die nach dem Ende einer alarmauslösenden Aktivität gewartet werden müssen, bevor der Alarm abgeschaltet wird."
+            }
+        },
+        "detections": {
+            "label": "Konfiguration der Erkennungen",
+            "description": "Einstellungen zum Erstellen von Erkennungsereignissen (ohne Alarm) und zur Festlegung ihrer Aufbewahrungsdauer.",
+            "enabled": {
+                "label": "Erkennung aktivieren"
+            },
+            "labels": {
+                "label": "Kennzeichnungen zur Erkennung",
+                "description": "Liste der Objektbezeichnungen, die als Erkennungsereignisse gelten."
+            },
+            "required_zones": {
+                "label": "Erforderliche Zonen",
+                "description": "Zonen, die ein Objekt betreten muss, damit es als Erkennung gewertet wird; lassen Sie das Feld leer, wenn alle Zonen zulässig sein sollen."
+            },
+            "cutoff_time": {
+                "label": "Zeitpunkt der Erkennung",
+                "description": "Sekunden, die nach dem Ende einer Aktivität, die keine Erkennung auslöst, gewartet werden müssen, bevor die Erkennung unterbrochen wird."
+            },
+            "enabled_in_config": {
+                "label": "Ursprünglicher Erkennungsstatus",
+                "description": "Zeigt an, ob die Erkennung ursprünglich in der statischen Konfiguration aktiviert war."
+            }
+        },
+        "genai": {
+            "label": "GenAI-Konfiguration",
+            "description": "Steuert den Einsatz generativer KI zur Erstellung von Beschreibungen und Zusammenfassungen von Rezensionsobjekten.",
+            "enabled": {
+                "label": "GenAI-Beschreibungen aktivieren",
+                "description": "Aktivieren oder deaktivieren Sie von GenAI generierte Beschreibungen und Zusammenfassungen für Überprüfungselemente."
+            },
+            "alerts": {
+                "label": "GenAI für Benachrichtigungen aktivieren",
+                "description": "Verwenden Sie GenAI, um Beschreibungen für Alarmmeldungen zu erstellen."
+            },
+            "detections": {
+                "label": "GenAI für die Erkennung aktivieren",
+                "description": "Verwenden Sie GenAI, um Beschreibungen für Erkennungselemente zu erstellen."
+            },
+            "image_source": {
+                "label": "Quelle des Bildes",
+                "description": "Quelle der an GenAI gesendeten Bilder („Vorschau“ oder „Aufzeichnungen“); „Aufzeichnungen“ verwenden Bilder in höherer Qualität, verbrauchen jedoch mehr Token."
+            },
+            "additional_concerns": {
+                "label": "Weitere Bedenken",
+                "description": "Eine Liste weiterer Aspekte oder Hinweise, die GenAI bei der Auswertung der Aktivitäten dieser Kamera berücksichtigen sollte."
+            },
+            "debug_save_thumbnails": {
+                "label": "Miniaturansichten speichern",
+                "description": "Speichern Sie Miniaturansichten, die zur Fehlerbehebung und Überprüfung an den GenAI-Anbieter gesendet werden."
+            },
+            "enabled_in_config": {
+                "label": "Ursprünglicher GenAI-Zustand",
+                "description": "Zeigt an, ob die GenAI-Überprüfung ursprünglich in der statischen Konfiguration aktiviert war."
+            },
+            "preferred_language": {
+                "label": "Bevorzugte Sprache",
+                "description": "Bevorzugte Sprache, in der die generierten Antworten vom GenAI-Anbieter bereitgestellt werden sollen."
+            },
+            "activity_context_prompt": {
+                "label": "Aufforderung zum Aktivitätskontext",
+                "description": "Eine benutzerdefinierte Eingabeaufforderung, die beschreibt, was als verdächtiges Verhalten gilt und was nicht, um den Zusammenfassungen der generativen KI einen Kontext zu geben."
+            }
+        }
+    },
+    "onvif": {
+        "autotracking": {
+            "required_zones": {
+                "label": "Erforderliche Zonen"
+            },
+            "movement_weights": {
+                "description": "Diese Kalibrierungswerte werden automatisch durch die Kamerakalibrierung generiert. Bitte nicht manuell ändern."
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Semantische Suche",
+        "triggers": {
+            "label": "Auslöser",
+            "description": "Aktionen und Übereinstimmungskriterien für kameraspezifische Auslöser der semantischen Suche.",
+            "friendly_name": {
+                "label": "Anzeigename",
+                "description": "Optionaler beschreibender Name, der in der Benutzeroberfläche für diesen Trigger angezeigt wird."
+            },
+            "enabled": {
+                "label": "Diesen Trigger aktivieren",
+                "description": "Diesen Trigger für die semantische Suche aktivieren oder deaktivieren."
+            },
+            "type": {
+                "label": "Auslöseart",
+                "description": "Auslösertyp: „thumbnail“ (Abgleich mit Bild) oder „description“ (Abgleich mit Text)."
+            },
+            "data": {
+                "label": "Inhalt anzeigen",
+                "description": "Textphrase oder Miniaturbild-ID, die mit den verfolgten Objekten abgeglichen werden soll."
+            },
+            "threshold": {
+                "label": "Auslöseschwelle",
+                "description": "Erforderlicher Mindestähnlichkeitswert (0–1) zur Aktivierung dieses Triggers."
+            },
+            "actions": {
+                "label": "Trigger-Aktionen",
+                "description": "Liste der Aktionen, die ausgeführt werden sollen, wenn der Trigger ausgelöst wird (Benachrichtigung, Unterbezeichnung, Attribut)."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Schnappschüsse",
+        "enabled": {
+            "label": "Schnappschüsse aktiviert"
+        },
+        "clean_copy": {
+            "label": "Saubere Kopie speichern",
+            "description": "Save an unannotated clean copy of snapshots in addition to annotated ones."
+        },
+        "timestamp": {
+            "label": "Zeitstempel-Einblendung",
+            "description": "Füge den gespeicherten Momentaufnahmen einen Zeitstempel hinzu."
+        },
+        "bounding_box": {
+            "label": "Einblendung der Begrenzungsrahmen",
+            "description": "Zeichne Begrenzungsrahmen für verfolgte Objekte auf gespeicherten Momentaufnahmen."
+        }
     }
 }
