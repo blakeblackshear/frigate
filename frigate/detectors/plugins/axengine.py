@@ -29,7 +29,7 @@ class AxengineDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="AXEngine NPU",
     )
-    
+
     type: Literal[DETECTOR_KEY]
 
 
