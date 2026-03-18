@@ -32,8 +32,6 @@ import { PlayerStats } from "@/components/player/PlayerStats";
 import { MdCircle } from "react-icons/md";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MdCircle } from "react-icons/md";
-import { useCameraActivity } from "@/hooks/use-camera-activity";
 
 import { isEqual } from "lodash";
 import useSWR from "swr";
