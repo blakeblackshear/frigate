@@ -1344,9 +1344,7 @@ def grid_snapshot(
 @router.get(
     "/events/{event_id}/snapshot-clean.webp",
 )
-async def event_snapshot_clean(
-    request: Request, event_id: str, download: bool = False
-):
+async def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
     webp_bytes = None
     try:
         event = Event.get(Event.id == event_id)
