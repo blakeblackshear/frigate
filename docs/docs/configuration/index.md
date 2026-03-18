@@ -61,7 +61,7 @@ mqtt:
 
 ```yaml
 onvif:
-  host: "{FRIGATE_ONVIF_HOST}"
+  host: "192.168.1.12"
   port: 8000
   user: "{FRIGATE_RTSP_USER}"
   password: "{FRIGATE_RTSP_PASSWORD}"
