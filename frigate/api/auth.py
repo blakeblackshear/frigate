@@ -67,7 +67,6 @@ def require_admin_by_default():
         "/stats",
         "/stats/history",
         "/config",
-        "/config/raw",
         "/vainfo",
         "/nvinfo",
         "/labels",

@@ -218,7 +218,7 @@ def config_raw_paths(request: Request):
     return JSONResponse(content=raw_paths)
 
 
-@router.get("/config/raw", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/config/raw", dependencies=[Depends(require_role(["admin"]))])
 def config_raw():
     config_file = find_config_file()
 
