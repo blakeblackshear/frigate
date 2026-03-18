@@ -7,13 +7,14 @@
     "masksAndZones": "Editor de Máscara e Zona - Frigate",
     "motionTuner": "Ajuste de Movimento - Frigate",
     "object": "Debug - Frigate",
-    "general": "Configurações de Interface de Usuário - Frigate",
+    "general": "Configurações de perfil - Frigate",
     "frigatePlus": "Frigate+ Configurações- Frigate",
     "notifications": "Configurações de notificação - Frigate",
     "cameraManagement": "Gerenciar Câmeras - Frigate",
     "cameraReview": "Configurações de Revisão de Câmera - Frigate",
     "globalConfig": "Configuração Global - Frigate",
-    "cameraConfig": "Configuração da Câmera - Frigate"
+    "cameraConfig": "Configuração da Câmera - Frigate",
+    "maintenance": "Manutenção - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -28,7 +29,8 @@
     "triggers": "Gatilhos",
     "roles": "Papéis",
     "cameraManagement": "Gerenciamento",
-    "cameraReview": "Revisar"
+    "cameraReview": "Revisar",
+    "general": "Geral"
   },
   "dialog": {
     "unsavedChanges": {
