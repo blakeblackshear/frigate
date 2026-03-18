@@ -176,9 +176,7 @@ export function useCameraActivity(
     enabled: isCameraEnabled,
     activeTracking: isCameraEnabled ? hasActiveObjects : false,
     activeMotion: isCameraEnabled
-      ? detectingMotion
-        ? detectingMotion === "ON"
-        : updatedCameraState?.motion === true
+      ? updatedCameraState?.motion === true || detectingMotion === "ON"
       : false,
     objects: isCameraEnabled ? (objects ?? []) : [],
     audio_detections: isCameraEnabled ? (audioDetections ?? []) : [],
