@@ -42,7 +42,7 @@ export default function Events() {
 
   const [severity, setSeverity] = useOverlayState<ReviewSeverity>(
     "severity",
-    "alert",
+    "significant_motion",
   );
 
   const [showReviewed, setShowReviewed] = useUserPersistence(
