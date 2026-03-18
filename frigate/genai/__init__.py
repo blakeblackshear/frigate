@@ -153,6 +153,9 @@ Each line represents a detection state, not necessarily unique individuals. Pare
             if "other_concerns" in schema.get("required", []):
                 schema["required"].remove("other_concerns")
 
+        # OpenAI strict mode requires additionalProperties: false on all objects
+        schema["additionalProperties"] = False
+
         response_format = {
             "type": "json_schema",
             "json_schema": {

@@ -63,7 +63,7 @@ class LibvaGpuSelector:
         if not self._valid_gpus:
             return ""
 
-        if gpu <= len(self._valid_gpus):
+        if gpu < len(self._valid_gpus):
             return self._valid_gpus[gpu]
         else:
             logger.warning(f"Invalid GPU index {gpu}, using first valid GPU")
@@ -278,7 +278,7 @@ def parse_preset_hardware_acceleration_encode(
         arg_map = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE
 
     if not isinstance(arg, str):
-        return arg_map["default"].format(input, output)
+        return arg_map["default"].format(ffmpeg_path, input, output)
 
     # Not all jetsons have HW encoders, so fall back to default SW encoder if not
     if arg.startswith("preset-jetson-") and not os.path.exists("/dev/nvhost-msenc"):
@@ -436,7 +436,7 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
 
     if arg == "preset-http-jpeg-generic":
         input = PRESETS_INPUT[arg].copy()
-        input[len(_user_agent_args) + 1] = str(detect_fps)
+        input[1] = str(detect_fps)
         return input
 
     return PRESETS_INPUT.get(arg, None)

@@ -125,8 +125,6 @@ export function useCameraActivity(
           newObjects = [...(objects ?? []), newActiveObject];
         }
       } else {
-        const newObjects = [...(objects ?? [])];
-
         let label = updatedEvent.after.label;
 
         if (updatedEvent.after.sub_label) {

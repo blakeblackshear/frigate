@@ -303,12 +303,20 @@ class BirdsEyeFrameManager:
                 birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is not None:
-            transparent_layer = birdseye_logo[:, :, 3]
+            if birdseye_logo.ndim == 2:
+                # Grayscale image (no channels) — use directly as luminance
+                transparent_layer = birdseye_logo
+            elif birdseye_logo.shape[2] >= 4:
+                # RGBA — use alpha channel as luminance
+                transparent_layer = birdseye_logo[:, :, 3]
+            else:
+                # RGB or other format without alpha — convert to grayscale
+                transparent_layer = cv2.cvtColor(birdseye_logo, cv2.COLOR_BGR2GRAY)
             y_offset = height // 2 - transparent_layer.shape[0] // 2
             x_offset = width // 2 - transparent_layer.shape[1] // 2
             self.blank_frame[
-                y_offset : y_offset + transparent_layer.shape[1],
-                x_offset : x_offset + transparent_layer.shape[0],
+                y_offset : y_offset + transparent_layer.shape[0],
+                x_offset : x_offset + transparent_layer.shape[1],
             ] = transparent_layer
         else:
             logger.warning("Unable to read Frigate logo")
@@ -753,7 +761,7 @@ class BirdsEyeFrameManager:
             frame_changed, layout_changed = self.update_frame(frame)
         except Exception:
             frame_changed, layout_changed = False, False
-            self.active_cameras = []
+            self.active_cameras = set()
             self.camera_layout = []
             print(traceback.format_exc())
 

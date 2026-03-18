@@ -381,7 +381,7 @@ export default function Replay() {
         </div>
 
         {/* Side panel */}
-        <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-4/12">
+        <div className="order-last mb-2 mt-2 flex h-full w-full flex-col overflow-hidden rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-4/12">
           <div className="mb-5 flex flex-col space-y-2">
             <Heading as="h3" className="mb-0">
               {t("title")}
@@ -399,7 +399,10 @@ export default function Replay() {
               <p>{t("description")}</p>
             </div>
           </div>
-          <Tabs defaultValue="debug" className="flex h-full w-full flex-col">
+          <Tabs
+            defaultValue="debug"
+            className="flex min-h-0 w-full flex-1 flex-col"
+          >
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="debug">
                 {t("debug.debugging", { ns: "views/settings" })}
@@ -409,7 +412,10 @@ export default function Replay() {
                 {t("websocket_messages")}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="debug" className="mt-2">
+            <TabsContent
+              value="debug"
+              className="scrollbar-container mt-2 overflow-y-auto"
+            >
               <div className="mt-2 space-y-6">
                 <div className="my-2.5 flex flex-col gap-2.5">
                   {DEBUG_OPTION_KEYS.map((key) => {
@@ -554,7 +560,10 @@ export default function Replay() {
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="objects" className="mt-2">
+            <TabsContent
+              value="objects"
+              className="scrollbar-container mt-2 overflow-y-auto"
+            >
               <ObjectList
                 cameraConfig={replayCameraConfig}
                 objects={objects}
