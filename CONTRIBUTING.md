@@ -12,7 +12,7 @@ If you've found a bug and want to fix it, go for it. Link to the relevant issue 
 
 Every new feature adds scope that the maintainers must test, maintain, and support long-term. Before writing code for a new feature:
 
-1. **Check for existing discussion.** Search [feature requests](https://github.com/blakeblackshear/frigate/issues) and [discussions](https://github.com/blakeblackshear/frigate/discussions) to see if it's been proposed or discussed.
+1. **Check for existing discussion.** Search [feature requests](https://github.com/blakeblackshear/frigate/issues) and [discussions](https://github.com/blakeblackshear/frigate/discussions) to see if it's been proposed or discussed. Pinned feature requests are on our radar — we plan to get to them, but we don't maintain a public roadmap or timeline. Check in with us first if you have interest in contributing to one.
 2. **Start a discussion or feature request first.** This helps ensure your idea aligns with Frigate's direction before you invest time building it. Community interest in a feature request helps us gauge demand, though a great idea is a great idea even without a crowd behind it.
 3. **Be open to "no".** We try to be thoughtful about what we take on, and sometimes that means saying no to good code if the feature isn't the right fit for the project. These calls are sometimes subjective, and we won't always get them right. We're happy to discuss and reconsider.
 
