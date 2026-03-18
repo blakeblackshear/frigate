@@ -1,7 +1,29 @@
 {
     "audio": {
         "global": {
-            "detection": "Détection globale"
+            "detection": "Détection globale",
+            "sensitivity": "Sensibilité globale"
+        },
+        "cameras": {
+            "detection": "Détection",
+            "sensitivity": "Sensibilité"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Apparence générale"
+        },
+        "cameras": {
+            "appearance": "Apparence"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Sensibilité globale",
+            "algorithm": "Algorithme global"
+        },
+        "cameras": {
+            "sensitivity": "Sensibilité"
         }
     }
 }
