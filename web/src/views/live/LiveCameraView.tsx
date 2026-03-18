@@ -760,7 +760,7 @@ export default function LiveCameraView({
               >
                 {clickOverlay && (
                   <div
-                    className="absolute inset-0 z-40 cursor-crosshair select-none"
+                    className="absolute inset-0 z-40 cursor-crosshair select-none touch-none"
                     onMouseDown={handleOverlayMouseDown}
                     onMouseMove={handleOverlayMouseMove}
                     onMouseUp={handleOverlayMouseUp}
