@@ -1893,7 +1893,7 @@ async def review_preview(
     "/preview/{file_name}/thumbnail.webp",
     dependencies=[Depends(allow_any_authenticated())],
 )
-def preview_thumbnail(file_name: str):
+async def preview_thumbnail(request: Request, file_name: str):
     """Get a thumbnail from the cached preview frames."""
     if len(file_name) > 1000:
         return JSONResponse(
@@ -1902,6 +1902,17 @@ def preview_thumbnail(file_name: str):
             ),
             status_code=403,
         )
+
+    # Extract camera name from preview filename (format: preview_{camera}-{timestamp}.ext)
+    if not file_name.startswith("preview_"):
+        return JSONResponse(
+            content={"success": False, "message": "Invalid preview filename"},
+            status_code=400,
+        )
+    # Use rsplit to handle camera names containing dashes (e.g. front-door)
+    name_part = file_name[len("preview_") :].rsplit(".", 1)[0]  # strip extension
+    camera_name = name_part.rsplit("-", 1)[0]  # split off timestamp
+    await require_camera_access(camera_name, request=request)
 
     safe_file_name_current = sanitize_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
