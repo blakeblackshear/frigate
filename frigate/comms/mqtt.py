@@ -38,6 +38,7 @@ class MqttClient(Communicator):
         )
 
     def stop(self) -> None:
+        self.publish("available", "stopped", retain=True)
         self.client.disconnect()
 
     def _set_initial_topics(self) -> None:
