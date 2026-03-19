@@ -452,8 +452,6 @@ async def _execute_set_camera_state(
     if not camera or not feature or not value:
         return {"error": "camera, feature, and value are all required."}
 
-    from frigate.api.camera import _SUB_COMMAND_FEATURES
-
     dispatcher = request.app.dispatcher
     frigate_config = request.app.frigate_config
 
