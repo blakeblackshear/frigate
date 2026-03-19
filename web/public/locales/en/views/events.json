@@ -43,7 +43,9 @@
   },
   "documentTitle": "Review - Frigate",
   "recordings": {
-    "documentTitle": "Recordings - Frigate"
+    "documentTitle": "Recordings - Frigate",
+    "invalidSharedLink": "Unable to open timestamped recording link due to parsing error.",
+    "invalidSharedCamera": "Unable to open timestamped recording link due to an unknown or unauthorized camera."
   },
   "calendarFilter": {
     "last24Hours": "Last 24 Hours"

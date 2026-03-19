@@ -30,9 +30,10 @@ import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function Events() {
@@ -74,6 +75,7 @@ export default function Events() {
   const [motionSearchDay, setMotionSearchDay] = useState<Date | undefined>(
     undefined,
   );
+  const handledReviewLinkRef = useRef<string | null>(null);
 
   const motionSearchCameras = useMemo(() => {
     if (!config?.cameras) {
@@ -257,16 +259,48 @@ export default function Events() {
     const timezone = searchParams.get(RECORDING_REVIEW_TIMEZONE_PARAM);
 
     if (!timestamp) {
+      handledReviewLinkRef.current = null;
+      return;
+    }
+
+    if (!config) {
       return;
     }
 
     const camera = location.hash
       ? decodeURIComponent(location.hash.substring(1))
       : null;
+    const reviewLinkKey = `${camera ?? ""}|${timestamp}|${timezone ?? ""}`;
+
+    if (handledReviewLinkRef.current === reviewLinkKey) {
+      return;
+    }
+
+    handledReviewLinkRef.current = reviewLinkKey;
 
     const reviewLink = parseRecordingReviewLink(camera, timestamp, timezone);
 
     if (!reviewLink) {
+      toast.error(t("recordings.invalidSharedLink"), {
+        position: "top-center",
+      });
+      navigate(location.pathname, {
+        state: location.state,
+        replace: true,
+      });
+      return;
+    }
+
+    // reject unknown or unauthorized cameras before switching into
+    // recording view so bad links cleanly fall back to plain /review
+    const validCamera =
+      config.cameras[reviewLink.camera] &&
+      allowedCameras.includes(reviewLink.camera);
+
+    if (!validCamera) {
+      toast.error(t("recordings.invalidSharedCamera"), {
+        position: "top-center",
+      });
       navigate(location.pathname, {
         state: location.state,
         replace: true,
@@ -298,11 +332,14 @@ export default function Events() {
     location.hash,
     location.pathname,
     location.state,
+    config,
     navigate,
+    allowedCameras,
     getReviewDayBounds,
     reviewFilter,
     searchParams,
     setReviewFilter,
+    t,
   ]);
 
   // review paging
