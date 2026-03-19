@@ -42,7 +42,6 @@ import {
   isTablet,
 } from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { LuCopy } from "react-icons/lu";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
@@ -78,8 +77,8 @@ import {
   GenAISummaryDialog,
   GenAISummaryChip,
 } from "@/components/overlay/chip/GenAISummaryChip";
-import copy from "copy-to-clipboard";
-import { toast } from "sonner";
+import ShareTimestampDialog from "@/components/overlay/ShareTimestampDialog";
+import { shareOrCopy } from "@/utils/browserUtil";
 import { createRecordingReviewUrl } from "@/utils/recordingReviewUrl";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
@@ -211,6 +210,7 @@ export function RecordingView({
 
   const [debugReplayMode, setDebugReplayMode] = useState<ExportMode>("none");
   const [debugReplayRange, setDebugReplayRange] = useState<TimeRange>();
+  const [shareTimestampOpen, setShareTimestampOpen] = useState(false);
 
   // move to next clip
 
@@ -333,21 +333,21 @@ export function RecordingView({
     manuallySetCurrentTime(startTime);
   }, [startTime, manuallySetCurrentTime]);
 
-  const onCopyReviewLink = useCallback(() => {
-    const reviewUrl = createRecordingReviewUrl(
-      location.pathname,
-      {
-        camera: mainCamera,
-        timestamp: Math.floor(currentTime),
-      },
-      config?.ui.timezone,
-    );
+  const onShareReviewLink = useCallback(
+    (timestamp: number) => {
+      const reviewUrl = createRecordingReviewUrl(
+        location.pathname,
+        {
+          camera: mainCamera,
+          timestamp: Math.floor(timestamp),
+        },
+        config?.ui.timezone,
+      );
 
-    copy(reviewUrl);
-    toast.success(t("toast.copyUrlToClipboard", { ns: "common" }), {
-      position: "top-center",
-    });
-  }, [location.pathname, mainCamera, currentTime, config?.ui.timezone, t]);
+      shareOrCopy(reviewUrl, `Frigate Review Timestamp: ${mainCamera}`);
+    },
+    [location.pathname, mainCamera, config?.ui.timezone],
+  );
 
   useEffect(() => {
     if (!scrubbing) {
@@ -695,21 +695,17 @@ export function RecordingView({
                 setMotionOnly={() => {}}
               />
             )}
-            <Button
-              className="flex items-center gap-2.5 rounded-lg"
-              aria-label={t("button.copy", { ns: "common" })}
-              size="sm"
-              onClick={onCopyReviewLink}
-            >
-              <LuCopy className="size-4 text-secondary-foreground" />
-              {isDesktop && (
-                <div className="text-primary">
-                  {t("button.copy", { ns: "common" })}
-                </div>
-              )}
-            </Button>
+            <ShareTimestampDialog
+              currentTime={currentTime}
+              open={shareTimestampOpen}
+              onOpenChange={setShareTimestampOpen}
+              onShareTimestamp={onShareReviewLink}
+            />
             {isDesktop && (
               <ActionsDropdown
+                onShareTimestampClick={() => {
+                  setShareTimestampOpen(true);
+                }}
                 onDebugReplayClick={() => {
                   const now = new Date(timeRange.before * 1000);
                   now.setHours(now.getHours() - 1);
@@ -788,6 +784,9 @@ export function RecordingView({
                 if (range != undefined) {
                   mainControllerRef.current?.pause();
                 }
+              }}
+              onShareTimestampClick={() => {
+                setShareTimestampOpen(true);
               }}
               onUpdateFilter={updateFilter}
               setRange={setExportRange}

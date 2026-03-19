@@ -11,11 +11,13 @@ import { FaFilm } from "react-icons/fa6";
 type ActionsDropdownProps = {
   onDebugReplayClick: () => void;
   onExportClick: () => void;
+  onShareTimestampClick: () => void;
 };
 
 export default function ActionsDropdown({
   onDebugReplayClick,
   onExportClick,
+  onShareTimestampClick,
 }: ActionsDropdownProps) {
   const { t } = useTranslation(["components/dialog", "views/replay", "common"]);
 
@@ -36,6 +38,9 @@ export default function ActionsDropdown({
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onExportClick}>
           {t("menu.export", { ns: "common" })}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onShareTimestampClick}>
+          Share Timestamp
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onDebugReplayClick}>
           {t("title", { ns: "views/replay" })}

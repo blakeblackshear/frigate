@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
-import { LuBug } from "react-icons/lu";
+import { LuBug, LuShare2 } from "react-icons/lu";
 import { TimeRange } from "@/types/timeline";
 import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
 import {
@@ -33,13 +33,15 @@ type DrawerMode =
   | "export"
   | "calendar"
   | "filter"
-  | "debug-replay";
+  | "debug-replay"
+  | "share-timestamp";
 
 const DRAWER_FEATURES = [
   "export",
   "calendar",
   "filter",
   "debug-replay",
+  "share-timestamp",
 ] as const;
 export type DrawerFeatures = (typeof DRAWER_FEATURES)[number];
 const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
@@ -47,6 +49,7 @@ const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
   "calendar",
   "filter",
   "debug-replay",
+  "share-timestamp",
 ];
 
 type MobileReviewSettingsDrawerProps = {
@@ -67,6 +70,7 @@ type MobileReviewSettingsDrawerProps = {
   debugReplayRange?: TimeRange;
   setDebugReplayMode?: (mode: ExportMode) => void;
   setDebugReplayRange?: (range: TimeRange | undefined) => void;
+  onShareTimestampClick?: () => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -90,6 +94,7 @@ export default function MobileReviewSettingsDrawer({
   debugReplayRange,
   setDebugReplayMode = () => {},
   setDebugReplayRange = () => {},
+  onShareTimestampClick = () => {},
   onUpdateFilter,
   setRange,
   setMode,
@@ -273,6 +278,19 @@ export default function MobileReviewSettingsDrawer({
           >
             <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
             {t("export")}
+          </Button>
+        )}
+        {features.includes("share-timestamp") && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label="Share timestamp"
+            onClick={() => {
+              setDrawerMode("none");
+              onShareTimestampClick();
+            }}
+          >
+            <LuShare2 className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
+            Share Timestamp
           </Button>
         )}
         {features.includes("calendar") && (
