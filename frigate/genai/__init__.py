@@ -120,9 +120,7 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 
 ## Objects in Scene
 
-Each line represents a detection state, not necessarily unique individuals. The `←` symbol separates a recognized subject's name from their object type — use only the name (before the `←`) in your response, not the type after it.
-
-**CRITICAL: When you see both a named entry and an unnamed entry of the same type (e.g., "[Name] ← person" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name/label (the part before the `←` symbol). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
+Each line represents a detection state, not necessarily unique individuals. The `←` symbol separates a recognized subject's name from their object type — use only the name (before the `←`) in your response, not the type after it. The same subject may appear across multiple lines if detected multiple times.
 
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
