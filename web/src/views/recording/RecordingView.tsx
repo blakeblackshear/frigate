@@ -335,14 +335,10 @@ export function RecordingView({
 
   const onShareReviewLink = useCallback(
     (timestamp: number) => {
-      const reviewUrl = createRecordingReviewUrl(
-        location.pathname,
-        {
-          camera: mainCamera,
-          timestamp: Math.floor(timestamp),
-        },
-        config?.ui.timezone,
-      );
+      const reviewUrl = createRecordingReviewUrl(location.pathname, {
+        camera: mainCamera,
+        timestamp: Math.floor(timestamp),
+      });
 
       shareOrCopy(
         reviewUrl,
@@ -352,7 +348,7 @@ export function RecordingView({
         }),
       );
     },
-    [location.pathname, mainCamera, config?.ui.timezone, t],
+    [location.pathname, mainCamera, t],
   );
 
   useEffect(() => {
