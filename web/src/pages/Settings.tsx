@@ -47,6 +47,7 @@ import ProfilesView from "@/views/settings/ProfilesView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
 import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
+import Go2RtcStreamsSettingsView from "@/views/settings/Go2RtcStreamsSettingsView";
 import SystemDetectionModelSettingsView from "@/views/settings/SystemDetectionModelSettingsView";
 import {
   SingleSectionPage,
@@ -132,6 +133,7 @@ const allSettingsViews = [
   "systemDetectorHardware",
   "systemDetectionModel",
   "systemMqtt",
+  "systemGo2rtcStreams",
   "integrationSemanticSearch",
   "integrationGenerativeAi",
   "integrationFaceRecognition",
@@ -415,6 +417,10 @@ const settingsGroups = [
     label: "system",
     items: [
       {
+        key: "systemGo2rtcStreams",
+        component: Go2RtcStreamsSettingsView,
+      },
+      {
         key: "systemDetectorHardware",
         component: SystemDetectorHardwareSettingsPage,
       },
@@ -562,6 +568,7 @@ const ENRICHMENTS_SECTION_MAPPING: Record<string, SettingsType> = {
 };
 
 const SYSTEM_SECTION_MAPPING: Record<string, SettingsType> = {
+  go2rtc_streams: "systemGo2rtcStreams",
   database: "systemDatabase",
   mqtt: "systemMqtt",
   tls: "systemTls",
