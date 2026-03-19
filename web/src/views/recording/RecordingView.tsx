@@ -145,7 +145,6 @@ export function RecordingView({
       ? startTime
       : timeRange.before - 60,
   );
-  const lastAppliedStartTimeRef = useRef(startTime);
 
   const mainCameraReviewItems = useMemo(
     () => reviewItems?.filter((cam) => cam.camera == mainCamera) ?? [],
@@ -322,16 +321,6 @@ export function RecordingView({
     },
     [currentTimeRange, updateSelectedSegment],
   );
-
-  useEffect(() => {
-    if (lastAppliedStartTimeRef.current === startTime) {
-      return;
-    }
-
-    lastAppliedStartTimeRef.current = startTime;
-    setPlayerTime(startTime);
-    manuallySetCurrentTime(startTime);
-  }, [startTime, manuallySetCurrentTime]);
 
   const onShareReviewLink = useCallback(
     (timestamp: number) => {
