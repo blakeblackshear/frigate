@@ -36,3 +36,11 @@ class CameraGroupConfig(FrigateBaseModel):
             return [v]
 
         return v
+
+    @field_validator("users", mode="before")
+    @classmethod
+    def validate_users(cls, v):
+        if isinstance(v, str):
+            return [v]
+
+        return v
