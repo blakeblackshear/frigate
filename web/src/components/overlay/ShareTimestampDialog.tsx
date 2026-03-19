@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -88,6 +89,11 @@ export default function ShareTimestampDialog({
           <DialogTitle>
             {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("recording.shareTimestamp.description", {
+              ns: "components/dialog",
+            })}
+          </DialogDescription>
         </DialogHeader>
         {content}
       </DialogContent>
