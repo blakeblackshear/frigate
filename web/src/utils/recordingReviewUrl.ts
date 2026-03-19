@@ -1,7 +1,6 @@
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 
-export const RECORDING_REVIEW_START_PARAM = "start_time";
-export const RECORDING_REVIEW_TIMEZONE_PARAM = "timezone";
+export const RECORDING_REVIEW_LINK_PARAM = "timestamp";
 
 export type RecordingReviewLinkState = {
   camera: string;
@@ -25,10 +24,14 @@ function formatRecordingReviewTimestamp(
 }
 
 export function parseRecordingReviewLink(
-  camera: string | null,
-  start: string | null,
-  timezone: string | null,
+  value: string | null,
 ): RecordingReviewLinkState | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const [camera, start, timezone] = value.split("|");
+
   if (!camera || !start) {
     return undefined;
   }
@@ -61,9 +64,9 @@ export function createRecordingReviewUrl(
   const normalizedPathname = pathname.startsWith("/")
     ? pathname
     : `/${pathname}`;
-  const timezoneParam = timezone
-    ? `&${RECORDING_REVIEW_TIMEZONE_PARAM}=${encodeURIComponent(timezone)}`
-    : "";
+  const reviewLink = timezone
+    ? `${state.camera}|${formattedTimestamp}|${timezone}`
+    : `${state.camera}|${formattedTimestamp}`;
 
-  return `${url.origin}${normalizedPathname}?${RECORDING_REVIEW_START_PARAM}=${formattedTimestamp}${timezoneParam}#${encodeURIComponent(state.camera)}`;
+  return `${url.origin}${normalizedPathname}?${RECORDING_REVIEW_LINK_PARAM}=${reviewLink}`;
 }

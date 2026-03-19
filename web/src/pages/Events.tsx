@@ -23,24 +23,19 @@ import {
 } from "@/utils/dateUtil";
 import {
   parseRecordingReviewLink,
-  RECORDING_REVIEW_START_PARAM,
-  RECORDING_REVIEW_TIMEZONE_PARAM,
+  RECORDING_REVIEW_LINK_PARAM,
 } from "@/utils/recordingReviewUrl";
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function Events() {
   const { t } = useTranslation(["views/events"]);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -75,7 +70,6 @@ export default function Events() {
   const [motionSearchDay, setMotionSearchDay] = useState<Date | undefined>(
     undefined,
   );
-  const handledReviewLinkRef = useRef<string | null>(null);
 
   const motionSearchCameras = useMemo(() => {
     if (!config?.cameras) {
@@ -249,50 +243,20 @@ export default function Events() {
     [recording, setRecording, setReviewFilter],
   );
 
-  // shared recording links enter /review through query params, but the
-  // existing recording view is opened via router state (`recording`)
-
-  // this effect translates the URL entry point into the state shape the
-  // rest of the page already uses, then cleans the URL back to plain /review
-  useEffect(() => {
-    const timestamp = searchParams.get(RECORDING_REVIEW_START_PARAM);
-    const timezone = searchParams.get(RECORDING_REVIEW_TIMEZONE_PARAM);
-
-    if (!timestamp) {
-      handledReviewLinkRef.current = null;
-      return;
-    }
-
+  useSearchEffect(RECORDING_REVIEW_LINK_PARAM, (reviewLinkValue: string) => {
     if (!config) {
-      return;
+      return false;
     }
 
-    const camera = location.hash
-      ? decodeURIComponent(location.hash.substring(1))
-      : null;
-    const reviewLinkKey = `${camera ?? ""}|${timestamp}|${timezone ?? ""}`;
-
-    if (handledReviewLinkRef.current === reviewLinkKey) {
-      return;
-    }
-
-    handledReviewLinkRef.current = reviewLinkKey;
-
-    const reviewLink = parseRecordingReviewLink(camera, timestamp, timezone);
+    const reviewLink = parseRecordingReviewLink(reviewLinkValue);
 
     if (!reviewLink) {
       toast.error(t("recordings.invalidSharedLink"), {
         position: "top-center",
       });
-      navigate(location.pathname, {
-        state: location.state,
-        replace: true,
-      });
-      return;
+      return true;
     }
 
-    // reject unknown or unauthorized cameras before switching into
-    // recording view so bad links cleanly fall back to plain /review
     const validCamera =
       config.cameras[reviewLink.camera] &&
       allowedCameras.includes(reviewLink.camera);
@@ -301,46 +265,27 @@ export default function Events() {
       toast.error(t("recordings.invalidSharedCamera"), {
         position: "top-center",
       });
-      navigate(location.pathname, {
-        state: location.state,
-        replace: true,
-      });
-      return;
+      return true;
     }
-
-    const nextRecording: RecordingStartingPoint = {
-      camera: reviewLink.camera,
-      startTime: reviewLink.timestamp,
-      // severity not actually applicable here, but the type requires it
-      // this pattern is also used LiveCameraView to enter recording view
-      severity: "alert" as const,
-    };
 
     setReviewFilter({
       ...reviewFilter,
       ...getReviewDayBounds(new Date(reviewLink.timestamp * 1000)),
     });
-
-    navigate(location.pathname, {
-      state: {
-        ...location.state,
-        recording: nextRecording,
+    setRecording(
+      {
+        camera: reviewLink.camera,
+        startTime: reviewLink.timestamp,
+        // severity not actually applicable here, but the type requires it
+        // this pattern is also used LiveCameraView to enter recording view
+        severity: "alert",
+        timelineType: notificationTab,
       },
-      replace: true,
-    });
-  }, [
-    location.hash,
-    location.pathname,
-    location.state,
-    config,
-    navigate,
-    allowedCameras,
-    getReviewDayBounds,
-    reviewFilter,
-    searchParams,
-    setReviewFilter,
-    t,
-  ]);
+      true,
+    );
+
+    return false;
+  });
 
   // review paging
 
