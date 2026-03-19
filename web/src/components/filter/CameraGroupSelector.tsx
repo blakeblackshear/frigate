@@ -679,11 +679,6 @@ export function CameraGroupEdit({
   const allowedCameras = useAllowedCameras();
   const isAdmin = useIsAdmin();
 
-  // fetch users list for the users multi-select (admin only)
-  const { data: usersList } = useSWR<{ username: string; role: string }[]>(
-    isAdmin ? "users" : null,
-  );
-
   const [openCamera, setOpenCamera] = useState<string | null>();
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -726,7 +721,6 @@ export function CameraGroupEdit({
       .refine((value) => Object.keys(LuIcons).includes(value), {
         message: "Invalid icon",
       }),
-    users: z.array(z.string()).optional(),
   });
 
   const onSubmit = useCallback(
@@ -762,18 +756,10 @@ export function CameraGroupEdit({
       const cameraQueries = values.cameras
         .map((cam) => `&camera_groups.${values.name}.cameras=${cam}`)
         .join("");
-      const usersQueries =
-        values.users && values.users.length > 0
-          ? values.users
-              .map(
-                (user) => `&camera_groups.${values.name}.users=${user}`,
-              )
-              .join("")
-          : "";
 
       axios
         .put(
-          `config/set?${renamingQuery}${orderQuery}&${iconQuery}${cameraQueries}${usersQueries}`,
+          `config/set?${renamingQuery}${orderQuery}&${iconQuery}${cameraQueries}`,
           {
             requires_restart: 0,
           },
@@ -842,7 +828,6 @@ export function CameraGroupEdit({
       name: (editingGroup && editingGroup[0]) ?? "",
       icon: editingGroup && (editingGroup[1].icon as IconName),
       cameras: editingGroup && editingGroup[1].cameras,
-      users: (editingGroup && editingGroup[1].users) ?? [],
     },
   });
 
@@ -984,56 +969,6 @@ export function CameraGroupEdit({
             </FormItem>
           )}
         />
-
-        {isAdmin && usersList && usersList.length > 0 && (
-          <>
-            <Separator className="my-2 flex bg-secondary" />
-            <FormField
-              control={form.control}
-              name="users"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("group.users.label", { defaultValue: "Assigned Users" })}</FormLabel>
-                  <FormDescription>
-                    {t("group.users.desc", { defaultValue: "If no users are selected, the group is visible to all users." })}
-                  </FormDescription>
-                  <FormMessage />
-                  <div className="scrollbar-container max-h-[30dvh] overflow-y-auto">
-                    {usersList.map((user) => (
-                      <FormControl key={user.username}>
-                        <div className="flex items-center justify-between gap-1">
-                          <label
-                            className="mx-2 w-full cursor-pointer text-primary"
-                            htmlFor={`user-${user.username}`}
-                          >
-                            {user.username}
-                            <span className="ml-2 text-xs text-muted-foreground">
-                              ({user.role})
-                            </span>
-                          </label>
-                          <Switch
-                            id={`user-${user.username}`}
-                            checked={
-                              field.value?.includes(user.username) ?? false
-                            }
-                            onCheckedChange={(checked) => {
-                              const updatedUsers = checked
-                                ? [...(field.value || []), user.username]
-                                : (field.value || []).filter(
-                                    (u) => u !== user.username,
-                                  );
-                              form.setValue("users", updatedUsers);
-                            }}
-                          />
-                        </div>
-                      </FormControl>
-                    ))}
-                  </div>
-                </FormItem>
-              )}
-            />
-          </>
-        )}
 
         <Separator className="my-2 flex bg-secondary" />
 
