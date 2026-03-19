@@ -49,7 +49,7 @@ Like the other real-time processors in Frigate, face recognition runs on the cam
 
 ## Advanced Configuration
 
-Fine-tune face recognition with these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled` and `min_area`.
+Fine-tune face recognition with these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled`, `min_area`, and `use_recording_snapshot`.
 
 ### Detection
 
@@ -76,6 +76,21 @@ Fine-tune face recognition with these optional parameters at the global level of
 - `device`: Target a specific device to run the face recognition model on (multi-GPU installation).
   - Default: `None`.
   - Note: This setting is only applicable when using the `large` model. See [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/)
+
+### Recording Snapshot Fallback
+
+- `use_recording_snapshot`: When enabled, if a detected face is too small on the detect stream (below `min_area`), Frigate will extract a high-resolution frame from the already-recorded main stream segments on disk and re-run face detection on that frame.
+  - Default: `False`
+  - Requires `record` to be enabled for the camera.
+  - No additional ffmpeg decode processes are spawned and no extra VRAM is consumed — the existing recording pipeline does all the heavy lifting.
+  - There may be a 2–5 second delay before the recording segment is available, but this is handled naturally by Frigate's multi-frame face history accumulator.
+  - This is especially useful when using a low-resolution sub-stream for the `detect` role (the recommended Frigate setup), where faces on distant persons are too small for recognition.
+
+```yaml
+face_recognition:
+  enabled: true
+  use_recording_snapshot: true
+```
 
 ## Usage
 
@@ -198,11 +213,15 @@ No, using another face recognition service will interfere with Frigate's built i
 
 ### Does face recognition run on the recording stream?
 
-Face recognition does not run on the recording stream, this would be suboptimal for many reasons:
+By default, face recognition runs only on the detect stream. However, with the `use_recording_snapshot` option enabled, Frigate can **fall back** to extracting a single high-resolution frame from the recording segments on disk when the face on the detect stream is too small. This is not the same as continuously decoding the main stream — it only extracts one frame per enrichment attempt (~50–100ms CPU, no VRAM cost).
+
+Without `use_recording_snapshot`, there are good reasons for not always using the recording stream:
 
 1. The latency of accessing the recordings means the notifications would not include the names of recognized people because recognition would not complete until after.
 2. The embedding models used run on a set image size, so larger images will be scaled down to match this anyway.
 3. Motion clarity is much more important than extra pixels, over-compression and motion blur are much more detrimental to results than resolution.
+
+The recording snapshot fallback is a middle ground: detect on the efficient sub-stream as usual, and only access the high-res recording when the detect stream resolution is genuinely insufficient.
 
 ### I get an unknown error when taking a photo directly with my iPhone
 

@@ -25,6 +25,7 @@ from frigate.log import suppress_stderr_during
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.object import box_overlaps, calculate_region
+from frigate.util.recording_frame import get_recording_frame, scale_bounding_box
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -172,6 +173,60 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
         return None
 
+    def _try_hires_state_classification(
+        self, camera: str, camera_config, frame_time: float
+    ) -> tuple[str, float] | None:
+        """Try state classification on a hi-res recording frame.
+
+        Returns (detected_state, score) or None.
+        """
+        logger.debug(
+            f"{camera}: State classification score below threshold, trying recording snapshot"
+        )
+
+        hires_frame = get_recording_frame(self.config.ffmpeg, camera, frame_time)
+        if hires_frame is None:
+            logger.debug(
+                f"{camera}: Recording frame not available for state classification"
+            )
+            return None
+
+        h, w = hires_frame.shape[:2]
+
+        # Scale normalized crop coordinates to hi-res resolution
+        x1 = max(0, min(int(camera_config.crop[0] * w), w))
+        y1 = max(0, min(int(camera_config.crop[1] * h), h))
+        x2 = max(0, min(int(camera_config.crop[2] * w), w))
+        y2 = max(0, min(int(camera_config.crop[3] * h), h))
+
+        if x2 <= x1 or y2 <= y1:
+            return None
+
+        crop = hires_frame[y1:y2, x1:x2]
+        # hires_frame is BGR from get_recording_frame, convert to RGB for model
+        crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+
+        try:
+            resized = cv2.resize(crop_rgb, (224, 224))
+        except Exception:
+            return None
+
+        input_data = np.expand_dims(resized, axis=0)
+        self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input_data)
+        self.interpreter.invoke()
+        res: np.ndarray = self.interpreter.get_tensor(
+            self.tensor_output_details[0]["index"]
+        )[0]
+        probs = res / res.sum(axis=0)
+        best_id = np.argmax(probs)
+        score = round(probs[best_id], 2)
+        detected_state = self.labelmap[best_id]
+
+        logger.debug(
+            f"{camera}: Hi-res state classification: {detected_state} (score={score})"
+        )
+        return detected_state, score
+
     def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray):
         if self.metrics and self.model_config.name in self.metrics.classification_cps:
             self.metrics.classification_cps[
@@ -309,7 +364,22 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             logger.debug(
                 f"Score {score} below threshold {self.model_config.threshold}, skipping verification"
             )
-            return
+            # try hi-res fallback for state classification
+            if (
+                self.model_config.use_recording_snapshot
+                and self.config.cameras[camera].record.enabled
+            ):
+                hires_result = self._try_hires_state_classification(
+                    camera, camera_config, now
+                )
+                if hires_result is not None:
+                    detected_state, score = hires_result
+                    if score < self.model_config.threshold:
+                        return
+                else:
+                    return
+            else:
+                return
 
         verified_state = self.verify_state_change(camera, detected_state)
 
@@ -470,6 +540,66 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
         return best_label, avg_score
 
+    def _try_hires_object_classification(
+        self, camera: str, obj_data: dict[str, Any], frame_time: float
+    ) -> tuple[str, float] | None:
+        """Try object classification on a hi-res recording frame.
+
+        Returns (label, score) or None.
+        """
+        camera_config = self.config.cameras[camera]
+
+        logger.debug(
+            f"{camera}: Object classification score below threshold, trying recording snapshot"
+        )
+
+        hires_frame = get_recording_frame(self.config.ffmpeg, camera, frame_time)
+        if hires_frame is None:
+            logger.debug(
+                f"{camera}: Recording frame not available for object classification"
+            )
+            return None
+
+        detect_res = (camera_config.detect.width, camera_config.detect.height)
+        record_res = (hires_frame.shape[1], hires_frame.shape[0])
+
+        if record_res[0] <= detect_res[0] and record_res[1] <= detect_res[1]:
+            logger.debug(
+                f"{camera}: Recording resolution not higher than detect, skipping classification fallback"
+            )
+            return None
+
+        scaled_box = scale_bounding_box(
+            obj_data["box"], detect_res, record_res, padding=0.10
+        )
+        left, top, right, bottom = scaled_box
+        crop = hires_frame[top:bottom, left:right]
+
+        if crop.size == 0:
+            return None
+
+        # hires_frame is BGR, convert to RGB for the model
+        crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+
+        try:
+            resized = cv2.resize(crop_rgb, (224, 224))
+        except Exception:
+            return None
+
+        input_data = np.expand_dims(resized, axis=0)
+        self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input_data)
+        self.interpreter.invoke()
+        res: np.ndarray = self.interpreter.get_tensor(
+            self.tensor_output_details[0]["index"]
+        )[0]
+        probs = res / res.sum(axis=0)
+        best_id = np.argmax(probs)
+        score = round(probs[best_id], 2)
+        label = self.labelmap[best_id]
+
+        logger.debug(f"{camera}: Hi-res object classification: {label} (score={score})")
+        return label, score
+
     def process_frame(self, obj_data, frame):
         if self.metrics and self.model_config.name in self.metrics.classification_cps:
             self.metrics.classification_cps[
@@ -578,9 +708,25 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             logger.debug(
                 f"{self.model_config.name}: Score {score} < threshold {self.model_config.threshold} for {object_id}, skipping"
             )
-            return
-
-        sub_label = self.labelmap[best_id]
+            # try hi-res fallback for object classification
+            camera = obj_data["camera"]
+            if (
+                self.model_config.use_recording_snapshot
+                and self.config.cameras[camera].record.enabled
+            ):
+                hires_result = self._try_hires_object_classification(
+                    camera, obj_data, now
+                )
+                if hires_result is not None:
+                    sub_label, score = hires_result
+                    if score < self.model_config.threshold:
+                        return
+                else:
+                    return
+            else:
+                return
+        else:
+            sub_label = self.labelmap[best_id]
 
         logger.debug(
             f"{self.model_config.name}: Object {object_id} (label={obj_data['label']}) passed threshold with sub_label={sub_label}, score={score}"

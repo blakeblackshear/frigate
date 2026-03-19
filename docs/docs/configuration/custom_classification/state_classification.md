@@ -50,6 +50,30 @@ classification:
 
 An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For state classification models, the default is 100.
 
+### Recording Snapshot Fallback
+
+When using a low-resolution sub-stream for the `detect` role, the crop region may lack sufficient detail for accurate state classification. The `use_recording_snapshot` option allows Frigate to fall back to extracting a high-resolution frame from the already-recorded main stream segments on disk when the classification score on the detect frame is below the configured threshold.
+
+```yaml
+classification:
+  custom:
+    front_door:
+      threshold: 0.8
+      use_recording_snapshot: true
+      state_config:
+        motion: true
+        interval: 10
+        cameras:
+          front:
+            crop: [0, 180, 220, 400]
+```
+
+- Default: `False`
+- Requires `record` to be enabled for the camera.
+- No additional ffmpeg decode processes are spawned — a single frame is extracted from the mp4 segment (~50–100ms CPU, no VRAM cost).
+- The crop coordinates are scaled from detect resolution to recording resolution automatically.
+- The existing 3-frame state verification handles any segment availability delays naturally.
+
 ## Training the model
 
 Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of three steps:

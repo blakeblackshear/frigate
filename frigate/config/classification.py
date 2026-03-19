@@ -145,6 +145,11 @@ class CustomClassificationConfig(FrigateBaseModel):
         description="How many classification attempts to save for recent classifications UI.",
         ge=0,
     )
+    use_recording_snapshot: bool = Field(
+        default=False,
+        title="Use recording snapshot",
+        description="When enabled, fall back to extracting a high-resolution frame from recording segments when the detect stream resolution is insufficient for classification.",
+    )
     object_config: CustomClassificationObjectConfig | None = Field(default=None)
     state_config: CustomClassificationStateConfig | None = Field(default=None)
 
@@ -296,6 +301,11 @@ class FaceRecognitionConfig(FrigateBaseModel):
         title="Device",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
+    use_recording_snapshot: bool = Field(
+        default=False,
+        title="Use recording snapshot",
+        description="When enabled, fall back to extracting a high-resolution frame from recording segments when the detect stream resolution is insufficient for face recognition.",
+    )
 
 
 class CameraFaceRecognitionConfig(FrigateBaseModel):
@@ -308,6 +318,11 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
         default=750,
         title="Minimum face area",
         description="Minimum area (pixels) of a detected face box required to attempt recognition.",
+    )
+    use_recording_snapshot: bool = Field(
+        default=False,
+        title="Use recording snapshot",
+        description="When enabled, fall back to extracting a high-resolution frame from recording segments when the detect stream resolution is insufficient for face recognition.",
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
@@ -391,6 +406,11 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         title="Replacement rules",
         description="Regex replacement rules used to normalize detected plate strings before matching.",
     )
+    use_recording_snapshot: bool = Field(
+        default=False,
+        title="Use recording snapshot",
+        description="When enabled, fall back to extracting a high-resolution frame from recording segments when the detect stream resolution is insufficient for license plate recognition.",
+    )
 
 
 class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
@@ -416,6 +436,11 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
         description="Enhancement level (0-10) to apply to plate crops prior to OCR; higher values may not always improve results, levels above 5 may only work with night time plates and should be used with caution.",
         ge=0,
         le=10,
+    )
+    use_recording_snapshot: bool = Field(
+        default=False,
+        title="Use recording snapshot",
+        description="When enabled, fall back to extracting a high-resolution frame from recording segments when the detect stream resolution is insufficient for license plate recognition.",
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())

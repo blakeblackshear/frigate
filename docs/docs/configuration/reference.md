@@ -659,7 +659,7 @@ semantic_search:
   device: None
 
 # Optional: Configuration for face recognition capability
-# NOTE: enabled, min_area can be overridden at the camera level
+# NOTE: enabled, min_area, use_recording_snapshot can be overridden at the camera level
 face_recognition:
   # Optional: Enable face recognition (default: shown below)
   enabled: False
@@ -683,9 +683,12 @@ face_recognition:
   # Optional: Target a specific device to run the model (default: shown below)
   # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
   device: None
+  # Optional: Fall back to extracting a hi-res frame from recording segments when
+  # the detect stream resolution is insufficient for face recognition (default: shown below)
+  use_recording_snapshot: False
 
 # Optional: Configuration for license plate recognition capability
-# NOTE: enabled, min_area, and enhancement can be overridden at the camera level
+# NOTE: enabled, min_area, enhancement, and use_recording_snapshot can be overridden at the camera level
 lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
@@ -715,6 +718,9 @@ lpr:
   debug_save_plates: False
   # Optional: List of regex replacement rules to normalize detected plates (default: shown below)
   replace_rules: {}
+  # Optional: Fall back to extracting a hi-res frame from recording segments when
+  # the detect stream resolution is insufficient for license plate recognition (default: shown below)
+  use_recording_snapshot: False
 
 # Optional: Configuration for AI / LLM provider
 # WARNING: Depending on the provider, this will send thumbnails over the internet
@@ -769,6 +775,9 @@ classification:
       # Optional: Number of classification attempts to save in the recent classifications tab (default: shown below)
       # NOTE: Defaults to 200 for object classification and 100 for state classification if not specified
       save_attempts: None
+      # Optional: Fall back to extracting a hi-res frame from recording segments when
+      # the detect stream resolution is insufficient for classification (default: shown below)
+      use_recording_snapshot: False
       # Optional: Object classification configuration
       object_config:
         # Required: Object types to classify

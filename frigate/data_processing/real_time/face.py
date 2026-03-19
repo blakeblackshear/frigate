@@ -28,6 +28,7 @@ from frigate.data_processing.common.face.model import (
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
+from frigate.util.recording_frame import get_recording_frame, scale_bounding_box
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -177,6 +178,79 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.faces_per_second.update()
         self.inference_speed.update(duration)
 
+    def _try_hires_face_detection(
+        self, camera: str, obj_data: dict[str, Any], frame_time: float
+    ) -> Optional[np.ndarray]:
+        """Attempt face detection on a hi-res frame from recordings.
+
+        Returns the face crop (BGR) if successful, or None.
+        """
+        camera_config = self.config.cameras[camera]
+
+        if not camera_config.face_recognition.use_recording_snapshot:
+            return None
+
+        if not camera_config.record.enabled:
+            logger.debug(
+                f"{camera}: Recording not enabled, cannot use recording snapshot for face"
+            )
+            return None
+
+        person_box = obj_data.get("box")
+        if not person_box:
+            return None
+
+        logger.debug(
+            f"{camera}: Face too small on detect stream, trying recording snapshot"
+        )
+
+        hires_frame = get_recording_frame(self.config.ffmpeg, camera, frame_time)
+        if hires_frame is None:
+            logger.debug(f"{camera}: Recording frame not available yet")
+            return None
+
+        detect_res = (camera_config.detect.width, camera_config.detect.height)
+        record_res = (hires_frame.shape[1], hires_frame.shape[0])
+
+        if record_res[0] <= detect_res[0] and record_res[1] <= detect_res[1]:
+            logger.debug(
+                f"{camera}: Recording resolution {record_res} not higher than detect {detect_res}, skipping"
+            )
+            return None
+
+        scaled_box = scale_bounding_box(
+            person_box, detect_res, record_res, padding=0.15
+        )
+        left, top, right, bottom = scaled_box
+        person_crop = hires_frame[top:bottom, left:right]
+
+        if person_crop.size == 0:
+            return None
+
+        face_box = self.__detect_face(person_crop, self.face_config.detection_threshold)
+        if not face_box:
+            logger.debug(f"{camera}: No face found in hi-res person crop")
+            return None
+
+        if area(face_box) < camera_config.face_recognition.min_area:
+            logger.debug(
+                f"{camera}: Face still too small in hi-res frame: {area(face_box)} < {camera_config.face_recognition.min_area}"
+            )
+            return None
+
+        face_crop = person_crop[
+            max(0, face_box[1]) : min(person_crop.shape[0], face_box[3]),
+            max(0, face_box[0]) : min(person_crop.shape[1], face_box[2]),
+        ]
+
+        if face_crop.size == 0:
+            return None
+
+        logger.debug(
+            f"{camera}: Successfully extracted face from hi-res recording frame (area={area(face_box)})"
+        )
+        return face_crop
+
     def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray):
         """Look for faces in image."""
         self.metrics.face_rec_fps.value = self.faces_per_second.eps()
@@ -236,25 +310,41 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
-                return
-
-            face_frame = person[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
-                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
-            ]
-
-            # check that face is correct size
-            if area(face_box) < self.config.cameras[camera].face_recognition.min_area:
-                logger.debug(
-                    f"Detected face that is smaller than the min_area {face} < {self.config.cameras[camera].face_recognition.min_area}"
+                # try hi-res fallback when no face detected at all
+                face_frame = self._try_hires_face_detection(
+                    camera, obj_data, obj_data.get("frame_time", start)
                 )
-                return
+                if face_frame is None:
+                    return
+            else:
+                face_frame = person[
+                    max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
+                    max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
+                ]
 
-            try:
-                face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
-            except Exception as e:
-                logger.debug(f"Failed to convert face frame color for {id}: {e}")
-                return
+                # check that face is correct size
+                if (
+                    area(face_box)
+                    < self.config.cameras[camera].face_recognition.min_area
+                ):
+                    logger.debug(
+                        f"Detected face that is smaller than the min_area {face} < {self.config.cameras[camera].face_recognition.min_area}"
+                    )
+                    # try hi-res fallback
+                    hires_face = self._try_hires_face_detection(
+                        camera, obj_data, obj_data.get("frame_time", start)
+                    )
+                    if hires_face is None:
+                        return
+                    face_frame = hires_face
+                else:
+                    try:
+                        face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
+                    except Exception as e:
+                        logger.debug(
+                            f"Failed to convert face frame color for {id}: {e}"
+                        )
+                        return
         else:
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
@@ -283,14 +373,20 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 < self.config.cameras[camera].face_recognition.min_area
             ):
                 logger.debug(f"Invalid face box {face}")
-                return
+                # try hi-res fallback for attribute-based path
+                hires_face = self._try_hires_face_detection(
+                    camera, obj_data, obj_data.get("frame_time", start)
+                )
+                if hires_face is None:
+                    return
+                face_frame = hires_face
+            else:
+                face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
-            face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-
-            face_frame = face_frame[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
-                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
-            ]
+                face_frame = face_frame[
+                    max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
+                    max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
+                ]
 
         res = self.recognizer.classify(face_frame)
 

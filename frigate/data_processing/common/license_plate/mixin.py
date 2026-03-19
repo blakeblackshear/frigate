@@ -27,6 +27,7 @@ from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
+from frigate.util.recording_frame import get_recording_frame, scale_bounding_box
 
 logger = logging.getLogger(__name__)
 
@@ -1176,6 +1177,97 @@ class LicensePlateProcessingMixin:
         )
         return event_id
 
+    def _try_hires_lpr(
+        self,
+        camera: str,
+        obj_data: dict[str, Any],
+        frame_time: float,
+    ) -> Optional[np.ndarray]:
+        """Try to get a license plate frame from hi-res recording.
+
+        Extracts the vehicle region from a recording frame and runs
+        plate detection on it. Returns the plate crop ready for OCR,
+        or None if unsuccessful.
+        """
+        camera_config = self.config.cameras[camera]
+
+        if not camera_config.lpr.use_recording_snapshot:
+            return None
+
+        if not camera_config.record.enabled:
+            logger.debug(
+                f"{camera}: Recording not enabled, cannot use recording snapshot for LPR"
+            )
+            return None
+
+        car_box = obj_data.get("box")
+        if not car_box:
+            return None
+
+        logger.debug(
+            f"{camera}: Plate too small on detect stream, trying recording snapshot"
+        )
+
+        hires_frame = get_recording_frame(self.config.ffmpeg, camera, frame_time)
+        if hires_frame is None:
+            logger.debug(f"{camera}: Recording frame not available yet for LPR")
+            return None
+
+        detect_res = (camera_config.detect.width, camera_config.detect.height)
+        record_res = (hires_frame.shape[1], hires_frame.shape[0])
+
+        if record_res[0] <= detect_res[0] and record_res[1] <= detect_res[1]:
+            logger.debug(
+                f"{camera}: Recording resolution {record_res} not higher than detect {detect_res}, skipping LPR fallback"
+            )
+            return None
+
+        scaled_box = scale_bounding_box(car_box, detect_res, record_res, padding=0.20)
+        left, top, right, bottom = scaled_box
+        car_crop = hires_frame[top:bottom, left:right]
+
+        if car_crop.size == 0:
+            return None
+
+        # double the size for better box detection (same as detect-stream path)
+        car_crop = cv2.resize(
+            car_crop, (int(2 * car_crop.shape[1]), int(2 * car_crop.shape[0]))
+        )
+
+        license_plate = self._detect_license_plate(camera, car_crop)
+        if not license_plate:
+            logger.debug(f"{camera}: No plate found in hi-res car crop")
+            return None
+
+        license_plate_area = max(
+            0,
+            (license_plate[2] - license_plate[0])
+            * (license_plate[3] - license_plate[1]),
+        )
+
+        # doubled size, so compare against min_area * 2
+        if license_plate_area < camera_config.lpr.min_area * 2:
+            logger.debug(
+                f"{camera}: Plate still too small in hi-res frame: {license_plate_area} < {camera_config.lpr.min_area * 2}"
+            )
+            return None
+
+        plate_frame = car_crop[
+            license_plate[1] : license_plate[3],
+            license_plate[0] : license_plate[2],
+        ]
+
+        # double the size for better OCR (same as detect-stream path)
+        plate_frame = cv2.resize(
+            plate_frame,
+            (int(2 * plate_frame.shape[1]), int(2 * plate_frame.shape[0])),
+        )
+
+        logger.debug(
+            f"{camera}: Successfully extracted plate from hi-res recording frame (area={license_plate_area})"
+        )
+        return plate_frame
+
     def lpr_process(
         self, obj_data: dict[str, Any], frame: np.ndarray, dedicated_lpr: bool = False
     ):
@@ -1329,38 +1421,55 @@ class LicensePlateProcessingMixin:
                     logger.debug(
                         f"{camera}: Detected no license plates for car/motorcycle object."
                     )
-                    return
+                    # try hi-res fallback
+                    hires_plate = self._try_hires_lpr(
+                        camera, obj_data, obj_data.get("frame_time", current_time)
+                    )
+                    if hires_plate is None:
+                        return
+                    license_plate_frame = hires_plate
+                    plate_box = car_box
+                else:
+                    license_plate_area = max(
+                        0,
+                        (license_plate[2] - license_plate[0])
+                        * (license_plate[3] - license_plate[1]),
+                    )
 
-                license_plate_area = max(
-                    0,
-                    (license_plate[2] - license_plate[0])
-                    * (license_plate[3] - license_plate[1]),
-                )
+                    # check that license plate is valid
+                    # double the value because we've doubled the size of the car
+                    if (
+                        license_plate_area
+                        < self.config.cameras[camera].lpr.min_area * 2
+                    ):
+                        logger.debug(f"{camera}: License plate is less than min_area")
+                        # try hi-res fallback
+                        hires_plate = self._try_hires_lpr(
+                            camera, obj_data, obj_data.get("frame_time", current_time)
+                        )
+                        if hires_plate is None:
+                            return
+                        license_plate_frame = hires_plate
+                        plate_box = car_box
+                    else:
+                        # Scale back to original car coordinates and then to frame
+                        plate_box_in_car = (
+                            license_plate[0] // 2,
+                            license_plate[1] // 2,
+                            license_plate[2] // 2,
+                            license_plate[3] // 2,
+                        )
+                        plate_box = (
+                            left + plate_box_in_car[0],
+                            top + plate_box_in_car[1],
+                            left + plate_box_in_car[2],
+                            top + plate_box_in_car[3],
+                        )
 
-                # check that license plate is valid
-                # double the value because we've doubled the size of the car
-                if license_plate_area < self.config.cameras[camera].lpr.min_area * 2:
-                    logger.debug(f"{camera}: License plate is less than min_area")
-                    return
-
-                # Scale back to original car coordinates and then to frame
-                plate_box_in_car = (
-                    license_plate[0] // 2,
-                    license_plate[1] // 2,
-                    license_plate[2] // 2,
-                    license_plate[3] // 2,
-                )
-                plate_box = (
-                    left + plate_box_in_car[0],
-                    top + plate_box_in_car[1],
-                    left + plate_box_in_car[2],
-                    top + plate_box_in_car[3],
-                )
-
-                license_plate_frame = car[
-                    license_plate[1] : license_plate[3],
-                    license_plate[0] : license_plate[2],
-                ]
+                        license_plate_frame = car[
+                            license_plate[1] : license_plate[3],
+                            license_plate[0] : license_plate[2],
+                        ]
             else:
                 # don't run for object without attributes if this isn't dedicated lpr with frigate+
                 if (
@@ -1400,33 +1509,42 @@ class LicensePlateProcessingMixin:
                     < self.config.cameras[camera].lpr.min_area
                 ):
                     logger.debug(
-                        f"{camera}: Area for license plate box {area(license_plate_box)} is less than min_area {self.config.cameras[camera].lpr.min_area}"
+                        f"{camera}: Area for license plate box {area(license_plate_box) if license_plate_box else 0} is less than min_area {self.config.cameras[camera].lpr.min_area}"
                     )
-                    return
+                    # try hi-res fallback for attribute-based path
+                    hires_plate = self._try_hires_lpr(
+                        camera, obj_data, obj_data.get("frame_time", current_time)
+                    )
+                    if hires_plate is None:
+                        return
+                    license_plate_frame = hires_plate
+                    plate_box = license_plate_box or obj_data.get("box", (0, 0, 0, 0))
+                else:
+                    license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
-                license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+                    # Expand the license_plate_box by 10%
+                    box_array = np.array(license_plate_box)
+                    expansion = (box_array[2:] - box_array[:2]) * 0.10
+                    expanded_box = np.array(
+                        [
+                            license_plate_box[0] - expansion[0],
+                            license_plate_box[1] - expansion[1],
+                            license_plate_box[2] + expansion[0],
+                            license_plate_box[3] + expansion[1],
+                        ]
+                    ).clip(
+                        0,
+                        [license_plate_frame.shape[1], license_plate_frame.shape[0]]
+                        * 2,
+                    )
 
-                # Expand the license_plate_box by 10%
-                box_array = np.array(license_plate_box)
-                expansion = (box_array[2:] - box_array[:2]) * 0.10
-                expanded_box = np.array(
-                    [
-                        license_plate_box[0] - expansion[0],
-                        license_plate_box[1] - expansion[1],
-                        license_plate_box[2] + expansion[0],
-                        license_plate_box[3] + expansion[1],
+                    plate_box = tuple(int(x) for x in expanded_box)
+
+                    # Crop using the expanded box
+                    license_plate_frame = license_plate_frame[
+                        int(expanded_box[1]) : int(expanded_box[3]),
+                        int(expanded_box[0]) : int(expanded_box[2]),
                     ]
-                ).clip(
-                    0, [license_plate_frame.shape[1], license_plate_frame.shape[0]] * 2
-                )
-
-                plate_box = tuple(int(x) for x in expanded_box)
-
-                # Crop using the expanded box
-                license_plate_frame = license_plate_frame[
-                    int(expanded_box[1]) : int(expanded_box[3]),
-                    int(expanded_box[0]) : int(expanded_box[2]),
-                ]
 
             # double the size of the license plate frame for better OCR
             license_plate_frame = cv2.resize(

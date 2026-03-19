@@ -685,8 +685,14 @@ class FrigateConfig(FrigateBaseModel):
 
             # only populate some fields down to the camera level for specific keys
             allowed_fields_map = {
-                "face_recognition": ["enabled", "min_area"],
-                "lpr": ["enabled", "expire_time", "min_area", "enhancement"],
+                "face_recognition": ["enabled", "min_area", "use_recording_snapshot"],
+                "lpr": [
+                    "enabled",
+                    "expire_time",
+                    "min_area",
+                    "enhancement",
+                    "use_recording_snapshot",
+                ],
                 "audio_transcription": ["enabled", "live_enabled"],
             }
 

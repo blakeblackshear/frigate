@@ -83,6 +83,26 @@ classification:
 
 An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For object classification models, the default is 200.
 
+### Recording Snapshot Fallback
+
+When using a low-resolution sub-stream for the `detect` role, distant or small objects may lack sufficient detail for accurate classification. The `use_recording_snapshot` option allows Frigate to fall back to extracting a high-resolution frame from the already-recorded main stream segments on disk when the classification score on the detect frame is below the configured threshold.
+
+```yaml
+classification:
+  custom:
+    dog:
+      threshold: 0.8
+      use_recording_snapshot: true
+      object_config:
+        objects: [dog]
+        classification_type: sub_label
+```
+
+- Default: `False`
+- Requires `record` to be enabled for the camera.
+- No additional ffmpeg decode processes are spawned — a single frame is extracted from the mp4 segment (~50–100ms CPU, no VRAM cost).
+- The existing multi-frame consensus scoring (60% agreement over 3+ attempts) handles any segment availability delays naturally.
+
 ## Training the model
 
 Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of two steps:

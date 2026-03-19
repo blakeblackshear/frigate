@@ -57,7 +57,7 @@ Like the other real-time processors in Frigate, license plate recognition runs o
 
 ## Advanced Configuration
 
-Fine-tune the LPR feature using these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled`, `min_area`, and `enhancement`.
+Fine-tune the LPR feature using these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled`, `min_area`, `enhancement`, and `use_recording_snapshot`.
 
 ### Detection
 
@@ -131,6 +131,14 @@ lpr:
 - Any changes made by the rules are printed to the LPR debug log.
 - Tip: You can test patterns with tools like regex101.com.
 
+### Recording Snapshot Fallback
+
+- **`use_recording_snapshot`**: When enabled, if a detected license plate is too small on the detect stream (below `min_area`) or no plate is found at all, Frigate will extract a high-resolution frame from the already-recorded main stream segments on disk and re-run plate detection and OCR on that frame.
+  - Default: `False`
+  - Requires `record` to be enabled for the camera.
+  - No additional ffmpeg decode processes are spawned — a single frame is extracted from the mp4 segment on disk (~50–100ms CPU, no VRAM cost).
+  - This is especially useful when using a low-resolution sub-stream for the `detect` role, where plates on moving or distant cars are too small for recognition.
+
 ### Debugging
 
 - **`debug_save_plates`**: Set to `True` to save captured text on plates for debugging. These images are stored in `/media/frigate/clips/lpr`, organized into subdirectories by `<camera>/<event_id>`, and named based on the capture timestamp.
@@ -139,7 +147,7 @@ lpr:
 
 ## Configuration Examples
 
-These configuration parameters are available at the global level of your config. The only optional parameters that should be set at the camera level are `enabled`, `min_area`, and `enhancement`.
+These configuration parameters are available at the global level of your config. The only optional parameters that should be set at the camera level are `enabled`, `min_area`, `enhancement`, and `use_recording_snapshot`.
 
 ```yaml
 lpr:
