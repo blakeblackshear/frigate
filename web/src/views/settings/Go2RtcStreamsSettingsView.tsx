@@ -15,7 +15,7 @@ import {
 } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import Heading from "@/components/ui/heading";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -436,6 +436,10 @@ export default function Go2RtcStreamsSettingsView({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
+              className={cn(
+                buttonVariants({ variant: "destructive" }),
+                "text-white",
+              )}
               onClick={() => deleteDialog && deleteStream(deleteDialog)}
             >
               {t("go2rtcStreams.deleteStream")}
