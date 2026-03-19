@@ -220,6 +220,10 @@
     "downloadCleanSnapshot": {
       "label": "下载干净快照",
       "aria": "下载干净快照"
+    },
+    "debugReplay": {
+      "label": "调试回放",
+      "aria": "在调试回放视图中查看此被追踪对象"
     }
   },
   "dialog": {

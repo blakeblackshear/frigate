@@ -1,1 +1,13 @@
-{}
+{
+    "version": {
+        "label": "Phiên bản cấu hình hiện tại",
+        "description": "Phiên bản dạng số hoặc chuỗi của cấu hình hiện tại giúp phát hiện các thay đổi về định dạng hoặc quá trình di chuyển dữ liệu."
+    },
+    "safe_mode": {
+        "label": "Chế độ an toàn",
+        "description": "Khi được kích hoạt, hãy khởi động Frigate ở chế độ an toàn với các tính năng bị hạn chế để khắc phục sự cố."
+    },
+    "environment_vars": {
+        "label": "Biến môi trường"
+    }
+}

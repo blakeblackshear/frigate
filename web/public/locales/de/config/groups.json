@@ -11,7 +11,7 @@
     },
     "timestamp_style": {
         "global": {
-            "appearance": "Globale Darstellung"
+            "appearance": "Globale Erscheinung"
         },
         "cameras": {
             "appearance": "Erscheinungsbild"
@@ -23,13 +23,13 @@
             "algorithm": "Globaler Algorithmus"
         },
         "cameras": {
-            "sensitivity": "Genauhigkeit",
+            "sensitivity": "Empfindlichkeit",
             "algorithm": "Algorithmus"
         }
     },
     "snapshots": {
         "global": {
-            "display": "Globale Anzeige"
+            "display": "Globales Display"
         },
         "cameras": {
             "display": "Anzeige"

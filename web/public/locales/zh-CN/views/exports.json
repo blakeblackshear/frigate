@@ -11,13 +11,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "重命名导出失败：{{errorMessage}}"
+      "renameExportFailed": "重命名导出失败：{{errorMessage}}",
+      "assignCaseFailed": "更新合集分配失败：{{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "分享导出",
     "downloadVideo": "下载视频",
     "editName": "编辑名称",
-    "deleteExport": "删除导出"
+    "deleteExport": "删除导出",
+    "assignToCase": "加入合集"
+  },
+  "headings": {
+    "uncategorizedExports": "未分类导出项",
+    "cases": "合集"
+  },
+  "caseDialog": {
+    "nameLabel": "合集名称",
+    "title": "加入合集",
+    "description": "选择现有合集或创建新合集。",
+    "selectLabel": "合集",
+    "newCaseOption": "创建新合集",
+    "descriptionLabel": "描述"
   }
 }

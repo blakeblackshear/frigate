@@ -97,7 +97,11 @@
     "shm": {
       "title": "Alocare SHM (shared memory)",
       "warning": "Dimensiunea actuală SHM de {{total}}MB este prea mică. Crește-o la cel puțin {{min_shm}}MB.",
-      "readTheDocumentation": "Citește documentația"
+      "readTheDocumentation": "Citește documentația",
+      "frameLifetime": {
+        "title": "Durata de viață a cadrului",
+        "description": "Fiecare cameră are {{frames}} sloturi de cadre în memoria partajată. La rata de cadre a celei mai rapide camere, fiecare cadru este disponibil pentru aproximativ {{lifetime}}s înainte de a fi suprascris."
+      }
     }
   },
   "title": "Sistem",

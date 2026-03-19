@@ -1,1 +1,2192 @@
-{}
+{
+    "version": {
+        "label": "当前配置版本",
+        "description": "用于标识当前生效配置的版本号（数字或字符串均可），帮助识别配置迁移或格式是否发生变更。"
+    },
+    "safe_mode": {
+        "label": "安全模式",
+        "description": "启用后，Frigate 将以安全模式启动，将会关闭部分功能，以便排查问题。"
+    },
+    "environment_vars": {
+        "label": "环境变量",
+        "description": "用于在 Home Assistant OS 中为 Frigate 进程设置的环境变量。非 HAOS 用户不能使用该配置项，而必须使用 Docker 的环境变量配置。"
+    },
+    "logger": {
+        "label": "日志",
+        "description": "控制默认日志详细程度，以及各组件的日志级别覆盖。",
+        "default": {
+            "label": "日志等级",
+            "description": "默认全局日志详细程度（调试、信息、警告、错误）。"
+        },
+        "logs": {
+            "label": "单进程日志级别",
+            "description": "按组件覆盖日志级别配置，用于提高或降低特定模块的日志详细程度。"
+        }
+    },
+    "audio": {
+        "label": "音频事件",
+        "enabled": {
+            "label": "开启音频检测",
+            "description": "为所有摄像头启用或禁用音频事件检测；可按摄像头覆盖。"
+        },
+        "max_not_heard": {
+            "label": "结束超时",
+            "description": "在结束音频事件之前，未检测到配置的音频类型的秒数。"
+        },
+        "num_threads": {
+            "label": "检测线程",
+            "description": "用于音频检测处理的线程数量。"
+        },
+        "description": "所有摄像头的基于音频的事件检测设置；可按摄像头覆盖。",
+        "min_volume": {
+            "label": "最小音量",
+            "description": "运行音频检测所需的最小 RMS 音量阈值；数值越低灵敏度越高（例如 200 高灵敏度，500 中等，1000 低灵敏度）。"
+        },
+        "listen": {
+            "label": "监听类型",
+            "description": "要检测的音频事件类型列表（例如：bark、fire_alarm、scream、speech、yell）。"
+        },
+        "filters": {
+            "label": "音频过滤器",
+            "description": "按音频类型的过滤器设置，如用于减少误报的置信度阈值。"
+        },
+        "enabled_in_config": {
+            "label": "原始音频状态",
+            "description": "指示原始静态配置文件中是否启用了音频检测。"
+        }
+    },
+    "auth": {
+        "cookie_secure": {
+            "label": "安全 Cookie 标志",
+            "description": "在身份验证 Cookie 上设置安全标志；使用 TLS 时应启用此选项。"
+        },
+        "label": "身份验证",
+        "description": "身份验证和会话相关设置，包括 Cookie 和速率限制选项。",
+        "enabled": {
+            "label": "开启身份验证",
+            "description": "为 Frigate 页面开启原生身份验证。"
+        },
+        "reset_admin_password": {
+            "label": "重置管理员密码",
+            "description": "启用后，启动时将重置管理员用户密码，并在日志中打印新密码。"
+        },
+        "cookie_name": {
+            "label": "JWT Cookie 名称",
+            "description": "用于存储原生身份验证 JWT 令牌的 Cookie 名称。"
+        },
+        "session_length": {
+            "label": "会话时长",
+            "description": "基于 JWT 的会话持续时间（秒）。"
+        },
+        "refresh_time": {
+            "label": "会话刷新窗口",
+            "description": "当会话距离过期时间在此秒数范围内时，将会话刷新回完整时长。"
+        },
+        "failed_login_rate_limit": {
+            "label": "登录失败限制",
+            "description": "用于限制登录失败尝试次数的规则，以减少暴力破解攻击。"
+        },
+        "trusted_proxies": {
+            "label": "受信任的代理",
+            "description": "用于确定客户端 IP 以进行速率限制的受信任代理 IP 列表。"
+        },
+        "hash_iterations": {
+            "label": "哈希迭代次数",
+            "description": "对用户密码进行哈希处理时使用的 PBKDF2-SHA256 迭代次数。"
+        },
+        "roles": {
+            "label": "权限组映射",
+            "description": "将权限组映射到摄像头列表。空列表表示该权限组可以访问所有摄像头。"
+        },
+        "admin_first_time_login": {
+            "label": "管理员首次登录标志",
+            "description": "启用后，UI 可能会在登录页面显示帮助链接，告知用户如何在管理员密码重置后登录。 "
+        }
+    },
+    "audio_transcription": {
+        "label": "音频转录",
+        "description": "用于事件和实时字幕的实时和语音音频转录设置。",
+        "live_enabled": {
+            "label": "实时监控转写",
+            "description": "在接收到音频时开启实时监控持续转写。"
+        },
+        "enabled": {
+            "label": "开启音频转录",
+            "description": "为所有摄像头启用或禁用自动音频转录；可按摄像头覆盖。"
+        },
+        "language": {
+            "label": "转录语言",
+            "description": "用于转录/翻译的语言代码（例如 'en' 表示英语）。请参阅 https://whisper-api.com/docs/languages/ 了解支持的语言代码。"
+        },
+        "device": {
+            "label": "转录设备",
+            "description": "运行转录模型的设备密钥（CPU/GPU）。目前仅支持 NVIDIA CUDA GPU 进行转录。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "用于离线音频事件转录的模型大小。"
+        }
+    },
+    "birdseye": {
+        "label": "鸟瞰图",
+        "description": "将多路摄像头画面合并为统一布局的鸟瞰合成视图设置。",
+        "enabled": {
+            "label": "开启鸟瞰图",
+            "description": "开启或关闭鸟瞰图功能。"
+        },
+        "mode": {
+            "label": "追踪模式",
+            "description": "在鸟瞰视图中包含摄像头的模式：'objects'（目标）、'motion'（动作）或 'continuous'（持续）。"
+        },
+        "order": {
+            "label": "排序位置",
+            "description": "用于控制摄像头在鸟瞰视图布局中排序位置的数值。"
+        },
+        "restream": {
+            "label": "转发 RTSP",
+            "description": "将鸟瞰图输出作为 RTSP 流重新转发；启用此功能将使鸟瞰图持续运行。"
+        },
+        "width": {
+            "label": "宽度",
+            "description": "合成的鸟瞰帧的输出宽度（像素）。"
+        },
+        "height": {
+            "label": "高度",
+            "description": "合成的鸟瞰帧的输出高度（像素）。"
+        },
+        "quality": {
+            "label": "编码质量",
+            "description": "鸟瞰图 mpeg1 流的编码质量（1 最高质量，31 最低）。"
+        },
+        "inactivity_threshold": {
+            "label": "非活动阈值",
+            "description": "摄像头停止在鸟瞰图中显示的非活动秒数。"
+        },
+        "layout": {
+            "label": "布局",
+            "description": "鸟瞰图合成的布局选项。",
+            "scaling_factor": {
+                "label": "缩放因子",
+                "description": "布局计算器使用的缩放因子（范围 1.0 到 5.0）。"
+            },
+            "max_cameras": {
+                "label": "最大摄像头数",
+                "description": "鸟瞰图中同时显示的最大摄像头数量；显示最近的摄像头。"
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "空闲心跳 FPS",
+            "description": "空闲时重新发送最后一个合成鸟瞰帧的每秒帧数；设为 0 则禁用。"
+        }
+    },
+    "detect": {
+        "label": "目标检测",
+        "description": "用于运行目标检测、初始化追踪器的检测模块设置。",
+        "enabled": {
+            "label": "开启检测",
+            "description": "为所有摄像头启用或禁用目标检测；可按摄像头覆盖。必须启用检测才能运行目标追踪。"
+        },
+        "height": {
+            "label": "检测画面高度",
+            "description": "用于配置检测流的画面高度（像素）；留空则使用原始视频流分辨率。"
+        },
+        "width": {
+            "label": "检测画面宽度",
+            "description": "用于配置检测流的画面宽度（像素）；留空则使用原始视频流分辨率。"
+        },
+        "fps": {
+            "label": "检测帧率",
+            "description": "检测时希望使用的帧率；数值越低，CPU 占用越小（推荐值为 5，仅在追踪极高速运动的目标时才设置更高数值，最高不建议超过 10）。"
+        },
+        "min_initialized": {
+            "label": "最小初始化帧数",
+            "description": "创建追踪目标前，需要连续检测到目标的次数。数值越大，错误触发的追踪越少。默认值为帧率除以 2。"
+        },
+        "max_disappeared": {
+            "label": "最大消失帧数",
+            "description": "追踪目标在连续多少帧未被检测到时，将被判定为已消失。"
+        },
+        "stationary": {
+            "label": "静止目标配置",
+            "description": "用于检测和管理长时间静止目标的相关设置。",
+            "interval": {
+                "label": "静止间隔",
+                "description": "设置每隔多少帧执行一次检测，用于确认目标是否处于静止状态。"
+            },
+            "threshold": {
+                "label": "静止阈值",
+                "description": "目标需要连续多少帧位置不变，才会被标记为静止状态。"
+            },
+            "max_frames": {
+                "label": "最大帧数",
+                "description": "限制静止目标最大追踪时长（以帧数为单位），超过将会停止追踪。",
+                "default": {
+                    "label": "默认最大帧数",
+                    "description": "停止追踪前，用于追踪静止目标的默认最大帧数。"
+                },
+                "objects": {
+                    "label": "目标最大帧数",
+                    "description": "可对不同类型目标分别设置静止追踪的最大帧数（覆盖全局设置）。"
+                }
+            },
+            "classifier": {
+                "label": "开启视觉分类器",
+                "description": "使用视觉分类器，即使检测框有轻微抖动，也能准确判断物体是真的静止。"
+            }
+        },
+        "annotation_offset": {
+            "label": "标记偏移量",
+            "description": "检测标记的时间偏移量（毫秒），用于让时间轴上的检测框与录像画面更精准对齐；可设置为正数或负数。"
+        }
+    },
+    "face_recognition": {
+        "label": "人脸识别",
+        "enabled": {
+            "label": "开启人脸识别",
+            "description": "为所有摄像头启用或禁用人脸识别；可按摄像头覆盖。"
+        },
+        "min_area": {
+            "label": "最小人脸区域",
+            "description": "需要尝试进行人脸识别的人脸检测框最小大小（像素）。"
+        },
+        "description": "所有摄像头的人脸检测和识别设置；可按摄像头覆盖。",
+        "model_size": {
+            "label": "模型大小",
+            "description": "用于人脸嵌入的模型大小（small/large）；较大的可能需要 GPU。"
+        },
+        "unknown_score": {
+            "label": "未知分数阈值",
+            "description": "低于此距离阈值的人脸被视为潜在匹配（数值越高越严格）。"
+        },
+        "detection_threshold": {
+            "label": "检测阈值",
+            "description": "将人脸检测视为有效所需的最小检测置信度。"
+        },
+        "recognition_threshold": {
+            "label": "识别阈值",
+            "description": "将两张人脸视为匹配的人脸嵌入距离阈值。"
+        },
+        "min_faces": {
+            "label": "最小人脸数",
+            "description": "在将识别的子标签应用于人员之前所需的最小人脸识别次数。"
+        },
+        "save_attempts": {
+            "label": "保存尝试",
+            "description": "为最近识别 UI 保留的人脸识别尝试次数。"
+        },
+        "blur_confidence_filter": {
+            "label": "模糊置信度过滤器",
+            "description": "根据图像模糊程度调整置信度分数，以减少低质量人脸的误报。"
+        },
+        "device": {
+            "label": "设备",
+            "description": "这是一个覆盖选项，用于指定特定设备。请参阅 https://onnxruntime.ai/docs/execution-providers/ 了解更多信息"
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg 编解码相关设置，包含可执行文件路径、命令行参数、硬件加速选项，以及按不同功能划分的输出参数。",
+        "path": {
+            "label": "FFmpeg 路径",
+            "description": "要使用的 FFmpeg 可执行文件路径，或版本别名（如 \"5.0\" 或 \"7.0\"）。"
+        },
+        "global_args": {
+            "label": "FFmpeg 全局参数",
+            "description": "传递给 FFmpeg 进程的全局参数。"
+        },
+        "hwaccel_args": {
+            "label": "硬件加速参数",
+            "description": "用于 FFmpeg 的硬件加速参数。建议使用对应硬件厂商的预设配置。"
+        },
+        "input_args": {
+            "label": "输入参数",
+            "description": "应用于 FFmpeg 输入视频流的输入参数。"
+        },
+        "output_args": {
+            "label": "输出参数",
+            "description": "用于不同 FFmpeg 功能（如检测、录制）的默认输出参数。",
+            "detect": {
+                "label": "检测输出参数",
+                "description": "检测功能视频流的默认输出参数。"
+            },
+            "record": {
+                "label": "录制输出参数",
+                "description": "录制功能视频流的默认输出参数。"
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg 重试时间",
+            "description": "摄像头视频流异常断开后，重新连接前的等待时间。默认为 10 秒。"
+        },
+        "apple_compatibility": {
+            "label": "Apple 兼容性",
+            "description": "录制 H.265 视频时启用 HEVC 标记，以提升对 Apple 设备播放的兼容性。"
+        },
+        "gpu": {
+            "label": "GPU 索引",
+            "description": "在启用硬件加速时，默认使用的 GPU 索引。"
+        },
+        "inputs": {
+            "label": "摄像头输入视频流",
+            "description": "该摄像头的所有输入流配置列表（包含路径和功能）。",
+            "path": {
+                "label": "输入路径",
+                "description": "摄像头输入视频流的地址或路径。"
+            },
+            "roles": {
+                "label": "输入流功能",
+                "description": "定义该视频流的功能。"
+            },
+            "global_args": {
+                "label": "FFmpeg 全局参数",
+                "description": "该输入视频流使用的 FFmpeg 全局通用参数。"
+            },
+            "hwaccel_args": {
+                "label": "硬件加速参数",
+                "description": "该输入视频流的硬件加速参数。"
+            },
+            "input_args": {
+                "label": "输入参数",
+                "description": "该视频流特定的输入参数。"
+            }
+        }
+    },
+    "database": {
+        "label": "数据库",
+        "description": "Frigate 用于存储追踪目标和录像元数据的 SQLite 数据库设置。",
+        "path": {
+            "label": "数据库路径",
+            "description": "Frigate SQLite 数据库文件的存储路径。"
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "集成的 go2rtc 转发服务设置，用于实时监控流转发和转码。"
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "连接到 MQTT 代理并发布遥测数据、快照和事件详情的设置。",
+        "enabled": {
+            "label": "开启 MQTT",
+            "description": "启用或禁用 MQTT 集成，用于状态、事件和快照。"
+        },
+        "host": {
+            "label": "MQTT 主机",
+            "description": "MQTT 代理的主机名或 IP 地址。"
+        },
+        "port": {
+            "label": "MQTT 端口",
+            "description": "MQTT 代理的端口（普通 MQTT 通常为 1883）。"
+        },
+        "topic_prefix": {
+            "label": "主题前缀",
+            "description": "所有 Frigate 主题的 MQTT 主题前缀；如果运行多个实例，必须唯一。"
+        },
+        "client_id": {
+            "label": "客户端 ID",
+            "description": "连接到 MQTT 代理时使用的客户端标识符；每个实例应该唯一。"
+        },
+        "stats_interval": {
+            "label": "统计信息间隔",
+            "description": "向 MQTT 发布系统和摄像头统计信息的时间间隔（秒）。"
+        },
+        "user": {
+            "label": "MQTT 用户名",
+            "description": "可选的 MQTT 用户名；可以通过环境变量或密钥提供。"
+        },
+        "password": {
+            "label": "MQTT 密码",
+            "description": "可选的 MQTT 密码；可以通过环境变量或密钥提供。"
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA 证书",
+            "description": "用于 TLS 连接到代理的 CA 证书路径（用于自签名证书）。"
+        },
+        "tls_client_cert": {
+            "label": "客户端证书",
+            "description": "TLS 双向认证的客户端证书路径；使用客户端证书时不要设置用户名/密码。"
+        },
+        "tls_client_key": {
+            "label": "客户端密钥",
+            "description": "客户端证书的私钥路径。"
+        },
+        "tls_insecure": {
+            "label": "TLS 不安全连接",
+            "description": "通过跳过主机名验证允许不安全的 TLS 连接（不推荐）。"
+        },
+        "qos": {
+            "label": "MQTT QoS",
+            "description": "MQTT 发布/订阅的服务质量级别（0、1 或 2）。"
+        }
+    },
+    "notifications": {
+        "label": "通知",
+        "description": "为所有摄像头启用和控制通知的设置；可按摄像头覆盖。",
+        "enabled": {
+            "label": "开启通知",
+            "description": "为所有摄像头启用或禁用通知；可按摄像头覆盖。"
+        },
+        "email": {
+            "label": "通知邮箱",
+            "description": "用于推送通知或某些通知提供商要求的邮箱地址。"
+        },
+        "cooldown": {
+            "label": "冷却时间",
+            "description": "通知之间的冷却时间（秒），以避免向收件人发送垃圾信息。"
+        },
+        "enabled_in_config": {
+            "label": "原始通知状态",
+            "description": "指示原始静态配置中是否启用了通知。"
+        }
+    },
+    "networking": {
+        "label": "网络",
+        "description": "网络相关设置，如 Frigate 端点的 IPv6 启用。",
+        "ipv6": {
+            "label": "IPv6 配置",
+            "description": "Frigate 网络服务的 IPv6 特定设置。",
+            "enabled": {
+                "label": "开启 IPv6",
+                "description": "在适用的情况下为 Frigate 服务（API 和 UI）启用 IPv6 支持。"
+            }
+        },
+        "listen": {
+            "label": "监听端口配置",
+            "description": "内部和外部监听端口的配置。此选项适用于高级用户。对于大多数用例，建议在 Docker compose 文件的 ports 部分进行更改。",
+            "internal": {
+                "label": "内部端口",
+                "description": "Frigate 的内部监听端口（默认 5000）。"
+            },
+            "external": {
+                "label": "外部端口",
+                "description": "Frigate 的外部监听端口（默认 8971）。"
+            }
+        }
+    },
+    "proxy": {
+        "label": "代理",
+        "description": "用于将 Frigate 集成到传递已认证用户头的反向代理后面的设置。",
+        "header_map": {
+            "label": "请求头映射",
+            "description": "将传入的代理请求头映射到 Frigate 用户和权限组字段，用于基于代理的身份验证。",
+            "user": {
+                "label": "用户请求头",
+                "description": "包含上游代理提供的已认证用户名的请求头。"
+            },
+            "role": {
+                "label": "权限组请求头",
+                "description": "包含来自上游代理的已认证用户权限组或用户组的请求头。"
+            },
+            "role_map": {
+                "label": "权限组映射",
+                "description": "将上游组值映射到 Frigate 权限组（例如将管理员组映射到管理员权限组）。"
+            }
+        },
+        "logout_url": {
+            "label": "登出 URL",
+            "description": "通过代理登出时重定向用户的 URL。"
+        },
+        "auth_secret": {
+            "label": "代理密钥",
+            "description": "与 X-Proxy-Secret 请求头进行比对的可选密钥，用于验证受信任的代理。"
+        },
+        "default_role": {
+            "label": "默认权限组",
+            "description": "当没有权限组映射适用时分配给代理认证用户的默认权限组（admin 或 viewer）。"
+        },
+        "separator": {
+            "label": "分隔符",
+            "description": "用于分割代理请求头中多个值的字符。"
+        }
+    },
+    "telemetry": {
+        "label": "遥测",
+        "description": "系统遥测和统计选项，包括 GPU 和网络带宽监控。",
+        "network_interfaces": {
+            "label": "网络接口",
+            "description": "要监控带宽统计信息的网络接口名称前缀列表。"
+        },
+        "stats": {
+            "label": "系统统计",
+            "description": "用于启用/禁用各种系统和 GPU 统计信息收集的选项。",
+            "amd_gpu_stats": {
+                "label": "AMD GPU 统计",
+                "description": "如果存在 AMD GPU，则启用 AMD GPU 统计信息收集。"
+            },
+            "intel_gpu_stats": {
+                "label": "Intel GPU 统计",
+                "description": "如果存在 Intel GPU，则启用 Intel GPU 统计信息收集。"
+            },
+            "network_bandwidth": {
+                "label": "网络带宽",
+                "description": "为摄像头 ffmpeg 进程和检测器启用按进程网络带宽监控（需要权限）。"
+            },
+            "intel_gpu_device": {
+                "label": "SR-IOV 设备",
+                "description": "将 Intel GPU 视为 SR-IOV 时使用的设备标识符，用于修复 GPU 统计信息。"
+            }
+        },
+        "version_check": {
+            "label": "版本检查",
+            "description": "启用出站检查以检测是否有更新版本的 Frigate 可用。"
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Frigate Web 端点（端口 8971）的 TLS 设置。",
+        "enabled": {
+            "label": "开启 TLS",
+            "description": "在配置的 TLS 端口上为 Frigate 的 Web UI 和 API 启用 TLS。"
+        }
+    },
+    "ui": {
+        "label": "用户界面",
+        "description": "用户界面偏好设置，如时区、时间/日期格式和单位。",
+        "timezone": {
+            "label": "时区",
+            "description": "UI 中显示的可选时区（如果未设置，则默认为浏览器本地时间）。"
+        },
+        "time_format": {
+            "label": "时间格式",
+            "description": "UI 中使用的时间格式（browser、12hour 或 24hour）。"
+        },
+        "date_style": {
+            "label": "日期样式",
+            "description": "UI 中使用的日期样式（full、long、medium、short）。"
+        },
+        "time_style": {
+            "label": "时间样式",
+            "description": "UI 中使用的时间样式（full、long、medium、short）。"
+        },
+        "unit_system": {
+            "label": "单位系统",
+            "description": "UI 和 MQTT 中使用的显示单位系统（公制或英制）。"
+        }
+    },
+    "detectors": {
+        "label": "检测器硬件",
+        "description": "目标检测器（CPU、GPU、ONNX 后端）的配置以及任何检测器特定的模型设置。",
+        "type": {
+            "label": "检测器类型",
+            "description": "用于目标检测的检测器类型（例如 'cpu'、'edgetpu'、'openvino'）。"
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "在主机 CPU 上运行 TensorFlow Lite 模型的 CPU TFLite 检测器，无硬件加速。不推荐使用。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "num_threads": {
+                "label": "检测线程数",
+                "description": "用于基于 CPU 的推理的线程数。"
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "将图像发送到远程 DeepStack HTTP API 进行推理的 DeepStack/CodeProject.AI 检测器。不推荐使用。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "api_url": {
+                "label": "DeepStack API URL",
+                "description": "DeepStack API 的 URL。"
+            },
+            "api_timeout": {
+                "label": "DeepStack API 超时时间（秒）",
+                "description": "DeepStack API 请求允许的最长时间。"
+            },
+            "api_key": {
+                "label": "DeepStack API 密钥（如需要）",
+                "description": "用于认证 DeepStack 服务的可选 API 密钥。"
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "通过 DeGirum 云或本地推理服务运行模型的 DeGirum 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchg'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "location": {
+                "label": "推理位置",
+                "description": "DeGirum 推理引擎的位置（例如 '@cloud'、'127.0.0.1'）。"
+            },
+            "zoo": {
+                "label": "模型库",
+                "description": "DeGirum 模型库的路径或 URL。"
+            },
+            "token": {
+                "label": "DeGirum 云令牌",
+                "description": "用于 DeGirum 云访问的令牌。"
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "使用 EdgeTPU 委托运行为 Coral EdgeTPU 编译的 TensorFlow Lite 模型的 EdgeTPU 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "device": {
+                "label": "设备类型",
+                "description": "用于 EdgeTPU 推理的设备（例如 'usb'、'pci'）。"
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "使用 HEF 模型和 HailoRT SDK 在 Hailo 硬件上进行推理的 Hailo-8/Hailo-8L 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "device": {
+                "label": "设备类型",
+                "description": "用于 Hailo 推理的设备（例如 'PCIe'、'M.2'）。"
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "在 MemryX 加速器上运行编译的 DFP 模型的 MemryX MX3 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "device": {
+                "label": "设备路径",
+                "description": "用于 MemryX 推理的设备（例如 'PCIe'）。"
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "运行 ONNX 模型的 ONNX 检测器；当可用时将使用可用的加速后端（CUDA/ROCm/OpenVINO）。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "device": {
+                "label": "设备类型",
+                "description": "用于 ONNX 推理的设备（例如 'AUTO'、'CPU'、'GPU'）。"
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "适用于 AMD 和 Intel CPU、Intel GPU 和 Intel VPU 硬件的 OpenVINO 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "device": {
+                "label": "设备类型",
+                "description": "用于 OpenVINO 推理的设备（例如 'CPU'、'GPU'、'NPU'）。"
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "用于 Rockchip NPU 的 RKNN 检测器；在 Rockchip 硬件上运行编译的 RKNN 模型。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "num_cores": {
+                "label": "使用的 NPU 核心数。",
+                "description": "要使用的 NPU 核心数（0 表示自动）。"
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "使用 Synap SDK 在 Synaptics 硬件上运行 .synap 格式模型的 Synaptics NPU 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            }
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "使用 Mesa Teflon 委托库在支持的 GPU 上加速推理的 TFLite Teflon 委托检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            }
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "使用序列化的 TensorRT 引擎进行加速推理的 Nvidia Jetson 设备 TensorRT 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "device": {
+                "label": "GPU 设备索引",
+                "description": "要使用的 GPU 设备索引。"
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "通过 ZeroMQ IPC 端点将推理卸载到外部进程的 ZMQ IPC 检测器。",
+            "type": {
+                "label": "类型"
+            },
+            "model": {
+                "label": "检测器特定模型配置",
+                "description": "检测器特定的模型配置选项（路径、输入大小等）。",
+                "path": {
+                    "label": "自定义目标检测模型路径",
+                    "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+                },
+                "labelmap_path": {
+                    "label": "自定义目标检测器的标签映射",
+                    "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+                },
+                "width": {
+                    "label": "目标检测模型输入宽度",
+                    "description": "模型输入张量的宽度（像素）。"
+                },
+                "height": {
+                    "label": "目标检测模型输入高度",
+                    "description": "模型输入张量的高度（像素）。"
+                },
+                "labelmap": {
+                    "label": "标签映射自定义",
+                    "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+                },
+                "attributes_map": {
+                    "label": "目标标签到属性标签的映射",
+                    "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+                },
+                "input_tensor": {
+                    "label": "模型输入张量形状",
+                    "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+                },
+                "input_pixel_format": {
+                    "label": "模型输入像素颜色格式",
+                    "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+                },
+                "input_dtype": {
+                    "label": "模型输入数据类型",
+                    "description": "模型输入张量的数据类型（例如 'float32'）。"
+                },
+                "model_type": {
+                    "label": "目标检测模型类型",
+                    "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                }
+            },
+            "model_path": {
+                "label": "检测器特定模型路径",
+                "description": "如果所选检测器需要，则为检测器模型二进制文件的路径。"
+            },
+            "endpoint": {
+                "label": "ZMQ IPC 端点",
+                "description": "要连接的 ZMQ 端点。"
+            },
+            "request_timeout_ms": {
+                "label": "ZMQ 请求超时（毫秒）",
+                "description": "ZMQ 请求的超时时间（毫秒）。"
+            },
+            "linger_ms": {
+                "label": "ZMQ 套接字逗留时间（毫秒）",
+                "description": "套接字逗留时间（毫秒）。"
+            }
+        }
+    },
+    "model": {
+        "label": "检测模型",
+        "description": "用于配置自定义目标检测模型及其输入形状的设置。",
+        "path": {
+            "label": "自定义目标检测模型路径",
+            "description": "自定义检测模型文件的路径（或 Frigate+ 模型的 plus://<model_id>）。"
+        },
+        "labelmap_path": {
+            "label": "自定义目标检测器的标签映射",
+            "description": "将数字类别映射到检测器字符串标签的标签映射文件路径。"
+        },
+        "width": {
+            "label": "目标检测模型输入宽度",
+            "description": "模型输入张量的宽度（像素）。"
+        },
+        "height": {
+            "label": "目标检测模型输入高度",
+            "description": "模型输入张量的高度（像素）。"
+        },
+        "labelmap": {
+            "label": "标签映射自定义",
+            "description": "要合并到标准标签映射中的覆盖或重映射条目。"
+        },
+        "attributes_map": {
+            "label": "目标标签到属性标签的映射",
+            "description": "从目标标签到属性标签的映射，用于附加元数据（例如 'car' -> ['license_plate']）。"
+        },
+        "input_tensor": {
+            "label": "模型输入张量形状",
+            "description": "模型期望的张量格式：'nhwc' 或 'nchw'。"
+        },
+        "input_pixel_format": {
+            "label": "模型输入像素颜色格式",
+            "description": "模型期望的像素色彩空间：'rgb'、'bgr' 或 'yuv'。"
+        },
+        "input_dtype": {
+            "label": "模型输入数据类型",
+            "description": "模型输入张量的数据类型（例如 'float32'）。"
+        },
+        "model_type": {
+            "label": "目标检测模型类型",
+            "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+        }
+    },
+    "genai": {
+        "label": "生成式 AI 配置（命名提供商）。",
+        "description": "用于生成目标描述和核查摘要的集成生成式 AI 提供商设置。",
+        "api_key": {
+            "label": "API 密钥",
+            "description": "某些提供商要求的 API 密钥（也可以通过环境变量设置）。"
+        },
+        "base_url": {
+            "label": "基础 URL",
+            "description": "自托管或兼容提供商的基础 URL（例如 Ollama 实例）。"
+        },
+        "model": {
+            "label": "模型",
+            "description": "用于生成描述或摘要的提供商模型。"
+        },
+        "provider": {
+            "label": "提供商",
+            "description": "要使用的 GenAI 提供商（例如：ollama、gemini、openai）。"
+        },
+        "roles": {
+            "label": "功能",
+            "description": "生成式 AI 功能（工具、视觉、嵌入）；每个功能单独一个提供商。"
+        },
+        "provider_options": {
+            "label": "提供商选项",
+            "description": "传递给 GenAI 客户端的附加提供商特定选项。"
+        },
+        "runtime_options": {
+            "label": "运行时选项",
+            "description": "每次推理调用时传递给提供商的运行时选项。"
+        }
+    },
+    "live": {
+        "label": "实时回放",
+        "description": "Web UI 用于控制实时监控流分辨率和质量的设置。",
+        "streams": {
+            "label": "实时监控流名称",
+            "description": "配置的流名称到用于实时监控播放的 restream/go2rtc 名称的映射。"
+        },
+        "height": {
+            "label": "实时监控高度",
+            "description": "在 Web UI 中渲染 jsmpeg 实时监控流的高度（像素）；必须小于等于检测流高度。"
+        },
+        "quality": {
+            "label": "实时监控质量",
+            "description": "jsmpeg 流的编码质量（1 最高，31 最低）。"
+        }
+    },
+    "motion": {
+        "label": "画面变动检测",
+        "description": "应用于摄像头的默认动作检测设置，除非按摄像头覆盖。",
+        "enabled": {
+            "label": "开启画面变动检测",
+            "description": "为所有摄像头启用或禁用动作检测；可按摄像头覆盖。"
+        },
+        "threshold": {
+            "label": "画面变动阈值",
+            "description": "画面变动检测器使用的像素差异阈值；数值越高灵敏度越低（范围 1-255）。"
+        },
+        "lightning_threshold": {
+            "label": "闪电阈值",
+            "description": "用于检测和忽略短暂闪电闪烁的阈值（数值越低越敏感，范围 0.3 到 1.0）。这不会完全阻止画面变动检测；只是当超过阈值时检测器会停止分析额外的帧。在此类事件期间仍会创建基于画面变动的录像。"
+        },
+        "skip_motion_threshold": {
+            "label": "跳过画面变动阈值",
+            "description": "如果单帧中图像变化超过此比例，检测器将返回无画面变动框并立即重新校准。这可以节省 CPU 并减少闪电、风暴等情况下的误报，但可能会错过真实事件，如 PTZ 摄像头自动追踪目标。权衡的是丢弃几兆字节的录像与查看几个短片之间的取舍。范围 0.0 到 1.0。"
+        },
+        "improve_contrast": {
+            "label": "改善对比度",
+            "description": "在画面变动分析之前对帧应用对比度改善以帮助检测。"
+        },
+        "contour_area": {
+            "label": "轮廓区域",
+            "description": "画面变动轮廓被计入所需的最小轮廓区域（像素）。"
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "用于画面变动计算的帧差异中使用的 alpha 混合因子。"
+        },
+        "frame_alpha": {
+            "label": "画面 alpha 通道",
+            "description": "画面变动预处理时混合画面所使用的 alpha 值。"
+        },
+        "frame_height": {
+            "label": "画面高度",
+            "description": "计算画面变动时缩放画面的高度（像素）。"
+        },
+        "mask": {
+            "label": "遮罩坐标",
+            "description": "定义用于包含/排除区域的画面变动遮罩多边形的有序 x,y 坐标。"
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT 关闭延迟",
+            "description": "在发布 MQTT 'off' 状态之前，最后一次画面变动后等待的秒数。"
+        },
+        "enabled_in_config": {
+            "label": "原始画面变动状态",
+            "description": "指示原始静态配置中是否启用了画面变动检测。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        }
+    },
+    "objects": {
+        "label": "目标",
+        "description": "目标追踪默认设置，包括要追踪的标签和按目标的过滤器。",
+        "track": {
+            "label": "要追踪的目标",
+            "description": "所有摄像头要追踪的目标标签列表；可按摄像头覆盖。"
+        },
+        "filters": {
+            "label": "目标过滤器",
+            "description": "应用于检测到的目标以减少误报的过滤器（区域、比例、置信度）。",
+            "min_area": {
+                "label": "最小目标区域",
+                "description": "此目标类型所需的最小边界框区域（像素或百分比）。可以是像素（整数）或百分比（0.000001 到 0.99 之间的浮点数）。"
+            },
+            "max_area": {
+                "label": "最大目标区域",
+                "description": "此目标类型允许的最大边界框区域（像素或百分比）。可以是像素（整数）或百分比（0.000001 到 0.99 之间的浮点数）。"
+            },
+            "min_ratio": {
+                "label": "最小纵横比",
+                "description": "边界框所需的最小宽高比。"
+            },
+            "max_ratio": {
+                "label": "最大纵横比",
+                "description": "边界框允许的最大宽高比。"
+            },
+            "threshold": {
+                "label": "置信度阈值",
+                "description": "目标被视为真正阳性所需的平均检测置信度阈值。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "目标被计入所需的最小单帧检测置信度。"
+            },
+            "mask": {
+                "label": "过滤器遮罩",
+                "description": "定义此过滤器在帧内应用位置的多边形坐标。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
+        },
+        "mask": {
+            "label": "目标遮罩",
+            "description": "用于防止在指定区域进行目标检测的遮罩多边形。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        },
+        "genai": {
+            "label": "GenAI 目标配置",
+            "description": "用于描述追踪目标和发送帧进行生成的 GenAI 选项。",
+            "enabled": {
+                "label": "开启 GenAI",
+                "description": "默认启用 GenAI 生成追踪目标的描述。"
+            },
+            "use_snapshot": {
+                "label": "使用快照",
+                "description": "使用目标快照而不是缩略图进行 GenAI 描述生成。"
+            },
+            "prompt": {
+                "label": "字幕提示",
+                "description": "使用 GenAI 生成描述时使用的默认提示模板。"
+            },
+            "object_prompts": {
+                "label": "目标提示",
+                "description": "用于自定义特定标签的 GenAI 输出的按目标提示。"
+            },
+            "objects": {
+                "label": "GenAI 目标",
+                "description": "默认发送给 GenAI 的目标标签列表。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入才能符合 GenAI 描述生成条件的区域。"
+            },
+            "debug_save_thumbnails": {
+                "label": "保存缩略图",
+                "description": "保存发送给 GenAI 的缩略图用于调试和核查。"
+            },
+            "send_triggers": {
+                "label": "GenAI 触发器",
+                "description": "定义何时应将帧发送给 GenAI（结束时、更新后等）。",
+                "tracked_object_end": {
+                    "label": "结束时发送",
+                    "description": "当追踪目标结束时向 GenAI 发送请求。"
+                },
+                "after_significant_updates": {
+                    "label": "早期 GenAI 触发器",
+                    "description": "在追踪目标进行指定次数的重大更新后向 GenAI 发送请求。"
+                }
+            },
+            "enabled_in_config": {
+                "label": "原始 GenAI 状态",
+                "description": "指示原始静态配置中是否启用了 GenAI。"
+            }
+        }
+    },
+    "record": {
+        "label": "录像",
+        "description": "应用于摄像头的录像和保留设置，除非按摄像头覆盖。",
+        "enabled": {
+            "label": "开启录像",
+            "description": "为所有摄像头启用或禁用录像；可按摄像头覆盖。"
+        },
+        "expire_interval": {
+            "label": "录像清理间隔",
+            "description": "清理过期录像片段的间隔分钟数。"
+        },
+        "continuous": {
+            "label": "持续保留",
+            "description": "无论是否有追踪目标或动作，保留录像的天数。如果只想保留警报和检测的录像，请设置为 0。",
+            "days": {
+                "label": "保留天数",
+                "description": "保留录像的天数。"
+            }
+        },
+        "motion": {
+            "label": "动作保留",
+            "description": "无论是否有追踪目标，由动作触发的录像保留天数。如果只想保留警报和检测的录像，请设置为 0。",
+            "days": {
+                "label": "保留天数",
+                "description": "保留录像的天数。"
+            }
+        },
+        "detections": {
+            "label": "检测保留",
+            "description": "检测事件的录像保留设置，包括前后捕获时长。",
+            "pre_capture": {
+                "label": "前捕获秒数",
+                "description": "检测事件之前包含在录像中的秒数。"
+            },
+            "post_capture": {
+                "label": "后捕获秒数",
+                "description": "检测事件之后包含在录像中的秒数。"
+            },
+            "retain": {
+                "label": "事件保留",
+                "description": "检测事件录像的保留设置。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留检测事件录像的天数。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
+                }
+            }
+        },
+        "alerts": {
+            "label": "警报保留",
+            "description": "警报事件的录像保留设置，包括前后捕获时长。",
+            "pre_capture": {
+                "label": "前捕获秒数",
+                "description": "检测事件之前包含在录像中的秒数。"
+            },
+            "post_capture": {
+                "label": "后捕获秒数",
+                "description": "检测事件之后包含在录像中的秒数。"
+            },
+            "retain": {
+                "label": "事件保留",
+                "description": "检测事件录像的保留设置。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留检测事件录像的天数。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
+                }
+            }
+        },
+        "export": {
+            "label": "导出配置",
+            "description": "导出录像时使用的设置，如延时摄影和硬件加速。",
+            "hwaccel_args": {
+                "label": "导出硬件加速参数",
+                "description": "用于导出/转码操作的硬件加速参数。"
+            }
+        },
+        "preview": {
+            "label": "预览配置",
+            "description": "控制 UI 中显示的录像预览质量的设置。",
+            "quality": {
+                "label": "预览质量",
+                "description": "预览质量级别（very_low、low、medium、high、very_high）。"
+            }
+        },
+        "enabled_in_config": {
+            "label": "原始录像状态",
+            "description": "指示原始静态配置中是否启用了录像。"
+        }
+    },
+    "review": {
+        "label": "核查",
+        "description": "控制 UI 和存储使用的警报、检测和 GenAI 核查摘要的设置。",
+        "alerts": {
+            "label": "警报配置",
+            "description": "哪些追踪目标生成警报以及如何保留警报的设置。",
+            "enabled": {
+                "label": "开启警报",
+                "description": "为所有摄像头启用或禁用警报生成；可按摄像头覆盖。"
+            },
+            "labels": {
+                "label": "警报标签",
+                "description": "符合警报条件的目标标签列表（例如：car、person）。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入才能被视为警报的区域；留空则允许任何区域。"
+            },
+            "enabled_in_config": {
+                "label": "原始警报状态",
+                "description": "追踪原始静态配置中是否启用了警报。"
+            },
+            "cutoff_time": {
+                "label": "警报截止时间",
+                "description": "在没有引起警报的活动后等待多少秒后截止警报。"
+            }
+        },
+        "detections": {
+            "label": "检测配置",
+            "description": "创建检测事件（非警报）以及保留多长时间的设置。",
+            "enabled": {
+                "label": "开启检测",
+                "description": "为所有摄像头启用或禁用检测事件；可按摄像头覆盖。"
+            },
+            "labels": {
+                "label": "检测标签",
+                "description": "符合检测事件条件的目标标签列表。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入才能被视为检测的区域；留空则允许任何区域。"
+            },
+            "cutoff_time": {
+                "label": "检测截止时间",
+                "description": "在没有引起检测的活动后等待多少秒后截止检测。"
+            },
+            "enabled_in_config": {
+                "label": "原始检测状态",
+                "description": "追踪原始静态配置中是否启用了检测。"
+            }
+        },
+        "genai": {
+            "label": "GenAI 配置",
+            "description": "控制使用生成式 AI 为核查项生成描述和摘要。",
+            "enabled": {
+                "label": "开启 GenAI 描述",
+                "description": "为核查项启用或禁用 GenAI 生成的描述和摘要。"
+            },
+            "alerts": {
+                "label": "为警报开启 GenAI",
+                "description": "使用 GenAI 为警报项生成描述。"
+            },
+            "detections": {
+                "label": "为检测开启 GenAI",
+                "description": "使用 GenAI 为检测项生成描述。"
+            },
+            "image_source": {
+                "label": "核查图像来源",
+                "description": "发送给 GenAI 的图像来源（'preview' 或 'recordings'）；'recordings' 使用更高质量的帧但消耗更多 token。"
+            },
+            "additional_concerns": {
+                "label": "额外关注事项",
+                "description": "GenAI 在评估此摄像头活动时应考虑的额外关注事项或备注列表。"
+            },
+            "debug_save_thumbnails": {
+                "label": "保存缩略图",
+                "description": "保存发送给 GenAI 提供商的缩略图用于调试和核查。"
+            },
+            "enabled_in_config": {
+                "label": "原始 GenAI 状态",
+                "description": "追踪原始静态配置中是否启用了 GenAI 核查。"
+            },
+            "preferred_language": {
+                "label": "首选语言",
+                "description": "向 GenAI 提供商请求生成响应的首选语言。"
+            },
+            "activity_context_prompt": {
+                "label": "活动上下文提示",
+                "description": "描述什么是和什么不是可疑活动的自定义提示，为 GenAI 摘要提供上下文。"
+            }
+        }
+    },
+    "snapshots": {
+        "label": "快照",
+        "description": "所有摄像头的追踪目标 JPEG 快照保存设置；可按摄像头覆盖。",
+        "enabled": {
+            "label": "开启快照",
+            "description": "为所有摄像头启用或禁用保存快照；可按摄像头覆盖。"
+        },
+        "clean_copy": {
+            "label": "保存干净副本",
+            "description": "除了带注释的快照外，还保存一份不带注释的干净快照副本。"
+        },
+        "timestamp": {
+            "label": "时间戳叠加",
+            "description": "在保存的快照上叠加时间戳。"
+        },
+        "bounding_box": {
+            "label": "边界框叠加",
+            "description": "在保存的快照上绘制追踪目标的边界框。"
+        },
+        "crop": {
+            "label": "裁剪快照",
+            "description": "将保存的快照裁剪到检测到的目标边界框。"
+        },
+        "required_zones": {
+            "label": "必需区域",
+            "description": "目标必须进入才能保存快照的区域。"
+        },
+        "height": {
+            "label": "快照高度",
+            "description": "将保存的快照调整到的目标高度（像素）；留空则保持原始大小。"
+        },
+        "retain": {
+            "label": "快照保留",
+            "description": "保存快照的保留设置，包括默认天数和按目标覆盖。",
+            "default": {
+                "label": "默认保留",
+                "description": "保留快照的默认天数。"
+            },
+            "mode": {
+                "label": "保留模式",
+                "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
+            },
+            "objects": {
+                "label": "目标保留",
+                "description": "按目标覆盖的快照保留天数。"
+            }
+        },
+        "quality": {
+            "label": "JPEG 质量",
+            "description": "保存快照的 JPEG 编码质量（0-100）。"
+        }
+    },
+    "timestamp_style": {
+        "label": "时间戳样式",
+        "description": "应用于调试视图和快照的帧内时间戳样式选项。",
+        "position": {
+            "label": "时间戳位置",
+            "description": "时间戳在图像上的位置（tl/tr/bl/br）。"
+        },
+        "format": {
+            "label": "时间戳格式",
+            "description": "用于时间戳的日期时间格式字符串（Python 日期时间格式代码）。"
+        },
+        "color": {
+            "label": "时间戳颜色",
+            "description": "时间戳文本的 RGB 颜色值（所有值 0-255）。",
+            "red": {
+                "label": "红色",
+                "description": "时间戳颜色的红色分量（0-255）。"
+            },
+            "green": {
+                "label": "绿色",
+                "description": "时间戳颜色的绿色分量（0-255）。"
+            },
+            "blue": {
+                "label": "蓝色",
+                "description": "时间戳颜色的蓝色分量（0-255）。"
+            }
+        },
+        "thickness": {
+            "label": "时间戳粗细",
+            "description": "时间戳文本的线条粗细。"
+        },
+        "effect": {
+            "label": "时间戳效果",
+            "description": "时间戳文本的视觉效果（none、solid、shadow）。"
+        }
+    },
+    "classification": {
+        "label": "目标分类",
+        "description": "用于优化目标标签或状态分类的分类模型设置。",
+        "bird": {
+            "label": "鸟类分类配置",
+            "description": "鸟类分类模型特定的设置。",
+            "enabled": {
+                "label": "鸟类分类",
+                "description": "启用或禁用鸟类分类。"
+            },
+            "threshold": {
+                "label": "最小分数",
+                "description": "接受鸟类分类所需的最小分类分数。"
+            }
+        },
+        "custom": {
+            "label": "自定义分类模型",
+            "description": "用于目标或状态检测的自定义分类模型配置。",
+            "enabled": {
+                "label": "开启模型",
+                "description": "启用或禁用自定义分类模型。"
+            },
+            "name": {
+                "label": "模型名称",
+                "description": "要使用的自定义分类模型的标识符。"
+            },
+            "threshold": {
+                "label": "分数阈值",
+                "description": "用于更改分类状态的分数阈值。"
+            },
+            "save_attempts": {
+                "label": "保存尝试",
+                "description": "为最近分类 UI 保存多少次分类尝试。"
+            },
+            "object_config": {
+                "objects": {
+                    "label": "分类目标",
+                    "description": "要运行目标分类的目标类型列表。"
+                },
+                "classification_type": {
+                    "label": "分类类型",
+                    "description": "应用的分类类型：'sub_label'（添加 sub_label）或其他支持的类型。"
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "分类摄像头",
+                    "description": "用于运行状态分类的按摄像头裁剪和设置。",
+                    "crop": {
+                        "label": "分类裁剪",
+                        "description": "用于在此摄像头上运行分类的裁剪坐标。"
+                    }
+                },
+                "motion": {
+                    "label": "动作时运行",
+                    "description": "启用后，当在指定裁剪区域内检测到动作时运行分类。"
+                },
+                "interval": {
+                    "label": "分类间隔",
+                    "description": "状态分类的定期分类运行间隔（秒）。"
+                }
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "语义搜索",
+        "description": "用于构建和查询目标嵌入以查找相似项的语义搜索设置。",
+        "enabled": {
+            "label": "开启语义搜索",
+            "description": "启用或禁用语义搜索功能。"
+        },
+        "reindex": {
+            "label": "启动时重建索引",
+            "description": "触发将历史追踪目标完全重新索引到嵌入数据库。"
+        },
+        "model": {
+            "label": "语义搜索模型",
+            "description": "用于语义搜索的嵌入模型（例如 'jinav1'）。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "选择模型大小；'small' 在 CPU 上运行，'large' 通常需要 GPU。"
+        },
+        "device": {
+            "label": "设备",
+            "description": "这是一个覆盖选项，用于指定特定设备。请参阅 https://onnxruntime.ai/docs/execution-providers/ 了解更多信息"
+        },
+        "triggers": {
+            "label": "触发器",
+            "description": "摄像头特定语义搜索触发器的操作和匹配条件。",
+            "friendly_name": {
+                "label": "友好名称",
+                "description": "在 UI 中为此触发器显示的可选友好名称。"
+            },
+            "enabled": {
+                "label": "开启此触发器",
+                "description": "启用或禁用此语义搜索触发器。"
+            },
+            "type": {
+                "label": "触发器类型",
+                "description": "触发器类型：'thumbnail'（与图像匹配）或 'description'（与文本匹配）。"
+            },
+            "data": {
+                "label": "触发器内容",
+                "description": "要与追踪目标匹配的文本短语或缩略图 ID。"
+            },
+            "threshold": {
+                "label": "触发器阈值",
+                "description": "激活此触发器所需的最小相似度分数（0-1）。"
+            },
+            "actions": {
+                "label": "触发器操作",
+                "description": "触发器匹配时要执行的操作列表（通知、sub_label、属性）。"
+            }
+        }
+    },
+    "lpr": {
+        "label": "车牌识别",
+        "description": "车牌识别设置，包括检测阈值、格式化和已知车牌。",
+        "enabled": {
+            "label": "开启 LPR",
+            "description": "为所有摄像头启用或禁用车牌识别；可按摄像头覆盖。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "用于文本检测/识别的模型大小。大多数用户应使用 'small'。"
+        },
+        "detection_threshold": {
+            "label": "检测阈值",
+            "description": "开始对疑似车牌运行 OCR 的检测置信度阈值。"
+        },
+        "min_area": {
+            "label": "最小车牌区域",
+            "description": "尝试识别所需的最小车牌区域（像素）。"
+        },
+        "recognition_threshold": {
+            "label": "识别阈值",
+            "description": "识别的车牌文本作为子标签附加所需的置信度阈值。"
+        },
+        "min_plate_length": {
+            "label": "最小车牌长度",
+            "description": "识别的车牌被视为有效所需的最小字符数。"
+        },
+        "format": {
+            "label": "车牌格式正则",
+            "description": "用于验证识别的车牌字符串是否符合预期格式的可选正则表达式。"
+        },
+        "match_distance": {
+            "label": "匹配距离",
+            "description": "将检测到的车牌与已知车牌比较时允许的字符不匹配数。"
+        },
+        "known_plates": {
+            "label": "已知车牌",
+            "description": "要特别追踪或报警的车牌或正则表达式列表。"
+        },
+        "enhancement": {
+            "label": "增强级别",
+            "description": "在 OCR 之前应用于车牌裁剪的增强级别（0-10）；较高的值可能不总是改善结果，5 以上的级别可能仅适用于夜间车牌，应谨慎使用。"
+        },
+        "debug_save_plates": {
+            "label": "保存调试车牌",
+            "description": "保存车牌裁剪图像用于调试 LPR 性能。"
+        },
+        "device": {
+            "label": "设备",
+            "description": "这是一个覆盖选项，用于指定特定设备。请参阅 https://onnxruntime.ai/docs/execution-providers/ 了解更多信息"
+        },
+        "replace_rules": {
+            "label": "替换规则",
+            "description": "用于在匹配之前规范化检测到的车牌字符串的正则替换规则。",
+            "pattern": {
+                "label": "正则模式"
+            },
+            "replacement": {
+                "label": "替换字符串"
+            }
+        },
+        "expire_time": {
+            "label": "过期秒数",
+            "description": "未见到的车牌从追踪器中过期的时间（秒）（仅适用于专用 LPR 摄像头）。"
+        }
+    },
+    "camera_groups": {
+        "label": "摄像头分组",
+        "description": "用于在 UI 中组织摄像头的命名摄像头分组配置。",
+        "cameras": {
+            "label": "摄像头列表",
+            "description": "此分组中包含的摄像头名称数组。"
+        },
+        "icon": {
+            "label": "分组图标",
+            "description": "在 UI 中代表摄像头分组的图标。"
+        },
+        "order": {
+            "label": "排序顺序",
+            "description": "用于在 UI 中对摄像头分组进行排序的数字顺序；数值越大越靠后。"
+        }
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "MQTT 图像发布设置。",
+        "enabled": {
+            "label": "发送图像",
+            "description": "为此摄像头启用将目标快照图像发布到 MQTT 主题。"
+        },
+        "timestamp": {
+            "label": "添加时间戳",
+            "description": "在发布到 MQTT 的图像上叠加时间戳。"
+        },
+        "bounding_box": {
+            "label": "添加边界框",
+            "description": "在通过 MQTT 发布的图像上绘制边界框。"
+        },
+        "crop": {
+            "label": "裁剪图像",
+            "description": "将发布到 MQTT 的图像裁剪到检测到的目标边界框。"
+        },
+        "height": {
+            "label": "图像高度",
+            "description": "通过 MQTT 发布的图像调整到的目标高度（像素）。"
+        },
+        "required_zones": {
+            "label": "必需区域",
+            "description": "目标必须进入才能发布 MQTT 图像的区域。"
+        },
+        "quality": {
+            "label": "JPEG 质量",
+            "description": "发布到 MQTT 的图像的 JPEG 质量（0-100）。"
+        }
+    },
+    "camera_ui": {
+        "label": "摄像头 UI",
+        "description": "此摄像头在 UI 中的显示顺序和可见性。顺序影响默认仪表板。如需更精细的控制，请使用摄像头分组。",
+        "order": {
+            "label": "UI 顺序",
+            "description": "用于在 UI 中对摄像头进行排序的数字顺序（默认仪表板和列表）；数值越大越靠后。"
+        },
+        "dashboard": {
+            "label": "在 UI 中显示",
+            "description": "切换此摄像头在 Frigate UI 中是否可见。禁用后需要手动编辑配置才能再次在 UI 中查看此摄像头。"
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "此摄像头的 ONVIF 连接和 PTZ 自动追踪设置。",
+        "host": {
+            "label": "ONVIF 主机",
+            "description": "此摄像头 ONVIF 服务的主机（和可选协议）。"
+        },
+        "port": {
+            "label": "ONVIF 端口",
+            "description": "ONVIF 服务的端口号。"
+        },
+        "user": {
+            "label": "ONVIF 用户名",
+            "description": "ONVIF 身份验证的用户名；某些设备需要管理员用户才能使用 ONVIF。"
+        },
+        "password": {
+            "label": "ONVIF 密码",
+            "description": "ONVIF 身份验证的密码。"
+        },
+        "tls_insecure": {
+            "label": "禁用 TLS 验证",
+            "description": "跳过 TLS 验证并禁用 ONVIF 的摘要认证（不安全；仅用于安全网络）。"
+        },
+        "autotracking": {
+            "label": "自动追踪",
+            "description": "使用 PTZ 摄像头移动自动追踪移动目标并使其保持在画面中心。",
+            "enabled": {
+                "label": "开启自动追踪",
+                "description": "启用或禁用检测目标的自动 PTZ 摄像头追踪。"
+            },
+            "calibrate_on_startup": {
+                "label": "启动时校准",
+                "description": "在启动时测量 PTZ 电机速度以提高追踪精度。Frigate 将在校准后用 movement_weights 更新配置。"
+            },
+            "zooming": {
+                "label": "变焦模式",
+                "description": "控制变焦行为：disabled（仅平移/倾斜）、absolute（最兼容）或 relative（同时平移/倾斜/变焦）。"
+            },
+            "zoom_factor": {
+                "label": "变焦因子",
+                "description": "控制追踪目标的变焦级别。数值越低保持更多场景可见；数值越高放大更近但可能丢失追踪。数值范围 0.1 到 0.75。"
+            },
+            "track": {
+                "label": "追踪目标",
+                "description": "应触发自动追踪的目标类型列表。"
+            },
+            "required_zones": {
+                "label": "必需区域",
+                "description": "目标必须进入这些区域之一才能开始自动追踪。"
+            },
+            "return_preset": {
+                "label": "返回预设",
+                "description": "追踪结束后返回的摄像头固件中配置的 ONVIF 预设名称。"
+            },
+            "timeout": {
+                "label": "返回超时",
+                "description": "失去追踪后等待多少秒后将摄像头返回到预设位置。"
+            },
+            "movement_weights": {
+                "label": "移动权重",
+                "description": "由摄像头校准自动生成的校准值。请勿手动修改。"
+            },
+            "enabled_in_config": {
+                "label": "原始自动追踪状态",
+                "description": "用于追踪配置中是否启用自动追踪的内部字段。"
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "忽略时间不匹配",
+            "description": "忽略 ONVIF 通信中摄像头和 Frigate 服务器之间的时间同步差异。"
+        }
+    }
+}

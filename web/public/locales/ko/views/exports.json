@@ -13,5 +13,8 @@
     "error": {
       "renameExportFailed": "내보내기 이름 변경에 실패했습니다: {{errorMessage}}"
     }
+  },
+  "headings": {
+    "uncategorizedExports": "분류되지 않은 내보내기"
   }
 }

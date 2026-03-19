@@ -103,5 +103,11 @@
                 }
             }
         }
+    },
+    "version": {
+        "description": "Numerieke of string-versie van de actieve configuratie om migraties of formaatwijzigingen te helpen detecteren."
+    },
+    "safe_mode": {
+        "label": "Veilige modus"
     }
 }

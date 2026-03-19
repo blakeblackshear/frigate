@@ -19,5 +19,9 @@
     "editName": "Név szerkesztése",
     "deleteExport": "Export törlése",
     "shareExport": "Export megosztása"
+  },
+  "headings": {
+    "cases": "Esetek",
+    "uncategorizedExports": "Kategória nélküli exportok"
   }
 }

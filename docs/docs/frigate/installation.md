@@ -464,6 +464,9 @@ devices:
   - /dev/axcl_host
   - /dev/ax_mmb_dev
   - /dev/msg_userdev
+volumes:
+  - /usr/bin/axcl:/usr/bin/axcl
+  - /usr/lib/axcl:/usr/lib/axcl
 ```
 
 If you are using `docker run`, add this option to your command `--device /dev/axcl_host --device /dev/ax_mmb_dev --device /dev/msg_userdev`

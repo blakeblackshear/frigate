@@ -1,1 +1,16 @@
-{}
+{
+    "minimum": "Deve ser pelo menos {{limit}}",
+    "maximum": "Deve ser no máximo {{limit}}",
+    "exclusiveMinimum": "Deve ser maior do que {{limit}}",
+    "exclusiveMaximum": "Deve ser menor do que {{limit}}",
+    "minLength": "Deve ter pelo menos {{limit}} caractere(s)",
+    "maxLength": "Deve ter no máximo {{limit}} caractere(s)",
+    "minItems": "Deve ter pelo menos {{limit}} itens",
+    "maxItems": "Deve ter no máximo {{limit}} itens",
+    "pattern": "Formato inválido",
+    "required": "Esse campo é necessário",
+    "type": "Tipo de valor inválido",
+    "enum": "Deve ser um dos valores permitidos",
+    "const": "Valor não condiz com a constante esperada",
+    "uniqueItems": "Todos os itens devem ser únicos"
+}

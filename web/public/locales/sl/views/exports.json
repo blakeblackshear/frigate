@@ -1,23 +1,37 @@
 {
   "documentTitle": "Izvoz - Frigate",
   "search": "Iskanje",
-  "noExports": "Izovzi niso najdeni",
+  "noExports": "Ni najdenih izvozov",
   "deleteExport": "Izbriši izvoz",
-  "deleteExport.desc": "Ali ste prepričani, da želite izbrisati {{exportName}}?",
+  "deleteExport.desc": "Ali si prepričan, da želiš izbrisati {{exportName}}?",
   "editExport": {
     "title": "Preimenuj izvoz",
-    "desc": "Vpišite novo ime za ta izvoz.",
+    "desc": "Vnesi novo ime za ta izvoz.",
     "saveExport": "Shrani izvoz"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Napaka pri preimenovanju izvoza: {{errorMessage}}"
+      "renameExportFailed": "Preimenovanje izvoza ni uspelo: {{errorMessage}}",
+      "assignCaseFailed": "Posodobitev dodelitve k primeru ni uspela: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Deli izvoz",
     "editName": "Uredi ime",
     "deleteExport": "Izbriši izvoz",
-    "downloadVideo": "Prenesi videoposnetek"
+    "downloadVideo": "Prenesi video",
+    "assignToCase": "Dodaj k primeru"
+  },
+  "headings": {
+    "cases": "Primeri",
+    "uncategorizedExports": "Nekategorizirani izvozi"
+  },
+  "caseDialog": {
+    "title": "Dodaj k primeru",
+    "description": "Izberi obstoječ primer ali ustvari novega.",
+    "selectLabel": "Primer",
+    "newCaseOption": "Ustvari nov primer",
+    "nameLabel": "Ime primera",
+    "descriptionLabel": "Opis"
   }
 }

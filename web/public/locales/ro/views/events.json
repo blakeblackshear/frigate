@@ -82,6 +82,9 @@
     "back": "Înapoi",
     "empty": "Nicio previzualizare disponibilă",
     "noPreview": "Previzualizare indisponibilă",
-    "seekAria": "Derulează player-ul {{camera}} la {{time}}"
+    "seekAria": "Derulează player-ul {{camera}} la {{time}}",
+    "filter": "Filtru",
+    "filterDesc": "Selectează zonele pentru a afișa doar clipurile cu mișcare în acele regiuni.",
+    "filterClear": "Șterge"
   }
 }

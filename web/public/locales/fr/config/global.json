@@ -1,5 +1,57 @@
 {
     "version": {
-        "label": "Version actuelle de la configuration"
+        "label": "Version actuelle de la configuration",
+        "description": "Version numérique ou sous forme de chaîne de la configuration active, permettant de détecter les migrations ou les changements de format"
+    },
+    "safe_mode": {
+        "label": "Mode sans échec",
+        "description": "Si activé, Frigate démarre en mode sans échec avec des fonctionnalités réduites pour le dépannage."
+    },
+    "environment_vars": {
+        "label": "Variables d'environnement",
+        "description": "Paires clé/valeur des variables d'environnement à définir pour le processus Frigate sous Home Assistant OS. Les utilisateurs sans HAOS doivent utiliser la configuration des variables d'environnement de Docker à la place."
+    },
+    "logger": {
+        "label": "Journalisation",
+        "description": "Contrôle la verbosité par défaut des journaux et les exceptions de niveau par composant.",
+        "default": {
+            "label": "Niveau de journalisation",
+            "description": "Verbosité de l'ensemble des journaux  par défaut (débogage, information, avertissement, erreur)"
+        },
+        "logs": {
+            "label": "Niveau de journalisation par processus",
+            "description": "Outrepasser le niveau de journalisation par composant pour augmenter ou diminuer la verbosité pour des modules spécifiques"
+        }
+    },
+    "auth": {
+        "label": "Authentification",
+        "enabled": {
+            "label": "Activer l'authentification",
+            "description": "Active l'authentification native de l'interface de Frigate."
+        },
+        "description": "Authentification et réglages en rapport avec la session incluant les options concernant les cookies et limite de taux.",
+        "reset_admin_password": {
+            "label": "réinitialiser le mot de passe administrateur",
+            "description": "Si vrai, réinitialise le mot de passe utilisateur administrateur au démarrage et écrit le nouveau mot de passe dans les journaux."
+        },
+        "cookie_name": {
+            "label": "Nom du cookie JWT",
+            "description": "Nom du cookie utilisé pour stocker le jeton JWT pour authentification native."
+        },
+        "cookie_secure": {
+            "label": "Drapeau du cookie sécurisé",
+            "description": "Active le drapeau sécurisé sur le cookie d'authentification ; Doit être activé quand le TLS est utilisé."
+        },
+        "session_length": {
+            "label": "Longueur de session",
+            "description": "Durée de session en secondes pour les sessions basé sur JWT."
+        },
+        "refresh_time": {
+            "label": "Fenêtre de rafraichissement de session",
+            "description": "Lorsqu'une session est à moins de ce nombre de secondes de son expiration, actualisez là pour lui redonner sa durée complète."
+        },
+        "failed_login_rate_limit": {
+            "label": "Limite de connexions échouées"
+        }
     }
 }

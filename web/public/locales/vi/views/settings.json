@@ -348,7 +348,7 @@
     },
     "restart_required": "Yêu cầu khởi động lại (mặt nạ/vùng đã thay đổi)",
     "motionMaskLabel": "Mặt nạ chuyển động {{number}}",
-    "objectMaskLabel": "Mặt nạ đối tượng {{number}} ({{label}})",
+    "objectMaskLabel": "Mặt nạ đối tượng {{number}}",
     "filter": {
       "all": "Tất cả Mặt nạ và Vùng"
     }

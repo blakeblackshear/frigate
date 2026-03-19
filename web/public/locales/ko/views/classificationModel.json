@@ -1,1 +1,13 @@
-{}
+{
+  "documentTitle": "분류 모델 - Frigate",
+  "details": {
+    "scoreInfo": "점수는 해당 객체에 대한 모든 탐지 결과의 평균 분류 신뢰도를 나타냅니다.",
+    "none": "없음",
+    "unknown": "알 수 없음"
+  },
+  "button": {
+    "deleteClassificationAttempts": "분류 이미지 삭제",
+    "renameCategory": "클래스 이름 변경",
+    "deleteCategory": "클래스 삭제"
+  }
+}

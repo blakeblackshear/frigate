@@ -78,7 +78,8 @@
     },
     "inProgress": "Đang tiến hành",
     "invalidStartTime": "Thời gian bắt đầu không hợp lệ",
-    "invalidEndTime": "Thời gian kết thúc không hợp lệ"
+    "invalidEndTime": "Thời gian kết thúc không hợp lệ",
+    "never": "Không bao giờ"
   },
   "menu": {
     "systemLogs": "Nhật ký hệ thống",
