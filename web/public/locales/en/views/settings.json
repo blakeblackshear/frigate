@@ -1316,6 +1316,8 @@
       "preset": "Preset",
       "manual": "Manual arguments",
       "inherit": "Inherit from camera setting",
+      "none": "None",
+      "useGlobalSetting": "Inherit from global setting",
       "selectPreset": "Select preset",
       "manualPlaceholder": "Enter FFmpeg arguments"
     },
