@@ -731,8 +731,6 @@ function StreamCard({
   );
 }
 
-// --- StreamUrlEntry sub-component ---
-
 type StreamUrlEntryProps = {
   streamName: string;
   url: string;
