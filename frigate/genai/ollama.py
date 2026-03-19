@@ -106,9 +106,7 @@ class OllamaClient(GenAIClient):
             if response_format and response_format.get("type") == "json_schema":
                 schema = response_format.get("json_schema", {}).get("schema")
                 if schema:
-                    ollama_options["format"] = self._clean_schema_for_ollama(
-                        schema
-                    )
+                    ollama_options["format"] = self._clean_schema_for_ollama(schema)
             result = self.provider.generate(
                 self.genai_config.model,
                 prompt,
