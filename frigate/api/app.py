@@ -171,18 +171,6 @@ def config(request: Request):
 
         config["go2rtc"]["streams"][stream_name] = cleaned
 
-    # filter camera_groups by current user
-    username = request.headers.get("remote-user")
-    role = request.headers.get("remote-role")
-
-    if username and role and role != "admin":
-        filtered_groups = {}
-        for group_name, group_config in config.get("camera_groups", {}).items():
-            group_users = group_config.get("users")
-            if not group_users or username in group_users:
-                filtered_groups[group_name] = group_config
-        config["camera_groups"] = filtered_groups
-
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
     config["model"]["all_attributes"] = config_obj.model.all_attributes
