@@ -55,6 +55,7 @@
     "systemDetectorHardware": "Detector hardware",
     "systemDetectionModel": "Detection model",
     "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantic search",
     "integrationGenerativeAi": "Generative AI",
     "integrationFaceRecognition": "Face recognition",
@@ -1492,5 +1493,47 @@
   "unsavedChanges": "You have unsaved changes",
   "confirmReset": "Confirm Reset",
   "resetToDefaultDescription": "This will reset all settings in this section to their default values. This action cannot be undone.",
-  "resetToGlobalDescription": "This will reset the settings in this section to the global defaults. This action cannot be undone."
+  "resetToGlobalDescription": "This will reset the settings in this section to the global defaults. This action cannot be undone.",
+  "go2rtcStreams": {
+    "title": "go2rtc Streams",
+    "description": "Manage go2rtc stream configurations for camera restreaming. Each stream has a name and one or more source URLs.",
+    "addStream": "Add stream",
+    "addStreamDesc": "Enter a name for the new stream. This name will be used to reference the stream in your camera configuration.",
+    "addUrl": "Add URL",
+    "streamName": "Stream name",
+    "streamNamePlaceholder": "e.g., front_door",
+    "streamUrlPlaceholder": "e.g., rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "Delete stream",
+    "deleteStreamConfirm": "Are you sure you want to delete the stream \"{{streamName}}\"? Cameras that reference this stream may stop working.",
+    "noStreams": "No go2rtc streams configured. Add a stream to get started.",
+    "validation": {
+      "nameRequired": "Stream name is required",
+      "nameDuplicate": "A stream with this name already exists",
+      "nameInvalid": "Stream name can only contain letters, numbers, underscores, and hyphens",
+      "urlRequired": "At least one URL is required"
+    },
+    "renameStream": "Rename stream",
+    "renameStreamDesc": "Enter a new name for this stream. Renaming a stream may break cameras or other streams that reference it by name.",
+    "newStreamName": "New stream name",
+    "ffmpeg": {
+      "useFfmpegModule": "Use compatibility mode (ffmpeg)",
+      "video": "Video",
+      "audio": "Audio",
+      "hardware": "Hardware acceleration",
+      "videoCopy": "Copy",
+      "videoH264": "Transcode to H.264",
+      "videoH265": "Transcode to H.265",
+      "videoExclude": "Exclude",
+      "audioCopy": "Copy",
+      "audioAac": "Transcode to AAC",
+      "audioOpus": "Transcode to Opus",
+      "audioPcmu": "Transcode to PCM μ-law",
+      "audioPcma": "Transcode to PCM A-law",
+      "audioPcm": "Transcode to PCM",
+      "audioMp3": "Transcode to MP3",
+      "audioExclude": "Exclude",
+      "hardwareNone": "No hardware acceleration",
+      "hardwareAuto": "Automatic hardware acceleration"
+    }
+  }
 }

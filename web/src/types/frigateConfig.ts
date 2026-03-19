@@ -486,7 +486,7 @@ export interface FrigateConfig {
   };
 
   go2rtc: {
-    streams: string[];
+    streams: Record<string, string | string[]>;
     webrtc: {
       candidates: string[];
     };

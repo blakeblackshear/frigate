@@ -18,6 +18,7 @@ class CameraConfigUpdateEnum(str, Enum):
     detect = "detect"
     enabled = "enabled"
     ffmpeg = "ffmpeg"
+    live = "live"
     motion = "motion"  # includes motion and motion masks
     notifications = "notifications"
     objects = "objects"
@@ -107,6 +108,8 @@ class CameraConfigUpdateSubscriber:
             config.enabled = updated_config
         elif update_type == CameraConfigUpdateEnum.object_genai:
             config.objects.genai = updated_config
+        elif update_type == CameraConfigUpdateEnum.live:
+            config.live = updated_config
         elif update_type == CameraConfigUpdateEnum.motion:
             config.motion = updated_config
         elif update_type == CameraConfigUpdateEnum.notifications:
