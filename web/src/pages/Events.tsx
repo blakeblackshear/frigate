@@ -247,6 +247,11 @@ export default function Events() {
     [recording, setRecording, setReviewFilter],
   );
 
+  // shared recording links enter /review through query params, but the
+  // existing recording view is opened via router state (`recording`)
+
+  // this effect translates the URL entry point into the state shape the
+  // rest of the page already uses, then cleans the URL back to plain /review
   useEffect(() => {
     const timestamp = searchParams.get(RECORDING_REVIEW_START_PARAM);
     const timezone = searchParams.get(RECORDING_REVIEW_TIMEZONE_PARAM);
@@ -262,16 +267,18 @@ export default function Events() {
     const reviewLink = parseRecordingReviewLink(camera, timestamp, timezone);
 
     if (!reviewLink) {
-      navigate(location.pathname + location.hash, {
+      navigate(location.pathname, {
         state: location.state,
         replace: true,
       });
       return;
     }
 
-    const nextRecording = {
+    const nextRecording: RecordingStartingPoint = {
       camera: reviewLink.camera,
       startTime: reviewLink.timestamp,
+      // severity not actually applicable here, but the type requires it
+      // this pattern is also used LiveCameraView to enter recording view
       severity: "alert" as const,
     };
 
@@ -280,7 +287,7 @@ export default function Events() {
       ...getReviewDayBounds(new Date(reviewLink.timestamp * 1000)),
     });
 
-    navigate(location.pathname + location.hash, {
+    navigate(location.pathname, {
       state: {
         ...location.state,
         recording: nextRecording,

@@ -15,9 +15,12 @@ function formatRecordingReviewTimestamp(
   const date = new Date(Math.floor(timestamp) * 1000);
 
   if (timezone) {
+    // when the UI timezone is configured, keep the URL readable by storing
+    // local time plus a separate timezone query param
     return formatInTimeZone(date, timezone, "yyyy-MM-dd'T'HH:mm:ss");
   }
 
+  // without a configured UI timezone, fall back to UTC timestamp
   return formatInTimeZone(date, "UTC", "yyyy-MM-dd'T'HH:mm:ss'Z'");
 }
 

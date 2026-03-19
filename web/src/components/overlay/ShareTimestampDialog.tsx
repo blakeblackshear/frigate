@@ -238,6 +238,8 @@ function CustomTimestampSelector({
       return 0;
     }
 
+    // the picker edits a timestamp in the configured UI timezone,
+    // but the stored value remains a unix timestamp
     return (timezoneOffset - localTimeOffset) * 60;
   }, [timezoneOffset, localTimeOffset]);
 
@@ -262,6 +264,7 @@ function CustomTimestampSelector({
 
   const setFromDisplayDate = useCallback(
     (date: Date) => {
+      // convert the edited display time back into the underlying Unix timestamp
       setTimestamp(date.getTime() / 1000 - offsetDeltaSeconds);
     },
     [offsetDeltaSeconds, setTimestamp],
