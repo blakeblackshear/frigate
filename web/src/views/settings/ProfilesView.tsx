@@ -207,8 +207,8 @@ export default function ProfilesView({
     async (profile: string | null) => {
       setActivating(true);
       try {
-        await axios.put("profile/set", {
-          profile: profile || null,
+        await axios.put("camera/*/set/profile", {
+          value: profile ?? "none",
         });
         await updateProfiles();
         toast.success(
@@ -244,7 +244,7 @@ export default function ProfilesView({
     try {
       // If this profile is active, deactivate it first
       if (activeProfile === deleteProfile) {
-        await axios.put("profile/set", { profile: null });
+        await axios.put("camera/*/set/profile", { value: "none" });
       }
 
       // Remove the profile from all cameras and the top-level definition

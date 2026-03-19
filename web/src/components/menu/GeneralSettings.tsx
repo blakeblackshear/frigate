@@ -128,7 +128,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   const handleActivateProfile = async (profileName: string | null) => {
     try {
-      await axios.put("profile/set", { profile: profileName || null });
+      await axios.put("camera/*/set/profile", { value: profileName ?? "none" });
       await updateProfiles();
       toast.success(
         profileName
