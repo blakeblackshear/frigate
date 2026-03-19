@@ -283,17 +283,6 @@ Topic to activate or deactivate a [profile](/configuration/profiles). Publish a 
 
 Topic with the currently active profile name. Published value is the profile name or `none` if no profile is active. This topic is retained.
 
-### `frigate/profiles/available`
-
-Topic with a JSON array of all available profile definitions. Published on startup as a retained message.
-
-```json
-[
-  { "name": "away", "friendly_name": "Away" },
-  { "name": "home", "friendly_name": "Home" }
-]
-```
-
 ### `frigate/notifications/set`
 
 Topic to turn notifications on and off. Expected values are `ON` and `OFF`.

@@ -1,4 +1,3 @@
-import json
 import logging
 import threading
 from typing import Any, Callable
@@ -169,16 +168,6 @@ class MqttClient(Communicator):
             self.config.active_profile or "none",
             retain=True,
         )
-        available_profiles = [
-            {"name": name, "friendly_name": defn.friendly_name}
-            for name, defn in sorted(self.config.profiles.items())
-        ]
-        self.publish(
-            "profiles/available",
-            json.dumps(available_profiles),
-            retain=True,
-        )
-
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
