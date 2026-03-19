@@ -133,9 +133,6 @@ function ShareTimestampContent({
   return (
     <div className="w-full">
       <div className="space-y-1">
-        <div className="text-sm font-medium">
-          {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
-        </div>
         <div className="text-sm text-muted-foreground">
           {t("recording.shareTimestamp.description", {
             ns: "components/dialog",
