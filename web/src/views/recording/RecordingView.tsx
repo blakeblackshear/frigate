@@ -334,16 +334,20 @@ export function RecordingView({
   }, [startTime, manuallySetCurrentTime]);
 
   const onCopyReviewLink = useCallback(() => {
-    const reviewUrl = createRecordingReviewUrl(location.pathname, {
-      camera: mainCamera,
-      timestamp: Math.floor(currentTime),
-    });
+    const reviewUrl = createRecordingReviewUrl(
+      location.pathname,
+      {
+        camera: mainCamera,
+        timestamp: Math.floor(currentTime),
+      },
+      config?.ui.timezone,
+    );
 
     copy(reviewUrl);
     toast.success(t("toast.copyUrlToClipboard", { ns: "common" }), {
       position: "top-center",
     });
-  }, [location.pathname, mainCamera, currentTime, t]);
+  }, [location.pathname, mainCamera, currentTime, config?.ui.timezone, t]);
 
   useEffect(() => {
     if (!scrubbing) {

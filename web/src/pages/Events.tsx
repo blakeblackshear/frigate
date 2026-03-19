@@ -24,6 +24,7 @@ import {
 import {
   parseRecordingReviewLink,
   RECORDING_REVIEW_START_PARAM,
+  RECORDING_REVIEW_TIMEZONE_PARAM,
 } from "@/utils/recordingReviewUrl";
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
@@ -248,6 +249,7 @@ export default function Events() {
 
   useEffect(() => {
     const timestamp = searchParams.get(RECORDING_REVIEW_START_PARAM);
+    const timezone = searchParams.get(RECORDING_REVIEW_TIMEZONE_PARAM);
 
     if (!timestamp) {
       return;
@@ -257,7 +259,7 @@ export default function Events() {
       ? decodeURIComponent(location.hash.substring(1))
       : null;
 
-    const reviewLink = parseRecordingReviewLink(camera, timestamp);
+    const reviewLink = parseRecordingReviewLink(camera, timestamp, timezone);
 
     if (!reviewLink) {
       navigate(location.pathname + location.hash, {
