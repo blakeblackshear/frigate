@@ -106,7 +106,7 @@ When forming your description:
 ## Response Field Guidelines
 
 Respond with a JSON object matching the provided schema. Field-specific guidance:
-- `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. Your description should align with and support the threat level you assign.
+- `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. Always use subject names from "Objects in Scene" — do not replace named subjects with generic terms like "a person" or "the individual". Your description should align with and support the threat level you assign.
 - `title`: Characterize **what took place and where** — interpret the overall purpose or outcome, do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). Always include subject names from "Objects in Scene" — do not replace named subjects with generic terms. No editorial qualifiers like "routine" or "suspicious."
 - `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
 {get_concern_prompt()}
@@ -120,9 +120,9 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 
 ## Objects in Scene
 
-Each line represents a detection state, not necessarily unique individuals. Parentheses indicate object type or category, use only the name/label in your response, not the parentheses.
+Each line represents a detection state, not necessarily unique individuals. The `←` symbol separates a recognized subject's name from their object type — use only the name (before the `←`) in your response, not the type after it.
 
-**CRITICAL: When you see both recognized and unrecognized entries of the same type (e.g., "Joe (person)" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name (e.g., "Joe"). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
+**CRITICAL: When you see both a named entry and an unnamed entry of the same type (e.g., "[Name] ← person" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name/label (the part before the `←` symbol). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
 
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
