@@ -1909,7 +1909,9 @@ async def preview_thumbnail(request: Request, file_name: str):
             content={"success": False, "message": "Invalid preview filename"},
             status_code=400,
         )
-    camera_name = file_name[len("preview_") :].split("-")[0]
+    # Use rsplit to handle camera names containing dashes (e.g. front-door)
+    name_part = file_name[len("preview_") :].rsplit(".", 1)[0]  # strip extension
+    camera_name = name_part.rsplit("-", 1)[0]  # split off timestamp
     await require_camera_access(camera_name, request=request)
 
     safe_file_name_current = sanitize_filename(file_name)
