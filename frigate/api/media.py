@@ -1142,7 +1142,6 @@ async def event_snapshot(
 
 @router.get(
     "/events/{event_id}/thumbnail.{extension}",
-    dependencies=[Depends(require_camera_access)],
 )
 async def event_thumbnail(
     request: Request,
@@ -1344,12 +1343,12 @@ def grid_snapshot(
 
 @router.get(
     "/events/{event_id}/snapshot-clean.webp",
-    dependencies=[Depends(require_camera_access)],
 )
-def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
+async def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
     webp_bytes = None
     try:
         event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
         snapshot_config = request.app.frigate_config.cameras[event.camera].snapshots
         if not (snapshot_config.enabled and event.has_snapshot):
             return JSONResponse(
@@ -1470,7 +1469,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get(
-    "/events/{event_id}/clip.mp4", dependencies=[Depends(require_camera_access)]
+    "/events/{event_id}/clip.mp4",
 )
 async def event_clip(
     request: Request,
@@ -1483,6 +1482,8 @@ async def event_clip(
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
+
+    await require_camera_access(event.camera, request=request)
 
     if not event.has_clip:
         return JSONResponse(
@@ -1500,15 +1501,17 @@ async def event_clip(
 
 
 @router.get(
-    "/events/{event_id}/preview.gif", dependencies=[Depends(require_camera_access)]
+    "/events/{event_id}/preview.gif",
 )
-def event_preview(request: Request, event_id: str):
+async def event_preview(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
+
+    await require_camera_access(event.camera, request=request)
 
     start_ts = event.start_time
     end_ts = start_ts + (
@@ -1854,8 +1857,8 @@ def preview_mp4(
     )
 
 
-@router.get("/review/{event_id}/preview", dependencies=[Depends(require_camera_access)])
-def review_preview(
+@router.get("/review/{event_id}/preview")
+async def review_preview(
     request: Request,
     event_id: str,
     format: str = Query(default="gif", enum=["gif", "mp4"]),
@@ -1867,6 +1870,8 @@ def review_preview(
             content=({"success": False, "message": "Review segment not found"}),
             status_code=404,
         )
+
+    await require_camera_access(review.camera, request=request)
 
     padding = 8
     start_ts = review.start_time - padding
@@ -1881,10 +1886,12 @@ def review_preview(
 
 
 @router.get(
-    "/preview/{file_name}/thumbnail.jpg", dependencies=[Depends(require_camera_access)]
+    "/preview/{file_name}/thumbnail.jpg",
+    dependencies=[Depends(allow_any_authenticated())],
 )
 @router.get(
-    "/preview/{file_name}/thumbnail.webp", dependencies=[Depends(require_camera_access)]
+    "/preview/{file_name}/thumbnail.webp",
+    dependencies=[Depends(allow_any_authenticated())],
 )
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview frames."""
