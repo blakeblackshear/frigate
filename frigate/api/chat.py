@@ -331,7 +331,9 @@ async def execute_tool(
 
     if tool_name == "set_camera_state":
         result = await _execute_set_camera_state(request, arguments)
-        return JSONResponse(content=result, status_code=200 if result.get("success") else 400)
+        return JSONResponse(
+            content=result, status_code=200 if result.get("success") else 400
+        )
 
     return JSONResponse(
         content={

@@ -243,7 +243,6 @@ def get_active_profile(request: Request):
     return JSONResponse(content={"active_profile": config_obj.active_profile})
 
 
-
 @router.get("/ffmpeg/presets", dependencies=[Depends(allow_any_authenticated())])
 def ffmpeg_presets():
     """Return available ffmpeg preset keys for config UI usage."""
