@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -22,6 +22,11 @@ class CameraGroupConfig(FrigateBaseModel):
         default=0,
         title="Sort order",
         description="Numeric order used to sort camera groups in the UI; larger numbers appear later.",
+    )
+    users: Optional[list[str]] = Field(
+        default=None,
+        title="Allowed users",
+        description="List of usernames who can see this group. If not set or empty, the group is visible to all users.",
     )
 
     @field_validator("cameras", mode="before")
