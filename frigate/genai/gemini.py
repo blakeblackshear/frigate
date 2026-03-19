@@ -397,13 +397,13 @@ class GeminiClient(GenAIClient):
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
 
-            response = self.provider.models.generate_content_stream(
+            stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
                 contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 
-            async for chunk in response:
+            async for chunk in stream:
                 if not chunk or not chunk.candidates:
                     continue
 
