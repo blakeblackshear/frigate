@@ -34,7 +34,6 @@ from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryPa
 from frigate.api.defs.request.app_body import (
     AppConfigSetBody,
     MediaSyncBody,
-    ProfileSetBody,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -242,25 +241,6 @@ def get_active_profile(request: Request):
     """Get the currently active profile."""
     config_obj: FrigateConfig = request.app.frigate_config
     return JSONResponse(content={"active_profile": config_obj.active_profile})
-
-
-@router.put("/profile/set", dependencies=[Depends(require_role(["admin"]))])
-def set_profile(request: Request, body: ProfileSetBody):
-    """Activate or deactivate a profile."""
-    profile_manager = request.app.profile_manager
-    err = profile_manager.activate_profile(body.profile)
-    if err:
-        return JSONResponse(
-            content={"success": False, "message": err},
-            status_code=400,
-        )
-    request.app.dispatcher.publish("profile/state", body.profile or "none", retain=True)
-    return JSONResponse(
-        content={
-            "success": True,
-            "active_profile": body.profile,
-        }
-    )
 
 
 @router.get("/ffmpeg/presets", dependencies=[Depends(allow_any_authenticated())])

@@ -30,10 +30,8 @@ class AppPutRoleBody(BaseModel):
     role: str
 
 
-class ProfileSetBody(BaseModel):
-    profile: Optional[str] = Field(
-        default=None, description="Profile name to activate, or null to deactivate"
-    )
+class CameraSetBody(BaseModel):
+    value: str = Field(..., description="The value to set for the feature")
 
 
 class MediaSyncBody(BaseModel):

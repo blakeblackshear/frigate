@@ -23,6 +23,7 @@ from frigate.api.auth import (
     require_camera_access,
     require_role,
 )
+from frigate.api.defs.request.app_body import CameraSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
@@ -1155,3 +1156,76 @@ async def delete_camera(
         },
         status_code=200,
     )
+
+
+_SUB_COMMAND_FEATURES = {"motion_mask", "object_mask", "zone"}
+
+
+@router.put(
+    "/camera/{camera_name}/set/{feature}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+@router.put(
+    "/camera/{camera_name}/set/{feature}/{sub_command}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def camera_set(
+    request: Request,
+    camera_name: str,
+    feature: str,
+    body: CameraSetBody,
+    sub_command: str | None = None,
+):
+    """Set a camera feature state. Use camera_name='*' to target all cameras."""
+    dispatcher = request.app.dispatcher
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if feature == "profile":
+        if camera_name != "*":
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Profile feature requires camera_name='*'",
+                },
+                status_code=400,
+            )
+        dispatcher._receive("profile/set", body.value)
+        return JSONResponse(content={"success": True})
+
+    if feature not in dispatcher._camera_settings_handlers:
+        return JSONResponse(
+            content={"success": False, "message": f"Unknown feature: {feature}"},
+            status_code=400,
+        )
+
+    if sub_command and feature not in _SUB_COMMAND_FEATURES:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Feature '{feature}' does not support sub-commands",
+            },
+            status_code=400,
+        )
+
+    if camera_name == "*":
+        cameras = list(frigate_config.cameras.keys())
+    elif camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera '{camera_name}' not found",
+            },
+            status_code=404,
+        )
+    else:
+        cameras = [camera_name]
+
+    for cam in cameras:
+        topic = (
+            f"{cam}/{feature}/{sub_command}/set"
+            if sub_command
+            else f"{cam}/{feature}/set"
+        )
+        dispatcher._receive(topic, body.value)
+
+    return JSONResponse(content={"success": True})
