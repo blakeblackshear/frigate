@@ -94,6 +94,7 @@ const sidebars: SidebarsConfig = {
       "Extra Configuration": [
         "configuration/authentication",
         "configuration/notifications",
+        "configuration/profiles",
         "configuration/ffmpeg_presets",
         "configuration/pwa",
         "configuration/tls",

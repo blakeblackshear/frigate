@@ -14,6 +14,7 @@ export type Polygon = {
   friendly_name?: string;
   enabled?: boolean;
   enabled_in_config?: boolean;
+  polygonSource?: "base" | "profile" | "override";
 };
 
 export type ZoneFormValuesType = {

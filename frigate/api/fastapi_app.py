@@ -29,11 +29,13 @@ from frigate.api import (
     review,
 )
 from frigate.api.auth import get_jwt_secret, limiter, require_admin_by_default
+from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
 )
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
+from frigate.config.profile_manager import ProfileManager
 from frigate.debug_replay import DebugReplayManager
 from frigate.embeddings import EmbeddingsContext
 from frigate.genai import GenAIClientManager
@@ -69,6 +71,8 @@ def create_fastapi_app(
     event_metadata_updater: EventMetadataPublisher,
     config_publisher: CameraConfigUpdatePublisher,
     replay_manager: DebugReplayManager,
+    dispatcher: Optional[Dispatcher] = None,
+    profile_manager: Optional[ProfileManager] = None,
     enforce_default_admin: bool = True,
 ):
     logger.info("Starting FastAPI app")
@@ -151,6 +155,8 @@ def create_fastapi_app(
     app.event_metadata_updater = event_metadata_updater
     app.config_publisher = config_publisher
     app.replay_manager = replay_manager
+    app.dispatcher = dispatcher
+    app.profile_manager = profile_manager
 
     if frigate_config.auth.enabled:
         secret = get_jwt_secret()

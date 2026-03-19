@@ -539,6 +539,67 @@ function generateUiSchema(
 }
 
 /**
+ * Removes hidden field properties from the JSON schema itself so RJSF won't
+ * validate them.  The existing ui:widget=hidden approach only hides rendering
+ * but still validates — fields with server-only values (e.g. raw_coordinates
+ * serialized as null) cause spurious validation errors.
+ *
+ * Supports dotted paths ("mask"), nested paths ("genai.enabled_in_config"),
+ * and wildcard segments ("filters.*.mask") where `*` matches
+ * additionalProperties.
+ */
+function stripHiddenFieldsFromSchema(
+  schema: RJSFSchema,
+  hiddenFields: string[],
+): void {
+  for (const pattern of hiddenFields) {
+    if (!pattern) continue;
+    const segments = pattern.split(".");
+    removePropertyBySegments(schema, segments);
+  }
+}
+
+function removePropertyBySegments(
+  schema: RJSFSchema,
+  segments: string[],
+): void {
+  if (segments.length === 0 || !isSchemaObject(schema)) return;
+
+  const [head, ...rest] = segments;
+  const props = schema.properties as Record<string, RJSFSchema> | undefined;
+
+  if (rest.length === 0) {
+    // Terminal segment — delete the property
+    if (head === "*") {
+      // Wildcard at leaf: strip from additionalProperties
+      if (isSchemaObject(schema.additionalProperties)) {
+        // Nothing to delete — "*" as the last segment means "every dynamic key".
+        // The parent's additionalProperties schema IS the dynamic value, not a
+        // container.  In practice hidden-field patterns always have a named leaf
+        // after the wildcard (e.g. "filters.*.mask"), so this branch is a no-op.
+      }
+    } else if (props && head in props) {
+      delete props[head];
+      if (Array.isArray(schema.required)) {
+        schema.required = (schema.required as string[]).filter(
+          (r) => r !== head,
+        );
+      }
+    }
+    return;
+  }
+
+  if (head === "*") {
+    // Wildcard segment — descend into additionalProperties
+    if (isSchemaObject(schema.additionalProperties)) {
+      removePropertyBySegments(schema.additionalProperties as RJSFSchema, rest);
+    }
+  } else if (props && head in props && isSchemaObject(props[head])) {
+    removePropertyBySegments(props[head], rest);
+  }
+}
+
+/**
  * Transforms a Pydantic JSON Schema to RJSF format
  * Resolves references and generates appropriate uiSchema
  */
@@ -549,6 +610,11 @@ export function transformSchema(
   // Resolve all $ref references and clean the result
   const cleanSchema = resolveAndCleanSchema(rawSchema);
   const normalizedSchema = normalizeNullableSchema(cleanSchema);
+
+  // Remove hidden fields from schema so RJSF won't validate them
+  if (options.hiddenFields && options.hiddenFields.length > 0) {
+    stripHiddenFieldsFromSchema(normalizedSchema, options.hiddenFields);
+  }
 
   // Generate uiSchema
   const uiSchema = generateUiSchema(normalizedSchema, options);

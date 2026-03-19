@@ -4,8 +4,16 @@ import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ConfigSectionData } from "@/types/configForm";
+import type { ProfileState } from "@/types/profile";
 import { getSectionConfig } from "@/utils/configUtil";
+import { getProfileColor } from "@/utils/profileColors";
+import { cn } from "@/lib/utils";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
@@ -20,17 +28,24 @@ export type SettingsPageProps = {
     level: "global" | "camera",
     status: SectionStatus,
   ) => void;
-  pendingDataBySection?: Record<string, unknown>;
+  pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,
     cameraName: string | undefined,
     data: ConfigSectionData | null,
   ) => void;
+  profileState?: ProfileState;
+  /** Callback to delete the current profile's overrides for the current section */
+  onDeleteProfileSection?: (profileName: string) => void;
+  profilesUIEnabled?: boolean;
+  setProfilesUIEnabled?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type SectionStatus = {
   hasChanges: boolean;
   isOverridden: boolean;
+  /** Where the override comes from: "global" = camera overrides global, "profile" = profile overrides base */
+  overrideSource?: "global" | "profile";
   hasValidationErrors: boolean;
 };
 
@@ -56,6 +71,8 @@ export function SingleSectionPage({
   onSectionStatusChange,
   pendingDataBySection,
   onPendingDataChange,
+  profileState,
+  onDeleteProfileSection,
 }: SingleSectionPageProps) {
   const sectionNamespace =
     level === "camera" ? "config/cameras" : "config/global";
@@ -77,6 +94,24 @@ export function SingleSectionPage({
   const sectionDocsUrl = resolvedSectionConfig.sectionDocs
     ? getLocaleDocUrl(resolvedSectionConfig.sectionDocs)
     : undefined;
+
+  const currentEditingProfile = selectedCamera
+    ? (profileState?.editingProfile[selectedCamera] ?? null)
+    : null;
+
+  const profileColor = useMemo(
+    () =>
+      currentEditingProfile && profileState?.allProfileNames
+        ? getProfileColor(currentEditingProfile, profileState.allProfileNames)
+        : undefined,
+    [currentEditingProfile, profileState?.allProfileNames],
+  );
+
+  const handleDeleteProfileSection = useCallback(() => {
+    if (currentEditingProfile && onDeleteProfileSection) {
+      onDeleteProfileSection(currentEditingProfile);
+    }
+  }, [currentEditingProfile, onDeleteProfileSection]);
 
   const handleSectionStatusChange = useCallback(
     (status: SectionStatus) => {
@@ -127,15 +162,44 @@ export function SingleSectionPage({
             {level === "camera" &&
               showOverrideIndicator &&
               sectionStatus.isOverridden && (
-                <Badge
-                  variant="secondary"
-                  className="cursor-default border-2 border-selected text-xs text-primary-variant"
-                >
-                  {t("button.overridden", {
-                    ns: "common",
-                    defaultValue: "Overridden",
-                  })}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "cursor-default border-2 text-center text-xs text-primary-variant",
+                        sectionStatus.overrideSource === "profile" &&
+                          profileColor
+                          ? profileColor.border
+                          : "border-selected",
+                      )}
+                    >
+                      {sectionStatus.overrideSource === "profile"
+                        ? t("button.overriddenBaseConfig", {
+                            ns: "views/settings",
+                            defaultValue: "Overridden (Base Config)",
+                          })
+                        : t("button.overriddenGlobal", {
+                            ns: "views/settings",
+                            defaultValue: "Overridden (Global)",
+                          })}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {sectionStatus.overrideSource === "profile"
+                      ? t("button.overriddenBaseConfigTooltip", {
+                          ns: "views/settings",
+                          profile: currentEditingProfile
+                            ? (profileState?.profileFriendlyNames.get(
+                                currentEditingProfile,
+                              ) ?? currentEditingProfile)
+                            : "",
+                        })
+                      : t("button.overriddenGlobalTooltip", {
+                          ns: "views/settings",
+                        })}
+                  </TooltipContent>
+                </Tooltip>
               )}
             {sectionStatus.hasChanges && (
               <Badge
@@ -160,6 +224,17 @@ export function SingleSectionPage({
         onPendingDataChange={onPendingDataChange}
         requiresRestart={requiresRestart}
         onStatusChange={handleSectionStatusChange}
+        profileName={currentEditingProfile ?? undefined}
+        profileFriendlyName={
+          currentEditingProfile
+            ? (profileState?.profileFriendlyNames.get(currentEditingProfile) ??
+              currentEditingProfile)
+            : undefined
+        }
+        profileBorderColor={profileColor?.border}
+        onDeleteProfileSection={
+          currentEditingProfile ? handleDeleteProfileSection : undefined
+        }
       />
     </div>
   );

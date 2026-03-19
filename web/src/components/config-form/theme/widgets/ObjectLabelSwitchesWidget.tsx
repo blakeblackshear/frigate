@@ -40,43 +40,42 @@ function getLabelmapLabels(context: FormContext): string[] {
   return [...labels];
 }
 
+// Extract track labels from an objects section value.
+function extractTrackLabels(value: unknown): string[] {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const trackValue = (value as JsonObject).track;
+    if (Array.isArray(trackValue)) {
+      return trackValue.filter(
+        (item): item is string => typeof item === "string",
+      );
+    }
+  }
+  return [];
+}
+
 // Build the list of labels for switches (labelmap + configured track list).
 function getObjectLabels(context: FormContext): string[] {
   const labelmapLabels = getLabelmapLabels(context);
   let cameraLabels: string[] = [];
   let globalLabels: string[] = [];
+  let formDataLabels: string[] = [];
 
   if (context) {
     // context.cameraValue and context.globalValue should be the entire objects section
-    if (
-      context.cameraValue &&
-      typeof context.cameraValue === "object" &&
-      !Array.isArray(context.cameraValue)
-    ) {
-      const trackValue = (context.cameraValue as JsonObject).track;
-      if (Array.isArray(trackValue)) {
-        cameraLabels = trackValue.filter(
-          (item): item is string => typeof item === "string",
-        );
-      }
-    }
+    cameraLabels = extractTrackLabels(context.cameraValue);
+    globalLabels = extractTrackLabels(context.globalValue);
 
-    if (
-      context.globalValue &&
-      typeof context.globalValue === "object" &&
-      !Array.isArray(context.globalValue)
-    ) {
-      const globalTrackValue = (context.globalValue as JsonObject).track;
-      if (Array.isArray(globalTrackValue)) {
-        globalLabels = globalTrackValue.filter(
-          (item): item is string => typeof item === "string",
-        );
-      }
-    }
+    // Include labels from the current form data so that labels added via
+    // profile overrides (or user edits) are always visible as switches.
+    formDataLabels = extractTrackLabels(context.formData);
   }
 
   const sourceLabels = cameraLabels.length > 0 ? cameraLabels : globalLabels;
-  const combinedLabels = new Set<string>([...labelmapLabels, ...sourceLabels]);
+  const combinedLabels = new Set<string>([
+    ...labelmapLabels,
+    ...sourceLabels,
+    ...formDataLabels,
+  ]);
   return [...combinedLabels].sort();
 }
 

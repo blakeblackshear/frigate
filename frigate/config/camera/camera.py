@@ -34,6 +34,7 @@ from .mqtt import CameraMqttConfig
 from .notification import NotificationConfig
 from .objects import ObjectConfig
 from .onvif import OnvifConfig
+from .profile import CameraProfileConfig
 from .record import RecordConfig
 from .review import ReviewConfig
 from .snapshots import SnapshotsConfig
@@ -183,6 +184,12 @@ class CameraConfig(FrigateBaseModel):
         None,
         title="Camera URL",
         description="URL to visit the camera directly from system page",
+    )
+
+    profiles: dict[str, CameraProfileConfig] = Field(
+        default_factory=dict,
+        title="Profiles",
+        description="Named config profiles with partial overrides that can be activated at runtime.",
     )
     zones: dict[str, ZoneConfig] = Field(
         default_factory=dict,

@@ -2,15 +2,28 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Mock complex imports before importing maintainer
-sys.modules["frigate.comms.inter_process"] = MagicMock()
-sys.modules["frigate.comms.detections_updater"] = MagicMock()
-sys.modules["frigate.comms.recordings_updater"] = MagicMock()
-sys.modules["frigate.config.camera.updater"] = MagicMock()
+# Mock complex imports before importing maintainer, saving originals so we can
+# restore them after import and avoid polluting sys.modules for other tests.
+_MOCKED_MODULES = [
+    "frigate.comms.inter_process",
+    "frigate.comms.detections_updater",
+    "frigate.comms.recordings_updater",
+    "frigate.config.camera.updater",
+]
+_originals = {name: sys.modules.get(name) for name in _MOCKED_MODULES}
+for name in _MOCKED_MODULES:
+    sys.modules[name] = MagicMock()
 
 # Now import the class under test
 from frigate.config import FrigateConfig  # noqa: E402
 from frigate.record.maintainer import RecordingMaintainer  # noqa: E402
+
+# Restore original modules (or remove mock if there was no original)
+for name, orig in _originals.items():
+    if orig is None:
+        sys.modules.pop(name, None)
+    else:
+        sys.modules[name] = orig
 
 
 class TestMaintainer(unittest.IsolatedAsyncioTestCase):

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 export type SaveAllPreviewItem = {
   scope: "global" | "camera";
   cameraName?: string;
+  profileName?: string;
   fieldPath: string;
   value: unknown;
 };
@@ -114,6 +115,18 @@ export default function SaveAllPreviewPopover({
                       })}
                     </span>
                     <span className="truncate">{scopeLabel}</span>
+                    {item.profileName && (
+                      <>
+                        <span className="text-muted-foreground">
+                          {t("saveAllPreview.profile.label", {
+                            ns: "views/settings",
+                          })}
+                        </span>
+                        <span className="truncate font-medium">
+                          {item.profileName}
+                        </span>
+                      </>
+                    )}
                     <span className="text-muted-foreground">
                       {t("saveAllPreview.field.label", {
                         ns: "views/settings",

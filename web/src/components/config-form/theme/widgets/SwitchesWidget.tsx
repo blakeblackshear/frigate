@@ -20,6 +20,7 @@ type FormContext = Pick<
   | "globalValue"
   | "fullCameraConfig"
   | "fullConfig"
+  | "formData"
   | "t"
   | "level"
 > & {

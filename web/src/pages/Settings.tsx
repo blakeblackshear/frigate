@@ -28,7 +28,11 @@ import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
-import type { ConfigSectionData } from "@/types/configForm";
+import type {
+  ConfigSectionData,
+  JsonObject,
+  JsonValue,
+} from "@/types/configForm";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
@@ -39,6 +43,7 @@ import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import ProfilesView from "@/views/settings/ProfilesView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
 import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
@@ -87,8 +92,13 @@ import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
 import {
   buildConfigDataForPath,
+  parseProfileFromSectionPath,
   prepareSectionSavePayload,
+  PROFILE_ELIGIBLE_SECTIONS,
 } from "@/utils/configUtil";
+import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import SaveAllPreviewPopover, {
@@ -97,7 +107,8 @@ import SaveAllPreviewPopover, {
 import { useRestart } from "@/api/ws";
 
 const allSettingsViews = [
-  "profileSettings",
+  "uiSettings",
+  "profiles",
   "globalDetect",
   "globalRecording",
   "globalSnapshots",
@@ -178,15 +189,15 @@ const parsePendingDataKey = (pendingDataKey: string) => {
 };
 
 const flattenOverrides = (
-  value: unknown,
+  value: JsonValue | undefined,
   path: string[] = [],
-): Array<{ path: string; value: unknown }> => {
+): Array<{ path: string; value: JsonValue }> => {
   if (value === undefined) return [];
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return [{ path: path.join("."), value }];
   }
 
-  const entries = Object.entries(value as Record<string, unknown>);
+  const entries = Object.entries(value);
   if (entries.length === 0) {
     return [{ path: path.join("."), value: {} }];
   }
@@ -308,7 +319,7 @@ const CameraTimestampStyleSettingsPage = createSectionPage(
 const settingsGroups = [
   {
     label: "general",
-    items: [{ key: "profileSettings", component: UiSettingsView }],
+    items: [{ key: "uiSettings", component: UiSettingsView }],
   },
   {
     label: "globalConfig",
@@ -334,6 +345,7 @@ const settingsGroups = [
   {
     label: "cameras",
     items: [
+      { key: "profiles", component: ProfilesView },
       { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraDetect", component: CameraDetectSettingsPage },
       { key: "cameraObjects", component: CameraObjectsSettingsPage },
@@ -479,7 +491,7 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "regionGrid",
 ];
 
-const ALLOWED_VIEWS_FOR_VIEWER = ["profileSettings", "notifications"];
+const ALLOWED_VIEWS_FOR_VIEWER = ["uiSettings", "notifications"];
 
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
@@ -502,6 +514,28 @@ const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
   ui: "cameraUi",
   timestamp_style: "cameraTimestampStyle",
 };
+
+// Reverse mapping: page key → config section key
+const REVERSE_CAMERA_SECTION_MAPPING: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(CAMERA_SECTION_MAPPING).map(([section, page]) => [
+      page,
+      section,
+    ]),
+  );
+// masksAndZones is a composite page, not in CAMERA_SECTION_MAPPING
+REVERSE_CAMERA_SECTION_MAPPING["masksAndZones"] = "masksAndZones";
+
+// Pages where the profile dropdown should appear
+const PROFILE_DROPDOWN_PAGES = new Set(
+  Object.entries(REVERSE_CAMERA_SECTION_MAPPING)
+    .filter(
+      ([, sectionKey]) =>
+        PROFILE_ELIGIBLE_SECTIONS.has(sectionKey) ||
+        sectionKey === "masksAndZones",
+    )
+    .map(([pageKey]) => pageKey),
+);
 
 // keys for global sections
 const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
@@ -594,7 +628,7 @@ function MobileMenuItem({
 
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
-  const [page, setPage] = useState<SettingsType>("profileSettings");
+  const [page, setPage] = useState<SettingsType>("uiSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [contentMobileOpen, setContentMobileOpen] = useState(false);
   const [sectionStatusByKey, setSectionStatusByKey] = useState<
@@ -602,6 +636,7 @@ export default function Settings() {
   >({});
 
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
 
   const [searchParams] = useSearchParams();
 
@@ -618,8 +653,27 @@ export default function Settings() {
 
   // Store pending form data keyed by "sectionKey" or "cameraName::sectionKey"
   const [pendingDataBySection, setPendingDataBySection] = useState<
-    Record<string, unknown>
+    Record<string, ConfigSectionData>
   >({});
+
+  // Profile editing state
+  const [editingProfile, setEditingProfile] = useState<
+    Record<string, string | null>
+  >({});
+  const [profilesUIEnabled, setProfilesUIEnabled] = useState(false);
+
+  const allProfileNames = useMemo(() => {
+    if (!config?.profiles) return [];
+    return Object.keys(config.profiles).sort();
+  }, [config]);
+
+  const profileFriendlyNames = useMemo(() => {
+    const map = new Map<string, string>();
+    if (profilesData?.profiles) {
+      profilesData.profiles.forEach((p) => map.set(p.name, p.friendly_name));
+    }
+    return map;
+  }, [profilesData]);
 
   const navigate = useNavigate();
 
@@ -692,11 +746,22 @@ export default function Settings() {
 
         const { scope, cameraName, sectionPath } =
           parsePendingDataKey(pendingDataKey);
+        const { isProfile, profileName, actualSection } =
+          parseProfileFromSectionPath(sectionPath);
         const flattened = flattenOverrides(payload.sanitizedOverrides);
+        const displaySection = isProfile ? actualSection : sectionPath;
 
         flattened.forEach(({ path, value }) => {
-          const fieldPath = path ? `${sectionPath}.${path}` : sectionPath;
-          items.push({ scope, cameraName, fieldPath, value });
+          const fieldPath = path ? `${displaySection}.${path}` : displaySection;
+          items.push({
+            scope,
+            cameraName,
+            profileName: isProfile
+              ? (profileFriendlyNames.get(profileName!) ?? profileName)
+              : undefined,
+            fieldPath,
+            value,
+          });
         });
       },
     );
@@ -710,7 +775,7 @@ export default function Settings() {
       if (cameraCompare !== 0) return cameraCompare;
       return left.fieldPath.localeCompare(right.fieldPath);
     });
-  }, [config, fullSchema, pendingDataBySection]);
+  }, [config, fullSchema, pendingDataBySection, profileFriendlyNames]);
 
   // Map a pendingDataKey to SettingsType menu key for clearing section status
   const pendingKeyToMenuKey = useCallback(
@@ -726,15 +791,20 @@ export default function Settings() {
         level = "global";
       }
 
+      // For profile keys like "profiles.armed.detect", extract the actual section
+      const { actualSection } = parseProfileFromSectionPath(sectionPath);
+
       if (level === "camera") {
-        return CAMERA_SECTION_MAPPING[sectionPath] as SettingsType | undefined;
+        return CAMERA_SECTION_MAPPING[actualSection] as
+          | SettingsType
+          | undefined;
       }
       return (
-        (GLOBAL_SECTION_MAPPING[sectionPath] as SettingsType | undefined) ??
-        (ENRICHMENTS_SECTION_MAPPING[sectionPath] as
+        (GLOBAL_SECTION_MAPPING[actualSection] as SettingsType | undefined) ??
+        (ENRICHMENTS_SECTION_MAPPING[actualSection] as
           | SettingsType
           | undefined) ??
-        (SYSTEM_SECTION_MAPPING[sectionPath] as SettingsType | undefined)
+        (SYSTEM_SECTION_MAPPING[actualSection] as SettingsType | undefined)
       );
     },
     [],
@@ -759,6 +829,7 @@ export default function Settings() {
 
     for (const key of pendingKeys) {
       const pendingData = pendingDataBySection[key];
+
       try {
         const payload = prepareSectionSavePayload({
           pendingDataKey: key,
@@ -884,6 +955,7 @@ export default function Settings() {
 
     setPendingDataBySection({});
     setUnsavedChanges(false);
+    setEditingProfile({});
 
     setSectionStatusByKey((prev) => {
       const updated = { ...prev };
@@ -940,7 +1012,7 @@ export default function Settings() {
         !isAdmin &&
         !ALLOWED_VIEWS_FOR_VIEWER.includes(page as SettingsType)
       ) {
-        setPageToggle("profileSettings");
+        setPageToggle("uiSettings");
       } else {
         setPageToggle(page as SettingsType);
       }
@@ -969,6 +1041,210 @@ export default function Settings() {
       document.title = t("documentTitle.default");
     }
   }, [t, contentMobileOpen]);
+
+  // Profile state handlers
+  const handleSelectProfile = useCallback(
+    (camera: string, _section: string, profile: string | null) => {
+      setEditingProfile((prev) => {
+        if (profile === null) {
+          const { [camera]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [camera]: profile };
+      });
+    },
+    [],
+  );
+
+  const handleDeleteProfileSection = useCallback(
+    async (camera: string, section: string, profile: string) => {
+      try {
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: {
+            cameras: {
+              [camera]: {
+                profiles: {
+                  [profile]: {
+                    [section]: "",
+                  },
+                },
+              },
+            },
+          },
+        });
+        await mutate("config");
+        // Switch back to base config
+        handleSelectProfile(camera, section, null);
+        toast.success(
+          t("profiles.deleteSectionSuccess", {
+            ns: "views/settings",
+            section: t(`configForm.sections.${section}`, {
+              ns: "views/settings",
+              defaultValue: section,
+            }),
+            profile: profileFriendlyNames.get(profile) ?? profile,
+          }),
+        );
+      } catch {
+        toast.error(t("toast.save.error.title", { ns: "common" }));
+      }
+    },
+    [handleSelectProfile, profileFriendlyNames, t],
+  );
+
+  const profileState: ProfileState = useMemo(
+    () => ({
+      editingProfile,
+      allProfileNames,
+      profileFriendlyNames,
+      onSelectProfile: handleSelectProfile,
+      onDeleteProfileSection: handleDeleteProfileSection,
+    }),
+    [
+      editingProfile,
+      allProfileNames,
+      profileFriendlyNames,
+      handleSelectProfile,
+      handleDeleteProfileSection,
+    ],
+  );
+
+  // Header profile dropdown: derive section key from current page
+  const currentSectionKey = useMemo(
+    () => REVERSE_CAMERA_SECTION_MAPPING[pageToggle] ?? null,
+    [pageToggle],
+  );
+
+  const headerEditingProfile = useMemo(() => {
+    if (!selectedCamera || !currentSectionKey) return null;
+    return editingProfile[selectedCamera] ?? null;
+  }, [selectedCamera, currentSectionKey, editingProfile]);
+
+  const showProfileDropdown =
+    PROFILE_DROPDOWN_PAGES.has(pageToggle) &&
+    !!selectedCamera &&
+    (allProfileNames.length > 0 || profilesUIEnabled);
+
+  const headerHasProfileData = useCallback(
+    (profileName: string): boolean => {
+      if (!config || !selectedCamera || !currentSectionKey) return false;
+      const profileData =
+        config.cameras[selectedCamera]?.profiles?.[profileName];
+      if (!profileData) return false;
+
+      if (currentSectionKey === "masksAndZones") {
+        const hasZones =
+          profileData.zones && Object.keys(profileData.zones).length > 0;
+        const hasMotionMasks =
+          profileData.motion?.mask &&
+          Object.keys(profileData.motion.mask).length > 0;
+        const hasObjectMasks =
+          (profileData.objects?.mask &&
+            Object.keys(profileData.objects.mask).length > 0) ||
+          (profileData.objects?.filters &&
+            Object.values(profileData.objects.filters).some(
+              (f) => f.mask && Object.keys(f.mask).length > 0,
+            ));
+        return !!(hasZones || hasMotionMasks || hasObjectMasks);
+      }
+
+      return !!profileData[currentSectionKey as keyof typeof profileData];
+    },
+    [config, selectedCamera, currentSectionKey],
+  );
+
+  const handleDeleteProfileForCurrentSection = useCallback(
+    async (profileName: string) => {
+      if (!selectedCamera || !currentSectionKey) return;
+
+      if (currentSectionKey === "masksAndZones") {
+        try {
+          const profileData =
+            config?.cameras?.[selectedCamera]?.profiles?.[profileName];
+          if (!profileData) return;
+
+          // Build a targeted delete payload that only removes mask-related
+          // sub-keys, not the entire motion/objects sections
+          const deletePayload: JsonObject = {};
+
+          if (profileData.zones !== undefined) {
+            deletePayload.zones = "";
+          }
+
+          if (profileData.motion?.mask !== undefined) {
+            deletePayload.motion = { mask: "" };
+          }
+
+          if (profileData.objects) {
+            const objDelete: JsonObject = {};
+            if (profileData.objects.mask !== undefined) {
+              objDelete.mask = "";
+            }
+            if (profileData.objects.filters) {
+              const filtersDelete: JsonObject = {};
+              for (const [filterName, filterVal] of Object.entries(
+                profileData.objects.filters,
+              )) {
+                if (filterVal.mask !== undefined) {
+                  filtersDelete[filterName] = { mask: "" };
+                }
+              }
+              if (Object.keys(filtersDelete).length > 0) {
+                objDelete.filters = filtersDelete;
+              }
+            }
+            if (Object.keys(objDelete).length > 0) {
+              deletePayload.objects = objDelete;
+            }
+          }
+
+          if (Object.keys(deletePayload).length === 0) return;
+
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: {
+              cameras: {
+                [selectedCamera]: {
+                  profiles: {
+                    [profileName]: deletePayload,
+                  },
+                },
+              },
+            },
+          });
+          await mutate("config");
+          handleSelectProfile(selectedCamera, "masksAndZones", null);
+          toast.success(
+            t("profiles.deleteSectionSuccess", {
+              ns: "views/settings",
+              section: t("configForm.sections.masksAndZones", {
+                ns: "views/settings",
+              }),
+              profile: profileFriendlyNames.get(profileName) ?? profileName,
+            }),
+          );
+        } catch {
+          toast.error(t("toast.save.error.title", { ns: "common" }));
+        }
+      } else {
+        await handleDeleteProfileSection(
+          selectedCamera,
+          currentSectionKey,
+          profileName,
+        );
+      }
+    },
+    [
+      selectedCamera,
+      currentSectionKey,
+      config,
+      handleSelectProfile,
+      handleDeleteProfileSection,
+      profileFriendlyNames,
+      t,
+    ],
+  );
 
   const handleSectionStatusChange = useCallback(
     (sectionKey: string, level: "global" | "camera", status: SectionStatus) => {
@@ -1016,24 +1292,64 @@ export default function Settings() {
     [],
   );
 
+  // The active profile being edited for the selected camera
+  const activeEditingProfile = selectedCamera
+    ? (editingProfile[selectedCamera] ?? null)
+    : null;
+
+  // Profile color for the active editing profile
+  const activeProfileColor = useMemo(
+    () =>
+      activeEditingProfile
+        ? getProfileColor(activeEditingProfile, allProfileNames)
+        : undefined,
+    [activeEditingProfile, allProfileNames],
+  );
+
   // Initialize override status for all camera sections
   useEffect(() => {
     if (!selectedCamera || !cameraOverrides) return;
 
     const overrideMap: Partial<
-      Record<SettingsType, Pick<SectionStatus, "hasChanges" | "isOverridden">>
+      Record<
+        SettingsType,
+        Pick<SectionStatus, "hasChanges" | "isOverridden" | "overrideSource">
+      >
     > = {};
+
+    // Build a set of menu keys that have pending changes for this camera
+    const pendingMenuKeys = new Set<string>();
+    const cameraPrefix = `${selectedCamera}::`;
+    for (const key of Object.keys(pendingDataBySection)) {
+      if (key.startsWith(cameraPrefix)) {
+        const menuKey = pendingKeyToMenuKey(key);
+        if (menuKey) pendingMenuKeys.add(menuKey);
+      }
+    }
+
+    // Get profile data if a profile is being edited
+    const profileData = activeEditingProfile
+      ? config?.cameras?.[selectedCamera]?.profiles?.[activeEditingProfile]
+      : undefined;
 
     // Set override status for all camera sections using the shared mapping
     Object.entries(CAMERA_SECTION_MAPPING).forEach(
       ([sectionKey, settingsKey]) => {
-        const isOverridden = cameraOverrides.includes(sectionKey);
-        // Check if there are pending changes for this camera and section
-        const pendingDataKey = `${selectedCamera}::${sectionKey}`;
-        const hasChanges = pendingDataKey in pendingDataBySection;
+        const globalOverridden = cameraOverrides.includes(sectionKey);
+
+        // Check if the active profile overrides this section
+        const profileOverrides = profileData
+          ? !!profileData[sectionKey as keyof typeof profileData]
+          : false;
+
         overrideMap[settingsKey] = {
-          hasChanges,
-          isOverridden,
+          hasChanges: pendingMenuKeys.has(settingsKey),
+          isOverridden: profileOverrides || globalOverridden,
+          overrideSource: profileOverrides
+            ? "profile"
+            : globalOverridden
+              ? "global"
+              : undefined,
         };
       },
     );
@@ -1046,12 +1362,20 @@ export default function Settings() {
         merged[key as SettingsType] = {
           hasChanges: status.hasChanges,
           isOverridden: status.isOverridden,
+          overrideSource: status.overrideSource,
           hasValidationErrors: existingStatus?.hasValidationErrors ?? false,
         };
       });
       return merged;
     });
-  }, [selectedCamera, cameraOverrides, pendingDataBySection]);
+  }, [
+    selectedCamera,
+    cameraOverrides,
+    pendingDataBySection,
+    pendingKeyToMenuKey,
+    activeEditingProfile,
+    config,
+  ]);
 
   const renderMenuItemLabel = useCallback(
     (key: SettingsType) => {
@@ -1060,13 +1384,20 @@ export default function Settings() {
         CAMERA_SECTION_KEYS.has(key) && status?.isOverridden;
       const showUnsavedDot = status?.hasChanges;
 
+      const dotColor =
+        status?.overrideSource === "profile" && activeProfileColor
+          ? activeProfileColor.dot
+          : "bg-selected";
+
       return (
         <div className="flex w-full items-center justify-between pr-4 md:pr-0">
           <div>{t("menu." + key)}</div>
           {(showOverrideDot || showUnsavedDot) && (
             <div className="ml-2 flex items-center gap-2">
               {showOverrideDot && (
-                <span className="inline-block size-2 rounded-full bg-selected" />
+                <span
+                  className={cn("inline-block size-2 rounded-full", dotColor)}
+                />
               )}
               {showUnsavedDot && (
                 <span className="inline-block size-2 rounded-full bg-danger" />
@@ -1076,7 +1407,7 @@ export default function Settings() {
         </div>
       );
     },
-    [sectionStatusByKey, t],
+    [sectionStatusByKey, t, activeProfileColor],
   );
 
   if (isMobile) {
@@ -1101,7 +1432,7 @@ export default function Settings() {
                   />
                 </div>
               </div>
-              <div className="flex flex-row text-center">
+              <div className="flex flex-row items-center">
                 <h2 className="ml-2 text-lg">
                   {t("menu.settings", { ns: "common" })}
                 </h2>
@@ -1134,7 +1465,7 @@ export default function Settings() {
                               key as SettingsType,
                             )
                           ) {
-                            setPageToggle("profileSettings");
+                            setPageToggle("uiSettings");
                           } else {
                             setPageToggle(key as SettingsType);
                           }
@@ -1217,6 +1548,22 @@ export default function Settings() {
                           updateZoneMaskFilter={setFilterZoneMask}
                         />
                       )}
+                      {showProfileDropdown && currentSectionKey && (
+                        <ProfileSectionDropdown
+                          allProfileNames={allProfileNames}
+                          profileFriendlyNames={profileFriendlyNames}
+                          editingProfile={headerEditingProfile}
+                          hasProfileData={headerHasProfileData}
+                          onSelectProfile={(profile) =>
+                            handleSelectProfile(
+                              selectedCamera,
+                              currentSectionKey,
+                              profile,
+                            )
+                          }
+                          iconOnly
+                        />
+                      )}
                       <CameraSelectButton
                         allCameras={cameras}
                         selectedCamera={selectedCamera}
@@ -1244,6 +1591,12 @@ export default function Settings() {
                     onSectionStatusChange={handleSectionStatusChange}
                     pendingDataBySection={pendingDataBySection}
                     onPendingDataChange={handlePendingDataChange}
+                    profileState={profileState}
+                    onDeleteProfileSection={
+                      handleDeleteProfileForCurrentSection
+                    }
+                    profilesUIEnabled={profilesUIEnabled}
+                    setProfilesUIEnabled={setProfilesUIEnabled}
                   />
                 );
               })()}
@@ -1288,10 +1641,12 @@ export default function Settings() {
     <div className="flex h-full flex-col">
       <Toaster position="top-center" />
       <div className="flex min-h-16 items-center justify-between border-b border-secondary p-3">
-        <Heading as="h3" className="mb-0">
-          {t("menu.settings", { ns: "common" })}
-        </Heading>
-        <div className="flex items-center gap-5">
+        <div className="mr-2 flex w-full items-center justify-between gap-3">
+          <Heading as="h3" className="mb-0">
+            {t("menu.settings", { ns: "common" })}
+          </Heading>
+        </div>
+        <div className="flex items-center gap-2">
           {hasPendingChanges && (
             <div
               className={cn(
@@ -1327,7 +1682,7 @@ export default function Settings() {
               >
                 {isSavingAll ? (
                   <>
-                    <ActivityIndicator className="mr-2" />
+                    <ActivityIndicator className="mr-2 size-4" />
                     {t("button.savingAll", { ns: "common" })}
                   </>
                 ) : (
@@ -1342,6 +1697,21 @@ export default function Settings() {
                 <ZoneMaskFilterButton
                   selectedZoneMask={filterZoneMask}
                   updateZoneMaskFilter={setFilterZoneMask}
+                />
+              )}
+              {showProfileDropdown && currentSectionKey && (
+                <ProfileSectionDropdown
+                  allProfileNames={allProfileNames}
+                  profileFriendlyNames={profileFriendlyNames}
+                  editingProfile={headerEditingProfile}
+                  hasProfileData={headerHasProfileData}
+                  onSelectProfile={(profile) =>
+                    handleSelectProfile(
+                      selectedCamera,
+                      currentSectionKey,
+                      profile,
+                    )
+                  }
                 />
               )}
               <CameraSelectButton
@@ -1379,7 +1749,7 @@ export default function Settings() {
                                   filteredItems[0].key as SettingsType,
                                 )
                               ) {
-                                setPageToggle("profileSettings");
+                                setPageToggle("uiSettings");
                               } else {
                                 setPageToggle(
                                   filteredItems[0].key as SettingsType,
@@ -1419,7 +1789,7 @@ export default function Settings() {
                                       item.key as SettingsType,
                                     )
                                   ) {
-                                    setPageToggle("profileSettings");
+                                    setPageToggle("uiSettings");
                                   } else {
                                     setPageToggle(item.key as SettingsType);
                                   }
@@ -1459,6 +1829,10 @@ export default function Settings() {
                   onSectionStatusChange={handleSectionStatusChange}
                   pendingDataBySection={pendingDataBySection}
                   onPendingDataChange={handlePendingDataChange}
+                  profileState={profileState}
+                  onDeleteProfileSection={handleDeleteProfileForCurrentSection}
+                  profilesUIEnabled={profilesUIEnabled}
+                  setProfilesUIEnabled={setProfilesUIEnabled}
                 />
               );
             })()}

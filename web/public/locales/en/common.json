@@ -168,6 +168,7 @@
     "systemMetrics": "System metrics",
     "configuration": "Configuration",
     "systemLogs": "System logs",
+    "profiles": "Profiles",
     "settings": "Settings",
     "configurationEditor": "Configuration Editor",
     "languages": "Languages",

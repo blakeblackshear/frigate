@@ -30,6 +30,12 @@ class AppPutRoleBody(BaseModel):
     role: str
 
 
+class ProfileSetBody(BaseModel):
+    profile: Optional[str] = Field(
+        default=None, description="Profile name to activate, or null to deactivate"
+    )
+
+
 class MediaSyncBody(BaseModel):
     dry_run: bool = Field(
         default=True, description="If True, only report orphans without deleting them"

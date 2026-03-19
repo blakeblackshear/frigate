@@ -8,12 +8,19 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
-    "general": "Profile Settings - Frigate",
+    "general": "UI Settings - Frigate",
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
     "notifications": "Notification Settings - Frigate",
-    "maintenance": "Maintenance - Frigate"
+    "maintenance": "Maintenance - Frigate",
+    "profiles": "Profiles - Frigate"
+  },
+  "button": {
+    "overriddenGlobal": "Overridden (Global)",
+    "overriddenGlobalTooltip": "This camera overrides global configuration settings in this section",
+    "overriddenBaseConfig": "Overridden (Base Config)",
+    "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section"
   },
   "menu": {
     "general": "General",
@@ -22,7 +29,8 @@
     "integrations": "Integrations",
     "cameras": "Camera configuration",
     "ui": "UI",
-    "profileSettings": "Profile settings",
+    "uiSettings": "UI settings",
+    "profiles": "Profiles",
     "globalDetect": "Object detection",
     "globalRecording": "Recording",
     "globalSnapshots": "Snapshots",
@@ -101,6 +109,9 @@
       "global": "Global",
       "camera": "Camera: {{cameraName}}"
     },
+    "profile": {
+      "label": "Profile"
+    },
     "field": {
       "label": "Field"
     },
@@ -114,7 +125,7 @@
     "noCamera": "No Camera"
   },
   "general": {
-    "title": "Profile Settings",
+    "title": "UI Settings",
     "liveDashboard": {
       "title": "Live Dashboard",
       "automaticLiveView": {
@@ -473,6 +484,14 @@
       "toast": {
         "success": "Camera {{cameraName}} saved successfully"
       }
+    },
+    "profiles": {
+      "title": "Profile Camera Overrides",
+      "selectLabel": "Select profile",
+      "description": "Configure which cameras are enabled or disabled when a profile is activated. Cameras set to \"Inherit\" keep their base enabled state.",
+      "inherit": "Inherit",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
     }
   },
   "cameraReview": {
@@ -519,6 +538,8 @@
     },
     "restart_required": "Restart required (masks/zones changed)",
     "disabledInConfig": "Item is disabled in the config file",
+    "profileBase": "(base)",
+    "profileOverride": "(override)",
     "toast": {
       "success": {
         "copyCoordinates": "Copied coordinates for {{polyName}} to clipboard."
@@ -1327,7 +1348,8 @@
       "genai": "GenAI",
       "face_recognition": "Face Recognition",
       "lpr": "License Plate Recognition",
-      "birdseye": "Birdseye"
+      "birdseye": "Birdseye",
+      "masksAndZones": "Masks / Zones"
     },
     "detect": {
       "title": "Detection Settings"
@@ -1426,6 +1448,46 @@
     "saveAllPartial_one": "{{successCount}} of {{totalCount}} section saved. {{failCount}} failed.",
     "saveAllPartial_other": "{{successCount}} of {{totalCount}} sections saved. {{failCount}} failed.",
     "saveAllFailure": "Failed to save all sections."
+  },
+  "profiles": {
+    "title": "Profiles",
+    "activeProfile": "Active Profile",
+    "noActiveProfile": "No active profile",
+    "active": "Active",
+    "activated": "Profile '{{profile}}' activated",
+    "activateFailed": "Failed to set profile",
+    "deactivated": "Profile deactivated",
+    "noProfiles": "No profiles defined.",
+    "noOverrides": "No overrides",
+    "cameraCount_one": "{{count}} camera",
+    "cameraCount_other": "{{count}} cameras",
+    "baseConfig": "Base Config",
+    "addProfile": "Add Profile",
+    "newProfile": "New Profile",
+    "profileNamePlaceholder": "e.g., Armed, Away, Night Mode",
+    "friendlyNameLabel": "Profile Name",
+    "profileIdLabel": "Profile ID",
+    "profileIdDescription": "Internal identifier used in config and automations",
+    "nameInvalid": "Only lowercase letters, numbers, and underscores allowed",
+    "nameDuplicate": "A profile with this name already exists",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Must be at least 2 characters",
+      "mustNotContainPeriod": "Must not contain periods",
+      "alreadyExists": "A profile with this ID already exists"
+    },
+    "renameProfile": "Rename Profile",
+    "renameSuccess": "Profile renamed to '{{profile}}'",
+    "deleteProfile": "Delete Profile",
+    "deleteProfileConfirm": "Delete profile \"{{profile}}\" from all cameras? This cannot be undone.",
+    "deleteSuccess": "Profile '{{profile}}' deleted",
+    "createSuccess": "Profile '{{profile}}' created",
+    "removeOverride": "Remove Profile Override",
+    "deleteSection": "Delete Section Overrides",
+    "deleteSectionConfirm": "Remove the {{section}} overrides for profile {{profile}} on {{camera}}?",
+    "deleteSectionSuccess": "Removed {{section}} overrides for {{profile}}",
+    "enableSwitch": "Enable Profiles",
+    "enabledDescription": "Profiles are enabled. Create a new profile below, navigate to a camera config section to make your changes, and save for changes to take effect.",
+    "disabledDescription": "Profiles allow you to define named sets of camera config overrides (e.g., armed, away, night) that can be activated on demand."
   },
   "unsavedChanges": "You have unsaved changes",
   "confirmReset": "Confirm Reset",
