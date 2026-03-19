@@ -18,7 +18,7 @@ export default function ActionsDropdown({
   onDebugReplayClick,
   onExportClick,
   onShareTimestampClick,
-}: ActionsDropdownProps) {
+}: Readonly<ActionsDropdownProps>) {
   const { t } = useTranslation(["components/dialog", "views/replay", "common"]);
 
   return (
@@ -40,7 +40,7 @@ export default function ActionsDropdown({
           {t("menu.export", { ns: "common" })}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onShareTimestampClick}>
-          Share Timestamp
+          {t("button.shareTimestamp", { ns: "common" })}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onDebugReplayClick}>
           {t("title", { ns: "views/replay" })}

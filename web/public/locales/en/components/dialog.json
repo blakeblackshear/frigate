@@ -99,6 +99,14 @@
     }
   },
   "recording": {
+    "shareTimestamp": {
+      "title": "Share Review Timestamp",
+      "description": "Share the current player position or choose a custom timestamp.",
+      "current": "Current Player Timestamp",
+      "custom": "Custom Timestamp",
+      "customDescription": "Pick a specific point in time to share.",
+      "shareTitle": "Frigate Review Timestamp: {{camera}}"
+    },
     "confirmDelete": {
       "title": "Confirm Delete",
       "desc": {

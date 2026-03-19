@@ -111,8 +111,8 @@ function ShareTimestampContent({
   customTimestamp,
   setCustomTimestamp,
   onShareTimestamp,
-}: ShareTimestampContentProps) {
-  const { t } = useTranslation(["common"]);
+}: Readonly<ShareTimestampContentProps>) {
+  const { t } = useTranslation(["common", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const currentTimestampLabel = useFormattedTimestamp(
     currentTime,
@@ -127,9 +127,13 @@ function ShareTimestampContent({
   return (
     <div className="w-full">
       <div className="space-y-1">
-        <div className="text-sm font-medium">Share Review Timestamp</div>
+        <div className="text-sm font-medium">
+          {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
+        </div>
         <div className="text-sm text-muted-foreground">
-          Share the current player position or choose a custom timestamp.
+          {t("recording.shareTimestamp.description", {
+            ns: "components/dialog",
+          })}
         </div>
       </div>
 
@@ -145,7 +149,9 @@ function ShareTimestampContent({
             <RadioGroupItem id="share-current" value="current" />
             <Label className="cursor-pointer space-y-1" htmlFor="share-current">
               <div className="text-sm font-medium">
-                Current Player Timestamp
+                {t("recording.shareTimestamp.current", {
+                  ns: "components/dialog",
+                })}
               </div>
               <div className="text-sm text-muted-foreground">
                 {currentTimestampLabel}
@@ -158,9 +164,15 @@ function ShareTimestampContent({
           <div className="flex items-start gap-2">
             <RadioGroupItem id="share-custom" value="custom" />
             <Label className="cursor-pointer space-y-1" htmlFor="share-custom">
-              <div className="text-sm font-medium">Custom Timestamp</div>
+              <div className="text-sm font-medium">
+                {t("recording.shareTimestamp.custom", {
+                  ns: "components/dialog",
+                })}
+              </div>
               <div className="text-sm text-muted-foreground">
-                Pick a specific point in time to share.
+                {t("recording.shareTimestamp.customDescription", {
+                  ns: "components/dialog",
+                })}
               </div>
             </Label>
           </div>
@@ -168,7 +180,9 @@ function ShareTimestampContent({
             <CustomTimestampSelector
               timestamp={customTimestamp}
               setTimestamp={setCustomTimestamp}
-              label="Custom Timestamp"
+              label={t("recording.shareTimestamp.custom", {
+                ns: "components/dialog",
+              })}
             />
           )}
         </div>
@@ -180,7 +194,7 @@ function ShareTimestampContent({
           variant="select"
           onClick={() => onShareTimestamp(Math.floor(selectedTimestamp))}
         >
-          <span>Share Timestamp Link</span>
+          <span>{t("button.shareTimestampUrl", { ns: "common" })}</span>
           <LuShare2 className="size-4" />
         </Button>
       </div>
@@ -198,7 +212,7 @@ function CustomTimestampSelector({
   timestamp,
   setTimestamp,
   label,
-}: CustomTimestampSelectorProps) {
+}: Readonly<CustomTimestampSelectorProps>) {
   const { t } = useTranslation(["common"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -310,9 +324,9 @@ function CustomTimestampSelector({
                   : nextClock.split(":");
                 const nextTimestamp = new Date(displayTimestamp * 1000);
                 nextTimestamp.setHours(
-                  parseInt(hour),
-                  parseInt(minute),
-                  parseInt(second ?? "0"),
+                  Number.parseInt(hour),
+                  Number.parseInt(minute),
+                  Number.parseInt(second ?? "0"),
                   0,
                 );
                 setFromDisplayDate(nextTimestamp);

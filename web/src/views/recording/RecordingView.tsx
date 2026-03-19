@@ -107,7 +107,7 @@ export function RecordingView({
   updateFilter,
   refreshData,
 }: RecordingViewProps) {
-  const { t } = useTranslation(["views/events"]);
+  const { t } = useTranslation(["views/events", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const location = useLocation();
@@ -344,9 +344,15 @@ export function RecordingView({
         config?.ui.timezone,
       );
 
-      shareOrCopy(reviewUrl, `Frigate Review Timestamp: ${mainCamera}`);
+      shareOrCopy(
+        reviewUrl,
+        t("recording.shareTimestamp.shareTitle", {
+          ns: "components/dialog",
+          camera: mainCamera,
+        }),
+      );
     },
-    [location.pathname, mainCamera, config?.ui.timezone],
+    [location.pathname, mainCamera, config?.ui.timezone, t],
   );
 
   useEffect(() => {

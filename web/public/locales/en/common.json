@@ -131,6 +131,8 @@
     "close": "Close",
     "copy": "Copy",
     "copiedToClipboard": "Copied to clipboard",
+    "shareTimestamp": "Share Timestamp",
+    "shareTimestampUrl": "Share Timestamp URL",
     "back": "Back",
     "history": "History",
     "fullscreen": "Fullscreen",

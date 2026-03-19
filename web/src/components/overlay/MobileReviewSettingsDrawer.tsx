@@ -104,6 +104,7 @@ export default function MobileReviewSettingsDrawer({
     "views/recording",
     "components/dialog",
     "views/replay",
+    "common",
   ]);
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
@@ -283,14 +284,14 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("share-timestamp") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
-            aria-label="Share timestamp"
+            aria-label={t("button.shareTimestamp", { ns: "common" })}
             onClick={() => {
               setDrawerMode("none");
               onShareTimestampClick();
             }}
           >
             <LuShare2 className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
-            Share Timestamp
+            {t("button.shareTimestamp", { ns: "common" })}
           </Button>
         )}
         {features.includes("calendar") && (
