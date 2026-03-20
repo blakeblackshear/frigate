@@ -181,7 +181,9 @@ class VLMWatchRunner(threading.Thread):
         # Keep system prompt + last _MAX_HISTORY user/assistant pairs
         max_msgs = 1 + _MAX_HISTORY * 2
         if len(self.conversation) > max_msgs:
-            self.conversation = [self.conversation[0]] + self.conversation[-(max_msgs - 1):]
+            self.conversation = [self.conversation[0]] + self.conversation[
+                -(max_msgs - 1) :
+            ]
 
         try:
             clean = re.sub(
@@ -258,9 +260,7 @@ class VLMWatchRunner(threading.Thread):
         zones = self.job.zones
         for obj in tracked_objects:
             label_ok = not labels or obj.get("label") in labels
-            zone_ok = not zones or bool(
-                set(obj.get("current_zones", [])) & set(zones)
-            )
+            zone_ok = not zones or bool(set(obj.get("current_zones", [])) & set(zones))
             if label_ok and zone_ok:
                 return True
         return False
