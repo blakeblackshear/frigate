@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SelectSeparator } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getUTCOffset } from "@/utils/dateUtil";
@@ -148,7 +148,7 @@ export function ShareTimestampContent({
         </div>
       </div>
 
-      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
+      {isDesktop && <Separator className="my-4 bg-secondary" />}
 
       <RadioGroup
         className="mt-4 flex flex-col gap-4"
@@ -201,7 +201,7 @@ export function ShareTimestampContent({
         </div>
       </RadioGroup>
 
-      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
+      {isDesktop && <Separator className="my-4 bg-secondary" />}
 
       <DialogFooter
         className={isDesktop ? "mt-4" : "mt-4 flex flex-col-reverse gap-4"}
