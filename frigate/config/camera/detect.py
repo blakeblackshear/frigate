@@ -49,8 +49,8 @@ class StationaryConfig(FrigateBaseModel):
 class DetectConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
-        title="Detection enabled",
-        description="Enable or disable object detection for all cameras; can be overridden per-camera. Detection must be enabled for object tracking to run.",
+        title="Enable object detection",
+        description="Enable or disable object detection for all cameras; can be overridden per-camera.",
     )
     height: Optional[int] = Field(
         default=None,

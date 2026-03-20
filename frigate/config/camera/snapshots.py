@@ -29,7 +29,7 @@ class RetainConfig(FrigateBaseModel):
 class SnapshotsConfig(FrigateBaseModel):
     enabled: bool = Field(
         default=False,
-        title="Snapshots enabled",
+        title="Enable snapshots",
         description="Enable or disable saving snapshots for all cameras; can be overridden per-camera.",
     )
     clean_copy: bool = Field(
