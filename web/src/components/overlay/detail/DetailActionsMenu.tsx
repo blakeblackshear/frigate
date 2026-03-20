@@ -85,7 +85,7 @@ export default function DetailActionsMenu({
             <DropdownMenuItem>
               <a
                 className="w-full"
-                href={`${baseUrl}api/events/${search.id}/snapshot.jpg?bbox=1`}
+                href={`${baseUrl}api/events/${search.id}/snapshot.jpg?crop=0&bbox=1`}
                 download={`${search.camera}_${search.label}.jpg`}
               >
                 <div className="flex cursor-pointer items-center gap-2">

@@ -107,7 +107,7 @@ export function FrigatePlusDialog({
                       <img
                         ref={imgRef}
                         className="mx-auto max-h-[60dvh] rounded-lg bg-black object-contain"
-                        src={`${baseUrl}api/events/${upload.id}/snapshot.jpg`}
+                        src={`${baseUrl}api/events/${upload.id}/snapshot.jpg?crop=0&bbox=1`}
                         alt={`${upload.label}`}
                         loading={isSafari ? "eager" : "lazy"}
                         onLoad={onImgLoad}
