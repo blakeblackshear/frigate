@@ -18,6 +18,11 @@ const semanticSearch: SectionConfigOverrides = {
     advancedFields: ["reindex", "device"],
     restartRequired: ["enabled", "model", "model_size", "device"],
     hiddenFields: ["reindex"],
+    uiSchema: {
+      model: {
+        "ui:widget": "semanticSearchModel",
+      },
+    },
   },
 };
 
