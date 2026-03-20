@@ -79,8 +79,8 @@
     "label": "Object Detection",
     "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
     "enabled": {
-      "label": "Detection enabled",
-      "description": "Enable or disable object detection for this camera. Detection must be enabled for object tracking to run."
+      "label": "Enable object detection",
+      "description": "Enable or disable object detection for this camera."
     },
     "height": {
       "label": "Detect height",
@@ -628,7 +628,7 @@
     "label": "Snapshots",
     "description": "Settings for saved JPEG snapshots of tracked objects for this camera.",
     "enabled": {
-      "label": "Snapshots enabled",
+      "label": "Enable snapshots",
       "description": "Enable or disable saving snapshots for this camera."
     },
     "clean_copy": {
@@ -859,6 +859,10 @@
   "webui_url": {
     "label": "Camera URL",
     "description": "URL to visit the camera directly from system page"
+  },
+  "profiles": {
+    "label": "Profiles",
+    "description": "Named config profiles with partial overrides that can be activated at runtime."
   },
   "zones": {
     "label": "Zones",

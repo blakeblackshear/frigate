@@ -4,7 +4,6 @@ import re
 import urllib.request
 from typing import Literal
 
-import axengine as axe
 from pydantic import ConfigDict
 
 from frigate.const import MODEL_CACHE_DIR
@@ -37,6 +36,12 @@ class Axengine(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: AxengineDetectorConfig):
+        try:
+            import axengine as axe
+        except ModuleNotFoundError:
+            raise ImportError("AXEngine is not installed.")
+            return
+
         logger.info("__init__ axengine")
         super().__init__(config)
         self.height = config.model.height

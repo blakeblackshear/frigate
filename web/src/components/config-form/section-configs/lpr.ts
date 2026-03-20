@@ -7,9 +7,9 @@ const lpr: SectionConfigOverrides = {
       enhancement: "/configuration/license_plate_recognition#enhancement",
     },
     restartRequired: [],
-    fieldOrder: ["enabled", "expire_time", "min_area", "enhancement"],
+    fieldOrder: ["enabled", "min_area", "enhancement", "expire_time"],
     hiddenFields: [],
-    advancedFields: ["expire_time", "min_area", "enhancement"],
+    advancedFields: ["expire_time", "enhancement"],
     overrideFields: ["enabled", "min_area", "enhancement"],
   },
   global: {

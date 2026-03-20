@@ -385,7 +385,7 @@ export default function ProfilesView({
 
       {/* Active Profile + Add Profile bar */}
       {(hasProfiles || profilesUIEnabled) && (
-        <div className="my-4 flex items-center justify-between rounded-lg border border-border/70 bg-card/30 p-4">
+        <div className="my-4 flex flex-col gap-3 rounded-lg border border-border/70 bg-card/30 p-4 sm:flex-row sm:items-center sm:justify-between">
           {hasProfiles && (
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-primary-variant">
@@ -470,12 +470,12 @@ export default function ProfilesView({
                   )}
                 >
                   <CollapsibleTrigger asChild>
-                    <div className="flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-secondary/30">
-                      <div className="flex items-center gap-3">
+                    <div className="flex cursor-pointer flex-wrap items-center gap-y-2 px-4 py-3 hover:bg-secondary/30">
+                      <div className="flex min-w-0 items-center gap-3">
                         {isExpanded ? (
-                          <LuChevronDown className="size-4 text-muted-foreground" />
+                          <LuChevronDown className="size-4 shrink-0 text-muted-foreground" />
                         ) : (
-                          <LuChevronRight className="size-4 text-muted-foreground" />
+                          <LuChevronRight className="size-4 shrink-0 text-muted-foreground" />
                         )}
                         <span
                           className={cn(
@@ -483,13 +483,13 @@ export default function ProfilesView({
                             color.dot,
                           )}
                         />
-                        <span className="font-medium">
+                        <span className="truncate font-medium">
                           {profileFriendlyNames?.get(profile) ?? profile}
                         </span>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-6 text-muted-foreground hover:text-primary"
+                          className="size-6 shrink-0 text-muted-foreground hover:text-primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             setRenameProfile(profile);
@@ -500,6 +500,8 @@ export default function ProfilesView({
                         >
                           <Pencil className="size-3" />
                         </Button>
+                      </div>
+                      <div className="ml-auto flex items-center gap-3">
                         {isActive && (
                           <Badge
                             variant="secondary"
@@ -508,8 +510,6 @@ export default function ProfilesView({
                             {t("profiles.active", { ns: "views/settings" })}
                           </Badge>
                         )}
-                      </div>
-                      <div className="flex items-center gap-3">
                         <span className="text-sm text-muted-foreground">
                           {cameras.length > 0
                             ? t("profiles.cameraCount", {
@@ -523,7 +523,7 @@ export default function ProfilesView({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-7 text-muted-foreground hover:text-destructive"
+                          className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
                           disabled={deleting && deleteProfile === profile}
                           onClick={(e) => {
                             e.stopPropagation();

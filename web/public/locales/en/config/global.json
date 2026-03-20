@@ -1174,7 +1174,7 @@
     }
   },
   "genai": {
-    "label": "Generative AI configuration (named providers).",
+    "label": "Generative AI configuration",
     "description": "Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
     "api_key": {
       "label": "API key",
@@ -1293,8 +1293,8 @@
     "label": "Object Detection",
     "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
     "enabled": {
-      "label": "Detection enabled",
-      "description": "Enable or disable object detection for all cameras; can be overridden per-camera. Detection must be enabled for object tracking to run."
+      "label": "Enable object detection",
+      "description": "Enable or disable object detection for all cameras; can be overridden per-camera."
     },
     "height": {
       "label": "Detect height",
@@ -1778,7 +1778,7 @@
     "label": "Snapshots",
     "description": "Settings for saved JPEG snapshots of tracked objects for all cameras; can be overridden per-camera.",
     "enabled": {
-      "label": "Snapshots enabled",
+      "label": "Enable snapshots",
       "description": "Enable or disable saving snapshots for all cameras; can be overridden per-camera."
     },
     "clean_copy": {
@@ -2127,6 +2127,18 @@
       "label": "Sort order",
       "description": "Numeric order used to sort camera groups in the UI; larger numbers appear later."
     }
+  },
+  "profiles": {
+    "label": "Profiles",
+    "description": "Named profile definitions with friendly names. Camera profiles must reference names defined here.",
+    "friendly_name": {
+      "label": "Friendly name",
+      "description": "Display name for this profile shown in the UI."
+    }
+  },
+  "active_profile": {
+    "label": "Active profile",
+    "description": "Currently active profile name. Runtime-only, not persisted in YAML."
   },
   "camera_mqtt": {
     "label": "MQTT",

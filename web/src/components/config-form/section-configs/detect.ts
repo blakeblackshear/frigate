@@ -18,7 +18,7 @@ const detect: SectionConfigOverrides = {
     ],
     restartRequired: [],
     fieldGroups: {
-      resolution: ["enabled", "width", "height", "fps"],
+      resolution: ["width", "height", "fps"],
       tracking: ["min_initialized", "max_disappeared"],
     },
     hiddenFields: ["enabled_in_config"],
