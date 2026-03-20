@@ -210,6 +210,9 @@ export function RecordingView({
   const [debugReplayMode, setDebugReplayMode] = useState<ExportMode>("none");
   const [debugReplayRange, setDebugReplayRange] = useState<TimeRange>();
   const [shareTimestampOpen, setShareTimestampOpen] = useState(false);
+  const [shareTimestampAtOpen, setShareTimestampAtOpen] = useState(
+    Math.floor(startTime),
+  );
 
   // move to next clip
 
@@ -686,15 +689,19 @@ export function RecordingView({
                 setMotionOnly={() => {}}
               />
             )}
-            <ShareTimestampDialog
-              currentTime={currentTime}
-              open={shareTimestampOpen}
-              onOpenChange={setShareTimestampOpen}
-              onShareTimestamp={onShareReviewLink}
-            />
+            {isDesktop && (
+              <ShareTimestampDialog
+                key={shareTimestampAtOpen}
+                currentTime={shareTimestampAtOpen}
+                open={shareTimestampOpen}
+                onOpenChange={setShareTimestampOpen}
+                onShareTimestamp={onShareReviewLink}
+              />
+            )}
             {isDesktop && (
               <ActionsDropdown
                 onShareTimestampClick={() => {
+                  setShareTimestampAtOpen(Math.floor(currentTime));
                   setShareTimestampOpen(true);
                 }}
                 onDebugReplayClick={() => {
@@ -776,9 +783,7 @@ export function RecordingView({
                   mainControllerRef.current?.pause();
                 }
               }}
-              onShareTimestampClick={() => {
-                setShareTimestampOpen(true);
-              }}
+              onShareTimestamp={onShareReviewLink}
               onUpdateFilter={updateFilter}
               setRange={setExportRange}
               setMode={setExportMode}

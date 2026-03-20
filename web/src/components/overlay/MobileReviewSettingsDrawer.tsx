@@ -26,6 +26,7 @@ import SaveExportOverlay from "./SaveExportOverlay";
 import { isIOS, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { ShareTimestampContent } from "./ShareTimestampDialog";
 
 type DrawerMode =
   | "none"
@@ -70,7 +71,7 @@ type MobileReviewSettingsDrawerProps = {
   debugReplayRange?: TimeRange;
   setDebugReplayMode?: (mode: ExportMode) => void;
   setDebugReplayRange?: (range: TimeRange | undefined) => void;
-  onShareTimestampClick?: () => void;
+  onShareTimestamp?: (timestamp: number) => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -94,7 +95,7 @@ export default function MobileReviewSettingsDrawer({
   debugReplayRange,
   setDebugReplayMode = () => {},
   setDebugReplayRange = () => {},
-  onShareTimestampClick = () => {},
+  onShareTimestamp = () => {},
   onUpdateFilter,
   setRange,
   setMode,
@@ -112,6 +113,15 @@ export default function MobileReviewSettingsDrawer({
     "1" | "5" | "custom" | "timeline"
   >("1");
   const [isDebugReplayStarting, setIsDebugReplayStarting] = useState(false);
+  const [selectedShareOption, setSelectedShareOption] = useState<
+    "current" | "custom"
+  >("current");
+  const [shareTimestampAtOpen, setShareTimestampAtOpen] = useState(
+    Math.floor(currentTime),
+  );
+  const [customShareTimestamp, setCustomShareTimestamp] = useState(
+    Math.floor(currentTime),
+  );
 
   // exports
 
@@ -284,14 +294,22 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("share-timestamp") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
-            aria-label={t("button.shareTimestamp", { ns: "common" })}
+            aria-label={t("recording.shareTimestamp.label", {
+              ns: "components/dialog",
+            })}
             onClick={() => {
-              setDrawerMode("none");
-              onShareTimestampClick();
+              const initialTimestamp = Math.floor(currentTime);
+
+              setShareTimestampAtOpen(initialTimestamp);
+              setCustomShareTimestamp(initialTimestamp);
+              setSelectedShareOption("current");
+              setDrawerMode("share-timestamp");
             }}
           >
             <LuShare2 className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
-            {t("button.shareTimestamp", { ns: "common" })}
+            {t("recording.shareTimestamp.label", {
+              ns: "components/dialog",
+            })}
           </Button>
         )}
         {features.includes("calendar") && (
@@ -495,6 +513,34 @@ export default function MobileReviewSettingsDrawer({
           }
         }}
       />
+    );
+  } else if (drawerMode == "share-timestamp") {
+    content = (
+      <div className="w-full">
+        <div className="relative h-8 w-full">
+          <div
+            className="absolute left-0 text-selected"
+            onClick={() => setDrawerMode("select")}
+          >
+            {t("button.back", { ns: "common" })}
+          </div>
+          <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
+            {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
+          </div>
+        </div>
+        <ShareTimestampContent
+          currentTime={shareTimestampAtOpen}
+          selectedOption={selectedShareOption}
+          setSelectedOption={setSelectedShareOption}
+          customTimestamp={customShareTimestamp}
+          setCustomTimestamp={setCustomShareTimestamp}
+          onShareTimestamp={(timestamp) => {
+            onShareTimestamp(timestamp);
+            setDrawerMode("none");
+          }}
+          onCancel={() => setDrawerMode("select")}
+        />
+      </div>
     );
   }
 

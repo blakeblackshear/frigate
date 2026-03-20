@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -22,7 +23,6 @@ import useSWR from "swr";
 import { TimezoneAwareCalendar } from "./ReviewActivityCalendar";
 import { FaCalendarAlt } from "react-icons/fa";
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
-import { LuShare2 } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 
 type ShareTimestampDialogProps = {
@@ -42,15 +42,19 @@ export default function ShareTimestampDialog({
   const [selectedOption, setSelectedOption] = useState<"current" | "custom">(
     "current",
   );
-  const [customTimestamp, setCustomTimestamp] = useState(
+  const [openedCurrentTime, setOpenedCurrentTime] = useState(
     Math.floor(currentTime),
   );
+  const [customTimestamp, setCustomTimestamp] = useState(openedCurrentTime);
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
       if (nextOpen) {
+        const initialTimestamp = Math.floor(currentTime);
+
+        setOpenedCurrentTime(initialTimestamp);
         setSelectedOption("current");
-        setCustomTimestamp(Math.floor(currentTime));
+        setCustomTimestamp(initialTimestamp);
       }
 
       onOpenChange(nextOpen);
@@ -60,7 +64,7 @@ export default function ShareTimestampDialog({
 
   const content = (
     <ShareTimestampContent
-      currentTime={currentTime}
+      currentTime={openedCurrentTime}
       selectedOption={selectedOption}
       setSelectedOption={setSelectedOption}
       customTimestamp={customTimestamp}
@@ -108,15 +112,17 @@ type ShareTimestampContentProps = {
   customTimestamp: number;
   setCustomTimestamp: (timestamp: number) => void;
   onShareTimestamp: (timestamp: number) => void;
+  onCancel?: () => void;
 };
 
-function ShareTimestampContent({
+export function ShareTimestampContent({
   currentTime,
   selectedOption,
   setSelectedOption,
   customTimestamp,
   setCustomTimestamp,
   onShareTimestamp,
+  onCancel,
 }: Readonly<ShareTimestampContentProps>) {
   const { t } = useTranslation(["common", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -191,16 +197,28 @@ function ShareTimestampContent({
         </div>
       </RadioGroup>
 
-      <div className="mt-4">
+      <DialogFooter
+        className={isDesktop ? "mt-4" : "mt-4 flex flex-col-reverse gap-4"}
+      >
+        {onCancel && (
+          <Button
+            className={isDesktop ? "p-2" : "w-full"}
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+          >
+            {t("button.cancel", { ns: "common" })}
+          </Button>
+        )}
         <Button
-          className="w-full justify-between gap-3"
+          className={isDesktop ? "" : "w-full"}
           variant="select"
+          size="sm"
           onClick={() => onShareTimestamp(Math.floor(selectedTimestamp))}
         >
-          <span>{t("button.shareTimestampUrl", { ns: "common" })}</span>
-          <LuShare2 className="size-4" />
+          {t("recording.shareTimestamp.button", { ns: "components/dialog" })}
         </Button>
-      </div>
+      </DialogFooter>
     </div>
   );
 }
@@ -298,7 +316,7 @@ function CustomTimestampSelector({
               {formattedTimestamp}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center" disablePortal>
+          <PopoverContent className="flex flex-col items-center">
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(displayTimestamp * 1000)}

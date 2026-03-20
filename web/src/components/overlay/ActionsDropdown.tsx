@@ -40,7 +40,7 @@ export default function ActionsDropdown({
           {t("menu.export", { ns: "common" })}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onShareTimestampClick}>
-          {t("button.shareTimestamp", { ns: "common" })}
+          {t("recording.shareTimestamp.label", { ns: "components/dialog" })}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onDebugReplayClick}>
           {t("title", { ns: "views/replay" })}

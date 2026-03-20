@@ -12,7 +12,14 @@ export function parseRecordingReviewLink(
     return undefined;
   }
 
-  const [camera, timestamp] = value.split("|");
+  const separatorIndex = value.lastIndexOf("_");
+
+  if (separatorIndex <= 0 || separatorIndex == value.length - 1) {
+    return undefined;
+  }
+
+  const camera = value.slice(0, separatorIndex);
+  const timestamp = value.slice(separatorIndex + 1);
 
   if (!camera || !timestamp) {
     return undefined;
@@ -20,7 +27,7 @@ export function parseRecordingReviewLink(
 
   const parsedTimestamp = Number(timestamp);
 
-  if (!Number.isFinite(parsedTimestamp)) {
+  if (!Number.isFinite(parsedTimestamp) || parsedTimestamp <= 0) {
     return undefined;
   }
 
@@ -38,7 +45,7 @@ export function createRecordingReviewUrl(
   const normalizedPathname = pathname.startsWith("/")
     ? pathname
     : `/${pathname}`;
-  const reviewLink = `${state.camera}|${Math.floor(state.timestamp)}`;
+  const reviewLink = `${state.camera}_${Math.floor(state.timestamp)}`;
 
   return `${url.origin}${normalizedPathname}?${RECORDING_REVIEW_LINK_PARAM}=${reviewLink}`;
 }
