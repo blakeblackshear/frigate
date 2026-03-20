@@ -26,6 +26,7 @@ export function parseRecordingReviewLink(
   }
 
   const parsedTimestamp = Number(timestamp);
+  const now = Math.floor(Date.now() / 1000);
 
   if (!Number.isFinite(parsedTimestamp) || parsedTimestamp <= 0) {
     return undefined;
@@ -33,7 +34,8 @@ export function parseRecordingReviewLink(
 
   return {
     camera,
-    timestamp: Math.floor(parsedTimestamp),
+    // clamp future timestamps to now
+    timestamp: Math.min(Math.floor(parsedTimestamp), now),
   };
 }
 
