@@ -398,12 +398,32 @@ async def _execute_get_live_context(
                 # be injected as a user message (images can't be in tool results)
                 result["_image_url"] = image_url
             elif genai_manager.vision_client is not None:
-                # Separate vision provider — have it describe the image
+                # Separate vision provider — have it describe the image,
+                # providing detection context so it knows what to focus on
                 frame_bytes = _decode_data_url(image_url)
                 if frame_bytes:
+                    detections = result.get("detections", [])
+                    if detections:
+                        detection_lines = []
+                        for d in detections:
+                            parts = [d.get("label", "unknown")]
+                            if d.get("sub_label"):
+                                parts.append(f"({d['sub_label']})")
+                            if d.get("zones"):
+                                parts.append(f"in {', '.join(d['zones'])}")
+                            detection_lines.append(" ".join(parts))
+                        context = (
+                            "The following objects are currently being tracked: "
+                            + "; ".join(detection_lines)
+                            + "."
+                        )
+                    else:
+                        context = "No objects are currently being tracked."
+
                     description = genai_manager.vision_client._send(
-                        "Describe what you see in this security camera image. "
-                        "Focus on people, vehicles, animals, and any notable activity.",
+                        f"Describe what you see in this security camera image. "
+                        f"{context} Focus on the scene, any visible activity, "
+                        f"and details about the tracked objects.",
                         [frame_bytes],
                     )
                     if description:
@@ -426,8 +446,8 @@ async def _get_live_frame_image_url(
     """
     Fetch the current live frame for a camera as a base64 data URL.
 
-    Returns None if the frame cannot be retrieved. Used when include_live_image
-    is set to attach the image to the first user message.
+    Returns None if the frame cannot be retrieved. Used by get_live_context
+    to attach the live image to the conversation.
     """
     if (
         camera not in allowed_cameras
@@ -442,12 +462,12 @@ async def _get_live_frame_image_url(
         if frame is None:
             return None
         height, width = frame.shape[:2]
-        max_dimension = 1024
-        if height > max_dimension or width > max_dimension:
-            scale = max_dimension / max(height, width)
+        target_height = 480
+        if height > target_height:
+            scale = target_height / height
             frame = cv2.resize(
                 frame,
-                (int(width * scale), int(height * scale)),
+                (int(width * scale), target_height),
                 interpolation=cv2.INTER_AREA,
             )
         _, img_encoded = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
@@ -719,7 +739,13 @@ async def chat_completion(
             if camera_config.friendly_name
             else camera_id.replace("_", " ").title()
         )
-        cameras_info.append(f"  - {friendly_name} (ID: {camera_id})")
+        zone_names = list(camera_config.zones.keys())
+        if zone_names:
+            cameras_info.append(
+                f"  - {friendly_name} (ID: {camera_id}, zones: {', '.join(zone_names)})"
+            )
+        else:
+            cameras_info.append(f"  - {friendly_name} (ID: {camera_id})")
 
     cameras_section = ""
     if cameras_info:
