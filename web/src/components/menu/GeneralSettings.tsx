@@ -74,7 +74,7 @@ import type { ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-import { supportedLanguageKeys } from "@/lib/const";
+import { supportedLanguages } from "@/lib/const";
 
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { MdCategory } from "react-icons/md";
@@ -91,25 +91,6 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const { data: profilesData, mutate: updateProfiles } =
     useSWR<ProfilesApiResponse>("profiles");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
-
-  // languages
-
-  const languages = useMemo(() => {
-    // Handle language keys that aren't directly used for translation key
-    const specialKeyMap: { [key: string]: string } = {
-      "nb-NO": "nb",
-      "yue-Hant": "yue",
-      "zh-CN": "zhCN",
-      "pt-BR": "ptBR",
-    };
-
-    return supportedLanguageKeys.map((key) => {
-      return {
-        code: key,
-        label: t(`menu.language.${specialKeyMap[key] || key}`),
-      };
-    });
-  }, [t]);
 
   // profiles
 
@@ -537,7 +518,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     </>
                   )}
                   <span tabIndex={0} className="sr-only" />
-                  {languages.map(({ code, label }) => (
+                  {supportedLanguages.map(({ code, label }) => (
                     <MenuItem
                       key={code}
                       className={

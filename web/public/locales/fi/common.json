@@ -104,12 +104,6 @@
       }
     },
     "faceLibrary": "Kasvokirjasto",
-    "language": {
-      "ca": "Katalaani",
-      "withSystem": {
-        "label": "Käytä järjestelmän asetuksia kielelle"
-      }
-    },
     "review": "Esikatselu",
     "theme": {
       "highcontrast": "Korkea resoluutio",

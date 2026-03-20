@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import i18next from "i18next";
-import { supportedLanguageKeys } from "@/lib/const";
+import { supportedLanguages } from "@/lib/const";
 
 type LanguageProviderState = {
   language: string;
@@ -30,7 +30,7 @@ export function LanguageProvider({
 
     const systemLanguage = window.navigator.language;
 
-    if (supportedLanguageKeys.includes(systemLanguage)) {
+    if (supportedLanguages.some(({ code }) => code === systemLanguage)) {
       return systemLanguage;
     }
 
@@ -38,7 +38,9 @@ export function LanguageProvider({
     if (systemLanguage.includes("-")) {
       const shortenedSystemLanguage = systemLanguage.split("-")[0];
 
-      if (supportedLanguageKeys.includes(shortenedSystemLanguage)) {
+      if (
+        supportedLanguages.some(({ code }) => code === shortenedSystemLanguage)
+      ) {
         return shortenedSystemLanguage;
       }
     }
