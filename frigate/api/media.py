@@ -35,6 +35,7 @@ from frigate.api.defs.query.media_query_parameters import (
 from frigate.api.defs.tags import Tags
 from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
+from frigate.config.camera.snapshots import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
     INSTALL_DIR,
@@ -115,7 +116,7 @@ def imagestream(
 
 
 def _resolve_snapshot_settings(
-    snapshot_config: Any, params: MediaEventsSnapshotQueryParams
+    snapshot_config: SnapshotsConfig, params: MediaEventsSnapshotQueryParams
 ) -> dict[str, Any]:
     return {
         "timestamp": snapshot_config.timestamp
