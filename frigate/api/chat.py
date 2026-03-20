@@ -690,7 +690,8 @@ async def _execute_start_camera_watch(
             zones=zones,
         )
     except RuntimeError as e:
-        return {"error": str(e)}
+        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        return {"error": "Failed to start VLM watch job."}
 
     return {
         "success": True,
@@ -1178,8 +1179,9 @@ async def start_vlm_monitor(
             zones=body.zones,
         )
     except RuntimeError as e:
+        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
         return JSONResponse(
-            content={"success": False, "message": str(e)},
+            content={"success": False, "message": "Failed to start VLM watch job."},
             status_code=409,
         )
 
