@@ -13,7 +13,7 @@ const snapshots: SectionConfigOverrides = {
       "retain",
     ],
     fieldGroups: {
-      display: ["enabled", "bounding_box", "crop", "quality", "timestamp"],
+      display: ["bounding_box", "crop", "quality", "timestamp"],
     },
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["height", "quality", "retain"],
