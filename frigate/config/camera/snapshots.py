@@ -35,17 +35,17 @@ class SnapshotsConfig(FrigateBaseModel):
     timestamp: bool = Field(
         default=False,
         title="Timestamp overlay",
-        description="Overlay a timestamp on saved snapshots.",
+        description="Overlay a timestamp on snapshots from API.",
     )
     bounding_box: bool = Field(
         default=True,
         title="Bounding box overlay",
-        description="Draw bounding boxes for tracked objects on saved snapshots.",
+        description="Draw bounding boxes for tracked objects on snapshots from API.",
     )
     crop: bool = Field(
         default=False,
         title="Crop snapshot",
-        description="Crop saved snapshots to the detected object's bounding box.",
+        description="Crop snapshots from API to the detected object's bounding box.",
     )
     required_zones: list[str] = Field(
         default_factory=list,
@@ -55,7 +55,7 @@ class SnapshotsConfig(FrigateBaseModel):
     height: Optional[int] = Field(
         default=None,
         title="Snapshot height",
-        description="Height (pixels) to resize saved snapshots to; leave empty to preserve original size.",
+        description="Height (pixels) to resize snapshots from API to; leave empty to preserve original size.",
     )
     retain: RetainConfig = Field(
         default_factory=RetainConfig,
