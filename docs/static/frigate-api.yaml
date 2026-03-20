@@ -10,30 +10,51 @@ servers:
   - url: http://localhost:5001/api
 
 paths:
+  /auth/first_time_login:
+    get:
+      tags:
+        - Auth
+      summary: First Time Login
+      description: |-
+        Return whether the admin first-time login help flag is set in config.
+
+        This endpoint is intentionally unauthenticated so the login page can
+        query it before a user is authenticated.
+      operationId: first_time_login_auth_first_time_login_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /auth:
     get:
       tags:
         - Auth
       summary: Authenticate request
-      description: |-
+      description: >-
         Authenticates the current request based on proxy headers or JWT token.
-        This endpoint verifies authentication credentials and manages JWT token refresh.
-        On success, no JSON body is returned; authentication state is communicated via response headers and cookies.
+        This endpoint verifies authentication credentials and manages JWT token
+        refresh. On success, no JSON body is returned; authentication state is
+        communicated via response headers and cookies.
       operationId: auth_auth_get
       responses:
         "202":
-          description: Authentication Accepted (no response body, different headers depending on auth method)
+          description: Authentication Accepted (no response body)
+          content:
+            application/json:
+              schema: {}
           headers:
             remote-user:
               description: Authenticated username or "viewer" in proxy-only mode
               schema:
                 type: string
             remote-role:
-              description: Resolved role (e.g., admin, viewer, or custom)
+              description: "Resolved role (e.g., admin, viewer, or custom)"
               schema:
                 type: string
             Set-Cookie:
-              description: May include refreshed JWT cookie ("frigate-token") when applicable
+              description: May include refreshed JWT cookie when applicable
               schema:
                 type: string
         "401":
@@ -43,9 +64,10 @@ paths:
       tags:
         - Auth
       summary: Get user profile
-      description: |-
-        Returns the current authenticated user's profile including username, role, and allowed cameras.
-        This endpoint requires authentication and returns information about the user's permissions.
+      description: >-
+        Returns the current authenticated user's profile including username,
+        role, and allowed cameras. This endpoint requires authentication and
+        returns information about the user's permissions.
       operationId: profile_profile_get
       responses:
         "200":
@@ -53,16 +75,14 @@ paths:
           content:
             application/json:
               schema: {}
-        "401":
-          description: Unauthorized
   /logout:
     get:
       tags:
         - Auth
       summary: Logout user
-      description: |-
-        Logs out the current user by clearing the session cookie.
-        After logout, subsequent requests will require re-authentication.
+      description: >-
+        Logs out the current user by clearing the session cookie. After logout,
+        subsequent requests will require re-authentication.
       operationId: logout_logout_get
       responses:
         "200":
@@ -70,21 +90,25 @@ paths:
           content:
             application/json:
               schema: {}
-        "303":
-          description: See Other (redirects to login page)
   /login:
     post:
       tags:
         - Auth
       summary: Login with credentials
-      description: |-
-        Authenticates a user with username and password.
-        Returns a JWT token as a secure HTTP-only cookie that can be used for subsequent API requests.
-        The JWT token can also be retrieved from the response and used as a Bearer token in the Authorization header.
+      description: >-
+        Authenticates a user with username and password. Returns a JWT token as
+        a secure HTTP-only cookie that can be used for subsequent API requests.
+        The JWT token can also be retrieved from the response and used as a
+        Bearer token in the Authorization header.
+
 
         Example using Bearer token:
+
         ```
-        curl -H "Authorization: Bearer <token_value>" https://frigate_ip:8971/api/profile
+
+        curl -H "Authorization: Bearer <token_value>"
+        https://frigate_ip:8971/api/profile
+
         ```
       operationId: login_login_post
       requestBody:
@@ -99,11 +123,6 @@ paths:
           content:
             application/json:
               schema: {}
-        "401":
-          description: Login Failed - Invalid credentials
-          content:
-            application/json:
-              schema: {}
         "422":
           description: Validation Error
           content:
@@ -115,9 +134,9 @@ paths:
       tags:
         - Auth
       summary: Get all users
-      description: |-
-        Returns a list of all users with their usernames and roles.
-        Requires admin role. Each user object contains the username and assigned role.
+      description: >-
+        Returns a list of all users with their usernames and roles. Requires
+        admin role. Each user object contains the username and assigned role.
       operationId: get_users_users_get
       responses:
         "200":
@@ -125,19 +144,13 @@ paths:
           content:
             application/json:
               schema: {}
-        "403":
-          description: Forbidden - Admin role required
     post:
       tags:
         - Auth
       summary: Create new user
-      description: |-
+      description: >-
         Creates a new user with the specified username, password, and role.
-        Requires admin role. Password must meet strength requirements:
-        - Minimum 8 characters
-        - At least one uppercase letter
-        - At least one digit
-        - At least one special character (!@#$%^&*(),.?":{}\|<>)
+        Requires admin role. Password must be at least 12 characters long.
       operationId: create_user_users_post
       requestBody:
         required: true
@@ -151,25 +164,18 @@ paths:
           content:
             application/json:
               schema: {}
-        "400":
-          description: Bad Request - Invalid username or role
-          content:
-            application/json:
-              schema: {}
-        "403":
-          description: Forbidden - Admin role required
         "422":
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /users/{username}:
+  "/users/{username}":
     delete:
       tags:
         - Auth
       summary: Delete user
-      description: |-
+      description: >-
         Deletes a user by username. The built-in admin user cannot be deleted.
         Requires admin role. Returns success message or error if user not found.
       operationId: delete_user_users__username__delete
@@ -180,36 +186,29 @@ paths:
           schema:
             type: string
             title: Username
-            description: The username of the user to delete
       responses:
         "200":
           description: Successful Response
           content:
             application/json:
               schema: {}
-        "403":
-          description: Forbidden - Cannot delete admin user or admin role required
         "422":
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /users/{username}/password:
+  "/users/{username}/password":
     put:
       tags:
         - Auth
       summary: Update user password
-      description: |-
-        Updates a user's password. Users can only change their own password unless they have admin role.
-        Requires the current password to verify identity for non-admin users.
-        Password must meet strength requirements:
-        - Minimum 8 characters
-        - At least one uppercase letter
-        - At least one digit
-        - At least one special character (!@#$%^&*(),.?":{}\|<>)
-
-        If user changes their own password, a new JWT cookie is automatically issued.
+      description: >-
+        Updates a user's password. Users can only change their own password
+        unless they have admin role. Requires the current password to verify
+        identity for non-admin users. Password must be at least 12 characters
+        long. If user changes their own password, a new JWT cookie is
+        automatically issued.
       operationId: update_password_users__username__password_put
       parameters:
         - name: username
@@ -218,7 +217,6 @@ paths:
           schema:
             type: string
             title: Username
-            description: The username of the user whose password to update
       requestBody:
         required: true
         content:
@@ -231,28 +229,21 @@ paths:
           content:
             application/json:
               schema: {}
-        "400":
-          description: Bad Request - Current password required or password doesn't meet requirements
-        "401":
-          description: Unauthorized - Current password is incorrect
-        "403":
-          description: Forbidden - Viewers can only update their own password
-        "404":
-          description: Not Found - User not found
         "422":
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /users/{username}/role:
+  "/users/{username}/role":
     put:
       tags:
         - Auth
       summary: Update user role
-      description: |-
-        Updates a user's role. The built-in admin user's role cannot be modified.
-        Requires admin role. Valid roles are defined in the configuration.
+      description: >-
+        Updates a user's role. The built-in admin user's role cannot be
+        modified. Requires admin role. Valid roles are defined in the
+        configuration.
       operationId: update_role_users__username__role_put
       parameters:
         - name: username
@@ -261,7 +252,6 @@ paths:
           schema:
             type: string
             title: Username
-            description: The username of the user whose role to update
       requestBody:
         required: true
         content:
@@ -274,10 +264,482 @@ paths:
           content:
             application/json:
               schema: {}
-        "400":
-          description: Bad Request - Invalid role
-        "403":
-          description: Forbidden - Cannot modify admin user's role or admin role required
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /go2rtc/streams:
+    get:
+      tags:
+        - Camera
+      summary: Go2Rtc Streams
+      operationId: go2rtc_streams_go2rtc_streams_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/go2rtc/streams/{camera_name}":
+    get:
+      tags:
+        - Camera
+      summary: Go2Rtc Camera Stream
+      operationId: go2rtc_camera_stream_go2rtc_streams__camera_name__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/go2rtc/streams/{stream_name}":
+    put:
+      tags:
+        - Camera
+      summary: Go2Rtc Add Stream
+      description: Add or update a go2rtc stream configuration.
+      operationId: go2rtc_add_stream_go2rtc_streams__stream_name__put
+      parameters:
+        - name: stream_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Stream Name
+        - name: src
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Src
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+        - Camera
+      summary: Go2Rtc Delete Stream
+      description: Delete a go2rtc stream.
+      operationId: go2rtc_delete_stream_go2rtc_streams__stream_name__delete
+      parameters:
+        - name: stream_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Stream Name
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /ffprobe:
+    get:
+      tags:
+        - Camera
+      summary: Ffprobe
+      operationId: ffprobe_ffprobe_get
+      parameters:
+        - name: paths
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Paths
+        - name: detailed
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Detailed
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /ffprobe/snapshot:
+    get:
+      tags:
+        - Camera
+      summary: Ffprobe Snapshot
+      description: Get a snapshot from a stream URL using ffmpeg.
+      operationId: ffprobe_snapshot_ffprobe_snapshot_get
+      parameters:
+        - name: url
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Url
+        - name: timeout
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Timeout
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /reolink/detect:
+    get:
+      tags:
+        - Camera
+      summary: Reolink Detect
+      description: >-
+        Detect Reolink camera capabilities and recommend optimal protocol.
+
+
+        Queries the Reolink camera API to determine the camera's resolution
+
+        and recommends either http-flv (for 5MP and below) or rtsp (for higher
+        resolutions).
+      operationId: reolink_detect_reolink_detect_get
+      parameters:
+        - name: host
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Host
+        - name: username
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Username
+        - name: password
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Password
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /onvif/probe:
+    get:
+      tags:
+        - Camera
+      summary: Probe ONVIF device
+      description: >-
+        Probe an ONVIF device to determine capabilities and optionally test
+        available stream URIs. Query params: host (required), port (default 80),
+        username, password, test (boolean), auth_type (basic or digest, default
+        basic).
+      operationId: onvif_probe_onvif_probe_get
+      parameters:
+        - name: host
+          in: query
+          required: false
+          schema:
+            type: string
+            title: Host
+        - name: port
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 80
+            title: Port
+        - name: username
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Username
+        - name: password
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Password
+        - name: test
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Test
+        - name: auth_type
+          in: query
+          required: false
+          schema:
+            type: string
+            default: basic
+            title: Auth Type
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/cameras/{camera_name}":
+    delete:
+      tags:
+        - Camera
+      summary: Delete Camera
+      description: |-
+        Delete a camera and all its associated data.
+
+        Removes the camera from config, stops processes, and cleans up
+        all database entries and media files.
+
+        Args:
+            camera_name: Name of the camera to delete
+            delete_exports: Whether to also delete exports for this camera
+      operationId: delete_camera_cameras__camera_name__delete
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: delete_exports
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Delete Exports
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/camera/{camera_name}/set/{feature}/{sub_command}":
+    put:
+      tags:
+        - Camera
+      summary: Camera Set
+      description: Set a camera feature state. Use camera_name='*' to target all cameras.
+      operationId: camera_set_camera__camera_name__set__feature___sub_command__put
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: feature
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Feature
+        - name: sub_command
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Sub Command
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CameraSetBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/camera/{camera_name}/set/{feature}":
+    put:
+      tags:
+        - Camera
+      summary: Camera Set
+      description: Set a camera feature state. Use camera_name='*' to target all cameras.
+      operationId: camera_set_camera__camera_name__set__feature__put
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: feature
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Feature
+        - name: sub_command
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Sub Command
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CameraSetBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /chat/tools:
+    get:
+      tags:
+        - Chat
+      summary: Get available tools
+      description: Returns OpenAI-compatible tool definitions for function calling.
+      operationId: get_tools_chat_tools_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /chat/execute:
+    post:
+      tags:
+        - Chat
+      summary: Execute a tool
+      description: Execute a tool function call from an LLM.
+      operationId: execute_tool_chat_execute_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToolExecuteRequest"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /chat/completion:
+    post:
+      tags:
+        - Chat
+      summary: Chat completion with tool calling
+      description: >-
+        Send a chat message to the configured GenAI provider with tool calling
+        support. The LLM can call Frigate tools to answer questions about your
+        cameras and events.
+      operationId: chat_completion_chat_completion_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatCompletionRequest"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
         "422":
           description: Validation Error
           content:
@@ -331,60 +793,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /media/sync:
-    post:
-      tags:
-        - App
-      summary: Start media sync job
-      description: |-
-        Start an asynchronous media sync job to find and (optionally) remove orphaned media files.
-        Returns 202 with job details when queued, or 409 if a job is already running.
-      operationId: sync_media_media_sync_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-      responses:
-        "202":
-          description: Accepted - Job queued
-        "409":
-          description: Conflict - Job already running
-        "422":
-          description: Validation Error
-
-  /media/sync/current:
-    get:
-      tags:
-        - App
-      summary: Get current media sync job
-      description: |-
-        Retrieve the current running media sync job, if any. Returns the job details or null when no job is active.
-      operationId: get_media_sync_current_media_sync_current_get
-      responses:
-        "200":
-          description: Successful Response
-        "422":
-          description: Validation Error
-
-  /media/sync/status/{job_id}:
-    get:
-      tags:
-        - App
-      summary: Get media sync job status
-      description: |-
-        Get status and results for the specified media sync job id. Returns 200 with job details including results, or 404 if the job is not found.
-      operationId: get_media_sync_status_media_sync_status__job_id__get
-      parameters:
-        - name: job_id
-          in: path
-      responses:
-        "200":
-          description: Successful Response
-        "404":
-          description: Not Found - Job not found
-        "422":
-          description: Validation Error
-  /faces/train/{name}/classify:
+  "/faces/train/{name}/classify":
     post:
       tags:
         - Classification
@@ -423,7 +832,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /faces/{name}/create:
+  "/faces/{name}/create":
     post:
       tags:
         - Classification
@@ -454,7 +863,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /faces/{name}/register:
+  "/faces/{name}/register":
     post:
       tags:
         - Classification
@@ -522,7 +931,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /faces/{name}/delete:
+  "/faces/{name}/delete":
     post:
       tags:
         - Classification
@@ -559,7 +968,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /faces/{old_name}/rename:
+  "/faces/{old_name}/rename":
     put:
       tags:
         - Classification
@@ -669,33 +1078,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /classification/attributes:
-    get:
-      tags:
-        - Classification
-      summary: Get custom classification attributes
-      description: |-
-        Returns custom classification attributes for a given object type.
-        Only includes models with classification_type set to 'attribute'.
-        By default returns a flat sorted list of all attribute labels.
-        If group_by_model is true, returns attributes grouped by model name.
-      operationId: get_custom_attributes_classification_attributes_get
-      parameters:
-        - name: object_type
-          in: query
-          schema:
-            type: string
-        - name: group_by_model
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        "200":
-          description: Successful Response
-        "422":
-          description: Validation Error
-  /classification/{name}/dataset:
+  "/classification/{name}/dataset":
     get:
       tags:
         - Classification
@@ -723,7 +1106,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /classification/{name}/train:
+  /classification/attributes:
+    get:
+      tags:
+        - Classification
+      summary: Get custom classification attributes
+      description: |-
+        Returns custom classification attributes for a given object type.
+            Only includes models with classification_type set to 'attribute'.
+            By default returns a flat sorted list of all attribute labels.
+            If group_by_model is true, returns attributes grouped by model name.
+      operationId: get_custom_attributes_classification_attributes_get
+      parameters:
+        - name: object_type
+          in: query
+          required: false
+          schema:
+            type: string
+            title: Object Type
+        - name: group_by_model
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Group By Model
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/classification/{name}/train":
     get:
       tags:
         - Classification
@@ -779,7 +1199,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /classification/{name}/dataset/{category}/delete:
+  "/classification/{name}/dataset/{category}/delete":
     post:
       tags:
         - Classification
@@ -822,7 +1242,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /classification/{name}/dataset/categorize:
+  "/classification/{name}/dataset/{old_category}/rename":
+    put:
+      tags:
+        - Classification
+      summary: Rename a classification category
+      description: |-
+        Renames a classification category for a given classification model.
+            The old category must exist and the new name must be valid. Returns a success message or an error if the name is invalid.
+      operationId: >-
+        rename_classification_category_classification__name__dataset__old_category__rename_put
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
+        - name: old_category
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Old Category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/classification/{name}/dataset/categorize":
     post:
       tags:
         - Classification
@@ -859,7 +1321,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /classification/{name}/train/delete:
+  "/classification/{name}/dataset/{category}/create":
+    post:
+      tags:
+        - Classification
+      summary: Create an empty classification category folder
+      description: |-
+        Creates an empty folder for a classification category.
+            This is used to create folders for categories that don't have images yet.
+            Returns a success message or an error if the name is invalid.
+      operationId: >-
+        create_classification_category_classification__name__dataset__category__create_post
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Category
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/classification/{name}/train/delete":
     post:
       tags:
         - Classification
@@ -882,6 +1381,88 @@ paths:
             schema:
               type: object
               title: Body
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /classification/generate_examples/state:
+    post:
+      tags:
+        - Classification
+      summary: Generate state classification examples
+      description: Generate examples for state classification.
+      operationId: generate_state_examples_classification_generate_examples_state_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateStateExamplesBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /classification/generate_examples/object:
+    post:
+      tags:
+        - Classification
+      summary: Generate object classification examples
+      description: Generate examples for object classification.
+      operationId: generate_object_examples_classification_generate_examples_object_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateObjectExamplesBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/classification/{name}":
+    delete:
+      tags:
+        - Classification
+      summary: Delete a classification model
+      description: |-
+        Deletes a specific classification model and all its associated data.
+            Works even if the model is not in the config (e.g., partially created during wizard).
+            Returns a success message.
+      operationId: delete_classification_model_classification__name__delete
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
       responses:
         "200":
           description: Successful Response
@@ -928,7 +1509,6 @@ paths:
           required: false
           schema:
             type: integer
-            default: 0
             title: Reviewed
         - name: limit
           in: query
@@ -1146,7 +1726,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /review/event/{event_id}:
+  "/review/event/{event_id}":
     get:
       tags:
         - Review
@@ -1172,7 +1752,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /review/{review_id}:
+  "/review/{review_id}":
     get:
       tags:
         - Review
@@ -1198,7 +1778,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /review/{review_id}/viewed:
+  "/review/{review_id}/viewed":
     delete:
       tags:
         - Review
@@ -1224,7 +1804,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /review/summarize/start/{start_ts}/end/{end_ts}:
+  "/review/summarize/start/{start_ts}/end/{end_ts}":
     post:
       tags:
         - Review
@@ -1282,43 +1862,6 @@ paths:
           content:
             application/json:
               schema: {}
-  /go2rtc/streams:
-    get:
-      tags:
-        - App
-      summary: Go2Rtc Streams
-      operationId: go2rtc_streams_go2rtc_streams_get
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /go2rtc/streams/{camera_name}:
-    get:
-      tags:
-        - App
-      summary: Go2Rtc Camera Stream
-      operationId: go2rtc_camera_stream_go2rtc_streams__camera_name__get
-      parameters:
-        - name: camera_name
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Camera Name
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
   /version:
     get:
       tags:
@@ -1394,6 +1937,60 @@ paths:
           content:
             application/json:
               schema: {}
+  /profiles:
+    get:
+      tags:
+        - App
+      summary: Get Profiles
+      description: List all available profiles and the currently active profile.
+      operationId: get_profiles_profiles_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /profile/active:
+    get:
+      tags:
+        - App
+      summary: Get Active Profile
+      description: Get the currently active profile.
+      operationId: get_active_profile_profile_active_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /ffmpeg/presets:
+    get:
+      tags:
+        - App
+      summary: Ffmpeg Presets
+      description: Return available ffmpeg preset keys for config UI usage.
+      operationId: ffmpeg_presets_ffmpeg_presets_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /config/raw_paths:
+    get:
+      tags:
+        - App
+      summary: Config Raw Paths
+      description: >-
+        Admin-only endpoint that returns camera paths and go2rtc streams without
+        credential masking.
+      operationId: config_raw_paths_config_raw_paths_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /config/raw:
     get:
       tags:
@@ -1461,32 +2058,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /ffprobe:
-    get:
-      tags:
-        - App
-      summary: Ffprobe
-      operationId: ffprobe_ffprobe_get
-      parameters:
-        - name: paths
-          in: query
-          required: false
-          schema:
-            type: string
-            default: ""
-            title: Paths
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
   /vainfo:
     get:
       tags:
@@ -1511,7 +2082,7 @@ paths:
           content:
             application/json:
               schema: {}
-  /logs/{service}:
+  "/logs/{service}":
     get:
       tags:
         - App
@@ -1588,6 +2159,79 @@ paths:
           content:
             application/json:
               schema: {}
+  /media/sync:
+    post:
+      tags:
+        - App
+      summary: Start media sync job
+      description: >-
+        Start an asynchronous media sync job to find and (optionally) remove
+        orphaned media files.
+            Returns 202 with job details when queued, or 409 if a job is already running.
+      operationId: sync_media_media_sync_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaSyncBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /media/sync/current:
+    get:
+      tags:
+        - App
+      summary: Get current media sync job
+      description: >-
+        Retrieve the current running media sync job, if any. Returns the job
+        details
+            or null when no job is active.
+      operationId: get_media_sync_current_media_sync_current_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/media/sync/status/{job_id}":
+    get:
+      tags:
+        - App
+      summary: Get media sync job status
+      description: >-
+        Get status and results for the specified media sync job id. Returns 200
+        with
+            job details including results, or 404 if the job is not found.
+      operationId: get_media_sync_status_media_sync_status__job_id__get
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Job Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
   /labels:
     get:
       tags:
@@ -1641,6 +2285,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /audio_labels:
+    get:
+      tags:
+        - App
+      summary: Get Audio Labels
+      operationId: get_audio_labels_audio_labels_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /plus/models:
     get:
       tags:
@@ -1807,7 +2463,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /preview/{camera_name}/start/{start_ts}/end/{end_ts}:
+  "/preview/{camera_name}/start/{start_ts}/end/{end_ts}":
     get:
       tags:
         - Preview
@@ -1823,9 +2479,7 @@ paths:
           in: path
           required: true
           schema:
-            anyOf:
-              - type: string
-              - type: "null"
+            type: string
             title: Camera Name
         - name: start_ts
           in: path
@@ -1857,7 +2511,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}:
+  "/preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}":
     get:
       tags:
         - Preview
@@ -1892,9 +2546,7 @@ paths:
           in: path
           required: true
           schema:
-            anyOf:
-              - type: string
-              - type: "null"
+            type: string
             title: Camera Name
         - name: tz_name
           in: path
@@ -1920,7 +2572,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames:
+  "/preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames":
     get:
       tags:
         - Preview
@@ -2022,6 +2674,40 @@ paths:
         Gets all exports from the database for cameras the user has access to.
             Returns a list of exports ordered by date (most recent first).
       operationId: get_exports_exports_get
+      parameters:
+        - name: export_case_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Export Case Id
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Cameras
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: "null"
+            title: Start Date
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: "null"
+            title: End Date
       responses:
         "200":
           description: Successful Response
@@ -2032,7 +2718,175 @@ paths:
                 items:
                   $ref: "#/components/schemas/ExportModel"
                 title: Response Get Exports Exports Get
-  /export/{camera_name}/start/{start_time}/end/{end_time}:
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /cases:
+    get:
+      tags:
+        - Export
+      summary: Get export cases
+      description: Gets all export cases from the database.
+      operationId: get_export_cases_cases_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExportCaseModel"
+                title: Response Get Export Cases Cases Get
+    post:
+      tags:
+        - Export
+      summary: Create export case
+      description: Creates a new export case.
+      operationId: create_export_case_cases_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportCaseCreateBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportCaseModel"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/cases/{case_id}":
+    get:
+      tags:
+        - Export
+      summary: Get a single export case
+      description: Gets a specific export case by ID.
+      operationId: get_export_case_cases__case_id__get
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Case Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportCaseModel"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+    patch:
+      tags:
+        - Export
+      summary: Update export case
+      description: Updates an existing export case.
+      operationId: update_export_case_cases__case_id__patch
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Case Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportCaseUpdateBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+        - Export
+      summary: Delete export case
+      description: |-
+        Deletes an export case.
+            Exports that reference this case will have their export_case set to null.
+      operationId: delete_export_case_cases__case_id__delete
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Case Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/export/{export_id}/case":
+    patch:
+      tags:
+        - Export
+      summary: Assign export to case
+      description: "Assigns an export to a case, or unassigns it if export_case_id is null."
+      operationId: assign_export_case_export__export_id__case_patch
+      parameters:
+        - name: export_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Export Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportCaseAssignBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/export/{camera_name}/start/{start_time}/end/{end_time}":
     post:
       tags:
         - Export
@@ -2084,7 +2938,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /export/{event_id}/rename:
+  "/export/{event_id}/rename":
     patch:
       tags:
         - Export
@@ -2119,7 +2973,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /export/{event_id}:
+  "/export/{event_id}":
     delete:
       tags:
         - Export
@@ -2145,7 +2999,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /exports/{export_id}:
+  "/export/custom/{camera_name}/start/{start_time}/end/{end_time}":
+    post:
+      tags:
+        - Export
+      summary: Start custom recording export
+      description: >-
+        Starts an export of a recording for the specified time range using
+        custom FFmpeg arguments.
+            The export can be from recordings or preview footage. Returns the export ID if
+            successful, or an error message if the camera is invalid or no recordings/previews
+            are found for the time range. If ffmpeg_input_args and ffmpeg_output_args are not provided,
+            defaults to timelapse export settings.
+      operationId: >-
+        export_recording_custom_export_custom__camera_name__start__start_time__end__end_time__post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+        - name: start_time
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Time
+        - name: end_time
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportRecordingsCustomBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartExportResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/exports/{export_id}":
     get:
       tags:
         - Export
@@ -2236,6 +3144,15 @@ paths:
               - type: "null"
             default: all
             title: Sub Labels
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Attributes
         - name: zone
           in: query
           required: false
@@ -2286,7 +3203,7 @@ paths:
             anyOf:
               - type: string
               - type: "null"
-            default: 00:00,24:00
+            default: "00:00,24:00"
             title: Time Range
         - name: has_clip
           in: query
@@ -2571,6 +3488,24 @@ paths:
               - type: "null"
             default: all
             title: Labels
+        - name: sub_labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Sub Labels
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Attributes
         - name: zones
           in: query
           required: false
@@ -2603,7 +3538,7 @@ paths:
             anyOf:
               - type: string
               - type: "null"
-            default: 00:00,24:00
+            default: "00:00,24:00"
             title: Time Range
         - name: has_clip
           in: query
@@ -2743,7 +3678,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}:
+  "/events/{event_id}":
     get:
       tags:
         - Events
@@ -2798,11 +3733,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/retain:
+  "/events/{event_id}/retain":
     post:
       tags:
         - Events
-      summary: Set event retain indefinitely
+      summary: Set event retain indefinitely.
       description: |-
         Sets an event to retain indefinitely.
             Returns a success message or an error if the event is not found.
@@ -2857,7 +3792,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/plus:
+  "/events/{event_id}/plus":
     post:
       tags:
         - Events
@@ -2891,7 +3826,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/false_positive:
+  "/events/{event_id}/false_positive":
     put:
       tags:
         - Events
@@ -2921,7 +3856,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/sub_label:
+  "/events/{event_id}/sub_label":
     post:
       tags:
         - Events
@@ -2956,7 +3891,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/recognized_license_plate:
+  "/events/{event_id}/recognized_license_plate":
     post:
       tags:
         - Events
@@ -2991,15 +3926,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/attributes:
+  "/events/{event_id}/attributes":
     post:
       tags:
         - Events
       summary: Set custom classification attributes
-      description: |-
+      description: >-
         Sets an event's custom classification attributes for all attribute-type
         models that apply to the event's object type.
-            Returns a success message or an error if the event is not found.
       operationId: set_attributes_events__event_id__attributes_post
       parameters:
         - name: event_id
@@ -3027,7 +3961,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/description:
+  "/events/{event_id}/description":
     post:
       tags:
         - Events
@@ -3062,7 +3996,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/description/regenerate:
+  "/events/{event_id}/description/regenerate":
     put:
       tags:
         - Events
@@ -3165,7 +4099,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{camera_name}/{label}/create:
+  "/events/{camera_name}/{label}/create":
     post:
       tags:
         - Events
@@ -3200,7 +4134,6 @@ paths:
                 duration: 30
                 include_recording: true
                 draw: {}
-                pre_capture: null
       responses:
         "200":
           description: Successful Response
@@ -3214,7 +4147,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/end:
+  "/events/{event_id}/end":
     put:
       tags:
         - Events
@@ -3292,7 +4225,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /trigger/embedding/{camera_name}/{name}:
+  "/trigger/embedding/{camera_name}/{name}":
     put:
       tags:
         - Events
@@ -3373,7 +4306,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /triggers/status/{camera_name}:
+  "/triggers/status/{camera_name}":
     get:
       tags:
         - Events
@@ -3403,7 +4336,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}:
+  "/{camera_name}":
     get:
       tags:
         - Media
@@ -3492,7 +4425,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/ptz/info:
+  "/{camera_name}/ptz/info":
     get:
       tags:
         - Media
@@ -3519,11 +4452,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/latest.{extension}:
+  "/{camera_name}/latest.{extension}":
     get:
       tags:
         - Media
       summary: Latest Frame
+      description: >-
+        Returns the latest frame from the specified camera in the requested
+        format (jpg, png, webp). Falls back to preview frames if the camera is
+        offline.
       operationId: latest_frame__camera_name__latest__extension__get
       parameters:
         - name: camera_name
@@ -3632,7 +4569,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/recordings/{frame_time}/snapshot.{format}:
+  "/{camera_name}/recordings/{frame_time}/snapshot.{format}":
     get:
       tags:
         - Media
@@ -3681,7 +4618,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/plus/{frame_time}:
+  "/{camera_name}/plus/{frame_time}":
     post:
       tags:
         - Media
@@ -3714,184 +4651,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /recordings/storage:
-    get:
-      tags:
-        - Media
-      summary: Get Recordings Storage Usage
-      operationId: get_recordings_storage_usage_recordings_storage_get
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /recordings/summary:
-    get:
-      tags:
-        - Media
-      summary: All Recordings Summary
-      description: Returns true/false by day indicating if recordings exist
-      operationId: all_recordings_summary_recordings_summary_get
-      parameters:
-        - name: timezone
-          in: query
-          required: false
-          schema:
-            type: string
-            default: utc
-            title: Timezone
-        - name: cameras
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: string
-              - type: "null"
-            default: all
-            title: Cameras
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/recordings/summary:
-    get:
-      tags:
-        - Media
-      summary: Recordings Summary
-      description: Returns hourly summary for recordings of given camera
-      operationId: recordings_summary__camera_name__recordings_summary_get
-      parameters:
-        - name: camera_name
-          in: path
-          required: true
-          schema:
-            anyOf:
-              - type: string
-              - type: "null"
-            title: Camera Name
-        - name: timezone
-          in: query
-          required: false
-          schema:
-            type: string
-            default: utc
-            title: Timezone
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/recordings:
-    get:
-      tags:
-        - Media
-      summary: Recordings
-      description: >-
-        Return specific camera recordings between the given 'after'/'end' times.
-        If not provided the last hour will be used
-      operationId: recordings__camera_name__recordings_get
-      parameters:
-        - name: camera_name
-          in: path
-          required: true
-          schema:
-            anyOf:
-              - type: string
-              - type: "null"
-            title: Camera Name
-        - name: after
-          in: query
-          required: false
-          schema:
-            type: number
-            default: 1759932070.40171
-            title: After
-        - name: before
-          in: query
-          required: false
-          schema:
-            type: number
-            default: 1759935670.40172
-            title: Before
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
-  /recordings/unavailable:
-    get:
-      tags:
-        - Media
-      summary: No Recordings
-      description: Get time ranges with no recordings.
-      operationId: no_recordings_recordings_unavailable_get
-      parameters:
-        - name: cameras
-          in: query
-          required: false
-          schema:
-            type: string
-            default: all
-            title: Cameras
-        - name: before
-          in: query
-          required: false
-          schema:
-            type: number
-            title: Before
-        - name: after
-          in: query
-          required: false
-          schema:
-            type: number
-            title: After
-        - name: scale
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 30
-            title: Scale
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                title: Response No Recordings Recordings Unavailable Get
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4:
+  "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4":
     get:
       tags:
         - Media
@@ -3933,7 +4693,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /vod/{camera_name}/start/{start_ts}/end/{end_ts}:
+  "/vod/{camera_name}/start/{start_ts}/end/{end_ts}":
     get:
       tags:
         - Media
@@ -3963,6 +4723,13 @@ paths:
           schema:
             type: number
             title: End Ts
+        - name: force_discontinuity
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Force Discontinuity
       responses:
         "200":
           description: Successful Response
@@ -3975,7 +4742,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /vod/{year_month}/{day}/{hour}/{camera_name}:
+  "/vod/{year_month}/{day}/{hour}/{camera_name}":
     get:
       tags:
         - Media
@@ -4023,7 +4790,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}:
+  "/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}":
     get:
       tags:
         - Media
@@ -4078,7 +4845,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /vod/event/{event_id}:
+  "/vod/event/{event_id}":
     get:
       tags:
         - Media
@@ -4115,7 +4882,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/snapshot.jpg:
+  "/vod/clip/{camera_name}/start/{start_ts}/end/{end_ts}":
+    get:
+      tags:
+        - Media
+      summary: Vod Clip
+      description: >-
+        Returns an HLS playlist for a timestamp range with HLS discontinuity
+        enabled. Append /master.m3u8 or /index.m3u8 for HLS playback.
+      operationId: vod_clip_vod_clip__camera_name__start__start_ts__end__end_ts__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/events/{event_id}/snapshot.jpg":
     get:
       tags:
         - Media
@@ -4194,7 +5003,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/thumbnail.{extension}:
+  "/events/{event_id}/thumbnail.{extension}":
     get:
       tags:
         - Media
@@ -4231,6 +5040,14 @@ paths:
               - android
             default: ios
             title: Format
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4243,7 +5060,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/grid.jpg:
+  "/{camera_name}/grid.jpg":
     get:
       tags:
         - Media
@@ -4284,12 +5101,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/snapshot-clean.webp:
+  "/{camera_name}/region_grid":
+    delete:
+      tags:
+        - Media
+      summary: Clear Region Grid
+      description: Clear the region grid for a camera.
+      operationId: clear_region_grid__camera_name__region_grid_delete
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/events/{event_id}/snapshot-clean.webp":
     get:
       tags:
         - Media
       summary: Event Snapshot Clean
-      operationId: event_snapshot_clean_events__event_id__snapshot_clean_png_get
+      operationId: event_snapshot_clean_events__event_id__snapshot_clean_webp_get
       parameters:
         - name: event_id
           in: path
@@ -4304,6 +5147,14 @@ paths:
             type: boolean
             default: false
             title: Download
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4316,7 +5167,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/clip.mp4:
+  "/events/{event_id}/clip.mp4":
     get:
       tags:
         - Media
@@ -4338,6 +5189,14 @@ paths:
             default: 0
             title: Padding
           description: Padding to apply to clip.
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4350,7 +5209,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /events/{event_id}/preview.gif:
+  "/events/{event_id}/preview.gif":
     get:
       tags:
         - Media
@@ -4363,6 +5222,14 @@ paths:
           schema:
             type: string
             title: Event Id
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4375,7 +5242,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif:
+  "/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif":
     get:
       tags:
         - Media
@@ -4423,7 +5290,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4:
+  "/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4":
     get:
       tags:
         - Media
@@ -4471,7 +5338,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /review/{event_id}/preview:
+  "/review/{event_id}/preview":
     get:
       tags:
         - Media
@@ -4494,6 +5361,14 @@ paths:
               - mp4
             default: gif
             title: Format
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4506,7 +5381,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /preview/{file_name}/thumbnail.webp:
+  "/preview/{file_name}/thumbnail.webp":
     get:
       tags:
         - Media
@@ -4520,6 +5395,14 @@ paths:
           schema:
             type: string
             title: File Name
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4532,7 +5415,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /preview/{file_name}/thumbnail.jpg:
+  "/preview/{file_name}/thumbnail.jpg":
     get:
       tags:
         - Media
@@ -4546,6 +5429,14 @@ paths:
           schema:
             type: string
             title: File Name
+        - name: camera_name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
       responses:
         "200":
           description: Successful Response
@@ -4558,7 +5449,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/{label}/thumbnail.jpg:
+  "/{camera_name}/{label}/thumbnail.jpg":
     get:
       tags:
         - Media
@@ -4591,7 +5482,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/{label}/best.jpg:
+  "/{camera_name}/{label}/best.jpg":
     get:
       tags:
         - Media
@@ -4624,7 +5515,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/{label}/clip.mp4:
+  "/{camera_name}/{label}/clip.mp4":
     get:
       tags:
         - Media
@@ -4657,7 +5548,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  /{camera_name}/{label}/snapshot.jpg:
+  "/{camera_name}/{label}/snapshot.jpg":
     get:
       tags:
         - Media
@@ -4693,6 +5584,402 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  "/{camera_name}/search/motion":
+    post:
+      tags:
+        - Motion Search
+      summary: Start motion search job
+      description: |-
+        Starts an asynchronous search for significant motion changes within
+            a user-defined Region of Interest (ROI) over a specified time range. Returns a job_id
+            that can be used to poll for results.
+      operationId: start_motion_search__camera_name__search_motion_post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MotionSearchRequest"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MotionSearchStartResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/{camera_name}/search/motion/{job_id}":
+    get:
+      tags:
+        - Motion Search
+      summary: Get motion search job status
+      description: Returns the status and results (if complete) of a motion search job.
+      operationId: >-
+        get_motion_search_status_endpoint__camera_name__search_motion__job_id__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Job Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MotionSearchStatusResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/{camera_name}/search/motion/{job_id}/cancel":
+    post:
+      tags:
+        - Motion Search
+      summary: Cancel motion search job
+      description: Cancels an active motion search job if it is still processing.
+      operationId: >-
+        cancel_motion_search_endpoint__camera_name__search_motion__job_id__cancel_post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Job Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /recordings/storage:
+    get:
+      tags:
+        - Recordings
+      summary: Get Recordings Storage Usage
+      operationId: get_recordings_storage_usage_recordings_storage_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /recordings/summary:
+    get:
+      tags:
+        - Recordings
+      summary: All Recordings Summary
+      description: Returns true/false by day indicating if recordings exist
+      operationId: all_recordings_summary_recordings_summary_get
+      parameters:
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            type: string
+            default: utc
+            title: Timezone
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Cameras
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/{camera_name}/recordings/summary":
+    get:
+      tags:
+        - Recordings
+      summary: Recordings Summary
+      description: Returns hourly summary for recordings of given camera
+      operationId: recordings_summary__camera_name__recordings_summary_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            type: string
+            default: utc
+            title: Timezone
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/{camera_name}/recordings":
+    get:
+      tags:
+        - Recordings
+      summary: Recordings
+      description: >-
+        Return specific camera recordings between the given 'after'/'end' times.
+        If not provided the last hour will be used
+      operationId: recordings__camera_name__recordings_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Camera Name
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 1774023877.74743
+            title: After
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 1774027477.74744
+            title: Before
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /recordings/unavailable:
+    get:
+      tags:
+        - Recordings
+      summary: No Recordings
+      description: Get time ranges with no recordings.
+      operationId: no_recordings_recordings_unavailable_get
+      parameters:
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            type: string
+            default: all
+            title: Cameras
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: number
+            title: Before
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: number
+            title: After
+        - name: scale
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+            title: Scale
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                title: Response No Recordings Recordings Unavailable Get
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  "/recordings/start/{start}/end/{end}":
+    delete:
+      tags:
+        - Recordings
+      summary: Delete recordings
+      description: |-
+        Deletes recordings within the specified time range.
+            Recordings can be filtered by cameras and kept based on motion, objects, or audio attributes.
+      operationId: delete_recordings_recordings_start__start__end__end__delete
+      parameters:
+        - name: start
+          in: path
+          required: true
+          schema:
+            type: number
+            description: Start timestamp (unix)
+            title: Start
+          description: Start timestamp (unix)
+        - name: end
+          in: path
+          required: true
+          schema:
+            type: number
+            description: End timestamp (unix)
+            title: End
+          description: End timestamp (unix)
+        - name: keep
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Keep
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Cameras
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /debug_replay/start:
+    post:
+      tags:
+        - App
+      summary: Start debug replay
+      description: Start a debug replay session from camera recordings.
+      operationId: start_debug_replay_debug_replay_start_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebugReplayStartBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugReplayStartResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /debug_replay/status:
+    get:
+      tags:
+        - App
+      summary: Get debug replay status
+      description: Get the status of the current debug replay session.
+      operationId: get_debug_replay_status_debug_replay_status_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugReplayStatusResponse"
+  /debug_replay/stop:
+    post:
+      tags:
+        - App
+      summary: Stop debug replay
+      description: Stop the active debug replay session and clean up all artifacts.
+      operationId: stop_debug_replay_debug_replay_stop_post
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugReplayStopResponse"
 components:
   schemas:
     AppConfigSetBody:
@@ -4711,6 +5998,10 @@ components:
             - type: object
             - type: "null"
           title: Config Data
+        skip_save:
+          type: boolean
+          title: Skip Save
+          default: false
       type: object
       title: AppConfigSetBody
     AppPostLoginBody:
@@ -4750,6 +6041,11 @@ components:
         password:
           type: string
           title: Password
+        old_password:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Old Password
       type: object
       required:
         - password
@@ -4768,6 +6064,7 @@ components:
         event_id:
           type: string
           title: Event Id
+          description: ID of the event to transcribe audio for
       type: object
       required:
         - event_id
@@ -4792,6 +6089,71 @@ components:
       required:
         - file
       title: Body_register_face_faces__name__register_post
+    CameraSetBody:
+      properties:
+        value:
+          type: string
+          title: Value
+          description: The value to set for the feature
+      type: object
+      required:
+        - value
+      title: CameraSetBody
+    ChatCompletionRequest:
+      properties:
+        messages:
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+          type: array
+          title: Messages
+          description: List of messages in the conversation
+        max_tool_iterations:
+          type: integer
+          maximum: 10
+          minimum: 1
+          title: Max Tool Iterations
+          description: "Maximum number of tool call iterations (default: 5)"
+          default: 5
+        stream:
+          type: boolean
+          title: Stream
+          description: >-
+            If true, stream the final assistant response in the body as
+            newline-delimited JSON.
+          default: false
+      type: object
+      required:
+        - messages
+      title: ChatCompletionRequest
+      description: Request for chat completion with tool calling.
+    ChatMessage:
+      properties:
+        role:
+          type: string
+          title: Role
+          description: "Message role: 'user', 'assistant', 'system', or 'tool'"
+        content:
+          type: string
+          title: Content
+          description: Message content
+        tool_call_id:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Tool Call Id
+          description: "For tool messages, the ID of the tool call"
+        name:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Name
+          description: "For tool messages, the tool name"
+      type: object
+      required:
+        - role
+        - content
+      title: ChatMessage
+      description: A single message in a chat conversation.
     DayReview:
       properties:
         day:
@@ -4818,6 +6180,82 @@ components:
         - total_alert
         - total_detection
       title: DayReview
+    DebugReplayStartBody:
+      properties:
+        camera:
+          type: string
+          title: Source camera name
+        start_time:
+          type: number
+          title: Start timestamp
+        end_time:
+          type: number
+          title: End timestamp
+      type: object
+      required:
+        - camera
+        - start_time
+        - end_time
+      title: DebugReplayStartBody
+      description: Request body for starting a debug replay session.
+    DebugReplayStartResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        replay_camera:
+          type: string
+          title: Replay Camera
+      type: object
+      required:
+        - success
+        - replay_camera
+      title: DebugReplayStartResponse
+      description: Response for starting a debug replay session.
+    DebugReplayStatusResponse:
+      properties:
+        active:
+          type: boolean
+          title: Active
+        replay_camera:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Replay Camera
+        source_camera:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Source Camera
+        start_time:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Start Time
+        end_time:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: End Time
+        live_ready:
+          type: boolean
+          title: Live Ready
+          default: false
+      type: object
+      required:
+        - active
+      title: DebugReplayStatusResponse
+      description: Response for debug replay status.
+    DebugReplayStopResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+      type: object
+      required:
+        - success
+      title: DebugReplayStopResponse
+      description: Response for stopping a debug replay session.
     DeleteFaceImagesBody:
       properties:
         ids:
@@ -4972,6 +6410,15 @@ components:
         - success
         - plus_id
       title: EventUploadPlusResponse
+    EventsAttributesBody:
+      properties:
+        attributes:
+          items:
+            type: string
+          type: array
+          title: Selected classification attributes for the event
+      type: object
+      title: EventsAttributesBody
     EventsCreateBody:
       properties:
         sub_label:
@@ -5007,8 +6454,7 @@ components:
           anyOf:
             - type: integer
             - type: "null"
-          title: Pre Capture Seconds
-          default: null
+          title: Pre Capture
       type: object
       title: EventsCreateBody
     EventsDeleteBody:
@@ -5081,18 +6527,86 @@ components:
       required:
         - subLabel
       title: EventsSubLabelBody
-    EventsAttributesBody:
+    ExportCaseAssignBody:
       properties:
-        attributes:
-          type: object
-          title: Attributes
-          description: Object with model names as keys and attribute values
-          additionalProperties:
-            type: string
+        export_case_id:
+          anyOf:
+            - type: string
+              maxLength: 30
+            - type: "null"
+          title: Export Case Id
+          description: "Case ID to assign to the export, or null to unassign"
+      type: object
+      title: ExportCaseAssignBody
+      description: Request body for assigning or unassigning an export to a case.
+    ExportCaseCreateBody:
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          title: Name
+          description: Friendly name of the export case
+        description:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Description
+          description: Optional description of the export case
       type: object
       required:
-        - attributes
-      title: EventsAttributesBody
+        - name
+      title: ExportCaseCreateBody
+      description: Request body for creating a new export case.
+    ExportCaseModel:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for the export case
+        name:
+          type: string
+          title: Name
+          description: Friendly name of the export case
+        description:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Description
+          description: Optional description of the export case
+        created_at:
+          type: number
+          title: Created At
+          description: Unix timestamp when the export case was created
+        updated_at:
+          type: number
+          title: Updated At
+          description: Unix timestamp when the export case was last updated
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      title: ExportCaseModel
+      description: Model representing a single export case.
+    ExportCaseUpdateBody:
+      properties:
+        name:
+          anyOf:
+            - type: string
+              maxLength: 100
+            - type: "null"
+          title: Name
+          description: Updated friendly name of the export case
+        description:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Description
+          description: Updated description of the export case
+      type: object
+      title: ExportCaseUpdateBody
+      description: Request body for updating an existing export case.
     ExportModel:
       properties:
         id:
@@ -5123,6 +6637,12 @@ components:
           type: boolean
           title: In Progress
           description: Whether the export is currently being processed
+        export_case_id:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Export Case Id
+          description: ID of the export case this export belongs to
       type: object
       required:
         - id
@@ -5136,10 +6656,30 @@ components:
       description: Model representing a single export.
     ExportRecordingsBody:
       properties:
-        playback:
-          $ref: "#/components/schemas/PlaybackFactorEnum"
-          title: Playback factor
-          default: realtime
+        source:
+          $ref: "#/components/schemas/PlaybackSourceEnum"
+          title: Playback source
+          default: recordings
+        name:
+          anyOf:
+            - type: string
+              maxLength: 256
+            - type: "null"
+          title: Friendly name
+        image_path:
+          type: string
+          title: Image Path
+        export_case_id:
+          anyOf:
+            - type: string
+              maxLength: 30
+            - type: "null"
+          title: Export case ID
+          description: ID of the export case to assign this export to
+      type: object
+      title: ExportRecordingsBody
+    ExportRecordingsCustomBody:
+      properties:
         source:
           $ref: "#/components/schemas/PlaybackSourceEnum"
           title: Playback source
@@ -5151,8 +6691,38 @@ components:
         image_path:
           type: string
           title: Image Path
+        export_case_id:
+          anyOf:
+            - type: string
+              maxLength: 30
+            - type: "null"
+          title: Export case ID
+          description: ID of the export case to assign this export to
+        ffmpeg_input_args:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: FFmpeg input arguments
+          description: >-
+            Custom FFmpeg input arguments. If not provided, defaults to
+            timelapse input args.
+        ffmpeg_output_args:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: FFmpeg output arguments
+          description: >-
+            Custom FFmpeg output arguments. If not provided, defaults to
+            timelapse output args.
+        cpu_fallback:
+          type: boolean
+          title: CPU Fallback
+          description: >-
+            If true, retry export without hardware acceleration if the initial
+            export fails.
+          default: false
       type: object
-      title: ExportRecordingsBody
+      title: ExportRecordingsCustomBody
     ExportRenameBody:
       properties:
         name:
@@ -5218,6 +6788,47 @@ components:
                 "john_doe": ["face1.webp", "face2.jpg"],
                 "jane_smith": ["face3.png"]
             }
+    GenerateObjectExamplesBody:
+      properties:
+        model_name:
+          type: string
+          title: Model Name
+          description: Name of the classification model
+        label:
+          type: string
+          title: Label
+          description: "Object label to collect examples for (e.g., 'person', 'car')"
+      type: object
+      required:
+        - model_name
+        - label
+      title: GenerateObjectExamplesBody
+    GenerateStateExamplesBody:
+      properties:
+        model_name:
+          type: string
+          title: Model Name
+          description: Name of the classification model
+        cameras:
+          additionalProperties:
+            prefixItems:
+              - type: number
+              - type: number
+              - type: number
+              - type: number
+            type: array
+            maxItems: 4
+            minItems: 4
+          type: object
+          title: Cameras
+          description: >-
+            Dictionary mapping camera names to normalized crop coordinates in
+            [x1, y1, x2, y2] format (values 0-1)
+      type: object
+      required:
+        - model_name
+        - cameras
+      title: GenerateStateExamplesBody
     GenericResponse:
       properties:
         success:
@@ -5261,12 +6872,199 @@ components:
         - total_alert
         - total_detection
       title: Last24HoursReview
-    PlaybackFactorEnum:
-      type: string
-      enum:
-        - realtime
-        - timelapse_25x
-      title: PlaybackFactorEnum
+    MediaSyncBody:
+      properties:
+        dry_run:
+          type: boolean
+          title: Dry Run
+          description: "If True, only report orphans without deleting them"
+          default: true
+        media_types:
+          items:
+            type: string
+          type: array
+          title: Media Types
+          description: >-
+            Types of media to sync: 'all', 'event_snapshots',
+            'event_thumbnails', 'review_thumbnails', 'previews', 'exports',
+            'recordings'
+          default:
+            - all
+        force:
+          type: boolean
+          title: Force
+          description: "If True, bypass safety threshold checks"
+          default: false
+      type: object
+      title: MediaSyncBody
+    MotionSearchMetricsResponse:
+      properties:
+        segments_scanned:
+          type: integer
+          title: Segments Scanned
+          default: 0
+        segments_processed:
+          type: integer
+          title: Segments Processed
+          default: 0
+        metadata_inactive_segments:
+          type: integer
+          title: Metadata Inactive Segments
+          default: 0
+        heatmap_roi_skip_segments:
+          type: integer
+          title: Heatmap Roi Skip Segments
+          default: 0
+        fallback_full_range_segments:
+          type: integer
+          title: Fallback Full Range Segments
+          default: 0
+        frames_decoded:
+          type: integer
+          title: Frames Decoded
+          default: 0
+        wall_time_seconds:
+          type: number
+          title: Wall Time Seconds
+          default: 0
+        segments_with_errors:
+          type: integer
+          title: Segments With Errors
+          default: 0
+      type: object
+      title: MotionSearchMetricsResponse
+      description: Metrics collected during motion search execution.
+    MotionSearchRequest:
+      properties:
+        start_time:
+          type: number
+          title: Start Time
+          description: Start timestamp for the search range
+        end_time:
+          type: number
+          title: End Time
+          description: End timestamp for the search range
+        polygon_points:
+          items:
+            items:
+              type: number
+            type: array
+          type: array
+          title: Polygon Points
+          description: "List of [x, y] normalized coordinates (0-1) defining the ROI polygon"
+        threshold:
+          type: integer
+          maximum: 255
+          minimum: 1
+          title: Threshold
+          description: Pixel difference threshold (1-255)
+          default: 30
+        min_area:
+          type: number
+          maximum: 100
+          minimum: 0.1
+          title: Min Area
+          description: Minimum change area as a percentage of the ROI
+          default: 5
+        frame_skip:
+          type: integer
+          maximum: 30
+          minimum: 1
+          title: Frame Skip
+          description: "Process every Nth frame (1=all frames, 5=every 5th frame)"
+          default: 5
+        parallel:
+          type: boolean
+          title: Parallel
+          description: Enable parallel scanning across segments
+          default: false
+        max_results:
+          type: integer
+          maximum: 200
+          minimum: 1
+          title: Max Results
+          description: Maximum number of search results to return
+          default: 25
+      type: object
+      required:
+        - start_time
+        - end_time
+        - polygon_points
+      title: MotionSearchRequest
+      description: Request body for motion search.
+    MotionSearchResult:
+      properties:
+        timestamp:
+          type: number
+          title: Timestamp
+          description: Timestamp where change was detected
+        change_percentage:
+          type: number
+          title: Change Percentage
+          description: Percentage of ROI area that changed
+      type: object
+      required:
+        - timestamp
+        - change_percentage
+      title: MotionSearchResult
+      description: A single search result with timestamp and change info.
+    MotionSearchStartResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+        job_id:
+          type: string
+          title: Job Id
+      type: object
+      required:
+        - success
+        - message
+        - job_id
+      title: MotionSearchStartResponse
+      description: Response when motion search job starts.
+    MotionSearchStatusResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+        status:
+          type: string
+          title: Status
+        results:
+          anyOf:
+            - items:
+                $ref: "#/components/schemas/MotionSearchResult"
+              type: array
+            - type: "null"
+          title: Results
+        total_frames_processed:
+          anyOf:
+            - type: integer
+            - type: "null"
+          title: Total Frames Processed
+        error_message:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Error Message
+        metrics:
+          anyOf:
+            - $ref: "#/components/schemas/MotionSearchMetricsResponse"
+            - type: "null"
+      type: object
+      required:
+        - success
+        - message
+        - status
+      title: MotionSearchStatusResponse
+      description: Response containing job status and results.
     PlaybackSourceEnum:
       type: string
       enum:
@@ -5315,6 +7113,7 @@ components:
         new_name:
           type: string
           title: New Name
+          description: New name for the face
       type: object
       required:
         - new_name
@@ -5345,6 +7144,10 @@ components:
           type: array
           minItems: 1
           title: Ids
+        reviewed:
+          type: boolean
+          title: Reviewed
+          default: true
       type: object
       required:
         - ids
@@ -5436,6 +7239,20 @@ components:
           default: 1
       type: object
       title: SubmitPlusBody
+    ToolExecuteRequest:
+      properties:
+        tool_name:
+          type: string
+          title: Tool Name
+        arguments:
+          type: object
+          title: Arguments
+      type: object
+      required:
+        - tool_name
+        - arguments
+      title: ToolExecuteRequest
+      description: Request model for tool execution.
     TriggerEmbeddingBody:
       properties:
         type:
