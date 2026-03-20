@@ -95,18 +95,18 @@ export default function DetailActionsMenu({
             </DropdownMenuItem>
           )}
           {search.has_snapshot && (
-              <DropdownMenuItem>
-                <a
-                  className="w-full"
-                  href={`${baseUrl}api/events/${search.id}/snapshot-clean.webp`}
-                  download={`${search.camera}_${search.label}-clean.webp`}
-                >
-                  <div className="flex cursor-pointer items-center gap-2">
-                    <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
-                  </div>
-                </a>
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem>
+              <a
+                className="w-full"
+                href={`${baseUrl}api/events/${search.id}/snapshot-clean.webp`}
+                download={`${search.camera}_${search.label}-clean.webp`}
+              >
+                <div className="flex cursor-pointer items-center gap-2">
+                  <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+          )}
           {search.has_clip && (
             <DropdownMenuItem>
               <a

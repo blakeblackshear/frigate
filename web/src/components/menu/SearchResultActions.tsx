@@ -167,16 +167,16 @@ export default function SearchResultActions({
         </MenuItem>
       )}
       {searchResult.has_snapshot && (
-          <MenuItem aria-label={t("itemMenu.downloadCleanSnapshot.aria")}>
-            <a
-              className="flex items-center"
-              href={`${baseUrl}api/events/${searchResult.id}/snapshot-clean.webp`}
-              download={`${searchResult.camera}_${searchResult.label}-clean.webp`}
-            >
-              <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
-            </a>
-          </MenuItem>
-        )}
+        <MenuItem aria-label={t("itemMenu.downloadCleanSnapshot.aria")}>
+          <a
+            className="flex items-center"
+            href={`${baseUrl}api/events/${searchResult.id}/snapshot-clean.webp`}
+            download={`${searchResult.camera}_${searchResult.label}-clean.webp`}
+          >
+            <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
+          </a>
+        </MenuItem>
+      )}
       {searchResult.data.type == "object" && (
         <MenuItem
           aria-label={t("itemMenu.viewTrackingDetails.aria")}
