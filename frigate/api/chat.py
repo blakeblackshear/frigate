@@ -201,10 +201,9 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
             "function": {
                 "name": "get_live_context",
                 "description": (
-                    "Get the current detection information for a camera: objects being tracked, "
+                    "Get the current live image and detection information for a camera: objects being tracked, "
                     "zones, timestamps. Use this to understand what is visible in the live view. "
-                    "Call this when the user has included a live image (via include_live_image) or "
-                    "when answering questions about what is happening right now on a specific camera."
+                    "Call this when answering questions about what is happening right now on a specific camera."
                 ),
                 "parameters": {
                     "type": "object",
@@ -384,11 +383,53 @@ async def _execute_get_live_context(
                     "stationary": obj_dict.get("stationary", False),
                 }
 
-        return {
+        result: Dict[str, Any] = {
             "camera": camera,
             "timestamp": frame_time,
             "detections": list(tracked_objects_dict.values()),
         }
+
+        # Grab live frame and handle based on provider configuration
+        image_url = await _get_live_frame_image_url(request, camera, allowed_cameras)
+        if image_url:
+            genai_manager = request.app.genai_manager
+            if genai_manager.tool_client is genai_manager.vision_client:
+                # Same provider handles both roles — pass image URL so it can
+                # be injected as a user message (images can't be in tool results)
+                result["_image_url"] = image_url
+            elif genai_manager.vision_client is not None:
+                # Separate vision provider — have it describe the image,
+                # providing detection context so it knows what to focus on
+                frame_bytes = _decode_data_url(image_url)
+                if frame_bytes:
+                    detections = result.get("detections", [])
+                    if detections:
+                        detection_lines = []
+                        for d in detections:
+                            parts = [d.get("label", "unknown")]
+                            if d.get("sub_label"):
+                                parts.append(f"({d['sub_label']})")
+                            if d.get("zones"):
+                                parts.append(f"in {', '.join(d['zones'])}")
+                            detection_lines.append(" ".join(parts))
+                        context = (
+                            "The following objects are currently being tracked: "
+                            + "; ".join(detection_lines)
+                            + "."
+                        )
+                    else:
+                        context = "No objects are currently being tracked."
+
+                    description = genai_manager.vision_client._send(
+                        f"Describe what you see in this security camera image. "
+                        f"{context} Focus on the scene, any visible activity, "
+                        f"and details about the tracked objects.",
+                        [frame_bytes],
+                    )
+                    if description:
+                        result["image_description"] = description
+
+        return result
 
     except Exception as e:
         logger.error(f"Error executing get_live_context: {e}", exc_info=True)
@@ -405,8 +446,8 @@ async def _get_live_frame_image_url(
     """
     Fetch the current live frame for a camera as a base64 data URL.
 
-    Returns None if the frame cannot be retrieved. Used when include_live_image
-    is set to attach the image to the first user message.
+    Returns None if the frame cannot be retrieved. Used by get_live_context
+    to attach the live image to the conversation.
     """
     if (
         camera not in allowed_cameras
@@ -421,12 +462,12 @@ async def _get_live_frame_image_url(
         if frame is None:
             return None
         height, width = frame.shape[:2]
-        max_dimension = 1024
-        if height > max_dimension or width > max_dimension:
-            scale = max_dimension / max(height, width)
+        target_height = 480
+        if height > target_height:
+            scale = target_height / height
             frame = cv2.resize(
                 frame,
-                (int(width * scale), int(height * scale)),
+                (int(width * scale), target_height),
                 interpolation=cv2.INTER_AREA,
             )
         _, img_encoded = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
@@ -434,6 +475,17 @@ async def _get_live_frame_image_url(
         return f"data:image/jpeg;base64,{b64}"
     except Exception as e:
         logger.debug("Failed to get live frame for %s: %s", camera, e)
+        return None
+
+
+def _decode_data_url(data_url: str) -> Optional[bytes]:
+    """Decode a base64 data URL to raw bytes."""
+    try:
+        # Format: data:image/jpeg;base64,<data>
+        _, encoded = data_url.split(",", 1)
+        return base64.b64decode(encoded)
+    except (ValueError, Exception) as e:
+        logger.debug("Failed to decode data URL: %s", e)
         return None
 
 
@@ -527,12 +579,18 @@ async def _execute_pending_tools(
     pending_tool_calls: List[Dict[str, Any]],
     request: Request,
     allowed_cameras: List[str],
-) -> tuple[List[ToolCall], List[Dict[str, Any]]]:
+) -> tuple[List[ToolCall], List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
-    Execute a list of tool calls; return (ToolCall list for API response, tool result dicts for conversation).
+    Execute a list of tool calls.
+
+    Returns:
+        (ToolCall list for API response,
+         tool result dicts for conversation,
+         extra messages to inject after tool results — e.g. user messages with images)
     """
     tool_calls_out: List[ToolCall] = []
     tool_results: List[Dict[str, Any]] = []
+    extra_messages: List[Dict[str, Any]] = []
     for tool_call in pending_tool_calls:
         tool_name = tool_call["name"]
         tool_args = tool_call.get("arguments") or {}
@@ -569,6 +627,27 @@ async def _execute_pending_tools(
                     for evt in tool_result
                     if isinstance(evt, dict)
                 ]
+
+            # Extract _image_url from get_live_context results — images can
+            # only be sent in user messages, not tool results
+            if isinstance(tool_result, dict) and "_image_url" in tool_result:
+                image_url = tool_result.pop("_image_url")
+                extra_messages.append(
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Here is the current live image from camera '{tool_result.get('camera', 'unknown')}'.",
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": image_url},
+                            },
+                        ],
+                    }
+                )
+
             result_content = (
                 json.dumps(tool_result)
                 if isinstance(tool_result, (dict, list))
@@ -604,7 +683,7 @@ async def _execute_pending_tools(
                     "content": error_content,
                 }
             )
-    return (tool_calls_out, tool_results)
+    return (tool_calls_out, tool_results, extra_messages)
 
 
 @router.post(
@@ -660,7 +739,13 @@ async def chat_completion(
             if camera_config.friendly_name
             else camera_id.replace("_", " ").title()
         )
-        cameras_info.append(f"  - {friendly_name} (ID: {camera_id})")
+        zone_names = list(camera_config.zones.keys())
+        if zone_names:
+            cameras_info.append(
+                f"  - {friendly_name} (ID: {camera_id}, zones: {', '.join(zone_names)})"
+            )
+        else:
+            cameras_info.append(f"  - {friendly_name} (ID: {camera_id})")
 
     cameras_section = ""
     if cameras_info:
@@ -668,14 +753,6 @@ async def chat_completion(
             "\n\nAvailable cameras:\n"
             + "\n".join(cameras_info)
             + "\n\nWhen users refer to cameras by their friendly name (e.g., 'Back Deck Camera'), use the corresponding camera ID (e.g., 'back_deck_cam') in tool calls."
-        )
-
-    live_image_note = ""
-    if body.include_live_image:
-        live_image_note = (
-            f"\n\nThe first user message includes a live image from camera "
-            f"'{body.include_live_image}'. Use get_live_context for that camera to get "
-            "current detection details (objects, zones) to aid in understanding the image."
         )
 
     system_prompt = f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
@@ -687,7 +764,7 @@ Do not start your response with phrases like "I will check...", "Let me see...",
 Always present times to the user in the server's local timezone. When tool results include start_time_local and end_time_local, use those exact strings when listing or describing detection times—do not convert or invent timestamps. Do not use UTC or ISO format with Z for the user-facing answer unless the tool result only provides Unix timestamps without local time fields.
 When users ask about "today", "yesterday", "this week", etc., use the current date above as reference.
 When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
-Always be accurate with time calculations based on the current date provided.{cameras_section}{live_image_note}"""
+Always be accurate with time calculations based on the current date provided.{cameras_section}"""
 
     conversation.append(
         {
@@ -696,7 +773,6 @@ Always be accurate with time calculations based on the current date provided.{ca
         }
     )
 
-    first_user_message_seen = False
     for msg in body.messages:
         msg_dict = {
             "role": msg.role,
@@ -706,21 +782,6 @@ Always be accurate with time calculations based on the current date provided.{ca
             msg_dict["tool_call_id"] = msg.tool_call_id
         if msg.name:
             msg_dict["name"] = msg.name
-
-        if (
-            msg.role == "user"
-            and not first_user_message_seen
-            and body.include_live_image
-        ):
-            first_user_message_seen = True
-            image_url = await _get_live_frame_image_url(
-                request, body.include_live_image, allowed_cameras
-            )
-            if image_url:
-                msg_dict["content"] = [
-                    {"type": "text", "text": msg.content},
-                    {"type": "image_url", "image_url": {"url": image_url}},
-                ]
 
         conversation.append(msg_dict)
 
@@ -779,11 +840,16 @@ Always be accurate with time calculations based on the current date provided.{ca
                                     msg.get("content"), pending
                                 )
                             )
-                            executed_calls, tool_results = await _execute_pending_tools(
+                            (
+                                executed_calls,
+                                tool_results,
+                                extra_msgs,
+                            ) = await _execute_pending_tools(
                                 pending, request, allowed_cameras
                             )
                             stream_tool_calls.extend(executed_calls)
                             conversation.extend(tool_results)
+                            conversation.extend(extra_msgs)
                             yield (
                                 json.dumps(
                                     {
@@ -890,11 +956,12 @@ Always be accurate with time calculations based on the current date provided.{ca
                 f"Tool calls detected (iteration {tool_iterations}/{max_iterations}): "
                 f"{len(pending_tool_calls)} tool(s) to execute"
             )
-            executed_calls, tool_results = await _execute_pending_tools(
+            executed_calls, tool_results, extra_msgs = await _execute_pending_tools(
                 pending_tool_calls, request, allowed_cameras
             )
             tool_calls.extend(executed_calls)
             conversation.extend(tool_results)
+            conversation.extend(extra_msgs)
             logger.debug(
                 f"Added {len(tool_results)} tool result(s) to conversation. "
                 f"Continuing with next LLM call..."
