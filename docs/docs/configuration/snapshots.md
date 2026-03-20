@@ -28,6 +28,4 @@ Frigate stores a single clean snapshot on disk:
 | `/api/events/<id>/snapshot-clean.webp`   | Returns the same stored snapshot without annotations                                                  |
 | [Frigate+](/plus/first_model) submission | Uses the same stored clean snapshot                                                                   |
 
-Note that for tracked objects pre Frigate 0.18, the snapshot frame time was not stored. If you request to annotate a pre-0.18 snapshot with a timestamp, this will be defaulted to the event start time, which may appear confusing.
-
 MQTT snapshots are configured separately under `cameras -> your_camera -> mqtt` and are unrelated to the stored event snapshot.
