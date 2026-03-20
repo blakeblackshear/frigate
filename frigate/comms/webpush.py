@@ -210,6 +210,15 @@ class WebPushClient(Communicator):
                 logger.debug(f"Notifications for {camera} are currently suspended.")
                 return
             self.send_trigger(decoded)
+        elif topic == "camera_monitoring":
+            decoded = json.loads(payload)
+            camera = decoded["camera"]
+            if not self.config.cameras[camera].notifications.enabled:
+                return
+            if self.is_camera_suspended(camera):
+                logger.debug(f"Notifications for {camera} are currently suspended.")
+                return
+            self.send_camera_monitoring(decoded)
         elif topic == "notification_test":
             if not self.config.notifications.enabled and not any(
                 cam.notifications.enabled for cam in self.config.cameras.values()
@@ -473,6 +482,30 @@ class WebPushClient(Communicator):
                 direct_url=direct_url,
                 image=image,
                 ttl=ttl,
+            )
+
+        self.cleanup_registrations()
+
+    def send_camera_monitoring(self, payload: dict[str, Any]) -> None:
+        camera: str = payload["camera"]
+        camera_name: str = getattr(
+            self.config.cameras[camera], "friendly_name", None
+        ) or titlecase(camera.replace("_", " "))
+
+        self.check_registrations()
+
+        reasoning: str = payload.get("reasoning", "")
+        title = f"{camera_name}: Monitoring Alert"
+        message = (reasoning[:197] + "...") if len(reasoning) > 200 else reasoning
+
+        logger.debug(f"Sending camera monitoring push notification for {camera_name}")
+
+        for user in self.web_pushers:
+            self.send_push_notification(
+                user=user,
+                payload=payload,
+                title=title,
+                message=message,
             )
 
         self.cleanup_registrations()

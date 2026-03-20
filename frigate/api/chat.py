@@ -26,6 +26,11 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
 from frigate.genai.utils import build_assistant_message_for_conversation
+from frigate.jobs.vlm_watch import (
+    get_vlm_watch_job,
+    start_vlm_watch_job,
+    stop_vlm_watch_job,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +87,16 @@ class ToolExecuteRequest(BaseModel):
     arguments: Dict[str, Any]
 
 
+class VLMMonitorRequest(BaseModel):
+    """Request model for starting a VLM watch job."""
+
+    camera: str
+    condition: str
+    max_duration_minutes: int = 60
+    labels: List[str] = []
+    zones: List[str] = []
+
+
 def get_tool_definitions() -> List[Dict[str, Any]]:
     """
     Get OpenAI-compatible tool definitions for Frigate.
@@ -95,9 +110,11 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
             "function": {
                 "name": "search_objects",
                 "description": (
-                    "Search for detected objects in Frigate by camera, object label, time range, "
-                    "zones, and other filters. Use this to answer questions about when "
-                    "objects were detected, what objects appeared, or to find specific object detections. "
+                    "Search the historical record of detected objects in Frigate. "
+                    "Use this ONLY for questions about the PAST — e.g. 'did anyone come by today?', "
+                    "'when was the last car?', 'show me detections from yesterday'. "
+                    "Do NOT use this for monitoring or alerting requests about future events — "
+                    "use start_camera_watch instead for those. "
                     "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car). "
                     "When the user asks about a specific name (person, delivery company, animal, etc.), "
                     "filter by sub_label only and do not set label."
@@ -214,6 +231,65 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                         },
                     },
                     "required": ["camera"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "start_camera_watch",
+                "description": (
+                    "Start a continuous VLM watch job that monitors a camera and sends a notification "
+                    "when a specified condition is met. Use this when the user wants to be alerted about "
+                    "a future event, e.g. 'tell me when guests arrive' or 'notify me when the package is picked up'. "
+                    "Only one watch job can run at a time. Returns a job ID."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "camera": {
+                            "type": "string",
+                            "description": "Camera ID to monitor.",
+                        },
+                        "condition": {
+                            "type": "string",
+                            "description": (
+                                "Natural-language description of the condition to watch for, "
+                                "e.g. 'a person arrives at the front door'."
+                            ),
+                        },
+                        "max_duration_minutes": {
+                            "type": "integer",
+                            "description": "Maximum time to watch before giving up (minutes, default 60).",
+                            "default": 60,
+                        },
+                        "labels": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Object labels that should trigger a VLM check (e.g. ['person', 'car']). If omitted, any detection on the camera triggers a check.",
+                        },
+                        "zones": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Zone names to filter by. If specified, only detections in these zones trigger a VLM check.",
+                        },
+                    },
+                    "required": ["camera", "condition"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "stop_camera_watch",
+                "description": (
+                    "Cancel the currently running VLM watch job. Use this when the user wants to "
+                    "stop a previously started watch, e.g. 'stop watching the front door'."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
                 },
             },
         },
@@ -565,14 +641,73 @@ async def _execute_tool_internal(
             )
             return {"error": "Camera parameter is required"}
         return await _execute_get_live_context(request, camera, allowed_cameras)
+    elif tool_name == "start_camera_watch":
+        return await _execute_start_camera_watch(request, arguments)
+    elif tool_name == "stop_camera_watch":
+        return _execute_stop_camera_watch()
     else:
         logger.error(
-            "Tool call failed: unknown tool %r. Expected one of: search_objects, get_live_context. "
-            "Arguments received: %s",
+            "Tool call failed: unknown tool %r. Expected one of: search_objects, get_live_context, "
+            "start_camera_watch, stop_camera_watch. Arguments received: %s",
             tool_name,
             json.dumps(arguments),
         )
         return {"error": f"Unknown tool: {tool_name}"}
+
+
+async def _execute_start_camera_watch(
+    request: Request,
+    arguments: Dict[str, Any],
+) -> Dict[str, Any]:
+    camera = arguments.get("camera", "").strip()
+    condition = arguments.get("condition", "").strip()
+    max_duration_minutes = int(arguments.get("max_duration_minutes", 60))
+    labels = arguments.get("labels") or []
+    zones = arguments.get("zones") or []
+
+    if not camera or not condition:
+        return {"error": "camera and condition are required."}
+
+    config = request.app.frigate_config
+    if camera not in config.cameras:
+        return {"error": f"Camera '{camera}' not found."}
+
+    genai_manager = request.app.genai_manager
+    vision_client = genai_manager.vision_client or genai_manager.tool_client
+    if vision_client is None:
+        return {"error": "No vision/GenAI provider configured."}
+
+    try:
+        job_id = start_vlm_watch_job(
+            camera=camera,
+            condition=condition,
+            max_duration_minutes=max_duration_minutes,
+            config=config,
+            frame_processor=request.app.detected_frames_processor,
+            genai_manager=genai_manager,
+            dispatcher=request.app.dispatcher,
+            labels=labels,
+            zones=zones,
+        )
+    except RuntimeError as e:
+        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        return {"error": "Failed to start VLM watch job."}
+
+    return {
+        "success": True,
+        "job_id": job_id,
+        "message": (
+            f"Now watching '{camera}' for: {condition}. "
+            f"You'll receive a notification when the condition is met (timeout: {max_duration_minutes} min)."
+        ),
+    }
+
+
+def _execute_stop_camera_watch() -> Dict[str, Any]:
+    cancelled = stop_vlm_watch_job()
+    if cancelled:
+        return {"success": True, "message": "Watch job cancelled."}
+    return {"success": False, "message": "No active watch job to cancel."}
 
 
 async def _execute_pending_tools(
@@ -991,3 +1126,95 @@ Always be accurate with time calculations based on the current date provided.{ca
             },
             status_code=500,
         )
+
+
+# ---------------------------------------------------------------------------
+# VLM Monitor endpoints
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/vlm/monitor",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Start a VLM watch job",
+    description=(
+        "Start monitoring a camera with the vision provider. "
+        "The VLM analyzes live frames until the specified condition is met, "
+        "then sends a notification. Only one watch job can run at a time."
+    ),
+)
+async def start_vlm_monitor(
+    request: Request,
+    body: VLMMonitorRequest,
+) -> JSONResponse:
+    config = request.app.frigate_config
+    genai_manager = request.app.genai_manager
+
+    if body.camera not in config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": f"Camera '{body.camera}' not found."},
+            status_code=404,
+        )
+
+    vision_client = genai_manager.vision_client or genai_manager.tool_client
+    if vision_client is None:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "No vision/GenAI provider configured.",
+            },
+            status_code=400,
+        )
+
+    try:
+        job_id = start_vlm_watch_job(
+            camera=body.camera,
+            condition=body.condition,
+            max_duration_minutes=body.max_duration_minutes,
+            config=config,
+            frame_processor=request.app.detected_frames_processor,
+            genai_manager=genai_manager,
+            dispatcher=request.app.dispatcher,
+            labels=body.labels,
+            zones=body.zones,
+        )
+    except RuntimeError as e:
+        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        return JSONResponse(
+            content={"success": False, "message": "Failed to start VLM watch job."},
+            status_code=409,
+        )
+
+    return JSONResponse(
+        content={"success": True, "job_id": job_id},
+        status_code=201,
+    )
+
+
+@router.get(
+    "/vlm/monitor",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get current VLM watch job",
+    description="Returns the current (or most recently completed) VLM watch job.",
+)
+async def get_vlm_monitor() -> JSONResponse:
+    job = get_vlm_watch_job()
+    if job is None:
+        return JSONResponse(content={"active": False}, status_code=200)
+    return JSONResponse(content={"active": True, **job.to_dict()}, status_code=200)
+
+
+@router.delete(
+    "/vlm/monitor",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Cancel the current VLM watch job",
+    description="Cancels the running watch job if one exists.",
+)
+async def cancel_vlm_monitor() -> JSONResponse:
+    cancelled = stop_vlm_watch_job()
+    if not cancelled:
+        return JSONResponse(
+            content={"success": False, "message": "No active watch job to cancel."},
+            status_code=404,
+        )
+    return JSONResponse(content={"success": True}, status_code=200)
