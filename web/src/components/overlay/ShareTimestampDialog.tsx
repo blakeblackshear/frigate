@@ -31,6 +31,10 @@ type ShareTimestampDialogProps = {
   currentTime: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  selectedOption: "current" | "custom";
+  setSelectedOption: (option: "current" | "custom") => void;
+  customTimestamp: number;
+  setCustomTimestamp: (timestamp: number) => void;
   onShareTimestamp: (timestamp: number) => void;
 };
 
@@ -38,35 +42,22 @@ export default function ShareTimestampDialog({
   currentTime,
   open,
   onOpenChange,
+  selectedOption,
+  setSelectedOption,
+  customTimestamp,
+  setCustomTimestamp,
   onShareTimestamp,
 }: Readonly<ShareTimestampDialogProps>) {
   const { t } = useTranslation(["components/dialog"]);
-  const [selectedOption, setSelectedOption] = useState<"current" | "custom">(
-    "current",
-  );
-  const [openedCurrentTime, setOpenedCurrentTime] = useState(
-    Math.floor(currentTime),
-  );
-  const [customTimestamp, setCustomTimestamp] = useState(openedCurrentTime);
 
   const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      if (nextOpen) {
-        const initialTimestamp = Math.floor(currentTime);
-
-        setOpenedCurrentTime(initialTimestamp);
-        setSelectedOption("current");
-        setCustomTimestamp(initialTimestamp);
-      }
-
-      onOpenChange(nextOpen);
-    },
-    [currentTime, onOpenChange],
+    (nextOpen: boolean) => onOpenChange(nextOpen),
+    [onOpenChange],
   );
 
   const content = (
     <ShareTimestampContent
-      currentTime={openedCurrentTime}
+      currentTime={currentTime}
       selectedOption={selectedOption}
       setSelectedOption={setSelectedOption}
       customTimestamp={customTimestamp}

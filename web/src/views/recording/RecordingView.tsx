@@ -213,6 +213,12 @@ export function RecordingView({
   const [shareTimestampAtOpen, setShareTimestampAtOpen] = useState(
     Math.floor(startTime),
   );
+  const [shareTimestampOption, setShareTimestampOption] = useState<
+    "current" | "custom"
+  >("current");
+  const [customShareTimestamp, setCustomShareTimestamp] = useState(
+    Math.floor(startTime),
+  );
 
   // move to next clip
 
@@ -694,13 +700,21 @@ export function RecordingView({
                 currentTime={shareTimestampAtOpen}
                 open={shareTimestampOpen}
                 onOpenChange={setShareTimestampOpen}
+                selectedOption={shareTimestampOption}
+                setSelectedOption={setShareTimestampOption}
+                customTimestamp={customShareTimestamp}
+                setCustomTimestamp={setCustomShareTimestamp}
                 onShareTimestamp={onShareReviewLink}
               />
             )}
             {isDesktop && (
               <ActionsDropdown
                 onShareTimestampClick={() => {
-                  setShareTimestampAtOpen(Math.floor(currentTime));
+                  const initialTimestamp = Math.floor(currentTime);
+
+                  setShareTimestampAtOpen(initialTimestamp);
+                  setShareTimestampOption("current");
+                  setCustomShareTimestamp(initialTimestamp);
                   setShareTimestampOpen(true);
                 }}
                 onDebugReplayClick={() => {
