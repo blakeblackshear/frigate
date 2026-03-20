@@ -1839,7 +1839,7 @@ export function ObjectSnapshotTab({
                   <img
                     ref={imgRef}
                     className="mx-auto max-h-[60dvh] rounded-lg bg-background object-contain"
-                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg?crop=0&bbox=1`}
+                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`}
                     alt={`${search?.label}`}
                     loading={isSafari ? "eager" : "lazy"}
                     onLoad={() => {

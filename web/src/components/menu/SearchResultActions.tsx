@@ -159,7 +159,7 @@ export default function SearchResultActions({
         <MenuItem aria-label={t("itemMenu.downloadSnapshot.aria")}>
           <a
             className="flex items-center"
-            href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg?crop=0&bbox=1`}
+            href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`}
             download={`${searchResult.camera}_${searchResult.label}.jpg`}
           >
             <span>{t("itemMenu.downloadSnapshot.label")}</span>
