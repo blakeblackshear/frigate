@@ -2,6 +2,7 @@ import {
   LuActivity,
   LuGithub,
   LuLanguages,
+  LuLayers,
   LuLifeBuoy,
   LuList,
   LuLogOut,
@@ -69,6 +70,9 @@ import SetPasswordDialog from "../overlay/SetPasswordDialog";
 import { toast } from "sonner";
 import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
+import type { ProfilesApiResponse } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { supportedLanguageKeys } from "@/lib/const";
 
@@ -84,6 +88,8 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const { getLocaleDocUrl } = useDocDomain();
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: profilesData, mutate: updateProfiles } =
+    useSWR<ProfilesApiResponse>("profiles");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
 
   // languages
@@ -104,6 +110,41 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       };
     });
   }, [t]);
+
+  // profiles
+
+  const allProfileNames = useMemo(
+    () => profilesData?.profiles?.map((p) => p.name) ?? [],
+    [profilesData],
+  );
+
+  const profileFriendlyNames = useMemo(() => {
+    const map = new Map<string, string>();
+    profilesData?.profiles?.forEach((p) => map.set(p.name, p.friendly_name));
+    return map;
+  }, [profilesData]);
+
+  const hasProfiles = allProfileNames.length > 0;
+
+  const handleActivateProfile = async (profileName: string | null) => {
+    try {
+      await axios.put("camera/*/set/profile", { value: profileName ?? "none" });
+      await updateProfiles();
+      toast.success(
+        profileName
+          ? t("profiles.activated", {
+              ns: "views/settings",
+              profile: profileFriendlyNames.get(profileName) ?? profileName,
+            })
+          : t("profiles.deactivated", { ns: "views/settings" }),
+        { position: "top-center" },
+      );
+    } catch {
+      toast.error(t("profiles.activateFailed", { ns: "views/settings" }), {
+        position: "top-center",
+      });
+    }
+  };
 
   // settings
 
@@ -285,6 +326,118 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span>{t("menu.systemLogs")}</span>
                     </MenuItem>
                   </Link>
+                  {hasProfiles && (
+                    <SubItem>
+                      <SubItemTrigger
+                        className={
+                          isDesktop
+                            ? "cursor-pointer"
+                            : "flex items-center p-2 text-sm"
+                        }
+                      >
+                        <LuLayers className="mr-2 size-4" />
+                        <span>{t("menu.profiles")}</span>
+                      </SubItemTrigger>
+                      <Portal>
+                        <SubItemContent
+                          className={
+                            isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                          }
+                        >
+                          {!isDesktop && (
+                            <>
+                              <DialogTitle className="sr-only">
+                                {t("menu.profiles")}
+                              </DialogTitle>
+                              <DialogDescription className="sr-only">
+                                {t("menu.profiles")}
+                              </DialogDescription>
+                            </>
+                          )}
+                          <span tabIndex={0} className="sr-only" />
+                          <MenuItem
+                            className={
+                              isDesktop
+                                ? "cursor-pointer"
+                                : "flex items-center p-2 text-sm"
+                            }
+                            aria-label={t("profiles.baseConfig", {
+                              ns: "views/settings",
+                            })}
+                            onClick={() => handleActivateProfile(null)}
+                          >
+                            <div className="flex w-full items-center justify-between gap-2">
+                              <span className="ml-6 mr-2">
+                                {t("profiles.baseConfig", {
+                                  ns: "views/settings",
+                                })}
+                              </span>
+                              {!profilesData?.active_profile && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs text-primary-variant"
+                                >
+                                  {t("profiles.active", {
+                                    ns: "views/settings",
+                                  })}
+                                </Badge>
+                              )}
+                            </div>
+                          </MenuItem>
+                          {allProfileNames.map((profileName) => {
+                            const color = getProfileColor(
+                              profileName,
+                              allProfileNames,
+                            );
+                            const isActive =
+                              profilesData?.active_profile === profileName;
+                            return (
+                              <MenuItem
+                                key={profileName}
+                                className={
+                                  isDesktop
+                                    ? "cursor-pointer"
+                                    : "flex items-center p-2 text-sm"
+                                }
+                                aria-label={
+                                  profileFriendlyNames.get(profileName) ??
+                                  profileName
+                                }
+                                onClick={() =>
+                                  handleActivateProfile(profileName)
+                                }
+                              >
+                                <div className="flex w-full items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className={cn(
+                                        "ml-2 size-2 shrink-0 rounded-full",
+                                        color.dot,
+                                      )}
+                                    />
+                                    <span>
+                                      {profileFriendlyNames.get(profileName) ??
+                                        profileName}
+                                    </span>
+                                  </div>
+                                  {isActive && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-xs text-primary-variant"
+                                    >
+                                      {t("profiles.active", {
+                                        ns: "views/settings",
+                                      })}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </MenuItem>
+                            );
+                          })}
+                        </SubItemContent>
+                      </Portal>
+                    </SubItem>
+                  )}
                 </DropdownMenuGroup>
               </>
             )}

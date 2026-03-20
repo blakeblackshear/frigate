@@ -73,6 +73,10 @@ export interface CameraConfig {
   };
   enabled: boolean;
   enabled_in_config: boolean;
+  face_recognition: {
+    enabled: boolean;
+    min_area: number;
+  };
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -99,6 +103,12 @@ export interface CameraConfig {
     height: number;
     quality: number;
     streams: { [key: string]: string };
+  };
+  lpr: {
+    enabled: boolean;
+    expire_time: number;
+    min_area: number;
+    enhancement: number;
   };
   motion: {
     contour_area: number;
@@ -306,7 +316,30 @@ export interface CameraConfig {
       friendly_name?: string;
     };
   };
+  profiles?: Record<string, CameraProfileConfig>;
+  /** Pre-profile base section configs, present only when a profile is active */
+  base_config?: Record<string, Record<string, unknown>>;
 }
+
+export type CameraProfileConfig = {
+  enabled?: boolean;
+  audio?: Partial<CameraConfig["audio"]>;
+  birdseye?: Partial<CameraConfig["birdseye"]>;
+  detect?: Partial<CameraConfig["detect"]>;
+  face_recognition?: Partial<CameraConfig["face_recognition"]>;
+  lpr?: Partial<CameraConfig["lpr"]>;
+  motion?: Partial<CameraConfig["motion"]>;
+  notifications?: Partial<CameraConfig["notifications"]>;
+  objects?: Partial<CameraConfig["objects"]>;
+  record?: Partial<CameraConfig["record"]>;
+  review?: Partial<CameraConfig["review"]>;
+  snapshots?: Partial<CameraConfig["snapshots"]>;
+  zones?: Partial<CameraConfig["zones"]>;
+};
+
+export type ProfileDefinitionConfig = {
+  friendly_name: string;
+};
 
 export type CameraGroupConfig = {
   cameras: string[];
@@ -454,13 +487,15 @@ export interface FrigateConfig {
   };
 
   go2rtc: {
-    streams: string[];
+    streams: Record<string, string | string[]>;
     webrtc: {
       candidates: string[];
     };
   };
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
+
+  profiles: { [profileName: string]: ProfileDefinitionConfig };
 
   lpr: {
     enabled: boolean;

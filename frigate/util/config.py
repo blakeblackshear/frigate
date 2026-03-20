@@ -717,7 +717,7 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
 
         if section == "motion":
             merged = deep_merge(
-                current.model_dump(exclude_unset=True, exclude={"rasterized_mask"}),
+                current.model_dump(exclude_unset=True),
                 update,
                 override=True,
             )
@@ -727,9 +727,7 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
 
         elif section == "objects":
             merged = deep_merge(
-                current.model_dump(
-                    exclude={"filters": {"__all__": {"rasterized_mask"}}}
-                ),
+                current.model_dump(),
                 update,
                 override=True,
             )

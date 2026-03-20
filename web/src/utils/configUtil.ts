@@ -6,6 +6,7 @@
 
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
+import merge from "lodash/merge";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
@@ -67,6 +68,63 @@ export const globalCameraDefaultSections = new Set([
   "notifications",
   "ffmpeg",
 ]);
+
+// ---------------------------------------------------------------------------
+// Profile helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the base (pre-profile) value for a camera section.
+ *
+ * When a profile is active the API populates `base_config` with original
+ * section values.  This helper returns that value when available, falling
+ * back to the top-level (effective) value otherwise.
+ */
+export function getBaseCameraSectionValue(
+  config: FrigateConfig | undefined,
+  cameraName: string | undefined,
+  sectionPath: string,
+): unknown {
+  if (!config || !cameraName) return undefined;
+  const cam = config.cameras?.[cameraName];
+  if (!cam) return undefined;
+  const base = cam.base_config?.[sectionPath];
+  return base !== undefined ? base : get(cam, sectionPath);
+}
+
+/** Sections that can appear inside a camera profile definition. */
+export const PROFILE_ELIGIBLE_SECTIONS = new Set([
+  "audio",
+  "birdseye",
+  "detect",
+  "face_recognition",
+  "lpr",
+  "motion",
+  "notifications",
+  "objects",
+  "record",
+  "review",
+  "snapshots",
+]);
+
+/**
+ * Parse a section path that may encode a profile reference.
+ *
+ * Examples:
+ *   "detect"                 → { isProfile: false, actualSection: "detect" }
+ *   "profiles.armed.detect"  → { isProfile: true, profileName: "armed", actualSection: "detect" }
+ */
+export function parseProfileFromSectionPath(sectionPath: string): {
+  isProfile: boolean;
+  profileName?: string;
+  actualSection: string;
+} {
+  const match = sectionPath.match(/^profiles\.([^.]+)\.(.+)$/);
+  if (match) {
+    return { isProfile: true, profileName: match[1], actualSection: match[2] };
+  }
+  return { isProfile: false, actualSection: sectionPath };
+}
 
 // ---------------------------------------------------------------------------
 // buildOverrides — pure recursive diff of current vs stored config & defaults
@@ -168,6 +226,26 @@ export function buildOverrides(
 // Normalize raw config data (strip internal fields) and remove any paths
 // listed in `hiddenFields` so they are not included in override computation.
 
+// lodash `unset` treats `*` as a literal key.  This helper expands wildcard
+// segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
+function unsetWithWildcard(obj: Record<string, unknown>, path: string): void {
+  if (!path.includes("*")) {
+    unset(obj, path);
+    return;
+  }
+  const segments = path.split(".");
+  const starIndex = segments.indexOf("*");
+  const prefix = segments.slice(0, starIndex).join(".");
+  const suffix = segments.slice(starIndex + 1).join(".");
+  const parent = prefix ? get(obj, prefix) : obj;
+  if (parent && typeof parent === "object") {
+    for (const key of Object.keys(parent as Record<string, unknown>)) {
+      const fullPath = suffix ? `${key}.${suffix}` : key;
+      unsetWithWildcard(parent as Record<string, unknown>, fullPath);
+    }
+  }
+}
+
 export function sanitizeSectionData(
   data: ConfigSectionData,
   hiddenFields?: string[],
@@ -179,7 +257,7 @@ export function sanitizeSectionData(
   const cleaned = cloneDeep(normalized) as ConfigSectionData;
   hiddenFields.forEach((path) => {
     if (!path) return;
-    unset(cleaned, path);
+    unsetWithWildcard(cleaned as Record<string, unknown>, path);
   });
   return cleaned;
 }
@@ -315,7 +393,7 @@ export function requiresRestartForFieldPath(
 
 export interface SectionSavePayload {
   basePath: string;
-  sanitizedOverrides: Record<string, unknown>;
+  sanitizedOverrides: JsonObject;
   updateTopic: string | undefined;
   needsRestart: boolean;
   pendingDataKey: string;
@@ -421,23 +499,57 @@ export function prepareSectionSavePayload(opts: {
     level = "global";
   }
 
-  // Resolve section config
-  const sectionConfig = getSectionConfig(sectionPath, level);
+  // Detect profile-encoded section paths (e.g., "profiles.armed.detect")
+  const profileInfo = parseProfileFromSectionPath(sectionPath);
+  const schemaSection = profileInfo.actualSection;
 
-  // Resolve section schema
-  const sectionSchema = extractSectionSchema(fullSchema, sectionPath, level);
+  // Resolve section config using the actual section name (not the profile path)
+  const sectionConfig = getSectionConfig(schemaSection, level);
+
+  // Resolve section schema using the actual section name
+  const sectionSchema = extractSectionSchema(fullSchema, schemaSection, level);
   if (!sectionSchema) return null;
 
   const modifiedSchema = modifySchemaForSection(
-    sectionPath,
+    schemaSection,
     level,
     sectionSchema,
   );
 
   // Compute rawFormData (the current stored value for this section)
+  // For profiles, merge base camera config with profile overrides (matching
+  // what BaseSection displays in the form) so the diff only contains actual
+  // user changes, not every field from the merged view.
   let rawSectionValue: unknown;
   if (level === "camera" && cameraName) {
-    rawSectionValue = get(config.cameras?.[cameraName], sectionPath);
+    if (profileInfo.isProfile) {
+      const baseValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
+        profileInfo.actualSection,
+      );
+      const profileOverrides = get(config.cameras?.[cameraName], sectionPath);
+      if (
+        profileOverrides &&
+        typeof profileOverrides === "object" &&
+        baseValue &&
+        typeof baseValue === "object"
+      ) {
+        rawSectionValue = merge(
+          cloneDeep(baseValue),
+          cloneDeep(profileOverrides),
+        );
+      } else {
+        rawSectionValue = baseValue;
+      }
+    } else {
+      // Use base (pre-profile) value so the diff matches what the form shows
+      rawSectionValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
+        sectionPath,
+      );
+    }
   } else {
     rawSectionValue = get(config, sectionPath);
   }
@@ -446,10 +558,21 @@ export function prepareSectionSavePayload(opts: {
       ? {}
       : rawSectionValue;
 
+  // For profile sections, also hide restart-required fields to match
+  // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
+  // for fields that are hidden from the form during profile editing).
+  let hiddenFieldsForSanitize = sectionConfig.hiddenFields;
+  if (profileInfo.isProfile && sectionConfig.restartRequired?.length) {
+    const base = sectionConfig.hiddenFields ?? [];
+    hiddenFieldsForSanitize = [
+      ...new Set([...base, ...sectionConfig.restartRequired]),
+    ];
+  }
+
   // Sanitize raw form data
   const rawData = sanitizeSectionData(
     rawFormData as ConfigSectionData,
-    sectionConfig.hiddenFields,
+    hiddenFieldsForSanitize,
   );
 
   // Compute schema defaults
@@ -457,7 +580,7 @@ export function prepareSectionSavePayload(opts: {
     ? applySchemaDefaults(modifiedSchema, {})
     : {};
   const effectiveDefaults = getEffectiveDefaultsForSection(
-    sectionPath,
+    schemaSection,
     level,
     modifiedSchema ?? undefined,
     schemaDefaults,
@@ -466,7 +589,7 @@ export function prepareSectionSavePayload(opts: {
   // Build overrides
   const overrides = buildOverrides(pendingData, rawData, effectiveDefaults);
   const sanitizedOverrides = sanitizeOverridesForSection(
-    sectionPath,
+    schemaSection,
     level,
     overrides,
   );
@@ -474,7 +597,7 @@ export function prepareSectionSavePayload(opts: {
   if (
     !sanitizedOverrides ||
     typeof sanitizedOverrides !== "object" ||
-    Object.keys(sanitizedOverrides as Record<string, unknown>).length === 0
+    Object.keys(sanitizedOverrides as JsonObject).length === 0
   ) {
     return null;
   }
@@ -485,9 +608,11 @@ export function prepareSectionSavePayload(opts: {
       ? `cameras.${cameraName}.${sectionPath}`
       : sectionPath;
 
-  // Compute updateTopic
+  // Compute updateTopic — profile definitions don't trigger hot-reload
   let updateTopic: string | undefined;
-  if (level === "camera" && cameraName) {
+  if (profileInfo.isProfile) {
+    updateTopic = undefined;
+  } else if (level === "camera" && cameraName) {
     const topic = cameraUpdateTopicMap[sectionPath];
     updateTopic = topic ? `config/cameras/${cameraName}/${topic}` : undefined;
   } else if (globalCameraDefaultSections.has(sectionPath)) {
@@ -497,16 +622,18 @@ export function prepareSectionSavePayload(opts: {
     updateTopic = `config/${sectionPath}`;
   }
 
-  // Restart detection
-  const needsRestart = requiresRestartForOverrides(
-    sanitizedOverrides,
-    sectionConfig.restartRequired,
-    true,
-  );
+  // Restart detection — profile definitions never need restart
+  const needsRestart = profileInfo.isProfile
+    ? false
+    : requiresRestartForOverrides(
+        sanitizedOverrides,
+        sectionConfig.restartRequired,
+        true,
+      );
 
   return {
     basePath,
-    sanitizedOverrides: sanitizedOverrides as Record<string, unknown>,
+    sanitizedOverrides: sanitizedOverrides as JsonObject,
     updateTopic,
     needsRestart,
     pendingDataKey,

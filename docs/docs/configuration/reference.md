@@ -1026,6 +1026,49 @@ cameras:
         actions:
           - notification
 
+    # Optional: Named config profiles with partial overrides that can be activated at runtime.
+    # NOTE: Profile names must be defined in the top-level 'profiles' section.
+    profiles:
+      # Required: name of the profile (must match a top-level profile definition)
+      away:
+        # Optional: Enable or disable the camera when this profile is active (default: not set, inherits base)
+        enabled: true
+        # Optional: Override audio settings
+        audio:
+          enabled: true
+        # Optional: Override birdseye settings
+        # birdseye:
+        # Optional: Override detect settings
+        detect:
+          enabled: true
+        # Optional: Override face_recognition settings
+        # face_recognition:
+        # Optional: Override lpr settings
+        # lpr:
+        # Optional: Override motion settings
+        # motion:
+        # Optional: Override notification settings
+        notifications:
+          enabled: true
+        # Optional: Override objects settings
+        objects:
+          track:
+            - person
+            - car
+        # Optional: Override record settings
+        record:
+          enabled: true
+        # Optional: Override review settings
+        review:
+          alerts:
+            labels:
+              - person
+              - car
+        # Optional: Override snapshot settings
+        # snapshots:
+        # Optional: Override or add zones (merged with base zones)
+        # zones:
+
 # Optional
 ui:
   # Optional: Set a timezone to use in the UI (default: use browser local time)
@@ -1092,4 +1135,14 @@ camera_groups:
     icon: LuCar
     # Required: index of this group
     order: 0
+
+# Optional: Profile definitions for named config overrides
+# NOTE: Profile names defined here can be referenced in camera profiles sections
+profiles:
+  # Required: name of the profile (machine name used internally)
+  home:
+    # Required: display name shown in the UI
+    friendly_name: Home
+  away:
+    friendly_name: Away
 ```

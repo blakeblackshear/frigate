@@ -23,7 +23,7 @@ export type ConfigFormContext = {
   extraHasChanges?: boolean;
   setExtraHasChanges?: (hasChanges: boolean) => void;
   formData?: JsonObject;
-  pendingDataBySection?: Record<string, unknown>;
+  pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,
     cameraName: string | undefined,

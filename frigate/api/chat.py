@@ -143,6 +143,62 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
         {
             "type": "function",
             "function": {
+                "name": "set_camera_state",
+                "description": (
+                    "Change a camera's feature state (e.g., turn detection on/off, enable/disable recordings). "
+                    "Use camera='*' to apply to all cameras at once. "
+                    "Only call this tool when the user explicitly asks to change a camera setting. "
+                    "Requires admin privileges."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "camera": {
+                            "type": "string",
+                            "description": "Camera name to target, or '*' to target all cameras.",
+                        },
+                        "feature": {
+                            "type": "string",
+                            "enum": [
+                                "detect",
+                                "record",
+                                "snapshots",
+                                "audio",
+                                "motion",
+                                "enabled",
+                                "birdseye",
+                                "birdseye_mode",
+                                "improve_contrast",
+                                "ptz_autotracker",
+                                "motion_contour_area",
+                                "motion_threshold",
+                                "notifications",
+                                "audio_transcription",
+                                "review_alerts",
+                                "review_detections",
+                                "object_descriptions",
+                                "review_descriptions",
+                                "profile",
+                            ],
+                            "description": (
+                                "The feature to change. Most features accept ON or OFF. "
+                                "birdseye_mode accepts CONTINUOUS, MOTION, or OBJECTS. "
+                                "motion_contour_area and motion_threshold accept a number. "
+                                "profile accepts a profile name or 'none' to deactivate (requires camera='*')."
+                            ),
+                        },
+                        "value": {
+                            "type": "string",
+                            "description": "The value to set. ON or OFF for toggles, a number for thresholds, a profile name or 'none' for profile.",
+                        },
+                    },
+                    "required": ["camera", "feature", "value"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
                 "name": "get_live_context",
                 "description": (
                     "Get the current detection information for a camera: objects being tracked, "
@@ -255,6 +311,7 @@ async def _execute_search_objects(
     description="Execute a tool function call from an LLM.",
 )
 async def execute_tool(
+    request: Request,
     body: ToolExecuteRequest = Body(...),
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ) -> JSONResponse:
@@ -271,6 +328,12 @@ async def execute_tool(
 
     if tool_name == "search_objects":
         return await _execute_search_objects(arguments, allowed_cameras)
+
+    if tool_name == "set_camera_state":
+        result = await _execute_set_camera_state(request, arguments)
+        return JSONResponse(
+            content=result, status_code=200 if result.get("success") else 400
+        )
 
     return JSONResponse(
         content={
@@ -374,6 +437,46 @@ async def _get_live_frame_image_url(
         return None
 
 
+async def _execute_set_camera_state(
+    request: Request,
+    arguments: Dict[str, Any],
+) -> Dict[str, Any]:
+    role = request.headers.get("remote-role", "")
+    if "admin" not in [r.strip() for r in role.split(",")]:
+        return {"error": "Admin privileges required to change camera settings."}
+
+    camera = arguments.get("camera", "").strip()
+    feature = arguments.get("feature", "").strip()
+    value = arguments.get("value", "").strip()
+
+    if not camera or not feature or not value:
+        return {"error": "camera, feature, and value are all required."}
+
+    dispatcher = request.app.dispatcher
+    frigate_config = request.app.frigate_config
+
+    if feature == "profile":
+        if camera != "*":
+            return {"error": "Profile feature requires camera='*'."}
+        dispatcher._receive("profile/set", value)
+        return {"success": True, "camera": camera, "feature": feature, "value": value}
+
+    if feature not in dispatcher._camera_settings_handlers:
+        return {"error": f"Unknown feature: {feature}"}
+
+    if camera == "*":
+        cameras = list(frigate_config.cameras.keys())
+    elif camera not in frigate_config.cameras:
+        return {"error": f"Camera '{camera}' not found."}
+    else:
+        cameras = [camera]
+
+    for cam in cameras:
+        dispatcher._receive(f"{cam}/{feature}/set", value)
+
+    return {"success": True, "camera": camera, "feature": feature, "value": value}
+
+
 async def _execute_tool_internal(
     tool_name: str,
     arguments: Dict[str, Any],
@@ -398,6 +501,8 @@ async def _execute_tool_internal(
         except (json.JSONDecodeError, AttributeError) as e:
             logger.warning(f"Failed to extract tool result: {e}")
             return {"error": "Failed to parse tool result"}
+    elif tool_name == "set_camera_state":
+        return await _execute_set_camera_state(request, arguments)
     elif tool_name == "get_live_context":
         camera = arguments.get("camera")
         if not camera:

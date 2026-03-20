@@ -50,6 +50,7 @@ type ZoneEditPaneProps = {
   setActiveLine: React.Dispatch<React.SetStateAction<number | undefined>>;
   snapPoints: boolean;
   setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
+  editingProfile?: string | null;
 };
 
 export default function ZoneEditPane({
@@ -65,6 +66,7 @@ export default function ZoneEditPane({
   setActiveLine,
   snapPoints,
   setSnapPoints,
+  editingProfile,
 }: ZoneEditPaneProps) {
   const { t } = useTranslation(["views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -101,15 +103,23 @@ export default function ZoneEditPane({
   }, [polygon, config]);
 
   const [lineA, lineB, lineC, lineD] = useMemo(() => {
-    const distances =
-      polygon?.camera &&
-      polygon?.name &&
-      config?.cameras[polygon.camera]?.zones[polygon.name]?.distances;
+    if (!polygon?.camera || !polygon?.name || !config) {
+      return [undefined, undefined, undefined, undefined];
+    }
+
+    // Check profile zone first, then base
+    const profileZone = editingProfile
+      ? config.cameras[polygon.camera]?.profiles?.[editingProfile]?.zones?.[
+          polygon.name
+        ]
+      : undefined;
+    const baseZone = config.cameras[polygon.camera]?.zones[polygon.name];
+    const distances = profileZone?.distances ?? baseZone?.distances;
 
     return Array.isArray(distances)
       ? distances.map((value) => parseFloat(value) || 0)
       : [undefined, undefined, undefined, undefined];
-  }, [polygon, config]);
+  }, [polygon, config, editingProfile]);
 
   const formSchema = z
     .object({
@@ -272,6 +282,17 @@ export default function ZoneEditPane({
       },
     );
 
+  // Resolve zone data: profile zone takes priority over base
+  const resolvedZoneData = useMemo(() => {
+    if (!polygon?.camera || !polygon?.name || !config) return undefined;
+    const cam = config.cameras[polygon.camera];
+    if (!cam) return undefined;
+    const profileZone = editingProfile
+      ? cam.profiles?.[editingProfile]?.zones?.[polygon.name]
+      : undefined;
+    return profileZone ?? cam.zones[polygon.name];
+  }, [polygon, config, editingProfile]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -279,20 +300,11 @@ export default function ZoneEditPane({
       name: polygon?.name ?? "",
       friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
       enabled:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.enabled !==
-          undefined
-          ? config?.cameras[polygon.camera]?.zones[polygon.name]?.enabled
+        resolvedZoneData?.enabled !== undefined
+          ? resolvedZoneData.enabled
           : (polygon?.enabled ?? true),
-      inertia:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.inertia,
-      loitering_time:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
+      inertia: resolvedZoneData?.inertia,
+      loitering_time: resolvedZoneData?.loitering_time,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
       speedEstimation: !!(lineA || lineB || lineC || lineD),
@@ -300,10 +312,7 @@ export default function ZoneEditPane({
       lineB,
       lineC,
       lineD,
-      speed_threshold:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold,
+      speed_threshold: resolvedZoneData?.speed_threshold,
     },
   });
 
@@ -341,6 +350,16 @@ export default function ZoneEditPane({
       if (!scaledWidth || !scaledHeight || !polygon) {
         return;
       }
+
+      // Determine config path prefix based on profile mode
+      const pathPrefix = editingProfile
+        ? `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${zoneName}`
+        : `cameras.${polygon.camera}.zones.${zoneName}`;
+
+      const oldPathPrefix = editingProfile
+        ? `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${polygon.name}`
+        : `cameras.${polygon.camera}.zones.${polygon.name}`;
+
       let mutatedConfig = config;
       let alertQueries = "";
       let detectionQueries = "";
@@ -349,55 +368,74 @@ export default function ZoneEditPane({
 
       if (renamingZone) {
         // rename - delete old zone and replace with new
-        const zoneInAlerts =
-          cameraConfig?.review.alerts.required_zones.includes(polygon.name) ??
-          false;
-        const zoneInDetections =
-          cameraConfig?.review.detections.required_zones.includes(
+        let renameAlertQueries = "";
+        let renameDetectionQueries = "";
+
+        // Only handle review queries for base config (not profiles)
+        if (!editingProfile) {
+          const zoneInAlerts =
+            cameraConfig?.review.alerts.required_zones.includes(polygon.name) ??
+            false;
+          const zoneInDetections =
+            cameraConfig?.review.detections.required_zones.includes(
+              polygon.name,
+            ) ?? false;
+
+          ({
+            alertQueries: renameAlertQueries,
+            detectionQueries: renameDetectionQueries,
+          } = reviewQueries(
             polygon.name,
-          ) ?? false;
+            false,
+            false,
+            polygon.camera,
+            cameraConfig?.review.alerts.required_zones || [],
+            cameraConfig?.review.detections.required_zones || [],
+          ));
 
-        const {
-          alertQueries: renameAlertQueries,
-          detectionQueries: renameDetectionQueries,
-        } = reviewQueries(
-          polygon.name,
-          false,
-          false,
-          polygon.camera,
-          cameraConfig?.review.alerts.required_zones || [],
-          cameraConfig?.review.detections.required_zones || [],
-        );
+          try {
+            await axios.put(
+              `config/set?${oldPathPrefix}${renameAlertQueries}${renameDetectionQueries}`,
+              {
+                requires_restart: 0,
+                update_topic: `config/cameras/${polygon.camera}/zones`,
+              },
+            );
 
-        try {
-          await axios.put(
-            `config/set?cameras.${polygon.camera}.zones.${polygon.name}${renameAlertQueries}${renameDetectionQueries}`,
-            {
+            // Wait for the config to be updated
+            mutatedConfig = await updateConfig();
+          } catch {
+            toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+              position: "top-center",
+            });
+            return;
+          }
+
+          // make sure new zone name is readded to review
+          ({ alertQueries, detectionQueries } = reviewQueries(
+            zoneName,
+            zoneInAlerts,
+            zoneInDetections,
+            polygon.camera,
+            mutatedConfig?.cameras[polygon.camera]?.review.alerts
+              .required_zones || [],
+            mutatedConfig?.cameras[polygon.camera]?.review.detections
+              .required_zones || [],
+          ));
+        } else {
+          // Profile mode: just delete the old profile zone path
+          try {
+            await axios.put(`config/set?${oldPathPrefix}`, {
               requires_restart: 0,
-              update_topic: `config/cameras/${polygon.camera}/zones`,
-            },
-          );
-
-          // Wait for the config to be updated
-          mutatedConfig = await updateConfig();
-        } catch (error) {
-          toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
-            position: "top-center",
-          });
-          return;
+            });
+            mutatedConfig = await updateConfig();
+          } catch {
+            toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+              position: "top-center",
+            });
+            return;
+          }
         }
-
-        // make sure new zone name is readded to review
-        ({ alertQueries, detectionQueries } = reviewQueries(
-          zoneName,
-          zoneInAlerts,
-          zoneInDetections,
-          polygon.camera,
-          mutatedConfig?.cameras[polygon.camera]?.review.alerts
-            .required_zones || [],
-          mutatedConfig?.cameras[polygon.camera]?.review.detections
-            .required_zones || [],
-        ));
       }
 
       const coordinates = flattenPoints(
@@ -405,10 +443,7 @@ export default function ZoneEditPane({
       ).join(",");
 
       let objectQueries = objects
-        .map(
-          (object) =>
-            `&cameras.${polygon?.camera}.zones.${zoneName}.objects=${object}`,
-        )
+        .map((object) => `&${pathPrefix}.objects=${object}`)
         .join("");
 
       const same_objects =
@@ -419,55 +454,55 @@ export default function ZoneEditPane({
 
       // deleting objects
       if (!objectQueries && !same_objects && !renamingZone) {
-        objectQueries = `&cameras.${polygon?.camera}.zones.${zoneName}.objects`;
+        objectQueries = `&${pathPrefix}.objects`;
       }
 
       let inertiaQuery = "";
       if (inertia) {
-        inertiaQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}`;
+        inertiaQuery = `&${pathPrefix}.inertia=${inertia}`;
       }
 
       let loiteringTimeQuery = "";
       if (loitering_time >= 0) {
-        loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
+        loiteringTimeQuery = `&${pathPrefix}.loitering_time=${loitering_time}`;
       }
 
       let distancesQuery = "";
       const distances = [lineA, lineB, lineC, lineD].filter(Boolean).join(",");
       if (speedEstimation) {
-        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
+        distancesQuery = `&${pathPrefix}.distances=${distances}`;
       } else {
         if (distances != "") {
-          distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+          distancesQuery = `&${pathPrefix}.distances`;
         }
       }
 
       let speedThresholdQuery = "";
       if (speed_threshold >= 0 && speedEstimation) {
-        speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold=${speed_threshold}`;
+        speedThresholdQuery = `&${pathPrefix}.speed_threshold=${speed_threshold}`;
       } else {
-        if (
-          polygon?.camera &&
-          polygon?.name &&
-          config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold
-        ) {
-          speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold`;
+        if (resolvedZoneData?.speed_threshold) {
+          speedThresholdQuery = `&${pathPrefix}.speed_threshold`;
         }
       }
 
       let friendlyNameQuery = "";
       if (friendly_name && friendly_name !== zoneName) {
-        friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.friendly_name=${encodeURIComponent(friendly_name)}`;
+        friendlyNameQuery = `&${pathPrefix}.friendly_name=${encodeURIComponent(friendly_name)}`;
       }
 
-      const enabledQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.enabled=${enabled ? "True" : "False"}`;
+      const enabledQuery = `&${pathPrefix}.enabled=${enabled ? "True" : "False"}`;
+
+      const updateTopic = editingProfile
+        ? undefined
+        : `config/cameras/${polygon.camera}/zones`;
 
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${enabledQuery}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
+          `config/set?${pathPrefix}.coordinates=${coordinates}${enabledQuery}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
           {
             requires_restart: 0,
-            update_topic: `config/cameras/${polygon.camera}/zones`,
+            update_topic: updateTopic,
           },
         )
         .then((res) => {
@@ -481,8 +516,10 @@ export default function ZoneEditPane({
               },
             );
             updateConfig();
-            // Publish the enabled state through websocket
-            sendZoneState(enabled ? "ON" : "OFF");
+            // Only publish WS state for base config (not profiles)
+            if (!editingProfile) {
+              sendZoneState(enabled ? "ON" : "OFF");
+            }
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -524,6 +561,8 @@ export default function ZoneEditPane({
       cameraConfig,
       t,
       sendZoneState,
+      editingProfile,
+      resolvedZoneData,
     ],
   );
 

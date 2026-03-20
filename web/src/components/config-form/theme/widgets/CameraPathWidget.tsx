@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import type { ConfigFormContext } from "@/types/configForm";
 import { cn } from "@/lib/utils";
 import { getSizedFieldClassName } from "../utils";
+import {
+  isMaskedPath,
+  hasCredentials,
+  maskCredentials,
+} from "@/utils/credentialMask";
 
 type RawPathsResponse = {
   cameras?: Record<
@@ -22,9 +27,6 @@ type RawPathsResponse = {
   >;
 };
 
-const MASKED_AUTH_PATTERN = /:\/\/\*:\*@/i;
-const MASKED_QUERY_PATTERN = /(?:[?&])user=\*&password=\*/i;
-
 const getInputIndexFromWidgetId = (id: string): number | undefined => {
   const match = id.match(/_inputs_(\d+)_path$/);
   if (!match) {
@@ -33,44 +35,6 @@ const getInputIndexFromWidgetId = (id: string): number | undefined => {
 
   const index = Number(match[1]);
   return Number.isNaN(index) ? undefined : index;
-};
-
-const isMaskedPath = (value: string): boolean =>
-  MASKED_AUTH_PATTERN.test(value) || MASKED_QUERY_PATTERN.test(value);
-
-const hasCredentials = (value: string): boolean => {
-  if (!value) {
-    return false;
-  }
-
-  if (isMaskedPath(value)) {
-    return true;
-  }
-
-  try {
-    const parsed = new URL(value);
-    if (parsed.username || parsed.password) {
-      return true;
-    }
-
-    return (
-      parsed.searchParams.has("user") && parsed.searchParams.has("password")
-    );
-  } catch {
-    return /:\/\/[^:@/\s]+:[^@/\s]+@/.test(value);
-  }
-};
-
-const maskCredentials = (value: string): string => {
-  if (!value) {
-    return value;
-  }
-
-  const maskedAuth = value.replace(/:\/\/[^:@/\s]+:[^@/\s]*@/g, "://*:*@");
-
-  return maskedAuth
-    .replace(/([?&]user=)[^&]*/gi, "$1*")
-    .replace(/([?&]password=)[^&]*/gi, "$1*");
 };
 
 export function CameraPathWidget(props: WidgetProps) {

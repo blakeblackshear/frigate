@@ -12,7 +12,6 @@ from pydantic import (
     Field,
     TypeAdapter,
     ValidationInfo,
-    field_serializer,
     field_validator,
     model_validator,
 )
@@ -68,6 +67,7 @@ from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .network import NetworkingConfig
+from .profile import ProfileDefinitionConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
@@ -97,8 +97,7 @@ stream_info_retriever = StreamInfoRetriever()
 class RuntimeMotionConfig(MotionConfig):
     """Runtime version of MotionConfig with rasterized masks."""
 
-    # The rasterized numpy mask (combination of all enabled masks)
-    rasterized_mask: np.ndarray = None
+    rasterized_mask: np.ndarray = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
@@ -144,24 +143,13 @@ class RuntimeMotionConfig(MotionConfig):
             empty_mask[:] = 255
             self.rasterized_mask = empty_mask
 
-    def dict(self, **kwargs):
-        ret = super().model_dump(**kwargs)
-        if "rasterized_mask" in ret:
-            ret.pop("rasterized_mask")
-        return ret
-
-    @field_serializer("rasterized_mask", when_used="json")
-    def serialize_rasterized_mask(self, value: Any, info):
-        return None
-
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
 
 class RuntimeFilterConfig(FilterConfig):
     """Runtime version of FilterConfig with rasterized masks."""
 
-    # The rasterized numpy mask (combination of all enabled masks)
-    rasterized_mask: Optional[np.ndarray] = None
+    rasterized_mask: Optional[np.ndarray] = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
@@ -224,16 +212,6 @@ class RuntimeFilterConfig(FilterConfig):
             self.rasterized_mask = create_mask(frame_shape, enabled_coords)
         else:
             self.rasterized_mask = None
-
-    def dict(self, **kwargs):
-        ret = super().model_dump(**kwargs)
-        if "rasterized_mask" in ret:
-            ret.pop("rasterized_mask")
-        return ret
-
-    @field_serializer("rasterized_mask", when_used="json")
-    def serialize_rasterized_mask(self, value: Any, info):
-        return None
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
@@ -559,6 +537,19 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict,
         title="Camera groups",
         description="Configuration for named camera groups used to organize cameras in the UI.",
+    )
+
+    profiles: Dict[str, ProfileDefinitionConfig] = Field(
+        default_factory=dict,
+        title="Profiles",
+        description="Named profile definitions with friendly names. Camera profiles must reference names defined here.",
+    )
+
+    active_profile: Optional[str] = Field(
+        default=None,
+        title="Active profile",
+        description="Currently active profile name. Runtime-only, not persisted in YAML.",
+        exclude=True,
     )
 
     _plus_api: PlusApi
@@ -909,6 +900,15 @@ class FrigateConfig(FrigateBaseModel):
             verify_motion_and_detect(camera_config)
             verify_objects_track(camera_config, labelmap_objects)
             verify_lpr_and_face(self, camera_config)
+
+        # Validate camera profiles reference top-level profile definitions
+        for cam_name, cam_config in self.cameras.items():
+            for profile_name in cam_config.profiles:
+                if profile_name not in self.profiles:
+                    raise ValueError(
+                        f"Camera '{cam_name}' references profile '{profile_name}' "
+                        f"which is not defined in the top-level 'profiles' section"
+                    )
 
         # set names on classification configs
         for name, config in self.classification.custom.items():

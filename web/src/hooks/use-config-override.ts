@@ -6,6 +6,7 @@ import set from "lodash/set";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { JsonObject, JsonValue } from "@/types/configForm";
 import { isJsonObject } from "@/lib/utils";
+import { getBaseCameraSectionValue } from "@/utils/configUtil";
 
 const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
 
@@ -144,7 +145,13 @@ export function useConfigOverride({
       };
     }
 
-    const cameraValue = get(cameraConfig, sectionPath);
+    // Prefer the base (pre-profile) value so that override detection and
+    // widget context reflect the camera's own config, not profile effects.
+    const cameraValue = getBaseCameraSectionValue(
+      config,
+      cameraName,
+      sectionPath,
+    );
 
     const normalizedGlobalValue = normalizeConfigValue(globalValue);
     const normalizedCameraValue = normalizeConfigValue(cameraValue);
@@ -256,7 +263,9 @@ export function useAllCameraOverrides(
 
     for (const { key, compareFields } of sectionsToCheck) {
       const globalValue = normalizeConfigValue(get(config, key));
-      const cameraValue = normalizeConfigValue(get(cameraConfig, key));
+      const cameraValue = normalizeConfigValue(
+        getBaseCameraSectionValue(config, cameraName, key),
+      );
 
       const comparisonGlobal = compareFields
         ? pickFields(globalValue, compareFields)

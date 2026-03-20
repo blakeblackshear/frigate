@@ -30,6 +30,10 @@ class AppPutRoleBody(BaseModel):
     role: str
 
 
+class CameraSetBody(BaseModel):
+    value: str = Field(..., description="The value to set for the feature")
+
+
 class MediaSyncBody(BaseModel):
     dry_run: bool = Field(
         default=True, description="If True, only report orphans without deleting them"
