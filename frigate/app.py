@@ -529,7 +529,7 @@ class FrigateApp:
             if not hasattr(self, attr):
                 continue
 
-            def on_restart(proc: FrigateProcess, _attr=attr, _key=key) -> None:
+            def on_restart(proc: FrigateProcess, _attr: str = attr, _key: str = key) -> None:
                 setattr(self, _attr, proc)
                 self.processes[_key] = proc.pid or 0
 
