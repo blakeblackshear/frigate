@@ -1,3 +1,5 @@
+import { baseUrl } from "@/api/baseUrl.ts";
+
 export const RECORDING_REVIEW_LINK_PARAM = "timestamp";
 
 export type RecordingReviewLinkState = {
@@ -43,11 +45,12 @@ export function createRecordingReviewUrl(
   pathname: string,
   state: RecordingReviewLinkState,
 ): string {
-  const url = new URL(globalThis.location.href);
-  const normalizedPathname = pathname.startsWith("/")
-    ? pathname
-    : `/${pathname}`;
-  const reviewLink = `${state.camera}_${Math.floor(state.timestamp)}`;
+  const url = new URL(baseUrl);
+  url.pathname = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  url.searchParams.set(
+    RECORDING_REVIEW_LINK_PARAM,
+    `${state.camera}_${Math.floor(state.timestamp)}`,
+  );
 
-  return `${url.origin}${normalizedPathname}?${RECORDING_REVIEW_LINK_PARAM}=${reviewLink}`;
+  return url.toString();
 }

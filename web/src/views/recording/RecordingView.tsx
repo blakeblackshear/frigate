@@ -691,7 +691,6 @@ export function RecordingView({
             )}
             {isDesktop && (
               <ShareTimestampDialog
-                key={shareTimestampAtOpen}
                 currentTime={shareTimestampAtOpen}
                 open={shareTimestampOpen}
                 onOpenChange={setShareTimestampOpen}

@@ -17,6 +17,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getUTCOffset } from "@/utils/dateUtil";
 import { useCallback, useMemo, useState } from "react";
@@ -204,19 +205,22 @@ export function ShareTimestampContent({
       {isDesktop && <Separator className="my-4 bg-secondary" />}
 
       <DialogFooter
-        className={isDesktop ? "mt-4" : "mt-4 flex flex-col-reverse gap-4"}
+        className={cn("mt-4", !isDesktop && "flex flex-col-reverse gap-4")}
       >
         {onCancel && (
-          <button
+          <Button
             type="button"
-            className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
+            className={cn(
+              "cursor-pointer p-2 text-center",
+              !isDesktop && "w-full",
+            )}
             onClick={onCancel}
           >
             {t("button.cancel", { ns: "common" })}
-          </button>
+          </Button>
         )}
         <Button
-          className={isDesktop ? "" : "w-full"}
+          className={cn(!isDesktop && "w-full")}
           variant="select"
           size="sm"
           onClick={() => onShareTimestamp(Math.floor(selectedTimestamp))}
@@ -298,7 +302,10 @@ function CustomTimestampSelector({
 
   return (
     <div
-      className={`flex items-center rounded-lg bg-secondary text-secondary-foreground ${isDesktop ? "gap-2 px-2" : "pl-2"}`}
+      className={cn(
+        "flex items-center rounded-lg bg-secondary text-secondary-foreground",
+        isDesktop ? "gap-2 px-2" : "pl-2",
+      )}
     >
       <FaCalendarAlt />
       <div className="flex flex-wrap items-center">
@@ -312,7 +319,7 @@ function CustomTimestampSelector({
         >
           <PopoverTrigger asChild>
             <Button
-              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+              className={cn("text-primary", !isDesktop && "text-xs")}
               aria-label={label}
               variant={selectorOpen ? "select" : "default"}
               size="sm"
