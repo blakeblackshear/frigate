@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SelectSeparator } from "@/components/ui/select";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getUTCOffset } from "@/utils/dateUtil";
@@ -73,6 +74,7 @@ export default function ShareTimestampDialog({
         onShareTimestamp(timestamp);
         onOpenChange(false);
       }}
+      onCancel={() => onOpenChange(false)}
     />
   );
 
@@ -146,6 +148,8 @@ export function ShareTimestampContent({
         </div>
       </div>
 
+      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
+
       <RadioGroup
         className="mt-4 flex flex-col gap-4"
         value={selectedOption}
@@ -197,18 +201,19 @@ export function ShareTimestampContent({
         </div>
       </RadioGroup>
 
+      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
+
       <DialogFooter
         className={isDesktop ? "mt-4" : "mt-4 flex flex-col-reverse gap-4"}
       >
         {onCancel && (
-          <Button
-            className={isDesktop ? "p-2" : "w-full"}
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
+            className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
             onClick={onCancel}
           >
             {t("button.cancel", { ns: "common" })}
-          </Button>
+          </button>
         )}
         <Button
           className={isDesktop ? "" : "w-full"}
