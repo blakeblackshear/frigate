@@ -372,24 +372,25 @@ export default function MotionSearchROICanvas({
               />
             )}
 
-            {/* Vertex points */}
-            {scaledPoints.map((point, index) => (
-              <Circle
-                key={index}
-                name={`point-${index}`}
-                x={point[0]}
-                y={point[1]}
-                radius={vertexRadius}
-                fill={polygonColorString}
-                stroke="white"
-                strokeWidth={2}
-                draggable={!isDrawing && isInteractive}
-                onDragMove={(e) => handlePointDragMove(e, index)}
-                onMouseOver={(e) => handleMouseOverPoint(e, index)}
-                onMouseOut={(e) => handleMouseOutPoint(e, index)}
-                onContextMenu={(e) => handleContextMenu(e, index)}
-              />
-            ))}
+            {/* Vertex points (only shown in interactive/dialog mode) */}
+            {isInteractive &&
+              scaledPoints.map((point, index) => (
+                <Circle
+                  key={index}
+                  name={`point-${index}`}
+                  x={point[0]}
+                  y={point[1]}
+                  radius={vertexRadius}
+                  fill={polygonColorString}
+                  stroke="white"
+                  strokeWidth={2}
+                  draggable={!isDrawing}
+                  onDragMove={(e) => handlePointDragMove(e, index)}
+                  onMouseOver={(e) => handleMouseOverPoint(e, index)}
+                  onMouseOut={(e) => handleMouseOutPoint(e, index)}
+                  onContextMenu={(e) => handleContextMenu(e, index)}
+                />
+              ))}
           </Layer>
         </Stage>
       )}
