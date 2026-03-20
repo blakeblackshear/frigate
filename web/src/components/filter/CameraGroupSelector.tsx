@@ -721,6 +721,7 @@ export function CameraGroupEdit({
       .refine((value) => Object.keys(LuIcons).includes(value), {
         message: "Invalid icon",
       }),
+    roles: z.array(z.string()).optional(),
   });
 
   const onSubmit = useCallback(
@@ -756,10 +757,13 @@ export function CameraGroupEdit({
       const cameraQueries = values.cameras
         .map((cam) => `&camera_groups.${values.name}.cameras=${cam}`)
         .join("");
+      const roleQueries = (values.roles ?? [])
+        .map((role) => `&camera_groups.${values.name}.roles=${role}`)
+        .join("");
 
       axios
         .put(
-          `config/set?${renamingQuery}${orderQuery}&${iconQuery}${cameraQueries}`,
+          `config/set?${renamingQuery}${orderQuery}&${iconQuery}${cameraQueries}${roleQueries}`,
           {
             requires_restart: 0,
           },
@@ -828,6 +832,7 @@ export function CameraGroupEdit({
       name: (editingGroup && editingGroup[0]) ?? "",
       icon: editingGroup && (editingGroup[1].icon as IconName),
       cameras: editingGroup && editingGroup[1].cameras,
+      roles: (editingGroup && editingGroup[1].roles) ?? [],
     },
   });
 
@@ -969,6 +974,49 @@ export function CameraGroupEdit({
             </FormItem>
           )}
         />
+
+        {isAdmin && config?.auth?.roles && (
+          <>
+            <Separator className="my-2 flex bg-secondary" />
+            <FormField
+              control={form.control}
+              name="roles"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("group.roles.label", { defaultValue: "Roles" })}</FormLabel>
+                  <FormDescription>
+                    {t("group.roles.desc", {
+                      defaultValue:
+                        "Select which roles can see this camera group. If no roles selected, group is only visible to admins.",
+                    })}
+                  </FormDescription>
+                  <FormMessage />
+                  {Object.keys(config.auth.roles)
+                    .filter((role) => role !== "admin")
+                    .map((role) => (
+                      <FormControl key={role}>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="mx-2 w-full cursor-pointer text-primary smart-capitalize">
+                            {role}
+                          </span>
+                          <Switch
+                            id={`role-${role}`}
+                            checked={field.value?.includes(role) ?? false}
+                            onCheckedChange={(checked) => {
+                              const updatedRoles = checked
+                                ? [...(field.value || []), role]
+                                : (field.value || []).filter((r) => r !== role);
+                              form.setValue("roles", updatedRoles);
+                            }}
+                          />
+                        </div>
+                      </FormControl>
+                    ))}
+                </FormItem>
+              )}
+            />
+          </>
+        )}
 
         <Separator className="my-2 flex bg-secondary" />
 

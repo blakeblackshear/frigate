@@ -226,6 +226,18 @@ def config(request: Request):
             request.app.frigate_config.model.merged_labelmap
         )
 
+    # filter camera_groups by role
+    username = request.headers.get("remote-user")
+    role = request.headers.get("remote-role")
+
+    if username and role and role != "admin":
+        filtered_groups = {}
+        for group_name, group_config in config.get("camera_groups", {}).items():
+            group_roles = group_config.get("roles")
+            if group_roles and role in group_roles:
+                filtered_groups[group_name] = group_config
+        config["camera_groups"] = filtered_groups
+
     return JSONResponse(content=config)
 
 

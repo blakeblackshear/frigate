@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -23,10 +23,23 @@ class CameraGroupConfig(FrigateBaseModel):
         title="Sort order",
         description="Numeric order used to sort camera groups in the UI; larger numbers appear later.",
     )
+    roles: Optional[list[str]] = Field(
+        default=None,
+        title="Roles",
+        description="List of roles that can see this camera group. If not set, only admin can see it.",
+    )
 
     @field_validator("cameras", mode="before")
     @classmethod
     def validate_cameras(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
+
+    @field_validator("roles", mode="before")
+    @classmethod
+    def validate_roles(cls, v):
         if isinstance(v, str) and "," not in v:
             return [v]
 
