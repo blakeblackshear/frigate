@@ -29,7 +29,7 @@ import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -243,10 +243,18 @@ export default function Events() {
     [recording, setRecording, setReviewFilter],
   );
 
+  const handledReviewLinkRef = useRef<string | undefined>(undefined);
+
   useSearchEffect(RECORDING_REVIEW_LINK_PARAM, (reviewLinkValue: string) => {
     if (!config) {
       return false;
     }
+
+    if (handledReviewLinkRef.current === reviewLinkValue) {
+      return false;
+    }
+
+    handledReviewLinkRef.current = reviewLinkValue;
 
     const reviewLink = parseRecordingReviewLink(reviewLinkValue);
 
