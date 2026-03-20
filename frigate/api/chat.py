@@ -840,7 +840,11 @@ Always be accurate with time calculations based on the current date provided.{ca
                                     msg.get("content"), pending
                                 )
                             )
-                            executed_calls, tool_results, extra_msgs = await _execute_pending_tools(
+                            (
+                                executed_calls,
+                                tool_results,
+                                extra_msgs,
+                            ) = await _execute_pending_tools(
                                 pending, request, allowed_cameras
                             )
                             stream_tool_calls.extend(executed_calls)
