@@ -122,6 +122,17 @@ docs/              # Documentation site
 migrations/        # Database migrations
 ```
 
+## Translations
+
+Frigate uses [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) for managing language translations. If you'd like to help translate Frigate into your language:
+
+1. Visit the [Frigate project on Weblate](https://hosted.weblate.org/projects/frigate-nvr/).
+2. Create an account or log in.
+3. Browse the available languages and select the one you'd like to contribute to, or request a new language.
+4. Translate strings directly in the Weblate interface — no code changes or pull requests needed.
+
+Translation contributions through Weblate are automatically synced to the repository. Please do not submit pull requests for translation changes — use Weblate instead so that translations are properly tracked and coordinated.
+
 ## Resources
 
 - [Documentation](https://docs.frigate.video)
