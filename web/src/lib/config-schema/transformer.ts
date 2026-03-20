@@ -137,7 +137,9 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
       return {
         ...rest,
         type: hasNull ? ["string", "null"] : "string",
-        ...(enumValues && enumValues.length > 0 ? { examples: enumValues } : {}),
+        ...(enumValues && enumValues.length > 0
+          ? { examples: enumValues }
+          : {}),
       } as RJSFSchema;
     }
 
