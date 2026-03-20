@@ -272,19 +272,21 @@ export default function Events() {
       ...reviewFilter,
       ...getReviewDayBounds(new Date(reviewLink.timestamp * 1000)),
     });
-    setRecording(
-      {
-        camera: reviewLink.camera,
-        startTime: reviewLink.timestamp,
-        // severity not actually applicable here, but the type requires it
-        // this pattern is also used LiveCameraView to enter recording view
-        severity: "alert",
-        timelineType: notificationTab,
-      },
-      true,
-    );
+    globalThis.setTimeout(() => {
+      setRecording(
+        {
+          camera: reviewLink.camera,
+          startTime: reviewLink.timestamp,
+          // severity not actually applicable here, but the type requires it
+          // this pattern is also used LiveCameraView to enter recording view
+          severity: "alert",
+          timelineType: notificationTab,
+        },
+        true,
+      );
+    }, 0);
 
-    return false;
+    return true;
   });
 
   // review paging
