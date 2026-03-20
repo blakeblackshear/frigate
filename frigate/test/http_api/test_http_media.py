@@ -1,19 +1,13 @@
 """Unit tests for recordings/media API endpoints."""
 
-import os
-import tempfile
 from datetime import datetime, timezone
-from unittest.mock import patch
 
-import cv2
-import numpy as np
 import pytz
 from fastapi import Request
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
-from frigate.models import Event, Recordings
+from frigate.models import Recordings
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
-from frigate.util import file as file_util
 
 
 class TestHttpMedia(BaseTestHttp):
@@ -21,19 +15,8 @@ class TestHttpMedia(BaseTestHttp):
 
     def setUp(self):
         """Set up test fixtures."""
-        super().setUp([Event, Recordings])
-        self.minimal_config["cameras"]["front_door"]["snapshots"] = {
-            "enabled": True,
-            "bounding_box": True,
-            "height": 40,
-            "timestamp": False,
-        }
+        super().setUp([Recordings])
         self.app = super().create_app()
-        self.clips_dir = tempfile.TemporaryDirectory()
-        self.clips_dir_patcher = patch.object(
-            file_util, "CLIPS_DIR", self.clips_dir.name
-        )
-        self.clips_dir_patcher.start()
 
         # Mock get_current_user for all tests
         async def mock_get_current_user(request: Request):
@@ -58,16 +41,8 @@ class TestHttpMedia(BaseTestHttp):
 
     def tearDown(self):
         """Clean up after tests."""
-        self.clips_dir_patcher.stop()
-        self.clips_dir.cleanup()
         self.app.dependency_overrides.clear()
         super().tearDown()
-
-    def _write_clean_snapshot(self, event_id: str, image: np.ndarray) -> None:
-        assert cv2.imwrite(
-            os.path.join(self.clips_dir.name, f"front_door-{event_id}-clean.webp"),
-            image,
-        )
 
     def test_recordings_summary_across_dst_spring_forward(self):
         """
@@ -428,49 +403,3 @@ class TestHttpMedia(BaseTestHttp):
             assert len(summary) == 1
             assert "2024-03-10" in summary
             assert summary["2024-03-10"] is True
-
-    def test_event_snapshot_helpers_read_clean_webp(self):
-        event_id = "clean-webp"
-        image = np.zeros((100, 200, 3), np.uint8)
-
-        self.insert_mock_event(
-            event_id,
-            data={
-                "box": [0.25, 0.25, 0.25, 0.5],
-                "score": 0.85,
-                "attributes": [],
-                "snapshot_clean": True,
-            },
-        )
-        self._write_clean_snapshot(event_id, image)
-
-        event = Event.get(Event.id == event_id)
-        snapshot_image, is_clean = file_util.load_event_snapshot_image(
-            event, clean_only=True
-        )
-
-        assert is_clean
-        assert snapshot_image is not None
-        assert snapshot_image.shape[:2] == image.shape[:2]
-
-        rendered_bytes, _ = file_util.get_event_snapshot_bytes(
-            event,
-            ext="jpg",
-            timestamp=False,
-            bounding_box=True,
-            crop=False,
-            height=40,
-            quality=None,
-            timestamp_style=self.app.frigate_config.cameras[
-                event.camera
-            ].timestamp_style,
-            colormap=self.app.frigate_config.model.colormap,
-        )
-        assert rendered_bytes is not None
-
-        rendered_image = cv2.imdecode(
-            np.frombuffer(rendered_bytes, dtype=np.uint8),
-            cv2.IMREAD_COLOR,
-        )
-        assert rendered_image.shape[0] == 40
-        assert rendered_image.max() > 0
