@@ -500,13 +500,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 <span>{t("menu.languages")}</span>
               </SubItemTrigger>
               <Portal>
-                <SubItemContent
-                  className={
-                    isDesktop
-                      ? ""
-                      : "scrollbar-container max-h-[75dvh] w-[92%] overflow-y-scroll rounded-lg md:rounded-2xl"
-                  }
-                >
+                <SubItemContent className="scrollbar-container max-h-[75dvh] w-[92%] overflow-y-scroll rounded-lg md:rounded-2xl">
                   {!isDesktop && (
                     <>
                       <DialogTitle className="sr-only">
