@@ -360,11 +360,13 @@ export default function LiveCameraView({
   }, [windowAspectRatio, containerRef]);
 
   const cameraAspectRatio = useMemo(() => {
+    let ratio;
     if (fullResolution.width && fullResolution.height) {
-      return fullResolution.width / fullResolution.height;
+      ratio = fullResolution.width / fullResolution.height;
     } else {
-      return camera.detect.width / camera.detect.height;
+      ratio = camera.detect.width / camera.detect.height;
     }
+    return camera.ui?.rotate ? 1 / ratio : ratio;
   }, [camera, fullResolution]);
 
   const constrainedAspectRatio = useMemo<number>(() => {
@@ -648,7 +650,11 @@ export default function LiveCameraView({
               >
                 <LivePlayer
                   key={camera.name}
-                  className={`${fullscreen ? "*:rounded-none" : ""}`}
+                  className={cn(
+                    fullscreen ? "*:rounded-none" : "",
+                    camera.ui?.rotate &&
+                      "[--frigate-mse-grid-rotated:1] [--frigate-mse-grid-rotation:rotate(90deg)]",
+                  )}
                   windowVisible
                   showStillWithoutActivity={false}
                   showMotionDot={false}
