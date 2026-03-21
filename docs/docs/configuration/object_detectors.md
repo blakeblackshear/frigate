@@ -1514,7 +1514,8 @@ model:
   model_type: yolo-generic
   width: 320
   height: 320
-  tensor_format: bgr
+  input_dtype: int
+  input_pixel_format: bgr
   labelmap_path: /labelmap/coco-80.txt
 ```
 
