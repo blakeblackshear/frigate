@@ -303,7 +303,7 @@ function PreviewVideoPlayer({
       {isVisible && (
         <video
           ref={previewRef}
-          className={`absolute size-full object-contain ${currentHourFrame ? "invisible" : "visible"}`}
+          className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
           preload="auto"
           autoPlay
           playsInline
