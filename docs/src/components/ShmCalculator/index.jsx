@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Admonition from "@theme/Admonition";
 import styles from "./styles.module.css";
 
 const ShmCalculator = () => {
@@ -71,35 +72,56 @@ const ShmCalculator = () => {
           count
         </p>
 
-        <div className={styles.row}>
-          <div className={styles.formGroup}>
-            <label htmlFor="width" className={styles.label}>
-              Width:
-            </label>
-            <input
-              id="width"
-              type="number"
-              min="1"
-              placeholder="e.g.: 1280"
-              className={styles.input}
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
-            />
+        <Admonition type="note">
+          The resolution below is the <strong>detect</strong> stream resolution,
+          not the <strong>record</strong> stream resolution. SHM size is
+          determined by the detect resolution used for object detection.{" "}
+          <a href="/frigate/camera_setup#choosing-a-detect-resolution">
+            Learn more about choosing a detect resolution.
+          </a>
+        </Admonition>
+
+        {width * height > 1280 * 720 && (
+          <Admonition type="warning">
+            Using a detect resolution higher than 720p is not recommended.
+            Higher resolutions do not improve object detection accuracy and will
+            consume significantly more resources.
+          </Admonition>
+        )}
+
+        <div className="row">
+          <div className="col col--6">
+            <div className={styles.formGroup}>
+              <label htmlFor="width" className={styles.label}>
+                Width:
+              </label>
+              <input
+                id="width"
+                type="number"
+                min="1"
+                placeholder="e.g.: 1280"
+                className={styles.input}
+                value={width}
+                onChange={(e) => setWidth(Number(e.target.value))}
+              />
+            </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="height" className={styles.label}>
-              Height:
-            </label>
-            <input
-              id="height"
-              type="number"
-              min="1"
-              placeholder="e.g.: 720"
-              className={styles.input}
-              value={height}
-              onChange={(e) => setHeight(Number(e.target.value))}
-            />
+          <div className="col col--6">
+            <div className={styles.formGroup}>
+              <label htmlFor="height" className={styles.label}>
+                Height:
+              </label>
+              <input
+                id="height"
+                type="number"
+                min="1"
+                placeholder="e.g.: 720"
+                className={styles.input}
+                value={height}
+                onChange={(e) => setHeight(Number(e.target.value))}
+              />
+            </div>
           </div>
         </div>
 
@@ -146,40 +168,28 @@ const ShmCalculator = () => {
           <h4>Common Presets</h4>
           <div className={styles.presetButtons}>
             <button
-              className={styles.presetButton}
+              className="button button--outline button--primary button--sm"
+              onClick={() => applyPreset(640, 360, 1)}
+            >
+              640x360 × 1
+            </button>
+            <button
+              className="button button--outline button--primary button--sm"
               onClick={() => applyPreset(1280, 720, 1)}
             >
               1280x720 × 1
             </button>
             <button
-              className={styles.presetButton}
+              className="button button--outline button--primary button--sm"
               onClick={() => applyPreset(1280, 720, 4)}
             >
               1280x720 × 4
             </button>
             <button
-              className={styles.presetButton}
+              className="button button--outline button--primary button--sm"
               onClick={() => applyPreset(1280, 720, 8)}
             >
               1280x720 × 8
-            </button>
-            <button
-              className={styles.presetButton}
-              onClick={() => applyPreset(1920, 1080, 1)}
-            >
-              1920x1080 × 1
-            </button>
-            <button
-              className={styles.presetButton}
-              onClick={() => applyPreset(1920, 1080, 4)}
-            >
-              1920x1080 × 4
-            </button>
-            <button
-              className={styles.presetButton}
-              onClick={() => applyPreset(3840, 2160, 1)}
-            >
-              4K × 1
             </button>
           </div>
         </div>

@@ -30,17 +30,7 @@
 }
 
 .formGroup {
-  margin-bottom: 0.5rem;
-}
-
-.row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.row .formGroup {
-  flex: 1;
+  margin-bottom: 1rem;
 }
 
 .label {
@@ -138,36 +128,4 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
-
-.presetButton {
-  padding: 0.5rem 1rem;
-  background: var(--ifm-background-surface-color);
-  border: 1px solid var(--ifm-border-color);
-  border-radius: 6px;
-  color: var(--ifm-font-color-base);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: var(--ifm-font-weight-normal);
-  transition: all 0.2s;
-}
-
-[data-theme='light'] .presetButton {
-  background: #fff;
-  border: 1px solid #d0d7de;
-}
-
-[data-theme='dark'] .presetButton {
-  background: #24292f;
-  border: 1px solid #3b434b;
-}
-
-.presetButton:hover {
-  background: var(--ifm-color-primary);
-  color: #fff;
-  border-color: var(--ifm-color-primary);
-}
-
-.presetButton:active {
-  transform: translateY(1px);
 }
