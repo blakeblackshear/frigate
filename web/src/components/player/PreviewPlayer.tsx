@@ -281,7 +281,7 @@ function PreviewVideoPlayer({
     <div
       ref={visibilityRef}
       className={cn(
-        "relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-black md:rounded-2xl",
+        "relative flex w-full justify-center overflow-hidden rounded-lg bg-black md:rounded-2xl",
         onClick && "cursor-pointer",
         className,
       )}
@@ -289,7 +289,7 @@ function PreviewVideoPlayer({
       onClick={onClick}
     >
       <img
-        className={`max-h-full max-w-full object-contain ${currentHourFrame ? "visible" : "invisible"}`}
+        className={`absolute size-full object-contain ${currentHourFrame ? "visible" : "invisible"}`}
         src={currentHourFrame}
         onLoad={() => {
           if (changeoverTimeout) {
@@ -303,7 +303,7 @@ function PreviewVideoPlayer({
       {isVisible && (
         <video
           ref={previewRef}
-          className={`max-h-full max-w-full object-contain ${currentHourFrame ? "invisible" : "visible"}`}
+          className={`absolute size-full object-contain ${currentHourFrame ? "invisible" : "visible"}`}
           preload="auto"
           autoPlay
           playsInline
@@ -348,7 +348,7 @@ function PreviewVideoPlayer({
           {t("noPreviewFoundFor", { camera: cameraName })}
         </div>
       )}
-      {firstLoad && <Skeleton className="aspect-video w-full" />}
+      {firstLoad && <Skeleton className="absolute aspect-video size-full" />}
     </div>
   );
 }
@@ -554,7 +554,7 @@ function PreviewFramesPlayer({
   return (
     <div
       className={cn(
-        "relative flex w-full items-center justify-center",
+        "relative flex w-full justify-center",
         className,
         onClick && "cursor-pointer",
       )}
@@ -562,7 +562,7 @@ function PreviewFramesPlayer({
     >
       <img
         ref={imgRef}
-        className="max-h-full max-w-full rounded-lg object-contain md:rounded-2xl"
+        className={`size-full rounded-lg bg-black object-contain md:rounded-2xl`}
         loading="lazy"
         onLoad={onImageLoaded}
       />
