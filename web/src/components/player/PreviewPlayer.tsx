@@ -33,6 +33,7 @@ type PreviewPlayerProps = {
   isScrubbing: boolean;
   forceAspect?: number;
   isVisible?: boolean;
+  rotate?: boolean;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
 };
@@ -45,6 +46,7 @@ export default function PreviewPlayer({
   startTime,
   isScrubbing,
   isVisible = true,
+  rotate,
   onControllerReady,
   onClick,
 }: PreviewPlayerProps) {
@@ -69,6 +71,7 @@ export default function PreviewPlayer({
         isScrubbing={isScrubbing}
         isVisible={isVisible}
         currentHourFrame={currentHourFrame}
+        rotate={rotate}
         onControllerReady={onControllerReady}
         onClick={onClick}
         setCurrentHourFrame={setCurrentHourFrame}
@@ -83,6 +86,7 @@ export default function PreviewPlayer({
         camera={camera}
         timeRange={timeRange}
         startTime={startTime}
+        rotate={rotate}
         onControllerReady={onControllerReady}
         onClick={onClick}
         setCurrentHourFrame={setCurrentHourFrame}
@@ -127,6 +131,7 @@ type PreviewVideoPlayerProps = {
   isScrubbing: boolean;
   isVisible: boolean;
   currentHourFrame?: string;
+  rotate?: boolean;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
   setCurrentHourFrame: (src: string | undefined) => void;
@@ -142,6 +147,7 @@ function PreviewVideoPlayer({
   isScrubbing,
   isVisible,
   currentHourFrame,
+  rotate,
   onControllerReady,
   onClick,
   setCurrentHourFrame,
@@ -182,6 +188,33 @@ function PreviewVideoPlayer({
 
     controller.scrubbing = isScrubbing;
   }, [controller, isScrubbing]);
+
+  // rotation support
+  const rotateContainerRef = useRef<HTMLDivElement>(null);
+  const [rotateContainerSize, setRotateContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    if (!rotate) return;
+
+    const container = rotateContainerRef.current;
+    if (!container) return;
+
+    const updateSize = () => {
+      setRotateContainerSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [rotate]);
 
   // initial state
 
@@ -282,67 +315,103 @@ function PreviewVideoPlayer({
       ref={visibilityRef}
       className={cn(
         "relative flex w-full justify-center overflow-hidden rounded-lg bg-black md:rounded-2xl",
+        rotate && "h-full",
         onClick && "cursor-pointer",
         className,
       )}
       data-camera={camera}
       onClick={onClick}
     >
-      <img
-        className={`absolute size-full object-contain ${currentHourFrame ? "visible" : "invisible"}`}
-        src={currentHourFrame}
-        onLoad={() => {
-          if (changeoverTimeout) {
-            clearTimeout(changeoverTimeout);
-            setChangeoverTimeout(undefined);
+      <div
+        ref={rotateContainerRef}
+        className="size-full"
+        style={
+          rotate
+            ? { position: "relative" as const, overflow: "hidden" as const }
+            : undefined
+        }
+      >
+        <div
+          style={
+            rotate
+              ? {
+                  position: "absolute" as const,
+                  top: "50%",
+                  left: "50%",
+                  width: rotateContainerSize.height || "100%",
+                  height: rotateContainerSize.width || "100%",
+                  transform: "translate(-50%, -50%)",
+                }
+              : { width: "100%", height: "100%" }
           }
-
-          previewRef.current?.load();
-        }}
-      />
-      {isVisible && (
-        <video
-          ref={previewRef}
-          className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
-          preload="auto"
-          autoPlay
-          playsInline
-          muted
-          disableRemotePlayback
-          disablePictureInPicture
-          onSeeked={onPreviewSeeked}
-          onLoadedData={() => {
-            if (firstLoad) {
-              setFirstLoad(false);
-            }
-
-            if (controller) {
-              controller.previewReady();
-            } else {
-              previewRef.current?.pause();
-            }
-
-            if (previewRef.current) {
-              setVideoSize([
-                previewRef.current.videoWidth,
-                previewRef.current.videoHeight,
-              ]);
-
-              if (startTime && currentPreview) {
-                previewRef.current.currentTime =
-                  startTime - currentPreview.start;
-              }
-            }
-          }}
         >
-          {currentPreview != undefined && (
-            <source
-              src={`${baseUrl}${currentPreview.src.substring(1)}`}
-              type={currentPreview.type}
-            />
+          <img
+            className={`absolute size-full object-contain ${currentHourFrame ? "visible" : "invisible"}`}
+            style={
+              rotate
+                ? { transform: "rotate(90deg)", transformOrigin: "center center" }
+                : undefined
+            }
+            src={currentHourFrame}
+            onLoad={() => {
+              if (changeoverTimeout) {
+                clearTimeout(changeoverTimeout);
+                setChangeoverTimeout(undefined);
+              }
+
+              previewRef.current?.load();
+            }}
+          />
+          {isVisible && (
+            <video
+              ref={previewRef}
+              className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
+              style={
+                rotate
+                  ? { transform: "rotate(90deg)", transformOrigin: "center center" }
+                  : undefined
+              }
+              preload="auto"
+              autoPlay
+              playsInline
+              muted
+              disableRemotePlayback
+              disablePictureInPicture
+              onSeeked={onPreviewSeeked}
+              onLoadedData={() => {
+                if (firstLoad) {
+                  setFirstLoad(false);
+                }
+
+                if (controller) {
+                  controller.previewReady();
+                } else {
+                  previewRef.current?.pause();
+                }
+
+                if (previewRef.current) {
+                  setVideoSize([
+                    previewRef.current.videoWidth,
+                    previewRef.current.videoHeight,
+                  ]);
+
+                  if (startTime && currentPreview) {
+                    previewRef.current.currentTime =
+                      startTime - currentPreview.start;
+                  }
+                }
+              }}
+            >
+              {currentPreview != undefined && (
+                <source
+                  src={`${baseUrl}${currentPreview.src.substring(1)}`}
+                  type={currentPreview.type}
+                />
+              )}
+            </video>
           )}
-        </video>
-      )}
+        </div>
+      </div>
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background_alt text-primary dark:bg-black md:rounded-2xl">
           {t("noPreviewFoundFor", { camera: cameraName })}
@@ -452,6 +521,7 @@ type PreviewFramesPlayerProps = {
   camera: string;
   timeRange: TimeRange;
   startTime?: number;
+  rotate?: boolean;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
   setCurrentHourFrame: (src: string) => void;
@@ -461,6 +531,7 @@ function PreviewFramesPlayer({
   camera,
   timeRange,
   startTime,
+  rotate,
   setCurrentHourFrame,
   onControllerReady,
   onClick,
@@ -503,6 +574,33 @@ function PreviewFramesPlayer({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgRef, frameTimes, imgRef.current]);
+
+  // rotation support
+  const rotateContainerRef = useRef<HTMLDivElement>(null);
+  const [rotateContainerSize, setRotateContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    if (!rotate) return;
+
+    const container = rotateContainerRef.current;
+    if (!container) return;
+
+    const updateSize = () => {
+      setRotateContainerSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [rotate]);
 
   // initial state
 
@@ -555,17 +653,48 @@ function PreviewFramesPlayer({
     <div
       className={cn(
         "relative flex w-full justify-center",
+        rotate && "h-full",
         className,
         onClick && "cursor-pointer",
       )}
       onClick={onClick}
     >
-      <img
-        ref={imgRef}
-        className={`size-full rounded-lg bg-black object-contain md:rounded-2xl`}
-        loading="lazy"
-        onLoad={onImageLoaded}
-      />
+      <div
+        ref={rotateContainerRef}
+        className="size-full"
+        style={
+          rotate
+            ? { position: "relative" as const, overflow: "hidden" as const }
+            : undefined
+        }
+      >
+        <div
+          style={
+            rotate
+              ? {
+                  position: "absolute" as const,
+                  top: "50%",
+                  left: "50%",
+                  width: rotateContainerSize.height || "100%",
+                  height: rotateContainerSize.width || "100%",
+                  transform: "translate(-50%, -50%)",
+                }
+              : { width: "100%", height: "100%" }
+          }
+        >
+          <img
+            ref={imgRef}
+            className={`size-full rounded-lg bg-black object-contain md:rounded-2xl`}
+            style={
+              rotate
+                ? { transform: "rotate(90deg)", transformOrigin: "center center" }
+                : undefined
+            }
+            loading="lazy"
+            onLoad={onImageLoaded}
+          />
+        </div>
+      </div>
       {previewFrames?.length === 0 && (
         <div className="-y-translate-1/2 align-center absolute inset-x-0 top-1/2 rounded-lg bg-background_alt text-center text-primary dark:bg-black md:rounded-2xl">
           {t("noPreviewFoundFor", { cameraName: cameraName })}

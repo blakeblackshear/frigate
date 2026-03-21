@@ -337,6 +337,7 @@ export default function DynamicVideoPlayer({
         cameraPreviews={cameraPreviews}
         startTime={startTimestamp}
         isScrubbing={isScrubbing}
+        rotate={rotate}
         onControllerReady={(previewController) =>
           setPreviewController(previewController)
         }
