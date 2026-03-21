@@ -98,8 +98,8 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
           : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
       const merged: Record<string, unknown> = {
-        ...rest,
         ...normalizedNonNullObj,
+        ...rest,
         type: mergedType,
       };
       // When unwrapping a nullable enum, add null to the enum list so
@@ -108,6 +108,39 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
         merged.enum = [...(merged.enum as unknown[]), null];
       }
       return merged as RJSFSchema;
+    }
+
+    // Handle anyOf where a plain string branch subsumes a string-enum branch
+    // (e.g. Union[StrEnum, str] or Union[StrEnum, str, None]).
+    // Collapse to a single string type with enum values preserved as `examples`.
+    const stringBranches = anyOf.filter(
+      (item) =>
+        isSchemaObject(item) &&
+        (item as Record<string, unknown>).type === "string",
+    );
+    const enumBranch = stringBranches.find((item) =>
+      Array.isArray((item as Record<string, unknown>).enum),
+    );
+    const plainStringBranch = stringBranches.find(
+      (item) => !Array.isArray((item as Record<string, unknown>).enum),
+    );
+
+    if (
+      enumBranch &&
+      plainStringBranch &&
+      anyOf.length === stringBranches.length + (hasNull ? 1 : 0)
+    ) {
+      const enumValues = (enumBranch as Record<string, unknown>).enum as
+        | unknown[]
+        | undefined;
+      const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
+      return {
+        ...rest,
+        type: hasNull ? ["string", "null"] : "string",
+        ...(enumValues && enumValues.length > 0
+          ? { examples: enumValues }
+          : {}),
+      } as RJSFSchema;
     }
 
     return {
@@ -142,8 +175,8 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
           : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
       const merged: Record<string, unknown> = {
-        ...rest,
         ...normalizedNonNullObj,
+        ...rest,
         type: mergedType,
       };
       // When unwrapping a nullable oneOf enum, add null to the enum list.

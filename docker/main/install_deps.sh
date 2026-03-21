@@ -52,7 +52,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
     rm -rf ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2026-03-19-13-03/ffmpeg-n7.1.3-43-g5a1f107b4c-linux64-gpl-7.1.tar.xz"
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
     rm -rf ffmpeg.tar.xz
 fi
@@ -64,7 +64,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
     rm -f ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2026-03-19-13-03/ffmpeg-n7.1.3-43-g5a1f107b4c-linuxarm64-gpl-7.1.tar.xz"
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
     rm -f ffmpeg.tar.xz
 fi

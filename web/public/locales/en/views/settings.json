@@ -1402,6 +1402,18 @@
         "audio": "Audio"
       }
     },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Embedding",
+        "vision": "Vision",
+        "tools": "Tools"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Select model…",
+      "builtIn": "Built-in Models",
+      "genaiProviders": "GenAI Providers"
+    },
     "review": {
       "title": "Review Settings"
     },

@@ -518,6 +518,15 @@ def main():
 
         sanitize_camera_descriptions(camera_translations)
 
+        # Profiles contain the same sections as the camera itself; only keep
+        # label and description to avoid duplicating every camera section.
+        if "profiles" in camera_translations:
+            camera_translations["profiles"] = {
+                k: v
+                for k, v in camera_translations["profiles"].items()
+                if k in ("label", "description")
+            }
+
         with open(cameras_file, "w", encoding="utf-8") as f:
             json.dump(camera_translations, f, indent=2, ensure_ascii=False)
             f.write("\n")

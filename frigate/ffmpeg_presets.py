@@ -120,10 +120,10 @@ PRESETS_HW_ACCEL_DECODE["preset-rk-h265"] = PRESETS_HW_ACCEL_DECODE[
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
-    FFMPEG_HWACCEL_VAAPI: "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
-    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2},hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
+    FFMPEG_HWACCEL_VAAPI: "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=nv12",
+    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=w={1}:h={2}:format=nv12,hwdownload,format=nv12,fps={0},format=yuv420p",
+    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=w={1}:h={2}:format=nv12,hwdownload,format=nv12,fps={0},format=yuv420p",
+    FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2},hwdownload,format=nv12",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
     FFMPEG_HWACCEL_RKMPP: "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
@@ -241,15 +241,6 @@ def parse_preset_hardware_acceleration_scale(
         scale = PRESETS_HW_ACCEL_SCALE["default"]
     else:
         scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
-
-    if (
-        ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5" in scale
-        and os.environ.get("FFMPEG_DISABLE_GAMMA_EQUALIZER") is not None
-    ):
-        scale = scale.replace(
-            ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
-            ":format=nv12,hwdownload,format=nv12,format=yuv420p",
-        )
 
     scale = scale.format(fps, width, height).split(" ")
     scale.extend(detect_args)

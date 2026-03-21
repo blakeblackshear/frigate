@@ -131,34 +131,35 @@ export function SingleSectionPage({
 
   return (
     <div className="flex size-full flex-col lg:pr-2">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <div className="flex flex-col">
-          <Heading as="h4">
-            {t(`${sectionKey}.label`, { ns: sectionNamespace })}
-          </Heading>
-          {i18n.exists(`${sectionKey}.description`, {
-            ns: sectionNamespace,
-          }) && (
-            <div className="my-1 text-sm text-muted-foreground">
-              {t(`${sectionKey}.description`, { ns: sectionNamespace })}
-            </div>
-          )}
-          {sectionDocsUrl && (
-            <div className="flex items-center text-sm text-primary-variant">
-              <Link
-                to={sectionDocsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                {t("readTheDocumentation", { ns: "common" })}
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
-          <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="mb-5 flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <Heading as="h4">
+              {t(`${sectionKey}.label`, { ns: sectionNamespace })}
+            </Heading>
+            {i18n.exists(`${sectionKey}.description`, {
+              ns: sectionNamespace,
+            }) && (
+              <div className="my-1 text-sm text-muted-foreground">
+                {t(`${sectionKey}.description`, { ns: sectionNamespace })}
+              </div>
+            )}
+            {sectionDocsUrl && (
+              <div className="flex items-center text-sm text-primary-variant">
+                <Link
+                  to={sectionDocsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline"
+                >
+                  {t("readTheDocumentation", { ns: "common" })}
+                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                </Link>
+              </div>
+            )}
+          </div>
+          {/* Desktop: badge inline next to title */}
+          <div className="hidden shrink-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
             {level === "camera" &&
               showOverrideIndicator &&
               sectionStatus.isOverridden && (
@@ -210,6 +211,40 @@ export function SingleSectionPage({
               </Badge>
             )}
           </div>
+        </div>
+        {/* Mobile: badge below title/description */}
+        <div className="flex flex-wrap items-center gap-2 sm:hidden">
+          {level === "camera" &&
+            showOverrideIndicator &&
+            sectionStatus.isOverridden && (
+              <Badge
+                variant="secondary"
+                className={cn(
+                  "cursor-default border-2 text-center text-xs text-primary-variant",
+                  sectionStatus.overrideSource === "profile" && profileColor
+                    ? profileColor.border
+                    : "border-selected",
+                )}
+              >
+                {sectionStatus.overrideSource === "profile"
+                  ? t("button.overriddenBaseConfig", {
+                      ns: "views/settings",
+                      defaultValue: "Overridden (Base Config)",
+                    })
+                  : t("button.overriddenGlobal", {
+                      ns: "views/settings",
+                      defaultValue: "Overridden (Global)",
+                    })}
+              </Badge>
+            )}
+          {sectionStatus.hasChanges && (
+            <Badge
+              variant="secondary"
+              className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+            >
+              {t("modified", { ns: "common", defaultValue: "Modified" })}
+            </Badge>
+          )}
         </div>
       </div>
       <ConfigSectionTemplate

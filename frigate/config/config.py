@@ -444,7 +444,7 @@ class FrigateConfig(FrigateBaseModel):
     # GenAI config (named provider configs: name -> GenAIConfig)
     genai: Dict[str, GenAIConfig] = Field(
         default_factory=dict,
-        title="Generative AI configuration (named providers).",
+        title="Generative AI configuration",
         description="Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
     )
 

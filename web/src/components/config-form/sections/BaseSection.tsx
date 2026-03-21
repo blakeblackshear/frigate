@@ -936,7 +936,7 @@ export function ConfigSection({
               </span>
             </div>
           )}
-          <div className="flex w-full items-center gap-2 md:w-auto">
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
             {((effectiveLevel === "camera" && isOverridden) ||
               effectiveLevel === "global") &&
               !hasChanges &&

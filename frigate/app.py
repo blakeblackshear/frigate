@@ -8,7 +8,7 @@ from multiprocessing import Queue
 from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import psutil
 import uvicorn
@@ -81,6 +81,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
+from frigate.util.process import FrigateProcess
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
@@ -499,6 +500,47 @@ class FrigateApp:
 
     def start_watchdog(self) -> None:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
+
+        # (attribute on self, key in self.processes, factory)
+        specs: list[tuple[str, str, Callable[[], FrigateProcess]]] = [
+            (
+                "embedding_process",
+                "embeddings",
+                lambda: EmbeddingProcess(
+                    self.config, self.embeddings_metrics, self.stop_event
+                ),
+            ),
+            (
+                "recording_process",
+                "recording",
+                lambda: RecordProcess(self.config, self.stop_event),
+            ),
+            (
+                "review_segment_process",
+                "review_segment",
+                lambda: ReviewProcess(self.config, self.stop_event),
+            ),
+            (
+                "output_processor",
+                "output",
+                lambda: OutputProcess(self.config, self.stop_event),
+            ),
+        ]
+
+        for attr, key, factory in specs:
+            if not hasattr(self, attr):
+                continue
+
+            def on_restart(
+                proc: FrigateProcess, _attr: str = attr, _key: str = key
+            ) -> None:
+                setattr(self, _attr, proc)
+                self.processes[_key] = proc.pid or 0
+
+            self.frigate_watchdog.register(
+                key, getattr(self, attr), factory, on_restart
+            )
+
         self.frigate_watchdog.start()
 
     def init_auth(self) -> None:
