@@ -48,6 +48,7 @@ type DynamicVideoPlayerProps = {
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   transformedOverlay?: ReactNode;
+  rotate?: boolean;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -67,6 +68,7 @@ export default function DynamicVideoPlayer({
   toggleFullscreen,
   containerRef,
   transformedOverlay,
+  rotate,
 }: DynamicVideoPlayerProps) {
   const { t } = useTranslation(["components/player"]);
   const apiHost = useApiHost();
@@ -322,6 +324,7 @@ export default function DynamicVideoPlayer({
           camera={contextCamera || camera}
           currentTimeOverride={currentTime}
           transformedOverlay={transformedOverlay}
+          rotate={rotate}
         />
       )}
       <PreviewPlayer

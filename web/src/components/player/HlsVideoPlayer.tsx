@@ -59,6 +59,7 @@ type HlsVideoPlayerProps = {
   camera?: string;
   currentTimeOverride?: number;
   transformedOverlay?: ReactNode;
+  rotate?: boolean;
 };
 
 export default function HlsVideoPlayer({
@@ -84,6 +85,7 @@ export default function HlsVideoPlayer({
   camera,
   currentTimeOverride,
   transformedOverlay,
+  rotate,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -98,6 +100,33 @@ export default function HlsVideoPlayer({
   const [useHlsCompat, setUseHlsCompat] = useState(false);
   const [loadedMetadata, setLoadedMetadata] = useState(false);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
+
+  // rotation support
+  const rotateContainerRef = useRef<HTMLDivElement>(null);
+  const [rotateContainerSize, setRotateContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    if (!rotate) return;
+
+    const container = rotateContainerRef.current;
+    if (!container) return;
+
+    const updateSize = () => {
+      setRotateContainerSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [rotate]);
 
   const applyVideoDimensions = useCallback(
     (width: number, height: number) => {
@@ -388,9 +417,42 @@ export default function HlsVideoPlayer({
                 />
               </div>
             )}
+          <div
+            ref={rotateContainerRef}
+            className="size-full"
+            style={
+              rotate
+                ? { position: "relative" as const, overflow: "hidden" as const }
+                : undefined
+            }
+          >
+            <div
+              style={
+                rotate
+                  ? {
+                      position: "absolute" as const,
+                      top: "50%",
+                      left: "50%",
+                      width: rotateContainerSize.height || "100%",
+                      height: rotateContainerSize.width || "100%",
+                      transform: "translate(-50%, -50%)",
+                    }
+                  : { width: "100%", height: "100%" }
+              }
+            >
           <video
             ref={videoRef}
             className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"} cursor-pointer`}
+            style={
+              rotate
+                ? {
+                    transform: "rotate(90deg)",
+                    transformOrigin: "center center",
+                    width: "100%",
+                    height: "100%",
+                  }
+                : undefined
+            }
             preload="auto"
             autoPlay
             controls={!frigateControls}
@@ -508,6 +570,8 @@ export default function HlsVideoPlayer({
               }
             }}
           />
+          </div>
+          </div>
         </div>
       </TransformComponent>
     </TransformWrapper>
