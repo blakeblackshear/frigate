@@ -466,7 +466,32 @@ export default function DraggableGridLayout({
     }));
   }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig]);
 
-  const activeGridLayout = fitToScreen && fitLayout ? fitLayout : currentGridLayout;
+  const [fitLayoutOverride, setFitLayoutOverride] = useState<Layout | undefined>();
+
+  useEffect(() => {
+    setFitLayoutOverride(undefined);
+  }, [fitGridParams, cameras, includeBirdseye]);
+
+  const handleFitDragStop = useCallback(
+    (newLayout: Layout) => {
+      if (!fitToScreen || !fitGridParams) return;
+      const w = fitGridParams.gridUnitsPerCam;
+      const normalized = newLayout.map((item) => ({
+        ...item,
+        w,
+        h: w,
+      }));
+      setFitLayoutOverride(normalized);
+    },
+    [fitToScreen, fitGridParams],
+  );
+
+  const activeGridLayout = useMemo(() => {
+    if (fitToScreen) {
+      return fitLayoutOverride ?? fitLayout ?? currentGridLayout;
+    }
+    return currentGridLayout;
+  }, [fitToScreen, fitLayoutOverride, fitLayout, currentGridLayout]);
 
   const handleResize = (
     _layout: Layout,
@@ -837,9 +862,9 @@ export default function DraggableGridLayout({
               handles: isEditMode && !fitToScreen ? ["sw", "nw", "se", "ne"] : [],
             }}
             dragConfig={{
-              enabled: isEditMode && !fitToScreen,
+              enabled: isEditMode,
             }}
-            onDragStop={handleLayoutChange}
+            onDragStop={fitToScreen ? handleFitDragStop : handleLayoutChange}
             onResize={handleResize}
             onResizeStart={() => setShowCircles(false)}
             onResizeStop={handleLayoutChange}
