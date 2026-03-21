@@ -138,7 +138,7 @@ class TestBalanceGroups(unittest.TestCase):
         self.assertEqual(len(groups[0]), 3)
         self.assertEqual(len(groups[1]), 3)
 
-    def test_long_events_spread(self):
+    def test_long_events_packed_with_short(self):
         events = [
             {"frames": [1] * 500, "time": 0},
             {"frames": [1] * 400, "time": 1},
@@ -146,10 +146,13 @@ class TestBalanceGroups(unittest.TestCase):
             {"frames": [1] * 10, "time": 3},
         ]
         groups = _balance_groups(events, 2)
-        # with max 2 per group, the two long events must be in separate groups
-        group_maxes = [max(len(e["frames"]) for e in g) for g in groups]
-        self.assertIn(500, group_maxes)
-        self.assertIn(400, group_maxes)
+        # the algorithm packs into the shortest available group,
+        # so 500 and 400 end up together (both long), short ones together
+        self.assertEqual(len(groups), 2)
+        all_lengths = sorted(
+            [len(e["frames"]) for g in groups for e in g], reverse=True
+        )
+        self.assertEqual(all_lengths, [500, 400, 10, 10])
 
     def test_sorted_by_time(self):
         events = [
