@@ -39,7 +39,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { IoClose, IoStatsChart } from "react-icons/io5";
-import { LuLayoutDashboard, LuPencil } from "react-icons/lu";
+import { LuLayoutDashboard, LuMaximize, LuPencil } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
 import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
@@ -131,6 +131,11 @@ export default function DraggableGridLayout({
 
   const [gridLayout, setGridLayout, isGridLayoutLoaded] =
     useUserPersistence<Layout>(`${cameraGroup}-draggable-layout`);
+
+  const [fitToScreen, setFitToScreen] = useUserPersistence(
+    "liveFitToScreen",
+    false,
+  );
 
   const [group] = useUserPersistedOverlayState(
     "cameraGroup",
@@ -360,10 +365,108 @@ export default function DraggableGridLayout({
     }
   }, [containerRef, containerHeight]);
 
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const viewportRoRef = useRef<ResizeObserver | null>(null);
+
+  useEffect(() => {
+    viewportRoRef.current?.disconnect();
+    viewportRoRef.current = null;
+    const el = containerRef.current;
+    if (!el) return;
+    setViewportHeight(el.clientHeight);
+    const ro = new ResizeObserver(([entry]) => {
+      setViewportHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    viewportRoRef.current = ro;
+    return () => ro.disconnect();
+  }, [containerRef]);
+
+  const totalCameras = useMemo(() => {
+    let count = cameras.length;
+    if (includeBirdseye && birdseyeConfig?.enabled) count += 1;
+    return count;
+  }, [cameras, includeBirdseye, birdseyeConfig]);
+
+  const fitGridParams = useMemo(() => {
+    if (!fitToScreen || !availableWidth || !viewportHeight || totalCameras === 0) {
+      return null;
+    }
+
+    const aspectRatio = 16 / 9;
+    let bestCols = 1;
+    let bestScore = 0;
+
+    for (let cols = 1; cols <= Math.min(totalCameras, 12); cols++) {
+      const w = Math.floor(12 / cols);
+      if (w < 1) continue;
+      const rows = Math.ceil(totalCameras / cols);
+      const camWidth = (w / 12) * availableWidth;
+      const camHeight = camWidth / aspectRatio;
+      const totalHeight = camHeight * rows;
+
+      if (totalHeight <= viewportHeight) {
+        const score = camWidth * camHeight;
+        if (score > bestScore) {
+          bestScore = score;
+          bestCols = cols;
+        }
+      }
+    }
+
+    if (bestScore === 0) {
+      let minOvershoot = Infinity;
+      for (let cols = 1; cols <= Math.min(totalCameras, 12); cols++) {
+        const w = Math.floor(12 / cols);
+        if (w < 1) continue;
+        const rows = Math.ceil(totalCameras / cols);
+        const camWidth = (w / 12) * availableWidth;
+        const camHeight = camWidth / aspectRatio;
+        const totalHeight = camHeight * rows;
+        if (totalHeight - viewportHeight < minOvershoot) {
+          minOvershoot = totalHeight - viewportHeight;
+          bestCols = cols;
+        }
+      }
+    }
+
+    const gridUnitsPerCam = Math.floor(12 / bestCols);
+    const rows = Math.ceil(totalCameras / bestCols);
+    const fittedCellH = viewportHeight / (rows * gridUnitsPerCam);
+
+    return { gridUnitsPerCam, colsPerRow: bestCols, cellHeight: fittedCellH };
+  }, [fitToScreen, availableWidth, viewportHeight, totalCameras]);
+
   const cellHeight = useMemo(() => {
+    if (fitGridParams) {
+      return fitGridParams.cellHeight;
+    }
     const aspectRatio = 16 / 9;
     return availableWidth / 12 / aspectRatio;
-  }, [availableWidth]);
+  }, [availableWidth, fitGridParams]);
+
+  const fitLayout = useMemo(() => {
+    if (!fitToScreen || !fitGridParams) return null;
+
+    const cameraNames =
+      includeBirdseye && birdseyeConfig?.enabled
+        ? ["birdseye", ...cameras.map((camera) => camera?.name || "")]
+        : cameras.map((camera) => camera?.name || "");
+
+    const w = fitGridParams.gridUnitsPerCam;
+    const h = w;
+    const colsPerRow = fitGridParams.colsPerRow;
+
+    return cameraNames.map((name, index) => ({
+      i: name,
+      x: (index % colsPerRow) * w,
+      y: Math.floor(index / colsPerRow) * h,
+      w,
+      h,
+    }));
+  }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig]);
+
+  const activeGridLayout = fitToScreen && fitLayout ? fitLayout : currentGridLayout;
 
   const handleResize = (
     _layout: Layout,
@@ -718,11 +821,11 @@ export default function DraggableGridLayout({
             className="grid-layout"
             width={availableWidth}
             layouts={{
-              lg: currentGridLayout,
-              md: currentGridLayout,
-              sm: currentGridLayout,
-              xs: currentGridLayout,
-              xxs: currentGridLayout,
+              lg: activeGridLayout,
+              md: activeGridLayout,
+              sm: activeGridLayout,
+              xs: activeGridLayout,
+              xxs: activeGridLayout,
             }}
             rowHeight={cellHeight}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
@@ -730,11 +833,11 @@ export default function DraggableGridLayout({
             margin={[0, 0]}
             containerPadding={[0, 0]}
             resizeConfig={{
-              enabled: isEditMode,
-              handles: isEditMode ? ["sw", "nw", "se", "ne"] : [],
+              enabled: isEditMode && !fitToScreen,
+              handles: isEditMode && !fitToScreen ? ["sw", "nw", "se", "ne"] : [],
             }}
             dragConfig={{
-              enabled: isEditMode,
+              enabled: isEditMode && !fitToScreen,
             }}
             onDragStop={handleLayoutChange}
             onResize={handleResize}
@@ -988,6 +1091,24 @@ export default function DraggableGridLayout({
                       </TooltipContent>
                     </Tooltip>
                   )}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          "cursor-pointer rounded-lg bg-secondary text-secondary-foreground transition-all duration-300 hover:bg-muted hover:opacity-100",
+                          fitToScreen ? "opacity-100" : "opacity-60",
+                        )}
+                        onClick={() => setFitToScreen(!fitToScreen)}
+                      >
+                        <LuMaximize className="size-5 md:m-[6px]" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {fitToScreen
+                        ? t("fitToScreen.disable")
+                        : t("fitToScreen.enable")}
+                    </TooltipContent>
+                  </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
