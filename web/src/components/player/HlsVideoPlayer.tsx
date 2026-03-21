@@ -379,7 +379,7 @@ export default function HlsVideoPlayer({
         }}
         contentStyle={{
           width: "100%",
-          height: isMobile ? "100%" : undefined,
+          height: isMobile || rotate ? "100%" : undefined,
         }}
       >
         <div className="relative size-full">
