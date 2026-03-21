@@ -199,10 +199,32 @@ class TestRecapConfig(unittest.TestCase):
 
         cfg = RecapConfig()
         self.assertFalse(cfg.enabled)
+        self.assertFalse(cfg.auto_generate)
+        self.assertEqual(cfg.schedule_time, "02:00")
+        self.assertEqual(cfg.cameras, [])
         self.assertEqual(cfg.default_label, "person")
+        self.assertEqual(cfg.speed, 2)
+        self.assertEqual(cfg.max_per_group, 3)
         self.assertEqual(cfg.video_duration, 30)
 
-    def test_validation(self):
+    def test_custom_values(self):
+        from frigate.config.recap import RecapConfig
+
+        cfg = RecapConfig(
+            enabled=True,
+            auto_generate=True,
+            schedule_time="03:30",
+            cameras=["front", "back"],
+            speed=4,
+            max_per_group=5,
+        )
+        self.assertTrue(cfg.auto_generate)
+        self.assertEqual(cfg.schedule_time, "03:30")
+        self.assertEqual(cfg.cameras, ["front", "back"])
+        self.assertEqual(cfg.speed, 4)
+        self.assertEqual(cfg.max_per_group, 5)
+
+    def test_validation_ranges(self):
         from pydantic import ValidationError
 
         from frigate.config.recap import RecapConfig
@@ -215,6 +237,29 @@ class TestRecapConfig(unittest.TestCase):
             RecapConfig(video_duration=2)
         with self.assertRaises(ValidationError):
             RecapConfig(background_samples=2)
+        with self.assertRaises(ValidationError):
+            RecapConfig(speed=0)
+        with self.assertRaises(ValidationError):
+            RecapConfig(speed=10)
+        with self.assertRaises(ValidationError):
+            RecapConfig(max_per_group=0)
+
+    def test_schedule_time_validation(self):
+        from pydantic import ValidationError
+
+        from frigate.config.recap import RecapConfig
+
+        with self.assertRaises(ValidationError):
+            RecapConfig(schedule_time="25:00")
+        with self.assertRaises(ValidationError):
+            RecapConfig(schedule_time="abc")
+        with self.assertRaises(ValidationError):
+            RecapConfig(schedule_time="12:60")
+        # valid edge cases
+        cfg = RecapConfig(schedule_time="00:00")
+        self.assertEqual(cfg.schedule_time, "00:00")
+        cfg = RecapConfig(schedule_time="23:59")
+        self.assertEqual(cfg.schedule_time, "23:59")
 
 
 if __name__ == "__main__":

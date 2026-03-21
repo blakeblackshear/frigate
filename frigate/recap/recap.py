@@ -317,8 +317,8 @@ class RecapGenerator(threading.Thread):
 
         recap_cfg = config.recap
         self.output_fps = recap_cfg.output_fps
-        self.speed = 2
-        self.max_per_group = 3
+        self.speed = recap_cfg.speed
+        self.max_per_group = recap_cfg.max_per_group
         self.video_duration = recap_cfg.video_duration
         self.background_samples = recap_cfg.background_samples
 
