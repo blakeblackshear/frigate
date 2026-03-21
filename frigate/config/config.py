@@ -69,6 +69,7 @@ from .mqtt import MqttConfig
 from .network import NetworkingConfig
 from .profile import ProfileDefinitionConfig
 from .proxy import ProxyConfig
+from .recap import RecapConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
 from .ui import UIConfig
@@ -412,6 +413,11 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ProxyConfig,
         title="Proxy",
         description="Settings for integrating Frigate behind a reverse proxy that passes authenticated user headers.",
+    )
+    recap: RecapConfig = Field(
+        default_factory=RecapConfig,
+        title="Recap",
+        description="Settings for time-stacked recap video generation that composites detected objects onto a clean background.",
     )
     telemetry: TelemetryConfig = Field(
         default_factory=TelemetryConfig,

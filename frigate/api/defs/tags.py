@@ -15,4 +15,5 @@ class Tags(Enum):
     notifications = "Notifications"
     preview = "Preview"
     recordings = "Recordings"
+    recap = "Recap"
     review = "Review"
