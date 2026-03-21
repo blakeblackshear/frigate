@@ -467,47 +467,27 @@ export default function DraggableGridLayout({
   }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig]);
 
   const [fitLayoutOverride, setFitLayoutOverride] = useState<Layout | undefined>();
-  const fitDragRef = useRef<{
-    draggedId: string;
-    mouseX: number;
-    mouseY: number;
-  } | null>(null);
+  const draggedItemRef = useRef<string | null>(null);
 
   useEffect(() => {
     setFitLayoutOverride(undefined);
   }, [fitGridParams, cameras, includeBirdseye]);
 
   const handleFitDrag = useCallback(
-    (
-      _layout: Layout,
-      _oldItem: LayoutItem,
-      layoutItem: LayoutItem,
-      _placeholder: LayoutItem,
-      event: MouseEvent,
-    ) => {
-      fitDragRef.current = {
-        draggedId: layoutItem.i,
-        mouseX: event.clientX,
-        mouseY: event.clientY,
-      };
+    (_layout: Layout, _oldItem: LayoutItem, layoutItem: LayoutItem) => {
+      draggedItemRef.current = layoutItem.i;
     },
     [],
   );
 
   const handleFitDragStop = useCallback(
-    (
-      _newLayout: Layout,
-      _oldItem: LayoutItem,
-      _layoutItem: LayoutItem,
-      _placeholder: LayoutItem,
-      event: MouseEvent,
-    ) => {
-      if (!fitToScreen || !fitGridParams || !fitDragRef.current) return;
+    (newLayout: Layout, _oldItem: LayoutItem, layoutItem: LayoutItem) => {
+      if (!fitToScreen || !fitGridParams) return;
 
       const w = fitGridParams.gridUnitsPerCam;
       const colsPerRow = fitGridParams.colsPerRow;
-      const draggedId = fitDragRef.current.draggedId;
-      fitDragRef.current = null;
+      const draggedId = draggedItemRef.current ?? layoutItem.i;
+      draggedItemRef.current = null;
 
       const currentOrder = fitLayoutOverride ?? fitLayout ?? [];
       const orderedNames = [...currentOrder]
@@ -517,23 +497,10 @@ export default function DraggableGridLayout({
         })
         .map((item) => item.i);
 
-      const gridEl = containerRef.current?.querySelector(
-        ".grid-layout",
-      ) as HTMLElement | null;
-      if (!gridEl) return;
-
-      const rect = gridEl.getBoundingClientRect();
-      const mouseRelX = event.clientX - rect.left;
-      const mouseRelY = event.clientY - rect.top;
-
-      const cellWidthPx = rect.width / colsPerRow;
-      const cellHeightPx = cellHeight * w;
-
-      const targetCol = Math.max(
-        0,
-        Math.min(Math.floor(mouseRelX / cellWidthPx), colsPerRow - 1),
-      );
-      const targetRow = Math.max(0, Math.floor(mouseRelY / cellHeightPx));
+      const dropCenterX = layoutItem.x + w / 2;
+      const dropCenterY = layoutItem.y + w / 2;
+      const targetCol = Math.min(Math.floor(dropCenterX / w), colsPerRow - 1);
+      const targetRow = Math.floor(dropCenterY / w);
       const totalRows = Math.ceil(orderedNames.length / colsPerRow);
       const clampedRow = Math.min(targetRow, totalRows - 1);
       const targetIndex = Math.min(
@@ -543,7 +510,7 @@ export default function DraggableGridLayout({
 
       const sourceIndex = orderedNames.indexOf(draggedId);
       if (sourceIndex === -1 || sourceIndex === targetIndex) {
-        setFitLayoutOverride((prev) => (prev ? [...prev] : prev));
+        setFitLayoutOverride((prev) => prev);
         return;
       }
 
@@ -563,7 +530,7 @@ export default function DraggableGridLayout({
 
       setFitLayoutOverride(normalized);
     },
-    [fitToScreen, fitGridParams, fitLayoutOverride, fitLayout, cellHeight, containerRef],
+    [fitToScreen, fitGridParams, fitLayoutOverride, fitLayout],
   );
 
   const activeGridLayout = useMemo(() => {
