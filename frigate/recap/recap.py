@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 RECAP_CACHE = os.path.join(CACHE_DIR, "recap")
 OUTPUT_CRF = "23"
 
-# bg subtraction within per-event spotlight — threshold can be low
+# bg subtraction within per-event spotlight - threshold can be low
 # because the reference frame matches the event's lighting exactly
 BG_DIFF_THRESHOLD = 25
 DILATE_ITERATIONS = 2
@@ -164,7 +164,7 @@ def _build_background(
     end_time: float,
     sample_count: int,
 ) -> Optional[np.ndarray]:
-    """Median of sampled frames — removes moving objects, keeps the static scene."""
+    """Median of sampled frames - removes moving objects, keeps the static scene."""
     duration = end_time - start_time
     step = duration / (sample_count + 1)
     resolution = None
@@ -444,7 +444,7 @@ class RecapGenerator(threading.Thread):
             if len(frames) < 3:
                 continue
 
-            # first frame is from pre-capture — use as per-event bg reference
+            # first frame is from pre-capture - use as per-event bg reference
             ref_bg = frames[0]
             event_frames = frames[2:]
             if not event_frames:
