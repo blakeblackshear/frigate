@@ -379,17 +379,21 @@ export function RecordingView({
         return undefined;
       }
 
+      let ratio: number;
       if (cam == mainCamera && fullResolution.width && fullResolution.height) {
-        return fullResolution.width / fullResolution.height;
+        ratio = fullResolution.width / fullResolution.height;
+      } else {
+        const camera = config.cameras[cam];
+
+        if (!camera) {
+          return undefined;
+        }
+
+        ratio = camera.detect.width / camera.detect.height;
       }
 
       const camera = config.cameras[cam];
-
-      if (!camera) {
-        return undefined;
-      }
-
-      return camera.detect.width / camera.detect.height;
+      return camera?.ui?.rotate ? 1 / ratio : ratio;
     },
     [config, fullResolution, mainCamera],
   );
@@ -811,6 +815,7 @@ export function RecordingView({
                 <DynamicVideoPlayer
                   className={grow}
                   camera={mainCamera}
+                  rotate={config?.cameras[mainCamera]?.ui?.rotate}
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
                   startTimestamp={playbackStart}
