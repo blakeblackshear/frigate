@@ -360,13 +360,11 @@ export default function LiveCameraView({
   }, [windowAspectRatio, containerRef]);
 
   const cameraAspectRatio = useMemo(() => {
-    let ratio;
     if (fullResolution.width && fullResolution.height) {
-      ratio = fullResolution.width / fullResolution.height;
+      return fullResolution.width / fullResolution.height;
     } else {
-      ratio = camera.detect.width / camera.detect.height;
+      return camera.detect.width / camera.detect.height;
     }
-    return camera.ui?.rotate ? 1 / ratio : ratio;
   }, [camera, fullResolution]);
 
   const constrainedAspectRatio = useMemo<number>(() => {
