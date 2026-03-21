@@ -39,7 +39,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { IoClose, IoStatsChart } from "react-icons/io5";
-import { LuLayoutDashboard, LuMaximize, LuPencil } from "react-icons/lu";
+import { LuLayoutDashboard, LuScanBarcode, LuPencil } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
 import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
@@ -476,11 +476,21 @@ export default function DraggableGridLayout({
     (newLayout: Layout) => {
       if (!fitToScreen || !fitGridParams) return;
       const w = fitGridParams.gridUnitsPerCam;
-      const normalized = newLayout.map((item) => ({
-        ...item,
+      const colsPerRow = fitGridParams.colsPerRow;
+
+      const sorted = [...newLayout].sort((a, b) => {
+        if (a.y !== b.y) return a.y - b.y;
+        return a.x - b.x;
+      });
+
+      const normalized = sorted.map((item, index) => ({
+        i: item.i,
+        x: (index % colsPerRow) * w,
+        y: Math.floor(index / colsPerRow) * w,
         w,
         h: w,
       }));
+
       setFitLayoutOverride(normalized);
     },
     [fitToScreen, fitGridParams],
@@ -1125,7 +1135,7 @@ export default function DraggableGridLayout({
                         )}
                         onClick={() => setFitToScreen(!fitToScreen)}
                       >
-                        <LuMaximize className="size-5 md:m-[6px]" />
+                        <LuScanBarcode className="size-5 md:m-[6px]" />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
