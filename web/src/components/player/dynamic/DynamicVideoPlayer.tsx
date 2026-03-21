@@ -326,7 +326,7 @@ export default function DynamicVideoPlayer({
       )}
       <PreviewPlayer
         className={cn(
-          className,
+          className?.replace(/\bsize-full\b/g, "w-full"),
           isScrubbing || isLoading ? "visible" : "hidden",
         )}
         camera={camera}
