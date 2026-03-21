@@ -145,8 +145,8 @@ class TestBalanceGroups(unittest.TestCase):
             {"frames": [1] * 10, "time": 2},
             {"frames": [1] * 10, "time": 3},
         ]
-        groups = _balance_groups(events, 3)
-        # long events should end up in different groups
+        groups = _balance_groups(events, 2)
+        # with max 2 per group, the two long events must be in separate groups
         group_maxes = [max(len(e["frames"]) for e in g) for g in groups]
         self.assertIn(500, group_maxes)
         self.assertIn(400, group_maxes)

@@ -24,6 +24,7 @@ router = APIRouter(tags=[Tags.recap])
     description="Creates a video showing all detected objects from the given time range "
     "composited onto a clean background. Each detection appears at its real "
     "position with a timestamp label.",
+    dependencies=[Depends(require_role(["admin"]))],
 )
 def generate_recap(
     request: Request,
@@ -31,7 +32,6 @@ def generate_recap(
     start_time: float,
     end_time: float,
     label: Optional[str] = None,
-    _: str = Depends(require_role(["admin"])),
 ):
     config = request.app.frigate_config
 
@@ -84,11 +84,11 @@ def generate_recap(
 @router.get(
     "/recap/{camera_name}",
     summary="List recap exports for a camera",
+    dependencies=[Depends(require_camera_access)],
 )
 def get_recaps(
     request: Request,
     camera_name: str,
-    _: str = Depends(require_camera_access()),
 ):
     recaps = (
         Export.select()
