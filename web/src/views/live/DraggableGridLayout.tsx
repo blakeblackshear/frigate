@@ -467,24 +467,61 @@ export default function DraggableGridLayout({
   }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig]);
 
   const [fitLayoutOverride, setFitLayoutOverride] = useState<Layout | undefined>();
+  const draggedItemRef = useRef<string | null>(null);
 
   useEffect(() => {
     setFitLayoutOverride(undefined);
   }, [fitGridParams, cameras, includeBirdseye]);
 
+  const handleFitDrag = useCallback(
+    (_layout: Layout, _oldItem: LayoutItem, layoutItem: LayoutItem) => {
+      draggedItemRef.current = layoutItem.i;
+    },
+    [],
+  );
+
   const handleFitDragStop = useCallback(
-    (newLayout: Layout) => {
+    (newLayout: Layout, _oldItem: LayoutItem, layoutItem: LayoutItem) => {
       if (!fitToScreen || !fitGridParams) return;
+
       const w = fitGridParams.gridUnitsPerCam;
       const colsPerRow = fitGridParams.colsPerRow;
+      const draggedId = draggedItemRef.current ?? layoutItem.i;
+      draggedItemRef.current = null;
 
-      const sorted = [...newLayout].sort((a, b) => {
-        if (a.y !== b.y) return a.y - b.y;
-        return a.x - b.x;
-      });
+      const currentOrder = fitLayoutOverride ?? fitLayout ?? [];
+      const orderedNames = [...currentOrder]
+        .sort((a, b) => {
+          if (a.y !== b.y) return a.y - b.y;
+          return a.x - b.x;
+        })
+        .map((item) => item.i);
 
-      const normalized = sorted.map((item, index) => ({
-        i: item.i,
+      const dropCenterX = layoutItem.x + w / 2;
+      const dropCenterY = layoutItem.y + w / 2;
+      const targetCol = Math.min(Math.floor(dropCenterX / w), colsPerRow - 1);
+      const targetRow = Math.floor(dropCenterY / w);
+      const totalRows = Math.ceil(orderedNames.length / colsPerRow);
+      const clampedRow = Math.min(targetRow, totalRows - 1);
+      const targetIndex = Math.min(
+        clampedRow * colsPerRow + targetCol,
+        orderedNames.length - 1,
+      );
+
+      const sourceIndex = orderedNames.indexOf(draggedId);
+      if (sourceIndex === -1 || sourceIndex === targetIndex) {
+        setFitLayoutOverride((prev) => prev);
+        return;
+      }
+
+      const newOrder = [...orderedNames];
+      [newOrder[sourceIndex], newOrder[targetIndex]] = [
+        newOrder[targetIndex],
+        newOrder[sourceIndex],
+      ];
+
+      const normalized = newOrder.map((name, index) => ({
+        i: name,
         x: (index % colsPerRow) * w,
         y: Math.floor(index / colsPerRow) * w,
         w,
@@ -493,7 +530,7 @@ export default function DraggableGridLayout({
 
       setFitLayoutOverride(normalized);
     },
-    [fitToScreen, fitGridParams],
+    [fitToScreen, fitGridParams, fitLayoutOverride, fitLayout],
   );
 
   const activeGridLayout = useMemo(() => {
@@ -874,6 +911,7 @@ export default function DraggableGridLayout({
             dragConfig={{
               enabled: isEditMode,
             }}
+            onDrag={fitToScreen ? handleFitDrag : undefined}
             onDragStop={fitToScreen ? handleFitDragStop : handleLayoutChange}
             onResize={handleResize}
             onResizeStart={() => setShowCircles(false)}
