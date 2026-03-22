@@ -85,7 +85,7 @@ export default function DetailActionsMenu({
             <DropdownMenuItem>
               <a
                 className="w-full"
-                href={`${baseUrl}api/events/${search.id}/snapshot.jpg?bbox=1`}
+                href={`${baseUrl}api/events/${search.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`}
                 download={`${search.camera}_${search.label}.jpg`}
               >
                 <div className="flex cursor-pointer items-center gap-2">
@@ -94,20 +94,19 @@ export default function DetailActionsMenu({
               </a>
             </DropdownMenuItem>
           )}
-          {search.has_snapshot &&
-            config?.cameras[search.camera].snapshots.clean_copy && (
-              <DropdownMenuItem>
-                <a
-                  className="w-full"
-                  href={`${baseUrl}api/events/${search.id}/snapshot-clean.webp`}
-                  download={`${search.camera}_${search.label}-clean.webp`}
-                >
-                  <div className="flex cursor-pointer items-center gap-2">
-                    <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
-                  </div>
-                </a>
-              </DropdownMenuItem>
-            )}
+          {search.has_snapshot && (
+            <DropdownMenuItem>
+              <a
+                className="w-full"
+                href={`${baseUrl}api/events/${search.id}/snapshot-clean.webp`}
+                download={`${search.camera}_${search.label}-clean.webp`}
+              >
+                <div className="flex cursor-pointer items-center gap-2">
+                  <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+          )}
           {search.has_clip && (
             <DropdownMenuItem>
               <a

@@ -246,8 +246,8 @@ def sync_recordings(
 def sync_event_snapshots(dry_run: bool = False, force: bool = False) -> SyncResult:
     """Sync event snapshots - delete files not referenced by any event.
 
-    Event snapshots are stored at: CLIPS_DIR/{camera}-{event_id}.jpg
-    Also checks for clean variants: {camera}-{event_id}-clean.webp and -clean.png
+    Event snapshots are stored at: CLIPS_DIR/{camera}-{event_id}-clean.webp
+    Also checks legacy variants: {camera}-{event_id}.jpg and -clean.png
     """
     result = SyncResult(media_type="event_snapshots")
 

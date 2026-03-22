@@ -5,14 +5,16 @@ import fcntl
 import logging
 import os
 import time
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 from numpy import ndarray
 
 from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.models import Event
+from frigate.util.image import get_snapshot_bytes, relative_box_to_absolute
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +32,207 @@ def get_event_thumbnail_bytes(event: Event) -> bytes | None:
             return None
 
 
-def get_event_snapshot(event: Event) -> ndarray:
-    media_name = f"{event.camera}-{event.id}"
-    return cv2.imread(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+def get_event_snapshot(event: Event) -> ndarray | None:
+    image, _ = load_event_snapshot_image(event)
+    return image
+
+
+def get_event_snapshot_path(
+    event: Event, *, clean_only: bool = False
+) -> tuple[str | None, bool]:
+    clean_snapshot_paths = [
+        os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"),
+        os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"),
+    ]
+
+    for image_path in clean_snapshot_paths:
+        if os.path.exists(image_path):
+            return image_path, True
+
+    snapshot_path = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
+    if not os.path.exists(snapshot_path):
+        return None, False
+
+    # Legacy JPG snapshots may already include overlays, so they should never
+    # be treated as clean input for additional rendering.
+    if clean_only:
+        return None, False
+
+    return snapshot_path, False
+
+
+def load_event_snapshot_image(
+    event: Event, *, clean_only: bool = False
+) -> tuple[ndarray | None, bool]:
+    image_path, is_clean_snapshot = get_event_snapshot_path(
+        event, clean_only=clean_only
+    )
+    if image_path is None:
+        return None, False
+
+    image = cv2.imread(image_path)
+    if image is None:
+        logger.warning("Unable to load snapshot from %s", image_path)
+        return None, False
+
+    return image, is_clean_snapshot
+
+
+def _get_event_snapshot_overlay_boxes(
+    frame_shape: tuple[int, ...], event: Event
+) -> list[dict[str, Any]]:
+    overlay_boxes: list[dict[str, Any]] = []
+    draw_data = event.data.get("draw") if event.data else {}
+    draw_boxes = draw_data.get("boxes", []) if isinstance(draw_data, dict) else []
+
+    for draw_box in draw_boxes:
+        box = relative_box_to_absolute(frame_shape, draw_box.get("box"))
+        if box is None:
+            continue
+
+        draw_color = draw_box.get("color", (255, 0, 0))
+        color = (
+            tuple(draw_color) if isinstance(draw_color, (list, tuple)) else (255, 0, 0)
+        )
+        overlay_boxes.append(
+            {
+                "box": box,
+                "label": event.label,
+                "score": draw_box.get("score"),
+                "color": color,
+            }
+        )
+
+    return overlay_boxes
+
+
+def get_event_snapshot_bytes(
+    event: Event,
+    *,
+    ext: str,
+    timestamp: bool = False,
+    bounding_box: bool = False,
+    crop: bool = False,
+    height: int | None = None,
+    quality: int | None = None,
+    timestamp_style: Any | None = None,
+    colormap: dict[str, tuple[int, int, int]] | None = None,
+) -> tuple[bytes | None, float]:
+    best_frame, is_clean_snapshot = load_event_snapshot_image(event)
+    if best_frame is None:
+        return None, 0
+
+    frame_time = _get_event_snapshot_frame_time(event)
+    box = relative_box_to_absolute(
+        best_frame.shape,
+        event.data.get("box") if event.data else None,
+    )
+    overlay_boxes = _get_event_snapshot_overlay_boxes(best_frame.shape, event)
+
+    if (bounding_box or crop or timestamp) and not is_clean_snapshot:
+        logger.warning(
+            "Unable to fully honor snapshot query parameters for completed event %s because the clean snapshot is unavailable.",
+            event.id,
+        )
+
+    return get_snapshot_bytes(
+        best_frame,
+        frame_time,
+        ext=ext,
+        timestamp=timestamp and is_clean_snapshot,
+        bounding_box=bounding_box and is_clean_snapshot,
+        crop=crop and is_clean_snapshot,
+        height=height,
+        quality=quality,
+        label=event.label,
+        box=box,
+        score=_get_event_snapshot_score(event),
+        area=_get_event_snapshot_area(event),
+        attributes=_get_event_snapshot_attributes(
+            best_frame.shape,
+            event.data.get("attributes") if event.data else None,
+        ),
+        color=(colormap or {}).get(event.label, (255, 255, 255)),
+        overlay_boxes=overlay_boxes,
+        timestamp_style=timestamp_style,
+        estimated_speed=_get_event_snapshot_estimated_speed(event),
+    )
+
+
+def _as_timestamp(value: Any) -> float:
+    if isinstance(value, datetime):
+        return value.timestamp()
+
+    return float(value)
+
+
+def _get_event_snapshot_frame_time(event: Event) -> float:
+    if event.data:
+        snapshot_frame_time = event.data.get("snapshot_frame_time")
+        if snapshot_frame_time is not None:
+            return _as_timestamp(snapshot_frame_time)
+
+        frame_time = event.data.get("frame_time")
+        if frame_time is not None:
+            return _as_timestamp(frame_time)
+
+    return _as_timestamp(event.start_time)
+
+
+def _get_event_snapshot_attributes(
+    frame_shape: tuple[int, ...], attributes: list[dict[str, Any]] | None
+) -> list[dict[str, Any]]:
+    absolute_attributes: list[dict[str, Any]] = []
+
+    for attribute in attributes or []:
+        box = relative_box_to_absolute(frame_shape, attribute.get("box"))
+        if box is None:
+            continue
+
+        absolute_attributes.append(
+            {
+                "box": box,
+                "label": attribute.get("label", "attribute"),
+                "score": attribute.get("score", 0),
+            }
+        )
+
+    return absolute_attributes
+
+
+def _get_event_snapshot_score(event: Event) -> float:
+    if event.data:
+        score = event.data.get("score")
+        if score is not None:
+            return score
+
+        top_score = event.data.get("top_score")
+        if top_score is not None:
+            return top_score
+
+    return event.top_score or event.score or 0
+
+
+def _get_event_snapshot_area(event: Event) -> int | None:
+    if event.data:
+        area = event.data.get("snapshot_area")
+        if area is not None:
+            return int(area)
+
+    return None
+
+
+def _get_event_snapshot_estimated_speed(event: Event) -> float:
+    if event.data:
+        estimated_speed = event.data.get("snapshot_estimated_speed")
+        if estimated_speed is not None:
+            return float(estimated_speed)
+
+        average_speed = event.data.get("average_estimated_speed")
+        if average_speed is not None:
+            return float(average_speed)
+
+    return 0
 
 
 ### Deletion
