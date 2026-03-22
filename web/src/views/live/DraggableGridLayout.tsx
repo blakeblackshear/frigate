@@ -16,6 +16,7 @@ import {
   Layout,
   LayoutItem,
   ResponsiveGridLayout as Responsive,
+  noCompactor,
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -920,6 +921,7 @@ export default function DraggableGridLayout({
           {containerWidth > 0 && <Responsive
             className="grid-layout"
             width={availableWidth}
+            compactor={fitToScreen ? noCompactor : undefined}
             layouts={{
               lg: activeGridLayout,
               md: activeGridLayout,
