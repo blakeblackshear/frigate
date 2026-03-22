@@ -60,7 +60,7 @@ class SnapshotsConfig(FrigateBaseModel):
     retain: RetainConfig = Field(
         default_factory=RetainConfig,
         title="Snapshot retention",
-        description="Retention settings for saved snapshots including default days and per-object overrides.",
+        description="Retention settings for snapshots including default days and per-object overrides.",
     )
     quality: int = Field(
         default=60,
