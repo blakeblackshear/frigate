@@ -68,7 +68,7 @@ function Live() {
   useKeyboardListener(
     ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
     (key, modifiers) => {
-      if (!modifiers.down || !config || selectedCameraName) {
+      if (!modifiers.down || !config || !key || selectedCameraName) {
         return false;
       }
 
