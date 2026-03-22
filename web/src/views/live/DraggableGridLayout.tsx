@@ -134,7 +134,7 @@ export default function DraggableGridLayout({
     useUserPersistence<Layout>(`${cameraGroup}-draggable-layout`);
 
   const [fitToScreen, setFitToScreen] = useUserPersistence(
-    "liveFitToScreen",
+    `${cameraGroup}-fitToScreen`,
     true,
   );
 
