@@ -208,6 +208,37 @@ PRESETS_HW_ACCEL_ENCODE_PREVIEW = {
     "default": "{0} -hide_banner {1} -c:v libx264 -profile:v baseline -preset:v ultrafast {2}",
 }
 
+# Presets for on-demand H.265 to H.264 transcode playback
+PRESETS_HW_ACCEL_ENCODE_TRANSCODE = {
+    # Based on birdseye presets with 720p scaling added
+    "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m -vf scale=-2:'min(720,ih)' {2}",
+    "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v h264_v4l2m2m -vf scale=-2:'min(720,ih)' {2}",
+    FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi -bf 0 -profile:v high -level:v 4.1 -vf format=vaapi|nv12,hwupload,scale_vaapi=w=-2:h=720 {2}",
+    "preset-intel-qsv-h264": "{0} -hide_banner {1} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 -vf scale=-2:'min(720,ih)' {2}",
+    "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 -vf scale=-2:'min(720,ih)' {2}",
+    FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {1} -c:v h264_nvenc -profile:v high -preset:v p2 -tune:v ll -vf scale_cuda=w=-2:h=720 {2}",
+    "preset-jetson-h264": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high -vf scale=-2:'min(720,ih)' {2}",
+    "preset-jetson-h265": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high -vf scale=-2:'min(720,ih)' {2}",
+    FFMPEG_HWACCEL_RKMPP: "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high -vf scale=-2:'min(720,ih)' {2}",
+    FFMPEG_HWACCEL_AMF: "{0} -hide_banner {1} -c:v h264_amf -profile:v high -vf scale=-2:'min(720,ih)' {2}",
+    "default": "{0} -hide_banner {1} -c:v libx264 -preset:v ultrafast -crf 26 -profile:v high -level:v 4.1 -pix_fmt yuv420p -vf scale=-2:'min(720,ih)' {2}",
+}
+PRESETS_HW_ACCEL_ENCODE_TRANSCODE["preset-nvidia-h264"] = (
+    PRESETS_HW_ACCEL_ENCODE_TRANSCODE[FFMPEG_HWACCEL_NVIDIA]
+)
+PRESETS_HW_ACCEL_ENCODE_TRANSCODE["preset-nvidia-h265"] = (
+    PRESETS_HW_ACCEL_ENCODE_TRANSCODE[FFMPEG_HWACCEL_NVIDIA]
+)
+PRESETS_HW_ACCEL_ENCODE_TRANSCODE[f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra"] = (
+    PRESETS_HW_ACCEL_ENCODE_TRANSCODE[FFMPEG_HWACCEL_RKMPP]
+)
+PRESETS_HW_ACCEL_ENCODE_TRANSCODE["preset-rk-h264"] = PRESETS_HW_ACCEL_ENCODE_TRANSCODE[
+    FFMPEG_HWACCEL_RKMPP
+]
+PRESETS_HW_ACCEL_ENCODE_TRANSCODE["preset-rk-h265"] = PRESETS_HW_ACCEL_ENCODE_TRANSCODE[
+    FFMPEG_HWACCEL_RKMPP
+]
+
 
 def parse_preset_hardware_acceleration_decode(
     arg: Any,
@@ -251,6 +282,7 @@ class EncodeTypeEnum(str, Enum):
     birdseye = "birdseye"
     preview = "preview"
     timelapse = "timelapse"
+    transcode = "transcode"
 
 
 def parse_preset_hardware_acceleration_encode(
@@ -267,6 +299,8 @@ def parse_preset_hardware_acceleration_encode(
         arg_map = PRESETS_HW_ACCEL_ENCODE_PREVIEW
     elif type == EncodeTypeEnum.timelapse:
         arg_map = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE
+    elif type == EncodeTypeEnum.transcode:
+        arg_map = PRESETS_HW_ACCEL_ENCODE_TRANSCODE
 
     if not isinstance(arg, str):
         return arg_map["default"].format(ffmpeg_path, input, output)

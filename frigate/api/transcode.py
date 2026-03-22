@@ -15,6 +15,10 @@ from frigate.api.auth import require_camera_access, require_role
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.const import PROCESS_PRIORITY_LOW
+from frigate.ffmpeg_presets import (
+    EncodeTypeEnum,
+    parse_preset_hardware_acceleration_encode,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,51 +87,29 @@ def _build_ffmpeg_cmd(
     output_playlist = os.path.join(output_dir, "master.m3u8")
     segment_pattern = os.path.join(output_dir, "segment-%d.ts")
 
-    return [
+    hwaccel_args = config.ffmpeg.hwaccel_args
+
+    input_args = (
+        f"-loglevel warning -y -protocol_whitelist pipe,file,http,tcp -i {input_url}"
+    )
+    output_args = (
+        f"-c:a aac -b:a 128k"
+        f" -f hls -hls_time 6 -hls_list_size 0"
+        f" -hls_segment_type mpegts"
+        f" -hls_flags independent_segments+append_list"
+        f" -hls_segment_filename {segment_pattern}"
+        f" {output_playlist}"
+    )
+
+    cmd_str = parse_preset_hardware_acceleration_encode(
         config.ffmpeg.ffmpeg_path,
-        "-hide_banner",
-        "-loglevel",
-        "warning",
-        "-y",
-        "-protocol_whitelist",
-        "pipe,file,http,tcp",
-        "-i",
-        input_url,
-        # Scale down to 720p max, preserve aspect ratio
-        "-vf",
-        "scale=-2:'min(720,ih)'",
-        # Encode to H.264 (software — universally available)
-        "-c:v",
-        "libx264",
-        "-preset",
-        "ultrafast",
-        "-crf",
-        "26",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-pix_fmt",
-        "yuv420p",
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        # Output as HLS with MPEG-TS segments
-        "-f",
-        "hls",
-        "-hls_time",
-        "6",
-        "-hls_list_size",
-        "0",
-        "-hls_segment_type",
-        "mpegts",
-        "-hls_flags",
-        "independent_segments+append_list",
-        "-hls_segment_filename",
-        segment_pattern,
-        output_playlist,
-    ]
+        hwaccel_args,
+        input_args,
+        output_args,
+        EncodeTypeEnum.transcode,
+    )
+
+    return cmd_str.split(" ")
 
 
 async def _wait_for_playlist(session_id: str) -> bool:
