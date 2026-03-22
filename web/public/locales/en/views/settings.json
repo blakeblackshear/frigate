@@ -1060,7 +1060,7 @@
     },
     "snapshotConfig": {
       "title": "Snapshot Configuration",
-      "desc": "Submitting to Frigate+ requires snapshots  to be enabled in your config.",
+      "desc": "Submitting to Frigate+ requires snapshots to be enabled in your config.",
       "cleanCopyWarning": "Some cameras have snapshots disabled",
       "table": {
         "camera": "Camera",
