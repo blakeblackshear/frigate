@@ -207,7 +207,10 @@ export function SingleSectionPage({
                 variant="secondary"
                 className="cursor-default bg-danger text-xs text-white hover:bg-danger"
               >
-                {t("modified", { ns: "common", defaultValue: "Modified" })}
+                {t("button.modified", {
+                  ns: "common",
+                  defaultValue: "Modified",
+                })}
               </Badge>
             )}
           </div>
@@ -242,7 +245,7 @@ export function SingleSectionPage({
               variant="secondary"
               className="cursor-default bg-danger text-xs text-white hover:bg-danger"
             >
-              {t("modified", { ns: "common", defaultValue: "Modified" })}
+              {t("button.modified", { ns: "common", defaultValue: "Modified" })}
             </Badge>
           )}
         </div>

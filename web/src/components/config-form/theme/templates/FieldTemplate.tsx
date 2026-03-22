@@ -20,6 +20,7 @@ import { requiresRestartForFieldPath } from "@/utils/configUtil";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
 import {
   buildTranslationPath,
+  resolveConfigTranslation,
   getFilterObjectLabel,
   hasOverrideAtPath,
   humanizeKey,
@@ -219,20 +220,16 @@ export function FieldTemplate(props: FieldTemplateProps) {
   // Try to get translated label, falling back to schema title, then RJSF label
   let finalLabel = label;
   if (effectiveNamespace && translationPath) {
-    // Prefer camera-scoped translations when a section prefix is provided
-    const prefixedTranslationKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.label`
-        : undefined;
-    const translationKey = `${translationPath}.label`;
-
-    if (
-      prefixedTranslationKey &&
-      i18n.exists(prefixedTranslationKey, { ns: effectiveNamespace })
-    ) {
-      finalLabel = t(prefixedTranslationKey, { ns: effectiveNamespace });
-    } else if (i18n.exists(translationKey, { ns: effectiveNamespace })) {
-      finalLabel = t(translationKey, { ns: effectiveNamespace });
+    const translatedLabel = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "label",
+      sectionI18nPrefix,
+      effectiveNamespace,
+    );
+    if (translatedLabel) {
+      finalLabel = translatedLabel;
     } else if (schemaTitle) {
       finalLabel = schemaTitle;
     } else if (translatedFilterObjectLabel) {
@@ -330,18 +327,16 @@ export function FieldTemplate(props: FieldTemplateProps) {
   // Try to get translated description, falling back to schema description
   let finalDescription = description || "";
   if (effectiveNamespace && translationPath) {
-    const prefixedDescriptionKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.description`
-        : undefined;
-    const descriptionKey = `${translationPath}.description`;
-    if (
-      prefixedDescriptionKey &&
-      i18n.exists(prefixedDescriptionKey, { ns: effectiveNamespace })
-    ) {
-      finalDescription = t(prefixedDescriptionKey, { ns: effectiveNamespace });
-    } else if (i18n.exists(descriptionKey, { ns: effectiveNamespace })) {
-      finalDescription = t(descriptionKey, { ns: effectiveNamespace });
+    const translatedDescription = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "description",
+      sectionI18nPrefix,
+      effectiveNamespace,
+    );
+    if (translatedDescription) {
+      finalDescription = translatedDescription;
     } else if (schemaDescription) {
       finalDescription = schemaDescription;
     }
