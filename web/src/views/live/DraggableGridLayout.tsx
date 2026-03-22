@@ -170,6 +170,7 @@ export default function DraggableGridLayout({
     setCurrentCameras(undefined);
     setCurrentIncludeBirdseye(undefined);
     setCurrentGridLayout(undefined);
+    setCameraZoomStates({});
   }, [cameraGroup, setIsEditMode]);
 
   // camera state
