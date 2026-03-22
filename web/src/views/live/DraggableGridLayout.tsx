@@ -485,11 +485,16 @@ export default function DraggableGridLayout({
     }));
   }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig, fitCameraOrder]);
 
+  const cameraKey = useMemo(
+    () => cameras.map((c) => c.name).sort().join(","),
+    [cameras],
+  );
+
   useEffect(() => {
     // Сбросить сохранённый порядок только если изменился набор камер
     // (добавили/удалили камеру), не при изменении размера окна
     setFitCameraOrder(undefined);
-  }, [cameras, includeBirdseye]);
+  }, [cameraKey, includeBirdseye]);
 
   const handleFitDragStop = useCallback(
     (
