@@ -138,6 +138,10 @@ export default function DraggableGridLayout({
     false,
   );
 
+  const [fitCameraOrder, setFitCameraOrder] = useUserPersistence<string[]>(
+    `${cameraGroup}-fit-camera-order`,
+  );
+
   const [group] = useUserPersistedOverlayState(
     "cameraGroup",
     "default" as string,
@@ -458,25 +462,34 @@ export default function DraggableGridLayout({
     const h = w;
     const colsPerRow = fitGridParams.colsPerRow;
 
-    return cameraNames.map((name, index) => ({
+    // Применить сохранённый порядок если он валиден
+    // (содержит ровно те же камеры, что и текущий набор)
+    let orderedNames = cameraNames;
+    if (fitCameraOrder) {
+      const savedSet = new Set(fitCameraOrder);
+      const currentSet = new Set(cameraNames);
+      if (
+        savedSet.size === currentSet.size &&
+        cameraNames.every((name) => savedSet.has(name))
+      ) {
+        orderedNames = fitCameraOrder;
+      }
+    }
+
+    return orderedNames.map((name, index) => ({
       i: name,
       x: (index % colsPerRow) * w,
       y: Math.floor(index / colsPerRow) * h,
       w,
       h,
     }));
-  }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig]);
-
-  const [fitLayoutOverride, setFitLayoutOverride] = useState<Layout | undefined>();
+  }, [fitToScreen, fitGridParams, cameras, includeBirdseye, birdseyeConfig, fitCameraOrder]);
 
   useEffect(() => {
-    setFitLayoutOverride(undefined);
-  }, [
-    fitGridParams?.gridUnitsPerCam,
-    fitGridParams?.colsPerRow,
-    cameras,
-    includeBirdseye,
-  ]);
+    // Сбросить сохранённый порядок только если изменился набор камер
+    // (добавили/удалили камеру), не при изменении размера окна
+    setFitCameraOrder(undefined);
+  }, [cameras, includeBirdseye]);
 
   const handleFitDragStop = useCallback(
     (
@@ -492,7 +505,8 @@ export default function DraggableGridLayout({
       const colsPerRow = fitGridParams.colsPerRow;
       const draggedId = newItem.i;
 
-      const currentOrder = fitLayoutOverride ?? fitLayout ?? [];
+      // Текущий порядок из fitLayout (уже учитывает fitCameraOrder)
+      const currentOrder = fitLayout ?? [];
       const orderedNames = [...currentOrder]
         .sort((a, b) => {
           if (a.y !== b.y) return a.y - b.y;
@@ -514,44 +528,30 @@ export default function DraggableGridLayout({
 
       const sourceIndex = orderedNames.indexOf(draggedId);
 
-      const snapBack = orderedNames.map((name, index) => ({
-        i: name,
-        x: (index % colsPerRow) * w,
-        y: Math.floor(index / colsPerRow) * w,
-        w,
-        h: w,
-      }));
-
       if (sourceIndex === -1 || sourceIndex === targetIndex) {
-        setFitLayoutOverride(snapBack);
+        // Snap back — пересохранить текущий порядок чтобы layout обновился
+        setFitCameraOrder([...orderedNames]);
         return;
       }
 
+      // Swap
       const newOrder = [...orderedNames];
       [newOrder[sourceIndex], newOrder[targetIndex]] = [
         newOrder[targetIndex],
         newOrder[sourceIndex],
       ];
 
-      const normalized = newOrder.map((name, index) => ({
-        i: name,
-        x: (index % colsPerRow) * w,
-        y: Math.floor(index / colsPerRow) * w,
-        w,
-        h: w,
-      }));
-
-      setFitLayoutOverride(normalized);
+      setFitCameraOrder(newOrder);
     },
-    [fitToScreen, fitGridParams, fitLayoutOverride, fitLayout],
+    [fitToScreen, fitGridParams, fitLayout, setFitCameraOrder],
   );
 
   const activeGridLayout = useMemo(() => {
     if (fitToScreen) {
-      return fitLayoutOverride ?? fitLayout ?? currentGridLayout;
+      return fitLayout ?? currentGridLayout;
     }
     return currentGridLayout;
-  }, [fitToScreen, fitLayoutOverride, fitLayout, currentGridLayout]);
+  }, [fitToScreen, fitLayout, currentGridLayout]);
 
   const handleResize = (
     _layout: Layout,
