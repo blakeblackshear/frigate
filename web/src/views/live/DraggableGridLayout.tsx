@@ -487,6 +487,23 @@ export default function DraggableGridLayout({
       const colsPerRow = fitGridParams.colsPerRow;
       const draggedId = newItem.i;
 
+      console.log("[FitDrag]", {
+        draggedId,
+        "newItem.x": newItem.x,
+        "newItem.y": newItem.y,
+        w,
+        colsPerRow,
+        targetCol: Math.max(0, Math.min(Math.round(newItem.x / w), colsPerRow - 1)),
+        targetRow: Math.max(0, Math.round(newItem.y / w)),
+        sourceIndex: [...(fitLayoutOverride ?? fitLayout ?? [])]
+          .sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x))
+          .map((item) => item.i)
+          .indexOf(newItem.i),
+        orderedNames: [...(fitLayoutOverride ?? fitLayout ?? [])]
+          .sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x))
+          .map((item) => item.i),
+      });
+
       const currentOrder = fitLayoutOverride ?? fitLayout ?? [];
       const orderedNames = [...currentOrder]
         .sort((a, b) => {
