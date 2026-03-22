@@ -481,28 +481,14 @@ export default function DraggableGridLayout({
       _placeholder: LayoutItem | null,
       _event: Event,
     ) => {
-      if (!fitToScreen || !fitGridParams || !newItem) return;
+      if (!fitToScreen || !fitGridParams || !newItem) {
+        console.log("[FitDrag] SKIP: early return", { fitToScreen, fitGridParams: !!fitGridParams, newItem: !!newItem });
+        return;
+      }
 
       const w = fitGridParams.gridUnitsPerCam;
       const colsPerRow = fitGridParams.colsPerRow;
       const draggedId = newItem.i;
-
-      console.log("[FitDrag]", {
-        draggedId,
-        "newItem.x": newItem.x,
-        "newItem.y": newItem.y,
-        w,
-        colsPerRow,
-        targetCol: Math.max(0, Math.min(Math.round(newItem.x / w), colsPerRow - 1)),
-        targetRow: Math.max(0, Math.round(newItem.y / w)),
-        sourceIndex: [...(fitLayoutOverride ?? fitLayout ?? [])]
-          .sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x))
-          .map((item) => item.i)
-          .indexOf(newItem.i),
-        orderedNames: [...(fitLayoutOverride ?? fitLayout ?? [])]
-          .sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x))
-          .map((item) => item.i),
-      });
 
       const currentOrder = fitLayoutOverride ?? fitLayout ?? [];
       const orderedNames = [...currentOrder]
@@ -525,6 +511,23 @@ export default function DraggableGridLayout({
       );
 
       const sourceIndex = orderedNames.indexOf(draggedId);
+
+      console.log("[FitDrag] CALC:", {
+        draggedId,
+        sourceIndex,
+        targetIndex,
+        targetCol,
+        targetRow,
+        clampedRow,
+        totalRows,
+        "newItem.x": newItem.x,
+        "newItem.y": newItem.y,
+        w,
+        colsPerRow,
+        orderedNames,
+        willSwap: sourceIndex !== -1 && sourceIndex !== targetIndex,
+      });
+
       const snapBack = orderedNames.map((name, index) => ({
         i: name,
         x: (index % colsPerRow) * w,
@@ -534,6 +537,7 @@ export default function DraggableGridLayout({
       }));
 
       if (sourceIndex === -1 || sourceIndex === targetIndex) {
+        console.log("[FitDrag] SNAP BACK (no swap)");
         setFitLayoutOverride(snapBack);
         return;
       }
@@ -552,6 +556,13 @@ export default function DraggableGridLayout({
         h: w,
       }));
 
+      console.log("[FitDrag] SWAP:", {
+        from: orderedNames[sourceIndex],
+        to: orderedNames[targetIndex],
+        newOrder,
+        normalized: normalized.map(n => `${n.i}(${n.x},${n.y})`),
+      });
+
       setFitLayoutOverride(normalized);
     },
     [fitToScreen, fitGridParams, fitLayoutOverride, fitLayout],
@@ -559,7 +570,13 @@ export default function DraggableGridLayout({
 
   const activeGridLayout = useMemo(() => {
     if (fitToScreen) {
-      return fitLayoutOverride ?? fitLayout ?? currentGridLayout;
+      const result = fitLayoutOverride ?? fitLayout ?? currentGridLayout;
+      console.log("[FitDrag] activeGridLayout:", {
+        usingOverride: !!fitLayoutOverride,
+        usingFitLayout: !fitLayoutOverride && !!fitLayout,
+        layout: result?.map(n => `${n.i}(${n.x},${n.y})`),
+      });
+      return result;
     }
     return currentGridLayout;
   }, [fitToScreen, fitLayoutOverride, fitLayout, currentGridLayout]);
