@@ -201,14 +201,23 @@ export function getNextScaleFromWheelDelta(
   return clampScale(currentScale + direction * step, minScale, maxScale);
 }
 
-export function getCameraZoomStorageKey(cameraName: string): string {
+export function getCameraZoomStorageKey(
+  cameraName: string,
+  cameraGroup?: string,
+): string {
+  if (cameraGroup) {
+    return `live:grid-card:zoom:${cameraGroup}:${cameraName}`;
+  }
   return `live:grid-card:zoom:${cameraName}`;
 }
 
 export function loadPersistedCameraZoomState(
   cameraName: string,
+  cameraGroup?: string,
 ): CameraZoomPersistedState | undefined {
-  const serialized = localStorage.getItem(getCameraZoomStorageKey(cameraName));
+  const serialized = localStorage.getItem(
+    getCameraZoomStorageKey(cameraName, cameraGroup),
+  );
 
   if (!serialized) {
     return undefined;
@@ -225,9 +234,10 @@ export function loadPersistedCameraZoomState(
 export function savePersistedCameraZoomState(
   cameraName: string,
   state: CameraZoomPersistedState,
+  cameraGroup?: string,
 ): void {
   localStorage.setItem(
-    getCameraZoomStorageKey(cameraName),
+    getCameraZoomStorageKey(cameraName, cameraGroup),
     JSON.stringify(state),
   );
 }

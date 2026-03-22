@@ -661,7 +661,7 @@ export default function DraggableGridLayout({
           return prev;
         }
 
-        const persisted = loadPersistedCameraZoomState(cameraName);
+        const persisted = loadPersistedCameraZoomState(cameraName, cameraGroup);
         if (!persisted) {
           return prev;
         }
@@ -677,7 +677,7 @@ export default function DraggableGridLayout({
         };
       });
     },
-    [getCardZoomDimensions],
+    [cameraGroup, getCardZoomDimensions],
   );
 
   const getDefaultZoomTransform = useCallback(
@@ -724,7 +724,7 @@ export default function DraggableGridLayout({
           contentHeight: content?.clientHeight ?? bounds.height,
         });
 
-        savePersistedCameraZoomState(cameraName, persisted);
+        savePersistedCameraZoomState(cameraName, persisted, cameraGroup);
 
         return {
           ...prev,
@@ -732,7 +732,7 @@ export default function DraggableGridLayout({
         };
       });
     },
-    [getDefaultZoomTransform],
+    [cameraGroup, getDefaultZoomTransform],
   );
 
   const detachCardZoomWheelListener = useCallback((cameraName: string) => {
