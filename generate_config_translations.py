@@ -238,9 +238,7 @@ def get_detector_translations(
             all_keys.update(nested.keys())
 
         for key in all_keys:
-            values = [
-                nested[key] for nested in all_nested.values() if key in nested
-            ]
+            values = [nested[key] for nested in all_nested.values() if key in nested]
             if len(values) == len(all_nested) and all(v == values[0] for v in values):
                 shared_fields[key] = values[0]
 
