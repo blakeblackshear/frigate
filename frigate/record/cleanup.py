@@ -10,6 +10,7 @@ from pathlib import Path
 
 from playhouse.sqlite_ext import SqliteExtDatabase
 
+from frigate.api.transcode import cleanup_stale_transcode_sessions
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
@@ -375,6 +376,7 @@ class RecordingCleanup(threading.Thread):
                 break
 
             self.clean_tmp_previews()
+            cleanup_stale_transcode_sessions()
 
             if counter == 0:
                 self.clean_tmp_clips()

@@ -27,6 +27,7 @@ from frigate.api import (
     preview,
     record,
     review,
+    transcode,
 )
 from frigate.api.auth import get_jwt_secret, limiter, require_admin_by_default
 from frigate.comms.dispatcher import Dispatcher
@@ -142,6 +143,7 @@ def create_fastapi_app(
     app.include_router(media.router)
     app.include_router(motion_search.router)
     app.include_router(record.router)
+    app.include_router(transcode.router)
     app.include_router(debug_replay.router)
     # App Properties
     app.frigate_config = frigate_config

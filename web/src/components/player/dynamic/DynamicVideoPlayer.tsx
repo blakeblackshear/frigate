@@ -26,6 +26,7 @@ import {
   calculateSeekPosition,
 } from "@/utils/videoUtil";
 import { isFirefox } from "react-device-detect";
+import { useTranscodedPlayback } from "@/hooks/use-transcoded-playback";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -71,6 +72,7 @@ export default function DynamicVideoPlayer({
   const { t } = useTranslation(["components/player"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { resolvePlaylistUrl } = useTranscodedPlayback(apiHost);
 
   // for detail stream context in History
   const {
@@ -219,9 +221,15 @@ export default function DynamicVideoPlayer({
       );
     }
 
-    setSource({
-      playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
-      startPosition,
+    const vodUrl = `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`;
+
+    resolvePlaylistUrl(
+      vodUrl,
+      camera,
+      recordingParams.after,
+      recordingParams.before,
+    ).then((playlist: string) => {
+      setSource({ playlist, startPosition });
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
