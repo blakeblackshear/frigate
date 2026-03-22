@@ -55,7 +55,7 @@ function setup_homekit_config() {
 
     if [[ ! -f "${config_path}" ]]; then
         echo "[INFO] Creating empty config file for HomeKit..."
-        echo '{}' > "${config_path}"
+        : > "${config_path}"
     fi
 
     # Convert YAML to JSON for jq processing
@@ -65,23 +65,25 @@ function setup_homekit_config() {
         return 0
     }
 
-    # Use jq to filter and keep only the homekit section
-    local cleaned_json="/tmp/cache/homekit_cleaned.json"
-    jq '
-        # Keep only the homekit section if it exists, otherwise empty object
-        if has("homekit") then {homekit: .homekit} else {} end
-    ' "${temp_json}" > "${cleaned_json}" 2>/dev/null || {
-        echo '{}' > "${cleaned_json}"
-    }
+    # Use jq to extract the homekit section, if it exists
+    local homekit_json
+    homekit_json=$(jq '
+        if has("homekit") then {homekit: .homekit} else null end
+    ' "${temp_json}" 2>/dev/null) || homekit_json="null"
 
-    # Convert back to YAML and write to the config file
-    yq eval -P "${cleaned_json}" > "${config_path}" 2>/dev/null || {
-        echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
-        echo '{}' > "${config_path}"
-    }
+    # If no homekit section, write an empty config file
+    if [[ "${homekit_json}" == "null" ]]; then
+        : > "${config_path}"
+    else
+        # Convert homekit JSON back to YAML and write to the config file
+        echo "${homekit_json}" | yq eval -P - > "${config_path}" 2>/dev/null || {
+            echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
+            : > "${config_path}"
+        }
+    fi
 
     # Clean up temp files
-    rm -f "${temp_json}" "${cleaned_json}"
+    rm -f "${temp_json}"
 }
 
 set_libva_version

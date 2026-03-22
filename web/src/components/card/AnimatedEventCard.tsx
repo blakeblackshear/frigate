@@ -213,6 +213,7 @@ export function AnimatedEventCard({
                       playsInline
                       muted
                       disableRemotePlayback
+                      disablePictureInPicture
                       loop
                       onTimeUpdate={() => {
                         if (!isLoaded) {

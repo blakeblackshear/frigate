@@ -23,6 +23,7 @@ Some cameras support h265 with different formats, but Safari only supports the a
 cameras:
   h265_cam: # <------ Doesn't matter what the camera is called
     ffmpeg:
+      # highlight-next-line
       apple_compatibility: true # <- Adds compatibility with MacOS and iPhone
 ```
 
@@ -30,7 +31,7 @@ cameras:
 
 Note that mjpeg cameras require encoding the video into h264 for recording, and restream roles. This will use significantly more CPU than if the cameras supported h264 feeds directly. It is recommended to use the restream role to create an h264 restream and then use that as the source for ffmpeg.
 
-```yaml
+```yaml {3,10}
 go2rtc:
   streams:
     mjpeg_cam: "ffmpeg:http://your_mjpeg_stream_url#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
@@ -96,6 +97,7 @@ This camera is H.265 only. To be able to play clips on some devices (like MacOs 
 cameras:
   annkec800: # <------ Name the camera
     ffmpeg:
+      # highlight-next-line
       apple_compatibility: true # <- Adds compatibility with MacOS and iPhone
       output_args:
         record: preset-record-generic-audio-aac
@@ -274,7 +276,7 @@ To use a USB camera (webcam) with Frigate, the recommendation is to use go2rtc's
 
 - In your Frigate Configuration File, add the go2rtc stream and roles as appropriate:
 
-```
+```yaml {4,11-12}
 go2rtc:
   streams:
     usb_camera:

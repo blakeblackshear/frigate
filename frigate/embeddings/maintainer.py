@@ -705,4 +705,7 @@ class EmbeddingMaintainer(threading.Thread):
         if not self.config.semantic_search.enabled:
             return
 
-        self.embeddings.embed_thumbnail(event_id, thumbnail)
+        try:
+            self.embeddings.embed_thumbnail(event_id, thumbnail)
+        except ValueError:
+            logger.warning(f"Failed to embed thumbnail for event {event_id}")

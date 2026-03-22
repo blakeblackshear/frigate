@@ -103,16 +103,19 @@ class ObjectDescriptionProcessor(PostProcessorApi):
                         logger.debug(f"{camera} sending early request to GenAI")
 
                         self.early_request_sent[data["id"]] = True
+                        # Copy thumbnails to avoid holding references after cleanup
+                        thumbnails_copy = [
+                            data["thumbnail"][:] if data.get("thumbnail") else None
+                            for data in self.tracked_events[data["id"]]
+                            if data.get("thumbnail")
+                        ]
                         threading.Thread(
                             target=self._genai_embed_description,
                             name=f"_genai_embed_description_{event.id}",
                             daemon=True,
                             args=(
                                 event,
-                                [
-                                    data["thumbnail"]
-                                    for data in self.tracked_events[data["id"]]
-                                ],
+                                thumbnails_copy,
                             ),
                         ).start()
 
@@ -172,8 +175,13 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embed_image = (
             [snapshot_image]
             if event.has_snapshot and source == "snapshot"
+            # Copy thumbnails to avoid holding references
             else (
-                [data["thumbnail"] for data in self.tracked_events[event_id]]
+                [
+                    data["thumbnail"][:] if data.get("thumbnail") else None
+                    for data in self.tracked_events[event_id]
+                    if data.get("thumbnail")
+                ]
                 if len(self.tracked_events.get(event_id, [])) > 0
                 else [thumbnail]
             )
@@ -265,8 +273,13 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embed_image = (
             [snapshot_image]
             if event.has_snapshot and camera_config.objects.genai.use_snapshot
+            # Copy thumbnails to avoid holding references after cleanup
             else (
-                [data["thumbnail"] for data in self.tracked_events[event.id]]
+                [
+                    data["thumbnail"][:] if data.get("thumbnail") else None
+                    for data in self.tracked_events[event.id]
+                    if data.get("thumbnail")
+                ]
                 if num_thumbnails > 0
                 else [thumbnail]
             )

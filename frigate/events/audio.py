@@ -321,6 +321,9 @@ class AudioEventMaintainer(threading.Thread):
             self.start_or_restart_ffmpeg()
 
         while not self.stop_event.is_set():
+            # check if there is an updated config
+            self.config_subscriber.check_for_updates()
+
             enabled = self.camera_config.enabled
             if enabled != self.was_enabled:
                 if enabled:
@@ -346,9 +349,6 @@ class AudioEventMaintainer(threading.Thread):
             if not enabled:
                 time.sleep(0.1)
                 continue
-
-            # check if there is an updated config
-            self.config_subscriber.check_for_updates()
 
             self.read_audio()
 

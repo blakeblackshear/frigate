@@ -401,6 +401,7 @@ export interface FrigateConfig {
   };
 
   auth: {
+    enabled: boolean;
     roles: {
       [roleName: string]: string[];
     };

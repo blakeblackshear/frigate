@@ -20,7 +20,7 @@ tls:
 
 TLS certificates can be mounted at `/etc/letsencrypt/live/frigate` using a bind mount or docker volume.
 
-```yaml
+```yaml {3-4}
 frigate:
   ...
   volumes:
@@ -32,7 +32,7 @@ Within the folder, the private key is expected to be named `privkey.pem` and the
 
 Note that certbot uses symlinks, and those can't be followed by the container unless it has access to the targets as well, so if using certbot you'll also have to mount the `archive` folder for your domain, e.g.:
 
-```yaml
+```yaml {3-5}
 frigate:
   ...
   volumes:
@@ -46,7 +46,7 @@ Frigate automatically compares the fingerprint of the certificate at `/etc/letse
 
 If you issue Frigate valid certificates you will likely want to configure it to run on port 443 so you can access it without a port number like `https://your-frigate-domain.com` by mapping 8971 to 443.
 
-```yaml
+```yaml {3-4}
 frigate:
   ...
   ports:

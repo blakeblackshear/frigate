@@ -17,15 +17,15 @@ From here, follow the guides for:
 - [Web Interface](#web-interface)
 - [Documentation](#documentation)
 
-### Frigate Home Assistant Add-on
+### Frigate Home Assistant App
 
-This repository holds the Home Assistant Add-on, for use with Home Assistant OS and compatible installations. It is the piece that allows you to run Frigate from your Home Assistant Supervisor tab.
+This repository holds the Home Assistant App, for use with Home Assistant OS and compatible installations. It is the piece that allows you to run Frigate from your Home Assistant Supervisor tab.
 
 Fork [blakeblackshear/frigate-hass-addons](https://github.com/blakeblackshear/frigate-hass-addons) to your own Github profile, then clone the forked repo to your local machine.
 
 ### Frigate Home Assistant Integration
 
-This repository holds the custom integration that allows your Home Assistant installation to automatically create entities for your Frigate instance, whether you are running Frigate as a standalone Docker container or as a [Home Assistant Add-on](#frigate-home-assistant-add-on).
+This repository holds the custom integration that allows your Home Assistant installation to automatically create entities for your Frigate instance, whether you are running Frigate as a standalone Docker container or as a [Home Assistant App](#frigate-home-assistant-app).
 
 Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshear/frigate-hass-integration) to your own GitHub profile, then clone the forked repo to your local machine.
 
@@ -89,6 +89,14 @@ After closing VS Code, you may still have containers running. To close everythin
 
 ### Testing
 
+#### Unit Tests
+
+GitHub will execute unit tests on new PRs. You must ensure that all tests pass.
+
+```shell
+python3 -u -m unittest
+```
+
 #### FFMPEG Hardware Acceleration
 
 The following commands are used inside the container to ensure hardware acceleration is working properly.
@@ -123,6 +131,28 @@ ffmpeg -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format
 
 ```shell
 ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
+### Submitting a pull request
+
+Code must be formatted, linted and type-tested. GitHub will run these checks on pull requests, so it is advised to run them yourself prior to opening.
+
+**Formatting**
+
+```shell
+ruff format frigate migrations docker *.py
+```
+
+**Linting**
+
+```shell
+ruff check frigate migrations docker *.py
+```
+
+**MyPy Static Typing**
+
+```shell
+python3 -u -m mypy --config-file frigate/mypy.ini frigate
 ```
 
 ## Web Interface

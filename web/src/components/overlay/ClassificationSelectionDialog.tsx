@@ -125,17 +125,23 @@ export default function ClassificationSelectionDialog({
                 isMobile && "gap-2 pb-4",
               )}
             >
-              {classes.sort().map((category) => (
-                <SelectorItem
-                  key={category}
-                  className="flex cursor-pointer gap-2 smart-capitalize"
-                  onClick={() => onCategorizeImage(category)}
-                >
-                  {category === "none"
-                    ? t("details.none")
-                    : category.replaceAll("_", " ")}
-                </SelectorItem>
-              ))}
+              {classes
+                .sort((a, b) => {
+                  if (a === "none") return 1;
+                  if (b === "none") return -1;
+                  return a.localeCompare(b);
+                })
+                .map((category) => (
+                  <SelectorItem
+                    key={category}
+                    className="flex cursor-pointer gap-2 smart-capitalize"
+                    onClick={() => onCategorizeImage(category)}
+                  >
+                    {category === "none"
+                      ? t("details.none")
+                      : category.replaceAll("_", " ")}
+                  </SelectorItem>
+                ))}
               <Separator />
               <SelectorItem
                 className="flex cursor-pointer gap-2 smart-capitalize"

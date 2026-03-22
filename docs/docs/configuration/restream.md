@@ -34,7 +34,7 @@ To improve connection speed when using Birdseye via restream you can enable a sm
 
 The go2rtc restream can be secured with RTSP based username / password authentication. Ex:
 
-```yaml
+```yaml {2-4}
 go2rtc:
   rtsp:
     username: "admin"
@@ -147,6 +147,7 @@ For example:
 ```yaml
 go2rtc:
   streams:
+    # highlight-error-line
     my_camera: rtsp://username:$@foo%@192.168.1.100
 ```
 
@@ -155,6 +156,7 @@ becomes
 ```yaml
 go2rtc:
   streams:
+    # highlight-next-line
     my_camera: rtsp://username:$%40foo%25@192.168.1.100
 ```
 

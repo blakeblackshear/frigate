@@ -73,7 +73,6 @@ def require_admin_by_default():
         "/stats",
         "/stats/history",
         "/config",
-        "/config/raw",
         "/vainfo",
         "/nvinfo",
         "/labels",
@@ -896,6 +895,7 @@ def create_user(
             User.notification_tokens: [],
         }
     ).execute()
+    request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"username": body.username})
 
 
@@ -913,6 +913,7 @@ def delete_user(request: Request, username: str):
         )
 
     User.delete_by_id(username)
+    request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"success": True})
 
 
@@ -1032,6 +1033,7 @@ async def update_role(
         )
 
     User.set_by_id(username, {User.role: body.role})
+    request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"success": True})
 
 
@@ -1045,7 +1047,16 @@ async def require_camera_access(
 
     current_user = await get_current_user(request)
     if isinstance(current_user, JSONResponse):
-        return current_user
+        detail = "Authentication required"
+        try:
+            error_payload = json.loads(current_user.body)
+            detail = (
+                error_payload.get("message") or error_payload.get("detail") or detail
+            )
+        except Exception:
+            pass
+
+        raise HTTPException(status_code=current_user.status_code, detail=detail)
 
     role = current_user["role"]
     all_camera_names = set(request.app.frigate_config.cameras.keys())
@@ -1061,6 +1072,61 @@ async def require_camera_access(
             status_code=403,
             detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
         )
+
+
+def _get_stream_owner_cameras(request: Request, stream_name: str) -> set[str]:
+    owner_cameras: set[str] = set()
+
+    for camera_name, camera in request.app.frigate_config.cameras.items():
+        if stream_name == camera_name:
+            owner_cameras.add(camera_name)
+            continue
+
+        if stream_name in camera.live.streams.values():
+            owner_cameras.add(camera_name)
+
+    return owner_cameras
+
+
+async def require_go2rtc_stream_access(
+    stream_name: Optional[str] = None,
+    request: Request = None,
+):
+    """Dependency to enforce go2rtc stream access based on owning camera access."""
+    if stream_name is None:
+        return
+
+    current_user = await get_current_user(request)
+    if isinstance(current_user, JSONResponse):
+        detail = "Authentication required"
+        try:
+            error_payload = json.loads(current_user.body)
+            detail = (
+                error_payload.get("message") or error_payload.get("detail") or detail
+            )
+        except Exception:
+            pass
+
+        raise HTTPException(status_code=current_user.status_code, detail=detail)
+
+    role = current_user["role"]
+    all_camera_names = set(request.app.frigate_config.cameras.keys())
+    roles_dict = request.app.frigate_config.auth.roles
+    allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
+
+    # Admin or full access bypasses
+    if role == "admin" or not roles_dict.get(role):
+        return
+
+    owner_cameras = _get_stream_owner_cameras(request, stream_name)
+
+    if owner_cameras & set(allowed_cameras):
+        return
+
+    raise HTTPException(
+        status_code=403,
+        detail=f"Access denied to camera '{stream_name}'. Allowed: {allowed_cameras}",
+    )
 
 
 async def get_allowed_cameras_for_filter(request: Request):

@@ -321,7 +321,7 @@ def config_raw_paths(request: Request):
     return JSONResponse(content=raw_paths)
 
 
-@router.get("/config/raw", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/config/raw", dependencies=[Depends(require_role(["admin"]))])
 def config_raw():
     config_file = find_config_file()
 
@@ -1073,7 +1073,12 @@ def get_recognized_license_plates(
 
 
 @router.get("/timeline", dependencies=[Depends(allow_any_authenticated())])
-def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = None):
+def timeline(
+    camera: str = "all",
+    limit: int = 100,
+    source_id: Optional[str] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     clauses = []
 
     selected_columns = [
@@ -1095,6 +1100,9 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
         else:
             clauses.append((Timeline.source_id.in_(source_ids)))
 
+    # Enforce per-camera access control
+    clauses.append((Timeline.camera << allowed_cameras))
+
     if len(clauses) == 0:
         clauses.append((True))
 
@@ -1110,7 +1118,10 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
 
 
 @router.get("/timeline/hourly", dependencies=[Depends(allow_any_authenticated())])
-def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
+def hourly_timeline(
+    params: AppTimelineHourlyQueryParameters = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get hourly summary for timeline."""
     cameras = params.cameras
     labels = params.labels
@@ -1127,6 +1138,9 @@ def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Timeline.camera << camera_list))
+
+    # Enforce per-camera access control
+    clauses.append((Timeline.camera << allowed_cameras))
 
     if labels != "all":
         label_list = labels.split(",")

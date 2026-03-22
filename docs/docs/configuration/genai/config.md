@@ -187,7 +187,7 @@ genai:
 
 To use a different Gemini-compatible API endpoint, set the `provider_options` with the `base_url` key to your provider's API URL. For example:
 
-```
+```yaml {4,5}
 genai:
   provider: gemini
   ...
@@ -219,6 +219,29 @@ genai:
   api_key: "{FRIGATE_OPENAI_API_KEY}"
   model: gpt-4o
 ```
+
+:::note
+
+To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
+
+:::
+
+:::tip
+
+For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
+
+```yaml {5,6}
+genai:
+  provider: openai
+  base_url: http://your-llama-server
+  model: your-model-name
+  provider_options:
+    context_size: 8192 # Specify the configured context size
+```
+
+This ensures Frigate uses the correct context window size when generating prompts.
+
+:::
 
 ### Azure OpenAI
 

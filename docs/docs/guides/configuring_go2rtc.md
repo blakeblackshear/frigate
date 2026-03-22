@@ -33,19 +33,16 @@ After adding this to the config, restart Frigate and try to watch the live strea
 ### What if my video doesn't play?
 
 - Check Logs:
-
   - Access the go2rtc logs in the Frigate UI under Logs in the sidebar.
   - If go2rtc is having difficulty connecting to your camera, you should see some error messages in the log.
 
 - Check go2rtc Web Interface: if you don't see any errors in the logs, try viewing the camera through go2rtc's web interface.
-
   - Navigate to port 1984 in your browser to access go2rtc's web interface.
     - If using Frigate through Home Assistant, enable the web interface at port 1984.
     - If using Docker, forward port 1984 before accessing the web interface.
   - Click `stream` for the specific camera to see if the camera's stream is being received.
 
 - Check Video Codec:
-
   - If the camera stream works in go2rtc but not in your browser, the video codec might be unsupported.
   - If using H265, switch to H264. Refer to [video codec compatibility](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#codecs-madness) in go2rtc documentation.
   - If unable to switch from H265 to H264, or if the stream format is different (e.g., MJPEG), re-encode the video using [FFmpeg parameters](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#source-ffmpeg). It supports rotating and resizing video feeds and hardware acceleration. Keep in mind that transcoding video from one format to another is a resource intensive task and you may be better off using the built-in jsmpeg view.
@@ -58,7 +55,6 @@ After adding this to the config, restart Frigate and try to watch the live strea
     ```
 
 - Switch to FFmpeg if needed:
-
   - Some camera streams may need to use the ffmpeg module in go2rtc. This has the downside of slower startup times, but has compatibility with more stream types.
 
     ```yaml
@@ -101,9 +97,9 @@ After adding this to the config, restart Frigate and try to watch the live strea
 
 :::warning
 
-To access the go2rtc stream externally when utilizing the Frigate Add-On (for
+To access the go2rtc stream externally when utilizing the Frigate App (for
 instance through VLC), you must first enable the RTSP Restream port.
-You can do this by visiting the Frigate Add-On configuration page within Home
+You can do this by visiting the Frigate App configuration page within Home
 Assistant and revealing the hidden options under the "Show disabled ports"
 section.
 

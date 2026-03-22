@@ -66,7 +66,7 @@ Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to com
 
 Add the onvif section to your camera in your configuration file:
 
-```yaml
+```yaml {4-8}
 cameras:
   back:
     ffmpeg: ...

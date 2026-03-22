@@ -22,7 +22,7 @@ To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the 
 
 Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to have an alert created when an object enters your entire_yard zone, the config would be:
 
-```yaml
+```yaml {6,8}
 cameras:
   name_of_your_camera:
     review:
@@ -108,6 +108,7 @@ cameras:
   name_of_your_camera:
     zones:
       sidewalk:
+        # highlight-next-line
         loitering_time: 4 # unit is in seconds
         objects:
           - person
@@ -122,6 +123,7 @@ cameras:
   name_of_your_camera:
     zones:
       front_yard:
+        # highlight-next-line
         inertia: 3
         objects:
           - person
@@ -134,6 +136,7 @@ cameras:
   name_of_your_camera:
     zones:
       driveway_entrance:
+        # highlight-next-line
         inertia: 1
         objects:
           - car
@@ -196,5 +199,6 @@ cameras:
         coordinates: ...
         distances: ...
         inertia: 1
+        # highlight-next-line
         speed_threshold: 20 # unit is in kph or mph, depending on how unit_system is set (see above)
 ```

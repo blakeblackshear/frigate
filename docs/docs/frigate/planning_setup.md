@@ -34,10 +34,13 @@ For commercial installations it is important to verify the number of supported c
 
 There are many different hardware options for object detection depending on priorities and available hardware. See [the recommended hardware page](./hardware.md#detectors) for more specifics on what hardware is recommended for object detection.
 
+### CPU
+
+Frigate requires a CPU with AVX + AVX2 instructions. Most modern CPUs (post-2011) support AVX and AVX2, but it is generally absent in low-power or budget-oriented processors, particularly older Intel Pentium, Celeron, and Atom-based chips. Specifically, Intel Celeron and Pentium models prior to the 2020 Tiger Lake generation typically lack AVX. Older Intel Xeon models may have AVX, but may lack AVX2.
+
 ### Storage
 
 Storage is an important consideration when planning a new installation. To get a more precise estimate of your storage requirements, you can use an IP camera storage calculator. Websites like [IPConfigure Storage Calculator](https://calculator.ipconfigure.com/) can help you determine the necessary disk space based on your camera settings.
-
 
 #### SSDs (Solid State Drives)
 
