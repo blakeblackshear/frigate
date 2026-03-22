@@ -17,6 +17,7 @@ import { requiresRestartForFieldPath } from "@/utils/configUtil";
 import { ConfigFormContext } from "@/types/configForm";
 import {
   buildTranslationPath,
+  resolveConfigTranslation,
   getDomainFromNamespace,
   getFilterObjectLabel,
   humanizeKey,
@@ -263,16 +264,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredLabel: string | undefined;
   if (i18nNs && translationPath) {
-    const prefixedLabelKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.label`
-        : undefined;
-    const labelKey = `${translationPath}.label`;
-    if (prefixedLabelKey && i18n.exists(prefixedLabelKey, { ns: i18nNs })) {
-      inferredLabel = t(prefixedLabelKey, { ns: i18nNs });
-    } else if (i18n.exists(labelKey, { ns: i18nNs })) {
-      inferredLabel = t(labelKey, { ns: i18nNs });
-    }
+    inferredLabel = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "label",
+      sectionI18nPrefix,
+      i18nNs,
+    );
   }
   if (!inferredLabel && translatedFilterLabel) {
     inferredLabel = translatedFilterLabel;
@@ -286,19 +285,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredDescription: string | undefined;
   if (i18nNs && translationPath) {
-    const prefixedDescriptionKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.description`
-        : undefined;
-    const descriptionKey = `${translationPath}.description`;
-    if (
-      prefixedDescriptionKey &&
-      i18n.exists(prefixedDescriptionKey, { ns: i18nNs })
-    ) {
-      inferredDescription = t(prefixedDescriptionKey, { ns: i18nNs });
-    } else if (i18n.exists(descriptionKey, { ns: i18nNs })) {
-      inferredDescription = t(descriptionKey, { ns: i18nNs });
-    }
+    inferredDescription = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "description",
+      sectionI18nPrefix,
+      i18nNs,
+    );
   }
   const schemaDescription = schema?.description;
   const fallbackDescription =

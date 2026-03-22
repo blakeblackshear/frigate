@@ -287,118 +287,63 @@
     "label": "Detector hardware",
     "description": "Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
     "type": {
-      "label": "Detector Type",
-      "description": "Type of detector to use for object detection (for example 'cpu', 'edgetpu', 'openvino')."
+      "label": "Type"
+    },
+    "model": {
+      "label": "Detector specific model configuration",
+      "description": "Detector-specific model configuration options (path, input size, etc.).",
+      "path": {
+        "label": "Custom Object detection model path",
+        "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
+      },
+      "labelmap_path": {
+        "label": "Label map for custom object detector",
+        "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
+      },
+      "width": {
+        "label": "Object detection model input width",
+        "description": "Width of the model input tensor in pixels."
+      },
+      "height": {
+        "label": "Object detection model input height",
+        "description": "Height of the model input tensor in pixels."
+      },
+      "labelmap": {
+        "label": "Labelmap customization",
+        "description": "Overrides or remapping entries to merge into the standard labelmap."
+      },
+      "attributes_map": {
+        "label": "Map of object labels to their attribute labels",
+        "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
+      },
+      "input_tensor": {
+        "label": "Model Input Tensor Shape",
+        "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
+      },
+      "input_pixel_format": {
+        "label": "Model Input Pixel Color Format",
+        "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
+      },
+      "input_dtype": {
+        "label": "Model Input D Type",
+        "description": "Data type of the model input tensor (for example 'float32')."
+      },
+      "model_type": {
+        "label": "Object Detection Model Type",
+        "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
+      }
+    },
+    "model_path": {
+      "label": "Detector specific model path",
+      "description": "File path to the detector model binary if required by the chosen detector."
     },
     "axengine": {
       "label": "AXEngine NPU",
-      "description": "AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      }
+      "description": "AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime."
     },
     "cpu": {
       "label": "CPU",
       "description": "CPU TFLite detector that runs TensorFlow Lite models on the host CPU without hardware acceleration. Not recommended.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "num_threads": {
         "label": "Number of detection threads",
         "description": "The number of threads used for CPU-based inference."
@@ -407,57 +352,6 @@
     "deepstack": {
       "label": "DeepStack",
       "description": "DeepStack/CodeProject.AI detector that sends images to a remote DeepStack HTTP API for inference. Not recommended.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "api_url": {
         "label": "DeepStack API URL",
         "description": "The URL of the DeepStack API."
@@ -474,57 +368,6 @@
     "degirum": {
       "label": "DeGirum",
       "description": "DeGirum detector for running models via DeGirum cloud or local inference services.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "location": {
         "label": "Inference Location",
         "description": "Location of the DeGirim inference engine (e.g. '@cloud', '127.0.0.1')."
@@ -541,57 +384,6 @@
     "edgetpu": {
       "label": "EdgeTPU",
       "description": "EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "device": {
         "label": "Device Type",
         "description": "The device to use for EdgeTPU inference (e.g. 'usb', 'pci')."
@@ -600,57 +392,6 @@
     "hailo8l": {
       "label": "Hailo-8/Hailo-8L",
       "description": "Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "device": {
         "label": "Device Type",
         "description": "The device to use for Hailo inference (e.g. 'PCIe', 'M.2')."
@@ -659,57 +400,6 @@
     "memryx": {
       "label": "MemryX",
       "description": "MemryX MX3 detector that runs compiled DFP models on MemryX accelerators.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "device": {
         "label": "Device Path",
         "description": "The device to use for MemryX inference (e.g. 'PCIe')."
@@ -718,57 +408,6 @@
     "onnx": {
       "label": "ONNX",
       "description": "ONNX detector for running ONNX models; will use available acceleration backends (CUDA/ROCm/OpenVINO) when available.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "device": {
         "label": "Device Type",
         "description": "The device to use for ONNX inference (e.g. 'AUTO', 'CPU', 'GPU')."
@@ -777,57 +416,6 @@
     "openvino": {
       "label": "OpenVINO",
       "description": "OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "device": {
         "label": "Device Type",
         "description": "The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU')."
@@ -836,57 +424,6 @@
     "rknn": {
       "label": "RKNN",
       "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "num_cores": {
         "label": "Number of NPU cores to use.",
         "description": "The number of NPU cores to use (0 for auto)."
@@ -894,168 +431,15 @@
     },
     "synaptics": {
       "label": "Synaptics",
-      "description": "Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      }
+      "description": "Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware."
     },
     "teflon_tfl": {
       "label": "Teflon",
-      "description": "Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      }
+      "description": "Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs."
     },
     "tensorrt": {
       "label": "TensorRT",
       "description": "TensorRT detector for Nvidia Jetson devices using serialized TensorRT engines for accelerated inference.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "device": {
         "label": "GPU Device Index",
         "description": "The GPU device index to use."
@@ -1064,57 +448,6 @@
     "zmq": {
       "label": "ZMQ IPC",
       "description": "ZMQ IPC detector that offloads inference to an external process via a ZeroMQ IPC endpoint.",
-      "type": {
-        "label": "Type"
-      },
-      "model": {
-        "label": "Detector specific model configuration",
-        "description": "Detector-specific model configuration options (path, input size, etc.).",
-        "path": {
-          "label": "Custom Object detection model path",
-          "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-        },
-        "labelmap_path": {
-          "label": "Label map for custom object detector",
-          "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-        },
-        "width": {
-          "label": "Object detection model input width",
-          "description": "Width of the model input tensor in pixels."
-        },
-        "height": {
-          "label": "Object detection model input height",
-          "description": "Height of the model input tensor in pixels."
-        },
-        "labelmap": {
-          "label": "Labelmap customization",
-          "description": "Overrides or remapping entries to merge into the standard labelmap."
-        },
-        "attributes_map": {
-          "label": "Map of object labels to their attribute labels",
-          "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-          "label": "Model Input Tensor Shape",
-          "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-        },
-        "input_pixel_format": {
-          "label": "Model Input Pixel Color Format",
-          "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-        },
-        "input_dtype": {
-          "label": "Model Input D Type",
-          "description": "Data type of the model input tensor (for example 'float32')."
-        },
-        "model_type": {
-          "label": "Object Detection Model Type",
-          "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
-        }
-      },
-      "model_path": {
-        "label": "Detector specific model path",
-        "description": "File path to the detector model binary if required by the chosen detector."
-      },
       "endpoint": {
         "label": "ZMQ IPC endpoint",
         "description": "The ZMQ endpoint to connect to."

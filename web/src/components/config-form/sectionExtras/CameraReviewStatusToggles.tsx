@@ -75,7 +75,9 @@ export default function CameraReviewStatusToggles({
             />
             <div className="space-y-0.5">
               <Label htmlFor="detections-enabled">
-                <Trans ns="views/settings">camera.review.detections</Trans>
+                <Trans ns="views/settings">
+                  cameraReview.review.detections
+                </Trans>
               </Label>
             </div>
           </div>

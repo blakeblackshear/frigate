@@ -1136,7 +1136,7 @@ export function ConfigSection({
                     )}
                   {hasChanges && (
                     <Badge variant="outline" className="text-xs">
-                      {t("modified", {
+                      {t("button.modified", {
                         ns: "common",
                         defaultValue: "Modified",
                       })}
@@ -1210,7 +1210,10 @@ export function ConfigSection({
                     variant="secondary"
                     className="cursor-default bg-danger text-xs text-white hover:bg-danger"
                   >
-                    {t("modified", { ns: "common", defaultValue: "Modified" })}
+                    {t("button.modified", {
+                      ns: "common",
+                      defaultValue: "Modified",
+                    })}
                   </Badge>
                 )}
               </div>
