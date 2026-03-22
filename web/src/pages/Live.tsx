@@ -65,6 +65,29 @@ function Live() {
     return false;
   });
 
+  useKeyboardListener(
+    ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+    (key, modifiers) => {
+      if (!modifiers.down || !config || selectedCameraName) {
+        return false;
+      }
+
+      const groups = Object.entries(config.camera_groups).sort(
+        (a, b) => a[1].order - b[1].order,
+      );
+
+      // 1-9 → индексы 0-8, 0 → индекс 9
+      const index = key === "0" ? 9 : parseInt(key) - 1;
+
+      if (index < groups.length) {
+        setCameraGroup(groups[index][0]);
+        return true;
+      }
+
+      return false;
+    },
+  );
+
   // document title
 
   useEffect(() => {
