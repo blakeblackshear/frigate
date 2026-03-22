@@ -272,7 +272,7 @@ def draw_box_with_label(
 
 def get_image_quality_params(ext: str, quality: Optional[int]) -> list[int]:
     if ext in ("jpg", "jpeg"):
-        return [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
+        return [int(cv2.IMWRITE_JPEG_QUALITY), quality if quality is not None else 70]
 
     if ext == "webp":
         return [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
