@@ -10,6 +10,7 @@ let hevcResult: boolean | null = null;
  * Result is cached after the first call.
  */
 export function isHevcSupported(): boolean {
+  if (localStorage.getItem("forceTranscode") === "true") return false;
   if (hevcResult !== null) return hevcResult;
 
   const codecs = [

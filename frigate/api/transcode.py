@@ -93,13 +93,16 @@ def _build_ffmpeg_cmd(
         "pipe,file,http,tcp",
         "-i",
         input_url,
+        # Scale down to 720p max, preserve aspect ratio
+        "-vf",
+        "scale=-2:'min(720,ih)'",
         # Encode to H.264 (software — universally available)
         "-c:v",
         "libx264",
         "-preset",
-        "fast",
+        "ultrafast",
         "-crf",
-        "23",
+        "26",
         "-profile:v",
         "high",
         "-level:v",
