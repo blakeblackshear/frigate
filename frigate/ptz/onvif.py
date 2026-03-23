@@ -619,7 +619,7 @@ class OnvifController:
                 },
                 "Zoom": {"x": speed},
             }
-            move_request.Translation.Zoom.x = zoom
+            move_request["Translation"]["Zoom"] = {"x": zoom}
 
         await self.cams[camera_name]["ptz"].RelativeMove(move_request)
 
@@ -628,7 +628,7 @@ class OnvifController:
         move_request.Translation.PanTilt.y = 0
 
         if zoom != 0 and "zoom-r" in self.cams[camera_name]["features"]:
-            move_request.Translation.Zoom.x = 0
+            del move_request["Translation"]["Zoom"]
 
         self.cams[camera_name]["active"] = False
 
@@ -772,8 +772,18 @@ class OnvifController:
             elif command == OnvifCommandEnum.preset:
                 await self._move_to_preset(camera_name, param)
             elif command == OnvifCommandEnum.move_relative:
-                _, pan, tilt = param.split("_")
-                await self._move_relative(camera_name, float(pan), float(tilt), 0, 1)
+                parts = param.split("_")
+                if len(parts) == 3:
+                    _, pan, tilt = parts
+                    zoom = 0.0
+                elif len(parts) == 4:
+                    _, pan, tilt, zoom = parts
+                else:
+                    logger.error(f"Invalid move_relative params: {param}")
+                    return
+                await self._move_relative(
+                    camera_name, float(pan), float(tilt), float(zoom), 1
+                )
             elif command in (OnvifCommandEnum.zoom_in, OnvifCommandEnum.zoom_out):
                 await self._zoom(camera_name, command)
             elif command in (OnvifCommandEnum.focus_in, OnvifCommandEnum.focus_out):
