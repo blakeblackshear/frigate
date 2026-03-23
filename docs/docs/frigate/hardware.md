@@ -205,7 +205,7 @@ Inference is done with the `onnx` detector type. Speeds will vary greatly depend
 | GTX 1070    | s-320: 16 ms                          |                           | 320: 14 ms                 |
 | RTX 3050    | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
 | RTX 3070    | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
-| RTX 5060 Ti | t-320: 5 ms s-320: 7 ms s-640: 22 ms  | Nano-320: ~ 6 ms          |                            |
+| RTX 5060 Ti | t-320: 5 ms s-320: 7 ms s-640: 22 ms  | Nano-320: ~ 4 ms          |                            |
 | RTX A4000   |                                       |                           | 320: ~ 15 ms               |
 | Tesla P40   |                                       |                           | 320: ~ 105 ms              |
 
