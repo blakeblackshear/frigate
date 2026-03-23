@@ -1397,10 +1397,12 @@ export default function Settings() {
           : "bg-selected";
 
       return (
-        <div className="flex w-full items-center justify-between pr-4 md:pr-0">
-          <div>{t("menu." + key)}</div>
+        <div className="flex w-full min-w-0 items-center justify-between pr-4 md:pr-0">
+          <div className="min-w-0 flex-1 whitespace-normal break-words">
+            {t("menu." + key)}
+          </div>
           {(showOverrideDot || showUnsavedDot) && (
-            <div className="ml-2 flex items-center gap-2">
+            <div className="ml-2 flex shrink-0 items-center gap-2">
               {showOverrideDot && (
                 <span
                   className={cn("inline-block size-2 rounded-full", dotColor)}
@@ -1747,7 +1749,7 @@ export default function Settings() {
                       <SidebarMenu>
                         <SidebarMenuItem>
                           <SidebarMenuButton
-                            className="ml-0"
+                            className="ml-0 h-auto min-h-8 py-1.5"
                             isActive={pageToggle === filteredItems[0].key}
                             onClick={() => {
                               if (
@@ -1788,6 +1790,7 @@ export default function Settings() {
                           {filteredItems.map((item) => (
                             <SidebarMenuSubItem key={item.key}>
                               <SidebarMenuSubButton
+                                className="h-auto w-full py-1.5"
                                 isActive={pageToggle === item.key}
                                 onClick={() => {
                                   if (
