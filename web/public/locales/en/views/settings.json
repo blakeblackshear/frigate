@@ -1253,6 +1253,8 @@
       "dryRunDisabled": "Files will be deleted",
       "force": "Force",
       "forceDesc": "Bypass safety threshold and complete sync even if more than 50% of the files would be deleted.",
+      "verbose": "Verbose",
+      "verboseDesc": "Write a full list of orphaned files to disk for review.",
       "running": "Sync Running...",
       "start": "Start Sync",
       "inProgress": "Sync is in progress. This page is disabled.",
