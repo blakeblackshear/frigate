@@ -156,9 +156,9 @@ class RecordingExporter(threading.Thread):
         else:
             # need to generate from existing images
             preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-            file_start = f"preview_{self.camera}"
-            start_file = f"{file_start}-{self.start_time}.{PREVIEW_FRAME_TYPE}"
-            end_file = f"{file_start}-{self.end_time}.{PREVIEW_FRAME_TYPE}"
+            file_start = f"preview_{self.camera}-"
+            start_file = f"{file_start}{self.start_time}.{PREVIEW_FRAME_TYPE}"
+            end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
             selected_preview = None
 
             for file in sorted(os.listdir(preview_dir)):
@@ -264,9 +264,9 @@ class RecordingExporter(threading.Thread):
         if is_current_hour(self.start_time):
             # get list of current preview frames
             preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-            file_start = f"preview_{self.camera}"
-            start_file = f"{file_start}-{self.start_time}.{PREVIEW_FRAME_TYPE}"
-            end_file = f"{file_start}-{self.end_time}.{PREVIEW_FRAME_TYPE}"
+            file_start = f"preview_{self.camera}-"
+            start_file = f"{file_start}{self.start_time}.{PREVIEW_FRAME_TYPE}"
+            end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
 
             for file in sorted(os.listdir(preview_dir)):
                 if not file.startswith(file_start):

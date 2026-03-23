@@ -145,9 +145,9 @@ def preview_hour(
 def get_preview_frames_from_cache(camera_name: str, start_ts: float, end_ts: float):
     """Get list of cached preview frames"""
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-    file_start = f"preview_{camera_name}"
-    start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
-    end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
+    file_start = f"preview_{camera_name}-"
+    start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
+    end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
     selected_previews = []
 
     for file in sorted(os.listdir(preview_dir)):
