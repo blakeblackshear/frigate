@@ -951,7 +951,7 @@ cameras:
     onvif:
       # Required: host of the camera being connected to.
       # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
-      # NOTE: ONVIF user, and password can be specified with environment variables or docker secrets
+      # NOTE: ONVIF host, user, and password can be specified with environment variables or docker secrets
       #       that must begin with 'FRIGATE_'. e.g. host: '{FRIGATE_ONVIF_USERNAME}'
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
