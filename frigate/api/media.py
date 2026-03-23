@@ -1228,6 +1228,33 @@ async def event_clip(
 
 
 @router.get(
+    "/review/{review_id}/clip.mp4",
+)
+async def review_clip(
+    request: Request,
+    review_id: str,
+    padding: int = Query(0, description="Padding to apply to clip."),
+):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Review not found"}, status_code=404
+        )
+
+    await require_camera_access(review.camera, request=request)
+
+    end_ts = (
+        datetime.now().timestamp()
+        if review.end_time is None
+        else review.end_time + padding
+    )
+    return await recording_clip(
+        request, review.camera, review.start_time - padding, end_ts
+    )
+
+
+@router.get(
     "/events/{event_id}/preview.gif",
 )
 async def event_preview(request: Request, event_id: str):
