@@ -19,19 +19,40 @@ self.addEventListener("push", function (event) {
         break;
     }
 
+    const notificationOptions = {
+      body: data.message,
+      icon: "/images/maskable-icon.png",
+      image: data.image,
+      badge: "/images/maskable-badge.png",
+      tag: data.id,
+      data: { id: data.id, link: data.direct_url },
+      actions,
+    };
+
+    // iOS Safari does not auto-coalesce notifications by tag (WebKit bug #258922).
+    // On iOS 18.3+ close() works, so we manually close duplicates before showing.
+    // On other platforms, tag-based replacement works natively — skip the extra work.
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !self.MSStream;
+
+    const show = () =>
+      // @ts-expect-error we know this exists
+      self.registration.showNotification(data.title, notificationOptions);
+
     // event.waitUntil is required on iOS Safari — without it, the browser
     // may consider this a "silent push" and revoke the subscription after 3 occurrences.
     event.waitUntil(
-      // @ts-expect-error we know this exists
-      self.registration.showNotification(data.title, {
-        body: data.message,
-        icon: "/images/maskable-icon.png",
-        image: data.image,
-        badge: "/images/maskable-badge.png",
-        tag: data.id,
-        data: { id: data.id, link: data.direct_url },
-        actions,
-      }), // eslint-disable-line comma-dangle
+      isIOS
+        ? // @ts-expect-error we know this exists
+          self.registration
+            .getNotifications({ tag: data.id })
+            .then((existing) => {
+              for (const n of existing) {
+                n.close();
+              }
+            })
+            .then(show)
+        : show(), // eslint-disable-line comma-dangle
     );
   } else {
     // pass
