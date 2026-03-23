@@ -26,6 +26,7 @@
       "deletedModel_one": "Successfully deleted {{count}} model",
       "deletedModel_other": "Successfully deleted {{count}} models",
       "categorizedImage": "Successfully Classified Image",
+      "reclassifiedImage": "Successfully Reclassified Image",
       "trainedModel": "Successfully trained model.",
       "trainingModel": "Successfully started model training.",
       "updatedModel": "Successfully updated model configuration",
@@ -43,7 +44,8 @@
       "trainingFailed": "Model training failed. Check Frigate logs for details.",
       "trainingFailedToStart": "Failed to start model training: {{errorMessage}}",
       "updateModelFailed": "Failed to update model: {{errorMessage}}",
-      "renameCategoryFailed": "Failed to rename class: {{errorMessage}}"
+      "renameCategoryFailed": "Failed to rename class: {{errorMessage}}",
+      "reclassifyFailed": "Failed to reclassify image: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -92,6 +94,8 @@
   },
   "categorizeImageAs": "Classify Image As:",
   "categorizeImage": "Classify Image",
+  "reclassifyImageAs": "Reclassify Image As:",
+  "reclassifyImage": "Reclassify Image",
   "menu": {
     "objects": "Objects",
     "states": "States"

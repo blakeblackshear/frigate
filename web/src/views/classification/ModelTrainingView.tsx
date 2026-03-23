@@ -304,6 +304,37 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     [pageToggle, model, refreshTrain, refreshDataset, t],
   );
 
+  const onReclassify = useCallback(
+    (image: string, newCategory: string) => {
+      axios
+        .post(
+          `/classification/${model.name}/dataset/${pageToggle}/reclassify`,
+          {
+            id: image,
+            new_category: newCategory,
+          },
+        )
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.reclassifiedImage"), {
+              position: "top-center",
+            });
+            refreshDataset();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.reclassifyFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [pageToggle, model, refreshDataset, t],
+  );
+
   // keyboard
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -535,10 +566,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           contentRef={contentRef}
           modelName={model.name}
           categoryName={pageToggle}
+          classes={Object.keys(dataset || {})}
           images={dataset?.[pageToggle] || []}
           selectedImages={selectedImages}
           onClickImages={onClickImages}
           onDelete={onDelete}
+          onReclassify={onReclassify}
         />
       )}
     </div>
@@ -776,19 +809,23 @@ type DatasetGridProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
   modelName: string;
   categoryName: string;
+  classes: string[];
   images: string[];
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
   onDelete: (ids: string[]) => void;
+  onReclassify: (image: string, newCategory: string) => void;
 };
 function DatasetGrid({
   contentRef,
   modelName,
   categoryName,
+  classes,
   images,
   selectedImages,
   onClickImages,
   onDelete,
+  onReclassify,
 }: DatasetGridProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
@@ -816,6 +853,19 @@ function DatasetGrid({
             i18nLibrary="views/classificationModel"
             onClick={(data, _) => onClickImages([data.filename], true)}
           >
+            <ClassificationSelectionDialog
+              classes={classes}
+              modelName={modelName}
+              image={image}
+              excludeCategory={categoryName}
+              dialogLabel={t("reclassifyImageAs")}
+              tooltipLabel={t("reclassifyImage")}
+              onCategorize={(newCat) => onReclassify(image, newCat)}
+            >
+              <BlurredIconButton>
+                <TbCategoryPlus className="size-5" />
+              </BlurredIconButton>
+            </ClassificationSelectionDialog>
             <Tooltip>
               <TooltipTrigger>
                 <LuTrash2
