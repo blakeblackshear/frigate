@@ -313,5 +313,6 @@
   "information": {
     "pixels": "{{area}}px"
   },
-  "no_items": "No items"
+  "no_items": "No items",
+  "validation_errors": "Validation Errors"
 }
