@@ -45,3 +45,7 @@ class MediaSyncBody(BaseModel):
     force: bool = Field(
         default=False, description="If True, bypass safety threshold checks"
     )
+    verbose: bool = Field(
+        default=False,
+        description="If True, write full orphan file list to disk",
+    )

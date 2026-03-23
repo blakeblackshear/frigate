@@ -872,7 +872,10 @@ def sync_media(body: MediaSyncBody = Body(...)):
         202 Accepted with job_id, or 409 Conflict if job already running.
     """
     job_id = start_media_sync_job(
-        dry_run=body.dry_run, media_types=body.media_types, force=body.force
+        dry_run=body.dry_run,
+        media_types=body.media_types,
+        force=body.force,
+        verbose=body.verbose,
     )
 
     if job_id is None:

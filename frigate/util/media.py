@@ -49,6 +49,7 @@ class SyncResult:
     orphans_found: int = 0
     orphans_deleted: int = 0
     orphan_paths: list[str] = field(default_factory=list)
+    orphan_db_paths: list[str] = field(default_factory=list)
     aborted: bool = False
     error: str | None = None
 
@@ -132,7 +133,7 @@ def sync_recordings(
                     )
 
         result.orphans_found += len(recordings_to_delete)
-        result.orphan_paths.extend(
+        result.orphan_db_paths.extend(
             [
                 recording["path"]
                 for recording in recordings_to_delete
@@ -771,6 +772,61 @@ class MediaSyncResults:
             "orphans_deleted": self.total_orphans_deleted,
         }
         return results
+
+
+def write_orphan_report(
+    results: "MediaSyncResults",
+    path: str,
+    job_id: str = "",
+    dry_run: bool = False,
+) -> None:
+    """Write a verbose orphan report file listing all orphan paths by media type.
+
+    Args:
+        results: The completed MediaSyncResults.
+        path: File path to write the report to.
+        job_id: Job ID for the report header.
+        dry_run: Whether the sync was a dry run, for the report header.
+    """
+    try:
+        with open(path, "w") as f:
+            f.write("# Media Sync Orphan Report\n")
+            f.write(f"# Job: {job_id}\n")
+            f.write(
+                f"# Date: {datetime.datetime.now().astimezone(datetime.timezone.utc).isoformat()}\n"
+            )
+            f.write(f"# Mode: dry_run={dry_run}\n\n")
+
+            for name, result in [
+                ("recordings", results.recordings),
+                ("event_snapshots", results.event_snapshots),
+                ("event_thumbnails", results.event_thumbnails),
+                ("review_thumbnails", results.review_thumbnails),
+                ("previews", results.previews),
+                ("exports", results.exports),
+            ]:
+                if result is None:
+                    continue
+
+                if result.orphan_db_paths:
+                    f.write(
+                        f"## {name} - orphaned db entries ({len(result.orphan_db_paths)})\n"
+                    )
+                    for orphan_path in result.orphan_db_paths:
+                        f.write(f"{orphan_path}\n")
+                    f.write("\n")
+
+                if result.orphan_paths:
+                    f.write(
+                        f"## {name} - orphaned files ({len(result.orphan_paths)})\n"
+                    )
+                    for orphan_path in result.orphan_paths:
+                        f.write(f"{orphan_path}\n")
+                    f.write("\n")
+
+        logger.debug("Wrote verbose orphan report to %s", path)
+    except OSError as e:
+        logger.error("Failed to write orphan report to %s: %s", path, e)
 
 
 def sync_all_media(
