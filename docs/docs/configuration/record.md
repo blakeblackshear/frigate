@@ -162,6 +162,8 @@ Normal operation may leave small numbers of orphaned files until Frigate's sched
 
 The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
 
+Setting `verbose: true` writes a detailed report of every orphaned file and database entry to `/config/media_sync/<job_id>.txt`. For recordings, the report separates orphaned database entries (DB records whose files are missing from disk) from orphaned files (files on disk with no corresponding database record).
+
 :::warning
 
 This operation uses considerable CPU resources and includes a safety threshold that aborts if more than 50% of files would be deleted. Only run when necessary. If you set `force: true` the safety threshold will be bypassed; do not use `force` unless you are certain the deletions are intended.

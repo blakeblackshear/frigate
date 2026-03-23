@@ -6891,6 +6891,11 @@ components:
           title: Force
           description: "If True, bypass safety threshold checks"
           default: false
+        verbose:
+          type: boolean
+          title: Verbose
+          description: "If True, write full orphan file list to /config/media_sync/<job_id>.txt"
+          default: false
       type: object
       title: MediaSyncBody
     MotionSearchMetricsResponse:
