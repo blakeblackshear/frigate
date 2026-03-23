@@ -494,7 +494,7 @@ export default function CameraEditForm({
                 <CardContent className="space-y-4 p-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium">
-                      {t("cameraWizard.step2.streamTitle", {
+                      {t("cameraWizard.step3.streamTitle", {
                         number: index + 1,
                       })}
                     </h4>

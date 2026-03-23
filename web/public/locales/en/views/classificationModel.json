@@ -23,15 +23,17 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Deleted Class",
-      "deletedImage": "Deleted Images",
       "deletedModel_one": "Successfully deleted {{count}} model",
       "deletedModel_other": "Successfully deleted {{count}} models",
       "categorizedImage": "Successfully Classified Image",
       "trainedModel": "Successfully trained model.",
       "trainingModel": "Successfully started model training.",
       "updatedModel": "Successfully updated model configuration",
-      "renamedCategory": "Successfully renamed class to {{name}}"
+      "renamedCategory": "Successfully renamed class to {{name}}",
+      "deletedCategory_one": "Deleted {{count}} class",
+      "deletedCategory_other": "Deleted {{count}} classes",
+      "deletedImage_one": "Deleted {{count}} image",
+      "deletedImage_other": "Deleted {{count}} images"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",

@@ -35,7 +35,8 @@
         "cameras_count_other": "{{count}} Cameras"
       },
       "empty": "No messages captured yet",
-      "count": "{{count}} messages",
+      "count_one": "{{count}} message",
+      "count_other": "{{count}} messages",
       "expanded": {
         "payload": "Payload"
       }
