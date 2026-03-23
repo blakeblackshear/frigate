@@ -15,6 +15,10 @@ from zeep.exceptions import Fault, TransportError
 
 from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig, ZoomingModeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.util.builtin import find_by_key
 
 logger = logging.getLogger(__name__)
@@ -65,7 +69,14 @@ class OnvifController:
                 self.camera_configs[cam_name] = cam
                 self.status_locks[cam_name] = asyncio.Lock()
 
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.onvif],
+        )
+
         asyncio.run_coroutine_threadsafe(self._init_cameras(), self.loop)
+        asyncio.run_coroutine_threadsafe(self._poll_config_updates(), self.loop)
 
     def _run_event_loop(self) -> None:
         """Run the event loop in a separate thread."""
@@ -79,6 +90,52 @@ class OnvifController:
         """Initialize all configured cameras."""
         for cam_name in self.camera_configs:
             await self._init_single_camera(cam_name)
+
+    async def _poll_config_updates(self) -> None:
+        """Poll for ONVIF config updates and re-initialize cameras as needed."""
+        while True:
+            await asyncio.sleep(1)
+            try:
+                updates = self.config_subscriber.check_for_updates()
+                for update_type, cameras in updates.items():
+                    if update_type == CameraConfigUpdateEnum.onvif.name:
+                        for cam_name in cameras:
+                            await self._reinit_camera(cam_name)
+            except Exception:
+                logger.error("Error checking for ONVIF config updates")
+
+    async def _close_camera(self, cam_name: str) -> None:
+        """Close the ONVIF client session for a camera."""
+        cam_state = self.cams.get(cam_name)
+        if cam_state and "onvif" in cam_state:
+            try:
+                await cam_state["onvif"].close()
+            except Exception:
+                logger.debug(f"Error closing ONVIF session for {cam_name}")
+
+    async def _reinit_camera(self, cam_name: str) -> None:
+        """Re-initialize a camera after config change."""
+        logger.info(f"Re-initializing ONVIF for {cam_name} due to config change")
+
+        # close existing session before re-init
+        await self._close_camera(cam_name)
+
+        cam = self.config.cameras.get(cam_name)
+        if not cam or not cam.onvif.host:
+            # ONVIF removed from config, clean up
+            self.cams.pop(cam_name, None)
+            self.camera_configs.pop(cam_name, None)
+            self.failed_cams.pop(cam_name, None)
+            return
+
+        # update stored config and reset state
+        self.camera_configs[cam_name] = cam
+        if cam_name not in self.status_locks:
+            self.status_locks[cam_name] = asyncio.Lock()
+        self.cams.pop(cam_name, None)
+        self.failed_cams.pop(cam_name, None)
+
+        await self._init_single_camera(cam_name)
 
     async def _init_single_camera(self, cam_name: str) -> bool:
         """Initialize a single camera by name.
@@ -1041,6 +1098,7 @@ class OnvifController:
             return
 
         logger.info("Exiting ONVIF controller...")
+        self.config_subscriber.stop()
 
         def stop_and_cleanup():
             try:

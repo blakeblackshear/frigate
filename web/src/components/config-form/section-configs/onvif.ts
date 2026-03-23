@@ -19,16 +19,7 @@ const onvif: SectionConfigOverrides = {
     ],
     advancedFields: ["tls_insecure", "ignore_time_mismatch"],
     overrideFields: [],
-    restartRequired: [
-      "host",
-      "port",
-      "user",
-      "password",
-      "profile",
-      "tls_insecure",
-      "ignore_time_mismatch",
-      "autotracking.calibrate_on_startup",
-    ],
+    restartRequired: ["autotracking.calibrate_on_startup"],
     uiSchema: {
       host: {
         "ui:options": { size: "sm" },
