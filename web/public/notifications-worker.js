@@ -19,16 +19,20 @@ self.addEventListener("push", function (event) {
         break;
     }
 
-    // @ts-expect-error we know this exists
-    self.registration.showNotification(data.title, {
-      body: data.message,
-      icon: "/images/maskable-icon.png",
-      image: data.image,
-      badge: "/images/maskable-badge.png",
-      tag: data.id,
-      data: { id: data.id, link: data.direct_url },
-      actions,
-    });
+    // event.waitUntil is required on iOS Safari — without it, the browser
+    // may consider this a "silent push" and revoke the subscription after 3 occurrences.
+    event.waitUntil(
+      // @ts-expect-error we know this exists
+      self.registration.showNotification(data.title, {
+        body: data.message,
+        icon: "/images/maskable-icon.png",
+        image: data.image,
+        badge: "/images/maskable-badge.png",
+        tag: data.id,
+        data: { id: data.id, link: data.direct_url },
+        actions,
+      }), // eslint-disable-line comma-dangle
+    );
   } else {
     // pass
     // This push event has no data
