@@ -30,16 +30,28 @@ import { Button } from "../ui/button";
 type FaceSelectionDialogProps = {
   className?: string;
   faceNames: string[];
+  excludeName?: string;
+  dialogLabel?: string;
+  tooltipLabel?: string;
   onTrainAttempt: (name: string) => void;
   children: ReactNode;
 };
 export default function FaceSelectionDialog({
   className,
   faceNames,
+  excludeName,
+  dialogLabel,
+  tooltipLabel,
   onTrainAttempt,
   children,
 }: FaceSelectionDialogProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
+
+  const filteredNames = useMemo(
+    () =>
+      excludeName ? faceNames.filter((n) => n !== excludeName) : faceNames,
+    [faceNames, excludeName],
+  );
 
   const isChildButton = useMemo(
     () => React.isValidElement(children) && children.type === Button,
@@ -86,14 +98,16 @@ export default function FaceSelectionDialog({
                 <DrawerDescription>Details</DrawerDescription>
               </DrawerHeader>
             )}
-            <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {dialogLabel ?? t("trainFaceAs")}
+            </DropdownMenuLabel>
             <div
               className={cn(
                 "flex max-h-[40dvh] flex-col overflow-y-auto overflow-x-hidden",
                 isMobile && "gap-2 pb-4",
               )}
             >
-              {faceNames.sort().map((faceName) => (
+              {filteredNames.sort().map((faceName) => (
                 <SelectorItem
                   key={faceName}
                   className="flex cursor-pointer gap-2 smart-capitalize"
@@ -112,7 +126,7 @@ export default function FaceSelectionDialog({
             </div>
           </SelectorContent>
         </Selector>
-        <TooltipContent>{t("trainFace")}</TooltipContent>
+        <TooltipContent>{tooltipLabel ?? t("trainFace")}</TooltipContent>
       </Tooltip>
     </div>
   );

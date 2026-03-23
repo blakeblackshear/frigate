@@ -339,6 +339,82 @@ async def recognize_face(request: Request, file: UploadFile):
 
 
 @router.post(
+    "/faces/{name}/reclassify",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Reclassify a face image to a different name",
+    description="""Moves a single face image from one person's folder to another.
+    The image is moved and renamed, and the face classifier is cleared to
+    incorporate the change. Returns a success message or an error if the
+    image or target name is invalid.""",
+)
+def reclassify_face_image(request: Request, name: str, body: dict = None):
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
+    json: dict[str, Any] = body or {}
+    image_id = sanitize_filename(json.get("id", ""))
+    new_name = sanitize_filename(json.get("new_name", ""))
+
+    if not image_id or not new_name:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "Both 'id' and 'new_name' are required.",
+                }
+            ),
+            status_code=400,
+        )
+
+    if new_name == name:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "New name must differ from the current name.",
+                }
+            ),
+            status_code=400,
+        )
+
+    source_folder = os.path.join(FACE_DIR, sanitize_filename(name))
+    source_file = os.path.join(source_folder, image_id)
+
+    if not os.path.isfile(source_file):
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Image not found: {image_id}",
+                }
+            ),
+            status_code=404,
+        )
+
+    target_filename = f"{new_name}-{datetime.datetime.now().timestamp()}.webp"
+    target_folder = os.path.join(FACE_DIR, new_name)
+
+    os.makedirs(target_folder, exist_ok=True)
+    shutil.move(source_file, os.path.join(target_folder, target_filename))
+
+    # Clean up empty source folder
+    if os.path.exists(source_folder) and not os.listdir(source_folder):
+        os.rmdir(source_folder)
+
+    context: EmbeddingsContext = request.app.embeddings
+    context.clear_face_classifier()
+
+    return JSONResponse(
+        content=({"success": True, "message": "Successfully reclassified face."}),
+        status_code=200,
+    )
+
+
+@router.post(
     "/faces/{name}/delete",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],

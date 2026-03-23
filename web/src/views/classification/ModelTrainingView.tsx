@@ -869,7 +869,7 @@ function DatasetGrid({
             <Tooltip>
               <TooltipTrigger>
                 <LuTrash2
-                  className="size-5 cursor-pointer text-primary-variant hover:text-danger"
+                  className="size-5 cursor-pointer text-gray-200 hover:text-danger"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete([image]);
