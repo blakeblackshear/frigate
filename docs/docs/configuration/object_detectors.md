@@ -330,7 +330,7 @@ detectors:
 | [YOLO-NAS](#yolo-nas)                 | ✅  | ✅  |                                                              |
 | [MobileNet v2](#ssdlite-mobilenet-v2) | ✅  | ✅  | Fast and lightweight model, less accurate than larger models |
 | [YOLOX](#yolox)                       | ✅  | ?   |                                                              |
-| [D-FINE](#d-fine)                     | ❌  | ❌  |                                                              |
+| [D-FINE / DEIMv2](#d-fine--deimv2)    | ❌  | ❌  |                                                              |
 
 #### SSDLite MobileNet v2
 
@@ -464,13 +464,13 @@ model:
 
 </details>
 
-#### D-FINE
+#### D-FINE / DEIMv2
 
-[D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+[D-FINE](https://github.com/Peterande/D-FINE) and [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) are DETR based models that share the same ONNX input/output format. The ONNX exported models are supported, but not included by default. See the models section for downloading [D-FINE](#downloading-d-fine-model) or [DEIMv2](#downloading-deimv2-model) for use in Frigate.
 
 :::warning
 
-Currently D-FINE models only run on OpenVINO in CPU mode, GPUs currently fail to compile the model
+Currently D-FINE / DEIMv2 models only run on OpenVINO in CPU mode, GPUs currently fail to compile the model
 
 :::
 
@@ -492,6 +492,31 @@ model:
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/dfine-s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+</details>
+
+<details>
+  <summary>DEIMv2 Setup & Config</summary>
+
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: CPU
+
+model:
+  model_type: dfine
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/deimv2_hgnetv2_n.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -648,7 +673,7 @@ The AMD GPU kernel is known problematic especially when converting models to mxr
 
 See [ONNX supported models](#supported-models) for supported models, there are some caveats:
 
-- D-FINE models are not supported
+- D-FINE / DEIMv2 models are not supported
 - YOLO-NAS models are known to not run well on integrated GPUs
 
 ## ONNX
@@ -693,7 +718,7 @@ detectors:
 | [RF-DETR](#rf-detr)           | ✅         | ❌      | Supports CUDA Graphs for optimal Nvidia performance |
 | [YOLO-NAS](#yolo-nas-1)       | ⚠️         | ⚠️      | Not supported by CUDA Graphs                        |
 | [YOLOX](#yolox-1)             | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance |
-| [D-FINE](#d-fine)             | ⚠️         | ❌      | Not supported by CUDA Graphs                        |
+| [D-FINE / DEIMv2](#d-fine--deimv2-1) | ⚠️         | ❌      | Not supported by CUDA Graphs                        |
 
 There is no default model provided, the following formats are supported:
 
@@ -822,9 +847,9 @@ model:
 
 </details>
 
-#### D-FINE
+#### D-FINE / DEIMv2
 
-[D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+[D-FINE](https://github.com/Peterande/D-FINE) and [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) are DETR based models that share the same ONNX input/output format. The ONNX exported models are supported, but not included by default. See the models section for downloading [D-FINE](#downloading-d-fine-model) or [DEIMv2](#downloading-deimv2-model) for use in Frigate.
 
 <details>
   <summary>D-FINE Setup & Config</summary>
@@ -843,6 +868,28 @@ model:
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/dfine_m_obj2coco.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+</details>
+
+<details>
+  <summary>DEIMv2 Setup & Config</summary>
+
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: dfine
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/deimv2_hgnetv2_n.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -1509,6 +1556,49 @@ RUN python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hg
 FROM scratch
 ARG MODEL_SIZE
 COPY --from=build /dfine/output/dfine_${MODEL_SIZE}_obj2coco.onnx /dfine-${MODEL_SIZE}.onnx
+EOF
+```
+
+### Downloading DEIMv2 Model
+
+[DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) can be exported as ONNX by running the command below. Pretrained weights are available on Hugging Face for two backbone families:
+
+- **HGNetv2** (smaller/faster): `atto`, `femto`, `pico`, `n`
+- **DINOv3** (larger/more accurate): `s`, `m`, `l`, `x`
+
+Set `BACKBONE` and `MODEL_SIZE` in the first line to match your desired variant. Hugging Face model names use uppercase (e.g. `HGNetv2_N`, `DINOv3_S`), while config files use lowercase (e.g. `hgnetv2_n`, `dinov3_s`).
+
+```sh
+docker build . --rm --build-arg BACKBONE=hgnetv2 --build-arg MODEL_SIZE=n --output . -f- <<'EOF'
+FROM python:3.11-slim AS build
+RUN apt-get update && apt-get install --no-install-recommends -y git libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+WORKDIR /deimv2
+RUN git clone https://github.com/Intellindust-AI-Lab/DEIMv2.git .
+# Install CPU-only PyTorch first to avoid pulling CUDA variant
+RUN uv pip install --no-cache --system torch torchvision --index-url https://download.pytorch.org/whl/cpu
+RUN uv pip install --no-cache --system -r requirements.txt
+RUN uv pip install --no-cache --system onnx safetensors huggingface_hub
+RUN mkdir -p output
+ARG BACKBONE
+ARG MODEL_SIZE
+# Download from Hugging Face and convert safetensors to pth
+RUN python3 -c "\
+from huggingface_hub import hf_hub_download; \
+from safetensors.torch import load_file; \
+import torch; \
+backbone = '${BACKBONE}'.replace('hgnetv2','HGNetv2').replace('dinov3','DINOv3'); \
+size = '${MODEL_SIZE}'.upper(); \
+st = load_file(hf_hub_download('Intellindust/DEIMv2_' + backbone + '_' + size + '_COCO', 'model.safetensors')); \
+torch.save({'model': st}, 'output/deimv2.pth')"
+RUN sed -i "s/data = torch.rand(2/data = torch.rand(1/" tools/deployment/export_onnx.py
+# HuggingFace safetensors omits frozen constants that the model constructor initializes
+RUN sed -i "s/cfg.model.load_state_dict(state)/cfg.model.load_state_dict(state, strict=False)/" tools/deployment/export_onnx.py
+RUN python3 tools/deployment/export_onnx.py -c configs/deimv2/deimv2_${BACKBONE}_${MODEL_SIZE}_coco.yml -r output/deimv2.pth
+FROM scratch
+ARG BACKBONE
+ARG MODEL_SIZE
+COPY --from=build /deimv2/output/deimv2.onnx /deimv2_${BACKBONE}_${MODEL_SIZE}.onnx
 EOF
 ```
 
