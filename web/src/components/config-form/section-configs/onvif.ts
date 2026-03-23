@@ -3,20 +3,12 @@ import type { SectionConfigOverrides } from "./types";
 const onvif: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/cameras#setting-up-camera-ptz-controls",
-    restartRequired: [
-      "host",
-      "port",
-      "user",
-      "password",
-      "tls_insecure",
-      "ignore_time_mismatch",
-      "autotracking.calibrate_on_startup",
-    ],
     fieldOrder: [
       "host",
       "port",
       "user",
       "password",
+      "profile",
       "tls_insecure",
       "ignore_time_mismatch",
       "autotracking",
@@ -27,9 +19,22 @@ const onvif: SectionConfigOverrides = {
     ],
     advancedFields: ["tls_insecure", "ignore_time_mismatch"],
     overrideFields: [],
+    restartRequired: [
+      "host",
+      "port",
+      "user",
+      "password",
+      "profile",
+      "tls_insecure",
+      "ignore_time_mismatch",
+      "autotracking.calibrate_on_startup",
+    ],
     uiSchema: {
       host: {
         "ui:options": { size: "sm" },
+      },
+      profile: {
+        "ui:widget": "onvifProfile",
       },
       autotracking: {
         required_zones: {

@@ -118,6 +118,7 @@ class OnvifController:
                 "active": False,
                 "features": [],
                 "presets": {},
+                "profiles": [],
             }
             return True
         except (Fault, ONVIFError, TransportError, Exception) as e:
@@ -173,7 +174,11 @@ class OnvifController:
             )
         ]
 
-        # log available profiles with names and tokens for debugging
+        # store available profiles for API response and log for debugging
+        self.cams[camera_name]["profiles"] = [
+            {"name": getattr(p, "Name", None) or p.token, "token": p.token}
+            for p in valid_profiles
+        ]
         for p in valid_profiles:
             logger.debug(
                 "Onvif profile for %s: name='%s', token='%s'",
@@ -838,6 +843,7 @@ class OnvifController:
                 "name": camera_name,
                 "features": self.cams[camera_name]["features"],
                 "presets": list(self.cams[camera_name]["presets"].keys()),
+                "profiles": self.cams[camera_name].get("profiles", []),
             }
 
         if camera_name not in self.cams.keys() and camera_name in self.config.cameras:

@@ -23,6 +23,7 @@ class CameraConfigUpdateEnum(str, Enum):
     notifications = "notifications"
     objects = "objects"
     object_genai = "object_genai"
+    onvif = "onvif"
     record = "record"
     remove = "remove"  # for removing a camera
     review = "review"
