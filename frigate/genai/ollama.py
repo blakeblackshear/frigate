@@ -54,9 +54,7 @@ class OllamaClient(GenAIClient):
             return None
 
     @staticmethod
-    def _clean_schema_for_ollama(
-        schema: dict, *, _is_properties: bool = False
-    ) -> dict:
+    def _clean_schema_for_ollama(schema: dict, *, _is_properties: bool = False) -> dict:
         """Strip Pydantic metadata from a JSON schema for Ollama compatibility.
 
         Ollama's grammar-based constrained generation works best with minimal
