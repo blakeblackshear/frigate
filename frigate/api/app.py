@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 import os
+import platform
 import traceback
 import urllib
 from datetime import datetime, timedelta
@@ -246,19 +247,26 @@ def get_active_profile(request: Request):
 @router.get("/ffmpeg/presets", dependencies=[Depends(allow_any_authenticated())])
 def ffmpeg_presets():
     """Return available ffmpeg preset keys for config UI usage."""
+    machine = platform.machine().lower()
+    is_arm64 = machine in ("aarch64", "arm64", "armv8", "armv7l")
 
-    # Whitelist based on documented presets in ffmpeg_presets.md
-    hwaccel_presets = [
-        "preset-rpi-64-h264",
-        "preset-rpi-64-h265",
-        "preset-vaapi",
-        "preset-intel-qsv-h264",
-        "preset-intel-qsv-h265",
-        "preset-nvidia",
-        "preset-jetson-h264",
-        "preset-jetson-h265",
-        "preset-rkmpp",
-    ]
+    if is_arm64:
+        hwaccel_presets = [
+            "preset-rpi-64-h264",
+            "preset-rpi-64-h265",
+            "preset-jetson-h264",
+            "preset-jetson-h265",
+            "preset-rkmpp",
+            "preset-vaapi",
+        ]
+    else:
+        hwaccel_presets = [
+            "preset-vaapi",
+            "preset-intel-qsv-h264",
+            "preset-intel-qsv-h265",
+            "preset-nvidia",
+        ]
+
     input_presets = [
         "preset-http-jpeg-generic",
         "preset-http-mjpeg-generic",

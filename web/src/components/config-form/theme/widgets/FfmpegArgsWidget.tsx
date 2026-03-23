@@ -405,7 +405,10 @@ export function FfmpegArgsWidget(props: WidgetProps) {
           <SelectContent>
             {presetOptions.map((preset) => (
               <SelectItem key={preset} value={preset}>
-                {preset}
+                {t(`configForm.ffmpegArgs.presetLabels.${preset}`, {
+                  ns: "views/settings",
+                  defaultValue: preset,
+                })}
               </SelectItem>
             ))}
           </SelectContent>
