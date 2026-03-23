@@ -58,7 +58,7 @@ import type { ConfigSectionData, JsonObject } from "@/types/configForm";
 import { sanitizeSectionData } from "@/utils/configUtil";
 import type { SectionRendererProps } from "./registry";
 
-const NOTIFICATION_SERVICE_WORKER = "/notification-worker.js";
+const NOTIFICATION_SERVICE_WORKER = "/notifications-worker.js";
 import {
   SettingsGroupCard,
   SPLIT_ROW_CLASS_NAME,
