@@ -25,9 +25,12 @@ export function OnvifProfileWidget(props: WidgetProps) {
     | undefined;
   const cameraName = formContext?.cameraName;
   const isCameraLevel = formContext?.level === "camera";
+  const hasOnvifHost = !!formContext?.fullCameraConfig?.onvif?.host;
 
   const { data: ptzInfo } = useSWR<CameraPtzInfo>(
-    isCameraLevel && cameraName ? `${cameraName}/ptz/info` : null,
+    isCameraLevel && cameraName && hasOnvifHost
+      ? `${cameraName}/ptz/info`
+      : null,
     {
       // ONVIF may not be initialized yet when the settings page loads,
       // so retry until profiles become available
@@ -37,9 +40,9 @@ export function OnvifProfileWidget(props: WidgetProps) {
   );
 
   const profiles = ptzInfo?.profiles ?? [];
-  const fieldClassName = getSizedFieldClassName(options, "sm");
+  const fieldClassName = getSizedFieldClassName(options, "md");
   const hasProfiles = profiles.length > 0;
-  const waiting = isCameraLevel && !!cameraName && !hasProfiles;
+  const waiting = isCameraLevel && !!cameraName && hasOnvifHost && !hasProfiles;
 
   const selected = value ?? AUTO_VALUE;
 
@@ -62,7 +65,7 @@ export function OnvifProfileWidget(props: WidgetProps) {
       }}
       disabled={disabled || readonly}
     >
-      <SelectTrigger id={id} className={fieldClassName}>
+      <SelectTrigger id={id} className={cn("text-left", fieldClassName)}>
         <SelectValue placeholder={schema.title || "Select..."} />
       </SelectTrigger>
       <SelectContent>
