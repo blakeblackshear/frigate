@@ -553,6 +553,17 @@
     "motionMaskLabel": "Motion Mask {{number}}",
     "objectMaskLabel": "Object Mask {{number}}",
     "form": {
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID must not be empty.",
+          "alreadyExists": "A mask with this ID already exists for this camera."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Name must not be empty."
+        }
+      },
       "zoneName": {
         "error": {
           "mustBeAtLeastTwoCharacters": "Zone name must be at least 2 characters.",
