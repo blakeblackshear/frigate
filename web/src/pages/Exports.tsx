@@ -220,7 +220,7 @@ function Exports() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("deleteExport")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteExport.label")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("deleteExport.desc", { exportName: deleteClip?.exportName })}
             </AlertDialogDescription>

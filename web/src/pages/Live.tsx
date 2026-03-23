@@ -81,7 +81,7 @@ function Live() {
         camera: `${cameraGroup[0].toUpperCase()}${cameraGroup.substring(1)}`,
       });
     } else {
-      document.title = t("documentTitle", { ns: "views/live" });
+      document.title = t("documentTitle.default", { ns: "views/live" });
     }
   }, [cameraGroup, selectedCameraName, t]);
 

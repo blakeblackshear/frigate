@@ -785,7 +785,7 @@ export default function ZoneEditPane({
                 </div>
                 <FormDescription>
                   {t("masksAndZones.zones.speedEstimation.desc")}
-                  <div className="mt-2 flex items-center text-primary">
+                  <span className="mt-2 flex items-center text-primary">
                     <Link
                       to={getLocaleDocUrl(
                         "configuration/zones#speed-estimation",
@@ -797,7 +797,7 @@ export default function ZoneEditPane({
                       {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
-                  </div>
+                  </span>
                 </FormDescription>
                 <FormMessage />
               </FormItem>

@@ -12,7 +12,10 @@
     "preview": "vite preview",
     "prettier:write": "prettier -u -w --ignore-path .gitignore \"*.{ts,tsx,js,jsx,css,html}\"",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "i18n:extract": "i18next-cli extract",
+    "i18n:extract:ci": "i18next-cli extract --ci",
+    "i18n:status": "i18next-cli status"
   },
   "dependencies": {
     "@cycjimmy/jsmpeg-player": "^6.1.2",
@@ -114,6 +117,7 @@
     "eslint-plugin-react-refresh": "^0.4.8",
     "eslint-plugin-vitest-globals": "^1.5.0",
     "fake-indexeddb": "^6.0.0",
+    "i18next-cli": "^1.5.11",
     "jest-websocket-mock": "^2.5.0",
     "jsdom": "^24.1.1",
     "monaco-editor": "^0.52.2",

@@ -81,6 +81,7 @@
     "zones": "Zones",
     "mask": "Mask",
     "motion": "Motion",
-    "regions": "Regions"
+    "regions": "Regions",
+    "paths": "Paths"
   }
 }

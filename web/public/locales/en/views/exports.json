@@ -6,8 +6,10 @@
     "cases": "Cases",
     "uncategorizedExports": "Uncategorized Exports"
   },
-  "deleteExport": "Delete Export",
-  "deleteExport.desc": "Are you sure you want to delete {{exportName}}?",
+  "deleteExport": {
+    "label": "Delete Export",
+    "desc": "Are you sure you want to delete {{exportName}}?"
+  },
   "editExport": {
     "title": "Rename Export",
     "desc": "Enter a new name for this export.",

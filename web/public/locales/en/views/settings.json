@@ -515,7 +515,6 @@
     "reviewClassification": {
       "title": "Review Classification",
       "desc": "Frigate categorizes review items as Alerts and Detections. By default, all <em>person</em> and <em>car</em> objects are considered Alerts. You can refine categorization of your review items by configuring required zones for them.",
-
       "noDefinedZones": "No zones are defined for this camera.",
       "objectAlertsTips": "All {{alertsLabels}} objects on {{cameraName}} will be shown as Alerts.",
       "zoneObjectAlertsTips": "All {{alertsLabels}} objects detected in {{zone}} on {{cameraName}} will be shown as Alerts.",
@@ -553,6 +552,17 @@
     "motionMaskLabel": "Motion Mask {{number}}",
     "objectMaskLabel": "Object Mask {{number}}",
     "form": {
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID must not be empty.",
+          "alreadyExists": "A mask with this ID already exists for this camera."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Name must not be empty."
+        }
+      },
       "zoneName": {
         "error": {
           "mustBeAtLeastTwoCharacters": "Zone name must be at least 2 characters.",
@@ -1286,7 +1296,8 @@
     },
     "camera": {
       "title": "Camera Settings",
-      "description": "These settings apply only to this camera and override the global settings."
+      "description": "These settings apply only to this camera and override the global settings.",
+      "noCameras": "No cameras available"
     },
     "advancedSettingsCount": "Advanced Settings ({{count}})",
     "advancedCount": "Advanced ({{count}})",
