@@ -161,28 +161,64 @@ class OnvifController:
             )
             return False
 
+        # build list of valid PTZ profiles
+        valid_profiles = [
+            p
+            for p in profiles
+            if p.VideoEncoderConfiguration
+            and p.PTZConfiguration
+            and (
+                p.PTZConfiguration.DefaultContinuousPanTiltVelocitySpace is not None
+                or p.PTZConfiguration.DefaultContinuousZoomVelocitySpace is not None
+            )
+        ]
+
+        # log available profiles with names and tokens for debugging
+        for p in valid_profiles:
+            logger.debug(
+                "Onvif profile for %s: name='%s', token='%s'",
+                camera_name,
+                getattr(p, "Name", None),
+                p.token,
+            )
+
+        configured_profile = self.config.cameras[camera_name].onvif.profile
         profile = None
-        for _, onvif_profile in enumerate(profiles):
-            if (
-                onvif_profile.VideoEncoderConfiguration
-                and onvif_profile.PTZConfiguration
-                and (
-                    onvif_profile.PTZConfiguration.DefaultContinuousPanTiltVelocitySpace
-                    is not None
-                    or onvif_profile.PTZConfiguration.DefaultContinuousZoomVelocitySpace
-                    is not None
+
+        if configured_profile is not None:
+            # match by exact token first, then by name
+            for p in valid_profiles:
+                if p.token == configured_profile:
+                    profile = p
+                    break
+            if profile is None:
+                for p in valid_profiles:
+                    if getattr(p, "Name", None) == configured_profile:
+                        profile = p
+                        break
+            if profile is None:
+                available = [
+                    f"name='{getattr(p, 'Name', None)}', token='{p.token}'"
+                    for p in valid_profiles
+                ]
+                logger.error(
+                    "Onvif profile '%s' not found for camera %s. Available profiles: %s",
+                    configured_profile,
+                    camera_name,
+                    available,
                 )
-            ):
-                # use the first profile that has a valid ptz configuration
-                profile = onvif_profile
-                logger.debug(f"Selected Onvif profile for {camera_name}: {profile}")
-                break
+                return False
+        else:
+            # use the first profile that has a valid ptz configuration
+            profile = valid_profiles[0] if valid_profiles else None
 
         if profile is None:
             logger.error(
                 f"No appropriate Onvif profiles found for camera: {camera_name}."
             )
             return False
+
+        logger.debug(f"Selected Onvif profile for {camera_name}: {profile}")
 
         # get the PTZ config for the profile
         try:
@@ -218,48 +254,92 @@ class OnvifController:
         move_request.ProfileToken = profile.token
         self.cams[camera_name]["move_request"] = move_request
 
-        # extra setup for autotracking cameras
-        if (
-            self.config.cameras[camera_name].onvif.autotracking.enabled_in_config
-            and self.config.cameras[camera_name].onvif.autotracking.enabled
-        ):
+        # get PTZ configuration options for feature detection and relative movement
+        ptz_config = None
+        fov_space_id = None
+
+        try:
             request = ptz.create_type("GetConfigurationOptions")
             request.ConfigurationToken = profile.PTZConfiguration.token
             ptz_config = await ptz.GetConfigurationOptions(request)
-            logger.debug(f"Onvif config for {camera_name}: {ptz_config}")
+            logger.debug(
+                f"Onvif PTZ configuration options for {camera_name}: {ptz_config}"
+            )
+        except (Fault, ONVIFError, TransportError, Exception) as e:
+            logger.debug(
+                f"Unable to get PTZ configuration options for {camera_name}: {e}"
+            )
+
+        # detect FOV translation space for relative movement
+        if ptz_config is not None:
+            try:
+                fov_space_id = next(
+                    (
+                        i
+                        for i, space in enumerate(
+                            ptz_config.Spaces.RelativePanTiltTranslationSpace
+                        )
+                        if "TranslationSpaceFov" in space["URI"]
+                    ),
+                    None,
+                )
+            except (AttributeError, TypeError):
+                fov_space_id = None
+
+        autotracking_config = self.config.cameras[camera_name].onvif.autotracking
+        autotracking_enabled = (
+            autotracking_config.enabled_in_config and autotracking_config.enabled
+        )
+
+        # autotracking-only: status request and service capabilities
+        if autotracking_enabled:
+            status_request = ptz.create_type("GetStatus")
+            status_request.ProfileToken = profile.token
+            self.cams[camera_name]["status_request"] = status_request
 
             service_capabilities_request = ptz.create_type("GetServiceCapabilities")
             self.cams[camera_name]["service_capabilities_request"] = (
                 service_capabilities_request
             )
 
-            fov_space_id = next(
-                (
-                    i
-                    for i, space in enumerate(
-                        ptz_config.Spaces.RelativePanTiltTranslationSpace
-                    )
-                    if "TranslationSpaceFov" in space["URI"]
-                ),
-                None,
-            )
-
-            # status request for autotracking and filling ptz-parameters
-            status_request = ptz.create_type("GetStatus")
-            status_request.ProfileToken = profile.token
-            self.cams[camera_name]["status_request"] = status_request
+        # setup relative move request when FOV relative movement is supported
+        if (
+            fov_space_id is not None
+            and configs.DefaultRelativePanTiltTranslationSpace is not None
+        ):
+            # one-off GetStatus to seed Translation field
+            status = None
             try:
-                status = await ptz.GetStatus(status_request)
-                logger.debug(f"Onvif status config for {camera_name}: {status}")
+                one_off_status_request = ptz.create_type("GetStatus")
+                one_off_status_request.ProfileToken = profile.token
+                status = await ptz.GetStatus(one_off_status_request)
+                logger.debug(f"Onvif status for {camera_name}: {status}")
             except Exception as e:
-                logger.warning(f"Unable to get status from camera: {camera_name}: {e}")
-                status = None
+                logger.warning(f"Unable to get status from camera {camera_name}: {e}")
 
-            # autotracking relative panning/tilting needs a relative zoom value set to 0
-            # if camera supports relative movement
+            rel_move_request = ptz.create_type("RelativeMove")
+            rel_move_request.ProfileToken = profile.token
+            logger.debug(f"{camera_name}: Relative move request: {rel_move_request}")
+
+            fov_uri = ptz_config["Spaces"]["RelativePanTiltTranslationSpace"][
+                fov_space_id
+            ]["URI"]
+
+            if rel_move_request.Translation is None:
+                if status is not None:
+                    # seed from current position
+                    rel_move_request.Translation = status.Position
+                    rel_move_request.Translation.PanTilt.space = fov_uri
+                else:
+                    # fallback: construct Translation explicitly
+                    rel_move_request.Translation = {
+                        "PanTilt": {"x": 0, "y": 0, "space": fov_uri}
+                    }
+
+            # configure zoom on relative move request
             if (
-                self.config.cameras[camera_name].onvif.autotracking.zooming
-                != ZoomingModeEnum.disabled
+                autotracking_enabled
+                and autotracking_config.zooming != ZoomingModeEnum.disabled
             ):
                 zoom_space_id = next(
                     (
@@ -271,60 +351,43 @@ class OnvifController:
                     ),
                     None,
                 )
-
-            # setup relative moving request for autotracking
-            move_request = ptz.create_type("RelativeMove")
-            move_request.ProfileToken = profile.token
-            logger.debug(f"{camera_name}: Relative move request: {move_request}")
-            if move_request.Translation is None and fov_space_id is not None:
-                move_request.Translation = status.Position
-                move_request.Translation.PanTilt.space = ptz_config["Spaces"][
-                    "RelativePanTiltTranslationSpace"
-                ][fov_space_id]["URI"]
-
-            # try setting relative zoom translation space
-            try:
-                if (
-                    self.config.cameras[camera_name].onvif.autotracking.zooming
-                    != ZoomingModeEnum.disabled
-                ):
+                try:
                     if zoom_space_id is not None:
-                        move_request.Translation.Zoom.space = ptz_config["Spaces"][
+                        rel_move_request.Translation.Zoom.space = ptz_config["Spaces"][
                             "RelativeZoomTranslationSpace"
                         ][zoom_space_id]["URI"]
-                else:
-                    if (
-                        move_request["Translation"] is not None
-                        and "Zoom" in move_request["Translation"]
-                    ):
-                        del move_request["Translation"]["Zoom"]
-                    if (
-                        move_request["Speed"] is not None
-                        and "Zoom" in move_request["Speed"]
-                    ):
-                        del move_request["Speed"]["Zoom"]
-                    logger.debug(
-                        f"{camera_name}: Relative move request after deleting zoom: {move_request}"
+                except Exception as e:
+                    autotracking_config.zooming = ZoomingModeEnum.disabled
+                    logger.warning(
+                        f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported. Exception: {e}"
                     )
-            except Exception as e:
-                self.config.cameras[
-                    camera_name
-                ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
-                logger.warning(
-                    f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported. Exception: {e}"
+            else:
+                # remove zoom fields from relative move request
+                if (
+                    rel_move_request["Translation"] is not None
+                    and "Zoom" in rel_move_request["Translation"]
+                ):
+                    del rel_move_request["Translation"]["Zoom"]
+                if (
+                    rel_move_request["Speed"] is not None
+                    and "Zoom" in rel_move_request["Speed"]
+                ):
+                    del rel_move_request["Speed"]["Zoom"]
+                logger.debug(
+                    f"{camera_name}: Relative move request after deleting zoom: {rel_move_request}"
                 )
 
-            if move_request.Speed is None:
-                move_request.Speed = configs.DefaultPTZSpeed if configs else None
+            if rel_move_request.Speed is None:
+                rel_move_request.Speed = configs.DefaultPTZSpeed if configs else None
             logger.debug(
-                f"{camera_name}: Relative move request after setup: {move_request}"
+                f"{camera_name}: Relative move request after setup: {rel_move_request}"
             )
-            self.cams[camera_name]["relative_move_request"] = move_request
+            self.cams[camera_name]["relative_move_request"] = rel_move_request
 
-            # setup absolute moving request for autotracking zooming
-            move_request = ptz.create_type("AbsoluteMove")
-            move_request.ProfileToken = profile.token
-            self.cams[camera_name]["absolute_move_request"] = move_request
+        # setup absolute move request
+        abs_move_request = ptz.create_type("AbsoluteMove")
+        abs_move_request.ProfileToken = profile.token
+        self.cams[camera_name]["absolute_move_request"] = abs_move_request
 
         # setup existing presets
         try:
@@ -358,47 +421,47 @@ class OnvifController:
 
         if configs.DefaultRelativeZoomTranslationSpace:
             supported_features.append("zoom-r")
-            if (
-                self.config.cameras[camera_name].onvif.autotracking.enabled_in_config
-                and self.config.cameras[camera_name].onvif.autotracking.enabled
-            ):
+            if ptz_config is not None:
                 try:
-                    # get camera's zoom limits from onvif config
                     self.cams[camera_name]["relative_zoom_range"] = (
                         ptz_config.Spaces.RelativeZoomTranslationSpace[0]
                     )
                 except Exception as e:
-                    if (
-                        self.config.cameras[camera_name].onvif.autotracking.zooming
-                        == ZoomingModeEnum.relative
-                    ):
-                        self.config.cameras[
-                            camera_name
-                        ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
+                    if autotracking_config.zooming == ZoomingModeEnum.relative:
+                        autotracking_config.zooming = ZoomingModeEnum.disabled
                         logger.warning(
                             f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported. Exception: {e}"
                         )
 
         if configs.DefaultAbsoluteZoomPositionSpace:
             supported_features.append("zoom-a")
-            if (
-                self.config.cameras[camera_name].onvif.autotracking.enabled_in_config
-                and self.config.cameras[camera_name].onvif.autotracking.enabled
-            ):
+            if ptz_config is not None:
                 try:
-                    # get camera's zoom limits from onvif config
                     self.cams[camera_name]["absolute_zoom_range"] = (
                         ptz_config.Spaces.AbsoluteZoomPositionSpace[0]
                     )
                     self.cams[camera_name]["zoom_limits"] = configs.ZoomLimits
                 except Exception as e:
-                    if self.config.cameras[camera_name].onvif.autotracking.zooming:
-                        self.config.cameras[
-                            camera_name
-                        ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
+                    if autotracking_config.zooming != ZoomingModeEnum.disabled:
+                        autotracking_config.zooming = ZoomingModeEnum.disabled
                         logger.warning(
                             f"Disabling autotracking zooming for {camera_name}: Absolute zoom not supported. Exception: {e}"
                         )
+
+        # disable autotracking zoom if required ranges are unavailable
+        if autotracking_config.zooming != ZoomingModeEnum.disabled:
+            if autotracking_config.zooming == ZoomingModeEnum.relative:
+                if "relative_zoom_range" not in self.cams[camera_name]:
+                    autotracking_config.zooming = ZoomingModeEnum.disabled
+                    logger.warning(
+                        f"Disabling autotracking zooming for {camera_name}: Relative zoom range unavailable"
+                    )
+            if autotracking_config.zooming == ZoomingModeEnum.absolute:
+                if "absolute_zoom_range" not in self.cams[camera_name]:
+                    autotracking_config.zooming = ZoomingModeEnum.disabled
+                    logger.warning(
+                        f"Disabling autotracking zooming for {camera_name}: Absolute zoom range unavailable"
+                    )
 
         if (
             self.cams[camera_name]["video_source_token"] is not None
@@ -416,10 +479,9 @@ class OnvifController:
             except (Fault, ONVIFError, TransportError, Exception) as e:
                 logger.debug(f"Focus not supported for {camera_name}: {e}")
 
+        # detect FOV relative movement support
         if (
-            self.config.cameras[camera_name].onvif.autotracking.enabled_in_config
-            and self.config.cameras[camera_name].onvif.autotracking.enabled
-            and fov_space_id is not None
+            fov_space_id is not None
             and configs.DefaultRelativePanTiltTranslationSpace is not None
         ):
             supported_features.append("pt-r-fov")
@@ -548,11 +610,8 @@ class OnvifController:
         move_request.Translation.PanTilt.x = pan
         move_request.Translation.PanTilt.y = tilt
 
-        if (
-            "zoom-r" in self.cams[camera_name]["features"]
-            and self.config.cameras[camera_name].onvif.autotracking.zooming
-            == ZoomingModeEnum.relative
-        ):
+        # include zoom if requested and camera supports relative zoom
+        if zoom != 0 and "zoom-r" in self.cams[camera_name]["features"]:
             move_request.Speed = {
                 "PanTilt": {
                     "x": speed,
@@ -568,11 +627,7 @@ class OnvifController:
         move_request.Translation.PanTilt.x = 0
         move_request.Translation.PanTilt.y = 0
 
-        if (
-            "zoom-r" in self.cams[camera_name]["features"]
-            and self.config.cameras[camera_name].onvif.autotracking.zooming
-            == ZoomingModeEnum.relative
-        ):
+        if zoom != 0 and "zoom-r" in self.cams[camera_name]["features"]:
             move_request.Translation.Zoom.x = 0
 
         self.cams[camera_name]["active"] = False
