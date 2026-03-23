@@ -324,9 +324,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         end_time: float,
     ) -> list[str]:
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-        file_start = f"preview_{camera}"
-        start_file = f"{file_start}-{start_time}.webp"
-        end_file = f"{file_start}-{end_time}.webp"
+        file_start = f"preview_{camera}-"
+        start_file = f"{file_start}{start_time}.webp"
+        end_file = f"{file_start}{end_time}.webp"
         all_frames = []
 
         for file in sorted(os.listdir(preview_dir)):

@@ -266,8 +266,8 @@ class PreviewRecorder:
             .timestamp()
         )
 
-        file_start = f"preview_{config.name}"
-        start_file = f"{file_start}-{start_ts}.webp"
+        file_start = f"preview_{config.name}-"
+        start_file = f"{file_start}{start_ts}.webp"
 
         for file in sorted(os.listdir(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))):
             if not file.startswith(file_start):
