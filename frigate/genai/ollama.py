@@ -54,12 +54,18 @@ class OllamaClient(GenAIClient):
             return None
 
     @staticmethod
-    def _clean_schema_for_ollama(schema: dict) -> dict:
+    def _clean_schema_for_ollama(
+        schema: dict, *, _is_properties: bool = False
+    ) -> dict:
         """Strip Pydantic metadata from a JSON schema for Ollama compatibility.
 
         Ollama's grammar-based constrained generation works best with minimal
         schemas. Pydantic adds title/description/constraint fields that can
         cause the grammar generator to silently skip required fields.
+
+        Keys inside a ``properties`` dict are actual field names and must never
+        be stripped, even if they collide with a metadata key name (e.g. a
+        model field called ``title``).
         """
         STRIP_KEYS = {
             "title",
@@ -71,10 +77,12 @@ class OllamaClient(GenAIClient):
         }
         result = {}
         for key, value in schema.items():
-            if key in STRIP_KEYS:
+            if not _is_properties and key in STRIP_KEYS:
                 continue
             if isinstance(value, dict):
-                result[key] = OllamaClient._clean_schema_for_ollama(value)
+                result[key] = OllamaClient._clean_schema_for_ollama(
+                    value, _is_properties=(key == "properties")
+                )
             elif isinstance(value, list):
                 result[key] = [
                     OllamaClient._clean_schema_for_ollama(item)
