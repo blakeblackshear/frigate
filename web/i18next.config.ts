@@ -28,7 +28,8 @@ function ignoreDynamicNamespaceKeys(): Plugin {
       for (const key of keys.keys()) {
         // Each map key is "ns:actualKey" format
         const separatorIndex = key.indexOf(":");
-        const actualKey = separatorIndex >= 0 ? key.slice(separatorIndex + 1) : key;
+        const actualKey =
+          separatorIndex >= 0 ? key.slice(separatorIndex + 1) : key;
         if (falsePositiveKeys.has(actualKey)) {
           keys.delete(key);
         }
