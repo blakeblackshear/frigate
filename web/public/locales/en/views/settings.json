@@ -1319,7 +1319,18 @@
       "none": "None",
       "useGlobalSetting": "Inherit from global setting",
       "selectPreset": "Select preset",
-      "manualPlaceholder": "Enter FFmpeg arguments"
+      "manualPlaceholder": "Enter FFmpeg arguments",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi 64-bit (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi 64-bit (H.265)",
+        "preset-vaapi": "VAAPI",
+        "preset-intel-qsv-h264": "Intel QSV (H.264)",
+        "preset-intel-qsv-h265": "Intel QSV (H.265)",
+        "preset-nvidia": "NVIDIA",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP"
+      }
     },
     "cameraInputs": {
       "itemTitle": "Stream {{index}}"
