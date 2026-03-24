@@ -180,9 +180,14 @@
         "classifyFailed": "Failed to classify images: {{error}}"
       },
       "generateSuccess": "Successfully generated sample images",
+      "refreshExamples": "Generate new examples",
+      "refreshConfirm": {
+        "title": "Generate New Examples?",
+        "description": "This will generate a new set of images and clear all selections, including any previous classes. You will need to re-select examples for all classes."
+      },
       "missingStatesWarning": {
-        "title": "Missing State Examples",
-        "description": "It's recommended to select examples for all states for best results. You can continue without selecting all states, but the model will not be trained until all states have images. After continuing, use the Recent Classifications view to classify images for the missing states, then train the model."
+        "title": "Missing Class Examples",
+        "description": "Not all classes have examples. Try generating new examples to find the missing class, or continue and use the Recent Classifications view to add images later."
       }
     }
   }

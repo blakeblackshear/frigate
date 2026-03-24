@@ -11,7 +11,24 @@ import { baseUrl } from "@/api/baseUrl";
 import { isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { IoIosWarning } from "react-icons/io";
+import { LuRefreshCw } from "react-icons/lu";
 
 export type Step3FormData = {
   examplesGenerated: boolean;
@@ -47,6 +64,7 @@ export default function Step3ChooseExamples({
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [cacheKey, setCacheKey] = useState<number>(Date.now());
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [showRefreshConfirm, setShowRefreshConfirm] = useState(false);
 
   const handleImageLoad = useCallback((imageName: string) => {
     setLoadedImages((prev) => new Set(prev).add(imageName));
@@ -484,8 +502,52 @@ export default function Step3ChooseExamples({
     }
   }, [currentClassIndex, allClasses, imageClassifications, onBack]);
 
+  const doRefresh = useCallback(() => {
+    setCurrentClassIndex(0);
+    setSelectedImages(new Set());
+    setImageClassifications({});
+    setLoadedImages(new Set());
+    setShowRefreshConfirm(false);
+    generateExamples();
+  }, [generateExamples]);
+
+  const handleRefresh = useCallback(() => {
+    if (Object.keys(imageClassifications).length > 0) {
+      setShowRefreshConfirm(true);
+    } else {
+      doRefresh();
+    }
+  }, [imageClassifications, doRefresh]);
+
   return (
     <div className="flex flex-col gap-6">
+      <AlertDialog
+        open={showRefreshConfirm}
+        onOpenChange={setShowRefreshConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("wizard.step3.refreshConfirm.title")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("wizard.step3.refreshConfirm.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={doRefresh}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              {t("button.continue", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {isTraining ? (
         <div className="flex flex-col items-center gap-6 py-12">
           <ActivityIndicator className="size-12" />
@@ -514,15 +576,43 @@ export default function Step3ChooseExamples({
           </div>
         </div>
       ) : hasGenerated ? (
-        <div className="flex flex-col gap-4">
+        <div className="relative flex flex-col gap-4">
+          <Tooltip open={showRefreshConfirm ? false : undefined}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 size-8"
+                onClick={handleRefresh}
+                disabled={isGenerating || isProcessing}
+              >
+                <LuRefreshCw className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>
+                {t("wizard.step3.refreshExamples")}
+              </TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
           {showMissingStatesWarning && (
             <Alert variant="destructive">
               <IoIosWarning className="size-5" />
               <AlertTitle>
                 {t("wizard.step3.missingStatesWarning.title")}
               </AlertTitle>
-              <AlertDescription>
+              <AlertDescription className="flex flex-col gap-2">
                 {t("wizard.step3.missingStatesWarning.description")}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-fit"
+                  onClick={handleRefresh}
+                  disabled={isGenerating || isProcessing}
+                >
+                  <LuRefreshCw className="mr-1.5 size-3.5" />
+                  {t("wizard.step3.refreshExamples")}
+                </Button>
               </AlertDescription>
             </Alert>
           )}
