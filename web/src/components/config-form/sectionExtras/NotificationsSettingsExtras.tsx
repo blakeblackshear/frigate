@@ -126,6 +126,8 @@ export default function NotificationsSettingsExtras({
       .getRegistration(NOTIFICATION_SERVICE_WORKER)
       .then((worker) => {
         if (worker) {
+          // Trigger a check for an updated service worker script
+          worker.update().catch(() => {});
           setRegistration(worker);
         } else {
           setRegistration(null);
@@ -633,7 +635,9 @@ export default function NotificationsSettingsExtras({
                       Notification.requestPermission().then((permission) => {
                         if (permission === "granted") {
                           navigator.serviceWorker
-                            .register(NOTIFICATION_SERVICE_WORKER)
+                            .register(NOTIFICATION_SERVICE_WORKER, {
+                              updateViaCache: "none",
+                            })
                             .then((workerRegistration) => {
                               setRegistration(workerRegistration);
 
