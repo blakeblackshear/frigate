@@ -1,0 +1,24 @@
+{
+  "title": "Frigate Chat",
+  "subtitle": "Your AI assistant for camera management and insights",
+  "placeholder": "Ask anything...",
+  "error": "Something went wrong. Please try again.",
+  "processing": "Processing...",
+  "toolsUsed": "Used: {{tools}}",
+  "showTools": "Show tools ({{count}})",
+  "hideTools": "Hide tools",
+  "call": "Call",
+  "result": "Result",
+  "arguments": "Arguments:",
+  "response": "Response:",
+  "send": "Send",
+  "suggested_requests": "Try asking:",
+  "starting_requests": {
+    "show_recent_events": "Show recent events",
+    "show_camera_status": "Show camera status"
+  },
+  "starting_requests_prompts": {
+    "show_recent_events": "Show me the recent events from the last hour",
+    "show_camera_status": "What is the current status of my cameras?"
+  }
+}

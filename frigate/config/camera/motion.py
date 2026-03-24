@@ -1,43 +1,89 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import Field, field_serializer
 
 from ..base import FrigateBaseModel
+from .mask import MotionMaskConfig
 
 __all__ = ["MotionConfig"]
 
 
 class MotionConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="Enable motion on all cameras.")
+    enabled: bool = Field(
+        default=True,
+        title="Enable motion detection",
+        description="Enable or disable motion detection for all cameras; can be overridden per-camera.",
+    )
     threshold: int = Field(
         default=30,
-        title="Motion detection threshold (1-255).",
+        title="Motion threshold",
+        description="Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255).",
         ge=1,
         le=255,
     )
     lightning_threshold: float = Field(
-        default=0.8, title="Lightning detection threshold (0.3-1.0).", ge=0.3, le=1.0
+        default=0.8,
+        title="Lightning threshold",
+        description="Threshold to detect and ignore brief lighting spikes (lower is more sensitive, values between 0.3 and 1.0). This does not prevent motion detection entirely; it merely causes the detector to stop analyzing additional frames once the threshold is exceeded. Motion-based recordings are still created during these events.",
+        ge=0.3,
+        le=1.0,
     )
-    improve_contrast: bool = Field(default=True, title="Improve Contrast")
-    contour_area: Optional[int] = Field(default=10, title="Contour Area")
-    delta_alpha: float = Field(default=0.2, title="Delta Alpha")
-    frame_alpha: float = Field(default=0.01, title="Frame Alpha")
-    frame_height: Optional[int] = Field(default=100, title="Frame Height")
-    mask: Union[str, list[str]] = Field(
-        default="", title="Coordinates polygon for the motion mask."
+    skip_motion_threshold: Optional[float] = Field(
+        default=None,
+        title="Skip motion threshold",
+        description="If set to a value between 0.0 and 1.0, and more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Leave unset (None) to disable this feature.",
+        ge=0.0,
+        le=1.0,
+    )
+    improve_contrast: bool = Field(
+        default=True,
+        title="Improve contrast",
+        description="Apply contrast improvement to frames before motion analysis to help detection.",
+    )
+    contour_area: Optional[int] = Field(
+        default=10,
+        title="Contour area",
+        description="Minimum contour area in pixels required for a motion contour to be counted.",
+    )
+    delta_alpha: float = Field(
+        default=0.2,
+        title="Delta alpha",
+        description="Alpha blending factor used in frame differencing for motion calculation.",
+    )
+    frame_alpha: float = Field(
+        default=0.01,
+        title="Frame alpha",
+        description="Alpha value used when blending frames for motion preprocessing.",
+    )
+    frame_height: Optional[int] = Field(
+        default=100,
+        title="Frame height",
+        description="Height in pixels to scale frames to when computing motion.",
+    )
+    mask: dict[str, Optional[MotionMaskConfig]] = Field(
+        default_factory=dict,
+        title="Mask coordinates",
+        description="Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas.",
     )
     mqtt_off_delay: int = Field(
         default=30,
-        title="Delay for updating MQTT with no motion detected.",
+        title="MQTT off delay",
+        description="Seconds to wait after last motion before publishing an MQTT 'off' state.",
     )
     enabled_in_config: Optional[bool] = Field(
-        default=None, title="Keep track of original state of motion detection."
+        default=None,
+        title="Original motion state",
+        description="Indicates whether motion detection was enabled in the original static configuration.",
     )
-    raw_mask: Union[str, list[str]] = ""
+    raw_mask: dict[str, Optional[MotionMaskConfig]] = Field(
+        default_factory=dict, exclude=True
+    )
 
     @field_serializer("mask", when_used="json")
     def serialize_mask(self, value: Any, info):
-        return self.raw_mask
+        if self.raw_mask:
+            return self.raw_mask
+        return value
 
     @field_serializer("raw_mask", when_used="json")
     def serialize_raw_mask(self, value: Any, info):

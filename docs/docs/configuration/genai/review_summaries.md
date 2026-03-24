@@ -7,7 +7,7 @@ Generative AI can be used to automatically generate structured summaries of revi
 
 Requests for a summary are requested automatically to your AI provider for alert review items when the activity has ended, they can also be optionally enabled for detections as well.
 
-Generative AI review summaries can also be toggled dynamically for a [camera via MQTT](/integrations/mqtt/#frigatecamera_namereviewdescriptionsset).
+Generative AI review summaries can also be toggled dynamically for a [camera via MQTT](/integrations/mqtt#frigatecamera_namereview_descriptionsset).
 
 ## Review Summary Usage and Best Practices
 
@@ -80,6 +80,7 @@ By default, review summaries use preview images (cached preview frames) which ha
 review:
   genai:
     enabled: true
+    # highlight-next-line
     image_source: recordings # Options: "preview" (default) or "recordings"
 ```
 
@@ -104,7 +105,7 @@ If recordings are not available for a given time period, the system will automat
 
 Along with the concern of suspicious activity or immediate threat, you may have concerns such as animals in your garden or a gate being left open. These concerns can be configured so that the review summaries will make note of them if the activity requires additional review. For example:
 
-```yaml
+```yaml {4,5}
 review:
   genai:
     enabled: true
@@ -116,7 +117,7 @@ review:
 
 By default, review summaries are generated in English. You can configure Frigate to generate summaries in your preferred language by setting the `preferred_language` option:
 
-```yaml
+```yaml {4}
 review:
   genai:
     enabled: true

@@ -27,7 +27,7 @@
       "deleteImageFailed": "No s'ha pogut suprimir: {{errorMessage}}",
       "deleteCategoryFailed": "No s'ha pogut suprimir la classe: {{errorMessage}}",
       "categorizeFailed": "No s'ha pogut categoritzar la imatge: {{errorMessage}}",
-      "trainingFailed": "Ha fallat l'entrenament del model. Comproveu els registres de fragata per a més detalls.",
+      "trainingFailed": "Ha fallat l'entrenament del model. Comproveu els registres de Frigate per a més detalls.",
       "deleteModelFailed": "No s'ha pogut suprimir el model: {{errorMessage}}",
       "updateModelFailed": "No s'ha pogut actualitzar el model: {{errorMessage}}",
       "renameCategoryFailed": "No s'ha pogut canviar el nom de la classe: {{errorMessage}}",

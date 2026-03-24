@@ -37,18 +37,18 @@ The following diagram adds a lot more detail than the simple view explained befo
 %%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 
 flowchart TD
-    RecStore[(Recording\nstore)]
-    SnapStore[(Snapshot\nstore)]
+    RecStore[(Recording<br>store)]
+    SnapStore[(Snapshot<br>store)]
 
     subgraph Acquisition
         Cam["Camera"] -->|FFmpeg supported| Stream
-        Cam -->|"Other streaming\nprotocols"| go2rtc
+        Cam -->|"Other streaming<br>protocols"| go2rtc
         go2rtc("go2rtc") --> Stream
-        Stream[Capture main and\nsub streams] --> |detect stream|Decode(Decode and\ndownscale)
+        Stream[Capture main and<br>sub streams] --> |detect stream|Decode(Decode and<br>downscale)
     end
     subgraph Motion
-        Decode --> MotionM(Apply\nmotion masks)
-        MotionM --> MotionD(Motion\ndetection)
+        Decode --> MotionM(Apply<br>motion masks)
+        MotionM --> MotionD(Motion<br>detection)
     end
     subgraph Detection
         MotionD --> |motion regions| ObjectD(Object detection)
@@ -60,8 +60,8 @@ flowchart TD
     MotionD --> |motion event|Birdseye
     ObjectZ --> |object event|Birdseye
 
-    MotionD --> |"video segments\n(retain motion)"|RecStore
+    MotionD --> |"video segments<br>(retain motion)"|RecStore
     ObjectZ --> |detection clip|RecStore
-    Stream -->|"video segments\n(retain all)"| RecStore
+    Stream -->|"video segments<br>(retain all)"| RecStore
     ObjectZ --> |detection snapshot|SnapStore
 ```

@@ -185,7 +185,9 @@
     "withSystem": "Modul sistemului",
     "restart": "Repornește Frigate",
     "review": "Revizuire",
-    "classification": "Clasificare"
+    "classification": "Clasificare",
+    "chat": "Chat",
+    "actions": "Acțiuni"
   },
   "button": {
     "cameraAudio": "Sunet cameră",
@@ -223,7 +225,18 @@
     "export": "Exportă",
     "deleteNow": "Șterge acum",
     "next": "Următorul",
-    "continue": "Continuă"
+    "continue": "Continuă",
+    "add": "Adaugă",
+    "undo": "Anulează",
+    "copiedToClipboard": "Copiat în clipboard",
+    "modified": "Modificat",
+    "overridden": "Suprascris",
+    "resetToGlobal": "Resetare la valori Globale",
+    "resetToDefault": "Resetare la valori implicite",
+    "saveAll": "Salvează toate",
+    "savingAll": "Se salvează toate…",
+    "undoAll": "Anulează toate",
+    "applying": "Se aplică…"
   },
   "unit": {
     "speed": {

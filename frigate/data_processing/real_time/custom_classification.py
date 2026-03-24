@@ -32,7 +32,7 @@ from .api import RealTimeProcessorApi
 try:
     from tflite_runtime.interpreter import Interpreter
 except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
+    from ai_edge_litert.interpreter import Interpreter
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +73,6 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.__build_detector()
 
     def __build_detector(self) -> None:
-        try:
-            from tflite_runtime.interpreter import Interpreter
-        except ModuleNotFoundError:
-            from tensorflow.lite.python.interpreter import Interpreter
-
         model_path = os.path.join(self.model_dir, "model.tflite")
         labelmap_path = os.path.join(self.model_dir, "labelmap.txt")
 

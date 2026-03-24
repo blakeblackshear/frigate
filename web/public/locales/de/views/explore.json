@@ -221,6 +221,10 @@
     "downloadCleanSnapshot": {
       "label": "Bereinigte Momentaufnahme herunterladen",
       "aria": "Bereinigte Momentaufnahme herunterladen"
+    },
+    "debugReplay": {
+      "label": "Debug-Wiedergabe",
+      "aria": "Dieses verfolgte Objekt in der Debug-Wiedergabeansicht anzeigen"
     }
   },
   "dialog": {

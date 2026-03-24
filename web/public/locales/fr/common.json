@@ -129,7 +129,17 @@
     "deleteNow": "Supprimer maintenant",
     "download": "Télécharger",
     "done": "Terminé",
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "add": "Ajouter",
+    "undo": "Annuler",
+    "copiedToClipboard": "Copié dans le presse-papiers",
+    "modified": "Modifié",
+    "overridden": "Surpassé",
+    "resetToGlobal": "Réinitialiser aux réglages globaux",
+    "resetToDefault": "Réinitialiser aux réglages par défaut",
+    "saveAll": "Tout enregistrer",
+    "savingAll": "Enregistrement de tout en cours…",
+    "undoAll": "Tout annuler"
   },
   "menu": {
     "configuration": "Configuration",

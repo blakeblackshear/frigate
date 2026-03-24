@@ -129,7 +129,17 @@
     "pictureInPicture": "Immagine nell'immagine",
     "twoWayTalk": "Comunicazione bidirezionale",
     "cameraAudio": "Audio della telecamera",
-    "continue": "Continua"
+    "continue": "Continua",
+    "add": "Aggiungi",
+    "undo": "Annulla",
+    "copiedToClipboard": "Copiato negli appunti",
+    "modified": "Modificato",
+    "overridden": "Sovrascritto",
+    "resetToGlobal": "Ripristina impostazioni globali",
+    "resetToDefault": "Ripristina impostazioni predefinite",
+    "saveAll": "Salva tutto",
+    "savingAll": "Salvataggio di tutto…",
+    "undoAll": "Annulla tutto"
   },
   "unit": {
     "speed": {
@@ -260,7 +270,8 @@
     },
     "withSystem": "Sistema",
     "faceLibrary": "Raccolta volti",
-    "classification": "Classificazione"
+    "classification": "Classificazione",
+    "chat": "Chat"
   },
   "pagination": {
     "next": {

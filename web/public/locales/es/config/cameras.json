@@ -1,0 +1,30 @@
+{
+    "name": {
+        "label": "Nombre de cámara",
+        "description": "El nombre de la cámara es necesario"
+    },
+    "enabled": {
+        "label": "Habilitado",
+        "description": "Habilitado"
+    },
+    "audio": {
+        "label": "Eventos de audio",
+        "description": "Configuración para la detección de eventos basada en audio para esta cámara.",
+        "enabled": {
+            "label": "Habilitar la detección de audio",
+            "description": "Activar o deshabilitar la detección de eventos de audio para esta cámara."
+        },
+        "max_not_heard": {
+            "label": "Finalizar el tiempo de espera",
+            "description": "Cantidad de segundos sin el tipo de audio configurado antes de que finalice el evento de audio."
+        },
+        "min_volume": {
+            "label": "Volumen mínimo"
+        }
+    },
+    "friendly_name": {
+        "label": "Nombre descriptivo",
+        "description": "Nombre descriptivo de la cámara utilizado en la interfaz de usuario de Frigate"
+    },
+    "label": "Configuración de Cámara"
+}

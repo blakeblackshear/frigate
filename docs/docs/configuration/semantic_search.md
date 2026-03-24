@@ -13,7 +13,7 @@ Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
 Semantic Search works by running a large AI model locally on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.
 
-A minimum of 8GB of RAM is required to use Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
+A minimum of 8GB of RAM is required to use Semantic Search. A CPU with AVX + AVX2 instructions is required to run Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
 
 For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
 
@@ -73,6 +73,40 @@ For most users, especially native English speakers, the V1 model remains the rec
 :::note
 
 Switching between V1 and V2 requires reindexing your embeddings. The embeddings from V1 and V2 are incompatible, and failing to reindex will result in incorrect search results.
+
+:::
+
+### GenAI Provider
+
+Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. Currently, only **llama.cpp** supports multimodal embeddings (both text and images).
+
+To use llama.cpp for semantic search:
+
+1. Configure a GenAI provider in your config with `embeddings` in its `roles`.
+2. Set `semantic_search.model` to the GenAI config key (e.g. `default`).
+3. Start the llama.cpp server with `--embeddings` and `--mmproj` for image support:
+
+```yaml
+genai:
+  default:
+    provider: llamacpp
+    base_url: http://localhost:8080
+    model: your-model-name
+    roles:
+      - embeddings
+      - vision
+      - tools
+
+semantic_search:
+  enabled: True
+  model: default
+```
+
+The llama.cpp server must be started with `--embeddings` for the embeddings API, and a multi-modal embeddings model. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
+
+:::note
+
+Switching between Jina models and a GenAI provider requires reindexing. Embeddings from different backends are incompatible.
 
 :::
 

@@ -59,7 +59,7 @@ from frigate.data_processing.real_time.license_plate import (
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
-from frigate.genai import get_genai_client
+from frigate.genai import GenAIClientManager
 from frigate.models import Event, Recordings, ReviewSegment, Trigger
 from frigate.util.builtin import serialize
 from frigate.util.file import get_event_thumbnail_bytes
@@ -96,9 +96,7 @@ class EmbeddingMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.semantic_search,
             ],
         )
-        self.classification_config_subscriber = ConfigSubscriber(
-            "config/classification/custom/"
-        )
+        self.enrichment_config_subscriber = ConfigSubscriber("config/")
 
         # Configure Frigate DB
         db = SqliteVecQueueDatabase(
@@ -116,8 +114,10 @@ class EmbeddingMaintainer(threading.Thread):
         models = [Event, Recordings, ReviewSegment, Trigger]
         db.bind(models)
 
+        self.genai_manager = GenAIClientManager(config)
+
         if config.semantic_search.enabled:
-            self.embeddings = Embeddings(config, db, metrics)
+            self.embeddings = Embeddings(config, db, metrics, self.genai_manager)
 
             # Check if we need to re-index events
             if config.semantic_search.reindex:
@@ -144,7 +144,6 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
-        self.genai_client = get_genai_client(config)
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
@@ -203,12 +202,15 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
-        if self.genai_client is not None and any(
+        if self.genai_manager.vision_client is not None and any(
             c.review.genai.enabled_in_config for c in self.config.cameras.values()
         ):
             self.post_processors.append(
                 ReviewDescriptionProcessor(
-                    self.config, self.requestor, self.metrics, self.genai_client
+                    self.config,
+                    self.requestor,
+                    self.metrics,
+                    self.genai_manager.vision_client,
                 )
             )
 
@@ -246,7 +248,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
             self.post_processors.append(semantic_trigger_processor)
 
-        if self.genai_client is not None and any(
+        if self.genai_manager.vision_client is not None and any(
             c.objects.genai.enabled_in_config for c in self.config.cameras.values()
         ):
             self.post_processors.append(
@@ -255,7 +257,7 @@ class EmbeddingMaintainer(threading.Thread):
                     self.embeddings,
                     self.requestor,
                     self.metrics,
-                    self.genai_client,
+                    self.genai_manager.vision_client,
                     semantic_trigger_processor,
                 )
             )
@@ -269,7 +271,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
             self.config_updater.check_for_updates()
-            self._check_classification_config_updates()
+            self._check_enrichment_config_updates()
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
@@ -280,7 +282,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_event_metadata()
 
         self.config_updater.stop()
-        self.classification_config_subscriber.stop()
+        self.enrichment_config_subscriber.stop()
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
@@ -291,67 +293,86 @@ class EmbeddingMaintainer(threading.Thread):
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
 
-    def _check_classification_config_updates(self) -> None:
-        """Check for classification config updates and add/remove processors."""
-        topic, model_config = self.classification_config_subscriber.check_for_update()
+    def _check_enrichment_config_updates(self) -> None:
+        """Check for enrichment config updates and delegate to processors."""
+        topic, payload = self.enrichment_config_subscriber.check_for_update()
 
-        if topic:
-            model_name = topic.split("/")[-1]
+        if topic is None:
+            return
 
-            if model_config is None:
-                self.realtime_processors = [
-                    processor
-                    for processor in self.realtime_processors
-                    if not (
-                        isinstance(
-                            processor,
-                            (
-                                CustomStateClassificationProcessor,
-                                CustomObjectClassificationProcessor,
-                            ),
-                        )
-                        and processor.model_config.name == model_name
-                    )
-                ]
+        # Custom classification add/remove requires managing the processor list
+        if topic.startswith("config/classification/custom/"):
+            self._handle_custom_classification_update(topic, payload)
+            return
 
-                logger.info(
-                    f"Successfully removed classification processor for model: {model_name}"
-                )
-            else:
-                self.config.classification.custom[model_name] = model_config
+        # Broadcast to all processors — each decides if the topic is relevant
+        for processor in self.realtime_processors:
+            processor.update_config(topic, payload)
 
-                # Check if processor already exists
-                for processor in self.realtime_processors:
-                    if isinstance(
+        for processor in self.post_processors:
+            processor.update_config(topic, payload)
+
+    def _handle_custom_classification_update(
+        self, topic: str, model_config: Any
+    ) -> None:
+        """Handle add/remove of custom classification processors."""
+        model_name = topic.split("/")[-1]
+
+        if model_config is None:
+            self.realtime_processors = [
+                processor
+                for processor in self.realtime_processors
+                if not (
+                    isinstance(
                         processor,
                         (
                             CustomStateClassificationProcessor,
                             CustomObjectClassificationProcessor,
                         ),
-                    ):
-                        if processor.model_config.name == model_name:
-                            logger.debug(
-                                f"Classification processor for model {model_name} already exists, skipping"
-                            )
-                            return
-
-                if model_config.state_config is not None:
-                    processor = CustomStateClassificationProcessor(
-                        self.config, model_config, self.requestor, self.metrics
                     )
-                else:
-                    processor = CustomObjectClassificationProcessor(
-                        self.config,
-                        model_config,
-                        self.event_metadata_publisher,
-                        self.requestor,
-                        self.metrics,
-                    )
-
-                self.realtime_processors.append(processor)
-                logger.info(
-                    f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
+                    and processor.model_config.name == model_name
                 )
+            ]
+
+            logger.info(
+                f"Successfully removed classification processor for model: {model_name}"
+            )
+            return
+
+        self.config.classification.custom[model_name] = model_config
+
+        # Check if processor already exists
+        for processor in self.realtime_processors:
+            if isinstance(
+                processor,
+                (
+                    CustomStateClassificationProcessor,
+                    CustomObjectClassificationProcessor,
+                ),
+            ):
+                if processor.model_config.name == model_name:
+                    logger.debug(
+                        f"Classification processor for model {model_name} already exists, skipping"
+                    )
+                    return
+
+        if model_config.state_config is not None:
+            processor = CustomStateClassificationProcessor(
+                self.config, model_config, self.requestor, self.metrics
+            )
+        else:
+            processor = CustomObjectClassificationProcessor(
+                self.config,
+                model_config,
+                self.event_metadata_publisher,
+                self.requestor,
+                self.metrics,
+            )
+
+        self.realtime_processors.append(processor)
+        logger.info(
+            f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
+        )
 
     def _process_requests(self) -> None:
         """Process embeddings requests"""
@@ -418,7 +439,9 @@ class EmbeddingMaintainer(threading.Thread):
         if self.config.semantic_search.enabled:
             self.embeddings.update_stats()
 
-        camera_config = self.config.cameras[camera]
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return
 
         # no need to process updated objects if no processors are active
         if len(self.realtime_processors) == 0 and len(self.post_processors) == 0:
@@ -636,7 +659,10 @@ class EmbeddingMaintainer(threading.Thread):
         if not camera or camera not in self.config.cameras:
             return
 
-        camera_config = self.config.cameras[camera]
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return
+
         dedicated_lpr_enabled = (
             camera_config.type == CameraTypeEnum.lpr
             and "license_plate" not in camera_config.objects.track
@@ -679,4 +705,7 @@ class EmbeddingMaintainer(threading.Thread):
         if not self.config.semantic_search.enabled:
             return
 
-        self.embeddings.embed_thumbnail(event_id, thumbnail)
+        try:
+            self.embeddings.embed_thumbnail(event_id, thumbnail)
+        except ValueError:
+            logger.warning(f"Failed to embed thumbnail for event {event_id}")

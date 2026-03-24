@@ -2,7 +2,7 @@ import logging
 import queue
 
 import numpy as np
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -14,10 +14,28 @@ DETECTOR_KEY = "degirum"
 
 ### DETECTOR CONFIG ###
 class DGDetectorConfig(BaseDetectorConfig):
+    """DeGirum detector for running models via DeGirum cloud or local inference services."""
+
+    model_config = ConfigDict(
+        title="DeGirum",
+    )
+
     type: Literal[DETECTOR_KEY]
-    location: str = Field(default=None, title="Inference Location")
-    zoo: str = Field(default=None, title="Model Zoo")
-    token: str = Field(default=None, title="DeGirum Cloud Token")
+    location: str = Field(
+        default=None,
+        title="Inference Location",
+        description="Location of the DeGirim inference engine (e.g. '@cloud', '127.0.0.1').",
+    )
+    zoo: str = Field(
+        default=None,
+        title="Model Zoo",
+        description="Path or URL to the DeGirum model zoo.",
+    )
+    token: str = Field(
+        default=None,
+        title="DeGirum Cloud Token",
+        description="Token for DeGirum Cloud access.",
+    )
 
 
 ### ACTUAL DETECTOR  ###

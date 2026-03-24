@@ -1,0 +1,2192 @@
+{
+    "audio": {
+        "label": "Avdio dogodki",
+        "enabled": {
+            "label": "Omogoči zaznavanje zvoka",
+            "description": "Vklopi ali izklopi zaznavanje avdio dogodkov za vse kamere."
+        },
+        "max_not_heard": {
+            "label": "Časovna omejitev konca",
+            "description": "Število sekund brez nastavljenega tipa zvoka, preden se avdio dogodek zaključi."
+        },
+        "min_volume": {
+            "label": "Najmanjša glasnost",
+            "description": "Najnižji prag glasnosti RMS za zagon zaznavanja; nižje vrednosti povečajo občutljivost (npr. 200 visoka, 500 srednja, 1000 nizka)."
+        },
+        "listen": {
+            "label": "Tipi zvokov za poslušanje",
+            "description": "Seznam tipov avdio dogodkov za zaznavanje (npr. lajež, požarni alarm, krik, govor, vpitje)."
+        },
+        "filters": {
+            "label": "Avdio filtri",
+            "description": "Nastavitve filtrov za posamezne tipe zvoka (npr. pragovi zaupanja) za zmanjšanje lažnih pozitivnih rezultatov."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje zvoka",
+            "description": "Pove, ali je bilo zaznavanje zvoka prvotno omogočeno v statični konfiguracijski datoteki."
+        },
+        "num_threads": {
+            "label": "Niti za zaznavanje",
+            "description": "Število niti za obdelavo zaznavanja zvoka."
+        },
+        "description": "Nastavitve za zaznavanje dogodkov na podlagi zvoka za vse kamere; lahko jih povoziš za vsako kamero posebej."
+    },
+    "audio_transcription": {
+        "label": "Transkripcija zvoka",
+        "description": "Nastavitve za transkripcijo zvoka v živo in govora, ki se uporablja za dogodke in podnapise v živo.",
+        "live_enabled": {
+            "label": "Transkripcija v živo",
+            "description": "Omogoči sprotno transkripcijo zvoka ob prejemu."
+        },
+        "enabled": {
+            "label": "Omogoči transkripcijo zvoka",
+            "description": "Vklopi ali izklopi samodejno transkripcijo zvoka za vse kamere."
+        },
+        "language": {
+            "label": "Jezik transkripcije",
+            "description": "Koda jezika za transkripcijo/prevajanje (npr. 'sl' za slovenščino ali 'en' za angleščino)."
+        },
+        "device": {
+            "label": "Naprava za transkripcijo",
+            "description": "Ključ naprave (CPU/GPU), na kateri naj teče model. Trenutno so podprte le NVIDIA CUDA grafične kartice."
+        },
+        "model_size": {
+            "label": "Velikost modela",
+            "description": "Velikost modela za uporabo pri transkripciji zvočnih dogodkov brez povezave."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye (Ptičja perspektiva)",
+        "description": "Nastavitve za sestavljen pogled Birdseye, ki združi več virov kamer v eno postavitev.",
+        "enabled": {
+            "label": "Omogoči Birdseye",
+            "description": "Vklopi ali izklopi funkcijo Birdseye."
+        },
+        "mode": {
+            "label": "Način sledenja",
+            "description": "Način vključitve kamer v Birdseye: 'objects' (objekti), 'motion' (gibanje) ali 'continuous' (neprekinjeno)."
+        },
+        "order": {
+            "label": "Položaj",
+            "description": "Številčna vrednost, ki določa vrstni red kamere v postavitvi Birdseye."
+        },
+        "restream": {
+            "label": "Pretakanje RTSP",
+            "description": "Ponovno pretakaj izhod Birdseye kot RTSP vir; to bo ohranilo Birdseye neprekinjeno delujoč."
+        },
+        "width": {
+            "label": "Širina",
+            "description": "Izhodna širina (v pikslih) sestavljenega okvira Birdseye."
+        },
+        "height": {
+            "label": "Višina",
+            "description": "Izhodna višina (v pikslih) sestavljenega okvira Birdseye."
+        },
+        "quality": {
+            "label": "Kakovost kodiranja",
+            "description": "Kakovost kodiranja za mpeg1 vir Birdseye (1 najvišja, 31 najnižja kakovost)."
+        },
+        "inactivity_threshold": {
+            "label": "Prag neaktivnosti",
+            "description": "Število sekund neaktivnosti, po katerih se kamera preneha prikazovati v Birdseye."
+        },
+        "layout": {
+            "label": "Postavitev",
+            "description": "Možnosti postavitve za kompozicijo Birdseye.",
+            "scaling_factor": {
+                "label": "Faktor povečave",
+                "description": "Faktor povečave za kalkulator postavitve (razpon od 1.0 do 5.0)."
+            },
+            "max_cameras": {
+                "label": "Največ kamer",
+                "description": "Največje število kamer, prikazanih hkrati v Birdseye; prikazane bodo najnovejše kamere."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "FPS v mirovanju",
+            "description": "Število slik na sekundo za ponovno pošiljanje zadnjega okvira Birdseye med mirovanjem; nastavi na 0 za onemogočitev."
+        }
+    },
+    "detect": {
+        "label": "Zaznavanje objektov",
+        "description": "Nastavitve za vlogo zaznavanja, ki se uporablja za iskanje objektov in inicializacijo sledilnikov.",
+        "enabled": {
+            "label": "Zaznavanje omogočeno",
+            "description": "Vklopi ali izklopi zaznavanje objektov za vse kamere. Zaznavanje mora biti omogočeno, da deluje sledenje objektom."
+        },
+        "height": {
+            "label": "Višina zaznavanja",
+            "description": "Višina (v pikslih) slik za tok zaznavanja; pusti prazno za uporabo izvorne ločljivosti."
+        },
+        "width": {
+            "label": "Širina zaznavanja",
+            "description": "Širina (v pikslih) slik za tok zaznavanja; pusti prazno za uporabo izvorne ločljivosti."
+        },
+        "fps": {
+            "label": "FPS zaznavanja",
+            "description": "Želeno število slik na sekundo za zaznavanje; nižje vrednosti zmanjšajo porabo procesorja (priporočeno je 5)."
+        },
+        "min_initialized": {
+            "label": "Najmanj slik za inicializacijo",
+            "description": "Število zaporednih zaznav, potrebnih pred ustvarjanjem sledenega objekta. Povečaj za manj lažnih zaznav."
+        },
+        "max_disappeared": {
+            "label": "Največ slik ob izginotju",
+            "description": "Število slik brez zaznave, preden se sledeni objekt šteje za izginulega."
+        },
+        "stationary": {
+            "label": "Konfiguracija nepremičnih objektov",
+            "description": "Nastavitve za zaznavanje in upravljanje objektov, ki nekaj časa ostanejo na mestu.",
+            "interval": {
+                "label": "Interval nepremičnosti",
+                "description": "Kako pogosto (v slikah) naj se preveri prisotnost nepremičnega objekta."
+            },
+            "threshold": {
+                "label": "Prag nepremičnosti",
+                "description": "Število slik brez spremembe položaja, potrebnih, da se objekt označi za nepremičnega."
+            },
+            "max_frames": {
+                "label": "Največ slik",
+                "description": "Omejuje, kako dolgo se sledi nepremičnim objektom, preden se zavržejo.",
+                "default": {
+                    "label": "Privzeto največ slik",
+                    "description": "Privzeto največje število slik za sledenje nepremičnemu objektu."
+                },
+                "objects": {
+                    "label": "Največ slik za objekt",
+                    "description": "Posebne omejitve za posamezne tipe objektov."
+                }
+            },
+            "classifier": {
+                "label": "Omogoči vizualni klasifikator",
+                "description": "Uporabi vizualni klasifikator za potrditev nepremičnih objektov, tudi če se okvirji rahlo premikajo."
+            }
+        },
+        "annotation_offset": {
+            "label": "Odmik anotacij",
+            "description": "Število milisekund za premik oznak zaznavanja, da se bolje ujemajo s posnetki; lahko je pozitivno ali negativno."
+        }
+    },
+    "face_recognition": {
+        "label": "Prepoznava obrazov",
+        "enabled": {
+            "label": "Omogoči prepoznavo obrazov",
+            "description": "Vklopi ali izklopi prepoznavo obrazov na vseh kamerah."
+        },
+        "min_area": {
+            "label": "Najmanjša površina obraza",
+            "description": "Najmanjša površina (v pikslih) okvirja obraza, potrebna za poskus prepoznave."
+        },
+        "description": "Nastavitve za zaznavanje in prepoznavo obrazov za vse kamere.",
+        "model_size": {
+            "label": "Velikost modela",
+            "description": "Velikost modela za vdelave obrazov; večji modeli lahko zahtevajo GPU."
+        },
+        "unknown_score": {
+            "label": "Prag za neznan obraz",
+            "description": "Prag razdalje, pod katerim se obraz šteje za potencialno ujemanje (višje = strožje)."
+        },
+        "detection_threshold": {
+            "label": "Prag zaznavanja",
+            "description": "Najmanjše zaupanje, potrebno za veljavno detekcijo obraza."
+        },
+        "recognition_threshold": {
+            "label": "Prag prepoznave",
+            "description": "Prag razdalje vdelave obraza za potrditev ujemanja dveh obrazov."
+        },
+        "min_faces": {
+            "label": "Najmanjše število obrazov",
+            "description": "Najmanjše število prepoznav obraza, preden se osebi dodeli prepoznana pod-oznaka."
+        },
+        "save_attempts": {
+            "label": "Shrani poskuse",
+            "description": "Število poskusov prepoznave obraza, ki se hranijo za vmesnik."
+        },
+        "blur_confidence_filter": {
+            "label": "Filter zamegljenosti",
+            "description": "Prilagodi oceno zaupanja glede na zamegljenost slike, da se zmanjša število napačnih prepoznav pri slabši kakovosti."
+        },
+        "device": {
+            "label": "Naprava",
+            "description": "Povoženje nastavitve za ciljanje specifične naprave."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "Nastavitve FFmpeg, vključno s potjo do binarne datoteke, argumenti, možnostmi strojnega pospeševanja in argumenti izhoda po vlogah.",
+        "path": {
+            "label": "Pot do FFmpeg",
+            "description": "Pot do binarne datoteke FFmpeg, ki naj se uporabi, ali vzdevek različice (\"5.0\" ali \"7.0\")."
+        },
+        "global_args": {
+            "label": "Globalni argumenti FFmpeg",
+            "description": "Globalni argumenti, posredovani procesom FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumenti strojnega pospeševanja",
+            "description": "Argumenti za strojno pospeševanje FFmpeg. Priporočljive so prednastavitve glede na ponudnika."
+        },
+        "input_args": {
+            "label": "Vhodni argumenti",
+            "description": "Vhodni argumenti, uporabljeni za vhodne tokove FFmpeg."
+        },
+        "output_args": {
+            "label": "Izhodni argumenti",
+            "description": "Privzeti izhodni argumenti, uporabljeni za različne vloge FFmpeg, kot sta zaznavanje in snemanje.",
+            "detect": {
+                "label": "Izhodni argumenti za zaznavanje",
+                "description": "Privzeti izhodni argumenti za tokove z vlogo zaznavanja (detect)."
+            },
+            "record": {
+                "label": "Izhodni argumenti za snemanje",
+                "description": "Privzeti izhodni argumenti za tokove z vlogo snemanja (record)."
+            }
+        },
+        "retry_interval": {
+            "label": "Čas ponovnega poskusa FFmpeg",
+            "description": "Število sekund čakanja pred ponovnim poskusom povezave s tokom kamere po napaki. Privzeto je 10."
+        },
+        "apple_compatibility": {
+            "label": "Združljivost z Apple napravami",
+            "description": "Omogoči označevanje HEVC za boljšo združljivost z Applovimi predvajalniki pri snemanju v H.265."
+        },
+        "gpu": {
+            "label": "Indeks GPU",
+            "description": "Privzeti indeks grafične kartice (GPU), uporabljen za strojno pospeševanje, če je na voljo."
+        },
+        "inputs": {
+            "label": "Vhodi kamere",
+            "description": "Seznam definicij vhodnih tokov (poti in vloge) za to kamero.",
+            "path": {
+                "label": "Vhodna pot",
+                "description": "URL ali pot do vhodnega toka kamere."
+            },
+            "roles": {
+                "label": "Vloge vhoda",
+                "description": "Vloge za ta vhodni tok."
+            },
+            "global_args": {
+                "label": "Globalni argumenti FFmpeg",
+                "description": "Globalni argumenti FFmpeg za ta vhodni tok."
+            },
+            "hwaccel_args": {
+                "label": "Argumenti strojnega pospeševanja",
+                "description": "Argumenti strojnega pospeševanja za ta vhodni tok."
+            },
+            "input_args": {
+                "label": "Vhodni argumenti",
+                "description": "Vhodni argumenti, specifični za ta tok."
+            }
+        }
+    },
+    "live": {
+        "label": "Predvajanje v živo",
+        "streams": {
+            "label": "Imena tokov v živo",
+            "description": "Preslikava konfiguriranih imen tokov v imena restream/go2rtc, uporabljena za predvajanje v živo."
+        },
+        "height": {
+            "label": "Višina v živo",
+            "description": "Višina (v pikslih) za upodabljanje jsmpeg toka v živo v spletnem vmesniku; mora biti <= višini toka za zaznavanje."
+        },
+        "quality": {
+            "label": "Kakovost v živo",
+            "description": "Kakovost kodiranja za jsmpeg tok (1 najvišja, 31 najnižja)."
+        },
+        "description": "Nastavitve, ki jih uporablja spletni vmesnik za nadzor ločljivosti in kakovosti toka v živo."
+    },
+    "lpr": {
+        "label": "Prepoznava registrskih tablic (LPR)",
+        "description": "Nastavitve prepoznave registrskih tablic, vključno s pragi detekcije, formatiranjem in znanimi tablicami.",
+        "enabled": {
+            "label": "Omogoči LPR",
+            "description": "Vklopi ali izklopi prepoznavo registrskih tablic za vse kamere."
+        },
+        "expire_time": {
+            "label": "Sekunde do poteka",
+            "description": "Čas v sekundah, po katerem nevidna tablica poteče iz sledilnika (samo za namenske LPR kamere)."
+        },
+        "min_area": {
+            "label": "Najmanjša površina tablice",
+            "description": "Najmanjša površina tablice (v pikslih) za poskus prepoznave."
+        },
+        "enhancement": {
+            "label": "Stopnja izboljšave",
+            "description": "Stopnja izboljšave (0-10) slik tablic pred OCR; stopnje nad 5 so priporočljive le za nočne posnetke."
+        },
+        "model_size": {
+            "label": "Velikost modela",
+            "description": "Velikost modela za zaznavanje/prepoznavanje besedila. Večina uporabnikov naj uporablja 'small'."
+        },
+        "detection_threshold": {
+            "label": "Prag zaznavanja",
+            "description": "Prag zaupanja za začetek izvajanja OCR na sumljivi tablici."
+        },
+        "recognition_threshold": {
+            "label": "Prag prepoznave",
+            "description": "Prag zaupanja, potreben, da se besedilo tablice doda kot pod-oznaka."
+        },
+        "min_plate_length": {
+            "label": "Najmanjša dolžina tablice",
+            "description": "Najmanjše število znakov, ki jih mora vsebovati tablica, da se šteje za veljavno."
+        },
+        "format": {
+            "label": "Regex format tablice",
+            "description": "Izbirni regex za preverjanje, ali prepoznana tablica ustreza pričakovanemu formatu."
+        },
+        "match_distance": {
+            "label": "Razdalja ujemanja",
+            "description": "Dovoljeno število napačnih znakov pri primerjanju zaznanih tablic z znanimi."
+        },
+        "known_plates": {
+            "label": "Znane tablice",
+            "description": "Seznam tablic ali regexov za posebno sledenje ali opozarjanje."
+        },
+        "debug_save_plates": {
+            "label": "Shrani tablice za razhroščevanje",
+            "description": "Shrani slike izrezov tablic za preverjanje delovanja LPR."
+        },
+        "device": {
+            "label": "Naprava",
+            "description": "Povoženje nastavitve za ciljanje specifične naprave."
+        },
+        "replace_rules": {
+            "label": "Pravila zamenjave",
+            "description": "Pravila za zamenjavo z regexi za normalizacijo nizov tablic pred primerjavo.",
+            "pattern": {
+                "label": "Regex vzorec"
+            },
+            "replacement": {
+                "label": "Niz za zamenjavo"
+            }
+        }
+    },
+    "motion": {
+        "label": "Zaznavanje gibanja",
+        "enabled": {
+            "label": "Omogoči zaznavanje gibanja",
+            "description": "Vklopi ali izklopi zaznavanje gibanja za vse kamere."
+        },
+        "threshold": {
+            "label": "Prag gibanja",
+            "description": "Prag razlike v pikslih, ki ga uporablja detektor gibanja; višje vrednosti zmanjšajo občutljivost (razpon 1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Prag za strele",
+            "description": "Prag za zaznavanje in ignoriranje kratkih svetlobnih skokov (nižje je bolj občutljivo). To ne prepreči snemanja, le ustavi analizo dodatnih okvirjev ob blisku."
+        },
+        "skip_motion_threshold": {
+            "label": "Prag za preskok gibanja",
+            "description": "Če se v enem okvirju spremeni večji delež slike od tega, detektor ne bo vrnil okvirjev gibanja in se bo takoj umeril. To zmanjša lažne pozitivne rezultate med nevihtami. Razpon 0.0 do 1.0."
+        },
+        "improve_contrast": {
+            "label": "Izboljšaj kontrast",
+            "description": "Uporabi izboljšavo kontrasta na okvirjih pred analizo gibanja za boljšo detekcijo."
+        },
+        "contour_area": {
+            "label": "Površina konture",
+            "description": "Najmanjša površina konture v pikslih, potrebna, da se gibanje upošteva."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Faktor alfa mešanja, uporabljen pri razlikovanju okvirjev za izračun gibanja."
+        },
+        "frame_alpha": {
+            "label": "Alfa okvirja",
+            "description": "Vrednost alfa, uporabljena pri mešanju okvirjev za predobdelavo gibanja."
+        },
+        "frame_height": {
+            "label": "Višina okvirja",
+            "description": "Višina v pikslih, na katero se spremeni velikost okvirja pri izračunu gibanja."
+        },
+        "mask": {
+            "label": "Koordinate maske",
+            "description": "Urejene koordinate x,y, ki določajo poligon maske gibanja za vključitev ali izključitev območij."
+        },
+        "mqtt_off_delay": {
+            "label": "Zakasnitev izklopa MQTT",
+            "description": "Število sekund čakanja po zadnjem zaznanem gibanju pred objavo stanja 'off' na MQTT."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje gibanja",
+            "description": "Pove, ali je bilo zaznavanje gibanja omogočeno v prvotni statični konfiguraciji."
+        },
+        "raw_mask": {
+            "label": "Surova maska"
+        },
+        "description": "Privzete nastavitve zaznavanja gibanja, uporabljene za kamere, razen če so povožene pri posamezni kameri."
+    },
+    "objects": {
+        "label": "Objekti",
+        "description": "Privzete nastavitve sledenja objektom, vključno s tem, katere oznake naj se sledijo, in filtri za posamezne objekte.",
+        "track": {
+            "label": "Objekti za sledenje",
+            "description": "Seznam oznak objektov, ki naj se sledijo na vseh kamerah."
+        },
+        "filters": {
+            "label": "Filtri objektov",
+            "description": "Filtri za zaznane objekte za zmanjšanje lažnih pozitivnih rezultatov (površina, razmerje, zaupanje).",
+            "min_area": {
+                "label": "Najmanjša površina objekta",
+                "description": "Najmanjša površina okvirja (v pikslih ali odstotkih), potrebna za to vrsto objekta."
+            },
+            "max_area": {
+                "label": "Največja površina objekta",
+                "description": "Največja dovoljena površina okvirja za to vrsto objekta."
+            },
+            "min_ratio": {
+                "label": "Najmanjše razmerje stranic",
+                "description": "Najmanjše razmerje širina/višina, potrebno za veljavnost okvirja."
+            },
+            "max_ratio": {
+                "label": "Največje razmerje stranic",
+                "description": "Največje dovoljeno razmerje širina/višina."
+            },
+            "threshold": {
+                "label": "Prag zaupanja",
+                "description": "Povprečni prag zaupanja detekcije, potreben, da se objekt šteje za pravega."
+            },
+            "min_score": {
+                "label": "Najmanjše zaupanje",
+                "description": "Najmanjše zaupanje detekcije v enem okvirju, da se objekt upošteva."
+            },
+            "mask": {
+                "label": "Maska filtra",
+                "description": "Koordinate poligona, ki določajo, kje znotraj okvirja velja ta filter."
+            },
+            "raw_mask": {
+                "label": "Surova maska"
+            }
+        },
+        "mask": {
+            "label": "Maska objekta",
+            "description": "Poligon maske, uporabljen za preprečevanje zaznavanja objektov na določenih območij."
+        },
+        "raw_mask": {
+            "label": "Surova maska"
+        },
+        "genai": {
+            "label": "GenAI konfiguracija objektov",
+            "description": "GenAI možnosti za opisovanje sledenih objektov in pošiljanje okvirjev za generiranje.",
+            "enabled": {
+                "label": "Omogoči GenAI",
+                "description": "Privzeto omogoči GenAI generiranje opisov za sledene objekte."
+            },
+            "use_snapshot": {
+                "label": "Uporabi posnetke",
+                "description": "Za generiranje GenAI opisov uporabi posnetke (snapshots) namesto sličic (thumbnails)."
+            },
+            "prompt": {
+                "label": "Navodilo za opis (Prompt)",
+                "description": "Privzeta predloga navodila, uporabljena pri generiranju opisov z GenAI."
+            },
+            "object_prompts": {
+                "label": "Navodila za specifične objekte",
+                "description": "Navodila po meri za specifične oznake objektov."
+            },
+            "objects": {
+                "label": "GenAI objekti",
+                "description": "Seznam oznak objektov, ki naj se privzeto pošiljajo GenAI-ju."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Območja, v katera mora objekt vstopiti, da je primeren za GenAI opis."
+            },
+            "debug_save_thumbnails": {
+                "label": "Shrani sličice",
+                "description": "Shrani sličice, poslane GenAI-ju, za namene razhroščevanja in pregleda."
+            },
+            "send_triggers": {
+                "label": "GenAI sprožilci",
+                "description": "Določa, kdaj naj se okvirji pošljejo GenAI-ju (ob koncu, po posodobitvah itd.).",
+                "tracked_object_end": {
+                    "label": "Pošlji ob koncu",
+                    "description": "Pošlji zahtevo GenAI-ju, ko se sledenje objektu konča."
+                },
+                "after_significant_updates": {
+                    "label": "Zgodnji GenAI sprožilec",
+                    "description": "Pošlji zahtevo GenAI-ju po določenem številu pomembnih posodobitev sledenega objekta."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Prvotno GenAI stanje",
+                "description": "Pove, ali je bil GenAI omogočen v prvotni statični konfiguraciji."
+            }
+        }
+    },
+    "record": {
+        "label": "Snemanje",
+        "enabled": {
+            "label": "Omogoči snemanje",
+            "description": "Vklopi ali izklopi snemanje za vse kamere."
+        },
+        "expire_interval": {
+            "label": "Interval čiščenja posnetkov",
+            "description": "Minute med cikli čiščenja, ki odstranijo potekle segmente snemanja."
+        },
+        "continuous": {
+            "label": "Neprekinjena hramba",
+            "description": "Število dni hrambe posnetkov ne glede na objekte ali gibanje. Nastavi na 0, če želiš hraniti le opozorila in detekcije.",
+            "days": {
+                "label": "Dni hrambe",
+                "description": "Število dni za hrambo posnetkov."
+            }
+        },
+        "motion": {
+            "label": "Hramba ob gibanju",
+            "description": "Število dni hrambe posnetkov, ki jih sproži gibanje, ne glede na objekte.",
+            "days": {
+                "label": "Dni hrambe",
+                "description": "Število dni za hrambo posnetkov."
+            }
+        },
+        "detections": {
+            "label": "Hramba detekcij",
+            "description": "Nastavitve hrambe za dogodke zaznavanja, vključno s trajanjem pred in po zajemu.",
+            "pre_capture": {
+                "label": "Sekunde pred zajemom",
+                "description": "Število sekund pred dogodkom zaznavanja, ki se vključi v posnetek."
+            },
+            "post_capture": {
+                "label": "Sekunde po zajemu",
+                "description": "Število sekund po dogodku zaznavanja, ki se vključi v posnetek."
+            },
+            "retain": {
+                "label": "Hramba dogodkov",
+                "description": "Nastavitve hrambe za posnetke dogodkov zaznavanja.",
+                "days": {
+                    "label": "Dni hrambe",
+                    "description": "Število dni za hrambo posnetkov dogodkov zaznavanja."
+                },
+                "mode": {
+                    "label": "Način hrambe",
+                    "description": "Način hrambe: all (vsi segmenti), motion (segmenti z gibanjem) ali active_objects (segmenti z aktivnimi objekti)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Hramba opozoril",
+            "description": "Nastavitve hrambe za dogodke opozoril.",
+            "pre_capture": {
+                "label": "Sekunde pred zajemom",
+                "description": "Število sekund pred dogodkom opozorila, ki se vključi v posnetek."
+            },
+            "post_capture": {
+                "label": "Sekunde po zajemu",
+                "description": "Število sekund po dogodku opozorila, ki se vključi v posnetek."
+            },
+            "retain": {
+                "label": "Hramba dogodkov",
+                "description": "Nastavitve hrambe za posnetke dogodkov opozoril.",
+                "days": {
+                    "label": "Dni hrambe",
+                    "description": "Število dni za hrambo posnetkov dogodkov opozoril."
+                },
+                "mode": {
+                    "label": "Način hrambe",
+                    "description": "Način hrambe posnetkov opozoril."
+                }
+            }
+        },
+        "export": {
+            "label": "Konfiguracija izvoza",
+            "description": "Nastavitve za izvoz posnetkov, kot sta časovni zamik (timelapse) in strojno pospeševanje.",
+            "hwaccel_args": {
+                "label": "Argumenti strojnega pospeševanja za izvoz",
+                "description": "Argumenti strojnega pospeševanja za operacije izvoza in transkodiranja."
+            }
+        },
+        "preview": {
+            "label": "Konfiguracija predogleda",
+            "description": "Nastavitve kakovosti predogledov snemanja v vmesniku.",
+            "quality": {
+                "label": "Kakovost predogleda",
+                "description": "Stopnja kakovosti predogleda (zelo nizka, nizka, srednja, visoka, zelo visoka)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje snemanja",
+            "description": "Pove, ali je bilo snemanje omogočeno v prvotni statični konfiguraciji."
+        },
+        "description": "Nastavitve snemanja in hrambe, razen če so povožene pri posamezni kameri."
+    },
+    "review": {
+        "label": "Pregled",
+        "alerts": {
+            "label": "Konfiguracija opozoril",
+            "description": "Nastavitve za objekte, ki sprožijo opozorila, in njihovo hrambo.",
+            "enabled": {
+                "label": "Omogoči opozorila",
+                "description": "Vklopi ali izklopi generiranje opozoril za vse kamere."
+            },
+            "labels": {
+                "label": "Oznake opozoril",
+                "description": "Seznam oznak objektov, ki štejejo kot opozorila (npr. avto, oseba)."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Območja, v katera mora objekt vstopiti, da postane opozorilo; pusti prazno za katerokoli območje."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno stanje opozoril",
+                "description": "Sledi, ali so bila opozorila prvotno omogočena."
+            },
+            "cutoff_time": {
+                "label": "Čas zaključka opozorila",
+                "description": "Število sekund čakanja po končani aktivnosti, preden se opozorilo zaključi."
+            }
+        },
+        "detections": {
+            "label": "Konfiguracija detekcij",
+            "description": "Nastavitve za ustvarjanje dogodkov zaznavanja (ki niso opozorila) in čas hrambe.",
+            "enabled": {
+                "label": "Omogoči detekcije",
+                "description": "Vklopi ali izklopi dogodke zaznavanja za vse kamere."
+            },
+            "labels": {
+                "label": "Oznake detekcij",
+                "description": "Seznam oznak objektov, ki štejejo kot dogodki zaznavanja."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Območja, v katera mora objekt vstopiti, da postane detekcija."
+            },
+            "cutoff_time": {
+                "label": "Čas zaključka detekcije",
+                "description": "Število sekund čakanja po končani aktivnosti, preden se detekcija zaključi."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno stanje detekcij",
+                "description": "Sledi, ali so bile detekcije prvotno omogočene."
+            }
+        },
+        "genai": {
+            "label": "GenAI konfiguracija",
+            "description": "Nadzira uporabo generativne UI za izdelavo opisov in povzetkov postavk pregleda.",
+            "enabled": {
+                "label": "Omogoči GenAI opise",
+                "description": "Omogoči ali onemogoči GenAI opise in povzetke za postavke pregleda."
+            },
+            "alerts": {
+                "label": "Omogoči GenAI za opozorila",
+                "description": "Uporabi GenAI za generiranje opisov opozoril."
+            },
+            "detections": {
+                "label": "Omogoči GenAI za detekcije",
+                "description": "Uporabi GenAI za generiranje opisov detekcij."
+            },
+            "image_source": {
+                "label": "Vir slik za pregled",
+                "description": "Vir slik za GenAI ('preview' ali 'recordings'); 'recordings' nudi višjo kakovost, a porabi več žetonov."
+            },
+            "additional_concerns": {
+                "label": "Dodatni pomisleki",
+                "description": "Seznam dodatnih navodil ali opomb, ki naj jih GenAI upošteva pri ocenjevanju aktivnosti."
+            },
+            "debug_save_thumbnails": {
+                "label": "Shrani sličice",
+                "description": "Shrani sličice, poslane ponudniku GenAI, za namene razhroščevanja."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno GenAI stanje",
+                "description": "Sledi, ali je bil GenAI pregled prvotno omogočen."
+            },
+            "preferred_language": {
+                "label": "Prednostni jezik",
+                "description": "Jezik, ki se zahteva od ponudnika GenAI za generirane odgovore."
+            },
+            "activity_context_prompt": {
+                "label": "Navodilo za kontekst aktivnosti",
+                "description": "Navodilo po meri, ki opisuje, kaj je in kaj ni sumljiva aktivnost, za boljšo orientacijo GenAI-ja."
+            }
+        },
+        "description": "Nastavitve, ki nadzorujejo opozorila, detekcije in GenAI povzetke za spletni vmesnik."
+    },
+    "semantic_search": {
+        "label": "Semantično iskanje",
+        "triggers": {
+            "label": "Sprožilci",
+            "description": "Dejanja in kriteriji ujemanja za sprožilce semantičnega iskanja na določeni kameri.",
+            "friendly_name": {
+                "label": "Prijazno ime",
+                "description": "Izbirno ime, ki se prikaže v vmesniku za ta sprožilec."
+            },
+            "enabled": {
+                "label": "Omogoči ta sprožilec",
+                "description": "Vklopi ali izklopi ta sprožilec semantičnega iskanja."
+            },
+            "type": {
+                "label": "Vrsta sprožilca",
+                "description": "Vrsta sprožilca: 'thumbnail' (ujemanje s sliko) ali 'description' (ujemanje z besedilom)."
+            },
+            "data": {
+                "label": "Vsebina sprožilca",
+                "description": "Besedilna fraza ali ID sličice za primerjavo s sledenimi objekti."
+            },
+            "threshold": {
+                "label": "Prag sprožilca",
+                "description": "Najmanjša ocena podobnosti (0-1), potrebna za aktivacijo tega sprožilca."
+            },
+            "actions": {
+                "label": "Dejanja sprožilca",
+                "description": "Seznam dejanj ob ujemanju (obvestilo, pod-oznaka, atribut)."
+            }
+        },
+        "description": "Nastavitve za semantično iskanje, ki gradi in poizveduje po vdelavah (embeddings) objektov za iskanje podobnih postavk.",
+        "enabled": {
+            "label": "Omogoči semantično iskanje",
+            "description": "Vklopi ali izklopi funkcijo semantičnega iskanja."
+        },
+        "reindex": {
+            "label": "Ponovno indeksiranje ob zagonu",
+            "description": "Sproži popolno ponovno indeksiranje zgodovinskih sledenih objektov v bazo podatkov vdelav."
+        },
+        "model": {
+            "label": "Model za semantično iskanje",
+            "description": "Model vdelav, ki se uporabi za semantično iskanje (npr. 'jinav1')."
+        },
+        "model_size": {
+            "label": "Velikost modela",
+            "description": "Izberi velikost modela; 'small' deluje na procesorju (CPU), 'large' običajno zahteva grafično kartico (GPU)."
+        },
+        "device": {
+            "label": "Naprava",
+            "description": "Povoženje nastavitve za ciljanje specifične naprave."
+        }
+    },
+    "snapshots": {
+        "label": "Posnetki (Snapshots)",
+        "enabled": {
+            "label": "Posnetki omogočeni",
+            "description": "Vklopi ali izklopi shranjevanje posnetkov za vse kamere."
+        },
+        "clean_copy": {
+            "label": "Shrani čisto kopijo",
+            "description": "Poleg označenih shrani tudi čisto kopijo posnetkov brez anotacij."
+        },
+        "timestamp": {
+            "label": "Prekrivna časovna značka",
+            "description": "Na shranjene posnetke dodaj časovno značko."
+        },
+        "bounding_box": {
+            "label": "Prekrivni okvirji (Bounding box)",
+            "description": "Na shranjene posnetke nariši okvirje za sledene objekte."
+        },
+        "crop": {
+            "label": "Obreži posnetek",
+            "description": "Shranjene posnetke obreži na okvir zaznanega objekta."
+        },
+        "required_zones": {
+            "label": "Zahtevana območja",
+            "description": "Območja, v katera mora objekt vstopiti, da se posnetek shrani."
+        },
+        "height": {
+            "label": "Višina posnetka",
+            "description": "Višina (v pikslih) za shranjene posnetke; pusti prazno za izvorno velikost."
+        },
+        "retain": {
+            "label": "Hramba posnetkov",
+            "description": "Nastavitve hrambe za posnetke, vključno s privzetimi dnevi in povoženji po objektih.",
+            "default": {
+                "label": "Privzeta hramba",
+                "description": "Privzeto število dni za hrambo posnetkov."
+            },
+            "mode": {
+                "label": "Način hrambe",
+                "description": "Način hrambe posnetkov."
+            },
+            "objects": {
+                "label": "Hramba po objektih",
+                "description": "Posebne nastavitve dni hrambe za posamezne vrste objektov."
+            }
+        },
+        "quality": {
+            "label": "Kakovost JPEG",
+            "description": "Kakovost kodiranja JPEG za shranjene posnetke (0-100)."
+        },
+        "description": "Nastavitve za shranjene JPEG posnetke sledenih objektov; lahko jih povoziš pri posamezni kameri."
+    },
+    "timestamp_style": {
+        "label": "Slog časovne značke",
+        "position": {
+            "label": "Položaj časovne značke",
+            "description": "Položaj časovne značke na sliki (tl/tr/bl/br - zgoraj levo/desno, spodaj levo/desno)."
+        },
+        "format": {
+            "label": "Format časovne značke",
+            "description": "Niz za format datuma in časa (Python datetime koda)."
+        },
+        "color": {
+            "label": "Barva časovne značke",
+            "description": "RGB vrednosti barve za besedilo časovne značke (vse vrednosti 0-255).",
+            "red": {
+                "label": "Rdeča",
+                "description": "Rdeča komponenta (0-255) barve."
+            },
+            "green": {
+                "label": "Zelena",
+                "description": "Zelena komponenta (0-255) barve."
+            },
+            "blue": {
+                "label": "Modra",
+                "description": "Modra komponenta (0-255) barve."
+            }
+        },
+        "thickness": {
+            "label": "Debelina časovne značke",
+            "description": "Debelina črte besedila časovne značke."
+        },
+        "effect": {
+            "label": "Učinek časovne značke",
+            "description": "Vizualni učinek za besedilo (brez, polno, senca)."
+        },
+        "description": "Možnosti oblikovanja časovnih značk v viru, ki se uporabljajo v pogledu za razhroščevanje in na posnetkih."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Nastavitve za povezovanje in objavljanje telemetrije, posnetkov zaslona in podrobnosti o dogodkih na posrednika (broker) MQTT.",
+        "enabled": {
+            "label": "Omogoči MQTT",
+            "description": "Omogoči ali onemogoči integracijo MQTT za stanja, dogodke in posnetke zaslona."
+        },
+        "host": {
+            "label": "Gostitelj MQTT",
+            "description": "Ime gostitelja ali IP naslov posrednika MQTT."
+        },
+        "port": {
+            "label": "Vrata MQTT (Port)",
+            "description": "Vrata posrednika MQTT (običajno 1883 za navaden MQTT)."
+        },
+        "topic_prefix": {
+            "label": "Predpona teme (Topic prefix)",
+            "description": "Predpona teme MQTT za vse teme Frigate; mora biti edinstvena, če poganjaš več instanc."
+        },
+        "client_id": {
+            "label": "ID odjemalca",
+            "description": "Identifikator odjemalca, uporabljen pri povezovanju z MQTT posrednikom; moral bi biti edinstven za vsako instanco."
+        },
+        "stats_interval": {
+            "label": "Interval statistike",
+            "description": "Interval v sekundah za objavljanje statistike sistema in kamer na MQTT."
+        },
+        "user": {
+            "label": "MQTT uporabniško ime",
+            "description": "Izbirno uporabniško ime za MQTT; lahko ga podaš prek okoljskih spremenljivk ali skrivnosti (secrets)."
+        },
+        "password": {
+            "label": "MQTT geslo",
+            "description": "Izbirno geslo za MQTT; lahko ga podaš prek okoljskih spremenljivk ali skrivnosti (secrets)."
+        },
+        "tls_ca_certs": {
+            "label": "Certifikati TLS CA",
+            "description": "Pot do CA certifikata za TLS povezave s posrednikom (za samopodpisane certifikate)."
+        },
+        "tls_client_cert": {
+            "label": "Certifikat odjemalca",
+            "description": "Pot do certifikata odjemalca za TLS medsebojno avtentikacijo; ne nastavljaj uporabniškega imena/gesla, če uporabljaš certifikate odjemalca."
+        },
+        "tls_client_key": {
+            "label": "Ključ odjemalca",
+            "description": "Pot do zasebnega ključa za certifikat odjemalca."
+        },
+        "tls_insecure": {
+            "label": "TLS nezaščiteno",
+            "description": "Dovoli nevarne TLS povezave s preskokom preverjanja imena gostitelja (ni priporočljivo)."
+        },
+        "qos": {
+            "label": "MQTT QoS",
+            "description": "Raven kakovosti storitve (Quality of Service) za objave/naročnine MQTT (0, 1 ali 2)."
+        }
+    },
+    "notifications": {
+        "label": "Obvestila",
+        "enabled": {
+            "label": "Omogoči obvestila",
+            "description": "Omogoči ali onemogoči obvestila za vse kamere; lahko jih povoziš pri posamezni kameri."
+        },
+        "email": {
+            "label": "E-pošta za obvestila",
+            "description": "E-poštni naslov, ki se uporablja za potisna obvestila ali ga zahtevajo določeni ponudniki obvestil."
+        },
+        "cooldown": {
+            "label": "Obdobje mirovanja (Cooldown)",
+            "description": "Čas mirovanja (v sekundah) med obvestili, da preprečiš zasipanje prejemnikov s sporočili."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje obvestil",
+            "description": "Pove, ali so bila obvestila omogočena v prvotni statični konfiguraciji."
+        },
+        "description": "Nastavitve za omogočanje in nadzor obvestil za vse kamere; lahko jih povoziš pri posamezni kameri."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Nastavitve ONVIF povezave in PTZ samodejnega sledenja za to kamero.",
+        "host": {
+            "label": "ONVIF gostitelj",
+            "description": "Naslov gostitelja za storitev ONVIF za to kamero."
+        },
+        "port": {
+            "label": "ONVIF vrata (port)",
+            "description": "Številka vrat za storitev ONVIF."
+        },
+        "user": {
+            "label": "ONVIF uporabniško ime",
+            "description": "Uporabniško ime za ONVIF avtentikacijo."
+        },
+        "password": {
+            "label": "ONVIF geslo",
+            "description": "Geslo za ONVIF avtentikacijo."
+        },
+        "tls_insecure": {
+            "label": "Onemogoči TLS preverjanje",
+            "description": "Preskoči preverjanje TLS (nevarno; uporabljaj le v varnih omrežjih)."
+        },
+        "autotracking": {
+            "label": "Samodejno sledenje",
+            "description": "Samodejno sledi premikajočim se objektom in jih drži v sredini okvirja s premiki PTZ kamere.",
+            "enabled": {
+                "label": "Omogoči samodejno sledenje",
+                "description": "Vklopi ali izklopi samodejno PTZ sledenje zaznanim objektom."
+            },
+            "calibrate_on_startup": {
+                "label": "Umeri ob zagonu",
+                "description": "Izmeri hitrosti motorjev PTZ ob zagonu za boljšo natančnost sledenja."
+            },
+            "zooming": {
+                "label": "Način povečave",
+                "description": "Nadzor povečave: onemogočeno, absolutno (najbolj združljivo) ali relativno."
+            },
+            "zoom_factor": {
+                "label": "Faktor povečave",
+                "description": "Nadzor stopnje povečave na sledenih objektih (0.1 do 0.75)."
+            },
+            "track": {
+                "label": "Sledeni objekti",
+                "description": "Seznam vrst objektov, ki sprožijo samodejno sledenje."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Objekti morajo vstopiti v eno od teh območij, preden se sledenje začne."
+            },
+            "return_preset": {
+                "label": "Prednastavitev za vrnitev",
+                "description": "Ime ONVIF prednastavitve (preset), na katero se kamera vrne po končanem sledenju."
+            },
+            "timeout": {
+                "label": "Čas do vrnitve",
+                "description": "Koliko sekund naj kamera čaka po izgubi objekta, preden se vrne v prvotni položaj."
+            },
+            "movement_weights": {
+                "label": "Uteži premikanja",
+                "description": "Vrednosti umerjanja, ki se generirajo samodejno. Ne spreminjaj ročno."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno stanje sledenja",
+                "description": "Interno polje za sledenje stanja sledenja v konfiguraciji."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Prezri časovno neskladje",
+            "description": "Prezri razlike v sinhronizaciji časa med kamero in strežnikom za ONVIF komunikacijo."
+        }
+    },
+    "version": {
+        "label": "Trenutna različica konfiguracije",
+        "description": "Številčna ali tekstovna različica aktivne konfiguracije, ki pomaga pri zaznavanju migracij ali sprememb formata."
+    },
+    "safe_mode": {
+        "label": "Varni način",
+        "description": "Ko je omogočeno, se Frigate zažene v varnem načinu z omejenimi funkcijami za odpravljanje težav."
+    },
+    "environment_vars": {
+        "label": "Okoljske spremenljivke",
+        "description": "Pari ključ/vrednost okoljskih spremenljivk, ki se nastavijo za proces Frigate v sistemu Home Assistant OS. Uporabniki, ki ne uporabljajo HAOS, morajo namesto tega uporabiti konfiguracijo okoljskih spremenljivk Docker."
+    },
+    "logger": {
+        "label": "Beleženje (Logging)",
+        "description": "Nadzira privzeto podrobnost dnevnikov in omogoča povoženje ravni beleženja za posamezne komponente.",
+        "default": {
+            "label": "Raven beleženja",
+            "description": "Privzeta globalna podrobnost dnevnikov (debug, info, warning, error)."
+        },
+        "logs": {
+            "label": "Raven beleženja po procesih",
+            "description": "Povoženje ravni beleženja za posamezne komponente, da povečaš ali zmanjšaš podrobnost za specifične module."
+        }
+    },
+    "auth": {
+        "label": "Avtentikacija",
+        "description": "Nastavitve avtentikacije in sej, vključno z možnostmi piškotkov in omejevanjem hitrosti zahtev.",
+        "enabled": {
+            "label": "Omogoči avtentikacijo",
+            "description": "Omogoči izvorno avtentikacijo za uporabniški vmesnik Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Ponastavi geslo skrbnika",
+            "description": "Če je izbrano (true), se ob zagonu ponastavi geslo skrbnika, novo geslo pa se izpiše v dnevnikih (logs)."
+        },
+        "cookie_name": {
+            "label": "Ime JWT piškotka",
+            "description": "Ime piškotka, ki se uporablja za shranjevanje žetona JWT za izvorno avtentikacijo."
+        },
+        "cookie_secure": {
+            "label": "Varnostna zastavica piškotka (Secure)",
+            "description": "Nastavi zastavico 'secure' na avtentikacijskem piškotku; to bi moralo biti vklopljeno, ko uporabljaš TLS."
+        },
+        "session_length": {
+            "label": "Dolžina seje",
+            "description": "Trajanje seje v sekundah za seje, ki temeljijo na JWT."
+        },
+        "refresh_time": {
+            "label": "Okno za osvežitev seje",
+            "description": "Ko seji do poteka manjka toliko sekund, jo sistem samodejno osveži na polno dolžino."
+        },
+        "failed_login_rate_limit": {
+            "label": "Omejitve neuspelih prijav",
+            "description": "Pravila za omejevanje hitrosti neuspelih poskusov prijave, da se zmanjša nevarnost napadov s silo (brute-force)."
+        },
+        "trusted_proxies": {
+            "label": "Zaupanja vredni proksiji",
+            "description": "Seznam zaupanja vrednih IP naslovov proksi strežnikov, ki se uporabljajo pri določanju IP-ja odjemalca za omejevanje hitrosti."
+        },
+        "hash_iterations": {
+            "label": "Iteracije zgostitve (Hash)",
+            "description": "Število iteracij PBKDF2-SHA256, ki se uporabijo pri zgoščevanju uporabniških gesel."
+        },
+        "roles": {
+            "label": "Preslikava vlog",
+            "description": "Preslikaj vloge na sezname kamer. Prazen seznam podeli vlogi dostop do vseh kamer."
+        },
+        "admin_first_time_login": {
+            "label": "Oznaka prve prijave skrbnika",
+            "description": "Ko je vklopljeno, lahko vmesnik na strani za prijavo prikaže povezavo do pomoči, ki uporabnike obvesti, kako se prijaviti po ponastavitvi skrbniškega gesla. "
+        }
+    },
+    "database": {
+        "label": "Zbirka podatkov",
+        "description": "Nastavitve za zbirko podatkov SQLite, ki jo Frigate uporablja za shranjevanje sledenih objektov in metapodatkov posnetkov.",
+        "path": {
+            "label": "Pot do zbirke podatkov",
+            "description": "Pot v datotečnem sistemu, kjer bo shranjena SQLite datoteka zbirke podatkov Frigate."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Nastavitve za integrirano storitev pretakanja go2rtc, ki se uporablja za posredovanje in pretvorbo prenosov v živo."
+    },
+    "networking": {
+        "label": "Omrežje",
+        "description": "Nastavitve, povezane z omrežjem, kot je omogočanje IPv6 za dostopne točke Frigate.",
+        "ipv6": {
+            "label": "Konfiguracija IPv6",
+            "description": "Specifične nastavitve IPv6 za omrežne storitve Frigate.",
+            "enabled": {
+                "label": "Omogoči IPv6",
+                "description": "Omogoči podporo za IPv6 za storitve Frigate (API in vmesnik), kjer je to mogoče."
+            }
+        },
+        "listen": {
+            "label": "Konfiguracija vrat za poslušanje",
+            "description": "Konfiguracija za notranja in zunanja vrata za poslušanje. To je za napredne uporabnike. V večini primerov je priporočljivo spremeniti sekcijo 'ports' v tvoji datoteki Docker Compose.",
+            "internal": {
+                "label": "Notranja vrata",
+                "description": "Notranja vrata za poslušanje za Frigate (privzeto 5000)."
+            },
+            "external": {
+                "label": "Zunanja vrata",
+                "description": "Zunanja vrata za poslušanje za Frigate (privzeto 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proksi",
+        "description": "Nastavitve za integracijo Frigate za povratnim proksijem (reverse proxy), ki posreduje glave z avtenticiranimi uporabniki.",
+        "header_map": {
+            "label": "Preslikava glav (Headers)",
+            "description": "Preslikaj dohodne glave proksija v polja za uporabnika in vlogo v Frigate za avtentikacijo prek proksija.",
+            "user": {
+                "label": "Glava uporabnika",
+                "description": "Glava, ki vsebuje avtenticirano uporabniško ime, ki ga posreduje nadrejeni proksi."
+            },
+            "role": {
+                "label": "Glava vloge",
+                "description": "Glava, ki vsebuje vlogo ali skupine avtenticiranega uporabnika iz nadrejenega proksija."
+            },
+            "role_map": {
+                "label": "Preslikava vlog",
+                "description": "Preslikaj vrednosti skupin iz nadrejenega sistema v vloge Frigate (npr. preslikaj skupine skrbnikov v vlogo 'admin')."
+            }
+        },
+        "logout_url": {
+            "label": "URL za odjavo",
+            "description": "URL, na katerega naj bodo uporabniki preusmerjeni ob odjavi prek proksija."
+        },
+        "auth_secret": {
+            "label": "Skrivnost proksija",
+            "description": "Izbirna skrivnost, ki se preveri glede na glavo 'X-Proxy-Secret' za potrditev zaupanja vrednih proksijev."
+        },
+        "default_role": {
+            "label": "Privzeta vloga",
+            "description": "Privzeta vloga, dodeljena uporabnikom, avtenticiranim prek proksija, ko nobena preslikava vlog ne ustreza (admin ali viewer)."
+        },
+        "separator": {
+            "label": "Ločilni znak",
+            "description": "Znak, ki se uporablja za ločevanje več vrednosti, podanih v glavah proksija."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetrija",
+        "description": "Sistemska telemetrija in možnosti statistike, vključno s spremljanjem grafičnega procesorja (GPU) in omrežne pasovne širine.",
+        "network_interfaces": {
+            "label": "Omrežni vmesniki",
+            "description": "Seznam predpon imen omrežnih vmesnikov, ki naj se spremljajo za statistiko pasovne širine."
+        },
+        "stats": {
+            "label": "Sistemska statistika",
+            "description": "Možnosti za omogočanje/onemogočanje zbiranja različnih sistemskih in GPU statistik.",
+            "amd_gpu_stats": {
+                "label": "Statistika AMD GPU",
+                "description": "Omogoči zbiranje statistike za AMD grafične procesorje, če so prisotni."
+            },
+            "intel_gpu_stats": {
+                "label": "Statistika Intel GPU",
+                "description": "Omogoči zbiranje statistike za Intel grafične procesorje, če so prisotni."
+            },
+            "network_bandwidth": {
+                "label": "Omrežna pasovna širina",
+                "description": "Omogoči spremljanje omrežne pasovne širine na proces za ffmpeg procese kamer in detektorje (zahteva posebna dovoljenja/capabilities)."
+            },
+            "intel_gpu_device": {
+                "label": "SR-IOV naprava",
+                "description": "Identifikator naprave, ki se uporablja pri obravnavi Intelovih GPU-jev kot SR-IOV za popravek GPU statistike."
+            }
+        },
+        "version_check": {
+            "label": "Preverjanje različice",
+            "description": "Omogoči odhodno preverjanje, da ugotoviš, ali je na voljo novejša različica Frigate."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Nastavitve TLS za spletne dostopne točke Frigate (vrata 8971).",
+        "enabled": {
+            "label": "Omogoči TLS",
+            "description": "Omogoči TLS za spletni vmesnik in API Frigate na konfiguriranih vratih TLS."
+        }
+    },
+    "ui": {
+        "label": "Uporabniški vmesnik (UI)",
+        "description": "Nastavitve uporabniškega vmesnika, kot so časovni pas, oblika zapisa časa/datuma in enote.",
+        "timezone": {
+            "label": "Časovni pas",
+            "description": "Izbirni časovni pas za prikaz v vmesniku (če ni nastavljeno, se uporabi lokalni čas brskalnika)."
+        },
+        "time_format": {
+            "label": "Oblika zapisa časa",
+            "description": "Oblika časa v vmesniku (brskalnik, 12-urna ali 24-urna)."
+        },
+        "date_style": {
+            "label": "Slog datuma",
+            "description": "Slog prikaza datuma v vmesniku (polno, dolgo, srednje, kratko)."
+        },
+        "time_style": {
+            "label": "Slog časa",
+            "description": "Slog prikaza časa v vmesniku (polno, dolgo, srednje, kratko)."
+        },
+        "unit_system": {
+            "label": "Sistem enot",
+            "description": "Sistem enot za prikaz (metrični ali imperialni), uporabljen v vmesniku in MQTT."
+        }
+    },
+    "detectors": {
+        "label": "Strojna oprema detektorjev",
+        "description": "Konfiguracija za detektorje objektov (CPU, GPU, ONNX zaledja) in specifične nastavitve modelov detektorjev.",
+        "type": {
+            "label": "Vrsta detektorja",
+            "description": "Vrsta detektorja za zaznavanje objektov (npr. 'cpu', 'edgetpu', 'openvino')."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "Detektor CPU TFLite, ki poganja modele TensorFlow Lite na glavnem procesorju brez strojne pospešitve. Ni priporočljivo.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov, ki se uporabljajo za dodajanje metapodatkov (na primer 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas), ki jo nekateri detektorji uporabljajo za optimizacijo."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja, če jo izbrani detektor zahteva."
+            },
+            "num_threads": {
+                "label": "Število niti za zaznavanje",
+                "description": "Število niti, ki se uporabljajo za sklepanje (inference) na procesorju (CPU)."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "Detektor DeepStack/CodeProject.AI, ki pošilja slike v oddaljeni API DeepStack HTTP za sklepanje. Ni priporočljivo.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov (npr. 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas), uporabljen za optimizacijo."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja, če jo izbrani detektor zahteva."
+            },
+            "api_url": {
+                "label": "URL API-ja DeepStack",
+                "description": "URL naslov API-ja DeepStack."
+            },
+            "api_timeout": {
+                "label": "Časovna omejitev API-ja DeepStack (v sekundah)",
+                "description": "Najdaljši dovoljeni čas za zahtevo na API DeepStack."
+            },
+            "api_key": {
+                "label": "Ključ API DeepStack (če je zahtevan)",
+                "description": "Izbirni ključ API za avtenticirane storitve DeepStack."
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "Detektor DeGirum za poganjanje modelov prek oblaka DeGirum ali lokalnih storitev sklepanja.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            },
+            "location": {
+                "label": "Lokacija sklepanja",
+                "description": "Lokacija pogona za sklepanje DeGirum (npr. '@cloud', '127.0.0.1')."
+            },
+            "zoo": {
+                "label": "Zbirka modelov (Model Zoo)",
+                "description": "Pot ali URL do zbirke modelov DeGirum."
+            },
+            "token": {
+                "label": "Žeton za DeGirum Cloud",
+                "description": "Žeton za dostop do oblaka DeGirum."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "Detektor EdgeTPU, ki poganja modele TensorFlow Lite, prevedene za Coral EdgeTPU, z uporabo delegata EdgeTPU.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov (npr. 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas), uporabljen za optimizacijo."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja, če jo izbrani detektor zahteva."
+            },
+            "device": {
+                "label": "Vrsta naprave",
+                "description": "Naprava, ki naj se uporabi za sklepanje EdgeTPU (npr. 'usb', 'pci')."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Detektor Hailo-8/Hailo-8L, ki uporablja modele HEF in SDK HailoRT za sklepanje na strojni opremi Hailo.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja, če jo izbrani detektor zahteva."
+            },
+            "device": {
+                "label": "Vrsta naprave",
+                "description": "Naprava, ki naj se uporabi za sklepanje Hailo (npr. 'PCIe', 'M.2')."
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "Detektor MemryX MX3, ki poganja prevedene modele DFP na pospeševalnikih MemryX.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            },
+            "device": {
+                "label": "Pot do naprave",
+                "description": "Naprava, ki naj se uporabi za sklepanje MemryX (npr. 'PCIe')."
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "Detektor ONNX za poganjanje modelov ONNX; uporabil bo razpoložljiva zaledja za pospeševanje (CUDA/ROCm/OpenVINO), če so na voljo.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            },
+            "device": {
+                "label": "Vrsta naprave",
+                "description": "Naprava, ki naj se uporabi za sklepanje ONNX (npr. 'AUTO', 'CPU', 'GPU')."
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "Detektor OpenVINO za procesorje AMD in Intel, grafične procesorje Intel in strojno opremo Intel VPU.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            },
+            "device": {
+                "label": "Vrsta naprave",
+                "description": "Naprava, ki naj se uporabi za sklepanje OpenVINO (npr. 'CPU', 'GPU', 'NPU')."
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "Detektor RKNN za NPUs Rockchip; poganja prevedene modele RKNN na strojni opremi Rockchip.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            },
+            "num_cores": {
+                "label": "Število jeder NPU",
+                "description": "Število jeder NPU, ki naj se uporabi (0 za samodejno)."
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "Detektor Synaptics NPU za modele v formatu .synap z uporabo SDK Synap na strojni opremi Synaptics.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            }
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "Detektor delegata Teflon za TFLite, ki uporablja knjižnico Mesa Teflon za pospeševanje sklepanja na podprtih grafičnih procesorjih.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov (npr. 'car' -> ['license_plate'])."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas), uporabljen za optimizacijo."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja, če jo izbrani detektor zahteva."
+            }
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "Detektor TensorRT za naprave Nvidia Jetson, ki uporablja serializirane pogone TensorRT za pospešeno sklepanje.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke s seznami oznak (labelmap), ki številčne razrede preslika v tekstovne oznake detektorja."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja modela v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja modela v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov, ki se združijo v standardni labelmap."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov za dodajanje metapodatkov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor, ki ga pričakuje model: 'rgb', 'bgr' ali 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov vhodnega tenzorja modela (na primer 'float32')."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do datoteke z binarnim modelom detektorja."
+            },
+            "device": {
+                "label": "Indeks grafične naprave (GPU)",
+                "description": "Indeks naprave GPU, ki naj se uporabi."
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "Detektor ZMQ IPC, ki preloži sklepanje na zunanji proces prek končne točke ZeroMQ IPC.",
+            "type": {
+                "label": "Vrsta"
+            },
+            "model": {
+                "label": "Konfiguracija modela za specifičen detektor",
+                "description": "Možnosti konfiguracije modela za določen detektor (pot, vhodna velikost itd.).",
+                "path": {
+                    "label": "Pot do modela za zaznavanje objektov po meri",
+                    "description": "Pot do datoteke modela po meri."
+                },
+                "labelmap_path": {
+                    "label": "Pot do labelmap datoteke za detektor po meri",
+                    "description": "Pot do datoteke labelmap."
+                },
+                "width": {
+                    "label": "Vhodna širina modela za zaznavanje",
+                    "description": "Širina vhodnega tenzorja v pikslih."
+                },
+                "height": {
+                    "label": "Vhodna višina modela za zaznavanje",
+                    "description": "Višina vhodnega tenzorja v pikslih."
+                },
+                "labelmap": {
+                    "label": "Prilagoditev labelmapa",
+                    "description": "Povoženja ali ponovne preslikave vnosov."
+                },
+                "attributes_map": {
+                    "label": "Zemljevid oznak objektov in njihovih atributov",
+                    "description": "Preslikava med oznakami objektov in oznakami atributov."
+                },
+                "input_tensor": {
+                    "label": "Oblika vhodnega tenzorja modela",
+                    "description": "Format tenzorja (nhwc ali nchw)."
+                },
+                "input_pixel_format": {
+                    "label": "Barvni format slikovnih pik vhoda modela",
+                    "description": "Barvni prostor (rgb, bgr ali yuv)."
+                },
+                "input_dtype": {
+                    "label": "Tip podatkov vhoda modela (D Type)",
+                    "description": "Tip podatkov (npr. float32)."
+                },
+                "model_type": {
+                    "label": "Vrsta modela za zaznavanje objektov",
+                    "description": "Arhitektura modela (ssd, yolox, yolonas)."
+                }
+            },
+            "model_path": {
+                "label": "Pot do modela za specifičen detektor",
+                "description": "Pot do binarne datoteke modela."
+            },
+            "endpoint": {
+                "label": "Končna točka ZMQ IPC",
+                "description": "ZMQ končna točka za povezavo."
+            },
+            "request_timeout_ms": {
+                "label": "Časovna omejitev zahteve ZMQ (v milisekundah)",
+                "description": "Časovna omejitev za zahteve ZMQ v milisekundah."
+            },
+            "linger_ms": {
+                "label": "Zadrževanje vtičnice ZMQ (v milisekundah)",
+                "description": "Obdobje zadrževanja vtičnice v milisekundah."
+            }
+        }
+    },
+    "model": {
+        "label": "Model za zaznavanje",
+        "description": "Nastavitve za konfiguracijo modela za zaznavanje objektov po meri in njegove vhodne oblike.",
+        "path": {
+            "label": "Pot do modela za zaznavanje objektov po meri",
+            "description": "Pot do datoteke modela po meri (ali plus://<model_id> za modele Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Pot do labelmap datoteke za detektor po meri",
+            "description": "Pot do datoteke labelmap, ki številčne razrede preslika v tekstovne oznake."
+        },
+        "width": {
+            "label": "Vhodna širina modela za zaznavanje",
+            "description": "Širina vhodnega tenzorja modela v pikslih."
+        },
+        "height": {
+            "label": "Vhodna višina modela za zaznavanje",
+            "description": "Višina vhodnega tenzorja modela v pikslih."
+        },
+        "labelmap": {
+            "label": "Prilagoditev labelmapa",
+            "description": "Povoženja ali ponovne preslikave vnosov v standardni labelmap."
+        },
+        "attributes_map": {
+            "label": "Zemljevid oznak objektov in njihovih atributov",
+            "description": "Preslikava med oznakami objektov in oznakami atributov za metapodatke."
+        },
+        "input_tensor": {
+            "label": "Oblika vhodnega tenzorja modela",
+            "description": "Format tenzorja, ki ga model pričakuje: 'nhwc' ali 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Barvni format slikovnih pik vhoda modela",
+            "description": "Barvni prostor, ki ga pričakuje model (rgb, bgr ali yuv)."
+        },
+        "input_dtype": {
+            "label": "Tip podatkov vhoda modela (D Type)",
+            "description": "Tip podatkov vhodnega tenzorja (npr. 'float32')."
+        },
+        "model_type": {
+            "label": "Vrsta modela za zaznavanje objektov",
+            "description": "Arhitektura modela detektorja (ssd, yolox, yolonas)."
+        }
+    },
+    "genai": {
+        "label": "Konfiguracija generativne umetne inteligence (imenovani ponudniki)",
+        "description": "Nastavitve za integrirane ponudnike generativne UI, ki se uporabljajo za opise objektov in povzetke pregledov.",
+        "api_key": {
+            "label": "Ključ API",
+            "description": "Ključ API, ki ga zahtevajo nekateri ponudniki (lahko ga nastaviš tudi prek okoljskih spremenljivk)."
+        },
+        "base_url": {
+            "label": "Osnovni URL",
+            "description": "Osnovni URL za lastno gostovane ali združljive ponudnike (na primer instanca Ollama)."
+        },
+        "model": {
+            "label": "Model",
+            "description": "Model ponudnika, ki naj se uporabi za generiranje opisov ali povzetkov."
+        },
+        "provider": {
+            "label": "Ponudnik",
+            "description": "Ponudnik GenAI (na primer: ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "Vloge",
+            "description": "Vloge GenAI (orodja, vid, vdelave); en ponudnik na vlogo."
+        },
+        "provider_options": {
+            "label": "Možnosti ponudnika",
+            "description": "Dodatne možnosti, specifične za ponudnika, ki se pošljejo GenAI odjemalcu."
+        },
+        "runtime_options": {
+            "label": "Možnosti ob izvedbi",
+            "description": "Možnosti ob izvedbi, ki se pošljejo ponudniku za vsak klic sklepanja."
+        }
+    },
+    "classification": {
+        "label": "Klasifikacija objektov",
+        "description": "Nastavitve za modele klasifikacije, ki se uporabljajo za izboljšanje oznak objektov ali klasifikacijo stanja.",
+        "bird": {
+            "label": "Konfiguracija klasifikacije ptic",
+            "description": "Nastavitve, specifične za modele za klasifikacijo ptic.",
+            "enabled": {
+                "label": "Klasifikacija ptic",
+                "description": "Vklopi ali izklopi klasifikacijo ptic."
+            },
+            "threshold": {
+                "label": "Najmanjša ocena",
+                "description": "Najmanjša ocena klasifikacije, potrebna za sprejetje detekcije ptice."
+            }
+        },
+        "custom": {
+            "label": "Modeli za klasifikacijo po meri",
+            "description": "Konfiguracija modelov po meri za zaznavanje objektov ali stanj.",
+            "enabled": {
+                "label": "Omogoči model",
+                "description": "Vklopi ali izklopi model za klasifikacijo po meri."
+            },
+            "name": {
+                "label": "Ime modela",
+                "description": "Identifikator za uporabljen model po meri."
+            },
+            "threshold": {
+                "label": "Prag ocene",
+                "description": "Prag ocene, uporabljen za spremembo stanja klasifikacije."
+            },
+            "save_attempts": {
+                "label": "Shrani poskuse",
+                "description": "Koliko poskusov klasifikacije naj se shrani za prikaz v vmesniku."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Klasificiraj objekte",
+                    "description": "Seznam vrst objektov, nad katerimi naj se izvaja klasifikacija."
+                },
+                "classification_type": {
+                    "label": "Vrsta klasifikacije",
+                    "description": "Vrsta uporabljene klasifikacije: 'sub_label' (doda pod-oznako) ali druge podprte vrste."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Kamere za klasifikacijo",
+                    "description": "Izrez (crop) in nastavitve za posamezno kamero za klasifikacijo stanja.",
+                    "crop": {
+                        "label": "Izrez za klasifikacijo",
+                        "description": "Koordinate izreza za izvajanje klasifikacije na tej kameri."
+                    }
+                },
+                "motion": {
+                    "label": "Zženi ob gibanju",
+                    "description": "Če je izbrano, zaženi klasifikacijo, ko je zaznano gibanje znotraj določenega izreza."
+                },
+                "interval": {
+                    "label": "Interval klasifikacije",
+                    "description": "Interval (v sekundah) med občasnimi klasifikacijami stanja."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "label": "Skupine kamer",
+        "description": "Konfiguracija za poimenovane skupine kamer za boljšo organizacijo v vmesniku.",
+        "cameras": {
+            "label": "Seznam kamer",
+            "description": "Seznam imen kamer, vključenih v to skupino."
+        },
+        "icon": {
+            "label": "Ikona skupine",
+            "description": "Ikona za predstavitev skupine kamer v vmesniku."
+        },
+        "order": {
+            "label": "Vrstni red",
+            "description": "Numerični vrstni red za razvrščanje skupin; večje številke se prikažejo kasneje."
+        }
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Nastavitve objavljanja slik preko MQTT.",
+        "enabled": {
+            "label": "Pošlji sliko",
+            "description": "Omogoči objavljanje posnetkov objektov na MQTT teme za to kamero."
+        },
+        "timestamp": {
+            "label": "Dodaj časovno značko",
+            "description": "Dodaj časovno značko na slike, objavljene na MQTT."
+        },
+        "bounding_box": {
+            "label": "Dodaj okvir",
+            "description": "Nariši okvirje objektov na slike, objavljene preko MQTT."
+        },
+        "crop": {
+            "label": "Obreži sliko",
+            "description": "Obreži slike za MQTT na okvir zaznanega objekta."
+        },
+        "height": {
+            "label": "Višina slike",
+            "description": "Višina (v pikslih) za spreminjanje velikosti slik za MQTT."
+        },
+        "required_zones": {
+            "label": "Zahtevana območja",
+            "description": "Območja, v katera mora objekt vstopiti, da se slika objavi na MQTT."
+        },
+        "quality": {
+            "label": "Kakovost JPEG",
+            "description": "Kakovost JPEG slik za MQTT (0-100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Uporabniški vmesnik kamere",
+        "description": "Vrstni red prikaza in vidljivost kamere v vmesniku.",
+        "order": {
+            "label": "UI vrstni red",
+            "description": "Številka za razvrščanje kamere v vmesniku; večje številke so nižje na seznamu."
+        },
+        "dashboard": {
+            "label": "Prikaži v vmesniku",
+            "description": "Preklopi vidljivost kamere v Frigate vmesniku. Če to izklopiš, boš moral ročno urediti konfiguracijo, da jo spet vidiš."
+        }
+    }
+}

@@ -1,0 +1,85 @@
+{
+  "time": {
+    "never": "Kurrë",
+    "ago": "{{timeAgo}} më parë",
+    "today": "Sot",
+    "yesterday": "Dje",
+    "last7": "7 ditët e fundit",
+    "last14": "14 ditët e fundit",
+    "last30": "30 ditët e fundit",
+    "thisWeek": "Këtë javë",
+    "lastWeek": "Javën e kaluar",
+    "thisMonth": "Këtë muaj",
+    "lastMonth": "Muajin e kaluar",
+    "5minutes": "5 minuta",
+    "10minutes": "10 minuta",
+    "30minutes": "30 minuta",
+    "1hour": "1 orë",
+    "12hours": "12 orë",
+    "24hours": "24 orë",
+    "pm": "mbasdite",
+    "am": "paradite"
+  },
+  "unit": {
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/orë",
+      "mbph": "MB/orë",
+      "gbph": "GB/orë"
+    }
+  },
+  "label": {
+    "back": "Kthehu pas",
+    "hide": "Fsheh {{item}}",
+    "show": "Shfaq {{item}}",
+    "ID": "ID",
+    "none": "Asnjë",
+    "all": "Të gjitha",
+    "other": "Tjetër"
+  },
+  "list": {
+    "two": "{{0}} dhe {{1}}",
+    "many": "{{items}}, dhe {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opsionale",
+    "internalID": "ID-ja e brendshme që Frigate përdor në konfigurim dhe në databazë"
+  },
+  "button": {
+    "add": "Shto",
+    "apply": "Vendos",
+    "applying": "Duke vendosur…",
+    "reset": "Rivendos",
+    "undo": "Zhbëj",
+    "done": "Përfunduar",
+    "enabled": "Aktivizuar",
+    "enable": "Aktivizo",
+    "disabled": "Deaktivizuar",
+    "disable": "Deaktivizo",
+    "save": "Ruaj",
+    "saving": "Duke ruajtur…",
+    "cancel": "Anulo",
+    "close": "Mbyll",
+    "copy": "Kopjo",
+    "copiedToClipboard": "Kopjuar në clipboard",
+    "back": "Pas",
+    "history": "Historia",
+    "fullscreen": "Ekran i plotë",
+    "exitFullscreen": "Dil nga ekrani i plotë",
+    "pictureInPicture": "Fotografi në fotografi (PiP)",
+    "twoWayTalk": "Komunikim dyanësor",
+    "cameraAudio": "Zëri i kamerës",
+    "on": "Aktiv",
+    "off": "Joaktiv",
+    "edit": "Ndrysho",
+    "copyCoordinates": "Kopjo koordinatat",
+    "delete": "Fshij",
+    "yes": "Po",
+    "no": "Jo",
+    "download": "Shkarko",
+    "info": "Info"
+  }
+}

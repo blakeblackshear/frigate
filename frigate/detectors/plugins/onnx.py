@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -23,8 +23,18 @@ DETECTOR_KEY = "onnx"
 
 
 class ONNXDetectorConfig(BaseDetectorConfig):
+    """ONNX detector for running ONNX models; will use available acceleration backends (CUDA/ROCm/OpenVINO) when available."""
+
+    model_config = ConfigDict(
+        title="ONNX",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default="AUTO", title="Device Type")
+    device: str = Field(
+        default="AUTO",
+        title="Device Type",
+        description="The device to use for ONNX inference (e.g. 'AUTO', 'CPU', 'GPU').",
+    )
 
 
 class ONNXDetector(DetectionApi):

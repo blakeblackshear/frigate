@@ -28,7 +28,7 @@ class FrigateMotionDetector(MotionDetector):
         self.motion_frame_count = 0
         self.frame_counter = 0
         resized_mask = cv2.resize(
-            config.mask,
+            config.rasterized_mask,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
             interpolation=cv2.INTER_LINEAR,
         )

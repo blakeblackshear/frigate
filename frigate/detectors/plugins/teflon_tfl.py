@@ -1,5 +1,6 @@
 import logging
 
+from pydantic import ConfigDict
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -18,6 +19,12 @@ DETECTOR_KEY = "teflon_tfl"
 
 
 class TeflonDetectorConfig(BaseDetectorConfig):
+    """Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs."""
+
+    model_config = ConfigDict(
+        title="Teflon",
+    )
+
     type: Literal[DETECTOR_KEY]
 
 

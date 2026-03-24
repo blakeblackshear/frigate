@@ -36,7 +36,9 @@
         "title": "Intel GPU Statistik Warnung",
         "message": "GPU stats nicht verfügbar",
         "description": "Dies ist ein bekannter Fehler in den GPU-Statistik-Tools von Intel (intel_gpu_top), bei dem das Tool ausfällt und wiederholt eine GPU-Auslastung von 0 % anzeigt, selbst wenn die Hardwarebeschleunigung und die Objekterkennung auf der (i)GPU korrekt funktionieren. Dies ist kein Fehler von Frigate. Du kannst den Host neu starten, um das Problem vorübergehend zu beheben und zu prüfen, ob die GPU korrekt funktioniert. Dies hat keine Auswirkungen auf die Leistung."
-      }
+      },
+      "gpuTemperature": "GPU Temperatur",
+      "npuTemperature": "NPU Temperatur"
     },
     "title": "Allgemein",
     "detector": {
@@ -56,7 +58,7 @@
         "recording": "Aufnahme",
         "audio_detector": "Geräuscherkennung",
         "review_segment": "Überprüfungsteil",
-        "embeddings": "Einbettungen"
+        "embeddings": "Einbetten"
       }
     }
   },
@@ -67,7 +69,8 @@
     "logs": {
       "frigate": "Frigate Protokolle – Frigate",
       "go2rtc": "Go2RTC Protokolle - Frigate",
-      "nginx": "Nginx Protokolle - Frigate"
+      "nginx": "Nginx Protokolle - Frigate",
+      "websocket": "Nachrichten Protokolle - Frigate"
     },
     "enrichments": "Erweiterte Statistiken - Frigate"
   },
@@ -93,7 +96,33 @@
         "whileStreamingLogs": "Beim Übertragen der Protokolle ist ein Fehler aufgetreten: {{errorMessage}}"
       }
     },
-    "tips": "Protokolle werden in Echtzeit vom Server übertragen"
+    "tips": "Protokolle werden in Echtzeit vom Server übertragen",
+    "websocket": {
+      "label": "Nachrichten",
+      "pause": "Pause",
+      "clear": "reinigen",
+      "filter": {
+        "all": "alle Themen",
+        "topics": "Themen",
+        "events": "Event",
+        "reviews": "Bewertungen",
+        "classification": "Klassifizierung",
+        "face_recognition": "Gesichtserkennung",
+        "lpr": "LPR",
+        "camera_activity": "Kameraaktivität",
+        "system": "System",
+        "camera": "Kamera",
+        "all_cameras": "Alle Kameras",
+        "cameras_count_one": "{{count}} Kamera",
+        "cameras_count_other": "{{count}} Kameras"
+      },
+      "empty": "Noch keine Nachrichten erfasst",
+      "count": "{{count}} Nachrichten",
+      "expanded": {
+        "payload": "Nutzlast"
+      },
+      "resume": "fortsetzen"
+    }
   },
   "metrics": "Systemmetriken",
   "storage": {
@@ -118,7 +147,11 @@
     "overview": "Übersicht",
     "shm": {
       "title": "SHM (Shared Memory) Zuweisung",
-      "warning": "Die aktuelle SHM-Größe von {{total}} MB ist zu klein. Erhöhe sie auf mindestens {{min_shm}} MB."
+      "warning": "Die aktuelle SHM-Größe von {{total}} MB ist zu klein. Erhöhe sie auf mindestens {{min_shm}} MB.",
+      "frameLifetime": {
+        "title": "Frame Lebenszeit",
+        "description": "Jede Kamera verfügt über {{frames}} Bildspeicherplätze im gemeinsamen Speicher. Bei der höchsten Bildrate der Kamera steht jedes Bild etwa {{lifetime}} Sekunden lang zur Verfügung, bevor es überschrieben wird."
+      }
     }
   },
   "cameras": {
@@ -165,6 +198,17 @@
       "error": {
         "unableToProbeCamera": "Die Kamera kann nicht getestet werden: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Verbindungsqualität",
+      "excellent": "Ausgezeichnet",
+      "fair": "Fair",
+      "poor": "arm",
+      "unusable": "Unbrauchbar",
+      "fps": "FPS",
+      "expectedFps": "Erwartete FPS",
+      "reconnectsLastHour": "Wiederverbindungen (letzte Stunde)",
+      "stallsLastHour": "Stände (letzte Stunde)"
     }
   },
   "enrichments": {
@@ -202,7 +246,8 @@
     "detectIsSlow": "{{detect}} ist langsam ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} ist sehr langsam ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} ist offline",
-    "shmTooLow": "Die Zuweisung für /dev/shm ({{total}} MB) sollte auf mindestens {{min}} MB erhöht werden."
+    "shmTooLow": "Die Zuweisung für /dev/shm ({{total}} MB) sollte auf mindestens {{min}} MB erhöht werden.",
+    "debugReplayActive": "Debug-Wiederholungssitzung ist aktiv"
   },
   "lastRefreshed": "Zuletzt aktualisiert: "
 }

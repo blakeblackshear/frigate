@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 import os
+import platform
 import traceback
 import urllib
 from datetime import datetime, timedelta
@@ -19,6 +20,7 @@ from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from filelock import FileLock, Timeout
 from markupsafe import escape
 from peewee import SQL, fn, operator
 from pydantic import ValidationError
@@ -30,22 +32,35 @@ from frigate.api.auth import (
     require_role,
 )
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
-from frigate.api.defs.request.app_body import AppConfigSetBody
+from frigate.api.defs.request.app_body import (
+    AppConfigSetBody,
+    MediaSyncBody,
+)
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
+from frigate.jobs.media_sync import (
+    get_current_media_sync_job,
+    get_media_sync_job_by_id,
+    start_media_sync_job,
+)
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
+from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
     clean_camera_user_pass,
+    deep_merge,
     flatten_config_data,
+    load_labels,
     process_config_query_string,
     update_yaml_file_bulk,
 )
-from frigate.util.config import find_config_file
+from frigate.util.config import apply_section_update, find_config_file
+from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
     process_logs,
@@ -70,9 +85,7 @@ def is_healthy():
 
 @router.get("/config/schema.json", dependencies=[Depends(allow_public())])
 def config_schema(request: Request):
-    return Response(
-        content=request.app.frigate_config.schema_json(), media_type="application/json"
-    )
+    return JSONResponse(content=get_config_schema(FrigateConfig))
 
 
 @router.get(
@@ -118,6 +131,10 @@ def config(request: Request):
     config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
+    config["detectors"] = {
+        name: detector.model_dump(mode="json", warnings="none", exclude_none=True)
+        for name, detector in config_obj.detectors.items()
+    }
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
@@ -140,6 +157,31 @@ def config(request: Request):
         # ensure that zones are relative
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
+
+        # Re-dump profile overrides with exclude_unset so that only
+        # explicitly-set fields are returned (not Pydantic defaults).
+        # Without this, the frontend merges defaults (e.g. threshold=30)
+        # over the camera's actual base values (e.g. threshold=20).
+        if camera.profiles:
+            for profile_name, profile_config in camera.profiles.items():
+                camera_dict.setdefault("profiles", {})[profile_name] = (
+                    profile_config.model_dump(
+                        mode="json", warnings="none", exclude_unset=True
+                    )
+                )
+
+        # When a profile is active, the top-level camera sections contain
+        # profile-merged (effective) values.  Include the original base
+        # configs so the frontend settings can display them separately.
+        if (
+            config_obj.active_profile is not None
+            and request.app.profile_manager is not None
+        ):
+            base_sections = request.app.profile_manager.get_base_configs_for_api(
+                camera_name
+            )
+            if base_sections:
+                camera_dict["base_config"] = base_sections
 
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
@@ -188,6 +230,75 @@ def config(request: Request):
     return JSONResponse(content=config)
 
 
+@router.get("/profiles", dependencies=[Depends(allow_any_authenticated())])
+def get_profiles(request: Request):
+    """List all available profiles and the currently active profile."""
+    profile_manager = request.app.profile_manager
+    return JSONResponse(content=profile_manager.get_profile_info())
+
+
+@router.get("/profile/active", dependencies=[Depends(allow_any_authenticated())])
+def get_active_profile(request: Request):
+    """Get the currently active profile."""
+    config_obj: FrigateConfig = request.app.frigate_config
+    return JSONResponse(content={"active_profile": config_obj.active_profile})
+
+
+@router.get("/ffmpeg/presets", dependencies=[Depends(allow_any_authenticated())])
+def ffmpeg_presets():
+    """Return available ffmpeg preset keys for config UI usage."""
+    machine = platform.machine().lower()
+    is_arm64 = machine in ("aarch64", "arm64", "armv8", "armv7l")
+
+    if is_arm64:
+        hwaccel_presets = [
+            "preset-rpi-64-h264",
+            "preset-rpi-64-h265",
+            "preset-jetson-h264",
+            "preset-jetson-h265",
+            "preset-rkmpp",
+            "preset-vaapi",
+        ]
+    else:
+        hwaccel_presets = [
+            "preset-vaapi",
+            "preset-intel-qsv-h264",
+            "preset-intel-qsv-h265",
+            "preset-nvidia",
+        ]
+
+    input_presets = [
+        "preset-http-jpeg-generic",
+        "preset-http-mjpeg-generic",
+        "preset-http-reolink",
+        "preset-rtmp-generic",
+        "preset-rtsp-generic",
+        "preset-rtsp-restream",
+        "preset-rtsp-restream-low-latency",
+        "preset-rtsp-udp",
+        "preset-rtsp-blue-iris",
+    ]
+    record_output_presets = [
+        "preset-record-generic",
+        "preset-record-generic-audio-copy",
+        "preset-record-generic-audio-aac",
+        "preset-record-mjpeg",
+        "preset-record-jpeg",
+        "preset-record-ubiquiti",
+    ]
+
+    return JSONResponse(
+        content={
+            "hwaccel_args": hwaccel_presets,
+            "input_args": input_presets,
+            "output_args": {
+                "record": record_output_presets,
+                "detect": [],
+            },
+        }
+    )
+
+
 @router.get("/config/raw_paths", dependencies=[Depends(require_role(["admin"]))])
 def config_raw_paths(request: Request):
     """Admin-only endpoint that returns camera paths and go2rtc streams without credential masking."""
@@ -218,7 +329,7 @@ def config_raw_paths(request: Request):
     return JSONResponse(content=raw_paths)
 
 
-@router.get("/config/raw", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/config/raw", dependencies=[Depends(require_role(["admin"]))])
 def config_raw():
     config_file = find_config_file()
 
@@ -362,108 +473,248 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-@router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
-def config_set(request: Request, body: AppConfigSetBody):
-    config_file = find_config_file()
+def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
+    """Apply config changes in-memory only, without writing to YAML.
 
-    with open(config_file, "r") as f:
-        old_raw_config = f.read()
-
+    Used for temporary config changes like debug replay camera tuning.
+    Updates the in-memory Pydantic config and publishes ZMQ updates,
+    bypassing YAML parsing entirely.
+    """
     try:
         updates = {}
-
-        # process query string parameters (takes precedence over body.config_data)
-        parsed_url = urllib.parse.urlparse(str(request.url))
-        query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
-
-        # Filter out empty keys but keep blank values for non-empty keys
-        query_string = {k: v for k, v in query_string.items() if k}
-
-        if query_string:
-            updates = process_config_query_string(query_string)
-        elif body.config_data:
+        if body.config_data:
             updates = flatten_config_data(body.config_data)
+            updates = {k: ("" if v is None else v) for k, v in updates.items()}
 
         if not updates:
             return JSONResponse(
-                content=(
-                    {"success": False, "message": "No configuration data provided"}
-                ),
+                content={"success": False, "message": "No configuration data provided"},
                 status_code=400,
             )
 
-        # apply all updates in a single operation
-        update_yaml_file_bulk(config_file, updates)
+        config: FrigateConfig = request.app.frigate_config
 
-        # validate the updated config
-        with open(config_file, "r") as f:
-            new_raw_config = f.read()
+        # Group flat key paths into nested per-camera, per-section dicts
+        grouped: dict[str, dict[str, dict]] = {}
+        for key_path, value in updates.items():
+            parts = key_path.split(".")
+            if len(parts) < 3 or parts[0] != "cameras":
+                continue
 
-        try:
-            config = FrigateConfig.parse(new_raw_config)
-        except Exception:
-            with open(config_file, "w") as f:
-                f.write(old_raw_config)
-                f.close()
-            logger.error(f"\nConfig Error:\n\n{str(traceback.format_exc())}")
-            return JSONResponse(
-                content=(
-                    {
+            cam, section = parts[1], parts[2]
+            grouped.setdefault(cam, {}).setdefault(section, {})
+
+            # Build nested dict from remaining path (e.g. "filters.person.threshold")
+            target = grouped[cam][section]
+            for part in parts[3:-1]:
+                target = target.setdefault(part, {})
+            if len(parts) > 3:
+                target[parts[-1]] = value
+            elif isinstance(value, dict):
+                grouped[cam][section] = deep_merge(
+                    grouped[cam][section], value, override=True
+                )
+            else:
+                grouped[cam][section] = value
+
+        # Apply each section update
+        for cam_name, sections in grouped.items():
+            camera_config = config.cameras.get(cam_name)
+            if not camera_config:
+                return JSONResponse(
+                    content={
                         "success": False,
-                        "message": "Error parsing config. Check logs for error message.",
-                    }
-                ),
-                status_code=400,
-            )
-    except Exception as e:
-        logging.error(f"Error updating config: {e}")
-        return JSONResponse(
-            content=({"success": False, "message": "Error updating config"}),
-            status_code=500,
-        )
+                        "message": f"Camera '{cam_name}' not found",
+                    },
+                    status_code=400,
+                )
 
-    if body.requires_restart == 0 or body.update_topic:
-        old_config: FrigateConfig = request.app.frigate_config
-        request.app.frigate_config = config
+            for section_name, update in sections.items():
+                err = apply_section_update(camera_config, section_name, update)
+                if err is not None:
+                    return JSONResponse(
+                        content={"success": False, "message": err},
+                        status_code=400,
+                    )
 
-        if body.update_topic:
-            if body.update_topic.startswith("config/cameras/"):
-                _, _, camera, field = body.update_topic.split("/")
+        # Publish ZMQ updates so processing threads pick up changes
+        if body.update_topic and body.update_topic.startswith("config/cameras/"):
+            _, _, camera, field = body.update_topic.split("/")
+            settings = getattr(config.cameras.get(camera, None), field, None)
 
-                if field == "add":
-                    settings = config.cameras[camera]
-                elif field == "remove":
-                    settings = old_config.cameras[camera]
-                else:
-                    settings = config.get_nested_object(body.update_topic)
-
+            if settings is not None:
                 request.app.config_publisher.publish_update(
                     CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
                     settings,
                 )
-            else:
-                # Generic handling for global config updates
-                settings = config.get_nested_object(body.update_topic)
 
-                # Publish None for removal, actual config for add/update
-                request.app.config_publisher.publisher.publish(
-                    body.update_topic, settings
+        return JSONResponse(
+            content={"success": True, "message": "Config applied in-memory"},
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"Error applying config in-memory: {e}")
+        return JSONResponse(
+            content={"success": False, "message": "Error applying config"},
+            status_code=500,
+        )
+
+
+@router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
+def config_set(request: Request, body: AppConfigSetBody):
+    config_file = find_config_file()
+
+    if body.skip_save:
+        return _config_set_in_memory(request, body)
+
+    lock = FileLock(f"{config_file}.lock", timeout=5)
+
+    try:
+        with lock:
+            with open(config_file, "r") as f:
+                old_raw_config = f.read()
+
+            try:
+                updates = {}
+
+                # process query string parameters (takes precedence over body.config_data)
+                parsed_url = urllib.parse.urlparse(str(request.url))
+                query_string = urllib.parse.parse_qs(
+                    parsed_url.query, keep_blank_values=True
                 )
 
-    return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Config successfully updated, restart to apply",
-            }
-        ),
-        status_code=200,
-    )
+                # Filter out empty keys but keep blank values for non-empty keys
+                query_string = {k: v for k, v in query_string.items() if k}
+
+                if query_string:
+                    updates = process_config_query_string(query_string)
+                elif body.config_data:
+                    updates = flatten_config_data(body.config_data)
+                    # Convert None values to empty strings for deletion (e.g., when deleting masks)
+                    updates = {k: ("" if v is None else v) for k, v in updates.items()}
+
+                if not updates:
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": "No configuration data provided",
+                            }
+                        ),
+                        status_code=400,
+                    )
+
+                # apply all updates in a single operation
+                update_yaml_file_bulk(config_file, updates)
+
+                # validate the updated config
+                with open(config_file, "r") as f:
+                    new_raw_config = f.read()
+
+                try:
+                    config = FrigateConfig.parse(new_raw_config)
+                except Exception:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                        f.close()
+                    logger.error(f"\nConfig Error:\n\n{str(traceback.format_exc())}")
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": "Error parsing config. Check logs for error message.",
+                            }
+                        ),
+                        status_code=400,
+                    )
+            except Exception as e:
+                logging.error(f"Error updating config: {e}")
+                return JSONResponse(
+                    content=({"success": False, "message": "Error updating config"}),
+                    status_code=500,
+                )
+
+            if body.requires_restart == 0 or body.update_topic:
+                old_config: FrigateConfig = request.app.frigate_config
+                request.app.frigate_config = config
+                request.app.genai_manager.update_config(config)
+
+                if request.app.profile_manager is not None:
+                    request.app.profile_manager.update_config(config)
+
+                if request.app.stats_emitter is not None:
+                    request.app.stats_emitter.config = config
+
+                if body.update_topic:
+                    if body.update_topic.startswith("config/cameras/"):
+                        _, _, camera, field = body.update_topic.split("/")
+
+                        if camera == "*":
+                            # Wildcard: fan out update to all cameras
+                            enum_value = CameraConfigUpdateEnum[field]
+                            for camera_name in config.cameras:
+                                settings = config.get_nested_object(
+                                    f"config/cameras/{camera_name}/{field}"
+                                )
+                                request.app.config_publisher.publish_update(
+                                    CameraConfigUpdateTopic(enum_value, camera_name),
+                                    settings,
+                                )
+                        else:
+                            if field == "add":
+                                settings = config.cameras[camera]
+                            elif field == "remove":
+                                settings = old_config.cameras[camera]
+                            else:
+                                settings = config.get_nested_object(body.update_topic)
+
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum[field], camera
+                                ),
+                                settings,
+                            )
+                    else:
+                        # Generic handling for global config updates
+                        settings = config.get_nested_object(body.update_topic)
+
+                        # Publish None for removal, actual config for add/update
+                        request.app.config_publisher.publisher.publish(
+                            body.update_topic, settings
+                        )
+
+            return JSONResponse(
+                content=(
+                    {
+                        "success": True,
+                        "message": "Config successfully updated, restart to apply",
+                    }
+                ),
+                status_code=200,
+            )
+    except Timeout:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "Another process is currently updating the config. Please try again in a few seconds.",
+                }
+            ),
+            status_code=503,
+        )
 
 
 @router.get("/vainfo", dependencies=[Depends(allow_any_authenticated())])
 def vainfo():
-    vainfo = vainfo_hwaccel()
+    # Use LibvaGpuSelector to pick an appropriate libva device (if available)
+    selected_gpu = ""
+    try:
+        selected_gpu = _gpu_selector.get_gpu_arg(FFMPEG_HWACCEL_VAAPI, 0) or ""
+    except Exception:
+        selected_gpu = ""
+
+    # If selected_gpu is empty, pass None to vainfo_hwaccel to run plain `vainfo`.
+    vainfo = vainfo_hwaccel(device_name=selected_gpu or None)
     return JSONResponse(
         content={
             "return_code": vainfo.returncode,
@@ -598,6 +849,101 @@ def restart():
     )
 
 
+@router.post(
+    "/media/sync",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Start media sync job",
+    description="""Start an asynchronous media sync job to find and (optionally) remove orphaned media files.
+    Returns 202 with job details when queued, or 409 if a job is already running.""",
+)
+def sync_media(body: MediaSyncBody = Body(...)):
+    """Start async media sync job - remove orphaned files.
+
+    Syncs specified media types: event snapshots, event thumbnails, review thumbnails,
+    previews, exports, and/or recordings. Job runs in background; use /media/sync/current
+    or /media/sync/status/{job_id} to check status.
+
+    Args:
+        body: MediaSyncBody with dry_run flag and media_types list.
+              media_types can include: 'all', 'event_snapshots', 'event_thumbnails',
+              'review_thumbnails', 'previews', 'exports', 'recordings'
+
+    Returns:
+        202 Accepted with job_id, or 409 Conflict if job already running.
+    """
+    job_id = start_media_sync_job(
+        dry_run=body.dry_run,
+        media_types=body.media_types,
+        force=body.force,
+        verbose=body.verbose,
+    )
+
+    if job_id is None:
+        # A job is already running
+        current = get_current_media_sync_job()
+        return JSONResponse(
+            content={
+                "error": "A media sync job is already running",
+                "current_job_id": current.id if current else None,
+            },
+            status_code=409,
+        )
+
+    return JSONResponse(
+        content={
+            "job": {
+                "job_type": "media_sync",
+                "status": JobStatusTypesEnum.queued,
+                "id": job_id,
+            }
+        },
+        status_code=202,
+    )
+
+
+@router.get(
+    "/media/sync/current",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get current media sync job",
+    description="""Retrieve the current running media sync job, if any. Returns the job details
+    or null when no job is active.""",
+)
+def get_media_sync_current():
+    """Get the current running media sync job, if any."""
+    job = get_current_media_sync_job()
+
+    if job is None:
+        return JSONResponse(content={"job": None}, status_code=200)
+
+    return JSONResponse(
+        content={"job": job.to_dict()},
+        status_code=200,
+    )
+
+
+@router.get(
+    "/media/sync/status/{job_id}",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get media sync job status",
+    description="""Get status and results for the specified media sync job id. Returns 200 with
+    job details including results, or 404 if the job is not found.""",
+)
+def get_media_sync_status(job_id: str):
+    """Get the status of a specific media sync job."""
+    job = get_media_sync_job_by_id(job_id)
+
+    if job is None:
+        return JSONResponse(
+            content={"error": "Job not found"},
+            status_code=404,
+        )
+
+    return JSONResponse(
+        content={"job": job.to_dict()},
+        status_code=200,
+    )
+
+
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
 def get_labels(camera: str = ""):
     try:
@@ -645,6 +991,12 @@ def get_sub_labels(split_joined: Optional[int] = None):
 
     sub_labels.sort()
     return JSONResponse(content=sub_labels)
+
+
+@router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
+def get_audio_labels():
+    labels = load_labels("/audio-labelmap.txt", prefill=521)
+    return JSONResponse(content=labels)
 
 
 @router.get("/plus/models", dependencies=[Depends(allow_any_authenticated())])
@@ -732,7 +1084,12 @@ def get_recognized_license_plates(
 
 
 @router.get("/timeline", dependencies=[Depends(allow_any_authenticated())])
-def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = None):
+def timeline(
+    camera: str = "all",
+    limit: int = 100,
+    source_id: Optional[str] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     clauses = []
 
     selected_columns = [
@@ -754,6 +1111,9 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
         else:
             clauses.append((Timeline.source_id.in_(source_ids)))
 
+    # Enforce per-camera access control
+    clauses.append((Timeline.camera << allowed_cameras))
+
     if len(clauses) == 0:
         clauses.append((True))
 
@@ -769,7 +1129,10 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
 
 
 @router.get("/timeline/hourly", dependencies=[Depends(allow_any_authenticated())])
-def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
+def hourly_timeline(
+    params: AppTimelineHourlyQueryParameters = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get hourly summary for timeline."""
     cameras = params.cameras
     labels = params.labels
@@ -786,6 +1149,9 @@ def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Timeline.camera << camera_list))
+
+    # Enforce per-camera access control
+    clauses.append((Timeline.camera << allowed_cameras))
 
     if labels != "all":
         label_list = labels.split(",")

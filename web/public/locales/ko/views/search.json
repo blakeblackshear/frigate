@@ -2,6 +2,10 @@
   "search": "검색",
   "savedSearches": "저장된 검색들",
   "button": {
-    "clear": "검색 초기화"
-  }
+    "clear": "검색 초기화",
+    "save": "검색 저장",
+    "filterInformation": "필터 정보",
+    "delete": "저장된 검색 삭제"
+  },
+  "searchFor": "{{inputValue}} 검색"
 }

@@ -248,20 +248,20 @@ def is_object_filtered(obj, objects_to_track, object_filters):
         if obj_settings.max_ratio < object_ratio:
             return True
 
-        if obj_settings.mask is not None:
+        if obj_settings.rasterized_mask is not None:
             # compute the coordinates of the object and make sure
             # the location isn't outside the bounds of the image (can happen from rounding)
             object_xmin = object_box[0]
             object_xmax = object_box[2]
             object_ymax = object_box[3]
-            y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
+            y_location = min(int(object_ymax), len(obj_settings.rasterized_mask) - 1)
             x_location = min(
                 int((object_xmax + object_xmin) / 2.0),
-                len(obj_settings.mask[0]) - 1,
+                len(obj_settings.rasterized_mask[0]) - 1,
             )
 
             # if the object is in a masked location, don't add it to detected objects
-            if obj_settings.mask[y_location][x_location] == 0:
+            if obj_settings.rasterized_mask[y_location][x_location] == 0:
                 return True
 
     return False

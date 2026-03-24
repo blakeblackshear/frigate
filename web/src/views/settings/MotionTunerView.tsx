@@ -4,7 +4,7 @@ import useSWR from "swr";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import {
@@ -63,6 +63,8 @@ export default function MotionTunerView({
     improve_contrast: undefined,
   });
 
+  const userInteractedRef = useRef(false);
+
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
       return config.cameras[selectedCamera];
@@ -70,6 +72,7 @@ export default function MotionTunerView({
   }, [config, selectedCamera]);
 
   useEffect(() => {
+    userInteractedRef.current = false;
     if (cameraConfig) {
       setMotionSettings({
         threshold: cameraConfig.motion.threshold,
@@ -87,24 +90,29 @@ export default function MotionTunerView({
   }, [selectedCamera]);
 
   useEffect(() => {
-    if (!motionSettings.threshold) return;
+    if (!motionSettings.threshold || !userInteractedRef.current) return;
 
     sendMotionThreshold(motionSettings.threshold);
   }, [motionSettings.threshold, sendMotionThreshold]);
 
   useEffect(() => {
-    if (!motionSettings.contour_area) return;
+    if (!motionSettings.contour_area || !userInteractedRef.current) return;
 
     sendMotionContourArea(motionSettings.contour_area);
   }, [motionSettings.contour_area, sendMotionContourArea]);
 
   useEffect(() => {
-    if (motionSettings.improve_contrast === undefined) return;
+    if (
+      motionSettings.improve_contrast === undefined ||
+      !userInteractedRef.current
+    )
+      return;
 
     sendImproveContrast(motionSettings.improve_contrast ? "ON" : "OFF");
   }, [motionSettings.improve_contrast, sendImproveContrast]);
 
   const handleMotionConfigChange = (newConfig: Partial<MotionSettings>) => {
+    userInteractedRef.current = true;
     setMotionSettings((prevConfig) => ({ ...prevConfig, ...newConfig }));
     setUnsavedChanges(true);
     setChangedValue(true);
@@ -299,7 +307,7 @@ export default function MotionTunerView({
             >
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
-                  <ActivityIndicator />
+                  <ActivityIndicator className="size-4" />
                   <span>{t("button.saving", { ns: "common" })}</span>
                 </div>
               ) : (

@@ -8,7 +8,7 @@ from pathlib import Path
 from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR
+from frigate.const import RECORD_DIR, REPLAY_CAMERA_PREFIX
 from frigate.models import Event, Recordings
 from frigate.util.builtin import clear_and_unlink
 
@@ -32,6 +32,10 @@ class StorageMaintainer(threading.Thread):
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
         for camera in self.config.cameras.keys():
+            # Skip replay cameras
+            if camera.startswith(REPLAY_CAMERA_PREFIX):
+                continue
+
             # cameras with < 50 segments should be refreshed to keep size accurate
             # when few segments are available
             if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
@@ -77,6 +81,10 @@ class StorageMaintainer(threading.Thread):
         usages: dict[str, dict] = {}
 
         for camera in self.config.cameras.keys():
+            # Skip replay cameras
+            if camera.startswith(REPLAY_CAMERA_PREFIX):
+                continue
+
             camera_storage = (
                 Recordings.select(fn.SUM(Recordings.segment_size))
                 .where(Recordings.camera == camera, Recordings.segment_size != 0)
@@ -272,6 +280,10 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         """Check every 5 minutes if storage needs to be cleaned up."""
+        if self.config.safe_mode:
+            logger.info("Safe mode enabled, skipping storage maintenance")
+            return
+
         self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
             if not self.camera_storage_stats or True in [

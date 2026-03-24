@@ -1,0 +1,36 @@
+{
+    "version": {
+        "label": "Versão atual da configuração",
+        "description": "Versão numérica ou em caracteres da configuração ativa para ajudar detectar migrações ou mudanças de formato."
+    },
+    "safe_mode": {
+        "label": "Modo Seguro",
+        "description": "Quando habilitado, Frigate inicia em modo seguro com recursos reduzidos para solucionar problemas."
+    },
+    "environment_vars": {
+        "label": "Variáveis de ambiente",
+        "description": "Pares de chave/valor de variáveis de ambiente para atribuir ao processo do Frigate no Home Assistant OS. Usuários que não usam HAOS devem usar variáveis de ambiente do Docker."
+    },
+    "logger": {
+        "label": "Logando",
+        "description": "Controla o padrão de verbosidade de registro e sobrescrever o nível de registro por componente.",
+        "default": {
+            "label": "Nível de registro",
+            "description": "Padrão global de verbosidade de registro (debug, info, aviso, erro)."
+        },
+        "logs": {
+            "label": "Nível de registro por processo"
+        }
+    },
+    "audio": {
+        "max_not_heard": {
+            "label": "Tempo limite final"
+        },
+        "min_volume": {
+            "label": "Volume mínimo"
+        }
+    },
+    "auth": {
+        "label": "Autenticação"
+    }
+}

@@ -60,7 +60,7 @@ export default function DeleteRoleDialog({
           <div className="text-sm text-muted-foreground">
             <p>
               <Trans
-                ns={"views/settings"}
+                ns="views/settings"
                 values={{ role }}
                 components={{ strong: <span className="font-medium" /> }}
               >

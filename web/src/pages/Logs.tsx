@@ -35,10 +35,12 @@ import { isIOS, isMobile } from "react-device-detect";
 import { isPWA } from "@/utils/isPWA";
 import { isInIframe } from "@/utils/isIFrame";
 import { useTranslation } from "react-i18next";
+import WsMessageFeed from "@/components/ws/WsMessageFeed";
 
 function Logs() {
   const { t } = useTranslation(["views/system"]);
   const [logService, setLogService] = useState<LogType>("frigate");
+  const isWebsocket = logService === "websocket";
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const lazyLogWrapperRef = useRef<HTMLDivElement>(null);
   const [logs, setLogs] = useState<string[]>([]);
@@ -216,6 +218,12 @@ function Logs() {
   }, [logService, filterSeverity, t]);
 
   useEffect(() => {
+    if (isWebsocket) {
+      setIsLoading(false);
+      setLogs([]);
+      return;
+    }
+
     setIsLoading(true);
     setLogs([]);
     lastFetchedIndexRef.current = -1;
@@ -494,116 +502,128 @@ function Logs() {
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="smart-capitalize">{item}</div>
+                  <div
+                    className={item !== "websocket" ? "smart-capitalize" : ""}
+                  >
+                    {item === "websocket" ? t("logs.websocket.label") : item}
+                  </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        <div className="flex items-center gap-2">
-          <Button
-            className="flex items-center justify-between gap-2"
-            aria-label={t("logs.copy.label")}
-            size="sm"
-            onClick={handleCopyLogs}
-          >
-            <FaCopy className="text-secondary-foreground" />
-            <div className="hidden text-primary md:block">
-              {t("logs.copy.label")}
-            </div>
-          </Button>
-          <Button
-            className="flex items-center justify-between gap-2"
-            aria-label={t("logs.download.label")}
-            size="sm"
-            onClick={handleDownloadLogs}
-          >
-            <FaDownload className="text-secondary-foreground" />
-            <div className="hidden text-primary md:block">
-              {t("button.download", { ns: "common" })}
-            </div>
-          </Button>
-          <LogSettingsButton
-            selectedLabels={filterSeverity}
-            updateLabelFilter={setFilterSeverity}
-            logSettings={logSettings}
-            setLogSettings={setLogSettings}
-          />
-        </div>
-      </div>
-
-      <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-xs sm:p-1">
-        <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
-          <div className="col-span-3 lg:col-span-2">
-            <div className="flex w-full flex-row items-center">
-              <div className="ml-1 min-w-16 smart-capitalize lg:min-w-20">
-                {t("logs.type.label")}
+        {!isWebsocket && (
+          <div className="flex items-center gap-2">
+            <Button
+              className="flex items-center justify-between gap-2"
+              aria-label={t("logs.copy.label")}
+              size="sm"
+              onClick={handleCopyLogs}
+            >
+              <FaCopy className="text-secondary-foreground" />
+              <div className="hidden text-primary md:block">
+                {t("logs.copy.label")}
               </div>
-              <div className="mr-3">{t("logs.type.timestamp")}</div>
+            </Button>
+            <Button
+              className="flex items-center justify-between gap-2"
+              aria-label={t("logs.download.label")}
+              size="sm"
+              onClick={handleDownloadLogs}
+            >
+              <FaDownload className="text-secondary-foreground" />
+              <div className="hidden text-primary md:block">
+                {t("button.download", { ns: "common" })}
+              </div>
+            </Button>
+            <LogSettingsButton
+              selectedLabels={filterSeverity}
+              updateLabelFilter={setFilterSeverity}
+              logSettings={logSettings}
+              setLogSettings={setLogSettings}
+            />
+          </div>
+        )}
+      </div>
+
+      {isWebsocket ? (
+        <div className="my-2 flex size-full flex-col overflow-hidden rounded-md border border-secondary bg-background_alt">
+          <WsMessageFeed maxSize={2000} />
+        </div>
+      ) : (
+        <div className="relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt font-mono text-xs sm:p-1">
+          <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
+            <div className="col-span-3 lg:col-span-2">
+              <div className="flex w-full flex-row items-center">
+                <div className="ml-1 min-w-16 smart-capitalize lg:min-w-20">
+                  {t("logs.type.label")}
+                </div>
+                <div className="mr-3">{t("logs.type.timestamp")}</div>
+              </div>
+            </div>
+            <div
+              className={cn(
+                "flex items-center",
+                logService == "frigate" ? "col-span-2" : "col-span-1",
+              )}
+            >
+              {t("logs.type.tag")}
+            </div>
+            <div
+              className={cn(
+                "col-span-5 flex items-center",
+                logService == "frigate"
+                  ? "md:col-span-7 lg:col-span-8"
+                  : "md:col-span-8 lg:col-span-9",
+              )}
+            >
+              <div className="flex flex-1">{t("logs.type.message")}</div>
             </div>
           </div>
-          <div
-            className={cn(
-              "flex items-center",
-              logService == "frigate" ? "col-span-2" : "col-span-1",
-            )}
-          >
-            {t("logs.type.tag")}
-          </div>
-          <div
-            className={cn(
-              "col-span-5 flex items-center",
-              logService == "frigate"
-                ? "md:col-span-7 lg:col-span-8"
-                : "md:col-span-8 lg:col-span-9",
-            )}
-          >
-            <div className="flex flex-1">{t("logs.type.message")}</div>
-          </div>
-        </div>
 
-        <div ref={lazyLogWrapperRef} className="size-full">
-          {isLoading ? (
-            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-          ) : (
-            <EnhancedScrollFollow
-              startFollowing={!isLoading}
-              onCustomScroll={handleScroll}
-              render={({ follow, onScroll }) => (
-                <>
-                  {follow && !logSettings.disableStreaming && (
-                    <div className="absolute right-1 top-3">
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
-                        </TooltipTrigger>
-                        <TooltipContent>{t("logs.tips")}</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  )}
-                  <LazyLog
-                    ref={lazyLogRef}
-                    enableLineNumbers={false}
-                    selectableLines
-                    lineClassName="text-primary bg-background"
-                    highlightLineClassName="bg-primary/20"
-                    onRowClick={handleRowClick}
-                    formatPart={formatPart}
-                    text={logs.join("\n")}
-                    follow={follow}
-                    onScroll={onScroll}
-                    loadingComponent={
-                      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                    }
-                    loading={isLoading}
-                  />
-                </>
-              )}
-            />
-          )}
+          <div ref={lazyLogWrapperRef} className="size-full">
+            {isLoading ? (
+              <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+            ) : (
+              <EnhancedScrollFollow
+                startFollowing={!isLoading}
+                onCustomScroll={handleScroll}
+                render={({ follow, onScroll }) => (
+                  <>
+                    {follow && !logSettings.disableStreaming && (
+                      <div className="absolute right-1 top-3">
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
+                          </TooltipTrigger>
+                          <TooltipContent>{t("logs.tips")}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )}
+                    <LazyLog
+                      ref={lazyLogRef}
+                      enableLineNumbers={false}
+                      selectableLines
+                      lineClassName="text-primary bg-background"
+                      highlightLineClassName="bg-primary/20"
+                      onRowClick={handleRowClick}
+                      formatPart={formatPart}
+                      text={logs.join("\n")}
+                      follow={follow}
+                      onScroll={onScroll}
+                      loadingComponent={
+                        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                      }
+                      loading={isLoading}
+                    />
+                  </>
+                )}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

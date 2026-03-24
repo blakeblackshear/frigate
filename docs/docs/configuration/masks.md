@@ -33,17 +33,54 @@ Your config file will be updated with the relative coordinates of the mask/zone:
 
 ```yaml
 motion:
-  mask: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400"
+  mask:
+    # Motion mask name (required)
+    mask1:
+      # Optional: A friendly name for the mask
+      friendly_name: "Timestamp area"
+      # Optional: Whether this mask is active (default: true)
+      enabled: true
+      # Required: Coordinates polygon for the mask
+      coordinates: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400"
 ```
 
-Multiple masks can be listed in your config.
+Multiple motion masks can be listed in your config:
 
 ```yaml
 motion:
   mask:
-    - 0.239,1.246,0.175,0.901,0.165,0.805,0.195,0.802
-    - 0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456
+    mask1:
+      friendly_name: "Timestamp area"
+      enabled: true
+      coordinates: "0.239,1.246,0.175,0.901,0.165,0.805,0.195,0.802"
+    mask2:
+      friendly_name: "Tree area"
+      enabled: true
+      coordinates: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456"
 ```
+
+Object filter masks can also be created through the UI or manually in the config. They are configured under the object filters section for each object type:
+
+```yaml
+objects:
+  filters:
+    person:
+      mask:
+        person_filter1:
+          friendly_name: "Roof area"
+          enabled: true
+          coordinates: "0.000,0.000,1.000,0.000,1.000,0.400,0.000,0.400"
+    car:
+      mask:
+        car_filter1:
+          friendly_name: "Sidewalk area"
+          enabled: true
+          coordinates: "0.000,0.700,1.000,0.700,1.000,1.000,0.000,1.000"
+```
+
+## Enabling/Disabling Masks
+
+Both motion masks and object filter masks can be toggled on or off without removing them from the configuration. Disabled masks are completely ignored at runtime - they will not affect motion detection or object filtering. This is useful for temporarily disabling a mask during certain seasons or times of day without modifying the configuration.
 
 ### Further Clarification
 

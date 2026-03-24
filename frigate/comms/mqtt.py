@@ -38,6 +38,7 @@ class MqttClient(Communicator):
         )
 
     def stop(self) -> None:
+        self.publish("available", "stopped", retain=True)
         self.client.disconnect()
 
     def _set_initial_topics(self) -> None:
@@ -133,6 +134,29 @@ class MqttClient(Communicator):
                 retain=True,
             )
 
+            for mask_name, motion_mask in camera.motion.mask.items():
+                if motion_mask:
+                    self.publish(
+                        f"{camera_name}/motion_mask/{mask_name}/state",
+                        "ON" if motion_mask.enabled else "OFF",
+                        retain=True,
+                    )
+
+            for mask_name, object_mask in camera.objects.mask.items():
+                if object_mask:
+                    self.publish(
+                        f"{camera_name}/object_mask/{mask_name}/state",
+                        "ON" if object_mask.enabled else "OFF",
+                        retain=True,
+                    )
+
+            for zone_name, zone in camera.zones.items():
+                self.publish(
+                    f"{camera_name}/zone/{zone_name}/state",
+                    "ON" if zone.enabled else "OFF",
+                    retain=True,
+                )
+
         if self.config.notifications.enabled_in_config:
             self.publish(
                 "notifications/state",
@@ -140,6 +164,11 @@ class MqttClient(Communicator):
                 retain=True,
             )
 
+        self.publish(
+            "profile/state",
+            self.config.active_profile or "none",
+            retain=True,
+        )
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
@@ -242,11 +271,34 @@ class MqttClient(Communicator):
                     self.on_mqtt_command,
                 )
 
+            for mask_name in self.config.cameras[name].motion.mask.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/motion_mask/{mask_name}/set",
+                    self.on_mqtt_command,
+                )
+
+            for mask_name in self.config.cameras[name].objects.mask.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/object_mask/{mask_name}/set",
+                    self.on_mqtt_command,
+                )
+
+            for zone_name in self.config.cameras[name].zones.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/zone/{zone_name}/set",
+                    self.on_mqtt_command,
+                )
+
         if self.config.notifications.enabled_in_config:
             self.client.message_callback_add(
                 f"{self.mqtt_config.topic_prefix}/notifications/set",
                 self.on_mqtt_command,
             )
+
+        self.client.message_callback_add(
+            f"{self.mqtt_config.topic_prefix}/profile/set",
+            self.on_mqtt_command,
+        )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/onConnect", self.on_mqtt_command

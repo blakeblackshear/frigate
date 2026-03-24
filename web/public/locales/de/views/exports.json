@@ -11,13 +11,27 @@
   "noExports": "Keine Exporte gefunden",
   "toast": {
     "error": {
-      "renameExportFailed": "Umbenennen des Exports fehlgeschlagen: {{errorMessage}}"
+      "renameExportFailed": "Umbenennen des Exports fehlgeschlagen: {{errorMessage}}",
+      "assignCaseFailed": "Aktualisierung der Fallzuweisung fehlgeschlagen: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Export teilen",
     "downloadVideo": "Video herunterladen",
     "editName": "Name ändern",
-    "deleteExport": "Export löschen"
+    "deleteExport": "Export löschen",
+    "assignToCase": "Hinzufügen zum Fall"
+  },
+  "headings": {
+    "cases": "Fälle",
+    "uncategorizedExports": "Nicht kategorisierte Exporte"
+  },
+  "caseDialog": {
+    "title": "Zum Fall hinzufügen",
+    "description": "Wählen Sie einen bestehenden Fall aus oder erstellen Sie einen neuen.",
+    "selectLabel": "Fall",
+    "newCaseOption": "Neuen Fall erstellen",
+    "nameLabel": "Fallname",
+    "descriptionLabel": "Beschreibung"
   }
 }

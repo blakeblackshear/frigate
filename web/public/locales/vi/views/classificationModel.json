@@ -33,7 +33,9 @@
     }
   },
   "details": {
-    "scoreInfo": "Điểm số cho biết mức độ tự tin trung bình mà hệ thống xác định được cho tất cả các lần phát hiện đối tượng này."
+    "scoreInfo": "Điểm số cho biết mức độ tự tin trung bình mà hệ thống xác định được cho tất cả các lần phát hiện đối tượng này.",
+    "none": "Không có",
+    "unknown": "Không rõ"
   },
   "tooltip": {
     "trainingInProgress": "Mô hình hiện đang được huấn luyện",

@@ -78,6 +78,15 @@ class Recordings(Model):
     dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB
     regions = IntegerField(null=True)
+    motion_heatmap = JSONField(null=True)  # 16x16 grid, 256 values (0-255)
+
+
+class ExportCase(Model):
+    id = CharField(null=False, primary_key=True, max_length=30)
+    name = CharField(index=True, max_length=100)
+    description = TextField(null=True)
+    created_at = DateTimeField()
+    updated_at = DateTimeField()
 
 
 class Export(Model):
@@ -88,6 +97,12 @@ class Export(Model):
     video_path = CharField(unique=True)
     thumb_path = CharField(unique=True)
     in_progress = BooleanField()
+    export_case = ForeignKeyField(
+        ExportCase,
+        null=True,
+        backref="exports",
+        column_name="export_case_id",
+    )
 
 
 class ReviewSegment(Model):

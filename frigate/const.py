@@ -14,7 +14,8 @@ RECORD_DIR = f"{BASE_DIR}/recordings"
 TRIGGER_DIR = f"{CLIPS_DIR}/triggers"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
-FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
+REPLAY_CAMERA_PREFIX = "_replay_"
+REPLAY_DIR = os.path.join(CACHE_DIR, "replay")
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 
@@ -122,6 +123,7 @@ UPDATE_REVIEW_DESCRIPTION = "update_review_description"
 UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
 UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
+UPDATE_JOB_STATE = "update_job_state"
 NOTIFICATION_TEST = "notification_test"
 
 # IO Nice Values

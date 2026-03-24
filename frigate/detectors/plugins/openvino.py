@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 import openvino as ov
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -20,8 +20,18 @@ DETECTOR_KEY = "openvino"
 
 
 class OvDetectorConfig(BaseDetectorConfig):
+    """OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware."""
+
+    model_config = ConfigDict(
+        title="OpenVINO",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default=None, title="Device Type")
+    device: str = Field(
+        default=None,
+        title="Device Type",
+        description="The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU').",
+    )
 
 
 class OvDetector(DetectionApi):

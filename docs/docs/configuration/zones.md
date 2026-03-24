@@ -10,6 +10,10 @@ For example, the cat in this image is currently in Zone 1, but **not** Zone 2.
 
 Zones cannot have the same name as a camera. If desired, a single zone can include multiple cameras if you have multiple cameras covering the same area by configuring zones with the same name for each camera.
 
+## Enabling/Disabling Zones
+
+Zones can be toggled on or off without removing them from the configuration. Disabled zones are completely ignored at runtime - objects will not be tracked for zone presence, and zones will not appear in the debug view. This is useful for temporarily disabling a zone during certain seasons or times of day without modifying the configuration.
+
 During testing, enable the Zones option for the Debug view of your camera (Settings --> Debug) so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
 To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the section of the web UI for creating a zone instead.
@@ -18,7 +22,7 @@ To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the 
 
 Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to have an alert created when an object enters your entire_yard zone, the config would be:
 
-```yaml
+```yaml {6,8}
 cameras:
   name_of_your_camera:
     review:
@@ -86,7 +90,6 @@ cameras:
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. Objects will be tracked for any `person` that enter anywhere in the yard, and for cars only if they enter the street.
 
-
 ### Zone Loitering
 
 Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time after which the object will be considered in the zone.
@@ -94,6 +97,7 @@ Sometimes objects are expected to be passing through a zone, but an object loite
 :::note
 
 When using loitering zones, a review item will behave in the following way:
+
 - When a person is in a loitering zone, the review item will remain active until the person leaves the loitering zone, regardless of if they are stationary.
 - When any other object is in a loitering zone, the review item will remain active until the loitering time is met. Then if the object is stationary the review item will end.
 
@@ -104,6 +108,7 @@ cameras:
   name_of_your_camera:
     zones:
       sidewalk:
+        # highlight-next-line
         loitering_time: 4 # unit is in seconds
         objects:
           - person
@@ -118,6 +123,7 @@ cameras:
   name_of_your_camera:
     zones:
       front_yard:
+        # highlight-next-line
         inertia: 3
         objects:
           - person
@@ -130,6 +136,7 @@ cameras:
   name_of_your_camera:
     zones:
       driveway_entrance:
+        # highlight-next-line
         inertia: 1
         objects:
           - car
@@ -192,5 +199,6 @@ cameras:
         coordinates: ...
         distances: ...
         inertia: 1
+        # highlight-next-line
         speed_threshold: 20 # unit is in kph or mph, depending on how unit_system is set (see above)
 ```

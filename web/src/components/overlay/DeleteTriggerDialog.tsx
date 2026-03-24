@@ -35,7 +35,7 @@ export default function DeleteTriggerDialog({
           <DialogTitle>{t("triggers.dialog.deleteTrigger.title")}</DialogTitle>
           <DialogDescription>
             <Trans
-              ns={"views/settings"}
+              ns="views/settings"
               values={{ triggerName }}
               components={{ strong: <span className="font-medium" /> }}
             >

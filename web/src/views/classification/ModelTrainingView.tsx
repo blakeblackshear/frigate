@@ -700,66 +700,72 @@ function LibrarySelector({
               </div>
             </>
           )}
-          {Object.keys(dataset).map((id) => (
-            <DropdownMenuItem
-              key={id}
-              className="group flex items-center justify-between"
-            >
-              <div
-                className="flex-grow cursor-pointer capitalize"
-                onClick={() => setPageToggle(id)}
+          {Object.keys(dataset)
+            .sort((a, b) => {
+              if (a === "none") return 1;
+              if (b === "none") return -1;
+              return a.localeCompare(b);
+            })
+            .map((id) => (
+              <DropdownMenuItem
+                key={id}
+                className="group flex items-center justify-between p-0"
               >
-                {id === "none" ? t("details.none") : id.replaceAll("_", " ")}
-                <span className="ml-2 text-muted-foreground">
-                  ({dataset?.[id].length})
-                </span>
-              </div>
-              {id != "none" && (
-                <div className="flex gap-0.5">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setRenameClass(id);
-                        }}
-                      >
-                        <LuPencil className="size-4 text-primary" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("button.renameCategory")}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDelete(id);
-                        }}
-                      >
-                        <LuTrash2 className="size-4 text-destructive" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("button.deleteCategory")}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
+                <div
+                  className="flex-grow cursor-pointer px-2 py-1.5 capitalize"
+                  onClick={() => setPageToggle(id)}
+                >
+                  {id === "none" ? t("details.none") : id.replaceAll("_", " ")}
+                  <span className="ml-2 text-muted-foreground">
+                    ({dataset?.[id].length})
+                  </span>
                 </div>
-              )}
-            </DropdownMenuItem>
-          ))}
+                {id != "none" && (
+                  <div className="flex gap-0.5 px-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRenameClass(id);
+                          }}
+                        >
+                          <LuPencil className="size-4 text-primary" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("button.renameCategory")}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDelete(id);
+                          }}
+                        >
+                          <LuTrash2 className="size-4 text-destructive" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("button.deleteCategory")}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  </div>
+                )}
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

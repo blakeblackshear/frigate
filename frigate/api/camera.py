@@ -1,5 +1,6 @@
 """Camera apis."""
 
+import asyncio
 import json
 import logging
 import re
@@ -11,18 +12,27 @@ import httpx
 import requests
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import JSONResponse
+from filelock import FileLock, Timeout
 from onvif import ONVIFCamera, ONVIFError
+from ruamel.yaml import YAML
 from zeep.exceptions import Fault, TransportError
 from zeep.transports import AsyncTransport
 
 from frigate.api.auth import (
     allow_any_authenticated,
-    require_camera_access,
+    require_go2rtc_stream_access,
     require_role,
 )
+from frigate.api.defs.request.app_body import CameraSetBody
 from frigate.api.defs.tags import Tags
-from frigate.config.config import FrigateConfig
+from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateTopic,
+)
 from frigate.util.builtin import clean_camera_user_pass
+from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
+from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
 from frigate.util.services import ffprobe_stream
 
@@ -71,14 +81,27 @@ def go2rtc_streams():
 
 
 @router.get(
-    "/go2rtc/streams/{camera_name}", dependencies=[Depends(require_camera_access)]
+    "/go2rtc/streams/{stream_name}",
+    dependencies=[Depends(require_go2rtc_stream_access)],
 )
-def go2rtc_camera_stream(request: Request, camera_name: str):
+def go2rtc_camera_stream(request: Request, stream_name: str):
     r = requests.get(
-        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
+        "http://127.0.0.1:1984/api/streams",
+        params={
+            "src": stream_name,
+            "video": "all",
+            "audio": "all",
+            "microphone": "",
+        },
     )
     if not r.ok:
-        camera_config = request.app.frigate_config.cameras.get(camera_name)
+        camera_config = request.app.frigate_config.cameras.get(stream_name)
+
+        if camera_config is None:
+            for camera_name, camera in request.app.frigate_config.cameras.items():
+                if stream_name in camera.live.streams.values():
+                    camera_config = request.app.frigate_config.cameras.get(camera_name)
+                    break
 
         if camera_config and camera_config.enabled:
             logger.error("Failed to fetch streams from go2rtc")
@@ -995,3 +1018,227 @@ async def onvif_probe(
                     await onvif_camera.close()
             except Exception as e:
                 logger.debug(f"Error closing ONVIF camera session: {e}")
+
+
+@router.delete(
+    "/cameras/{camera_name}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+async def delete_camera(
+    request: Request,
+    camera_name: str,
+    delete_exports: bool = Query(default=False),
+):
+    """Delete a camera and all its associated data.
+
+    Removes the camera from config, stops processes, and cleans up
+    all database entries and media files.
+
+    Args:
+        camera_name: Name of the camera to delete
+        delete_exports: Whether to also delete exports for this camera
+    """
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera {camera_name} not found",
+            },
+            status_code=404,
+        )
+
+    old_camera_config = frigate_config.cameras[camera_name]
+    config_file = find_config_file()
+    lock = FileLock(f"{config_file}.lock", timeout=5)
+
+    try:
+        with lock:
+            with open(config_file, "r") as f:
+                old_raw_config = f.read()
+
+            try:
+                yaml = YAML()
+                yaml.indent(mapping=2, sequence=4, offset=2)
+
+                with open(config_file, "r") as f:
+                    data = yaml.load(f)
+
+                # Remove camera from config
+                if "cameras" in data and camera_name in data["cameras"]:
+                    del data["cameras"][camera_name]
+
+                # Remove camera from auth roles
+                auth = data.get("auth", {})
+                if auth and "roles" in auth:
+                    empty_roles = []
+                    for role_name, cameras_list in auth["roles"].items():
+                        if (
+                            isinstance(cameras_list, list)
+                            and camera_name in cameras_list
+                        ):
+                            cameras_list.remove(camera_name)
+                            # Custom roles can't be empty; mark for removal
+                            if not cameras_list and role_name not in (
+                                "admin",
+                                "viewer",
+                            ):
+                                empty_roles.append(role_name)
+                    for role_name in empty_roles:
+                        del auth["roles"][role_name]
+
+                with open(config_file, "w") as f:
+                    yaml.dump(data, f)
+
+                with open(config_file, "r") as f:
+                    new_raw_config = f.read()
+
+                try:
+                    config = FrigateConfig.parse(new_raw_config)
+                except Exception:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                    logger.exception(
+                        "Config error after removing camera %s",
+                        camera_name,
+                    )
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Error parsing config after camera removal",
+                        },
+                        status_code=400,
+                    )
+            except Exception as e:
+                logger.error(
+                    "Error updating config to remove camera %s: %s", camera_name, e
+                )
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": "Error updating config",
+                    },
+                    status_code=500,
+                )
+
+            # Update runtime config
+            request.app.frigate_config = config
+            request.app.genai_manager.update_config(config)
+
+            # Publish removal to stop ffmpeg processes and clean up runtime state
+            request.app.config_publisher.publish_update(
+                CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, camera_name),
+                old_camera_config,
+            )
+
+    except Timeout:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Another process is currently updating the config",
+            },
+            status_code=409,
+        )
+
+    # Clean up database entries
+    counts, export_paths = await asyncio.to_thread(
+        cleanup_camera_db, camera_name, delete_exports
+    )
+
+    # Clean up media files in background thread
+    await asyncio.to_thread(
+        cleanup_camera_files, camera_name, export_paths if delete_exports else None
+    )
+
+    # Best-effort go2rtc stream removal
+    try:
+        requests.delete(
+            "http://127.0.0.1:1984/api/streams",
+            params={"src": camera_name},
+            timeout=5,
+        )
+    except Exception:
+        logger.debug("Failed to remove go2rtc stream for %s", camera_name)
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Camera {camera_name} has been deleted",
+            "cleanup": counts,
+        },
+        status_code=200,
+    )
+
+
+_SUB_COMMAND_FEATURES = {"motion_mask", "object_mask", "zone"}
+
+
+@router.put(
+    "/camera/{camera_name}/set/{feature}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+@router.put(
+    "/camera/{camera_name}/set/{feature}/{sub_command}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def camera_set(
+    request: Request,
+    camera_name: str,
+    feature: str,
+    body: CameraSetBody,
+    sub_command: str | None = None,
+):
+    """Set a camera feature state. Use camera_name='*' to target all cameras."""
+    dispatcher = request.app.dispatcher
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if feature == "profile":
+        if camera_name != "*":
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Profile feature requires camera_name='*'",
+                },
+                status_code=400,
+            )
+        dispatcher._receive("profile/set", body.value)
+        return JSONResponse(content={"success": True})
+
+    if feature not in dispatcher._camera_settings_handlers:
+        return JSONResponse(
+            content={"success": False, "message": f"Unknown feature: {feature}"},
+            status_code=400,
+        )
+
+    if sub_command and feature not in _SUB_COMMAND_FEATURES:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Feature '{feature}' does not support sub-commands",
+            },
+            status_code=400,
+        )
+
+    if camera_name == "*":
+        cameras = list(frigate_config.cameras.keys())
+    elif camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera '{camera_name}' not found",
+            },
+            status_code=404,
+        )
+    else:
+        cameras = [camera_name]
+
+    for cam in cameras:
+        topic = (
+            f"{cam}/{feature}/{sub_command}/set"
+            if sub_command
+            else f"{cam}/{feature}/set"
+        )
+        dispatcher._receive(topic, body.value)
+
+    return JSONResponse(content={"success": True})

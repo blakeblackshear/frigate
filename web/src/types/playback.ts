@@ -11,3 +11,7 @@ export type PreviewPlayback = {
   preview: Preview | undefined;
   timeRange: TimeRange;
 };
+
+export type VodManifest = {
+  sequences: { clips: { clipFrom?: number }[] }[];
+};

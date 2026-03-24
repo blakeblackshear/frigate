@@ -5,14 +5,17 @@
     "camera": "Kameraeinstellungen - Frigate",
     "masksAndZones": "Masken- und Zoneneditor – Frigate",
     "object": "Debug - Frigate",
-    "general": "UI-Einstellungen - Frigate",
+    "general": "Profil-Einstellungen - Frigate",
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
     "classification": "Klassifizierungseinstellungen – Frigate",
     "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
     "notifications": "Benachrichtigungseinstellungen",
     "enrichments": "Erweiterte Statistiken - Frigate",
     "cameraManagement": "Kameras verwalten - Frigate",
-    "cameraReview": "Kameraeinstellungen prüfen - Frigate"
+    "cameraReview": "Kameraeinstellungen prüfen - Frigate",
+    "globalConfig": "Grundeinstellungen - Frigate",
+    "cameraConfig": "Kameraeinstellungen - Frigate",
+    "maintenance": "Wartung - Frigate"
   },
   "menu": {
     "ui": "Benutzeroberfläche",
@@ -28,7 +31,63 @@
     "triggers": "Auslöser",
     "roles": "Rollen",
     "cameraManagement": "Verwaltung",
-    "cameraReview": "Überprüfung"
+    "cameraReview": "Überprüfung",
+    "system": "System",
+    "general": "allgemein",
+    "globalConfig": "Grundeinstellungen",
+    "integrations": "Integrationen",
+    "profileSettings": "Profileinstellungen",
+    "globalDetect": "Objekterkennung",
+    "globalRecording": "Aufnahme",
+    "globalSnapshots": "Schnappschüsse",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Bewegungserkennung",
+    "globalObjects": "Objekte",
+    "globalReview": "Überprüfung",
+    "globalAudioEvents": "Audio Events",
+    "globalLivePlayback": "Live-Wiedergabe",
+    "globalTimestampStyle": "Zeitstempelformat",
+    "systemDatabase": "Datenbank",
+    "systemTls": "TLS",
+    "systemAuthentication": "Authentifizierung",
+    "systemNetworking": "Netzwerk",
+    "systemProxy": "Proxy",
+    "systemUi": "UI",
+    "systemLogging": "Log",
+    "systemEnvironmentVariables": "Umgebungsvariablen",
+    "systemTelemetry": "Telemetrie",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "Erkannte Hardware",
+    "systemDetectionModel": "Erkennungsmodell",
+    "systemMqtt": "mqtt",
+    "integrationSemanticSearch": "Semantische Suche",
+    "integrationGenerativeAi": "Generative KI",
+    "integrationFaceRecognition": "Gesichtserkennung",
+    "integrationLpr": "Kennzeichenerkennung",
+    "integrationObjectClassification": "Objekt Klassifizierung",
+    "integrationAudioTranscription": "Audio-Transkription",
+    "cameraDetect": "Objekterkennung",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Aufnahme",
+    "cameraSnapshots": "Momentaufnahme",
+    "cameraMotion": "Bewegungserkennung",
+    "cameraObjects": "Objekte",
+    "cameraConfigReview": "Überprüfung",
+    "cameraAudioEvents": "Audio Evente",
+    "cameraAudioTranscription": "Audio-Transkription",
+    "cameraNotifications": "Benachrichtigung",
+    "cameraLivePlayback": "Live-Wiedergabe",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Gesichtserkennung",
+    "cameraLpr": "Kennzeichenerkennung",
+    "cameraMqttConfig": "mqtt",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "Kamera UI",
+    "cameraTimestampStyle": "Zeitstempel Stil",
+    "cameraMqtt": "Kamera mqtt",
+    "mediaSync": "Medien-Synchronisierung",
+    "regionGrid": "Regionsraster"
   },
   "dialog": {
     "unsavedChanges": {
@@ -41,7 +100,7 @@
     "noCamera": "Keine Kamera"
   },
   "general": {
-    "title": "Einstellungen der Benutzeroberfläche",
+    "title": "Profileinstellungen",
     "liveDashboard": {
       "title": "Live Übersicht",
       "playAlertVideos": {
@@ -49,12 +108,12 @@
         "desc": "Standardmäßig werden die letzten Warnmeldungen auf dem Live-Dashboard als kurze Videoschleifen abgespielt. Deaktiviere diese Option, um nur ein statisches Bild der letzten Warnungen auf diesem Gerät/Browser anzuzeigen."
       },
       "automaticLiveView": {
-        "desc": "Automatisch zur Live-Ansicht einer Kamera wechseln, wenn eine Aktivität erkannt wird. Wenn diese Option deaktiviert ist, werden statische Kamerabilder auf dem Live-Dashboard nur einmal pro Minute aktualisiert.",
+        "desc": "Wechsle automatisch zur Live Ansicht der Kamera, wenn eine Aktivität erkannt wurde. Wenn du diese Option deaktivierst, werden die statischen Kamerabilder auf der Liveübersicht nur einmal pro Minute aktualisiert.",
         "label": "Automatische Live Ansicht"
       },
       "displayCameraNames": {
         "label": "Immer Namen der Kamera anzeigen",
-        "desc": "Zeige immer die Kameranamen in einem Chip im Dashboard der Mehrkamera-Live-Ansicht an."
+        "desc": "Kamerabezeichnung permanent in einem Chip im Live-View-Dashboard für alle Kameras anzeigen."
       },
       "liveFallbackTimeout": {
         "label": "Live Player Ausfallzeitlimit",
@@ -408,7 +467,7 @@
       }
     },
     "motionMaskLabel": "Bewegungsmaske {{number}}",
-    "objectMaskLabel": "Objektmaske {{number}} ({{label}})"
+    "objectMaskLabel": "Objektmaske {{number}}"
   },
   "debug": {
     "objectShapeFilterDrawing": {
@@ -555,7 +614,7 @@
             "special": "Mindestens ein Sonderzeichen (!@#$%^&*(),.?\":{}|<>)"
           },
           "show": "Passwort anzeigen",
-          "hide": "Verberge Passwort"
+          "hide": "Verstecke Passwort"
         },
         "newPassword": {
           "title": "Neues Passwort",
@@ -1215,7 +1274,7 @@
         "restreamingWarning": "Die Reduzierung der Verbindungen zur Kamera für den Aufzeichnungsstream kann zu einer geringfügigen Erhöhung der CPU-Auslastung führen.",
         "brands": {
           "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Aktivieren Sie HTTP in den Firmware-Einstellungen der Kamera und starten Sie den Assistenten neu.",
-          "reolink-http": "Reolink-HTTP-Streams sollten für eine bessere Kompatibilität FFmpeg verwenden. Aktivieren Sie für diesen Stream die Option „Stream-Kompatibilitätsmodus verwenden“."
+          "reolink-http": "Für eine bessere Kompatibilität sollten Reolink HTTP-Streams FFmpeg nutzen. Aktiviere für diesen Stream 'Stream-Kompatibilitätsmodus verwenden'."
         },
         "dahua": {
           "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Kameras von Dahua / Amcrest / EmpireTech unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu überprüfen und zu nutzen, sofern sie verfügbar sind."
@@ -1264,6 +1323,18 @@
       "toast": {
         "success": "Kamera {{cameraName}} erfolgreich gespeichert"
       }
+    },
+    "deleteCamera": "Kamera löschen",
+    "deleteCameraDialog": {
+      "title": "Kamera löschen",
+      "description": "Durch das Löschen einer Kamera werden alle Aufzeichnungen, erfassten Objekte und Konfigurationseinstellungen für diese Kamera endgültig entfernt. Alle mit dieser Kamera verbundenen go2rtc-Streams müssen möglicherweise noch manuell entfernt werden.",
+      "selectPlaceholder": "Kamera auswählen...",
+      "confirmTitle": "Bist du dir sicher?",
+      "confirmWarning": "Das Löschen von <strong>{{cameraName}}</strong> kann nicht rückgängig gemacht werden.",
+      "deleteExports": "Lösche auch die Exporte für diese Kamera",
+      "confirmButton": "Dauerhalft löschen",
+      "success": "Die Kamera {{cameraName}} wurde erfolgreich gelöscht",
+      "error": "Das Löschen der Kamera {{cameraName}} ist fehlgeschlagen"
     }
   },
   "cameraReview": {
@@ -1301,6 +1372,23 @@
       "toast": {
         "success": "Die Konfiguration der Bewertungsklassifizierung wurde gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
       }
+    }
+  },
+  "saveAllPreview": {
+    "title": "Änderungen speichern",
+    "triggerLabel": "Änderungen überprüfen",
+    "empty": "Keine ausstehenden Änderungen.",
+    "scope": {
+      "label": "Umfang",
+      "global": "Global",
+      "camera": "kamera: {{cameraName}}"
+    },
+    "field": {
+      "label": "Feld"
+    },
+    "value": {
+      "label": "Neuer Wert",
+      "reset": "Zurücksetzen"
     }
   }
 }

@@ -16,6 +16,8 @@ mqtt:
   # Optional: Enable mqtt server (default: shown below)
   enabled: True
   # Required: host name
+  # NOTE: MQTT host can be specified with an environment variable or docker secrets that must begin with 'FRIGATE_'.
+  #       e.g. host: '{FRIGATE_MQTT_HOST}'
   host: mqtt.server.com
   # Optional: port (default: shown below)
   port: 1883
@@ -73,11 +75,19 @@ tls:
   # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
-# Optional: IPv6 configuration
+# Optional: Networking configuration
 networking:
   # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
   ipv6:
     enabled: False
+  # Optional: Override ports Frigate uses for listening (defaults: shown below)
+  # An IP address may also be provided to bind to a specific interface, e.g. ip:port
+  # NOTE: This setting is for advanced users and may break some integrations. The majority
+  #       of users should change ports in the docker compose file
+  #       or use the docker run `--publish` option to select a different port.
+  listen:
+    internal: 5000
+    external: 8971
 
 # Optional: Proxy configuration
 proxy:
@@ -337,7 +347,15 @@ objects:
   # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
   # Checks based on the bottom center of the bounding box of the object.
   # NOTE: This mask is COMBINED with the object type specific mask below
-  mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
+  mask:
+    # Object filter mask name (required)
+    mask1:
+      # Optional: A friendly name for the mask
+      friendly_name: "Object filter mask area"
+      # Optional: Whether this mask is active (default: true)
+      enabled: true
+      # Required: Coordinates polygon for the mask
+      coordinates: "0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278"
   # Optional: filters to reduce false positives for specific object types
   filters:
     person:
@@ -357,7 +375,15 @@ objects:
       threshold: 0.7
       # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
       # Checks based on the bottom center of the bounding box of the object
-      mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
+      mask:
+        # Object filter mask name (required)
+        mask1:
+          # Optional: A friendly name for the mask
+          friendly_name: "Object filter mask area"
+          # Optional: Whether this mask is active (default: true)
+          enabled: true
+          # Required: Coordinates polygon for the mask
+          coordinates: "0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278"
   # Optional: Configuration for AI generated tracked object descriptions
   genai:
     # Optional: Enable AI object description generation (default: shown below)
@@ -456,12 +482,16 @@ motion:
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
   threshold: 30
-  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
-  #           needs to recalibrate. (default: shown below)
+  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection needs
+  # to recalibrate and motion checks stop for that frame. Recordings are unaffected. (default: shown below)
   # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
-  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching
-  # a doorbell camera.
+  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
   lightning_threshold: 0.8
+  # Optional: Fraction of the frame that must change in a single update before motion boxes are completely
+  # ignored. Values range between 0.0 and 1.0. When exceeded, no motion boxes are reported and **no motion
+  # recording** is created for that frame. Leave unset (null) to disable this feature. Use with care on PTZ
+  # cameras or other situations where you require guaranteed frame capture.
+  skip_motion_threshold: None
   # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: shown below)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
   # make motion detection more sensitive to smaller moving objects.
@@ -481,7 +511,15 @@ motion:
   frame_height: 100
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
-  mask: 0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000
+  mask:
+    # Motion mask name (required)
+    mask1:
+      # Optional: A friendly name for the mask
+      friendly_name: "Motion mask area"
+      # Optional: Whether this mask is active (default: true)
+      enabled: true
+      # Required: Coordinates polygon for the mask
+      coordinates: "0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000"
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
@@ -510,8 +548,6 @@ record:
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
   expire_interval: 60
-  # Optional: Two-way sync recordings database with disk on startup and once a day (default: shown below).
-  sync_recordings: False
   # Optional: Continuous retention settings
   continuous:
     # Optional: Number of days to retain recordings regardless of tracked objects or motion (default: shown below)
@@ -534,6 +570,8 @@ record:
     # The -r (framerate) dictates how smooth the output video is.
     # So the args would be -vf setpts=0.02*PTS -r 30 in that case.
     timelapse_args: "-vf setpts=0.04*PTS -r 30"
+    # Optional: Global hardware acceleration settings for timelapse exports. (default: inherit)
+    hwaccel_args: auto
   # Optional: Recording Preview Settings
   preview:
     # Optional: Quality of recording preview (default: shown below).
@@ -580,13 +618,12 @@ record:
       #       never stored, so setting the mode to "all" here won't bring them back.
       mode: motion
 
-# Optional: Configuration for the jpg snapshots written to the clips directory for each tracked object
+# Optional: Configuration for the snapshots written to the clips directory for each tracked object
+# Timestamp, bounding_box, crop and height settings are applied by default to API requests for snapshots.
 # NOTE: Can be overridden at the camera level
 snapshots:
-  # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
+  # Optional: Enable writing snapshot images to /media/frigate/clips (default: shown below)
   enabled: False
-  # Optional: save a clean copy of the snapshot image (default: shown below)
-  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
@@ -604,8 +641,8 @@ snapshots:
     # Optional: Per object retention days
     objects:
       person: 15
-  # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
-  quality: 70
+  # Optional: quality of the encoded snapshot image, 0-100 (default: shown below)
+  quality: 60
 
 # Optional: Configuration for semantic search capability
 semantic_search:
@@ -752,7 +789,7 @@ classification:
         interval: None
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.9.10)
+# Uses https://github.com/AlexxIT/go2rtc (v1.9.13)
 # NOTE: The default go2rtc API port (1984) must be used,
 #       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:
@@ -838,6 +875,11 @@ cameras:
       # Optional: camera specific output args (default: inherit)
       # output_args:
 
+    # Optional: camera specific hwaccel args for timelapse export (default: inherit)
+    # record:
+    #   export:
+    #     hwaccel_args:
+
     # Optional: timeout for highest scoring image before allowing it
     # to be replaced by a newer image. (default: shown below)
     best_image_timeout: 60
@@ -853,6 +895,9 @@ cameras:
       front_steps:
         # Optional: A friendly name or descriptive text for the zones
         friendly_name: ""
+        # Optional: Whether this zone is active (default: shown below)
+        # Disabled zones are completely ignored at runtime - no object tracking or debug drawing
+        enabled: True
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
@@ -906,6 +951,8 @@ cameras:
     onvif:
       # Required: host of the camera being connected to.
       # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
+      # NOTE: ONVIF user, and password can be specified with environment variables or docker secrets
+      #       that must begin with 'FRIGATE_'. e.g. host: '{FRIGATE_ONVIF_USERNAME}'
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
       port: 8000
@@ -982,6 +1029,49 @@ cameras:
         actions:
           - notification
 
+    # Optional: Named config profiles with partial overrides that can be activated at runtime.
+    # NOTE: Profile names must be defined in the top-level 'profiles' section.
+    profiles:
+      # Required: name of the profile (must match a top-level profile definition)
+      away:
+        # Optional: Enable or disable the camera when this profile is active (default: not set, inherits base)
+        enabled: true
+        # Optional: Override audio settings
+        audio:
+          enabled: true
+        # Optional: Override birdseye settings
+        # birdseye:
+        # Optional: Override detect settings
+        detect:
+          enabled: true
+        # Optional: Override face_recognition settings
+        # face_recognition:
+        # Optional: Override lpr settings
+        # lpr:
+        # Optional: Override motion settings
+        # motion:
+        # Optional: Override notification settings
+        notifications:
+          enabled: true
+        # Optional: Override objects settings
+        objects:
+          track:
+            - person
+            - car
+        # Optional: Override record settings
+        record:
+          enabled: true
+        # Optional: Override review settings
+        review:
+          alerts:
+            labels:
+              - person
+              - car
+        # Optional: Override snapshot settings
+        # snapshots:
+        # Optional: Override or add zones (merged with base zones)
+        # zones:
+
 # Optional
 ui:
   # Optional: Set a timezone to use in the UI (default: use browser local time)
@@ -1048,4 +1138,14 @@ camera_groups:
     icon: LuCar
     # Required: index of this group
     order: 0
+
+# Optional: Profile definitions for named config overrides
+# NOTE: Profile names defined here can be referenced in camera profiles sections
+profiles:
+  # Required: name of the profile (machine name used internally)
+  home:
+    # Required: display name shown in the UI
+    friendly_name: Home
+  away:
+    friendly_name: Away
 ```

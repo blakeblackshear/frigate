@@ -6,16 +6,24 @@
       "title": "Frigate이 재시작 중입니다",
       "content": "이 페이지는 {{countdown}} 뒤에 새로 고침 됩니다.",
       "button": "강제 재시작"
-    }
+    },
+    "description": "이 작업은 Frigate가 재시작 되는 동안 잠시 작동이 중지됩니다."
   },
   "explore": {
     "plus": {
       "submitToPlus": {
-        "label": "Frigate+에 등록하기"
+        "label": "Frigate+에 등록하기",
+        "desc": "제외하려는 위치에서 감지된 객체는 '오감지(False Positive)'가 아닙니다. 이를 오감지로 제출하면 모델 학습에 혼선을 줄 수 있습니다."
       },
       "review": {
         "question": {
-          "label": "Frigate +에 이 레이블 등록하기"
+          "label": "Frigate +에 이 레이블 등록하기",
+          "ask_a": "이 것은 <code>{{label}}</code> 인가요?",
+          "ask_an": "이 것은 <code>{{label}}</code> 인가요?",
+          "ask_full": "이 것은 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 인가요?"
+        },
+        "state": {
+          "submitted": "제출됨"
         }
       }
     },
@@ -26,7 +34,7 @@
   "export": {
     "time": {
       "fromTimeline": "타임라인에서 선택하기",
-      "lastHour_other": "지난 시간",
+      "lastHour_other": "지난 {{count}} 시간­",
       "custom": "커스텀",
       "start": {
         "title": "시작 시간",
@@ -44,16 +52,21 @@
     "export": "내보내기",
     "selectOrExport": "선택 또는 내보내기",
     "toast": {
-      "success": "내보내기가 성공적으로 시작되었습니다. /exports 폴더에서 파일을 보실 수 있습니다.",
+      "success": "내보내기가 성공적으로 시작되었습니다. 내보내기 페이지에서 파일을 보실 수 있습니다.",
       "error": {
         "failed": "내보내기 시작 실패:{{error}}",
         "endTimeMustAfterStartTime": "종료 시간은 시작 시간보다 뒤에 있어야합니다",
         "noVaildTimeSelected": "유효한 시간 범위가 선택되지 않았습니다"
-      }
+      },
+      "view": "보기"
     },
     "fromTimeline": {
       "saveExport": "내보내기 저장",
       "previewExport": "내보내기 미리보기"
+    },
+    "case": {
+      "label": "유형",
+      "placeholder": "유형 선택"
     }
   },
   "streaming": {
@@ -86,7 +99,28 @@
   },
   "recording": {
     "confirmDelete": {
-      "title": "삭제 확인"
+      "title": "삭제 확인",
+      "desc": {
+        "selected": "이 리뷰 항목과 관련된 모든 녹화된 영상을 삭제하시겠습니까?<br /><br />다음에 이 팝업을 건너뛰려면 <em>Shift</em> 키를 누르고 삭제하세요."
+      },
+      "toast": {
+        "success": "선택한 리뷰 항목과 관련된 동영상 파일이 성공적으로 삭제되었습니다.",
+        "error": "삭제 실패: {{error}}"
+      }
+    },
+    "button": {
+      "export": "내보내기",
+      "markAsReviewed": "검토 완료로 표시",
+      "markAsUnreviewed": "검토 안 함 표시",
+      "deleteNow": "지금 삭제"
     }
+  },
+  "imagePicker": {
+    "selectImage": "추적된 객체의 썸네일을 선택하세요",
+    "unknownLabel": "저장된 트리거 이미지",
+    "search": {
+      "placeholder": "레이블 또는 서브 레이블로 검색..."
+    },
+    "noImages": "표시할 썸네일이 없습니다"
   }
 }

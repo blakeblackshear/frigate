@@ -1,6 +1,8 @@
 import ReviewCard from "@/components/card/ReviewCard";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
+import DebugReplayDialog from "@/components/overlay/DebugReplayDialog";
 import ExportDialog from "@/components/overlay/ExportDialog";
+import ActionsDropdown from "@/components/overlay/ActionsDropdown";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -199,6 +201,11 @@ export function RecordingView({
   const [exportRange, setExportRange] = useState<TimeRange>();
   const [showExportPreview, setShowExportPreview] = useState(false);
 
+  // debug replay
+
+  const [debugReplayMode, setDebugReplayMode] = useState<ExportMode>("none");
+  const [debugReplayRange, setDebugReplayRange] = useState<TimeRange>();
+
   // move to next clip
 
   const onClipEnded = useCallback(() => {
@@ -269,7 +276,7 @@ export function RecordingView({
   );
 
   useEffect(() => {
-    if (scrubbing || exportRange) {
+    if (scrubbing || exportRange || debugReplayRange) {
       if (
         currentTime > currentTimeRange.before + 60 ||
         currentTime < currentTimeRange.after - 60
@@ -592,6 +599,23 @@ export function RecordingView({
               onSelectCamera={onSelectCamera}
             />
             {isDesktop && (
+              <DebugReplayDialog
+                camera={mainCamera}
+                currentTime={currentTime}
+                latestTime={timeRange.before}
+                mode={debugReplayMode}
+                range={debugReplayRange}
+                setRange={(range: TimeRange | undefined) => {
+                  setDebugReplayRange(range);
+
+                  if (range != undefined) {
+                    mainControllerRef.current?.pause();
+                  }
+                }}
+                setMode={setDebugReplayMode}
+              />
+            )}
+            {isDesktop && (
               <ExportDialog
                 camera={mainCamera}
                 currentTime={currentTime}
@@ -639,6 +663,28 @@ export function RecordingView({
                 setMotionOnly={() => {}}
               />
             )}
+            {isDesktop && (
+              <ActionsDropdown
+                onDebugReplayClick={() => {
+                  const now = new Date(timeRange.before * 1000);
+                  now.setHours(now.getHours() - 1);
+                  setDebugReplayRange({
+                    after: now.getTime() / 1000,
+                    before: timeRange.before,
+                  });
+                  setDebugReplayMode("select");
+                }}
+                onExportClick={() => {
+                  const now = new Date(timeRange.before * 1000);
+                  now.setHours(now.getHours() - 1);
+                  setExportRange({
+                    before: timeRange.before,
+                    after: now.getTime() / 1000,
+                  });
+                  setExportMode("select");
+                }}
+              />
+            )}
             {isDesktop ? (
               <ToggleGroup
                 className="*:rounded-md *:px-3 *:py-4"
@@ -654,7 +700,7 @@ export function RecordingView({
                   value="timeline"
                   aria-label={t("timeline.aria")}
                 >
-                  <div className="">{t("timeline")}</div>
+                  <div className="">{t("timeline.label")}</div>
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
@@ -688,6 +734,16 @@ export function RecordingView({
               showExportPreview={showExportPreview}
               allLabels={reviewFilterList.labels}
               allZones={reviewFilterList.zones}
+              debugReplayMode={debugReplayMode}
+              debugReplayRange={debugReplayRange}
+              setDebugReplayMode={setDebugReplayMode}
+              setDebugReplayRange={(range: TimeRange | undefined) => {
+                setDebugReplayRange(range);
+
+                if (range != undefined) {
+                  mainControllerRef.current?.pause();
+                }
+              }}
               onUpdateFilter={updateFilter}
               setRange={setExportRange}
               setMode={setExportMode}
@@ -758,7 +814,9 @@ export function RecordingView({
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
                   startTimestamp={playbackStart}
-                  hotKeys={exportMode != "select"}
+                  hotKeys={
+                    exportMode != "select" && debugReplayMode != "select"
+                  }
                   fullscreen={fullscreen}
                   onTimestampUpdate={(timestamp) => {
                     setPlayerTime(timestamp);
@@ -772,7 +830,11 @@ export function RecordingView({
                   onControllerReady={(controller) => {
                     mainControllerRef.current = controller;
                   }}
-                  isScrubbing={scrubbing || exportMode == "timeline"}
+                  isScrubbing={
+                    scrubbing ||
+                    exportMode == "timeline" ||
+                    debugReplayMode == "timeline"
+                  }
                   supportsFullscreen={supportsFullScreen}
                   setFullResolution={setFullResolution}
                   toggleFullscreen={toggleFullscreen}
@@ -840,18 +902,29 @@ export function RecordingView({
             contentRef={contentRef}
             mainCamera={mainCamera}
             timelineType={
-              (exportRange == undefined ? timelineType : "timeline") ??
-              "timeline"
+              (exportRange == undefined && debugReplayRange == undefined
+                ? timelineType
+                : "timeline") ?? "timeline"
             }
             timeRange={timeRange}
             mainCameraReviewItems={mainCameraReviewItems}
             activeReviewItem={activeReviewItem}
             currentTime={currentTime}
-            exportRange={exportMode == "timeline" ? exportRange : undefined}
+            exportRange={
+              exportMode == "timeline"
+                ? exportRange
+                : debugReplayMode == "timeline"
+                  ? debugReplayRange
+                  : undefined
+            }
             setCurrentTime={setCurrentTime}
             manuallySetCurrentTime={manuallySetCurrentTime}
             setScrubbing={setScrubbing}
-            setExportRange={setExportRange}
+            setExportRange={
+              debugReplayMode == "timeline"
+                ? setDebugReplayRange
+                : setExportRange
+            }
             onAnalysisOpen={onAnalysisOpen}
             isPlaying={mainControllerRef?.current?.isPlaying() ?? false}
           />

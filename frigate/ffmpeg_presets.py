@@ -63,7 +63,7 @@ class LibvaGpuSelector:
         if not self._valid_gpus:
             return ""
 
-        if gpu <= len(self._valid_gpus):
+        if gpu < len(self._valid_gpus):
             return self._valid_gpus[gpu]
         else:
             logger.warning(f"Invalid GPU index {gpu}, using first valid GPU")
@@ -120,10 +120,10 @@ PRESETS_HW_ACCEL_DECODE["preset-rk-h265"] = PRESETS_HW_ACCEL_DECODE[
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
-    FFMPEG_HWACCEL_VAAPI: "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
-    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2},hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
+    FFMPEG_HWACCEL_VAAPI: "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=nv12",
+    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=w={1}:h={2}:format=nv12,hwdownload,format=nv12,fps={0},format=yuv420p",
+    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=w={1}:h={2}:format=nv12,hwdownload,format=nv12,fps={0},format=yuv420p",
+    FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2},hwdownload,format=nv12",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
     FFMPEG_HWACCEL_RKMPP: "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
@@ -242,15 +242,6 @@ def parse_preset_hardware_acceleration_scale(
     else:
         scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
 
-    if (
-        ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5" in scale
-        and os.environ.get("FFMPEG_DISABLE_GAMMA_EQUALIZER") is not None
-    ):
-        scale = scale.replace(
-            ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
-            ":format=nv12,hwdownload,format=nv12,format=yuv420p",
-        )
-
     scale = scale.format(fps, width, height).split(" ")
     scale.extend(detect_args)
     return scale
@@ -278,7 +269,7 @@ def parse_preset_hardware_acceleration_encode(
         arg_map = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE
 
     if not isinstance(arg, str):
-        return arg_map["default"].format(input, output)
+        return arg_map["default"].format(ffmpeg_path, input, output)
 
     # Not all jetsons have HW encoders, so fall back to default SW encoder if not
     if arg.startswith("preset-jetson-") and not os.path.exists("/dev/nvhost-msenc"):
@@ -436,7 +427,7 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
 
     if arg == "preset-http-jpeg-generic":
         input = PRESETS_INPUT[arg].copy()
-        input[len(_user_agent_args) + 1] = str(detect_fps)
+        input[1] = str(detect_fps)
         return input
 
     return PRESETS_INPUT.get(arg, None)

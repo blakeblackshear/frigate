@@ -13,11 +13,16 @@
     "shareExport": "اشتراک‌گذاری خروجی",
     "downloadVideo": "دانلود ویدئو",
     "editName": "ویرایش نام",
-    "deleteExport": "حذف خروجی"
+    "deleteExport": "حذف خروجی",
+    "assignToCase": "به مورد اضافه کنید"
   },
   "toast": {
     "error": {
       "renameExportFailed": "تغییر نام خروجی ناموفق بود: {{errorMessage}}"
     }
+  },
+  "headings": {
+    "cases": "موارد",
+    "uncategorizedExports": "خروجی دسته‌بندی نشده"
   }
 }

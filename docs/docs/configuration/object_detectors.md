@@ -34,7 +34,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Nvidia GPU**
 
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
+- [ONNX](#onnx): Nvidia GPUs will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
 
 **Nvidia Jetson** <CommunityBadge />
 
@@ -48,6 +48,11 @@ Frigate supports multiple different detectors that work on different types of ha
 **Synaptics** <CommunityBadge />
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
+
+**AXERA** <CommunityBadge />
+
+- [AXEngine](#axera): axmodels can run on AXERA AI acceleration.
+
 
 **For Testing**
 
@@ -65,7 +70,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `memryx`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -157,7 +162,13 @@ A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` 
 
 #### YOLOv9
 
-YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are supported, but not included by default. [Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes.
+YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are supported, but not included by default. [Instructions](#yolov9-for-google-coral-support) for downloading a model with support for the Google Coral.
+
+:::tip
+
+**Frigate+ Users:** Follow the [instructions](/integrations/plus#use-models) to set a model ID in your config file.
+
+:::
 
 <details>
   <summary>YOLOv9 Setup & Config</summary>
@@ -566,7 +577,7 @@ $ docker run --device=/dev/kfd --device=/dev/dri  \
 
 When using Docker Compose:
 
-```yaml
+```yaml {4-6}
 services:
   frigate:
     ...
@@ -597,7 +608,7 @@ $ docker run -e HSA_OVERRIDE_GFX_VERSION=10.0.0 \
 
 When using Docker Compose:
 
-```yaml
+```yaml {4-5}
 services:
   frigate:
     ...
@@ -654,11 +665,9 @@ ONNX is an open format for building machine learning models, Frigate supports ru
 If the correct build is used for your GPU then the GPU will be detected and used automatically.
 
 - **AMD**
-
   - ROCm will automatically be detected and used with the ONNX detector in the `-rocm` Frigate image.
 
 - **Intel**
-
   - OpenVINO will automatically be detected and used with the ONNX detector in the default Frigate image.
 
 - **Nvidia**
@@ -1474,6 +1483,42 @@ model:
   input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
 ```
 
+## AXERA
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- AX650N
+- AX8850N
+
+This implementation uses the [AXera Pulsar2 Toolchain](https://huggingface.co/AXERA-TECH/Pulsar2).
+
+See the [installation docs](../frigate/installation.md#axera) for information on configuring the AXEngine hardware.
+
+### Configuration
+
+When configuring the AXEngine detector, you have to specify the model name.
+
+#### yolov9
+
+A yolov9 model is provided in the container at `/axmodels` and is used by this detector type by default.
+
+Use the model configuration shown below when using the axengine detector with the default axmodel:
+
+```yaml
+detectors:
+  axengine:
+    type: axengine
+
+model:
+  path: frigate-yolov9-tiny
+  model_type: yolo-generic
+  width: 320
+  height: 320
+  input_dtype: int
+  input_pixel_format: bgr
+  labelmap_path: /labelmap/coco-80.txt
+```
+
 # Models
 
 Some model types are not included in Frigate by default.
@@ -1556,19 +1601,23 @@ cd tensorrt_demos/yolo
 python3 yolo_to_onnx.py -m yolov7-320
 ```
 
-#### YOLOv9
+#### YOLOv9 for Google Coral Support
+
+[Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes.
+
+#### YOLOv9 for other detectors
 
 YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` and `IMG_SIZE=320` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available model sizes are `t`, `s`, `m`, `c`, and `e`, common image sizes are `320` and `640`).
 
 ```sh
 docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
 FROM python:3.11 AS build
-RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
-COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
 WORKDIR /yolov9
 ADD https://github.com/WongKinYiu/yolov9.git .
 RUN uv pip install --system -r requirements.txt
-RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier>=0.4.1 onnxscript
+RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier==0.4.* onnxscript
 ARG MODEL_SIZE
 ARG IMG_SIZE
 ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt

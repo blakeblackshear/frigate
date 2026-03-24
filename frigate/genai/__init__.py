@@ -7,14 +7,26 @@ import os
 import re
 from typing import Any, Optional
 
+import numpy as np
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
+from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
 from frigate.const import CLIPS_DIR
 from frigate.data_processing.post.types import ReviewMetadata
+from frigate.genai.manager import GenAIClientManager
 from frigate.models import Event
 
 logger = logging.getLogger(__name__)
+
+__all__ = [
+    "GenAIClient",
+    "GenAIClientManager",
+    "GenAIConfig",
+    "GenAIProviderEnum",
+    "PROVIDERS",
+    "load_providers",
+    "register_genai_provider",
+]
 
 PROVIDERS = {}
 
@@ -69,7 +81,7 @@ class GenAIClient:
                 return "\n- (No objects detected)"
 
         context_prompt = f"""
-Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"]} security camera.
+Your task is to analyze a sequence of images taken in chronological order from a security camera.
 
 ## Normal Activity Patterns for This Property
 
@@ -77,12 +89,7 @@ Your task is to analyze the sequence of images ({len(thumbnails)} total) taken i
 
 ## Task Instructions
 
-Your task is to provide a clear, accurate description of the scene that:
-1. States exactly what is happening based on observable actions and movements.
-2. Evaluates the activity against the Normal and Suspicious Activity Indicators above.
-3. Assigns a potential_threat_level (0, 1, or 2) based on the threat level indicators defined above, applying them consistently.
-
-**Use the activity patterns above as guidance to calibrate your assessment. Match the activity against both normal and suspicious indicators, then use your judgment based on the complete context.**
+Describe the scene based on observable actions and movements, evaluate the activity against the Activity Indicators above, and assign a potential_threat_level (0, 1, or 2) by applying the threat level indicators consistently.
 
 ## Analysis Guidelines
 
@@ -96,35 +103,28 @@ When forming your description:
 - **Consider duration as a primary factor**: Apply the duration thresholds defined in the activity patterns above. Brief sequences during normal hours with apparent purpose typically indicate normal activity unless explicit suspicious actions are visible.
 - **Weigh all evidence holistically**: Match the activity against the normal and suspicious patterns defined above, then evaluate based on the complete context (zone, objects, time, actions, duration). Apply the threat level indicators consistently. Use your judgment for edge cases.
 
-## Response Format
+## Response Field Guidelines
 
-Your response MUST be a flat JSON object with:
-- `scene` (string): A narrative description of what happens across the sequence from start to finish, in chronological order. Start by describing how the sequence begins, then describe the progression of events. **Describe all significant movements and actions in the order they occur.** For example, if a vehicle arrives and then a person exits, describe both actions sequentially. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
-- `title` (string): A concise, grammatically complete title in the format "[Subject] [action verb] [context]" that matches your scene description. Use names from "Objects in Scene" when you visually observe them.
-- `shortSummary` (string): A brief 2-sentence summary of the scene, suitable for notifications. Should capture the key activity and context without full detail. This should be a condensed version of the scene description above.
-- `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
-- `potential_threat_level` (integer): 0, 1, or 2 as defined in "Normal Activity Patterns for This Property" above. Your threat level must be consistent with your scene description and the guidance above.
+Respond with a JSON object matching the provided schema. Field-specific guidance:
+- `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. Always use subject names from "Objects in Scene" — do not replace named subjects with generic terms like "a person" or "the individual". Your description should align with and support the threat level you assign.
+- `title`: Characterize **what took place and where** — interpret the overall purpose or outcome, do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). Always include subject names from "Objects in Scene" — do not replace named subjects with generic terms. No editorial qualifiers like "routine" or "suspicious."
+- `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
 {get_concern_prompt()}
 
 ## Sequence Details
 
-- Frame 1 = earliest, Frame {len(thumbnails)} = latest
+- Camera: {review_data["camera"]}
+- Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest)
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
 - Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}
 
 ## Objects in Scene
 
-Each line represents a detection state, not necessarily unique individuals. Parentheses indicate object type or category, use only the name/label in your response, not the parentheses.
-
-**CRITICAL: When you see both recognized and unrecognized entries of the same type (e.g., "Joe (person)" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name (e.g., "Joe"). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
+Each line represents a detection state, not necessarily unique individuals. The `←` symbol separates a recognized subject's name from their object type — use only the name (before the `←`) in your response, not the type after it. The same subject may appear across multiple lines if detected multiple times.
 
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
 
-## Important Notes
-- Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
-- Only describe objects from the "Objects in Scene" list above. Do not hallucinate additional objects.
-- When describing people or vehicles, use the exact names provided.
 {get_language_prompt()}
 """
         logger.debug(
@@ -140,7 +140,30 @@ Each line represents a detection state, not necessarily unique individuals. Pare
             ) as f:
                 f.write(context_prompt)
 
-        response = self._send(context_prompt, thumbnails)
+        # Build JSON schema for structured output from ReviewMetadata model
+        schema = ReviewMetadata.model_json_schema()
+        schema.get("properties", {}).pop("time", None)
+
+        if "time" in schema.get("required", []):
+            schema["required"].remove("time")
+        if not concerns:
+            schema.get("properties", {}).pop("other_concerns", None)
+            if "other_concerns" in schema.get("required", []):
+                schema["required"].remove("other_concerns")
+
+        # OpenAI strict mode requires additionalProperties: false on all objects
+        schema["additionalProperties"] = False
+
+        response_format = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "review_metadata",
+                "strict": True,
+                "schema": schema,
+            },
+        }
+
+        response = self._send(context_prompt, thumbnails, response_format)
 
         if debug_save and response:
             with open(
@@ -159,8 +182,12 @@ Each line represents a detection state, not necessarily unique individuals. Pare
             try:
                 metadata = ReviewMetadata.model_validate_json(clean_json)
 
-                # If any verified objects (contain parentheses with name), set to 0
-                if any("(" in obj for obj in review_data["unified_objects"]):
+                # Normalize confidence if model returned a percentage (e.g. 85 instead of 0.85)
+                if metadata.confidence > 1.0:
+                    metadata.confidence = min(metadata.confidence / 100.0, 1.0)
+
+                # If any verified objects (contain ← separator), set to 0
+                if any("←" in obj for obj in review_data["unified_objects"]):
                     metadata.potential_threat_level = 0
 
                 metadata.time = review_data["start"]
@@ -284,7 +311,12 @@ Guidelines:
         """Initialize the client."""
         return None
 
-    def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
+    def _send(
+        self,
+        prompt: str,
+        images: list[bytes],
+        response_format: Optional[dict] = None,
+    ) -> Optional[str]:
         """Submit a request to the provider."""
         return None
 
@@ -292,18 +324,82 @@ Guidelines:
         """Get the context window size for this provider in tokens."""
         return 4096
 
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Generate embeddings for text and/or images.
 
-def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
-    """Get the GenAI client."""
-    if not config.genai.provider:
-        return None
+        Returns list of numpy arrays (one per input). Expected dimension is 768
+        for Frigate semantic search compatibility.
 
-    load_providers()
-    provider = PROVIDERS.get(config.genai.provider)
-    if provider:
-        return provider(config.genai)
+        Providers that support embeddings should override this method.
+        """
+        logger.warning(
+            "%s does not support embeddings. "
+            "This method should be overridden by the provider implementation.",
+            self.__class__.__name__,
+        )
+        return []
 
-    return None
+    def chat_with_tools(
+        self,
+        messages: list[dict[str, Any]],
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[str] = "auto",
+    ) -> dict[str, Any]:
+        """
+        Send chat messages to LLM with optional tool definitions.
+
+        This method handles conversation-style interactions with the LLM,
+        including function calling/tool usage capabilities.
+
+        Args:
+            messages: List of message dictionaries. Each message should have:
+                - 'role': str - One of 'user', 'assistant', 'system', or 'tool'
+                - 'content': str - The message content
+                - 'tool_call_id': Optional[str] - For tool responses, the ID of the tool call
+                - 'name': Optional[str] - For tool messages, the tool name
+            tools: Optional list of tool definitions in OpenAI-compatible format.
+                   Each tool should have 'type': 'function' and 'function' with:
+                   - 'name': str - Tool name
+                   - 'description': str - Tool description
+                   - 'parameters': dict - JSON schema for parameters
+            tool_choice: How the model should handle tools:
+                - 'auto': Model decides whether to call tools
+                - 'none': Model must not call tools
+                - 'required': Model must call at least one tool
+                - Or a dict specifying a specific tool to call
+            **kwargs: Additional provider-specific parameters.
+
+        Returns:
+            Dictionary with:
+            - 'content': Optional[str] - The text response from the LLM, None if tool calls
+            - 'tool_calls': Optional[List[Dict]] - List of tool calls if LLM wants to call tools.
+              Each tool call dict has:
+                - 'id': str - Unique identifier for this tool call
+                - 'name': str - Tool name to call
+                - 'arguments': dict - Arguments for the tool call (parsed JSON)
+            - 'finish_reason': str - Reason generation stopped:
+                - 'stop': Normal completion
+                - 'tool_calls': LLM wants to call tools
+                - 'length': Hit token limit
+                - 'error': An error occurred
+
+        Raises:
+            NotImplementedError: If the provider doesn't implement this method.
+        """
+        # Base implementation - each provider should override this
+        logger.warning(
+            f"{self.__class__.__name__} does not support chat_with_tools. "
+            "This method should be overridden by the provider implementation."
+        )
+        return {
+            "content": None,
+            "tool_calls": None,
+            "finish_reason": "error",
+        }
 
 
 def load_providers():

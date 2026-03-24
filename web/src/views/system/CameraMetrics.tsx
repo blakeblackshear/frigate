@@ -1,6 +1,7 @@
 import { useFrigateStats } from "@/api/ws";
 import { CameraLineGraph } from "@/components/graph/LineGraph";
 import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
+import { ConnectionQualityIndicator } from "@/components/camera/ConnectionQualityIndicator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
@@ -282,8 +283,37 @@ export default function CameraMetrics({
                   )}
                   <div className="flex w-full flex-col gap-3">
                     <div className="flex flex-row items-center justify-between">
-                      <div className="text-sm font-medium text-muted-foreground smart-capitalize">
-                        <CameraNameLabel camera={camera} />
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-medium text-muted-foreground smart-capitalize">
+                          <CameraNameLabel camera={camera} />
+                        </div>
+                        {statsHistory.length > 0 &&
+                          statsHistory[statsHistory.length - 1]?.cameras[
+                            camera.name
+                          ] && (
+                            <ConnectionQualityIndicator
+                              quality={
+                                statsHistory[statsHistory.length - 1]?.cameras[
+                                  camera.name
+                                ]?.connection_quality
+                              }
+                              expectedFps={
+                                statsHistory[statsHistory.length - 1]?.cameras[
+                                  camera.name
+                                ]?.expected_fps || 0
+                              }
+                              reconnects={
+                                statsHistory[statsHistory.length - 1]?.cameras[
+                                  camera.name
+                                ]?.reconnects_last_hour || 0
+                              }
+                              stalls={
+                                statsHistory[statsHistory.length - 1]?.cameras[
+                                  camera.name
+                                ]?.stalls_last_hour || 0
+                              }
+                            />
+                          )}
                       </div>
                       <Tooltip>
                         <TooltipTrigger>

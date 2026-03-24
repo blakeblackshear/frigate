@@ -116,7 +116,9 @@ class PtzMotionEstimator:
                 mask[y1:y2, x1:x2] = 0
 
             # merge camera config motion mask with detections. Norfair function needs 0,1 mask
-            mask = np.bitwise_and(mask, self.camera_config.motion.mask).clip(max=1)
+            mask = np.bitwise_and(mask, self.camera_config.motion.rasterized_mask).clip(
+                max=1
+            )
 
             # Norfair estimator function needs color so it can convert it right back to gray
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGRA)
@@ -899,7 +901,7 @@ class PtzAutoTracker:
         # Check direction difference
         velocities = np.round(velocities)
         invalid_dirs = False
-        if not np.any(np.linalg.norm(velocities, axis=1)):
+        if np.all(np.linalg.norm(velocities, axis=1)):
             cosine_sim = np.dot(velocities[0], velocities[1]) / (
                 np.linalg.norm(velocities[0]) * np.linalg.norm(velocities[1])
             )
@@ -1065,7 +1067,7 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {bb_right - bb_left}, max width: {camera_width * (self.zoom_factor[camera] + 0.1)}, height: {bb_bottom - bb_top}, max height: {camera_height * (self.zoom_factor[camera] + 0.1)}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[0])}, y threshold: {velocity_threshold_y}"
+                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
             )
             logger.debug(f"{camera}: Zoom test: at max zoom: {at_max_zoom}")
             logger.debug(f"{camera}: Zoom test: at min zoom: {at_min_zoom}")

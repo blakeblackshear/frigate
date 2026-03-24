@@ -1,6 +1,6 @@
 import { baseUrl } from "./baseUrl";
 import { SWRConfig } from "swr";
-import { WsProvider } from "./ws";
+import { WsProvider } from "./WsProvider";
 import axios from "axios";
 import { ReactNode } from "react";
 import { isRedirectingToLogin, setRedirectingToLogin } from "./auth-redirect";

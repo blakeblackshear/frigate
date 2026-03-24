@@ -78,6 +78,10 @@
     "fromTimeline": {
       "saveExport": "Salvesta eksporditud sisu",
       "previewExport": "Eksporditud sisu eelvaade"
+    },
+    "case": {
+      "label": "Juhtum",
+      "placeholder": "Vali juhtum"
     }
   },
   "streaming": {

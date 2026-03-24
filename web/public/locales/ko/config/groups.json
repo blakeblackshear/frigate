@@ -1,0 +1,11 @@
+{
+    "audio": {
+        "global": {
+            "detection": "전체 감지",
+            "sensitivity": "전체 민감도"
+        },
+        "cameras": {
+            "detection": "감지"
+        }
+    }
+}

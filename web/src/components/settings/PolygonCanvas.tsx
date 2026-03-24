@@ -7,9 +7,10 @@ import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { snapPointToLines } from "@/utils/canvasUtil";
+import { usePolygonStates } from "@/hooks/use-polygon-states";
 
 type PolygonCanvasProps = {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   camera: string;
   width: number;
   height: number;
@@ -40,6 +41,7 @@ export function PolygonCanvas({
   const imageRef = useRef<Konva.Image | null>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const apiHost = useApiHost();
+  const getPolygonEnabled = usePolygonStates(polygons);
 
   const videoElement = useMemo(() => {
     if (camera && width && height) {
@@ -256,7 +258,7 @@ export function PolygonCanvas({
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
 
-    if (containerRef.current && !activePolygon.isFinished) {
+    if (containerRef.current && activePolygon && !activePolygon.isFinished) {
       containerRef.current.style.cursor = "crosshair";
     }
   };
@@ -321,6 +323,7 @@ export function PolygonCanvas({
                 isActive={index === activePolygonIndex}
                 isHovered={index === hoveredPolygonIndex}
                 isFinished={polygon.isFinished}
+                enabled={getPolygonEnabled(polygon)}
                 color={polygon.color}
                 handlePointDragMove={handlePointDragMove}
                 handleGroupDragEnd={handleGroupDragEnd}
@@ -350,6 +353,7 @@ export function PolygonCanvas({
               isActive={true}
               isHovered={activePolygonIndex === hoveredPolygonIndex}
               isFinished={polygons[activePolygonIndex].isFinished}
+              enabled={getPolygonEnabled(polygons[activePolygonIndex])}
               color={polygons[activePolygonIndex].color}
               handlePointDragMove={handlePointDragMove}
               handleGroupDragEnd={handleGroupDragEnd}

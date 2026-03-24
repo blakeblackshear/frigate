@@ -63,5 +63,28 @@
   "normalActivity": "Normal",
   "needsReview": "Necesită revizuire",
   "securityConcern": "Potențială problemă de securitate",
-  "select_all": "Toate"
+  "select_all": "Toate",
+  "motionSearch": {
+    "menuItem": "Căutare mișcare",
+    "openMenu": "Opțiuni cameră"
+  },
+  "motionPreviews": {
+    "menuItem": "Vezi previzualizări mișcare",
+    "title": "Previzualizări mișcare: {{camera}}",
+    "mobileSettingsTitle": "Setări previzualizări mișcare",
+    "mobileSettingsDesc": "Ajustează viteza de redare și estomparea, și alege o dată pentru a revizui clipurile doar cu mișcare.",
+    "dim": "Estompare",
+    "dimAria": "Ajustează intensitatea estompării",
+    "dimDesc": "Crește intensitatea estompării pentru a mări vizibilitatea zonei de mișcare.",
+    "speed": "Vitez",
+    "speedAria": "Selectează viteza de redare a previzualizării",
+    "speedDesc": "Alege cât de repede sunt redate clipurile de previzualizare.",
+    "back": "Înapoi",
+    "empty": "Nicio previzualizare disponibilă",
+    "noPreview": "Previzualizare indisponibilă",
+    "seekAria": "Derulează player-ul {{camera}} la {{time}}",
+    "filter": "Filtru",
+    "filterDesc": "Selectează zonele pentru a afișa doar clipurile cu mișcare în acele regiuni.",
+    "filterClear": "Șterge"
+  }
 }

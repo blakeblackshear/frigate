@@ -45,30 +45,55 @@ class ModelTypeEnum(str, Enum):
 
 
 class ModelConfig(BaseModel):
-    path: Optional[str] = Field(None, title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(
-        None, title="Label map for custom object detector."
+    path: Optional[str] = Field(
+        None,
+        title="Custom Object detection model path",
+        description="Path to a custom detection model file (or plus://<model_id> for Frigate+ models).",
     )
-    width: int = Field(default=320, title="Object detection model input width.")
-    height: int = Field(default=320, title="Object detection model input height.")
+    labelmap_path: Optional[str] = Field(
+        None,
+        title="Label map for custom object detector",
+        description="Path to a labelmap file that maps numeric classes to string labels for the detector.",
+    )
+    width: int = Field(
+        default=320,
+        title="Object detection model input width",
+        description="Width of the model input tensor in pixels.",
+    )
+    height: int = Field(
+        default=320,
+        title="Object detection model input height",
+        description="Height of the model input tensor in pixels.",
+    )
     labelmap: Dict[int, str] = Field(
-        default_factory=dict, title="Labelmap customization."
+        default_factory=dict,
+        title="Labelmap customization",
+        description="Overrides or remapping entries to merge into the standard labelmap.",
     )
     attributes_map: Dict[str, list[str]] = Field(
         default=DEFAULT_ATTRIBUTE_LABEL_MAP,
-        title="Map of object labels to their attribute labels.",
+        title="Map of object labels to their attribute labels",
+        description="Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate']).",
     )
     input_tensor: InputTensorEnum = Field(
-        default=InputTensorEnum.nhwc, title="Model Input Tensor Shape"
+        default=InputTensorEnum.nhwc,
+        title="Model Input Tensor Shape",
+        description="Tensor format expected by the model: 'nhwc' or 'nchw'.",
     )
     input_pixel_format: PixelFormatEnum = Field(
-        default=PixelFormatEnum.rgb, title="Model Input Pixel Color Format"
+        default=PixelFormatEnum.rgb,
+        title="Model Input Pixel Color Format",
+        description="Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'.",
     )
     input_dtype: InputDTypeEnum = Field(
-        default=InputDTypeEnum.int, title="Model Input D Type"
+        default=InputDTypeEnum.int,
+        title="Model Input D Type",
+        description="Data type of the model input tensor (for example 'float32').",
     )
     model_type: ModelTypeEnum = Field(
-        default=ModelTypeEnum.ssd, title="Object Detection Model Type"
+        default=ModelTypeEnum.ssd,
+        title="Object Detection Model Type",
+        description="Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization.",
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
@@ -210,12 +235,20 @@ class ModelConfig(BaseModel):
 
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
-    type: str = Field(default="cpu", title="Detector Type")
+    type: str = Field(
+        default="cpu",
+        title="Detector Type",
+        description="Type of detector to use for object detection (for example 'cpu', 'edgetpu', 'openvino').",
+    )
     model: Optional[ModelConfig] = Field(
-        default=None, title="Detector specific model configuration."
+        default=None,
+        title="Detector specific model configuration",
+        description="Detector-specific model configuration options (path, input size, etc.).",
     )
     model_path: Optional[str] = Field(
-        default=None, title="Detector specific model path."
+        default=None,
+        title="Detector specific model path",
+        description="File path to the detector model binary if required by the chosen detector.",
     )
     model_config = ConfigDict(
         extra="allow", arbitrary_types_allowed=True, protected_namespaces=()

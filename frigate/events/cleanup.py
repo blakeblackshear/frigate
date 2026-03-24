@@ -95,7 +95,8 @@ class EventCleanup(threading.Thread):
                 .namedtuples()
                 .iterator()
             )
-            logger.debug(f"{len(list(expired_events))} events can be expired")
+            expired_events = list(expired_events)
+            logger.debug(f"{len(expired_events)} events can be expired")
 
             # delete the media from disk
             for expired in expired_events:
@@ -220,7 +221,8 @@ class EventCleanup(threading.Thread):
             .namedtuples()
             .iterator()
         )
-        logger.debug(f"{len(list(expired_events))} events can be expired")
+        expired_events = list(expired_events)
+        logger.debug(f"{len(expired_events)} events can be expired")
         # delete the media from disk
         for expired in expired_events:
             media_name = f"{expired.camera}-{expired.id}"
@@ -324,6 +326,10 @@ class EventCleanup(threading.Thread):
         return events_to_update
 
     def run(self) -> None:
+        if self.config.safe_mode:
+            logger.info("Safe mode enabled, skipping event cleanup")
+            return
+
         # only expire events every 5 minutes
         while not self.stop_event.wait(300):
             events_with_expired_clips = self.expire_clips()

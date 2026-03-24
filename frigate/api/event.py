@@ -1,5 +1,6 @@
 """Event apis."""
 
+import asyncio
 import base64
 import datetime
 import json
@@ -12,7 +13,6 @@ from pathlib import Path
 from typing import List
 from urllib.parse import unquote
 
-import cv2
 import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
@@ -61,7 +61,7 @@ from frigate.const import CLIPS_DIR, TRIGGER_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
-from frigate.util.file import get_event_thumbnail_bytes
+from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
 from frigate.util.time import get_dst_transitions, get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -1081,30 +1081,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             content=({"success": False, "message": message}), status_code=400
         )
 
-    # load clean.webp or clean.png (legacy)
     try:
-        filename_webp = f"{event.camera}-{event.id}-clean.webp"
-        filename_png = f"{event.camera}-{event.id}-clean.png"
-
-        image_path = None
-        if os.path.exists(os.path.join(CLIPS_DIR, filename_webp)):
-            image_path = os.path.join(CLIPS_DIR, filename_webp)
-        elif os.path.exists(os.path.join(CLIPS_DIR, filename_png)):
-            image_path = os.path.join(CLIPS_DIR, filename_png)
-
-        if image_path is None:
-            logger.error(f"Unable to find clean snapshot for event: {event.id}")
-            return JSONResponse(
-                content=(
-                    {
-                        "success": False,
-                        "message": "Unable to find clean snapshot for event",
-                    }
-                ),
-                status_code=400,
-            )
-
-        image = cv2.imread(image_path)
+        image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
     except Exception:
         logger.error(f"Unable to load clean snapshot for event: {event.id}")
         return JSONResponse(
@@ -1114,17 +1092,22 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             status_code=400,
         )
 
-    if image is None or image.size == 0:
-        logger.error(f"Unable to load clean snapshot for event: {event.id}")
+    if not is_clean_snapshot or image is None or image.size == 0:
+        logger.error(f"Unable to find clean snapshot for event: {event.id}")
         return JSONResponse(
             content=(
-                {"success": False, "message": "Unable to load clean snapshot for event"}
+                {
+                    "success": False,
+                    "message": "Unable to find clean snapshot for event",
+                }
             ),
             status_code=400,
         )
 
     try:
-        plus_id = request.app.frigate_config.plus_api.upload_image(image, event.camera)
+        plus_id = await asyncio.to_thread(
+            request.app.frigate_config.plus_api.upload_image, image, event.camera
+        )
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse(
@@ -1140,7 +1123,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         box = event.data["box"]
 
         try:
-            request.app.frigate_config.plus_api.add_annotation(
+            await asyncio.to_thread(
+                request.app.frigate_config.plus_api.add_annotation,
                 event.plus_id,
                 box,
                 event.label,
@@ -1230,7 +1214,8 @@ async def false_positive(request: Request, event_id: str):
     )
 
     try:
-        request.app.frigate_config.plus_api.add_false_positive(
+        await asyncio.to_thread(
+            request.app.frigate_config.plus_api.add_false_positive,
             event.plus_id,
             region,
             box,
@@ -1782,6 +1767,7 @@ def create_event(
             body.duration,
             "api",
             body.draw,
+            body.pre_capture,
         ),
         EventMetadataTypeEnum.manual_event_create.value,
     )

@@ -110,6 +110,7 @@ def ensure_torch_dependencies() -> bool:
                     "pip",
                     "install",
                     "--break-system-packages",
+                    "setuptools<81",
                     "torch",
                     "torchvision",
                 ],

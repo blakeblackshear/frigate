@@ -11,7 +11,7 @@
     "5minutes": "5분",
     "untilRestart": "재시작 될 때까지",
     "ago": "{{timeAgo}} 전",
-    "justNow": "지금 막",
+    "justNow": "방금",
     "today": "오늘",
     "yesterday": "어제",
     "last7": "최근 7일",
@@ -67,7 +67,11 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "never": "한 번도 없음",
+    "inProgress": "진행 중",
+    "invalidStartTime": "잘못된 시작 시간",
+    "invalidEndTime": "잘못된 종료 시간"
   },
   "notFound": {
     "title": "404",
@@ -96,48 +100,49 @@
     "configurationEditor": "설정 편집기",
     "languages": "언어",
     "language": {
-      "en": "English (English)",
-      "es": "Español (Spanish)",
-      "zhCN": "简体中文 (Simplified Chinese)",
-      "hi": "हिन्दी (Hindi)",
-      "fr": "Français (French)",
-      "ar": "العربية (Arabic)",
-      "pt": "Português (Portuguese)",
-      "ptBR": "Português brasileiro (Brazilian Portuguese)",
-      "ru": "Русский (Russian)",
-      "de": "Deutsch (German)",
-      "ja": "日本語 (Japanese)",
-      "tr": "Türkçe (Turkish)",
-      "it": "Italiano (Italian)",
-      "nl": "Nederlands (Dutch)",
-      "sv": "Svenska (Swedish)",
-      "cs": "Čeština (Czech)",
-      "nb": "Norsk Bokmål (Norwegian Bokmål)",
-      "ko": "한국어 (Korean)",
-      "vi": "Tiếng Việt (Vietnamese)",
-      "fa": "فارسی (Persian)",
-      "pl": "Polski (Polish)",
-      "uk": "Українська (Ukrainian)",
-      "he": "עברית (Hebrew)",
-      "el": "Ελληνικά (Greek)",
-      "ro": "Română (Romanian)",
-      "hu": "Magyar (Hungarian)",
+      "en": "English (영어)",
+      "es": "Español (스페인어)",
+      "zhCN": "简体中文 (중국어 간체)",
+      "hi": "हिन्दी (힌두어)",
+      "fr": "Français (프랑스어)",
+      "ar": "العربية (아랍어)",
+      "pt": "Português (포르투갈어)",
+      "ptBR": "Português brasileiro (브라질 포르투갈어)",
+      "ru": "Русский (러시아어)",
+      "de": "Deutsch (독일어)",
+      "ja": "日本語 (일본어)",
+      "tr": "Türkçe (튀르키예어)",
+      "it": "Italiano (이탈리아어)",
+      "nl": "Nederlands (네덜란드어)",
+      "sv": "Svenska (스웨덴어)",
+      "cs": "Čeština (체코어)",
+      "nb": "Norsk Bokmål (노르웨이어 보크몰)",
+      "ko": "한국어",
+      "vi": "Tiếng Việt (베트남어)",
+      "fa": "فارسی (페르시아어)",
+      "pl": "Polski (폴란드어)",
+      "uk": "Українська (우크라이나어)",
+      "he": "עברית (히브리어)",
+      "el": "Ελληνικά (그리스어)",
+      "ro": "Română (루마니아어)",
+      "hu": "Magyar (헝가리어)",
       "fi": "Suomi (Finnish)",
-      "da": "Dansk (Danish)",
-      "sk": "Slovenčina (Slovak)",
-      "yue": "粵語 (Cantonese)",
-      "th": "ไทย (Thai)",
-      "ca": "Català (Catalan)",
-      "sr": "Српски (Serbian)",
-      "sl": "Slovenščina (Slovenian)",
-      "lt": "Lietuvių (Lithuanian)",
-      "bg": "Български (Bulgarian)",
-      "gl": "Galego (Galician)",
-      "id": "Bahasa Indonesia (Indonesian)",
-      "ur": "اردو (Urdu)",
+      "da": "Dansk (덴마크어)",
+      "sk": "Slovenčina (슬로바키아어)",
+      "yue": "粵語 (광둥어)",
+      "th": "ไทย (태국어)",
+      "ca": "Català (카탈로니아어)",
+      "sr": "Српски (세르비아어)",
+      "sl": "Slovenščina (슬로베니아어)",
+      "lt": "Lietuvių (리투아니아어)",
+      "bg": "Български (불가리아어)",
+      "gl": "Galego (갈리시아어)",
+      "id": "Bahasa Indonesia (인도네시아어)",
+      "ur": "اردو (우르두어)",
       "withSystem": {
         "label": "시스템 설정 언어 사용"
-      }
+      },
+      "hr": "Hrvatski (크로아티아어)"
     },
     "appearance": "화면 설정",
     "darkMode": {
@@ -175,8 +180,11 @@
     "review": "다시보기",
     "explore": "탐색",
     "export": "내보내기",
-    "uiPlayground": "UI 실험장",
-    "faceLibrary": "얼굴 라이브러리"
+    "uiPlayground": "UI 실험실",
+    "faceLibrary": "얼굴 라이브러리",
+    "classification": "분류",
+    "chat": "채팅",
+    "actions": "작업"
   },
   "unit": {
     "speed": {
@@ -191,13 +199,19 @@
       "kbps": "kB/s",
       "mbps": "MB/s",
       "gbps": "GB/s",
-      "kbph": "kB/hour",
-      "mbph": "MB/hour",
-      "gbph": "GB/hour"
+      "kbph": "kB/시간",
+      "mbph": "MB/시간",
+      "gbph": "GB/시간"
     }
   },
   "label": {
-    "back": "뒤로"
+    "back": "뒤로",
+    "hide": "{{item}} 숨기기",
+    "show": "{{item}} 표시",
+    "ID": "아이디",
+    "none": "없음",
+    "all": "전체",
+    "other": "그 외"
   },
   "button": {
     "apply": "적용",
@@ -216,7 +230,7 @@
     "history": "히스토리",
     "fullscreen": "전체화면",
     "exitFullscreen": "전체화면 나가기",
-    "pictureInPicture": "Picture in Picture",
+    "pictureInPicture": "화면 속 화면",
     "twoWayTalk": "양방향 말하기",
     "cameraAudio": "카메라 오디오",
     "on": "켜기",
@@ -234,7 +248,19 @@
     "unselect": "선택 해제",
     "export": "내보내기",
     "deleteNow": "바로 삭제하기",
-    "next": "다음"
+    "next": "다음",
+    "add": "추가",
+    "undo": "실행 취소",
+    "copiedToClipboard": "클립보드에 복사",
+    "continue": "계속하기",
+    "modified": "수정됨",
+    "overridden": "재정의됨",
+    "resetToGlobal": "글로벌 설정으로 재설정",
+    "resetToDefault": "기본값으로 재설정",
+    "saveAll": "모두 저장",
+    "savingAll": "모두 저장 중. …",
+    "undoAll": "모두 실행 취소",
+    "applying": "적용 중…"
   },
   "toast": {
     "copyUrlToClipboard": "클립보드에 URL이 복사되었습니다.",
@@ -253,7 +279,7 @@
     "desc": "관리자는 Frigate UI에 모든 접근 권한이 있습니다. 감시자는 카메라 감시, 돌아보기, 과거 영상 조회만 가능합니다."
   },
   "pagination": {
-    "label": "나눠보기",
+    "label": "페이지 번호",
     "previous": {
       "title": "이전",
       "label": "이전 페이지"
@@ -267,5 +293,14 @@
   "selectItem": "{{item}} 선택",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}}과 {{1}}",
+    "many": "{{items}} 그리고 {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "선택",
+    "internalID": "Frigate 내부 ID는 구성 및 데이터베이스에서 사용됩니다"
   }
 }

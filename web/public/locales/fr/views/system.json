@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Journaux de Frigate - Frigate",
       "nginx": "Journaux Nginx - Frigate",
-      "go2rtc": "Journaux Go2RTC - Frigate"
+      "go2rtc": "Journaux Go2RTC - Frigate",
+      "websocket": "Journaux des messages - Frigate"
     }
   },
   "title": "Système",
@@ -81,7 +82,9 @@
         "title": "Avertissement relatif aux statistiques du GPU Intel",
         "message": "Statistiques du GPU non disponibles",
         "description": "Il s'agit d'un bug connu de l'outil de statistiques GPU d'Intel (intel_gpu_top) : il peut afficher à tort une utilisation de 0 %, même lorsque l'accélération matérielle et la détection d'objets fonctionnent correctement sur l'iGPU. Ce problème ne vient pas de Frigate. Vous pouvez redémarrer l'hôte pour rétablir temporairement l'affichage et confirmer le fonctionnement du GPU. Les performances ne sont pas affectées."
-      }
+      },
+      "gpuTemperature": "Température du GPU",
+      "npuTemperature": "Température du NPU"
     },
     "otherProcesses": {
       "title": "Autres processus",
@@ -165,6 +168,17 @@
       "error": {
         "unableToProbeCamera": "Impossible d'interroger la caméra : {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Qualité de la connexion",
+      "excellent": "Excellente",
+      "fair": "Acceptable",
+      "poor": "Médiocre",
+      "unusable": "Inutilisable",
+      "fps": "IPS",
+      "expectedFps": "IPS attendues",
+      "reconnectsLastHour": "Reconnexions (dernière heure)",
+      "stallsLastHour": "Baisses de qualité (dernière heure)"
     }
   },
   "lastRefreshed": "Dernier rafraichissement : ",

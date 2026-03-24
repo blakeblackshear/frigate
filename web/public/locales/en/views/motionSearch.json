@@ -1,0 +1,75 @@
+{
+  "documentTitle": "Motion Search - Frigate",
+  "title": "Motion Search",
+  "description": "Draw a polygon to define the region of interest, and specify a time range to search for motion changes within that region.",
+  "selectCamera": "Motion Search is loading",
+  "startSearch": "Start Search",
+  "searchStarted": "Search started",
+  "searchCancelled": "Search cancelled",
+  "cancelSearch": "Cancel",
+  "searching": "Search in progress.",
+  "searchComplete": "Search complete",
+  "noResultsYet": "Run a search to find motion changes in the selected region",
+  "noChangesFound": "No pixel changes detected in the selected region",
+  "changesFound_one": "Found {{count}} motion change",
+  "changesFound_other": "Found {{count}} motion changes",
+  "framesProcessed": "{{count}} frames processed",
+  "jumpToTime": "Jump to this time",
+  "results": "Results",
+  "showSegmentHeatmap": "Heatmap",
+  "newSearch": "New Search",
+  "clearResults": "Clear Results",
+  "clearROI": "Clear polygon",
+  "polygonControls": {
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "undo": "Undo last point",
+    "reset": "Reset polygon"
+  },
+  "motionHeatmapLabel": "Motion Heatmap",
+  "dialog": {
+    "title": "Motion Search",
+    "cameraLabel": "Camera",
+    "previewAlt": "Camera preview for {{camera}}"
+  },
+  "timeRange": {
+    "title": "Search Range",
+    "start": "Start time",
+    "end": "End time"
+  },
+  "settings": {
+    "title": "Search Settings",
+    "parallelMode": "Parallel mode",
+    "parallelModeDesc": "Scan multiple recording segments at the same time (faster, but significantly more CPU intensive)",
+    "threshold": "Sensitivity Threshold",
+    "thresholdDesc": "Lower values detect smaller changes (1-255)",
+    "minArea": "Minimum Change Area",
+    "minAreaDesc": "Minimum percentage of the region of interest that must change to be considered significant",
+    "frameSkip": "Frame Skip",
+    "frameSkipDesc": "Process every Nth frame. Set this to your camera's frame rate to process one frame per second (e.g. 5 for a 5 FPS camera, 30 for a 30 FPS camera). Higher values will be faster, but may miss short motion events.",
+    "maxResults": "Maximum Results",
+    "maxResultsDesc": "Stop after this many matching timestamps"
+  },
+  "errors": {
+    "noCamera": "Please select a camera",
+    "noROI": "Please draw a region of interest",
+    "noTimeRange": "Please select a time range",
+    "invalidTimeRange": "End time must be after start time",
+    "searchFailed": "Search failed: {{message}}",
+    "polygonTooSmall": "Polygon must have at least 3 points",
+    "unknown": "Unknown error"
+  },
+  "changePercentage": "{{percentage}}% changed",
+  "metrics": {
+    "title": "Search Metrics",
+    "segmentsScanned": "Segments scanned",
+    "segmentsProcessed": "Processed",
+    "segmentsSkippedInactive": "Skipped (no activity)",
+    "segmentsSkippedHeatmap": "Skipped (no ROI overlap)",
+    "fallbackFullRange": "Fallback full-range scan",
+    "framesDecoded": "Frames decoded",
+    "wallTime": "Search time",
+    "segmentErrors": "Segment errors",
+    "seconds": "{{seconds}}s"
+  }
+}

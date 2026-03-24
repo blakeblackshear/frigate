@@ -133,7 +133,7 @@
   },
   "unit": {
     "speed": {
-      "kph": "Km/h",
+      "kph": "km/h",
       "mph": "míle/h"
     },
     "length": {
@@ -177,7 +177,7 @@
       "fi": "Suomi (Finština)",
       "sk": "Slovenčina (Slovenština)",
       "withSystem": {
-        "label": "Použít systémové nastavení pro jazyk"
+        "label": "Použít systémové nastavení jazyka"
       },
       "zhCN": "简体中文 (Zjednodušená čínština)",
       "es": "Español (Španělština)",
@@ -205,14 +205,15 @@
       "pl": "Polski (Polština)",
       "th": "ไทย (Thaiština)",
       "ca": "Català (Katalánština)",
-      "sl": "Slovinština (Slovinsko)",
-      "ptBR": "Português brasileiro (Brazilian Portuguese)",
-      "sr": "Српски (Serbian)",
-      "lt": "Lietuvių (Lithuanian)",
-      "bg": "Български (Bulgarian)",
-      "gl": "Galego (Galician)",
-      "id": "Bahasa Indonesia (Indonesian)",
-      "ur": "اردو (Urdu)"
+      "sl": "Slovinština (Slovinština)",
+      "ptBR": "Português brasileiro (Brazilská Portugalština)",
+      "sr": "Српски (Srbština)",
+      "lt": "Lietuvių (Litevština)",
+      "bg": "Български (Bulharština)",
+      "gl": "Galego (Galicijština)",
+      "id": "Bahasa Indonesia (Indonéština)",
+      "ur": "اردو (Urdština)",
+      "hr": "Hrvatski (Chorvatština)"
     },
     "theme": {
       "highcontrast": "Vysoký kontrast",

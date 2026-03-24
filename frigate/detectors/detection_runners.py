@@ -131,10 +131,8 @@ class ONNXModelRunner(BaseModelRunner):
 
         return model_type in [
             EnrichmentModelTypeEnum.paddleocr.value,
-            EnrichmentModelTypeEnum.yolov9_license_plate.value,
-            EnrichmentModelTypeEnum.jina_v1.value,
             EnrichmentModelTypeEnum.jina_v2.value,
-            EnrichmentModelTypeEnum.facenet.value,
+            EnrichmentModelTypeEnum.arcface.value,
             ModelTypeEnum.rfdetr.value,
             ModelTypeEnum.dfine.value,
         ]
@@ -529,6 +527,17 @@ class RKNNModelRunner(BaseModelRunner):
                             # Transpose from NCHW to NHWC
                             pixel_data = np.transpose(pixel_data, (0, 2, 3, 1))
                         rknn_inputs.append(pixel_data)
+                    elif name == "data":
+                        # ArcFace: undo Python normalisation to uint8 [0,255]
+                        # RKNN runtime applies mean=127.5/std=127.5 internally before first layer
+                        face_data = inputs[name]
+                        if len(face_data.shape) == 4 and face_data.shape[1] == 3:
+                            # Transpose from NCHW to NHWC
+                            face_data = np.transpose(face_data, (0, 2, 3, 1))
+                        face_data = (
+                            ((face_data + 1.0) * 127.5).clip(0, 255).astype(np.uint8)
+                        )
+                        rknn_inputs.append(face_data)
                     else:
                         rknn_inputs.append(inputs[name])
 

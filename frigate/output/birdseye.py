@@ -273,17 +273,13 @@ class BirdsEyeFrameManager:
         stop_event: mp.Event,
     ):
         self.config = config
-        self.mode = config.birdseye.mode
         width, height = get_canvas_shape(config.birdseye.width, config.birdseye.height)
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
-        self.inactivity_threshold = config.birdseye.inactivity_threshold
-
-        if config.birdseye.layout.max_cameras:
-            self.last_refresh_time = 0
+        self.last_refresh_time = 0
 
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
@@ -307,12 +303,20 @@ class BirdsEyeFrameManager:
                 birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is not None:
-            transparent_layer = birdseye_logo[:, :, 3]
+            if birdseye_logo.ndim == 2:
+                # Grayscale image (no channels) — use directly as luminance
+                transparent_layer = birdseye_logo
+            elif birdseye_logo.shape[2] >= 4:
+                # RGBA — use alpha channel as luminance
+                transparent_layer = birdseye_logo[:, :, 3]
+            else:
+                # RGB or other format without alpha — convert to grayscale
+                transparent_layer = cv2.cvtColor(birdseye_logo, cv2.COLOR_BGR2GRAY)
             y_offset = height // 2 - transparent_layer.shape[0] // 2
             x_offset = width // 2 - transparent_layer.shape[1] // 2
             self.blank_frame[
-                y_offset : y_offset + transparent_layer.shape[1],
-                x_offset : x_offset + transparent_layer.shape[0],
+                y_offset : y_offset + transparent_layer.shape[0],
+                x_offset : x_offset + transparent_layer.shape[1],
             ] = transparent_layer
         else:
             logger.warning("Unable to read Frigate logo")
@@ -420,12 +424,13 @@ class BirdsEyeFrameManager:
             [
                 cam
                 for cam, cam_data in self.cameras.items()
-                if self.config.cameras[cam].birdseye.enabled
+                if cam in self.config.cameras
+                and self.config.cameras[cam].birdseye.enabled
                 and self.config.cameras[cam].enabled_in_config
                 and self.config.cameras[cam].enabled
                 and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame_time"] - cam_data["last_active_frame"]
-                < self.inactivity_threshold
+                < self.config.birdseye.inactivity_threshold
             ]
         )
         logger.debug(f"Active cameras: {active_cameras}")
@@ -723,8 +728,11 @@ class BirdsEyeFrameManager:
         Update birdseye for a specific camera with new frame data.
         Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
         """
-        # don't process if birdseye is disabled for this camera
-        camera_config = self.config.cameras[camera]
+        # don't process if camera was removed or birdseye is disabled
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return False, False
+
         force_update = False
 
         # disabling birdseye is a little tricky
@@ -753,7 +761,7 @@ class BirdsEyeFrameManager:
             frame_changed, layout_changed = self.update_frame(frame)
         except Exception:
             frame_changed, layout_changed = False, False
-            self.active_cameras = []
+            self.active_cameras = set()
             self.camera_layout = []
             print(traceback.format_exc())
 

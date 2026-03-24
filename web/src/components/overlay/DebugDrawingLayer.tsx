@@ -10,7 +10,7 @@ import Konva from "konva";
 import { useResizeObserver } from "@/hooks/resize-observer";
 
 type DebugDrawingLayerProps = {
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   cameraWidth: number;
   cameraHeight: number;
 };

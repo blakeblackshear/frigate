@@ -72,6 +72,10 @@ export interface CameraConfig {
   };
   enabled: boolean;
   enabled_in_config: boolean;
+  face_recognition: {
+    enabled: boolean;
+    min_area: number;
+  };
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -99,6 +103,12 @@ export interface CameraConfig {
     quality: number;
     streams: { [key: string]: string };
   };
+  lpr: {
+    enabled: boolean;
+    expire_time: number;
+    min_area: number;
+    enhancement: number;
+  };
   motion: {
     contour_area: number;
     delta_alpha: number;
@@ -106,7 +116,15 @@ export interface CameraConfig {
     frame_height: number;
     improve_contrast: boolean;
     lightning_threshold: number;
-    mask: string[];
+    skip_motion_threshold: number | null;
+    mask: {
+      [maskId: string]: {
+        friendly_name?: string;
+        enabled: boolean;
+        enabled_in_config?: boolean;
+        coordinates: string;
+      };
+    };
     mqtt_off_delay: number;
     threshold: number;
   };
@@ -128,7 +146,14 @@ export interface CameraConfig {
   objects: {
     filters: {
       [objectName: string]: {
-        mask: string[] | null;
+        mask: {
+          [maskId: string]: {
+            friendly_name?: string;
+            enabled: boolean;
+            enabled_in_config?: boolean;
+            coordinates: string;
+          };
+        };
         max_area: number;
         max_ratio: number;
         min_area: number;
@@ -137,7 +162,14 @@ export interface CameraConfig {
         threshold: number;
       };
     };
-    mask: string;
+    mask: {
+      [maskId: string]: {
+        friendly_name?: string;
+        enabled: boolean;
+        enabled_in_config?: boolean;
+        coordinates: string;
+      };
+    };
     track: string[];
     genai: {
       enabled: boolean;
@@ -197,7 +229,6 @@ export interface CameraConfig {
       days: number;
       mode: string;
     };
-    sync_recordings: boolean;
   };
   review: {
     alerts: {
@@ -242,7 +273,6 @@ export interface CameraConfig {
   };
   snapshots: {
     bounding_box: boolean;
-    clean_copy: boolean;
     crop: boolean;
     enabled: boolean;
     height: number | null;
@@ -273,6 +303,8 @@ export interface CameraConfig {
     [zoneName: string]: {
       coordinates: string;
       distances: string[];
+      enabled: boolean;
+      enabled_in_config?: boolean;
       filters: Record<string, unknown>;
       inertia: number;
       loitering_time: number;
@@ -282,7 +314,30 @@ export interface CameraConfig {
       friendly_name?: string;
     };
   };
+  profiles?: Record<string, CameraProfileConfig>;
+  /** Pre-profile base section configs, present only when a profile is active */
+  base_config?: Record<string, Record<string, unknown>>;
 }
+
+export type CameraProfileConfig = {
+  enabled?: boolean;
+  audio?: Partial<CameraConfig["audio"]>;
+  birdseye?: Partial<CameraConfig["birdseye"]>;
+  detect?: Partial<CameraConfig["detect"]>;
+  face_recognition?: Partial<CameraConfig["face_recognition"]>;
+  lpr?: Partial<CameraConfig["lpr"]>;
+  motion?: Partial<CameraConfig["motion"]>;
+  notifications?: Partial<CameraConfig["notifications"]>;
+  objects?: Partial<CameraConfig["objects"]>;
+  record?: Partial<CameraConfig["record"]>;
+  review?: Partial<CameraConfig["review"]>;
+  snapshots?: Partial<CameraConfig["snapshots"]>;
+  zones?: Partial<CameraConfig["zones"]>;
+};
+
+export type ProfileDefinitionConfig = {
+  friendly_name: string;
+};
 
 export type CameraGroupConfig = {
   cameras: string[];
@@ -346,6 +401,7 @@ export interface FrigateConfig {
   };
 
   auth: {
+    enabled: boolean;
     roles: {
       [roleName: string]: string[];
     };
@@ -430,13 +486,15 @@ export interface FrigateConfig {
   };
 
   go2rtc: {
-    streams: string[];
+    streams: Record<string, string | string[]>;
     webrtc: {
       candidates: string[];
     };
   };
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
+
+  profiles: { [profileName: string]: ProfileDefinitionConfig };
 
   lpr: {
     enabled: boolean;
@@ -468,7 +526,7 @@ export interface FrigateConfig {
       supportedDetectors: string[];
       width: number;
       height: number;
-    };
+    } | null;
   };
 
   motion: Record<string, unknown> | null;
@@ -542,7 +600,6 @@ export interface FrigateConfig {
       days: number;
       mode: string;
     };
-    sync_recordings: boolean;
   };
 
   rtmp: {
@@ -558,7 +615,6 @@ export interface FrigateConfig {
 
   snapshots: {
     bounding_box: boolean;
-    clean_copy: boolean;
     crop: boolean;
     enabled: boolean;
     height: number | null;

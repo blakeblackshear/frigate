@@ -20,11 +20,7 @@ import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
 import { isDesktop, isMobile } from "react-device-detect";
-import {
-  flattenPoints,
-  parseCoordinates,
-  toRGBColorString,
-} from "@/utils/canvasUtil";
+import { toRGBColorString } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useCallback, useMemo, useState } from "react";
 import axios from "axios";
@@ -36,6 +32,10 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
+import ActivityIndicator from "../indicators/activity-indicator";
+import { cn } from "@/lib/utils";
+import { useMotionMaskState, useObjectMaskState, useZoneState } from "@/api/ws";
+import { getProfileColor } from "@/utils/profileColors";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -45,6 +45,12 @@ type PolygonItemProps = {
   setActivePolygonIndex: (index: number | undefined) => void;
   setEditPane: (type: PolygonType) => void;
   handleCopyCoordinates: (index: number) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  loadingPolygonIndex: number | undefined;
+  setLoadingPolygonIndex: (index: number | undefined) => void;
+  editingProfile?: string | null;
+  allProfileNames?: string[];
 };
 
 export default function PolygonItem({
@@ -55,12 +61,42 @@ export default function PolygonItem({
   setActivePolygonIndex,
   setEditPane,
   handleCopyCoordinates,
+  isLoading,
+  setIsLoading,
+  loadingPolygonIndex,
+  setLoadingPolygonIndex,
+  editingProfile,
+  allProfileNames,
 }: PolygonItemProps) {
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { payload: motionMaskState, send: sendMotionMaskState } =
+    useMotionMaskState(polygon.camera, polygon.name);
+  const { payload: objectMaskState, send: sendObjectMaskState } =
+    useObjectMaskState(polygon.camera, polygon.name);
+  const { payload: zoneState, send: sendZoneState } = useZoneState(
+    polygon.camera,
+    polygon.name,
+  );
+  const isPolygonEnabled = useMemo(() => {
+    const wsState =
+      polygon.type === "zone"
+        ? zoneState
+        : polygon.type === "motion_mask"
+          ? motionMaskState
+          : objectMaskState;
+    const wsEnabled =
+      wsState === "ON" ? true : wsState === "OFF" ? false : undefined;
+    return wsEnabled ?? polygon.enabled ?? true;
+  }, [
+    polygon.enabled,
+    polygon.type,
+    zoneState,
+    motionMaskState,
+    objectMaskState,
+  ]);
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -76,97 +112,12 @@ export default function PolygonItem({
 
   const PolygonItemIcon = polygon ? polygonTypeIcons[polygon.type] : undefined;
 
+  const isBasePolygon = !!editingProfile && polygon.polygonSource === "base";
+
   const saveToConfig = useCallback(
     async (polygon: Polygon) => {
       if (!polygon || !cameraConfig) {
         return;
-      }
-      let url = "";
-      if (polygon.type == "zone") {
-        const { alertQueries, detectionQueries } = reviewQueries(
-          polygon.name,
-          false,
-          false,
-          polygon.camera,
-          cameraConfig?.review.alerts.required_zones || [],
-          cameraConfig?.review.detections.required_zones || [],
-        );
-        url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
-      }
-      if (polygon.type == "motion_mask") {
-        const filteredMask = (
-          Array.isArray(cameraConfig.motion.mask)
-            ? cameraConfig.motion.mask
-            : [cameraConfig.motion.mask]
-        ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-
-        url = filteredMask
-          .map((pointsArray) => {
-            const coordinates = flattenPoints(
-              parseCoordinates(pointsArray),
-            ).join(",");
-            return `cameras.${polygon?.camera}.motion.mask=${coordinates}&`;
-          })
-          .join("");
-
-        if (!url) {
-          // deleting last mask
-          url = `cameras.${polygon?.camera}.motion.mask&`;
-        }
-      }
-
-      if (polygon.type == "object_mask") {
-        let configObject;
-        let globalMask = false;
-
-        // global mask on camera for all objects
-        if (!polygon.objects.length) {
-          configObject = cameraConfig.objects.mask;
-          globalMask = true;
-        } else {
-          configObject = cameraConfig.objects.filters[polygon.objects[0]].mask;
-        }
-
-        if (!configObject) {
-          return;
-        }
-
-        const globalObjectMasksArray = Array.isArray(cameraConfig.objects.mask)
-          ? cameraConfig.objects.mask
-          : cameraConfig.objects.mask
-            ? [cameraConfig.objects.mask]
-            : [];
-
-        let filteredMask;
-        if (globalMask) {
-          filteredMask = (
-            Array.isArray(configObject) ? configObject : [configObject]
-          ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-        } else {
-          filteredMask = (
-            Array.isArray(configObject) ? configObject : [configObject]
-          )
-            .filter((mask) => !globalObjectMasksArray.includes(mask))
-            .filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-        }
-
-        url = filteredMask
-          .map((pointsArray) => {
-            const coordinates = flattenPoints(
-              parseCoordinates(pointsArray),
-            ).join(",");
-            return globalMask
-              ? `cameras.${polygon?.camera}.objects.mask=${coordinates}&`
-              : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask=${coordinates}&`;
-          })
-          .join("");
-
-        if (!url) {
-          // deleting last mask
-          url = globalMask
-            ? `cameras.${polygon?.camera}.objects.mask&`
-            : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask`;
-        }
       }
 
       const updateTopicType =
@@ -178,12 +129,101 @@ export default function PolygonItem({
               ? "objects"
               : polygon.type;
 
+      const updateTopic = editingProfile
+        ? undefined
+        : `config/cameras/${polygon.camera}/${updateTopicType}`;
+
       setIsLoading(true);
+      setLoadingPolygonIndex(index);
+
+      if (polygon.type === "zone") {
+        let url: string;
+
+        if (editingProfile) {
+          // Profile mode: just delete the profile zone
+          url = `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${polygon.name}`;
+        } else {
+          // Base mode: handle review queries
+          const { alertQueries, detectionQueries } = reviewQueries(
+            polygon.name,
+            false,
+            false,
+            polygon.camera,
+            cameraConfig?.review.alerts.required_zones || [],
+            cameraConfig?.review.detections.required_zones || [],
+          );
+          url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
+        }
+
+        await axios
+          .put(`config/set?${url}`, {
+            requires_restart: 0,
+            update_topic: updateTopic,
+          })
+          .then((res) => {
+            if (res.status === 200) {
+              toast.success(
+                t("masksAndZones.form.polygonDrawing.delete.success", {
+                  name: polygon?.friendly_name ?? polygon?.name,
+                }),
+                { position: "top-center" },
+              );
+              updateConfig();
+            } else {
+              toast.error(
+                t("toast.save.error.title", {
+                  ns: "common",
+                  errorMessage: res.statusText,
+                }),
+                { position: "top-center" },
+              );
+            }
+          })
+          .catch((error) => {
+            const errorMessage =
+              error.response?.data?.message ||
+              error.response?.data?.detail ||
+              "Unknown error";
+            toast.error(
+              t("toast.save.error.title", { errorMessage, ns: "common" }),
+              { position: "top-center" },
+            );
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+        return;
+      }
+
+      // Motion masks and object masks use JSON body format
+      const deleteSection =
+        polygon.type === "motion_mask"
+          ? { motion: { mask: { [polygon.name]: null } } }
+          : !polygon.objects.length
+            ? { objects: { mask: { [polygon.name]: null } } }
+            : {
+                objects: {
+                  filters: {
+                    [polygon.objects[0]]: {
+                      mask: { [polygon.name]: null },
+                    },
+                  },
+                },
+              };
+
+      const configUpdate = {
+        cameras: {
+          [polygon.camera]: editingProfile
+            ? { profiles: { [editingProfile]: deleteSection } }
+            : deleteSection,
+        },
+      };
 
       await axios
-        .put(`config/set?${url}`, {
+        .put("config/set", {
+          config_data: configUpdate,
           requires_restart: 0,
-          update_topic: `config/cameras/${polygon.camera}/${updateTopicType}`,
+          update_topic: updateTopic,
         })
         .then((res) => {
           if (res.status === 200) {
@@ -191,9 +231,7 @@ export default function PolygonItem({
               t("masksAndZones.form.polygonDrawing.delete.success", {
                 name: polygon?.friendly_name ?? polygon?.name,
               }),
-              {
-                position: "top-center",
-              },
+              { position: "top-center" },
             );
             updateConfig();
           } else {
@@ -202,9 +240,7 @@ export default function PolygonItem({
                 ns: "common",
                 errorMessage: res.statusText,
               }),
-              {
-                position: "top-center",
-              },
+              { position: "top-center" },
             );
           }
         })
@@ -215,16 +251,23 @@ export default function PolygonItem({
             "Unknown error";
           toast.error(
             t("toast.save.error.title", { errorMessage, ns: "common" }),
-            {
-              position: "top-center",
-            },
+            { position: "top-center" },
           );
         })
         .finally(() => {
           setIsLoading(false);
+          setLoadingPolygonIndex(undefined);
         });
     },
-    [updateConfig, cameraConfig, t],
+    [
+      updateConfig,
+      cameraConfig,
+      t,
+      setIsLoading,
+      index,
+      setLoadingPolygonIndex,
+      editingProfile,
+    ],
   );
 
   const handleDelete = () => {
@@ -232,13 +275,57 @@ export default function PolygonItem({
     saveToConfig(polygon);
   };
 
+  const handleToggleEnabled = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      // Prevent toggling if disabled in config or if this is a base polygon in profile mode
+      if (polygon.enabled_in_config === false || isBasePolygon) {
+        return;
+      }
+      if (!polygon) {
+        return;
+      }
+
+      // Don't toggle via WS in profile mode
+      if (editingProfile) {
+        return;
+      }
+
+      const isEnabled = isPolygonEnabled;
+      const nextState = isEnabled ? "OFF" : "ON";
+
+      if (polygon.type === "zone") {
+        sendZoneState(nextState);
+        return;
+      }
+
+      if (polygon.type === "motion_mask") {
+        sendMotionMaskState(nextState);
+        return;
+      }
+
+      if (polygon.type === "object_mask") {
+        sendObjectMaskState(nextState);
+      }
+    },
+    [
+      isPolygonEnabled,
+      polygon,
+      sendZoneState,
+      sendMotionMaskState,
+      sendObjectMaskState,
+      isBasePolygon,
+      editingProfile,
+    ],
+  );
+
   return (
     <>
       <Toaster position="top-center" closeButton={true} />
 
       <div
         key={index}
-        className="transition-background my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100"
+        className="transition-background relative my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100"
         data-index={index}
         onMouseEnter={() => setHoveredPolygonIndex(index)}
         onMouseLeave={() => setHoveredPolygonIndex(null)}
@@ -250,23 +337,85 @@ export default function PolygonItem({
         }}
       >
         <div
-          className={`flex items-center ${
+          className={`flex min-w-0 items-center ${
             hoveredPolygonIndex === index
               ? "text-primary"
               : "text-primary-variant"
           }`}
         >
-          {PolygonItemIcon && (
-            <PolygonItemIcon
-              className="mr-2 size-5"
-              style={{
-                fill: toRGBColorString(polygon.color, true),
-                color: toRGBColorString(polygon.color, true),
-              }}
-            />
-          )}
-          <p className="cursor-default">
+          {PolygonItemIcon &&
+            (isLoading && loadingPolygonIndex === index ? (
+              <div className="mr-2">
+                <ActivityIndicator className="size-5" />
+              </div>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleToggleEnabled}
+                    disabled={
+                      isLoading ||
+                      polygon.enabled_in_config === false ||
+                      isBasePolygon ||
+                      !!editingProfile
+                    }
+                    className="mr-2 shrink-0 cursor-pointer border-none bg-transparent p-0 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <PolygonItemIcon
+                      className="size-5"
+                      style={{
+                        fill: toRGBColorString(polygon.color, isPolygonEnabled),
+                        color: toRGBColorString(
+                          polygon.color,
+                          isPolygonEnabled,
+                        ),
+                      }}
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {polygon.enabled_in_config === false
+                    ? t("masksAndZones.disabledInConfig", {
+                        ns: "views/settings",
+                      })
+                    : isPolygonEnabled
+                      ? t("button.disable", { ns: "common" })
+                      : t("button.enable", { ns: "common" })}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          {editingProfile &&
+            (polygon.polygonSource === "profile" ||
+              polygon.polygonSource === "override") &&
+            allProfileNames && (
+              <span
+                className={cn(
+                  "mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full",
+                  getProfileColor(editingProfile, allProfileNames).dot,
+                )}
+              />
+            )}
+          <p
+            className={cn(
+              "cursor-default",
+              !isPolygonEnabled && "opacity-60",
+              polygon.enabled_in_config === false && "line-through",
+              isBasePolygon && "opacity-50",
+            )}
+          >
             {polygon.friendly_name ?? polygon.name}
+            {!isPolygonEnabled && " (disabled)"}
+            {isBasePolygon && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                {t("masksAndZones.profileBase", { ns: "views/settings" })}
+              </span>
+            )}
+            {polygon.polygonSource === "override" && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                {t("masksAndZones.profileOverride", { ns: "views/settings" })}
+              </span>
+            )}
           </p>
         </div>
         <AlertDialog
@@ -316,6 +465,7 @@ export default function PolygonItem({
               <DropdownMenuContent>
                 <DropdownMenuItem
                   aria-label={t("button.edit", { ns: "common" })}
+                  disabled={isLoading}
                   onClick={() => {
                     setActivePolygonIndex(index);
                     setEditPane(polygon.type);
@@ -325,13 +475,14 @@ export default function PolygonItem({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   aria-label={t("button.copy", { ns: "common" })}
+                  disabled={isLoading}
                   onClick={() => handleCopyCoordinates(index)}
                 >
                   {t("button.copy", { ns: "common" })}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   aria-label={t("button.delete", { ns: "common" })}
-                  disabled={isLoading}
+                  disabled={isLoading || isBasePolygon}
                   onClick={() => setDeleteDialogOpen(true)}
                 >
                   {t("button.delete", { ns: "common" })}
@@ -341,15 +492,30 @@ export default function PolygonItem({
           </>
         )}
         {!isMobile && hoveredPolygonIndex === index && (
-          <div className="flex flex-row items-center gap-2">
+          <div
+            className="absolute inset-y-0 right-0 flex flex-row items-center gap-2 rounded-r-lg pl-8 pr-1"
+            style={{
+              background:
+                polygon.color.length === 3
+                  ? `linear-gradient(to right, transparent 0%, rgba(${polygon.color[2]},${polygon.color[1]},${polygon.color[0]},0.85) 40%)`
+                  : "linear-gradient(to right, transparent 0%, rgba(220,0,0,0.85) 40%)",
+            }}
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={LuPencil}
-                  className={`size-[15px] cursor-pointer ${hoveredPolygonIndex === index && "text-primary-variant"}`}
+                  disabled={isLoading}
+                  className={cn(
+                    "size-[15px] cursor-pointer",
+                    hoveredPolygonIndex === index && "text-primary-variant",
+                    isLoading && "cursor-not-allowed opacity-50",
+                  )}
                   onClick={() => {
-                    setActivePolygonIndex(index);
-                    setEditPane(polygon.type);
+                    if (!isLoading) {
+                      setActivePolygonIndex(index);
+                      setEditPane(polygon.type);
+                    }
                   }}
                 />
               </TooltipTrigger>
@@ -362,10 +528,16 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={LuCopy}
-                  className={`size-[15px] cursor-pointer ${
-                    hoveredPolygonIndex === index && "text-primary-variant"
-                  }`}
-                  onClick={() => handleCopyCoordinates(index)}
+                  className={cn(
+                    "size-[15px] cursor-pointer",
+                    hoveredPolygonIndex === index && "text-primary-variant",
+                    isLoading && "cursor-not-allowed opacity-50",
+                  )}
+                  onClick={() => {
+                    if (!isLoading) {
+                      handleCopyCoordinates(index);
+                    }
+                  }}
                 />
               </TooltipTrigger>
               <TooltipContent>
@@ -377,11 +549,17 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={HiTrash}
-                  className={`size-[15px] cursor-pointer ${
+                  disabled={isLoading}
+                  className={cn(
+                    "size-[15px] cursor-pointer",
                     hoveredPolygonIndex === index &&
-                    "fill-primary-variant text-primary-variant"
-                  }`}
-                  onClick={() => !isLoading && setDeleteDialogOpen(true)}
+                      "fill-primary-variant text-primary-variant",
+                    (isLoading || isBasePolygon) &&
+                      "cursor-not-allowed opacity-50",
+                  )}
+                  onClick={() =>
+                    !isLoading && !isBasePolygon && setDeleteDialogOpen(true)
+                  }
                 />
               </TooltipTrigger>
               <TooltipContent>

@@ -23,22 +23,21 @@ import { useCallback, useEffect, useMemo } from "react";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { ObjectMaskFormValuesType, Polygon } from "@/types/canvas";
 import PolygonEditControls from "./PolygonEditControls";
 import { FaCheckCircle } from "react-icons/fa";
-import {
-  flattenPoints,
-  interpolatePoints,
-  parseCoordinates,
-} from "@/utils/canvasUtil";
+import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import NameAndIdFields from "../input/NameAndIdFields";
+import { Switch } from "../ui/switch";
+import { useObjectMaskState } from "@/api/ws";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -52,6 +51,7 @@ type ObjectMaskEditPaneProps = {
   onCancel?: () => void;
   snapPoints: boolean;
   setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
+  editingProfile?: string | null;
 };
 
 export default function ObjectMaskEditPane({
@@ -66,6 +66,7 @@ export default function ObjectMaskEditPane({
   onCancel,
   snapPoints,
   setSnapPoints,
+  editingProfile,
 }: ObjectMaskEditPaneProps) {
   const { t } = useTranslation(["views/settings"]);
   const { data: config, mutate: updateConfig } =
@@ -79,6 +80,11 @@ export default function ObjectMaskEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const { send: sendObjectMaskState } = useObjectMaskState(
+    polygon?.camera || "",
+    polygon?.name || "",
+  );
+
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
       return config.cameras[polygon.camera];
@@ -87,48 +93,80 @@ export default function ObjectMaskEditPane({
 
   const defaultName = useMemo(() => {
     if (!polygons) {
-      return;
+      return "";
     }
 
     const count = polygons.filter((poly) => poly.type == "object_mask").length;
 
-    let objectType = "";
-    const objects = polygon?.objects[0];
-    if (objects === undefined) {
-      objectType = "all objects";
-    } else {
-      objectType = objects;
+    return t("masksAndZones.objectMaskLabel", {
+      number: count,
+    });
+  }, [polygons, t]);
+
+  const defaultId = useMemo(() => {
+    if (!polygons) {
+      return "";
     }
 
-    return t("masksAndZones.objectMaskLabel", {
-      number: count + 1,
-      label: getTranslatedLabel(objectType),
-    });
-  }, [polygons, polygon, t]);
+    const count = polygons.filter((poly) => poly.type == "object_mask").length;
 
-  const formSchema = z
-    .object({
-      objects: z.string(),
-      polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
-    })
-    .refine(() => polygon?.isFinished === true, {
+    return `object_mask_${count}`;
+  }, [polygons]);
+
+  const formSchema = z.object({
+    name: z
+      .string()
+      .min(1, {
+        message: t("masksAndZones.form.id.error.mustNotBeEmpty"),
+      })
+      .refine(
+        (value: string) => {
+          // When editing, allow the same name
+          if (polygon?.name && value === polygon.name) {
+            return true;
+          }
+          // Check if mask ID already exists in global masks or filter masks
+          const globalMaskIds = Object.keys(cameraConfig?.objects.mask || {});
+          const filterMaskIds = Object.values(
+            cameraConfig?.objects.filters || {},
+          ).flatMap((filter) => Object.keys(filter.mask || {}));
+          return (
+            !globalMaskIds.includes(value) && !filterMaskIds.includes(value)
+          );
+        },
+        {
+          message: t("masksAndZones.form.id.error.alreadyExists"),
+        },
+      ),
+    friendly_name: z.string().min(1, {
+      message: t("masksAndZones.form.name.error.mustNotBeEmpty"),
+    }),
+    enabled: z.boolean(),
+    objects: z.string(),
+    isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
       message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
-      path: ["polygon.isFinished"],
-    });
+    }),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
+      name: polygon?.name || defaultId,
+      friendly_name: polygon?.friendly_name || defaultName,
+      enabled: polygon?.enabled ?? true,
       objects: polygon?.objects[0] ?? "all_labels",
-      polygon: { isFinished: polygon?.isFinished ?? false, name: defaultName },
+      isFinished: polygon?.isFinished ?? false,
     },
   });
 
   const saveToConfig = useCallback(
-    async (
-      { objects: form_objects }: ObjectMaskFormValuesType, // values submitted via the form
-    ) => {
+    async ({
+      name: maskId,
+      friendly_name,
+      enabled,
+      objects: form_objects,
+    }: ObjectMaskFormValuesType) => {
       if (!scaledWidth || !scaledHeight || !polygon || !cameraConfig) {
         return;
       }
@@ -137,93 +175,91 @@ export default function ObjectMaskEditPane({
         interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
       ).join(",");
 
-      let queryString = "";
-      let configObject;
-      let createFilter = false;
-      let globalMask = false;
-      let filteredMask = [coordinates];
       const editingMask = polygon.name.length > 0;
+      const renamingMask = editingMask && maskId !== polygon.name;
+      const globalMask = form_objects === "all_labels";
 
-      // global mask on camera for all objects
-      if (form_objects == "all_labels") {
-        configObject = cameraConfig.objects.mask;
-        globalMask = true;
-      } else {
-        if (
-          cameraConfig.objects.filters[form_objects] &&
-          cameraConfig.objects.filters[form_objects].mask !== null
-        ) {
-          configObject = cameraConfig.objects.filters[form_objects].mask;
-        } else {
-          createFilter = true;
+      // Build the mask configuration
+      const maskConfig = {
+        friendly_name: friendly_name,
+        enabled: enabled,
+        coordinates: coordinates,
+      };
+
+      // If renaming, delete the old mask first
+      if (renamingMask) {
+        try {
+          // Determine if old mask was global or per-object
+          const wasGlobal =
+            polygon.objects.length === 0 || polygon.objects[0] === "all_labels";
+
+          let oldPath: string;
+          if (editingProfile) {
+            oldPath = wasGlobal
+              ? `cameras.${polygon.camera}.profiles.${editingProfile}.objects.mask.${polygon.name}`
+              : `cameras.${polygon.camera}.profiles.${editingProfile}.objects.filters.${polygon.objects[0]}.mask.${polygon.name}`;
+          } else {
+            oldPath = wasGlobal
+              ? `cameras.${polygon.camera}.objects.mask.${polygon.name}`
+              : `cameras.${polygon.camera}.objects.filters.${polygon.objects[0]}.mask.${polygon.name}`;
+          }
+
+          await axios.put(`config/set?${oldPath}`, {
+            requires_restart: 0,
+          });
+        } catch {
+          toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+            position: "top-center",
+          });
+          setIsLoading(false);
+          return;
         }
       }
 
-      if (!createFilter) {
-        let index = Array.isArray(configObject)
-          ? configObject.length
-          : configObject
-            ? 1
-            : 0;
+      // Build config path based on profile mode
+      const objectsSection = globalMask
+        ? { objects: { mask: { [maskId]: maskConfig } } }
+        : {
+            objects: {
+              filters: { [form_objects]: { mask: { [maskId]: maskConfig } } },
+            },
+          };
 
-        // editing existing mask, not creating a new one
-        if (editingMask) {
-          index = polygon.typeIndex;
-        }
+      const cameraData = editingProfile
+        ? { profiles: { [editingProfile]: objectsSection } }
+        : objectsSection;
 
-        filteredMask = (
-          Array.isArray(configObject) ? configObject : [configObject as string]
-        ).filter((_, currentIndex) => currentIndex !== index);
+      const updateTopic = editingProfile
+        ? undefined
+        : `config/cameras/${polygon.camera}/objects`;
 
-        filteredMask.splice(index, 0, coordinates);
-      }
-
-      // prevent duplicating global masks under specific object filters
-      if (!globalMask) {
-        const globalObjectMasksArray = Array.isArray(cameraConfig.objects.mask)
-          ? cameraConfig.objects.mask
-          : cameraConfig.objects.mask
-            ? [cameraConfig.objects.mask]
-            : [];
-
-        filteredMask = filteredMask.filter(
-          (mask) => !globalObjectMasksArray.includes(mask),
-        );
-      }
-
-      queryString = filteredMask
-        .map((pointsArray) => {
-          const coordinates = flattenPoints(parseCoordinates(pointsArray)).join(
-            ",",
-          );
-          return globalMask
-            ? `cameras.${polygon?.camera}.objects.mask=${coordinates}&`
-            : `cameras.${polygon?.camera}.objects.filters.${form_objects}.mask=${coordinates}&`;
-        })
-        .join("");
-
-      if (!queryString) {
-        return;
-      }
+      const configBody = {
+        config_data: {
+          cameras: {
+            [polygon.camera]: cameraData,
+          },
+        },
+        requires_restart: 0,
+        update_topic: updateTopic,
+      };
 
       axios
-        .put(`config/set?${queryString}`, {
-          requires_restart: 0,
-          update_topic: `config/cameras/${polygon.camera}/objects`,
-        })
+        .put("config/set", configBody)
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              polygon.name
-                ? t("masksAndZones.objectMasks.toast.success.title", {
-                    polygonName: polygon.name,
-                  })
-                : t("masksAndZones.objectMasks.toast.success.noName"),
+              t("masksAndZones.objectMasks.toast.success.title", {
+                polygonName: friendly_name || maskId,
+              }),
               {
                 position: "top-center",
               },
             );
             updateConfig();
+            // Only publish WS state for base config
+            if (!editingProfile) {
+              sendObjectMaskState(enabled ? "ON" : "OFF");
+            }
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -263,6 +299,8 @@ export default function ObjectMaskEditPane({
       setIsLoading,
       cameraConfig,
       t,
+      sendObjectMaskState,
+      editingProfile,
     ],
   );
 
@@ -323,89 +361,118 @@ export default function ObjectMaskEditPane({
 
       <Separator className="my-3 bg-secondary" />
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-1 flex-col space-y-6"
-        >
-          <div>
-            <FormField
-              control={form.control}
-              name="polygon.name"
-              render={() => (
-                <FormItem>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="objects"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {t("masksAndZones.objectMasks.objects.title")}
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={polygon.name.length != 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an object type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <ZoneObjectSelector camera={polygon.camera} />
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    {t("masksAndZones.objectMasks.objects.desc")}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="polygon.isFinished"
-              render={() => (
-                <FormItem>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex flex-1 flex-col justify-end">
-            <div className="flex flex-row gap-2 pt-5">
-              <Button
-                className="flex flex-1"
-                aria-label={t("button.cancel", { ns: "common" })}
-                onClick={onCancel}
-              >
-                {t("button.cancel", { ns: "common" })}
-              </Button>
-              <Button
-                variant="select"
-                disabled={isLoading}
-                className="flex flex-1"
-                aria-label={t("button.save", { ns: "common" })}
-                type="submit"
-              >
-                {isLoading ? (
-                  <div className="flex flex-row items-center gap-2">
-                    <ActivityIndicator />
-                    <span>{t("button.saving", { ns: "common" })}</span>
-                  </div>
-                ) : (
-                  t("button.save", { ns: "common" })
+      <FormProvider {...form}>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-1 flex-col space-y-6"
+          >
+            <div className="space-y-4">
+              <NameAndIdFields
+                type="object_mask"
+                control={form.control}
+                nameField="friendly_name"
+                idField="name"
+                idVisible={(polygon && polygon.name.length > 0) ?? false}
+                nameLabel={t("masksAndZones.objectMasks.name.title")}
+                nameDescription={t(
+                  "masksAndZones.objectMasks.name.description",
                 )}
-              </Button>
+                placeholderName={t(
+                  "masksAndZones.objectMasks.name.placeholder",
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>
+                        {t("masksAndZones.masks.enabled.title")}
+                      </FormLabel>
+                      <FormDescription>
+                        {t("masksAndZones.masks.enabled.description")}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="objects"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("masksAndZones.objectMasks.objects.title")}
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={polygon.name.length != 0}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an object type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <ZoneObjectSelector camera={polygon.camera} />
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      {t("masksAndZones.objectMasks.objects.desc")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isFinished"
+                render={() => (
+                  <FormItem>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          </div>
-        </form>
-      </Form>
+            <div className="flex flex-1 flex-col justify-end">
+              <div className="flex flex-row gap-2 pt-5">
+                <Button
+                  className="flex flex-1"
+                  aria-label={t("button.cancel", { ns: "common" })}
+                  onClick={onCancel}
+                >
+                  {t("button.cancel", { ns: "common" })}
+                </Button>
+                <Button
+                  variant="select"
+                  disabled={isLoading}
+                  className="flex flex-1"
+                  aria-label={t("button.save", { ns: "common" })}
+                  type="submit"
+                >
+                  {isLoading ? (
+                    <div className="flex flex-row items-center gap-2">
+                      <ActivityIndicator className="size-4" />
+                      <span>{t("button.saving", { ns: "common" })}</span>
+                    </div>
+                  ) : (
+                    t("button.save", { ns: "common" })
+                  )}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </FormProvider>
     </>
   );
 }

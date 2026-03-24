@@ -10,7 +10,7 @@ import {
 export default function ProtectedRoute({
   requiredRoles,
 }: {
-  requiredRoles: string[];
+  requiredRoles?: string[];
 }) {
   const { auth } = useContext(AuthContext);
 
@@ -36,6 +36,13 @@ export default function ProtectedRoute({
     );
   }
 
+  // Wait for config to provide required roles
+  if (!requiredRoles) {
+    return (
+      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
   if (auth.isLoading) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -47,7 +54,7 @@ export default function ProtectedRoute({
     return <Outlet />;
   }
 
-  // Authenticated mode (8971): require login
+  // Authenticated mode (external port): require login
   if (!auth.user) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />

@@ -4,7 +4,7 @@ import os
 
 import cv2
 import numpy as np
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -13,7 +13,7 @@ from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 try:
     from tflite_runtime.interpreter import Interpreter, load_delegate
 except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
+    from ai_edge_litert.interpreter import Interpreter, load_delegate
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,18 @@ DETECTOR_KEY = "edgetpu"
 
 
 class EdgeTpuDetectorConfig(BaseDetectorConfig):
+    """EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate."""
+
+    model_config = ConfigDict(
+        title="EdgeTPU",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default=None, title="Device Type")
+    device: str = Field(
+        default=None,
+        title="Device Type",
+        description="The device to use for EdgeTPU inference (e.g. 'usb', 'pci').",
+    )
 
 
 class EdgeTpuTfl(DetectionApi):

@@ -115,8 +115,11 @@
     "internalID": "The Internal ID Frigate uses in the configuration and database"
   },
   "button": {
+    "add": "Add",
     "apply": "Apply",
+    "applying": "Applying…",
     "reset": "Reset",
+    "undo": "Undo",
     "done": "Done",
     "enabled": "Enabled",
     "enable": "Enable",
@@ -127,6 +130,7 @@
     "cancel": "Cancel",
     "close": "Close",
     "copy": "Copy",
+    "copiedToClipboard": "Copied to clipboard",
     "back": "Back",
     "history": "History",
     "fullscreen": "Fullscreen",
@@ -150,13 +154,22 @@
     "export": "Export",
     "deleteNow": "Delete Now",
     "next": "Next",
-    "continue": "Continue"
+    "continue": "Continue",
+    "modified": "Modified",
+    "overridden": "Overridden",
+    "resetToGlobal": "Reset to Global",
+    "resetToDefault": "Reset to Default",
+    "saveAll": "Save All",
+    "savingAll": "Saving All…",
+    "undoAll": "Undo All",
+    "retry": "Retry"
   },
   "menu": {
     "system": "System",
     "systemMetrics": "System metrics",
     "configuration": "Configuration",
     "systemLogs": "System logs",
+    "profiles": "Profiles",
     "settings": "Settings",
     "configurationEditor": "Configuration Editor",
     "languages": "Languages",
@@ -242,9 +255,11 @@
     "review": "Review",
     "explore": "Explore",
     "export": "Export",
+    "actions": "Actions",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
     "classification": "Classification",
+    "chat": "Chat",
     "user": {
       "title": "User",
       "account": "Account",
@@ -261,7 +276,8 @@
       "error": {
         "title": "Failed to save config changes: {{errorMessage}}",
         "noMessage": "Failed to save config changes"
-      }
+      },
+      "success": "Successfully saved config changes."
     }
   },
   "role": {
@@ -296,5 +312,7 @@
   "readTheDocumentation": "Read the documentation",
   "information": {
     "pixels": "{{area}}px"
-  }
+  },
+  "no_items": "No items",
+  "validation_errors": "Validation Errors"
 }

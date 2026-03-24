@@ -11,7 +11,7 @@ By default, descriptions will be generated for all tracked objects and all zones
 
 Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the uncompressed images from the `detect` stream collected over the object's lifetime to the model. Once the object lifecycle ends, only a single compressed and cropped thumbnail is saved with the tracked object. Using a snapshot might be useful when you want to _regenerate_ a tracked object's description as it will provide the AI with a higher-quality image (typically downscaled by the AI itself) than the cropped/compressed thumbnail. Using a snapshot otherwise has a trade-off in that only a single image is sent to your provider, which will limit the model's ability to determine object movement or direction.
 
-Generative AI object descriptions can also be toggled dynamically for a camera via MQTT with the topic `frigate/<camera_name>/object_descriptions/set`. See the [MQTT documentation](/integrations/mqtt/#frigatecamera_nameobjectdescriptionsset).
+Generative AI object descriptions can also be toggled dynamically for a camera via MQTT with the topic `frigate/<camera_name>/object_descriptions/set`. See the [MQTT documentation](/integrations/mqtt#frigatecamera_nameobject_descriptionsset).
 
 ## Usage and Best Practices
 

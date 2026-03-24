@@ -8,20 +8,18 @@ and generates JSON translation files with titles and descriptions for the web UI
 
 import json
 import logging
-import shutil
+import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, get_args, get_origin
-
-from pydantic import BaseModel
-from pydantic.fields import FieldInfo
+from typing import Any, Dict, get_args, get_origin
 
 from frigate.config.config import FrigateConfig
+from frigate.util.schema import get_config_schema
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_field_translations(field_info: FieldInfo) -> Dict[str, str]:
+def get_field_translations(field_info) -> Dict[str, str]:
     """Extract title and description from a Pydantic field."""
     translations = {}
 
@@ -34,50 +32,147 @@ def get_field_translations(field_info: FieldInfo) -> Dict[str, str]:
     return translations
 
 
-def process_model_fields(model: type[BaseModel]) -> Dict[str, Any]:
+def extract_translations_from_schema(
+    schema: Dict[str, Any], defs: Dict[str, Any] = None
+) -> Dict[str, Any]:
     """
-    Recursively process a Pydantic model to extract translations.
+    Recursively extract translations (titles and descriptions) from a JSON schema.
 
-    Returns a nested dictionary structure matching the config schema,
-    with title and description for each field.
+    Returns a dictionary structure with label and description for each field,
+    and nested fields directly under their parent keys.
     """
+    if defs is None:
+        defs = schema.get("$defs", {})
+
     translations = {}
 
-    model_fields = model.model_fields
+    # Add top-level title and description if present
+    if "title" in schema:
+        translations["label"] = schema["title"]
+    if "description" in schema:
+        translations["description"] = schema["description"]
 
-    for field_name, field_info in model_fields.items():
-        field_translations = get_field_translations(field_info)
+    # Process nested properties
+    properties = schema.get("properties", {})
+    for field_name, field_schema in properties.items():
+        field_translations = {}
 
-        # Get the field's type annotation
-        field_type = field_info.annotation
+        # Handle $ref references
+        if "$ref" in field_schema:
+            ref_path = field_schema["$ref"]
+            if ref_path.startswith("#/$defs/"):
+                ref_name = ref_path.split("/")[-1]
+                if ref_name in defs:
+                    ref_schema = defs[ref_name]
+                    # Extract from the referenced schema
+                    ref_translations = extract_translations_from_schema(
+                        ref_schema, defs=defs
+                    )
+                    # Use the $ref field's own title/description if present
+                    if "title" in field_schema:
+                        field_translations["label"] = field_schema["title"]
+                    elif "label" in ref_translations:
+                        field_translations["label"] = ref_translations["label"]
+                    if "description" in field_schema:
+                        field_translations["description"] = field_schema["description"]
+                    elif "description" in ref_translations:
+                        field_translations["description"] = ref_translations[
+                            "description"
+                        ]
+                    # Add nested properties from referenced schema
+                    nested_without_root = {
+                        k: v
+                        for k, v in ref_translations.items()
+                        if k not in ("label", "description")
+                    }
+                    field_translations.update(nested_without_root)
+        # Handle additionalProperties with $ref (for dict types)
+        elif "additionalProperties" in field_schema:
+            additional_props = field_schema["additionalProperties"]
+            # Extract title and description from the field itself
+            if "title" in field_schema:
+                field_translations["label"] = field_schema["title"]
+            if "description" in field_schema:
+                field_translations["description"] = field_schema["description"]
 
-        # Handle Optional types
-        origin = get_origin(field_type)
+            # If additionalProperties contains a $ref, extract nested translations
+            if "$ref" in additional_props:
+                ref_path = additional_props["$ref"]
+                if ref_path.startswith("#/$defs/"):
+                    ref_name = ref_path.split("/")[-1]
+                    if ref_name in defs:
+                        ref_schema = defs[ref_name]
+                        nested = extract_translations_from_schema(ref_schema, defs=defs)
+                        nested_without_root = {
+                            k: v
+                            for k, v in nested.items()
+                            if k not in ("label", "description")
+                        }
+                        field_translations.update(nested_without_root)
+        # Handle items with $ref (for array types)
+        elif "items" in field_schema:
+            items = field_schema["items"]
+            # Extract title and description from the field itself
+            if "title" in field_schema:
+                field_translations["label"] = field_schema["title"]
+            if "description" in field_schema:
+                field_translations["description"] = field_schema["description"]
 
-        if origin is Optional or (
-            hasattr(origin, "__name__") and origin.__name__ == "UnionType"
-        ):
-            args = get_args(field_type)
-            field_type = next(
-                (arg for arg in args if arg is not type(None)), field_type
-            )
+            # If items contains a $ref, extract nested translations
+            if "$ref" in items:
+                ref_path = items["$ref"]
+                if ref_path.startswith("#/$defs/"):
+                    ref_name = ref_path.split("/")[-1]
+                    if ref_name in defs:
+                        ref_schema = defs[ref_name]
+                        nested = extract_translations_from_schema(ref_schema, defs=defs)
+                        nested_without_root = {
+                            k: v
+                            for k, v in nested.items()
+                            if k not in ("label", "description")
+                        }
+                        field_translations.update(nested_without_root)
+        else:
+            # Extract title and description
+            if "title" in field_schema:
+                field_translations["label"] = field_schema["title"]
+            if "description" in field_schema:
+                field_translations["description"] = field_schema["description"]
 
-        # Handle Dict types (like Dict[str, CameraConfig])
-        if get_origin(field_type) is dict:
-            dict_args = get_args(field_type)
-
-            if len(dict_args) >= 2:
-                value_type = dict_args[1]
-
-                if isinstance(value_type, type) and issubclass(value_type, BaseModel):
-                    nested_translations = process_model_fields(value_type)
-
-                    if nested_translations:
-                        field_translations["properties"] = nested_translations
-        elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
-            nested_translations = process_model_fields(field_type)
-            if nested_translations:
-                field_translations["properties"] = nested_translations
+            # Recursively process nested properties
+            if "properties" in field_schema:
+                nested = extract_translations_from_schema(field_schema, defs=defs)
+                # Merge nested translations
+                nested_without_root = {
+                    k: v for k, v in nested.items() if k not in ("label", "description")
+                }
+                field_translations.update(nested_without_root)
+            # Handle anyOf cases
+            elif "anyOf" in field_schema:
+                for item in field_schema["anyOf"]:
+                    if "properties" in item:
+                        nested = extract_translations_from_schema(item, defs=defs)
+                        nested_without_root = {
+                            k: v
+                            for k, v in nested.items()
+                            if k not in ("label", "description")
+                        }
+                        field_translations.update(nested_without_root)
+                    elif "$ref" in item:
+                        ref_path = item["$ref"]
+                        if ref_path.startswith("#/$defs/"):
+                            ref_name = ref_path.split("/")[-1]
+                            if ref_name in defs:
+                                ref_schema = defs[ref_name]
+                                nested = extract_translations_from_schema(
+                                    ref_schema, defs=defs
+                                )
+                                nested_without_root = {
+                                    k: v
+                                    for k, v in nested.items()
+                                    if k not in ("label", "description")
+                                }
+                                field_translations.update(nested_without_root)
 
         if field_translations:
             translations[field_name] = field_translations
@@ -85,76 +180,389 @@ def process_model_fields(model: type[BaseModel]) -> Dict[str, Any]:
     return translations
 
 
-def generate_section_translation(
-    section_name: str, field_info: FieldInfo
-) -> Dict[str, Any]:
+def generate_section_translation(config_class: type) -> Dict[str, Any]:
     """
-    Generate translation structure for a top-level config section.
+    Generate translation structure for a config section using its JSON schema.
     """
-    section_translations = get_field_translations(field_info)
-    field_type = field_info.annotation
-    origin = get_origin(field_type)
+    schema = config_class.model_json_schema()
+    return extract_translations_from_schema(schema)
 
-    if origin is Optional or (
-        hasattr(origin, "__name__") and origin.__name__ == "UnionType"
-    ):
-        args = get_args(field_type)
-        field_type = next((arg for arg in args if arg is not type(None)), field_type)
 
-    # Handle Dict types (like detectors, cameras, camera_groups)
-    if get_origin(field_type) is dict:
-        dict_args = get_args(field_type)
-        if len(dict_args) >= 2:
-            value_type = dict_args[1]
-            if isinstance(value_type, type) and issubclass(value_type, BaseModel):
-                nested = process_model_fields(value_type)
-                if nested:
-                    section_translations["properties"] = nested
+def get_detector_translations(
+    config_schema: Dict[str, Any],
+) -> tuple[Dict[str, Any], Dict[str, Any], set[str]]:
+    """Build detector type translations with nested fields based on schema definitions.
 
-    # If the field itself is a BaseModel, process it
-    elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
-        nested = process_model_fields(field_type)
-        if nested:
-            section_translations["properties"] = nested
+    Returns a tuple of (type_translations, shared_fields, nested_field_keys).
+    Shared fields (identical across all detector types) are returned separately
+    to avoid duplication in the output.
+    """
+    defs = config_schema.get("$defs", {})
+    detector_schema = defs.get("DetectorConfig", {})
+    discriminator = detector_schema.get("discriminator", {})
+    mapping = discriminator.get("mapping", {})
 
-    return section_translations
+    # First pass: collect all nested fields per detector type
+    all_nested: Dict[str, Dict[str, Any]] = {}
+    type_meta: Dict[str, Dict[str, str]] = {}
+
+    for detector_type, ref in mapping.items():
+        if not isinstance(ref, str) or not ref.startswith("#/$defs/"):
+            continue
+
+        ref_name = ref.split("/")[-1]
+        ref_schema = defs.get(ref_name, {})
+        if not ref_schema:
+            continue
+
+        meta: Dict[str, str] = {}
+        title = ref_schema.get("title")
+        description = ref_schema.get("description")
+        if title:
+            meta["label"] = title
+        if description:
+            meta["description"] = description
+        type_meta[detector_type] = meta
+
+        nested = extract_translations_from_schema(ref_schema, defs=defs)
+        all_nested[detector_type] = {
+            k: v for k, v in nested.items() if k not in ("label", "description")
+        }
+
+    # Find fields that are identical across all types that have them
+    shared_fields: Dict[str, Any] = {}
+    if all_nested:
+        # Collect all field keys across all types
+        all_keys: set[str] = set()
+        for nested in all_nested.values():
+            all_keys.update(nested.keys())
+
+        for key in all_keys:
+            values = [nested[key] for nested in all_nested.values() if key in nested]
+            if len(values) == len(all_nested) and all(v == values[0] for v in values):
+                shared_fields[key] = values[0]
+
+    # Build per-type translations with only unique (non-shared) fields
+    type_translations: Dict[str, Any] = {}
+    nested_field_keys: set[str] = set()
+    for detector_type, nested in all_nested.items():
+        type_entry: Dict[str, Any] = {}
+        type_entry.update(type_meta.get(detector_type, {}))
+
+        unique_fields = {k: v for k, v in nested.items() if k not in shared_fields}
+        if unique_fields:
+            type_entry.update(unique_fields)
+            nested_field_keys.update(unique_fields.keys())
+
+        if type_entry:
+            type_translations[detector_type] = type_entry
+
+    return type_translations, shared_fields, nested_field_keys
 
 
 def main():
     """Main function to generate config translations."""
 
     # Define output directory
-    output_dir = Path(__file__).parent / "web" / "public" / "locales" / "en" / "config"
+    if len(sys.argv) > 1:
+        output_dir = Path(sys.argv[1])
+    else:
+        output_dir = (
+            Path(__file__).parent / "web" / "public" / "locales" / "en" / "config"
+        )
 
     logger.info(f"Output directory: {output_dir}")
 
-    # Clean and recreate the output directory
-    if output_dir.exists():
-        logger.info(f"Removing existing directory: {output_dir}")
-        shutil.rmtree(output_dir)
-
-    logger.info(f"Creating directory: {output_dir}")
+    # Ensure the output directory exists; do not delete existing files.
     output_dir.mkdir(parents=True, exist_ok=True)
+    logger.info(
+        f"Using output directory (existing files will be overwritten): {output_dir}"
+    )
 
     config_fields = FrigateConfig.model_fields
+    config_schema = get_config_schema(FrigateConfig)
     logger.info(f"Found {len(config_fields)} top-level config sections")
+
+    global_translations = {}
 
     for field_name, field_info in config_fields.items():
         if field_name.startswith("_"):
             continue
 
         logger.info(f"Processing section: {field_name}")
-        section_data = generate_section_translation(field_name, field_info)
+
+        # Get the field's type
+        field_type = field_info.annotation
+        from typing import Optional, Union
+
+        origin = get_origin(field_type)
+        if (
+            origin is Optional
+            or origin is Union
+            or (
+                hasattr(origin, "__name__")
+                and origin.__name__ in ("UnionType", "Union")
+            )
+        ):
+            args = get_args(field_type)
+            field_type = next(
+                (arg for arg in args if arg is not type(None)), field_type
+            )
+
+        # Handle Dict[str, SomeModel] - extract the value type
+        if origin is dict:
+            args = get_args(field_type)
+            if args and len(args) > 1:
+                field_type = args[1]  # Get value type from Dict[key, value]
+
+        # Start with field's top-level metadata (label, description)
+        section_data = get_field_translations(field_info)
+
+        # Generate nested translations from the field type's schema
+        if hasattr(field_type, "model_json_schema"):
+            schema = field_type.model_json_schema()
+            # Extract nested properties from schema
+            nested = extract_translations_from_schema(schema)
+            # Remove top-level label/description from nested since we got those from field_info
+            nested_without_root = {
+                k: v for k, v in nested.items() if k not in ("label", "description")
+            }
+            section_data.update(nested_without_root)
+
+        if field_name == "detectors":
+            detector_types, shared_fields, detector_field_keys = (
+                get_detector_translations(config_schema)
+            )
+            # Add shared fields at the base detectors level
+            section_data.update(shared_fields)
+            # Add per-type translations (only unique fields per type)
+            section_data.update(detector_types)
+            for key in detector_field_keys:
+                if key == "type":
+                    continue
+                section_data.pop(key, None)
 
         if not section_data:
             logger.warning(f"No translations found for section: {field_name}")
             continue
 
-        output_file = output_dir / f"{field_name}.json"
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(section_data, f, indent=2, ensure_ascii=False)
+        # Add camera-level fields to global config documentation if applicable
+        CAMERA_LEVEL_FIELDS = {
+            "birdseye": (
+                "frigate.config.camera.birdseye",
+                "BirdseyeCameraConfig",
+                ["order"],
+            ),
+            "ffmpeg": (
+                "frigate.config.camera.ffmpeg",
+                "CameraFfmpegConfig",
+                ["inputs"],
+            ),
+            "lpr": (
+                "frigate.config.classification",
+                "CameraLicensePlateRecognitionConfig",
+                ["expire_time"],
+            ),
+            "semantic_search": (
+                "frigate.config.classification",
+                "CameraSemanticSearchConfig",
+                ["triggers"],
+            ),
+        }
 
-        logger.info(f"Generated: {output_file}")
+        if field_name in CAMERA_LEVEL_FIELDS:
+            module_path, class_name, field_names = CAMERA_LEVEL_FIELDS[field_name]
+            try:
+                import importlib
+
+                module = importlib.import_module(module_path)
+                camera_class = getattr(module, class_name)
+                schema = camera_class.model_json_schema()
+                camera_fields = schema.get("properties", {})
+                defs = schema.get("$defs", {})
+
+                for fname in field_names:
+                    if fname in camera_fields:
+                        field_schema = camera_fields[fname]
+                        field_trans = {}
+                        if "title" in field_schema:
+                            field_trans["label"] = field_schema["title"]
+                        if "description" in field_schema:
+                            field_trans["description"] = field_schema["description"]
+
+                        # Extract nested properties based on schema type
+                        nested_to_extract = None
+
+                        # Handle direct $ref
+                        if "$ref" in field_schema:
+                            ref_path = field_schema["$ref"]
+                            if ref_path.startswith("#/$defs/"):
+                                ref_name = ref_path.split("/")[-1]
+                                if ref_name in defs:
+                                    nested_to_extract = defs[ref_name]
+
+                        # Handle additionalProperties with $ref (for dict types)
+                        elif "additionalProperties" in field_schema:
+                            additional_props = field_schema["additionalProperties"]
+                            if "$ref" in additional_props:
+                                ref_path = additional_props["$ref"]
+                                if ref_path.startswith("#/$defs/"):
+                                    ref_name = ref_path.split("/")[-1]
+                                    if ref_name in defs:
+                                        nested_to_extract = defs[ref_name]
+
+                        # Handle items with $ref (for array types)
+                        elif "items" in field_schema:
+                            items = field_schema["items"]
+                            if "$ref" in items:
+                                ref_path = items["$ref"]
+                                if ref_path.startswith("#/$defs/"):
+                                    ref_name = ref_path.split("/")[-1]
+                                    if ref_name in defs:
+                                        nested_to_extract = defs[ref_name]
+
+                        # Extract nested properties if we found a schema to use
+                        if nested_to_extract:
+                            nested = extract_translations_from_schema(
+                                nested_to_extract, defs=defs
+                            )
+                            nested_without_root = {
+                                k: v
+                                for k, v in nested.items()
+                                if k not in ("label", "description")
+                            }
+                            field_trans.update(nested_without_root)
+
+                        if field_trans:
+                            section_data[fname] = field_trans
+            except Exception as e:
+                logger.warning(
+                    f"Could not add camera-level fields for {field_name}: {e}"
+                )
+
+        # Add to global translations instead of writing separate files
+        global_translations[field_name] = section_data
+
+        logger.info(f"Added section to global translations: {field_name}")
+
+    # Handle camera-level configs that aren't top-level FrigateConfig fields
+    # These are defined as fields in CameraConfig, so we extract title/description from there
+    camera_level_configs = {
+        "camera_mqtt": ("frigate.config.camera.mqtt", "CameraMqttConfig", "mqtt"),
+        "camera_ui": ("frigate.config.camera.ui", "CameraUiConfig", "ui"),
+        "onvif": ("frigate.config.camera.onvif", "OnvifConfig", "onvif"),
+    }
+
+    # Import CameraConfig to extract field metadata
+    from frigate.config.camera.camera import CameraConfig
+
+    camera_config_schema = CameraConfig.model_json_schema()
+    camera_properties = camera_config_schema.get("properties", {})
+
+    for config_name, (
+        module_path,
+        class_name,
+        camera_field_name,
+    ) in camera_level_configs.items():
+        try:
+            logger.info(f"Processing camera-level section: {config_name}")
+            import importlib
+
+            module = importlib.import_module(module_path)
+            config_class = getattr(module, class_name)
+
+            section_data = {}
+
+            # Extract top-level label and description from CameraConfig field definition
+            if camera_field_name in camera_properties:
+                field_schema = camera_properties[camera_field_name]
+                if "title" in field_schema:
+                    section_data["label"] = field_schema["title"]
+                if "description" in field_schema:
+                    section_data["description"] = field_schema["description"]
+
+            # Process model fields from schema
+            schema = config_class.model_json_schema()
+            nested = extract_translations_from_schema(schema)
+            # Remove top-level label/description since we got those from CameraConfig
+            nested_without_root = {
+                k: v for k, v in nested.items() if k not in ("label", "description")
+            }
+            section_data.update(nested_without_root)
+
+            # Add camera-level section into global translations (do not write separate file)
+            global_translations[config_name] = section_data
+            logger.info(
+                f"Added camera-level section to global translations: {config_name}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to generate {config_name}: {e}")
+
+    # Remove top-level 'cameras' field if present so it remains a separate file
+    if "cameras" in global_translations:
+        logger.info(
+            "Removing top-level 'cameras' from global translations to keep it as a separate cameras.json"
+        )
+        del global_translations["cameras"]
+
+    # Write consolidated global.json with per-section keys
+    global_file = output_dir / "global.json"
+    with open(global_file, "w", encoding="utf-8") as f:
+        json.dump(global_translations, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+    logger.info(f"Generated consolidated translations: {global_file}")
+
+    if not global_translations:
+        logger.warning("No global translations were generated!")
+    else:
+        logger.info(f"Global contains {len(global_translations)} sections")
+
+    # Generate cameras.json from CameraConfig schema
+    cameras_file = output_dir / "cameras.json"
+    logger.info(f"Generating cameras.json: {cameras_file}")
+    try:
+        if "camera_config_schema" in locals():
+            camera_schema = camera_config_schema
+        else:
+            from frigate.config.camera.camera import CameraConfig
+
+            camera_schema = CameraConfig.model_json_schema()
+
+        camera_translations = extract_translations_from_schema(camera_schema)
+
+        # Change descriptions to use 'for this camera' for fields that are global
+        def sanitize_camera_descriptions(obj):
+            if isinstance(obj, dict):
+                for k, v in list(obj.items()):
+                    if k == "description" and isinstance(v, str):
+                        obj[k] = v.replace(
+                            "for all cameras; can be overridden per-camera",
+                            "for this camera",
+                        )
+                    else:
+                        sanitize_camera_descriptions(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    sanitize_camera_descriptions(item)
+
+        sanitize_camera_descriptions(camera_translations)
+
+        # Profiles contain the same sections as the camera itself; only keep
+        # label and description to avoid duplicating every camera section.
+        if "profiles" in camera_translations:
+            camera_translations["profiles"] = {
+                k: v
+                for k, v in camera_translations["profiles"].items()
+                if k in ("label", "description")
+            }
+
+        with open(cameras_file, "w", encoding="utf-8") as f:
+            json.dump(camera_translations, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        logger.info(f"Generated cameras.json: {cameras_file}")
+    except Exception as e:
+        logger.error(f"Failed to generate cameras.json: {e}")
 
     logger.info("Translation generation complete!")
 

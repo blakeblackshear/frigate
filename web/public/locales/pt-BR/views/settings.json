@@ -7,11 +7,14 @@
     "masksAndZones": "Editor de Máscara e Zona - Frigate",
     "motionTuner": "Ajuste de Movimento - Frigate",
     "object": "Debug - Frigate",
-    "general": "Configurações de Interface de Usuário - Frigate",
+    "general": "Configurações de perfil - Frigate",
     "frigatePlus": "Frigate+ Configurações- Frigate",
     "notifications": "Configurações de notificação - Frigate",
     "cameraManagement": "Gerenciar Câmeras - Frigate",
-    "cameraReview": "Configurações de Revisão de Câmera - Frigate"
+    "cameraReview": "Configurações de Revisão de Câmera - Frigate",
+    "globalConfig": "Configuração Global - Frigate",
+    "cameraConfig": "Configuração da Câmera - Frigate",
+    "maintenance": "Manutenção - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -26,7 +29,8 @@
     "triggers": "Gatilhos",
     "roles": "Papéis",
     "cameraManagement": "Gerenciamento",
-    "cameraReview": "Revisar"
+    "cameraReview": "Revisar",
+    "general": "Geral"
   },
   "dialog": {
     "unsavedChanges": {
@@ -385,7 +389,7 @@
       "add": "Nova Máscara de Movimento",
       "edit": "Editar Máscara de Movimento",
       "context": {
-        "title": "Máscaras de movimento são usadas para prevenir typos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas com <em> muita parcimônia</em>, excesso de mascaramento tornará mais difícil de objetos serem rastreados.",
+        "title": "Máscaras de movimento são usadas para prevenir tipos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas <em> com moderação </em>. Excesso de mascaramento tornará o rastreamento de objetos mais difícil.",
         "documentation": "Leia a documentação"
       },
       "point_one": "{{count}} ponto",
@@ -900,7 +904,9 @@
       "errors": {
         "brandOrCustomUrlRequired": "Selecione a marca da câmera com o host/IP or selecione 'Outro' com uma URL customizada",
         "nameRequired": "Nome para a câmera requerido",
-        "nameLength": "O nome da câmera deve ter 64 caracteres ou menos"
+        "nameLength": "O nome da câmera deve ter 64 caracteres ou menos",
+        "invalidCharacters": "Nome da câmera contém caracteres inválidos",
+        "nameExists": "Nome da câmera já existe"
       },
       "testing": {
         "probingMetadata": "Inferindo o metadata da câmera...",

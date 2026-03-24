@@ -229,6 +229,7 @@ Reolink
 restream
 restreamed
 restreaming
+RJSF
 rkmpp
 rknn
 rkrga

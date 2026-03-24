@@ -1,0 +1,2192 @@
+{
+    "ffmpeg": {
+        "apple_compatibility": {
+            "description": "Activa l'etiquetatge HEVC per a una millor compatibilitat amb el reproductor d'Apple en gravar H.265.",
+            "label": "Compatibilitat d'Apple"
+        },
+        "description": "Paràmetres del FFmpeg que inclouen camins binaris, args, opcions de hwaccel i args de sortida per rol.",
+        "path": {
+            "label": "Ruta FFmpeg",
+            "description": "Ruta al binari FFmpeg a usar o un àlies de versió («5.0» o «7.0»)."
+        },
+        "global_args": {
+            "label": "Arguments globals del FFmpeg",
+            "description": "Arguments globals passats als processos FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Arguments d'acceleració del maquinari",
+            "description": "Arguments d'acceleració de maquinari per a FFmpeg. Es recomanen predefinits específics del proveïdor."
+        },
+        "input_args": {
+            "label": "Arguments d'entrada",
+            "description": "Arguments d'entrada aplicats als fluxos d'entrada del FFmpeg."
+        },
+        "output_args": {
+            "label": "Arguments de sortida",
+            "description": "Arguments de sortida predeterminats utilitzats per a diferents rols FFmpeg com detecta i registra.",
+            "detect": {
+                "label": "Detecta els arguments de sortida",
+                "description": "Arguments de sortida predeterminats per a detectar fluxos de rol."
+            },
+            "record": {
+                "label": "Registra els arguments de sortida",
+                "description": "Arguments de sortida predeterminats per a enregistrar fluxos de rols."
+            }
+        },
+        "retry_interval": {
+            "label": "Temps de reintent del FFmpeg",
+            "description": "Segons a esperar abans d'intentar tornar a connectar un flux de càmera després d'un error. Per defecte és 10."
+        },
+        "gpu": {
+            "label": "Índex de GPU",
+            "description": "Índex de GPU predeterminat utilitzat per a l'acceleració de maquinari si està disponible."
+        },
+        "inputs": {
+            "label": "Entrada de la càmera",
+            "description": "Llista de definicions de flux d'entrada (camins i rols) per a aquesta càmera.",
+            "path": {
+                "label": "Ruta d'entrada",
+                "description": "URL o camí del flux d'entrada de la càmera."
+            },
+            "roles": {
+                "label": "Rols d'entrada",
+                "description": "Rols per a aquest flux d'entrada."
+            },
+            "global_args": {
+                "label": "Arguments globals del FFmpeg",
+                "description": "Arguments globals del FFmpeg per a aquest flux d'entrada."
+            },
+            "hwaccel_args": {
+                "label": "Arguments d'acceleració del maquinari",
+                "description": "Arguments d'acceleració del maquinari per a aquest flux d'entrada."
+            },
+            "input_args": {
+                "label": "Arguments d'entrada",
+                "description": "Arguments d'entrada específics d'aquest flux."
+            }
+        },
+        "label": "FFmpeg"
+    },
+    "live": {
+        "height": {
+            "description": "Alçada (píxels) per a renderitzar el flux en viu jsmpeg a la interfície d'usuari web; ha de ser . detecta l'alçada del flux.",
+            "label": "Alçada del directe"
+        },
+        "label": "Reproducció en directe",
+        "description": "Configuració utilitzada per la interfície d'usuari web per controlar la resolució i la qualitat del flux en viu.",
+        "streams": {
+            "label": "Noms de flux en viu",
+            "description": "Assignació de noms de flux configurats per a restream/go2rtc noms utilitzats per a la reproducció en viu."
+        },
+        "quality": {
+            "label": "Qualitat del directe",
+            "description": "Qualitat de codificació per al flux jsmpeg (1 més alt, 31 més baix)."
+        }
+    },
+    "ui": {
+        "label": "Interfície",
+        "description": "Preferències de la interfície d'usuari com ara la zona horària, el format de l'hora/data i les unitats.",
+        "timezone": {
+            "label": "Zona horària",
+            "description": "Zona horària opcional que es mostrarà a través de la interfície d'usuari (per defecte al navegador hora local si no s'estableix)."
+        },
+        "time_format": {
+            "label": "Format de l'hora",
+            "description": "Format d'hora a utilitzar a la interfície d'usuari (navegador, 12 hores o 24 hores)."
+        },
+        "date_style": {
+            "label": "Estil de data",
+            "description": "Estil de data a utilitzar a la interfície d'usuari (complet, llarg, mitjà, curt)."
+        },
+        "time_style": {
+            "label": "Estil de temps",
+            "description": "Estil de temps a utilitzar a la interfície d'usuari (complet, llarg, mitjà, curt)."
+        },
+        "unit_system": {
+            "label": "Sistema d'unitat",
+            "description": "Sistema d'unitats per a la visualització (mètrica o imperial) utilitzat en la IU i MQTT."
+        }
+    },
+    "motion": {
+        "improve_contrast": {
+            "description": "Aplicar la millora del contrast als fotogrames abans de l'anàlisi del moviment per ajudar a la detecció.",
+            "label": "Millora el contrast"
+        },
+        "label": "Detecció de moviment",
+        "description": "Paràmetres de detecció de moviment per defecte aplicats a les càmeres llevat que se substitueixin per càmera.",
+        "enabled": {
+            "label": "Habilita la detecció de moviment",
+            "description": "Activa o desactiva la detecció de moviment per a totes les càmeres; es pot sobreescriure per càmera."
+        },
+        "threshold": {
+            "label": "Llindar del moviment",
+            "description": "Llindar de diferència de píxels utilitzat pel detector de moviment; els valors més alts redueixen la sensibilitat (interval 1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Llindar del llamp",
+            "description": "Llindar per detectar i ignorar les puntes d'il·luminació breu (més baixes són més sensibles, valors entre 0,3 i 1,0). Això no impedeix la detecció de moviment per complet; simplement fa que el detector deixi d'analitzar fotogrames addicionals una vegada que el llindar s'excedeix. Els enregistraments basats en moviment encara es creen durant aquests esdeveniments."
+        },
+        "contour_area": {
+            "label": "Àrea de la vora",
+            "description": "Àrea mínima de contorn en píxels necessària per a comptar un contorn de moviment."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Factor de barreja alfa utilitzat en la diferència de fotogrames per al càlcul del moviment."
+        },
+        "frame_alpha": {
+            "label": "Alfa del fotograma",
+            "description": "Valor alfa utilitzat en la barreja de fotogrames per al preprocessament del moviment."
+        },
+        "frame_height": {
+            "label": "Alçada del marc",
+            "description": "Alçada en píxels per a escalar els fotogrames quan es computa el moviment."
+        },
+        "mask": {
+            "label": "Coordenades de la màscara",
+            "description": "Coordenades x,y que defineixen el polígon de màscara de moviment utilitzat per incloure/excloure àrees."
+        },
+        "mqtt_off_delay": {
+            "label": "Retard MQTT desactivat",
+            "description": "Segons a esperar després de l'última moció abans de publicar un estat MQTT 'off'."
+        },
+        "enabled_in_config": {
+            "label": "Estat del moviment original",
+            "description": "Indica si la detecció de moviment s'ha activat en la configuració estàtica original."
+        },
+        "raw_mask": {
+            "label": "Màscara en brut"
+        },
+        "skip_motion_threshold": {
+            "label": "Omet el llindar de moviment",
+            "description": "Si més d'aquesta fracció de la imatge canvia en un sol fotograma, el detector no retornarà cap caixa de moviment i recalibrarà immediatament. Això pot estalviar CPU i reduir falsos positius durant el llamp, tempestes, etc., però pot perdre esdeveniments reals com una càmera PTZ que fa un seguiment automàtic d'un objecte. La compensació es troba entre deixar caure uns quants megabytes d'enregistraments versus revisar un parell de clips curts. Interval de 0,0 a 1,0."
+        }
+    },
+    "objects": {
+        "filters": {
+            "label": "Filtres d'objectes",
+            "description": "Filtres aplicats als objectes detectats per reduir falsos positius (àrea, relació, confiança).",
+            "min_area": {
+                "label": "Àrea mínima de l'objecte",
+                "description": "Es requereix una àrea de caixa contenidora mínima (píxels o percentatge) per a aquest tipus d'objecte. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "max_area": {
+                "label": "Àrea màxima de l'objecte",
+                "description": "Es permet l'àrea màxima de la caixa contenidora (píxels o percentatge) per a aquest tipus d'objecte. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "min_ratio": {
+                "label": "Relació mínima d'aspecte",
+                "description": "Relació mínima d'amplada/alçada requerida per a la casella contenidora a qualificar."
+            },
+            "max_ratio": {
+                "label": "Relació màxima d'aspecte",
+                "description": "Es permet la relació màxima d'amplada/alçada per a la casella contenidora a qualificar."
+            },
+            "threshold": {
+                "label": "Llindar de confiança",
+                "description": "Es requereix un llindar de confiança mitjà per a la detecció perquè l'objecte es consideri un veritable positiu."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Es requereix una confiança mínima de detecció d'un sol fotograma per a comptar l'objecte."
+            },
+            "mask": {
+                "label": "Màscara de filtre",
+                "description": "Coordenades de polígon que defineixen on s'aplica aquest filtre dins del marc."
+            },
+            "raw_mask": {
+                "label": "Màscara en brut"
+            }
+        },
+        "genai": {
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Zones que s'han d'introduir perquè els objectes es puguin classificar per a la generació de descripcions de GenAI."
+            },
+            "label": "Configuració de l'objecte GenAI",
+            "description": "Opcions de GenAI per descriure objectes rastrejats i enviar fotogrames per a la generació.",
+            "enabled": {
+                "label": "Habilita el GenAI",
+                "description": "Habilita la generació de descripcions de GenAI per als objectes rastrejats de manera predeterminada."
+            },
+            "use_snapshot": {
+                "label": "Utilitza instantànies",
+                "description": "Usa instantànies d'objecte en lloc de miniatures per a la generació de descripcions de GenAI."
+            },
+            "prompt": {
+                "label": "Indicació de la llegenda",
+                "description": "Plantilla de pregunta predeterminada utilitzada en generar descripcions amb GenAI."
+            },
+            "object_prompts": {
+                "label": "Peticions d'objecte",
+                "description": "Per objecte demana personalitzar les sortides de GenAI per a etiquetes específiques."
+            },
+            "objects": {
+                "label": "Objectes GenAI",
+                "description": "Llista d'etiquetes d'objectes a enviar a GenAI per defecte."
+            },
+            "debug_save_thumbnails": {
+                "label": "Desa les miniatures",
+                "description": "Desa les miniatures enviades a GenAI per a la depuració i la revisió."
+            },
+            "send_triggers": {
+                "label": "Activadors de GenAI",
+                "description": "Defineix quan s'han d'enviar fotogrames a GenAI (al final, després de les actualitzacions, etc.).",
+                "tracked_object_end": {
+                    "label": "Envia al final",
+                    "description": "Envia una sol·licitud a GenAI quan acabi l'objecte rastrejat."
+                },
+                "after_significant_updates": {
+                    "label": "Activador de GenAI primerenc",
+                    "description": "Envia una sol·licitud a GenAI després d'un nombre especificat d'actualitzacions significatives per a l'objecte rastrejat."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Estat original de GenAI",
+                "description": "Indica si el GenAI s'ha activat a la configuració estàtica original."
+            }
+        },
+        "label": "Objectes",
+        "description": "Object tracking defaults incloent quines etiquetes rastrejar i per objecte filtres.",
+        "track": {
+            "label": "Objectes a seguir",
+            "description": "Llista d'etiquetes d'objectes a rastrejar per a totes les càmeres; es poden sobreescriure per càmera."
+        },
+        "mask": {
+            "label": "Màscara d'objecte",
+            "description": "Polígon de màscara utilitzat per evitar la detecció d'objectes en àrees especificades."
+        },
+        "raw_mask": {
+            "label": "Màscara en brut"
+        }
+    },
+    "record": {
+        "detections": {
+            "retain": {
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "label": "Retenció d'esdeveniments",
+                "description": "Configuració de retenció per a enregistraments d'esdeveniments de detecció.",
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            },
+            "label": "Retenció de detecció",
+            "description": "Configuració de retenció de l'enregistrament per a esdeveniments de detecció, incloent-hi la durada de la captura anterior a la publicació.",
+            "pre_capture": {
+                "label": "Segons de precaptura",
+                "description": "Nombre de segons abans de l'esdeveniment de detecció a incloure en l'enregistrament."
+            },
+            "post_capture": {
+                "label": "Segons de postcaptura",
+                "description": "Nombre de segons després de l'esdeveniment de detecció que s'inclourà a l'enregistrament."
+            }
+        },
+        "alerts": {
+            "post_capture": {
+                "label": "Segons de postcaptura",
+                "description": "Nombre de segons després de l'esdeveniment de detecció que s'inclourà a l'enregistrament."
+            },
+            "label": "Retenció d'alerta",
+            "description": "Configuració de retenció de l'enregistrament per a esdeveniments d'alerta, incloses les durades de captura anteriors a la publicació.",
+            "pre_capture": {
+                "label": "Segons de precaptura",
+                "description": "Nombre de segons abans de l'esdeveniment de detecció a incloure en l'enregistrament."
+            },
+            "retain": {
+                "label": "Retenció d'esdeveniments",
+                "description": "Configuració de retenció per a enregistraments d'esdeveniments de detecció.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            }
+        },
+        "label": "Enregistrament",
+        "description": "Configuració d'enregistrament i retenció aplicada a les càmeres llevat que se substitueixi per càmera.",
+        "enabled": {
+            "label": "Habilita l'enregistrament",
+            "description": "Activa o desactiva l'enregistrament per a totes les càmeres; es pot substituir per càmera."
+        },
+        "expire_interval": {
+            "label": "Interval de neteja de l'enregistrament",
+            "description": "Minuts entre passades de neteja que eliminen segments d'enregistrament caducats."
+        },
+        "continuous": {
+            "label": "Retenció contínua",
+            "description": "Nombre de dies per a retenir els enregistraments independentment dels objectes rastrejats o del moviment. Establiu-ho a 0 si només voleu retenir enregistraments d'alertes i deteccions.",
+            "days": {
+                "label": "Dies de retenció",
+                "description": "Dies per retenir enregistraments."
+            }
+        },
+        "motion": {
+            "label": "Retenció del moviment",
+            "description": "Nombre de dies per a retenir els enregistraments activats pel moviment independentment dels objectes rastrejats. Establiu-ho a 0 si només voleu retenir enregistraments d'alertes i deteccions.",
+            "days": {
+                "label": "Dies de retenció",
+                "description": "Dies per retenir enregistraments."
+            }
+        },
+        "export": {
+            "label": "Exporta la configuració",
+            "description": "Paràmetres utilitzats en exportar enregistraments com el timelapse i l'acceleració del maquinari.",
+            "hwaccel_args": {
+                "label": "Exporta els arguments de l'hwaccel",
+                "description": "Args d'acceleració de maquinari a utilitzar per a operacions d'exportació/transcodificació."
+            }
+        },
+        "preview": {
+            "label": "Configuració de la vista prèvia",
+            "description": "Paràmetres que controlen la qualitat de les vistes prèvies de l'enregistrament que es mostren a la interfície d'usuari.",
+            "quality": {
+                "label": "Qualitat de la vista prèvia",
+                "description": "Nivell de qualitat de la vista prèvia (moltlowbaix, baix, mitjà, alt, molt).alt)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Estat de l'enregistrament original",
+            "description": "Indica si l'enregistrament s'ha activat en la configuració estàtica original."
+        }
+    },
+    "review": {
+        "detections": {
+            "required_zones": {
+                "description": "Zones que un objecte ha d'introduir per a ser considerat una detecció; deixeu-ho buit per a permetre qualsevol zona.",
+                "label": "Zones requerides"
+            },
+            "label": "Configuració de les deteccions",
+            "description": "Paràmetres per a crear esdeveniments de detecció (no-alerta) i quant de temps conservar-los.",
+            "enabled": {
+                "label": "Habilita les deteccions",
+                "description": "Habilita o inhabilita els esdeveniments de detecció per a totes les càmeres; es poden sobreescriure per càmera."
+            },
+            "labels": {
+                "label": "Etiquetes de detecció",
+                "description": "Llista d'etiquetes d'objectes que es qualifiquen com a esdeveniments de detecció."
+            },
+            "cutoff_time": {
+                "label": "Temps de tall de detecció",
+                "description": "Segons a esperar després de no haver-hi activitat de detecció abans de tallar una detecció"
+            },
+            "enabled_in_config": {
+                "label": "Estat de les deteccions originals",
+                "description": "Fa un seguiment de si les deteccions es van habilitar originalment a la configuració estàtica."
+            }
+        },
+        "genai": {
+            "image_source": {
+                "description": "Font d'imatges enviades a GenAI ('previsualització' o 'enregistraments'); 'enregistraments' utilitza Fotogrames de més qualitat però més tokens.",
+                "label": "Revisa l'origen de la imatge"
+            },
+            "enabled_in_config": {
+                "description": "Fa un seguiment de si la revisió de GenAI es va habilitar originalment a la configuració estàtica.",
+                "label": "Estat original de GenAI"
+            },
+            "label": "Configuració del GenAI",
+            "description": "Controla l'ús de la IA generativa per a la producció de descripcions i resums d'articles de revisió.",
+            "enabled": {
+                "label": "Habilita les descripcions del GenAI",
+                "description": "Activa o desactiva les descripcions i resums generats per GenAI per als elements de revisió."
+            },
+            "alerts": {
+                "label": "Habilita el GenAI per a alertes",
+                "description": "Utilitzeu GenAI per a generar descripcions per als elements d'alerta."
+            },
+            "detections": {
+                "label": "Habilita el GenAI per a les deteccions",
+                "description": "Utilitzeu GenAI per generar descripcions per als elements de detecció."
+            },
+            "additional_concerns": {
+                "label": "Altres preocupacions",
+                "description": "Una llista de preocupacions o notes addicionals que el GenAI ha de tenir en compte a l'hora d'avaluar l'activitat en aquesta càmera."
+            },
+            "debug_save_thumbnails": {
+                "label": "Desa les miniatures",
+                "description": "Desa les miniatures que s'envien al proveïdor GenAI per a la depuració i la revisió."
+            },
+            "preferred_language": {
+                "label": "Idioma preferit",
+                "description": "Idioma preferit per sol·licitar al proveïdor GenAI respostes generades."
+            },
+            "activity_context_prompt": {
+                "label": "Indicador de context de l'activitat",
+                "description": "Pregunta personalitzada que descriu el que és i no és una activitat sospitosa per proporcionar context per als resums de GenAI."
+            }
+        },
+        "label": "Revisió",
+        "description": "Configuració que controla les alertes, les deteccions i els resums de revisió de GenAI utilitzats per la IU i l'emmagatzematge.",
+        "alerts": {
+            "label": "Configuració d'alertes",
+            "description": "Paràmetres per als quals els objectes rastrejats generen alertes i com es mantenen les alertes",
+            "enabled": {
+                "label": "Habilita les alertes",
+                "description": "Activa o desactiva la generació d'alertes per a totes les càmeres; es pot substituir per càmera."
+            },
+            "labels": {
+                "label": "Etiquetes d'alerta",
+                "description": "Llista d'etiquetes d'objectes que qualifiquen d'alertes (per exemple: cotxe, persona)."
+            },
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Zones que un objecte ha d'introduir per a ser considerat una alerta; deixeu-ho buit per a permetre qualsevol zona."
+            },
+            "enabled_in_config": {
+                "label": "Estat de les alertes originals",
+                "description": "Fa un seguiment de si les alertes es van habilitar originalment a la configuració estàtica."
+            },
+            "cutoff_time": {
+                "label": "Temps de tall d'alertes",
+                "description": "Segons a esperar després de no provocar activitat d'alerta abans de tallar una alerta."
+            }
+        }
+    },
+    "semantic_search": {
+        "triggers": {
+            "enabled": {
+                "description": "Activa o desactiva aquest activador de cerca semàntica.",
+                "label": "Habilita aquest activador"
+            },
+            "label": "Activadors",
+            "description": "Accions i criteris coincidents per als desencadenants de cerca semàntica específics de la càmera.",
+            "friendly_name": {
+                "label": "Nom amistós",
+                "description": "Nom opcional amistós que es mostra a la interfície d'usuari per a aquest activador."
+            },
+            "type": {
+                "label": "Tipus d'activador",
+                "description": "Tipus d'activador: «miniatures» (match contra imatge) o «descripció» (match contra text)."
+            },
+            "data": {
+                "label": "Contingut del disparador",
+                "description": "Frase de text o ID de miniatures per a coincidir amb els objectes rastrejats."
+            },
+            "threshold": {
+                "label": "Llindar d'activació",
+                "description": "Puntuació mínima de similitud (0-1) necessària per activar aquest activador."
+            },
+            "actions": {
+                "label": "Accions d'activació",
+                "description": "Llista d'accions a executar quan coincideixi l'activador (notificació, sublabeletiqueta, atribut)."
+            }
+        },
+        "label": "Cerca semàntica",
+        "description": "Configuració de la cerca semàntica que construeix i consulta incrustacions d'objectes per trobar elements similars.",
+        "enabled": {
+            "label": "Habilita la cerca semàntica",
+            "description": "Activa o desactiva la funció de cerca semàntica."
+        },
+        "reindex": {
+            "label": "Reindexa en iniciar",
+            "description": "Activa un reíndex complet d'objectes rastrejats històrics a la base de dades d'incrustacions."
+        },
+        "model": {
+            "label": "Model de cerca semàntic",
+            "description": "El model d'incrustació a utilitzar per a la cerca semàntica (per exemple 'jinav1')."
+        },
+        "model_size": {
+            "label": "Mida del model",
+            "description": "Seleccioneu la mida del model; «petit» s'executa a la CPU i «gran» normalment requereix GPU."
+        },
+        "device": {
+            "label": "Dispositiu",
+            "description": "Això és una sobreescriptura, per dirigir-se a un dispositiu específic. Vegeu https://onnxruntime.ai/docs/execution-providers/ per a més informació"
+        }
+    },
+    "snapshots": {
+        "label": "Instantànies",
+        "description": "Arranjament per a les instantànies JPEG desades dels objectes rastrejats per a totes les càmeres; es pot sobreescriure per càmera.",
+        "enabled": {
+            "label": "Instantànies habilitades",
+            "description": "Habilita o inhabilita les instantànies de desament per a totes les càmeres; es pot sobreescriure per càmera."
+        },
+        "clean_copy": {
+            "label": "Desa la còpia neta",
+            "description": "Desa una còpia neta no anotada de les instantànies a més de les anotades."
+        },
+        "timestamp": {
+            "label": "Superposició de marca horària",
+            "description": "Superposa una marca horària a les instantànies desades."
+        },
+        "bounding_box": {
+            "label": "Superposició de la caixa contenidora",
+            "description": "Dibuixa caixes contenidores per als objectes seguits en les instantànies desades."
+        },
+        "crop": {
+            "label": "Retalla la instantània",
+            "description": "Retalla les instantànies desades a la caixa contenidora de l'objecte detectat."
+        },
+        "required_zones": {
+            "label": "Zones requerides",
+            "description": "Zones que ha d'introduir un objecte perquè es desi una instantània."
+        },
+        "height": {
+            "label": "Alçada de la instantània",
+            "description": "Alçada (píxels) per a canviar la mida de les instantànies desades; deixeu-ho buit per a preservar la mida original."
+        },
+        "retain": {
+            "label": "Retenció de la instantània",
+            "description": "Paràmetres de retenció per a les instantànies desades, inclosos els dies predeterminats i les anul·lacions per objecte.",
+            "default": {
+                "label": "Retenció predeterminada",
+                "description": "Nombre predeterminat de dies per a retenir les instantànies."
+            },
+            "mode": {
+                "label": "Mode de retenció",
+                "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+            },
+            "objects": {
+                "label": "Retenció d'objectes",
+                "description": "Anul·lació per objecte per dies de retenció d'instantànies."
+            }
+        },
+        "quality": {
+            "label": "Qualitat JPEG",
+            "description": "Qualitat del codi JPEG per a les instantànies desades (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "format": {
+            "label": "Format de la marca horària",
+            "description": "Cadena de format de data i hora utilitzada per a marques horàries (codis de format de data i hora de Python)."
+        },
+        "color": {
+            "blue": {
+                "label": "Blau",
+                "description": "Component blau (0-255) per al color de la marca horària."
+            },
+            "label": "Color de la marca horària",
+            "description": "Valors de color RGB per al text de la marca de temps (tots els valors 0-255).",
+            "red": {
+                "label": "Vermell",
+                "description": "Component vermell (0-255) per al color de la marca horària."
+            },
+            "green": {
+                "label": "Verd",
+                "description": "Component verd (0-255) per al color de la marca horària."
+            }
+        },
+        "label": "Estil de la marca horària",
+        "description": "Opcions d'estilització per a marques horàries d'alimentació aplicades a la vista de depuració i instantànies.",
+        "position": {
+            "label": "Posició de la marca horària",
+            "description": "Posició de la marca horària a la imatge (tl/tr/bl/br)."
+        },
+        "thickness": {
+            "label": "Gruix de la marca de temps",
+            "description": "Gruix de la línia del text de la marca de temps."
+        },
+        "effect": {
+            "label": "Efecte de marca horària",
+            "description": "Efecte visual per al text de la marca de temps (cap, sòlid, ombra)."
+        }
+    },
+    "onvif": {
+        "autotracking": {
+            "enabled_in_config": {
+                "description": "Camp intern per a fer el seguiment de si s'ha habilitat el seguiment automàtic a la configuració.",
+                "label": "Estat de la pista automàtica original"
+            },
+            "label": "Aeguiment automàtic",
+            "description": "Segueix automàticament els objectes en moviment i els manté centrats en el marc utilitzant els moviments de la càmera PTZ.",
+            "enabled": {
+                "label": "Habilita el seguiment automàtic",
+                "description": "Activa o desactiva el seguiment automàtic de la càmera PTZ dels objectes detectats."
+            },
+            "calibrate_on_startup": {
+                "label": "Calibra a l'inici",
+                "description": "Mesura les velocitats del motor PTZ a l'inici per millorar la precisió del seguiment. Frigate actualitzarà la configuració amb «movtion.weights» després del calibratge."
+            },
+            "zooming": {
+                "label": "Mode de zoom",
+                "description": "Comportament de zoom de control: desactivat (només pan/tilt), absolut (més compatible) o relatiu (pa/tilt/zoom concurrent)."
+            },
+            "zoom_factor": {
+                "label": "Factor de zoom",
+                "description": "Controla el nivell d'ampliació dels objectes rastrejats. Els valors més baixos mantenen més escena a la vista; els valors més alts s'apropen, però poden perdre el seguiment. Valors entre 0,1 i 0,75."
+            },
+            "track": {
+                "label": "Objectes rastrejats",
+                "description": "Llista de tipus d'objectes que haurien d'activar el seguiment automàtic."
+            },
+            "required_zones": {
+                "label": "Zones requerides",
+                "description": "Els objectes han d'entrar en una d'aquestes zones abans que comenci el seguiment automàtic."
+            },
+            "return_preset": {
+                "label": "Retorna la predefinició",
+                "description": "Nom predefinit ONVIF configurat al microprogramari de la càmera per tornar després de finalitzar el seguiment."
+            },
+            "timeout": {
+                "label": "Temps d'espera de retorn",
+                "description": "Espereu tants segons després de perdre el seguiment abans de tornar la càmera a la posició preestablerta."
+            },
+            "movement_weights": {
+                "label": "Pes del moviment",
+                "description": "Valors de calibratge generats automàticament pel calibratge de la càmera. No modifiquis manualment."
+            }
+        },
+        "label": "ONVIF",
+        "description": "Connexió ONVIF i configuració de seguiment automàtic PTZ per a aquesta càmera.",
+        "host": {
+            "label": "Servidor ONVIF",
+            "description": "Host (i esquema opcional) per al servei ONVIF per a aquesta càmera."
+        },
+        "port": {
+            "label": "Port ONVIF",
+            "description": "Número de port del servei ONVIF."
+        },
+        "user": {
+            "label": "Nom d'usuari ONVIF",
+            "description": "Nom d'usuari per a l'autenticació ONVIF; alguns dispositius requereixen l'usuari administrador per a ONVIF."
+        },
+        "password": {
+            "label": "Contrasenya ONVIF",
+            "description": "Contrasenya per a l'autenticació ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Inhabilita la verificació TLS",
+            "description": "Omet la verificació TLS i desactiva l'autenticació de resum per a ONVIF (no segur; només s'utilitza en xarxes segures)."
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignora el desajust de temps",
+            "description": "Ignora les diferències de sincronització de temps entre càmera i servidor Frigate per a la comunicació ONVIF."
+        }
+    },
+    "audio_transcription": {
+        "enabled": {
+            "label": "Habilita la transcripció d'àudio",
+            "description": "Activa o desactiva la transcripció automàtica d'àudio per a totes les càmeres; es pot substituir per càmera."
+        },
+        "label": "Transcripció d'àudio",
+        "description": "Configuració per a la transcripció d'àudio en viu i de veu utilitzada per a esdeveniments i llegendes en directe.",
+        "language": {
+            "label": "Idioma de transcripció",
+            "description": "Codi d'idioma utilitzat per a la transcripció/traducció (per exemple 'en' per a l'anglès). Vegeu https://whisper-api.com/docs/languages/ per als codis de llengua compatibles."
+        },
+        "device": {
+            "label": "Dispositiu de transcripció",
+            "description": "Tecla de dispositiu (CPU/GPU) per a executar el model de transcripció. Actualment només les GPU CUDA NVIDIA estan admeses per a la transcripció."
+        },
+        "model_size": {
+            "label": "Mida del model",
+            "description": "Mida del model a utilitzar per a la transcripció d'esdeveniments d'àudio fora de línia."
+        },
+        "live_enabled": {
+            "label": "Transcripció en viu",
+            "description": "Habilita la transcripció en directe per a l'àudio a mesura que es rep."
+        }
+    },
+    "version": {
+        "label": "Versió de configuració actual",
+        "description": "Versió numèrica o de cadena de la configuració activa per ajudar a detectar migracions o canvis de format."
+    },
+    "safe_mode": {
+        "label": "Mode segur",
+        "description": "Quan està activat, arrenca la Frigate en mode segur amb funcions reduïdes per a la resolució de problemes."
+    },
+    "environment_vars": {
+        "label": "Variables d'entorn",
+        "description": "Parells clau/valor de les variables d'entorn a establir per al procés Frigate al sistema operatiu Home Assistant. Els usuaris que no són usuaris de HAOS han d'utilitzar la configuració de la variable d'entorn Docker."
+    },
+    "logger": {
+        "label": "Registre",
+        "description": "Controla la verbositat predeterminada del registre i el nivell de registre per component.",
+        "default": {
+            "label": "Nivell de registre",
+            "description": "Veritat predeterminada del registre global (depuració, informació, avís, error)."
+        },
+        "logs": {
+            "label": "Nivell de registre per procés",
+            "description": "El nivell de registre per component substitueix per augmentar o disminuir la verbositat per a mòduls específics."
+        }
+    },
+    "auth": {
+        "label": "Autenticació",
+        "description": "Configuració relacionada amb l'autenticació i la sessió, incloses les opcions de cookies i límit de velocitat.",
+        "enabled": {
+            "label": "Habilita l'autenticació",
+            "description": "Habilita l'autenticació nativa per a la interfície d'usuari de la Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Restableix la contrasenya d'administrador",
+            "description": "Si és cert, restableix la contrasenya de l'usuari administrador a l'inici i imprimeix la nova contrasenya als registres."
+        },
+        "cookie_name": {
+            "label": "Nom de la cookie JWT",
+            "description": "Nom de la cookie utilitzada per emmagatzemar el testimoni JWT per a l'autenticació nativa."
+        },
+        "cookie_secure": {
+            "label": "Atribut de segura de la cookie",
+            "description": "Establiu l'indicador segur a l'auth cookie; hauria de ser cert quan s'utilitza TLS."
+        },
+        "session_length": {
+            "label": "Longitud de la sessió",
+            "description": "Durada de la sessió en segons per a les sessions basades en JWT."
+        },
+        "refresh_time": {
+            "label": "Finestra d'actualització de sessió",
+            "description": "Quan una sessió estigui dins d'aquests segons d'expiració, refresca-la de nou a tota la durada."
+        },
+        "failed_login_rate_limit": {
+            "label": "Límits d'inici de sessió fallits",
+            "description": "Regles de limitació de la taxa per als intents d'inici de sessió fallits per reduir els atacs de força bruta."
+        },
+        "trusted_proxies": {
+            "label": "Intermediaris de confiança",
+            "description": "Llista d'IP de confiança usades quan es determina la IP del client per limitar la taxa."
+        },
+        "hash_iterations": {
+            "label": "Iteracions de resum",
+            "description": "Nombre d'iteracions PBKDF2-SHA256 a utilitzar quan es fan servir contrasenyes d'usuari."
+        },
+        "roles": {
+            "label": "Mapatge de rols",
+            "description": "Mapa els rols a les llistes de càmeres. Una llista buida permet l'accés a totes les càmeres per al rol."
+        },
+        "admin_first_time_login": {
+            "label": "Bandera d'administració per primera vegada",
+            "description": "Quan sigui cert, la interfície d'usuari pot mostrar un enllaç d'ajuda a la pàgina d'inici de sessió informant els usuaris de com iniciar la sessió després d'un restabliment de contrasenya d'administrador. "
+        }
+    },
+    "face_recognition": {
+        "label": "Reconeixement de cares",
+        "description": "Configuració per a la detecció de la cara i el reconeixement de totes les càmeres; es pot substituir per càmera.",
+        "enabled": {
+            "label": "Habilita el reconeixement facial",
+            "description": "Activa o desactiva el reconeixement facial de totes les càmeres; es pot substituir per càmera."
+        },
+        "model_size": {
+            "label": "Mida del model",
+            "description": "Mida del model a utilitzar per a incrustacions facials (petit/gran); més gran pot requerir GPU."
+        },
+        "unknown_score": {
+            "label": "Llindar de puntuació desconegut",
+            "description": "Llindar de distància per sota del qual una cara es considera una coincidència potencial (més alta ). més estricta)."
+        },
+        "detection_threshold": {
+            "label": "Llindar de detecció",
+            "description": "Confiança mínima de detecció necessària per considerar vàlida una detecció facial."
+        },
+        "recognition_threshold": {
+            "label": "Llindar de reconeixement",
+            "description": "Llindar de distància d'incrustació de cares per considerar dues cares una coincidència."
+        },
+        "min_area": {
+            "label": "Àrea mínima de la cara",
+            "description": "Àrea mínima (píxels) d'un quadre facial detectat requerit per intentar el reconeixement."
+        },
+        "min_faces": {
+            "label": "Cares mínimes",
+            "description": "Nombre mínim de reconeixements facials necessaris abans d'aplicar una subetiqueta reconeguda a una persona."
+        },
+        "save_attempts": {
+            "label": "Desa els intents",
+            "description": "Nombre d'intents de reconeixement facial que s'han de conservar per a la interfície d'usuari de reconeixement recent."
+        },
+        "blur_confidence_filter": {
+            "label": "Filtre de confiança del difuminat",
+            "description": "Ajusta les puntuacions de confiança basades en el difuminat de la imatge per reduir falsos positius per a cares de mala qualitat."
+        },
+        "device": {
+            "label": "Dispositiu",
+            "description": "Això és una sobreescriptura, per dirigir-se a un dispositiu específic. Vegeu https://onnxruntime.ai/docs/execution-providers/ per a més informació"
+        }
+    },
+    "database": {
+        "label": "Base de dades",
+        "description": "Configuració de la base de dades SQLite utilitzada per Frigate per emmagatzemar objectes rastrejats i enregistrar metadades.",
+        "path": {
+            "label": "Ruta a la base de dades",
+            "description": "Ruta del sistema de fitxers on s'emmagatzemarà el fitxer de base de dades SQLite de Frigate."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Paràmetres per al servei de restreaming go2rtc integrat utilitzat per a la retransmissió i traducció de flux en viu."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Configuració per a connectar i publicar telemetria, instantànies i detalls d'esdeveniment a un corredor MQTT.",
+        "enabled": {
+            "label": "Habilita MQTT",
+            "description": "Activa o desactiva la integració MQTT per a l'estat, els esdeveniments i les instantànies."
+        },
+        "host": {
+            "label": "Amfitrió MQTT",
+            "description": "Nom d'amfitrió o adreça IP del corredor MQTT."
+        },
+        "port": {
+            "label": "Port MQTT",
+            "description": "Port del corredor MQTT (normalment 1883 per a MQTT pla)."
+        },
+        "topic_prefix": {
+            "label": "Prefix del tema",
+            "description": "El prefix del tema MQTT per a tots els temes de Frigate; ha de ser únic si s'executen diverses instàncies."
+        },
+        "client_id": {
+            "label": "ID del client",
+            "description": "L'identificador de client utilitzat quan es connecta al broker MQTT; hauria de ser únic per instància."
+        },
+        "stats_interval": {
+            "label": "Interval d'estadístiques",
+            "description": "Interval en segons per a la publicació de les estadístiques del sistema i de la càmera a MQTT."
+        },
+        "user": {
+            "label": "Nom d'usuari MQTT",
+            "description": "El nom d'usuari opcional del MQTT; es pot proporcionar a través de variables d'entorn o secrets."
+        },
+        "password": {
+            "label": "Contrasenya MQTT",
+            "description": "Contrasenya opcional MQTT; es pot proporcionar a través de variables d'entorn o secrets."
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA certs",
+            "description": "Ruta al certificat de CA per a les connexions TLS al corredor (per a autosignats certs)."
+        },
+        "tls_client_cert": {
+            "label": "Cert del client",
+            "description": "Ruta del certificat del client per a l'autenticació mútua TLS; no estableixis l'usuari/contrasenya quan utilitzis el client CERT."
+        },
+        "tls_client_key": {
+            "label": "Clau del client",
+            "description": "Camí de clau privada per al certificat de client."
+        },
+        "tls_insecure": {
+            "label": "TLS insegur",
+            "description": "Permet connexions TLS insegures saltant la verificació del nom d'amfitrió (no recomanat)"
+        },
+        "qos": {
+            "label": "MQTT QoS",
+            "description": "Nivell de qualitat del servei per a publicacions/subscripcions de MQTT (0, 1, o 2)."
+        }
+    },
+    "notifications": {
+        "label": "Notificacions",
+        "description": "La configuració per a habilitar i controlar les notificacions de totes les càmeres; es pot substituir per la càmera.",
+        "enabled": {
+            "label": "Habilita les notificacions",
+            "description": "Activa o desactiva les notificacions per a totes les càmeres; es pot sobreescriure per càmera."
+        },
+        "email": {
+            "label": "Correu electrònic de notificació",
+            "description": "Adreça de correu electrònic utilitzada per a notificacions push o requerides per determinats proveïdors de notificacions."
+        },
+        "cooldown": {
+            "label": "Període de reducció",
+            "description": "Retirada (segons) entre notificacions per evitar els destinataris de correu brossa."
+        },
+        "enabled_in_config": {
+            "label": "Estat de les notificacions originals",
+            "description": "Indica si les notificacions s'han activat en la configuració estàtica original."
+        }
+    },
+    "networking": {
+        "label": "Xarxa",
+        "description": "Paràmetres relacionats amb la xarxa com l'habilitació IPv6 per als punts finals de Frigate.",
+        "ipv6": {
+            "label": "Configuració IPv6",
+            "description": "Configuració específica d'IPv6 per als serveis de xarxa de fragate.",
+            "enabled": {
+                "label": "Habilita IPv6",
+                "description": "Activa el suport IPv6 per als serveis de Frigate (API i UI) quan sigui aplicable"
+            }
+        },
+        "listen": {
+            "label": "S'està escoltant la configuració dels ports",
+            "description": "Configuració per a ports d'escolta interns i externs. Això és per a usuaris avançats. Per a la majoria de casos d'ús es recomana canviar la secció de ports del fitxer Docker.",
+            "internal": {
+                "label": "Port intern",
+                "description": "Port d'escolta intern per a la Frigate (predeterminat 5000)."
+            },
+            "external": {
+                "label": "Port extern",
+                "description": "Port d'escolta extern per a la Frigate (predeterminat 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "description": "Paràmetres per a integrar Frigate darrere d'un servidor intermediari invers que passa les capçaleres d'usuari autenticades.",
+        "header_map": {
+            "label": "Mapeig de capçaleres",
+            "description": "Mapa les capçaleres del servidor intermediari entrant a l'usuari de Frigate i als camps de rol per a l'autenticació basada en el servidor intermediari.",
+            "user": {
+                "label": "Capçalera d'usuari",
+                "description": "Capçalera que conté el nom d'usuari autenticat proporcionat pel servidor intermediari de la font."
+            },
+            "role": {
+                "label": "Capçalera del rol",
+                "description": "Capçalera que conté el rol o els grups de l'usuari autenticat des del servidor intermediari de flux ascendent."
+            },
+            "role_map": {
+                "label": "Mapatge del rol",
+                "description": "Mapa els valors de grup de la font als rols de Frigate (per exemple, assigna els grups d'administració al rol d'administrador)."
+            }
+        },
+        "logout_url": {
+            "label": "URL de sortida",
+            "description": "URL a la qual redirigir els usuaris quan es tanqui la sessió a través del servidor intermediari."
+        },
+        "auth_secret": {
+            "label": "Secret proxy",
+            "description": "S'ha comprovat el secret opcional contra la capçalera X-Proxy-Secret per verificar els servidors intermediaris de confiança."
+        },
+        "default_role": {
+            "label": "Rol predeterminat",
+            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols (administrador o visor)."
+        },
+        "separator": {
+            "label": "Caràcter separador",
+            "description": "Caràcter utilitzat per a dividir múltiples valors proporcionats a les capçaleres del servidor intermediari."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetria",
+        "description": "Opcions de telemetria del sistema i estadístiques, incloent-hi la GPU i el monitoratge de l'amplada de banda de la xarxa.",
+        "network_interfaces": {
+            "label": "Interfícies de xarxa",
+            "description": "Llista de prefixos de nom d'interfície de xarxa que s'han de controlar per a les estadístiques d'amplada de banda."
+        },
+        "stats": {
+            "label": "Estadístiques del sistema",
+            "description": "Opcions per a habilitar/desactivar la col·lecció de diverses estadístiques de sistemes i GPU.",
+            "amd_gpu_stats": {
+                "label": "Estadístiques de GPU AMD",
+                "description": "Habilita la col·lecció d'estadístiques de GPU AMD si hi ha una GPU AMD present."
+            },
+            "intel_gpu_stats": {
+                "label": "Estadístiques de la GPU d'Intel",
+                "description": "Habilita la col·lecció d'estadístiques de GPU d'Intel si hi ha una GPU d'Intel."
+            },
+            "network_bandwidth": {
+                "label": "Amplada de banda de la xarxa",
+                "description": "Habilita el monitoratge d'amplada de banda per procés per als processos i detectors de ffmpeg de càmera (requereix capacitats)."
+            },
+            "intel_gpu_device": {
+                "label": "Dispositiu SR-IOV",
+                "description": "Identificador de dispositiu utilitzat quan es tracten les GPU d'Intel com a SR-IOV per corregir les estadístiques de GPU."
+            }
+        },
+        "version_check": {
+            "label": "Comprovació de versió",
+            "description": "Activa una comprovació de sortida per detectar si hi ha disponible una versió de Frigate més nova."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Configuració de TLS per als punts finals web de Frigate (port 8971).",
+        "enabled": {
+            "label": "Habilita TLS",
+            "description": "Activa TLS per a la interfície d'usuari web i l'API de Frigate al port TLS configurat."
+        }
+    },
+    "detectors": {
+        "label": "Detector de hardware",
+        "description": "Configuració per a detectors d'objectes (CPU, GPU, dorsals ONNX) i qualsevol configuració de model específica per a detectors.",
+        "type": {
+            "label": "Tipus de detector",
+            "description": "Tipus de detector a utilitzar per a la detecció d'objectes (per exemple 'cpu', 'edgetpu', 'openvino')."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "Detector TFLite de CPU que executa els models TensorFlow Lite a la CPU de l'amfitrió sense acceleració de maquinari. No recomanat.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Mapeig d'etiquetes d'objecte a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple, 'cotxe' -> ['matrícula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "num_threads": {
+                "label": "Nombre de fils de detecció",
+                "description": "El nombre de fils utilitzats per a la inferència basada en CPU."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "Detector DeepStack/CodeProject.AI que envia imatges a una API HTTP de DeepStack remota per a la inferència. No recomanat.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Camí personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Camí a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple, 'cotxe' -> ['matrícula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "api_url": {
+                "label": "URL de l'API del DeepStack",
+                "description": "L'URL de l'API de DeepStack."
+            },
+            "api_timeout": {
+                "label": "Temps d'espera de l'API DeepStack (en segons)",
+                "description": "Temps màxim permès per a una sol·licitud de l'API DeepStack."
+            },
+            "api_key": {
+                "label": "Clau API del DeepStack (si es requereix)",
+                "description": "Clau API opcional per als serveis DeepStack autenticats."
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "Detector DeGirum per a l'execució de models a través del núvol DeGirum o serveis d'inferència locals.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple, 'cotxe' -> ['matrícula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "location": {
+                "label": "Ubicació de la referència",
+                "description": "Ubicació del motor d'inferència DeGirim (p. ex. ',cloud', '127.0.0.1')."
+            },
+            "zoo": {
+                "label": "Model Zoo",
+                "description": "Camí o URL al zoològic del model zoo."
+            },
+            "token": {
+                "label": "Token del cloud de DeGirum",
+                "description": "Token d'accés al cloud de DeGirum."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "Detector EdgeTPU que executa models TensorFlow Lite compilats per a Coral EdgeTPU utilitzant el delegat EdgeTPU.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' -> ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "device": {
+                "label": "Tipus de dispositiu",
+                "description": "El dispositiu a utilitzar per a la inferència EdgeTPU (p. ex. «usb», «pci»)."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Detector Hailo-8/Hailo-8L utilitzant models HEF i el HailoRT SDK per inferència en maquinari Hailo.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' -> ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "device": {
+                "label": "Tipus de dispositiu",
+                "description": "El dispositiu a utilitzar per a la inferència Hailo (p. ex. 'PCIe', 'M.2')."
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "Detector MemryX MX3 que executa models DFP compilats en acceleradors MemryX.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' -> ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Camí del model específic del detector",
+                "description": "Camí de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "device": {
+                "label": "Camí del dispositiu",
+                "description": "El dispositiu a utilitzar per a la inferència MemryX (p. ex. «PCIe»)."
+            }
+        },
+        "onnx": {
+            "description": "Detector ONNX per executar models ONNX; utilitzarà els dorsals d'acceleració disponibles (CUDA/ROCm/OpenVINO) quan estigui disponible.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' -> ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple 'float32')."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "device": {
+                "label": "Tipus de dispositiu",
+                "description": "El dispositiu a utilitzar per a la inferència ONNX (p. ex. «AUTO», «CPU», «GPU»)."
+            },
+            "label": "ONNX"
+        },
+        "openvino": {
+            "description": "Detector OpenVINO per a CPU AMD i Intel, GPUs Intel i maquinari Intel VPU.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Rutaa un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "device": {
+                "label": "Tipus de dispositiu",
+                "description": "El dispositiu a utilitzar per a la inferència OpenVINO (p. ex. 'CPU', 'GPU', 'NPU')."
+            },
+            "label": "OpenVINO"
+        },
+        "rknn": {
+            "description": "El detector RKNN per a Rockchip NPUs; executa models RKNN compilats en maquinari Rockchip.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "num_cores": {
+                "label": "Nombre de nuclis NPU a utilitzar.",
+                "description": "El nombre de nuclis NPU a usar (0 per a l'automàtic)."
+            },
+            "label": "RKNN"
+        },
+        "synaptics": {
+            "label": "Sinapsi",
+            "description": "Detector NPU Synaptics per a models en format .synap utilitzant el Synap SDK en maquinari Synaptics.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)"
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            }
+        },
+        "teflon_tfl": {
+            "description": "Detector delegat de Teflon per a TFLite utilitzant la biblioteca delegat de Mesa Teflon per accelerar la inferència en GPU compatibles.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Cami de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "label": "Teflon"
+        },
+        "tensorrt": {
+            "description": "Detector TensorRT per a dispositius Nvidia Jetson utilitzant motors TensorRT serialitzats per a la inferència accelerada.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "device": {
+                "label": "Índex del dispositiu GPU",
+                "description": "L'índex del dispositiu GPU a utilitzar."
+            },
+            "label": "TensorRT"
+        },
+        "zmq": {
+            "description": "Detector ZMQ IPC que descarrega la inferència a un procés extern a través d'un extrem IPC ZeroMQ.",
+            "type": {
+                "label": "Tipus"
+            },
+            "model": {
+                "label": "Configuració del model específic del detector",
+                "description": "Opcions de configuració del model específic del detector (camí, mida d'entrada, etc.).",
+                "path": {
+                    "label": "Ruta personalitzat del model de detecció d'objectes",
+                    "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+                    "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+                },
+                "width": {
+                    "label": "Amplada d'entrada del model de detecció d'objectes",
+                    "description": "Amplada del tensor d'entrada del model en píxels."
+                },
+                "height": {
+                    "label": "Alçada d'entrada del model de detecció d'objectes",
+                    "description": "Alçada del tensor d'entrada del model en píxels."
+                },
+                "labelmap": {
+                    "label": "Personalització del mapa d'etiquetes",
+                    "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+                },
+                "attributes_map": {
+                    "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+                    "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+                },
+                "input_tensor": {
+                    "label": "Forma del sensor d'entrada del model",
+                    "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+                },
+                "input_pixel_format": {
+                    "label": "Format de color del píxel d'entrada del model",
+                    "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tipus D d'entrada del model",
+                    "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+                },
+                "model_type": {
+                    "label": "Tipus de model de detecció d'objectes",
+                    "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+                }
+            },
+            "model_path": {
+                "label": "Ruta del model específic del detector",
+                "description": "Ruta de fitxer al binari del model de detector si el detector escollit ho requereix."
+            },
+            "endpoint": {
+                "label": "Final ZMQ IPC",
+                "description": "L'extrem ZMQ al qual connectar-se."
+            },
+            "request_timeout_ms": {
+                "label": "Temps d'espera de la sol·licitud ZMQ en mil·lisegons",
+                "description": "Temps d'espera per a les sol·licituds ZMQ en mil·lisegons."
+            },
+            "linger_ms": {
+                "label": "Socket ZMQ roman en mil·lisegons",
+                "description": "Període de permanència del socket en mil·lisegons."
+            },
+            "label": "ZMQ IPC"
+        }
+    },
+    "model": {
+        "label": "Model de detecció",
+        "description": "Configuració per a configurar un model de detecció d'objectes personalitzat i la seva forma d'entrada.",
+        "path": {
+            "label": "Ruta personalitzat del model de detecció d'objectes",
+            "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+            "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+        },
+        "width": {
+            "label": "Amplada d'entrada del model de detecció d'objectes",
+            "description": "Amplada del tensor d'entrada del model en píxels."
+        },
+        "height": {
+            "label": "Alçada d'entrada del model de detecció d'objectes",
+            "description": "Alçada del tensor d'entrada del model en píxels."
+        },
+        "labelmap": {
+            "label": "Personalització del mapa d'etiquetes",
+            "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+        },
+        "attributes_map": {
+            "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+            "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'car' ->. ['matricula'])."
+        },
+        "input_tensor": {
+            "label": "Forma del sensor d'entrada del model",
+            "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Format de color del píxel d'entrada del model",
+            "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Tipus D d'entrada del model",
+            "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+        },
+        "model_type": {
+            "label": "Tipus de model de detecció d'objectes",
+            "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+        }
+    },
+    "genai": {
+        "label": "Configuració de la IA generadora (proveïdors amb nom).",
+        "description": "Paràmetres per als proveïdors integrats generatius d'IA utilitzats per generar descripcions d'objectes i resums de revisions.",
+        "api_key": {
+            "label": "Clau API",
+            "description": "Clau API requerida per alguns proveïdors (també es pot establir a través de variables d'entorn)."
+        },
+        "base_url": {
+            "label": "URL base",
+            "description": "URL base per a proveïdors allotjats o compatibles (per exemple, una instància d'Ollama)."
+        },
+        "model": {
+            "description": "El model a utilitzar del proveïdor per generar descripcions o resums.",
+            "label": "Model"
+        },
+        "provider": {
+            "label": "Proveïdor",
+            "description": "El proveïdor GenAI a utilitzar (per exemple: ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "Rols",
+            "description": "Funcions genAI (eines, visió, incrustacions); un proveïdor per rol."
+        },
+        "provider_options": {
+            "label": "Opcions del proveïdor",
+            "description": "Opcions addicionals específiques del proveïdor per passar al client GenAI."
+        },
+        "runtime_options": {
+            "label": "Opcions de temps d'execució",
+            "description": "Les opcions d'execució passades al proveïdor per a cada crida d'inferència."
+        }
+    },
+    "audio": {
+        "label": "Esdeveniments d'àudio",
+        "description": "Configuració per a la detecció d'esdeveniments basats en àudio per a totes les càmeres; es pot substituir per càmera.",
+        "enabled": {
+            "label": "Habilita la detecció d'àudio",
+            "description": "Activa o desactiva la detecció d'esdeveniments d'àudio per a totes les càmeres; es pot substituir per càmera."
+        },
+        "max_not_heard": {
+            "label": "Temps d'espera final",
+            "description": "Quantitat de segons sense el tipus d'àudio configurat abans que acabi l'esdeveniment d'àudio."
+        },
+        "min_volume": {
+            "label": "Volum mínim",
+            "description": "Llindar mínim de volum RMS necessari per executar la detecció d'àudio; els valors més baixos augmenten la sensibilitat (p. ex., 200 alta, 500 mitjana, 1000 baixa)."
+        },
+        "listen": {
+            "label": "Tipus d'escoltes",
+            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, crit, parla, crida)."
+        },
+        "filters": {
+            "label": "Filtres d'àudio",
+            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius."
+        },
+        "enabled_in_config": {
+            "label": "Estat d'àudio original",
+            "description": "Indica si la detecció d'àudio s'ha activat originalment al fitxer de configuració estàtic."
+        },
+        "num_threads": {
+            "label": "Fils de detecció",
+            "description": "Nombre de fils a utilitzar per al processament de detecció d'àudio."
+        }
+    },
+    "birdseye": {
+        "description": "Arranjament per a la vista composta Birdseye que compon múltiples canals de càmera en una única disposició.",
+        "enabled": {
+            "label": "Habilita Birdseye",
+            "description": "Activa o desactiva la funció de vista Birdseye."
+        },
+        "mode": {
+            "label": "Mode de seguiment",
+            "description": "Mode per a incloure càmeres en Birdseye: 'objectes', 'motion' o 'continuous'."
+        },
+        "restream": {
+            "label": "Restream RTSP",
+            "description": "Torna a transmetre la sortida Birdseye com a font RTSP; habilitant això es mantindrà Birdseye funcionant contínuament."
+        },
+        "width": {
+            "label": "Amplada",
+            "description": "Amplada de sortida (píxels) del marc Birdseye compost."
+        },
+        "height": {
+            "label": "Alçada",
+            "description": "Alçada de sortida (píxels) del marc Birdseye compost."
+        },
+        "quality": {
+            "label": "Qualitat de la codificació",
+            "description": "Qualitat de codificació per a l'alimentació Birdseye mpeg1 (1 qualitat més alta, 31 més baixa)."
+        },
+        "inactivity_threshold": {
+            "label": "Llindar d'inactivitat",
+            "description": "Segons d'inactivitat després de la qual una càmera deixarà de mostrar-se a Birdseye."
+        },
+        "layout": {
+            "label": "Disposició",
+            "description": "Opcions de disposició per a la composició Birdseye.",
+            "scaling_factor": {
+                "label": "Factor d'escalat",
+                "description": "Factor d'escalat utilitzat per la calculadora de disposició (interval 1.0 a 5.0)."
+            },
+            "max_cameras": {
+                "label": "Màxim de càmeres",
+                "description": "Nombre màxim de càmeres a mostrar alhora a Birdseye; mostra les càmeres més recents."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "FPS de batec cardíac inactiu",
+            "description": "Fotogrames per segon per a tornar a enviar l'últim fotograma compost Birdseye quan estigui inactiu; establert a 0 per a desactivar."
+        },
+        "order": {
+            "label": "Posició",
+            "description": "Posició numèrica que controla l'ordenació de la càmera en la disposició Birdseye."
+        },
+        "label": "Birdseye"
+    },
+    "detect": {
+        "label": "Detecció d'objectes",
+        "description": "Configuració del rol de detecció utilitzat per executar la detecció d'objectes i inicialitzar els rastrejadors.",
+        "enabled": {
+            "label": "Detecció activada",
+            "description": "Activa o desactiva la detecció d'objectes per a totes les càmeres; es pot sobreescriure per càmera. La detecció s'ha d'activar perquè s'executi el seguiment d'objectes."
+        },
+        "height": {
+            "label": "Detecta l'alçada",
+            "description": "Alçada (píxels) dels fotogrames utilitzats per al flux de detecció; deixeu-ho buit per a utilitzar la resolució nativa del flux."
+        },
+        "width": {
+            "label": "Detecta l'amplada",
+            "description": "Amplada (píxels) dels fotogrames utilitzats per al flux de detecció; deixeu-ho buit per a utilitzar la resolució nativa del flux."
+        },
+        "fps": {
+            "label": "Detecta FPS",
+            "description": "Fotogrames desitjats per segon per executar la detecció; els valors més baixos redueixen l'ús de la CPU (el valor recomanat és 5, només estableix més alt - com a màxim 10 - si el seguiment d'objectes en moviment extremadament ràpid)."
+        },
+        "min_initialized": {
+            "label": "Fotogrames d'inicialització mínims",
+            "description": "Nombre d'incidències de detecció consecutives necessàries abans de crear un objecte rastrejat. Incrementa per a reduir les falses inicialitzacions. El valor per defecte és fps dividit per 2."
+        },
+        "max_disappeared": {
+            "label": "Màxim de fotogrames desapareguts",
+            "description": "Nombre de fotogrames sense detecció abans que es consideri que un objecte rastrejat ha desaparegut."
+        },
+        "stationary": {
+            "label": "Configuració d'objectes estacionaris",
+            "description": "Configuració per detectar i gestionar objectes que romanen estacionaris durant un període de temps.",
+            "interval": {
+                "label": "Interval estacionari",
+                "description": "Amb quina freqüència (en fotogrames) s'executa una comprovació de detecció per confirmar un objecte estacionari."
+            },
+            "threshold": {
+                "label": "Llindar estacionari",
+                "description": "Nombre de fotogrames sense cap canvi de posició necessari per a marcar un objecte com a estacionari."
+            },
+            "max_frames": {
+                "label": "Fotogrames màxims",
+                "description": "Limita quant de temps es segueixen els objectes estacionaris abans de descartar-los.",
+                "default": {
+                    "label": "Fotogrames màxims predeterminats",
+                    "description": "Fotogrames màxims predeterminats per a fer el seguiment d'un objecte estacionari abans d'aturar-se."
+                },
+                "objects": {
+                    "label": "Fotogrames màxims de l'objecte",
+                    "description": "Sobreescriu l'objecte per als fotogrames màxims per fer un seguiment dels objectes estacionaris."
+                }
+            },
+            "classifier": {
+                "label": "Habilita el classificador visual",
+                "description": "Utilitzeu un classificador visual per detectar objectes realment estacionaris, fins i tot quan les caixes contenidores tremolen."
+            }
+        },
+        "annotation_offset": {
+            "label": "Desplaçament de l'anotació",
+            "description": "Mil·lisegons per a desplaçar detecta anotacions per a alinear millor els límits de la línia de temps amb els enregistraments; pot ser positiu o negatiu."
+        }
+    },
+    "classification": {
+        "label": "Classificació de l'objecte",
+        "description": "Paràmetres per als models de classificació utilitzats per refinar les etiquetes dels objectes o la classificació de l'estat.",
+        "bird": {
+            "label": "Configuració de la classificació dels ocells",
+            "description": "Paràmetres específics dels models de classificació d'aus.",
+            "enabled": {
+                "label": "Classificació dels ocells",
+                "description": "Activa o desactiva la classificació d'ocells."
+            },
+            "threshold": {
+                "label": "Puntuació mínima",
+                "description": "Puntuació mínima requerida per acceptar una classificació d'ocells."
+            }
+        },
+        "custom": {
+            "label": "Models de classificació personalitzats",
+            "description": "Configuració per a models de classificació personalitzats utilitzats per a objectes o detecció d'estats.",
+            "enabled": {
+                "label": "Habilita el model",
+                "description": "Activa o desactiva el model de classificació personalitzat."
+            },
+            "name": {
+                "label": "Nom del model",
+                "description": "Identificador per al model de classificació personalitzat a utilitzar."
+            },
+            "threshold": {
+                "label": "Llindar de puntuació",
+                "description": "Llindar de puntuació utilitzat per a canviar l'estat de classificació."
+            },
+            "save_attempts": {
+                "label": "Desa els intents",
+                "description": "Quants intents de classificació s'han de desar per a les classificacions recents de la interfície d'usuari."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Classifica els objectes",
+                    "description": "Llista de tipus d'objectes on executar la classificació d'objectes."
+                },
+                "classification_type": {
+                    "label": "Tipus de classificació",
+                    "description": "Tipus de classificació aplicat: 'sub.label' (afegeix sub.label) o altres tipus admesos."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Càmeres de classificació",
+                    "description": "Retalla per càmera i configuració per executar la classificació d'estat.",
+                    "crop": {
+                        "label": "Retalla la classificació",
+                        "description": "Retalla les coordenades a usar per a executar la classificació en aquesta càmera."
+                    }
+                },
+                "motion": {
+                    "label": "Executa en moviment",
+                    "description": "Si és cert, executeu la classificació quan es detecti el moviment dins del retall especificat."
+                },
+                "interval": {
+                    "label": "Interval de classificació",
+                    "description": "Interval (segons) entre les classificacions periòdiques per a la classificació estatal."
+                }
+            }
+        }
+    },
+    "lpr": {
+        "label": "Reconeixement de la placa de llicència",
+        "description": "Paràmetres de reconeixement de la matrícula de la llicència, inclosos els llindars de detecció, el format i les plaques conegudes.",
+        "enabled": {
+            "label": "Habilita el LPR",
+            "description": "Activa o desactiva el reconeixement de la matrícula per a totes les càmeres; es pot substituir per la càmera."
+        },
+        "model_size": {
+            "label": "Mida del model",
+            "description": "Mida del model utilitzat per a la detecció/reconeixement del text. La majoria d'usuaris haurien d'utilitzar 'petits'."
+        },
+        "detection_threshold": {
+            "label": "Llindar de detecció",
+            "description": "Llindar de confiança de detecció per començar a executar OCR en una placa sospitosa."
+        },
+        "min_area": {
+            "label": "Àrea mínima de la placa",
+            "description": "Àrea mínima de placa (píxels) necessària per intentar el reconeixement."
+        },
+        "recognition_threshold": {
+            "label": "Llindar de reconeixement",
+            "description": "Es requereix un llindar de confiança perquè el text de la placa reconeguda s'adjunti com a subetiqueta."
+        },
+        "min_plate_length": {
+            "label": "Longitud mínima de la placa",
+            "description": "El nombre mínim de caràcters que ha de contenir una placa reconeguda ha de ser considerat vàlid."
+        },
+        "format": {
+            "label": "Format regex de la matrícula",
+            "description": "Expressió regular opcional per a validar les cadenes de placa reconegudes contra un format esperat."
+        },
+        "match_distance": {
+            "label": "Distància de la coincidència",
+            "description": "Nombre de desajustos de caràcters permesos quan es comparen les plaques detectades amb les plaques conegudes."
+        },
+        "known_plates": {
+            "label": "Matricules conegudes",
+            "description": "Llista de plaques o expressions regulars per fer un seguiment o una alerta especialment activades."
+        },
+        "enhancement": {
+            "label": "Nivell de millora",
+            "description": "Nivell de millora (0-10) per aplicar als cultius de plaques abans de l'OCR; els valors més alts no sempre poden millorar els resultats, els nivells superiors a 5 només poden funcionar amb plaques nocturnes i s'han d'utilitzar amb precaució."
+        },
+        "debug_save_plates": {
+            "label": "Desa les plaques de depuració",
+            "description": "Desa les imatges retallades de la matrícula per a depurar el rendiment LPR."
+        },
+        "device": {
+            "label": "Dispositiu",
+            "description": "Això és una sobreescriptura, per dirigir-se a un dispositiu específic. Vegeu https://onnxruntime.ai/docs/execution-providers/ per a més informació"
+        },
+        "replace_rules": {
+            "label": "Regles de reemplaçament",
+            "description": "Regex regles de reemplaçament usades per a normalitzar les cadenes de placa detectades abans de coincidir.",
+            "pattern": {
+                "label": "Patró Regex"
+            },
+            "replacement": {
+                "label": "Cadena de reemplaçament"
+            }
+        },
+        "expire_time": {
+            "label": "Caduca els segons",
+            "description": "Temps en segons després del qual una placa no vista expira del rastrejador (només per a càmeres LPR dedicades)."
+        }
+    },
+    "camera_groups": {
+        "label": "Grups de càmera",
+        "description": "Configuració dels grups de càmeres amb nom utilitzats per a organitzar càmeres a la interfície d'usuari.",
+        "cameras": {
+            "label": "Llista de càmeres",
+            "description": "Matriu de noms de càmera inclosos en aquest grup."
+        },
+        "icon": {
+            "label": "Icona de grup",
+            "description": "Icona utilitzada per a representar el grup de càmeres a la interfície d'usuari."
+        },
+        "order": {
+            "label": "Ordre d'ordenació",
+            "description": "Ordre numèric utilitzat per ordenar els grups de càmera a la interfície d'usuari; els nombres més grans apareixen més tard."
+        }
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Configuració de la publicació d'imatges MQTT",
+        "enabled": {
+            "label": "Envia la imatge",
+            "description": "Habilita la publicació d'instantànies d'imatges per a objectes als temes MQTT d'aquesta càmera."
+        },
+        "timestamp": {
+            "label": "Afegeix una marca horària",
+            "description": "Superposa una marca horària a les imatges publicades a MQTT."
+        },
+        "bounding_box": {
+            "label": "Afegeix un contenidor",
+            "description": "Dibuixa caixes contenidores en imatges publicades sobre MQTT."
+        },
+        "crop": {
+            "label": "Retalla la imatge",
+            "description": "Retalla les imatges publicades a MQTT segons el quadre de delimitació de l'objecte detectat."
+        },
+        "height": {
+            "label": "Alçada de la imatge",
+            "description": "Alçada (píxels) per a canviar la mida de les imatges publicades sobre MQTT."
+        },
+        "required_zones": {
+            "label": "Zones requerides",
+            "description": "Zones que ha d'introduir un objecte perquè es publiqui una imatge MQTT."
+        },
+        "quality": {
+            "label": "Qualitat JPEG",
+            "description": "Qualitat JPEG per a les imatges publicades a MQTT (0-100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Interfície de la càmera",
+        "description": "Mostra l'ordre i la visibilitat d'aquesta càmera a la interfície d'usuari. La comanda afecta el tauler predeterminat. Per a un control més granular, utilitzeu grups de càmera.",
+        "order": {
+            "label": "Ordre de la interfície",
+            "description": "Ordre numèric utilitzat per ordenar la càmera a la interfície d'usuari (taulell de control i llistes per defecte); els nombres més grans apareixen més tard."
+        },
+        "dashboard": {
+            "label": "Mostra a la interfície",
+            "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+        }
+    }
+}

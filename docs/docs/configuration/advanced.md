@@ -44,13 +44,21 @@ go2rtc:
 
 ### `environment_vars`
 
-This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS.
+This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS. Docker users should set environment variables in their `docker run` command (`-e FRIGATE_MQTT_PASSWORD=secret`) or `docker-compose.yml` file (`environment:` section) instead. Note that values set here are stored in plain text in your config file, so if the goal is to keep credentials out of your configuration, use Docker environment variables or Docker secrets instead.
+
+Variables prefixed with `FRIGATE_` can be referenced in config fields that support environment variable substitution (such as MQTT host and credentials, camera stream URLs, and ONVIF host and credentials) using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
 Example:
 
 ```yaml
 environment_vars:
-  VARIABLE_NAME: variable_value
+  FRIGATE_MQTT_USER: my_mqtt_user
+  FRIGATE_MQTT_PASSWORD: my_mqtt_password
+
+mqtt:
+  host: "{FRIGATE_MQTT_HOST}"
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
 ```
 
 #### TensorFlow Thread Configuration
@@ -155,33 +163,32 @@ services:
 
 ### Enabling IPv6
 
-IPv6 is disabled by default, to enable IPv6 listen.gotmpl needs to be bind mounted with IPv6 enabled. For example:
+IPv6 is disabled by default, to enable IPv6 modify your Frigate configuration as follows:
 
-```
-{{ if not .enabled }}
-# intended for external traffic, protected by auth
-listen 8971;
-{{ else }}
-# intended for external traffic, protected by auth
-listen 8971 ssl;
-
-# intended for internal traffic, not protected by auth
-listen 5000;
+```yaml
+networking:
+  ipv6:
+    enabled: True
 ```
 
-becomes
+### Listen on different ports
 
-```
-{{ if not .enabled }}
-# intended for external traffic, protected by auth
-listen [::]:8971 ipv6only=off;
-{{ else }}
-# intended for external traffic, protected by auth
-listen [::]:8971 ipv6only=off ssl;
+You can change the ports Nginx uses for listening using Frigate's configuration file. The internal port (unauthenticated) and external port (authenticated) can be changed independently. You can also specify an IP address using the format `ip:port` if you wish to bind the port to a specific interface. This may be useful for example to prevent exposing the internal port outside the container.
 
-# intended for internal traffic, not protected by auth
-listen [::]:5000 ipv6only=off;
+For example:
+
+```yaml
+networking:
+  listen:
+    internal: 127.0.0.1:5000
+    external: 8971
 ```
+
+:::warning
+
+This setting is for advanced users. For the majority of use cases it's recommended to change the `ports` section of your Docker compose file or use the Docker `run` `--publish` option instead, e.g. `-p 443:8971`. Changing Frigate's ports may break some integrations.
+
+:::
 
 ## Base path
 
@@ -234,7 +241,7 @@ To do this:
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.10, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.13, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 

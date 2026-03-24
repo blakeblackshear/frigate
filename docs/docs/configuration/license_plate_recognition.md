@@ -30,7 +30,7 @@ In the default mode, Frigate's LPR needs to first detect a `car` or `motorcycle`
 
 ## Minimum System Requirements
 
-License plate recognition works by running AI models locally on your system. The YOLOv9 plate detector model and the OCR models ([PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)) are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM is required.
+License plate recognition works by running AI models locally on your system. The YOLOv9 plate detector model and the OCR models ([PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)) are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM and a CPU with AVX + AVX2 instructions is required.
 
 ## Configuration
 
@@ -43,7 +43,7 @@ lpr:
 
 Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You should disable it for specific cameras at the camera level if you don't want to run LPR on cars on those cameras:
 
-```yaml
+```yaml {4,5}
 cameras:
   garage:
     ...
@@ -375,7 +375,6 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 Start with ["Why isn't my license plate being detected and recognized?"](#why-isnt-my-license-plate-being-detected-and-recognized). If you are still having issues, work through these steps.
 
 1. Start with a simplified LPR config.
-
    - Remove or comment out everything in your LPR config, including `min_area`, `min_plate_length`, `format`, `known_plates`, or `enhancement` values so that the only values left are `enabled` and `debug_save_plates`. This will run LPR with Frigate's default values.
 
      ```yaml
@@ -386,31 +385,28 @@ Start with ["Why isn't my license plate being detected and recognized?"](#why-is
      ```
 
 2. Enable debug logs to see exactly what Frigate is doing.
-
    - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only keep this enabled when necessary. Restart Frigate after this change.
 
      ```yaml
      logger:
        default: info
        logs:
+        # highlight-next-line
          frigate.data_processing.common.license_plate: debug
      ```
 
 3. Ensure your plates are being _detected_.
 
    If you are using a Frigate+ or `license_plate` detecting model:
-
    - Watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected.
    - View MQTT messages for `frigate/events` to verify detected plates.
    - You may need to adjust your `min_score` and/or `threshold` for the `license_plate` object if your plates are not being detected.
 
    If you are **not** using a Frigate+ or `license_plate` detecting model:
-
    - Watch the debug logs for messages from the YOLOv9 plate detector.
    - You may need to adjust your `detection_threshold` if your plates are not being detected.
 
 4. Ensure the characters on detected plates are being _recognized_.
-
    - Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`). Ensure these images are readable and the text is clear.
    - Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` or `motorcycle` label will change to the recognized plate when LPR is enabled and working.
    - Adjust `recognition_threshold` settings per the suggestions [above](#advanced-configuration).

@@ -9,9 +9,15 @@ __all__ = ["LoggerConfig"]
 
 
 class LoggerConfig(FrigateBaseModel):
-    default: LogLevel = Field(default=LogLevel.info, title="Default logging level.")
+    default: LogLevel = Field(
+        default=LogLevel.info,
+        title="Logging level",
+        description="Default global log verbosity (debug, info, warning, error).",
+    )
     logs: dict[str, LogLevel] = Field(
-        default_factory=dict, title="Log level for specified processes."
+        default_factory=dict,
+        title="Per-process log level",
+        description="Per-component log level overrides to increase or decrease verbosity for specific modules.",
     )
 
     @model_validator(mode="after")

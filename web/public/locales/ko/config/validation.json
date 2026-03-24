@@ -1,0 +1,32 @@
+{
+    "minimum": "최소 {{limit}} 이상",
+    "maximum": "최대 {{limit}} 이하",
+    "exclusiveMinimum": "최소 {{limit}} 초과",
+    "exclusiveMaximum": "최대 {{limit}} 미만",
+    "minLength": "{{limit}}자 이상이어야 합니다",
+    "maxLength": "{{limit}}자 이하여야 합니다",
+    "minItems": "{{limit}}개 이상이어야 합니다",
+    "maxItems": "{{limit}}개 이하여야 합니다",
+    "pattern": "잘못된 형식",
+    "required": "이 항목은 필수 입력 사항입니다",
+    "type": "잘못된 유형입니다",
+    "enum": "허용된 값 중 하나여야 합니다",
+    "const": "값이 예상된 상수와 일치하지 않습니다",
+    "uniqueItems": "모든 항목은 고유해야 합니다",
+    "format": "잘못된 형식",
+    "additionalProperties": "알 수 없는 속성은 허용되지 않습니다",
+    "oneOf": "허용된 형식 중 하나와 일치해야 합니다",
+    "anyOf": "허용된 형식 중 최소 하나와 일치해야 합니다",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "역할 매핑이 설정된 경우 역할 헤더(Role header)가 필수입니다."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "각 역할은 하나의 입력 스트림에만 할당할 수 있습니다.",
+            "detectRequired": "최소 하나의 입력 스트림에 'detect' 역할이 할당되어야 합니다.",
+            "hwaccelDetectOnly": "하드웨어 가속 설정은 'detect' 스트림에서만 가능합니다."
+        }
+    }
+}

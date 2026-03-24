@@ -1,0 +1,1588 @@
+{
+  "version": {
+    "label": "Current config version",
+    "description": "Numeric or string version of the active configuration to help detect migrations or format changes."
+  },
+  "safe_mode": {
+    "label": "Safe mode",
+    "description": "When enabled, start Frigate in safe mode with reduced features for troubleshooting."
+  },
+  "environment_vars": {
+    "label": "Environment variables",
+    "description": "Key/value pairs of environment variables to set for the Frigate process in Home Assistant OS. Non-HAOS users must use Docker environment variable configuration instead."
+  },
+  "logger": {
+    "label": "Logging",
+    "description": "Controls default log verbosity and per-component log level overrides.",
+    "default": {
+      "label": "Logging level",
+      "description": "Default global log verbosity (debug, info, warning, error)."
+    },
+    "logs": {
+      "label": "Per-process log level",
+      "description": "Per-component log level overrides to increase or decrease verbosity for specific modules."
+    }
+  },
+  "auth": {
+    "label": "Authentication",
+    "description": "Authentication and session-related settings including cookie and rate limit options.",
+    "enabled": {
+      "label": "Enable authentication",
+      "description": "Enable native authentication for the Frigate UI."
+    },
+    "reset_admin_password": {
+      "label": "Reset admin password",
+      "description": "If true, reset the admin user's password on startup and print the new password in logs."
+    },
+    "cookie_name": {
+      "label": "JWT cookie name",
+      "description": "Name of the cookie used to store the JWT token for native authentication."
+    },
+    "cookie_secure": {
+      "label": "Secure cookie flag",
+      "description": "Set the secure flag on the auth cookie; should be true when using TLS."
+    },
+    "session_length": {
+      "label": "Session length",
+      "description": "Session duration in seconds for JWT-based sessions."
+    },
+    "refresh_time": {
+      "label": "Session refresh window",
+      "description": "When a session is within this many seconds of expiring, refresh it back to full length."
+    },
+    "failed_login_rate_limit": {
+      "label": "Failed login limits",
+      "description": "Rate limiting rules for failed login attempts to reduce brute-force attacks."
+    },
+    "trusted_proxies": {
+      "label": "Trusted proxies",
+      "description": "List of trusted proxy IPs used when determining client IP for rate limiting."
+    },
+    "hash_iterations": {
+      "label": "Hash iterations",
+      "description": "Number of PBKDF2-SHA256 iterations to use when hashing user passwords."
+    },
+    "roles": {
+      "label": "Role mappings",
+      "description": "Map roles to camera lists. An empty list grants access to all cameras for the role."
+    },
+    "admin_first_time_login": {
+      "label": "First-time admin flag",
+      "description": "When true the UI may show a help link on the login page informing users how to sign in after an admin password reset. "
+    }
+  },
+  "database": {
+    "label": "Database",
+    "description": "Settings for the SQLite database used by Frigate to store tracked object and recording metadata.",
+    "path": {
+      "label": "Database path",
+      "description": "Filesystem path where the Frigate SQLite database file will be stored."
+    }
+  },
+  "go2rtc": {
+    "label": "go2rtc",
+    "description": "Settings for the integrated go2rtc restreaming service used for live stream relaying and translation."
+  },
+  "mqtt": {
+    "label": "MQTT",
+    "description": "Settings for connecting and publishing telemetry, snapshots, and event details to an MQTT broker.",
+    "enabled": {
+      "label": "Enable MQTT",
+      "description": "Enable or disable MQTT integration for state, events, and snapshots."
+    },
+    "host": {
+      "label": "MQTT host",
+      "description": "Hostname or IP address of the MQTT broker."
+    },
+    "port": {
+      "label": "MQTT port",
+      "description": "Port of the MQTT broker (usually 1883 for plain MQTT)."
+    },
+    "topic_prefix": {
+      "label": "Topic prefix",
+      "description": "MQTT topic prefix for all Frigate topics; must be unique if running multiple instances."
+    },
+    "client_id": {
+      "label": "Client ID",
+      "description": "Client identifier used when connecting to the MQTT broker; should be unique per instance."
+    },
+    "stats_interval": {
+      "label": "Stats interval",
+      "description": "Interval in seconds for publishing system and camera stats to MQTT."
+    },
+    "user": {
+      "label": "MQTT username",
+      "description": "Optional MQTT username; can be provided via environment variables or secrets."
+    },
+    "password": {
+      "label": "MQTT password",
+      "description": "Optional MQTT password; can be provided via environment variables or secrets."
+    },
+    "tls_ca_certs": {
+      "label": "TLS CA certs",
+      "description": "Path to CA certificate for TLS connections to the broker (for self-signed certs)."
+    },
+    "tls_client_cert": {
+      "label": "Client cert",
+      "description": "Client certificate path for TLS mutual authentication; do not set user/password when using client certs."
+    },
+    "tls_client_key": {
+      "label": "Client key",
+      "description": "Private key path for the client certificate."
+    },
+    "tls_insecure": {
+      "label": "TLS insecure",
+      "description": "Allow insecure TLS connections by skipping hostname verification (not recommended)."
+    },
+    "qos": {
+      "label": "MQTT QoS",
+      "description": "Quality of Service level for MQTT publishes/subscriptions (0, 1, or 2)."
+    }
+  },
+  "notifications": {
+    "label": "Notifications",
+    "description": "Settings to enable and control notifications for all cameras; can be overridden per-camera.",
+    "enabled": {
+      "label": "Enable notifications",
+      "description": "Enable or disable notifications for all cameras; can be overridden per-camera."
+    },
+    "email": {
+      "label": "Notification email",
+      "description": "Email address used for push notifications or required by certain notification providers."
+    },
+    "cooldown": {
+      "label": "Cooldown period",
+      "description": "Cooldown (seconds) between notifications to avoid spamming recipients."
+    },
+    "enabled_in_config": {
+      "label": "Original notifications state",
+      "description": "Indicates whether notifications were enabled in the original static configuration."
+    }
+  },
+  "networking": {
+    "label": "Networking",
+    "description": "Network-related settings such as IPv6 enablement for Frigate endpoints.",
+    "ipv6": {
+      "label": "IPv6 configuration",
+      "description": "IPv6-specific settings for Frigate network services.",
+      "enabled": {
+        "label": "Enable IPv6",
+        "description": "Enable IPv6 support for Frigate services (API and UI) where applicable."
+      }
+    },
+    "listen": {
+      "label": "Listening ports configuration",
+      "description": "Configuration for internal and external listening ports. This is for advanced users. For the majority of use cases it's recommended to change the ports section of your Docker compose file.",
+      "internal": {
+        "label": "Internal port",
+        "description": "Internal listening port for Frigate (default 5000)."
+      },
+      "external": {
+        "label": "External port",
+        "description": "External listening port for Frigate (default 8971)."
+      }
+    }
+  },
+  "proxy": {
+    "label": "Proxy",
+    "description": "Settings for integrating Frigate behind a reverse proxy that passes authenticated user headers.",
+    "header_map": {
+      "label": "Header mapping",
+      "description": "Map incoming proxy headers to Frigate user and role fields for proxy-based auth.",
+      "user": {
+        "label": "User header",
+        "description": "Header containing the authenticated username provided by the upstream proxy."
+      },
+      "role": {
+        "label": "Role header",
+        "description": "Header containing the authenticated user's role or groups from the upstream proxy."
+      },
+      "role_map": {
+        "label": "Role mapping",
+        "description": "Map upstream group values to Frigate roles (for example map admin groups to the admin role)."
+      }
+    },
+    "logout_url": {
+      "label": "Logout URL",
+      "description": "URL to redirect users to when logging out via the proxy."
+    },
+    "auth_secret": {
+      "label": "Proxy secret",
+      "description": "Optional secret checked against the X-Proxy-Secret header to verify trusted proxies."
+    },
+    "default_role": {
+      "label": "Default role",
+      "description": "Default role assigned to proxy-authenticated users when no role mapping applies (admin or viewer)."
+    },
+    "separator": {
+      "label": "Separator character",
+      "description": "Character used to split multiple values provided in proxy headers."
+    }
+  },
+  "telemetry": {
+    "label": "Telemetry",
+    "description": "System telemetry and stats options including GPU and network bandwidth monitoring.",
+    "network_interfaces": {
+      "label": "Network interfaces",
+      "description": "List of network interface name prefixes to monitor for bandwidth statistics."
+    },
+    "stats": {
+      "label": "System stats",
+      "description": "Options to enable/disable collection of various system and GPU statistics.",
+      "amd_gpu_stats": {
+        "label": "AMD GPU stats",
+        "description": "Enable collection of AMD GPU statistics if an AMD GPU is present."
+      },
+      "intel_gpu_stats": {
+        "label": "Intel GPU stats",
+        "description": "Enable collection of Intel GPU statistics if an Intel GPU is present."
+      },
+      "network_bandwidth": {
+        "label": "Network bandwidth",
+        "description": "Enable per-process network bandwidth monitoring for camera ffmpeg processes and detectors (requires capabilities)."
+      },
+      "intel_gpu_device": {
+        "label": "SR-IOV device",
+        "description": "Device identifier used when treating Intel GPUs as SR-IOV to fix GPU stats."
+      }
+    },
+    "version_check": {
+      "label": "Version check",
+      "description": "Enable an outbound check to detect if a newer Frigate version is available."
+    }
+  },
+  "tls": {
+    "label": "TLS",
+    "description": "TLS settings for Frigate's web endpoints (port 8971).",
+    "enabled": {
+      "label": "Enable TLS",
+      "description": "Enable TLS for Frigate's web UI and API on the configured TLS port."
+    }
+  },
+  "ui": {
+    "label": "UI",
+    "description": "User interface preferences such as timezone, time/date formatting, and units.",
+    "timezone": {
+      "label": "Timezone",
+      "description": "Optional timezone to display across the UI (defaults to browser local time if unset)."
+    },
+    "time_format": {
+      "label": "Time format",
+      "description": "Time format to use in the UI (browser, 12hour, or 24hour)."
+    },
+    "date_style": {
+      "label": "Date style",
+      "description": "Date style to use in the UI (full, long, medium, short)."
+    },
+    "time_style": {
+      "label": "Time style",
+      "description": "Time style to use in the UI (full, long, medium, short)."
+    },
+    "unit_system": {
+      "label": "Unit system",
+      "description": "Unit system for display (metric or imperial) used in the UI and MQTT."
+    }
+  },
+  "detectors": {
+    "label": "Detector hardware",
+    "description": "Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
+    "type": {
+      "label": "Type"
+    },
+    "model": {
+      "label": "Detector specific model configuration",
+      "description": "Detector-specific model configuration options (path, input size, etc.).",
+      "path": {
+        "label": "Custom Object detection model path",
+        "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
+      },
+      "labelmap_path": {
+        "label": "Label map for custom object detector",
+        "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
+      },
+      "width": {
+        "label": "Object detection model input width",
+        "description": "Width of the model input tensor in pixels."
+      },
+      "height": {
+        "label": "Object detection model input height",
+        "description": "Height of the model input tensor in pixels."
+      },
+      "labelmap": {
+        "label": "Labelmap customization",
+        "description": "Overrides or remapping entries to merge into the standard labelmap."
+      },
+      "attributes_map": {
+        "label": "Map of object labels to their attribute labels",
+        "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
+      },
+      "input_tensor": {
+        "label": "Model Input Tensor Shape",
+        "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
+      },
+      "input_pixel_format": {
+        "label": "Model Input Pixel Color Format",
+        "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
+      },
+      "input_dtype": {
+        "label": "Model Input D Type",
+        "description": "Data type of the model input tensor (for example 'float32')."
+      },
+      "model_type": {
+        "label": "Object Detection Model Type",
+        "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
+      }
+    },
+    "model_path": {
+      "label": "Detector specific model path",
+      "description": "File path to the detector model binary if required by the chosen detector."
+    },
+    "axengine": {
+      "label": "AXEngine NPU",
+      "description": "AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime."
+    },
+    "cpu": {
+      "label": "CPU",
+      "description": "CPU TFLite detector that runs TensorFlow Lite models on the host CPU without hardware acceleration. Not recommended.",
+      "num_threads": {
+        "label": "Number of detection threads",
+        "description": "The number of threads used for CPU-based inference."
+      }
+    },
+    "deepstack": {
+      "label": "DeepStack",
+      "description": "DeepStack/CodeProject.AI detector that sends images to a remote DeepStack HTTP API for inference. Not recommended.",
+      "api_url": {
+        "label": "DeepStack API URL",
+        "description": "The URL of the DeepStack API."
+      },
+      "api_timeout": {
+        "label": "DeepStack API timeout (in seconds)",
+        "description": "Maximum time allowed for a DeepStack API request."
+      },
+      "api_key": {
+        "label": "DeepStack API key (if required)",
+        "description": "Optional API key for authenticated DeepStack services."
+      }
+    },
+    "degirum": {
+      "label": "DeGirum",
+      "description": "DeGirum detector for running models via DeGirum cloud or local inference services.",
+      "location": {
+        "label": "Inference Location",
+        "description": "Location of the DeGirim inference engine (e.g. '@cloud', '127.0.0.1')."
+      },
+      "zoo": {
+        "label": "Model Zoo",
+        "description": "Path or URL to the DeGirum model zoo."
+      },
+      "token": {
+        "label": "DeGirum Cloud Token",
+        "description": "Token for DeGirum Cloud access."
+      }
+    },
+    "edgetpu": {
+      "label": "EdgeTPU",
+      "description": "EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate.",
+      "device": {
+        "label": "Device Type",
+        "description": "The device to use for EdgeTPU inference (e.g. 'usb', 'pci')."
+      }
+    },
+    "hailo8l": {
+      "label": "Hailo-8/Hailo-8L",
+      "description": "Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware.",
+      "device": {
+        "label": "Device Type",
+        "description": "The device to use for Hailo inference (e.g. 'PCIe', 'M.2')."
+      }
+    },
+    "memryx": {
+      "label": "MemryX",
+      "description": "MemryX MX3 detector that runs compiled DFP models on MemryX accelerators.",
+      "device": {
+        "label": "Device Path",
+        "description": "The device to use for MemryX inference (e.g. 'PCIe')."
+      }
+    },
+    "onnx": {
+      "label": "ONNX",
+      "description": "ONNX detector for running ONNX models; will use available acceleration backends (CUDA/ROCm/OpenVINO) when available.",
+      "device": {
+        "label": "Device Type",
+        "description": "The device to use for ONNX inference (e.g. 'AUTO', 'CPU', 'GPU')."
+      }
+    },
+    "openvino": {
+      "label": "OpenVINO",
+      "description": "OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware.",
+      "device": {
+        "label": "Device Type",
+        "description": "The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU')."
+      }
+    },
+    "rknn": {
+      "label": "RKNN",
+      "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware.",
+      "num_cores": {
+        "label": "Number of NPU cores to use.",
+        "description": "The number of NPU cores to use (0 for auto)."
+      }
+    },
+    "synaptics": {
+      "label": "Synaptics",
+      "description": "Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware."
+    },
+    "teflon_tfl": {
+      "label": "Teflon",
+      "description": "Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs."
+    },
+    "tensorrt": {
+      "label": "TensorRT",
+      "description": "TensorRT detector for Nvidia Jetson devices using serialized TensorRT engines for accelerated inference.",
+      "device": {
+        "label": "GPU Device Index",
+        "description": "The GPU device index to use."
+      }
+    },
+    "zmq": {
+      "label": "ZMQ IPC",
+      "description": "ZMQ IPC detector that offloads inference to an external process via a ZeroMQ IPC endpoint.",
+      "endpoint": {
+        "label": "ZMQ IPC endpoint",
+        "description": "The ZMQ endpoint to connect to."
+      },
+      "request_timeout_ms": {
+        "label": "ZMQ request timeout in milliseconds",
+        "description": "Timeout for ZMQ requests in milliseconds."
+      },
+      "linger_ms": {
+        "label": "ZMQ socket linger in milliseconds",
+        "description": "Socket linger period in milliseconds."
+      }
+    }
+  },
+  "model": {
+    "label": "Detection model",
+    "description": "Settings to configure a custom object detection model and its input shape.",
+    "path": {
+      "label": "Custom Object detection model path",
+      "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
+    },
+    "labelmap_path": {
+      "label": "Label map for custom object detector",
+      "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
+    },
+    "width": {
+      "label": "Object detection model input width",
+      "description": "Width of the model input tensor in pixels."
+    },
+    "height": {
+      "label": "Object detection model input height",
+      "description": "Height of the model input tensor in pixels."
+    },
+    "labelmap": {
+      "label": "Labelmap customization",
+      "description": "Overrides or remapping entries to merge into the standard labelmap."
+    },
+    "attributes_map": {
+      "label": "Map of object labels to their attribute labels",
+      "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
+    },
+    "input_tensor": {
+      "label": "Model Input Tensor Shape",
+      "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
+    },
+    "input_pixel_format": {
+      "label": "Model Input Pixel Color Format",
+      "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
+    },
+    "input_dtype": {
+      "label": "Model Input D Type",
+      "description": "Data type of the model input tensor (for example 'float32')."
+    },
+    "model_type": {
+      "label": "Object Detection Model Type",
+      "description": "Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization."
+    }
+  },
+  "genai": {
+    "label": "Generative AI configuration",
+    "description": "Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
+    "api_key": {
+      "label": "API key",
+      "description": "API key required by some providers (can also be set via environment variables)."
+    },
+    "base_url": {
+      "label": "Base URL",
+      "description": "Base URL for self-hosted or compatible providers (for example an Ollama instance)."
+    },
+    "model": {
+      "label": "Model",
+      "description": "The model to use from the provider for generating descriptions or summaries."
+    },
+    "provider": {
+      "label": "Provider",
+      "description": "The GenAI provider to use (for example: ollama, gemini, openai)."
+    },
+    "roles": {
+      "label": "Roles",
+      "description": "GenAI roles (tools, vision, embeddings); one provider per role."
+    },
+    "provider_options": {
+      "label": "Provider options",
+      "description": "Additional provider-specific options to pass to the GenAI client."
+    },
+    "runtime_options": {
+      "label": "Runtime options",
+      "description": "Runtime options passed to the provider for each inference call."
+    }
+  },
+  "audio": {
+    "label": "Audio events",
+    "description": "Settings for audio-based event detection for all cameras; can be overridden per-camera.",
+    "enabled": {
+      "label": "Enable audio detection",
+      "description": "Enable or disable audio event detection for all cameras; can be overridden per-camera."
+    },
+    "max_not_heard": {
+      "label": "End timeout",
+      "description": "Amount of seconds without the configured audio type before the audio event is ended."
+    },
+    "min_volume": {
+      "label": "Minimum volume",
+      "description": "Minimum RMS volume threshold required to run audio detection; lower values increase sensitivity (e.g., 200 high, 500 medium, 1000 low)."
+    },
+    "listen": {
+      "label": "Listen types",
+      "description": "List of audio event types to detect (for example: bark, fire_alarm, scream, speech, yell)."
+    },
+    "filters": {
+      "label": "Audio filters",
+      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives."
+    },
+    "enabled_in_config": {
+      "label": "Original audio state",
+      "description": "Indicates whether audio detection was originally enabled in the static config file."
+    },
+    "num_threads": {
+      "label": "Detection threads",
+      "description": "Number of threads to use for audio detection processing."
+    }
+  },
+  "birdseye": {
+    "label": "Birdseye",
+    "description": "Settings for the Birdseye composite view that composes multiple camera feeds into a single layout.",
+    "enabled": {
+      "label": "Enable Birdseye",
+      "description": "Enable or disable the Birdseye view feature."
+    },
+    "mode": {
+      "label": "Tracking mode",
+      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
+    },
+    "restream": {
+      "label": "Restream RTSP",
+      "description": "Re-stream the Birdseye output as an RTSP feed; enabling this will keep Birdseye running continuously."
+    },
+    "width": {
+      "label": "Width",
+      "description": "Output width (pixels) of the composed Birdseye frame."
+    },
+    "height": {
+      "label": "Height",
+      "description": "Output height (pixels) of the composed Birdseye frame."
+    },
+    "quality": {
+      "label": "Encoding quality",
+      "description": "Encoding quality for the Birdseye mpeg1 feed (1 highest quality, 31 lowest)."
+    },
+    "inactivity_threshold": {
+      "label": "Inactivity threshold",
+      "description": "Seconds of inactivity after which a camera will stop being shown in Birdseye."
+    },
+    "layout": {
+      "label": "Layout",
+      "description": "Layout options for the Birdseye composition.",
+      "scaling_factor": {
+        "label": "Scaling factor",
+        "description": "Scaling factor used by the layout calculator (range 1.0 to 5.0)."
+      },
+      "max_cameras": {
+        "label": "Max cameras",
+        "description": "Maximum number of cameras to display at once in Birdseye; shows the most recent cameras."
+      }
+    },
+    "idle_heartbeat_fps": {
+      "label": "Idle heartbeat FPS",
+      "description": "Frames-per-second to resend the last composed Birdseye frame when idle; set to 0 to disable."
+    },
+    "order": {
+      "label": "Position",
+      "description": "Numeric position controlling the camera's ordering in the Birdseye layout."
+    }
+  },
+  "detect": {
+    "label": "Object Detection",
+    "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
+    "enabled": {
+      "label": "Enable object detection",
+      "description": "Enable or disable object detection for all cameras; can be overridden per-camera."
+    },
+    "height": {
+      "label": "Detect height",
+      "description": "Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution."
+    },
+    "width": {
+      "label": "Detect width",
+      "description": "Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution."
+    },
+    "fps": {
+      "label": "Detect FPS",
+      "description": "Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects)."
+    },
+    "min_initialized": {
+      "label": "Minimum initialization frames",
+      "description": "Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2."
+    },
+    "max_disappeared": {
+      "label": "Maximum disappeared frames",
+      "description": "Number of frames without a detection before a tracked object is considered gone."
+    },
+    "stationary": {
+      "label": "Stationary objects config",
+      "description": "Settings to detect and manage objects that remain stationary for a period of time.",
+      "interval": {
+        "label": "Stationary interval",
+        "description": "How often (in frames) to run a detection check to confirm a stationary object."
+      },
+      "threshold": {
+        "label": "Stationary threshold",
+        "description": "Number of frames with no position change required to mark an object as stationary."
+      },
+      "max_frames": {
+        "label": "Max frames",
+        "description": "Limits how long stationary objects are tracked before being discarded.",
+        "default": {
+          "label": "Default max frames",
+          "description": "Default maximum frames to track a stationary object before stopping."
+        },
+        "objects": {
+          "label": "Object max frames",
+          "description": "Per-object overrides for maximum frames to track stationary objects."
+        }
+      },
+      "classifier": {
+        "label": "Enable visual classifier",
+        "description": "Use a visual classifier to detect truly stationary objects even when bounding boxes jitter."
+      }
+    },
+    "annotation_offset": {
+      "label": "Annotation offset",
+      "description": "Milliseconds to shift detect annotations to better align timeline bounding boxes with recordings; can be positive or negative."
+    }
+  },
+  "ffmpeg": {
+    "label": "FFmpeg",
+    "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
+    "path": {
+      "label": "FFmpeg path",
+      "description": "Path to the FFmpeg binary to use or a version alias (\"5.0\" or \"7.0\")."
+    },
+    "global_args": {
+      "label": "FFmpeg global arguments",
+      "description": "Global arguments passed to FFmpeg processes."
+    },
+    "hwaccel_args": {
+      "label": "Hardware acceleration arguments",
+      "description": "Hardware acceleration arguments for FFmpeg. Provider-specific presets are recommended."
+    },
+    "input_args": {
+      "label": "Input arguments",
+      "description": "Input arguments applied to FFmpeg input streams."
+    },
+    "output_args": {
+      "label": "Output arguments",
+      "description": "Default output arguments used for different FFmpeg roles such as detect and record.",
+      "detect": {
+        "label": "Detect output arguments",
+        "description": "Default output arguments for detect role streams."
+      },
+      "record": {
+        "label": "Record output arguments",
+        "description": "Default output arguments for record role streams."
+      }
+    },
+    "retry_interval": {
+      "label": "FFmpeg retry time",
+      "description": "Seconds to wait before attempting to reconnect a camera stream after failure. Default is 10."
+    },
+    "apple_compatibility": {
+      "label": "Apple compatibility",
+      "description": "Enable HEVC tagging for better Apple player compatibility when recording H.265."
+    },
+    "gpu": {
+      "label": "GPU index",
+      "description": "Default GPU index used for hardware acceleration if available."
+    },
+    "inputs": {
+      "label": "Camera inputs",
+      "description": "List of input stream definitions (paths and roles) for this camera.",
+      "path": {
+        "label": "Input path",
+        "description": "Camera input stream URL or path."
+      },
+      "roles": {
+        "label": "Input roles",
+        "description": "Roles for this input stream."
+      },
+      "global_args": {
+        "label": "FFmpeg global arguments",
+        "description": "FFmpeg global arguments for this input stream."
+      },
+      "hwaccel_args": {
+        "label": "Hardware acceleration arguments",
+        "description": "Hardware acceleration arguments for this input stream."
+      },
+      "input_args": {
+        "label": "Input arguments",
+        "description": "Input arguments specific to this stream."
+      }
+    }
+  },
+  "live": {
+    "label": "Live playback",
+    "description": "Settings used by the Web UI to control live stream resolution and quality.",
+    "streams": {
+      "label": "Live stream names",
+      "description": "Mapping of configured stream names to restream/go2rtc names used for live playback."
+    },
+    "height": {
+      "label": "Live height",
+      "description": "Height (pixels) to render the jsmpeg live stream in the Web UI; must be <= detect stream height."
+    },
+    "quality": {
+      "label": "Live quality",
+      "description": "Encoding quality for the jsmpeg stream (1 highest, 31 lowest)."
+    }
+  },
+  "motion": {
+    "label": "Motion detection",
+    "description": "Default motion detection settings applied to cameras unless overridden per-camera.",
+    "enabled": {
+      "label": "Enable motion detection",
+      "description": "Enable or disable motion detection for all cameras; can be overridden per-camera."
+    },
+    "threshold": {
+      "label": "Motion threshold",
+      "description": "Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255)."
+    },
+    "lightning_threshold": {
+      "label": "Lightning threshold",
+      "description": "Threshold to detect and ignore brief lighting spikes (lower is more sensitive, values between 0.3 and 1.0). This does not prevent motion detection entirely; it merely causes the detector to stop analyzing additional frames once the threshold is exceeded. Motion-based recordings are still created during these events."
+    },
+    "skip_motion_threshold": {
+      "label": "Skip motion threshold",
+      "description": "If set to a value between 0.0 and 1.0, and more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Leave unset (None) to disable this feature."
+    },
+    "improve_contrast": {
+      "label": "Improve contrast",
+      "description": "Apply contrast improvement to frames before motion analysis to help detection."
+    },
+    "contour_area": {
+      "label": "Contour area",
+      "description": "Minimum contour area in pixels required for a motion contour to be counted."
+    },
+    "delta_alpha": {
+      "label": "Delta alpha",
+      "description": "Alpha blending factor used in frame differencing for motion calculation."
+    },
+    "frame_alpha": {
+      "label": "Frame alpha",
+      "description": "Alpha value used when blending frames for motion preprocessing."
+    },
+    "frame_height": {
+      "label": "Frame height",
+      "description": "Height in pixels to scale frames to when computing motion."
+    },
+    "mask": {
+      "label": "Mask coordinates",
+      "description": "Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas."
+    },
+    "mqtt_off_delay": {
+      "label": "MQTT off delay",
+      "description": "Seconds to wait after last motion before publishing an MQTT 'off' state."
+    },
+    "enabled_in_config": {
+      "label": "Original motion state",
+      "description": "Indicates whether motion detection was enabled in the original static configuration."
+    },
+    "raw_mask": {
+      "label": "Raw Mask"
+    }
+  },
+  "objects": {
+    "label": "Objects",
+    "description": "Object tracking defaults including which labels to track and per-object filters.",
+    "track": {
+      "label": "Objects to track",
+      "description": "List of object labels to track for all cameras; can be overridden per-camera."
+    },
+    "filters": {
+      "label": "Object filters",
+      "description": "Filters applied to detected objects to reduce false positives (area, ratio, confidence).",
+      "min_area": {
+        "label": "Minimum object area",
+        "description": "Minimum bounding box area (pixels or percentage) required for this object type. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      },
+      "max_area": {
+        "label": "Maximum object area",
+        "description": "Maximum bounding box area (pixels or percentage) allowed for this object type. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      },
+      "min_ratio": {
+        "label": "Minimum aspect ratio",
+        "description": "Minimum width/height ratio required for the bounding box to qualify."
+      },
+      "max_ratio": {
+        "label": "Maximum aspect ratio",
+        "description": "Maximum width/height ratio allowed for the bounding box to qualify."
+      },
+      "threshold": {
+        "label": "Confidence threshold",
+        "description": "Average detection confidence threshold required for the object to be considered a true positive."
+      },
+      "min_score": {
+        "label": "Minimum confidence",
+        "description": "Minimum single-frame detection confidence required for the object to be counted."
+      },
+      "mask": {
+        "label": "Filter mask",
+        "description": "Polygon coordinates defining where this filter applies within the frame."
+      },
+      "raw_mask": {
+        "label": "Raw Mask"
+      }
+    },
+    "mask": {
+      "label": "Object mask",
+      "description": "Mask polygon used to prevent object detection in specified areas."
+    },
+    "raw_mask": {
+      "label": "Raw Mask"
+    },
+    "genai": {
+      "label": "GenAI object config",
+      "description": "GenAI options for describing tracked objects and sending frames for generation.",
+      "enabled": {
+        "label": "Enable GenAI",
+        "description": "Enable GenAI generation of descriptions for tracked objects by default."
+      },
+      "use_snapshot": {
+        "label": "Use snapshots",
+        "description": "Use object snapshots instead of thumbnails for GenAI description generation."
+      },
+      "prompt": {
+        "label": "Caption prompt",
+        "description": "Default prompt template used when generating descriptions with GenAI."
+      },
+      "object_prompts": {
+        "label": "Object prompts",
+        "description": "Per-object prompts to customize GenAI outputs for specific labels."
+      },
+      "objects": {
+        "label": "GenAI objects",
+        "description": "List of object labels to send to GenAI by default."
+      },
+      "required_zones": {
+        "label": "Required zones",
+        "description": "Zones that must be entered for objects to qualify for GenAI description generation."
+      },
+      "debug_save_thumbnails": {
+        "label": "Save thumbnails",
+        "description": "Save thumbnails sent to GenAI for debugging and review."
+      },
+      "send_triggers": {
+        "label": "GenAI triggers",
+        "description": "Defines when frames should be sent to GenAI (on end, after updates, etc.).",
+        "tracked_object_end": {
+          "label": "Send on end",
+          "description": "Send a request to GenAI when the tracked object ends."
+        },
+        "after_significant_updates": {
+          "label": "Early GenAI trigger",
+          "description": "Send a request to GenAI after a specified number of significant updates for the tracked object."
+        }
+      },
+      "enabled_in_config": {
+        "label": "Original GenAI state",
+        "description": "Indicates whether GenAI was enabled in the original static config."
+      }
+    }
+  },
+  "record": {
+    "label": "Recording",
+    "description": "Recording and retention settings applied to cameras unless overridden per-camera.",
+    "enabled": {
+      "label": "Enable recording",
+      "description": "Enable or disable recording for all cameras; can be overridden per-camera."
+    },
+    "expire_interval": {
+      "label": "Record cleanup interval",
+      "description": "Minutes between cleanup passes that remove expired recording segments."
+    },
+    "continuous": {
+      "label": "Continuous retention",
+      "description": "Number of days to retain recordings regardless of tracked objects or motion. Set to 0 if you only want to retain recordings of alerts and detections.",
+      "days": {
+        "label": "Retention days",
+        "description": "Days to retain recordings."
+      }
+    },
+    "motion": {
+      "label": "Motion retention",
+      "description": "Number of days to retain recordings triggered by motion regardless of tracked objects. Set to 0 if you only want to retain recordings of alerts and detections.",
+      "days": {
+        "label": "Retention days",
+        "description": "Days to retain recordings."
+      }
+    },
+    "detections": {
+      "label": "Detection retention",
+      "description": "Recording retention settings for detection events including pre/post capture durations.",
+      "pre_capture": {
+        "label": "Pre-capture seconds",
+        "description": "Number of seconds before the detection event to include in the recording."
+      },
+      "post_capture": {
+        "label": "Post-capture seconds",
+        "description": "Number of seconds after the detection event to include in the recording."
+      },
+      "retain": {
+        "label": "Event retention",
+        "description": "Retention settings for recordings of detection events.",
+        "days": {
+          "label": "Retention days",
+          "description": "Number of days to retain recordings of detection events."
+        },
+        "mode": {
+          "label": "Retention mode",
+          "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+        }
+      }
+    },
+    "alerts": {
+      "label": "Alert retention",
+      "description": "Recording retention settings for alert events including pre/post capture durations.",
+      "pre_capture": {
+        "label": "Pre-capture seconds",
+        "description": "Number of seconds before the detection event to include in the recording."
+      },
+      "post_capture": {
+        "label": "Post-capture seconds",
+        "description": "Number of seconds after the detection event to include in the recording."
+      },
+      "retain": {
+        "label": "Event retention",
+        "description": "Retention settings for recordings of detection events.",
+        "days": {
+          "label": "Retention days",
+          "description": "Number of days to retain recordings of detection events."
+        },
+        "mode": {
+          "label": "Retention mode",
+          "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+        }
+      }
+    },
+    "export": {
+      "label": "Export config",
+      "description": "Settings used when exporting recordings such as timelapse and hardware acceleration.",
+      "hwaccel_args": {
+        "label": "Export hwaccel args",
+        "description": "Hardware acceleration args to use for export/transcode operations."
+      }
+    },
+    "preview": {
+      "label": "Preview config",
+      "description": "Settings controlling the quality of recording previews shown in the UI.",
+      "quality": {
+        "label": "Preview quality",
+        "description": "Preview quality level (very_low, low, medium, high, very_high)."
+      }
+    },
+    "enabled_in_config": {
+      "label": "Original recording state",
+      "description": "Indicates whether recording was enabled in the original static configuration."
+    }
+  },
+  "review": {
+    "label": "Review",
+    "description": "Settings that control alerts, detections, and GenAI review summaries used by the UI and storage.",
+    "alerts": {
+      "label": "Alerts config",
+      "description": "Settings for which tracked objects generate alerts and how alerts are retained.",
+      "enabled": {
+        "label": "Enable alerts",
+        "description": "Enable or disable alert generation for all cameras; can be overridden per-camera."
+      },
+      "labels": {
+        "label": "Alert labels",
+        "description": "List of object labels that qualify as alerts (for example: car, person)."
+      },
+      "required_zones": {
+        "label": "Required zones",
+        "description": "Zones that an object must enter to be considered an alert; leave empty to allow any zone."
+      },
+      "enabled_in_config": {
+        "label": "Original alerts state",
+        "description": "Tracks whether alerts were originally enabled in the static configuration."
+      },
+      "cutoff_time": {
+        "label": "Alerts cutoff time",
+        "description": "Seconds to wait after no alert-causing activity before cutting off an alert."
+      }
+    },
+    "detections": {
+      "label": "Detections config",
+      "description": "Settings for creating detection events (non-alert) and how long to keep them.",
+      "enabled": {
+        "label": "Enable detections",
+        "description": "Enable or disable detection events for all cameras; can be overridden per-camera."
+      },
+      "labels": {
+        "label": "Detection labels",
+        "description": "List of object labels that qualify as detection events."
+      },
+      "required_zones": {
+        "label": "Required zones",
+        "description": "Zones that an object must enter to be considered a detection; leave empty to allow any zone."
+      },
+      "cutoff_time": {
+        "label": "Detections cutoff time",
+        "description": "Seconds to wait after no detection-causing activity before cutting off a detection."
+      },
+      "enabled_in_config": {
+        "label": "Original detections state",
+        "description": "Tracks whether detections were originally enabled in the static configuration."
+      }
+    },
+    "genai": {
+      "label": "GenAI config",
+      "description": "Controls use of generative AI for producing descriptions and summaries of review items.",
+      "enabled": {
+        "label": "Enable GenAI descriptions",
+        "description": "Enable or disable GenAI-generated descriptions and summaries for review items."
+      },
+      "alerts": {
+        "label": "Enable GenAI for alerts",
+        "description": "Use GenAI to generate descriptions for alert items."
+      },
+      "detections": {
+        "label": "Enable GenAI for detections",
+        "description": "Use GenAI to generate descriptions for detection items."
+      },
+      "image_source": {
+        "label": "Review image source",
+        "description": "Source of images sent to GenAI ('preview' or 'recordings'); 'recordings' uses higher quality frames but more tokens."
+      },
+      "additional_concerns": {
+        "label": "Additional concerns",
+        "description": "A list of additional concerns or notes the GenAI should consider when evaluating activity on this camera."
+      },
+      "debug_save_thumbnails": {
+        "label": "Save thumbnails",
+        "description": "Save thumbnails that are sent to the GenAI provider for debugging and review."
+      },
+      "enabled_in_config": {
+        "label": "Original GenAI state",
+        "description": "Tracks whether GenAI review was originally enabled in the static configuration."
+      },
+      "preferred_language": {
+        "label": "Preferred language",
+        "description": "Preferred language to request from the GenAI provider for generated responses."
+      },
+      "activity_context_prompt": {
+        "label": "Activity context prompt",
+        "description": "Custom prompt describing what is and is not suspicious activity to provide context for GenAI summaries."
+      }
+    }
+  },
+  "snapshots": {
+    "label": "Snapshots",
+    "description": "Settings for API-generated snapshots of tracked objects for all cameras; can be overridden per-camera.",
+    "enabled": {
+      "label": "Enable snapshots",
+      "description": "Enable or disable saving snapshots for all cameras; can be overridden per-camera."
+    },
+    "timestamp": {
+      "label": "Timestamp overlay",
+      "description": "Overlay a timestamp on snapshots from API."
+    },
+    "bounding_box": {
+      "label": "Bounding box overlay",
+      "description": "Draw bounding boxes for tracked objects on snapshots from API."
+    },
+    "crop": {
+      "label": "Crop snapshot",
+      "description": "Crop snapshots from API to the detected object's bounding box."
+    },
+    "required_zones": {
+      "label": "Required zones",
+      "description": "Zones an object must enter for a snapshot to be saved."
+    },
+    "height": {
+      "label": "Snapshot height",
+      "description": "Height (pixels) to resize snapshots from API to; leave empty to preserve original size."
+    },
+    "retain": {
+      "label": "Snapshot retention",
+      "description": "Retention settings for snapshots including default days and per-object overrides.",
+      "default": {
+        "label": "Default retention",
+        "description": "Default number of days to retain snapshots."
+      },
+      "mode": {
+        "label": "Retention mode",
+        "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+      },
+      "objects": {
+        "label": "Object retention",
+        "description": "Per-object overrides for snapshot retention days."
+      }
+    },
+    "quality": {
+      "label": "Snapshot quality",
+      "description": "Encode quality for saved snapshots (0-100)."
+    }
+  },
+  "timestamp_style": {
+    "label": "Timestamp style",
+    "description": "Styling options for in-feed timestamps applied to debug view and snapshots.",
+    "position": {
+      "label": "Timestamp position",
+      "description": "Position of the timestamp on the image (tl/tr/bl/br)."
+    },
+    "format": {
+      "label": "Timestamp format",
+      "description": "Datetime format string used for timestamps (Python datetime format codes)."
+    },
+    "color": {
+      "label": "Timestamp color",
+      "description": "RGB color values for the timestamp text (all values 0-255).",
+      "red": {
+        "label": "Red",
+        "description": "Red component (0-255) for timestamp color."
+      },
+      "green": {
+        "label": "Green",
+        "description": "Green component (0-255) for timestamp color."
+      },
+      "blue": {
+        "label": "Blue",
+        "description": "Blue component (0-255) for timestamp color."
+      }
+    },
+    "thickness": {
+      "label": "Timestamp thickness",
+      "description": "Line thickness of the timestamp text."
+    },
+    "effect": {
+      "label": "Timestamp effect",
+      "description": "Visual effect for the timestamp text (none, solid, shadow)."
+    }
+  },
+  "audio_transcription": {
+    "label": "Audio transcription",
+    "description": "Settings for live and speech audio transcription used for events and live captions.",
+    "enabled": {
+      "label": "Enable audio transcription",
+      "description": "Enable or disable automatic audio transcription for all cameras; can be overridden per-camera."
+    },
+    "language": {
+      "label": "Transcription language",
+      "description": "Language code used for transcription/translation (for example 'en' for English). See https://whisper-api.com/docs/languages/ for supported language codes."
+    },
+    "device": {
+      "label": "Transcription device",
+      "description": "Device key (CPU/GPU) to run the transcription model on. Only NVIDIA CUDA GPUs are currently supported for transcription."
+    },
+    "model_size": {
+      "label": "Model size",
+      "description": "Model size to use for offline audio event transcription."
+    },
+    "live_enabled": {
+      "label": "Live transcription",
+      "description": "Enable streaming live transcription for audio as it is received."
+    }
+  },
+  "classification": {
+    "label": "Object classification",
+    "description": "Settings for classification models used to refine object labels or state classification.",
+    "bird": {
+      "label": "Bird classification config",
+      "description": "Settings specific to bird classification models.",
+      "enabled": {
+        "label": "Bird classification",
+        "description": "Enable or disable bird classification."
+      },
+      "threshold": {
+        "label": "Minimum score",
+        "description": "Minimum classification score required to accept a bird classification."
+      }
+    },
+    "custom": {
+      "label": "Custom Classification Models",
+      "description": "Configuration for custom classification models used for objects or state detection.",
+      "enabled": {
+        "label": "Enable model",
+        "description": "Enable or disable the custom classification model."
+      },
+      "name": {
+        "label": "Model name",
+        "description": "Identifier for the custom classification model to use."
+      },
+      "threshold": {
+        "label": "Score threshold",
+        "description": "Score threshold used to change the classification state."
+      },
+      "save_attempts": {
+        "label": "Save attempts",
+        "description": "How many classification attempts to save for recent classifications UI."
+      },
+      "object_config": {
+        "objects": {
+          "label": "Classify objects",
+          "description": "List of object types to run object classification on."
+        },
+        "classification_type": {
+          "label": "Classification type",
+          "description": "Classification type applied: 'sub_label' (adds sub_label) or other supported types."
+        }
+      },
+      "state_config": {
+        "cameras": {
+          "label": "Classification cameras",
+          "description": "Per-camera crop and settings for running state classification.",
+          "crop": {
+            "label": "Classification crop",
+            "description": "Crop coordinates to use for running classification on this camera."
+          }
+        },
+        "motion": {
+          "label": "Run on motion",
+          "description": "If true, run classification when motion is detected within the specified crop."
+        },
+        "interval": {
+          "label": "Classification interval",
+          "description": "Interval (seconds) between periodic classification runs for state classification."
+        }
+      }
+    }
+  },
+  "semantic_search": {
+    "label": "Semantic Search",
+    "description": "Settings for Semantic Search which builds and queries object embeddings to find similar items.",
+    "enabled": {
+      "label": "Enable semantic search",
+      "description": "Enable or disable the semantic search feature."
+    },
+    "reindex": {
+      "label": "Reindex on startup",
+      "description": "Trigger a full reindex of historical tracked objects into the embeddings database."
+    },
+    "model": {
+      "label": "Semantic search model or GenAI provider name",
+      "description": "The embeddings model to use for semantic search (for example 'jinav1'), or the name of a GenAI provider with the embeddings role."
+    },
+    "model_size": {
+      "label": "Model size",
+      "description": "Select model size; 'small' runs on CPU and 'large' typically requires GPU."
+    },
+    "device": {
+      "label": "Device",
+      "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
+    },
+    "triggers": {
+      "label": "Triggers",
+      "description": "Actions and matching criteria for camera-specific semantic search triggers.",
+      "friendly_name": {
+        "label": "Friendly name",
+        "description": "Optional friendly name displayed in the UI for this trigger."
+      },
+      "enabled": {
+        "label": "Enable this trigger",
+        "description": "Enable or disable this semantic search trigger."
+      },
+      "type": {
+        "label": "Trigger type",
+        "description": "Type of trigger: 'thumbnail' (match against image) or 'description' (match against text)."
+      },
+      "data": {
+        "label": "Trigger content",
+        "description": "Text phrase or thumbnail ID to match against tracked objects."
+      },
+      "threshold": {
+        "label": "Trigger threshold",
+        "description": "Minimum similarity score (0-1) required to activate this trigger."
+      },
+      "actions": {
+        "label": "Trigger actions",
+        "description": "List of actions to execute when trigger matches (notification, sub_label, attribute)."
+      }
+    }
+  },
+  "face_recognition": {
+    "label": "Face recognition",
+    "description": "Settings for face detection and recognition for all cameras; can be overridden per-camera.",
+    "enabled": {
+      "label": "Enable face recognition",
+      "description": "Enable or disable face recognition for all cameras; can be overridden per-camera."
+    },
+    "model_size": {
+      "label": "Model size",
+      "description": "Model size to use for face embeddings (small/large); larger may require GPU."
+    },
+    "unknown_score": {
+      "label": "Unknown score threshold",
+      "description": "Distance threshold below which a face is considered a potential match (higher = stricter)."
+    },
+    "detection_threshold": {
+      "label": "Detection threshold",
+      "description": "Minimum detection confidence required to consider a face detection valid."
+    },
+    "recognition_threshold": {
+      "label": "Recognition threshold",
+      "description": "Face embedding distance threshold to consider two faces a match."
+    },
+    "min_area": {
+      "label": "Minimum face area",
+      "description": "Minimum area (pixels) of a detected face box required to attempt recognition."
+    },
+    "min_faces": {
+      "label": "Minimum faces",
+      "description": "Minimum number of face recognitions required before applying a recognized sub-label to a person."
+    },
+    "save_attempts": {
+      "label": "Save attempts",
+      "description": "Number of face recognition attempts to retain for recent recognition UI."
+    },
+    "blur_confidence_filter": {
+      "label": "Blur confidence filter",
+      "description": "Adjust confidence scores based on image blur to reduce false positives for poor quality faces."
+    },
+    "device": {
+      "label": "Device",
+      "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
+    }
+  },
+  "lpr": {
+    "label": "License Plate Recognition",
+    "description": "License plate recognition settings including detection thresholds, formatting, and known plates.",
+    "enabled": {
+      "label": "Enable LPR",
+      "description": "Enable or disable license plate recognition for all cameras; can be overridden per-camera."
+    },
+    "model_size": {
+      "label": "Model size",
+      "description": "Model size used for text detection/recognition. Most users should use 'small'."
+    },
+    "detection_threshold": {
+      "label": "Detection threshold",
+      "description": "Detection confidence threshold to begin running OCR on a suspected plate."
+    },
+    "min_area": {
+      "label": "Minimum plate area",
+      "description": "Minimum plate area (pixels) required to attempt recognition."
+    },
+    "recognition_threshold": {
+      "label": "Recognition threshold",
+      "description": "Confidence threshold required for recognized plate text to be attached as a sub-label."
+    },
+    "min_plate_length": {
+      "label": "Min plate length",
+      "description": "Minimum number of characters a recognized plate must contain to be considered valid."
+    },
+    "format": {
+      "label": "Plate format regex",
+      "description": "Optional regex to validate recognized plate strings against an expected format."
+    },
+    "match_distance": {
+      "label": "Match distance",
+      "description": "Number of character mismatches allowed when comparing detected plates to known plates."
+    },
+    "known_plates": {
+      "label": "Known plates",
+      "description": "List of plates or regexes to specially track or alert on."
+    },
+    "enhancement": {
+      "label": "Enhancement level",
+      "description": "Enhancement level (0-10) to apply to plate crops prior to OCR; higher values may not always improve results, levels above 5 may only work with night time plates and should be used with caution."
+    },
+    "debug_save_plates": {
+      "label": "Save debug plates",
+      "description": "Save plate crop images for debugging LPR performance."
+    },
+    "device": {
+      "label": "Device",
+      "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information"
+    },
+    "replace_rules": {
+      "label": "Replacement rules",
+      "description": "Regex replacement rules used to normalize detected plate strings before matching.",
+      "pattern": {
+        "label": "Regex pattern"
+      },
+      "replacement": {
+        "label": "Replacement string"
+      }
+    },
+    "expire_time": {
+      "label": "Expire seconds",
+      "description": "Time in seconds after which an unseen plate is expired from the tracker (for dedicated LPR cameras only)."
+    }
+  },
+  "camera_groups": {
+    "label": "Camera groups",
+    "description": "Configuration for named camera groups used to organize cameras in the UI.",
+    "cameras": {
+      "label": "Camera list",
+      "description": "Array of camera names included in this group."
+    },
+    "icon": {
+      "label": "Group icon",
+      "description": "Icon used to represent the camera group in the UI."
+    },
+    "order": {
+      "label": "Sort order",
+      "description": "Numeric order used to sort camera groups in the UI; larger numbers appear later."
+    }
+  },
+  "profiles": {
+    "label": "Profiles",
+    "description": "Named profile definitions with friendly names. Camera profiles must reference names defined here.",
+    "friendly_name": {
+      "label": "Friendly name",
+      "description": "Display name for this profile shown in the UI."
+    }
+  },
+  "active_profile": {
+    "label": "Active profile",
+    "description": "Currently active profile name. Runtime-only, not persisted in YAML."
+  },
+  "camera_mqtt": {
+    "label": "MQTT",
+    "description": "MQTT image publishing settings.",
+    "enabled": {
+      "label": "Send image",
+      "description": "Enable publishing image snapshots for objects to MQTT topics for this camera."
+    },
+    "timestamp": {
+      "label": "Add timestamp",
+      "description": "Overlay a timestamp on images published to MQTT."
+    },
+    "bounding_box": {
+      "label": "Add bounding box",
+      "description": "Draw bounding boxes on images published over MQTT."
+    },
+    "crop": {
+      "label": "Crop image",
+      "description": "Crop images published to MQTT to the detected object's bounding box."
+    },
+    "height": {
+      "label": "Image height",
+      "description": "Height (pixels) to resize images published over MQTT."
+    },
+    "required_zones": {
+      "label": "Required zones",
+      "description": "Zones that an object must enter for an MQTT image to be published."
+    },
+    "quality": {
+      "label": "JPEG quality",
+      "description": "JPEG quality for images published to MQTT (0-100)."
+    }
+  },
+  "camera_ui": {
+    "label": "Camera UI",
+    "description": "Display ordering and visibility for this camera in the UI. Ordering affects the default dashboard. For more granular control, use camera groups.",
+    "order": {
+      "label": "UI order",
+      "description": "Numeric order used to sort the camera in the UI (default dashboard and lists); larger numbers appear later."
+    },
+    "dashboard": {
+      "label": "Show in UI",
+      "description": "Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again."
+    }
+  },
+  "onvif": {
+    "label": "ONVIF",
+    "description": "ONVIF connection and PTZ autotracking settings for this camera.",
+    "host": {
+      "label": "ONVIF host",
+      "description": "Host (and optional scheme) for the ONVIF service for this camera."
+    },
+    "port": {
+      "label": "ONVIF port",
+      "description": "Port number for the ONVIF service."
+    },
+    "user": {
+      "label": "ONVIF username",
+      "description": "Username for ONVIF authentication; some devices require admin user for ONVIF."
+    },
+    "password": {
+      "label": "ONVIF password",
+      "description": "Password for ONVIF authentication."
+    },
+    "tls_insecure": {
+      "label": "Disable TLS verify",
+      "description": "Skip TLS verification and disable digest auth for ONVIF (unsafe; use in safe networks only)."
+    },
+    "autotracking": {
+      "label": "Autotracking",
+      "description": "Automatically track moving objects and keep them centered in the frame using PTZ camera movements.",
+      "enabled": {
+        "label": "Enable Autotracking",
+        "description": "Enable or disable automatic PTZ camera tracking of detected objects."
+      },
+      "calibrate_on_startup": {
+        "label": "Calibrate on start",
+        "description": "Measure PTZ motor speeds on startup to improve tracking accuracy. Frigate will update config with movement_weights after calibration."
+      },
+      "zooming": {
+        "label": "Zoom mode",
+        "description": "Control zoom behavior: disabled (pan/tilt only), absolute (most compatible), or relative (concurrent pan/tilt/zoom)."
+      },
+      "zoom_factor": {
+        "label": "Zoom factor",
+        "description": "Control zoom level on tracked objects. Lower values keep more scene in view; higher values zoom in closer but may lose tracking. Values between 0.1 and 0.75."
+      },
+      "track": {
+        "label": "Tracked objects",
+        "description": "List of object types that should trigger autotracking."
+      },
+      "required_zones": {
+        "label": "Required zones",
+        "description": "Objects must enter one of these zones before autotracking begins."
+      },
+      "return_preset": {
+        "label": "Return preset",
+        "description": "ONVIF preset name configured in camera firmware to return to after tracking ends."
+      },
+      "timeout": {
+        "label": "Return timeout",
+        "description": "Wait this many seconds after losing tracking before returning camera to preset position."
+      },
+      "movement_weights": {
+        "label": "Movement weights",
+        "description": "Calibration values automatically generated by camera calibration. Do not modify manually."
+      },
+      "enabled_in_config": {
+        "label": "Original autotrack state",
+        "description": "Internal field to track whether autotracking was enabled in configuration."
+      }
+    },
+    "ignore_time_mismatch": {
+      "label": "Ignore time mismatch",
+      "description": "Ignore time synchronization differences between camera and Frigate server for ONVIF communication."
+    }
+  }
+}

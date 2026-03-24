@@ -323,6 +323,7 @@ function DialogContentComponent({
       <TrackingDetails
         className={cn(isDesktop ? "size-full" : "flex flex-col gap-4")}
         event={search as unknown as Event}
+        isAnnotationSettingsOpen={isPopoverOpen}
         tabs={
           isDesktop ? (
             <TabsWithActions
@@ -494,6 +495,15 @@ export default function SearchDetailDialog({
       setIsOpen(search != undefined);
     }
   }, [search]);
+
+  useEffect(() => {
+    if (!isDesktop || !onPrevious || !onNext) {
+      setShowNavigationButtons(false);
+      return;
+    }
+
+    setShowNavigationButtons(isOpen);
+  }, [isOpen, onNext, onPrevious]);
 
   // show/hide annotation settings is handled inside TabsWithActions
 
@@ -1829,7 +1839,7 @@ export function ObjectSnapshotTab({
                   <img
                     ref={imgRef}
                     className="mx-auto max-h-[60dvh] rounded-lg bg-background object-contain"
-                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`}
                     alt={`${search?.label}`}
                     loading={isSafari ? "eager" : "lazy"}
                     onLoad={() => {

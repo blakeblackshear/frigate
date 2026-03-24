@@ -1,0 +1,675 @@
+// Shared config save utilities.
+//
+// Provides the core per-section save logic (buildOverrides, sanitize, restart
+// detection, update-topic resolution) used by both the individual per-section
+// Save button in BaseSection and the global "Save All" coordinator in Settings.
+
+import get from "lodash/get";
+import cloneDeep from "lodash/cloneDeep";
+import merge from "lodash/merge";
+import unset from "lodash/unset";
+import isEqual from "lodash/isEqual";
+import mergeWith from "lodash/mergeWith";
+import set from "lodash/set";
+import { isJsonObject } from "@/lib/utils";
+import { applySchemaDefaults } from "@/lib/config-schema";
+import { normalizeConfigValue } from "@/hooks/use-config-override";
+import {
+  modifySchemaForSection,
+  getEffectiveDefaultsForSection,
+  sanitizeOverridesForSection,
+} from "@/components/config-form/sections/section-special-cases";
+import type { RJSFSchema } from "@rjsf/utils";
+import type { FrigateConfig } from "@/types/frigateConfig";
+import type {
+  ConfigSectionData,
+  JsonObject,
+  JsonValue,
+} from "@/types/configForm";
+import type { SectionConfig } from "../components/config-form/sections/BaseSection";
+import { sectionConfigs } from "../components/config-form/sectionConfigs";
+
+// ---------------------------------------------------------------------------
+// cameraUpdateTopicMap — maps config section paths to MQTT/WS update topics
+// ---------------------------------------------------------------------------
+
+export const cameraUpdateTopicMap: Record<string, string> = {
+  detect: "detect",
+  record: "record",
+  snapshots: "snapshots",
+  motion: "motion",
+  objects: "objects",
+  review: "review",
+  audio: "audio",
+  notifications: "notifications",
+  live: "live",
+  timestamp_style: "timestamp_style",
+  audio_transcription: "audio_transcription",
+  birdseye: "birdseye",
+  face_recognition: "face_recognition",
+  ffmpeg: "ffmpeg",
+  lpr: "lpr",
+  semantic_search: "semantic_search",
+  mqtt: "mqtt",
+  onvif: "onvif",
+  ui: "ui",
+};
+
+// Sections where global config serves as the default for per-camera config.
+// Global updates to these sections are fanned out to all cameras via wildcard.
+export const globalCameraDefaultSections = new Set([
+  "detect",
+  "objects",
+  "motion",
+  "record",
+  "snapshots",
+  "review",
+  "audio",
+  "notifications",
+  "ffmpeg",
+]);
+
+// ---------------------------------------------------------------------------
+// Profile helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the base (pre-profile) value for a camera section.
+ *
+ * When a profile is active the API populates `base_config` with original
+ * section values.  This helper returns that value when available, falling
+ * back to the top-level (effective) value otherwise.
+ */
+export function getBaseCameraSectionValue(
+  config: FrigateConfig | undefined,
+  cameraName: string | undefined,
+  sectionPath: string,
+): unknown {
+  if (!config || !cameraName) return undefined;
+  const cam = config.cameras?.[cameraName];
+  if (!cam) return undefined;
+  const base = cam.base_config?.[sectionPath];
+  return base !== undefined ? base : get(cam, sectionPath);
+}
+
+/** Sections that can appear inside a camera profile definition. */
+export const PROFILE_ELIGIBLE_SECTIONS = new Set([
+  "audio",
+  "birdseye",
+  "detect",
+  "face_recognition",
+  "lpr",
+  "motion",
+  "notifications",
+  "objects",
+  "record",
+  "review",
+  "snapshots",
+]);
+
+/**
+ * Parse a section path that may encode a profile reference.
+ *
+ * Examples:
+ *   "detect"                 → { isProfile: false, actualSection: "detect" }
+ *   "profiles.armed.detect"  → { isProfile: true, profileName: "armed", actualSection: "detect" }
+ */
+export function parseProfileFromSectionPath(sectionPath: string): {
+  isProfile: boolean;
+  profileName?: string;
+  actualSection: string;
+} {
+  const match = sectionPath.match(/^profiles\.([^.]+)\.(.+)$/);
+  if (match) {
+    return { isProfile: true, profileName: match[1], actualSection: match[2] };
+  }
+  return { isProfile: false, actualSection: sectionPath };
+}
+
+// ---------------------------------------------------------------------------
+// buildOverrides — pure recursive diff of current vs stored config & defaults
+// ---------------------------------------------------------------------------
+
+// Recursively compare `current` (pending form data) against `base` (persisted
+// config) and `defaults` (schema defaults) to produce a minimal overrides
+// payload.
+//
+// - Returns `undefined` when the value matches `base` (or `defaults` when
+//   `base` is absent), indicating no override is needed.
+// - For objects, recurses per-key; deleted keys (present in `base` but absent
+//   in `current`) are represented as `""`.
+// - For arrays, returns the full array when it differs.
+
+export function buildOverrides(
+  current: unknown,
+  base: unknown,
+  defaults: unknown,
+): unknown | undefined {
+  if (current === null || current === undefined || current === "") {
+    return undefined;
+  }
+
+  if (Array.isArray(current)) {
+    if (
+      current.length === 0 &&
+      (base === undefined || base === null) &&
+      (defaults === undefined || defaults === null)
+    ) {
+      return undefined;
+    }
+    if (
+      (base === undefined &&
+        defaults !== undefined &&
+        isEqual(current, defaults)) ||
+      isEqual(current, base)
+    ) {
+      return undefined;
+    }
+    return current;
+  }
+
+  if (isJsonObject(current)) {
+    const currentObj = current;
+    const baseObj = isJsonObject(base) ? base : undefined;
+    const defaultsObj = isJsonObject(defaults) ? defaults : undefined;
+
+    const result: JsonObject = {};
+    for (const [key, value] of Object.entries(currentObj)) {
+      if (value === undefined && baseObj && baseObj[key] !== undefined) {
+        result[key] = "";
+        continue;
+      }
+      const overrideValue = buildOverrides(
+        value,
+        baseObj ? baseObj[key] : undefined,
+        defaultsObj ? defaultsObj[key] : undefined,
+      );
+      if (overrideValue !== undefined) {
+        result[key] = overrideValue as JsonValue;
+      }
+    }
+
+    if (baseObj) {
+      for (const [key, baseValue] of Object.entries(baseObj)) {
+        if (Object.prototype.hasOwnProperty.call(currentObj, key)) {
+          continue;
+        }
+        if (baseValue === undefined) {
+          continue;
+        }
+        result[key] = "";
+      }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+  }
+
+  if (
+    base === undefined &&
+    defaults !== undefined &&
+    isEqual(current, defaults)
+  ) {
+    return undefined;
+  }
+
+  if (isEqual(current, base)) {
+    return undefined;
+  }
+
+  return current;
+}
+
+// ---------------------------------------------------------------------------
+// sanitizeSectionData — normalize config values and strip hidden fields
+// ---------------------------------------------------------------------------
+
+// Normalize raw config data (strip internal fields) and remove any paths
+// listed in `hiddenFields` so they are not included in override computation.
+
+// lodash `unset` treats `*` as a literal key.  This helper expands wildcard
+// segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
+function unsetWithWildcard(obj: Record<string, unknown>, path: string): void {
+  if (!path.includes("*")) {
+    unset(obj, path);
+    return;
+  }
+  const segments = path.split(".");
+  const starIndex = segments.indexOf("*");
+  const prefix = segments.slice(0, starIndex).join(".");
+  const suffix = segments.slice(starIndex + 1).join(".");
+  const parent = prefix ? get(obj, prefix) : obj;
+  if (parent && typeof parent === "object") {
+    for (const key of Object.keys(parent as Record<string, unknown>)) {
+      const fullPath = suffix ? `${key}.${suffix}` : key;
+      unsetWithWildcard(parent as Record<string, unknown>, fullPath);
+    }
+  }
+}
+
+export function sanitizeSectionData(
+  data: ConfigSectionData,
+  hiddenFields?: string[],
+): ConfigSectionData {
+  const normalized = normalizeConfigValue(data) as ConfigSectionData;
+  if (!hiddenFields || hiddenFields.length === 0) {
+    return normalized;
+  }
+  const cleaned = cloneDeep(normalized) as ConfigSectionData;
+  hiddenFields.forEach((path) => {
+    if (!path) return;
+    unsetWithWildcard(cleaned as Record<string, unknown>, path);
+  });
+  return cleaned;
+}
+
+// ---------------------------------------------------------------------------
+// buildConfigDataForPath — convert dotted path to nested config_data payload
+// ---------------------------------------------------------------------------
+
+// Converts a dotted path (e.g. "cameras.front_door.detect") and a value into
+// a properly nested config_data object (e.g. { cameras: { front_door: { detect: value } } }).
+// This ensures the backend's flatten_config_data function can correctly distinguish
+// between path separators (dots in the path) and literal dots in keys
+// (e.g. "frigate.foo.bar" in logger.logs).
+export function buildConfigDataForPath(
+  path: string,
+  value: unknown,
+): Record<string, unknown> {
+  const configData: Record<string, unknown> = {};
+  set(configData, path, value);
+  return configData;
+}
+
+// ---------------------------------------------------------------------------
+// requiresRestartForOverrides — determine whether a restart is needed
+// ---------------------------------------------------------------------------
+
+// Check whether the given overrides include fields that require a Frigate
+// restart.  When `restartRequired` is `undefined` the caller's default is
+// used; an empty array means "never restart"; otherwise the function checks
+// if any of the listed field paths are present in the overrides object.
+
+function hasMatchAtPath(value: unknown, pathSegments: string[]): boolean {
+  if (pathSegments.length === 0) {
+    return value !== undefined;
+  }
+
+  if (value === undefined || value === null) {
+    return false;
+  }
+
+  const [segment, ...rest] = pathSegments;
+
+  if (segment === "*") {
+    if (Array.isArray(value)) {
+      return value.some((item) => hasMatchAtPath(item, rest));
+    }
+
+    if (isJsonObject(value)) {
+      return Object.values(value).some((item) => hasMatchAtPath(item, rest));
+    }
+
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    const index = Number(segment);
+    if (!Number.isInteger(index)) {
+      return false;
+    }
+    return hasMatchAtPath(value[index], rest);
+  }
+
+  if (isJsonObject(value)) {
+    return hasMatchAtPath(value[segment], rest);
+  }
+
+  return false;
+}
+
+export function requiresRestartForOverrides(
+  overrides: unknown,
+  restartRequired: string[] | undefined,
+  defaultRequiresRestart: boolean = true,
+): boolean {
+  if (restartRequired === undefined) {
+    return defaultRequiresRestart;
+  }
+  if (restartRequired.length === 0) {
+    return false;
+  }
+  if (!overrides || typeof overrides !== "object") {
+    return false;
+  }
+  return restartRequired.some((path) => {
+    if (!path) {
+      return false;
+    }
+
+    if (!path.includes("*")) {
+      return get(overrides as JsonObject, path) !== undefined;
+    }
+
+    return hasMatchAtPath(overrides, path.split("."));
+  });
+}
+
+export function requiresRestartForFieldPath(
+  fieldPath: Array<string | number>,
+  restartRequired: string[] | undefined,
+  defaultRequiresRestart: boolean = true,
+): boolean {
+  if (restartRequired === undefined) {
+    return defaultRequiresRestart;
+  }
+
+  if (restartRequired.length === 0) {
+    return false;
+  }
+
+  if (fieldPath.length === 0) {
+    return false;
+  }
+
+  const probe: Record<string, unknown> = {};
+  set(
+    probe,
+    fieldPath.map((segment) => String(segment)),
+    true,
+  );
+
+  return requiresRestartForOverrides(
+    probe,
+    restartRequired,
+    defaultRequiresRestart,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SectionSavePayload — data produced by prepareSectionSavePayload
+// ---------------------------------------------------------------------------
+
+// Ready-to-PUT payload for a single config section.
+
+export interface SectionSavePayload {
+  basePath: string;
+  sanitizedOverrides: JsonObject;
+  updateTopic: string | undefined;
+  needsRestart: boolean;
+  pendingDataKey: string;
+}
+
+// ---------------------------------------------------------------------------
+// extractSectionSchema — resolve a section schema from the full config schema
+// ---------------------------------------------------------------------------
+
+import { resolveAndCleanSchema } from "@/lib/config-schema";
+
+type SchemaWithDefinitions = RJSFSchema & {
+  $defs?: Record<string, RJSFSchema>;
+  definitions?: Record<string, RJSFSchema>;
+  properties?: Record<string, RJSFSchema>;
+};
+
+function getSchemaDefinitions(schema: RJSFSchema): Record<string, RJSFSchema> {
+  return (
+    (schema as SchemaWithDefinitions).$defs ||
+    (schema as SchemaWithDefinitions).definitions ||
+    {}
+  );
+}
+
+function extractSectionSchema(
+  schema: RJSFSchema,
+  sectionPath: string,
+  level: "global" | "camera",
+): RJSFSchema | null {
+  const defs = getSchemaDefinitions(schema);
+  const schemaObj = schema as SchemaWithDefinitions;
+  let sectionDef: RJSFSchema | null = null;
+
+  if (level === "camera") {
+    const cameraConfigDef = defs.CameraConfig;
+    if (cameraConfigDef?.properties) {
+      const sectionProp = cameraConfigDef.properties[sectionPath];
+      if (sectionProp && typeof sectionProp === "object") {
+        if ("$ref" in sectionProp && typeof sectionProp.$ref === "string") {
+          const refPath = sectionProp.$ref
+            .replace(/^#\/\$defs\//, "")
+            .replace(/^#\/definitions\//, "");
+          sectionDef = defs[refPath] || null;
+        } else {
+          sectionDef = sectionProp;
+        }
+      }
+    }
+  } else {
+    if (schemaObj.properties) {
+      const sectionProp = schemaObj.properties[sectionPath];
+      if (sectionProp && typeof sectionProp === "object") {
+        if ("$ref" in sectionProp && typeof sectionProp.$ref === "string") {
+          const refPath = sectionProp.$ref
+            .replace(/^#\/\$defs\//, "")
+            .replace(/^#\/definitions\//, "");
+          sectionDef = defs[refPath] || null;
+        } else {
+          sectionDef = sectionProp;
+        }
+      }
+    }
+  }
+
+  if (!sectionDef) return null;
+
+  const schemaWithDefs: RJSFSchema = { ...sectionDef, $defs: defs };
+  return resolveAndCleanSchema(schemaWithDefs);
+}
+
+// ---------------------------------------------------------------------------
+// prepareSectionSavePayload — build the PUT payload for a single section
+// ---------------------------------------------------------------------------
+
+// Given a pending-data key (e.g. `"detect"` or `"front_door::detect"`), its
+// dirty form data, the current stored config, and the full JSON Schema,
+// produce a `SectionSavePayload` that can be sent directly to
+// `PUT config/set`.  Returns `null` when there are no effective overrides.
+
+export function prepareSectionSavePayload(opts: {
+  pendingDataKey: string;
+  pendingData: unknown;
+  config: FrigateConfig;
+  fullSchema: RJSFSchema;
+}): SectionSavePayload | null {
+  const { pendingDataKey, pendingData, config, fullSchema } = opts;
+
+  if (!pendingData) return null;
+
+  // Parse pendingDataKey → sectionPath, level, cameraName
+  let sectionPath: string;
+  let level: "global" | "camera";
+  let cameraName: string | undefined;
+
+  if (pendingDataKey.includes("::")) {
+    const idx = pendingDataKey.indexOf("::");
+    cameraName = pendingDataKey.slice(0, idx);
+    sectionPath = pendingDataKey.slice(idx + 2);
+    level = "camera";
+  } else {
+    sectionPath = pendingDataKey;
+    level = "global";
+  }
+
+  // Detect profile-encoded section paths (e.g., "profiles.armed.detect")
+  const profileInfo = parseProfileFromSectionPath(sectionPath);
+  const schemaSection = profileInfo.actualSection;
+
+  // Resolve section config using the actual section name (not the profile path)
+  const sectionConfig = getSectionConfig(schemaSection, level);
+
+  // Resolve section schema using the actual section name
+  const sectionSchema = extractSectionSchema(fullSchema, schemaSection, level);
+  if (!sectionSchema) return null;
+
+  const modifiedSchema = modifySchemaForSection(
+    schemaSection,
+    level,
+    sectionSchema,
+  );
+
+  // Compute rawFormData (the current stored value for this section)
+  // For profiles, merge base camera config with profile overrides (matching
+  // what BaseSection displays in the form) so the diff only contains actual
+  // user changes, not every field from the merged view.
+  let rawSectionValue: unknown;
+  if (level === "camera" && cameraName) {
+    if (profileInfo.isProfile) {
+      const baseValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
+        profileInfo.actualSection,
+      );
+      const profileOverrides = get(config.cameras?.[cameraName], sectionPath);
+      if (
+        profileOverrides &&
+        typeof profileOverrides === "object" &&
+        baseValue &&
+        typeof baseValue === "object"
+      ) {
+        rawSectionValue = merge(
+          cloneDeep(baseValue),
+          cloneDeep(profileOverrides),
+        );
+      } else {
+        rawSectionValue = baseValue;
+      }
+    } else {
+      // Use base (pre-profile) value so the diff matches what the form shows
+      rawSectionValue = getBaseCameraSectionValue(
+        config,
+        cameraName,
+        sectionPath,
+      );
+    }
+  } else {
+    rawSectionValue = get(config, sectionPath);
+  }
+  const rawFormData =
+    rawSectionValue === undefined || rawSectionValue === null
+      ? {}
+      : rawSectionValue;
+
+  // For profile sections, also hide restart-required fields to match
+  // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
+  // for fields that are hidden from the form during profile editing).
+  let hiddenFieldsForSanitize = sectionConfig.hiddenFields;
+  if (profileInfo.isProfile && sectionConfig.restartRequired?.length) {
+    const base = sectionConfig.hiddenFields ?? [];
+    hiddenFieldsForSanitize = [
+      ...new Set([...base, ...sectionConfig.restartRequired]),
+    ];
+  }
+
+  // Sanitize raw form data
+  const rawData = sanitizeSectionData(
+    rawFormData as ConfigSectionData,
+    hiddenFieldsForSanitize,
+  );
+
+  // Compute schema defaults
+  const schemaDefaults = modifiedSchema
+    ? applySchemaDefaults(modifiedSchema, {})
+    : {};
+  const effectiveDefaults = getEffectiveDefaultsForSection(
+    schemaSection,
+    level,
+    modifiedSchema ?? undefined,
+    schemaDefaults,
+  );
+
+  // Build overrides
+  const overrides = buildOverrides(pendingData, rawData, effectiveDefaults);
+  const sanitizedOverrides = sanitizeOverridesForSection(
+    schemaSection,
+    level,
+    overrides,
+  );
+
+  if (
+    !sanitizedOverrides ||
+    typeof sanitizedOverrides !== "object" ||
+    Object.keys(sanitizedOverrides as JsonObject).length === 0
+  ) {
+    return null;
+  }
+
+  // Compute basePath
+  const basePath =
+    level === "camera" && cameraName
+      ? `cameras.${cameraName}.${sectionPath}`
+      : sectionPath;
+
+  // Compute updateTopic — profile definitions don't trigger hot-reload
+  let updateTopic: string | undefined;
+  if (profileInfo.isProfile) {
+    updateTopic = undefined;
+  } else if (level === "camera" && cameraName) {
+    const topic = cameraUpdateTopicMap[sectionPath];
+    updateTopic = topic ? `config/cameras/${cameraName}/${topic}` : undefined;
+  } else if (globalCameraDefaultSections.has(sectionPath)) {
+    const topic = cameraUpdateTopicMap[sectionPath];
+    updateTopic = topic ? `config/cameras/*/${topic}` : `config/${sectionPath}`;
+  } else {
+    updateTopic = `config/${sectionPath}`;
+  }
+
+  // Restart detection — profile definitions never need restart
+  const needsRestart = profileInfo.isProfile
+    ? false
+    : requiresRestartForOverrides(
+        sanitizedOverrides,
+        sectionConfig.restartRequired,
+        true,
+      );
+
+  return {
+    basePath,
+    sanitizedOverrides: sanitizedOverrides as JsonObject,
+    updateTopic,
+    needsRestart,
+    pendingDataKey,
+  };
+}
+
+const mergeSectionConfig = (
+  base: SectionConfig | undefined,
+  overrides: Partial<SectionConfig> | undefined,
+): SectionConfig =>
+  mergeWith({}, base ?? {}, overrides ?? {}, (objValue, srcValue, key) => {
+    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+      return srcValue ?? objValue;
+    }
+
+    if (key === "uiSchema" && srcValue !== undefined) {
+      return srcValue;
+    }
+
+    return undefined;
+  });
+
+export function getSectionConfig(
+  sectionKey: string,
+  level: "global" | "camera" | "replay",
+): SectionConfig {
+  const entry = sectionConfigs[sectionKey];
+  if (!entry) {
+    return {};
+  }
+
+  const overrides =
+    level === "global"
+      ? entry.global
+      : level === "replay"
+        ? entry.replay
+        : entry.camera;
+  return mergeSectionConfig(entry.base, overrides);
+}

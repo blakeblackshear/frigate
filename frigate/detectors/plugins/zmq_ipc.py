@@ -5,7 +5,7 @@ from typing import Any, List
 
 import numpy as np
 import zmq
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -17,14 +17,28 @@ DETECTOR_KEY = "zmq"
 
 
 class ZmqDetectorConfig(BaseDetectorConfig):
+    """ZMQ IPC detector that offloads inference to an external process via a ZeroMQ IPC endpoint."""
+
+    model_config = ConfigDict(
+        title="ZMQ IPC",
+    )
+
     type: Literal[DETECTOR_KEY]
     endpoint: str = Field(
-        default="ipc:///tmp/cache/zmq_detector", title="ZMQ IPC endpoint"
+        default="ipc:///tmp/cache/zmq_detector",
+        title="ZMQ IPC endpoint",
+        description="The ZMQ endpoint to connect to.",
     )
     request_timeout_ms: int = Field(
-        default=200, title="ZMQ request timeout in milliseconds"
+        default=200,
+        title="ZMQ request timeout in milliseconds",
+        description="Timeout for ZMQ requests in milliseconds.",
     )
-    linger_ms: int = Field(default=0, title="ZMQ socket linger in milliseconds")
+    linger_ms: int = Field(
+        default=0,
+        title="ZMQ socket linger in milliseconds",
+        description="Socket linger period in milliseconds.",
+    )
 
 
 class ZmqIpcDetector(DetectionApi):

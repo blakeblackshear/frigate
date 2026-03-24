@@ -24,6 +24,10 @@ export type CameraStats = {
   pid: number;
   process_fps: number;
   skipped_fps: number;
+  connection_quality: "excellent" | "fair" | "poor" | "unusable";
+  expected_fps: number;
+  reconnects_last_hour: number;
+  stalls_last_hour: number;
 };
 
 export type CpuStats = {
@@ -37,6 +41,7 @@ export type DetectorStats = {
   detection_start: number;
   inference_speed: number;
   pid: number;
+  temperature?: number;
 };
 
 export type EmbeddingsStats = {
@@ -56,11 +61,13 @@ export type GpuStats = {
   enc?: string;
   dec?: string;
   pstate?: string;
+  temp?: number;
 };
 
 export type NpuStats = {
   npu: number;
   mem: string;
+  temp?: number;
 };
 
 export type GpuInfo = "vainfo" | "nvinfo";
@@ -68,7 +75,6 @@ export type GpuInfo = "vainfo" | "nvinfo";
 export type ServiceStats = {
   last_updated: number;
   storage: { [path: string]: StorageStats };
-  temperatures: { [apex: string]: number };
   uptime: number;
   latest_version: string;
   version: string;
@@ -80,6 +86,7 @@ export type StorageStats = {
   used: number;
   mount_type: string;
   min_shm?: number;
+  shm_frame_count?: number;
 };
 
 export type PotentialProblem = {

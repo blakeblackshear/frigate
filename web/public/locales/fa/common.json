@@ -17,13 +17,13 @@
     "5minutes": "۵ دقیقه",
     "10minutes": "۱۰ دقیقه",
     "day_one": "{{time}} روز",
-    "day_other": "{{time}} روز",
+    "day_other": "{{time}} روزها",
     "h": "{{time}}س",
     "hour_one": "{{time}} ساعت",
-    "hour_other": "{{time}} ساعت",
+    "hour_other": "{{time}} ساعتها",
     "m": "{{time}} دقیقه",
     "minute_one": "{{time}} دقیقه",
-    "minute_other": "{{time}} دقیقه",
+    "minute_other": "{{time}} دقایق",
     "s": "{{time}}ث",
     "30minutes": "۳۰ دقیقه",
     "1hour": "۱ ساعت",
@@ -33,10 +33,10 @@
     "am": "ق.ظ.",
     "yr": "{{time}} سال",
     "year_one": "{{time}} سال",
-    "year_other": "{{time}} سال",
+    "year_other": "{{time}} سالها",
     "mo": "{{time}} ماه",
     "month_one": "{{time}} ماه",
-    "month_other": "{{time}} ماه",
+    "month_other": "{{time}} ماه ها",
     "d": "{{time}} روز",
     "second_one": "{{time}} ثانیه",
     "second_other": "‏{{time}} ثانیه",
@@ -75,7 +75,8 @@
     },
     "inProgress": "در حال انجام",
     "invalidStartTime": "زمان شروع نامعتبر است",
-    "invalidEndTime": "زمان پایان نامعتبر است"
+    "invalidEndTime": "زمان پایان نامعتبر است",
+    "never": "هرگز"
   },
   "unit": {
     "length": {
@@ -233,7 +234,7 @@
       "cameras": {
         "title": "دوربین‌ها",
         "count_one": "{{count}} دوربین",
-        "count_other": "{{count}} دوربین"
+        "count_other": "{{count}} دوربینها"
       }
     },
     "review": "بازبینی",

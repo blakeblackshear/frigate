@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional
 
 import numpy as np
 from pydantic import (
@@ -12,7 +12,6 @@ from pydantic import (
     Field,
     TypeAdapter,
     ValidationInfo,
-    field_serializer,
     field_validator,
     model_validator,
 )
@@ -45,7 +44,8 @@ from .camera.audio import AudioConfig
 from .camera.birdseye import BirdseyeConfig
 from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
-from .camera.genai import GenAIConfig
+from .camera.genai import GenAIConfig, GenAIRoleEnum
+from .camera.mask import ObjectMaskConfig
 from .camera.motion import MotionConfig
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
@@ -60,12 +60,14 @@ from .classification import (
     FaceRecognitionConfig,
     LicensePlateRecognitionConfig,
     SemanticSearchConfig,
+    SemanticSearchModelEnum,
 )
 from .database import DatabaseConfig
 from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .network import NetworkingConfig
+from .profile import ProfileDefinitionConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
@@ -93,54 +95,99 @@ stream_info_retriever = StreamInfoRetriever()
 
 
 class RuntimeMotionConfig(MotionConfig):
-    raw_mask: Union[str, List[str]] = ""
-    mask: np.ndarray = None
+    """Runtime version of MotionConfig with rasterized masks."""
+
+    rasterized_mask: np.ndarray = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
 
-        mask = get_relative_coordinates(config.get("mask", ""), frame_shape)
-        config["raw_mask"] = mask
-
-        if mask:
-            config["mask"] = create_mask(frame_shape, mask)
-        else:
-            empty_mask = np.zeros(frame_shape, np.uint8)
-            empty_mask[:] = 255
-            config["mask"] = empty_mask
+        # Store original mask dict for serialization
+        original_mask = config.get("mask", {})
+        if isinstance(original_mask, dict):
+            # Process the new dict format - update raw_coordinates for each mask
+            processed_mask = {}
+            for mask_id, mask_config in original_mask.items():
+                if isinstance(mask_config, dict):
+                    coords = mask_config.get("coordinates", "")
+                    relative_coords = get_relative_coordinates(coords, frame_shape)
+                    mask_config_copy = mask_config.copy()
+                    mask_config_copy["raw_coordinates"] = (
+                        relative_coords if relative_coords else coords
+                    )
+                    mask_config_copy["coordinates"] = (
+                        relative_coords if relative_coords else coords
+                    )
+                    processed_mask[mask_id] = mask_config_copy
+                else:
+                    processed_mask[mask_id] = mask_config
+            config["mask"] = processed_mask
+            config["raw_mask"] = processed_mask
 
         super().__init__(**config)
 
-    def dict(self, **kwargs):
-        ret = super().model_dump(**kwargs)
-        if "mask" in ret:
-            ret["mask"] = ret["raw_mask"]
-            ret.pop("raw_mask")
-        return ret
+        # Rasterize only enabled masks
+        enabled_coords = []
+        for mask_config in self.mask.values():
+            if mask_config.enabled and mask_config.coordinates:
+                coords = mask_config.coordinates
+                if isinstance(coords, list):
+                    enabled_coords.extend(coords)
+                else:
+                    enabled_coords.append(coords)
 
-    @field_serializer("mask", when_used="json")
-    def serialize_mask(self, value: Any, info):
-        return self.raw_mask
-
-    @field_serializer("raw_mask", when_used="json")
-    def serialize_raw_mask(self, value: Any, info):
-        return None
+        if enabled_coords:
+            self.rasterized_mask = create_mask(frame_shape, enabled_coords)
+        else:
+            empty_mask = np.zeros(frame_shape, np.uint8)
+            empty_mask[:] = 255
+            self.rasterized_mask = empty_mask
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
 
 class RuntimeFilterConfig(FilterConfig):
-    mask: Optional[np.ndarray] = None
-    raw_mask: Optional[Union[str, List[str]]] = None
+    """Runtime version of FilterConfig with rasterized masks."""
+
+    rasterized_mask: Optional[np.ndarray] = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
-        mask = get_relative_coordinates(config.get("mask"), frame_shape)
 
-        config["raw_mask"] = mask
-
-        if mask is not None:
-            config["mask"] = create_mask(frame_shape, mask)
+        # Store original mask dict for serialization
+        original_mask = config.get("mask", {})
+        if isinstance(original_mask, dict):
+            # Process the new dict format - update raw_coordinates for each mask
+            processed_mask = {}
+            for mask_id, mask_config in original_mask.items():
+                # Handle both dict and ObjectMaskConfig formats
+                if hasattr(mask_config, "model_dump"):
+                    # It's an ObjectMaskConfig object
+                    mask_dict = mask_config.model_dump()
+                    coords = mask_dict.get("coordinates", "")
+                    relative_coords = get_relative_coordinates(coords, frame_shape)
+                    mask_dict["raw_coordinates"] = (
+                        relative_coords if relative_coords else coords
+                    )
+                    mask_dict["coordinates"] = (
+                        relative_coords if relative_coords else coords
+                    )
+                    processed_mask[mask_id] = mask_dict
+                elif isinstance(mask_config, dict):
+                    coords = mask_config.get("coordinates", "")
+                    relative_coords = get_relative_coordinates(coords, frame_shape)
+                    mask_config_copy = mask_config.copy()
+                    mask_config_copy["raw_coordinates"] = (
+                        relative_coords if relative_coords else coords
+                    )
+                    mask_config_copy["coordinates"] = (
+                        relative_coords if relative_coords else coords
+                    )
+                    processed_mask[mask_id] = mask_config_copy
+                else:
+                    processed_mask[mask_id] = mask_config
+            config["mask"] = processed_mask
+            config["raw_mask"] = processed_mask
 
         # Convert min_area and max_area to pixels if they're percentages
         if "min_area" in config:
@@ -151,12 +198,20 @@ class RuntimeFilterConfig(FilterConfig):
 
         super().__init__(**config)
 
-    def dict(self, **kwargs):
-        ret = super().model_dump(**kwargs)
-        if "mask" in ret:
-            ret["mask"] = ret["raw_mask"]
-            ret.pop("raw_mask")
-        return ret
+        # Rasterize only enabled masks
+        enabled_coords = []
+        for mask_config in self.mask.values():
+            if mask_config.enabled and mask_config.coordinates:
+                coords = mask_config.coordinates
+                if isinstance(coords, list):
+                    enabled_coords.extend(coords)
+                else:
+                    enabled_coords.append(coords)
+
+        if enabled_coords:
+            self.rasterized_mask = create_mask(frame_shape, enabled_coords)
+        else:
+            self.rasterized_mask = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
@@ -299,116 +354,202 @@ def verify_lpr_and_face(
 
 
 class FrigateConfig(FrigateBaseModel):
-    version: Optional[str] = Field(default=None, title="Current config version.")
+    version: Optional[str] = Field(
+        default=None,
+        title="Current config version",
+        description="Numeric or string version of the active configuration to help detect migrations or format changes.",
+    )
     safe_mode: bool = Field(
-        default=False, title="If Frigate should be started in safe mode."
+        default=False,
+        title="Safe mode",
+        description="When enabled, start Frigate in safe mode with reduced features for troubleshooting.",
     )
 
     # Fields that install global state should be defined first, so that their validators run first.
     environment_vars: EnvVars = Field(
-        default_factory=dict, title="Frigate environment variables."
+        default_factory=dict,
+        title="Environment variables",
+        description="Key/value pairs of environment variables to set for the Frigate process in Home Assistant OS. Non-HAOS users must use Docker environment variable configuration instead.",
     )
     logger: LoggerConfig = Field(
         default_factory=LoggerConfig,
-        title="Logging configuration.",
+        title="Logging",
+        description="Controls default log verbosity and per-component log level overrides.",
         validate_default=True,
     )
 
     # Global config
-    auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
+    auth: AuthConfig = Field(
+        default_factory=AuthConfig,
+        title="Authentication",
+        description="Authentication and session-related settings including cookie and rate limit options.",
+    )
     database: DatabaseConfig = Field(
-        default_factory=DatabaseConfig, title="Database configuration."
+        default_factory=DatabaseConfig,
+        title="Database",
+        description="Settings for the SQLite database used by Frigate to store tracked object and recording metadata.",
     )
     go2rtc: RestreamConfig = Field(
-        default_factory=RestreamConfig, title="Global restream configuration."
+        default_factory=RestreamConfig,
+        title="go2rtc",
+        description="Settings for the integrated go2rtc restreaming service used for live stream relaying and translation.",
     )
-    mqtt: MqttConfig = Field(title="MQTT configuration.")
+    mqtt: MqttConfig = Field(
+        title="MQTT",
+        description="Settings for connecting and publishing telemetry, snapshots, and event details to an MQTT broker.",
+    )
     notifications: NotificationConfig = Field(
-        default_factory=NotificationConfig, title="Global notification configuration."
+        default_factory=NotificationConfig,
+        title="Notifications",
+        description="Settings to enable and control notifications for all cameras; can be overridden per-camera.",
     )
     networking: NetworkingConfig = Field(
-        default_factory=NetworkingConfig, title="Networking configuration"
+        default_factory=NetworkingConfig,
+        title="Networking",
+        description="Network-related settings such as IPv6 enablement for Frigate endpoints.",
     )
     proxy: ProxyConfig = Field(
-        default_factory=ProxyConfig, title="Proxy configuration."
+        default_factory=ProxyConfig,
+        title="Proxy",
+        description="Settings for integrating Frigate behind a reverse proxy that passes authenticated user headers.",
     )
     telemetry: TelemetryConfig = Field(
-        default_factory=TelemetryConfig, title="Telemetry configuration."
+        default_factory=TelemetryConfig,
+        title="Telemetry",
+        description="System telemetry and stats options including GPU and network bandwidth monitoring.",
     )
-    tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
-    ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
+    tls: TlsConfig = Field(
+        default_factory=TlsConfig,
+        title="TLS",
+        description="TLS settings for Frigate's web endpoints (port 8971).",
+    )
+    ui: UIConfig = Field(
+        default_factory=UIConfig,
+        title="UI",
+        description="User interface preferences such as timezone, time/date formatting, and units.",
+    )
 
     # Detector config
     detectors: Dict[str, BaseDetectorConfig] = Field(
         default=DEFAULT_DETECTORS,
-        title="Detector hardware configuration.",
+        title="Detector hardware",
+        description="Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
     )
     model: ModelConfig = Field(
-        default_factory=ModelConfig, title="Detection model configuration."
+        default_factory=ModelConfig,
+        title="Detection model",
+        description="Settings to configure a custom object detection model and its input shape.",
     )
 
-    # GenAI config
-    genai: GenAIConfig = Field(
-        default_factory=GenAIConfig, title="Generative AI configuration."
+    # GenAI config (named provider configs: name -> GenAIConfig)
+    genai: Dict[str, GenAIConfig] = Field(
+        default_factory=dict,
+        title="Generative AI configuration",
+        description="Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
     )
 
     # Camera config
-    cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
+    cameras: Dict[str, CameraConfig] = Field(title="Cameras", description="Cameras")
     audio: AudioConfig = Field(
-        default_factory=AudioConfig, title="Global Audio events configuration."
+        default_factory=AudioConfig,
+        title="Audio events",
+        description="Settings for audio-based event detection for all cameras; can be overridden per-camera.",
     )
     birdseye: BirdseyeConfig = Field(
-        default_factory=BirdseyeConfig, title="Birdseye configuration."
+        default_factory=BirdseyeConfig,
+        title="Birdseye",
+        description="Settings for the Birdseye composite view that composes multiple camera feeds into a single layout.",
     )
     detect: DetectConfig = Field(
-        default_factory=DetectConfig, title="Global object tracking configuration."
+        default_factory=DetectConfig,
+        title="Object Detection",
+        description="Settings for the detection/detect role used to run object detection and initialize trackers.",
     )
     ffmpeg: FfmpegConfig = Field(
-        default_factory=FfmpegConfig, title="Global FFmpeg configuration."
+        default_factory=FfmpegConfig,
+        title="FFmpeg",
+        description="FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
     )
     live: CameraLiveConfig = Field(
-        default_factory=CameraLiveConfig, title="Live playback settings."
+        default_factory=CameraLiveConfig,
+        title="Live playback",
+        description="Settings used by the Web UI to control live stream resolution and quality.",
     )
     motion: Optional[MotionConfig] = Field(
-        default=None, title="Global motion detection configuration."
+        default=None,
+        title="Motion detection",
+        description="Default motion detection settings applied to cameras unless overridden per-camera.",
     )
     objects: ObjectConfig = Field(
-        default_factory=ObjectConfig, title="Global object configuration."
+        default_factory=ObjectConfig,
+        title="Objects",
+        description="Object tracking defaults including which labels to track and per-object filters.",
     )
     record: RecordConfig = Field(
-        default_factory=RecordConfig, title="Global record configuration."
+        default_factory=RecordConfig,
+        title="Recording",
+        description="Recording and retention settings applied to cameras unless overridden per-camera.",
     )
     review: ReviewConfig = Field(
-        default_factory=ReviewConfig, title="Review configuration."
+        default_factory=ReviewConfig,
+        title="Review",
+        description="Settings that control alerts, detections, and GenAI review summaries used by the UI and storage.",
     )
     snapshots: SnapshotsConfig = Field(
-        default_factory=SnapshotsConfig, title="Global snapshots configuration."
+        default_factory=SnapshotsConfig,
+        title="Snapshots",
+        description="Settings for API-generated snapshots of tracked objects for all cameras; can be overridden per-camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
-        title="Global timestamp style configuration.",
+        title="Timestamp style",
+        description="Styling options for in-feed timestamps applied to debug view and snapshots.",
     )
 
     # Classification Config
     audio_transcription: AudioTranscriptionConfig = Field(
-        default_factory=AudioTranscriptionConfig, title="Audio transcription config."
+        default_factory=AudioTranscriptionConfig,
+        title="Audio transcription",
+        description="Settings for live and speech audio transcription used for events and live captions.",
     )
     classification: ClassificationConfig = Field(
-        default_factory=ClassificationConfig, title="Object classification config."
+        default_factory=ClassificationConfig,
+        title="Object classification",
+        description="Settings for classification models used to refine object labels or state classification.",
     )
     semantic_search: SemanticSearchConfig = Field(
-        default_factory=SemanticSearchConfig, title="Semantic search configuration."
+        default_factory=SemanticSearchConfig,
+        title="Semantic Search",
+        description="Settings for Semantic Search which builds and queries object embeddings to find similar items.",
     )
     face_recognition: FaceRecognitionConfig = Field(
-        default_factory=FaceRecognitionConfig, title="Face recognition config."
+        default_factory=FaceRecognitionConfig,
+        title="Face recognition",
+        description="Settings for face detection and recognition for all cameras; can be overridden per-camera.",
     )
     lpr: LicensePlateRecognitionConfig = Field(
         default_factory=LicensePlateRecognitionConfig,
-        title="License Plate recognition config.",
+        title="License Plate Recognition",
+        description="License plate recognition settings including detection thresholds, formatting, and known plates.",
     )
 
     camera_groups: Dict[str, CameraGroupConfig] = Field(
-        default_factory=dict, title="Camera group configuration"
+        default_factory=dict,
+        title="Camera groups",
+        description="Configuration for named camera groups used to organize cameras in the UI.",
+    )
+
+    profiles: Dict[str, ProfileDefinitionConfig] = Field(
+        default_factory=dict,
+        title="Profiles",
+        description="Named profile definitions with friendly names. Camera profiles must reference names defined here.",
+    )
+
+    active_profile: Optional[str] = Field(
+        default=None,
+        title="Active profile",
+        description="Currently active profile name. Runtime-only, not persisted in YAML.",
+        exclude=True,
     )
 
     _plus_api: PlusApi
@@ -430,6 +571,36 @@ class FrigateConfig(FrigateBaseModel):
 
         # set notifications state
         self.notifications.enabled_in_config = self.notifications.enabled
+
+        # validate genai: each role (tools, vision, embeddings) at most once
+        role_to_name: dict[GenAIRoleEnum, str] = {}
+        for name, genai_cfg in self.genai.items():
+            for role in genai_cfg.roles:
+                if role in role_to_name:
+                    raise ValueError(
+                        f"GenAI role '{role.value}' is assigned to both "
+                        f"'{role_to_name[role]}' and '{name}'; each role must have "
+                        "exactly one provider."
+                    )
+                role_to_name[role] = name
+
+        # validate semantic_search.model when it is a GenAI provider name
+        if (
+            self.semantic_search.enabled
+            and isinstance(self.semantic_search.model, str)
+            and not isinstance(self.semantic_search.model, SemanticSearchModelEnum)
+        ):
+            if self.semantic_search.model not in self.genai:
+                raise ValueError(
+                    f"semantic_search.model '{self.semantic_search.model}' is not a "
+                    "valid GenAI config key. Must match a key in genai config."
+                )
+            genai_cfg = self.genai[self.semantic_search.model]
+            if GenAIRoleEnum.embeddings not in genai_cfg.roles:
+                raise ValueError(
+                    f"GenAI provider '{self.semantic_search.model}' must have "
+                    "'embeddings' in its roles for semantic search."
+                )
 
         # set default min_score for object attributes
         for attribute in self.model.all_attributes:
@@ -475,6 +646,9 @@ class FrigateConfig(FrigateBaseModel):
 
             # users should not set model themselves
             if detector_config.model:
+                logger.warning(
+                    "The model key should be specified at the root level of the config, not under detectors. The nested model key will be ignored."
+                )
                 detector_config.model = None
 
             model_config = self.model.model_dump(exclude_unset=True, warnings="none")
@@ -524,6 +698,14 @@ class FrigateConfig(FrigateBaseModel):
 
             if camera_config.ffmpeg.hwaccel_args == "auto":
                 camera_config.ffmpeg.hwaccel_args = self.ffmpeg.hwaccel_args
+
+            # Resolve export hwaccel_args: camera export -> camera ffmpeg -> global ffmpeg
+            # This allows per-camera override for exports (e.g., when camera resolution
+            # exceeds hardware encoder limits)
+            if camera_config.record.export.hwaccel_args == "auto":
+                camera_config.record.export.hwaccel_args = (
+                    camera_config.ffmpeg.hwaccel_args
+                )
 
             for input in camera_config.ffmpeg.inputs:
                 need_detect_dimensions = "detect" in input.roles and (
@@ -617,34 +799,62 @@ class FrigateConfig(FrigateBaseModel):
             for key in object_keys:
                 camera_config.objects.filters[key] = FilterConfig()
 
+            # Process global object masks to set raw_coordinates
+            if camera_config.objects.mask:
+                processed_global_masks = {}
+                for mask_id, mask_config in camera_config.objects.mask.items():
+                    if mask_config:
+                        coords = mask_config.coordinates
+                        relative_coords = get_relative_coordinates(
+                            coords, camera_config.frame_shape
+                        )
+                        # Create a new ObjectMaskConfig with raw_coordinates set
+                        processed_global_masks[mask_id] = ObjectMaskConfig(
+                            friendly_name=mask_config.friendly_name,
+                            enabled=mask_config.enabled,
+                            coordinates=relative_coords if relative_coords else coords,
+                            raw_coordinates=relative_coords
+                            if relative_coords
+                            else coords,
+                            enabled_in_config=mask_config.enabled,
+                        )
+                    else:
+                        processed_global_masks[mask_id] = mask_config
+                camera_config.objects.mask = processed_global_masks
+                camera_config.objects.raw_mask = processed_global_masks
+
             # Apply global object masks and convert masks to numpy array
             for object, filter in camera_config.objects.filters.items():
+                # Set enabled_in_config for per-object masks before processing
+                for mask_config in filter.mask.values():
+                    if mask_config:
+                        mask_config.enabled_in_config = mask_config.enabled
+
+                # Merge global object masks with per-object filter masks
+                merged_mask = dict(filter.mask)  # Copy filter-specific masks
+
+                # Add global object masks if they exist
                 if camera_config.objects.mask:
-                    filter_mask = []
-                    if filter.mask is not None:
-                        filter_mask = (
-                            filter.mask
-                            if isinstance(filter.mask, list)
-                            else [filter.mask]
-                        )
-                    object_mask = (
-                        get_relative_coordinates(
-                            (
-                                camera_config.objects.mask
-                                if isinstance(camera_config.objects.mask, list)
-                                else [camera_config.objects.mask]
-                            ),
-                            camera_config.frame_shape,
-                        )
-                        or []
-                    )
-                    filter.mask = filter_mask + object_mask
+                    for mask_id, mask_config in camera_config.objects.mask.items():
+                        # Use a global prefix to avoid key collisions
+                        global_mask_id = f"global_{mask_id}"
+                        merged_mask[global_mask_id] = mask_config
 
                 # Set runtime filter to create masks
                 camera_config.objects.filters[object] = RuntimeFilterConfig(
                     frame_shape=camera_config.frame_shape,
-                    **filter.model_dump(exclude_unset=True),
+                    mask=merged_mask,
+                    **filter.model_dump(
+                        exclude_unset=True, exclude={"mask", "raw_mask"}
+                    ),
                 )
+
+            # Set enabled_in_config for motion masks to match config file state BEFORE creating RuntimeMotionConfig
+            if camera_config.motion:
+                camera_config.motion.enabled_in_config = camera_config.motion.enabled
+                for mask_config in camera_config.motion.mask.values():
+                    if mask_config:
+                        mask_config.enabled_in_config = mask_config.enabled
 
             # Convert motion configuration
             if camera_config.motion is None:
@@ -654,10 +864,8 @@ class FrigateConfig(FrigateBaseModel):
             else:
                 camera_config.motion = RuntimeMotionConfig(
                     frame_shape=camera_config.frame_shape,
-                    raw_mask=camera_config.motion.mask,
                     **camera_config.motion.model_dump(exclude_unset=True),
                 )
-            camera_config.motion.enabled_in_config = camera_config.motion.enabled
 
             # generate zone contours
             if len(camera_config.zones) > 0:
@@ -670,6 +878,10 @@ class FrigateConfig(FrigateBaseModel):
                             )
 
                     zone.generate_contour(camera_config.frame_shape)
+
+                # Set enabled_in_config for zones to match config file state
+                for zone in camera_config.zones.values():
+                    zone.enabled_in_config = zone.enabled
 
             # Set live view stream if none is set
             if not camera_config.live.streams:
@@ -688,6 +900,15 @@ class FrigateConfig(FrigateBaseModel):
             verify_motion_and_detect(camera_config)
             verify_objects_track(camera_config, labelmap_objects)
             verify_lpr_and_face(self, camera_config)
+
+        # Validate camera profiles reference top-level profile definitions
+        for cam_name, cam_config in self.cameras.items():
+            for profile_name in cam_config.profiles:
+                if profile_name not in self.profiles:
+                    raise ValueError(
+                        f"Camera '{cam_name}' references profile '{profile_name}' "
+                        f"which is not defined in the top-level 'profiles' section"
+                    )
 
         # set names on classification configs
         for name, config in self.classification.custom.items():
@@ -711,11 +932,6 @@ class FrigateConfig(FrigateBaseModel):
                     raise ValueError(
                         f"Camera {camera.name} has audio transcription enabled, but audio detection is not enabled for this camera. Audio detection must be enabled for cameras with audio transcription when it is disabled globally."
                     )
-
-        if self.plus_api and not self.snapshots.clean_copy:
-            logger.warning(
-                "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
-            )
 
         # Validate auth roles against cameras
         camera_names = set(self.cameras.keys())

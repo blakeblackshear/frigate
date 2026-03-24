@@ -35,39 +35,58 @@ DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
 class FfmpegOutputArgsConfig(FrigateBaseModel):
     detect: Union[str, list[str]] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Detect role FFmpeg output arguments.",
+        title="Detect output arguments",
+        description="Default output arguments for detect role streams.",
     )
     record: Union[str, list[str]] = Field(
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Record role FFmpeg output arguments.",
+        title="Record output arguments",
+        description="Default output arguments for record role streams.",
     )
 
 
 class FfmpegConfig(FrigateBaseModel):
-    path: str = Field(default="default", title="FFmpeg path")
+    path: str = Field(
+        default="default",
+        title="FFmpeg path",
+        description='Path to the FFmpeg binary to use or a version alias ("5.0" or "7.0").',
+    )
     global_args: Union[str, list[str]] = Field(
-        default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
+        default=FFMPEG_GLOBAL_ARGS_DEFAULT,
+        title="FFmpeg global arguments",
+        description="Global arguments passed to FFmpeg processes.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
-        default="auto", title="FFmpeg hardware acceleration arguments."
+        default="auto",
+        title="Hardware acceleration arguments",
+        description="Hardware acceleration arguments for FFmpeg. Provider-specific presets are recommended.",
     )
     input_args: Union[str, list[str]] = Field(
-        default=FFMPEG_INPUT_ARGS_DEFAULT, title="FFmpeg input arguments."
+        default=FFMPEG_INPUT_ARGS_DEFAULT,
+        title="Input arguments",
+        description="Input arguments applied to FFmpeg input streams.",
     )
     output_args: FfmpegOutputArgsConfig = Field(
         default_factory=FfmpegOutputArgsConfig,
-        title="FFmpeg output arguments per role.",
+        title="Output arguments",
+        description="Default output arguments used for different FFmpeg roles such as detect and record.",
     )
     retry_interval: float = Field(
         default=10.0,
-        title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
+        title="FFmpeg retry time",
+        description="Seconds to wait before attempting to reconnect a camera stream after failure. Default is 10.",
         gt=0.0,
     )
     apple_compatibility: bool = Field(
         default=False,
-        title="Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players.",
+        title="Apple compatibility",
+        description="Enable HEVC tagging for better Apple player compatibility when recording H.265.",
     )
-    gpu: int = Field(default=0, title="GPU index to use for hardware acceleration.")
+    gpu: int = Field(
+        default=0,
+        title="GPU index",
+        description="Default GPU index used for hardware acceleration if available.",
+    )
 
     @property
     def ffmpeg_path(self) -> str:
@@ -95,21 +114,36 @@ class CameraRoleEnum(str, Enum):
 
 
 class CameraInput(FrigateBaseModel):
-    path: EnvString = Field(title="Camera input path.")
-    roles: list[CameraRoleEnum] = Field(title="Roles assigned to this input.")
+    path: EnvString = Field(
+        title="Input path",
+        description="Camera input stream URL or path.",
+    )
+    roles: list[CameraRoleEnum] = Field(
+        title="Input roles",
+        description="Roles for this input stream.",
+    )
     global_args: Union[str, list[str]] = Field(
-        default_factory=list, title="FFmpeg global arguments."
+        default_factory=list,
+        title="FFmpeg global arguments",
+        description="FFmpeg global arguments for this input stream.",
     )
     hwaccel_args: Union[str, list[str]] = Field(
-        default_factory=list, title="FFmpeg hardware acceleration arguments."
+        default_factory=list,
+        title="Hardware acceleration arguments",
+        description="Hardware acceleration arguments for this input stream.",
     )
     input_args: Union[str, list[str]] = Field(
-        default_factory=list, title="FFmpeg input arguments."
+        default_factory=list,
+        title="Input arguments",
+        description="Input arguments specific to this stream.",
     )
 
 
 class CameraFfmpegConfig(FfmpegConfig):
-    inputs: list[CameraInput] = Field(title="Camera inputs.")
+    inputs: list[CameraInput] = Field(
+        title="Camera inputs",
+        description="List of input stream definitions (paths and roles) for this camera.",
+    )
 
     @field_validator("inputs")
     @classmethod

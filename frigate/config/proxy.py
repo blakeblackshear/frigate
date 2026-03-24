@@ -10,36 +10,47 @@ __all__ = ["ProxyConfig", "HeaderMappingConfig"]
 
 class HeaderMappingConfig(FrigateBaseModel):
     user: str = Field(
-        default=None, title="Header name from upstream proxy to identify user."
+        default=None,
+        title="User header",
+        description="Header containing the authenticated username provided by the upstream proxy.",
     )
     role: str = Field(
         default=None,
-        title="Header name from upstream proxy to identify user role.",
+        title="Role header",
+        description="Header containing the authenticated user's role or groups from the upstream proxy.",
     )
     role_map: Optional[dict[str, list[str]]] = Field(
         default_factory=dict,
-        title=("Mapping of Frigate roles to upstream group values. "),
+        title=("Role mapping"),
+        description="Map upstream group values to Frigate roles (for example map admin groups to the admin role).",
     )
 
 
 class ProxyConfig(FrigateBaseModel):
     header_map: HeaderMappingConfig = Field(
         default_factory=HeaderMappingConfig,
-        title="Header mapping definitions for proxy user passing.",
+        title="Header mapping",
+        description="Map incoming proxy headers to Frigate user and role fields for proxy-based auth.",
     )
     logout_url: Optional[str] = Field(
-        default=None, title="Redirect url for logging out with proxy."
+        default=None,
+        title="Logout URL",
+        description="URL to redirect users to when logging out via the proxy.",
     )
     auth_secret: Optional[EnvString] = Field(
         default=None,
-        title="Secret value for proxy authentication.",
+        title="Proxy secret",
+        description="Optional secret checked against the X-Proxy-Secret header to verify trusted proxies.",
     )
     default_role: Optional[str] = Field(
-        default="viewer", title="Default role for proxy users."
+        default="viewer",
+        title="Default role",
+        description="Default role assigned to proxy-authenticated users when no role mapping applies (admin or viewer).",
     )
     separator: Optional[str] = Field(
         default=",",
-        title="The character used to separate values in a mapped header.",
+        title="Separator character",
+        description="Character used to split multiple values provided in proxy headers.",
     )
 
     @field_validator("separator", mode="before")

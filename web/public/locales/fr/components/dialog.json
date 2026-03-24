@@ -77,6 +77,10 @@
     "fromTimeline": {
       "saveExport": "Enregistrer l'exportation",
       "previewExport": "Aperçu de l'exportation"
+    },
+    "case": {
+      "label": "Dossier",
+      "placeholder": "Sélectionner un dossier"
     }
   },
   "search": {

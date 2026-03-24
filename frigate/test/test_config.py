@@ -151,6 +151,22 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.track
 
+    def test_deep_merge_override_replaces_list_values(self):
+        base = {"objects": {"track": ["person", "face"]}}
+        update = {"objects": {"track": ["person"]}}
+
+        merged = deep_merge(base, update, override=True)
+
+        assert merged["objects"]["track"] == ["person"]
+
+    def test_deep_merge_merge_lists_still_appends(self):
+        base = {"track": ["person"]}
+        update = {"track": ["face"]}
+
+        merged = deep_merge(base, update, override=True, merge_lists=True)
+
+        assert merged["track"] == ["person", "face"]
+
     def test_override_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
@@ -343,8 +359,24 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "objects": {
-                        "mask": "0,0,1,1,0,1",
-                        "filters": {"dog": {"mask": "1,1,1,1,1,1"}},
+                        "mask": {
+                            "global_mask_1": {
+                                "friendly_name": "Global Mask 1",
+                                "enabled": True,
+                                "coordinates": "0,0,1,1,0,1",
+                            }
+                        },
+                        "filters": {
+                            "dog": {
+                                "mask": {
+                                    "dog_mask_1": {
+                                        "friendly_name": "Dog Mask 1",
+                                        "enabled": True,
+                                        "coordinates": "1,1,1,1,1,1",
+                                    }
+                                }
+                            }
+                        },
                     },
                 }
             },
@@ -353,8 +385,10 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         back_camera = frigate_config.cameras["back"]
         assert "dog" in back_camera.objects.filters
-        assert len(back_camera.objects.filters["dog"].raw_mask) == 2
-        assert len(back_camera.objects.filters["person"].raw_mask) == 1
+        # dog filter has its own mask + global mask merged
+        assert len(back_camera.objects.filters["dog"].mask) == 2
+        # person filter only has the global mask
+        assert len(back_camera.objects.filters["person"].mask) == 1
 
     def test_motion_mask_relative_matches_explicit(self):
         config = {
@@ -373,9 +407,13 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "motion": {
-                        "mask": [
-                            "0,0,200,100,600,300,800,400",
-                        ]
+                        "mask": {
+                            "explicit_mask": {
+                                "friendly_name": "Explicit Mask",
+                                "enabled": True,
+                                "coordinates": "0,0,200,100,600,300,800,400",
+                            }
+                        }
                     },
                 },
                 "relative": {
@@ -390,9 +428,13 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "motion": {
-                        "mask": [
-                            "0.0,0.0,0.25,0.25,0.75,0.75,1.0,1.0",
-                        ]
+                        "mask": {
+                            "relative_mask": {
+                                "friendly_name": "Relative Mask",
+                                "enabled": True,
+                                "coordinates": "0.0,0.0,0.25,0.25,0.75,0.75,1.0,1.0",
+                            }
+                        }
                     },
                 },
             },
@@ -400,8 +442,8 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert np.array_equal(
-            frigate_config.cameras["explicit"].motion.mask,
-            frigate_config.cameras["relative"].motion.mask,
+            frigate_config.cameras["explicit"].motion.rasterized_mask,
+            frigate_config.cameras["relative"].motion.rasterized_mask,
         )
 
     def test_default_input_args(self):
@@ -1166,7 +1208,7 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert frigate_config.cameras["back"].snapshots.bounding_box
-        assert frigate_config.cameras["back"].snapshots.quality == 70
+        assert frigate_config.cameras["back"].snapshots.quality == 60
 
     def test_global_snapshots_merge(self):
         config = {

@@ -1,0 +1,32 @@
+{
+  "minimum": "Must be at least {{limit}}",
+  "maximum": "Must be at most {{limit}}",
+  "exclusiveMinimum": "Must be greater than {{limit}}",
+  "exclusiveMaximum": "Must be less than {{limit}}",
+  "minLength": "Must be at least {{limit}} character(s)",
+  "maxLength": "Must be at most {{limit}} character(s)",
+  "minItems": "Must have at least {{limit}} items",
+  "maxItems": "Must have at most {{limit}} items",
+  "pattern": "Invalid format",
+  "required": "This field is required",
+  "type": "Invalid value type",
+  "enum": "Must be one of the allowed values",
+  "const": "Value does not match expected constant",
+  "uniqueItems": "All items must be unique",
+  "format": "Invalid format",
+  "additionalProperties": "Unknown property is not allowed",
+  "oneOf": "Must match exactly one of the allowed schemas",
+  "anyOf": "Must match at least one of the allowed schemas",
+  "proxy": {
+    "header_map": {
+      "roleHeaderRequired": "Role header is required when role mappings are configured."
+    }
+  },
+  "ffmpeg": {
+    "inputs": {
+      "rolesUnique": "Each role can only be assigned to one input stream.",
+      "detectRequired": "At least one input stream must be assigned the 'detect' role.",
+      "hwaccelDetectOnly": "Only the input stream with the detect role can define hardware acceleration arguments."
+    }
+  }
+}

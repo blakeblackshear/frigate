@@ -6,7 +6,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from frigate.const import MODEL_CACHE_DIR, SUPPORTED_RK_SOCS
 from frigate.detectors.detection_api import DetectionApi
@@ -29,8 +29,20 @@ model_cache_dir = os.path.join(MODEL_CACHE_DIR, "rknn_cache/")
 
 
 class RknnDetectorConfig(BaseDetectorConfig):
+    """RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware."""
+
+    model_config = ConfigDict(
+        title="RKNN",
+    )
+
     type: Literal[DETECTOR_KEY]
-    num_cores: int = Field(default=0, ge=0, le=3, title="Number of NPU cores to use.")
+    num_cores: int = Field(
+        default=0,
+        ge=0,
+        le=3,
+        title="Number of NPU cores to use.",
+        description="The number of NPU cores to use (0 for auto).",
+    )
 
 
 class Rknn(DetectionApi):

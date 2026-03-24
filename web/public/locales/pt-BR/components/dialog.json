@@ -6,7 +6,8 @@
       "title": "Frigate está Reiniciando",
       "content": "Essa página vai recarregar em {{countdown}} segundos.",
       "button": "Forçar Recarregar Agora"
-    }
+    },
+    "description": "Isto irá parar brevemente o Frigate enquanto reinicia."
   },
   "explore": {
     "plus": {
@@ -118,6 +119,7 @@
     "search": {
       "placeholder": "Pesquisar por rótulo ou sub-rótulo…"
     },
-    "noImages": "Nenhuma miniatura encontrada para essa câmera"
+    "noImages": "Nenhuma miniatura encontrada para essa câmera",
+    "unknownLabel": "Imagem de Gatilho Salva"
   }
 }

@@ -8,9 +8,8 @@ import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
-from functools import reduce
 from pathlib import Path as FilePath
-from typing import Any, List
+from typing import Any
 from urllib.parse import unquote
 
 import cv2
@@ -19,40 +18,44 @@ import pytz
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
-from peewee import DoesNotExist, fn, operator
+from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
 from frigate.api.auth import (
     allow_any_authenticated,
-    get_allowed_cameras_for_filter,
     require_camera_access,
+    require_role,
 )
 from frigate.api.defs.query.media_query_parameters import (
     Extension,
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
-    MediaRecordingsAvailabilityQueryParams,
-    MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
 from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
+from frigate.config.camera.snapshots import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
-    CLIPS_DIR,
     INSTALL_DIR,
     MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
-    RECORD_DIR,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
+from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
-from frigate.util.file import get_event_thumbnail_bytes
-from frigate.util.image import get_image_from_recording
-from frigate.util.time import get_dst_transitions
+from frigate.util.file import (
+    get_event_snapshot_bytes,
+    get_event_snapshot_path,
+    get_event_thumbnail_bytes,
+    load_event_snapshot_image,
+)
+from frigate.util.image import get_image_from_recording, get_image_quality_params
+from frigate.util.media import get_keyframe_before
 
 logger = logging.getLogger(__name__)
+
 
 router = APIRouter(tags=[Tags.media])
 
@@ -114,6 +117,24 @@ def imagestream(
         )
 
 
+def _resolve_snapshot_settings(
+    snapshot_config: SnapshotsConfig, params: MediaEventsSnapshotQueryParams
+) -> dict[str, Any]:
+    return {
+        "timestamp": snapshot_config.timestamp
+        if params.timestamp is None
+        else bool(params.timestamp),
+        "bounding_box": snapshot_config.bounding_box
+        if params.bbox is None
+        else bool(params.bbox),
+        "crop": snapshot_config.crop if params.crop is None else bool(params.crop),
+        "height": snapshot_config.height if params.height is None else params.height,
+        "quality": snapshot_config.quality
+        if params.quality is None
+        else params.quality,
+    }
+
+
 @router.get("/{camera_name}/ptz/info", dependencies=[Depends(require_camera_access)])
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
@@ -131,7 +152,9 @@ async def camera_ptz_info(request: Request, camera_name: str):
 
 
 @router.get(
-    "/{camera_name}/latest.{extension}", dependencies=[Depends(require_camera_access)]
+    "/{camera_name}/latest.{extension}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns the latest frame from the specified camera in the requested format (jpg, png, webp). Falls back to preview frames if the camera is offline.",
 )
 async def latest_frame(
     request: Request,
@@ -149,14 +172,7 @@ async def latest_frame(
         "paths": params.paths,
         "regions": params.regions,
     }
-    quality = params.quality
-
-    if extension == Extension.png:
-        quality_params = None
-    elif extension == Extension.webp:
-        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-    else:  # jpg or jpeg
-        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+    quality_params = get_image_quality_params(extension.value, params.quality)
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -165,20 +181,37 @@ async def latest_frame(
             or 10
         )
 
+        is_offline = False
         if frame is None or datetime.now().timestamp() > (
             frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
-            if request.app.camera_error_image is None:
-                error_image = glob.glob(
-                    os.path.join(INSTALL_DIR, "frigate/images/camera-error.jpg")
-                )
+            last_frame_time = frame_processor.get_current_frame_time(camera_name)
+            preview_path = get_most_recent_preview_frame(
+                camera_name, before=last_frame_time
+            )
 
-                if len(error_image) > 0:
-                    request.app.camera_error_image = cv2.imread(
-                        error_image[0], cv2.IMREAD_UNCHANGED
+            if preview_path:
+                logger.debug(f"Using most recent preview frame for {camera_name}")
+                frame = cv2.imread(preview_path, cv2.IMREAD_UNCHANGED)
+
+                if frame is not None:
+                    is_offline = True
+
+            if frame is None or not is_offline:
+                logger.debug(
+                    f"No live or preview frame available for {camera_name}. Using error image."
+                )
+                if request.app.camera_error_image is None:
+                    error_image = glob.glob(
+                        os.path.join(INSTALL_DIR, "frigate/images/camera-error.jpg")
                     )
 
-            frame = request.app.camera_error_image
+                    if len(error_image) > 0:
+                        request.app.camera_error_image = cv2.imread(
+                            error_image[0], cv2.IMREAD_UNCHANGED
+                        )
+
+                frame = request.app.camera_error_image
 
         height = int(params.height or str(frame.shape[0]))
         width = int(height * frame.shape[1] / frame.shape[0])
@@ -200,14 +233,18 @@ async def latest_frame(
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
+
+        headers = {
+            "Cache-Control": "no-store" if not params.store else "private, max-age=60",
+        }
+
+        if is_offline:
+            headers["X-Frigate-Offline"] = "true"
+
         return Response(
             content=img.tobytes(),
             media_type=extension.get_mime_type(),
-            headers={
-                "Cache-Control": "no-store"
-                if not params.store
-                else "private, max-age=60",
-            },
+            headers=headers,
         )
     elif (
         camera_name == "birdseye"
@@ -397,333 +434,6 @@ async def submit_recording_snapshot_to_plus(
         )
 
 
-@router.get("/recordings/storage", dependencies=[Depends(allow_any_authenticated())])
-def get_recordings_storage_usage(request: Request):
-    recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
-        "storage"
-    ][RECORD_DIR]
-
-    if not recording_stats:
-        return JSONResponse({})
-
-    total_mb = recording_stats["total"]
-
-    camera_usages: dict[str, dict] = (
-        request.app.storage_maintainer.calculate_camera_usages()
-    )
-
-    for camera_name in camera_usages.keys():
-        if camera_usages.get(camera_name, {}).get("usage"):
-            camera_usages[camera_name]["usage_percent"] = (
-                camera_usages.get(camera_name, {}).get("usage", 0) / total_mb
-            ) * 100
-
-    return JSONResponse(content=camera_usages)
-
-
-@router.get("/recordings/summary", dependencies=[Depends(allow_any_authenticated())])
-def all_recordings_summary(
-    request: Request,
-    params: MediaRecordingsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
-):
-    """Returns true/false by day indicating if recordings exist"""
-
-    cameras = params.cameras
-    if cameras != "all":
-        requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content={})
-        camera_list = list(filtered)
-    else:
-        camera_list = allowed_cameras
-
-    time_range_query = (
-        Recordings.select(
-            fn.MIN(Recordings.start_time).alias("min_time"),
-            fn.MAX(Recordings.start_time).alias("max_time"),
-        )
-        .where(Recordings.camera << camera_list)
-        .dicts()
-        .get()
-    )
-
-    min_time = time_range_query.get("min_time")
-    max_time = time_range_query.get("max_time")
-
-    if min_time is None or max_time is None:
-        return JSONResponse(content={})
-
-    dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
-
-    days: dict[str, bool] = {}
-
-    for period_start, period_end, period_offset in dst_periods:
-        hours_offset = int(period_offset / 60 / 60)
-        minutes_offset = int(period_offset / 60 - hours_offset * 60)
-        period_hour_modifier = f"{hours_offset} hour"
-        period_minute_modifier = f"{minutes_offset} minute"
-
-        period_query = (
-            Recordings.select(
-                fn.strftime(
-                    "%Y-%m-%d",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("day")
-            )
-            .where(
-                (Recordings.camera << camera_list)
-                & (Recordings.end_time >= period_start)
-                & (Recordings.start_time <= period_end)
-            )
-            .group_by(
-                fn.strftime(
-                    "%Y-%m-%d",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                )
-            )
-            .order_by(Recordings.start_time.desc())
-            .namedtuples()
-        )
-
-        for g in period_query:
-            days[g.day] = True
-
-    return JSONResponse(content=dict(sorted(days.items())))
-
-
-@router.get(
-    "/{camera_name}/recordings/summary", dependencies=[Depends(require_camera_access)]
-)
-async def recordings_summary(camera_name: str, timezone: str = "utc"):
-    """Returns hourly summary for recordings of given camera"""
-
-    time_range_query = (
-        Recordings.select(
-            fn.MIN(Recordings.start_time).alias("min_time"),
-            fn.MAX(Recordings.start_time).alias("max_time"),
-        )
-        .where(Recordings.camera == camera_name)
-        .dicts()
-        .get()
-    )
-
-    min_time = time_range_query.get("min_time")
-    max_time = time_range_query.get("max_time")
-
-    days: dict[str, dict] = {}
-
-    if min_time is None or max_time is None:
-        return JSONResponse(content=list(days.values()))
-
-    dst_periods = get_dst_transitions(timezone, min_time, max_time)
-
-    for period_start, period_end, period_offset in dst_periods:
-        hours_offset = int(period_offset / 60 / 60)
-        minutes_offset = int(period_offset / 60 - hours_offset * 60)
-        period_hour_modifier = f"{hours_offset} hour"
-        period_minute_modifier = f"{minutes_offset} minute"
-
-        recording_groups = (
-            Recordings.select(
-                fn.strftime(
-                    "%Y-%m-%d %H",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("hour"),
-                fn.SUM(Recordings.duration).alias("duration"),
-                fn.SUM(Recordings.motion).alias("motion"),
-                fn.SUM(Recordings.objects).alias("objects"),
-            )
-            .where(
-                (Recordings.camera == camera_name)
-                & (Recordings.end_time >= period_start)
-                & (Recordings.start_time <= period_end)
-            )
-            .group_by((Recordings.start_time + period_offset).cast("int") / 3600)
-            .order_by(Recordings.start_time.desc())
-            .namedtuples()
-        )
-
-        event_groups = (
-            Event.select(
-                fn.strftime(
-                    "%Y-%m-%d %H",
-                    fn.datetime(
-                        Event.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("hour"),
-                fn.COUNT(Event.id).alias("count"),
-            )
-            .where(Event.camera == camera_name, Event.has_clip)
-            .where(
-                (Event.start_time >= period_start) & (Event.start_time <= period_end)
-            )
-            .group_by((Event.start_time + period_offset).cast("int") / 3600)
-            .namedtuples()
-        )
-
-        event_map = {g.hour: g.count for g in event_groups}
-
-        for recording_group in recording_groups:
-            parts = recording_group.hour.split()
-            hour = parts[1]
-            day = parts[0]
-            events_count = event_map.get(recording_group.hour, 0)
-            hour_data = {
-                "hour": hour,
-                "events": events_count,
-                "motion": recording_group.motion,
-                "objects": recording_group.objects,
-                "duration": round(recording_group.duration),
-            }
-            if day in days:
-                # merge counts if already present (edge-case at DST boundary)
-                days[day]["events"] += events_count or 0
-                days[day]["hours"].append(hour_data)
-            else:
-                days[day] = {
-                    "events": events_count or 0,
-                    "hours": [hour_data],
-                    "day": day,
-                }
-
-    return JSONResponse(content=list(days.values()))
-
-
-@router.get("/{camera_name}/recordings", dependencies=[Depends(require_camera_access)])
-async def recordings(
-    camera_name: str,
-    after: float = (datetime.now() - timedelta(hours=1)).timestamp(),
-    before: float = datetime.now().timestamp(),
-):
-    """Return specific camera recordings between the given 'after'/'end' times. If not provided the last hour will be used"""
-    recordings = (
-        Recordings.select(
-            Recordings.id,
-            Recordings.start_time,
-            Recordings.end_time,
-            Recordings.segment_size,
-            Recordings.motion,
-            Recordings.objects,
-            Recordings.duration,
-        )
-        .where(
-            Recordings.camera == camera_name,
-            Recordings.end_time >= after,
-            Recordings.start_time <= before,
-        )
-        .order_by(Recordings.start_time)
-        .dicts()
-        .iterator()
-    )
-
-    return JSONResponse(content=list(recordings))
-
-
-@router.get(
-    "/recordings/unavailable",
-    response_model=list[dict],
-    dependencies=[Depends(allow_any_authenticated())],
-)
-async def no_recordings(
-    request: Request,
-    params: MediaRecordingsAvailabilityQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
-):
-    """Get time ranges with no recordings."""
-    cameras = params.cameras
-    if cameras != "all":
-        requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content=[])
-        cameras = ",".join(filtered)
-    else:
-        cameras = allowed_cameras
-
-    before = params.before or datetime.datetime.now().timestamp()
-    after = (
-        params.after
-        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
-    )
-    scale = params.scale
-
-    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-    else:
-        camera_list = allowed_cameras
-
-    # Get recording start times
-    data: list[Recordings] = (
-        Recordings.select(Recordings.start_time, Recordings.end_time)
-        .where(reduce(operator.and_, clauses))
-        .order_by(Recordings.start_time.asc())
-        .dicts()
-        .iterator()
-    )
-
-    # Convert recordings to list of (start, end) tuples
-    recordings = [(r["start_time"], r["end_time"]) for r in data]
-
-    # Iterate through time segments and check if each has any recording
-    no_recording_segments = []
-    current = after
-    current_gap_start = None
-
-    while current < before:
-        segment_end = min(current + scale, before)
-
-        # Check if this segment overlaps with any recording
-        has_recording = any(
-            rec_start < segment_end and rec_end > current
-            for rec_start, rec_end in recordings
-        )
-
-        if not has_recording:
-            # This segment has no recordings
-            if current_gap_start is None:
-                current_gap_start = current  # Start a new gap
-        else:
-            # This segment has recordings
-            if current_gap_start is not None:
-                # End the current gap and append it
-                no_recording_segments.append(
-                    {"start_time": int(current_gap_start), "end_time": int(current)}
-                )
-                current_gap_start = None
-
-        current = segment_end
-
-    # Append the last gap if it exists
-    if current_gap_start is not None:
-        no_recording_segments.append(
-            {"start_time": int(current_gap_start), "end_time": int(before)}
-        )
-
-    return JSONResponse(content=no_recording_segments)
-
-
 @router.get(
     "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
     dependencies=[Depends(require_camera_access)],
@@ -900,6 +610,33 @@ async def vod_ts(
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
+        # nginx-vod-module pushes clipFrom forward to the next keyframe,
+        # which can leave too few frames and produce an empty/unplayable
+        # segment. Snap clipFrom back to the preceding keyframe so the
+        # segment always starts with a decodable frame.
+        if "clipFrom" in clip:
+            keyframe_ms = get_keyframe_before(recording.path, clip["clipFrom"])
+            if keyframe_ms is not None:
+                gained = clip["clipFrom"] - keyframe_ms
+                clip["clipFrom"] = keyframe_ms
+                duration += gained
+                logger.debug(
+                    "VOD: snapped clipFrom to keyframe at %sms for %s, duration now %sms",
+                    keyframe_ms,
+                    recording.path,
+                    duration,
+                )
+            else:
+                # could not read keyframes, remove clipFrom to use full recording
+                logger.debug(
+                    "VOD: no keyframe info for %s, removing clipFrom to use full recording",
+                    recording.path,
+                )
+                del clip["clipFrom"]
+                duration = int(recording.duration * 1000)
+                if recording.end_time > end_ts:
+                    duration -= int((recording.end_time - end_ts) * 1000)
+
         if duration < min_duration_ms:
             # skip if the clip has no valid duration (too short to contain frames)
             logger.debug(
@@ -1037,7 +774,7 @@ async def vod_clip(
 
 @router.get(
     "/events/{event_id}/snapshot.jpg",
-    description="Returns a snapshot image for the specified object id. NOTE: The query params only take affect while the event is in-progress. Once the event has ended the snapshot configuration is used.",
+    description="Returns a snapshot image for the specified object id.",
 )
 async def event_snapshot(
     request: Request,
@@ -1046,6 +783,7 @@ async def event_snapshot(
 ):
     event_complete = False
     jpg_bytes = None
+    frame_time = 0
     try:
         event = Event.get(Event.id == event_id, Event.end_time != None)
         event_complete = True
@@ -1055,11 +793,22 @@ async def event_snapshot(
                 content={"success": False, "message": "Snapshot not available"},
                 status_code=404,
             )
-        # read snapshot from disk
-        with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
-        ) as image_file:
-            jpg_bytes = image_file.read()
+        snapshot_settings = _resolve_snapshot_settings(
+            request.app.frigate_config.cameras[event.camera].snapshots, params
+        )
+        jpg_bytes, frame_time = get_event_snapshot_bytes(
+            event,
+            ext="jpg",
+            timestamp=snapshot_settings["timestamp"],
+            bounding_box=snapshot_settings["bounding_box"],
+            crop=snapshot_settings["crop"],
+            height=snapshot_settings["height"],
+            quality=snapshot_settings["quality"],
+            timestamp_style=request.app.frigate_config.cameras[
+                event.camera
+            ].timestamp_style,
+            colormap=request.app.frigate_config.model.colormap,
+        )
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
@@ -1070,13 +819,16 @@ async def event_snapshot(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        jpg_bytes = tracked_obj.get_img_bytes(
+                        snapshot_settings = _resolve_snapshot_settings(
+                            camera_state.camera_config.snapshots, params
+                        )
+                        jpg_bytes, frame_time = tracked_obj.get_img_bytes(
                             ext="jpg",
-                            timestamp=params.timestamp,
-                            bounding_box=params.bbox,
-                            crop=params.crop,
-                            height=params.height,
-                            quality=params.quality,
+                            timestamp=snapshot_settings["timestamp"],
+                            bounding_box=snapshot_settings["bounding_box"],
+                            crop=snapshot_settings["crop"],
+                            height=snapshot_settings["height"],
+                            quality=snapshot_settings["quality"],
                         )
                         await require_camera_access(camera_state.name, request=request)
         except Exception:
@@ -1099,6 +851,7 @@ async def event_snapshot(
     headers = {
         "Content-Type": "image/jpeg",
         "Cache-Control": "private, max-age=31536000" if event_complete else "no-store",
+        "X-Frame-Time": str(frame_time),
     }
 
     if params.download:
@@ -1113,7 +866,6 @@ async def event_snapshot(
 
 @router.get(
     "/events/{event_id}/thumbnail.{extension}",
-    dependencies=[Depends(require_camera_access)],
 )
 async def event_thumbnail(
     request: Request,
@@ -1157,11 +909,12 @@ async def event_thumbnail(
             status_code=404,
         )
 
+    img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
+    img = cv2.imdecode(img_as_np, flags=1)
+
     # android notifications prefer a 2:1 ratio
     if format == "android":
-        img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
-        img = cv2.imdecode(img_as_np, flags=1)
-        thumbnail = cv2.copyMakeBorder(
+        img = cv2.copyMakeBorder(
             img,
             0,
             0,
@@ -1171,14 +924,14 @@ async def event_thumbnail(
             (0, 0, 0),
         )
 
-        quality_params = None
-        if extension in (Extension.jpg, Extension.jpeg):
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == Extension.webp:
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+    quality_params = None
+    if extension in (Extension.jpg, Extension.jpeg):
+        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+    elif extension == Extension.webp:
+        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
-        thumbnail_bytes = img.tobytes()
+    _, encoded = cv2.imencode(f".{extension.value}", img, quality_params)
+    thumbnail_bytes = encoded.tobytes()
 
     return Response(
         thumbnail_bytes,
@@ -1312,20 +1065,39 @@ def grid_snapshot(
         )
 
 
+@router.delete(
+    "/{camera_name}/region_grid", dependencies=[Depends(require_role("admin"))]
+)
+def clear_region_grid(request: Request, camera_name: str):
+    """Clear the region grid for a camera."""
+    if camera_name not in request.app.frigate_config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": "Camera not found"},
+            status_code=404,
+        )
+
+    Regions.delete().where(Regions.camera == camera_name).execute()
+    return JSONResponse(
+        content={"success": True, "message": "Region grid cleared"},
+    )
+
+
 @router.get(
     "/events/{event_id}/snapshot-clean.webp",
-    dependencies=[Depends(require_camera_access)],
 )
-def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
+async def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
     webp_bytes = None
+    event_complete = False
     try:
         event = Event.get(Event.id == event_id)
+        event_complete = event.end_time is not None
+        await require_camera_access(event.camera, request=request)
         snapshot_config = request.app.frigate_config.cameras[event.camera].snapshots
         if not (snapshot_config.enabled and event.has_snapshot):
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": "Snapshots and clean_copy must be enabled in the config",
+                    "message": "Snapshots must be enabled in the config",
                 },
                 status_code=404,
             )
@@ -1357,54 +1129,10 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
         )
     if webp_bytes is None:
         try:
-            # webp
-            clean_snapshot_path_webp = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"
+            image_path, is_clean_snapshot = get_event_snapshot_path(
+                event, clean_only=True
             )
-            # png (legacy)
-            clean_snapshot_path_png = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
-            )
-
-            if os.path.exists(clean_snapshot_path_webp):
-                with open(clean_snapshot_path_webp, "rb") as image_file:
-                    webp_bytes = image_file.read()
-            elif os.path.exists(clean_snapshot_path_png):
-                # convert png to webp and save for future use
-                png_image = cv2.imread(clean_snapshot_path_png, cv2.IMREAD_UNCHANGED)
-                if png_image is None:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": "Invalid png snapshot",
-                        },
-                        status_code=400,
-                    )
-
-                ret, webp_data = cv2.imencode(
-                    ".webp", png_image, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-                )
-                if not ret:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": "Unable to convert png to webp",
-                        },
-                        status_code=400,
-                    )
-
-                webp_bytes = webp_data.tobytes()
-
-                # save the converted webp for future requests
-                try:
-                    with open(clean_snapshot_path_webp, "wb") as f:
-                        f.write(webp_bytes)
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to save converted webp for event {event.id}: {e}"
-                    )
-                    # continue since we now have the data to return
-            else:
+            if not is_clean_snapshot or image_path is None:
                 return JSONResponse(
                     content={
                         "success": False,
@@ -1412,6 +1140,34 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     },
                     status_code=404,
                 )
+
+            if image_path.endswith(".webp"):
+                with open(image_path, "rb") as image_file:
+                    webp_bytes = image_file.read()
+            else:
+                image = load_event_snapshot_image(event, clean_only=True)[0]
+                if image is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to load clean snapshot for event",
+                        },
+                        status_code=400,
+                    )
+
+                ret, webp_data = cv2.imencode(
+                    ".webp", image, get_image_quality_params("webp", None)
+                )
+                if not ret:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to convert snapshot to webp",
+                        },
+                        status_code=400,
+                    )
+
+                webp_bytes = webp_data.tobytes()
         except Exception:
             logger.error(f"Unable to load clean snapshot for event: {event.id}")
             return JSONResponse(
@@ -1424,7 +1180,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
     headers = {
         "Content-Type": "image/webp",
-        "Cache-Control": "private, max-age=31536000",
+        "Cache-Control": "private, max-age=31536000" if event_complete else "no-cache",
     }
 
     if download:
@@ -1440,7 +1196,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get(
-    "/events/{event_id}/clip.mp4", dependencies=[Depends(require_camera_access)]
+    "/events/{event_id}/clip.mp4",
 )
 async def event_clip(
     request: Request,
@@ -1453,6 +1209,8 @@ async def event_clip(
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
+
+    await require_camera_access(event.camera, request=request)
 
     if not event.has_clip:
         return JSONResponse(
@@ -1470,15 +1228,44 @@ async def event_clip(
 
 
 @router.get(
-    "/events/{event_id}/preview.gif", dependencies=[Depends(require_camera_access)]
+    "/review/{review_id}/clip.mp4",
 )
-def event_preview(request: Request, event_id: str):
+async def review_clip(
+    request: Request,
+    review_id: str,
+    padding: int = Query(0, description="Padding to apply to clip."),
+):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Review not found"}, status_code=404
+        )
+
+    await require_camera_access(review.camera, request=request)
+
+    end_ts = (
+        datetime.now().timestamp()
+        if review.end_time is None
+        else review.end_time + padding
+    )
+    return await recording_clip(
+        request, review.camera, review.start_time - padding, end_ts
+    )
+
+
+@router.get(
+    "/events/{event_id}/preview.gif",
+)
+async def event_preview(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
+
+    await require_camera_access(event.camera, request=request)
 
     start_ts = event.start_time
     end_ts = start_ts + (
@@ -1502,25 +1289,25 @@ def preview_gif(
 ):
     if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
         # has preview mp4
-        preview: Previews = (
-            Previews.select(
-                Previews.camera,
-                Previews.path,
-                Previews.duration,
-                Previews.start_time,
-                Previews.end_time,
+        try:
+            preview: Previews = (
+                Previews.select(
+                    Previews.camera,
+                    Previews.path,
+                    Previews.duration,
+                    Previews.start_time,
+                    Previews.end_time,
+                )
+                .where(
+                    Previews.start_time.between(start_ts, end_ts)
+                    | Previews.end_time.between(start_ts, end_ts)
+                    | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+                )
+                .where(Previews.camera == camera_name)
+                .limit(1)
+                .get()
             )
-            .where(
-                Previews.start_time.between(start_ts, end_ts)
-                | Previews.end_time.between(start_ts, end_ts)
-                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
-            )
-            .where(Previews.camera == camera_name)
-            .limit(1)
-            .get()
-        )
-
-        if not preview:
+        except DoesNotExist:
             return JSONResponse(
                 content={"success": False, "message": "Preview not found"},
                 status_code=404,
@@ -1570,9 +1357,16 @@ def preview_gif(
     else:
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-        file_start = f"preview_{camera_name}"
-        start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
-        end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
+
+        if not os.path.isdir(preview_dir):
+            return JSONResponse(
+                content={"success": False, "message": "Preview not found"},
+                status_code=404,
+            )
+
+        file_start = f"preview_{camera_name}-"
+        start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
+        end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
         selected_previews = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -1745,9 +1539,16 @@ def preview_mp4(
     else:
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-        file_start = f"preview_{camera_name}"
-        start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
-        end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
+
+        if not os.path.isdir(preview_dir):
+            return JSONResponse(
+                content={"success": False, "message": "Preview not found"},
+                status_code=404,
+            )
+
+        file_start = f"preview_{camera_name}-"
+        start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
+        end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
         selected_previews = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -1824,8 +1625,8 @@ def preview_mp4(
     )
 
 
-@router.get("/review/{event_id}/preview", dependencies=[Depends(require_camera_access)])
-def review_preview(
+@router.get("/review/{event_id}/preview")
+async def review_preview(
     request: Request,
     event_id: str,
     format: str = Query(default="gif", enum=["gif", "mp4"]),
@@ -1837,6 +1638,8 @@ def review_preview(
             content=({"success": False, "message": "Review segment not found"}),
             status_code=404,
         )
+
+    await require_camera_access(review.camera, request=request)
 
     padding = 8
     start_ts = review.start_time - padding
@@ -1851,12 +1654,14 @@ def review_preview(
 
 
 @router.get(
-    "/preview/{file_name}/thumbnail.jpg", dependencies=[Depends(require_camera_access)]
+    "/preview/{file_name}/thumbnail.jpg",
+    dependencies=[Depends(allow_any_authenticated())],
 )
 @router.get(
-    "/preview/{file_name}/thumbnail.webp", dependencies=[Depends(require_camera_access)]
+    "/preview/{file_name}/thumbnail.webp",
+    dependencies=[Depends(allow_any_authenticated())],
 )
-def preview_thumbnail(file_name: str):
+async def preview_thumbnail(request: Request, file_name: str):
     """Get a thumbnail from the cached preview frames."""
     if len(file_name) > 1000:
         return JSONResponse(
@@ -1865,6 +1670,17 @@ def preview_thumbnail(file_name: str):
             ),
             status_code=403,
         )
+
+    # Extract camera name from preview filename (format: preview_{camera}-{timestamp}.ext)
+    if not file_name.startswith("preview_"):
+        return JSONResponse(
+            content={"success": False, "message": "Invalid preview filename"},
+            status_code=400,
+        )
+    # Use rsplit to handle camera names containing dashes (e.g. front-door)
+    name_part = file_name[len("preview_") :].rsplit(".", 1)[0]  # strip extension
+    camera_name = name_part.rsplit("-", 1)[0]  # split off timestamp
+    await require_camera_access(camera_name, request=request)
 
     safe_file_name_current = sanitize_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")

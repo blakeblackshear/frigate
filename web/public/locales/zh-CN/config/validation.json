@@ -1,0 +1,32 @@
+{
+    "minimum": "必须至少为 {{limit}}",
+    "maximum": "最大值不能超过 {{limit}}",
+    "exclusiveMinimum": "必须大于 {{limit}}",
+    "exclusiveMaximum": "必须小于 {{limit}}",
+    "minLength": "长度至少为 {{limit}} 个字符",
+    "maxLength": "长度最多为 {{limit}} 个字符",
+    "minItems": "至少包含 {{limit}} 项",
+    "maxItems": "最多包含 {{limit}} 项",
+    "pattern": "格式无效",
+    "required": "此字段为必填项",
+    "type": "值类型无效",
+    "ffmpeg": {
+        "inputs": {
+            "detectRequired": "必须至少有一个输入流分配为“检测”功能。",
+            "rolesUnique": "每个功能只能分配给一个输入流。",
+            "hwaccelDetectOnly": "只有分配了检测功能的输入流才能定义硬件加速参数。"
+        }
+    },
+    "enum": "必须是允许的值之一",
+    "const": "值与预期的常量不匹配",
+    "uniqueItems": "所有项必须唯一",
+    "format": "格式无效",
+    "additionalProperties": "不允许未知属性",
+    "oneOf": "必须完全匹配一个允许的模式",
+    "anyOf": "必须至少匹配一个允许的模式",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "配置权限组映射时需要的 role 请求头。"
+        }
+    }
+}

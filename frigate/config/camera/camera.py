@@ -34,6 +34,7 @@ from .mqtt import CameraMqttConfig
 from .notification import NotificationConfig
 from .objects import ObjectConfig
 from .onvif import OnvifConfig
+from .profile import CameraProfileConfig
 from .record import RecordConfig
 from .review import ReviewConfig
 from .snapshots import SnapshotsConfig
@@ -50,10 +51,17 @@ class CameraTypeEnum(str, Enum):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(None, title="Camera name.", pattern=REGEX_CAMERA_NAME)
+    name: Optional[str] = Field(
+        None,
+        title="Camera name",
+        description="Camera name is required",
+        pattern=REGEX_CAMERA_NAME,
+    )
 
     friendly_name: Optional[str] = Field(
-        None, title="Camera friendly name used in the Frigate UI."
+        None,
+        title="Friendly name",
+        description="Camera friendly name used in the Frigate UI",
     )
 
     @model_validator(mode="before")
@@ -63,80 +71,135 @@ class CameraConfig(FrigateBaseModel):
             pass
         return values
 
-    enabled: bool = Field(default=True, title="Enable camera.")
+    enabled: bool = Field(default=True, title="Enabled", description="Enabled")
 
     # Options with global fallback
     audio: AudioConfig = Field(
-        default_factory=AudioConfig, title="Audio events configuration."
+        default_factory=AudioConfig,
+        title="Audio events",
+        description="Settings for audio-based event detection for this camera.",
     )
     audio_transcription: CameraAudioTranscriptionConfig = Field(
         default_factory=CameraAudioTranscriptionConfig,
-        title="Audio transcription config.",
+        title="Audio transcription",
+        description="Settings for live and speech audio transcription used for events and live captions.",
     )
     birdseye: BirdseyeCameraConfig = Field(
-        default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."
+        default_factory=BirdseyeCameraConfig,
+        title="Birdseye",
+        description="Settings for the Birdseye composite view that composes multiple camera feeds into a single layout.",
     )
     detect: DetectConfig = Field(
-        default_factory=DetectConfig, title="Object detection configuration."
+        default_factory=DetectConfig,
+        title="Object Detection",
+        description="Settings for the detection/detect role used to run object detection and initialize trackers.",
     )
     face_recognition: CameraFaceRecognitionConfig = Field(
-        default_factory=CameraFaceRecognitionConfig, title="Face recognition config."
+        default_factory=CameraFaceRecognitionConfig,
+        title="Face recognition",
+        description="Settings for face detection and recognition for this camera.",
     )
-    ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
+    ffmpeg: CameraFfmpegConfig = Field(
+        title="FFmpeg",
+        description="FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
+    )
     live: CameraLiveConfig = Field(
-        default_factory=CameraLiveConfig, title="Live playback settings."
+        default_factory=CameraLiveConfig,
+        title="Live playback",
+        description="Settings used by the Web UI to control live stream selection, resolution and quality.",
     )
     lpr: CameraLicensePlateRecognitionConfig = Field(
-        default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
+        default_factory=CameraLicensePlateRecognitionConfig,
+        title="License Plate Recognition",
+        description="License plate recognition settings including detection thresholds, formatting, and known plates.",
     )
-    motion: MotionConfig = Field(None, title="Motion detection configuration.")
+    motion: MotionConfig = Field(
+        None,
+        title="Motion detection",
+        description="Default motion detection settings for this camera.",
+    )
     objects: ObjectConfig = Field(
-        default_factory=ObjectConfig, title="Object configuration."
+        default_factory=ObjectConfig,
+        title="Objects",
+        description="Object tracking defaults including which labels to track and per-object filters.",
     )
     record: RecordConfig = Field(
-        default_factory=RecordConfig, title="Record configuration."
+        default_factory=RecordConfig,
+        title="Recording",
+        description="Recording and retention settings for this camera.",
     )
     review: ReviewConfig = Field(
-        default_factory=ReviewConfig, title="Review configuration."
+        default_factory=ReviewConfig,
+        title="Review",
+        description="Settings that control alerts, detections, and GenAI review summaries used by the UI and storage for this camera.",
     )
     semantic_search: CameraSemanticSearchConfig = Field(
         default_factory=CameraSemanticSearchConfig,
-        title="Semantic search configuration.",
+        title="Semantic Search",
+        description="Settings for semantic search which builds and queries object embeddings to find similar items.",
     )
     snapshots: SnapshotsConfig = Field(
-        default_factory=SnapshotsConfig, title="Snapshot configuration."
+        default_factory=SnapshotsConfig,
+        title="Snapshots",
+        description="Settings for API-generated snapshots of tracked objects for this camera.",
     )
     timestamp_style: TimestampStyleConfig = Field(
-        default_factory=TimestampStyleConfig, title="Timestamp style configuration."
+        default_factory=TimestampStyleConfig,
+        title="Timestamp style",
+        description="Styling options for in-feed timestamps applied to recordings and snapshots.",
     )
 
     # Options without global fallback
     best_image_timeout: int = Field(
         default=60,
-        title="How long to wait for the image with the highest confidence score.",
+        title="Best image timeout",
+        description="How long to wait for the image with the highest confidence score.",
     )
     mqtt: CameraMqttConfig = Field(
-        default_factory=CameraMqttConfig, title="MQTT configuration."
+        default_factory=CameraMqttConfig,
+        title="MQTT",
+        description="MQTT image publishing settings.",
     )
     notifications: NotificationConfig = Field(
-        default_factory=NotificationConfig, title="Notifications configuration."
+        default_factory=NotificationConfig,
+        title="Notifications",
+        description="Settings to enable and control notifications for this camera.",
     )
     onvif: OnvifConfig = Field(
-        default_factory=OnvifConfig, title="Camera Onvif Configuration."
+        default_factory=OnvifConfig,
+        title="ONVIF",
+        description="ONVIF connection and PTZ autotracking settings for this camera.",
     )
-    type: CameraTypeEnum = Field(default=CameraTypeEnum.generic, title="Camera Type")
+    type: CameraTypeEnum = Field(
+        default=CameraTypeEnum.generic,
+        title="Camera type",
+        description="Camera Type",
+    )
     ui: CameraUiConfig = Field(
-        default_factory=CameraUiConfig, title="Camera UI Modifications."
+        default_factory=CameraUiConfig,
+        title="Camera UI",
+        description="Display ordering and visibility for this camera in the UI. Ordering affects the default dashboard. For more granular control, use camera groups.",
     )
     webui_url: Optional[str] = Field(
         None,
-        title="URL to visit the camera directly from system page",
+        title="Camera URL",
+        description="URL to visit the camera directly from system page",
+    )
+
+    profiles: dict[str, CameraProfileConfig] = Field(
+        default_factory=dict,
+        title="Profiles",
+        description="Named config profiles with partial overrides that can be activated at runtime.",
     )
     zones: dict[str, ZoneConfig] = Field(
-        default_factory=dict, title="Zone configuration."
+        default_factory=dict,
+        title="Zones",
+        description="Zones allow you to define a specific area of the frame so you can determine whether or not an object is within a particular area.",
     )
     enabled_in_config: Optional[bool] = Field(
-        default=None, title="Keep track of original state of camera."
+        default=None,
+        title="Original camera state",
+        description="Keep track of original state of camera.",
     )
 
     _ffmpeg_cmds: list[dict[str, list[str]]] = PrivateAttr()
@@ -186,6 +249,14 @@ class CameraConfig(FrigateBaseModel):
     def create_ffmpeg_cmds(self):
         if "_ffmpeg_cmds" in self:
             return
+        self._build_ffmpeg_cmds()
+
+    def recreate_ffmpeg_cmds(self):
+        """Force regeneration of ffmpeg commands from current config."""
+        self._build_ffmpeg_cmds()
+
+    def _build_ffmpeg_cmds(self):
+        """Build ffmpeg commands from the current ffmpeg config."""
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
