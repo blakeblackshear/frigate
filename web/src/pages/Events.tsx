@@ -409,8 +409,11 @@ export default function Events() {
 
   // review status
 
-  const markAllItemsAsReviewed = useCallback(
-    async (currentItems: ReviewSegment[]) => {
+  const markItemsAsReviewed = useCallback(
+    async (
+      currentItems: ReviewSegment[],
+      itemsToMarkReviewed: ReviewSegment[] | undefined = undefined,
+    ) => {
       if (currentItems.length == 0) {
         return;
       }
@@ -435,13 +438,14 @@ export default function Events() {
         { revalidate: false, populateCache: true },
       );
 
-      const itemsToMarkReviewed = currentItems
-        ?.filter((seg) => seg.end_time)
-        ?.map((seg) => seg.id);
+      const reviewList =
+        itemsToMarkReviewed?.map((seg) => seg.id) ||
+        currentItems?.filter((seg) => seg.end_time)?.map((seg) => seg.id) ||
+        [];
 
-      if (itemsToMarkReviewed.length > 0) {
+      if (reviewList.length > 0) {
         await axios.post(`reviews/viewed`, {
-          ids: itemsToMarkReviewed,
+          ids: reviewList,
           reviewed: true,
         });
         reloadData();
@@ -611,7 +615,7 @@ export default function Events() {
         setShowReviewed={setShowReviewed}
         setSeverity={setSeverity}
         markItemAsReviewed={markItemAsReviewed}
-        markAllItemsAsReviewed={markAllItemsAsReviewed}
+        markItemsAsReviewed={markItemsAsReviewed}
         onOpenRecording={setRecording}
         motionPreviewsCamera={motionPreviewsCamera ?? null}
         setMotionPreviewsCamera={(camera) =>
