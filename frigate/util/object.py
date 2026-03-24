@@ -271,18 +271,17 @@ def get_min_region_size(model_config: ModelConfig) -> int:
     """Get the min region size."""
     largest_dimension = max(model_config.height, model_config.width)
 
-    if largest_dimension > 320:
-        # We originally tested allowing any model to have a region down to half of the model size
-        # but this led to many false positives. In this case we specifically target larger models
-        # which can benefit from a smaller region in some cases to detect smaller objects.
-        half = int(largest_dimension / 2)
+    # return largest dimension for smaller models, but make sure the dimension is normalized
+    if largest_dimension < 320:
+        if largest_dimension % 4 == 0:
+            return largest_dimension
 
-        if half % 4 == 0:
-            return half
+        return int((largest_dimension + 3) / 4) * 4
 
-        return int((half + 3) / 4) * 4
-
-    return largest_dimension
+    # Any model that is 320 or larger should have a minimum region size of 320
+    # this allows larger models to use smaller regions to detect smaller objects
+    # in the case that the motion area is smaller so that it can be upscaled.
+    return 320
 
 
 def create_tensor_input(frame, model_config: ModelConfig, region):
