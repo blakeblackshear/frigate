@@ -257,6 +257,8 @@ export function RecordingView({
   const [scrubbing, setScrubbing] = useState(false);
   const [currentTime, setCurrentTime] = useState<number>(startTime);
   const [playerTime, setPlayerTime] = useState(startTime);
+  const wasScrubbingRef = useRef(false);
+  const pendingScrubSeekTimeRef = useRef<number | null>(null);
 
   const updateSelectedSegment = useCallback(
     (currentTime: number, updateStartTime: boolean) => {
@@ -346,6 +348,17 @@ export function RecordingView({
     // we only want to seek when current time doesn't match the player update time
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTime, scrubbing]);
+
+  useEffect(() => {
+    // force an explicit seek when the user releases timeline scrubbing,
+    // and guard against old player time updates overwriting the new target.
+    if (wasScrubbingRef.current && !scrubbing) {
+      pendingScrubSeekTimeRef.current = currentTime;
+      mainControllerRef.current?.seekToTimestamp(currentTime, true);
+    }
+
+    wasScrubbingRef.current = scrubbing;
+  }, [scrubbing, currentTime]);
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
@@ -820,7 +833,19 @@ export function RecordingView({
                   fullscreen={fullscreen}
                   onTimestampUpdate={(timestamp) => {
                     setPlayerTime(timestamp);
-                    setCurrentTime(timestamp);
+
+                    const pendingScrubSeekTime =
+                      pendingScrubSeekTimeRef.current;
+                    if (pendingScrubSeekTime != null) {
+                      // keep the scrubbed target time anchored until playback catches up.
+                      if (Math.abs(timestamp - pendingScrubSeekTime) <= 1) {
+                        pendingScrubSeekTimeRef.current = null;
+                        setCurrentTime(timestamp);
+                      }
+                    } else {
+                      setCurrentTime(timestamp);
+                    }
+
                     Object.values(previewRefs.current ?? {}).forEach((prev) =>
                       prev.scrubToTimestamp(Math.floor(timestamp)),
                     );

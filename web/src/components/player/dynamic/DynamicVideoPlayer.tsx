@@ -406,6 +406,9 @@ export default function DynamicVideoPlayer({
               onSeekToTime(timestamp, play);
             }
           }}
+          onGetAbsoluteTimestamp={(playerSeconds) =>
+            controller ? controller.getProgress(playerSeconds) : undefined
+          }
           onPlaying={() => {
             if (isScrubbing) {
               playerRef.current?.pause();
