@@ -83,6 +83,7 @@ function playbackSessionReducer(
  */
 type DynamicVideoPlayerProps = {
   className?: string;
+  videoClassName?: string;
   camera: string;
   timeRange: TimeRange;
   cameraPreviews: Preview[];
@@ -102,6 +103,7 @@ type DynamicVideoPlayerProps = {
 };
 export default function DynamicVideoPlayer({
   className,
+  videoClassName,
   camera,
   timeRange,
   cameraPreviews,
@@ -387,6 +389,7 @@ export default function DynamicVideoPlayer({
       {source && (
         <HlsVideoPlayer
           videoRef={playerRef}
+          videoClassName={videoClassName}
           containerRef={containerRef}
           visible={
             !isScrubbing &&

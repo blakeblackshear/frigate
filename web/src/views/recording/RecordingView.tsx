@@ -413,6 +413,7 @@ export function RecordingView({
     () => !isDesktop && mainLayoutHeight > mainLayoutWidth,
     [mainLayoutHeight, mainLayoutWidth],
   );
+  const usePortraitSplitLayout = isMobilePortraitStacked && !fullscreen;
 
   const updateMobileSplitFromClientY = useCallback(
     (clientY: number) => {
@@ -897,17 +898,21 @@ export function RecordingView({
                       useHeightBased
                       ? "h-full"
                       : "w-full"
-                    : cn(
-                        "flex-shrink-0 portrait:w-full landscape:h-full",
-                        mainCameraAspect == "wide"
-                          ? "aspect-wide"
-                          : mainCameraAspect == "tall"
-                            ? "aspect-tall portrait:h-full"
-                            : "aspect-video",
-                      ),
+                    : usePortraitSplitLayout
+                      ? "size-full"
+                      : cn(
+                          "flex-shrink-0 portrait:w-full landscape:h-full",
+                          mainCameraAspect == "wide"
+                            ? "aspect-wide"
+                            : mainCameraAspect == "tall"
+                              ? "aspect-tall portrait:h-full"
+                              : "aspect-video",
+                        ),
                 )}
                 style={{
-                  aspectRatio: getCameraAspect(mainCamera),
+                  aspectRatio: usePortraitSplitLayout
+                    ? undefined
+                    : getCameraAspect(mainCamera),
                 }}
               >
                 {(isDesktop || isTablet) && (
@@ -921,6 +926,9 @@ export function RecordingView({
 
                 <DynamicVideoPlayer
                   className={grow}
+                  videoClassName={
+                    usePortraitSplitLayout ? "object-contain" : undefined
+                  }
                   camera={mainCamera}
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
