@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { usePersistence } from "./use-persistence";
 import { useUserPersistence } from "./use-user-persistence";
@@ -200,36 +207,51 @@ export function useSearchEffect(
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [pendingRemoval, setPendingRemoval] = useState(false);
+  const processedRef = useRef<string | null>(null);
 
-  const param = useMemo(() => {
-    const param = searchParams.get(key);
+  const currentParam = searchParams.get(key);
 
-    if (!param) {
-      return undefined;
-    }
-
-    return [key, decodeURIComponent(param)];
-  }, [searchParams, key]);
-
+  // Process the param via callback (once per unique param value)
   useEffect(() => {
-    if (!param) {
+    if (currentParam == null || currentParam === processedRef.current) {
       return;
     }
 
-    const remove = callback(param[1]);
+    const decoded = decodeURIComponent(currentParam);
+    const shouldRemove = callback(decoded);
 
-    if (remove) {
-      navigate(location.pathname + location.hash, {
-        state: location.state,
-        replace: true,
-      });
+    if (shouldRemove) {
+      processedRef.current = currentParam;
+      setPendingRemoval(true);
     }
+  }, [currentParam, callback, key]);
+
+  // Remove the search param in a separate render cycle so that any state
+  // changes from the callback (e.g., overlay state navigations) are already
+  // reflected in location.state before we navigate to strip the param.
+  useEffect(() => {
+    if (!pendingRemoval) {
+      return;
+    }
+
+    setPendingRemoval(false);
+    navigate(location.pathname + location.hash, {
+      state: location.state,
+      replace: true,
+    });
   }, [
-    param,
-    location.state,
+    pendingRemoval,
+    navigate,
     location.pathname,
     location.hash,
-    callback,
-    navigate,
+    location.state,
   ]);
+
+  // Reset tracking when param is removed from the URL
+  useEffect(() => {
+    if (currentParam == null) {
+      processedRef.current = null;
+    }
+  }, [currentParam]);
 }
