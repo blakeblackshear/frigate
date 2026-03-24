@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -26,6 +27,56 @@ import {
   calculateSeekPosition,
 } from "@/utils/videoUtil";
 import { isFirefox } from "react-device-detect";
+
+type PlaybackPhase =
+  | "idle"
+  | "loadingSource"
+  | "awaitingMetadata"
+  | "ready"
+  | "buffering"
+  | "error";
+
+type PlaybackSessionState = {
+  sessionId: number;
+  phase: PlaybackPhase;
+};
+
+type PlaybackSessionAction =
+  | {
+      type: "beginSession";
+      sessionId: number;
+      phase: Extract<PlaybackPhase, "loadingSource" | "awaitingMetadata">;
+    }
+  | {
+      type: "setPhase";
+      sessionId: number;
+      phase: PlaybackPhase;
+    };
+
+function playbackSessionReducer(
+  state: PlaybackSessionState,
+  action: PlaybackSessionAction,
+): PlaybackSessionState {
+  if (action.sessionId < state.sessionId) {
+    return state;
+  }
+
+  if (action.type === "beginSession") {
+    if (action.sessionId <= state.sessionId) {
+      return state;
+    }
+
+    return {
+      sessionId: action.sessionId,
+      phase: action.phase,
+    };
+  }
+
+  return {
+    sessionId: action.sessionId,
+    phase: action.phase,
+  };
+}
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -118,37 +169,46 @@ export default function DynamicVideoPlayer({
 
   // initial state
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
-  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
+  const [playbackSession, dispatchPlaybackSession] = useReducer(
+    playbackSessionReducer,
+    {
+      sessionId: 0,
+      phase: "idle" as PlaybackPhase,
+    },
+  );
+  const playbackSessionCounterRef = useRef(0);
 
   // Don't set source until recordings load - we need accurate startPosition
   // to avoid hls.js clamping to video end when startPosition exceeds duration
   const [source, setSource] = useState<HlsSource | undefined>(undefined);
 
-  // start at correct time
+  const beginPlaybackSession = useCallback(
+    (phase: Extract<PlaybackPhase, "loadingSource" | "awaitingMetadata">) => {
+      playbackSessionCounterRef.current += 1;
+      const nextSessionId = playbackSessionCounterRef.current;
 
-  useEffect(() => {
-    if (!isScrubbing) {
-      setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
-    }
-
-    return () => {
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
-      }
-    };
-    // we only want trigger when scrubbing state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera, isScrubbing]);
+      dispatchPlaybackSession({
+        type: "beginSession",
+        sessionId: nextSessionId,
+        phase,
+      });
+    },
+    [],
+  );
 
   const onPlayerLoaded = useCallback(() => {
+    dispatchPlaybackSession({
+      type: "setPhase",
+      sessionId: playbackSession.sessionId,
+      phase: "ready",
+    });
+
     if (!controller || !startTimestamp) {
       return;
     }
 
     controller.seekToTimestamp(startTimestamp, true);
-  }, [startTimestamp, controller]);
+  }, [startTimestamp, controller, playbackSession.sessionId]);
 
   const onTimeUpdate = useCallback(
     (time: number) => {
@@ -156,17 +216,23 @@ export default function DynamicVideoPlayer({
         return;
       }
 
-      if (isLoading) {
-        setIsLoading(false);
-      }
-
-      if (isBuffering) {
-        setIsBuffering(false);
+      if (playbackSession.phase === "buffering") {
+        dispatchPlaybackSession({
+          type: "setPhase",
+          sessionId: playbackSession.sessionId,
+          phase: "ready",
+        });
       }
 
       onTimestampUpdate(controller.getProgress(time));
     },
-    [controller, onTimestampUpdate, isBuffering, isLoading, isScrubbing],
+    [
+      controller,
+      onTimestampUpdate,
+      isScrubbing,
+      playbackSession.phase,
+      playbackSession.sessionId,
+    ],
   );
 
   const onUploadFrameToPlus = useCallback(
@@ -196,11 +262,29 @@ export default function DynamicVideoPlayer({
   );
 
   useEffect(() => {
-    if (!recordings?.length) {
-      if (recordings?.length == 0) {
-        setNoRecording(true);
-      }
+    beginPlaybackSession("loadingSource");
+    setNoRecording(false);
+    setSource(undefined);
+  }, [
+    beginPlaybackSession,
+    camera,
+    recordingParams.after,
+    recordingParams.before,
+  ]);
 
+  useEffect(() => {
+    if (!recordings) {
+      return;
+    }
+
+    if (recordings.length == 0) {
+      setSource(undefined);
+      setNoRecording(true);
+      dispatchPlaybackSession({
+        type: "setPhase",
+        sessionId: playbackSession.sessionId,
+        phase: "idle",
+      });
       return;
     }
 
@@ -219,13 +303,21 @@ export default function DynamicVideoPlayer({
       );
     }
 
-    setSource({
+    const nextSource = {
       playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
       startPosition,
+    };
+
+    setSource(nextSource);
+    setNoRecording(false);
+    dispatchPlaybackSession({
+      type: "setPhase",
+      sessionId: playbackSession.sessionId,
+      phase: "awaitingMetadata",
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recordings]);
+  }, [recordings, playbackSession.sessionId]);
 
   useEffect(() => {
     if (!controller || !recordings?.length) {
@@ -235,8 +327,6 @@ export default function DynamicVideoPlayer({
     if (playerRef.current) {
       playerRef.current.autoplay = !isScrubbing;
     }
-
-    setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -279,13 +369,30 @@ export default function DynamicVideoPlayer({
     [onClipEnded, controller, recordings],
   );
 
+  const showPreview =
+    isScrubbing ||
+    (!noRecording &&
+      playbackSession.phase !== "ready" &&
+      playbackSession.phase !== "buffering");
+  const showLoadingIndicator =
+    !isScrubbing &&
+    !noRecording &&
+    (playbackSession.phase === "loadingSource" ||
+      playbackSession.phase === "awaitingMetadata" ||
+      playbackSession.phase === "buffering");
+  const showNoRecordings = !isScrubbing && noRecording;
+
   return (
     <>
       {source && (
         <HlsVideoPlayer
           videoRef={playerRef}
           containerRef={containerRef}
-          visible={!(isScrubbing || isLoading)}
+          visible={
+            !isScrubbing &&
+            (playbackSession.phase === "ready" ||
+              playbackSession.phase === "buffering")
+          }
           currentSource={source}
           hotKeys={hotKeys}
           supportsFullscreen={supportsFullscreen}
@@ -304,18 +411,31 @@ export default function DynamicVideoPlayer({
               playerRef.current?.pause();
             }
 
-            if (loadingTimeout) {
-              clearTimeout(loadingTimeout);
-            }
-
             setNoRecording(false);
+            if (playbackSession.phase === "buffering") {
+              dispatchPlaybackSession({
+                type: "setPhase",
+                sessionId: playbackSession.sessionId,
+                phase: "ready",
+              });
+            }
           }}
           setFullResolution={setFullResolution}
           onUploadFrame={onUploadFrameToPlus}
           toggleFullscreen={toggleFullscreen}
           onError={(error) => {
             if (error == "stalled" && !isScrubbing) {
-              setIsBuffering(true);
+              dispatchPlaybackSession({
+                type: "setPhase",
+                sessionId: playbackSession.sessionId,
+                phase: "buffering",
+              });
+            } else {
+              dispatchPlaybackSession({
+                type: "setPhase",
+                sessionId: playbackSession.sessionId,
+                phase: "error",
+              });
             }
           }}
           isDetailMode={isDetailMode}
@@ -325,10 +445,7 @@ export default function DynamicVideoPlayer({
         />
       )}
       <PreviewPlayer
-        className={cn(
-          className,
-          isScrubbing || isLoading ? "visible" : "hidden",
-        )}
+        className={cn(className, showPreview ? "visible" : "hidden")}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}
@@ -338,10 +455,10 @@ export default function DynamicVideoPlayer({
           setPreviewController(previewController)
         }
       />
-      {!isScrubbing && (isLoading || isBuffering) && !noRecording && (
+      {showLoadingIndicator && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}
-      {!isScrubbing && !isLoading && noRecording && (
+      {showNoRecordings && (
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {t("noRecordingsFoundForThisTime")}
         </div>

@@ -97,6 +97,7 @@ export default function HlsVideoPlayer({
   const hlsRef = useRef<Hls>(undefined);
   const [useHlsCompat, setUseHlsCompat] = useState(false);
   const [loadedMetadata, setLoadedMetadata] = useState(false);
+  const metadataResolvedRef = useRef(false);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
   const applyVideoDimensions = useCallback(
@@ -113,10 +114,19 @@ export default function HlsVideoPlayer({
   );
 
   const handleLoadedMetadata = useCallback(() => {
-    setLoadedMetadata(true);
     if (!videoRef.current) {
       return;
     }
+
+    const markMetadataResolved = () => {
+      if (metadataResolvedRef.current) {
+        return;
+      }
+
+      metadataResolvedRef.current = true;
+      setLoadedMetadata(true);
+      onPlayerLoaded?.();
+    };
 
     const width = videoRef.current.videoWidth;
     const height = videoRef.current.videoHeight;
@@ -125,6 +135,7 @@ export default function HlsVideoPlayer({
     // Poll with requestAnimationFrame until dimensions become available (or timeout).
     if (width > 0 && height > 0) {
       applyVideoDimensions(width, height);
+      markMetadataResolved();
       return;
     }
 
@@ -136,15 +147,19 @@ export default function HlsVideoPlayer({
       const h = videoRef.current.videoHeight;
       if (w > 0 && h > 0) {
         applyVideoDimensions(w, h);
+        markMetadataResolved();
         return;
       }
       if (attempts < maxAttempts) {
         attempts += 1;
         requestAnimationFrame(tryGetDims);
+      } else {
+        // Fallback: avoid blocking playback forever if dimensions remain unavailable.
+        markMetadataResolved();
       }
     };
     requestAnimationFrame(tryGetDims);
-  }, [videoRef, applyVideoDimensions]);
+  }, [videoRef, applyVideoDimensions, onPlayerLoaded]);
 
   useEffect(() => {
     if (!videoRef.current) {
@@ -163,7 +178,10 @@ export default function HlsVideoPlayer({
       return;
     }
 
+    metadataResolvedRef.current = false;
     setLoadedMetadata(false);
+    setVideoDimensions({ width: 0, height: 0 });
+    setTallCamera(false);
 
     const currentPlaybackRate = videoRef.current.playbackRate;
 
@@ -273,6 +291,7 @@ export default function HlsVideoPlayer({
 
   return (
     <TransformWrapper
+      key={`${currentSource.playlist}-${currentSource.startPosition ?? "auto"}`}
       minScale={1.0}
       wheel={{ smoothStep: 0.005 }}
       onZoom={(zoom) => setZoomScale(zoom.state.scale)}
@@ -469,8 +488,7 @@ export default function HlsVideoPlayer({
                 onTimeUpdate(frameTime);
               }
             }}
-            onLoadedData={() => {
-              onPlayerLoaded?.();
+            onLoadedMetadata={() => {
               handleLoadedMetadata();
 
               if (videoRef.current) {
@@ -483,6 +501,7 @@ export default function HlsVideoPlayer({
                 }
               }
             }}
+            onLoadedData={handleLoadedMetadata}
             onEnded={() => {
               if (onClipEnded) {
                 onClipEnded(getVideoTime() ?? 0);
@@ -498,6 +517,7 @@ export default function HlsVideoPlayer({
                 setLoadedMetadata(false);
                 setUseHlsCompat(true);
               } else {
+                onError?.("startup");
                 toast.error(
                   // @ts-expect-error code does exist
                   `Failed to play recordings (error ${e.target.error.code}): ${e.target.error.message}`,
