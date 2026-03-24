@@ -46,6 +46,7 @@ from frigate.record.export import (
     DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
     PlaybackSourceEnum,
     RecordingExporter,
+    validate_ffmpeg_args,
 )
 from frigate.util.time import is_current_hour
 
@@ -546,6 +547,24 @@ def export_recording_custom(
             )
 
     export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
+
+    # Validate user-provided ffmpeg args to prevent injection
+    for args_label, args_value in [
+        ("input", ffmpeg_input_args),
+        ("output", ffmpeg_output_args),
+    ]:
+        if args_value is not None:
+            valid, message = validate_ffmpeg_args(args_value)
+            if not valid:
+                return JSONResponse(
+                    content=(
+                        {
+                            "success": False,
+                            "message": f"Invalid ffmpeg {args_label} arguments: {message}",
+                        }
+                    ),
+                    status_code=400,
+                )
 
     # Set default values if not provided (timelapse defaults)
     if ffmpeg_input_args is None:

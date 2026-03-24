@@ -36,6 +36,54 @@ logger = logging.getLogger(__name__)
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
 
+# ffmpeg flags that can read from or write to arbitrary files
+BLOCKED_FFMPEG_ARGS = frozenset(
+    {
+        "-i",
+        "-filter_script",
+        "-vstats_file",
+        "-passlogfile",
+        "-sdp_file",
+        "-dump_attachment",
+    }
+)
+
+
+def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
+    """Validate that user-provided ffmpeg args don't allow input/output injection.
+
+    Blocks:
+    - The -i flag and other flags that read/write arbitrary files
+    - Absolute/relative file paths (potential extra outputs)
+    - URLs and ffmpeg protocol references (data exfiltration)
+    """
+    if not args or not args.strip():
+        return True, ""
+
+    tokens = args.split()
+    for token in tokens:
+        # Block flags that could inject inputs or write to arbitrary files
+        if token.lower() in BLOCKED_FFMPEG_ARGS:
+            return False, f"Forbidden ffmpeg argument: {token}"
+
+        # Block tokens that look like file paths (potential output injection)
+        if (
+            token.startswith("/")
+            or token.startswith("./")
+            or token.startswith("../")
+            or token.startswith("~")
+        ):
+            return False, "File paths are not allowed in custom ffmpeg arguments"
+
+        # Block URLs and ffmpeg protocol references (e.g. http://, tcp://, pipe:, file:)
+        if "://" in token or token.startswith("pipe:") or token.startswith("file:"):
+            return (
+                False,
+                "Protocol references are not allowed in custom ffmpeg arguments",
+            )
+
+    return True, ""
+
 
 def lower_priority():
     os.nice(PROCESS_PRIORITY_LOW)
