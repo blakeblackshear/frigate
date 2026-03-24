@@ -110,7 +110,10 @@ type EventViewProps = {
   setShowReviewed: (show: boolean) => void;
   setSeverity: (severity: ReviewSeverity) => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
-  markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
+  markItemsAsReviewed: (
+    currentItems: ReviewSegment[],
+    itemsToMarkReviewed?: ReviewSegment[] | undefined,
+  ) => void;
   onOpenRecording: (recordingInfo: RecordingStartingPoint) => void;
   motionPreviewsCamera: string | null;
   setMotionPreviewsCamera: (camera: string | null) => void;
@@ -132,7 +135,7 @@ export default function EventView({
   setShowReviewed,
   setSeverity,
   markItemAsReviewed,
-  markAllItemsAsReviewed,
+  markItemsAsReviewed,
   onOpenRecording,
   motionPreviewsCamera,
   setMotionPreviewsCamera,
@@ -498,7 +501,7 @@ export default function EventView({
             loading={severity != severityToggle}
             emptyCardData={emptyCardData}
             markItemAsReviewed={markItemAsReviewed}
-            markAllItemsAsReviewed={markAllItemsAsReviewed}
+            markItemsAsReviewed={markItemsAsReviewed}
             onSelectReview={onSelectReview}
             onSelectAllReviews={onSelectAllReviews}
             setSelectedReviews={setSelectedReviews}
@@ -549,7 +552,10 @@ type DetectionReviewProps = {
   loading: boolean;
   emptyCardData: EmptyCardData;
   markItemAsReviewed: (review: ReviewSegment) => void;
-  markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
+  markItemsAsReviewed: (
+    currentItems: ReviewSegment[],
+    itemsToMarkReviewed?: ReviewSegment[] | undefined,
+  ) => void;
   onSelectReview: (
     review: ReviewSegment,
     ctrl: boolean,
@@ -573,7 +579,7 @@ function DetectionReview({
   loading,
   emptyCardData,
   markItemAsReviewed,
-  markAllItemsAsReviewed,
+  markItemsAsReviewed,
   onSelectReview,
   onSelectAllReviews,
   setSelectedReviews,
@@ -788,12 +794,7 @@ function DetectionReview({
           break;
         case "r":
           if (selectedReviews.length > 0 && !modifiers.repeat) {
-            currentItems?.forEach((item) => {
-              if (selectedReviews.some((r) => r.id === item.id)) {
-                item.has_been_reviewed = true;
-                markItemAsReviewed(item);
-              }
-            });
+            markItemsAsReviewed(currentItems || [], selectedReviews);
             setSelectedReviews([]);
             return true;
           }
@@ -903,7 +904,7 @@ function DetectionReview({
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);
-                    markAllItemsAsReviewed(currentItems ?? []);
+                    markItemsAsReviewed(currentItems ?? []);
                   }}
                 >
                   {t("markTheseItemsAsReviewed")}
