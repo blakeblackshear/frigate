@@ -119,12 +119,13 @@ export function generateSnapshotFilename(
   return `${cameraName}_snapshot_${safeTimestamp}.jpg`;
 }
 
-export async function grabVideoSnapshot(): Promise<SnapshotResult> {
+export async function grabVideoSnapshot(
+  targetVideo?: HTMLVideoElement | null,
+): Promise<SnapshotResult> {
   try {
-    // Find the video element in the player
-    const videoElement = document.querySelector(
-      "#player-container video",
-    ) as HTMLVideoElement;
+    const videoElement =
+      targetVideo ??
+      (document.querySelector("#player-container video") as HTMLVideoElement);
 
     if (!videoElement) {
       return {
