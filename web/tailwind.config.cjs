@@ -40,6 +40,8 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "collapsible-down": "collapsible-down 0.2s ease-out",
+        "collapsible-up": "collapsible-up 0.2s ease-out",
         move: "move 3s ease-in-out infinite",
         scale1: "scale1 3s ease-in-out infinite",
         scale2: "scale2 3s ease-in-out infinite",
@@ -147,6 +149,14 @@ module.exports = {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
+        },
+        "collapsible-down": {
+          from: { height: "0px" },
+          to: { height: "var(--radix-collapsible-content-height)" },
+        },
+        "collapsible-up": {
+          from: { height: "var(--radix-collapsible-content-height)" },
+          to: { height: "0px" },
         },
         move: {
           "50%": { left: "calc(100% - 7px)" },
