@@ -13,6 +13,7 @@ import DetailStream from "@/components/timeline/DetailStream";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -29,6 +30,7 @@ import {
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import {
   MutableRefObject,
+  PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -79,6 +81,9 @@ import {
 } from "@/components/overlay/chip/GenAISummaryChip";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
+const MOBILE_VIDEO_SPLIT_DEFAULT = 0.5;
+const MOBILE_VIDEO_SPLIT_MIN = 0.35;
+const MOBILE_VIDEO_SPLIT_MAX = 0.8;
 
 type RecordingViewProps = {
   startCamera: string;
@@ -383,6 +388,89 @@ export function RecordingView({
 
   const { fullscreen, toggleFullscreen, supportsFullScreen } =
     useFullscreen(mainLayoutRef);
+
+  // mobile portrait split between video and timeline
+
+  const [mobileVideoSplit, setMobileVideoSplit] = useUserPersistence<number>(
+    "recordingMobileVideoSplit",
+    MOBILE_VIDEO_SPLIT_DEFAULT,
+  );
+  const mobileVideoSplitSafe = useMemo(
+    () =>
+      Math.min(
+        MOBILE_VIDEO_SPLIT_MAX,
+        Math.max(
+          MOBILE_VIDEO_SPLIT_MIN,
+          mobileVideoSplit ?? MOBILE_VIDEO_SPLIT_DEFAULT,
+        ),
+      ),
+    [mobileVideoSplit],
+  );
+  const [isDraggingMobileSplit, setIsDraggingMobileSplit] = useState(false);
+  const [{ width: mainLayoutWidth, height: mainLayoutHeight }] =
+    useResizeObserver(mainLayoutRef);
+  const isMobilePortraitStacked = useMemo(
+    () => !isDesktop && mainLayoutHeight > mainLayoutWidth,
+    [mainLayoutHeight, mainLayoutWidth],
+  );
+
+  const updateMobileSplitFromClientY = useCallback(
+    (clientY: number) => {
+      if (!mainLayoutRef.current || !isMobilePortraitStacked) {
+        return;
+      }
+
+      const rect = mainLayoutRef.current.getBoundingClientRect();
+      if (rect.height <= 0) {
+        return;
+      }
+
+      const split = (clientY - rect.top) / rect.height;
+      const clampedSplit = Math.min(
+        MOBILE_VIDEO_SPLIT_MAX,
+        Math.max(MOBILE_VIDEO_SPLIT_MIN, split),
+      );
+      setMobileVideoSplit(clampedSplit);
+    },
+    [isMobilePortraitStacked, setMobileVideoSplit],
+  );
+
+  const onMobileSplitPointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLButtonElement>) => {
+      if (!isMobilePortraitStacked) {
+        return;
+      }
+
+      e.preventDefault();
+      setIsDraggingMobileSplit(true);
+      updateMobileSplitFromClientY(e.clientY);
+    },
+    [isMobilePortraitStacked, updateMobileSplitFromClientY],
+  );
+
+  useEffect(() => {
+    if (!isDraggingMobileSplit) {
+      return;
+    }
+
+    const onPointerMove = (e: PointerEvent) => {
+      updateMobileSplitFromClientY(e.clientY);
+    };
+
+    const onPointerUp = () => {
+      setIsDraggingMobileSplit(false);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+    };
+  }, [isDraggingMobileSplit, updateMobileSplitFromClientY]);
 
   // layout
 
@@ -778,8 +866,18 @@ export function RecordingView({
               "flex flex-1 flex-wrap overflow-hidden",
               isDesktop
                 ? "min-w-0 px-4"
-                : "portrait:max-h-[50dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
+                : cn(
+                    "portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
+                    isMobilePortraitStacked
+                      ? "portrait:flex-none"
+                      : "portrait:max-h-[50dvh]",
+                  ),
             )}
+            style={
+              isMobilePortraitStacked
+                ? { height: `${Math.round(mobileVideoSplitSafe * 100)}%` }
+                : undefined
+            }
           >
             <div
               className={cn(
@@ -923,6 +1021,19 @@ export function RecordingView({
               )}
             </div>
           </div>
+          {isMobilePortraitStacked && !fullscreen && (
+            <button
+              type="button"
+              aria-label="Resize video and timeline"
+              onPointerDown={onMobileSplitPointerDown}
+              className={cn(
+                "relative z-30 mx-auto h-4 w-full flex-shrink-0 touch-none",
+                isDraggingMobileSplit ? "cursor-grabbing" : "cursor-grab",
+              )}
+            >
+              <span className="absolute inset-x-1/2 top-1/2 h-1 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/60" />
+            </button>
+          )}
           <Timeline
             contentRef={contentRef}
             mainCamera={mainCamera}
