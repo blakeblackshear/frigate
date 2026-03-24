@@ -11,7 +11,7 @@ import useSWR from "swr";
 
 type ThresholdBarGraphProps = {
   graphId: string;
-  name: string;
+  name?: string;
   unit: string;
   threshold: Threshold;
   updateTimes: number[];
@@ -25,6 +25,7 @@ export function ThresholdBarGraph({
   updateTimes,
   data,
 }: ThresholdBarGraphProps) {
+  const displayName = name || data[0]?.name || "";
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -186,7 +187,7 @@ export function ThresholdBarGraph({
   return (
     <div className="flex w-full flex-col">
       <div className="flex items-center gap-1">
-        <div className="text-xs text-secondary-foreground">{name}</div>
+        <div className="text-xs text-secondary-foreground">{displayName}</div>
         <div className="text-xs text-primary">
           {lastValue}
           {unit}

@@ -548,7 +548,10 @@ export default function GeneralMetrics({
       Object.entries(stats.processes).forEach(([key, procStats]) => {
         if (procStats.pid.toString() in stats.cpu_usages) {
           if (!(key in series)) {
-            series[key] = { name: key, data: [] };
+            series[key] = {
+              name: t(`general.otherProcesses.series.${key}`),
+              data: [],
+            };
           }
 
           const data = stats.cpu_usages[procStats.pid.toString()]?.cpu;
@@ -563,7 +566,7 @@ export default function GeneralMetrics({
       });
     });
     return Object.keys(series).length > 0 ? Object.values(series) : [];
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   const otherProcessMemSeries = useMemo(() => {
     if (!statsHistory) {
@@ -582,7 +585,10 @@ export default function GeneralMetrics({
       Object.entries(stats.processes).forEach(([key, procStats]) => {
         if (procStats.pid.toString() in stats.cpu_usages) {
           if (!(key in series)) {
-            series[key] = { name: key, data: [] };
+            series[key] = {
+              name: t(`general.otherProcesses.series.${key}`),
+              data: [],
+            };
           }
 
           const data = stats.cpu_usages[procStats.pid.toString()]?.mem;
@@ -597,7 +603,7 @@ export default function GeneralMetrics({
       });
     });
     return Object.values(series);
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   return (
     <>
@@ -964,11 +970,10 @@ export default function GeneralMetrics({
               <div className="mb-5">
                 {t("general.otherProcesses.processCpuUsage")}
               </div>
-              {otherProcessCpuSeries.map((series) => (
+              {otherProcessCpuSeries.map((series, index) => (
                 <ThresholdBarGraph
-                  key={series.name}
-                  graphId={`${series.name}-cpu`}
-                  name={t(`general.otherProcesses.series.${series.name}`)}
+                  key={`other-process-cpu-${index}`}
+                  graphId={`other-process-cpu-${index}`}
                   unit="%"
                   threshold={DetectorCpuThreshold}
                   updateTimes={updateTimes}
@@ -984,12 +989,11 @@ export default function GeneralMetrics({
               <div className="mb-5">
                 {t("general.otherProcesses.processMemoryUsage")}
               </div>
-              {otherProcessMemSeries.map((series) => (
+              {otherProcessMemSeries.map((series, index) => (
                 <ThresholdBarGraph
-                  key={series.name}
-                  graphId={`${series.name}-mem`}
+                  key={`other-process-mem-${index}`}
+                  graphId={`other-process-mem-${index}`}
                   unit="%"
-                  name={series.name.replaceAll("_", " ")}
                   threshold={DetectorMemThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
