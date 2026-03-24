@@ -34,12 +34,7 @@ export function useHistoryBack({
         // Store the current URL (pathname + search, without hash) before pushing history state
         urlWhenOpenedRef.current =
           window.location.pathname + window.location.search;
-        // Preserve existing history state (including React Router state) so that
-        // navigating back to this entry doesn't lose location.state values
-        window.history.pushState(
-          { ...window.history.state, overlayOpen: true },
-          "",
-        );
+        window.history.pushState({ overlayOpen: true }, "");
         historyPushedRef.current = true;
       }
 
@@ -76,15 +71,4 @@ export function useHistoryBack({
       urlWhenOpenedRef.current = null;
     }
   }, [enabled, open]);
-
-  // Clean up stale history entry if the component unmounts while the overlay
-  // is still open (e.g. parent component removed from the tree)
-  React.useEffect(() => {
-    return () => {
-      if (historyPushedRef.current) {
-        historyPushedRef.current = false;
-        window.history.back();
-      }
-    };
-  }, []);
 }
