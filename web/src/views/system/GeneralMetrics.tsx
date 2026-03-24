@@ -548,7 +548,10 @@ export default function GeneralMetrics({
       Object.entries(stats.processes).forEach(([key, procStats]) => {
         if (procStats.pid.toString() in stats.cpu_usages) {
           if (!(key in series)) {
-            series[key] = { name: t(`general.otherProcesses.series.${key}`), data: [] };
+            series[key] = {
+              name: t(`general.otherProcesses.series.${key}`),
+              data: [],
+            };
           }
 
           const data = stats.cpu_usages[procStats.pid.toString()]?.cpu;
@@ -582,7 +585,10 @@ export default function GeneralMetrics({
       Object.entries(stats.processes).forEach(([key, procStats]) => {
         if (procStats.pid.toString() in stats.cpu_usages) {
           if (!(key in series)) {
-            series[key] = { name: t(`general.otherProcesses.series.${key}`), data: [] };
+            series[key] = {
+              name: t(`general.otherProcesses.series.${key}`),
+              data: [],
+            };
           }
 
           const data = stats.cpu_usages[procStats.pid.toString()]?.mem;
