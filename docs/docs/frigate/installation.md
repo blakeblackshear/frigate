@@ -3,6 +3,8 @@ id: installation
 title: Installation
 ---
 
+import ShmCalculator from '@site/src/components/ShmCalculator'
+
 Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/apps/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
 
 :::tip
@@ -77,20 +79,7 @@ The default shm size of **128MB** is fine for setups with **2 cameras** detectin
 
 The Frigate container also stores logs in shm, which can take up to **40MB**, so make sure to take this into account in your math as well.
 
-You can calculate the **minimum** shm size for each camera with the following formula using the resolution specified for detect:
-
-```console
-# Template for one camera without logs, replace <width> and <height>
-$ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 20 + 270480) / 1048576))'
-
-# Example for 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 20 + 270480) / 1048576 + 40))'
-66.63MB
-
-# Example for eight cameras detecting at 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 20 + 270480) / 1048576) * 8 + 40))'
-253MB
-```
+<ShmCalculator/>
 
 The shm size cannot be set per container for Home Assistant Apps. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
 
