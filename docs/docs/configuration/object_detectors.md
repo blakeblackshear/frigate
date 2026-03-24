@@ -166,7 +166,7 @@ YOLOv9 models that are compiled for TensorFlow Lite and properly quantized are s
 
 :::tip
 
-**Frigate+ Users:** Follow the [instructions](../integrations/plus#use-models) to set a model ID in your config file.
+**Frigate+ Users:** Follow the [instructions](/integrations/plus#use-models) to set a model ID in your config file.
 
 :::
 
@@ -577,7 +577,7 @@ $ docker run --device=/dev/kfd --device=/dev/dri  \
 
 When using Docker Compose:
 
-```yaml
+```yaml {4-6}
 services:
   frigate:
     ...
@@ -608,7 +608,7 @@ $ docker run -e HSA_OVERRIDE_GFX_VERSION=10.0.0 \
 
 When using Docker Compose:
 
-```yaml
+```yaml {4-5}
 services:
   frigate:
     ...
@@ -1514,7 +1514,8 @@ model:
   model_type: yolo-generic
   width: 320
   height: 320
-  tensor_format: bgr
+  input_dtype: int
+  input_pixel_format: bgr
   labelmap_path: /labelmap/coco-80.txt
 ```
 

@@ -125,6 +125,50 @@ export function buildTranslationPath(
 }
 
 /**
+ * Resolve a translated label or description for a config form field.
+ *
+ * Tries keys in priority order:
+ *   1. Type-specific prefixed key (e.g. "detectors.edgetpu.device.label")
+ *   2. Shared prefixed key with type stripped (e.g. "detectors.device.label")
+ *   3. Unprefixed key (e.g. "device.label")
+ *
+ * @returns The translated string, or undefined if no key matched.
+ */
+export function resolveConfigTranslation(
+  i18n: { exists: (key: string, opts?: Record<string, unknown>) => boolean },
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  translationPath: string,
+  suffix: "label" | "description",
+  sectionI18nPrefix?: string,
+  ns?: string,
+): string | undefined {
+  const opts = ns ? { ns } : undefined;
+
+  if (
+    sectionI18nPrefix &&
+    !translationPath.startsWith(`${sectionI18nPrefix}.`)
+  ) {
+    // 1. Type-specific prefixed key (e.g. detectors.edgetpu.device.label)
+    const prefixed = `${sectionI18nPrefix}.${translationPath}.${suffix}`;
+    if (i18n.exists(prefixed, opts)) return t(prefixed, opts);
+
+    // 2. Shared prefixed key — strip leading type segment
+    //    e.g. detectors.edgetpu.model.path → detectors.model.path
+    const dot = translationPath.indexOf(".");
+    if (dot !== -1) {
+      const shared = `${sectionI18nPrefix}.${translationPath.substring(dot + 1)}.${suffix}`;
+      if (i18n.exists(shared, opts)) return t(shared, opts);
+    }
+  }
+
+  // 3. Unprefixed key
+  const base = `${translationPath}.${suffix}`;
+  if (i18n.exists(base, opts)) return t(base, opts);
+
+  return undefined;
+}
+
+/**
  * Extract the filter object label from a path containing "filters" segment.
  * Returns the segment immediately after "filters".
  *

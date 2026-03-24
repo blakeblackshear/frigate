@@ -15,7 +15,7 @@ const record: SectionConfigOverrides = {
       "export",
     ],
     fieldGroups: {
-      retention: ["enabled", "continuous", "motion"],
+      retention: ["continuous", "motion"],
       events: ["alerts", "detections"],
     },
     hiddenFields: ["enabled_in_config", "sync_recordings"],

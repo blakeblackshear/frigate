@@ -8,7 +8,7 @@ from multiprocessing import Queue
 from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import psutil
 import uvicorn
@@ -30,6 +30,7 @@ from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
+from frigate.config.profile_manager import ProfileManager
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -80,6 +81,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
+from frigate.util.process import FrigateProcess
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
@@ -118,6 +120,7 @@ class FrigateApp:
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
+        self.profile_manager: Optional[ProfileManager] = None
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -349,6 +352,19 @@ class FrigateApp:
             comms,
         )
 
+    def init_profile_manager(self) -> None:
+        self.profile_manager = ProfileManager(
+            self.config, self.inter_config_updater, self.dispatcher
+        )
+        self.dispatcher.profile_manager = self.profile_manager
+
+        persisted = ProfileManager.load_persisted_profile()
+        if persisted and any(
+            persisted in cam.profiles for cam in self.config.cameras.values()
+        ):
+            logger.info("Restoring persisted profile '%s'", persisted)
+            self.profile_manager.activate_profile(persisted)
+
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
             try:
@@ -482,6 +498,47 @@ class FrigateApp:
 
     def start_watchdog(self) -> None:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
+
+        # (attribute on self, key in self.processes, factory)
+        specs: list[tuple[str, str, Callable[[], FrigateProcess]]] = [
+            (
+                "embedding_process",
+                "embeddings",
+                lambda: EmbeddingProcess(
+                    self.config, self.embeddings_metrics, self.stop_event
+                ),
+            ),
+            (
+                "recording_process",
+                "recording",
+                lambda: RecordProcess(self.config, self.stop_event),
+            ),
+            (
+                "review_segment_process",
+                "review_segment",
+                lambda: ReviewProcess(self.config, self.stop_event),
+            ),
+            (
+                "output_processor",
+                "output",
+                lambda: OutputProcess(self.config, self.stop_event),
+            ),
+        ]
+
+        for attr, key, factory in specs:
+            if not hasattr(self, attr):
+                continue
+
+            def on_restart(
+                proc: FrigateProcess, _attr: str = attr, _key: str = key
+            ) -> None:
+                setattr(self, _attr, proc)
+                self.processes[_key] = proc.pid or 0
+
+            self.frigate_watchdog.register(
+                key, getattr(self, attr), factory, on_restart
+            )
+
         self.frigate_watchdog.start()
 
     def init_auth(self) -> None:
@@ -557,6 +614,7 @@ class FrigateApp:
         self.init_inter_process_communicator()
         self.start_detectors()
         self.init_dispatcher()
+        self.init_profile_manager()
         self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
@@ -586,6 +644,8 @@ class FrigateApp:
                     self.event_metadata_updater,
                     self.inter_config_updater,
                     self.replay_manager,
+                    self.dispatcher,
+                    self.profile_manager,
                 ),
                 host="127.0.0.1",
                 port=5001,

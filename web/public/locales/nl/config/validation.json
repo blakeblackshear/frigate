@@ -1,1 +1,5 @@
-{}
+{
+    "minimum": "Minimale waarde van {{limit}} vereist",
+    "maximum": "Mag niet meer dan {{limit}} bedragen.",
+    "exclusiveMinimum": "Waarde moet groter zijn dan {{limit}}"
+}

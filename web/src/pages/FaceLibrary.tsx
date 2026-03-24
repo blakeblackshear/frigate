@@ -266,6 +266,34 @@ export default function FaceLibrary() {
     [setPageToggle, refreshFaces, t],
   );
 
+  const onReclassify = useCallback(
+    (image: string, newName: string) => {
+      axios
+        .post(`/faces/${pageToggle}/reclassify`, {
+          id: image,
+          new_name: newName,
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.reclassifiedFace"), {
+              position: "top-center",
+            });
+            refreshFaces();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.reclassifyFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [pageToggle, refreshFaces, t],
+  );
+
   // keyboard
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -452,10 +480,12 @@ export default function FaceLibrary() {
           <FaceGrid
             contentRef={contentRef}
             faceImages={faceImages}
+            faceNames={faces}
             pageToggle={pageToggle}
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onDelete={onDelete}
+            onReclassify={onReclassify}
           />
         ))
       )}
@@ -598,10 +628,10 @@ function LibrarySelector({
           {Object.values(faces).map((face) => (
             <DropdownMenuItem
               key={face}
-              className="group flex items-center justify-between"
+              className="group flex items-center justify-between p-0"
             >
               <div
-                className="flex-grow cursor-pointer"
+                className="flex-grow cursor-pointer px-2 py-1.5"
                 onClick={() => setPageToggle(face)}
               >
                 {face}
@@ -609,7 +639,7 @@ function LibrarySelector({
                   ({faceData?.[face].length})
                 </span>
               </div>
-              <div className="flex gap-0.5">
+              <div className="flex gap-0.5 px-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -983,18 +1013,22 @@ function FaceAttemptGroup({
 type FaceGridProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
   faceImages: string[];
+  faceNames: string[];
   pageToggle: string;
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onDelete: (name: string, ids: string[]) => void;
+  onReclassify: (image: string, newName: string) => void;
 };
 function FaceGrid({
   contentRef,
   faceImages,
+  faceNames,
   pageToggle,
   selectedFaces,
   onClickFaces,
   onDelete,
+  onReclassify,
 }: FaceGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -1032,6 +1066,17 @@ function FaceGrid({
             i18nLibrary="views/faceLibrary"
             onClick={(data, meta) => onClickFaces([data.filename], meta)}
           >
+            <FaceSelectionDialog
+              faceNames={faceNames}
+              excludeName={pageToggle}
+              dialogLabel={t("reclassifyFaceAs")}
+              tooltipLabel={t("reclassifyFace")}
+              onTrainAttempt={(newName) => onReclassify(image, newName)}
+            >
+              <BlurredIconButton>
+                <AddFaceIcon className="size-5" />
+              </BlurredIconButton>
+            </FaceSelectionDialog>
             <Tooltip>
               <TooltipTrigger>
                 <LuTrash2

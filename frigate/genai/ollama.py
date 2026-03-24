@@ -53,6 +53,45 @@ class OllamaClient(GenAIClient):
             logger.warning("Error initializing Ollama: %s", str(e))
             return None
 
+    @staticmethod
+    def _clean_schema_for_ollama(schema: dict, *, _is_properties: bool = False) -> dict:
+        """Strip Pydantic metadata from a JSON schema for Ollama compatibility.
+
+        Ollama's grammar-based constrained generation works best with minimal
+        schemas. Pydantic adds title/description/constraint fields that can
+        cause the grammar generator to silently skip required fields.
+
+        Keys inside a ``properties`` dict are actual field names and must never
+        be stripped, even if they collide with a metadata key name (e.g. a
+        model field called ``title``).
+        """
+        STRIP_KEYS = {
+            "title",
+            "description",
+            "minimum",
+            "maximum",
+            "exclusiveMinimum",
+            "exclusiveMaximum",
+        }
+        result = {}
+        for key, value in schema.items():
+            if not _is_properties and key in STRIP_KEYS:
+                continue
+            if isinstance(value, dict):
+                result[key] = OllamaClient._clean_schema_for_ollama(
+                    value, _is_properties=(key == "properties")
+                )
+            elif isinstance(value, list):
+                result[key] = [
+                    OllamaClient._clean_schema_for_ollama(item)
+                    if isinstance(item, dict)
+                    else item
+                    for item in value
+                ]
+            else:
+                result[key] = value
+        return result
+
     def _send(
         self,
         prompt: str,
@@ -73,7 +112,7 @@ class OllamaClient(GenAIClient):
             if response_format and response_format.get("type") == "json_schema":
                 schema = response_format.get("json_schema", {}).get("schema")
                 if schema:
-                    ollama_options["format"] = schema
+                    ollama_options["format"] = self._clean_schema_for_ollama(schema)
             result = self.provider.generate(
                 self.genai_config.model,
                 prompt,

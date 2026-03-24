@@ -90,7 +90,7 @@ export default function EditRoleCamerasDialog({
           </DialogTitle>
           <DialogDescription>
             <Trans
-              ns={"views/settings"}
+              ns="views/settings"
               values={{ role }}
               components={{ strong: <span className="font-medium" /> }}
             >

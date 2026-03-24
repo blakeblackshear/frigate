@@ -161,13 +161,15 @@
     "resetToDefault": "Reset to Default",
     "saveAll": "Save All",
     "savingAll": "Saving All…",
-    "undoAll": "Undo All"
+    "undoAll": "Undo All",
+    "retry": "Retry"
   },
   "menu": {
     "system": "System",
     "systemMetrics": "System metrics",
     "configuration": "Configuration",
     "systemLogs": "System logs",
+    "profiles": "Profiles",
     "settings": "Settings",
     "configurationEditor": "Configuration Editor",
     "languages": "Languages",
@@ -274,7 +276,8 @@
       "error": {
         "title": "Failed to save config changes: {{errorMessage}}",
         "noMessage": "Failed to save config changes"
-      }
+      },
+      "success": "Successfully saved config changes."
     }
   },
   "role": {
@@ -309,5 +312,7 @@
   "readTheDocumentation": "Read the documentation",
   "information": {
     "pixels": "{{area}}px"
-  }
+  },
+  "no_items": "No items",
+  "validation_errors": "Validation Errors"
 }

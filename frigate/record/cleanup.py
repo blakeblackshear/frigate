@@ -368,6 +368,11 @@ class RecordingCleanup(threading.Thread):
         return maybe_empty_dirs
 
     def run(self) -> None:
+
+        if self.config.safe_mode:
+            logger.info("Safe mode enabled, skipping recording cleanup")
+            return
+
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
             if self.stop_event.wait(60):

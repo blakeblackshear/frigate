@@ -64,7 +64,12 @@ class LlamaCppClient(GenAIClient):
             return None
 
         try:
-            content = []
+            content = [
+                {
+                    "type": "text",
+                    "text": prompt,
+                }
+            ]
             for image in images:
                 encoded_image = base64.b64encode(image).decode("utf-8")
                 content.append(
@@ -75,12 +80,6 @@ class LlamaCppClient(GenAIClient):
                         },
                     }
                 )
-            content.append(
-                {
-                    "type": "text",
-                    "text": prompt,
-                }
-            )
 
             # Build request payload with llama.cpp native options
             payload = {

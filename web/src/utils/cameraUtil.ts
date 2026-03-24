@@ -115,6 +115,51 @@ export type CameraAudioFeatures = {
  * @param requireSecureContext - If true, two-way audio requires secure context (default: true)
  * @returns CameraAudioFeatures object with detected capabilities
  */
+/**
+ * Calculates optimal detect dimensions from stream resolution.
+ *
+ * Scales dimensions to an efficient size for object detection while
+ * preserving the stream's aspect ratio. Does not upscale.
+ *
+ * @param streamWidth - Native stream width in pixels
+ * @param streamHeight - Native stream height in pixels
+ * @returns Detect dimensions with even values, or null if inputs are invalid
+ */
+
+// Target size for the smaller dimension (width or height) for detect streams
+export const DETECT_TARGET_PX = 720;
+
+export function calculateDetectDimensions(
+  streamWidth: number,
+  streamHeight: number,
+): { width: number; height: number } | null {
+  if (
+    !Number.isFinite(streamWidth) ||
+    !Number.isFinite(streamHeight) ||
+    streamWidth <= 0 ||
+    streamHeight <= 0
+  ) {
+    return null;
+  }
+
+  const smallerDim = Math.min(streamWidth, streamHeight);
+  const target = Math.min(DETECT_TARGET_PX, smallerDim);
+  const scale = target / smallerDim;
+
+  let width = Math.round(streamWidth * scale);
+  let height = Math.round(streamHeight * scale);
+
+  // Round down to even numbers (required for video processing)
+  width = width - (width % 2);
+  height = height - (height % 2);
+
+  if (width < 2 || height < 2) {
+    return null;
+  }
+
+  return { width, height };
+}
+
 export function detectCameraAudioFeatures(
   metadata: LiveStreamMetadata | null | undefined,
   requireSecureContext: boolean = true,

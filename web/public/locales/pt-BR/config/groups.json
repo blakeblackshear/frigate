@@ -1,0 +1,44 @@
+{
+    "audio": {
+        "global": {
+            "detection": "Detecção Global",
+            "sensitivity": "Sensibilidade Global"
+        },
+        "cameras": {
+            "detection": "Detecção",
+            "sensitivity": "Sensibilidade"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Aparência Global"
+        },
+        "cameras": {
+            "appearance": "Aparência"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Sensibilidade Global",
+            "algorithm": "Algoritmo Global"
+        },
+        "cameras": {
+            "sensitivity": "Sensibilidade",
+            "algorithm": "Algoritmo"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Exibição Global"
+        },
+        "cameras": {
+            "display": "Exibição"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Resolução Global",
+            "tracking": "Rastreamento Global"
+        }
+    }
+}

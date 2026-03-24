@@ -92,7 +92,7 @@ class PtzAutotrackConfig(FrigateBaseModel):
 
 
 class OnvifConfig(FrigateBaseModel):
-    host: str = Field(
+    host: EnvString = Field(
         default="",
         title="ONVIF host",
         description="Host (and optional scheme) for the ONVIF service for this camera.",

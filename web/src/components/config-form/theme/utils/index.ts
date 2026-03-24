@@ -4,6 +4,7 @@
 
 export {
   buildTranslationPath,
+  resolveConfigTranslation,
   getFilterObjectLabel,
   humanizeKey,
   getDomainFromNamespace,

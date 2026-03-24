@@ -86,7 +86,7 @@ Frigate looks for a JWT token secret in the following order:
 
 1. An environment variable named `FRIGATE_JWT_SECRET`
 2. A file named `FRIGATE_JWT_SECRET` in the directory specified by the `CREDENTIALS_DIRECTORY` environment variable (defaults to the Docker Secrets directory: `/run/secrets/`)
-3. A `jwt_secret` option from the Home Assistant Add-on options
+3. A `jwt_secret` option from the Home Assistant App options
 4. A `.jwt_secret` file in the config directory
 
 If no secret is found on startup, Frigate generates one and stores it in a `.jwt_secret` file in the config directory.
@@ -232,7 +232,7 @@ The viewer role provides read-only access to all cameras in the UI and API. Cust
 
 ### Role Configuration Example
 
-```yaml
+```yaml {11-16}
 cameras:
   front_door:
     # ... camera config

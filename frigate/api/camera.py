@@ -20,9 +20,10 @@ from zeep.transports import AsyncTransport
 
 from frigate.api.auth import (
     allow_any_authenticated,
-    require_camera_access,
+    require_go2rtc_stream_access,
     require_role,
 )
+from frigate.api.defs.request.app_body import CameraSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
@@ -80,14 +81,27 @@ def go2rtc_streams():
 
 
 @router.get(
-    "/go2rtc/streams/{camera_name}", dependencies=[Depends(require_camera_access)]
+    "/go2rtc/streams/{stream_name}",
+    dependencies=[Depends(require_go2rtc_stream_access)],
 )
-def go2rtc_camera_stream(request: Request, camera_name: str):
+def go2rtc_camera_stream(request: Request, stream_name: str):
     r = requests.get(
-        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
+        "http://127.0.0.1:1984/api/streams",
+        params={
+            "src": stream_name,
+            "video": "all",
+            "audio": "all",
+            "microphone": "",
+        },
     )
     if not r.ok:
-        camera_config = request.app.frigate_config.cameras.get(camera_name)
+        camera_config = request.app.frigate_config.cameras.get(stream_name)
+
+        if camera_config is None:
+            for camera_name, camera in request.app.frigate_config.cameras.items():
+                if stream_name in camera.live.streams.values():
+                    camera_config = request.app.frigate_config.cameras.get(camera_name)
+                    break
 
         if camera_config and camera_config.enabled:
             logger.error("Failed to fetch streams from go2rtc")
@@ -1155,3 +1169,76 @@ async def delete_camera(
         },
         status_code=200,
     )
+
+
+_SUB_COMMAND_FEATURES = {"motion_mask", "object_mask", "zone"}
+
+
+@router.put(
+    "/camera/{camera_name}/set/{feature}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+@router.put(
+    "/camera/{camera_name}/set/{feature}/{sub_command}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def camera_set(
+    request: Request,
+    camera_name: str,
+    feature: str,
+    body: CameraSetBody,
+    sub_command: str | None = None,
+):
+    """Set a camera feature state. Use camera_name='*' to target all cameras."""
+    dispatcher = request.app.dispatcher
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if feature == "profile":
+        if camera_name != "*":
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Profile feature requires camera_name='*'",
+                },
+                status_code=400,
+            )
+        dispatcher._receive("profile/set", body.value)
+        return JSONResponse(content={"success": True})
+
+    if feature not in dispatcher._camera_settings_handlers:
+        return JSONResponse(
+            content={"success": False, "message": f"Unknown feature: {feature}"},
+            status_code=400,
+        )
+
+    if sub_command and feature not in _SUB_COMMAND_FEATURES:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Feature '{feature}' does not support sub-commands",
+            },
+            status_code=400,
+        )
+
+    if camera_name == "*":
+        cameras = list(frigate_config.cameras.keys())
+    elif camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera '{camera_name}' not found",
+            },
+            status_code=404,
+        )
+    else:
+        cameras = [camera_name]
+
+    for cam in cameras:
+        topic = (
+            f"{cam}/{feature}/{sub_command}/set"
+            if sub_command
+            else f"{cam}/{feature}/set"
+        )
+        dispatcher._receive(topic, body.value)
+
+    return JSONResponse(content={"success": True})

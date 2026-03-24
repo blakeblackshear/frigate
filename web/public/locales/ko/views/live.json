@@ -172,7 +172,21 @@
   "noCameras": {
     "title": "설정된 카메라 없음",
     "description": "카메라를 연결해 시작하세요.",
-    "buttonText": "카메라 추가"
+    "buttonText": "카메라 추가",
+    "restricted": {
+      "title": "연결된 카메라 없음",
+      "description": "이 그룹의 카메라를 볼 권한이 없습니다."
+    },
+    "default": {
+      "title": "설정된 카메라 없음",
+      "description": "카메라를 연결하여 Frigate을 시작하세요.",
+      "buttonText": "카메라 추가"
+    },
+    "group": {
+      "title": "그룹에 카메라 없음",
+      "description": "이 그룹에 할당되거나 활성화된 카메라가 없습니다.",
+      "buttonText": "그룹 관리"
+    }
   },
   "snapshot": {
     "takeSnapshot": "인스턴트 스냅샷 다운로드",

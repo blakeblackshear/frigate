@@ -4,8 +4,16 @@ import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ConfigSectionData } from "@/types/configForm";
+import type { ProfileState } from "@/types/profile";
 import { getSectionConfig } from "@/utils/configUtil";
+import { getProfileColor } from "@/utils/profileColors";
+import { cn } from "@/lib/utils";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
@@ -20,17 +28,24 @@ export type SettingsPageProps = {
     level: "global" | "camera",
     status: SectionStatus,
   ) => void;
-  pendingDataBySection?: Record<string, unknown>;
+  pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,
     cameraName: string | undefined,
     data: ConfigSectionData | null,
   ) => void;
+  profileState?: ProfileState;
+  /** Callback to delete the current profile's overrides for the current section */
+  onDeleteProfileSection?: (profileName: string) => void;
+  profilesUIEnabled?: boolean;
+  setProfilesUIEnabled?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type SectionStatus = {
   hasChanges: boolean;
   isOverridden: boolean;
+  /** Where the override comes from: "global" = camera overrides global, "profile" = profile overrides base */
+  overrideSource?: "global" | "profile";
   hasValidationErrors: boolean;
 };
 
@@ -56,6 +71,8 @@ export function SingleSectionPage({
   onSectionStatusChange,
   pendingDataBySection,
   onPendingDataChange,
+  profileState,
+  onDeleteProfileSection,
 }: SingleSectionPageProps) {
   const sectionNamespace =
     level === "camera" ? "config/cameras" : "config/global";
@@ -78,6 +95,24 @@ export function SingleSectionPage({
     ? getLocaleDocUrl(resolvedSectionConfig.sectionDocs)
     : undefined;
 
+  const currentEditingProfile = selectedCamera
+    ? (profileState?.editingProfile[selectedCamera] ?? null)
+    : null;
+
+  const profileColor = useMemo(
+    () =>
+      currentEditingProfile && profileState?.allProfileNames
+        ? getProfileColor(currentEditingProfile, profileState.allProfileNames)
+        : undefined,
+    [currentEditingProfile, profileState?.allProfileNames],
+  );
+
+  const handleDeleteProfileSection = useCallback(() => {
+    if (currentEditingProfile && onDeleteProfileSection) {
+      onDeleteProfileSection(currentEditingProfile);
+    }
+  }, [currentEditingProfile, onDeleteProfileSection]);
+
   const handleSectionStatusChange = useCallback(
     (status: SectionStatus) => {
       setSectionStatus(status);
@@ -96,56 +131,123 @@ export function SingleSectionPage({
 
   return (
     <div className="flex size-full flex-col lg:pr-2">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <div className="flex flex-col">
-          <Heading as="h4">
-            {t(`${sectionKey}.label`, { ns: sectionNamespace })}
-          </Heading>
-          {i18n.exists(`${sectionKey}.description`, {
-            ns: sectionNamespace,
-          }) && (
-            <div className="my-1 text-sm text-muted-foreground">
-              {t(`${sectionKey}.description`, { ns: sectionNamespace })}
-            </div>
-          )}
-          {sectionDocsUrl && (
-            <div className="flex items-center text-sm text-primary-variant">
-              <Link
-                to={sectionDocsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                {t("readTheDocumentation", { ns: "common" })}
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col items-end gap-2 md:flex-row md:items-center">
-          <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="mb-5 flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <Heading as="h4">
+              {t(`${sectionKey}.label`, { ns: sectionNamespace })}
+            </Heading>
+            {i18n.exists(`${sectionKey}.description`, {
+              ns: sectionNamespace,
+            }) && (
+              <div className="my-1 text-sm text-muted-foreground">
+                {t(`${sectionKey}.description`, { ns: sectionNamespace })}
+              </div>
+            )}
+            {sectionDocsUrl && (
+              <div className="flex items-center text-sm text-primary-variant">
+                <Link
+                  to={sectionDocsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline"
+                >
+                  {t("readTheDocumentation", { ns: "common" })}
+                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                </Link>
+              </div>
+            )}
+          </div>
+          {/* Desktop: badge inline next to title */}
+          <div className="hidden shrink-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
             {level === "camera" &&
               showOverrideIndicator &&
               sectionStatus.isOverridden && (
-                <Badge
-                  variant="secondary"
-                  className="cursor-default border-2 border-selected text-xs text-primary-variant"
-                >
-                  {t("button.overridden", {
-                    ns: "common",
-                    defaultValue: "Overridden",
-                  })}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "cursor-default border-2 text-center text-xs text-primary-variant",
+                        sectionStatus.overrideSource === "profile" &&
+                          profileColor
+                          ? profileColor.border
+                          : "border-selected",
+                      )}
+                    >
+                      {sectionStatus.overrideSource === "profile"
+                        ? t("button.overriddenBaseConfig", {
+                            ns: "views/settings",
+                            defaultValue: "Overridden (Base Config)",
+                          })
+                        : t("button.overriddenGlobal", {
+                            ns: "views/settings",
+                            defaultValue: "Overridden (Global)",
+                          })}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {sectionStatus.overrideSource === "profile"
+                      ? t("button.overriddenBaseConfigTooltip", {
+                          ns: "views/settings",
+                          profile: currentEditingProfile
+                            ? (profileState?.profileFriendlyNames.get(
+                                currentEditingProfile,
+                              ) ?? currentEditingProfile)
+                            : "",
+                        })
+                      : t("button.overriddenGlobalTooltip", {
+                          ns: "views/settings",
+                        })}
+                  </TooltipContent>
+                </Tooltip>
               )}
             {sectionStatus.hasChanges && (
               <Badge
                 variant="secondary"
                 className="cursor-default bg-danger text-xs text-white hover:bg-danger"
               >
-                {t("modified", { ns: "common", defaultValue: "Modified" })}
+                {t("button.modified", {
+                  ns: "common",
+                  defaultValue: "Modified",
+                })}
               </Badge>
             )}
           </div>
+        </div>
+        {/* Mobile: badge below title/description */}
+        <div className="flex flex-wrap items-center gap-2 sm:hidden">
+          {level === "camera" &&
+            showOverrideIndicator &&
+            sectionStatus.isOverridden && (
+              <Badge
+                variant="secondary"
+                className={cn(
+                  "cursor-default border-2 text-center text-xs text-primary-variant",
+                  sectionStatus.overrideSource === "profile" && profileColor
+                    ? profileColor.border
+                    : "border-selected",
+                )}
+              >
+                {sectionStatus.overrideSource === "profile"
+                  ? t("button.overriddenBaseConfig", {
+                      ns: "views/settings",
+                      defaultValue: "Overridden (Base Config)",
+                    })
+                  : t("button.overriddenGlobal", {
+                      ns: "views/settings",
+                      defaultValue: "Overridden (Global)",
+                    })}
+              </Badge>
+            )}
+          {sectionStatus.hasChanges && (
+            <Badge
+              variant="secondary"
+              className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+            >
+              {t("button.modified", { ns: "common", defaultValue: "Modified" })}
+            </Badge>
+          )}
         </div>
       </div>
       <ConfigSectionTemplate
@@ -160,6 +262,17 @@ export function SingleSectionPage({
         onPendingDataChange={onPendingDataChange}
         requiresRestart={requiresRestart}
         onStatusChange={handleSectionStatusChange}
+        profileName={currentEditingProfile ?? undefined}
+        profileFriendlyName={
+          currentEditingProfile
+            ? (profileState?.profileFriendlyNames.get(currentEditingProfile) ??
+              currentEditingProfile)
+            : undefined
+        }
+        profileBorderColor={profileColor?.border}
+        onDeleteProfileSection={
+          currentEditingProfile ? handleDeleteProfileSection : undefined
+        }
       />
     </div>
   );

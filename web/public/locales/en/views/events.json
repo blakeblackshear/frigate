@@ -15,8 +15,10 @@
       "description": "Review items can only be created for a camera when recordings are enabled for that camera."
     }
   },
-  "timeline": "Timeline",
-  "timeline.aria": "Select timeline",
+  "timeline": {
+    "label": "Timeline",
+    "aria": "Select timeline"
+  },
   "zoomIn": "Zoom In",
   "zoomOut": "Zoom Out",
   "events": {

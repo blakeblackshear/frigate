@@ -79,8 +79,8 @@
     "label": "Object Detection",
     "description": "Settings for the detection/detect role used to run object detection and initialize trackers.",
     "enabled": {
-      "label": "Detection enabled",
-      "description": "Enable or disable object detection for this camera. Detection must be enabled for object tracking to run."
+      "label": "Enable object detection",
+      "description": "Enable or disable object detection for this camera."
     },
     "height": {
       "label": "Detect height",
@@ -268,7 +268,7 @@
     },
     "skip_motion_threshold": {
       "label": "Skip motion threshold",
-      "description": "If more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Range 0.0 to 1.0."
+      "description": "If set to a value between 0.0 and 1.0, and more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Leave unset (None) to disable this feature."
     },
     "improve_contrast": {
       "label": "Improve contrast",
@@ -626,26 +626,22 @@
   },
   "snapshots": {
     "label": "Snapshots",
-    "description": "Settings for saved JPEG snapshots of tracked objects for this camera.",
+    "description": "Settings for API-generated snapshots of tracked objects for this camera.",
     "enabled": {
-      "label": "Snapshots enabled",
+      "label": "Enable snapshots",
       "description": "Enable or disable saving snapshots for this camera."
-    },
-    "clean_copy": {
-      "label": "Save clean copy",
-      "description": "Save an unannotated clean copy of snapshots in addition to annotated ones."
     },
     "timestamp": {
       "label": "Timestamp overlay",
-      "description": "Overlay a timestamp on saved snapshots."
+      "description": "Overlay a timestamp on snapshots from API."
     },
     "bounding_box": {
       "label": "Bounding box overlay",
-      "description": "Draw bounding boxes for tracked objects on saved snapshots."
+      "description": "Draw bounding boxes for tracked objects on snapshots from API."
     },
     "crop": {
       "label": "Crop snapshot",
-      "description": "Crop saved snapshots to the detected object's bounding box."
+      "description": "Crop snapshots from API to the detected object's bounding box."
     },
     "required_zones": {
       "label": "Required zones",
@@ -653,11 +649,11 @@
     },
     "height": {
       "label": "Snapshot height",
-      "description": "Height (pixels) to resize saved snapshots to; leave empty to preserve original size."
+      "description": "Height (pixels) to resize snapshots from API to; leave empty to preserve original size."
     },
     "retain": {
       "label": "Snapshot retention",
-      "description": "Retention settings for saved snapshots including default days and per-object overrides.",
+      "description": "Retention settings for snapshots including default days and per-object overrides.",
       "default": {
         "label": "Default retention",
         "description": "Default number of days to retain snapshots."
@@ -672,8 +668,8 @@
       }
     },
     "quality": {
-      "label": "JPEG quality",
-      "description": "JPEG encode quality for saved snapshots (0-100)."
+      "label": "Snapshot quality",
+      "description": "Encode quality for saved snapshots (0-100)."
     }
   },
   "timestamp_style": {
@@ -859,6 +855,10 @@
   "webui_url": {
     "label": "Camera URL",
     "description": "URL to visit the camera directly from system page"
+  },
+  "profiles": {
+    "label": "Profiles",
+    "description": "Named config profiles with partial overrides that can be activated at runtime."
   },
   "zones": {
     "label": "Zones",

@@ -17,6 +17,7 @@ import { requiresRestartForFieldPath } from "@/utils/configUtil";
 import { ConfigFormContext } from "@/types/configForm";
 import {
   buildTranslationPath,
+  resolveConfigTranslation,
   getDomainFromNamespace,
   getFilterObjectLabel,
   humanizeKey,
@@ -263,16 +264,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredLabel: string | undefined;
   if (i18nNs && translationPath) {
-    const prefixedLabelKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.label`
-        : undefined;
-    const labelKey = `${translationPath}.label`;
-    if (prefixedLabelKey && i18n.exists(prefixedLabelKey, { ns: i18nNs })) {
-      inferredLabel = t(prefixedLabelKey, { ns: i18nNs });
-    } else if (i18n.exists(labelKey, { ns: i18nNs })) {
-      inferredLabel = t(labelKey, { ns: i18nNs });
-    }
+    inferredLabel = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "label",
+      sectionI18nPrefix,
+      i18nNs,
+    );
   }
   if (!inferredLabel && translatedFilterLabel) {
     inferredLabel = translatedFilterLabel;
@@ -286,19 +285,14 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   let inferredDescription: string | undefined;
   if (i18nNs && translationPath) {
-    const prefixedDescriptionKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.description`
-        : undefined;
-    const descriptionKey = `${translationPath}.description`;
-    if (
-      prefixedDescriptionKey &&
-      i18n.exists(prefixedDescriptionKey, { ns: i18nNs })
-    ) {
-      inferredDescription = t(prefixedDescriptionKey, { ns: i18nNs });
-    } else if (i18n.exists(descriptionKey, { ns: i18nNs })) {
-      inferredDescription = t(descriptionKey, { ns: i18nNs });
-    }
+    inferredDescription = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "description",
+      sectionI18nPrefix,
+      i18nNs,
+    );
   }
   const schemaDescription = schema?.description;
   const fallbackDescription =
@@ -311,51 +305,54 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
       return null;
     }
 
-    const grouped = new Set<string>();
-    const groups = Object.entries(groupDefinitions)
-      .map(([groupKey, fields]) => {
-        const ordered = fields
-          .map((field) => items.find((item) => item.name === field))
-          .filter(Boolean) as (typeof properties)[number][];
+    // Build a lookup: field name → group info
+    const fieldToGroup = new Map<
+      string,
+      { groupKey: string; label: string; items: (typeof properties)[number][] }
+    >();
+    const hasGroups = Object.keys(groupDefinitions).length > 0;
 
-        if (ordered.length === 0) {
-          return null;
-        }
+    for (const [groupKey, fields] of Object.entries(groupDefinitions)) {
+      const ordered = fields
+        .map((field) => items.find((item) => item.name === field))
+        .filter(Boolean) as (typeof properties)[number][];
 
-        ordered.forEach((item) => grouped.add(item.name));
+      if (ordered.length === 0) continue;
 
-        const label = domain
-          ? t(`${sectionI18nPrefix}.${domain}.${groupKey}`, {
-              ns: "config/groups",
-              defaultValue: humanizeKey(groupKey),
-            })
-          : t(`groups.${groupKey}`, {
-              defaultValue: humanizeKey(groupKey),
-            });
+      const label = domain
+        ? t(`${sectionI18nPrefix}.${domain}.${groupKey}`, {
+            ns: "config/groups",
+            defaultValue: humanizeKey(groupKey),
+          })
+        : t(`groups.${groupKey}`, {
+            defaultValue: humanizeKey(groupKey),
+          });
 
-        return {
-          key: groupKey,
-          label,
-          items: ordered,
-        };
-      })
-      .filter(Boolean) as Array<{
-      key: string;
-      label: string;
-      items: (typeof properties)[number][];
-    }>;
+      const groupInfo = { groupKey, label, items: ordered };
+      for (const item of ordered) {
+        fieldToGroup.set(item.name, groupInfo);
+      }
+    }
 
-    const ungrouped = items.filter((item) => !grouped.has(item.name));
     const isObjectLikeField = (item: (typeof properties)[number]) => {
       const fieldSchema = (item.content.props as RjsfElementProps)?.schema;
       return fieldSchema?.type === "object";
     };
 
-    return (
-      <div className="space-y-6">
-        {groups.map((group) => (
+    // Walk items in order (respects fieldOrder / ui:order).
+    // When we hit the first field of a group, render the whole group block.
+    // Skip subsequent fields that belong to an already-rendered group.
+    const renderedGroups = new Set<string>();
+    const elements: React.ReactNode[] = [];
+
+    for (const item of items) {
+      const group = fieldToGroup.get(item.name);
+      if (group) {
+        if (renderedGroups.has(group.groupKey)) continue;
+        renderedGroups.add(group.groupKey);
+        elements.push(
           <div
-            key={group.key}
+            key={group.groupKey}
             className="space-y-4 rounded-lg border border-border/70 bg-card/30 p-4"
           >
             <div className="text-md border-b border-border/60 pb-4 font-semibold text-primary-variant">
@@ -366,25 +363,21 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                 <div key={element.name}>{element.content}</div>
               ))}
             </div>
-          </div>
-        ))}
+          </div>,
+        );
+      } else {
+        elements.push(
+          <div
+            key={item.name}
+            className={cn(hasGroups && !isObjectLikeField(item) && "px-4")}
+          >
+            {item.content}
+          </div>,
+        );
+      }
+    }
 
-        {ungrouped.length > 0 && (
-          <div className={cn("space-y-6", groups.length > 0 && "pt-2")}>
-            {ungrouped.map((element) => (
-              <div
-                key={element.name}
-                className={cn(
-                  groups.length > 0 && !isObjectLikeField(element) && "px-4",
-                )}
-              >
-                {element.content}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
+    return <div className="space-y-6">{elements}</div>;
   };
 
   // Root level renders children directly
@@ -456,7 +449,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0 pr-3">
                 <CardTitle
                   className={cn(
                     "flex items-center text-sm",
@@ -475,9 +468,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                 )}
               </div>
               {isOpen ? (
-                <LuChevronDown className="h-4 w-4" />
+                <LuChevronDown className="h-4 w-4 shrink-0" />
               ) : (
-                <LuChevronRight className="h-4 w-4" />
+                <LuChevronRight className="h-4 w-4 shrink-0" />
               )}
             </div>
           </CardHeader>

@@ -42,3 +42,7 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 ## [Scrypted - Frigate bridge plugin](https://github.com/apocaliss92/scrypted-frigate-bridge)
 
 [Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is an plugin that allows to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
+
+## [Strix](https://github.com/eduard256/Strix)
+
+[Strix](https://github.com/eduard256/Strix) auto-discovers working stream URLs for IP cameras and generates ready-to-use Frigate configs. It tests thousands of URL patterns against your camera and supports cameras without RTSP or ONVIF. 67K+ camera models from 3.6K+ brands.

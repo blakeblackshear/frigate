@@ -586,6 +586,23 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         new_config["cameras"][name] = camera_config
 
+    # Remove deprecated clean_copy from global snapshots config
+    if new_config.get("snapshots", {}).get("clean_copy") is not None:
+        del new_config["snapshots"]["clean_copy"]
+        if not new_config["snapshots"]:
+            del new_config["snapshots"]
+
+    # Remove deprecated clean_copy from camera snapshots configs
+    for name, camera in new_config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
+
+        if camera_config.get("snapshots", {}).get("clean_copy") is not None:
+            del camera_config["snapshots"]["clean_copy"]
+            if not camera_config["snapshots"]:
+                del camera_config["snapshots"]
+
+        new_config["cameras"][name] = camera_config
+
     new_config["version"] = "0.18-0"
     return new_config
 
@@ -717,7 +734,7 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
 
         if section == "motion":
             merged = deep_merge(
-                current.model_dump(exclude_unset=True, exclude={"rasterized_mask"}),
+                current.model_dump(exclude_unset=True),
                 update,
                 override=True,
             )
@@ -727,9 +744,7 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
 
         elif section == "objects":
             merged = deep_merge(
-                current.model_dump(
-                    exclude={"filters": {"__all__": {"rasterized_mask"}}}
-                ),
+                current.model_dump(),
                 update,
                 override=True,
             )

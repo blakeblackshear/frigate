@@ -13,7 +13,7 @@ const audio: SectionConfigOverrides = {
       "num_threads",
     ],
     fieldGroups: {
-      detection: ["enabled", "listen", "filters"],
+      detection: ["listen", "filters"],
       sensitivity: ["min_volume", "max_not_heard"],
     },
     hiddenFields: ["enabled_in_config"],

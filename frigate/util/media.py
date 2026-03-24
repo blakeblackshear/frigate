@@ -4,13 +4,20 @@ import datetime
 import errno
 import logging
 import os
+import subprocess as sp
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
 from peewee import DatabaseError, chunked
 
-from frigate.const import CLIPS_DIR, EXPORT_DIR, RECORD_DIR, THUMB_DIR
+from frigate.const import (
+    CLIPS_DIR,
+    DEFAULT_FFMPEG_VERSION,
+    EXPORT_DIR,
+    RECORD_DIR,
+    THUMB_DIR,
+)
 from frigate.models import (
     Event,
     Export,
@@ -26,6 +33,12 @@ logger = logging.getLogger(__name__)
 # Safety threshold - abort if more than 50% of files would be deleted
 SAFETY_THRESHOLD = 0.5
 
+FFPROBE_PATH = (
+    f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
+    if DEFAULT_FFMPEG_VERSION
+    else "ffprobe"
+)
+
 
 @dataclass
 class SyncResult:
@@ -36,6 +49,7 @@ class SyncResult:
     orphans_found: int = 0
     orphans_deleted: int = 0
     orphan_paths: list[str] = field(default_factory=list)
+    orphan_db_paths: list[str] = field(default_factory=list)
     aborted: bool = False
     error: str | None = None
 
@@ -119,7 +133,7 @@ def sync_recordings(
                     )
 
         result.orphans_found += len(recordings_to_delete)
-        result.orphan_paths.extend(
+        result.orphan_db_paths.extend(
             [
                 recording["path"]
                 for recording in recordings_to_delete
@@ -246,8 +260,8 @@ def sync_recordings(
 def sync_event_snapshots(dry_run: bool = False, force: bool = False) -> SyncResult:
     """Sync event snapshots - delete files not referenced by any event.
 
-    Event snapshots are stored at: CLIPS_DIR/{camera}-{event_id}.jpg
-    Also checks for clean variants: {camera}-{event_id}-clean.webp and -clean.png
+    Event snapshots are stored at: CLIPS_DIR/{camera}-{event_id}-clean.webp
+    Also checks legacy variants: {camera}-{event_id}.jpg and -clean.png
     """
     result = SyncResult(media_type="event_snapshots")
 
@@ -760,6 +774,61 @@ class MediaSyncResults:
         return results
 
 
+def write_orphan_report(
+    results: "MediaSyncResults",
+    path: str,
+    job_id: str = "",
+    dry_run: bool = False,
+) -> None:
+    """Write a verbose orphan report file listing all orphan paths by media type.
+
+    Args:
+        results: The completed MediaSyncResults.
+        path: File path to write the report to.
+        job_id: Job ID for the report header.
+        dry_run: Whether the sync was a dry run, for the report header.
+    """
+    try:
+        with open(path, "w") as f:
+            f.write("# Media Sync Orphan Report\n")
+            f.write(f"# Job: {job_id}\n")
+            f.write(
+                f"# Date: {datetime.datetime.now().astimezone(datetime.timezone.utc).isoformat()}\n"
+            )
+            f.write(f"# Mode: dry_run={dry_run}\n\n")
+
+            for name, result in [
+                ("recordings", results.recordings),
+                ("event_snapshots", results.event_snapshots),
+                ("event_thumbnails", results.event_thumbnails),
+                ("review_thumbnails", results.review_thumbnails),
+                ("previews", results.previews),
+                ("exports", results.exports),
+            ]:
+                if result is None:
+                    continue
+
+                if result.orphan_db_paths:
+                    f.write(
+                        f"## {name} - orphaned db entries ({len(result.orphan_db_paths)})\n"
+                    )
+                    for orphan_path in result.orphan_db_paths:
+                        f.write(f"{orphan_path}\n")
+                    f.write("\n")
+
+                if result.orphan_paths:
+                    f.write(
+                        f"## {name} - orphaned files ({len(result.orphan_paths)})\n"
+                    )
+                    for orphan_path in result.orphan_paths:
+                        f.write(f"{orphan_path}\n")
+                    f.write("\n")
+
+        logger.debug("Wrote verbose orphan report to %s", path)
+    except OSError as e:
+        logger.error("Failed to write orphan report to %s: %s", path, e)
+
+
 def sync_all_media(
     dry_run: bool = False, media_types: list[str] = ["all"], force: bool = False
 ) -> MediaSyncResults:
@@ -808,3 +877,53 @@ def sync_all_media(
     )
 
     return results
+
+
+def get_keyframe_before(path: str, offset_ms: int) -> int | None:
+    """Get the timestamp (ms) of the last keyframe at or before offset_ms.
+
+    Uses ffprobe packet index to read keyframe positions from the mp4 file.
+    Returns None if ffprobe fails or no keyframe is found before the offset.
+    """
+    try:
+        result = sp.run(
+            [
+                FFPROBE_PATH,
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "packet=pts_time,flags",
+                "-of",
+                "csv=p=0",
+                "-loglevel",
+                "error",
+                path,
+            ],
+            capture_output=True,
+            timeout=5,
+        )
+    except (sp.TimeoutExpired, FileNotFoundError):
+        return None
+
+    if result.returncode != 0:
+        return None
+
+    offset_s = offset_ms / 1000.0
+    best_ms = None
+    for line in result.stdout.decode().strip().splitlines():
+        parts = line.strip().split(",")
+        if len(parts) != 2:
+            continue
+        ts_str, flags = parts
+        if "K" not in flags:
+            continue
+        try:
+            ts = float(ts_str)
+        except ValueError:
+            continue
+        if ts <= offset_s:
+            best_ms = int(ts * 1000)
+        else:
+            break
+
+    return best_ms

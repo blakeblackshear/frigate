@@ -24,7 +24,7 @@ A custom icon can be added to the birdseye background by providing a 180x180 ima
 
 If you want to include a camera in Birdseye view only for specific circumstances, or just don't include it at all, the Birdseye setting can be set at the camera level.
 
-```yaml
+```yaml {8-10,12-14}
 # Include all cameras by default in Birdseye view
 birdseye:
   enabled: True
@@ -48,6 +48,7 @@ By default birdseye shows all cameras that have had the configured activity in t
 ```yaml
 birdseye:
   enabled: True
+  # highlight-next-line
   inactivity_threshold: 15
 ```
 
@@ -78,9 +79,11 @@ birdseye:
 cameras:
   front:
     birdseye:
+      # highlight-next-line
       order: 1
   back:
     birdseye:
+      # highlight-next-line
       order: 2
 ```
 
@@ -92,7 +95,7 @@ It is possible to limit the number of cameras shown on birdseye at one time. Whe
 
 For example, this can be configured to only show the most recently active camera.
 
-```yaml
+```yaml {3-4}
 birdseye:
   enabled: True
   layout:
@@ -103,7 +106,7 @@ birdseye:
 
 By default birdseye tries to fit 2 cameras in each row and then double in size until a suitable layout is found. The scaling can be configured with a value between 1.0 and 5.0 depending on use case.
 
-```yaml
+```yaml {3-4}
 birdseye:
   enabled: True
   layout:

@@ -20,7 +20,7 @@ from frigate.genai import GenAIClient
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
-from frigate.util.file import get_event_thumbnail_bytes
+from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
 from frigate.util.image import create_thumbnail, ensure_jpeg_bytes
 
 if TYPE_CHECKING:
@@ -103,16 +103,19 @@ class ObjectDescriptionProcessor(PostProcessorApi):
                         logger.debug(f"{camera} sending early request to GenAI")
 
                         self.early_request_sent[data["id"]] = True
+                        # Copy thumbnails to avoid holding references after cleanup
+                        thumbnails_copy = [
+                            data["thumbnail"][:] if data.get("thumbnail") else None
+                            for data in self.tracked_events[data["id"]]
+                            if data.get("thumbnail")
+                        ]
                         threading.Thread(
                             target=self._genai_embed_description,
                             name=f"_genai_embed_description_{event.id}",
                             daemon=True,
                             args=(
                                 event,
-                                [
-                                    data["thumbnail"]
-                                    for data in self.tracked_events[data["id"]]
-                                ],
+                                thumbnails_copy,
                             ),
                         ).start()
 
@@ -172,8 +175,13 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embed_image = (
             [snapshot_image]
             if event.has_snapshot and source == "snapshot"
+            # Copy thumbnails to avoid holding references
             else (
-                [data["thumbnail"] for data in self.tracked_events[event_id]]
+                [
+                    data["thumbnail"][:] if data.get("thumbnail") else None
+                    for data in self.tracked_events[event_id]
+                    if data.get("thumbnail")
+                ]
                 if len(self.tracked_events.get(event_id, [])) > 0
                 else [thumbnail]
             )
@@ -224,39 +232,28 @@ class ObjectDescriptionProcessor(PostProcessorApi):
     def _read_and_crop_snapshot(self, event: Event) -> bytes | None:
         """Read, decode, and crop the snapshot image."""
 
-        snapshot_file = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
-
-        if not os.path.isfile(snapshot_file):
-            logger.error(
-                f"Cannot load snapshot for {event.id}, file not found: {snapshot_file}"
-            )
-            return None
-
         try:
-            with open(snapshot_file, "rb") as image_file:
-                snapshot_image = image_file.read()
+            img, _ = load_event_snapshot_image(event)
+            if img is None:
+                logger.error(f"Cannot load snapshot for {event.id}, file not found")
+                return None
 
-                img = cv2.imdecode(
-                    np.frombuffer(snapshot_image, dtype=np.int8),
-                    cv2.IMREAD_COLOR,
-                )
+            # Crop snapshot based on region
+            # provide full image if region doesn't exist (manual events)
+            height, width = img.shape[:2]
+            x1_rel, y1_rel, width_rel, height_rel = event.data.get(
+                "region", [0, 0, 1, 1]
+            )
+            x1, y1 = int(x1_rel * width), int(y1_rel * height)
 
-                # Crop snapshot based on region
-                # provide full image if region doesn't exist (manual events)
-                height, width = img.shape[:2]
-                x1_rel, y1_rel, width_rel, height_rel = event.data.get(
-                    "region", [0, 0, 1, 1]
-                )
-                x1, y1 = int(x1_rel * width), int(y1_rel * height)
+            cropped_image = img[
+                y1 : y1 + int(height_rel * height),
+                x1 : x1 + int(width_rel * width),
+            ]
 
-                cropped_image = img[
-                    y1 : y1 + int(height_rel * height),
-                    x1 : x1 + int(width_rel * width),
-                ]
+            _, buffer = cv2.imencode(".jpg", cropped_image)
 
-                _, buffer = cv2.imencode(".jpg", cropped_image)
-
-                return buffer.tobytes()
+            return buffer.tobytes()
         except Exception:
             return None
 
@@ -276,8 +273,13 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embed_image = (
             [snapshot_image]
             if event.has_snapshot and camera_config.objects.genai.use_snapshot
+            # Copy thumbnails to avoid holding references after cleanup
             else (
-                [data["thumbnail"] for data in self.tracked_events[event.id]]
+                [
+                    data["thumbnail"][:] if data.get("thumbnail") else None
+                    for data in self.tracked_events[event.id]
+                    if data.get("thumbnail")
+                ]
                 if num_thumbnails > 0
                 else [thumbnail]
             )

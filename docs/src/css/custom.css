@@ -234,3 +234,11 @@
   content: "schema";
   color: var(--ifm-color-secondary-contrast-foreground);
 }
+
+.code-block-error-line {
+  background-color: #ff000020;
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+  border-left: 3px solid #ff000080;
+}

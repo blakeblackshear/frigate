@@ -1,75 +1,197 @@
 {
   "description": {
-    "invalidName": "Neveljavno ime. Ime lahko vsebuje črke, števila, presledke, narekovaje, podčrtaje in pomišljaje."
+    "invalidName": "Neveljavno ime. Imena lahko vsebujejo le črke, številke, presledke, opuščaje, podčrtaje in vezaje."
   },
   "categories": "Razredi",
   "createCategory": {
-    "new": "Naredi nov razred"
+    "new": "Ustvari nov razred"
   },
   "button": {
     "renameCategory": "Preimenuj razred",
-    "deleteCategory": "Zbriši razred",
-    "deleteImages": "Zbriši slike",
-    "trainModel": "Treniraj model",
-    "deleteClassificationAttempts": "Izbriši klasifikacijske slike",
+    "deleteCategory": "Izbriši razred",
+    "deleteImages": "Izbriši slike",
+    "trainModel": "Nauči model",
+    "deleteClassificationAttempts": "Izbriši slike klasifikacij",
     "addClassification": "Dodaj klasifikacijo",
-    "deleteModels": "Izbriši model",
+    "deleteModels": "Izbriši modele",
     "editModel": "Uredi model"
   },
   "toast": {
     "success": {
-      "deletedCategory": "Izbrisan razred",
-      "deletedImage": "Zbrisane slike",
-      "trainedModel": "Uspešno treniranje modela.",
-      "trainingModel": "Uspešen začetek treniranje modela.",
-      "deletedModel_one": "Uspešno izbrisan {{count}} model",
+      "deletedCategory": "Razred izbrisan",
+      "deletedImage": "Slike izbrisane",
+      "trainedModel": "Model uspešno naučen.",
+      "trainingModel": "Učenje modela se je uspešno začelo.",
+      "deletedModel_one": "Model uspešno izbrisan",
       "deletedModel_two": "Uspešno izbrisana {{count}} modela",
       "deletedModel_few": "Uspešno izbrisani {{count}} modeli",
       "deletedModel_other": "Uspešno izbrisanih {{count}} modelov",
-      "categorizedImage": "Uspešna klasifikacija slike",
-      "updatedModel": "Uspešno posodobljene podrobnosti modela",
-      "renamedCategory": "Uspešno preimenovan razred v {{name}}"
+      "categorizedImage": "Slika uspešno klasificirana",
+      "updatedModel": "Konfiguracija modela uspešno posodobljena",
+      "renamedCategory": "Razred uspešno preimenovan v {{name}}"
     },
     "error": {
-      "deleteImageFailed": "Neuspešno brisanje: {{errorMessage}}",
-      "deleteCategoryFailed": "Neuspešno brisanje razreda: {{errorMessage}}",
-      "trainingFailed": "Neuspešen začetek treniranje modela: {{errorMessage}}",
-      "deleteModelFailed": "Napaka pri brisanju modela: {{errorMessage}}"
+      "deleteImageFailed": "Brisanje ni uspelo: {{errorMessage}}",
+      "deleteCategoryFailed": "Brisanje razreda ni uspelo: {{errorMessage}}",
+      "trainingFailed": "Učenje modela ni uspelo. Preveri Frigate dnevnike (logs) za podrobnosti.",
+      "deleteModelFailed": "Brisanje modela ni uspelo: {{errorMessage}}",
+      "categorizeFailed": "Klasifikacija slike ni uspela: {{errorMessage}}",
+      "trainingFailedToStart": "Začetek učenja modela ni uspel: {{errorMessage}}",
+      "updateModelFailed": "Posodobitev modela ni uspela: {{errorMessage}}",
+      "renameCategoryFailed": "Preimenovanje razreda ni uspelo: {{errorMessage}}"
     }
   },
   "deleteCategory": {
-    "title": "Zbriši razred"
+    "title": "Izbriši razred",
+    "desc": "Ali si prepričan, da želiš izbrisati razred {{name}}? To bo trajno izbrisalo vse povezane slike in zahtevalo ponovno učenje modela.",
+    "minClassesTitle": "Razreda ni mogoče izbrisati",
+    "minClassesDesc": "Klasifikacijski model mora imeti vsaj 2 razreda. Dodaj drug razred, preden izbrišeš tega."
   },
   "deleteTrainImages": {
-    "title": "Zbriši slike za treniranje",
-    "desc": "Ali ste prepričani, da želite izbrisati {{count}} slik? Tega dejanja ni mogoče razveljaviti."
+    "title": "Izbriši slike za učenje",
+    "desc_one": "Ali si prepričan, da želiš izbrisati {{count}} sliko?",
+    "desc_two": "Ali si prepričan, da želiš izbrisati {{count}} sliki?",
+    "desc_few": "Ali si prepričan, da želiš izbrisati {{count}} slike?",
+    "desc_other": "Ali si prepričan, da želiš izbrisati {{count}} slik? Tega dejanja ni mogoče razveljaviti."
   },
   "renameCategory": {
     "title": "Preimenuj razred",
-    "desc": "Vnesite novo ime za {{name}}. Model bo treba znova naučiti, da bo sprememba imena začela veljati."
+    "desc": "Vnesi novo ime za {{name}}. Za uveljavitev spremembe imena boš moral ponovno naučiti model."
   },
   "train": {
-    "title": "Nedavne razvrstitve",
-    "aria": "Izberi nedavne razvrstitve",
-    "titleShort": "Nedavno"
+    "title": "Zadnje klasifikacije",
+    "aria": "Izberi zadnje klasifikacije",
+    "titleShort": "Zadnje"
   },
-  "categorizeImageAs": "Razvrsti sliko kot:",
-  "categorizeImage": "Razvrsti sliko",
+  "categorizeImageAs": "Klasificiraj sliko kot:",
+  "categorizeImage": "Klasificiraj sliko",
   "noModels": {
     "object": {
-      "title": "Ni modelov za razvrščanje objektov"
+      "title": "Ni modelov za klasifikacijo objektov",
+      "description": "Ustvari model po meri za klasifikacijo zaznanih objektov.",
+      "buttonText": "Ustvari model objekta"
+    },
+    "state": {
+      "title": "Ni modelov za klasifikacijo stanja",
+      "description": "Ustvari model po meri za spremljanje in klasifikacijo sprememb stanja na določenih območjih kamere.",
+      "buttonText": "Ustvari model stanja"
     }
   },
-  "documentTitle": "Klasifikacijski modeli - fregate",
+  "documentTitle": "Modeli za klasifikacijo - Frigate",
   "details": {
-    "scoreInfo": "Razultat predstavlja povprečno stopnjo sigurnosti čez vsa zaznavynja objekta.",
-    "none": "Nobeno",
-    "unknown": "Neznano"
+    "scoreInfo": "Ocena predstavlja povprečno zaupanje klasifikacije vseh zaznav tega objekta.",
+    "none": "Brez",
+    "unknown": "Neznan"
   },
   "tooltip": {
-    "trainingInProgress": "Model se trenutno trenira",
-    "noNewImages": "Novih slik za treniranje ni na voljo. Označite več slik v bazi.",
-    "noChanges": "Ni sprememb v bazi od zadnjega treniranja.",
-    "modelNotReady": "Model ni pripravljen na treniranje"
+    "trainingInProgress": "Učenje modela trenutno poteka",
+    "noNewImages": "Ni novih slik za učenje. Najprej klasificiraj več slik v naboru podatkov.",
+    "noChanges": "Od zadnjega učenja v naboru podatkov ni bilo sprememb.",
+    "modelNotReady": "Model ni pripravljen na učenje"
+  },
+  "deleteModel": {
+    "title": "Izbriši klasifikacijski model",
+    "single": "Ali si prepričan, da želiš izbrisati {{name}}? To bo trajno izbrisalo vse povezane podatke, vključno s slikami in podatki za učenje. Tega dejanja ni mogoče razveljaviti.",
+    "desc_one": "Ali si prepričan, da želiš izbrisati {{count}} model?",
+    "desc_two": "Ali si prepričan, da želiš izbrisati {{count}} modela?",
+    "desc_few": "Ali si prepričan, da želiš izbrisati {{count}} modele?",
+    "desc_other": "Ali si prepričan, da želiš izbrisati {{count}} modelov? To bo trajno izbrisalo vse povezane podatke. Tega dejanja ni mogoče razveljaviti."
+  },
+  "edit": {
+    "title": "Uredi klasifikacijski model",
+    "descriptionState": "Uredi razrede za ta model klasifikacije stanja. Spremembe bodo zahtevale ponovno učenje modela.",
+    "descriptionObject": "Uredi vrsto objekta in vrsto klasifikacije za ta model klasifikacije objektov.",
+    "stateClassesInfo": "Opomba: Spreminjanje razredov stanja zahteva ponovno učenje modela s posodobljenimi razredi."
+  },
+  "deleteDatasetImages": {
+    "title": "Izbriši slike iz nabora podatkov",
+    "desc_one": "Ali si prepričan, da želiš izbrisati {{count}} sliko iz {{dataset}}?",
+    "desc_two": "Ali si prepričan, da želiš izbrisati {{count}} sliki iz {{dataset}}?",
+    "desc_few": "Ali si prepričan, da želiš izbrisati {{count}} slike iz {{dataset}}?",
+    "desc_other": "Ali si prepričan, da želiš izbrisati {{count}} slik iz {{dataset}}? Tega dejanja ni mogoče razveljaviti in zahtevalo bo ponovno učenje modela."
+  },
+  "menu": {
+    "objects": "Objekti",
+    "states": "Stanja"
+  },
+  "wizard": {
+    "title": "Ustvari novo klasifikacijo",
+    "steps": {
+      "nameAndDefine": "Poimenuj in določi",
+      "stateArea": "Območje stanja",
+      "chooseExamples": "Izberi primere"
+    },
+    "step1": {
+      "description": "Modeli stanja spremljajo fiksna območja kamere za spremembe (npr. odprta/zaprta vrata). Modeli objektov dodajo klasifikacije zaznanim objektom (npr. znane živali, dostavljavci itd.).",
+      "name": "Ime",
+      "namePlaceholder": "Vnesi ime modela...",
+      "type": "Vrsta",
+      "typeState": "Stanje",
+      "typeObject": "Objekt",
+      "objectLabel": "Oznaka objekta",
+      "objectLabelPlaceholder": "Izberi vrsto objekta...",
+      "classificationType": "Vrsta klasifikacije",
+      "classificationTypeTip": "Spoznaj vrste klasifikacij",
+      "classificationTypeDesc": "Pod-oznake dodajo dodatno besedilo k oznaki objekta (npr. 'Oseba: dostavljavec'). Atributi so metapodatki, ki jih je mogoče iskati in se shranjujejo ločeno.",
+      "classificationSubLabel": "Pod-oznaka",
+      "classificationAttribute": "Atribut",
+      "classes": "Razredi",
+      "states": "Stanja",
+      "classesTip": "Spoznaj razrede",
+      "classesStateDesc": "Določi različna stanja, v katerih je lahko območje tvoje kamere. Na primer: 'odprto' in 'zaprto' za garažna vrata.",
+      "classesObjectDesc": "Določi različne kategorije, v katere naj se klasificirajo zaznani objekti. Na primer: 'dostavljavec', 'stanovalec', 'neznanec' za klasifikacijo oseb.",
+      "classPlaceholder": "Vnesi ime razreda...",
+      "errors": {
+        "nameRequired": "Ime modela je obvezno",
+        "nameLength": "Ime modela mora imeti 64 znakov ali manj",
+        "nameOnlyNumbers": "Ime modela ne sme vsebovati samo številk",
+        "classRequired": "Zahtevan je vsaj 1 razred",
+        "classesUnique": "Imena razredov morajo biti edinstvena",
+        "noneNotAllowed": "Razred 'none' ni dovoljen",
+        "stateRequiresTwoClasses": "Modeli stanja zahtevajo vsaj 2 razreda",
+        "objectLabelRequired": "Prosim, izberi oznako objekta",
+        "objectTypeRequired": "Prosim, izberi vrsto klasifikacije"
+      }
+    },
+    "step2": {
+      "description": "Izberi kamere in določi območje spremljanja za vsako kamero. Model bo klasificiral stanje teh območij.",
+      "cameras": "Kamere",
+      "selectCamera": "Izberi kamero",
+      "noCameras": "Klikni +, da dodaš kamere",
+      "selectCameraPrompt": "Izberi kamero s seznama, da določiš njeno območje spremljanja"
+    },
+    "step3": {
+      "selectImagesPrompt": "Izberi vse slike z: {{className}}",
+      "selectImagesDescription": "Klikni na slike, da jih izbereš. Klikni Nadaljuj, ko končaš s tem razredom.",
+      "allImagesRequired_one": "Prosim, klasificiraj vse slike. Preostala je še {{count}} slika.",
+      "allImagesRequired_two": "Prosim, klasificiraj vse slike. Preostali sta še {{count}} sliki.",
+      "allImagesRequired_few": "Prosim, klasificiraj vse slike. Preostale so še {{count}} slike.",
+      "allImagesRequired_other": "Prosim, klasificiraj vse slike. Preostalo je še {{count}} slik.",
+      "generating": {
+        "title": "Generiranje vzorčnih slik",
+        "description": "Frigate pridobiva reprezentativne slike iz tvojih posnetkov. To lahko traja trenutek..."
+      },
+      "training": {
+        "title": "Učenje modela",
+        "description": "Tvoj model se uči v ozadju. To pogovorno okno lahko zapreš; model bo začel delovati takoj, ko bo učenje končano."
+      },
+      "retryGenerate": "Poskusi ponovno generirati",
+      "noImages": "Vzorčne slike niso bile generirane",
+      "classifying": "Klasificiranje in učenje...",
+      "trainingStarted": "Učenje se je uspešno začelo",
+      "modelCreated": "Model uspešno ustvarjen. Uporabi pogled Zadnje klasifikacije, da dodaš slike za manjkajoča stanja, nato nauči model.",
+      "errors": {
+        "noCameras": "Ni nastavljenih kamer",
+        "noObjectLabel": "Oznaka objekta ni izbrana",
+        "generateFailed": "Generiranje primerov ni uspelo: {{error}}",
+        "generationFailed": "Generiranje ni uspelo. Prosim, poskusi ponovno.",
+        "classifyFailed": "Klasifikacija slik ni uspela: {{error}}"
+      },
+      "generateSuccess": "Vzorčne slike so bile uspešno generirane",
+      "missingStatesWarning": {
+        "title": "Manjkajoči primeri stanj",
+        "description": "Za najboljše rezultate je priporočljivo izbrati primere za vsa stanja. Lahko nadaljuješ brez izbire vseh stanj, vendar model ne bo naučen, dokler vsa stanja ne bodo imela slik. Po nadaljevanju uporabi pogled Zadnje klasifikacije za klasifikacijo slik za manjkajoča stanja, nato nauči model."
+      }
+    }
   }
 }

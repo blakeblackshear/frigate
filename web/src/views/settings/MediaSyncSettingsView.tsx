@@ -22,6 +22,7 @@ export default function MediaSyncSettingsView() {
   ]);
   const [dryRun, setDryRun] = useState(true);
   const [force, setForce] = useState(false);
+  const [verbose, setVerbose] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const MEDIA_TYPES = [
@@ -67,6 +68,7 @@ export default function MediaSyncSettingsView() {
           dry_run: dryRun,
           media_types: selectedMediaTypes,
           force: force,
+          verbose: verbose,
         },
         {
           headers: {
@@ -94,7 +96,7 @@ export default function MediaSyncSettingsView() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedMediaTypes, dryRun, force, t]);
+  }, [selectedMediaTypes, dryRun, force, verbose, t]);
 
   return (
     <>
@@ -201,6 +203,25 @@ export default function MediaSyncSettingsView() {
                         id="force"
                         checked={force}
                         onCheckedChange={setForce}
+                        disabled={isJobRunning}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <div className="flex flex-row items-center justify-between gap-4">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="verbose" className="cursor-pointer">
+                          {t("maintenance.sync.verbose")}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t("maintenance.sync.verboseDesc")}
+                        </p>
+                      </div>
+                      <Switch
+                        id="verbose"
+                        checked={verbose}
+                        onCheckedChange={setVerbose}
                         disabled={isJobRunning}
                       />
                     </div>

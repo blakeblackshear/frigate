@@ -304,6 +304,37 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     [pageToggle, model, refreshTrain, refreshDataset, t],
   );
 
+  const onReclassify = useCallback(
+    (image: string, newCategory: string) => {
+      axios
+        .post(
+          `/classification/${model.name}/dataset/${pageToggle}/reclassify`,
+          {
+            id: image,
+            new_category: newCategory,
+          },
+        )
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.reclassifiedImage"), {
+              position: "top-center",
+            });
+            refreshDataset();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.reclassifyFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [pageToggle, model, refreshDataset, t],
+  );
+
   // keyboard
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -535,10 +566,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           contentRef={contentRef}
           modelName={model.name}
           categoryName={pageToggle}
+          classes={Object.keys(dataset || {})}
           images={dataset?.[pageToggle] || []}
           selectedImages={selectedImages}
           onClickImages={onClickImages}
           onDelete={onDelete}
+          onReclassify={onReclassify}
         />
       )}
     </div>
@@ -700,66 +733,72 @@ function LibrarySelector({
               </div>
             </>
           )}
-          {Object.keys(dataset).map((id) => (
-            <DropdownMenuItem
-              key={id}
-              className="group flex items-center justify-between"
-            >
-              <div
-                className="flex-grow cursor-pointer capitalize"
-                onClick={() => setPageToggle(id)}
+          {Object.keys(dataset)
+            .sort((a, b) => {
+              if (a === "none") return 1;
+              if (b === "none") return -1;
+              return a.localeCompare(b);
+            })
+            .map((id) => (
+              <DropdownMenuItem
+                key={id}
+                className="group flex items-center justify-between p-0"
               >
-                {id === "none" ? t("details.none") : id.replaceAll("_", " ")}
-                <span className="ml-2 text-muted-foreground">
-                  ({dataset?.[id].length})
-                </span>
-              </div>
-              {id != "none" && (
-                <div className="flex gap-0.5">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setRenameClass(id);
-                        }}
-                      >
-                        <LuPencil className="size-4 text-primary" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("button.renameCategory")}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDelete(id);
-                        }}
-                      >
-                        <LuTrash2 className="size-4 text-destructive" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("button.deleteCategory")}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
+                <div
+                  className="flex-grow cursor-pointer px-2 py-1.5 capitalize"
+                  onClick={() => setPageToggle(id)}
+                >
+                  {id === "none" ? t("details.none") : id.replaceAll("_", " ")}
+                  <span className="ml-2 text-muted-foreground">
+                    ({dataset?.[id].length})
+                  </span>
                 </div>
-              )}
-            </DropdownMenuItem>
-          ))}
+                {id != "none" && (
+                  <div className="flex gap-0.5 px-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRenameClass(id);
+                          }}
+                        >
+                          <LuPencil className="size-4 text-primary" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("button.renameCategory")}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDelete(id);
+                          }}
+                        >
+                          <LuTrash2 className="size-4 text-destructive" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("button.deleteCategory")}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  </div>
+                )}
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
@@ -770,19 +809,23 @@ type DatasetGridProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
   modelName: string;
   categoryName: string;
+  classes: string[];
   images: string[];
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
   onDelete: (ids: string[]) => void;
+  onReclassify: (image: string, newCategory: string) => void;
 };
 function DatasetGrid({
   contentRef,
   modelName,
   categoryName,
+  classes,
   images,
   selectedImages,
   onClickImages,
   onDelete,
+  onReclassify,
 }: DatasetGridProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
@@ -810,10 +853,23 @@ function DatasetGrid({
             i18nLibrary="views/classificationModel"
             onClick={(data, _) => onClickImages([data.filename], true)}
           >
+            <ClassificationSelectionDialog
+              classes={classes}
+              modelName={modelName}
+              image={image}
+              excludeCategory={categoryName}
+              dialogLabel={t("reclassifyImageAs")}
+              tooltipLabel={t("reclassifyImage")}
+              onCategorize={(newCat) => onReclassify(image, newCat)}
+            >
+              <BlurredIconButton>
+                <TbCategoryPlus className="size-5" />
+              </BlurredIconButton>
+            </ClassificationSelectionDialog>
             <Tooltip>
               <TooltipTrigger>
                 <LuTrash2
-                  className="size-5 cursor-pointer text-primary-variant hover:text-danger"
+                  className="size-5 cursor-pointer text-gray-200 hover:text-danger"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete([image]);

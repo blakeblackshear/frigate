@@ -4,7 +4,7 @@ import re
 import urllib.request
 from typing import Literal
 
-import axengine as axe
+from pydantic import ConfigDict
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
@@ -23,6 +23,12 @@ model_cache_dir = os.path.join(MODEL_CACHE_DIR, "axengine_cache/")
 
 
 class AxengineDetectorConfig(BaseDetectorConfig):
+    """AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime."""
+
+    model_config = ConfigDict(
+        title="AXEngine NPU",
+    )
+
     type: Literal[DETECTOR_KEY]
 
 
@@ -30,6 +36,12 @@ class Axengine(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: AxengineDetectorConfig):
+        try:
+            import axengine as axe
+        except ModuleNotFoundError:
+            raise ImportError("AXEngine is not installed.")
+            return
+
         logger.info("__init__ axengine")
         super().__init__(config)
         self.height = config.model.height

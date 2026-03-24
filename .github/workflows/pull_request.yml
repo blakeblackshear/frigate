@@ -27,6 +27,9 @@ jobs:
       - name: Lint
         run: npm run lint
         working-directory: ./web
+      - name: Check i18n keys
+        run: npm run i18n:extract:ci
+        working-directory: ./web
 
   web_test:
     name: Web - Test

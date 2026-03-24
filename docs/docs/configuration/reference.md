@@ -16,6 +16,8 @@ mqtt:
   # Optional: Enable mqtt server (default: shown below)
   enabled: True
   # Required: host name
+  # NOTE: MQTT host can be specified with an environment variable or docker secrets that must begin with 'FRIGATE_'.
+  #       e.g. host: '{FRIGATE_MQTT_HOST}'
   host: mqtt.server.com
   # Optional: port (default: shown below)
   port: 1883
@@ -616,13 +618,12 @@ record:
       #       never stored, so setting the mode to "all" here won't bring them back.
       mode: motion
 
-# Optional: Configuration for the jpg snapshots written to the clips directory for each tracked object
+# Optional: Configuration for the snapshots written to the clips directory for each tracked object
+# Timestamp, bounding_box, crop and height settings are applied by default to API requests for snapshots.
 # NOTE: Can be overridden at the camera level
 snapshots:
-  # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
+  # Optional: Enable writing snapshot images to /media/frigate/clips (default: shown below)
   enabled: False
-  # Optional: save a clean copy of the snapshot image (default: shown below)
-  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
@@ -640,8 +641,8 @@ snapshots:
     # Optional: Per object retention days
     objects:
       person: 15
-  # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
-  quality: 70
+  # Optional: quality of the encoded snapshot image, 0-100 (default: shown below)
+  quality: 60
 
 # Optional: Configuration for semantic search capability
 semantic_search:
@@ -950,6 +951,8 @@ cameras:
     onvif:
       # Required: host of the camera being connected to.
       # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
+      # NOTE: ONVIF user, and password can be specified with environment variables or docker secrets
+      #       that must begin with 'FRIGATE_'. e.g. host: '{FRIGATE_ONVIF_USERNAME}'
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
       port: 8000
@@ -1026,6 +1029,49 @@ cameras:
         actions:
           - notification
 
+    # Optional: Named config profiles with partial overrides that can be activated at runtime.
+    # NOTE: Profile names must be defined in the top-level 'profiles' section.
+    profiles:
+      # Required: name of the profile (must match a top-level profile definition)
+      away:
+        # Optional: Enable or disable the camera when this profile is active (default: not set, inherits base)
+        enabled: true
+        # Optional: Override audio settings
+        audio:
+          enabled: true
+        # Optional: Override birdseye settings
+        # birdseye:
+        # Optional: Override detect settings
+        detect:
+          enabled: true
+        # Optional: Override face_recognition settings
+        # face_recognition:
+        # Optional: Override lpr settings
+        # lpr:
+        # Optional: Override motion settings
+        # motion:
+        # Optional: Override notification settings
+        notifications:
+          enabled: true
+        # Optional: Override objects settings
+        objects:
+          track:
+            - person
+            - car
+        # Optional: Override record settings
+        record:
+          enabled: true
+        # Optional: Override review settings
+        review:
+          alerts:
+            labels:
+              - person
+              - car
+        # Optional: Override snapshot settings
+        # snapshots:
+        # Optional: Override or add zones (merged with base zones)
+        # zones:
+
 # Optional
 ui:
   # Optional: Set a timezone to use in the UI (default: use browser local time)
@@ -1092,4 +1138,14 @@ camera_groups:
     icon: LuCar
     # Required: index of this group
     order: 0
+
+# Optional: Profile definitions for named config overrides
+# NOTE: Profile names defined here can be referenced in camera profiles sections
+profiles:
+  # Required: name of the profile (machine name used internally)
+  home:
+    # Required: display name shown in the UI
+    friendly_name: Home
+  away:
+    friendly_name: Away
 ```

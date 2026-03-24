@@ -5,7 +5,9 @@
     "all": {
       "title": "모든 레이블",
       "short": "레이블"
-    }
+    },
+    "count_one": "레이블 {{count}}개",
+    "count_other": "레이블 {{count}}개"
   },
   "zones": {
     "label": "구역",
@@ -15,7 +17,7 @@
     }
   },
   "dates": {
-    "selectPreset": "프리셋 선택",
+    "selectPreset": "프리셋 선택…",
     "all": {
       "title": "모든 날짜",
       "short": "날짜"
@@ -31,7 +33,9 @@
     "label": "분류",
     "all": {
       "title": "모든 분류"
-    }
+    },
+    "count_one": "{{count}}개 클래스",
+    "count_other": "{{count}}개 클래스"
   },
   "reset": {
     "label": "기본값으로 필터 초기화"

@@ -71,7 +71,7 @@ To exclude a specific camera from alerts or detections, simply provide an empty 
 
 For example, to exclude objects on the camera _gatecamera_ from any detections, include this in your config:
 
-```yaml
+```yaml {3-5}
 cameras:
   gatecamera:
     review:

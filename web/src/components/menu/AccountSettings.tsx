@@ -126,19 +126,21 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
 
           <DropdownMenuSeparator className={isDesktop ? "my-2" : "my-2"} />
 
-          {profile?.username && profile.username !== "anonymous" && (
-            <MenuItem
-              className={cn(
-                "flex w-full items-center gap-2",
-                isDesktop ? "cursor-pointer" : "p-2 text-sm",
-              )}
-              aria-label={t("menu.user.setPassword", { ns: "common" })}
-              onClick={() => setPasswordDialogOpen(true)}
-            >
-              <LuSquarePen className="mr-2 size-4" />
-              <span>{t("menu.user.setPassword", { ns: "common" })}</span>
-            </MenuItem>
-          )}
+          {config?.auth?.enabled !== false &&
+            profile?.username &&
+            profile.username !== "anonymous" && (
+              <MenuItem
+                className={cn(
+                  "flex w-full items-center gap-2",
+                  isDesktop ? "cursor-pointer" : "p-2 text-sm",
+                )}
+                aria-label={t("menu.user.setPassword", { ns: "common" })}
+                onClick={() => setPasswordDialogOpen(true)}
+              >
+                <LuSquarePen className="mr-2 size-4" />
+                <span>{t("menu.user.setPassword", { ns: "common" })}</span>
+              </MenuItem>
+            )}
 
           <MenuItem
             className={cn(

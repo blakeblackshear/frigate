@@ -34,7 +34,11 @@ type ClassificationSelectionDialogProps = {
   classes: string[];
   modelName: string;
   image: string;
-  onRefresh: () => void;
+  onRefresh?: () => void;
+  onCategorize?: (category: string) => void;
+  excludeCategory?: string;
+  dialogLabel?: string;
+  tooltipLabel?: string;
   children: ReactNode;
 };
 export default function ClassificationSelectionDialog({
@@ -43,12 +47,21 @@ export default function ClassificationSelectionDialog({
   modelName,
   image,
   onRefresh,
+  onCategorize,
+  excludeCategory,
+  dialogLabel,
+  tooltipLabel,
   children,
 }: ClassificationSelectionDialogProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
   const onCategorizeImage = useCallback(
     (category: string) => {
+      if (onCategorize) {
+        onCategorize(category);
+        return;
+      }
+
       axios
         .post(`/classification/${modelName}/dataset/categorize`, {
           category,
@@ -59,7 +72,7 @@ export default function ClassificationSelectionDialog({
             toast.success(t("toast.success.categorizedImage"), {
               position: "top-center",
             });
-            onRefresh();
+            onRefresh?.();
           }
         })
         .catch((error) => {
@@ -72,7 +85,13 @@ export default function ClassificationSelectionDialog({
           });
         });
     },
-    [modelName, image, onRefresh, t],
+    [modelName, image, onRefresh, onCategorize, t],
+  );
+
+  const filteredClasses = useMemo(
+    () =>
+      excludeCategory ? classes.filter((c) => c !== excludeCategory) : classes,
+    [classes, excludeCategory],
   );
 
   const isChildButton = useMemo(
@@ -111,6 +130,7 @@ export default function ClassificationSelectionDialog({
           </SelectorTrigger>
           <SelectorContent
             className={cn("", isMobile && "mx-1 gap-2 rounded-t-2xl px-4")}
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             {isMobile && (
               <DrawerHeader className="sr-only">
@@ -118,24 +138,32 @@ export default function ClassificationSelectionDialog({
                 <DrawerDescription>Details</DrawerDescription>
               </DrawerHeader>
             )}
-            <DropdownMenuLabel>{t("categorizeImageAs")}</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {dialogLabel ?? t("categorizeImageAs")}
+            </DropdownMenuLabel>
             <div
               className={cn(
                 "flex max-h-[40dvh] flex-col overflow-y-auto",
                 isMobile && "gap-2 pb-4",
               )}
             >
-              {classes.sort().map((category) => (
-                <SelectorItem
-                  key={category}
-                  className="flex cursor-pointer gap-2 smart-capitalize"
-                  onClick={() => onCategorizeImage(category)}
-                >
-                  {category === "none"
-                    ? t("details.none")
-                    : category.replaceAll("_", " ")}
-                </SelectorItem>
-              ))}
+              {filteredClasses
+                .sort((a, b) => {
+                  if (a === "none") return 1;
+                  if (b === "none") return -1;
+                  return a.localeCompare(b);
+                })
+                .map((category) => (
+                  <SelectorItem
+                    key={category}
+                    className="flex cursor-pointer gap-2 smart-capitalize"
+                    onClick={() => onCategorizeImage(category)}
+                  >
+                    {category === "none"
+                      ? t("details.none")
+                      : category.replaceAll("_", " ")}
+                  </SelectorItem>
+                ))}
               <Separator />
               <SelectorItem
                 className="flex cursor-pointer gap-2 smart-capitalize"
@@ -146,7 +174,7 @@ export default function ClassificationSelectionDialog({
             </div>
           </SelectorContent>
         </Selector>
-        <TooltipContent>{t("categorizeImage")}</TooltipContent>
+        <TooltipContent>{tooltipLabel ?? t("categorizeImage")}</TooltipContent>
       </Tooltip>
     </div>
   );

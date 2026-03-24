@@ -1,31 +1,31 @@
 {
   "search": "Iskanje",
   "savedSearches": "Shranjena iskanja",
-  "searchFor": "Iskanje za {{inputValue}}",
+  "searchFor": "Išči: {{inputValue}}",
   "button": {
-    "clear": "Izbriši iskanje",
+    "clear": "Počisti iskanje",
     "save": "Shrani iskanje",
     "delete": "Izbriši shranjeno iskanje",
-    "filterInformation": "Informacije o filtru",
-    "filterActive": "Aktivirani filtri"
+    "filterInformation": "Informacije o filtrih",
+    "filterActive": "Aktivni filtri"
   },
   "filter": {
     "label": {
       "cameras": "Kamere",
       "labels": "Oznake",
       "zones": "Območja",
-      "sub_labels": "Podoznake",
-      "search_type": "Tip iskanja",
+      "sub_labels": "Pod-oznake",
+      "search_type": "Vrsta iskanja",
       "time_range": "Časovni razpon",
       "before": "Pred",
       "after": "Po",
-      "min_score": "Najmanj točk",
-      "max_score": "Največ točk",
+      "min_score": "Najnižja ocena",
+      "max_score": "Najvišja ocena",
       "recognized_license_plate": "Prepoznana registrska tablica",
       "has_clip": "Ima posnetek",
       "max_speed": "Najvišja hitrost",
       "min_speed": "Najnižja hitrost",
-      "has_snapshot": "Ima sliko",
+      "has_snapshot": "Ima sliko (snapshot)",
       "attributes": "Atributi"
     },
     "searchType": {
@@ -34,40 +34,40 @@
     },
     "toast": {
       "error": {
-        "beforeDateBeLaterAfter": "Datum »pred« mora biti poznejši od datuma »po«.",
-        "afterDatebeEarlierBefore": "Datum »po« mora biti zgodnejši od datuma »pred«.",
-        "minScoreMustBeLessOrEqualMaxScore": "Polje 'Najmanj točk' mora biti manjše ali enako polju 'Največ točk'.",
-        "maxScoreMustBeGreaterOrEqualMinScore": "Polje 'Največ točk' mora biti večje ali enako polju 'Najmanj točk'.",
-        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Polje 'Najvišja hitrost' mora biti večje ali enako polju 'Najnižja hitrost'.",
-        "minSpeedMustBeLessOrEqualMaxSpeed": "Polje 'Najnižja hitrost' mora biti manjše ali enako 'Najvišji hitrosti'."
+        "beforeDateBeLaterAfter": "Datum 'Pred' mora biti poznejši od datuma 'Po'.",
+        "afterDatebeEarlierBefore": "Datum 'Po' mora biti zgodnejši od datuma 'Pred'.",
+        "minScoreMustBeLessOrEqualMaxScore": "Najnižja ocena mora biti manjša ali enaka najvišji oceni.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Najvišja ocena mora biti večja ali enaka najnižji oceni.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Najvišja hitrost mora biti večja ali enaka najnižji hitrosti.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Najnižja hitrost mora biti manjša ali enaka najvišji hitrosti."
       }
     },
     "tips": {
-      "title": "Kako uporabljati besedilne filtre",
+      "title": "Kako uporabljati tekstovne filtre",
       "desc": {
-        "text": "Filtri vam pomagajo zožati rezultate iskanja. Tukaj je, kako jih uporabiti v vnosnem polju:",
-        "step1": "Vnesite ime ključa filtra, ki mu sledi dvopičje (npr. »kamere:«).",
-        "step2": "Izberite vrednost iz predlogov, ali vpišite svojo.",
-        "step3": "Uporabite več filtrov tako, da jih dodate enega za drugim s presledkom vmes.",
-        "step4": "Datumski filtri uporabljajo format: {{DateFormat}}.",
-        "step5": "Časovni filter uporablja format: {{exampleTime}}.",
-        "step6": "Filter izbrišete s klikom na 'x' poleg njih.",
+        "text": "Filtri ti pomagajo zožiti rezultate iskanja. Takole jih uporabiš v vnosnem polju:",
+        "step1": "Vnesi ime ključa filtra, ki mu sledi dvopičje (npr. \"cameras:\").",
+        "step2": "Izberi vrednost iz predlogov ali vnesi svojo.",
+        "step3": "Uporabiš lahko več filtrov hkrati tako, da jih dodaš enega za drugim s presledkom vmes.",
+        "step4": "Datumski filtri (before: in after:) uporabljajo format {{DateFormat}}.",
+        "step5": "Filter časovnega razpona uporablja format {{exampleTime}}.",
+        "step6": "Filtre odstraniš s klikom na 'x' poleg njih.",
         "exampleLabel": "Primer:"
       }
     },
     "header": {
-      "currentFilterType": "Filtriraj vrednosti",
+      "currentFilterType": "Vrednosti filtrov",
       "noFilters": "Filtri",
       "activeFilters": "Aktivni filtri"
     }
   },
-  "trackedObjectId": "ID sledečega objekta",
+  "trackedObjectId": "ID sledenega objekta",
   "similaritySearch": {
-    "title": "Iskanje podobnosti",
-    "active": "Iskanje podobnosti je aktivno",
-    "clear": "Izbriši iskanje podobnosti"
+    "title": "Iskanje po podobnosti",
+    "active": "Iskanje po podobnosti je aktivno",
+    "clear": "Počisti iskanje po podobnosti"
   },
   "placeholder": {
-    "search": "Iskanje …"
+    "search": "Išči…"
   }
 }

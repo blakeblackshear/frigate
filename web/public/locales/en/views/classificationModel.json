@@ -23,15 +23,18 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Deleted Class",
-      "deletedImage": "Deleted Images",
       "deletedModel_one": "Successfully deleted {{count}} model",
       "deletedModel_other": "Successfully deleted {{count}} models",
       "categorizedImage": "Successfully Classified Image",
+      "reclassifiedImage": "Successfully Reclassified Image",
       "trainedModel": "Successfully trained model.",
       "trainingModel": "Successfully started model training.",
       "updatedModel": "Successfully updated model configuration",
-      "renamedCategory": "Successfully renamed class to {{name}}"
+      "renamedCategory": "Successfully renamed class to {{name}}",
+      "deletedCategory_one": "Deleted {{count}} class",
+      "deletedCategory_other": "Deleted {{count}} classes",
+      "deletedImage_one": "Deleted {{count}} image",
+      "deletedImage_other": "Deleted {{count}} images"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
@@ -41,7 +44,8 @@
       "trainingFailed": "Model training failed. Check Frigate logs for details.",
       "trainingFailedToStart": "Failed to start model training: {{errorMessage}}",
       "updateModelFailed": "Failed to update model: {{errorMessage}}",
-      "renameCategoryFailed": "Failed to rename class: {{errorMessage}}"
+      "renameCategoryFailed": "Failed to rename class: {{errorMessage}}",
+      "reclassifyFailed": "Failed to reclassify image: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -90,6 +94,8 @@
   },
   "categorizeImageAs": "Classify Image As:",
   "categorizeImage": "Classify Image",
+  "reclassifyImageAs": "Reclassify Image As:",
+  "reclassifyImage": "Reclassify Image",
   "menu": {
     "objects": "Objects",
     "states": "States"
@@ -178,9 +184,14 @@
         "classifyFailed": "Failed to classify images: {{error}}"
       },
       "generateSuccess": "Successfully generated sample images",
+      "refreshExamples": "Generate new examples",
+      "refreshConfirm": {
+        "title": "Generate New Examples?",
+        "description": "This will generate a new set of images and clear all selections, including any previous classes. You will need to re-select examples for all classes."
+      },
       "missingStatesWarning": {
-        "title": "Missing State Examples",
-        "description": "It's recommended to select examples for all states for best results. You can continue without selecting all states, but the model will not be trained until all states have images. After continuing, use the Recent Classifications view to classify images for the missing states, then train the model."
+        "title": "Missing Class Examples",
+        "description": "Not all classes have examples. Try generating new examples to find the missing class, or continue and use the Recent Classifications view to add images later."
       }
     }
   }

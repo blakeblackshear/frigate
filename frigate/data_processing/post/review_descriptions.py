@@ -324,9 +324,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         end_time: float,
     ) -> list[str]:
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-        file_start = f"preview_{camera}"
-        start_file = f"{file_start}-{start_time}.webp"
-        end_file = f"{file_start}-{end_time}.webp"
+        file_start = f"preview_{camera}-"
+        start_file = f"{file_start}{start_time}.webp"
+        end_file = f"{file_start}{end_time}.webp"
         all_frames = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -463,6 +463,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         thumbs = []
         for idx, thumb_path in enumerate(frame_paths):
             thumb_data = cv2.imread(thumb_path)
+
+            if thumb_data is None:
+                logger.warning(
+                    "Could not read preview frame at %s, skipping", thumb_path
+                )
+                continue
+
             ret, jpg = cv2.imencode(
                 ".jpg", thumb_data, [int(cv2.IMWRITE_JPEG_QUALITY), 100]
             )
@@ -521,7 +528,7 @@ def run_analysis(
     for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
         object_type = verified_label.replace("-verified", "").replace("_", " ")
         name = titlecase(sub_labels_list[i].replace("_", " "))
-        unified_objects.append(f"{name} ({object_type})")
+        unified_objects.append(f"{name} ← {object_type}")
 
     for label in objects_list:
         if "-verified" in label:

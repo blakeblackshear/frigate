@@ -105,9 +105,9 @@ class PlusApi:
 
     def upload_image(self, image: ndarray, camera: str) -> str:
         r = self._get("image/signed_urls")
-        presigned_urls = r.json()
         if not r.ok:
             raise Exception("Unable to get signed urls")
+        presigned_urls = r.json()
 
         # resize and submit original
         files = {"file": get_jpg_bytes(image, 1920, 85)}

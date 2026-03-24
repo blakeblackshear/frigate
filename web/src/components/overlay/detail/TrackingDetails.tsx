@@ -41,6 +41,7 @@ import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { VideoResolutionType } from "@/types/live";
+import { VodManifest } from "@/types/playback";
 
 type TrackingDetailsProps = {
   className?: string;
@@ -133,19 +134,64 @@ export function TrackingDetails({
     },
   );
 
+  // Fetch the VOD manifest JSON to get the actual clipFrom after keyframe
+  // snapping. The backend may snap clipFrom backwards to a keyframe, making
+  // the video start earlier than the requested time.
+  const vodManifestUrl = useMemo(() => {
+    if (!event.camera) return null;
+    const startTime =
+      event.start_time + annotationOffset / 1000 - REVIEW_PADDING;
+    const endTime =
+      (event.end_time ?? Date.now() / 1000) +
+      annotationOffset / 1000 +
+      REVIEW_PADDING;
+    return `vod/clip/${event.camera}/start/${startTime}/end/${endTime}`;
+  }, [event, annotationOffset]);
+
+  const { data: vodManifest } = useSWR<VodManifest>(vodManifestUrl, null, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 30000,
+  });
+
+  // Derive the actual video start time from the VOD manifest's first clip.
+  // Without this correction the timeline-to-player-time mapping is off by
+  // the keyframe preroll amount.
+  const actualVideoStart = useMemo(() => {
+    const videoStartTime = eventStartRecord - REVIEW_PADDING;
+
+    if (!vodManifest?.sequences?.[0]?.clips?.[0] || !recordings?.length) {
+      return videoStartTime;
+    }
+
+    const firstClip = vodManifest.sequences[0].clips[0];
+
+    // Guard: clipFrom is only expected when the first recording starts before
+    // the requested start. If this doesn't hold, fall back.
+    if (recordings[0].start_time >= videoStartTime) {
+      return recordings[0].start_time;
+    }
+
+    if (firstClip.clipFrom !== undefined) {
+      // clipFrom is in milliseconds from the start of the first recording
+      return recordings[0].start_time + firstClip.clipFrom / 1000;
+    }
+
+    // clipFrom absent means the full recording is included (keyframe probe failed)
+    return recordings[0].start_time;
+  }, [vodManifest, recordings, eventStartRecord]);
+
   // Convert a timeline timestamp to actual video player time, accounting for
   // motion-only recording gaps. Uses the same algorithm as DynamicVideoController.
   const timestampToVideoTime = useCallback(
     (timestamp: number): number => {
       if (!recordings || recordings.length === 0) {
         // Fallback to simple calculation if no recordings data
-        return timestamp - (eventStartRecord - REVIEW_PADDING);
+        return timestamp - actualVideoStart;
       }
 
-      const videoStartTime = eventStartRecord - REVIEW_PADDING;
-
-      // If timestamp is before video start, return 0
-      if (timestamp < videoStartTime) return 0;
+      // If timestamp is before actual video start, return 0
+      if (timestamp < actualVideoStart) return 0;
 
       // Check if timestamp is before the first recording or after the last
       if (
@@ -159,10 +205,10 @@ export function TrackingDetails({
       // Calculate the inpoint offset - the HLS video may start partway through the first segment
       let inpointOffset = 0;
       if (
-        videoStartTime > recordings[0].start_time &&
-        videoStartTime < recordings[0].end_time
+        actualVideoStart > recordings[0].start_time &&
+        actualVideoStart < recordings[0].end_time
       ) {
-        inpointOffset = videoStartTime - recordings[0].start_time;
+        inpointOffset = actualVideoStart - recordings[0].start_time;
       }
 
       let seekSeconds = 0;
@@ -180,7 +226,7 @@ export function TrackingDetails({
           if (segment === recordings[0]) {
             // For the first segment, account for the inpoint offset
             seekSeconds +=
-              timestamp - Math.max(segment.start_time, videoStartTime);
+              timestamp - Math.max(segment.start_time, actualVideoStart);
           } else {
             seekSeconds += timestamp - segment.start_time;
           }
@@ -190,7 +236,7 @@ export function TrackingDetails({
 
       return seekSeconds;
     },
-    [recordings, eventStartRecord],
+    [recordings, actualVideoStart],
   );
 
   // Convert video player time back to timeline timestamp, accounting for
@@ -199,19 +245,16 @@ export function TrackingDetails({
     (playerTime: number): number => {
       if (!recordings || recordings.length === 0) {
         // Fallback to simple calculation if no recordings data
-        const videoStartTime = eventStartRecord - REVIEW_PADDING;
-        return playerTime + videoStartTime;
+        return playerTime + actualVideoStart;
       }
-
-      const videoStartTime = eventStartRecord - REVIEW_PADDING;
 
       // Calculate the inpoint offset - the video may start partway through the first segment
       let inpointOffset = 0;
       if (
-        videoStartTime > recordings[0].start_time &&
-        videoStartTime < recordings[0].end_time
+        actualVideoStart > recordings[0].start_time &&
+        actualVideoStart < recordings[0].end_time
       ) {
-        inpointOffset = videoStartTime - recordings[0].start_time;
+        inpointOffset = actualVideoStart - recordings[0].start_time;
       }
 
       let timestamp = 0;
@@ -228,7 +271,7 @@ export function TrackingDetails({
           if (segment === recordings[0]) {
             // For the first segment, add the inpoint offset
             timestamp =
-              Math.max(segment.start_time, videoStartTime) +
+              Math.max(segment.start_time, actualVideoStart) +
               (playerTime - totalTime);
           } else {
             timestamp = segment.start_time + (playerTime - totalTime);
@@ -241,7 +284,7 @@ export function TrackingDetails({
 
       return timestamp;
     },
-    [recordings, eventStartRecord],
+    [recordings, actualVideoStart],
   );
 
   eventSequence?.map((event) => {
@@ -1080,7 +1123,7 @@ function LifecycleIconRow({
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
-            {isAdmin && config?.plus?.enabled && item.data.box && (
+            {isAdmin && (config?.plus?.enabled || item.data.box) && (
               <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                 <DropdownMenuTrigger>
                   <div className="rounded p-1 pr-2" role="button">

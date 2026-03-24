@@ -6,80 +6,80 @@
     "delete": {
       "label": "Izbriši skupino kamer",
       "confirm": {
-        "title": "Potrdite izbris",
-        "desc": "Ali ste prepričani, da želite izbrisati skupino kamer z imenom <em>{{name}}</em>?"
+        "title": "Potrdi brisanje",
+        "desc": "Ali si prepričan, da želiš izbrisati skupino kamer <em>{{name}}</em>?"
       }
     },
     "camera": {
       "setting": {
-        "desc": "Spremeni možnosti prenosa v živo za nadzorno ploščo te skupine kamer. <em>Te nastavitve so specifične za napravo/brskalnik.</em>",
+        "desc": "Spremeni možnosti prenosa v živo za nadzorno ploščo te skupine. <em>Te nastavitve so specifične za napravo/brskalnik.</em>",
         "streamMethod": {
           "method": {
             "smartStreaming": {
-              "desc": "Pametno pretakanje bo posodabljalo sliko vaše kamere enkrat na minuto, kadar ni zaznane nobene aktivnosti, da prihrani pasovno širino in vire. Ko je zaznana aktivnost, se slika brez prekinitve preklopi na prenos v živo.",
+              "desc": "Pametno pretakanje posodobi sliko kamere enkrat na minuto, ko ni zaznane dejavnosti, da prihrani pasovno širino in vire. Ko je zaznana dejavnost, se slika neopazno preklopi na prenos v živo.",
               "label": "Pametno pretakanje (priporočeno)"
             },
             "continuousStreaming": {
               "desc": {
-                "warning": "Neprekinjeno pretakanje lahko povzroči visoko porabo pasovne širine in težave z zmogljivostjo. Uporabljajte previdno.",
-                "title": "Slika kamere bo na nadzorni plošči vedno prenos v živo, tudi če ni zaznane nobene aktivnosti."
+                "warning": "Neprekinjeno pretakanje lahko povzroči visoko porabo pasovne širine in težave z zmogljivostjo. Uporabljaj previdno.",
+                "title": "Slika kamere bo vedno v živo, ko je vidna na nadzorni plošči, tudi če ni zaznane dejavnosti."
               },
               "label": "Neprekinjeno pretakanje"
             },
             "noStreaming": {
-              "desc": "Slike kamere se bodo posodabljale enkrat na minuto.",
+              "desc": "Slike kamere se bodo posodobile le enkrat na minuto, prenos v živo pa se ne bo izvajal.",
               "label": "Brez pretakanja"
             }
           },
-          "label": "Metoda pretakanja",
-          "placeholder": "Izberiti metodo pretakanja"
+          "label": "Način pretakanja",
+          "placeholder": "Izberi način pretakanja"
         },
         "audio": {
           "tips": {
-            "title": "Izhod za zvok mora biti nastavljen v go2rtc za ta tok.",
+            "title": "Za ta tok mora kamera oddajati zvok, ki mora biti konfiguriran v go2rtc.",
             "document": "Preberite dokumentacijo "
           }
         },
-        "label": "Nastavitve pretakanja kamer",
-        "title": "Nastavitve pretakanja kamere {{cameraName}}",
-        "audioIsAvailable": "Zvok za ta tok je na voljo",
-        "audioIsUnavailable": "Zvok za ta tok ni na voljo",
+        "label": "Nastavitve pretakanja kamere",
+        "title": "Nastavitve pretakanja za {{cameraName}}",
+        "audioIsAvailable": "Zvok je na voljo za ta tok",
+        "audioIsUnavailable": "Zvok ni na voljo za ta tok",
         "compatibilityMode": {
-          "label": "Način združjivosti",
-          "desc": "To možnost omogočite le, če se v prenosu v živo vaše kamere pojavljajo barvni artefakti in diagonalna črta na desni strani slike."
+          "label": "Združljivostni način",
+          "desc": "To možnost omogoči le, če so v prenosu v živo vidni barvni popački ali diagonalna črta na desni strani slike."
         },
-        "placeholder": "Izberite tok",
+        "placeholder": "Izberi tok",
         "stream": "Tok"
       },
-      "birdseye": "Ptičji pogled"
+      "birdseye": "Ptičja perspektiva"
     },
     "name": {
       "label": "Ime",
-      "placeholder": "Vpišite ime …",
+      "placeholder": "Vnesi ime…",
       "errorMessage": {
-        "mustLeastCharacters": "Ime skupine kamer mora imeti vsaj 2 znaka.",
-        "exists": "Skupina kamer s tem imenom že obstaja.",
-        "nameMustNotPeriod": "Ime skupine kamer ne sme vsebovati pike.",
+        "mustLeastCharacters": "Ime skupine mora imeti vsaj 2 znaka.",
+        "exists": "Skupina s tem imenom že obstaja.",
+        "nameMustNotPeriod": "Ime skupine ne sme vsebovati pike.",
         "invalid": "Neveljavno ime skupine kamer."
       }
     },
     "cameras": {
       "label": "Kamere",
-      "desc": "Izberite kamere za to skupino."
+      "desc": "Izberi kamere za to skupino."
     },
     "icon": "Ikona",
-    "success": "Skupina kamer z imenom ({{name}}) je bila shranjena."
+    "success": "Skupina kamer ({{name}}) je bila shranjena."
   },
   "debug": {
     "options": {
       "label": "Nastavitve",
       "title": "Možnosti",
-      "showOptions": "Prikaži Možnosti",
-      "hideOptions": "Skrij Možnosti"
+      "showOptions": "Pokaži možnosti",
+      "hideOptions": "Skrij možnosti"
     },
-    "boundingBox": "Omejitve okvirja",
+    "boundingBox": "Okvir zaznave",
     "timestamp": "Časovni žig",
-    "zones": "Območja",
+    "zones": "Cone",
     "mask": "Maska",
     "motion": "Gibanje",
     "regions": "Regije"

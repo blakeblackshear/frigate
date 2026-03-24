@@ -117,11 +117,15 @@ def get_cpu_stats() -> dict[str, dict]:
         "mem": str(system_mem.percent),
     }
 
+    keywords = ["ffmpeg", "go2rtc", "frigate.", "python3"]
     for process in psutil.process_iter(["pid", "name", "cpu_percent", "cmdline"]):
         pid = str(process.info["pid"])
         try:
             cpu_percent = process.info["cpu_percent"]
             cmdline = " ".join(process.info["cmdline"]).rstrip()
+
+            if not any(keyword in cmdline for keyword in keywords):
+                continue
 
             with open(f"/proc/{pid}/stat", "r") as f:
                 stats = f.readline().split()

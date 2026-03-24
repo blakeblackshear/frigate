@@ -1,1 +1,44 @@
-{}
+{
+    "detect": {
+        "stationary": {
+            "label": "Mozdulatlan tárgyak beállítása",
+            "interval": {
+                "label": "Mozdulatlansági intervallum",
+                "description": "Milyen gyakorisággal (képkockákban) kell futtatni az észlelési ellenőrzést a mozdulatlan objektumok megerősítéséhez."
+            },
+            "threshold": {
+                "label": "Mozdulatlansági küszöbérték",
+                "description": "Képkockák száma amennyitől az objektumot mozdulatlannak jelöli meg."
+            },
+            "max_frames": {
+                "label": "Max képkockák",
+                "description": "Az a korlát, ami a mozdulatlan objektumokat követi mielőtt elengedi őket.",
+                "default": {
+                    "label": "Alapértelmezett max képkocka szám",
+                    "description": "Alapértelmezett maximális képkockák száma, amelyeket egy mozdulatlan objektum követése előtt meg kell jeleníteni."
+                },
+                "objects": {
+                    "label": "Objektum max képkockáinak száma",
+                    "description": "Objektumonkénti felülírások a maximális képkockák számához, hogy nyomon lehessen követni a mozdulatlan objektumokat."
+                }
+            },
+            "classifier": {
+                "label": "Vizuális osztályozó engedélyezése",
+                "description": "Vizuális osztályozóval lehet precízen álló tárgyakat felismerni, még akkor is, ha a keretező négyzetek mozognak."
+            },
+            "description": "Beállítások az egy ideig mozdulatlanul maradó tárgyak észleléséhez és kezeléséhez."
+        }
+    },
+    "version": {
+        "label": "Aktuális konfiguráció verzió",
+        "description": "Az aktív konfiguráció numerikus vagy karakterláncos változata, amely segít felismerni az migrálásokat vagy a formátumváltozásokat."
+    },
+    "safe_mode": {
+        "label": "Biztonságos mód",
+        "description": "Ha engedélyezve van, a Frigate programot biztonsági módban indítja el, csökkentett funkciókkal a hibaelhárítás érdekében."
+    },
+    "environment_vars": {
+        "label": "Környezeti változók",
+        "description": "A Home Assistant OS rendszerben a Frigate folyamat számára beállítandó környezeti változói. A nem HAOS-felhasználóknak helyette a Docker konfigurációját kell használniuk."
+    }
+}

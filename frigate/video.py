@@ -515,7 +515,7 @@ class CameraWatchdog(threading.Thread):
 
                         for role in p["roles"]:
                             self.requestor.send_data(
-                                f"{self.config.name}/status/{role}", "offline"
+                                f"{self.config.name}/status/{role.value}", "offline"
                             )
 
                         continue
@@ -528,7 +528,7 @@ class CameraWatchdog(threading.Thread):
 
                 for role in p["roles"]:
                     self.requestor.send_data(
-                        f"{self.config.name}/status/{role}", "offline"
+                        f"{self.config.name}/status/{role.value}", "offline"
                     )
 
                 p["logpipe"].dump()

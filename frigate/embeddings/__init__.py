@@ -205,14 +205,14 @@ class EmbeddingsContext:
         )
 
     def get_face_ids(self, name: str) -> list[str]:
-        sql_query = f"""
+        sql_query = """
             SELECT
                 id
             FROM vec_descriptions
-            WHERE id LIKE '%{name}%'
+            WHERE id LIKE ?
         """
 
-        return self.db.execute_sql(sql_query).fetchall()
+        return self.db.execute_sql(sql_query, (f"%{name}%",)).fetchall()
 
     def reprocess_face(self, face_file: str) -> dict[str, Any]:
         return self.requestor.send_data(

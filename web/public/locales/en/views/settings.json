@@ -8,12 +8,19 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
-    "general": "Profile Settings - Frigate",
+    "general": "UI Settings - Frigate",
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
     "notifications": "Notification Settings - Frigate",
-    "maintenance": "Maintenance - Frigate"
+    "maintenance": "Maintenance - Frigate",
+    "profiles": "Profiles - Frigate"
+  },
+  "button": {
+    "overriddenGlobal": "Overridden (Global)",
+    "overriddenGlobalTooltip": "This camera overrides global configuration settings in this section",
+    "overriddenBaseConfig": "Overridden (Base Config)",
+    "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section"
   },
   "menu": {
     "general": "General",
@@ -22,7 +29,8 @@
     "integrations": "Integrations",
     "cameras": "Camera configuration",
     "ui": "UI",
-    "profileSettings": "Profile settings",
+    "uiSettings": "UI settings",
+    "profiles": "Profiles",
     "globalDetect": "Object detection",
     "globalRecording": "Recording",
     "globalSnapshots": "Snapshots",
@@ -47,6 +55,7 @@
     "systemDetectorHardware": "Detector hardware",
     "systemDetectionModel": "Detection model",
     "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantic search",
     "integrationGenerativeAi": "Generative AI",
     "integrationFaceRecognition": "Face recognition",
@@ -83,6 +92,7 @@
     "triggers": "Triggers",
     "debug": "Debug",
     "frigateplus": "Frigate+",
+    "maintenance": "Maintenance",
     "mediaSync": "Media sync",
     "regionGrid": "Region grid"
   },
@@ -101,6 +111,9 @@
       "global": "Global",
       "camera": "Camera: {{cameraName}}"
     },
+    "profile": {
+      "label": "Profile"
+    },
     "field": {
       "label": "Field"
     },
@@ -114,7 +127,7 @@
     "noCamera": "No Camera"
   },
   "general": {
-    "title": "Profile Settings",
+    "title": "UI Settings",
     "liveDashboard": {
       "title": "Live Dashboard",
       "automaticLiveView": {
@@ -473,6 +486,14 @@
       "toast": {
         "success": "Camera {{cameraName}} saved successfully"
       }
+    },
+    "profiles": {
+      "title": "Profile Camera Overrides",
+      "selectLabel": "Select profile",
+      "description": "Configure which cameras are enabled or disabled when a profile is activated. Cameras set to \"Inherit\" keep their base enabled state.",
+      "inherit": "Inherit",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
     }
   },
   "cameraReview": {
@@ -494,7 +515,6 @@
     "reviewClassification": {
       "title": "Review Classification",
       "desc": "Frigate categorizes review items as Alerts and Detections. By default, all <em>person</em> and <em>car</em> objects are considered Alerts. You can refine categorization of your review items by configuring required zones for them.",
-
       "noDefinedZones": "No zones are defined for this camera.",
       "objectAlertsTips": "All {{alertsLabels}} objects on {{cameraName}} will be shown as Alerts.",
       "zoneObjectAlertsTips": "All {{alertsLabels}} objects detected in {{zone}} on {{cameraName}} will be shown as Alerts.",
@@ -519,6 +539,8 @@
     },
     "restart_required": "Restart required (masks/zones changed)",
     "disabledInConfig": "Item is disabled in the config file",
+    "profileBase": "(base)",
+    "profileOverride": "(override)",
     "toast": {
       "success": {
         "copyCoordinates": "Copied coordinates for {{polyName}} to clipboard."
@@ -530,6 +552,17 @@
     "motionMaskLabel": "Motion Mask {{number}}",
     "objectMaskLabel": "Object Mask {{number}}",
     "form": {
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID must not be empty.",
+          "alreadyExists": "A mask with this ID already exists for this camera."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Name must not be empty."
+        }
+      },
       "zoneName": {
         "error": {
           "mustBeAtLeastTwoCharacters": "Zone name must be at least 2 characters.",
@@ -1037,12 +1070,11 @@
     },
     "snapshotConfig": {
       "title": "Snapshot Configuration",
-      "desc": "Submitting to Frigate+ requires both snapshots and <code>clean_copy</code> snapshots to be enabled in your config.",
-      "cleanCopyWarning": "Some cameras have snapshots enabled but have the clean copy disabled. You need to enable <code>clean_copy</code> in your snapshot config to be able to submit images from these cameras to Frigate+.",
+      "desc": "Submitting to Frigate+ requires snapshots to be enabled in your config.",
+      "cleanCopyWarning": "Some cameras have snapshots disabled",
       "table": {
         "camera": "Camera",
-        "snapshots": "Snapshots",
-        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+        "snapshots": "Snapshots"
       }
     },
     "modelInfo": {
@@ -1221,6 +1253,8 @@
       "dryRunDisabled": "Files will be deleted",
       "force": "Force",
       "forceDesc": "Bypass safety threshold and complete sync even if more than 50% of the files would be deleted.",
+      "verbose": "Verbose",
+      "verboseDesc": "Write a full list of orphaned files to disk for review.",
       "running": "Sync Running...",
       "start": "Start Sync",
       "inProgress": "Sync is in progress. This page is disabled.",
@@ -1264,7 +1298,8 @@
     },
     "camera": {
       "title": "Camera Settings",
-      "description": "These settings apply only to this camera and override the global settings."
+      "description": "These settings apply only to this camera and override the global settings.",
+      "noCameras": "No cameras available"
     },
     "advancedSettingsCount": "Advanced Settings ({{count}})",
     "advancedCount": "Advanced ({{count}})",
@@ -1294,8 +1329,21 @@
       "preset": "Preset",
       "manual": "Manual arguments",
       "inherit": "Inherit from camera setting",
+      "none": "None",
+      "useGlobalSetting": "Inherit from global setting",
       "selectPreset": "Select preset",
-      "manualPlaceholder": "Enter FFmpeg arguments"
+      "manualPlaceholder": "Enter FFmpeg arguments",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP"
+      }
     },
     "cameraInputs": {
       "itemTitle": "Stream {{index}}"
@@ -1327,7 +1375,8 @@
       "genai": "GenAI",
       "face_recognition": "Face Recognition",
       "lpr": "License Plate Recognition",
-      "birdseye": "Birdseye"
+      "birdseye": "Birdseye",
+      "masksAndZones": "Masks / Zones"
     },
     "detect": {
       "title": "Detection Settings"
@@ -1376,6 +1425,18 @@
         "record": "Record",
         "audio": "Audio"
       }
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Embedding",
+        "vision": "Vision",
+        "tools": "Tools"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Select model…",
+      "builtIn": "Built-in Models",
+      "genaiProviders": "GenAI Providers"
     },
     "review": {
       "title": "Review Settings"
@@ -1427,8 +1488,90 @@
     "saveAllPartial_other": "{{successCount}} of {{totalCount}} sections saved. {{failCount}} failed.",
     "saveAllFailure": "Failed to save all sections."
   },
+  "profiles": {
+    "title": "Profiles",
+    "activeProfile": "Active Profile",
+    "noActiveProfile": "No active profile",
+    "active": "Active",
+    "activated": "Profile '{{profile}}' activated",
+    "activateFailed": "Failed to set profile",
+    "deactivated": "Profile deactivated",
+    "noProfiles": "No profiles defined.",
+    "noOverrides": "No overrides",
+    "cameraCount_one": "{{count}} camera",
+    "cameraCount_other": "{{count}} cameras",
+    "baseConfig": "Base Config",
+    "addProfile": "Add Profile",
+    "newProfile": "New Profile",
+    "profileNamePlaceholder": "e.g., Armed, Away, Night Mode",
+    "friendlyNameLabel": "Profile Name",
+    "profileIdLabel": "Profile ID",
+    "profileIdDescription": "Internal identifier used in config and automations",
+    "nameInvalid": "Only lowercase letters, numbers, and underscores allowed",
+    "nameDuplicate": "A profile with this name already exists",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Must be at least 2 characters",
+      "mustNotContainPeriod": "Must not contain periods",
+      "alreadyExists": "A profile with this ID already exists"
+    },
+    "renameProfile": "Rename Profile",
+    "renameSuccess": "Profile renamed to '{{profile}}'",
+    "deleteProfile": "Delete Profile",
+    "deleteProfileConfirm": "Delete profile \"{{profile}}\" from all cameras? This cannot be undone.",
+    "deleteSuccess": "Profile '{{profile}}' deleted",
+    "createSuccess": "Profile '{{profile}}' created",
+    "removeOverride": "Remove Profile Override",
+    "deleteSection": "Delete Section Overrides",
+    "deleteSectionConfirm": "Remove the {{section}} overrides for profile {{profile}} on {{camera}}?",
+    "deleteSectionSuccess": "Removed {{section}} overrides for {{profile}}",
+    "enableSwitch": "Enable Profiles",
+    "enabledDescription": "Profiles are enabled. Create a new profile below, navigate to a camera config section to make your changes, and save for changes to take effect.",
+    "disabledDescription": "Profiles allow you to define named sets of camera config overrides (e.g., armed, away, night) that can be activated on demand."
+  },
   "unsavedChanges": "You have unsaved changes",
   "confirmReset": "Confirm Reset",
   "resetToDefaultDescription": "This will reset all settings in this section to their default values. This action cannot be undone.",
-  "resetToGlobalDescription": "This will reset the settings in this section to the global defaults. This action cannot be undone."
+  "resetToGlobalDescription": "This will reset the settings in this section to the global defaults. This action cannot be undone.",
+  "go2rtcStreams": {
+    "title": "go2rtc Streams",
+    "description": "Manage go2rtc stream configurations for camera restreaming. Each stream has a name and one or more source URLs.",
+    "addStream": "Add stream",
+    "addStreamDesc": "Enter a name for the new stream. This name will be used to reference the stream in your camera configuration.",
+    "addUrl": "Add URL",
+    "streamName": "Stream name",
+    "streamNamePlaceholder": "e.g., front_door",
+    "streamUrlPlaceholder": "e.g., rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "Delete stream",
+    "deleteStreamConfirm": "Are you sure you want to delete the stream \"{{streamName}}\"? Cameras that reference this stream may stop working.",
+    "noStreams": "No go2rtc streams configured. Add a stream to get started.",
+    "validation": {
+      "nameRequired": "Stream name is required",
+      "nameDuplicate": "A stream with this name already exists",
+      "nameInvalid": "Stream name can only contain letters, numbers, underscores, and hyphens",
+      "urlRequired": "At least one URL is required"
+    },
+    "renameStream": "Rename stream",
+    "renameStreamDesc": "Enter a new name for this stream. Renaming a stream may break cameras or other streams that reference it by name.",
+    "newStreamName": "New stream name",
+    "ffmpeg": {
+      "useFfmpegModule": "Use compatibility mode (ffmpeg)",
+      "video": "Video",
+      "audio": "Audio",
+      "hardware": "Hardware acceleration",
+      "videoCopy": "Copy",
+      "videoH264": "Transcode to H.264",
+      "videoH265": "Transcode to H.265",
+      "videoExclude": "Exclude",
+      "audioCopy": "Copy",
+      "audioAac": "Transcode to AAC",
+      "audioOpus": "Transcode to Opus",
+      "audioPcmu": "Transcode to PCM μ-law",
+      "audioPcma": "Transcode to PCM A-law",
+      "audioPcm": "Transcode to PCM",
+      "audioMp3": "Transcode to MP3",
+      "audioExclude": "Exclude",
+      "hardwareNone": "No hardware acceleration",
+      "hardwareAuto": "Automatic hardware acceleration"
+    }
+  }
 }

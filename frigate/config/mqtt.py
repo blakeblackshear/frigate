@@ -17,7 +17,7 @@ class MqttConfig(FrigateBaseModel):
         title="Enable MQTT",
         description="Enable or disable MQTT integration for state, events, and snapshots.",
     )
-    host: str = Field(
+    host: EnvString = Field(
         default="",
         title="MQTT host",
         description="Hostname or IP address of the MQTT broker.",

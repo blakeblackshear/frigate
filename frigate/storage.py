@@ -280,6 +280,10 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         """Check every 5 minutes if storage needs to be cleaned up."""
+        if self.config.safe_mode:
+            logger.info("Safe mode enabled, skipping storage maintenance")
+            return
+
         self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
             if not self.camera_storage_stats or True in [

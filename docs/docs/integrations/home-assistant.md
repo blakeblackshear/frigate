@@ -99,11 +99,11 @@ services:
       ...
 ```
 
-### Home Assistant Add-on
+### Home Assistant App
 
-If you are using Home Assistant Add-on, the URL should be one of the following depending on which Add-on variant you are using. Note that if you are using the Proxy Add-on, you should NOT point the integration at the proxy URL. Just enter the same URL used to access Frigate directly from your network.
+If you are using Home Assistant App, the URL should be one of the following depending on which App variant you are using. Note that if you are using the Proxy App, you should NOT point the integration at the proxy URL. Just enter the same URL used to access Frigate directly from your network.
 
-| Add-on Variant             | URL                                    |
+| App Variant                | URL                                    |
 | -------------------------- | -------------------------------------- |
 | Frigate                    | `http://ccab4aaf-frigate:5000`         |
 | Frigate (Full Access)      | `http://ccab4aaf-frigate-fa:5000`      |

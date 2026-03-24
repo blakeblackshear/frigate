@@ -26,7 +26,7 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 ## Server
 
-My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral, Hailo, or other AI accelerators.
+My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU (with AVX + AVX2 instructions) and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral, Hailo, or other AI accelerators.
 
 Note that many of these mini PCs come with Windows pre-installed, and you will need to install Linux according to the [getting started guide](../guides/getting_started.md).
 
@@ -205,7 +205,7 @@ Inference is done with the `onnx` detector type. Speeds will vary greatly depend
 | GTX 1070    | s-320: 16 ms                          |                           | 320: 14 ms                 |
 | RTX 3050    | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
 | RTX 3070    | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
-| RTX 5060 Ti | t-320: 5 ms s-320: 7 ms s-640: 22 ms  | Nano-320: ~ 6 ms          |                            |
+| RTX 5060 Ti | t-320: 5 ms s-320: 7 ms s-640: 22 ms  | Nano-320: ~ 4 ms          |                            |
 | RTX A4000   |                                       |                           | 320: ~ 15 ms               |
 | Tesla P40   |                                       |                           | 320: ~ 105 ms              |
 

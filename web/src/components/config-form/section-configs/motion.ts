@@ -23,7 +23,7 @@ const motion: SectionConfigOverrides = {
       "mqtt_off_delay",
     ],
     fieldGroups: {
-      sensitivity: ["enabled", "threshold", "contour_area"],
+      sensitivity: ["threshold", "contour_area"],
       algorithm: ["improve_contrast", "delta_alpha", "frame_alpha"],
     },
     uiSchema: {

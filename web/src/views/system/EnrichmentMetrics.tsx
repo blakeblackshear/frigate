@@ -107,7 +107,10 @@ export default function EnrichmentMetrics({
           };
         }
 
-        series[key].data.push({ x: statsIdx + 1, y: stat });
+        series[key].data.push({
+          x: statsIdx + 1,
+          y: rawKey.includes("description_speed") ? stat / 1000 : stat,
+        });
       });
     });
 
@@ -115,6 +118,7 @@ export default function EnrichmentMetrics({
     const grouped: {
       [category: string]: {
         categoryName: string;
+        unit: string;
         speedSeries?: {
           name: string;
           metrics: Threshold;
@@ -154,6 +158,7 @@ export default function EnrichmentMetrics({
       if (!(categoryKey in grouped)) {
         grouped[categoryKey] = {
           categoryName,
+          unit: categoryKey.includes("description") ? "s" : "ms",
           speedSeries: undefined,
           eventsSeries: undefined,
         };
@@ -196,7 +201,7 @@ export default function EnrichmentMetrics({
                         key={`${group.categoryName}-speed`}
                         graphId={`${group.categoryName}-inference`}
                         name={t("enrichments.averageInf")}
-                        unit="ms"
+                        unit={group.unit}
                         threshold={group.speedSeries.metrics}
                         updateTimes={updateTimes}
                         data={[group.speedSeries]}

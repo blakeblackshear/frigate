@@ -6,7 +6,7 @@ const faceRecognition: SectionConfigOverrides = {
     restartRequired: [],
     fieldOrder: ["enabled", "min_area"],
     hiddenFields: [],
-    advancedFields: ["min_area"],
+    advancedFields: [],
     overrideFields: ["enabled", "min_area"],
   },
   global: {

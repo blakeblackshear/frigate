@@ -98,8 +98,8 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
           : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
       const merged: Record<string, unknown> = {
-        ...rest,
         ...normalizedNonNullObj,
+        ...rest,
         type: mergedType,
       };
       // When unwrapping a nullable enum, add null to the enum list so
@@ -108,6 +108,39 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
         merged.enum = [...(merged.enum as unknown[]), null];
       }
       return merged as RJSFSchema;
+    }
+
+    // Handle anyOf where a plain string branch subsumes a string-enum branch
+    // (e.g. Union[StrEnum, str] or Union[StrEnum, str, None]).
+    // Collapse to a single string type with enum values preserved as `examples`.
+    const stringBranches = anyOf.filter(
+      (item) =>
+        isSchemaObject(item) &&
+        (item as Record<string, unknown>).type === "string",
+    );
+    const enumBranch = stringBranches.find((item) =>
+      Array.isArray((item as Record<string, unknown>).enum),
+    );
+    const plainStringBranch = stringBranches.find(
+      (item) => !Array.isArray((item as Record<string, unknown>).enum),
+    );
+
+    if (
+      enumBranch &&
+      plainStringBranch &&
+      anyOf.length === stringBranches.length + (hasNull ? 1 : 0)
+    ) {
+      const enumValues = (enumBranch as Record<string, unknown>).enum as
+        | unknown[]
+        | undefined;
+      const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
+      return {
+        ...rest,
+        type: hasNull ? ["string", "null"] : "string",
+        ...(enumValues && enumValues.length > 0
+          ? { examples: enumValues }
+          : {}),
+      } as RJSFSchema;
     }
 
     return {
@@ -142,8 +175,8 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
           : ["null"];
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
       const merged: Record<string, unknown> = {
-        ...rest,
         ...normalizedNonNullObj,
+        ...rest,
         type: mergedType,
       };
       // When unwrapping a nullable oneOf enum, add null to the enum list.
@@ -539,6 +572,67 @@ function generateUiSchema(
 }
 
 /**
+ * Removes hidden field properties from the JSON schema itself so RJSF won't
+ * validate them.  The existing ui:widget=hidden approach only hides rendering
+ * but still validates — fields with server-only values (e.g. raw_coordinates
+ * serialized as null) cause spurious validation errors.
+ *
+ * Supports dotted paths ("mask"), nested paths ("genai.enabled_in_config"),
+ * and wildcard segments ("filters.*.mask") where `*` matches
+ * additionalProperties.
+ */
+function stripHiddenFieldsFromSchema(
+  schema: RJSFSchema,
+  hiddenFields: string[],
+): void {
+  for (const pattern of hiddenFields) {
+    if (!pattern) continue;
+    const segments = pattern.split(".");
+    removePropertyBySegments(schema, segments);
+  }
+}
+
+function removePropertyBySegments(
+  schema: RJSFSchema,
+  segments: string[],
+): void {
+  if (segments.length === 0 || !isSchemaObject(schema)) return;
+
+  const [head, ...rest] = segments;
+  const props = schema.properties as Record<string, RJSFSchema> | undefined;
+
+  if (rest.length === 0) {
+    // Terminal segment — delete the property
+    if (head === "*") {
+      // Wildcard at leaf: strip from additionalProperties
+      if (isSchemaObject(schema.additionalProperties)) {
+        // Nothing to delete — "*" as the last segment means "every dynamic key".
+        // The parent's additionalProperties schema IS the dynamic value, not a
+        // container.  In practice hidden-field patterns always have a named leaf
+        // after the wildcard (e.g. "filters.*.mask"), so this branch is a no-op.
+      }
+    } else if (props && head in props) {
+      delete props[head];
+      if (Array.isArray(schema.required)) {
+        schema.required = (schema.required as string[]).filter(
+          (r) => r !== head,
+        );
+      }
+    }
+    return;
+  }
+
+  if (head === "*") {
+    // Wildcard segment — descend into additionalProperties
+    if (isSchemaObject(schema.additionalProperties)) {
+      removePropertyBySegments(schema.additionalProperties as RJSFSchema, rest);
+    }
+  } else if (props && head in props && isSchemaObject(props[head])) {
+    removePropertyBySegments(props[head], rest);
+  }
+}
+
+/**
  * Transforms a Pydantic JSON Schema to RJSF format
  * Resolves references and generates appropriate uiSchema
  */
@@ -549,6 +643,11 @@ export function transformSchema(
   // Resolve all $ref references and clean the result
   const cleanSchema = resolveAndCleanSchema(rawSchema);
   const normalizedSchema = normalizeNullableSchema(cleanSchema);
+
+  // Remove hidden fields from schema so RJSF won't validate them
+  if (options.hiddenFields && options.hiddenFields.length > 0) {
+    stripHiddenFieldsFromSchema(normalizedSchema, options.hiddenFields);
+  }
 
   // Generate uiSchema
   const uiSchema = generateUiSchema(normalizedSchema, options);

@@ -752,7 +752,7 @@ export function RecordingView({
                   value="timeline"
                   aria-label={t("timeline.aria")}
                 >
-                  <div className="">{t("timeline")}</div>
+                  <div className="">{t("timeline.label")}</div>
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}

@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 import os
+import platform
 import traceback
 import urllib
 from datetime import datetime, timedelta
@@ -31,7 +32,10 @@ from frigate.api.auth import (
     require_role,
 )
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
-from frigate.api.defs.request.app_body import AppConfigSetBody, MediaSyncBody
+from frigate.api.defs.request.app_body import (
+    AppConfigSetBody,
+    MediaSyncBody,
+)
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
@@ -154,6 +158,31 @@ def config(request: Request):
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
+        # Re-dump profile overrides with exclude_unset so that only
+        # explicitly-set fields are returned (not Pydantic defaults).
+        # Without this, the frontend merges defaults (e.g. threshold=30)
+        # over the camera's actual base values (e.g. threshold=20).
+        if camera.profiles:
+            for profile_name, profile_config in camera.profiles.items():
+                camera_dict.setdefault("profiles", {})[profile_name] = (
+                    profile_config.model_dump(
+                        mode="json", warnings="none", exclude_unset=True
+                    )
+                )
+
+        # When a profile is active, the top-level camera sections contain
+        # profile-merged (effective) values.  Include the original base
+        # configs so the frontend settings can display them separately.
+        if (
+            config_obj.active_profile is not None
+            and request.app.profile_manager is not None
+        ):
+            base_sections = request.app.profile_manager.get_base_configs_for_api(
+                camera_name
+            )
+            if base_sections:
+                camera_dict["base_config"] = base_sections
+
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
         mode="json", warnings="none", exclude_none=True
@@ -201,22 +230,43 @@ def config(request: Request):
     return JSONResponse(content=config)
 
 
+@router.get("/profiles", dependencies=[Depends(allow_any_authenticated())])
+def get_profiles(request: Request):
+    """List all available profiles and the currently active profile."""
+    profile_manager = request.app.profile_manager
+    return JSONResponse(content=profile_manager.get_profile_info())
+
+
+@router.get("/profile/active", dependencies=[Depends(allow_any_authenticated())])
+def get_active_profile(request: Request):
+    """Get the currently active profile."""
+    config_obj: FrigateConfig = request.app.frigate_config
+    return JSONResponse(content={"active_profile": config_obj.active_profile})
+
+
 @router.get("/ffmpeg/presets", dependencies=[Depends(allow_any_authenticated())])
 def ffmpeg_presets():
     """Return available ffmpeg preset keys for config UI usage."""
+    machine = platform.machine().lower()
+    is_arm64 = machine in ("aarch64", "arm64", "armv8", "armv7l")
 
-    # Whitelist based on documented presets in ffmpeg_presets.md
-    hwaccel_presets = [
-        "preset-rpi-64-h264",
-        "preset-rpi-64-h265",
-        "preset-vaapi",
-        "preset-intel-qsv-h264",
-        "preset-intel-qsv-h265",
-        "preset-nvidia",
-        "preset-jetson-h264",
-        "preset-jetson-h265",
-        "preset-rkmpp",
-    ]
+    if is_arm64:
+        hwaccel_presets = [
+            "preset-rpi-64-h264",
+            "preset-rpi-64-h265",
+            "preset-jetson-h264",
+            "preset-jetson-h265",
+            "preset-rkmpp",
+            "preset-vaapi",
+        ]
+    else:
+        hwaccel_presets = [
+            "preset-vaapi",
+            "preset-intel-qsv-h264",
+            "preset-intel-qsv-h265",
+            "preset-nvidia",
+        ]
+
     input_presets = [
         "preset-http-jpeg-generic",
         "preset-http-mjpeg-generic",
@@ -279,7 +329,7 @@ def config_raw_paths(request: Request):
     return JSONResponse(content=raw_paths)
 
 
-@router.get("/config/raw", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/config/raw", dependencies=[Depends(require_role(["admin"]))])
 def config_raw():
     config_file = find_config_file()
 
@@ -589,6 +639,9 @@ def config_set(request: Request, body: AppConfigSetBody):
                 request.app.frigate_config = config
                 request.app.genai_manager.update_config(config)
 
+                if request.app.profile_manager is not None:
+                    request.app.profile_manager.update_config(config)
+
                 if request.app.stats_emitter is not None:
                     request.app.stats_emitter.config = config
 
@@ -819,7 +872,10 @@ def sync_media(body: MediaSyncBody = Body(...)):
         202 Accepted with job_id, or 409 Conflict if job already running.
     """
     job_id = start_media_sync_job(
-        dry_run=body.dry_run, media_types=body.media_types, force=body.force
+        dry_run=body.dry_run,
+        media_types=body.media_types,
+        force=body.force,
+        verbose=body.verbose,
     )
 
     if job_id is None:
@@ -1028,7 +1084,12 @@ def get_recognized_license_plates(
 
 
 @router.get("/timeline", dependencies=[Depends(allow_any_authenticated())])
-def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = None):
+def timeline(
+    camera: str = "all",
+    limit: int = 100,
+    source_id: Optional[str] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     clauses = []
 
     selected_columns = [
@@ -1050,6 +1111,9 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
         else:
             clauses.append((Timeline.source_id.in_(source_ids)))
 
+    # Enforce per-camera access control
+    clauses.append((Timeline.camera << allowed_cameras))
+
     if len(clauses) == 0:
         clauses.append((True))
 
@@ -1065,7 +1129,10 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
 
 
 @router.get("/timeline/hourly", dependencies=[Depends(allow_any_authenticated())])
-def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
+def hourly_timeline(
+    params: AppTimelineHourlyQueryParameters = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get hourly summary for timeline."""
     cameras = params.cameras
     labels = params.labels
@@ -1082,6 +1149,9 @@ def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Timeline.camera << camera_list))
+
+    # Enforce per-camera access control
+    clauses.append((Timeline.camera << allowed_cameras))
 
     if labels != "all":
         label_list = labels.split(",")

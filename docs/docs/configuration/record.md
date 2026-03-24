@@ -130,7 +130,7 @@ When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means 
 
 To configure the speed-up factor, the frame rate and further custom settings, the configuration parameter `timelapse_args` can be used. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
 
-```yaml
+```yaml {3-4}
 record:
   enabled: True
   export:
@@ -161,6 +161,8 @@ Media files (event snapshots, event thumbnails, review thumbnails, previews, exp
 Normal operation may leave small numbers of orphaned files until Frigate's scheduled cleanup, but crashes, configuration changes, or upgrades may cause more orphaned files that Frigate does not clean up. This feature checks the file system for media files and removes any that are not referenced in the database.
 
 The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
+
+Setting `verbose: true` writes a detailed report of every orphaned file and database entry to `/config/media_sync/<job_id>.txt`. For recordings, the report separates orphaned database entries (DB records whose files are missing from disk) from orphaned files (files on disk with no corresponding database record).
 
 :::warning
 

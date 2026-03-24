@@ -35,9 +35,9 @@ from frigate.api.defs.query.media_query_parameters import (
 from frigate.api.defs.tags import Tags
 from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
+from frigate.config.camera.snapshots import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
-    CLIPS_DIR,
     INSTALL_DIR,
     MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
@@ -45,10 +45,17 @@ from frigate.const import (
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
-from frigate.util.file import get_event_thumbnail_bytes
-from frigate.util.image import get_image_from_recording
+from frigate.util.file import (
+    get_event_snapshot_bytes,
+    get_event_snapshot_path,
+    get_event_thumbnail_bytes,
+    load_event_snapshot_image,
+)
+from frigate.util.image import get_image_from_recording, get_image_quality_params
+from frigate.util.media import get_keyframe_before
 
 logger = logging.getLogger(__name__)
+
 
 router = APIRouter(tags=[Tags.media])
 
@@ -110,6 +117,24 @@ def imagestream(
         )
 
 
+def _resolve_snapshot_settings(
+    snapshot_config: SnapshotsConfig, params: MediaEventsSnapshotQueryParams
+) -> dict[str, Any]:
+    return {
+        "timestamp": snapshot_config.timestamp
+        if params.timestamp is None
+        else bool(params.timestamp),
+        "bounding_box": snapshot_config.bounding_box
+        if params.bbox is None
+        else bool(params.bbox),
+        "crop": snapshot_config.crop if params.crop is None else bool(params.crop),
+        "height": snapshot_config.height if params.height is None else params.height,
+        "quality": snapshot_config.quality
+        if params.quality is None
+        else params.quality,
+    }
+
+
 @router.get("/{camera_name}/ptz/info", dependencies=[Depends(require_camera_access)])
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
@@ -147,14 +172,7 @@ async def latest_frame(
         "paths": params.paths,
         "regions": params.regions,
     }
-    quality = params.quality
-
-    if extension == Extension.png:
-        quality_params = None
-    elif extension == Extension.webp:
-        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-    else:  # jpg or jpeg
-        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+    quality_params = get_image_quality_params(extension.value, params.quality)
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -592,6 +610,33 @@ async def vod_ts(
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
+        # nginx-vod-module pushes clipFrom forward to the next keyframe,
+        # which can leave too few frames and produce an empty/unplayable
+        # segment. Snap clipFrom back to the preceding keyframe so the
+        # segment always starts with a decodable frame.
+        if "clipFrom" in clip:
+            keyframe_ms = get_keyframe_before(recording.path, clip["clipFrom"])
+            if keyframe_ms is not None:
+                gained = clip["clipFrom"] - keyframe_ms
+                clip["clipFrom"] = keyframe_ms
+                duration += gained
+                logger.debug(
+                    "VOD: snapped clipFrom to keyframe at %sms for %s, duration now %sms",
+                    keyframe_ms,
+                    recording.path,
+                    duration,
+                )
+            else:
+                # could not read keyframes, remove clipFrom to use full recording
+                logger.debug(
+                    "VOD: no keyframe info for %s, removing clipFrom to use full recording",
+                    recording.path,
+                )
+                del clip["clipFrom"]
+                duration = int(recording.duration * 1000)
+                if recording.end_time > end_ts:
+                    duration -= int((recording.end_time - end_ts) * 1000)
+
         if duration < min_duration_ms:
             # skip if the clip has no valid duration (too short to contain frames)
             logger.debug(
@@ -729,7 +774,7 @@ async def vod_clip(
 
 @router.get(
     "/events/{event_id}/snapshot.jpg",
-    description="Returns a snapshot image for the specified object id. NOTE: The query params only take affect while the event is in-progress. Once the event has ended the snapshot configuration is used.",
+    description="Returns a snapshot image for the specified object id.",
 )
 async def event_snapshot(
     request: Request,
@@ -748,11 +793,22 @@ async def event_snapshot(
                 content={"success": False, "message": "Snapshot not available"},
                 status_code=404,
             )
-        # read snapshot from disk
-        with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
-        ) as image_file:
-            jpg_bytes = image_file.read()
+        snapshot_settings = _resolve_snapshot_settings(
+            request.app.frigate_config.cameras[event.camera].snapshots, params
+        )
+        jpg_bytes, frame_time = get_event_snapshot_bytes(
+            event,
+            ext="jpg",
+            timestamp=snapshot_settings["timestamp"],
+            bounding_box=snapshot_settings["bounding_box"],
+            crop=snapshot_settings["crop"],
+            height=snapshot_settings["height"],
+            quality=snapshot_settings["quality"],
+            timestamp_style=request.app.frigate_config.cameras[
+                event.camera
+            ].timestamp_style,
+            colormap=request.app.frigate_config.model.colormap,
+        )
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
@@ -763,13 +819,16 @@ async def event_snapshot(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
+                        snapshot_settings = _resolve_snapshot_settings(
+                            camera_state.camera_config.snapshots, params
+                        )
                         jpg_bytes, frame_time = tracked_obj.get_img_bytes(
                             ext="jpg",
-                            timestamp=params.timestamp,
-                            bounding_box=params.bbox,
-                            crop=params.crop,
-                            height=params.height,
-                            quality=params.quality,
+                            timestamp=snapshot_settings["timestamp"],
+                            bounding_box=snapshot_settings["bounding_box"],
+                            crop=snapshot_settings["crop"],
+                            height=snapshot_settings["height"],
+                            quality=snapshot_settings["quality"],
                         )
                         await require_camera_access(camera_state.name, request=request)
         except Exception:
@@ -807,7 +866,6 @@ async def event_snapshot(
 
 @router.get(
     "/events/{event_id}/thumbnail.{extension}",
-    dependencies=[Depends(require_camera_access)],
 )
 async def event_thumbnail(
     request: Request,
@@ -851,11 +909,12 @@ async def event_thumbnail(
             status_code=404,
         )
 
+    img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
+    img = cv2.imdecode(img_as_np, flags=1)
+
     # android notifications prefer a 2:1 ratio
     if format == "android":
-        img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
-        img = cv2.imdecode(img_as_np, flags=1)
-        thumbnail = cv2.copyMakeBorder(
+        img = cv2.copyMakeBorder(
             img,
             0,
             0,
@@ -865,14 +924,14 @@ async def event_thumbnail(
             (0, 0, 0),
         )
 
-        quality_params = None
-        if extension in (Extension.jpg, Extension.jpeg):
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == Extension.webp:
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+    quality_params = None
+    if extension in (Extension.jpg, Extension.jpeg):
+        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+    elif extension == Extension.webp:
+        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
-        thumbnail_bytes = img.tobytes()
+    _, encoded = cv2.imencode(f".{extension.value}", img, quality_params)
+    thumbnail_bytes = encoded.tobytes()
 
     return Response(
         thumbnail_bytes,
@@ -1025,18 +1084,20 @@ def clear_region_grid(request: Request, camera_name: str):
 
 @router.get(
     "/events/{event_id}/snapshot-clean.webp",
-    dependencies=[Depends(require_camera_access)],
 )
-def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
+async def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
     webp_bytes = None
+    event_complete = False
     try:
         event = Event.get(Event.id == event_id)
+        event_complete = event.end_time is not None
+        await require_camera_access(event.camera, request=request)
         snapshot_config = request.app.frigate_config.cameras[event.camera].snapshots
         if not (snapshot_config.enabled and event.has_snapshot):
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": "Snapshots and clean_copy must be enabled in the config",
+                    "message": "Snapshots must be enabled in the config",
                 },
                 status_code=404,
             )
@@ -1068,54 +1129,10 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
         )
     if webp_bytes is None:
         try:
-            # webp
-            clean_snapshot_path_webp = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"
+            image_path, is_clean_snapshot = get_event_snapshot_path(
+                event, clean_only=True
             )
-            # png (legacy)
-            clean_snapshot_path_png = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
-            )
-
-            if os.path.exists(clean_snapshot_path_webp):
-                with open(clean_snapshot_path_webp, "rb") as image_file:
-                    webp_bytes = image_file.read()
-            elif os.path.exists(clean_snapshot_path_png):
-                # convert png to webp and save for future use
-                png_image = cv2.imread(clean_snapshot_path_png, cv2.IMREAD_UNCHANGED)
-                if png_image is None:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": "Invalid png snapshot",
-                        },
-                        status_code=400,
-                    )
-
-                ret, webp_data = cv2.imencode(
-                    ".webp", png_image, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-                )
-                if not ret:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": "Unable to convert png to webp",
-                        },
-                        status_code=400,
-                    )
-
-                webp_bytes = webp_data.tobytes()
-
-                # save the converted webp for future requests
-                try:
-                    with open(clean_snapshot_path_webp, "wb") as f:
-                        f.write(webp_bytes)
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to save converted webp for event {event.id}: {e}"
-                    )
-                    # continue since we now have the data to return
-            else:
+            if not is_clean_snapshot or image_path is None:
                 return JSONResponse(
                     content={
                         "success": False,
@@ -1123,6 +1140,34 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     },
                     status_code=404,
                 )
+
+            if image_path.endswith(".webp"):
+                with open(image_path, "rb") as image_file:
+                    webp_bytes = image_file.read()
+            else:
+                image = load_event_snapshot_image(event, clean_only=True)[0]
+                if image is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to load clean snapshot for event",
+                        },
+                        status_code=400,
+                    )
+
+                ret, webp_data = cv2.imencode(
+                    ".webp", image, get_image_quality_params("webp", None)
+                )
+                if not ret:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to convert snapshot to webp",
+                        },
+                        status_code=400,
+                    )
+
+                webp_bytes = webp_data.tobytes()
         except Exception:
             logger.error(f"Unable to load clean snapshot for event: {event.id}")
             return JSONResponse(
@@ -1135,7 +1180,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
     headers = {
         "Content-Type": "image/webp",
-        "Cache-Control": "private, max-age=31536000",
+        "Cache-Control": "private, max-age=31536000" if event_complete else "no-cache",
     }
 
     if download:
@@ -1151,7 +1196,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get(
-    "/events/{event_id}/clip.mp4", dependencies=[Depends(require_camera_access)]
+    "/events/{event_id}/clip.mp4",
 )
 async def event_clip(
     request: Request,
@@ -1164,6 +1209,8 @@ async def event_clip(
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
+
+    await require_camera_access(event.camera, request=request)
 
     if not event.has_clip:
         return JSONResponse(
@@ -1181,15 +1228,44 @@ async def event_clip(
 
 
 @router.get(
-    "/events/{event_id}/preview.gif", dependencies=[Depends(require_camera_access)]
+    "/review/{review_id}/clip.mp4",
 )
-def event_preview(request: Request, event_id: str):
+async def review_clip(
+    request: Request,
+    review_id: str,
+    padding: int = Query(0, description="Padding to apply to clip."),
+):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Review not found"}, status_code=404
+        )
+
+    await require_camera_access(review.camera, request=request)
+
+    end_ts = (
+        datetime.now().timestamp()
+        if review.end_time is None
+        else review.end_time + padding
+    )
+    return await recording_clip(
+        request, review.camera, review.start_time - padding, end_ts
+    )
+
+
+@router.get(
+    "/events/{event_id}/preview.gif",
+)
+async def event_preview(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
+
+    await require_camera_access(event.camera, request=request)
 
     start_ts = event.start_time
     end_ts = start_ts + (
@@ -1213,25 +1289,25 @@ def preview_gif(
 ):
     if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
         # has preview mp4
-        preview: Previews = (
-            Previews.select(
-                Previews.camera,
-                Previews.path,
-                Previews.duration,
-                Previews.start_time,
-                Previews.end_time,
+        try:
+            preview: Previews = (
+                Previews.select(
+                    Previews.camera,
+                    Previews.path,
+                    Previews.duration,
+                    Previews.start_time,
+                    Previews.end_time,
+                )
+                .where(
+                    Previews.start_time.between(start_ts, end_ts)
+                    | Previews.end_time.between(start_ts, end_ts)
+                    | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+                )
+                .where(Previews.camera == camera_name)
+                .limit(1)
+                .get()
             )
-            .where(
-                Previews.start_time.between(start_ts, end_ts)
-                | Previews.end_time.between(start_ts, end_ts)
-                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
-            )
-            .where(Previews.camera == camera_name)
-            .limit(1)
-            .get()
-        )
-
-        if not preview:
+        except DoesNotExist:
             return JSONResponse(
                 content={"success": False, "message": "Preview not found"},
                 status_code=404,
@@ -1288,9 +1364,9 @@ def preview_gif(
                 status_code=404,
             )
 
-        file_start = f"preview_{camera_name}"
-        start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
-        end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
+        file_start = f"preview_{camera_name}-"
+        start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
+        end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
         selected_previews = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -1470,9 +1546,9 @@ def preview_mp4(
                 status_code=404,
             )
 
-        file_start = f"preview_{camera_name}"
-        start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
-        end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
+        file_start = f"preview_{camera_name}-"
+        start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
+        end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
         selected_previews = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -1549,8 +1625,8 @@ def preview_mp4(
     )
 
 
-@router.get("/review/{event_id}/preview", dependencies=[Depends(require_camera_access)])
-def review_preview(
+@router.get("/review/{event_id}/preview")
+async def review_preview(
     request: Request,
     event_id: str,
     format: str = Query(default="gif", enum=["gif", "mp4"]),
@@ -1562,6 +1638,8 @@ def review_preview(
             content=({"success": False, "message": "Review segment not found"}),
             status_code=404,
         )
+
+    await require_camera_access(review.camera, request=request)
 
     padding = 8
     start_ts = review.start_time - padding
@@ -1576,12 +1654,14 @@ def review_preview(
 
 
 @router.get(
-    "/preview/{file_name}/thumbnail.jpg", dependencies=[Depends(require_camera_access)]
+    "/preview/{file_name}/thumbnail.jpg",
+    dependencies=[Depends(allow_any_authenticated())],
 )
 @router.get(
-    "/preview/{file_name}/thumbnail.webp", dependencies=[Depends(require_camera_access)]
+    "/preview/{file_name}/thumbnail.webp",
+    dependencies=[Depends(allow_any_authenticated())],
 )
-def preview_thumbnail(file_name: str):
+async def preview_thumbnail(request: Request, file_name: str):
     """Get a thumbnail from the cached preview frames."""
     if len(file_name) > 1000:
         return JSONResponse(
@@ -1590,6 +1670,17 @@ def preview_thumbnail(file_name: str):
             ),
             status_code=403,
         )
+
+    # Extract camera name from preview filename (format: preview_{camera}-{timestamp}.ext)
+    if not file_name.startswith("preview_"):
+        return JSONResponse(
+            content={"success": False, "message": "Invalid preview filename"},
+            status_code=400,
+        )
+    # Use rsplit to handle camera names containing dashes (e.g. front-door)
+    name_part = file_name[len("preview_") :].rsplit(".", 1)[0]  # strip extension
+    camera_name = name_part.rsplit("-", 1)[0]  # split off timestamp
+    await require_camera_access(camera_name, request=request)
 
     safe_file_name_current = sanitize_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")

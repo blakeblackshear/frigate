@@ -66,6 +66,8 @@
   "nofaces": "No faces available",
   "trainFaceAs": "Train Face as:",
   "trainFace": "Train Face",
+  "reclassifyFaceAs": "Reclassify Face as:",
+  "reclassifyFace": "Reclassify Face",
   "toast": {
     "success": {
       "uploadedImage": "Successfully uploaded image.",
@@ -77,6 +79,7 @@
       "deletedName_other": "{{count}} faces have been successfully deleted.",
       "renamedFace": "Successfully renamed face to {{name}}",
       "trainedFace": "Successfully trained face.",
+      "reclassifiedFace": "Successfully reclassified face.",
       "updatedFaceScore": "Successfully updated face score to {{name}} ({{score}})."
     },
     "error": {
@@ -86,6 +89,7 @@
       "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
       "renameFaceFailed": "Failed to rename face: {{errorMessage}}",
       "trainFailed": "Failed to train: {{errorMessage}}",
+      "reclassifyFailed": "Failed to reclassify face: {{errorMessage}}",
       "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
     }
   }

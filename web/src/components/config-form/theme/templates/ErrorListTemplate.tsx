@@ -7,7 +7,11 @@ import type {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LuCircleAlert } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
-import { buildTranslationPath, humanizeKey } from "../utils";
+import {
+  buildTranslationPath,
+  resolveConfigTranslation,
+  humanizeKey,
+} from "../utils";
 import type { ConfigFormContext } from "@/types/configForm";
 
 type ErrorSchemaNode = RJSFSchema & {
@@ -114,22 +118,15 @@ const resolveErrorFieldLabel = ({
   );
 
   if (effectiveNamespace && translationPath) {
-    const prefixedTranslationKey =
-      sectionI18nPrefix && !translationPath.startsWith(`${sectionI18nPrefix}.`)
-        ? `${sectionI18nPrefix}.${translationPath}.label`
-        : undefined;
-    const translationKey = `${translationPath}.label`;
-
-    if (
-      prefixedTranslationKey &&
-      i18n.exists(prefixedTranslationKey, { ns: effectiveNamespace })
-    ) {
-      return t(prefixedTranslationKey, { ns: effectiveNamespace });
-    }
-
-    if (i18n.exists(translationKey, { ns: effectiveNamespace })) {
-      return t(translationKey, { ns: effectiveNamespace });
-    }
+    const translated = resolveConfigTranslation(
+      i18n,
+      t,
+      translationPath,
+      "label",
+      sectionI18nPrefix,
+      effectiveNamespace,
+    );
+    if (translated) return translated;
   }
 
   const schemaNode = resolveSchemaNodeForPath(schema, segments);

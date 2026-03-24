@@ -136,7 +136,7 @@ export default function EventMenu({
                 download
                 href={
                   event.has_snapshot
-                    ? `${apiHost}api/events/${event.id}/snapshot.jpg`
+                    ? `${apiHost}api/events/${event.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`
                     : `${apiHost}api/events/${event.id}/thumbnail.webp`
                 }
               >

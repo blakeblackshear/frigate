@@ -55,6 +55,14 @@ DYNAMIC_OBJECT_THRESHOLDS = StationaryThresholds(
     motion_classifier_enabled=True,
 )
 
+# Thresholds for objects that are not expected to be stationary
+NON_STATIONARY_OBJECT_THRESHOLDS = StationaryThresholds(
+    objects=["license_plate"],
+    known_active_iou=0.9,
+    stationary_check_iou=0.9,
+    max_stationary_history=4,
+)
+
 
 def get_stationary_threshold(label: str) -> StationaryThresholds:
     """Get the stationary thresholds for a given object label."""
@@ -64,6 +72,9 @@ def get_stationary_threshold(label: str) -> StationaryThresholds:
 
     if label in DYNAMIC_OBJECT_THRESHOLDS.objects:
         return DYNAMIC_OBJECT_THRESHOLDS
+
+    if label in NON_STATIONARY_OBJECT_THRESHOLDS.objects:
+        return NON_STATIONARY_OBJECT_THRESHOLDS
 
     return StationaryThresholds()
 

@@ -1,7 +1,9 @@
 import type { WidgetProps } from "@rjsf/utils";
 import useSWR from "swr";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import get from "lodash/get";
+import isEqual from "lodash/isEqual";
 import { Input } from "@/components/ui/input";
 import { ConfigFormContext } from "@/types/configForm";
 import {
@@ -22,7 +24,7 @@ type FfmpegPresetResponse = {
   };
 };
 
-type FfmpegArgsMode = "preset" | "manual" | "inherit";
+type FfmpegArgsMode = "preset" | "manual" | "inherit" | "none";
 
 type PresetField =
   | "hwaccel_args"
@@ -60,8 +62,8 @@ const resolveMode = (
   defaultMode: FfmpegArgsMode,
   allowInherit: boolean,
 ): FfmpegArgsMode => {
-  if (allowInherit && (value === null || value === undefined)) {
-    return "inherit";
+  if (value === null || value === undefined) {
+    return allowInherit ? "inherit" : "none";
   }
 
   if (allowInherit && Array.isArray(value) && value.length === 0) {
@@ -122,6 +124,19 @@ export function FfmpegArgsWidget(props: WidgetProps) {
   const hideDescription = options?.hideDescription === true;
   const useSplitLayout = options?.splitLayout !== false;
 
+  // Detect camera-level top-level fields (not inside inputs array).
+  // These should show "Use global setting" instead of "None".
+  const isInputScoped = id.includes("_inputs_");
+  const showUseGlobalSetting = isCameraLevel && !isInputScoped && !allowInherit;
+
+  // Extract the global value for this specific field to detect inheritance
+  const globalFieldValue = useMemo(() => {
+    if (!showUseGlobalSetting || !formContext?.globalValue || !presetField) {
+      return undefined;
+    }
+    return get(formContext.globalValue as Record<string, unknown>, presetField);
+  }, [showUseGlobalSetting, formContext?.globalValue, presetField]);
+
   const { data } = useSWR<FfmpegPresetResponse>("ffmpeg/presets");
 
   const presetOptions = useMemo(
@@ -132,14 +147,48 @@ export function FfmpegArgsWidget(props: WidgetProps) {
   const canUsePresets = presetOptions.length > 0;
   const defaultMode: FfmpegArgsMode = canUsePresets ? "preset" : "manual";
 
-  const detectedMode = useMemo(
-    () => resolveMode(value, presetOptions, defaultMode, allowInherit),
-    [value, presetOptions, defaultMode, allowInherit],
-  );
+  // Detect if this field's value is effectively inherited from the global
+  // config (i.e. the camera does not override it).
+  const isInheritedFromGlobal = useMemo(() => {
+    if (!showUseGlobalSetting) return false;
+    if (value === undefined || value === null) return true;
+    if (globalFieldValue === undefined || globalFieldValue === null)
+      return false;
+    return isEqual(value, globalFieldValue);
+  }, [showUseGlobalSetting, value, globalFieldValue]);
+
+  const detectedMode = useMemo(() => {
+    if (showUseGlobalSetting && isInheritedFromGlobal) {
+      return "inherit" as FfmpegArgsMode;
+    }
+    return resolveMode(value, presetOptions, defaultMode, allowInherit);
+  }, [
+    showUseGlobalSetting,
+    isInheritedFromGlobal,
+    value,
+    presetOptions,
+    defaultMode,
+    allowInherit,
+  ]);
 
   const [mode, setMode] = useState<FfmpegArgsMode>(detectedMode);
 
+  // Track whether the user has explicitly changed mode to prevent the
+  // detected-mode sync from snapping back (e.g. when a user-selected
+  // preset happens to match the global value).
+  const userSetModeRef = useRef(false);
+
+  const formIsClean = !formContext?.hasChanges;
+
+  // Reset tracking when the widget identity changes (camera switch)
+  // or when the form returns to a clean state (after a successful save).
   useEffect(() => {
+    userSetModeRef.current = false;
+  }, [id, formIsClean]);
+
+  useEffect(() => {
+    if (userSetModeRef.current) return;
+
     if (!canUsePresets && detectedMode === "preset") {
       setMode("manual");
       return;
@@ -150,9 +199,15 @@ export function FfmpegArgsWidget(props: WidgetProps) {
 
   const handleModeChange = useCallback(
     (nextMode: FfmpegArgsMode) => {
+      userSetModeRef.current = true;
       setMode(nextMode);
 
       if (nextMode === "inherit") {
+        onChange(undefined);
+        return;
+      }
+
+      if (nextMode === "none") {
         onChange(undefined);
         return;
       }
@@ -203,7 +258,6 @@ export function FfmpegArgsWidget(props: WidgetProps) {
       return undefined;
     }
 
-    const isInputScoped = id.includes("_inputs_");
     const prefix = isInputScoped ? "ffmpeg.inputs" : "ffmpeg";
 
     if (presetField === "hwaccel_args") {
@@ -227,7 +281,7 @@ export function FfmpegArgsWidget(props: WidgetProps) {
     }
 
     return undefined;
-  }, [id, presetField]);
+  }, [isInputScoped, presetField]);
 
   const translatedDescription =
     fallbackDescriptionKey &&
@@ -247,7 +301,25 @@ export function FfmpegArgsWidget(props: WidgetProps) {
         onValueChange={(next) => handleModeChange(next as FfmpegArgsMode)}
         className="gap-3"
       >
-        {allowInherit ? (
+        {showUseGlobalSetting ? (
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
+              value="inherit"
+              id={`${id}-inherit`}
+              disabled={disabled || readonly}
+              className={
+                mode === "inherit"
+                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+              }
+            />
+            <label htmlFor={`${id}-inherit`} className="cursor-pointer text-sm">
+              {t("configForm.ffmpegArgs.useGlobalSetting", {
+                ns: "views/settings",
+              })}
+            </label>
+          </div>
+        ) : allowInherit ? (
           <div className="flex items-center space-x-2">
             <RadioGroupItem
               value="inherit"
@@ -263,7 +335,23 @@ export function FfmpegArgsWidget(props: WidgetProps) {
               {t("configForm.ffmpegArgs.inherit", { ns: "views/settings" })}
             </label>
           </div>
-        ) : null}
+        ) : (
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
+              value="none"
+              id={`${id}-none`}
+              disabled={disabled || readonly}
+              className={
+                mode === "none"
+                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+              }
+            />
+            <label htmlFor={`${id}-none`} className="cursor-pointer text-sm">
+              {t("configForm.ffmpegArgs.none", { ns: "views/settings" })}
+            </label>
+          </div>
+        )}
         <div className="flex items-center space-x-2">
           <RadioGroupItem
             value="preset"
@@ -296,7 +384,8 @@ export function FfmpegArgsWidget(props: WidgetProps) {
         </div>
       </RadioGroup>
 
-      {mode === "inherit" ? null : mode === "preset" && canUsePresets ? (
+      {mode === "inherit" || mode === "none" ? null : mode === "preset" &&
+        canUsePresets ? (
         <Select
           value={presetValue}
           onValueChange={handlePresetChange}
@@ -316,7 +405,10 @@ export function FfmpegArgsWidget(props: WidgetProps) {
           <SelectContent>
             {presetOptions.map((preset) => (
               <SelectItem key={preset} value={preset}>
-                {preset}
+                {t(`configForm.ffmpegArgs.presetLabels.${preset}`, {
+                  ns: "views/settings",
+                  defaultValue: preset,
+                })}
               </SelectItem>
             ))}
           </SelectContent>
