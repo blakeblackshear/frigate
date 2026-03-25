@@ -102,8 +102,19 @@ If examples for some of your classes do not appear in the grid, you can continue
 
 ### Improving the Model
 
+:::tip Diversity matters far more than volume
+
+Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what *that exact moment* looked like rather than what actually defines the class. **This is why Frigate does not implement bulk training in the UI.**
+
+For more detail, see [Frigate Tip: Best Practices for Training Face and Custom Classification Models](https://github.com/blakeblackshear/frigate/discussions/21374).
+
+:::
+
+- **Start small and iterate**: Begin with a small, representative set of images per class. Models often begin working well with surprisingly few examples and improve naturally over time.
+- **Favor hard examples**: When images appear in the Recent Classifications tab, prioritize images scoring below 90–100% or those captured under new lighting, weather, or distance conditions.
+- **Avoid bulk training similar images**: Training large batches of images that already score 100% (or close) adds little new information and increases the risk of overfitting.
+- **The wizard is just the starting point**: You don’t need to find and label every class upfront. Missing classes will naturally appear in Recent Classifications, and those images tend to be more valuable because they represent new conditions and edge cases.
 - **Problem framing**: Keep classes visually distinct and relevant to the chosen object types.
-- **Data collection**: Use the model’s Recent Classification tab to gather balanced examples across times of day, weather, and distances.
 - **Preprocessing**: Ensure examples reflect object crops similar to Frigate’s boxes; keep the subject centered.
 - **Labels**: Keep label names short and consistent; include a `none` class if you plan to ignore uncertain predictions for sub labels.
 - **Threshold**: Tune `threshold` per model to reduce false assignments. Start at `0.8` and adjust based on validation.
