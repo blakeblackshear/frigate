@@ -1,7 +1,6 @@
 """Handle outputting individual cameras via jsmpeg."""
 
 import logging
-import multiprocessing as mp
 import queue
 import subprocess as sp
 import threading

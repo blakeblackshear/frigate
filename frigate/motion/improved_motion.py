@@ -1,13 +1,11 @@
 import logging
+from typing import Optional
 
 import cv2
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
-from typing import Any, Optional
-
 from frigate.camera import PTZMetrics
-from frigate.config import MotionConfig
 from frigate.config.config import RuntimeMotionConfig
 from frigate.motion import MotionDetector
 from frigate.util.image import grab_cv2_contours
