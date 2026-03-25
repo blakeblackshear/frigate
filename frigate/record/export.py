@@ -85,10 +85,6 @@ def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
     return True, ""
 
 
-def lower_priority() -> None:
-    os.nice(PROCESS_PRIORITY_LOW)
-
-
 class PlaybackSourceEnum(str, Enum):
     recordings = "recordings"
     preview = "preview"
@@ -439,10 +435,9 @@ class RecordingExporter(threading.Thread):
             return
 
         p = sp.run(
-            ffmpeg_cmd,
+            ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + ffmpeg_cmd,
             input="\n".join(playlist_lines),
             encoding="ascii",
-            preexec_fn=lower_priority,
             capture_output=True,
         )
 
@@ -467,10 +462,9 @@ class RecordingExporter(threading.Thread):
                 )
 
             p = sp.run(
-                ffmpeg_cmd,
+                ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + ffmpeg_cmd,
                 input="\n".join(playlist_lines),
                 encoding="ascii",
-                preexec_fn=lower_priority,
                 capture_output=True,
             )
 
