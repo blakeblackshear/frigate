@@ -32,6 +32,7 @@ class CameraConfigUpdateEnum(str, Enum):
     face_recognition = "face_recognition"
     lpr = "lpr"
     snapshots = "snapshots"
+    timestamp_style = "timestamp_style"
     zones = "zones"
 
 
@@ -133,6 +134,8 @@ class CameraConfigUpdateSubscriber:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.onvif:
             config.onvif = updated_config
+        elif update_type == CameraConfigUpdateEnum.timestamp_style:
+            config.timestamp_style = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:
             config.zones = updated_config
 

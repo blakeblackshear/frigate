@@ -70,10 +70,21 @@ Once some images are assigned, training will begin automatically.
 
 ### Improving the Model
 
+:::tip Diversity matters far more than volume
+
+Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what *that exact moment* looked like rather than what actually defines the state. This often leads to models that work perfectly under the original conditions but become unstable when day turns to night, weather changes, or seasonal lighting shifts. **This is why Frigate does not implement bulk training in the UI.**
+
+For more detail, see [Frigate Tip: Best Practices for Training Face and Custom Classification Models](https://github.com/blakeblackshear/frigate/discussions/21374).
+
+:::
+
+- **Start small and iterate**: Begin with a small, representative set of images per class. Models often begin working well with surprisingly few examples and improve naturally over time.
 - **Problem framing**: Keep classes visually distinct and state-focused (e.g., `open`, `closed`, `unknown`). Avoid combining object identity with state in a single model unless necessary.
 - **Data collection**: Use the model's Recent Classifications tab to gather balanced examples across times of day and weather.
 - **When to train**: Focus on cases where the model is entirely incorrect or flips between states when it should not. There's no need to train additional images when the model is already working consistently.
-- **Selecting training images**: Images scoring below 100% due to new conditions (e.g., first snow of the year, seasonal changes) or variations (e.g., objects temporarily in view, insects at night) are good candidates for training, as they represent scenarios different from the default state. Training these lower-scoring images that differ from existing training data helps prevent overfitting. Avoid training large quantities of images that look very similar, especially if they already score 100% as this can lead to overfitting.
+- **Favor hard examples**: When images appear in the Recent Classifications tab, prioritize images scoring below 90–100% or those captured under new conditions (e.g., first snow of the year, seasonal changes, objects temporarily in view, insects at night). These represent scenarios different from the default state and help prevent overfitting.
+- **Avoid bulk training similar images**: Training large batches of images that already score 100% (or close) adds little new information and increases the risk of overfitting.
+- **The wizard is just the starting point**: You don't need to find and label every state upfront. Missing states will naturally appear in Recent Classifications, and those images tend to be more valuable because they represent new conditions and edge cases.
 
 ## Debugging Classification Models
 

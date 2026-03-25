@@ -1,5 +1,6 @@
 // Select Widget - maps to shadcn/ui Select
 import type { WidgetProps } from "@rjsf/utils";
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -21,8 +22,17 @@ export function SelectWidget(props: WidgetProps) {
     schema,
   } = props;
 
+  const { t } = useTranslation(["views/settings"]);
   const { enumOptions = [] } = options;
+  const enumI18nPrefix = options["enumI18nPrefix"] as string | undefined;
   const fieldClassName = getSizedFieldClassName(options, "sm");
+
+  const getLabel = (option: { value: unknown; label: string }) => {
+    if (enumI18nPrefix) {
+      return t(`${enumI18nPrefix}.${option.value}`);
+    }
+    return option.label;
+  };
 
   return (
     <Select
@@ -42,7 +52,7 @@ export function SelectWidget(props: WidgetProps) {
       <SelectContent>
         {enumOptions.map((option: { value: unknown; label: string }) => (
           <SelectItem key={String(option.value)} value={String(option.value)}>
-            {option.label}
+            {getLabel(option)}
           </SelectItem>
         ))}
       </SelectContent>

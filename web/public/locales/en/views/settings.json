@@ -825,6 +825,12 @@
       "area": "Area"
     }
   },
+  "timestampPosition": {
+    "tl": "Top left",
+    "tr": "Top right",
+    "bl": "Bottom left",
+    "br": "Bottom right"
+  },
   "users": {
     "title": "Users",
     "management": {
@@ -1342,7 +1348,22 @@
         "preset-nvidia": "NVIDIA GPU",
         "preset-jetson-h264": "NVIDIA Jetson (H.264)",
         "preset-jetson-h265": "NVIDIA Jetson (H.265)",
-        "preset-rkmpp": "Rockchip RKMPP"
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generic)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generic)",
+        "preset-http-reolink": "HTTP - Reolink Cameras",
+        "preset-rtmp-generic": "RTMP (Generic)",
+        "preset-rtsp-generic": "RTSP (Generic)",
+        "preset-rtsp-restream": "RTSP - Restream from go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Restream from go2rtc (Low Latency)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Record (Generic, no audio)",
+        "preset-record-generic-audio-copy": "Record (Generic + Copy Audio)",
+        "preset-record-generic-audio-aac": "Record (Generic + Audio to AAC)",
+        "preset-record-mjpeg": "Record - MJPEG Cameras",
+        "preset-record-jpeg": "Record - JPEG Cameras",
+        "preset-record-ubiquiti": "Record - Ubiquiti Cameras"
       }
     },
     "cameraInputs": {
