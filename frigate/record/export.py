@@ -85,7 +85,7 @@ def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
     return True, ""
 
 
-def lower_priority():
+def lower_priority() -> None:
     os.nice(PROCESS_PRIORITY_LOW)
 
 
@@ -150,7 +150,7 @@ class RecordingExporter(threading.Thread):
         ):
             # has preview mp4
             try:
-                preview: Previews = (
+                preview = (
                     Previews.select(
                         Previews.camera,
                         Previews.path,
@@ -231,20 +231,19 @@ class RecordingExporter(threading.Thread):
 
     def get_record_export_command(
         self, video_path: str, use_hwaccel: bool = True
-    ) -> list[str]:
+    ) -> tuple[list[str], str | list[str]]:
         # handle case where internal port is a string with ip:port
         internal_port = self.config.networking.listen.internal
         if type(internal_port) is str:
             internal_port = int(internal_port.split(":")[-1])
 
+        playlist_lines: list[str] = []
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
-            playlist_lines = f"http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
+            playlist_url = f"http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
             ffmpeg_input = (
-                f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_lines}"
+                f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_url}"
             )
         else:
-            playlist_lines = []
-
             # get full set of recordings
             export_recordings = (
                 Recordings.select(
@@ -305,7 +304,7 @@ class RecordingExporter(threading.Thread):
 
     def get_preview_export_command(
         self, video_path: str, use_hwaccel: bool = True
-    ) -> list[str]:
+    ) -> tuple[list[str], list[str]]:
         playlist_lines = []
         codec = "-c copy"
 
@@ -355,7 +354,6 @@ class RecordingExporter(threading.Thread):
             .iterator()
         )
 
-        preview: Previews
         for preview in export_previews:
             playlist_lines.append(f"file '{preview.path}'")
 
@@ -493,7 +491,7 @@ class RecordingExporter(threading.Thread):
         logger.debug(f"Finished exporting {video_path}")
 
 
-def migrate_exports(ffmpeg: FfmpegConfig, camera_names: list[str]):
+def migrate_exports(ffmpeg: FfmpegConfig, camera_names: list[str]) -> None:
     Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
 
     exports = []
