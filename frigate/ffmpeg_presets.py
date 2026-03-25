@@ -3,7 +3,7 @@
 import logging
 import os
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from frigate.const import (
     FFMPEG_HVC1_ARGS,
@@ -215,7 +215,7 @@ def parse_preset_hardware_acceleration_decode(
     width: int,
     height: int,
     gpu: int,
-) -> list[str]:
+) -> Optional[list[str]]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -242,9 +242,9 @@ def parse_preset_hardware_acceleration_scale(
     else:
         scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
 
-    scale = scale.format(fps, width, height).split(" ")
-    scale.extend(detect_args)
-    return scale
+    scale_args = scale.format(fps, width, height).split(" ")
+    scale_args.extend(detect_args)
+    return scale_args
 
 
 class EncodeTypeEnum(str, Enum):
@@ -420,7 +420,7 @@ PRESETS_INPUT = {
 }
 
 
-def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
+def parse_preset_input(arg: Any, detect_fps: int) -> Optional[list[str]]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -530,7 +530,7 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
+def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> Optional[list[str]]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
