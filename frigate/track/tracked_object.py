@@ -67,8 +67,8 @@ class TrackedObject:
         self.has_snapshot = False
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data: dict[str, Any] | None = None
-        self.last_updated = 0
-        self.last_published = 0
+        self.last_updated: float = 0
+        self.last_published: float = 0
         self.frame = None
         self.active = True
         self.pending_loitering = False

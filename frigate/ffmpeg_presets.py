@@ -530,7 +530,9 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> Optional[list[str]]:
+def parse_preset_output_record(
+    arg: Any, force_record_hvc1: bool
+) -> Optional[list[str]]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None

@@ -31,26 +31,26 @@ logger = logging.getLogger(__name__)
 class CameraState:
     def __init__(
         self,
-        name,
+        name: str,
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
         ptz_autotracker_thread: PtzAutoTrackerThread,
-    ):
+    ) -> None:
         self.name = name
         self.config = config
         self.camera_config = config.cameras[name]
         self.frame_manager = frame_manager
         self.best_objects: dict[str, TrackedObject] = {}
         self.tracked_objects: dict[str, TrackedObject] = {}
-        self.frame_cache = {}
-        self.zone_objects = defaultdict(list)
+        self.frame_cache: dict[float, dict[str, Any]] = {}
+        self.zone_objects: defaultdict[str, list[Any]] = defaultdict(list)
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
-        self.motion_boxes = []
-        self.regions = []
-        self.previous_frame_id = None
-        self.callbacks = defaultdict(list)
+        self.motion_boxes: list[tuple[int, int, int, int]] = []
+        self.regions: list[tuple[int, int, int, int]] = []
+        self.previous_frame_id: str | None = None
+        self.callbacks: defaultdict[str, list[Callable]] = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
 
@@ -62,10 +62,10 @@ class CameraState:
             motion_boxes = self.motion_boxes.copy()
             regions = self.regions.copy()
 
-        frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
+        frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)  # type: ignore[assignment]
         # draw on the frame
         if draw_options.get("mask"):
-            mask_overlay = np.where(self.camera_config.motion.rasterized_mask == [0])
+            mask_overlay = np.where(self.camera_config.motion.rasterized_mask == [0])  # type: ignore[attr-defined]
             frame_copy[mask_overlay] = [0, 0, 0]
 
         if draw_options.get("bounding_boxes"):
@@ -97,7 +97,7 @@ class CameraState:
                     and obj["id"]
                     == self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
                         self.name
-                    ].obj_data["id"]
+                    ].obj_data["id"]  # type: ignore[attr-defined]
                     and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
@@ -109,10 +109,12 @@ class CameraState:
                     if (
                         self.camera_config.onvif.autotracking.zooming
                         != ZoomingModeEnum.disabled
+                        and self.camera_config.detect.width is not None
+                        and self.camera_config.detect.height is not None
                     ):
                         max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
                             self.name
-                        ]["max_target_box"]
+                        ]["max_target_box"]  # type: ignore[index]
                         side_length = max_target_box * (
                             max(
                                 self.camera_config.detect.width,
@@ -221,14 +223,14 @@ class CameraState:
                 )
 
         if draw_options.get("timestamp"):
-            color = self.camera_config.timestamp_style.color
+            ts_color = self.camera_config.timestamp_style.color
             draw_timestamp(
                 frame_copy,
                 frame_time,
                 self.camera_config.timestamp_style.format,
                 font_effect=self.camera_config.timestamp_style.effect,
                 font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=(color.blue, color.green, color.red),
+                font_color=(ts_color.blue, ts_color.green, ts_color.red),
                 position=self.camera_config.timestamp_style.position,
             )
 
@@ -273,10 +275,10 @@ class CameraState:
 
         return frame_copy
 
-    def finished(self, obj_id):
+    def finished(self, obj_id: str) -> None:
         del self.tracked_objects[obj_id]
 
-    def on(self, event_type: str, callback: Callable):
+    def on(self, event_type: str, callback: Callable[..., Any]) -> None:
         self.callbacks[event_type].append(callback)
 
     def update(
@@ -286,7 +288,7 @@ class CameraState:
         current_detections: dict[str, dict[str, Any]],
         motion_boxes: list[tuple[int, int, int, int]],
         regions: list[tuple[int, int, int, int]],
-    ):
+    ) -> None:
         current_frame = self.frame_manager.get(
             frame_name, self.camera_config.frame_shape_yuv
         )
@@ -313,7 +315,7 @@ class CameraState:
                 f"{self.name}: New object, adding {frame_time} to frame cache for {id}"
             )
             self.frame_cache[frame_time] = {
-                "frame": np.copy(current_frame),
+                "frame": np.copy(current_frame),  # type: ignore[arg-type]
                 "object_id": id,
             }
 
@@ -356,7 +358,8 @@ class CameraState:
             if thumb_update and current_frame is not None:
                 # ensure this frame is stored in the cache
                 if (
-                    updated_obj.thumbnail_data["frame_time"] == frame_time
+                    updated_obj.thumbnail_data is not None
+                    and updated_obj.thumbnail_data["frame_time"] == frame_time
                     and frame_time not in self.frame_cache
                 ):
                     logger.debug(
@@ -397,7 +400,7 @@ class CameraState:
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
-        camera_activity: dict[str, list[Any]] = {
+        camera_activity: dict[str, Any] = {
             "motion": len(motion_boxes) > 0,
             "objects": [],
         }
@@ -411,10 +414,7 @@ class CameraState:
                 sub_label = None
 
                 if obj.obj_data.get("sub_label"):
-                    if (
-                        obj.obj_data.get("sub_label")[0]
-                        in self.config.model.all_attributes
-                    ):
+                    if obj.obj_data["sub_label"][0] in self.config.model.all_attributes:
                         label = obj.obj_data["sub_label"][0]
                     else:
                         label = f"{object_type}-verified"
@@ -449,14 +449,19 @@ class CameraState:
                 # if the object is a higher score than the current best score
                 # or the current object is older than desired, use the new object
                 if (
-                    is_better_thumbnail(
+                    current_best.thumbnail_data is not None
+                    and obj.thumbnail_data is not None
+                    and is_better_thumbnail(
                         object_type,
                         current_best.thumbnail_data,
                         obj.thumbnail_data,
                         self.camera_config.frame_shape,
                     )
-                    or (now - current_best.thumbnail_data["frame_time"])
-                    > self.camera_config.best_image_timeout
+                    or (
+                        current_best.thumbnail_data is not None
+                        and (now - current_best.thumbnail_data["frame_time"])
+                        > self.camera_config.best_image_timeout
+                    )
                 ):
                     self.send_mqtt_snapshot(obj, object_type)
             else:
@@ -472,7 +477,9 @@ class CameraState:
             if obj.thumbnail_data is not None
         }
         current_best_frames = {
-            obj.thumbnail_data["frame_time"] for obj in self.best_objects.values()
+            obj.thumbnail_data["frame_time"]
+            for obj in self.best_objects.values()
+            if obj.thumbnail_data is not None
         }
         thumb_frames_to_delete = [
             t
@@ -540,7 +547,7 @@ class CameraState:
             with open(
                 os.path.join(
                     CLIPS_DIR,
-                    f"{self.camera_config.name}-{event_id}-clean.webp",
+                    f"{self.name}-{event_id}-clean.webp",
                 ),
                 "wb",
             ) as p:
@@ -549,7 +556,7 @@ class CameraState:
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
-        thumb_path = os.path.join(THUMB_DIR, self.camera_config.name)
+        thumb_path = os.path.join(THUMB_DIR, self.name)
         os.makedirs(thumb_path, exist_ok=True)
         cv2.imwrite(os.path.join(thumb_path, f"{event_id}.webp"), thumb)
 
