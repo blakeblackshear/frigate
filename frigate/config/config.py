@@ -25,6 +25,7 @@ from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     get_ffmpeg_arg_list,
+    load_labels,
 )
 from frigate.util.config import (
     CURRENT_CONFIG_VERSION,
@@ -40,7 +41,7 @@ from frigate.util.services import auto_detect_hwaccel
 from .auth import AuthConfig
 from .base import FrigateBaseModel
 from .camera import CameraConfig, CameraLiveConfig
-from .camera.audio import AudioConfig
+from .camera.audio import AudioConfig, AudioFilterConfig
 from .camera.birdseye import BirdseyeConfig
 from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
@@ -671,6 +672,12 @@ class FrigateConfig(FrigateBaseModel):
             detector_config.model = model
             self.detectors[key] = detector_config
 
+        all_audio_labels = {
+            label
+            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
+            if label
+        }
+
         for name, camera in self.cameras.items():
             modified_global_config = global_config.copy()
 
@@ -790,6 +797,14 @@ class FrigateConfig(FrigateBaseModel):
             camera_config.review.genai.enabled_in_config = (
                 camera_config.review.genai.enabled
             )
+
+            if camera_config.audio.filters is None:
+                camera_config.audio.filters = {}
+
+            audio_keys = all_audio_labels
+            audio_keys = audio_keys - camera_config.audio.filters.keys()
+            for key in audio_keys:
+                camera_config.audio.filters[key] = AudioFilterConfig()
 
             # Add default filters
             object_keys = camera_config.objects.track
