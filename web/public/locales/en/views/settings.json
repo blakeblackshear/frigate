@@ -825,6 +825,12 @@
       "area": "Area"
     }
   },
+  "timestampPosition": {
+    "tl": "Top left",
+    "tr": "Top right",
+    "bl": "Bottom left",
+    "br": "Bottom right"
+  },
   "users": {
     "title": "Users",
     "management": {

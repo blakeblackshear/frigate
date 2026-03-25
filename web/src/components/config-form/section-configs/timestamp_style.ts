@@ -10,6 +10,7 @@ const timestampStyle: SectionConfigOverrides = {
     uiSchema: {
       position: {
         "ui:size": "xs",
+        "ui:options": { enumI18nPrefix: "timestampPosition" },
       },
       format: {
         "ui:size": "xs",
