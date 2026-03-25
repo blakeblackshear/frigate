@@ -9,6 +9,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any
 
+import aiohttp
 import numpy
 from onvif import ONVIFCamera, ONVIFError, ONVIFService
 from zeep.exceptions import Fault, TransportError
@@ -104,6 +105,20 @@ class OnvifController:
             if password is not None and isinstance(password, bytes):
                 password = password.decode("utf-8")
 
+            # Build extra kwargs for digest auth mode (Hikvision and similar cameras
+            # that reject WSSE wsUsername tokens and require HTTP Digest at transport level).
+            onvif_extra: dict[str, Any] = {}
+            if cam.onvif.auth_mode == "digest" and user and password:
+                try:
+                    onvif_extra["middlewares"] = [
+                        aiohttp.DigestAuthMiddleware(user, password)
+                    ]
+                except AttributeError:
+                    logger.warning(
+                        f"DigestAuthMiddleware not available in installed aiohttp version "
+                        f"for camera {cam_name}; falling back to default auth."
+                    )
+
             self.cams[cam_name] = {
                 "onvif": ONVIFCamera(
                     cam.onvif.host,
@@ -113,6 +128,7 @@ class OnvifController:
                     wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
                     adjust_time=cam.onvif.ignore_time_mismatch,
                     encrypt=not cam.onvif.tls_insecure,
+                    **onvif_extra,
                 ),
                 "init": False,
                 "active": False,

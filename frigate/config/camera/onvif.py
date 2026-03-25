@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -116,6 +116,11 @@ class OnvifConfig(FrigateBaseModel):
         default=False,
         title="Disable TLS verify",
         description="Skip TLS verification and disable digest auth for ONVIF (unsafe; use in safe networks only).",
+    )
+    auth_mode: Literal["auto", "digest", "wsse"] = Field(
+        default="auto",
+        title="ONVIF authentication mode",
+        description="Authentication mode for ONVIF connections. 'auto' tries WSSE first (default behavior). 'digest' forces HTTP Digest auth at the transport level — required for some Hikvision cameras that reject WSSE wsUsername tokens and return 401. 'wsse' forces WSSE UsernameToken only.",
     )
     autotracking: PtzAutotrackConfig = Field(
         default_factory=PtzAutotrackConfig,
