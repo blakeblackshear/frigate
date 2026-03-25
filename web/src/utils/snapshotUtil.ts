@@ -103,20 +103,15 @@ export function generateSnapshotFilename(
   timestampSeconds?: number,
   timezone?: string,
 ): string {
-  const seconds = timestampSeconds ?? Date.now() / 1000;
+  const seconds =
+    typeof timestampSeconds === "number" && Number.isFinite(timestampSeconds)
+      ? timestampSeconds
+      : Date.now() / 1000;
   const timestamp = formatUnixTimestampToDateTime(seconds, {
     timezone,
     date_format: "yyyy-MM-dd'T'HH-mm-ss",
   });
-
-  const safeTimestamp =
-    timestamp === "Invalid time"
-      ? new Date(seconds * 1000)
-          .toISOString()
-          .replace(/[:.]/g, "-")
-          .slice(0, -5)
-      : timestamp;
-  return `${cameraName}_snapshot_${safeTimestamp}.jpg`;
+  return `${cameraName}_snapshot_${timestamp}.jpg`;
 }
 
 export async function grabVideoSnapshot(

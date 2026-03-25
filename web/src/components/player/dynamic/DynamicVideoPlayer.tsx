@@ -47,7 +47,6 @@ type DynamicVideoPlayerProps = {
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
-  supportsSnapshot?: boolean;
   transformedOverlay?: ReactNode;
 };
 export default function DynamicVideoPlayer({
@@ -67,7 +66,6 @@ export default function DynamicVideoPlayer({
   setFullResolution,
   toggleFullscreen,
   containerRef,
-  supportsSnapshot = false,
   transformedOverlay,
 }: DynamicVideoPlayerProps) {
   const { t } = useTranslation(["components/player"]);
@@ -323,7 +321,6 @@ export default function DynamicVideoPlayer({
           isDetailMode={isDetailMode}
           camera={contextCamera || camera}
           currentTimeOverride={currentTime}
-          supportsSnapshot={supportsSnapshot}
           transformedOverlay={transformedOverlay}
         />
       )}

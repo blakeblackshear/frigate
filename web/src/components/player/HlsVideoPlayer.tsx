@@ -63,7 +63,6 @@ type HlsVideoPlayerProps = {
   isDetailMode?: boolean;
   camera?: string;
   currentTimeOverride?: number;
-  supportsSnapshot?: boolean;
   transformedOverlay?: ReactNode;
 };
 
@@ -89,7 +88,6 @@ export default function HlsVideoPlayer({
   isDetailMode = false,
   camera,
   currentTimeOverride,
-  supportsSnapshot = false,
   transformedOverlay,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation(["components/player", "views/live"]);
@@ -271,7 +269,7 @@ export default function HlsVideoPlayer({
   const getVideoTime = useCallback(() => {
     const currentTime = videoRef.current?.currentTime;
 
-    if (currentTime == undefined) {
+    if (!currentTime) {
       return undefined;
     }
 
@@ -300,6 +298,7 @@ export default function HlsVideoPlayer({
       });
     }
   }, [camera, config?.ui?.timezone, currentTime, getVideoTime, t, videoRef]);
+  const onSnapshot = camera ? handleSnapshot : undefined;
 
   return (
     <TransformWrapper
@@ -324,7 +323,7 @@ export default function HlsVideoPlayer({
             seek: true,
             playbackRate: true,
             plusUpload: isAdmin && config?.plus?.enabled == true,
-            snapshot: supportsSnapshot,
+            snapshot: !!onSnapshot,
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}
@@ -351,7 +350,7 @@ export default function HlsVideoPlayer({
           onUploadFrame={async () => {
             const frameTime = getVideoTime();
 
-            if (frameTime != undefined && onUploadFrame) {
+            if (frameTime && onUploadFrame) {
               const resp = await onUploadFrame(frameTime);
 
               if (resp && resp.status == 200) {
@@ -365,7 +364,7 @@ export default function HlsVideoPlayer({
               }
             }
           }}
-          onSnapshot={supportsSnapshot ? handleSnapshot : undefined}
+          onSnapshot={onSnapshot}
           snapshotTitle={t("snapshot.takeSnapshot", { ns: "views/live" })}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
@@ -498,7 +497,7 @@ export default function HlsVideoPlayer({
 
               const frameTime = getVideoTime();
 
-              if (frameTime != undefined) {
+              if (frameTime) {
                 onTimeUpdate(frameTime);
               }
             }}
