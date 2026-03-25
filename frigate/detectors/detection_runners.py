@@ -24,23 +24,36 @@ def is_arm64_platform() -> bool:
 
 def get_ort_session_options(
     is_complex_model: bool = False,
-) -> ort.SessionOptions | None:
+) -> ort.SessionOptions:
     """Get ONNX Runtime session options with appropriate settings.
 
     Args:
         is_complex_model: Whether the model needs basic optimization to avoid graph fusion issues.
 
     Returns:
-        SessionOptions with appropriate optimization level, or None for default settings.
+        SessionOptions with appropriate optimization level and thread settings.
     """
+    sess_options = ort.SessionOptions()
+
+    # When OMP_NUM_THREADS=1 is set (recommended for LXC/container environments),
+    # or when running in a container where pthread_setaffinity_np is blocked,
+    # onnxruntime logs repeated errors like:
+    #   "pthread_setaffinity_np failed ... error code: 22 ... Invalid argument"
+    # Setting intra/inter_op_num_threads=1 prevents the thread pool from trying
+    # to set CPU affinity, eliminating the error spam in LXC containers (Proxmox, etc.).
+    import os
+
+    omp_threads = int(os.environ.get("OMP_NUM_THREADS", "0"))
+    if omp_threads == 1:
+        sess_options.intra_op_num_threads = 1
+        sess_options.inter_op_num_threads = 1
+
     if is_complex_model:
-        sess_options = ort.SessionOptions()
         sess_options.graph_optimization_level = (
             ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
         )
-        return sess_options
 
-    return None
+    return sess_options
 
 
 # Import OpenVINO only when needed to avoid circular dependencies

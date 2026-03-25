@@ -24,6 +24,10 @@ services:
     #                     capabilities: [gpu]
     environment:
       YOLO_MODELS: ""
+      # Set OMP_NUM_THREADS=1 when running in LXC containers (e.g. Proxmox) to prevent
+      # onnxruntime from calling pthread_setaffinity_np(), which fails in LXC with EINVAL.
+      # This affects face_recognition, semantic_search, and classification features.
+      # OMP_NUM_THREADS: "1"
     # devices:
       # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
