@@ -5,6 +5,8 @@ import multiprocessing as mp
 import queue
 import subprocess as sp
 import threading
+from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
 from frigate.config import CameraConfig, FfmpegConfig
 
@@ -17,7 +19,7 @@ class FFMpegConverter(threading.Thread):
         camera: str,
         ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
-        stop_event: mp.Event,
+        stop_event: MpEvent,
         in_width: int,
         in_height: int,
         out_width: int,
@@ -64,16 +66,17 @@ class FFMpegConverter(threading.Thread):
             start_new_session=True,
         )
 
-    def __write(self, b) -> None:
+    def __write(self, b: bytes) -> None:
+        assert self.process.stdin is not None
         self.process.stdin.write(b)
 
-    def read(self, length):
+    def read(self, length: int) -> Any:
         try:
-            return self.process.stdout.read1(length)
+            return self.process.stdout.read1(length)  # type: ignore[union-attr]
         except ValueError:
             return False
 
-    def exit(self):
+    def exit(self) -> None:
         self.process.terminate()
 
         try:
@@ -98,8 +101,8 @@ class BroadcastThread(threading.Thread):
         self,
         camera: str,
         converter: FFMpegConverter,
-        websocket_server,
-        stop_event: mp.Event,
+        websocket_server: Any,
+        stop_event: MpEvent,
     ):
         super().__init__()
         self.camera = camera
@@ -107,7 +110,7 @@ class BroadcastThread(threading.Thread):
         self.websocket_server = websocket_server
         self.stop_event = stop_event
 
-    def run(self):
+    def run(self) -> None:
         while not self.stop_event.is_set():
             buf = self.converter.read(65536)
             if buf:
@@ -133,15 +136,15 @@ class BroadcastThread(threading.Thread):
 
 class JsmpegCamera:
     def __init__(
-        self, config: CameraConfig, stop_event: mp.Event, websocket_server
+        self, config: CameraConfig, stop_event: MpEvent, websocket_server: Any
     ) -> None:
         self.config = config
-        self.input = queue.Queue(maxsize=config.detect.fps)
+        self.input: queue.Queue[bytes] = queue.Queue(maxsize=config.detect.fps)
         width = int(
             config.live.height * (config.frame_shape[1] / config.frame_shape[0])
         )
         self.converter = FFMpegConverter(
-            config.name,
+            config.name or "",
             config.ffmpeg,
             self.input,
             stop_event,
@@ -152,13 +155,13 @@ class JsmpegCamera:
             config.live.quality,
         )
         self.broadcaster = BroadcastThread(
-            config.name, self.converter, websocket_server, stop_event
+            config.name or "", self.converter, websocket_server, stop_event
         )
 
         self.converter.start()
         self.broadcaster.start()
 
-    def write_frame(self, frame_bytes) -> None:
+    def write_frame(self, frame_bytes: bytes) -> None:
         try:
             self.input.put_nowait(frame_bytes)
         except queue.Full:

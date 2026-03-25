@@ -22,7 +22,6 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Previews
-from frigate.track.object_processing import TrackedObject
 from frigate.util.image import copy_yuv_to_position, get_blank_yuv_frame, get_yuv_crop
 
 logger = logging.getLogger(__name__)
@@ -66,7 +65,9 @@ def get_cache_image_name(camera: str, frame_time: float) -> str:
     )
 
 
-def get_most_recent_preview_frame(camera: str, before: float = None) -> str | None:
+def get_most_recent_preview_frame(
+    camera: str, before: float | None = None
+) -> str | None:
     """Get the most recent preview frame for a camera."""
     if not os.path.exists(PREVIEW_CACHE_DIR):
         return None
@@ -147,12 +148,12 @@ class FFMpegConverter(threading.Thread):
             if t_idx == item_count - 1:
                 # last frame does not get a duration
                 playlist.append(
-                    f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"
+                    f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"  # type: ignore[arg-type]
                 )
                 continue
 
             playlist.append(
-                f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"
+                f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"  # type: ignore[arg-type]
             )
             playlist.append(
                 f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
@@ -199,30 +200,33 @@ class FFMpegConverter(threading.Thread):
         # unlink files from cache
         # don't delete last frame as it will be used as first frame in next segment
         for t in self.frame_times[0:-1]:
-            Path(get_cache_image_name(self.config.name, t)).unlink(missing_ok=True)
+            Path(get_cache_image_name(self.config.name, t)).unlink(missing_ok=True)  # type: ignore[arg-type]
 
 
 class PreviewRecorder:
     def __init__(self, config: CameraConfig) -> None:
         self.config = config
-        self.start_time = 0
-        self.last_output_time = 0
+        self.camera_name: str = config.name or ""
+        self.start_time: float = 0
+        self.last_output_time: float = 0
         self.offline = False
-        self.output_frames = []
+        self.output_frames: list[float] = []
 
-        if config.detect.width > config.detect.height:
+        if config.detect.width is None or config.detect.height is None:
+            raise ValueError("Detect width and height must be set for previews.")
+
+        self.detect_width: int = config.detect.width
+        self.detect_height: int = config.detect.height
+
+        if self.detect_width > self.detect_height:
             self.out_height = PREVIEW_HEIGHT
             self.out_width = (
-                int((config.detect.width / config.detect.height) * self.out_height)
-                // 4
-                * 4
+                int((self.detect_width / self.detect_height) * self.out_height) // 4 * 4
             )
         else:
             self.out_width = PREVIEW_HEIGHT
             self.out_height = (
-                int((config.detect.height / config.detect.width) * self.out_width)
-                // 4
-                * 4
+                int((self.detect_height / self.detect_width) * self.out_width) // 4 * 4
             )
 
         # create communication for finished previews
@@ -302,7 +306,7 @@ class PreviewRecorder:
         )
         self.start_time = frame_time
         self.last_output_time = frame_time
-        self.output_frames: list[float] = []
+        self.output_frames = []
 
     def should_write_frame(
         self,
@@ -342,7 +346,9 @@ class PreviewRecorder:
 
     def write_frame_to_cache(self, frame_time: float, frame: np.ndarray) -> None:
         # resize yuv frame
-        small_frame = np.zeros((self.out_height * 3 // 2, self.out_width), np.uint8)
+        small_frame: np.ndarray = np.zeros(
+            (self.out_height * 3 // 2, self.out_width), np.uint8
+        )
         copy_yuv_to_position(
             small_frame,
             (0, 0),
@@ -356,7 +362,7 @@ class PreviewRecorder:
             cv2.COLOR_YUV2BGR_I420,
         )
         cv2.imwrite(
-            get_cache_image_name(self.config.name, frame_time),
+            get_cache_image_name(self.camera_name, frame_time),
             small_frame,
             [
                 int(cv2.IMWRITE_WEBP_QUALITY),
@@ -396,7 +402,7 @@ class PreviewRecorder:
                 ).start()
             else:
                 logger.debug(
-                    f"Not saving preview for {self.config.name} because there are no saved frames."
+                    f"Not saving preview for {self.camera_name} because there are no saved frames."
                 )
 
             self.reset_frame_cache(frame_time)
@@ -416,9 +422,7 @@ class PreviewRecorder:
         if not self.offline:
             self.write_frame_to_cache(
                 frame_time,
-                get_blank_yuv_frame(
-                    self.config.detect.width, self.config.detect.height
-                ),
+                get_blank_yuv_frame(self.detect_width, self.detect_height),
             )
             self.offline = True
 
@@ -431,9 +435,9 @@ class PreviewRecorder:
                 return
 
             old_frame_path = get_cache_image_name(
-                self.config.name, self.output_frames[-1]
+                self.camera_name, self.output_frames[-1]
             )
-            new_frame_path = get_cache_image_name(self.config.name, frame_time)
+            new_frame_path = get_cache_image_name(self.camera_name, frame_time)
             shutil.copy(old_frame_path, new_frame_path)
 
             # save last frame to ensure consistent duration
@@ -447,13 +451,12 @@ class PreviewRecorder:
             self.reset_frame_cache(frame_time)
 
     def stop(self) -> None:
-        self.config_subscriber.stop()
         self.requestor.stop()
 
 
 def get_active_objects(
-    frame_time: float, camera_config: CameraConfig, all_objects: list[TrackedObject]
-) -> list[TrackedObject]:
+    frame_time: float, camera_config: CameraConfig, all_objects: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """get active objects for detection."""
     return [
         o

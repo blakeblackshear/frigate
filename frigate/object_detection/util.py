@@ -46,7 +46,9 @@ class ResponseStore:
     """
 
     def __init__(self) -> None:
-        self.responses: dict[int, ndarray] = {}  # Maps request_id -> (original_input, infer_results)
+        self.responses: dict[
+            int, ndarray
+        ] = {}  # Maps request_id -> (original_input, infer_results)
         self.lock = threading.Lock()
         self.cond = threading.Condition(self.lock)
 
@@ -65,7 +67,9 @@ class ResponseStore:
             return self.responses.pop(request_id)
 
 
-def tensor_transform(desired_shape: InputTensorEnum) -> tuple[int, int, int, int] | None:
+def tensor_transform(
+    desired_shape: InputTensorEnum,
+) -> tuple[int, int, int, int] | None:
     # Currently this function only supports BHWC permutations
     if desired_shape == InputTensorEnum.nhwc:
         return None
