@@ -68,7 +68,7 @@ export default function HlsVideoPlayer({
   videoClassName,
   containerRef,
   visible,
-  showControls = visible,
+  showControls = true,
   currentSource,
   hotKeys,
   supportsFullscreen,
@@ -290,7 +290,7 @@ export default function HlsVideoPlayer({
           )}
           video={videoRef.current}
           isPlaying={isPlaying}
-          show={showControls && (controls || controlsOpen)}
+          show={visible && showControls && (controls || controlsOpen)}
           muted={muted}
           volume={volume}
           features={{
@@ -395,9 +395,8 @@ export default function HlsVideoPlayer({
           <video
             ref={videoRef}
             className={cn(
-              "size-full rounded-lg bg-black md:rounded-2xl",
+              "size-full cursor-pointer rounded-lg bg-black md:rounded-2xl",
               loadedMetadata ? "" : "invisible",
-              "cursor-pointer",
               videoClassName,
             )}
             preload="auto"

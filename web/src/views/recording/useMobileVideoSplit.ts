@@ -23,7 +23,6 @@ type UseMobileVideoSplitProps = {
 type UseMobileVideoSplitReturn = {
   cameraSectionStyle: CSSProperties | undefined;
   isDraggingMobileSplit: boolean;
-  isMobilePortraitStacked: boolean;
   onHandlePointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
   usePortraitSplitLayout: boolean;
 };
@@ -40,11 +39,10 @@ export function useMobileVideoSplit({
   const [{ width: mainLayoutWidth, height: mainLayoutHeight }] =
     useResizeObserver(mainLayoutRef);
 
-  const isMobilePortraitStacked = useMemo(
-    () => !isDesktop && mainLayoutHeight > mainLayoutWidth,
-    [mainLayoutHeight, mainLayoutWidth],
+  const usePortraitSplitLayout = useMemo(
+    () => !isDesktop && !fullscreen && mainLayoutHeight > mainLayoutWidth,
+    [fullscreen, mainLayoutHeight, mainLayoutWidth],
   );
-  const usePortraitSplitLayout = isMobilePortraitStacked && !fullscreen;
   const mobileVideoSplitSafe = useMemo(
     () =>
       Math.min(
@@ -59,7 +57,7 @@ export function useMobileVideoSplit({
 
   const updateMobileSplitFromClientY = useCallback(
     (clientY: number) => {
-      if (!mainLayoutRef.current || !isMobilePortraitStacked) {
+      if (!mainLayoutRef.current || !usePortraitSplitLayout) {
         return;
       }
 
@@ -75,12 +73,12 @@ export function useMobileVideoSplit({
       );
       setMobileVideoSplit(clampedSplit);
     },
-    [isMobilePortraitStacked, mainLayoutRef, setMobileVideoSplit],
+    [usePortraitSplitLayout, mainLayoutRef, setMobileVideoSplit],
   );
 
   const onHandlePointerDown = useCallback(
     (event: PointerEvent<HTMLButtonElement>) => {
-      if (!isMobilePortraitStacked) {
+      if (!usePortraitSplitLayout) {
         return;
       }
 
@@ -88,7 +86,7 @@ export function useMobileVideoSplit({
       setIsDraggingMobileSplit(true);
       updateMobileSplitFromClientY(event.clientY);
     },
-    [isMobilePortraitStacked, updateMobileSplitFromClientY],
+    [usePortraitSplitLayout, updateMobileSplitFromClientY],
   );
 
   useEffect(() => {
@@ -117,16 +115,15 @@ export function useMobileVideoSplit({
 
   const cameraSectionStyle = useMemo(
     () =>
-      isMobilePortraitStacked
+      usePortraitSplitLayout
         ? { height: `${Math.round(mobileVideoSplitSafe * 100)}%` }
         : undefined,
-    [isMobilePortraitStacked, mobileVideoSplitSafe],
+    [usePortraitSplitLayout, mobileVideoSplitSafe],
   );
 
   return {
     cameraSectionStyle,
     isDraggingMobileSplit,
-    isMobilePortraitStacked,
     onHandlePointerDown,
     usePortraitSplitLayout,
   };

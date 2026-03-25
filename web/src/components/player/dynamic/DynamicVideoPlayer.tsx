@@ -282,12 +282,9 @@ export default function DynamicVideoPlayer({
   );
 
   const showPreview = isScrubbing || isLoading;
-  const previewPlayer = (
+  const renderPreviewPlayer = (previewClassName: string) => (
     <PreviewPlayer
-      className={cn(
-        source ? "pointer-events-none absolute inset-0 z-20" : className,
-        showPreview ? "visible" : "invisible",
-      )}
+      className={previewClassName}
       camera={camera}
       timeRange={timeRange}
       cameraPreviews={cameraPreviews}
@@ -298,6 +295,12 @@ export default function DynamicVideoPlayer({
       }
     />
   );
+  const previewOverlay = renderPreviewPlayer(
+    cn(
+      "pointer-events-none absolute inset-0 z-20",
+      showPreview ? "visible" : "invisible",
+    ),
+  );
 
   return (
     <>
@@ -306,6 +309,8 @@ export default function DynamicVideoPlayer({
           videoRef={playerRef}
           videoClassName={videoClassName}
           containerRef={containerRef}
+          // Keep transform wrapper mounted while scrubbing/loading
+          // so zoom and pan position are preserved.
           visible={true}
           showControls={!isScrubbing && !isLoading}
           currentSource={source}
@@ -346,12 +351,13 @@ export default function DynamicVideoPlayer({
           transformedOverlay={
             <>
               {transformedOverlay}
-              {previewPlayer}
+              {previewOverlay}
             </>
           }
         />
       )}
-      {!source && previewPlayer}
+      {!source &&
+        renderPreviewPlayer(cn(className, showPreview ? "visible" : "hidden"))}
       {!isScrubbing && (isLoading || isBuffering) && !noRecording && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}

@@ -374,7 +374,6 @@ export function RecordingView({
   const {
     cameraSectionStyle,
     isDraggingMobileSplit,
-    isMobilePortraitStacked,
     onHandlePointerDown,
     usePortraitSplitLayout,
   } = useMobileVideoSplit({
@@ -778,7 +777,7 @@ export function RecordingView({
                 ? "min-w-0 px-4"
                 : cn(
                     "portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
-                    isMobilePortraitStacked
+                    usePortraitSplitLayout
                       ? "portrait:flex-none"
                       : "portrait:max-h-[50dvh]",
                   ),
@@ -922,7 +921,7 @@ export function RecordingView({
               )}
             </div>
           </div>
-          {isMobilePortraitStacked && !fullscreen && (
+          {usePortraitSplitLayout && (
             <button
               type="button"
               aria-label={t("recordings.resizeSplit")}
