@@ -8,7 +8,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
 from frigate.config import FrigateConfig
-from frigate.events.maintainer import EventStateEnum, EventTypeEnum
+from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Timeline
 from frigate.util.builtin import to_relative_box
 
@@ -28,7 +28,7 @@ class TimelineProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         self.stop_event = stop_event
-        self.pre_event_cache: dict[str, list[dict[str, Any]]] = {}
+        self.pre_event_cache: dict[str, list[dict[Any, Any]]] = {}
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -56,7 +56,7 @@ class TimelineProcessor(threading.Thread):
 
     def insert_or_save(
         self,
-        entry: dict[str, Any],
+        entry: dict[Any, Any],
         prev_event_data: dict[Any, Any],
         event_data: dict[Any, Any],
     ) -> None:
@@ -84,11 +84,15 @@ class TimelineProcessor(threading.Thread):
         event_type: str,
         prev_event_data: dict[Any, Any],
         event_data: dict[Any, Any],
-    ) -> bool:
+    ) -> None:
         """Handle object detection."""
         camera_config = self.config.cameras.get(camera)
-        if camera_config is None:
-            return False
+        if (
+            camera_config is None
+            or camera_config.detect.width is None
+            or camera_config.detect.height is None
+        ):
+            return
         event_id = event_data["id"]
 
         # Base timeline entry data that all entries will share
