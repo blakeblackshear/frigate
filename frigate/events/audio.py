@@ -37,8 +37,8 @@ from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe, suppress_stderr_during
 from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
+from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util.process import FrigateProcess
-from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
     from tflite_runtime.interpreter import Interpreter
