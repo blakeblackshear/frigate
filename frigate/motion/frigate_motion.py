@@ -1,7 +1,9 @@
+from typing import Any
+
 import cv2
 import numpy as np
 
-from frigate.config import MotionConfig
+from frigate.config.config import RuntimeMotionConfig
 from frigate.motion import MotionDetector
 from frigate.util.image import grab_cv2_contours
 
@@ -9,19 +11,20 @@ from frigate.util.image import grab_cv2_contours
 class FrigateMotionDetector(MotionDetector):
     def __init__(
         self,
-        frame_shape,
-        config: MotionConfig,
+        frame_shape: tuple[int, ...],
+        config: RuntimeMotionConfig,
         fps: int,
-        improve_contrast,
-        threshold,
-        contour_area,
-    ):
+        improve_contrast: Any,
+        threshold: Any,
+        contour_area: Any,
+    ) -> None:
         self.config = config
         self.frame_shape = frame_shape
-        self.resize_factor = frame_shape[0] / config.frame_height
+        frame_height = config.frame_height or frame_shape[0]
+        self.resize_factor = frame_shape[0] / frame_height
         self.motion_frame_size = (
-            config.frame_height,
-            config.frame_height * frame_shape[1] // frame_shape[0],
+            frame_height,
+            frame_height * frame_shape[1] // frame_shape[0],
         )
         self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
         self.avg_delta = np.zeros(self.motion_frame_size, np.float32)
@@ -38,10 +41,10 @@ class FrigateMotionDetector(MotionDetector):
         self.threshold = threshold
         self.contour_area = contour_area
 
-    def is_calibrating(self):
+    def is_calibrating(self) -> bool:
         return False
 
-    def detect(self, frame):
+    def detect(self, frame: np.ndarray) -> list:
         motion_boxes = []
 
         gray = frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]]
@@ -99,7 +102,7 @@ class FrigateMotionDetector(MotionDetector):
 
             # dilate the thresholded image to fill in holes, then find contours
             # on thresholded image
-            thresh_dilated = cv2.dilate(thresh, None, iterations=2)
+            thresh_dilated = cv2.dilate(thresh, None, iterations=2)  # type: ignore[call-overload]
             contours = cv2.findContours(
                 thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
             )
