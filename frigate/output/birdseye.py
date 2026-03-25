@@ -4,13 +4,13 @@ import datetime
 import glob
 import logging
 import math
-import multiprocessing as mp
 import os
 import queue
 import subprocess as sp
 import threading
 import time
 import traceback
+from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
 
 import cv2
@@ -74,25 +74,25 @@ class Canvas:
         self,
         canvas_width: int,
         canvas_height: int,
-        scaling_factor: int,
+        scaling_factor: float,
     ) -> None:
         self.scaling_factor = scaling_factor
         gcd = math.gcd(canvas_width, canvas_height)
         self.aspect = get_standard_aspect_ratio(
-            (canvas_width / gcd), (canvas_height / gcd)
+            int(canvas_width / gcd), int(canvas_height / gcd)
         )
         self.width = canvas_width
-        self.height = (self.width * self.aspect[1]) / self.aspect[0]
-        self.coefficient_cache: dict[int, int] = {}
+        self.height: float = (self.width * self.aspect[1]) / self.aspect[0]
+        self.coefficient_cache: dict[int, float] = {}
         self.aspect_cache: dict[str, tuple[int, int]] = {}
 
-    def get_aspect(self, coefficient: int) -> tuple[int, int]:
+    def get_aspect(self, coefficient: float) -> tuple[float, float]:
         return (self.aspect[0] * coefficient, self.aspect[1] * coefficient)
 
-    def get_coefficient(self, camera_count: int) -> int:
+    def get_coefficient(self, camera_count: int) -> float:
         return self.coefficient_cache.get(camera_count, self.scaling_factor)
 
-    def set_coefficient(self, camera_count: int, coefficient: int) -> None:
+    def set_coefficient(self, camera_count: int, coefficient: float) -> None:
         self.coefficient_cache[camera_count] = coefficient
 
     def get_camera_aspect(
@@ -105,7 +105,7 @@ class Canvas:
 
         gcd = math.gcd(camera_width, camera_height)
         camera_aspect = get_standard_aspect_ratio(
-            camera_width / gcd, camera_height / gcd
+            int(camera_width / gcd), int(camera_height / gcd)
         )
         self.aspect_cache[cam_name] = camera_aspect
         return camera_aspect
@@ -116,7 +116,7 @@ class FFMpegConverter(threading.Thread):
         self,
         ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
-        stop_event: mp.Event,
+        stop_event: MpEvent,
         in_width: int,
         in_height: int,
         out_width: int,
@@ -128,7 +128,7 @@ class FFMpegConverter(threading.Thread):
         self.camera = "birdseye"
         self.input_queue = input_queue
         self.stop_event = stop_event
-        self.bd_pipe = None
+        self.bd_pipe: int | None = None
 
         if birdseye_rtsp:
             self.recreate_birdseye_pipe()
@@ -181,7 +181,8 @@ class FFMpegConverter(threading.Thread):
         os.close(stdin)
         self.reading_birdseye = False
 
-    def __write(self, b) -> None:
+    def __write(self, b: bytes) -> None:
+        assert self.process.stdin is not None
         self.process.stdin.write(b)
 
         if self.bd_pipe:
@@ -200,13 +201,13 @@ class FFMpegConverter(threading.Thread):
 
                 return
 
-    def read(self, length):
+    def read(self, length: int) -> Any:
         try:
-            return self.process.stdout.read1(length)
+            return self.process.stdout.read1(length)  # type: ignore[union-attr]
         except ValueError:
             return False
 
-    def exit(self):
+    def exit(self) -> None:
         if self.bd_pipe:
             os.close(self.bd_pipe)
 
@@ -233,8 +234,8 @@ class BroadcastThread(threading.Thread):
         self,
         camera: str,
         converter: FFMpegConverter,
-        websocket_server,
-        stop_event: mp.Event,
+        websocket_server: Any,
+        stop_event: MpEvent,
     ):
         super().__init__()
         self.camera = camera
@@ -242,7 +243,7 @@ class BroadcastThread(threading.Thread):
         self.websocket_server = websocket_server
         self.stop_event = stop_event
 
-    def run(self):
+    def run(self) -> None:
         while not self.stop_event.is_set():
             buf = self.converter.read(65536)
             if buf:
@@ -270,16 +271,16 @@ class BirdsEyeFrameManager:
     def __init__(
         self,
         config: FrigateConfig,
-        stop_event: mp.Event,
+        stop_event: MpEvent,
     ):
         self.config = config
         width, height = get_canvas_shape(config.birdseye.width, config.birdseye.height)
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
-        self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
+        self.frame: np.ndarray = np.ndarray(self.yuv_shape, dtype=np.uint8)
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
-        self.last_refresh_time = 0
+        self.last_refresh_time: float = 0
 
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
@@ -323,15 +324,15 @@ class BirdsEyeFrameManager:
 
         self.frame[:] = self.blank_frame
 
-        self.cameras = {}
+        self.cameras: dict[str, Any] = {}
         for camera in self.config.cameras.keys():
             self.add_camera(camera)
 
-        self.camera_layout = []
-        self.active_cameras = set()
+        self.camera_layout: list[Any] = []
+        self.active_cameras: set[str] = set()
         self.last_output_time = 0.0
 
-    def add_camera(self, cam: str):
+    def add_camera(self, cam: str) -> None:
         """Add a camera to self.cameras with the correct structure."""
         settings = self.config.cameras[cam]
         # precalculate the coordinates for all the channels
@@ -361,16 +362,21 @@ class BirdsEyeFrameManager:
             },
         }
 
-    def remove_camera(self, cam: str):
+    def remove_camera(self, cam: str) -> None:
         """Remove a camera from self.cameras."""
         if cam in self.cameras:
             del self.cameras[cam]
 
-    def clear_frame(self):
+    def clear_frame(self) -> None:
         logger.debug("Clearing the birdseye frame")
         self.frame[:] = self.blank_frame
 
-    def copy_to_position(self, position, camera=None, frame: np.ndarray = None):
+    def copy_to_position(
+        self,
+        position: Any,
+        camera: Optional[str] = None,
+        frame: Optional[np.ndarray] = None,
+    ) -> None:
         if camera is None:
             frame = None
             channel_dims = None
@@ -389,7 +395,9 @@ class BirdsEyeFrameManager:
             channel_dims,
         )
 
-    def camera_active(self, mode, object_box_count, motion_box_count):
+    def camera_active(
+        self, mode: Any, object_box_count: int, motion_box_count: int
+    ) -> bool:
         if mode == BirdseyeModeEnum.continuous:
             return True
 
@@ -398,6 +406,8 @@ class BirdsEyeFrameManager:
 
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
+
+        return False
 
     def get_camera_coordinates(self) -> dict[str, dict[str, int]]:
         """Return the coordinates of each camera in the current layout."""
@@ -451,7 +461,7 @@ class BirdsEyeFrameManager:
                         - self.cameras[active_camera]["last_active_frame"]
                     ),
                 )
-                active_cameras = limited_active_cameras[:max_cameras]
+                active_cameras = set(limited_active_cameras[:max_cameras])
                 max_camera_refresh = True
                 self.last_refresh_time = now
 
@@ -510,7 +520,7 @@ class BirdsEyeFrameManager:
 
                     # center camera view in canvas and ensure that it fits
                     if scaled_width < self.canvas.width:
-                        coefficient = 1
+                        coefficient: float = 1
                         x_offset = int((self.canvas.width - scaled_width) / 2)
                     else:
                         coefficient = self.canvas.width / scaled_width
@@ -557,7 +567,7 @@ class BirdsEyeFrameManager:
                         calculating = False
                         self.canvas.set_coefficient(len(active_cameras), coefficient)
 
-                    self.camera_layout = layout_candidate
+                    self.camera_layout = layout_candidate or []
                 frame_changed = True
 
             # Draw the layout
@@ -577,10 +587,12 @@ class BirdsEyeFrameManager:
         self,
         cameras_to_add: list[str],
         coefficient: float,
-    ) -> tuple[Any]:
+    ) -> Optional[list[list[Any]]]:
         """Calculate the optimal layout for 2+ cameras."""
 
-        def map_layout(camera_layout: list[list[Any]], row_height: int):
+        def map_layout(
+            camera_layout: list[list[Any]], row_height: int
+        ) -> tuple[int, int, Optional[list[list[Any]]]]:
             """Map the calculated layout."""
             candidate_layout = []
             starting_x = 0
@@ -777,11 +789,11 @@ class Birdseye:
     def __init__(
         self,
         config: FrigateConfig,
-        stop_event: mp.Event,
-        websocket_server,
+        stop_event: MpEvent,
+        websocket_server: Any,
     ) -> None:
         self.config = config
-        self.input = queue.Queue(maxsize=10)
+        self.input: queue.Queue[bytes] = queue.Queue(maxsize=10)
         self.converter = FFMpegConverter(
             config.ffmpeg,
             self.input,
@@ -806,7 +818,7 @@ class Birdseye:
         )
 
         if config.birdseye.restream:
-            self.birdseye_buffer = self.frame_manager.create(
+            self.birdseye_buffer: Any = self.frame_manager.create(
                 "birdseye",
                 self.birdseye_manager.yuv_shape[0] * self.birdseye_manager.yuv_shape[1],
             )

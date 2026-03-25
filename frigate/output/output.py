@@ -61,6 +61,12 @@ def check_disabled_camera_update(
             # last camera update was more than 1 second ago
             # need to send empty data to birdseye because current
             # frame is now out of date
+            cam_width = config.cameras[camera].detect.width
+            cam_height = config.cameras[camera].detect.height
+
+            if cam_width is None or cam_height is None:
+                raise ValueError(f"Camera {camera} detect dimensions not configured")
+
             if birdseye and offline_time < 10:
                 # we only need to send blank frames to birdseye at the beginning of a camera being offline
                 birdseye.write_data(
@@ -68,10 +74,7 @@ def check_disabled_camera_update(
                     [],
                     [],
                     now,
-                    get_blank_yuv_frame(
-                        config.cameras[camera].detect.width,
-                        config.cameras[camera].detect.height,
-                    ),
+                    get_blank_yuv_frame(cam_width, cam_height),
                 )
 
     if not has_enabled_camera and birdseye:
@@ -173,7 +176,7 @@ class OutputProcess(FrigateProcess):
                 birdseye_config_subscriber.check_for_update()
             )
 
-            if update_topic is not None:
+            if update_topic is not None and birdseye_config is not None:
                 previous_global_mode = self.config.birdseye.mode
                 self.config.birdseye = birdseye_config
 
@@ -198,7 +201,10 @@ class OutputProcess(FrigateProcess):
                             birdseye,
                         )
 
-            (topic, data) = detection_subscriber.check_for_update(timeout=1)
+            _result = detection_subscriber.check_for_update(timeout=1)
+            if _result is None:
+                continue
+            (topic, data) = _result
             now = datetime.datetime.now().timestamp()
 
             if now - last_disabled_cam_check > 5:
@@ -208,7 +214,7 @@ class OutputProcess(FrigateProcess):
                     self.config, birdseye, preview_recorders, preview_write_times
                 )
 
-            if not topic:
+            if not topic or data is None:
                 continue
 
             (
@@ -262,11 +268,15 @@ class OutputProcess(FrigateProcess):
                 jsmpeg_cameras[camera].write_frame(frame.tobytes())
 
             # send output data to birdseye if websocket is connected or restreaming
-            if self.config.birdseye.enabled and (
-                self.config.birdseye.restream
-                or any(
-                    ws.environ["PATH_INFO"].endswith("birdseye")
-                    for ws in websocket_server.manager
+            if (
+                self.config.birdseye.enabled
+                and birdseye is not None
+                and (
+                    self.config.birdseye.restream
+                    or any(
+                        ws.environ["PATH_INFO"].endswith("birdseye")
+                        for ws in websocket_server.manager
+                    )
                 )
             ):
                 birdseye.write_data(
@@ -282,9 +292,12 @@ class OutputProcess(FrigateProcess):
         move_preview_frames("clips")
 
         while True:
-            (topic, data) = detection_subscriber.check_for_update(timeout=0)
+            _cleanup_result = detection_subscriber.check_for_update(timeout=0)
+            if _cleanup_result is None:
+                break
+            (topic, data) = _cleanup_result
 
-            if not topic:
+            if not topic or data is None:
                 break
 
             (
@@ -322,7 +335,7 @@ class OutputProcess(FrigateProcess):
         logger.info("exiting output process...")
 
 
-def move_preview_frames(loc: str):
+def move_preview_frames(loc: str) -> None:
     preview_holdover = os.path.join(CLIPS_DIR, "preview_restart_cache")
     preview_cache = os.path.join(CACHE_DIR, "preview_frames")
 
