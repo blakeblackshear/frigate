@@ -23,10 +23,10 @@ class OpenAIClient(GenAIClient):
     def _init_provider(self) -> AzureOpenAI | None:
         """Initialize the client."""
         try:
-            parsed_url = urlparse(self.genai_config.base_url)
-            query_params = parse_qs(parsed_url.query)  # type: ignore[type-var]
+            parsed_url = urlparse(self.genai_config.base_url or "")
+            query_params = parse_qs(parsed_url.query)
             api_version = query_params.get("api-version", [None])[0]
-            azure_endpoint = f"{parsed_url.scheme}://{parsed_url.netloc}/"  # type: ignore[str-bytes-safe]
+            azure_endpoint = f"{parsed_url.scheme}://{parsed_url.netloc}/"
 
             if not api_version:
                 logger.warning("Azure OpenAI url is missing API version.")
@@ -36,7 +36,7 @@ class OpenAIClient(GenAIClient):
             logger.warning("Error parsing Azure OpenAI url: %s", str(e))
             return None
 
-        return AzureOpenAI(  # type: ignore[call-overload,no-any-return]
+        return AzureOpenAI(
             api_key=self.genai_config.api_key,
             api_version=api_version,
             azure_endpoint=azure_endpoint,

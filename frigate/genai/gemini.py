@@ -6,6 +6,7 @@ from typing import Any, AsyncGenerator, Optional
 
 from google import genai
 from google.genai import errors, types
+from google.genai.types import FunctionCallingConfigMode
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -78,7 +79,9 @@ class GeminiClient(GenAIClient):
             return None
 
         try:
-            description = response.text.strip()  # type: ignore[union-attr]
+            if response.text is None:
+                return None
+            description = response.text.strip()
         except (ValueError, AttributeError):
             # No description was generated
             return None
@@ -110,10 +113,10 @@ class GeminiClient(GenAIClient):
                 # Map roles to Gemini format
                 if role == "system":
                     # Gemini doesn't have system role, prepend to first user message
-                    if gemini_messages and gemini_messages[0].role == "user":
-                        gemini_messages[0].parts[  # type: ignore[index]
+                    if gemini_messages and gemini_messages[0].role == "user" and gemini_messages[0].parts:
+                        gemini_messages[0].parts[
                             0
-                        ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"  # type: ignore[index]
+                        ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
                     else:
                         gemini_messages.append(
                             types.Content(
@@ -171,15 +174,15 @@ class GeminiClient(GenAIClient):
             if tool_choice:
                 if tool_choice == "none":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="NONE")  # type: ignore[arg-type]
+                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.NONE)
                     )
                 elif tool_choice == "auto":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="AUTO")  # type: ignore[arg-type]
+                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.AUTO)
                     )
                 elif tool_choice == "required":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="ANY")  # type: ignore[arg-type]
+                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.ANY)
                     )
 
             # Build request config
@@ -307,10 +310,10 @@ class GeminiClient(GenAIClient):
                 # Map roles to Gemini format
                 if role == "system":
                     # Gemini doesn't have system role, prepend to first user message
-                    if gemini_messages and gemini_messages[0].role == "user":
-                        gemini_messages[0].parts[  # type: ignore[index]
+                    if gemini_messages and gemini_messages[0].role == "user" and gemini_messages[0].parts:
+                        gemini_messages[0].parts[
                             0
-                        ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"  # type: ignore[index]
+                        ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
                     else:
                         gemini_messages.append(
                             types.Content(
@@ -368,15 +371,15 @@ class GeminiClient(GenAIClient):
             if tool_choice:
                 if tool_choice == "none":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="NONE")  # type: ignore[arg-type]
+                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.NONE)
                     )
                 elif tool_choice == "auto":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="AUTO")  # type: ignore[arg-type]
+                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.AUTO)
                     )
                 elif tool_choice == "required":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="ANY")  # type: ignore[arg-type]
+                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.ANY)
                     )
 
             # Build request config
