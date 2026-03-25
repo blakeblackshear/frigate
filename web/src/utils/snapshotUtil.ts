@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 type SnapshotResponse = {
   dataUrl: string;
@@ -97,17 +98,34 @@ export function downloadSnapshot(dataUrl: string, filename: string): void {
   }
 }
 
-export function generateSnapshotFilename(cameraName: string): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
-  return `${cameraName}_snapshot_${timestamp}.jpg`;
+export function generateSnapshotFilename(
+  cameraName: string,
+  timestampSeconds?: number,
+  timezone?: string,
+): string {
+  const seconds = timestampSeconds ?? Date.now() / 1000;
+  const timestamp = formatUnixTimestampToDateTime(seconds, {
+    timezone,
+    date_format: "yyyy-MM-dd'T'HH-mm-ss",
+  });
+
+  const safeTimestamp =
+    timestamp === "Invalid time"
+      ? new Date(seconds * 1000)
+          .toISOString()
+          .replace(/[:.]/g, "-")
+          .slice(0, -5)
+      : timestamp;
+  return `${cameraName}_snapshot_${safeTimestamp}.jpg`;
 }
 
-export async function grabVideoSnapshot(): Promise<SnapshotResult> {
+export async function grabVideoSnapshot(
+  targetVideo?: HTMLVideoElement | null,
+): Promise<SnapshotResult> {
   try {
-    // Find the video element in the player
-    const videoElement = document.querySelector(
-      "#player-container video",
-    ) as HTMLVideoElement;
+    const videoElement =
+      targetVideo ??
+      (document.querySelector("#player-container video") as HTMLVideoElement);
 
     if (!videoElement) {
       return {

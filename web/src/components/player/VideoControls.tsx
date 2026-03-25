@@ -34,12 +34,14 @@ import {
 import { cn } from "@/lib/utils";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { TbCameraDown } from "react-icons/tb";
 
 type VideoControls = {
   volume?: boolean;
   seek?: boolean;
   playbackRate?: boolean;
   plusUpload?: boolean;
+  snapshot?: boolean;
   fullscreen?: boolean;
 };
 
@@ -48,6 +50,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   seek: true,
   playbackRate: true,
   plusUpload: false,
+  snapshot: false,
   fullscreen: false,
 };
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
@@ -71,6 +74,8 @@ type VideoControlsProps = {
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
+  onSnapshot?: () => void;
+  snapshotTitle?: string;
   toggleFullscreen?: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
@@ -92,6 +97,8 @@ export default function VideoControls({
   onSeek,
   onSetPlaybackRate,
   onUploadFrame,
+  onSnapshot,
+  snapshotTitle,
   toggleFullscreen,
   containerRef,
 }: VideoControlsProps) {
@@ -290,6 +297,17 @@ export default function VideoControls({
           onUploadFrame={onUploadFrame}
           containerRef={containerRef}
           fullscreen={fullscreen}
+        />
+      )}
+      {features.snapshot && onSnapshot && (
+        <TbCameraDown
+          aria-label={snapshotTitle}
+          className="size-5 cursor-pointer"
+          title={snapshotTitle}
+          onClick={(e: React.MouseEvent<SVGElement>) => {
+            e.stopPropagation();
+            onSnapshot();
+          }}
         />
       )}
       {features.fullscreen && toggleFullscreen && (

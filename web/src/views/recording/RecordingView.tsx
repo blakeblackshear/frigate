@@ -839,6 +839,7 @@ export function RecordingView({
                   setFullResolution={setFullResolution}
                   toggleFullscreen={toggleFullscreen}
                   containerRef={mainLayoutRef}
+                  supportsSnapshot={true}
                 />
               </div>
               {isDesktop && effectiveCameras.length > 1 && (
