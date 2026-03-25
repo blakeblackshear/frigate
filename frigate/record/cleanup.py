@@ -298,7 +298,7 @@ class RecordingCleanup(threading.Thread):
                 Recordings.path,
             )
             .where(
-                Recordings.camera.not_in(list(self.config.cameras.keys())),  # type: ignore[call-arg, arg-type]
+                Recordings.camera.not_in(list(self.config.cameras.keys())),  # type: ignore[call-arg, arg-type, misc]
                 Recordings.end_time < expire_before,
             )
             .namedtuples()

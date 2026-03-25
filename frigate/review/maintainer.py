@@ -31,7 +31,7 @@ from frigate.const import (
 )
 from frigate.models import ReviewSegment
 from frigate.review.types import SeverityEnum
-from frigate.track.object_processing import ManualEventState, TrackedObject
+from frigate.track.object_processing import ManualEventState
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class PendingReviewSegment:
         )
 
     def update_frame(
-        self, camera_config: CameraConfig, frame, objects: list[TrackedObject]
+        self, camera_config: CameraConfig, frame, objects: list[dict[str, Any]]
     ):
         min_x = camera_config.frame_shape[1]
         min_y = camera_config.frame_shape[0]
@@ -165,7 +165,7 @@ class ActiveObjects:
         self,
         frame_time: float,
         camera_config: CameraConfig,
-        all_objects: list[TrackedObject],
+        all_objects: list[dict[str, Any]],
     ):
         self.camera_config = camera_config
 
@@ -250,7 +250,7 @@ class ActiveObjects:
 
         return False
 
-    def get_all_objects(self) -> list[TrackedObject]:
+    def get_all_objects(self) -> list[dict[str, Any]]:
         return (
             self.categorized_objects["alerts"] + self.categorized_objects["detections"]
         )
@@ -319,7 +319,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         segment: PendingReviewSegment,
         camera_config: CameraConfig,
         frame,
-        objects: list[TrackedObject],
+        objects: list[dict[str, Any]],
         prev_data: dict[str, Any],
     ) -> None:
         """Update segment."""
@@ -377,7 +377,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         segment: PendingReviewSegment,
         frame_name: str,
         frame_time: float,
-        objects: list[TrackedObject],
+        objects: list[dict[str, Any]],
     ) -> None:
         """Validate if existing review segment should continue."""
         camera_config = self.config.cameras[segment.camera]
@@ -544,7 +544,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         camera: str,
         frame_name: str,
         frame_time: float,
-        objects: list[TrackedObject],
+        objects: list[dict[str, Any]],
     ) -> None:
         """Check if a new review segment should be created."""
         camera_config = self.config.cameras[camera]
