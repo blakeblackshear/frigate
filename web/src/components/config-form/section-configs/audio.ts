@@ -19,6 +19,16 @@ const audio: SectionConfigOverrides = {
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["min_volume", "max_not_heard", "num_threads"],
     uiSchema: {
+      filters: {
+        "ui:options": {
+          expandable: false,
+        },
+      },
+      "filters.*": {
+        "ui:options": {
+          additionalPropertyKeyReadonly: true,
+        },
+      },
       listen: {
         "ui:widget": "audioLabels",
       },
