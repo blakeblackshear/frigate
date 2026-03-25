@@ -752,7 +752,7 @@
   },
   "live": {
     "label": "Live playback",
-    "description": "Settings used by the Web UI to control live stream resolution and quality.",
+    "description": "Settings to control the jsmpeg live stream resolution and quality. This does not affect restreamed cameras that use go2rtc for live view.",
     "streams": {
       "label": "Live stream names",
       "description": "Mapping of configured stream names to restream/go2rtc names used for live playback."

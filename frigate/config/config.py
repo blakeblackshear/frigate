@@ -474,7 +474,7 @@ class FrigateConfig(FrigateBaseModel):
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig,
         title="Live playback",
-        description="Settings used by the Web UI to control live stream resolution and quality.",
+        description="Settings to control the jsmpeg live stream resolution and quality. This does not affect restreamed cameras that use go2rtc for live view.",
     )
     motion: Optional[MotionConfig] = Field(
         default=None,
