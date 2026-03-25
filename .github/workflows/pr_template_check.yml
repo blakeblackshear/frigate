@@ -1,0 +1,120 @@
+name: PR template check
+
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  check_template:
+    name: Validate PR description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR description against template
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maintainers = ['blakeblackshear', 'NickM-27', 'hawkeye217'];
+            const author = context.payload.pull_request.user.login;
+
+            if (maintainers.includes(author)) {
+              console.log(`Skipping template check for maintainer: ${author}`);
+              return;
+            }
+
+            const body = context.payload.pull_request.body || '';
+            const errors = [];
+
+            // Check that key template sections exist
+            const requiredSections = [
+              '## Proposed change',
+              '## Type of change',
+              '## AI disclosure',
+              '## Checklist',
+            ];
+
+            for (const section of requiredSections) {
+              if (!body.includes(section)) {
+                errors.push(`Missing section: **${section}**`);
+              }
+            }
+
+            // Check that "Proposed change" has content beyond the default HTML comment
+            const proposedChangeMatch = body.match(
+              /## Proposed change\s*(?:<!--[\s\S]*?-->\s*)?([\s\S]*?)(?=\n## )/
+            );
+            const proposedContent = proposedChangeMatch
+              ? proposedChangeMatch[1].trim()
+              : '';
+            if (!proposedContent) {
+              errors.push(
+                'The **Proposed change** section is empty. Please describe what this PR does.'
+              );
+            }
+
+            // Check that at least one "Type of change" checkbox is checked
+            const typeSection = body.match(
+              /## Type of change\s*([\s\S]*?)(?=\n## )/
+            );
+            if (typeSection && !/- \[x\]/i.test(typeSection[1])) {
+              errors.push(
+                'No **Type of change** selected. Please check at least one option.'
+              );
+            }
+
+            // Check that at least one AI disclosure checkbox is checked
+            const aiSection = body.match(
+              /## AI disclosure\s*([\s\S]*?)(?=\n## )/
+            );
+            if (aiSection && !/- \[x\]/i.test(aiSection[1])) {
+              errors.push(
+                'No **AI disclosure** option selected. Please indicate whether AI tools were used.'
+              );
+            }
+
+            // Check that at least one checklist item is checked
+            const checklistSection = body.match(
+              /## Checklist\s*([\s\S]*?)$/
+            );
+            if (checklistSection && !/- \[x\]/i.test(checklistSection[1])) {
+              errors.push(
+                'No **Checklist** items checked. Please review and check the items that apply.'
+              );
+            }
+
+            if (errors.length === 0) {
+              console.log('PR description passes template validation.');
+              return;
+            }
+
+            const prNumber = context.payload.pull_request.number;
+            const message = [
+              '## PR template validation failed',
+              '',
+              'This PR was automatically closed because the description does not follow the [pull request template](https://github.com/blakeblackshear/frigate/blob/dev/.github/pull_request_template.md).',
+              '',
+              '**Issues found:**',
+              ...errors.map((e) => `- ${e}`),
+              '',
+              'Please update your PR description to include all required sections from the template, then reopen this PR.',
+              '',
+              '> If you used an AI tool to generate this PR, please see our [contributing guidelines](https://github.com/blakeblackshear/frigate/blob/dev/CONTRIBUTING.md) for details.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: message,
+            });
+
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              state: 'closed',
+            });
+
+            core.setFailed('PR description does not follow the template.');
