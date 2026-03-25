@@ -4,7 +4,7 @@ import base64
 import io
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 
 import httpx
 import numpy as np
@@ -23,7 +23,7 @@ def _to_jpeg(img_bytes: bytes) -> bytes | None:
     try:
         img = Image.open(io.BytesIO(img_bytes))
         if img.mode != "RGB":
-            img = img.convert("RGB")
+            img = img.convert("RGB")  # type: ignore[assignment]
         buf = io.BytesIO()
         img.save(buf, format="JPEG", quality=85)
         return buf.getvalue()
@@ -36,10 +36,10 @@ def _to_jpeg(img_bytes: bytes) -> bytes | None:
 class LlamaCppClient(GenAIClient):
     """Generative AI client for Frigate using llama.cpp server."""
 
-    provider: str  # base_url
+    provider: str | None  # base_url
     provider_options: dict[str, Any]
 
-    def _init_provider(self):
+    def _init_provider(self) -> str | None:
         """Initialize the client."""
         self.provider_options = {
             **self.genai_config.provider_options,
@@ -75,7 +75,7 @@ class LlamaCppClient(GenAIClient):
                 content.append(
                     {
                         "type": "image_url",
-                        "image_url": {
+                        "image_url": {  # type: ignore[dict-item]
                             "url": f"data:image/jpeg;base64,{encoded_image}",
                         },
                     }
@@ -111,7 +111,7 @@ class LlamaCppClient(GenAIClient):
             ):
                 choice = result["choices"][0]
                 if "message" in choice and "content" in choice["message"]:
-                    return choice["message"]["content"].strip()
+                    return str(choice["message"]["content"].strip())
             return None
         except Exception as e:
             logger.warning("llama.cpp returned an error: %s", str(e))
@@ -229,7 +229,7 @@ class LlamaCppClient(GenAIClient):
             content.append(
                 {
                     "prompt_string": "<__media__>\n",
-                    "multimodal_data": [encoded],
+                    "multimodal_data": [encoded],  # type: ignore[dict-item]
                 }
             )
 
@@ -367,7 +367,7 @@ class LlamaCppClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
-    ):
+    ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools via OpenAI-compatible streaming API."""
         if self.provider is None:
             logger.warning(
