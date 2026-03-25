@@ -45,7 +45,8 @@
   },
   "documentTitle": "Review - Frigate",
   "recordings": {
-    "documentTitle": "Recordings - Frigate"
+    "documentTitle": "Recordings - Frigate",
+    "resizeSplit": "Resize video and timeline"
   },
   "calendarFilter": {
     "last24Hours": "Last 24 Hours"
