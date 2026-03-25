@@ -707,14 +707,23 @@ export default function LiveCameraView({
               }}
             >
               <div
-                className={`relative flex flex-col items-center justify-center ${growClassName}`}
+                className={cn(
+                  "flex flex-col items-center justify-center",
+                  growClassName,
+                )}
                 ref={clickOverlayRef}
                 style={{
                   aspectRatio: constrainedAspectRatio,
                 }}
               >
                 {clickOverlay && overlaySize.width > 0 && (
-                  <div className="absolute inset-0 z-40 cursor-crosshair">
+                  <div
+                    className="absolute z-40 cursor-crosshair"
+                    style={{
+                      width: overlaySize.width,
+                      height: overlaySize.height,
+                    }}
+                  >
                     <Stage
                       width={overlaySize.width}
                       height={overlaySize.height}
