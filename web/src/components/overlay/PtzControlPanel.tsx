@@ -284,7 +284,9 @@ export default function PtzControlPanel({
             <p>
               {clickOverlay
                 ? t("ptz.move.clickMove.disable")
-                : t("ptz.move.clickMove.enable")}
+                : ptz?.features?.includes("zoom-r")
+                  ? t("ptz.move.clickMove.enableWithZoom")
+                  : t("ptz.move.clickMove.enable")}
             </p>
           </TooltipContent>
         </Tooltip>

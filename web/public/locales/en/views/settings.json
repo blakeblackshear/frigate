@@ -1573,5 +1573,9 @@
       "hardwareNone": "No hardware acceleration",
       "hardwareAuto": "Automatic hardware acceleration"
     }
+  },
+  "onvif": {
+    "profileAuto": "Auto",
+    "profileLoading": "Loading profiles..."
   }
 }

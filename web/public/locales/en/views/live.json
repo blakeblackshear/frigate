@@ -17,6 +17,7 @@
       "clickMove": {
         "label": "Click in the frame to center the camera",
         "enable": "Enable click to move",
+        "enableWithZoom": "Enable click to move / drag to zoom",
         "disable": "Disable click to move"
       },
       "left": {

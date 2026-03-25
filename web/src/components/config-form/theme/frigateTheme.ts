@@ -29,6 +29,7 @@ import { TimezoneSelectWidget } from "./widgets/TimezoneSelectWidget";
 import { CameraPathWidget } from "./widgets/CameraPathWidget";
 import { OptionalFieldWidget } from "./widgets/OptionalFieldWidget";
 import { SemanticSearchModelWidget } from "./widgets/SemanticSearchModelWidget";
+import { OnvifProfileWidget } from "./widgets/OnvifProfileWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -79,6 +80,7 @@ export const frigateTheme: FrigateTheme = {
     timezoneSelect: TimezoneSelectWidget,
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
+    onvifProfile: OnvifProfileWidget,
   },
   templates: {
     FieldTemplate: FieldTemplate as React.ComponentType<FieldTemplateProps>,

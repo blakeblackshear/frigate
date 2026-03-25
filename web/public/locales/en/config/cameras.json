@@ -787,6 +787,10 @@
       "label": "Disable TLS verify",
       "description": "Skip TLS verification and disable digest auth for ONVIF (unsafe; use in safe networks only)."
     },
+    "profile": {
+      "label": "ONVIF profile",
+      "description": "Specific ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically."
+    },
     "autotracking": {
       "label": "Autotracking",
       "description": "Automatically track moving objects and keep them centered in the frame using PTZ camera movements.",

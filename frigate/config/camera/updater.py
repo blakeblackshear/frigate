@@ -23,6 +23,7 @@ class CameraConfigUpdateEnum(str, Enum):
     notifications = "notifications"
     objects = "objects"
     object_genai = "object_genai"
+    onvif = "onvif"
     record = "record"
     remove = "remove"  # for removing a camera
     review = "review"
@@ -130,6 +131,8 @@ class CameraConfigUpdateSubscriber:
             config.lpr = updated_config
         elif update_type == CameraConfigUpdateEnum.snapshots:
             config.snapshots = updated_config
+        elif update_type == CameraConfigUpdateEnum.onvif:
+            config.onvif = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:
             config.zones = updated_config
 

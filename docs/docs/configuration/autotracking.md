@@ -52,6 +52,10 @@ cameras:
       password: admin
       # Optional: Skip TLS verification from the ONVIF server (default: shown below)
       tls_insecure: False
+      # Optional: ONVIF media profile to use for PTZ control, matched by token or name. (default: shown below)
+      # If not set, the first profile with valid PTZ configuration is selected automatically.
+      # Use this when your camera has multiple ONVIF profiles and you need to select a specific one.
+      profile: None
       # Optional: PTZ camera object autotracking. Keeps a moving object in
       # the center of the frame by automatically moving the PTZ camera.
       autotracking:
