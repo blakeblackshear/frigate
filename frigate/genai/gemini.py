@@ -113,7 +113,11 @@ class GeminiClient(GenAIClient):
                 # Map roles to Gemini format
                 if role == "system":
                     # Gemini doesn't have system role, prepend to first user message
-                    if gemini_messages and gemini_messages[0].role == "user" and gemini_messages[0].parts:
+                    if (
+                        gemini_messages
+                        and gemini_messages[0].role == "user"
+                        and gemini_messages[0].parts
+                    ):
                         gemini_messages[0].parts[
                             0
                         ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
@@ -174,15 +178,21 @@ class GeminiClient(GenAIClient):
             if tool_choice:
                 if tool_choice == "none":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.NONE)
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.NONE
+                        )
                     )
                 elif tool_choice == "auto":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.AUTO)
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.AUTO
+                        )
                     )
                 elif tool_choice == "required":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.ANY)
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.ANY
+                        )
                     )
 
             # Build request config
@@ -310,7 +320,11 @@ class GeminiClient(GenAIClient):
                 # Map roles to Gemini format
                 if role == "system":
                     # Gemini doesn't have system role, prepend to first user message
-                    if gemini_messages and gemini_messages[0].role == "user" and gemini_messages[0].parts:
+                    if (
+                        gemini_messages
+                        and gemini_messages[0].role == "user"
+                        and gemini_messages[0].parts
+                    ):
                         gemini_messages[0].parts[
                             0
                         ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
@@ -371,15 +385,21 @@ class GeminiClient(GenAIClient):
             if tool_choice:
                 if tool_choice == "none":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.NONE)
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.NONE
+                        )
                     )
                 elif tool_choice == "auto":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.AUTO)
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.AUTO
+                        )
                     )
                 elif tool_choice == "required":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode=FunctionCallingConfigMode.ANY)
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.ANY
+                        )
                     )
 
             # Build request config

@@ -54,9 +54,9 @@ class VLMWatchRunner(threading.Thread):
         job: VLMWatchJob,
         config: FrigateConfig,
         cancel_event: threading.Event,
-        frame_processor,
-        genai_manager,
-        dispatcher,
+        frame_processor: Any,
+        genai_manager: Any,
+        dispatcher: Any,
     ) -> None:
         super().__init__(daemon=True, name=f"vlm_watch_{job.id}")
         self.job = job
@@ -226,9 +226,12 @@ class VLMWatchRunner(threading.Thread):
             remaining = deadline - time.time()
             if remaining <= 0:
                 break
-            topic, payload = self.detection_subscriber.check_for_update(
+            result = self.detection_subscriber.check_for_update(
                 timeout=min(1.0, remaining)
             )
+            if result is None:
+                continue
+            topic, payload = result
             if topic is None or payload is None:
                 continue
             # payload = (camera, frame_name, frame_time, tracked_objects, motion_boxes, regions)
@@ -328,9 +331,9 @@ def start_vlm_watch_job(
     condition: str,
     max_duration_minutes: int,
     config: FrigateConfig,
-    frame_processor,
-    genai_manager,
-    dispatcher,
+    frame_processor: Any,
+    genai_manager: Any,
+    dispatcher: Any,
     labels: list[str] | None = None,
     zones: list[str] | None = None,
 ) -> str:
