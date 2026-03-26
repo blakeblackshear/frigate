@@ -47,7 +47,7 @@ class ModelTypeEnum(str, Enum):
 class ModelConfig(BaseModel):
     path: Optional[str] = Field(
         None,
-        title="Custom Object detection model path",
+        title="Custom object detector model path",
         description="Path to a custom detection model file (or plus://<model_id> for Frigate+ models).",
     )
     labelmap_path: Optional[str] = Field(

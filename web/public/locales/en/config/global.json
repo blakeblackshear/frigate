@@ -293,7 +293,7 @@
       "label": "Detector specific model configuration",
       "description": "Detector-specific model configuration options (path, input size, etc.).",
       "path": {
-        "label": "Custom Object detection model path",
+        "label": "Custom object detector model path",
         "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
       },
       "labelmap_path": {
@@ -466,7 +466,7 @@
     "label": "Detection model",
     "description": "Settings to configure a custom object detection model and its input shape.",
     "path": {
-      "label": "Custom Object detection model path",
+      "label": "Custom object detector model path",
       "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
     },
     "labelmap_path": {
