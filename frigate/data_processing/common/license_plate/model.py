@@ -1,5 +1,4 @@
-from comms.inter_process import InterProcessRequestor
-
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.embeddings.onnx.lpr_embedding import (
     LicensePlateDetector,
     PaddleOCRClassification,
