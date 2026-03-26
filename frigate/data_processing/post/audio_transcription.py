@@ -6,7 +6,6 @@ import threading
 import time
 from typing import Any, Optional
 
-from embeddings.embeddings import Embeddings
 from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -18,6 +17,7 @@ from frigate.const import (
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.types import PostProcessDataEnum
+from frigate.embeddings.embeddings import Embeddings
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.audio import get_audio_from_recording
 

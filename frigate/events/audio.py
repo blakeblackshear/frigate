@@ -10,11 +10,11 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Tuple
 
 import numpy as np
-from config.camera.ffmpeg import CameraFfmpegConfig
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FrigateConfig
+from frigate.config.camera.ffmpeg import CameraFfmpegConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
