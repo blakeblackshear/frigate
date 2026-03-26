@@ -23,7 +23,7 @@ const record: SectionConfigOverrides = {
     uiSchema: {
       export: {
         hwaccel_args: {
-          "ui:options": { size: "lg" },
+          "ui:options": { suppressMultiSchema: true, size: "lg" },
         },
       },
     },
