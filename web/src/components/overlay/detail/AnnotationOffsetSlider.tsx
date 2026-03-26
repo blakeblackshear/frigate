@@ -9,14 +9,15 @@ import { toast } from "sonner";
 import { Trans, useTranslation } from "react-i18next";
 import { LuExternalLink, LuInfo, LuMinus, LuPlus } from "react-icons/lu";
 import { cn } from "@/lib/utils";
+import {
+  ANNOTATION_OFFSET_MAX,
+  ANNOTATION_OFFSET_MIN,
+  ANNOTATION_OFFSET_STEP,
+} from "@/lib/const";
 import { isMobile } from "react-device-detect";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
-
-const OFFSET_MIN = -2500;
-const OFFSET_MAX = 2500;
-const OFFSET_STEP = 50;
 
 type Props = {
   className?: string;
@@ -43,7 +44,10 @@ export default function AnnotationOffsetSlider({ className }: Props) {
     (delta: number) => {
       setAnnotationOffset((prev) => {
         const next = prev + delta;
-        return Math.max(OFFSET_MIN, Math.min(OFFSET_MAX, next));
+        return Math.max(
+          ANNOTATION_OFFSET_MIN,
+          Math.min(ANNOTATION_OFFSET_MAX, next),
+        );
       });
     },
     [setAnnotationOffset],
@@ -114,17 +118,17 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           size="icon"
           className="size-8 shrink-0"
           aria-label="-50ms"
-          onClick={() => stepOffset(-OFFSET_STEP)}
-          disabled={annotationOffset <= OFFSET_MIN}
+          onClick={() => stepOffset(-ANNOTATION_OFFSET_STEP)}
+          disabled={annotationOffset <= ANNOTATION_OFFSET_MIN}
         >
           <LuMinus className="size-4" />
         </Button>
         <div className="w-full flex-1 landscape:flex">
           <Slider
             value={[annotationOffset]}
-            min={OFFSET_MIN}
-            max={OFFSET_MAX}
-            step={OFFSET_STEP}
+            min={ANNOTATION_OFFSET_MIN}
+            max={ANNOTATION_OFFSET_MAX}
+            step={ANNOTATION_OFFSET_STEP}
             onValueChange={handleChange}
           />
         </div>
@@ -134,8 +138,8 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           size="icon"
           className="size-8 shrink-0"
           aria-label="+50ms"
-          onClick={() => stepOffset(OFFSET_STEP)}
-          disabled={annotationOffset >= OFFSET_MAX}
+          onClick={() => stepOffset(ANNOTATION_OFFSET_STEP)}
+          disabled={annotationOffset >= ANNOTATION_OFFSET_MAX}
         >
           <LuPlus className="size-4" />
         </Button>
