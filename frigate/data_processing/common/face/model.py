@@ -3,7 +3,6 @@ import os
 import queue
 import threading
 from abc import ABC, abstractmethod
-from typing import Any
 
 import cv2
 import numpy as np
