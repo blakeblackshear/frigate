@@ -22,11 +22,17 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
+from frigate.comms.inter_process import InterProcessRequestor
+from frigate.config import FrigateConfig
+from frigate.config.classification import LicensePlateRecognitionConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
+from frigate.data_processing.common.license_plate.model import LicensePlateModelRunner
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
+
+from ...types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +40,17 @@ WRITE_DEBUG_IMAGES = False
 
 
 class LicensePlateProcessingMixin:
-    def __init__(self, *args, **kwargs):
+    # Attributes expected from consuming classes (set before super().__init__)
+    config: FrigateConfig
+    metrics: DataProcessorMetrics
+    model_runner: LicensePlateModelRunner
+    lpr_config: LicensePlateRecognitionConfig
+    requestor: InterProcessRequestor
+    detected_license_plates: dict[str, dict[str, Any]]
+    camera_current_cars: dict[str, list[str]]
+    sub_label_publisher: EventMetadataPublisher
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.plate_rec_speed = InferenceSpeed(self.metrics.alpr_speed)
         self.plates_rec_second = EventsPerSecond()
