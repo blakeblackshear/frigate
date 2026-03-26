@@ -4,7 +4,7 @@ import logging
 import os
 import queue
 import threading
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 
@@ -39,11 +39,11 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         self.config = config
         self.camera_config = camera_config
         self.requestor = requestor
-        self.stream = None
-        self.whisper_model = None
+        self.stream: Any = None
+        self.whisper_model: FasterWhisperASR | None = None
         self.model_runner = model_runner
-        self.transcription_segments = []
-        self.audio_queue = queue.Queue()
+        self.transcription_segments: list[str] = []
+        self.audio_queue: queue.Queue[tuple[dict[str, Any], np.ndarray]] = queue.Queue()
         self.stop_event = stop_event
 
     def __build_recognizer(self) -> None:
@@ -142,10 +142,10 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             logger.error(f"Error processing audio stream: {e}")
             return None
 
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
+    def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray) -> None:
         pass
 
-    def process_audio(self, obj_data: dict[str, any], audio: np.ndarray) -> bool | None:
+    def process_audio(self, obj_data: dict[str, Any], audio: np.ndarray) -> bool | None:
         if audio is None or audio.size == 0:
             logger.debug("No audio data provided for transcription")
             return None
@@ -269,13 +269,13 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         )
 
     def handle_request(
-        self, topic: str, request_data: dict[str, any]
-    ) -> dict[str, any] | None:
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if topic == "clear_audio_recognizer":
             self.stream = None
             self.__build_recognizer()
             return {"message": "Audio recognizer cleared and rebuilt", "success": True}
         return None
 
-    def expire_object(self, object_id: str) -> None:
+    def expire_object(self, object_id: str, camera: str) -> None:
         pass
