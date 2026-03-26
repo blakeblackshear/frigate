@@ -1513,7 +1513,7 @@ export default function Settings() {
                     onClick={handleUndoAll}
                     variant="outline"
                     size="sm"
-                    disabled={isSavingAll}
+                    disabled={isSavingAll || isAnySectionSaving}
                     className="flex w-full items-center justify-center gap-2"
                   >
                     {t("button.undoAll", {
@@ -1525,7 +1525,11 @@ export default function Settings() {
                     onClick={handleSaveAll}
                     variant="select"
                     size="sm"
-                    disabled={isSavingAll || isAnySectionSaving || hasPendingValidationErrors}
+                    disabled={
+                      isSavingAll ||
+                      isAnySectionSaving ||
+                      hasPendingValidationErrors
+                    }
                     className="flex w-full items-center justify-center gap-2"
                   >
                     {isSavingAll ? (
@@ -1681,7 +1685,7 @@ export default function Settings() {
                 onClick={handleUndoAll}
                 variant="outline"
                 size="sm"
-                disabled={isSavingAll}
+                disabled={isSavingAll || isAnySectionSaving}
                 className="flex items-center justify-center gap-2"
               >
                 {t("button.undoAll", {
@@ -1693,7 +1697,11 @@ export default function Settings() {
                 variant="select"
                 size="sm"
                 onClick={handleSaveAll}
-                disabled={isSavingAll || isAnySectionSaving || hasPendingValidationErrors}
+                disabled={
+                  isSavingAll ||
+                  isAnySectionSaving ||
+                  hasPendingValidationErrors
+                }
                 className="flex items-center justify-center gap-2"
               >
                 {isSavingAll ? (
@@ -1850,6 +1858,8 @@ export default function Settings() {
                   onDeleteProfileSection={handleDeleteProfileForCurrentSection}
                   profilesUIEnabled={profilesUIEnabled}
                   setProfilesUIEnabled={setProfilesUIEnabled}
+                  isSavingAll={isSavingAll}
+                  onSectionSavingChange={handleSectionSavingChange}
                 />
               );
             })()}

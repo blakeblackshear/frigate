@@ -996,7 +996,7 @@ export function ConfigSection({
               <Button
                 onClick={handleReset}
                 variant="outline"
-                disabled={isSaving || disabled}
+                disabled={isSaving || isSavingAll || disabled}
                 className="flex min-w-36 flex-1 gap-2"
               >
                 {t("button.undo", { ns: "common", defaultValue: "Undo" })}
