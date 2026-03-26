@@ -7,6 +7,7 @@ import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
+from typing import Any
 
 from playhouse.sqlite_ext import SqliteExtDatabase
 
@@ -60,7 +61,9 @@ class RecordingCleanup(threading.Thread):
             db.execute_sql("PRAGMA wal_checkpoint(TRUNCATE);")
             db.close()
 
-    def expire_review_segments(self, config: CameraConfig, now: datetime) -> set[Path]:
+    def expire_review_segments(
+        self, config: CameraConfig, now: datetime.datetime
+    ) -> set[Path]:
         """Delete review segments that are expired"""
         alert_expire_date = (
             now - datetime.timedelta(days=config.record.alerts.retain.days)
@@ -68,7 +71,7 @@ class RecordingCleanup(threading.Thread):
         detection_expire_date = (
             now - datetime.timedelta(days=config.record.detections.retain.days)
         ).timestamp()
-        expired_reviews: ReviewSegment = (
+        expired_reviews = (
             ReviewSegment.select(ReviewSegment.id, ReviewSegment.thumb_path)
             .where(ReviewSegment.camera == config.name)
             .where(
@@ -109,13 +112,13 @@ class RecordingCleanup(threading.Thread):
         continuous_expire_date: float,
         motion_expire_date: float,
         config: CameraConfig,
-        reviews: ReviewSegment,
+        reviews: list[Any],
     ) -> set[Path]:
         """Delete recordings for existing camera based on retention config."""
         # Get the timestamp for cutoff of retained days
 
         # Get recordings to check for expiration
-        recordings: Recordings = (
+        recordings = (
             Recordings.select(
                 Recordings.id,
                 Recordings.start_time,
@@ -148,13 +151,12 @@ class RecordingCleanup(threading.Thread):
         review_start = 0
         deleted_recordings = set()
         kept_recordings: list[tuple[float, float]] = []
-        recording: Recordings
         for recording in recordings:
             keep = False
             mode = None
             # Now look for a reason to keep this recording segment
             for idx in range(review_start, len(reviews)):
-                review: ReviewSegment = reviews[idx]
+                review = reviews[idx]
                 severity = review.severity
                 pre_capture = config.record.get_review_pre_capture(severity)
                 post_capture = config.record.get_review_post_capture(severity)
@@ -214,7 +216,7 @@ class RecordingCleanup(threading.Thread):
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
 
-        previews: list[Previews] = (
+        previews = (
             Previews.select(
                 Previews.id,
                 Previews.start_time,
@@ -290,13 +292,13 @@ class RecordingCleanup(threading.Thread):
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
-        no_camera_recordings: Recordings = (
+        no_camera_recordings = (
             Recordings.select(
                 Recordings.id,
                 Recordings.path,
             )
             .where(
-                Recordings.camera.not_in(list(self.config.cameras.keys())),
+                Recordings.camera.not_in(list(self.config.cameras.keys())),  # type: ignore[call-arg, arg-type, misc]
                 Recordings.end_time < expire_before,
             )
             .namedtuples()
@@ -341,7 +343,7 @@ class RecordingCleanup(threading.Thread):
             ).timestamp()
 
             # Get all the reviews to check against
-            reviews: ReviewSegment = (
+            reviews = (
                 ReviewSegment.select(
                     ReviewSegment.start_time,
                     ReviewSegment.end_time,
