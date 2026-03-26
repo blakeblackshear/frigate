@@ -75,6 +75,7 @@ type VideoControlsProps = {
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
   onSnapshot?: () => void;
+  snapshotLoading?: boolean;
   snapshotTitle?: string;
   toggleFullscreen?: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -98,6 +99,7 @@ export default function VideoControls({
   onSetPlaybackRate,
   onUploadFrame,
   onSnapshot,
+  snapshotLoading = false,
   snapshotTitle,
   toggleFullscreen,
   containerRef,
@@ -302,10 +304,17 @@ export default function VideoControls({
       {features.snapshot && onSnapshot && (
         <TbCameraDown
           aria-label={snapshotTitle}
-          className="size-5 cursor-pointer"
+          aria-disabled={snapshotLoading}
+          className={cn(
+            "size-5",
+            snapshotLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+          )}
           title={snapshotTitle}
           onClick={(e: React.MouseEvent<SVGElement>) => {
             e.stopPropagation();
+            if (snapshotLoading) {
+              return;
+            }
             onSnapshot();
           }}
         />

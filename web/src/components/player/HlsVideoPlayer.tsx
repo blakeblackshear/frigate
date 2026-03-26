@@ -231,6 +231,7 @@ export default function HlsVideoPlayer({
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [isSnapshotLoading, setIsSnapshotLoading] = useState(false);
   const [zoomScale, setZoomScale] = useState(1.0);
   const [videoDimensions, setVideoDimensions] = useState<{
     width: number;
@@ -277,27 +278,44 @@ export default function HlsVideoPlayer({
   }, [videoRef, inpointOffset]);
 
   const handleSnapshot = useCallback(async () => {
-    const frameTime = getVideoTime();
-    const result = await grabVideoSnapshot(videoRef.current);
-
-    if (result.success) {
-      downloadSnapshot(
-        result.data.dataUrl,
-        generateSnapshotFilename(
-          camera ?? "recording",
-          currentTime ?? frameTime,
-          config?.ui?.timezone,
-        ),
-      );
-      toast.success(t("snapshot.downloadStarted", { ns: "views/live" }), {
-        position: "top-center",
-      });
-    } else {
-      toast.error(t("snapshot.captureFailed", { ns: "views/live" }), {
-        position: "top-center",
-      });
+    if (isSnapshotLoading) {
+      return;
     }
-  }, [camera, config?.ui?.timezone, currentTime, getVideoTime, t, videoRef]);
+
+    setIsSnapshotLoading(true);
+    try {
+      const frameTime = getVideoTime();
+      const result = await grabVideoSnapshot(videoRef.current);
+
+      if (result.success) {
+        downloadSnapshot(
+          result.data.dataUrl,
+          generateSnapshotFilename(
+            camera ?? "recording",
+            currentTime ?? frameTime,
+            config?.ui?.timezone,
+          ),
+        );
+        toast.success(t("snapshot.downloadStarted", { ns: "views/live" }), {
+          position: "top-center",
+        });
+      } else {
+        toast.error(t("snapshot.captureFailed", { ns: "views/live" }), {
+          position: "top-center",
+        });
+      }
+    } finally {
+      setIsSnapshotLoading(false);
+    }
+  }, [
+    camera,
+    config?.ui?.timezone,
+    currentTime,
+    getVideoTime,
+    isSnapshotLoading,
+    t,
+    videoRef,
+  ]);
   const onSnapshot = camera ? handleSnapshot : undefined;
 
   return (
@@ -365,6 +383,7 @@ export default function HlsVideoPlayer({
             }
           }}
           onSnapshot={onSnapshot}
+          snapshotLoading={isSnapshotLoading}
           snapshotTitle={t("snapshot.takeSnapshot", { ns: "views/live" })}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
