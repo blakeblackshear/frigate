@@ -152,6 +152,10 @@ export interface BaseSectionProps {
   profileBorderColor?: string;
   /** Callback to delete the current profile's overrides for this section */
   onDeleteProfileSection?: () => void;
+  /** Whether a SaveAll operation is in progress (disables individual Save) */
+  isSavingAll?: boolean;
+  /** Callback when this section's saving state changes */
+  onSavingChange?: (isSaving: boolean) => void;
 }
 
 export interface CreateSectionOptions {
@@ -186,6 +190,8 @@ export function ConfigSection({
   profileFriendlyName,
   profileBorderColor,
   onDeleteProfileSection,
+  isSavingAll = false,
+  onSavingChange,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -246,6 +252,7 @@ export function ConfigSection({
     [onPendingDataChange, effectiveSectionPath, cameraName],
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isResettingToDefault, setIsResettingToDefault] = useState(false);
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
   const [extraHasChanges, setExtraHasChanges] = useState(false);
   const [formKey, setFormKey] = useState(0);
@@ -577,6 +584,7 @@ export function ConfigSection({
     if (!pendingData) return;
 
     setIsSaving(true);
+    onSavingChange?.(true);
     try {
       const basePath =
         effectiveLevel === "camera" && cameraName
@@ -699,6 +707,7 @@ export function ConfigSection({
       }
     } finally {
       setIsSaving(false);
+      onSavingChange?.(false);
     }
   }, [
     sectionPath,
@@ -718,12 +727,14 @@ export function ConfigSection({
     setPendingData,
     requiresRestartForOverrides,
     skipSave,
+    onSavingChange,
   ]);
 
   // Handle reset to global/defaults - removes camera-level override or resets global to defaults
   const handleResetToGlobal = useCallback(async () => {
     if (effectiveLevel === "camera" && !cameraName) return;
 
+    setIsResettingToDefault(true);
     try {
       const basePath =
         effectiveLevel === "camera" && cameraName
@@ -758,6 +769,8 @@ export function ConfigSection({
           defaultValue: "Failed to reset settings",
         }),
       );
+    } finally {
+      setIsResettingToDefault(false);
     }
   }, [
     effectiveSectionPath,
@@ -945,9 +958,12 @@ export function ConfigSection({
                 <Button
                   onClick={() => setIsResetDialogOpen(true)}
                   variant="outline"
-                  disabled={isSaving || disabled}
+                  disabled={isSaving || isResettingToDefault || disabled}
                   className="flex flex-1 gap-2"
                 >
+                  {isResettingToDefault && (
+                    <ActivityIndicator className="h-4 w-4" />
+                  )}
                   {effectiveLevel === "global"
                     ? t("button.resetToDefault", {
                         ns: "common",
@@ -990,7 +1006,11 @@ export function ConfigSection({
               onClick={handleSave}
               variant="select"
               disabled={
-                !hasChanges || hasValidationErrors || isSaving || disabled
+                !hasChanges ||
+                hasValidationErrors ||
+                isSaving ||
+                isSavingAll ||
+                disabled
               }
               className="flex min-w-36 flex-1 gap-2"
             >
