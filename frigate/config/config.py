@@ -764,7 +764,7 @@ class FrigateConfig(FrigateBaseModel):
                 )
 
             # Default min_initialized configuration
-            min_initialized = int(camera_config.detect.fps / 2)
+            min_initialized = max(int(camera_config.detect.fps / 2), 2)
             if camera_config.detect.min_initialized is None:
                 camera_config.detect.min_initialized = min_initialized
 
