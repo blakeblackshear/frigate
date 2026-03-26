@@ -2,17 +2,19 @@
 
 import datetime
 import logging
+import subprocess
 import threading
 import time
 from multiprocessing.managers import DictProxy
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Tuple
+from typing import Any, Tuple
 
 import numpy as np
+from config.camera.ffmpeg import CameraFfmpegConfig
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
+from frigate.config import CameraConfig, CameraInput, FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -35,8 +37,7 @@ from frigate.data_processing.real_time.audio_transcription import (
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe, suppress_stderr_during
-from frigate.object_detection.base import load_labels
-from frigate.util.builtin import get_ffmpeg_arg_list
+from frigate.util.builtin import get_ffmpeg_arg_list, load_labels
 from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util.process import FrigateProcess
 
@@ -49,7 +50,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
+def get_ffmpeg_command(ffmpeg: CameraFfmpegConfig) -> list[str]:
     ffmpeg_input: CameraInput = [i for i in ffmpeg.inputs if "audio" in i.roles][0]
     input_args = get_ffmpeg_arg_list(ffmpeg.global_args) + (
         parse_preset_input(ffmpeg_input.input_args, 1)
@@ -102,9 +103,11 @@ class AudioProcessor(FrigateProcess):
         threading.current_thread().name = "process:audio_manager"
 
         if self.config.audio_transcription.enabled:
-            self.transcription_model_runner = AudioTranscriptionModelRunner(
-                self.config.audio_transcription.device,
-                self.config.audio_transcription.model_size,
+            self.transcription_model_runner: AudioTranscriptionModelRunner | None = (
+                AudioTranscriptionModelRunner(
+                    self.config.audio_transcription.device or "AUTO",
+                    self.config.audio_transcription.model_size,
+                )
             )
         else:
             self.transcription_model_runner = None
@@ -118,7 +121,7 @@ class AudioProcessor(FrigateProcess):
                 self.config,
                 self.camera_metrics,
                 self.transcription_model_runner,
-                self.stop_event,
+                self.stop_event,  # type: ignore[arg-type]
             )
             audio_threads.append(audio_thread)
             audio_thread.start()
@@ -162,7 +165,7 @@ class AudioEventMaintainer(threading.Thread):
         self.logger = logging.getLogger(f"audio.{self.camera_config.name}")
         self.ffmpeg_cmd = get_ffmpeg_command(self.camera_config.ffmpeg)
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_config.name}.audio")
-        self.audio_listener = None
+        self.audio_listener: subprocess.Popen[Any] | None = None
         self.audio_transcription_model_runner = audio_transcription_model_runner
         self.transcription_processor = None
         self.transcription_thread = None
@@ -171,7 +174,7 @@ class AudioEventMaintainer(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.config_subscriber = CameraConfigUpdateSubscriber(
             None,
-            {self.camera_config.name: self.camera_config},
+            {str(self.camera_config.name): self.camera_config},
             [
                 CameraConfigUpdateEnum.audio,
                 CameraConfigUpdateEnum.enabled,
@@ -180,7 +183,10 @@ class AudioEventMaintainer(threading.Thread):
         )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio.value)
 
-        if self.config.audio_transcription.enabled:
+        if (
+            self.config.audio_transcription.enabled
+            and self.audio_transcription_model_runner is not None
+        ):
             # init the transcription processor for this camera
             self.transcription_processor = AudioTranscriptionRealTimeProcessor(
                 config=self.config,
@@ -200,11 +206,11 @@ class AudioEventMaintainer(threading.Thread):
 
         self.was_enabled = camera.enabled
 
-    def detect_audio(self, audio) -> None:
+    def detect_audio(self, audio: np.ndarray) -> None:
         if not self.camera_config.audio.enabled or self.stop_event.is_set():
             return
 
-        audio_as_float = audio.astype(np.float32)
+        audio_as_float: np.ndarray = audio.astype(np.float32)
         rms, dBFS = self.calculate_audio_levels(audio_as_float)
 
         self.camera_metrics[self.camera_config.name].audio_rms.value = rms
@@ -261,7 +267,7 @@ class AudioEventMaintainer(threading.Thread):
             else:
                 self.transcription_processor.check_unload_model()
 
-    def calculate_audio_levels(self, audio_as_float: np.float32) -> Tuple[float, float]:
+    def calculate_audio_levels(self, audio_as_float: np.ndarray) -> Tuple[float, float]:
         # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
         # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
         rms = np.sqrt(np.mean(np.absolute(np.square(audio_as_float))))
@@ -295,6 +301,10 @@ class AudioEventMaintainer(threading.Thread):
             time.sleep(self.camera_config.ffmpeg.retry_interval)
             self.logpipe.dump()
             self.start_or_restart_ffmpeg()
+
+        if self.audio_listener is None or self.audio_listener.stdout is None:
+            log_and_restart()
+            return
 
         try:
             chunk = self.audio_listener.stdout.read(self.chunk_size)
@@ -341,7 +351,10 @@ class AudioEventMaintainer(threading.Thread):
                     self.requestor.send_data(
                         EXPIRE_AUDIO_ACTIVITY, self.camera_config.name
                     )
-                    stop_ffmpeg(self.audio_listener, self.logger)
+
+                    if self.audio_listener:
+                        stop_ffmpeg(self.audio_listener, self.logger)
+
                     self.audio_listener = None
                 self.was_enabled = enabled
                 continue
@@ -367,7 +380,7 @@ class AudioEventMaintainer(threading.Thread):
 
 
 class AudioTfl:
-    def __init__(self, stop_event: threading.Event, num_threads=2):
+    def __init__(self, stop_event: threading.Event, num_threads: int = 2) -> None:
         self.stop_event = stop_event
         self.num_threads = num_threads
         self.labels = load_labels("/audio-labelmap.txt", prefill=521)
@@ -382,7 +395,7 @@ class AudioTfl:
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
 
-    def _detect_raw(self, tensor_input):
+    def _detect_raw(self, tensor_input: np.ndarray) -> np.ndarray:
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
         detections = np.zeros((20, 6), np.float32)
@@ -410,8 +423,10 @@ class AudioTfl:
 
         return detections
 
-    def detect(self, tensor_input, threshold=AUDIO_MIN_CONFIDENCE):
-        detections = []
+    def detect(
+        self, tensor_input: np.ndarray, threshold: float = AUDIO_MIN_CONFIDENCE
+    ) -> list[tuple[str, float, tuple[float, float, float, float]]]:
+        detections: list[tuple[str, float, tuple[float, float, float, float]]] = []
 
         if self.stop_event.is_set():
             return detections
