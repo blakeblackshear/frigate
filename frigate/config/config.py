@@ -614,6 +614,21 @@ class FrigateConfig(FrigateBaseModel):
         if self.ffmpeg.hwaccel_args == "auto":
             self.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
+        # Populate global audio filters for all audio labels
+        all_audio_labels = {
+            label
+            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
+            if label
+        }
+
+        if self.audio.filters is None:
+            self.audio.filters = {}
+
+        for key in sorted(all_audio_labels - self.audio.filters.keys()):
+            self.audio.filters[key] = AudioFilterConfig()
+
+        self.audio.filters = dict(sorted(self.audio.filters.items()))
+
         # Global config to propagate down to camera level
         global_config = self.model_dump(
             include={
@@ -671,12 +686,6 @@ class FrigateConfig(FrigateBaseModel):
             labelmap_objects = model.merged_labelmap.values()
             detector_config.model = model
             self.detectors[key] = detector_config
-
-        all_audio_labels = {
-            label
-            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
-            if label
-        }
 
         for name, camera in self.cameras.items():
             modified_global_config = global_config.copy()
@@ -755,7 +764,7 @@ class FrigateConfig(FrigateBaseModel):
                 )
 
             # Default min_initialized configuration
-            min_initialized = int(camera_config.detect.fps / 2)
+            min_initialized = max(int(camera_config.detect.fps / 2), 2)
             if camera_config.detect.min_initialized is None:
                 camera_config.detect.min_initialized = min_initialized
 
@@ -801,10 +810,12 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.audio.filters is None:
                 camera_config.audio.filters = {}
 
-            audio_keys = all_audio_labels
-            audio_keys = audio_keys - camera_config.audio.filters.keys()
-            for key in audio_keys:
+            for key in sorted(all_audio_labels - camera_config.audio.filters.keys()):
                 camera_config.audio.filters[key] = AudioFilterConfig()
+
+            camera_config.audio.filters = dict(
+                sorted(camera_config.audio.filters.items())
+            )
 
             # Add default filters
             object_keys = camera_config.objects.track

@@ -1521,6 +1521,8 @@
     "noOverrides": "No overrides",
     "cameraCount_one": "{{count}} camera",
     "cameraCount_other": "{{count}} cameras",
+    "columnCamera": "Camera",
+    "columnOverrides": "Profile Overrides",
     "baseConfig": "Base Config",
     "addProfile": "Add Profile",
     "newProfile": "New Profile",

@@ -465,6 +465,16 @@ PRESETS_RECORD_OUTPUT = {
         "-c:a",
         "aac",
     ],
+    # NOTE: This preset originally used "-c:a copy" to pass through audio
+    # without re-encoding. FFmpeg 7.x introduced a threaded pipeline where
+    # demuxing, encoding, and muxing run in parallel via a Scheduler. This
+    # broke audio streamcopy from RTSP sources: packets are demuxed correctly
+    # but silently dropped before reaching the muxer (0 bytes written). The
+    # issue is specific to RTSP + streamcopy; file inputs and transcoding both
+    # work. Transcoding AAC audio is very lightweight (~30KiB per 10s segment)
+    # and adds negligible CPU overhead, so this is an acceptable workaround.
+    # The benefits of FFmpeg 7.x — particularly the removal of gamma correction
+    # hacks required by earlier versions — outweigh this trade-off.
     "preset-record-generic-audio-copy": [
         "-f",
         "segment",
@@ -476,8 +486,10 @@ PRESETS_RECORD_OUTPUT = {
         "1",
         "-strftime",
         "1",
-        "-c",
+        "-c:v",
         "copy",
+        "-c:a",
+        "aac",
     ],
     "preset-record-mjpeg": [
         "-f",

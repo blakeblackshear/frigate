@@ -13,10 +13,11 @@ import { Slider } from "@/components/ui/slider";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-
-const OFFSET_MIN = -2500;
-const OFFSET_MAX = 2500;
-const OFFSET_STEP = 50;
+import {
+  ANNOTATION_OFFSET_MAX,
+  ANNOTATION_OFFSET_MIN,
+  ANNOTATION_OFFSET_STEP,
+} from "@/lib/const";
 
 type AnnotationSettingsPaneProps = {
   event: Event;
@@ -49,7 +50,10 @@ export function AnnotationSettingsPane({
     (delta: number) => {
       setAnnotationOffset((prev) => {
         const next = prev + delta;
-        return Math.max(OFFSET_MIN, Math.min(OFFSET_MAX, next));
+        return Math.max(
+          ANNOTATION_OFFSET_MIN,
+          Math.min(ANNOTATION_OFFSET_MAX, next),
+        );
       });
     },
     [setAnnotationOffset],
@@ -128,16 +132,16 @@ export function AnnotationSettingsPane({
             size="icon"
             className="size-8 shrink-0"
             aria-label="-50ms"
-            onClick={() => stepOffset(-OFFSET_STEP)}
-            disabled={annotationOffset <= OFFSET_MIN}
+            onClick={() => stepOffset(-ANNOTATION_OFFSET_STEP)}
+            disabled={annotationOffset <= ANNOTATION_OFFSET_MIN}
           >
             <LuMinus className="size-4" />
           </Button>
           <Slider
             value={[annotationOffset]}
-            min={OFFSET_MIN}
-            max={OFFSET_MAX}
-            step={OFFSET_STEP}
+            min={ANNOTATION_OFFSET_MIN}
+            max={ANNOTATION_OFFSET_MAX}
+            step={ANNOTATION_OFFSET_STEP}
             onValueChange={handleSliderChange}
             className="flex-1"
           />
@@ -147,8 +151,8 @@ export function AnnotationSettingsPane({
             size="icon"
             className="size-8 shrink-0"
             aria-label="+50ms"
-            onClick={() => stepOffset(OFFSET_STEP)}
-            disabled={annotationOffset >= OFFSET_MAX}
+            onClick={() => stepOffset(ANNOTATION_OFFSET_STEP)}
+            disabled={annotationOffset >= ANNOTATION_OFFSET_MAX}
           >
             <LuPlus className="size-4" />
           </Button>

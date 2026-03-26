@@ -29,9 +29,10 @@ const review: SectionConfigOverrides = {
       },
       genai: {
         additional_concerns: {
-          "ui:widget": "textarea",
+          "ui:widget": "ArrayAsTextWidget",
           "ui:options": {
             size: "full",
+            multiline: true,
           },
         },
         activity_context_prompt: {

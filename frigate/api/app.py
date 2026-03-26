@@ -613,6 +613,34 @@ def config_set(request: Request, body: AppConfigSetBody):
 
                 try:
                     config = FrigateConfig.parse(new_raw_config)
+                except ValidationError as e:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                        f.close()
+                    logger.error(
+                        f"Config Validation Error:\n\n{str(traceback.format_exc())}"
+                    )
+                    error_messages = []
+                    for err in e.errors():
+                        msg = err.get("msg", "")
+                        # Strip pydantic "Value error, " prefix for cleaner display
+                        if msg.startswith("Value error, "):
+                            msg = msg[len("Value error, ") :]
+                        error_messages.append(msg)
+                    message = (
+                        "; ".join(error_messages)
+                        if error_messages
+                        else "Check logs for error message."
+                    )
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": f"Error saving config: {message}",
+                            }
+                        ),
+                        status_code=400,
+                    )
                 except Exception:
                     with open(config_file, "w") as f:
                         f.write(old_raw_config)
