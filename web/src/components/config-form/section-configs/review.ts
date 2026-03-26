@@ -29,7 +29,7 @@ const review: SectionConfigOverrides = {
       },
       genai: {
         additional_concerns: {
-          "ui:widget": "textarea",
+          "ui:widget": "textareaArray",
           "ui:options": {
             size: "full",
           },

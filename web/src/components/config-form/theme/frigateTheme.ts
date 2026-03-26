@@ -30,6 +30,7 @@ import { CameraPathWidget } from "./widgets/CameraPathWidget";
 import { OptionalFieldWidget } from "./widgets/OptionalFieldWidget";
 import { SemanticSearchModelWidget } from "./widgets/SemanticSearchModelWidget";
 import { OnvifProfileWidget } from "./widgets/OnvifProfileWidget";
+import { TextareaArrayWidget } from "./widgets/TextareaArrayWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -81,6 +82,7 @@ export const frigateTheme: FrigateTheme = {
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
     onvifProfile: OnvifProfileWidget,
+    textareaArray: TextareaArrayWidget,
   },
   templates: {
     FieldTemplate: FieldTemplate as React.ComponentType<FieldTemplateProps>,
