@@ -1,5 +1,7 @@
 """Embeddings types."""
 
+from __future__ import annotations
+
 from enum import Enum
 from multiprocessing.managers import DictProxy, SyncManager, ValueProxy
 from typing import Any
