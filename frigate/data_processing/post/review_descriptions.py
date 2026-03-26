@@ -48,8 +48,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.metrics = metrics
         self.genai_client = client
         self.review_desc_speed = InferenceSpeed(self.metrics.review_desc_speed)
-        self.review_descs_dps = EventsPerSecond()
-        self.review_descs_dps.start()
+        self.review_desc_dps = EventsPerSecond()
+        self.review_desc_dps.start()
 
     def calculate_frame_count(
         self,
@@ -59,7 +59,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     ) -> int:
         """Calculate optimal number of frames based on context size, image source, and resolution.
 
-        Token usage varies by resolution: larger images (ultrawide aspect ratios) use more tokens.
+        Token usage varies by resolution: larger images (ultra-wide aspect ratios) use more tokens.
         Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
         Capped at 20 frames.
         """
@@ -68,7 +68,11 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
         detect_width = camera_config.detect.width
         detect_height = camera_config.detect.height
-        aspect_ratio = detect_width / detect_height
+
+        if not detect_width or not detect_height:
+            aspect_ratio = 16 / 9
+        else:
+            aspect_ratio = detect_width / detect_height
 
         if image_source == ImageSourceEnum.recordings:
             if aspect_ratio >= 1:
@@ -99,8 +103,10 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
         return min(max(max_frames, 3), 20)
 
-    def process_data(self, data, data_type):
-        self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
+    def process_data(
+        self, data: dict[str, Any], data_type: PostProcessDataEnum
+    ) -> None:
+        self.metrics.review_desc_dps.value = self.review_desc_dps.eps()
 
         if data_type != PostProcessDataEnum.review:
             return
@@ -186,7 +192,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 )
 
             # kickoff analysis
-            self.review_descs_dps.update()
+            self.review_desc_dps.update()
             threading.Thread(
                 target=run_analysis,
                 args=(
@@ -202,7 +208,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 ),
             ).start()
 
-    def handle_request(self, topic, request_data):
+    def handle_request(self, topic: str, request_data: dict[str, Any]) -> str | None:
         if topic == EmbeddingsRequestEnum.summarize_review.value:
             start_ts = request_data["start_ts"]
             end_ts = request_data["end_ts"]
@@ -327,7 +333,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         file_start = f"preview_{camera}-"
         start_file = f"{file_start}{start_time}.webp"
         end_file = f"{file_start}{end_time}.webp"
-        all_frames = []
+        all_frames: list[str] = []
 
         for file in sorted(os.listdir(preview_dir)):
             if not file.startswith(file_start):
@@ -465,7 +471,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             thumb_data = cv2.imread(thumb_path)
 
             if thumb_data is None:
-                logger.warning(
+                logger.warning(  # type: ignore[unreachable]
                     "Could not read preview frame at %s, skipping", thumb_path
                 )
                 continue
@@ -488,13 +494,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         return thumbs
 
 
-@staticmethod
 def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
     review_inference_speed: InferenceSpeed,
     camera_config: CameraConfig,
-    final_data: dict[str, str],
+    final_data: dict[str, Any],
     thumbs: list[bytes],
     genai_config: GenAIReviewConfig,
     labelmap_objects: list[str],

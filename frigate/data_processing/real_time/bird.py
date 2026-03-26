@@ -14,7 +14,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.log import suppress_stderr_during
-from frigate.util.object import calculate_region
+from frigate.util.image import calculate_region
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -35,10 +35,10 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics)
-        self.interpreter: Interpreter = None
+        self.interpreter: Interpreter | None = None
         self.sub_label_publisher = sub_label_publisher
-        self.tensor_input_details: dict[str, Any] = None
-        self.tensor_output_details: dict[str, Any] = None
+        self.tensor_input_details: list[dict[str, Any]] | None = None
+        self.tensor_output_details: list[dict[str, Any]] | None = None
         self.detected_birds: dict[str, float] = {}
         self.labelmap: dict[int, str] = {}
 
@@ -61,7 +61,7 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             self.downloader = ModelDownloader(
                 model_name="bird",
                 download_path=download_path,
-                file_names=self.model_files.keys(),
+                file_names=list(self.model_files.keys()),
                 download_func=self.__download_models,
                 complete_func=self.__build_detector,
             )
@@ -102,8 +102,12 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
                 i += 1
                 line = f.readline()
 
-    def process_frame(self, obj_data, frame):
-        if not self.interpreter:
+    def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray) -> None:
+        if (
+            not self.interpreter
+            or not self.tensor_input_details
+            or not self.tensor_output_details
+        ):
             return
 
         if obj_data["label"] != "bird":
@@ -145,7 +149,7 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             self.tensor_output_details[0]["index"]
         )[0]
         probs = res / res.sum(axis=0)
-        best_id = np.argmax(probs)
+        best_id = int(np.argmax(probs))
 
         if best_id == 964:
             logger.debug("No bird classification was detected.")
@@ -179,9 +183,11 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         self.config.classification = payload
         logger.debug("Bird classification config updated dynamically")
 
-    def handle_request(self, topic, request_data):
+    def handle_request(
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         return None
 
-    def expire_object(self, object_id, camera):
+    def expire_object(self, object_id: str, camera: str) -> None:
         if object_id in self.detected_birds:
             self.detected_birds.pop(object_id)

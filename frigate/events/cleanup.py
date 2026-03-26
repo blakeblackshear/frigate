@@ -29,7 +29,7 @@ class EventCleanup(threading.Thread):
         self.stop_event = stop_event
         self.db = db
         self.camera_keys = list(self.config.cameras.keys())
-        self.removed_camera_labels: list[str] = None
+        self.removed_camera_labels: list[Event] | None = None
         self.camera_labels: dict[str, dict[str, Any]] = {}
 
     def get_removed_camera_labels(self) -> list[Event]:
@@ -37,7 +37,7 @@ class EventCleanup(threading.Thread):
         if self.removed_camera_labels is None:
             self.removed_camera_labels = list(
                 Event.select(Event.label)
-                .where(Event.camera.not_in(self.camera_keys))
+                .where(Event.camera.not_in(self.camera_keys))  # type: ignore[arg-type,call-arg,misc]
                 .distinct()
                 .execute()
             )
@@ -61,7 +61,7 @@ class EventCleanup(threading.Thread):
                 ),
             }
 
-        return self.camera_labels[camera]["labels"]
+        return self.camera_labels[camera]["labels"]  # type: ignore[no-any-return]
 
     def expire_snapshots(self) -> list[str]:
         ## Expire events from unlisted cameras based on the global config
@@ -74,7 +74,9 @@ class EventCleanup(threading.Thread):
         # loop over object types in db
         for event in distinct_labels:
             # get expiration time for this label
-            expire_days = retain_config.objects.get(event.label, retain_config.default)
+            expire_days = retain_config.objects.get(
+                str(event.label), retain_config.default
+            )
 
             expire_after = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
@@ -87,7 +89,7 @@ class EventCleanup(threading.Thread):
                     Event.thumbnail,
                 )
                 .where(
-                    Event.camera.not_in(self.camera_keys),
+                    Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
                     Event.start_time < expire_after,
                     Event.label == event.label,
                     Event.retain_indefinitely == False,
@@ -109,16 +111,16 @@ class EventCleanup(threading.Thread):
 
             # update the clips attribute for the db entry
             query = Event.select(Event.id).where(
-                Event.camera.not_in(self.camera_keys),
+                Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
                 Event.start_time < expire_after,
                 Event.label == event.label,
                 Event.retain_indefinitely == False,
             )
 
-            events_to_update = []
+            events_to_update: list[str] = []
 
             for event in query.iterator():
-                events_to_update.append(event.id)
+                events_to_update.append(str(event.id))
                 if len(events_to_update) >= CHUNK_SIZE:
                     logger.debug(
                         f"Updating {update_params} for {len(events_to_update)} events"
@@ -150,7 +152,7 @@ class EventCleanup(threading.Thread):
             for event in distinct_labels:
                 # get expiration time for this label
                 expire_days = retain_config.objects.get(
-                    event.label, retain_config.default
+                    str(event.label), retain_config.default
                 )
 
                 expire_after = (
@@ -177,7 +179,7 @@ class EventCleanup(threading.Thread):
                 # only snapshots are stored in /clips
                 # so no need to delete mp4 files
                 for event in expired_events:
-                    events_to_update.append(event.id)
+                    events_to_update.append(str(event.id))
                     deleted = delete_event_snapshot(event)
 
                     if not deleted:
@@ -214,7 +216,7 @@ class EventCleanup(threading.Thread):
                 Event.camera,
             )
             .where(
-                Event.camera.not_in(self.camera_keys),
+                Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
                 Event.start_time < expire_after,
                 Event.retain_indefinitely == False,
             )
@@ -245,7 +247,7 @@ class EventCleanup(threading.Thread):
 
         # update the clips attribute for the db entry
         query = Event.select(Event.id).where(
-            Event.camera.not_in(self.camera_keys),
+            Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
             Event.start_time < expire_after,
             Event.retain_indefinitely == False,
         )
@@ -358,7 +360,7 @@ class EventCleanup(threading.Thread):
 
             logger.debug(f"Found {len(events_to_delete)} events that can be expired")
             if len(events_to_delete) > 0:
-                ids_to_delete = [e.id for e in events_to_delete]
+                ids_to_delete = [str(e.id) for e in events_to_delete]
                 for i in range(0, len(ids_to_delete), CHUNK_SIZE):
                     chunk = ids_to_delete[i : i + CHUNK_SIZE]
                     logger.debug(f"Deleting {len(chunk)} events from the database")

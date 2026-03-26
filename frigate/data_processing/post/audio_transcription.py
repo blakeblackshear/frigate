@@ -4,7 +4,7 @@ import logging
 import os
 import threading
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from peewee import DoesNotExist
 
@@ -17,6 +17,7 @@ from frigate.const import (
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.types import PostProcessDataEnum
+from frigate.embeddings.embeddings import Embeddings
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.audio import get_audio_from_recording
 
@@ -31,7 +32,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         self,
         config: FrigateConfig,
         requestor: InterProcessRequestor,
-        embeddings,
+        embeddings: Embeddings,
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics, None)
@@ -40,7 +41,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         self.embeddings = embeddings
         self.recognizer = None
         self.transcription_lock = threading.Lock()
-        self.transcription_thread = None
+        self.transcription_thread: threading.Thread | None = None
         self.transcription_running = False
 
         # faster-whisper handles model downloading automatically
@@ -69,7 +70,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             self.recognizer = None
 
     def process_data(
-        self, data: dict[str, any], data_type: PostProcessDataEnum
+        self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:
         """Transcribe audio from a recording.
 
@@ -141,13 +142,13 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         except Exception as e:
             logger.error(f"Error in audio transcription post-processing: {e}")
 
-    def __transcribe_audio(self, audio_data: bytes) -> Optional[tuple[str, float]]:
+    def __transcribe_audio(self, audio_data: bytes) -> Optional[str]:
         """Transcribe WAV audio data using faster-whisper."""
         if not self.recognizer:
             logger.debug("Recognizer not initialized")
             return None
 
-        try:
+        try:  # type: ignore[unreachable]
             # Save audio data to a temporary wav (faster-whisper expects a file)
             temp_wav = os.path.join(CACHE_DIR, f"temp_audio_{int(time.time())}.wav")
             with open(temp_wav, "wb") as f:
@@ -176,7 +177,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             logger.error(f"Error transcribing audio: {e}")
             return None
 
-    def _transcription_wrapper(self, event: dict[str, any]) -> None:
+    def _transcription_wrapper(self, event: dict[str, Any]) -> None:
         """Wrapper to run transcription and reset running flag when done."""
         try:
             self.process_data(
@@ -194,7 +195,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
 
             self.requestor.send_data(UPDATE_AUDIO_TRANSCRIPTION_STATE, "idle")
 
-    def handle_request(self, topic: str, request_data: dict[str, any]) -> str | None:
+    def handle_request(self, topic: str, request_data: dict[str, Any]) -> str | None:
         if topic == "transcribe_audio":
             event = request_data["event"]
 
