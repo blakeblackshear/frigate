@@ -61,14 +61,16 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self,
         obj_data: dict[str, Any],
         frame: np.ndarray,
-        dedicated_lpr: bool | None = False,
-    ):
+        dedicated_lpr: bool = False,
+    ) -> None:
         """Look for license plates in image."""
         self.lpr_process(obj_data, frame, dedicated_lpr)
 
-    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
-        return
+    def handle_request(
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        return None
 
-    def expire_object(self, object_id: str, camera: str):
+    def expire_object(self, object_id: str, camera: str) -> None:
         """Expire lpr objects."""
         self.lpr_expire(object_id, camera)

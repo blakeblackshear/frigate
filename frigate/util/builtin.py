@@ -12,7 +12,7 @@ import shlex
 import struct
 import urllib.parse
 from collections.abc import Mapping
-from multiprocessing.sharedctypes import Synchronized
+from multiprocessing.managers import ValueProxy
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
 
@@ -64,7 +64,7 @@ class EventsPerSecond:
 
 
 class InferenceSpeed:
-    def __init__(self, metric: Synchronized) -> None:
+    def __init__(self, metric: ValueProxy[float]) -> None:
         self.__metric = metric
         self.__initialized = False
 

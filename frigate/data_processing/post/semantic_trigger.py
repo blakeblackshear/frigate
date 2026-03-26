@@ -19,6 +19,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
+from frigate.embeddings.embeddings import Embeddings
 from frigate.embeddings.util import ZScoreNormalization
 from frigate.models import Event, Trigger
 from frigate.util.builtin import cosine_distance
@@ -40,8 +41,8 @@ class SemanticTriggerProcessor(PostProcessorApi):
         requestor: InterProcessRequestor,
         sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
-        embeddings,
-    ):
+        embeddings: Embeddings,
+    ) -> None:
         super().__init__(config, metrics, None)
         self.db = db
         self.embeddings = embeddings
@@ -236,10 +237,13 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     return
 
                 # Skip the event if not an object
-                if event.data.get("type") != "object":
+                if event.data.get("type") != "object":  # type: ignore[attr-defined]
                     return
 
                 thumbnail_bytes = get_event_thumbnail_bytes(event)
+
+                if thumbnail_bytes is None:
+                    return
 
                 nparr = np.frombuffer(thumbnail_bytes, np.uint8)
                 thumbnail = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -262,8 +266,10 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     thumbnail,
                 )
 
-    def handle_request(self, topic, request_data):
+    def handle_request(
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | str | None:
         return None
 
-    def expire_object(self, object_id, camera):
+    def expire_object(self, object_id: str, camera: str) -> None:
         pass

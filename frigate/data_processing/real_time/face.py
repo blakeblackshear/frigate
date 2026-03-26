@@ -52,11 +52,11 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.face_config = config.face_recognition
         self.requestor = requestor
         self.sub_label_publisher = sub_label_publisher
-        self.face_detector: cv2.FaceDetectorYN = None
+        self.face_detector: cv2.FaceDetectorYN | None = None
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.camera_current_people: dict[str, list[str]] = {}
-        self.recognizer: FaceRecognizer | None = None
+        self.recognizer: FaceRecognizer
         self.faces_per_second = EventsPerSecond()
         self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
 
@@ -78,7 +78,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             self.downloader = ModelDownloader(
                 model_name="facedet",
                 download_path=download_path,
-                file_names=self.model_files.keys(),
+                file_names=list(self.model_files.keys()),
                 download_func=self.__download_models,
                 complete_func=self.__build_detector,
             )
@@ -134,7 +134,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
     def __detect_face(
         self, input: np.ndarray, threshold: float
-    ) -> tuple[int, int, int, int]:
+    ) -> tuple[int, int, int, int] | None:
         """Detect faces in input image."""
         if not self.face_detector:
             return None
@@ -153,7 +153,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         faces = self.face_detector.detect(input)
 
         if faces is None or faces[1] is None:
-            return None
+            return None  # type: ignore[unreachable]
 
         face = None
 
@@ -168,7 +168,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             h: int = int(raw_bbox[3] / scale_factor)
             bbox = (x, y, x + w, y + h)
 
-            if face is None or area(bbox) > area(face):
+            if face is None or area(bbox) > area(face):  # type: ignore[unreachable]
                 face = bbox
 
         return face
@@ -177,7 +177,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.faces_per_second.update()
         self.inference_speed.update(duration)
 
-    def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray):
+    def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray) -> None:
         """Look for faces in image."""
         self.metrics.face_rec_fps.value = self.faces_per_second.eps()
         camera = obj_data["camera"]
@@ -349,7 +349,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
-    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
+    def handle_request(
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
             self.recognizer.clear()
             return {"success": True, "message": "Face classifier cleared."}
@@ -432,7 +434,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 img = cv2.imread(current_file)
 
             if img is None:
-                return {
+                return {  # type: ignore[unreachable]
                     "message": "Invalid image file.",
                     "success": False,
                 }
@@ -469,7 +471,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 "score": score,
             }
 
-    def expire_object(self, object_id: str, camera: str):
+        return None
+
+    def expire_object(self, object_id: str, camera: str) -> None:
         if object_id in self.person_face_history:
             self.person_face_history.pop(object_id)
 
@@ -478,7 +482,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
     def weighted_average(
         self, results_list: list[tuple[str, float, int]], max_weight: int = 4000
-    ):
+    ) -> tuple[str | None, float]:
         """
         Calculates a robust weighted average, capping the area weight and giving more weight to higher scores.
 
@@ -493,8 +497,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             return None, 0.0
 
         counts: dict[str, int] = {}
-        weighted_scores: dict[str, int] = {}
-        total_weights: dict[str, int] = {}
+        weighted_scores: dict[str, float] = {}
+        total_weights: dict[str, float] = {}
 
         for name, score, face_area in results_list:
             if name == "unknown":
@@ -509,7 +513,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             counts[name] += 1
 
             # Capped weight based on face area
-            weight = min(face_area, max_weight)
+            weight: float = min(face_area, max_weight)
 
             # Score-based weighting (higher scores get more weight)
             weight *= (score - self.face_config.unknown_score) * 10
@@ -519,7 +523,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if not weighted_scores:
             return None, 0.0
 
-        best_name = max(weighted_scores, key=weighted_scores.get)
+        best_name = max(weighted_scores, key=lambda k: weighted_scores[k])
 
         # If the number of faces for this person < min_faces, we are not confident it is a correct result
         if counts[best_name] < self.face_config.min_faces:

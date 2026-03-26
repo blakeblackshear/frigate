@@ -17,7 +17,7 @@ class PostProcessorApi(ABC):
         self,
         config: FrigateConfig,
         metrics: DataProcessorMetrics,
-        model_runner: DataProcessorModelRunner,
+        model_runner: DataProcessorModelRunner | None,
     ) -> None:
         self.config = config
         self.metrics = metrics
@@ -41,7 +41,7 @@ class PostProcessorApi(ABC):
     @abstractmethod
     def handle_request(
         self, topic: str, request_data: dict[str, Any]
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any] | str | None:
         """Handle metadata requests.
         Args:
             request_data (dict): containing data about requested change to process.
