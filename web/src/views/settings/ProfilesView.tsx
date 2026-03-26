@@ -542,6 +542,20 @@ export default function ProfilesView({
                   <CollapsibleContent>
                     {cameras.length > 0 ? (
                       <div className="mx-4 mb-3 ml-11 border-l border-border/50 pl-4">
+                        <div className="flex items-baseline gap-3 border-b border-border/30 pb-1.5">
+                          <span className="min-w-[120px] shrink-0 text-xs font-semibold uppercase text-muted-foreground">
+                            {t("profiles.columnCamera", {
+                              ns: "views/settings",
+                              defaultValue: "Camera",
+                            })}
+                          </span>
+                          <span className="text-xs font-semibold uppercase text-muted-foreground">
+                            {t("profiles.columnOverrides", {
+                              ns: "views/settings",
+                              defaultValue: "Profile Overrides",
+                            })}
+                          </span>
+                        </div>
                         {cameras.map((camera) => {
                           const sections = cameraData[camera];
                           return (
