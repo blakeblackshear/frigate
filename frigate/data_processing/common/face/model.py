@@ -197,7 +197,7 @@ class FaceNetRecognizer(FaceRecognizer):
                         continue  # type: ignore[unreachable]
 
                     img = self.align_face(img, img.shape[1], img.shape[0])
-                    emb = self.face_embedder([img])[0].squeeze()  # type: ignore[arg-type]
+                    emb = self.face_embedder([img])[0].squeeze()
                     face_embeddings_map[name].append(emb)
 
                 idx += 1

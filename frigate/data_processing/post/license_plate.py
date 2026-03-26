@@ -29,7 +29,7 @@ from .api import PostProcessorApi
 logger = logging.getLogger(__name__)
 
 
-class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
+class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):  # type: ignore[misc]
     def __init__(
         self,
         config: FrigateConfig,
