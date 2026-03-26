@@ -1,18 +1,21 @@
 import re
 import sqlite3
+from typing import Any
 
 from playhouse.sqliteq import SqliteQueueDatabase
 
 
 class SqliteVecQueueDatabase(SqliteQueueDatabase):
-    def __init__(self, *args, load_vec_extension: bool = False, **kwargs) -> None:
+    def __init__(
+        self, *args: Any, load_vec_extension: bool = False, **kwargs: Any
+    ) -> None:
         self.load_vec_extension: bool = load_vec_extension
         # no extension necessary, sqlite will load correctly for each platform
         self.sqlite_vec_path = "/usr/local/lib/vec0"
         super().__init__(*args, **kwargs)
 
-    def _connect(self, *args, **kwargs) -> sqlite3.Connection:
-        conn: sqlite3.Connection = super()._connect(*args, **kwargs)
+    def _connect(self, *args: Any, **kwargs: Any) -> sqlite3.Connection:
+        conn: sqlite3.Connection = super()._connect(*args, **kwargs)  # type: ignore[misc]
         if self.load_vec_extension:
             self._load_vec_extension(conn)
 
@@ -27,7 +30,7 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         conn.enable_load_extension(False)
 
     def _register_regexp(self, conn: sqlite3.Connection) -> None:
-        def regexp(expr: str, item: str) -> bool:
+        def regexp(expr: str, item: str | None) -> bool:
             if item is None:
                 return False
             try:
