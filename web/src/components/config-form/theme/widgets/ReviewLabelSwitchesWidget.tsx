@@ -75,6 +75,7 @@ export function ReviewLabelSwitchesWidget(props: WidgetProps) {
         getEntities: getReviewLabels,
         getDisplayLabel: getReviewLabelDisplayName,
         i18nKey: "reviewLabels",
+        allowCustomEntries: true,
         listClassName:
           "relative max-h-none overflow-visible md:max-h-64 md:overflow-y-auto md:overscroll-contain md:scrollbar-container",
       }}

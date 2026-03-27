@@ -1478,7 +1478,8 @@
     "timestamp_style": {
       "title": "Timestamp Settings"
     },
-    "searchPlaceholder": "Search..."
+    "searchPlaceholder": "Search...",
+    "addCustomLabel": "Add custom label..."
   },
   "globalConfig": {
     "title": "Global Configuration",

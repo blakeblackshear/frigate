@@ -1,6 +1,6 @@
 // Generic Switches Widget - Reusable component for selecting from any list of entities
 import { WidgetProps } from "@rjsf/utils";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,8 @@ export type SwitchesWidgetOptions = {
   listClassName?: string;
   /** Enable search input to filter the list */
   enableSearch?: boolean;
+  /** Allow users to add custom entries not in the predefined list */
+  allowCustomEntries?: boolean;
 };
 
 function normalizeValue(value: unknown): string[] {
@@ -122,20 +124,46 @@ export function SwitchesWidget(props: WidgetProps) {
     [props.options],
   );
 
+  const allowCustomEntries = useMemo(
+    () => props.options?.allowCustomEntries as boolean | undefined,
+    [props.options],
+  );
+
   const selectedEntities = useMemo(() => normalizeValue(value), [value]);
   const [isOpen, setIsOpen] = useState(selectedEntities.length > 0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [customEntries, setCustomEntries] = useState<string[]>([]);
+  const [customInput, setCustomInput] = useState("");
+
+  const allEntities = useMemo(() => {
+    if (customEntries.length === 0) {
+      return availableEntities;
+    }
+    const merged = new Set([...availableEntities, ...customEntries]);
+    return [...merged].sort();
+  }, [availableEntities, customEntries]);
 
   const filteredEntities = useMemo(() => {
     if (!enableSearch || !searchTerm.trim()) {
-      return availableEntities;
+      return allEntities;
     }
     const term = searchTerm.toLowerCase();
-    return availableEntities.filter((entity) => {
+    return allEntities.filter((entity) => {
       const displayLabel = getDisplayLabel(entity, context);
       return displayLabel.toLowerCase().includes(term);
     });
-  }, [availableEntities, searchTerm, enableSearch, getDisplayLabel, context]);
+  }, [allEntities, searchTerm, enableSearch, getDisplayLabel, context]);
+
+  const addCustomEntry = useCallback(() => {
+    const trimmed = customInput.trim().toLowerCase();
+    if (!trimmed || allEntities.includes(trimmed)) {
+      setCustomInput("");
+      return;
+    }
+    setCustomEntries((prev) => [...prev, trimmed]);
+    onChange([...selectedEntities, trimmed]);
+    setCustomInput("");
+  }, [customInput, allEntities, selectedEntities, onChange]);
 
   const toggleEntity = (entity: string, enabled: boolean) => {
     if (enabled) {
@@ -181,7 +209,7 @@ export function SwitchesWidget(props: WidgetProps) {
         </CollapsibleTrigger>
 
         <CollapsibleContent className="rounded-lg border border-input bg-secondary pb-1 pr-0 pt-2 md:max-w-md">
-          {availableEntities.length === 0 ? (
+          {allEntities.length === 0 && !allowCustomEntries ? (
             <div className="text-sm text-muted-foreground">{emptyMessage}</div>
           ) : (
             <>
@@ -223,6 +251,26 @@ export function SwitchesWidget(props: WidgetProps) {
                   );
                 })}
               </div>
+              {allowCustomEntries && !disabled && !readonly && (
+                <div className="mx-2 mt-2 pb-1">
+                  <Input
+                    type="text"
+                    placeholder={t?.("configForm.addCustomLabel", {
+                      ns: "views/settings",
+                      defaultValue: "Add custom label...",
+                    })}
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addCustomEntry();
+                      }
+                    }}
+                    onBlur={addCustomEntry}
+                  />
+                </div>
+              )}
             </>
           )}
         </CollapsibleContent>
