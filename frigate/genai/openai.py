@@ -44,7 +44,12 @@ class OpenAIClient(GenAIClient):
     ) -> Optional[str]:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
-        messages_content = []
+        messages_content: list[dict] = [
+            {
+                "type": "text",
+                "text": prompt,
+            }
+        ]
         for image in encoded_images:
             messages_content.append(
                 {
@@ -55,12 +60,6 @@ class OpenAIClient(GenAIClient):
                     },
                 }
             )
-        messages_content.append(
-            {
-                "type": "text",
-                "text": prompt,
-            }
-        )
         try:
             request_params = {
                 "model": self.genai_config.model,

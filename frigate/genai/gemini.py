@@ -50,9 +50,9 @@ class GeminiClient(GenAIClient):
         response_format: Optional[dict] = None,
     ) -> Optional[str]:
         """Submit a request to Gemini."""
-        contents = [
+        contents = [prompt] + [
             types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
-        ] + [prompt]
+        ]
         try:
             # Merge runtime_options into generation_config if provided
             generation_config_dict: dict[str, Any] = {"candidate_count": 1}
