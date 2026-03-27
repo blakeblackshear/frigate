@@ -8,9 +8,7 @@ const review: SectionConfigOverrides = {
     fieldGroups: {},
     hiddenFields: [
       "enabled_in_config",
-      "alerts.labels",
       "alerts.enabled_in_config",
-      "detections.labels",
       "detections.enabled_in_config",
       "genai.enabled_in_config",
     ],
@@ -18,11 +16,23 @@ const review: SectionConfigOverrides = {
     uiSchema: {
       alerts: {
         "ui:before": { render: "CameraReviewStatusToggles" },
+        labels: {
+          "ui:widget": "reviewLabels",
+          "ui:options": {
+            suppressMultiSchema: true,
+          },
+        },
         required_zones: {
           "ui:widget": "hidden",
         },
       },
       detections: {
+        labels: {
+          "ui:widget": "reviewLabels",
+          "ui:options": {
+            suppressMultiSchema: true,
+          },
+        },
         required_zones: {
           "ui:widget": "hidden",
         },
