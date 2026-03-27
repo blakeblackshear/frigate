@@ -40,6 +40,7 @@ class VLMWatchJob(Job):
     labels: list = field(default_factory=list)
     zones: list = field(default_factory=list)
     last_reasoning: str = ""
+    notification_message: str = ""
     iteration_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
@@ -196,6 +197,7 @@ class VLMWatchRunner(threading.Thread):
                 min(_MAX_INTERVAL, int(parsed.get("next_run_in", 30))),
             )
             reasoning = str(parsed.get("reasoning", ""))
+            notification_message = str(parsed.get("notification_message", ""))
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             logger.warning(
                 "VLM watch job %s: failed to parse VLM response: %s", self.job.id, e
@@ -203,6 +205,7 @@ class VLMWatchRunner(threading.Thread):
             return 30
 
         self.job.last_reasoning = reasoning
+        self.job.notification_message = notification_message
         self.job.iteration_count += 1
         self._broadcast_status()
 
@@ -213,7 +216,7 @@ class VLMWatchRunner(threading.Thread):
                 self.job.camera,
                 reasoning,
             )
-            self._send_notification(reasoning)
+            self._send_notification(notification_message or reasoning)
             self.job.status = JobStatusTypesEnum.success
             return 0
 
@@ -284,7 +287,11 @@ class VLMWatchRunner(threading.Thread):
             f"You will receive a sequence of frames over time. Use the conversation history to understand "
             f"what is stationary vs. actively changing.\n\n"
             f"For each frame respond with JSON only:\n"
-            f'{{"condition_met": <true/false>, "next_run_in": <integer seconds 1-300>, "reasoning": "<brief explanation>"}}\n\n'
+            f'{{"condition_met": <true/false>, "next_run_in": <integer seconds 1-300>, "reasoning": "<brief explanation>", "notification_message": "<natural language notification>"}}\n\n'
+            f"Guidelines for notification_message:\n"
+            f"- Only required when condition_met is true.\n"
+            f"- Write a short, natural notification a user would want to receive on their phone.\n"
+            f'- Example: "Your package has been delivered to the front porch."\n\n'
             f"Guidelines for next_run_in:\n"
             f"- Scene is empty / nothing of interest visible: 60-300.\n"
             f"- Relevant object(s) visible anywhere in frame (even outside the target zone): 3-10. "
@@ -294,12 +301,13 @@ class VLMWatchRunner(threading.Thread):
             f"- Keep reasoning to 1-2 sentences."
         )
 
-    def _send_notification(self, reasoning: str) -> None:
+    def _send_notification(self, message: str) -> None:
         """Publish a camera_monitoring event so downstream handlers (web push, MQTT) can notify users."""
         payload = {
             "camera": self.job.camera,
             "condition": self.job.condition,
-            "reasoning": reasoning,
+            "message": message,
+            "reasoning": self.job.last_reasoning,
             "job_id": self.job.id,
         }
 
