@@ -488,6 +488,43 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     return stats
 
 
+def get_axcl_npu_stats() -> Optional[dict[str, str | float]]:
+    """Get NPU stats using axcl."""
+    # Check if axcl-smi exists
+    axcl_smi_path = "/usr/bin/axcl/axcl-smi"
+    if not os.path.exists(axcl_smi_path):
+        return None
+
+    try:
+        # Run axcl-smi command to get NPU stats
+        axcl_command = [axcl_smi_path, "sh", "cat", "/proc/ax_proc/npu/top"]
+        p = sp.run(
+            axcl_command,
+            capture_output=True,
+            text=True,
+        )
+
+        if p.returncode != 0:
+            pass
+        else:
+            utilization = None
+
+            for line in p.stdout.strip().splitlines():
+                line = line.strip()
+                if line.startswith("utilization:"):
+                    match = re.search(r"utilization:(\d+)%", line)
+                    if match:
+                        utilization = float(match.group(1))
+
+            if utilization is not None:
+                stats: dict[str, str | float] = {"npu": utilization, "mem": "-%"}
+                return stats
+    except Exception:
+        pass
+
+    return None
+
+
 def try_get_info(f, h, default="N/A", sensor=None):
     try:
         if h:
