@@ -19,6 +19,7 @@ from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     calculate_shm_requirements,
     get_amd_gpu_stats,
+    get_axcl_npu_stats,
     get_bandwidth_stats,
     get_cpu_stats,
     get_fs_type,
@@ -324,6 +325,10 @@ async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> No
             # OpenVINO NPU usage
             ov_usage = get_openvino_npu_stats()
             stats["openvino"] = ov_usage
+        elif detector.type == "axengine":
+            # AXERA NPU usage
+            axcl_usage = get_axcl_npu_stats()
+            stats["axengine"] = axcl_usage
 
     if stats:
         all_stats["npu_usages"] = stats
