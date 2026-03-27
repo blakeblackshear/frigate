@@ -20,11 +20,16 @@ function getReviewLabels(context: FormContext): string[] {
     trackLabels.forEach((label: string) => labels.add(label));
   }
 
-  // Audio labels from listen config (camera-level, falling back to global)
-  const audioLabels =
-    fullCameraConfig?.audio?.listen ?? fullConfig?.audio?.listen;
-  if (Array.isArray(audioLabels)) {
-    audioLabels.forEach((label: string) => labels.add(label));
+  // Audio labels from listen config, only if audio detection is enabled
+  const audioEnabled =
+    fullCameraConfig?.audio?.enabled_in_config ??
+    fullConfig?.audio?.enabled_in_config;
+  if (audioEnabled) {
+    const audioLabels =
+      fullCameraConfig?.audio?.listen ?? fullConfig?.audio?.listen;
+    if (Array.isArray(audioLabels)) {
+      audioLabels.forEach((label: string) => labels.add(label));
+    }
   }
 
   // Include any labels already in the review form data (alerts + detections)
