@@ -1431,6 +1431,10 @@
       "summary": "{{count}} object types selected",
       "empty": "No object labels available"
     },
+    "reviewLabels": {
+      "summary": "{{count}} labels selected",
+      "empty": "No labels available"
+    },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"
     },
