@@ -35,6 +35,8 @@ const review: SectionConfigOverrides = {
           "ui:widget": "reviewLabels",
           "ui:options": {
             suppressMultiSchema: true,
+            emptySelectionHintKey:
+              "configForm.reviewLabels.allNonAlertDetections",
           },
         },
         required_zones: {

@@ -1433,7 +1433,8 @@
     },
     "reviewLabels": {
       "summary": "{{count}} labels selected",
-      "empty": "No labels available"
+      "empty": "No labels available",
+      "allNonAlertDetections": "All non-alert activity will be included as detections."
     },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"

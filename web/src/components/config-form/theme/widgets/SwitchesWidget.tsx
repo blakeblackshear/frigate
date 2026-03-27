@@ -45,6 +45,8 @@ export type SwitchesWidgetOptions = {
   enableSearch?: boolean;
   /** Allow users to add custom entries not in the predefined list */
   allowCustomEntries?: boolean;
+  /** i18n key for a hint shown when no entities are selected */
+  emptySelectionHintKey?: string;
 };
 
 function normalizeValue(value: unknown): string[] {
@@ -129,6 +131,11 @@ export function SwitchesWidget(props: WidgetProps) {
     [props.options],
   );
 
+  const emptySelectionHintKey = useMemo(
+    () => props.options?.emptySelectionHintKey as string | undefined,
+    [props.options],
+  );
+
   const selectedEntities = useMemo(() => normalizeValue(value), [value]);
   const [isOpen, setIsOpen] = useState(selectedEntities.length > 0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -191,7 +198,7 @@ export function SwitchesWidget(props: WidgetProps) {
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="space-y-3">
+      <div className="space-y-2">
         <CollapsibleTrigger asChild>
           <Button
             type="button"
@@ -207,6 +214,12 @@ export function SwitchesWidget(props: WidgetProps) {
             {summary}
           </Button>
         </CollapsibleTrigger>
+
+        {emptySelectionHintKey && selectedEntities.length === 0 && t && (
+          <div className="mt-0 pb-2 text-sm text-success">
+            {t(emptySelectionHintKey, { ns: namespace })}
+          </div>
+        )}
 
         <CollapsibleContent className="rounded-lg border border-input bg-secondary pb-1 pr-0 pt-2 md:max-w-md">
           {allEntities.length === 0 && !allowCustomEntries ? (
