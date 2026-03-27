@@ -307,7 +307,9 @@ export default function VideoControls({
           aria-disabled={snapshotLoading}
           className={cn(
             "size-5",
-            snapshotLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+            snapshotLoading
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer",
           )}
           title={snapshotTitle}
           onClick={(e: React.MouseEvent<SVGElement>) => {

@@ -278,10 +278,6 @@ export default function HlsVideoPlayer({
   }, [videoRef, inpointOffset]);
 
   const handleSnapshot = useCallback(async () => {
-    if (isSnapshotLoading) {
-      return;
-    }
-
     setIsSnapshotLoading(true);
     try {
       const frameTime = getVideoTime();
@@ -307,15 +303,7 @@ export default function HlsVideoPlayer({
     } finally {
       setIsSnapshotLoading(false);
     }
-  }, [
-    camera,
-    config?.ui?.timezone,
-    currentTime,
-    getVideoTime,
-    isSnapshotLoading,
-    t,
-    videoRef,
-  ]);
+  }, [camera, config?.ui?.timezone, currentTime, getVideoTime, t, videoRef]);
   const onSnapshot = camera ? handleSnapshot : undefined;
 
   return (
