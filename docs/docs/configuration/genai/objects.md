@@ -3,6 +3,10 @@ id: genai_objects
 title: Object Descriptions
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
 
 Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle, or can optionally be sent earlier after a number of significantly changed frames, for example in use in more real-time notifications. Descriptions can also be regenerated manually via the Frigate UI. Note that if you are manually entering a description for tracked objects prior to its end, this will be overwritten by the generated response.
@@ -15,9 +19,9 @@ Generative AI object descriptions can also be toggled dynamically for a camera v
 
 ## Usage and Best Practices
 
-Frigate's thumbnail search excels at identifying specific details about tracked objects – for example, using an "image caption" approach to find a "person wearing a yellow vest," "a white dog running across the lawn," or "a red car on a residential street." To enhance this further, Frigate’s default prompts are designed to ask your AI provider about the intent behind the object's actions, rather than just describing its appearance.
+Frigate's thumbnail search excels at identifying specific details about tracked objects -- for example, using an "image caption" approach to find a "person wearing a yellow vest," "a white dog running across the lawn," or "a red car on a residential street." To enhance this further, Frigate's default prompts are designed to ask your AI provider about the intent behind the object's actions, rather than just describing its appearance.
 
-While generating simple descriptions of detected objects is useful, understanding intent provides a deeper layer of insight. Instead of just recognizing "what" is in a scene, Frigate’s default prompts aim to infer "why" it might be there or "what" it could do next. Descriptions tell you what’s happening, but intent gives context. For instance, a person walking toward a door might seem like a visitor, but if they’re moving quickly after hours, you can infer a potential break-in attempt. Detecting a person loitering near a door at night can trigger an alert sooner than simply noting "a person standing by the door," helping you respond based on the situation’s context.
+While generating simple descriptions of detected objects is useful, understanding intent provides a deeper layer of insight. Instead of just recognizing "what" is in a scene, Frigate's default prompts aim to infer "why" it might be there or "what" it could do next. Descriptions tell you what's happening, but intent gives context. For instance, a person walking toward a door might seem like a visitor, but if they're moving quickly after hours, you can infer a potential break-in attempt. Detecting a person loitering near a door at night can trigger an alert sooner than simply noting "a person standing by the door," helping you respond based on the situation's context.
 
 ## Custom Prompts
 
@@ -33,7 +37,18 @@ Prompts can use variable replacements `{label}`, `{sub_label}`, and `{camera}` t
 
 :::
 
-You are also able to define custom prompts in your configuration.
+You can define custom prompts at the global level and per-object type. To configure custom prompts:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Global configuration > Objects" />.
+   - Expand the **GenAI** section
+   - Set **Prompt** to your custom prompt text
+   - Under **Object Prompts**, add entries keyed by object type (e.g., `person`, `car`) with custom prompts for each
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 genai:
@@ -49,7 +64,25 @@ objects:
       car: "Observe the primary vehicle in these images. Focus on its movement, direction, or purpose (e.g., parking, approaching, circling). If it's a delivery vehicle, mention the company."
 ```
 
-Prompts can also be overridden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire.
+</TabItem>
+</ConfigTabs>
+
+Prompts can also be overridden at the camera level to provide a more detailed prompt to the model about your specific camera. To configure camera-level overrides:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Objects" /> for the desired camera.
+   - Expand the **GenAI** section
+   - Set **Enabled** to on
+   - Set **Use Snapshot** to on if desired
+   - Set **Prompt** to a camera-specific prompt
+   - Under **Object Prompts**, add entries keyed by object type with camera-specific prompts
+   - Set **Objects** to the list of object types that should receive descriptions (e.g., `person`, `cat`)
+   - Set **Required Zones** to limit descriptions to objects in specific zones (e.g., `steps`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -68,6 +101,9 @@ cameras:
         required_zones:
           - steps
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### Experiment with prompts
 

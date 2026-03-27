@@ -3,6 +3,10 @@ id: getting_started
 title: Getting started
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 # Getting Started
 
 :::tip
@@ -85,7 +89,7 @@ This section shows how to create a minimal directory structure for a Docker inst
 
 ### Setup directories
 
-Frigate will create a config file if one does not exist on the initial startup. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor which supports config validation.
+Frigate will create a config file if one does not exist on the initial startup. The following directory structure is the bare minimum to get started.
 
 ```
 .
@@ -128,7 +132,7 @@ services:
       - "8554:8554" # RTSP feeds
 ```
 
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8971` where you can login with the `admin` user and finish the configuration using the built-in configuration editor.
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8971` where you can login with the `admin` user and finish configuration using the Settings UI.
 
 ## Configuring Frigate
 
@@ -140,15 +144,15 @@ At this point you should be able to start Frigate and a basic config will be cre
 
 ### Step 2: Add a camera
 
-You can click the `Add Camera` button to use the camera setup wizard to get your first camera added into Frigate.
+Click the **Add Camera** button in <NavPath path="Settings > Camera configuration > Management" /> to use the camera setup wizard to get your first camera added into Frigate.
 
 ### Step 3: Configure hardware acceleration (recommended)
 
-Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration_video.md) config reference for examples applicable to your hardware.
+Now that you have a working camera configuration, set up hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration_video.md) docs for examples applicable to your hardware.
 
-Here is an example configuration with hardware acceleration configured to work with most Intel processors with an integrated GPU using the [preset](../configuration/ffmpeg_presets.md):
+:::note
 
-`docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
+Hardware acceleration requires passing the appropriate device to the Docker container. For Intel and AMD GPUs, add the device to your `docker-compose.yml`:
 
 ```yaml {4,5}
 services:
@@ -159,7 +163,17 @@ services:
     ...
 ```
 
-`config.yml`
+After modifying, run `docker compose up -d` to apply changes.
+
+:::
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to the appropriate preset for your hardware (e.g., `VAAPI (Intel/AMD GPU)` for most Intel processors).
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 mqtt: ...
@@ -173,6 +187,9 @@ cameras:
     detect: ...
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Step 4: Configure detectors
 
 By default, Frigate will use a single CPU detector.
@@ -183,6 +200,15 @@ In many cases, the integrated graphics on Intel CPUs provides sufficient perform
   <summary>Use Intel OpenVINO detector</summary>
 
 You need to refer to **Configure hardware acceleration** above to enable the container to use the GPU.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `openvino` and **Device** `GPU`
+2. Navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings for OpenVINO
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {3-6,9-15,20-21}
 mqtt: ...
@@ -209,6 +235,9 @@ cameras:
       ...
 ```
 
+</TabItem>
+</ConfigTabs>
+
 </details>
 
 If you have a USB Coral, you will need to add a detectors section to your config.
@@ -216,7 +245,9 @@ If you have a USB Coral, you will need to add a detectors section to your config
 <details>
    <summary>Use USB Coral detector</summary>
 
-`docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
+:::note
+
+You need to pass the USB Coral device to the Docker container. Add the following to your `docker-compose.yml` and run `docker compose up -d`:
 
 ```yaml {4-6}
 services:
@@ -227,6 +258,16 @@ services:
       - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://github.com/jnicolson/gasket-builder
     ...
 ```
+
+:::
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `edgetpu` and **Device** `usb`.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {3-6,11-12}
 mqtt: ...
@@ -244,17 +285,20 @@ cameras:
       ...
 ```
 
+</TabItem>
+</ConfigTabs>
+
 </details>
 
 More details on available detectors can be found [here](../configuration/object_detectors.md).
 
-Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they will need to be added according to the [configuration file reference](../configuration/reference.md).
+Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they can be configured in <NavPath path="Settings > Global configuration > Objects" /> or via the [configuration file reference](../configuration/reference.md).
 
 ### Step 5: Setup motion masks
 
-Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. To do this, navigate to the camera in the UI, select "Debug" at the top, and enable "Motion boxes" in the options below the video feed. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
+Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and enable the Debug view to see motion boxes. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
 
-Now that you know where you need to mask, use the "Mask & Zone creator" in the options pane to generate the coordinates needed for your config file. More information about masks can be found [here](../configuration/masks.md).
+Use the mask editor to draw polygon masks directly on the camera feed. More information about masks can be found [here](../configuration/masks.md).
 
 :::warning
 
@@ -262,37 +306,18 @@ Note that motion masks should not be used to mark out areas where you do not wan
 
 :::
 
-Your configuration should look similar to this now.
-
-```yaml {16-18}
-mqtt:
-  enabled: False
-
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
-
-cameras:
-  name_of_your_camera:
-    ffmpeg:
-      inputs:
-        - path: rtsp://10.0.10.10:554/rtsp
-          roles:
-            - detect
-    motion:
-      mask:
-        motion_area:
-          friendly_name: "Motion mask"
-          enabled: true
-          coordinates: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
-```
-
 ### Step 6: Enable recordings
 
 In order to review activity in the Frigate UI, recordings need to be enabled.
 
-To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, it won't be possible to enable it in the UI.
+<ConfigTabs>
+<TabItem value="ui">
+
+1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and add a second input with the `record` role pointing to your high-resolution stream
+2. Navigate to <NavPath path="Settings > Global configuration > Recording" /> (or <NavPath path="Settings > Camera configuration > Recording" /> for a specific camera) and set **Enable recording** to on
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {16-17}
 mqtt: ...
@@ -314,6 +339,9 @@ cameras:
       enabled: True
     motion: ...
 ```
+
+</TabItem>
+</ConfigTabs>
 
 If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
 

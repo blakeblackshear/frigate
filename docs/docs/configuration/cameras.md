@@ -3,6 +3,10 @@ id: cameras
 title: Camera Configuration
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 ## Setting Up Camera Inputs
 
 Several inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
@@ -16,6 +20,24 @@ Each role can only be assigned to one input per camera. The options for roles ar
 | `detect` | Main feed for object detection. [docs](object_detectors.md)                         |
 | `record` | Saves segments of the video feed based on configuration settings. [docs](record.md) |
 | `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                          |
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+| Field | Description |
+|-------|-------------|
+| **Camera inputs** | List of input stream definitions (paths and roles) for this camera. |
+Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
+
+| Field | Description |
+|-------|-------------|
+| **Detect width** | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
+| **Detect height** | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 mqtt:
@@ -36,7 +58,18 @@ cameras:
       height: 720 # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
-Additional cameras are simply added to the config under the `cameras` entry.
+</TabItem>
+</ConfigTabs>
+
+Additional cameras are simply added under the camera configuration section.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Management" /> and use the add camera button to configure each additional camera.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 mqtt: ...
@@ -45,6 +78,9 @@ cameras:
   front: ...
   side: ...
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::note
 
@@ -64,7 +100,21 @@ Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to com
 
 :::
 
-Add the onvif section to your camera in your configuration file:
+Configure the ONVIF connection for your camera to enable PTZ controls.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and select your camera.
+   - Set **Ffmpeg** to `...`
+2. Navigate to <NavPath path="Settings > Camera configuration > ONVIF" /> and select your camera.
+   - Set **ONVIF host** to `10.0.10.10`
+   - Set **ONVIF port** to `8000`
+   - Set **ONVIF username** to `admin`
+   - Set **ONVIF password** to `password`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {4-8}
 cameras:
@@ -76,6 +126,9 @@ cameras:
       user: admin
       password: password
 ```
+
+</TabItem>
+</ConfigTabs>
 
 If the ONVIF connection is successful, PTZ controls will be available in the camera's WebUI.
 
@@ -130,13 +183,20 @@ The FeatureList on the [ONVIF Conformant Products Database](https://www.onvif.or
 
 ## Setting up camera groups
 
-:::tip
+Camera groups let you organize cameras together with a shared name and icon, making it easier to review and filter them. A default group for all cameras is always available.
 
-It is recommended to set up camera groups using the UI.
+<ConfigTabs>
+<TabItem value="ui">
 
-:::
+1. Navigate to <NavPath path="Settings > General > UI settings" />.
+2. Under the camera groups section, create a new group:
+   - Set the **group name** (e.g. `front`)
+   - Select the **cameras** to include (e.g. `driveway_cam`, `garage_cam`)
+   - Choose an **icon** (e.g. `LuCar`)
+   - Set the **order** to control the display position
 
-Cameras can be grouped together and assigned a name and icon, this allows them to be reviewed and filtered together. There will always be the default group for all cameras.
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 camera_groups:
@@ -147,6 +207,9 @@ camera_groups:
     icon: LuCar
     order: 0
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Two-Way Audio
 

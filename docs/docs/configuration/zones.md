@@ -3,6 +3,10 @@ id: zones
 title: Zones
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Zones allow you to define a specific area of the frame and apply additional filters for object types so you can determine whether or not an object is within a particular area. Presence in a zone is evaluated based on the bottom center of the bounding box for the object. It does not matter how much of the bounding box overlaps with the zone.
 
 For example, the cat in this image is currently in Zone 1, but **not** Zone 2.
@@ -16,11 +20,51 @@ Zones can be toggled on or off without removing them from the configuration. Dis
 
 During testing, enable the Zones option for the Debug view of your camera (Settings --> Debug) so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
-To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the section of the web UI for creating a zone instead.
+## Creating a Zone
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Under the **Zones** section, click the plus icon to add a new zone.
+3. Click on the camera's latest image to create the points for the zone boundary. Click the first point again to close the polygon.
+4. Configure zone options such as **Friendly name**, **Objects**, **Loitering time**, and **Inertia** in the zone editor.
+5. Press **Save** when finished.
+
+</TabItem>
+<TabItem value="yaml">
+
+Follow [the steps for creating a mask](masks.md), but use the zone section of the web UI instead. Alternatively, define zones directly in your configuration file:
+
+```yaml
+cameras:
+  name_of_your_camera:
+    zones:
+      entire_yard:
+        friendly_name: Entire yard
+        coordinates: 0.123,0.456,0.789,0.012,...
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Restricting alerts and detections to specific zones
 
-Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to have an alert created when an object enters your entire_yard zone, the config would be:
+Often you will only want alerts to be created when an object enters areas of interest. This is done by combining zones with required zones for review items.
+
+To create an alert only when an object enters the `entire_yard` zone:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Review" />.
+
+| Field | Description |
+|-------|-------------|
+| **Alerts config > Required zones** | Zones that an object must enter to be considered an alert; leave empty to allow any zone. |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {6,8}
 cameras:
@@ -35,7 +79,23 @@ cameras:
         coordinates: ...
 ```
 
-You may also want to filter detections to only be created when an object enters a secondary area of interest. This is done using zones along with setting required_zones. Let's say you want alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard, the config would be
+</TabItem>
+</ConfigTabs>
+
+You may also want to filter detections to only be created when an object enters a secondary area of interest. For example, to trigger alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Review" />.
+
+| Field | Description |
+|-------|-------------|
+| **Alerts config > Required zones** | Zones that an object must enter to be considered an alert; leave empty to allow any zone. |
+| **Detections config > Required zones** | Zones that an object must enter to be considered a detection; leave empty to allow any zone. |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -56,7 +116,21 @@ cameras:
         coordinates: ...
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Restricting snapshots to specific zones
+
+To only save snapshots when an object enters a specific zone:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Snapshots" /> and select your camera.
+   - Set **Required zones** to `entire_yard`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -70,9 +144,24 @@ cameras:
         coordinates: ...
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Restricting zones to specific objects
 
-Sometimes you want to limit a zone to specific object types to have more granular control of when alerts, detections, and snapshots are saved. The following example will limit one zone to person objects and the other to cars.
+Sometimes you want to limit a zone to specific object types to have more granular control of when alerts, detections, and snapshots are saved. The following example limits one zone to person objects and the other to cars.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Create a zone named `entire_yard` covering everywhere you want to track a person.
+   - Under **Objects**, add `person`
+3. Create a second zone named `front_yard_street` covering just the street.
+   - Under **Objects**, add `car`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -87,6 +176,9 @@ cameras:
         objects:
           - car
 ```
+
+</TabItem>
+</ConfigTabs>
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. Objects will be tracked for any `person` that enter anywhere in the yard, and for cars only if they enter the street.
 
@@ -103,6 +195,17 @@ When using loitering zones, a review item will behave in the following way:
 
 :::
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Edit or create the zone (e.g., `sidewalk`).
+   - Set **Loitering time** to the desired number of seconds (e.g., `4`)
+   - Under **Objects**, add the relevant object types (e.g., `person`)
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 cameras:
   name_of_your_camera:
@@ -114,9 +217,22 @@ cameras:
           - person
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Zone Inertia
 
-Sometimes an objects bounding box may be slightly incorrect and the bottom center of the bounding box is inside the zone while the object is not actually in the zone. Zone inertia helps guard against this by requiring an object's bounding box to be within the zone for multiple consecutive frames. This value can be configured:
+Sometimes an objects bounding box may be slightly incorrect and the bottom center of the bounding box is inside the zone while the object is not actually in the zone. Zone inertia helps guard against this by requiring an object's bounding box to be within the zone for multiple consecutive frames.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Edit or create the zone (e.g., `front_yard`).
+   - Set **Inertia** to the desired number of consecutive frames (e.g., `3`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -129,7 +245,20 @@ cameras:
           - person
 ```
 
+</TabItem>
+</ConfigTabs>
+
 There may also be cases where you expect an object to quickly enter and exit a zone, like when a car is pulling into the driveway, and you may want to have the object be considered present in the zone immediately:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Edit or create the zone (e.g., `driveway_entrance`).
+   - Set **Inertia** to `1`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -142,6 +271,9 @@ cameras:
           - car
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Speed Estimation
 
 Frigate can be configured to estimate the speed of objects moving through a zone. This works by combining data from Frigate's object tracker and "real world" distance measurements of the edges of the zone. The recommended use case for this feature is to track the speed of vehicles on a road as they move through the zone.
@@ -152,7 +284,19 @@ Your zone must be defined with exactly 4 points and should be aligned to the gro
 
 Speed estimation requires a minimum number of frames for your object to be tracked before a valid estimate can be calculated, so create your zone away from places where objects enter and exit for the best results. The object's bounding box must be stable and remain a constant size as it enters and exits the zone. _Your zone should not take up the full frame, and the zone does **not** need to be the same size or larger than the objects passing through it._ An object's speed is tracked while it passes through the zone and then saved to Frigate's database.
 
-Accurate real-world distance measurements are required to estimate speeds. These distances can be specified in your zone config through the `distances` field.
+Accurate real-world distance measurements are required to estimate speeds. These distances can be specified through the `distances` field. Each number represents the real-world distance between consecutive points in the `coordinates` list. The fastest and most accurate way to configure this is through the Zone Editor in the Frigate UI.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Create or edit a zone with exactly 4 points aligned to the ground plane.
+3. In the zone editor, enter the real-world **Distances** between each pair of consecutive points.
+   - For example, if the distance between the first and second points is 10 meters, between the second and third is 12 meters, etc.
+4. Distances are measured in meters (metric) or feet (imperial), depending on the **Unit system** setting.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -163,15 +307,33 @@ cameras:
         distances: 10,12,11,13.5 # in meters or feet
 ```
 
-Each number in the `distance` field represents the real-world distance between the points in the `coordinates` list. So in the example above, the distance between the first two points ([0.033,0.306] and [0.324,0.138]) is 10. The distance between the second and third set of points ([0.324,0.138] and [0.439,0.185]) is 12, and so on. The fastest and most accurate way to configure this is through the Zone Editor in the Frigate UI.
+So in the example above, the distance between the first two points ([0.033,0.306] and [0.324,0.138]) is 10. The distance between the second and third set of points ([0.324,0.138] and [0.439,0.185]) is 12, and so on.
+
+</TabItem>
+</ConfigTabs>
 
 The `distance` values are measured in meters (metric) or feet (imperial), depending on how `unit_system` is configured in your `ui` config:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > UI" />.
+
+| Field | Description |
+|-------|-------------|
+| **Unit system** | Set to `metric` (kilometers per hour) or `imperial` (miles per hour) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 ui:
   # can be "metric" or "imperial", default is metric
   unit_system: metric
 ```
+
+</TabItem>
+</ConfigTabs>
 
 The average speed of your object as it moved through your zone is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label (see the caveats below). Current estimated speed, average estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic. See the [MQTT docs](../integrations/mqtt.md#frigateevents).
 
@@ -191,6 +353,17 @@ These speed values are output as a number in miles per hour (mph) or kilometers 
 
 Zones can be configured with a minimum speed requirement, meaning an object must be moving at or above this speed to be considered inside the zone. Zone `distances` must be defined as described above.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
+2. Edit or create the zone with distances configured.
+   - Set **Speed threshold** to the desired minimum speed (e.g., `20`)
+   - The unit is kph or mph, depending on the **Unit system** setting
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 cameras:
   name_of_your_camera:
@@ -202,3 +375,6 @@ cameras:
         # highlight-next-line
         speed_threshold: 20 # unit is in kph or mph, depending on how unit_system is set (see above)
 ```
+
+</TabItem>
+</ConfigTabs>

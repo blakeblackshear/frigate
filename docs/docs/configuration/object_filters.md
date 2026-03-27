@@ -3,11 +3,15 @@ id: object_filters
 title: Filters
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 There are several types of object filters that can be used to reduce false positive rates.
 
 ## Object Scores
 
-For object filters in your configuration, any single detection below `min_score` will be ignored as a false positive. `threshold` is based on the median of the history of scores (padded to 3 values) for a tracked object. Consider the following frames when `min_score` is set to 0.6 and threshold is set to 0.85:
+For object filters, any single detection below `min_score` will be ignored as a false positive. `threshold` is based on the median of the history of scores (padded to 3 values) for a tracked object. Consider the following frames when `min_score` is set to 0.6 and threshold is set to 0.85:
 
 | Frame | Current Score | Score History                     | Computed Score | Detected Object |
 | ----- | ------------- | --------------------------------- | -------------- | --------------- |
@@ -28,6 +32,46 @@ Any detection below `min_score` will be immediately thrown out and never tracked
 
 `threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create an tracked object. If `threshold` is too high then true positive tracked objects may be missed due to the object never scoring high enough.
 
+## Configuring Object Scores
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Objects" /> to set score filters globally.
+
+| Field | Description |
+|-------|-------------|
+| **Object filters > Person > Min Score** | Minimum score for a single detection to initiate tracking |
+| **Object filters > Person > Threshold** | Minimum computed (median) score to be considered a true positive |
+
+To override score filters for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" /> and select the camera.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+objects:
+  filters:
+    person:
+      min_score: 0.5
+      threshold: 0.7
+```
+
+To override at the camera level:
+
+```yaml
+cameras:
+  front_door:
+    objects:
+      filters:
+        person:
+          min_score: 0.5
+          threshold: 0.7
+```
+
+</TabItem>
+</ConfigTabs>
+
 ## Object Shape
 
 False positives can also be reduced by filtering a detection based on its shape.
@@ -46,6 +90,50 @@ Conceptually, a ratio of 1 is a square, 0.5 is a "tall skinny" box, and 2 is a "
 
 :::
 
+### Configuring Shape Filters
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Objects" /> to set shape filters globally.
+
+| Field | Description |
+|-------|-------------|
+| **Object filters > Person > Min Area** | Minimum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Max Area** | Maximum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Min Ratio** | Minimum width/height ratio of the bounding box |
+| **Object filters > Person > Max Ratio** | Maximum width/height ratio of the bounding box |
+
+To override shape filters for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" /> and select the camera.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+objects:
+  filters:
+    person:
+      min_area: 5000
+      max_area: 100000
+      min_ratio: 0.5
+      max_ratio: 2.0
+```
+
+To override at the camera level:
+
+```yaml
+cameras:
+  front_door:
+    objects:
+      filters:
+        person:
+          min_area: 5000
+          max_area: 100000
+```
+
+</TabItem>
+</ConfigTabs>
+
 ## Other Tools
 
 ### Zones
@@ -54,4 +142,4 @@ Conceptually, a ratio of 1 is a square, 0.5 is a "tall skinny" box, and 2 is a "
 
 ### Object Masks
 
-[Object Filter Masks](/configuration/masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape.
+[Object Filter Masks](/configuration/masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.

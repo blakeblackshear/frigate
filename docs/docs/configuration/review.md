@@ -3,6 +3,10 @@ id: review
 title: Review
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 The Review page of the Frigate UI is for quickly reviewing historical footage of interest from your cameras. _Review items_ are indicated on a vertical timeline and displayed as a grid of previews - bandwidth-optimized, low frame rate, low resolution videos. Hovering over or swiping a preview plays the video and marks it as reviewed. If more in-depth analysis is required, the preview can be clicked/tapped and the full frame rate, full resolution recording is displayed.
 
 Review items are filterable by date, object type, and camera.
@@ -38,7 +42,19 @@ See the [objects documentation](objects.md) for the list of objects that Frigate
 
 ## Restricting alerts to specific labels
 
-By default a review item will only be marked as an alert if a person or car is detected. This can be configured to include any object or audio label using the following config:
+By default a review item will only be marked as an alert if a person or car is detected. Configure the alert labels to include any object or audio label.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+| Field | Description |
+|-------|-------------|
+| **Alerts > Labels** | List of object or audio labels that qualify a review item as an alert |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 # can be overridden at the camera level
@@ -52,9 +68,24 @@ review:
       - speech
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ## Restricting detections to specific labels
 
 By default all detections that do not qualify as an alert qualify as a detection. However, detections can further be filtered to only include certain labels or certain zones.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+| Field | Description |
+|-------|-------------|
+| **Detections > Labels** | List of labels to restrict which tracked objects qualify as detections |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 # can be overridden at the camera level
@@ -65,11 +96,23 @@ review:
       - dog
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ## Excluding a camera from alerts or detections
 
-To exclude a specific camera from alerts or detections, simply provide an empty list to the alerts or detections field _at the camera level_.
+To exclude a specific camera from alerts or detections, provide an empty list to the alerts or detections labels field at the camera level.
 
-For example, to exclude objects on the camera _gatecamera_ from any detections, include this in your config:
+For example, to exclude objects on the camera _gatecamera_ from any detections:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Review" /> and select the **gatecamera** camera.
+   - Set **Detections > Labels** to an empty list
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {3-5}
 cameras:
@@ -78,6 +121,9 @@ cameras:
       detections:
         labels: []
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Restricting review items to specific zones
 

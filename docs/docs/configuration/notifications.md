@@ -3,6 +3,10 @@ id: notifications
 title: Notifications
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 # Notifications
 
 Frigate offers native notifications using the [WebPush Protocol](https://web.dev/articles/push-notifications-web-push-protocol) which uses the [VAPID spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid) to deliver notifications to web apps using encryption.
@@ -18,14 +22,27 @@ In order to use notifications the following requirements must be met:
 
 ### Configuration
 
-To configure notifications, go to the Frigate WebUI -> Settings -> Notifications and enable, then fill out the fields and save.
+Enable notifications and fill out the required fields.
 
-Optionally, you can change the default cooldown period for notifications through the `cooldown` parameter in your config file. This parameter can also be overridden at the camera level.
+Optionally, change the default cooldown period for notifications. The cooldown can also be overridden at the camera level.
 
 Notifications will be prevented if either:
 
 - The global cooldown period hasn't elapsed since any camera's last notification
 - The camera-specific cooldown period hasn't elapsed for the specific camera
+
+#### Global notifications
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Notifications > Notifications" />.
+   - Set **Enable notifications** to on
+   - Set **Notification email** to your email address
+   - Set **Cooldown period** to the desired number of seconds to wait before sending another notification from any camera (e.g. `10`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 notifications:
@@ -33,6 +50,21 @@ notifications:
   email: "johndoe@gmail.com"
   cooldown: 10 # wait 10 seconds before sending another notification from any camera
 ```
+
+</TabItem>
+</ConfigTabs>
+
+#### Per-camera notifications
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Notifications" /> and select the desired camera.
+   - Set **Enabled** to on
+   - Set **Cooldown** to the desired number of seconds to wait before sending another notification from this camera (e.g. `30`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -42,6 +74,9 @@ cameras:
       enabled: True
       cooldown: 30 # wait 30 seconds before sending another notification from the doorbell camera
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### Registration
 

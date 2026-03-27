@@ -3,9 +3,30 @@ id: metrics
 title: Metrics
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 # Metrics
 
 Frigate exposes Prometheus metrics at the `/api/metrics` endpoint that can be used to monitor the performance and health of your Frigate instance.
+
+## Enabling Telemetry
+
+Prometheus metrics are exposed via the telemetry configuration. Enable or configure telemetry to control metric availability.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Telemetry" /> to configure metrics and telemetry settings.
+
+</TabItem>
+<TabItem value="yaml">
+
+Metrics are available at `/api/metrics` by default. No additional Frigate configuration is required to expose them.
+
+</TabItem>
+</ConfigTabs>
 
 ## Available Metrics
 

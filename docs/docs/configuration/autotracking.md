@@ -3,6 +3,10 @@ id: autotracking
 title: Camera Autotracking
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.
 
 ![Autotracking example with zooming](/img/frigate-autotracking-example.gif)
@@ -29,11 +33,44 @@ A growing list of cameras and brands that have been reported by users to work wi
 
 First, set up a PTZ preset in your camera's firmware and give it a name. If you're unsure how to do this, consult the documentation for your camera manufacturer's firmware. Some tutorials for common brands: [Amcrest](https://www.youtube.com/watch?v=lJlE9-krmrM), [Reolink](https://www.youtube.com/watch?v=VAnxHUY5i5w), [Dahua](https://www.youtube.com/watch?v=7sNbc5U-k54).
 
-Edit your Frigate configuration file and enter the ONVIF parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name you configured in your camera's firmware to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
+Configure the ONVIF connection and autotracking parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
 
 An [ONVIF connection](cameras.md) is required for autotracking to function. Also, a [motion mask](masks.md) over your camera's timestamp and any overlay text is recommended to ensure they are completely excluded from scene change calculations when the camera is moving.
 
 Note that `autotracking` is disabled by default but can be enabled in the configuration or by MQTT.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > ONVIF" /> for the desired camera.
+
+**ONVIF Connection**
+
+| Field | Description |
+|-------|-------------|
+| **Host** | Host of the camera being connected to. HTTP is assumed by default; prefix with `https://` for HTTPS. |
+| **Port** | ONVIF port for device (default: 8000) |
+| **User** | Username for login. Some devices require admin to access ONVIF. |
+| **Password** | Password for login |
+| **TLS Insecure** | Skip TLS verification from the ONVIF server (default: false) |
+| **Profile** | ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically. |
+
+**Autotracking**
+
+| Field | Description |
+|-------|-------------|
+| **Enabled** | Enable or disable object autotracking (default: false) |
+| **Calibrate on Startup** | Calibrate the camera on startup by measuring PTZ motor speed (default: false) |
+| **Zooming** | Zoom mode during autotracking: `disabled`, `absolute`, or `relative` (default: disabled) |
+| **Zoom Factor** | Controls zoom behavior on tracked objects, between 0.1 and 0.75. Lower keeps more scene visible; higher zooms in more (default: 0.3) |
+| **Track** | List of object types to track (default: person) |
+| **Required Zones** | Zones an object must enter to begin autotracking |
+| **Return Preset** | Name of ONVIF preset in camera firmware to return to when tracking ends (default: home) |
+| **Timeout** | Seconds to delay before returning to preset (default: 10) |
+| **Movement Weights** | Auto-generated calibration values. Do not modify manually. |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -92,13 +129,16 @@ cameras:
         movement_weights: []
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ## Calibration
 
 PTZ motors operate at different speeds. Performing a calibration will direct Frigate to measure this speed over a variety of movements and use those measurements to better predict the amount of movement necessary to keep autotracked objects in the center of the frame.
 
 Calibration is optional, but will greatly assist Frigate in autotracking objects that move across the camera's field of view more quickly.
 
-To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
+To begin calibration, set `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
 
 After calibration has ended, your PTZ will be moved to the preset specified by `return_preset`.
 

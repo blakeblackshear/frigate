@@ -3,6 +3,10 @@ id: ffmpeg_presets
 title: FFmpeg presets
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Some presets of FFmpeg args are provided by default to make the configuration easier. All presets can be seen in [this file](https://github.com/blakeblackshear/frigate/blob/master/frigate/ffmpeg_presets.py).
 
 ### Hwaccel Presets
@@ -22,6 +26,30 @@ See [the hwaccel docs](/configuration/hardware_acceleration_video.md) for more i
 | preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
 | preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
 | preset-rkmpp        | Rockchip MPP  | Use image with \*-rk suffix and privileged mode       |
+
+Select the appropriate hwaccel preset for your hardware.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to the appropriate preset for your hardware.
+2. To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and set **Hardware acceleration arguments** for that camera.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+ffmpeg:
+  hwaccel_args: preset-vaapi
+
+cameras:
+  front_door:
+    ffmpeg:
+      hwaccel_args: preset-nvidia
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Input Args Presets
 
@@ -72,7 +100,7 @@ Output args presets help make the config more readable and handle use cases for 
 
 | Preset                           | Usage                             | Other Notes                                                                                                                                                                                              |
 | -------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| preset-record-generic            | Record WITHOUT audio              | If your camera doesn’t have audio, or if you don’t want to record audio, use this option                                                                                                                 |
+| preset-record-generic            | Record WITHOUT audio              | If your camera doesn't have audio, or if you don't want to record audio, use this option                                                                                                                 |
 | preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings                                                                                                                                                                   |
 | preset-record-generic-audio-aac  | Record WITH transcoded aac audio  | This is the default when no option is specified. Use it to transcode audio to AAC. If the source is already in AAC format, use preset-record-generic-audio-copy instead to avoid unnecessary re-encoding |
 | preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead                                                                                                                                                               |
