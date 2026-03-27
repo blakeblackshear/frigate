@@ -20,6 +20,7 @@ import { TextareaWidget } from "./widgets/TextareaWidget";
 import { SwitchesWidget } from "./widgets/SwitchesWidget";
 import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
 import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
+import { ReviewLabelSwitchesWidget } from "./widgets/ReviewLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
@@ -76,6 +77,7 @@ export const frigateTheme: FrigateTheme = {
     switches: SwitchesWidget,
     objectLabels: ObjectLabelSwitchesWidget,
     audioLabels: AudioLabelSwitchesWidget,
+    reviewLabels: ReviewLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
     timezoneSelect: TimezoneSelectWidget,
     optionalField: OptionalFieldWidget,

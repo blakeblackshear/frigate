@@ -188,7 +188,7 @@ class ReviewConfig(FrigateBaseModel):
     detections: DetectionsConfig = Field(
         default_factory=DetectionsConfig,
         title="Detections config",
-        description="Settings for creating detection events (non-alert) and how long to keep them.",
+        description="Settings for which tracked objects generate detections (non-alert) and how detections are retained.",
     )
     genai: GenAIReviewConfig = Field(
         default_factory=GenAIReviewConfig,

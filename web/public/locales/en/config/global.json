@@ -1044,7 +1044,7 @@
     },
     "detections": {
       "label": "Detections config",
-      "description": "Settings for creating detection events (non-alert) and how long to keep them.",
+      "description": "Settings for which tracked objects generate detections (non-alert) and how detections are retained.",
       "enabled": {
         "label": "Enable detections",
         "description": "Enable or disable detection events for all cameras; can be overridden per-camera."

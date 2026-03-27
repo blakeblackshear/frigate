@@ -1431,6 +1431,11 @@
       "summary": "{{count}} object types selected",
       "empty": "No object labels available"
     },
+    "reviewLabels": {
+      "summary": "{{count}} labels selected",
+      "empty": "No labels available",
+      "allNonAlertDetections": "All non-alert activity will be included as detections."
+    },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"
     },
@@ -1474,7 +1479,8 @@
     "timestamp_style": {
       "title": "Timestamp Settings"
     },
-    "searchPlaceholder": "Search..."
+    "searchPlaceholder": "Search...",
+    "addCustomLabel": "Add custom label..."
   },
   "globalConfig": {
     "title": "Global Configuration",
