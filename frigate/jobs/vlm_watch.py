@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 _MIN_INTERVAL = 1
 _MAX_INTERVAL = 300
 
+# Minimum seconds between VLM iterations when woken by detections (no zone filter)
+_DETECTION_COOLDOWN_WITHOUT_ZONE = 10
+
 # Max user/assistant turn pairs to keep in conversation history
 _MAX_HISTORY = 10
 
@@ -223,12 +226,28 @@ class VLMWatchRunner(threading.Thread):
         return next_run_in
 
     def _wait_for_trigger(self, max_wait: float) -> None:
-        """Wait up to max_wait seconds, returning early if a relevant detection fires on the target camera."""
-        deadline = time.time() + max_wait
+        """Wait up to max_wait seconds, returning early if a relevant detection fires on the target camera.
+
+        With zones configured, a matching detection wakes immediately (events
+        are already filtered).  Without zones, detections are frequent so a
+        cooldown is enforced: messages are continuously drained to prevent
+        queue backup, but the loop only exits once a match has been seen
+        *and* the cooldown period has elapsed.
+        """
+        now = time.time()
+        deadline = now + max_wait
+        use_cooldown = not self.job.zones
+        earliest_wake = now + _DETECTION_COOLDOWN_WITHOUT_ZONE if use_cooldown else 0
+        triggered = False
+
         while not self.cancel_event.is_set():
             remaining = deadline - time.time()
             if remaining <= 0:
                 break
+
+            if triggered and time.time() >= earliest_wake:
+                break
+
             result = self.detection_subscriber.check_for_update(
                 timeout=min(1.0, remaining)
             )
@@ -253,12 +272,22 @@ class VLMWatchRunner(threading.Thread):
             if cam != self.job.camera or not tracked_objects:
                 continue
             if self._detection_matches_filters(tracked_objects):
-                logger.debug(
-                    "VLM watch job %s: woken early by detection event on %s",
-                    self.job.id,
-                    self.job.camera,
-                )
-                break
+                if not use_cooldown:
+                    logger.debug(
+                        "VLM watch job %s: woken early by detection event on %s",
+                        self.job.id,
+                        self.job.camera,
+                    )
+                    break
+
+                if not triggered:
+                    logger.debug(
+                        "VLM watch job %s: detection match on %s, draining for %.0fs",
+                        self.job.id,
+                        self.job.camera,
+                        max(0, earliest_wake - time.time()),
+                    )
+                    triggered = True
 
     def _detection_matches_filters(self, tracked_objects: list) -> bool:
         """Return True if any tracked object passes the label and zone filters."""
