@@ -180,7 +180,7 @@ export function SwitchesWidget(props: WidgetProps) {
           </Button>
         </CollapsibleTrigger>
 
-        <CollapsibleContent className="rounded-lg border border-input bg-secondary p-2 pr-0 md:max-w-md">
+        <CollapsibleContent className="rounded-lg border border-input bg-secondary pb-1 pr-0 pt-2 md:max-w-md">
           {availableEntities.length === 0 ? (
             <div className="text-sm text-muted-foreground">{emptyMessage}</div>
           ) : (
