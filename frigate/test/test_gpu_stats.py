@@ -45,6 +45,6 @@ class TestGpuStats(unittest.TestCase):
         assert intel_stats == {
             "gpu": "26.08%",
             "mem": "-%",
-            "enc": "0.0%",
+            "compute": "0.0%",
             "dec": "2.27%",
         }

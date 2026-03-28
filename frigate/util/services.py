@@ -296,7 +296,7 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             render.append(float(single))
 
         if render:
-            results["enc"] = f"{round(sum(render) / len(render), 2)}%"
+            results["compute"] = f"{round(sum(render) / len(render), 2)}%"
 
         # Video engines are the fixed-function decode engines
         video = []
@@ -395,9 +395,9 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
 
         results["mem"] = "-%"
 
-        # Encoder: Render/3D engine (compute/shader encode)
+        # Compute: Render/3D engine (compute/shader workloads and QSV encode)
         if render_global:
-            results["enc"] = f"{round(sum(render_global) / len(render_global), 2)}%"
+            results["compute"] = f"{round(sum(render_global) / len(render_global), 2)}%"
 
         # Decoder: Video engine (fixed-function codec)
         if video_global:

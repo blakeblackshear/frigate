@@ -360,6 +360,11 @@ class CustomCollector(object):
             "GPU encoder utilisation %",
             labels=["gpu_name"],
         )
+        gpu_compute_usages = GaugeMetricFamily(
+            "frigate_gpu_compute_usage_percent",
+            "GPU compute / encode utilisation %",
+            labels=["gpu_name"],
+        )
         gpu_dec_usages = GaugeMetricFamily(
             "frigate_gpu_decoder_usage_percent",
             "GPU decoder utilisation %",
@@ -371,6 +376,9 @@ class CustomCollector(object):
                 self.add_metric(gpu_usages, [gpu_name], gpu_stats, "gpu")
                 self.add_metric(gpu_mem_usages, [gpu_name], gpu_stats, "mem")
                 self.add_metric(gpu_enc_usages, [gpu_name], gpu_stats, "enc")
+                self.add_metric(
+                    gpu_compute_usages, [gpu_name], gpu_stats, "compute"
+                )
                 self.add_metric(gpu_dec_usages, [gpu_name], gpu_stats, "dec")
         except KeyError:
             pass
@@ -378,6 +386,7 @@ class CustomCollector(object):
         yield gpu_usages
         yield gpu_mem_usages
         yield gpu_enc_usages
+        yield gpu_compute_usages
         yield gpu_dec_usages
 
         # service stats

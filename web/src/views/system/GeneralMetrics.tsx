@@ -334,6 +334,43 @@ export default function GeneralMetrics({
     return Object.keys(series).length > 0 ? Object.values(series) : undefined;
   }, [statsHistory]);
 
+  const gpuComputeSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: number; y: string }[] };
+    } = {};
+    let hasValidGpu = false;
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        if (stats.compute) {
+          hasValidGpu = true;
+          series[key].data.push({
+            x: statsIdx + 1,
+            y: stats.compute.slice(0, -1),
+          });
+        }
+      });
+    });
+
+    if (!hasValidGpu) {
+      return [];
+    }
+
+    return Object.keys(series).length > 0 ? Object.values(series) : undefined;
+  }, [statsHistory]);
+
   const gpuDecSeries = useMemo(() => {
     if (!statsHistory) {
       return [];
@@ -742,8 +779,9 @@ export default function GeneralMetrics({
               className={cn(
                 "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
                 gpuTempSeries?.length && "md:grid-cols-3",
-                gpuEncSeries?.length && "xl:grid-cols-4",
-                gpuEncSeries?.length &&
+                (gpuEncSeries?.length || gpuComputeSeries?.length) &&
+                  "xl:grid-cols-4",
+                (gpuEncSeries?.length || gpuComputeSeries?.length) &&
                   gpuTempSeries?.length &&
                   "3xl:grid-cols-5",
               )}
@@ -843,6 +881,30 @@ export default function GeneralMetrics({
                             <ThresholdBarGraph
                               key={series.name}
                               graphId={`${series.name}-enc`}
+                              unit="%"
+                              name={series.name}
+                              threshold={GPUMemThreshold}
+                              updateTimes={updateTimes}
+                              data={[series]}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
+                  {statsHistory.length != 0 ? (
+                    <>
+                      {gpuComputeSeries && gpuComputeSeries?.length != 0 && (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">
+                            {t("general.hardwareInfo.gpuCompute")}
+                          </div>
+                          {gpuComputeSeries.map((series) => (
+                            <ThresholdBarGraph
+                              key={series.name}
+                              graphId={`${series.name}-compute`}
                               unit="%"
                               name={series.name}
                               threshold={GPUMemThreshold}

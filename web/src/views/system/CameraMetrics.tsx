@@ -3,6 +3,7 @@ import { CameraLineGraph } from "@/components/graph/LineGraph";
 import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { ConnectionQualityIndicator } from "@/components/camera/ConnectionQualityIndicator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -43,7 +44,7 @@ export default function CameraMetrics({
     [
       "stats/history",
       {
-        keys: "cpu_usages,cameras,camera_fps,detection_fps,skipped_fps,service",
+        keys: "cpu_usages,gpu_usages,cameras,camera_fps,detection_fps,skipped_fps,service",
       },
     ],
     {
@@ -177,6 +178,64 @@ export default function CameraMetrics({
         series[key]["detect"].data.push({
           x: statsIdx,
           y: stats.cpu_usages[camStats.pid?.toString()]?.cpu,
+        });
+      });
+    });
+    return series;
+  }, [config, getCameraName, statsHistory, t]);
+
+  const cameraGpuSeries = useMemo(() => {
+    if (!statsHistory || statsHistory.length == 0) {
+      return {};
+    }
+
+    // Find GPU entry with per-client data
+    const firstGpu = statsHistory.find((s) => s?.gpu_usages);
+    if (!firstGpu?.gpu_usages) {
+      return {};
+    }
+
+    const gpuWithClients = Object.values(firstGpu.gpu_usages).find(
+      (g) => g.clients,
+    );
+    if (!gpuWithClients) {
+      return {};
+    }
+
+    const series: {
+      [cam: string]: {
+        [key: string]: { name: string; data: { x: number; y: string }[] };
+      };
+    } = {};
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      const gpuClients = Object.values(stats.gpu_usages || {}).find(
+        (g) => g.clients,
+      )?.clients;
+
+      Object.entries(stats.cameras).forEach(([key, camStats]) => {
+        if (!config?.cameras[key].enabled) {
+          return;
+        }
+
+        if (!(key in series)) {
+          const camName = getCameraName(key);
+          series[key] = {};
+          series[key]["gpu"] = {
+            name: t("cameras.label.cameraGpu", { camName: camName }),
+            data: [],
+          };
+        }
+
+        const pid = camStats.ffmpeg_pid?.toString();
+        series[key]["gpu"].data.push({
+          x: statsIdx,
+          y: (gpuClients && pid ? gpuClients[pid] : undefined)
+            ?.slice(0, -1) ?? "0",
         });
       });
     });
@@ -332,7 +391,11 @@ export default function CameraMetrics({
                     </div>
                     <div
                       key={camera.name}
-                      className="grid gap-2 sm:grid-cols-2"
+                      className={cn(
+                        "grid gap-2 sm:grid-cols-2",
+                        Object.keys(cameraGpuSeries).length > 0 &&
+                          "lg:grid-cols-3",
+                      )}
                     >
                       {Object.keys(cameraCpuSeries).includes(camera.name) ? (
                         <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
@@ -349,6 +412,20 @@ export default function CameraMetrics({
                         </div>
                       ) : (
                         <Skeleton className="aspect-video size-full" />
+                      )}
+                      {Object.keys(cameraGpuSeries).includes(camera.name) && (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">GPU</div>
+                          <CameraLineGraph
+                            graphId={`${camera.name}-gpu`}
+                            unit="%"
+                            dataLabels={["gpu"]}
+                            updateTimes={updateTimes}
+                            data={Object.values(
+                              cameraGpuSeries[camera.name] || {},
+                            )}
+                          />
+                        </div>
                       )}
                       {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                         <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
