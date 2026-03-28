@@ -265,14 +265,30 @@ def get_amd_gpu_stats() -> Optional[dict[str, str]]:
 
 
 def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, str]]:
-    """Get stats using intel_gpu_top."""
+    """Get stats using intel_gpu_top.
+
+    Returns overall GPU usage derived from rc6 residency (idle time),
+    plus individual engine breakdowns:
+      - enc: Render/3D engine (compute/shader encoder, used by QSV)
+      - dec: Video engines (fixed-function codec, used by VAAPI)
+    """
 
     def get_stats_manually(output: str) -> dict[str, str]:
         """Find global stats via regex when json fails to parse."""
         reading = "".join(output)
         results: dict[str, str] = {}
 
-        # render is used for qsv
+        # rc6 residency for overall GPU usage
+        rc6_match = re.search(r'"rc6":\{"value":([\d.]+)', reading)
+        if rc6_match:
+            rc6_value = float(rc6_match.group(1))
+            results["gpu"] = f"{round(100.0 - rc6_value, 2)}%"
+        else:
+            results["gpu"] = "-%"
+
+        results["mem"] = "-%"
+
+        # Render/3D is the compute/encode engine
         render = []
         for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[14:])
@@ -280,11 +296,9 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             render.append(float(single))
 
         if render:
-            render_avg = sum(render) / len(render)
-        else:
-            render_avg = 1
+            results["enc"] = f"{round(sum(render) / len(render), 2)}%"
 
-        # video is used for vaapi
+        # Video engines are the fixed-function decode engines
         video = []
         for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[10:])
@@ -292,12 +306,8 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             video.append(float(single))
 
         if video:
-            video_avg = sum(video) / len(video)
-        else:
-            video_avg = 1
+            results["dec"] = f"{round(sum(video) / len(video), 2)}%"
 
-        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
-        results["mem"] = "-%"
         return results
 
     intel_gpu_top_command = [
@@ -336,10 +346,16 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             return get_stats_manually(output)
 
         results: dict[str, str] = {}
+        rc6_values = []
         render = {"global": []}
         video = {"global": []}
 
         for block in data:
+            # rc6 residency: percentage of time GPU is idle
+            rc6 = block.get("rc6", {}).get("value")
+            if rc6 is not None:
+                rc6_values.append(float(rc6))
+
             global_engine = block.get("engines")
 
             if global_engine:
@@ -373,11 +389,22 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
                     if video_frame is not None:
                         video[key].append(float(video_frame))
 
-        if render["global"] and video["global"]:
-            results["gpu"] = (
-                f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
+        # Overall GPU usage from rc6 (idle) residency
+        if rc6_values:
+            rc6_avg = sum(rc6_values) / len(rc6_values)
+            results["gpu"] = f"{round(100.0 - rc6_avg, 2)}%"
+
+        results["mem"] = "-%"
+
+        # Encoder: Render/3D engine (compute/shader encode)
+        if render["global"]:
+            results["enc"] = (
+                f"{round(sum(render['global']) / len(render['global']), 2)}%"
             )
-            results["mem"] = "-%"
+
+        # Decoder: Video engine (fixed-function codec)
+        if video["global"]:
+            results["dec"] = f"{round(sum(video['global']) / len(video['global']), 2)}%"
 
         if len(render.keys()) > 1:
             results["clients"] = {}
