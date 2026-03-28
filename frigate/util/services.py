@@ -347,8 +347,10 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
 
         results: dict[str, str] = {}
         rc6_values = []
-        render = {"global": []}
-        video = {"global": []}
+        render_global = []
+        video_global = []
+        # per-client: {pid: [total_busy_per_sample, ...]}
+        client_usages: dict[str, list[float]] = {}
 
         for block in data:
             # rc6 residency: percentage of time GPU is idle
@@ -363,31 +365,28 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
                 video_frame = global_engine.get("Video/0", {}).get("busy")
 
                 if render_frame is not None:
-                    render["global"].append(float(render_frame))
+                    render_global.append(float(render_frame))
 
                 if video_frame is not None:
-                    video["global"].append(float(video_frame))
+                    video_global.append(float(video_frame))
 
             clients = block.get("clients", {})
 
-            if clients and len(clients):
+            if clients:
                 for client_block in clients.values():
-                    key = client_block["pid"]
+                    pid = client_block["pid"]
 
-                    if render.get(key) is None:
-                        render[key] = []
-                        video[key] = []
+                    if pid not in client_usages:
+                        client_usages[pid] = []
 
-                    client_engine = client_block.get("engine-classes", {})
+                    # Sum all engine-class busy values for this client
+                    total_busy = 0.0
+                    for engine in client_block.get("engine-classes", {}).values():
+                        busy = engine.get("busy")
+                        if busy is not None:
+                            total_busy += float(busy)
 
-                    render_frame = client_engine.get("Render/3D", {}).get("busy")
-                    video_frame = client_engine.get("Video", {}).get("busy")
-
-                    if render_frame is not None:
-                        render[key].append(float(render_frame))
-
-                    if video_frame is not None:
-                        video[key].append(float(video_frame))
+                    client_usages[pid].append(total_busy)
 
         # Overall GPU usage from rc6 (idle) residency
         if rc6_values:
@@ -397,25 +396,22 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
         results["mem"] = "-%"
 
         # Encoder: Render/3D engine (compute/shader encode)
-        if render["global"]:
-            results["enc"] = (
-                f"{round(sum(render['global']) / len(render['global']), 2)}%"
-            )
+        if render_global:
+            results["enc"] = f"{round(sum(render_global) / len(render_global), 2)}%"
 
         # Decoder: Video engine (fixed-function codec)
-        if video["global"]:
-            results["dec"] = f"{round(sum(video['global']) / len(video['global']), 2)}%"
+        if video_global:
+            results["dec"] = f"{round(sum(video_global) / len(video_global), 2)}%"
 
-        if len(render.keys()) > 1:
+        # Per-client GPU usage (sum of all engines per process)
+        if client_usages:
             results["clients"] = {}
 
-            for key in render.keys():
-                if key == "global" or not render[key] or not video[key]:
-                    continue
-
-                results["clients"][key] = (
-                    f"{round(((sum(render[key]) / len(render[key])) + (sum(video[key]) / len(video[key]))) / 2, 2)}%"
-                )
+            for pid, samples in client_usages.items():
+                if samples:
+                    results["clients"][pid] = (
+                        f"{round(sum(samples) / len(samples), 2)}%"
+                    )
 
         return results
 
