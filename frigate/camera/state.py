@@ -54,6 +54,28 @@ class CameraState:
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
 
+        # Minimum object area thresholds for fast-tracking updates to secondary
+        # face/LPR pipelines when using a model without built-in detection.
+        self.face_recognition_min_obj_area: int = 0
+        self.lpr_min_obj_area: int = 0
+
+        if (
+            self.camera_config.face_recognition.enabled
+            and "face" not in config.objects.all_objects
+        ):
+            # A face is roughly 1/8 of person box area; use a conservative
+            # multiplier so fast-tracking starts slightly before the optimal zone
+            self.face_recognition_min_obj_area = (
+                self.camera_config.face_recognition.min_area * 6
+            )
+
+        if (
+            self.camera_config.lpr.enabled
+            and "license_plate" not in self.camera_config.objects.track
+        ):
+            # A plate is a smaller fraction of a vehicle box; use ~20x multiplier
+            self.lpr_min_obj_area = self.camera_config.lpr.min_area * 20
+
     def get_current_frame(self, draw_options: dict[str, Any] = {}) -> np.ndarray:
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
@@ -372,13 +394,29 @@ class CameraState:
 
                 updated_obj.last_updated = frame_time
 
-            # if it has been more than 5 seconds since the last thumb update
-            # and the last update is greater than the last publish or
-            # the object has changed significantly or
-            # the object moved enough to update the path
+            # Determine the staleness threshold for publishing updates.
+            # Fast-track to 1s for objects in the optimal size range for
+            # secondary face/LPR recognition that don't yet have a sub_label.
+            obj_area = updated_obj.obj_data.get("area", 0)
+            has_sub_label = updated_obj.obj_data.get("sub_label") is not None
+            publish_threshold = 5
+
+            if not has_sub_label:
+                obj_label = updated_obj.obj_data.get("label")
+                if (
+                    obj_label == "person"
+                    and self.face_recognition_min_obj_area > 0
+                    and obj_area >= self.face_recognition_min_obj_area
+                ) or (
+                    obj_label in ("car", "motorcycle")
+                    and self.lpr_min_obj_area > 0
+                    and obj_area >= self.lpr_min_obj_area
+                ):
+                    publish_threshold = 1
+
             if (
                 (
-                    frame_time - updated_obj.last_published > 5
+                    frame_time - updated_obj.last_published > publish_threshold
                     and updated_obj.last_updated > updated_obj.last_published
                 )
                 or significant_update
