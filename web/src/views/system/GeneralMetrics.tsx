@@ -76,7 +76,7 @@ export default function GeneralMetrics({
 
     statsHistory.length > 0 &&
       Object.keys(statsHistory[0]?.gpu_usages ?? {}).forEach((key) => {
-        if (key == "amd-vaapi" || key == "intel-vaapi" || key == "intel-qsv") {
+        if (key == "amd-vaapi" || key == "intel-gpu") {
           vaCount += 1;
         }
 
@@ -265,7 +265,7 @@ export default function GeneralMetrics({
 
     if (
       Object.keys(statsHistory?.at(0)?.gpu_usages ?? {}).length == 1 &&
-      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {})[0].includes("intel")
+      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {})[0] === "intel-gpu"
     ) {
       // intel gpu stats do not support memory
       return undefined;
@@ -409,9 +409,7 @@ export default function GeneralMetrics({
     }
 
     const gpuKeys = Object.keys(statsHistory[0]?.gpu_usages ?? {});
-    const hasIntelGpu = gpuKeys.some(
-      (key) => key === "intel-vaapi" || key === "intel-qsv",
-    );
+    const hasIntelGpu = gpuKeys.some((key) => key === "intel-gpu");
 
     if (!hasIntelGpu) {
       return false;
@@ -427,7 +425,7 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.gpu_usages || {}).forEach(([key, gpuStats]) => {
-        if (key === "intel-vaapi" || key === "intel-qsv") {
+        if (key === "intel-gpu") {
           if (gpuStats.gpu) {
             hasDataPoints = true;
             const gpuValue = parseFloat(gpuStats.gpu.slice(0, -1));
