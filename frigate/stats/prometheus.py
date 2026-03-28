@@ -376,9 +376,7 @@ class CustomCollector(object):
                 self.add_metric(gpu_usages, [gpu_name], gpu_stats, "gpu")
                 self.add_metric(gpu_mem_usages, [gpu_name], gpu_stats, "mem")
                 self.add_metric(gpu_enc_usages, [gpu_name], gpu_stats, "enc")
-                self.add_metric(
-                    gpu_compute_usages, [gpu_name], gpu_stats, "compute"
-                )
+                self.add_metric(gpu_compute_usages, [gpu_name], gpu_stats, "compute")
                 self.add_metric(gpu_dec_usages, [gpu_name], gpu_stats, "dec")
         except KeyError:
             pass
