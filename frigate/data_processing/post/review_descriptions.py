@@ -149,10 +149,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     additional_buffer_per_side = (MIN_RECORDING_DURATION - duration) / 2
                     buffer_extension = min(5, additional_buffer_per_side)
 
+                final_data["start_time"] -= buffer_extension
+                final_data["end_time"] += buffer_extension
+
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"] - buffer_extension,
-                    final_data["end_time"] + buffer_extension,
+                    final_data["start_time"],
+                    final_data["end_time"],
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
 
