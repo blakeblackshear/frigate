@@ -123,6 +123,15 @@ def get_detector_temperature(
             if index < len(hailo_device_names):
                 device_name = hailo_device_names[index]
                 return hailo_temps[device_name]
+    elif detector_type == "hailo10h":
+        # Get temperatures for Hailo devices
+        hailo_temps = get_hailo_temps()
+        if hailo_temps:
+            hailo_device_names = sorted(hailo_temps.keys())
+            index = detector_index_by_type.get("hailo10h", 0)
+            if index < len(hailo_device_names):
+                device_name = hailo_device_names[index]
+                return hailo_temps[device_name]
     elif detector_type == "rknn":
         # Rockchip temperatures are handled by the GPU / NPU stats
         # as there are not detector specific temperatures

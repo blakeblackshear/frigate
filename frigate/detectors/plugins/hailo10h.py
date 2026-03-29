@@ -401,10 +401,10 @@ class HailoDetector(DetectionApi):
 
 # ----------------- HailoDetectorConfig Class ----------------- #
 class HailoDetectorConfig(BaseDetectorConfig):
-    """Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware."""
+    """Hailo10H detector using HEF models and the HailoRT SDK for inference on Hailo hardware."""
 
     model_config = ConfigDict(
-        title="Hailo-8/Hailo-8L",
+        title="Hailo-10H",
     )
 
     type: Literal[DETECTOR_KEY]
