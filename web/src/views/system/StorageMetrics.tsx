@@ -10,7 +10,11 @@ import {
 import useSWR from "swr";
 import { CiCircleAlert } from "react-icons/ci";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useFormattedTimestamp, useTimezone } from "@/hooks/use-date-utils";
+import {
+  useFormattedTimestamp,
+  useTimeFormat,
+  useTimezone,
+} from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { useTranslation } from "react-i18next";
 import { TZDate } from "react-day-picker";
@@ -81,7 +85,7 @@ export default function StorageMetrics({
       : null;
   }, [recordingsSummary, timezone]);
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampMonthDayYear.${timeFormat}`, {
       ns: "common",

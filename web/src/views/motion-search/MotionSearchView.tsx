@@ -51,7 +51,7 @@ import {
   RecordingSegment,
 } from "@/types/record";
 import { VideoResolutionType } from "@/types/live";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import MotionSearchROICanvas from "./MotionSearchROICanvas";
 import MotionSearchDialog from "./MotionSearchDialog";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -94,12 +94,13 @@ export default function MotionSearchView({
   ]);
   const navigate = useNavigate();
 
+  const is24Hour = use24HourTime(config);
   const resultTimestampFormat = useMemo(
     () =>
-      config.ui?.time_format === "24hour"
+      is24Hour
         ? t("time.formattedTimestamp.24hour", { ns: "common" })
         : t("time.formattedTimestamp.12hour", { ns: "common" }),
-    [config.ui?.time_format, t],
+    [is24Hour, t],
   );
 
   // Refs

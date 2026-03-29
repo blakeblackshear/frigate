@@ -39,6 +39,7 @@ import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { use24HourTime } from "@/hooks/use-date-utils";
 import { Link } from "react-router-dom";
 import { useTriggers } from "@/api/ws";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
@@ -89,6 +90,7 @@ export default function TriggerView({
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
+  const is24Hour = use24HourTime(config);
   const { data: trigger_status, mutate } = useSWR(
     config?.cameras[selectedCamera]?.semantic_search?.triggers &&
       Object.keys(config.cameras[selectedCamera].semantic_search.triggers)
@@ -581,20 +583,19 @@ export default function TriggerView({
                                           ?.last_triggered,
                                         {
                                           timezone: config.ui.timezone,
-                                          date_format:
-                                            config.ui.time_format == "24hour"
-                                              ? t(
-                                                  "time.formattedTimestamp2.24hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                )
-                                              : t(
-                                                  "time.formattedTimestamp2.12hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                ),
+                                          date_format: is24Hour
+                                            ? t(
+                                                "time.formattedTimestamp2.24hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              )
+                                            : t(
+                                                "time.formattedTimestamp2.12hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              ),
                                           time_style: "medium",
                                           date_style: "medium",
                                         },
@@ -742,20 +743,19 @@ export default function TriggerView({
                                           ?.last_triggered,
                                         {
                                           timezone: config.ui.timezone,
-                                          date_format:
-                                            config.ui.time_format == "24hour"
-                                              ? t(
-                                                  "time.formattedTimestamp2.24hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                )
-                                              : t(
-                                                  "time.formattedTimestamp2.12hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                ),
+                                          date_format: is24Hour
+                                            ? t(
+                                                "time.formattedTimestamp2.24hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              )
+                                            : t(
+                                                "time.formattedTimestamp2.12hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              ),
                                           time_style: "medium",
                                           date_style: "medium",
                                         },

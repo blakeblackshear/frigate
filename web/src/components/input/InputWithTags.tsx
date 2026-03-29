@@ -50,6 +50,7 @@ import {
 import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { use24HourTime } from "@/hooks/use-date-utils";
 import { MdImageSearch } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -80,6 +81,8 @@ export default function InputWithTags({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const is24Hour = use24HourTime(config);
+  const resolvedTimeFormat = is24Hour ? "24hour" : ("12hour" as const);
 
   const allAudioListenLabels = useMemo<Set<string>>(() => {
     if (!config) {
@@ -431,12 +434,8 @@ export default function InputWithTags({
       const [startTime, endTime] = (filterValues as string)
         .replace("-", ",")
         .split(",");
-      return `${
-        config?.ui.time_format === "24hour"
-          ? startTime
-          : convertTo12Hour(startTime)
-      } - ${
-        config?.ui.time_format === "24hour" ? endTime : convertTo12Hour(endTime)
+      return `${is24Hour ? startTime : convertTo12Hour(startTime)} - ${
+        is24Hour ? endTime : convertTo12Hour(endTime)
       }`;
     } else if (filterType === "min_score" || filterType === "max_score") {
       return Math.round(Number(filterValues) * 100).toString() + "%";
@@ -478,7 +477,7 @@ export default function InputWithTags({
         (filterType === "time_range" &&
           isValidTimeRange(
             trimmedValue.replace("-", ","),
-            config?.ui.time_format,
+            resolvedTimeFormat,
           )) ||
         ((filterType === "min_score" || filterType === "max_score") &&
           !isNaN(Number(trimmedValue)) &&
@@ -495,7 +494,7 @@ export default function InputWithTags({
             ? trimmedValue
                 .replace("-", ",")
                 .split(",")
-                .map((time) => to24Hour(time.trim(), config?.ui.time_format))
+                .map((time) => to24Hour(time.trim(), resolvedTimeFormat))
                 .join(",")
             : trimmedValue,
         );
@@ -511,7 +510,7 @@ export default function InputWithTags({
         setCurrentFilterType(null);
       }
     },
-    [allSuggestions, createFilter, config],
+    [allSuggestions, createFilter, resolvedTimeFormat],
   );
 
   const handleInputChange = useCallback(
@@ -598,7 +597,7 @@ export default function InputWithTags({
           suggestion = suggestion
             .replace("-", ",")
             .split(",")
-            .map((time) => to24Hour(time.trim(), config?.ui.time_format))
+            .map((time) => to24Hour(time.trim(), resolvedTimeFormat))
             .join(",");
         }
         createFilter(currentFilterType, suggestion);
@@ -627,7 +626,7 @@ export default function InputWithTags({
 
       inputRef.current?.focus();
     },
-    [createFilter, currentFilterType, allSuggestions, config],
+    [createFilter, currentFilterType, allSuggestions, resolvedTimeFormat],
   );
 
   const handleSearch = useCallback(
@@ -779,10 +778,7 @@ export default function InputWithTags({
                     </li>
                     <li>
                       {t("filter.tips.desc.step5", {
-                        exampleTime:
-                          config?.ui.time_format == "24hour"
-                            ? "15:00-16:00"
-                            : "3:00PM-4:00PM",
+                        exampleTime: is24Hour ? "15:00-16:00" : "3:00PM-4:00PM",
                       })}
                     </li>
                     <li>{t("filter.tips.desc.step6")}</li>

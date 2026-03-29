@@ -8,6 +8,7 @@ import { isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
+import { useTimeFormat } from "@/hooks/use-date-utils";
 
 const GRAPH_COLORS = ["#5C7CFA", "#ED5CFA", "#FAD75C"];
 
@@ -48,7 +49,7 @@ export function CameraLineGraph({
 
   const locale = useDateLocale();
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
       ns: "common",
@@ -203,7 +204,7 @@ export function EventsPerSecondsLineGraph({
   const locale = useDateLocale();
   const { t } = useTranslation(["common"]);
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
       ns: "common",

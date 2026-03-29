@@ -8,6 +8,7 @@ import {
   formatUnixTimestampToDateTime,
   getDurationFromTimestamps,
 } from "@/utils/dateUtil";
+import { use24HourTime } from "@/hooks/use-date-utils";
 import { useTranslation } from "react-i18next";
 import AnnotationOffsetSlider from "@/components/overlay/detail/AnnotationOffsetSlider";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -398,12 +399,12 @@ function ReviewGroup({
     }
   }, [isActive, alwaysExpandActive]);
 
+  const is24Hour = use24HourTime(config);
   const displayTime = formatUnixTimestampToDateTime(start, {
     timezone: config.ui.timezone,
-    date_format:
-      config.ui.time_format == "24hour"
-        ? t("time.formattedTimestampHourMinuteSecond.24hour", { ns: "common" })
-        : t("time.formattedTimestampHourMinuteSecond.12hour", { ns: "common" }),
+    date_format: is24Hour
+      ? t("time.formattedTimestampHourMinuteSecond.24hour", { ns: "common" })
+      : t("time.formattedTimestampHourMinuteSecond.12hour", { ns: "common" }),
     time_style: "medium",
     date_style: "medium",
   });
@@ -787,17 +788,17 @@ function LifecycleItem({
     );
   }, [config, item]);
 
+  const is24Hour = use24HourTime(config);
   const formattedEventTimestamp = config
     ? formatUnixTimestampToDateTime(item?.timestamp ?? 0, {
         timezone: config.ui.timezone,
-        date_format:
-          config.ui.time_format == "24hour"
-            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
-                ns: "common",
-              })
-            : t("time.formattedTimestampHourMinuteSecond.12hour", {
-                ns: "common",
-              }),
+        date_format: is24Hour
+          ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+              ns: "common",
+            })
+          : t("time.formattedTimestampHourMinuteSecond.12hour", {
+              ns: "common",
+            }),
         time_style: "medium",
         date_style: "medium",
       })

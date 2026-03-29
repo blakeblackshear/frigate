@@ -43,8 +43,9 @@ import { TimezoneAwareCalendar } from "@/components/overlay/ReviewActivityCalend
 
 import { useApiHost } from "@/api";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { getUTCOffset } from "@/utils/dateUtil";
+import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import MotionSearchROICanvas from "./MotionSearchROICanvas";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -452,7 +453,6 @@ export default function MotionSearchDialog({
                 range={searchRange}
                 setRange={setSearchRange}
                 defaultRange={defaultRange}
-                timeFormat={config.ui?.time_format}
                 timezone={timezone}
               />
 
@@ -476,7 +476,6 @@ type SearchRangeSelectorProps = {
   range?: TimeRange;
   setRange: React.Dispatch<React.SetStateAction<TimeRange | undefined>>;
   defaultRange: TimeRange;
-  timeFormat?: "browser" | "12hour" | "24hour";
   timezone?: string;
 };
 
@@ -484,7 +483,6 @@ function SearchRangeSelector({
   range,
   setRange,
   defaultRange,
-  timeFormat,
   timezone,
 }: SearchRangeSelectorProps) {
   const { t } = useTranslation(["views/motionSearch", "common"]);
@@ -527,15 +525,18 @@ function SearchRangeSelector({
     return time;
   }, [range, defaultRange, timezoneOffset, localTimeOffset]);
 
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const is24Hour = use24HourTime(config);
+
   const formattedStart = useFormattedTimestamp(
     startTime,
-    timeFormat === "24hour"
+    is24Hour
       ? t("time.formattedTimestamp.24hour", { ns: "common" })
       : t("time.formattedTimestamp.12hour", { ns: "common" }),
   );
   const formattedEnd = useFormattedTimestamp(
     endTime,
-    timeFormat === "24hour"
+    is24Hour
       ? t("time.formattedTimestamp.24hour", { ns: "common" })
       : t("time.formattedTimestamp.12hour", { ns: "common" }),
   );

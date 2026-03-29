@@ -8,6 +8,7 @@ import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
+import { useTimeFormat } from "@/hooks/use-date-utils";
 
 type ThresholdBarGraphProps = {
   graphId: string;
@@ -53,7 +54,7 @@ export function ThresholdBarGraph({
   const locale = useDateLocale();
   const { t } = useTranslation(["common"]);
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
       ns: "common",
