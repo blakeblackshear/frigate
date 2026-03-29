@@ -8,6 +8,8 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
+    InputDTypeEnum,
+    InputTensorEnum,
     ModelTypeEnum,
 )
 from frigate.util.model import (
@@ -59,7 +61,33 @@ class ONNXDetector(DetectionApi):
         if self.onnx_model_type == ModelTypeEnum.yolox:
             self.calculate_grids_strides()
 
+        self._warmup(detector_config)
         logger.info(f"ONNX: {path} loaded")
+
+    def _warmup(self, detector_config: ONNXDetectorConfig) -> None:
+        """Run a warmup inference to front-load one-time compilation costs.
+
+        Some GPU backends have a slow first inference: CUDA may need PTX JIT
+        compilation on newer architectures (e.g. NVIDIA 50-series / Blackwell),
+        and MIGraphX compiles the model graph on first run. Running it here
+        (during detector creation) keeps the watchdog start_time at 0.0 so the
+        process won't be killed.
+        """
+        if detector_config.model.input_tensor == InputTensorEnum.nchw:
+            shape = (1, 3, detector_config.model.height, detector_config.model.width)
+        else:
+            shape = (1, detector_config.model.height, detector_config.model.width, 3)
+
+        if detector_config.model.input_dtype in (
+            InputDTypeEnum.float,
+            InputDTypeEnum.float_denorm,
+        ):
+            dtype = np.float32
+        else:
+            dtype = np.uint8
+
+        logger.info("ONNX: warming up detector (may take a while on first run)...")
+        self.detect_raw(np.zeros(shape, dtype=dtype))
 
     def detect_raw(self, tensor_input: np.ndarray):
         if self.onnx_model_type == ModelTypeEnum.dfine:
