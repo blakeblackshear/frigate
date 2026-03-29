@@ -84,6 +84,18 @@ export function use24HourTime(config: FrigateConfig | undefined) {
   }, [config, localeUses24HourTime]);
 }
 
+/**
+ * Returns the resolved time format key ("24hour" | "12hour") based on config
+ * and browser locale. Use this instead of checking config.ui.time_format directly
+ * to correctly handle the "browser" setting.
+ */
+export function useTimeFormat(
+  config: FrigateConfig | undefined,
+): "24hour" | "12hour" {
+  const is24Hour = use24HourTime(config);
+  return is24Hour ? "24hour" : "12hour";
+}
+
 export function useFormattedHour(
   config: FrigateConfig | undefined,
   time: string, // hour is assumed to be in 24 hour format per the Date object
