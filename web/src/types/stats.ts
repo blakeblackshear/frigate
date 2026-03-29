@@ -60,8 +60,10 @@ export type GpuStats = {
   mem: string;
   enc?: string;
   dec?: string;
+  compute?: string;
   pstate?: string;
   temp?: number;
+  clients?: { [pid: string]: string };
 };
 
 export type NpuStats = {

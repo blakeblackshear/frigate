@@ -261,45 +261,33 @@ async def set_gpu_stats(
             else:
                 stats["jetson-gpu"] = {"gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
-        elif "qsv" in args:
+        elif "qsv" in args or ("vaapi" in args and not is_vaapi_amd_driver()):
             if not config.telemetry.stats.intel_gpu_stats:
                 continue
 
-            # intel QSV GPU
-            intel_usage = get_intel_gpu_stats(config.telemetry.stats.intel_gpu_device)
-
-            if intel_usage is not None:
-                stats["intel-qsv"] = intel_usage or {"gpu": "", "mem": ""}
-            else:
-                stats["intel-qsv"] = {"gpu": "", "mem": ""}
-                hwaccel_errors.append(args)
-        elif "vaapi" in args:
-            if is_vaapi_amd_driver():
-                if not config.telemetry.stats.amd_gpu_stats:
-                    continue
-
-                # AMD VAAPI GPU
-                amd_usage = get_amd_gpu_stats()
-
-                if amd_usage:
-                    stats["amd-vaapi"] = amd_usage
-                else:
-                    stats["amd-vaapi"] = {"gpu": "", "mem": ""}
-                    hwaccel_errors.append(args)
-            else:
-                if not config.telemetry.stats.intel_gpu_stats:
-                    continue
-
-                # intel VAAPI GPU
+            if "intel-gpu" not in stats:
+                # intel GPU (QSV or VAAPI both use the same physical GPU)
                 intel_usage = get_intel_gpu_stats(
                     config.telemetry.stats.intel_gpu_device
                 )
 
                 if intel_usage is not None:
-                    stats["intel-vaapi"] = intel_usage or {"gpu": "", "mem": ""}
+                    stats["intel-gpu"] = intel_usage or {"gpu": "", "mem": ""}
                 else:
-                    stats["intel-vaapi"] = {"gpu": "", "mem": ""}
+                    stats["intel-gpu"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
+        elif "vaapi" in args:
+            if not config.telemetry.stats.amd_gpu_stats:
+                continue
+
+            # AMD VAAPI GPU
+            amd_usage = get_amd_gpu_stats()
+
+            if amd_usage:
+                stats["amd-vaapi"] = amd_usage
+            else:
+                stats["amd-vaapi"] = {"gpu": "", "mem": ""}
+                hwaccel_errors.append(args)
         elif "preset-rk" in args:
             rga_usage = get_rockchip_gpu_stats()
 

@@ -355,16 +355,37 @@ class CustomCollector(object):
         gpu_mem_usages = GaugeMetricFamily(
             "frigate_gpu_mem_usage_percent", "GPU memory usage %", labels=["gpu_name"]
         )
+        gpu_enc_usages = GaugeMetricFamily(
+            "frigate_gpu_encoder_usage_percent",
+            "GPU encoder utilisation %",
+            labels=["gpu_name"],
+        )
+        gpu_compute_usages = GaugeMetricFamily(
+            "frigate_gpu_compute_usage_percent",
+            "GPU compute / encode utilisation %",
+            labels=["gpu_name"],
+        )
+        gpu_dec_usages = GaugeMetricFamily(
+            "frigate_gpu_decoder_usage_percent",
+            "GPU decoder utilisation %",
+            labels=["gpu_name"],
+        )
 
         try:
             for gpu_name, gpu_stats in stats["gpu_usages"].items():
                 self.add_metric(gpu_usages, [gpu_name], gpu_stats, "gpu")
                 self.add_metric(gpu_mem_usages, [gpu_name], gpu_stats, "mem")
+                self.add_metric(gpu_enc_usages, [gpu_name], gpu_stats, "enc")
+                self.add_metric(gpu_compute_usages, [gpu_name], gpu_stats, "compute")
+                self.add_metric(gpu_dec_usages, [gpu_name], gpu_stats, "dec")
         except KeyError:
             pass
 
         yield gpu_usages
         yield gpu_mem_usages
+        yield gpu_enc_usages
+        yield gpu_compute_usages
+        yield gpu_dec_usages
 
         # service stats
         uptime_seconds = GaugeMetricFamily(
