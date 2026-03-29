@@ -27,6 +27,21 @@ const review: SectionConfigOverrides = {
         },
       },
     ],
+    fieldMessages: [
+      {
+        key: "detections-all-non-alert",
+        field: "detections.labels",
+        messageKey: "configMessages.review.allNonAlertDetections",
+        severity: "info",
+        position: "after",
+        condition: (ctx) => {
+          const labels = (
+            ctx.formData?.detections as Record<string, unknown> | undefined
+          )?.labels;
+          return !Array.isArray(labels) || labels.length === 0;
+        },
+      },
+    ],
     fieldDocs: {
       "alerts.labels": "/configuration/review/#alerts-and-detections",
       "detections.labels": "/configuration/review/#alerts-and-detections",
@@ -59,8 +74,6 @@ const review: SectionConfigOverrides = {
           "ui:widget": "reviewLabels",
           "ui:options": {
             suppressMultiSchema: true,
-            emptySelectionHintKey:
-              "configForm.reviewLabels.allNonAlertDetections",
           },
         },
         required_zones: {

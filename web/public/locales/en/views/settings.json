@@ -1433,8 +1433,7 @@
     },
     "reviewLabels": {
       "summary": "{{count}} labels selected",
-      "empty": "No labels available",
-      "allNonAlertDetections": "All non-alert activity will be included as detections."
+      "empty": "No labels available"
     },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"
@@ -1610,7 +1609,8 @@
   "configMessages": {
     "review": {
       "recordDisabled": "Recording is disabled, review items will not be generated.",
-      "detectDisabled": "Object detection is disabled. Review items require detected objects to categorize alerts and detections."
+      "detectDisabled": "Object detection is disabled. Review items require detected objects to categorize alerts and detections.",
+      "allNonAlertDetections": "All non-alert activity will be included as detections."
     },
     "audio": {
       "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."

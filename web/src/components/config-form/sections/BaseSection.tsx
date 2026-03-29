@@ -573,8 +573,16 @@ export function ConfigSection({
     if (activeFieldMessages.length === 0) return sectionConfig.uiSchema;
     const merged = { ...(sectionConfig.uiSchema ?? {}) };
     for (const msg of activeFieldMessages) {
-      const fieldKey = msg.field;
-      const existing = merged[fieldKey] as Record<string, unknown> | undefined;
+      const segments = msg.field.split(".");
+      // Navigate to the nested uiSchema node, shallow-cloning along the way
+      let node = merged;
+      for (let i = 0; i < segments.length - 1; i++) {
+        const seg = segments[i];
+        node[seg] = { ...(node[seg] as Record<string, unknown>) };
+        node = node[seg] as Record<string, unknown>;
+      }
+      const leafKey = segments[segments.length - 1];
+      const existing = node[leafKey] as Record<string, unknown> | undefined;
       const existingMessages = ((existing?.["ui:messages"] as unknown[]) ??
         []) as Array<{
         key: string;
@@ -582,7 +590,7 @@ export function ConfigSection({
         severity: string;
         position?: string;
       }>;
-      merged[fieldKey] = {
+      node[leafKey] = {
         ...existing,
         "ui:messages": [
           ...existingMessages,
