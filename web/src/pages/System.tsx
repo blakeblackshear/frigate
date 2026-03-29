@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -49,7 +49,17 @@ function System() {
     setPage,
     100,
   );
-  const [lastUpdated, setLastUpdated] = useState<number>(Date.now() / 1000);
+  const [lastUpdated, setLastUpdated] = useState<number>(
+    Math.floor(Date.now() / 1000),
+  );
+
+  // Track which tabs have been visited so we can keep them mounted after first visit.
+  // Using a ref updated during render avoids extra render cycles from state/effects.
+  const visitedTabsRef = useRef(new Set<string>());
+  if (page) {
+    visitedTabsRef.current.add(page);
+  }
+  const visitedTabs = visitedTabsRef.current;
 
   useEffect(() => {
     if (pageToggle) {
@@ -116,24 +126,37 @@ function System() {
           </div>
         )}
       </div>
-      {page == "general" && (
-        <GeneralMetrics
-          lastUpdated={lastUpdated}
-          setLastUpdated={setLastUpdated}
-        />
+      {visitedTabs.has("general") && (
+        <div className={page == "general" ? "contents" : "hidden"}>
+          <GeneralMetrics
+            lastUpdated={lastUpdated}
+            setLastUpdated={setLastUpdated}
+            isActive={page == "general"}
+          />
+        </div>
       )}
-      {page == "enrichments" && (
-        <EnrichmentMetrics
-          lastUpdated={lastUpdated}
-          setLastUpdated={setLastUpdated}
-        />
+      {metrics.includes("enrichments") && visitedTabs.has("enrichments") && (
+        <div className={page == "enrichments" ? "contents" : "hidden"}>
+          <EnrichmentMetrics
+            lastUpdated={lastUpdated}
+            setLastUpdated={setLastUpdated}
+            isActive={page == "enrichments"}
+          />
+        </div>
       )}
-      {page == "storage" && <StorageMetrics setLastUpdated={setLastUpdated} />}
-      {page == "cameras" && (
-        <CameraMetrics
-          lastUpdated={lastUpdated}
-          setLastUpdated={setLastUpdated}
-        />
+      {visitedTabs.has("storage") && (
+        <div className={page == "storage" ? "contents" : "hidden"}>
+          <StorageMetrics setLastUpdated={setLastUpdated} />
+        </div>
+      )}
+      {visitedTabs.has("cameras") && (
+        <div className={page == "cameras" ? "contents" : "hidden"}>
+          <CameraMetrics
+            lastUpdated={lastUpdated}
+            setLastUpdated={setLastUpdated}
+            isActive={page == "cameras"}
+          />
+        </div>
       )}
     </div>
   );
