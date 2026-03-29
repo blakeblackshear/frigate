@@ -61,6 +61,7 @@ class TrackedObject:
         self.zone_loitering: dict[str, int] = {}
         self.current_zones: list[str] = []
         self.entered_zones: list[str] = []
+        self.new_zone_entered: bool = False
         self.attributes: dict[str, float] = defaultdict(float)
         self.false_positive = True
         self.has_clip = False
@@ -278,6 +279,7 @@ class TrackedObject:
 
                             if name not in self.entered_zones:
                                 self.entered_zones.append(name)
+                                self.new_zone_entered = True
                         else:
                             self.zone_loitering[name] = loitering_score
 
