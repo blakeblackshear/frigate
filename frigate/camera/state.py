@@ -389,6 +389,18 @@ class CameraState:
                     c(self.name, updated_obj, frame_name)
                 updated_obj.last_published = frame_time
 
+            # send MQTT snapshot when object first enters a required zone,
+            # since the initial snapshot at creation time is blocked before
+            # zone evaluation has run
+            if updated_obj.new_zone_entered and not updated_obj.false_positive:
+                mqtt_required = self.camera_config.mqtt.required_zones
+                if mqtt_required and set(updated_obj.entered_zones) & set(
+                    mqtt_required
+                ):
+                    object_type = updated_obj.obj_data["label"]
+                    self.send_mqtt_snapshot(updated_obj, object_type)
+                updated_obj.new_zone_entered = False
+
         for id in removed_ids:
             # publish events to mqtt
             removed_obj = tracked_objects[id]
