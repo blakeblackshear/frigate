@@ -15,6 +15,17 @@ const review: SectionConfigOverrides = {
           return ctx.fullConfig.record?.enabled === false;
         },
       },
+      {
+        key: "detect-disabled",
+        messageKey: "configMessages.review.detectDisabled",
+        severity: "info",
+        condition: (ctx) => {
+          if (ctx.level === "camera" && ctx.fullCameraConfig) {
+            return ctx.fullCameraConfig.detect?.enabled === false;
+          }
+          return false;
+        },
+      },
     ],
     fieldDocs: {
       "alerts.labels": "/configuration/review/#alerts-and-detections",

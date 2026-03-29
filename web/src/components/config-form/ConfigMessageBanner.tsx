@@ -36,12 +36,12 @@ export function ConfigMessageBanner({ messages }: ConfigMessageBannerProps) {
   if (messages.length === 0) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="max-w-5xl space-y-2">
       {messages.map((msg) => (
         <Alert
           key={msg.key}
           variant={severityVariantMap[msg.severity]}
-          className="flex items-center [&>svg]:static [&>svg~*]:pl-2 [&>svg+div]:translate-y-0"
+          className="flex items-center [&>svg+div]:translate-y-0 [&>svg]:static [&>svg~*]:pl-2"
         >
           <SeverityIcon severity={msg.severity} />
           <AlertDescription>{t(msg.messageKey)}</AlertDescription>
