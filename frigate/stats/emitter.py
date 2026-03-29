@@ -94,9 +94,14 @@ class StatsEmitter(threading.Thread):
                 first_value = next(iter(parent.values()), None)
 
                 if isinstance(first_value, dict):
-                    # Filter each nested entry to only requested fields
+                    # Filter each nested entry to only requested fields,
+                    # omitting None values to preserve key-absence semantics
                     selected[parent_key] = {
-                        entry_key: {field: entry.get(field) for field in child_keys}
+                        entry_key: {
+                            field: val
+                            for field in child_keys
+                            if (val := entry.get(field)) is not None
+                        }
                         for entry_key, entry in parent.items()
                     }
                 else:
