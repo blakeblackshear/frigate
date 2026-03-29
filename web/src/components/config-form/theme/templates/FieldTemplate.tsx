@@ -28,6 +28,7 @@ import {
 } from "../utils";
 import { normalizeOverridePath } from "../utils/overrides";
 import get from "lodash/get";
+import { ConfigFieldMessage } from "../../ConfigFieldMessage";
 import isEqual from "lodash/isEqual";
 import { SPLIT_ROW_CLASS_NAME } from "@/components/card/SettingsGroupCard";
 
@@ -382,6 +383,46 @@ export function FieldTemplate(props: FieldTemplateProps) {
 
   const beforeContent = renderCustom(beforeSpec);
   const afterContent = renderCustom(afterSpec);
+
+  // Render conditional field messages from ui:messages
+  const fieldMessageSpecs = uiSchema?.["ui:messages"] as
+    | Array<{
+        key: string;
+        messageKey: string;
+        severity: string;
+        position?: string;
+      }>
+    | undefined;
+  const beforeMessages = fieldMessageSpecs?.filter(
+    (m) => (m.position ?? "before") === "before",
+  );
+  const afterMessages = fieldMessageSpecs?.filter(
+    (m) => m.position === "after",
+  );
+  const beforeMessagesContent =
+    beforeMessages && beforeMessages.length > 0 ? (
+      <div className="space-y-2">
+        {beforeMessages.map((m) => (
+          <ConfigFieldMessage
+            key={m.key}
+            messageKey={m.messageKey}
+            severity={m.severity}
+          />
+        ))}
+      </div>
+    ) : null;
+  const afterMessagesContent =
+    afterMessages && afterMessages.length > 0 ? (
+      <div className="space-y-2">
+        {afterMessages.map((m) => (
+          <ConfigFieldMessage
+            key={m.key}
+            messageKey={m.messageKey}
+            severity={m.severity}
+          />
+        ))}
+      </div>
+    ) : null;
   const WrapIfAdditionalTemplate = getTemplate(
     "WrapIfAdditionalTemplate",
     registry,
@@ -600,6 +641,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     >
       <div className="flex flex-col space-y-6">
         {beforeContent}
+        {beforeMessagesContent}
         <div className={cn("space-y-1")} data-field-id={translationPath}>
           {renderStandardLabel()}
           {renderFieldLayout()}
@@ -607,6 +649,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
           {errors}
           {help}
         </div>
+        {afterMessagesContent}
         {afterContent}
       </div>
     </WrapIfAdditionalTemplate>

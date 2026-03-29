@@ -71,6 +71,13 @@ import {
 } from "@/utils/configUtil";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useRestart } from "@/api/ws";
+import type {
+  ConditionalMessage,
+  FieldConditionalMessage,
+  MessageConditionContext,
+} from "../section-configs/types";
+import { useConfigMessages } from "@/hooks/use-config-messages";
+import { ConfigMessageBanner } from "../ConfigMessageBanner";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -100,6 +107,10 @@ export interface SectionConfig {
     formData: unknown,
     errors: FormValidation,
   ) => FormValidation;
+  /** Conditional messages displayed as banners above the section form */
+  messages?: ConditionalMessage[];
+  /** Conditional messages displayed inline with specific fields */
+  fieldMessages?: FieldConditionalMessage[];
 }
 
 export interface BaseSectionProps {
@@ -536,6 +547,65 @@ export function ConfigSection({
   const currentFormData = pendingData || formData;
   const effectiveBaselineFormData = baselineSnapshot;
 
+  // Build context for conditional messages
+  const messageContext = useMemo<MessageConditionContext | undefined>(() => {
+    if (!config || !currentFormData) return undefined;
+    return {
+      fullConfig: config,
+      fullCameraConfig:
+        effectiveLevel === "camera" && cameraName
+          ? config.cameras?.[cameraName]
+          : undefined,
+      level: effectiveLevel,
+      cameraName,
+      formData: currentFormData as ConfigSectionData,
+    };
+  }, [config, currentFormData, effectiveLevel, cameraName]);
+
+  const { activeMessages, activeFieldMessages } = useConfigMessages(
+    sectionConfig.messages,
+    sectionConfig.fieldMessages,
+    messageContext,
+  );
+
+  // Merge field-level conditional messages into uiSchema
+  const effectiveUiSchema = useMemo(() => {
+    if (activeFieldMessages.length === 0) return sectionConfig.uiSchema;
+    const merged = { ...(sectionConfig.uiSchema ?? {}) };
+    for (const msg of activeFieldMessages) {
+      const segments = msg.field.split(".");
+      // Navigate to the nested uiSchema node, shallow-cloning along the way
+      let node = merged;
+      for (let i = 0; i < segments.length - 1; i++) {
+        const seg = segments[i];
+        node[seg] = { ...(node[seg] as Record<string, unknown>) };
+        node = node[seg] as Record<string, unknown>;
+      }
+      const leafKey = segments[segments.length - 1];
+      const existing = node[leafKey] as Record<string, unknown> | undefined;
+      const existingMessages = ((existing?.["ui:messages"] as unknown[]) ??
+        []) as Array<{
+        key: string;
+        messageKey: string;
+        severity: string;
+        position?: string;
+      }>;
+      node[leafKey] = {
+        ...existing,
+        "ui:messages": [
+          ...existingMessages,
+          {
+            key: msg.key,
+            messageKey: msg.messageKey,
+            severity: msg.severity,
+            position: msg.position ?? "before",
+          },
+        ],
+      };
+    }
+    return merged;
+  }, [sectionConfig.uiSchema, activeFieldMessages]);
+
   const currentOverrides = useMemo(() => {
     if (!currentFormData || typeof currentFormData !== "object") {
       return undefined;
@@ -874,6 +944,7 @@ export function ConfigSection({
 
   const sectionContent = (
     <div className="space-y-6">
+      <ConfigMessageBanner messages={activeMessages} />
       <ConfigForm
         key={formKey}
         schema={modifiedSchema}
@@ -885,7 +956,7 @@ export function ConfigSection({
         hiddenFields={effectiveHiddenFields}
         advancedFields={sectionConfig.advancedFields}
         liveValidate={sectionConfig.liveValidate}
-        uiSchema={sectionConfig.uiSchema}
+        uiSchema={effectiveUiSchema}
         disabled={disabled || isSaving}
         readonly={readonly}
         showSubmit={false}

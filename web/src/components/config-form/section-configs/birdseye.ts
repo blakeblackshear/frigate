@@ -3,6 +3,20 @@ import type { SectionConfigOverrides } from "./types";
 const birdseye: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/birdseye",
+    messages: [
+      {
+        key: "objects-mode-detect-disabled",
+        messageKey: "configMessages.birdseye.objectsModeDetectDisabled",
+        severity: "info",
+        condition: (ctx) => {
+          if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
+          return (
+            ctx.formData?.mode === "objects" &&
+            ctx.fullCameraConfig.detect?.enabled === false
+          );
+        },
+      },
+    ],
     restartRequired: [],
     fieldOrder: ["enabled", "mode", "order"],
     hiddenFields: [],

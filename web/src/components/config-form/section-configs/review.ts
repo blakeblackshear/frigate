@@ -3,6 +3,45 @@ import type { SectionConfigOverrides } from "./types";
 const review: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/review",
+    messages: [
+      {
+        key: "record-disabled",
+        messageKey: "configMessages.review.recordDisabled",
+        severity: "warning",
+        condition: (ctx) => {
+          if (ctx.level === "camera" && ctx.fullCameraConfig) {
+            return ctx.fullCameraConfig.record.enabled === false;
+          }
+          return ctx.fullConfig.record?.enabled === false;
+        },
+      },
+      {
+        key: "detect-disabled",
+        messageKey: "configMessages.review.detectDisabled",
+        severity: "info",
+        condition: (ctx) => {
+          if (ctx.level === "camera" && ctx.fullCameraConfig) {
+            return ctx.fullCameraConfig.detect?.enabled === false;
+          }
+          return false;
+        },
+      },
+    ],
+    fieldMessages: [
+      {
+        key: "detections-all-non-alert",
+        field: "detections.labels",
+        messageKey: "configMessages.review.allNonAlertDetections",
+        severity: "info",
+        position: "after",
+        condition: (ctx) => {
+          const labels = (
+            ctx.formData?.detections as Record<string, unknown> | undefined
+          )?.labels;
+          return !Array.isArray(labels) || labels.length === 0;
+        },
+      },
+    ],
     fieldDocs: {
       "alerts.labels": "/configuration/review/#alerts-and-detections",
       "detections.labels": "/configuration/review/#alerts-and-detections",
@@ -35,8 +74,6 @@ const review: SectionConfigOverrides = {
           "ui:widget": "reviewLabels",
           "ui:options": {
             suppressMultiSchema: true,
-            emptySelectionHintKey:
-              "configForm.reviewLabels.allNonAlertDetections",
           },
         },
         required_zones: {

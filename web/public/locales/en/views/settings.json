@@ -1433,8 +1433,7 @@
     },
     "reviewLabels": {
       "summary": "{{count}} labels selected",
-      "empty": "No labels available",
-      "allNonAlertDetections": "All non-alert activity will be included as detections."
+      "empty": "No labels available"
     },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"
@@ -1606,5 +1605,38 @@
   "onvif": {
     "profileAuto": "Auto",
     "profileLoading": "Loading profiles..."
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "Recording is disabled, review items will not be generated.",
+      "detectDisabled": "Object detection is disabled. Review items require detected objects to categorize alerts and detections.",
+      "allNonAlertDetections": "All non-alert activity will be included as detections."
+    },
+    "audio": {
+      "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in global settings for camera-level face recognition to function.",
+      "personNotTracked": "Face recognition requires the 'person' object to be tracked. Ensure 'person' is in the object tracking list."
+    },
+    "lpr": {
+      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in global settings for camera-level LPR to function.",
+      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked."
+    },
+    "record": {
+      "noRecordRole": "No streams have the record role defined. Recording will not function."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye is set to 'objects' mode, but object detection is disabled for this camera. The camera will not appear in Birdseye."
+    },
+    "snapshots": {
+      "detectDisabled": "Object detection is disabled. Snapshots are generated from tracked objects and will not be created."
+    }
   }
 }
