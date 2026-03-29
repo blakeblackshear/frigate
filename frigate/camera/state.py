@@ -398,21 +398,22 @@ class CameraState:
             # Fast-track to 1s for objects in the optimal size range for
             # secondary face/LPR recognition that don't yet have a sub_label.
             obj_area = updated_obj.obj_data.get("area", 0)
-            has_sub_label = updated_obj.obj_data.get("sub_label") is not None
+            obj_label = updated_obj.obj_data.get("label")
             publish_threshold = 5
 
-            if not has_sub_label:
-                obj_label = updated_obj.obj_data.get("label")
-                if (
-                    obj_label == "person"
-                    and self.face_recognition_min_obj_area > 0
-                    and obj_area >= self.face_recognition_min_obj_area
-                ) or (
-                    obj_label in ("car", "motorcycle")
-                    and self.lpr_min_obj_area > 0
-                    and obj_area >= self.lpr_min_obj_area
-                ):
-                    publish_threshold = 1
+            if (
+                obj_label == "person"
+                and self.face_recognition_min_obj_area > 0
+                and obj_area >= self.face_recognition_min_obj_area
+                and updated_obj.obj_data.get("sub_label") is None
+            ) or (
+                obj_label in ("car", "motorcycle")
+                and self.lpr_min_obj_area > 0
+                and obj_area >= self.lpr_min_obj_area
+                and updated_obj.obj_data.get("sub_label") is None
+                and updated_obj.obj_data.get("recognized_license_plate") is None
+            ):
+                publish_threshold = 1
 
             if (
                 (
