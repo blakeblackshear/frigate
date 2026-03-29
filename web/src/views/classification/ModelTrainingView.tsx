@@ -601,7 +601,9 @@ function LibrarySelector({
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [renameClass, setRenameClass] = useState<string | null>(null);
   const pageTitle = useMemo(() => {
-    if (pageToggle != "train") {
+    if (pageToggle == "none") {
+      return t("details.none");
+    } else if (pageToggle != "train") {
       return pageToggle;
     }
 
