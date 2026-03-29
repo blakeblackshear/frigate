@@ -498,4 +498,30 @@ def stats_snapshot(
             "pid": pid,
         }
 
+    # Embed cpu/mem stats into detectors, cameras, and processes
+    # so history consumers don't need the full cpu_usages dict
+    cpu_usages = stats.get("cpu_usages", {})
+
+    for det_stats in stats["detectors"].values():
+        pid_str = str(det_stats.get("pid", ""))
+        usage = cpu_usages.get(pid_str, {})
+        det_stats["cpu"] = usage.get("cpu")
+        det_stats["mem"] = usage.get("mem")
+
+    for cam_stats in stats["cameras"].values():
+        for pid_key, field in [
+            ("ffmpeg_pid", "ffmpeg_cpu"),
+            ("capture_pid", "capture_cpu"),
+            ("pid", "detect_cpu"),
+        ]:
+            pid_str = str(cam_stats.get(pid_key, ""))
+            usage = cpu_usages.get(pid_str, {})
+            cam_stats[field] = usage.get("cpu")
+
+    for proc_stats in stats["processes"].values():
+        pid_str = str(proc_stats.get("pid", ""))
+        usage = cpu_usages.get(pid_str, {})
+        proc_stats["cpu"] = usage.get("cpu")
+        proc_stats["mem"] = usage.get("mem")
+
     return stats

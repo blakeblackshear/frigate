@@ -3,7 +3,7 @@ import { useDateLocale } from "@/hooks/use-date-locale";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ type ThresholdBarGraphProps = {
   threshold: Threshold;
   updateTimes: number[];
   data: ApexAxisChartSeries;
+  isActive?: boolean;
 };
 export function ThresholdBarGraph({
   graphId,
@@ -24,6 +25,7 @@ export function ThresholdBarGraph({
   threshold,
   updateTimes,
   data,
+  isActive = true,
 }: ThresholdBarGraphProps) {
   const displayName = name || data[0]?.name || "";
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -173,16 +175,28 @@ export function ThresholdBarGraph({
       return data;
     }
 
-    const copiedData = [...data];
+    const dataPointCount = data[0].data.length;
     const fakeData = [];
-    for (let i = data.length; i < 30; i++) {
+    for (let i = dataPointCount; i < 30; i++) {
       fakeData.push({ x: i - 30, y: 0 });
     }
 
-    // @ts-expect-error data types are not obvious
-    copiedData[0].data = [...fakeData, ...data[0].data];
-    return copiedData;
+    const paddedFirst = {
+      ...data[0],
+      data: [...fakeData, ...data[0].data],
+    };
+    return [paddedFirst, ...data.slice(1)] as ApexAxisChartSeries;
   }, [data]);
+
+  const hasBeenActive = useRef(isActive);
+  useEffect(() => {
+    if (isActive && hasBeenActive.current === false) {
+      ApexCharts.exec(graphId, "updateSeries", chartData, true);
+    }
+    hasBeenActive.current = isActive;
+    // only replay animation on visibility change, not data updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, graphId]);
 
   return (
     <div className="flex w-full flex-col">
