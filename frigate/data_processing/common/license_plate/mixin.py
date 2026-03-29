@@ -1095,7 +1095,7 @@ class LicensePlateProcessingMixin:
             logger.debug(
                 f"{camera}: Found license plate. Bounding box: {expanded_box.astype(int)}"
             )
-            return tuple(expanded_box.astype(int))  # type: ignore[return-value]
+            return tuple(int(x) for x in expanded_box)  # type: ignore[return-value]
         else:
             return None  # No detection above the threshold
 
