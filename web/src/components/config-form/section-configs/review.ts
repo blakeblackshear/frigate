@@ -3,6 +3,19 @@ import type { SectionConfigOverrides } from "./types";
 const review: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/review",
+    messages: [
+      {
+        key: "record-disabled",
+        messageKey: "configMessages.review.recordDisabled",
+        severity: "warning",
+        condition: (ctx) => {
+          if (ctx.level === "camera" && ctx.fullCameraConfig) {
+            return ctx.fullCameraConfig.record.enabled === false;
+          }
+          return ctx.fullConfig.record?.enabled === false;
+        },
+      },
+    ],
     fieldDocs: {
       "alerts.labels": "/configuration/review/#alerts-and-detections",
       "detections.labels": "/configuration/review/#alerts-and-detections",

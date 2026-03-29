@@ -1606,5 +1606,16 @@
   "onvif": {
     "profileAuto": "Auto",
     "profileLoading": "Loading profiles..."
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "Recording is disabled, review items will not be generated."
+    },
+    "audio": {
+      "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended."
+    }
   }
 }
