@@ -28,6 +28,9 @@ export type CameraStats = {
   expected_fps: number;
   reconnects_last_hour: number;
   stalls_last_hour: number;
+  ffmpeg_cpu?: string;
+  capture_cpu?: string;
+  detect_cpu?: string;
 };
 
 export type CpuStats = {
@@ -42,6 +45,8 @@ export type DetectorStats = {
   inference_speed: number;
   pid: number;
   temperature?: number;
+  cpu?: string;
+  mem?: string;
 };
 
 export type EmbeddingsStats = {
@@ -53,6 +58,8 @@ export type EmbeddingsStats = {
 
 export type ExtraProcessStats = {
   pid: number;
+  cpu?: string;
+  mem?: string;
 };
 
 export type GpuStats = {
