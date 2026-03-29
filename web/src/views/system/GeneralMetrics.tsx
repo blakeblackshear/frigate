@@ -934,6 +934,7 @@ export default function GeneralMetrics({
                               threshold={GPUMemThreshold}
                               updateTimes={updateTimes}
                               data={[series]}
+                              isActive={isActive}
                             />
                           ))}
                         </div>
