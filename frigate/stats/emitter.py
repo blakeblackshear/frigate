@@ -52,17 +52,62 @@ class StatsEmitter(threading.Thread):
     def get_stats_history(
         self, keys: Optional[list[str]] = None
     ) -> list[dict[str, Any]]:
-        """Get stats history."""
+        """Get stats history.
+
+        Supports dot-notation for nested keys to avoid returning large objects
+        when only specific subfields are needed. Handles two patterns:
+
+        - Flat dict: "service.last_updated" returns {"service": {"last_updated": ...}}
+        - Dict-of-dicts: "cameras.camera_fps" returns each camera entry filtered
+          to only include "camera_fps"
+        """
         if not keys:
             return self.stats_history
+
+        # Pre-parse keys into top-level keys and dot-notation fields
+        top_level_keys: list[str] = []
+        nested_keys: dict[str, list[str]] = {}
+
+        for k in keys:
+            if "." in k:
+                parent_key, child_key = k.split(".", 1)
+                nested_keys.setdefault(parent_key, []).append(child_key)
+            else:
+                top_level_keys.append(k)
 
         selected_stats: list[dict[str, Any]] = []
 
         for s in self.stats_history:
-            selected = {}
+            selected: dict[str, Any] = {}
 
-            for k in keys:
+            for k in top_level_keys:
                 selected[k] = s.get(k)
+
+            for parent_key, child_keys in nested_keys.items():
+                parent = s.get(parent_key)
+
+                if not isinstance(parent, dict):
+                    selected[parent_key] = parent
+                    continue
+
+                # Check if values are dicts (dict-of-dicts like cameras/detectors)
+                first_value = next(iter(parent.values()), None)
+
+                if isinstance(first_value, dict):
+                    # Filter each nested entry to only requested fields
+                    selected[parent_key] = {
+                        entry_key: {
+                            field: entry.get(field) for field in child_keys
+                        }
+                        for entry_key, entry in parent.items()
+                    }
+                else:
+                    # Flat dict (like service) - pick individual fields
+                    if parent_key not in selected:
+                        selected[parent_key] = {}
+
+                    for child_key in child_keys:
+                        selected[parent_key][child_key] = parent.get(child_key)
 
             selected_stats.append(selected)
 
