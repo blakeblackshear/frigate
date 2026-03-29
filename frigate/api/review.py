@@ -40,6 +40,11 @@ from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
+# Pre-computed constants for resolution-independent datetime-to-epoch conversion
+# (pandas 3.0+ stores datetime64 as microseconds, not nanoseconds)
+_EPOCH = pd.Timestamp("1970-01-01")
+_ONE_SECOND = pd.Timedelta("1s")
+
 router = APIRouter(tags=[Tags.review])
 
 
@@ -659,7 +664,7 @@ def motion_activity(
             df.iloc[i : i + chunk, 0] = 0.0
 
     # change types for output
-    df.index = df.index.astype(int) // (10**9)
+    df.index = (df.index - _EPOCH) // _ONE_SECOND
     normalized = df.reset_index().to_dict("records")
     return JSONResponse(content=normalized)
 
