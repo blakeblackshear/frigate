@@ -2,7 +2,7 @@ import { isDesktop, isIOS, isMobile, isSafari } from "react-device-detect";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
@@ -769,9 +769,10 @@ function ObjectDetailsTab({
     setShowNavigationButtons,
   ]);
 
+  const is24Hour = use24HourTime(config);
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestampMonthDayYearHourMinute.24hour", {
           ns: "common",
         })

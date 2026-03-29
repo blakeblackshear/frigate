@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { SelectSeparator } from "../ui/select";
 import { TimeRange } from "@/types/timeline";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { getUTCOffset } from "@/utils/dateUtil";
 import { TimezoneAwareCalendar } from "./ReviewActivityCalendar";
 import { FaArrowRight, FaCalendarAlt } from "react-icons/fa";
@@ -69,16 +69,18 @@ export function CustomTimeSelector({
     return time;
   }, [range, latestTime, timezoneOffset, localTimeOffset]);
 
+  const is24Hour = use24HourTime(config);
+
   const formattedStart = useFormattedTimestamp(
     startTime,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestamp.24hour")
       : t("time.formattedTimestamp.12hour"),
   );
 
   const formattedEnd = useFormattedTimestamp(
     endTime,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestamp.24hour")
       : t("time.formattedTimestamp.12hour"),
   );

@@ -19,7 +19,7 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import { Skeleton } from "@/components/ui/skeleton";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import TimeAgo from "@/components/dynamic/TimeAgo";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 
 const MOTION_HEATMAP_GRID_SIZE = 16;
@@ -165,9 +165,10 @@ function MotionPreviewClip({
   const [fallbackFrameIndex, setFallbackFrameIndex] = useState(0);
   const [fallbackFramesReady, setFallbackFramesReady] = useState(false);
 
+  const is24Hour = use24HourTime(config);
   const formattedDate = useFormattedTimestamp(
     range.start_time,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestampMonthDayHourMinute.24hour", {
           ns: "common",
         })
