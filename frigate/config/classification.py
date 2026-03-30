@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, field_validator
 
 from .base import FrigateBaseModel
 
@@ -178,6 +178,16 @@ class SemanticSearchConfig(FrigateBaseModel):
         title="Semantic search model or GenAI provider name",
         description="The embeddings model to use for semantic search (for example 'jinav1'), or the name of a GenAI provider with the embeddings role.",
     )
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def coerce_model_enum(cls, v):
+        if isinstance(v, str):
+            try:
+                return SemanticSearchModelEnum(v)
+            except ValueError:
+                return v
+        return v
     model_size: str = Field(
         default="small",
         title="Model size",
