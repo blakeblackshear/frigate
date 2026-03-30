@@ -92,13 +92,13 @@ Fine-tune the LPR feature using these optional parameters. The only optional par
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
 
 - Set **Enable LPR** to on
-- Set **Detection threshold** to `0.7`
-- Set **Minimum plate area** to `1000`
-- Set **Device** to `CPU`
-- Set **Model size** to `small`
+- Set **Detection threshold** to `0.7` — minimum confidence for the plate detector to consider a region as a license plate
+- Set **Minimum plate area** to `1000` — ignore plates smaller than 1000 pixels (length x width)
+- Set **Device** to `CPU` — device to run the plate detection model on (can also be `GPU`)
+- Set **Model size** to `small` — most users should use `small`
 
 </TabItem>
 <TabItem value="yaml">
@@ -120,12 +120,12 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
 
 - Set **Enable LPR** to on
-- Set **Recognition threshold** to `0.9`
-- Set **Min plate length** to `4`
-- Set **Plate format regex** to `^[A-Z]{2}[0-9]{2} [A-Z]{3}$`
+- Set **Recognition threshold** to `0.9` — minimum confidence for recognized text to be accepted as a valid plate
+- Set **Min plate length** to `4` — only accept plates with 4 or more characters
+- Set **Plate format regex** to `^[A-Z]{2}[0-9]{2} [A-Z]{3}$` — only accept plates matching this format (e.g., UK-style plates)
 
 </TabItem>
 <TabItem value="yaml">
@@ -146,12 +146,12 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
 
 - Set **Enable LPR** to on
-- Set **Match distance** to `1`
-- Set **Known plates > Wife'S Car** to `ABC-1234`
-- Set **Known plates > Johnny** to `J*N-*234`
+- Set **Match distance** to `1` — allow up to 1 character mismatch when comparing detected plates to known plates
+- Set **Known plates > Wife'S Car** to `ABC-1234` — exact plate number for this vehicle
+- Set **Known plates > Johnny** to `J*N-*234` — wildcard pattern matching multiple plate variations
 
 </TabItem>
 <TabItem value="yaml">
@@ -175,10 +175,10 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
 
 - Set **Enable LPR** to on
-- Set **Enhancement level** to `5`
+- Set **Enhancement level** to `1` — applies image enhancement (0-10) to plate crops before OCR to improve character recognition
 
 </TabItem>
 <TabItem value="yaml">
@@ -186,13 +186,13 @@ Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /
 ```yaml
 lpr:
   enabled: True
-  enhancement: 5
+  enhancement: 1
 ```
 
 </TabItem>
 </ConfigTabs>
 
-If Frigate is already recognizing plates correctly, leave enhancement at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at 5 and adjusting as needed. Use the `debug_save_plates` configuration option (see below) to see how different enhancement levels affect your plates.
+If Frigate is already recognizing plates correctly, leave enhancement at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at 3 and adjusting as needed. Use the `debug_save_plates` configuration option (see below) to see how different enhancement levels affect your plates.
 
 ### Normalization Rules
 
@@ -201,9 +201,15 @@ If Frigate is already recognizing plates correctly, leave enhancement at the def
 
 Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-| Field                 | Description                                                                       |
-| --------------------- | --------------------------------------------------------------------------------- |
-| **Replacement rules** | Regex replacement rules used to normalize detected plate strings before matching. |
+Under **Replacement rules**, add regex rules to normalize detected plate strings before matching. Rules fire in order. For example:
+
+| Pattern          | Replacement | Description                                        |
+| ---------------- | ----------- | -------------------------------------------------- |
+| `[%#*?]`         | _(empty)_   | Remove noise symbols                               |
+| `[= ]`           | `-`         | Normalize `=` or space to dash                     |
+| `O`              | `0`         | Swap `O` to `0` (common OCR error)                 |
+| `I`              | `1`         | Swap `I` to `1`                                    |
+| `(\w{3})(\w{3})` | `\1-\2`     | Split 6 chars into groups (e.g., ABC123 → ABC-123) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -268,15 +274,15 @@ These configuration parameters are available at the global level. The only optio
 
 Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-| Field                          | Description                                                                                |
-| ------------------------------ | ------------------------------------------------------------------------------------------ |
-| **Enable LPR**                 | Enable or disable license plate recognition for all cameras; can be overridden per-camera. |
-| **Minimum plate area**         | Minimum plate area (pixels) required to attempt recognition.                               |
-| **Min plate length**           | Minimum number of characters a recognized plate must contain to be considered valid.       |
-| **Known plates > Wife'S Car**  |                                                                                            |
-| **Known plates > Johnny**      |                                                                                            |
-| **Known plates > Sally**       |                                                                                            |
-| **Known plates > Work Trucks** |                                                                                            |
+| Field                          | Description                                                                                           |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Enable LPR**                 | Set to on                                                                                             |
+| **Minimum plate area**         | Set to `1500` — ignore plates with an area (length x width) smaller than 1500 pixels                  |
+| **Min plate length**           | Set to `4` — only recognize plates with 4 or more characters                                          |
+| **Known plates > Wife's Car**  | `ABC-1234`, `ABC-I234` (accounts for potential confusion between the number one and capital letter I) |
+| **Known plates > Johnny**      | `J*N-*234` (matches JHN-1234 and JMN-I234; `*` matches any number of characters)                      |
+| **Known plates > Sally**       | `[S5]LL 1234` (matches both SLL 1234 and 5LL 1234)                                                    |
+| **Known plates > Work Trucks** | `EMP-[0-9]{3}[A-Z]` (matches plates like EMP-123A, EMP-456Z)                                          |
 
 </TabItem>
 <TabItem value="yaml">
@@ -349,48 +355,48 @@ An example configuration for a dedicated LPR camera using a `license_plate`-dete
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /> and set **Enable LPR** to on. Set **Device** to `CPU` (can also be `GPU` if available).
 
-| Field      | Description |
-| ---------- | ----------- |
-| **Ffmpeg** |             |
+Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and add your camera streams.
 
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
-| Field                             | Description                                                                                                                                                                      |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Enable object detection**       | Enable or disable object detection for this camera.                                                                                                                              |
-| **Detect FPS**                    | Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects). |
-| **Minimum initialization frames** | Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2.                     |
-| **Detect width**                  | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                            |
-| **Detect height**                 | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                           |
+| Field                             | Description                                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Enable object detection**       | Set to on                                                                                                                      |
+| **Detect FPS**                    | Set to `5`. Increase to `10` if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended. |
+| **Minimum initialization frames** | Set to `2`                                                                                                                     |
+| **Detect width**                  | Set to `1920`                                                                                                                  |
+| **Detect height**                 | Set to `1080`                                                                                                                  |
 
 Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
-| Field                                          | Description                                     |
-| ---------------------------------------------- | ----------------------------------------------- |
-| **Objects to track**                           | List of object labels to track for this camera. |
-| **Object filters > License Plate > Threshold** |                                                 |
+| Field                                          | Description         |
+| ---------------------------------------------- | ------------------- |
+| **Objects to track**                           | Add `license_plate` |
+| **Object filters > License Plate > Threshold** | Set to `0.7`        |
 
 Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
 
-| Field                | Description                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Motion threshold** | Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255). |
-| **Contour area**     | Minimum contour area in pixels required for a motion contour to be counted.                             |
-| **Improve contrast** | Apply contrast improvement to frames before motion analysis to help detection.                          |
+| Field                | Description                                                           |
+| -------------------- | --------------------------------------------------------------------- |
+| **Motion threshold** | Set to `30`                                                           |
+| **Contour area**     | Set to `60`. Use an increased value to tune out small motion changes. |
+| **Improve contrast** | Set to off                                                            |
+
+Also add a motion mask over your camera's timestamp so it is not incorrectly detected as a license plate.
 
 Navigate to <NavPath path="Settings > Camera configuration > Recording" />.
 
-| Field                | Description                                  |
-| -------------------- | -------------------------------------------- |
-| **Enable recording** | Enable or disable recording for this camera. |
+| Field                | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| **Enable recording** | Set to on. Disable recording if you only want snapshots. |
 
 Navigate to <NavPath path="Settings > Camera configuration > Snapshots" />.
 
-| Field                | Description                                         |
-| -------------------- | --------------------------------------------------- |
-| **Enable snapshots** | Enable or disable saving snapshots for this camera. |
+| Field                | Description |
+| -------------------- | ----------- |
+| **Enable snapshots** | Set to on   |
 
 </TabItem>
 <TabItem value="yaml">
@@ -454,54 +460,54 @@ An example configuration for a dedicated LPR camera using the secondary pipeline
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" />.
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /> and set **Enable LPR** to on. Set **Device** to `CPU` (can also be `GPU` if available and the correct Docker image is used). Set **Detection threshold** to `0.7` (change if necessary).
 
-| Field                 | Description                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Enable LPR**        | Enable or disable LPR on this camera.                                                                                                                                                             |
-| **Enhancement level** | Enhancement level (0-10) to apply to plate crops prior to OCR; higher values may not always improve results, levels above 5 may only work with night time plates and should be used with caution. |
+Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for your dedicated LPR camera.
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+| Field                 | Description                                                                      |
+| --------------------- | -------------------------------------------------------------------------------- |
+| **Enable LPR**        | Set to on                                                                        |
+| **Enhancement level** | Set to `3` (optional — enhances the image before trying to recognize characters) |
 
-| Field      | Description |
-| ---------- | ----------- |
-| **Ffmpeg** |             |
+Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and add your camera streams.
 
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
-| Field                       | Description                                                                                                                                                                      |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Enable object detection** | Enable or disable object detection for this camera.                                                                                                                              |
-| **Detect FPS**              | Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects). |
-| **Detect width**            | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                            |
-| **Detect height**           | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                           |
+| Field                       | Description                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Enable object detection** | Set to off — disables Frigate's standard object detection pipeline                                                           |
+| **Detect FPS**              | Set to `5`. Increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU. |
+| **Detect width**            | Set to `1920` (recommended value, but depends on your camera)                                                                |
+| **Detect height**           | Set to `1080` (recommended value, but depends on your camera)                                                                |
 
 Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
-| Field                | Description                                     |
-| -------------------- | ----------------------------------------------- |
-| **Objects to track** | List of object labels to track for this camera. |
+| Field                | Description                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------- |
+| **Objects to track** | Set to an empty list — required when not using a Frigate+ model for dedicated LPR mode |
 
 Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
 
-| Field                | Description                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Motion threshold** | Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255). |
-| **Contour area**     | Minimum contour area in pixels required for a motion contour to be counted.                             |
-| **Improve contrast** | Apply contrast improvement to frames before motion analysis to help detection.                          |
+| Field                | Description                                                           |
+| -------------------- | --------------------------------------------------------------------- |
+| **Motion threshold** | Set to `30`                                                           |
+| **Contour area**     | Set to `60`. Use an increased value to tune out small motion changes. |
+| **Improve contrast** | Set to off                                                            |
+
+Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and add a motion mask over your camera's timestamp so it is not incorrectly detected as a license plate.
 
 Navigate to <NavPath path="Settings > Camera configuration > Recording" />.
 
-| Field                | Description                                  |
-| -------------------- | -------------------------------------------- |
-| **Enable recording** | Enable or disable recording for this camera. |
+| Field                | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| **Enable recording** | Set to on. Disable recording if you only want snapshots. |
 
 Navigate to <NavPath path="Settings > Camera configuration > Review" />.
 
-| Field                                     | Description                                         |
-| ----------------------------------------- | --------------------------------------------------- |
-| **Detections config > Enable detections** | Enable or disable detection events for this camera. |
-| **Detections config > Retain > Default**  |                                                     |
+| Field                                     | Description     |
+| ----------------------------------------- | --------------- |
+| **Detections config > Enable detections** | Set to on       |
+| **Detections config > Retain > Default**  | Set to `7` days |
 
 </TabItem>
 <TabItem value="yaml">
