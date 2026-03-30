@@ -315,6 +315,32 @@ Note that motion masks should not be used to mark out areas where you do not wan
 
 :::
 
+If you are using YAML to configure Frigate instead of the UI, your configuration should look similar to this now:
+
+```yaml {16-18}
+mqtt:
+  enabled: False
+
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+
+cameras:
+  name_of_your_camera:
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.0.10.10:554/rtsp
+          roles:
+            - detect
+    motion:
+      mask:
+        motion_area:
+          friendly_name: "Motion mask"
+          enabled: true
+          coordinates: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
+```
+
 ### Step 6: Enable recordings
 
 In order to review activity in the Frigate UI, recordings need to be enabled.

@@ -123,7 +123,7 @@ Enable debug logs for classification models by adding `frigate.data_processing.r
 Navigate to <NavPath path="Settings > System > Logging" />.
 
 - Set **Logging level** to `debug`
-- Set **Per-process log level > Frigate.Data Processing.Real Time.Custom Classification** to `debug` for verbose classification logging
+- Set **Per-process log level > `frigate.data_processing.real_time.custom_classification`** to `debug` for verbose classification logging
 
 </TabItem>
 <TabItem value="yaml">

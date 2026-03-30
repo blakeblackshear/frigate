@@ -77,9 +77,10 @@ Fine-tune face recognition with these optional parameters. The only optional par
 
 Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 
-- Set **Enable face recognition** to on
-- Set **Detection threshold** to `0.7`
-- Set **Minimum face area** to `500`
+- **Detection threshold**: Face detection confidence score required before recognition runs. This field only applies to the standalone face detection model; `min_score` should be used to filter for models that have face detection built in.
+  - Default: `0.7`
+- **Minimum face area**: Minimum size (in pixels) a face must be before recognition runs. Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant faces.
+  - Default: `500` pixels
 
 </TabItem>
 <TabItem value="yaml">
@@ -101,14 +102,19 @@ face_recognition:
 
 Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 
-- Set **Enable face recognition** to on
-- Set **Model size** to `small`
-- Set **Unknown score threshold** to `0.8`
-- Set **Recognition threshold** to `0.9`
-- Set **Minimum faces** to `1`
-- Set **Save attempts** to `200`
-- Set **Blur confidence filter** to on
-- Set **Device** to `None`
+- **Model size**: Which model size to use, options are `small` or `large`.
+- **Unknown score threshold**: Min score to mark a person as a potential match; matches at or below this will be marked as unknown.
+  - Default: `0.8`
+- **Recognition threshold**: Recognition confidence score required to add the face to the object as a sub label.
+  - Default: `0.9`
+- **Minimum faces**: Min face recognitions for the sub label to be applied to the person object.
+  - Default: `1`
+- **Save attempts**: Number of images of recognized faces to save for training.
+  - Default: `200`
+- **Blur confidence filter**: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
+  - Default: `True`
+- **Device**: Target a specific device to run the face recognition model on (multi-GPU installation). This setting is only applicable when using the `large` model. See [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/).
+  - Default: `None`
 
 </TabItem>
 <TabItem value="yaml">

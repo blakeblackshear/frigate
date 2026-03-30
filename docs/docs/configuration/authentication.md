@@ -342,11 +342,7 @@ The viewer role provides read-only access to all cameras in the UI and API. Cust
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Authentication" /> and configure roles under the **Roles** section.
-
-| Field     | Description                                                       |
-| --------- | ----------------------------------------------------------------- |
-| **Roles** | Define custom roles and assign which cameras each role can access |
+Navigate to <NavPath path="Settings > Users > Roles" /> to define custom roles and assign which cameras each role can access.
 
 </TabItem>
 <TabItem value="yaml">

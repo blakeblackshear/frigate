@@ -92,13 +92,16 @@ Fine-tune the LPR feature using these optional parameters. The only optional par
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-- Set **Enable LPR** to on
-- Set **Detection threshold** to `0.7` — minimum confidence for the plate detector to consider a region as a license plate
-- Set **Minimum plate area** to `1000` — ignore plates smaller than 1000 pixels (length x width)
-- Set **Device** to `CPU` — device to run the plate detection model on (can also be `GPU`)
-- Set **Model size** to `small` — most users should use `small`
+- **Detection threshold**: License plate object detection confidence score required before recognition runs. This field only applies to the standalone license plate detection model; `threshold` and `min_score` object filters should be used for models like Frigate+ that have license plate detection built in.
+  - Default: `0.7`
+- **Minimum plate area**: Minimum area (in pixels) a license plate must be before recognition runs. This is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image. Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
+  - Default: `1000` pixels
+- **Device**: Device to use to run license plate detection _and_ recognition models. Auto-selected by Frigate and can be `CPU`, `GPU`, or the GPU's device number. For users without a model that detects license plates natively, using a GPU may increase performance of the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
+  - Default: `None`
+- **Model size**: The size of the model used to identify regions of text on plates. The `small` model is fast and identifies groups of Latin and Chinese characters. The `large` model identifies Latin characters only, and uses an enhanced text detector to find characters on multi-line plates. If your country or region does not use multi-line plates, you should use the `small` model.
+  - Default: `small`
 
 </TabItem>
 <TabItem value="yaml">
@@ -120,12 +123,12 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-- Set **Enable LPR** to on
-- Set **Recognition threshold** to `0.9` — minimum confidence for recognized text to be accepted as a valid plate
-- Set **Min plate length** to `4` — only accept plates with 4 or more characters
-- Set **Plate format regex** to `^[A-Z]{2}[0-9]{2} [A-Z]{3}$` — only accept plates matching this format (e.g., UK-style plates)
+- **Recognition threshold**: Recognition confidence score required to add the plate to the object as a `recognized_license_plate` and/or `sub_label`.
+  - Default: `0.9`
+- **Min plate length**: Minimum number of characters a detected license plate must have to be added as a `recognized_license_plate` and/or `sub_label`. Use this to filter out short, incomplete, or incorrect detections.
+- **Plate format regex**: A regular expression defining the expected format of detected plates. Plates that do not match this format will be discarded. Websites like https://regex101.com/ can help test regular expressions for your plates.
 
 </TabItem>
 <TabItem value="yaml">
@@ -146,12 +149,10 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-- Set **Enable LPR** to on
-- Set **Match distance** to `1` — allow up to 1 character mismatch when comparing detected plates to known plates
-- Set **Known plates > Wife'S Car** to `ABC-1234` — exact plate number for this vehicle
-- Set **Known plates > Johnny** to `J*N-*234` — wildcard pattern matching multiple plate variations
+- **Known plates**: Assign custom `sub_label` values to `car` and `motorcycle` objects when a recognized plate matches a known value. These labels appear in the UI, filters, and notifications. Unknown plates are still saved but are added to the `recognized_license_plate` field rather than the `sub_label`.
+- **Match distance**: Allows for minor variations (missing/incorrect characters) when matching a detected plate to a known plate. For example, setting to `1` allows a plate `ABCDE` to match `ABCBE` or `ABCD`. This parameter will _not_ operate on known plates that are defined as regular expressions.
 
 </TabItem>
 <TabItem value="yaml">
@@ -175,10 +176,10 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />. For example:
+Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-- Set **Enable LPR** to on
-- Set **Enhancement level** to `1` — applies image enhancement (0-10) to plate crops before OCR to improve character recognition
+- **Enhancement level**: A value between 0 and 10 that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters. This setting is best adjusted at the camera level if running LPR on multiple cameras.
+  - Default: `0` (no enhancement)
 
 </TabItem>
 <TabItem value="yaml">
@@ -246,8 +247,7 @@ These rules must be defined at the global level of your `lpr` config.
 
 Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-- Set **Enable LPR** to on
-- Set **Save debug plates** to on
+- **Save debug plates**: Set to on to save captured text on plates for debugging. These images are stored in `/media/frigate/clips/lpr`, organized into subdirectories by `<camera>/<event_id>`, and named based on the capture timestamp.
 
 </TabItem>
 <TabItem value="yaml">

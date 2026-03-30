@@ -33,7 +33,7 @@ A growing list of cameras and brands that have been reported by users to work wi
 
 First, set up a PTZ preset in your camera's firmware and give it a name. If you're unsure how to do this, consult the documentation for your camera manufacturer's firmware. Some tutorials for common brands: [Amcrest](https://www.youtube.com/watch?v=lJlE9-krmrM), [Reolink](https://www.youtube.com/watch?v=VAnxHUY5i5w), [Dahua](https://www.youtube.com/watch?v=7sNbc5U-k54).
 
-Configure the ONVIF connection and autotracking parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
+Configure the ONVIF connection and autotracking parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name you configured in your camera's firmware to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
 
 An [ONVIF connection](cameras.md) is required for autotracking to function. Also, a [motion mask](masks.md) over your camera's timestamp and any overlay text is recommended to ensure they are completely excluded from scene change calculations when the camera is moving.
 

@@ -106,13 +106,11 @@ Configure the ONVIF connection for your camera to enable PTZ controls.
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and select your camera.
-   - Set **Ffmpeg** to `...`
-2. Navigate to <NavPath path="Settings > Camera configuration > ONVIF" /> and select your camera.
-   - Set **ONVIF host** to `10.0.10.10`
-   - Set **ONVIF port** to `8000`
-   - Set **ONVIF username** to `admin`
-   - Set **ONVIF password** to `password`
+1. Navigate to <NavPath path="Settings > Camera configuration > ONVIF" /> and select your camera.
+   - Set **ONVIF host** to your camera's IP address, e.g.: `10.0.10.10`
+   - Set **ONVIF port** to your camera's ONVIF port, e.g.: `8000`
+   - Set **ONVIF username** to your camera's ONVIF username, e.g.: `admin`
+   - Set **ONVIF password** to your camera's ONVIF password, e.g.: `password`
 
 </TabItem>
 <TabItem value="yaml">
@@ -189,12 +187,7 @@ Camera groups let you organize cameras together with a shared name and icon, mak
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > General > UI settings" />.
-2. Under the camera groups section, create a new group:
-   - Set the **group name** (e.g. `front`)
-   - Select the **cameras** to include (e.g. `driveway_cam`, `garage_cam`)
-   - Choose an **icon** (e.g. `LuCar`)
-   - Set the **order** to control the display position
+On the Live dashboard, press the **+** icon in the main navigation to add a new camera group. Configure the group name, select which cameras to include, choose an icon, and set the display order.
 
 </TabItem>
 <TabItem value="yaml">

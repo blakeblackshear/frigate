@@ -203,8 +203,6 @@ record:
 
 This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
 
-**WARNING**: Recordings must be enabled. If a camera has recordings disabled, enabling via the methods listed above will have no effect.
-
 ## Can I have "continuous" recordings, but only at certain times?
 
 Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
