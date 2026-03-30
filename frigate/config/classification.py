@@ -188,6 +188,7 @@ class SemanticSearchConfig(FrigateBaseModel):
             except ValueError:
                 return v
         return v
+
     model_size: str = Field(
         default="small",
         title="Model size",
