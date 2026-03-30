@@ -1188,7 +1188,7 @@ class TestConfig(unittest.TestCase):
     def test_global_detect_merge(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "detect": {"max_disappeared": 1, "height": 720},
+            "detect": {"max_disappeared": 1, "height": 720, "width": 1280},
             "cameras": {
                 "back": {
                     "ffmpeg": {
