@@ -737,8 +737,8 @@ export function ConfigSection({
         );
       }
 
+      await refreshConfig();
       setPendingData(null);
-      refreshConfig();
       onSave?.();
     } catch (error) {
       // Parse Pydantic validation errors from API response
