@@ -232,19 +232,7 @@ proxy:
 
 ## Role mapping
 
-In some environments, upstream identity providers (OIDC, SAML, LDAP, etc.) do not pass a Frigate-compatible role directly, but instead pass one or more group claims. To handle this, Frigate supports a `role_map` that translates upstream group names into Frigate's internal roles (`admin`, `viewer`, or custom).
-
-<ConfigTabs>
-<TabItem value="ui">
-
-Navigate to <NavPath path="Settings > System > Proxy" /> and configure the role mapping under the header mapping settings.
-
-| Field                         | Description                                                                                                                          |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Header mapping > Role map** | Maps upstream group names to Frigate roles. Each Frigate role (`admin`, `viewer`, or custom) maps to a list of upstream group names. |
-
-</TabItem>
-<TabItem value="yaml">
+In some environments, upstream identity providers (OIDC, SAML, LDAP, etc.) do not pass a Frigate-compatible role directly, but instead pass one or more group claims. To handle this, Frigate supports a `role_map` that translates upstream group names into Frigate's internal roles (`admin`, `viewer`, or custom). This is configurable via YAML in the configuration file:
 
 ```yaml
 proxy:
@@ -261,9 +249,6 @@ proxy:
       operator:  # Custom role mapping
         - operators
 ```
-
-</TabItem>
-</ConfigTabs>
 
 In this example:
 
