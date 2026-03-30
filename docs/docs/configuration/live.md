@@ -324,7 +324,7 @@ When your browser runs into problems playing back your camera streams, it will l
    4. Look for messages prefixed with the camera name.
 
    These logs help identify if the issue is player-specific (MSE vs. WebRTC) or related to camera configuration (e.g., go2rtc streams, codecs). If you see frequent errors:
-   - Verify your camera's H.264/AAC settings (see [Frigate's camera settings recommendations](#camera_settings_recommendations)).
+   - Verify your camera's H.264/AAC settings (see [Frigate's camera settings recommendations](#camera-settings-recommendations)).
    - Check go2rtc configuration for transcoding (e.g., audio to AAC/OPUS).
    - Test with a different stream via the UI dropdown (if `live -> streams` is configured).
    - For WebRTC-specific issues, ensure port 8555 is forwarded and candidates are set (see (WebRTC Extra Configuration)(#webrtc-extra-configuration)).

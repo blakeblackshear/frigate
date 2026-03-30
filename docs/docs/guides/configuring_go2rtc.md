@@ -17,7 +17,7 @@ First, you will want to configure go2rtc to connect to your camera stream by add
 
 For the best experience, you should set the stream name under `go2rtc` to match the name of your camera so that Frigate will automatically map it and be able to use better live view options for the camera.
 
-See [the live view docs](../configuration/live.md#setting-stream-for-live-ui) for more information.
+See [the live view docs](../configuration/live.md#setting-streams-for-live-ui) for more information.
 
 :::
 

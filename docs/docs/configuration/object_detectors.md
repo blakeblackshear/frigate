@@ -286,7 +286,7 @@ Note that due to hardware limitations of the Coral, the labelmap is a subset of 
 
 This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleration Modules. The integration automatically detects your hardware architecture via the Hailo CLI and selects the appropriate default model if no custom model is specified.
 
-See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the Hailo hardware.
+See the [installation docs](../frigate/installation.md#hailo-8) for information on configuring the Hailo hardware.
 
 ### Configuration
 
@@ -850,7 +850,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 ### Setup
 
-Support for AMD GPUs is provided using the [ONNX detector](#ONNX). In order to utilize the AMD GPU for object detection use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
+Support for AMD GPUs is provided using the [ONNX detector](#onnx). In order to utilize the AMD GPU for object detection use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
 
 ### Docker settings for GPU access
 

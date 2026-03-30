@@ -167,7 +167,7 @@ record:
 </TabItem>
 </ConfigTabs>
 
-Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
+Continuous recording supports different retention modes [which are described below](#configuring-recording-retention).
 
 ### Object Recording
 
