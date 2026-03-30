@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from ..base import FrigateBaseModel
 
@@ -88,3 +88,11 @@ class DetectConfig(FrigateBaseModel):
         title="Annotation offset",
         description="Milliseconds to shift detect annotations to better align timeline bounding boxes with recordings; can be positive or negative.",
     )
+
+    @model_validator(mode="after")
+    def validate_dimensions(self) -> "DetectConfig":
+        if (self.width is None) != (self.height is None):
+            raise ValueError(
+                "detect -> both width and height must be specified together, or both omitted"
+            )
+        return self
