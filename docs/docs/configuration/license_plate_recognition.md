@@ -63,7 +63,7 @@ Like other enrichments in Frigate, LPR **must be enabled globally** to use the f
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for the desired camera and disable the **Enabled** toggle.
+Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for the desired camera and disable the **Enable LPR** toggle.
 
 </TabItem>
 <TabItem value="yaml">
@@ -201,8 +201,8 @@ If Frigate is already recognizing plates correctly, leave enhancement at the def
 
 Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                 | Description                                                                       |
+| --------------------- | --------------------------------------------------------------------------------- |
 | **Replacement rules** | Regex replacement rules used to normalize detected plate strings before matching. |
 
 </TabItem>
@@ -268,15 +268,15 @@ These configuration parameters are available at the global level. The only optio
 
 Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
 
-| Field | Description |
-|-------|-------------|
-| **Enable LPR** | Enable or disable license plate recognition for all cameras; can be overridden per-camera. |
-| **Minimum plate area** | Minimum plate area (pixels) required to attempt recognition. |
-| **Min plate length** | Minimum number of characters a recognized plate must contain to be considered valid. |
-| **Known plates > Wife'S Car** |  |
-| **Known plates > Johnny** |  |
-| **Known plates > Sally** |  |
-| **Known plates > Work Trucks** |  |
+| Field                          | Description                                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| **Enable LPR**                 | Enable or disable license plate recognition for all cameras; can be overridden per-camera. |
+| **Minimum plate area**         | Minimum plate area (pixels) required to attempt recognition.                               |
+| **Min plate length**           | Minimum number of characters a recognized plate must contain to be considered valid.       |
+| **Known plates > Wife'S Car**  |                                                                                            |
+| **Known plates > Johnny**      |                                                                                            |
+| **Known plates > Sally**       |                                                                                            |
+| **Known plates > Work Trucks** |                                                                                            |
 
 </TabItem>
 <TabItem value="yaml">
@@ -308,7 +308,7 @@ If a camera is configured to detect `car` or `motorcycle` but you don't want Fri
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for the desired camera and disable the **Enabled** toggle.
+Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for the desired camera and disable the **Enable LPR** toggle.
 
 </TabItem>
 <TabItem value="yaml">
@@ -351,40 +351,45 @@ An example configuration for a dedicated LPR camera using a `license_plate`-dete
 
 Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
 
-| Field | Description |
-|-------|-------------|
-| **Ffmpeg** |  |
+| Field      | Description |
+| ---------- | ----------- |
+| **Ffmpeg** |             |
+
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
-| Field | Description |
-|-------|-------------|
-| **Enable object detection** | Enable or disable object detection for this camera. |
-| **Detect FPS** | Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects). |
-| **Minimum initialization frames** | Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2. |
-| **Detect width** | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
-| **Detect height** | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
+| Field                             | Description                                                                                                                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Enable object detection**       | Enable or disable object detection for this camera.                                                                                                                              |
+| **Detect FPS**                    | Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects). |
+| **Minimum initialization frames** | Number of consecutive detection hits required before creating a tracked object. Increase to reduce false initializations. Default value is fps divided by 2.                     |
+| **Detect width**                  | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                            |
+| **Detect height**                 | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                           |
+
 Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
-| Field | Description |
-|-------|-------------|
-| **Objects to track** | List of object labels to track for this camera. |
-| **Object filters > License Plate > Threshold** |  |
+| Field                                          | Description                                     |
+| ---------------------------------------------- | ----------------------------------------------- |
+| **Objects to track**                           | List of object labels to track for this camera. |
+| **Object filters > License Plate > Threshold** |                                                 |
+
 Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Motion threshold** | Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255). |
-| **Contour area** | Minimum contour area in pixels required for a motion contour to be counted. |
-| **Improve contrast** | Apply contrast improvement to frames before motion analysis to help detection. |
+| **Contour area**     | Minimum contour area in pixels required for a motion contour to be counted.                             |
+| **Improve contrast** | Apply contrast improvement to frames before motion analysis to help detection.                          |
+
 Navigate to <NavPath path="Settings > Camera configuration > Recording" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                  |
+| -------------------- | -------------------------------------------- |
 | **Enable recording** | Enable or disable recording for this camera. |
+
 Navigate to <NavPath path="Settings > Camera configuration > Snapshots" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                         |
+| -------------------- | --------------------------------------------------- |
 | **Enable snapshots** | Enable or disable saving snapshots for this camera. |
 
 </TabItem>
@@ -451,46 +456,52 @@ An example configuration for a dedicated LPR camera using the secondary pipeline
 
 Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" />.
 
-| Field | Description |
-|-------|-------------|
-| **Enable LPR** | Enable or disable LPR on this camera. |
+| Field                 | Description                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Enable LPR**        | Enable or disable LPR on this camera.                                                                                                                                                             |
 | **Enhancement level** | Enhancement level (0-10) to apply to plate crops prior to OCR; higher values may not always improve results, levels above 5 may only work with night time plates and should be used with caution. |
+
 Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
 
-| Field | Description |
-|-------|-------------|
-| **Ffmpeg** |  |
+| Field      | Description |
+| ---------- | ----------- |
+| **Ffmpeg** |             |
+
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
-| Field | Description |
-|-------|-------------|
-| **Enable object detection** | Enable or disable object detection for this camera. |
-| **Detect FPS** | Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects). |
-| **Detect width** | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
-| **Detect height** | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
+| Field                       | Description                                                                                                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Enable object detection** | Enable or disable object detection for this camera.                                                                                                                              |
+| **Detect FPS**              | Desired frames per second to run detection on; lower values reduce CPU usage (recommended value is 5, only set higher - at most 10 - if tracking extremely fast moving objects). |
+| **Detect width**            | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                            |
+| **Detect height**           | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.                                                                           |
+
 Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                     |
+| -------------------- | ----------------------------------------------- |
 | **Objects to track** | List of object labels to track for this camera. |
+
 Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Motion threshold** | Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255). |
-| **Contour area** | Minimum contour area in pixels required for a motion contour to be counted. |
-| **Improve contrast** | Apply contrast improvement to frames before motion analysis to help detection. |
+| **Contour area**     | Minimum contour area in pixels required for a motion contour to be counted.                             |
+| **Improve contrast** | Apply contrast improvement to frames before motion analysis to help detection.                          |
+
 Navigate to <NavPath path="Settings > Camera configuration > Recording" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                  |
+| -------------------- | -------------------------------------------- |
 | **Enable recording** | Enable or disable recording for this camera. |
+
 Navigate to <NavPath path="Settings > Camera configuration > Review" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                                     | Description                                         |
+| ----------------------------------------- | --------------------------------------------------- |
 | **Detections config > Enable detections** | Enable or disable detection events for this camera. |
-| **Detections config > Retain > Default** |  |
+| **Detections config > Retain > Default**  |                                                     |
 
 </TabItem>
 <TabItem value="yaml">
@@ -641,7 +652,7 @@ lpr:
      logger:
        default: info
        logs:
-        # highlight-next-line
+         # highlight-next-line
          frigate.data_processing.common.license_plate: debug
      ```
 

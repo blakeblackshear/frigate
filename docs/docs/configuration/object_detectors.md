@@ -56,7 +56,6 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [AXEngine](#axera): axmodels can run on AXERA AI acceleration.
 
-
 **For Testing**
 
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
@@ -92,7 +91,7 @@ See [common Edge TPU troubleshooting steps](/troubleshooting/edgetpu) if the Edg
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Edge TPU** detector type with device set to `usb`.
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **EdgeTPU** detector type with device set to `usb`.
 
 </TabItem>
 <TabItem value="yaml">
@@ -137,7 +136,7 @@ _warning: may have [compatibility issues](https://github.com/blakeblackshear/fri
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Edge TPU** detector type with the device field left empty.
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **EdgeTPU** detector type with the device field left empty.
 
 </TabItem>
 <TabItem value="yaml">
@@ -157,7 +156,7 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Edge TPU** detector type with device set to `pci`.
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **EdgeTPU** detector type with device set to `pci`.
 
 </TabItem>
 <TabItem value="yaml">
@@ -247,15 +246,15 @@ After placing the downloaded files for the tflite model and labels in your confi
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Edge TPU** detector type with device set to `usb`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings:
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **EdgeTPU** detector type with device set to `usb`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolo-generic` |
-| **Width** | `320` (should match the imgsize of the model) |
-| **Height** | `320` (should match the imgsize of the model) |
-| **Path** | `/config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite` |
-| **Labelmap path** | `/config/labels-coco17.txt` |
+| Field                                    | Value                                                             |
+| ---------------------------------------- | ----------------------------------------------------------------- |
+| **Object Detection Model Type**          | `yolo-generic`                                                    |
+| **Object detection model input width**   | `320` (should match the imgsize of the model)                     |
+| **Object detection model input height**  | `320` (should match the imgsize of the model)                     |
+| **Custom object detector model path**    | `/config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite` |
+| **Label map for custom object detector** | `/config/labels-coco17.txt`                                       |
 
 </TabItem>
 <TabItem value="yaml">
@@ -304,17 +303,17 @@ Use this configuration for YOLO-based models. When no custom model path or URL i
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Hailo-8L** detector type with device set to `PCIe`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings:
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Hailo-8/Hailo-8L** detector type with device set to `PCIe`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings:
 
-| Field | Value |
-|-------|-------|
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input tensor** | `nhwc` |
-| **Input pixel format** | `rgb` |
-| **Input dtype** | `int` |
-| **Model type** | `yolo-generic` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                   |
+| ---------------------------------------- | ----------------------- |
+| **Object detection model input width**   | `320`                   |
+| **Object detection model input height**  | `320`                   |
+| **Model Input Tensor Shape**             | `nhwc`                  |
+| **Model Input Pixel Color Format**       | `rgb`                   |
+| **Model Input D Type**                   | `int`                   |
+| **Object Detection Model Type**          | `yolo-generic`          |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt` |
 
 The detector automatically selects the default model based on your hardware. Optionally, specify a local model path or URL to override.
 
@@ -360,15 +359,15 @@ For SSD-based models, provide either a model path or URL to your compiled SSD mo
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Hailo-8L** detector type with device set to `PCIe`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings:
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Hailo-8/Hailo-8L** detector type with device set to `PCIe`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings:
 
-| Field | Value |
-|-------|-------|
-| **Width** | `300` |
-| **Height** | `300` |
-| **Input tensor** | `nhwc` |
-| **Input pixel format** | `rgb` |
-| **Model type** | `ssd` |
+| Field                                   | Value  |
+| --------------------------------------- | ------ |
+| **Object detection model input width**  | `300`  |
+| **Object detection model input height** | `300`  |
+| **Model Input Tensor Shape**            | `nhwc` |
+| **Model Input Pixel Color Format**      | `rgb`  |
+| **Object Detection Model Type**         | `ssd`  |
 
 Specify the local model path or URL for SSD MobileNet v1.
 
@@ -405,7 +404,7 @@ The Hailo detector supports all YOLO models compiled for Hailo hardware that inc
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Hailo-8L** detector type with device set to `PCIe`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings to match your custom model dimensions and format.
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Hailo-8/Hailo-8L** detector type with device set to `PCIe`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings to match your custom model dimensions and format.
 
 </TabItem>
 <TabItem value="yaml">
@@ -505,14 +504,14 @@ Use the model configuration shown below when using the OpenVINO detector with th
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **OpenVINO** detector type with device set to `GPU` (or `NPU`). Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Width** | `300` |
-| **Height** | `300` |
-| **Input tensor** | `nhwc` |
-| **Input pixel format** | `bgr` |
-| **Path** | `/openvino-model/ssdlite_mobilenet_v2.xml` |
-| **Labelmap path** | `/openvino-model/coco_91cl_bkgr.txt` |
+| Field                                    | Value                                      |
+| ---------------------------------------- | ------------------------------------------ |
+| **Object detection model input width**   | `300`                                      |
+| **Object detection model input height**  | `300`                                      |
+| **Model Input Tensor Shape**             | `nhwc`                                     |
+| **Model Input Pixel Color Format**       | `bgr`                                      |
+| **Custom object detector model path**    | `/openvino-model/ssdlite_mobilenet_v2.xml` |
+| **Label map for custom object detector** | `/openvino-model/coco_91cl_bkgr.txt`       |
 
 </TabItem>
 <TabItem value="yaml">
@@ -555,15 +554,15 @@ After placing the downloaded onnx model in your config folder, use the following
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **OpenVINO** detector type with device set to `GPU`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolonas` |
-| **Width** | `320` (should match whatever was set in notebook) |
-| **Height** | `320` (should match whatever was set in notebook) |
-| **Input tensor** | `nchw` |
-| **Input pixel format** | `bgr` |
-| **Path** | `/config/yolo_nas_s.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                             |
+| ---------------------------------------- | ------------------------------------------------- |
+| **Object Detection Model Type**          | `yolonas`                                         |
+| **Object detection model input width**   | `320` (should match whatever was set in notebook) |
+| **Object detection model input height**  | `320` (should match whatever was set in notebook) |
+| **Model Input Tensor Shape**             | `nchw`                                            |
+| **Model Input Pixel Color Format**       | `bgr`                                             |
+| **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
 
 </TabItem>
 <TabItem value="yaml">
@@ -617,15 +616,15 @@ After placing the downloaded onnx model in your config folder, use the following
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **OpenVINO** detector type with device set to `GPU` (or `NPU`). Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolo-generic` |
-| **Width** | `320` (should match the imgsize set during model export) |
-| **Height** | `320` (should match the imgsize set during model export) |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/yolo.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
+| **Object Detection Model Type**          | `yolo-generic`                                           |
+| **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+| **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+| **Model Input Tensor Shape**             | `nchw`                                                   |
+| **Model Input D Type**                   | `float`                                                  |
+| **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
 
 </TabItem>
 <TabItem value="yaml">
@@ -673,14 +672,14 @@ After placing the downloaded onnx model in your `config/model_cache` folder, use
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **OpenVINO** detector type with device set to `GPU`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `rfdetr` |
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/rfdetr.onnx` |
+| Field                                   | Value                             |
+| --------------------------------------- | --------------------------------- |
+| **Object Detection Model Type**         | `rfdetr`                          |
+| **Object detection model input width**  | `320`                             |
+| **Object detection model input height** | `320`                             |
+| **Model Input Tensor Shape**            | `nchw`                            |
+| **Model Input D Type**                  | `float`                           |
+| **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` |
 
 </TabItem>
 <TabItem value="yaml">
@@ -725,15 +724,15 @@ After placing the downloaded onnx model in your config/model_cache folder, use t
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **OpenVINO** detector type with device set to `CPU`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `dfine` |
-| **Width** | `640` |
-| **Height** | `640` |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/dfine-s.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                              |
+| ---------------------------------------- | ---------------------------------- |
+| **Object Detection Model Type**          | `dfine`                            |
+| **Object detection model input width**   | `640`                              |
+| **Object detection model input height**  | `640`                              |
+| **Model Input Tensor Shape**             | `nchw`                             |
+| **Model Input D Type**                   | `float`                            |
+| **Custom object detector model path**    | `/config/model_cache/dfine-s.onnx` |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`            |
 
 </TabItem>
 <TabItem value="yaml">
@@ -777,7 +776,7 @@ Using the detector config below will connect to the client:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ZMQ** detector type with the endpoint set to `tcp://host.docker.internal:5555`.
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ZMQ IPC** detector type with the endpoint set to `tcp://host.docker.internal:5555`.
 
 </TabItem>
 <TabItem value="yaml">
@@ -811,17 +810,17 @@ When Frigate is started with the following config it will connect to the detecto
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ZMQ** detector type with the endpoint set to `tcp://host.docker.internal:5555`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ZMQ IPC** detector type with the endpoint set to `tcp://host.docker.internal:5555`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolo-generic` |
-| **Width** | `320` (should match the imgsize set during model export) |
-| **Height** | `320` (should match the imgsize set during model export) |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/yolo.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
+| **Object Detection Model Type**          | `yolo-generic`                                           |
+| **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+| **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+| **Model Input Tensor Shape**             | `nchw`                                                   |
+| **Model Input D Type**                   | `float`                                                  |
+| **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1022,15 +1021,15 @@ After placing the downloaded onnx model in your config folder, use the following
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ONNX** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolonas` |
-| **Width** | `320` (should match whatever was set in notebook) |
-| **Height** | `320` (should match whatever was set in notebook) |
-| **Input pixel format** | `bgr` |
-| **Input tensor** | `nchw` |
-| **Path** | `/config/yolo_nas_s.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                             |
+| ---------------------------------------- | ------------------------------------------------- |
+| **Object Detection Model Type**          | `yolonas`                                         |
+| **Object detection model input width**   | `320` (should match whatever was set in notebook) |
+| **Object detection model input height**  | `320` (should match whatever was set in notebook) |
+| **Model Input Pixel Color Format**       | `bgr`                                             |
+| **Model Input Tensor Shape**             | `nchw`                                            |
+| **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1081,15 +1080,15 @@ After placing the downloaded onnx model in your config folder, use the following
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ONNX** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolo-generic` |
-| **Width** | `320` (should match the imgsize set during model export) |
-| **Height** | `320` (should match the imgsize set during model export) |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/yolo.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
+| **Object Detection Model Type**          | `yolo-generic`                                           |
+| **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+| **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+| **Model Input Tensor Shape**             | `nchw`                                                   |
+| **Model Input D Type**                   | `float`                                                  |
+| **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1130,15 +1129,15 @@ After placing the downloaded onnx model in your config folder, use the following
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ONNX** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolox` |
-| **Width** | `416` (should match the imgsize set during model export) |
-| **Height** | `416` (should match the imgsize set during model export) |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float_denorm` |
-| **Path** | `/config/model_cache/yolox_tiny.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
+| **Object Detection Model Type**          | `yolox`                                                  |
+| **Object detection model input width**   | `416` (should match the imgsize set during model export) |
+| **Object detection model input height**  | `416` (should match the imgsize set during model export) |
+| **Model Input Tensor Shape**             | `nchw`                                                   |
+| **Model Input D Type**                   | `float_denorm`                                           |
+| **Custom object detector model path**    | `/config/model_cache/yolox_tiny.onnx`                    |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1179,14 +1178,14 @@ After placing the downloaded onnx model in your `config/model_cache` folder, use
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ONNX** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `rfdetr` |
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/rfdetr.onnx` |
+| Field                                   | Value                             |
+| --------------------------------------- | --------------------------------- |
+| **Object Detection Model Type**         | `rfdetr`                          |
+| **Object detection model input width**  | `320`                             |
+| **Object detection model input height** | `320`                             |
+| **Model Input Tensor Shape**            | `nchw`                            |
+| **Model Input D Type**                  | `float`                           |
+| **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1224,15 +1223,15 @@ After placing the downloaded onnx model in your `config/model_cache` folder, use
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **ONNX** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `dfine` |
-| **Width** | `640` |
-| **Height** | `640` |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Path** | `/config/model_cache/dfine_m_obj2coco.onnx` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                       |
+| ---------------------------------------- | ------------------------------------------- |
+| **Object Detection Model Type**          | `dfine`                                     |
+| **Object detection model input width**   | `640`                                       |
+| **Object detection model input height**  | `640`                                       |
+| **Model Input Tensor Shape**             | `nchw`                                      |
+| **Model Input D Type**                   | `float`                                     |
+| **Custom object detector model path**    | `/config/model_cache/dfine_m_obj2coco.onnx` |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                     |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1312,7 +1311,7 @@ To integrate CodeProject.AI into Frigate, configure the detector as follows:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Deepstack** detector type. Set the API URL to point to your CodeProject.AI server (e.g., `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`).
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **DeepStack** detector type. Set the API URL to point to your CodeProject.AI server (e.g., `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`).
 
 </TabItem>
 <TabItem value="yaml">
@@ -1417,14 +1416,14 @@ Below is the recommended configuration for using the **YOLO-NAS** (small) model 
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **MemryX** detector type with device set to `PCIe:0`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolonas` |
-| **Width** | `320` (can be set to `640` for higher resolution) |
-| **Height** | `320` (can be set to `640` for higher resolution) |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                             |
+| ---------------------------------------- | ------------------------------------------------- |
+| **Object Detection Model Type**          | `yolonas`                                         |
+| **Object detection model input width**   | `320` (can be set to `640` for higher resolution) |
+| **Object detection model input height**  | `320` (can be set to `640` for higher resolution) |
+| **Model Input Tensor Shape**             | `nchw`                                            |
+| **Model Input D Type**                   | `float`                                           |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1465,14 +1464,14 @@ Below is the recommended configuration for using the **YOLOv9** (small) model wi
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **MemryX** detector type with device set to `PCIe:0`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolo-generic` |
-| **Width** | `320` (can be set to `640` for higher resolution) |
-| **Height** | `320` (can be set to `640` for higher resolution) |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                             |
+| ---------------------------------------- | ------------------------------------------------- |
+| **Object Detection Model Type**          | `yolo-generic`                                    |
+| **Object detection model input width**   | `320` (can be set to `640` for higher resolution) |
+| **Object detection model input height**  | `320` (can be set to `640` for higher resolution) |
+| **Model Input Tensor Shape**             | `nchw`                                            |
+| **Model Input D Type**                   | `float`                                           |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1512,14 +1511,14 @@ Below is the recommended configuration for using the **YOLOX** (small) model wit
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **MemryX** detector type with device set to `PCIe:0`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `yolox` |
-| **Width** | `640` |
-| **Height** | `640` |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float_denorm` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                   |
+| ---------------------------------------- | ----------------------- |
+| **Object Detection Model Type**          | `yolox`                 |
+| **Object detection model input width**   | `640`                   |
+| **Object detection model input height**  | `640`                   |
+| **Model Input Tensor Shape**             | `nchw`                  |
+| **Model Input D Type**                   | `float_denorm`          |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt` |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1559,14 +1558,14 @@ Below is the recommended configuration for using the **SSDLite MobileNet v2** mo
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **MemryX** detector type with device set to `PCIe:0`. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Model type** | `ssd` |
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input tensor** | `nchw` |
-| **Input dtype** | `float` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                   |
+| ---------------------------------------- | ----------------------- |
+| **Object Detection Model Type**          | `ssd`                   |
+| **Object detection model input width**   | `320`                   |
+| **Object detection model input height**  | `320`                   |
+| **Model Input Tensor Shape**             | `nchw`                  |
+| **Model Input D Type**                   | `float`                 |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt` |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1698,14 +1697,14 @@ Use the config below to work with generated TRT models:
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **TensorRT** detector type with the device set to `0` (the default GPU index). Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Path** | `/config/model_cache/tensorrt/yolov7-320.trt` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
-| **Input tensor** | `nchw` |
-| **Input pixel format** | `rgb` |
-| **Width** | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
-| **Height** | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
+| Field                                    | Value                                                        |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| **Custom object detector model path**    | `/config/model_cache/tensorrt/yolov7-320.trt`                |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                                      |
+| **Model Input Tensor Shape**             | `nchw`                                                       |
+| **Model Input Pixel Color Format**       | `rgb`                                                        |
+| **Object detection model input width**   | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
+| **Object detection model input height**  | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1755,13 +1754,13 @@ Use the model configuration shown below when using the synaptics detector with t
 
 Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **Synaptics** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Path** | `/synaptics/mobilenet.synap` |
-| **Width** | `224` |
-| **Height** | `224` |
-| **Tensor format** | `nhwc` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                        |
+| ---------------------------------------- | ---------------------------- |
+| **Custom object detector model path**    | `/synaptics/mobilenet.synap` |
+| **Object detection model input width**   | `224`                        |
+| **Object detection model input height**  | `224`                        |
+| **Tensor format**                        | `nhwc`                       |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`      |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1882,15 +1881,15 @@ The inference time was determined on a rk3588 with 3 NPU cores.
 
 Navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Path** | `deci-fp16-yolonas_s` (or `deci-fp16-yolonas_m`, `deci-fp16-yolonas_l`) |
-| **Model type** | `yolonas` |
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input pixel format** | `bgr` |
-| **Input tensor** | `nhwc` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                                                   |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| **Custom object detector model path**    | `deci-fp16-yolonas_s` (or `deci-fp16-yolonas_m`, `deci-fp16-yolonas_l`) |
+| **Object Detection Model Type**          | `yolonas`                                                               |
+| **Object detection model input width**   | `320`                                                                   |
+| **Object detection model input height**  | `320`                                                                   |
+| **Model Input Pixel Color Format**       | `bgr`                                                                   |
+| **Model Input Tensor Shape**             | `nhwc`                                                                  |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                                                 |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1928,14 +1927,14 @@ The pre-trained YOLO-NAS weights from DeciAI are subject to their license and ca
 
 Navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Path** | `frigate-fp16-yolov9-t` (or other yolov9 variants) |
-| **Model type** | `yolo-generic` |
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input tensor** | `nhwc` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                              |
+| ---------------------------------------- | -------------------------------------------------- |
+| **Custom object detector model path**    | `frigate-fp16-yolov9-t` (or other yolov9 variants) |
+| **Object Detection Model Type**          | `yolo-generic`                                     |
+| **Object detection model input width**   | `320`                                              |
+| **Object detection model input height**  | `320`                                              |
+| **Model Input Tensor Shape**             | `nhwc`                                             |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                            |
 
 </TabItem>
 <TabItem value="yaml">
@@ -1968,14 +1967,14 @@ model: # required
 
 Navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Path** | `rock-i8-yolox_nano` (or other yolox variants) |
-| **Model type** | `yolox` |
-| **Width** | `416` |
-| **Height** | `416` |
-| **Input tensor** | `nhwc` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                                          |
+| ---------------------------------------- | ---------------------------------------------- |
+| **Custom object detector model path**    | `rock-i8-yolox_nano` (or other yolox variants) |
+| **Object Detection Model Type**          | `yolox`                                        |
+| **Object detection model input width**   | `416`                                          |
+| **Object detection model input height**  | `416`                                          |
+| **Model Input Tensor Shape**             | `nhwc`                                         |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`                        |
 
 </TabItem>
 <TabItem value="yaml">
@@ -2190,17 +2189,17 @@ Use the model configuration shown below when using the axengine detector with th
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **AXEngine** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select the **AXEngine NPU** detector type. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
 
-| Field | Value |
-|-------|-------|
-| **Path** | `frigate-yolov9-tiny` |
-| **Model type** | `yolo-generic` |
-| **Width** | `320` |
-| **Height** | `320` |
-| **Input dtype** | `int` |
-| **Input pixel format** | `bgr` |
-| **Labelmap path** | `/labelmap/coco-80.txt` |
+| Field                                    | Value                   |
+| ---------------------------------------- | ----------------------- |
+| **Custom object detector model path**    | `frigate-yolov9-tiny`   |
+| **Object Detection Model Type**          | `yolo-generic`          |
+| **Object detection model input width**   | `320`                   |
+| **Object detection model input height**  | `320`                   |
+| **Model Input D Type**                   | `int`                   |
+| **Model Input Pixel Color Format**       | `bgr`                   |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt` |
 
 </TabItem>
 <TabItem value="yaml">

@@ -27,7 +27,7 @@ Not every segment of video captured by Frigate may be of the same level of inter
 
 :::note
 
-Alerts and detections categorize the tracked objects in review items, but Frigate must first detect those objects with your configured object detector (Coral, OpenVINO, etc). By default, the object tracker only detects `person`. Setting `labels` for `alerts` and `detections` does not automatically enable detection of new objects. To detect more than `person`, you should add the following to your config:
+Alerts and detections categorize the tracked objects in review items, but Frigate must first detect those objects with your configured object detector (Coral, OpenVINO, etc). By default, the object tracker only detects `person`. Setting `labels` for `alerts` and `detections` does not automatically enable detection of new objects. To detect more than `person`, you should add more labels via <NavPath path="Settings > Global configuration > Objects" /> or <NavPath path="Settings > Camera configuration > Objects" /> and select your camera. Alternatively, add the following to your config:
 
 ```yaml
 objects:
@@ -47,11 +47,9 @@ By default a review item will only be marked as an alert if a person or car is d
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Review" />.
+Navigate to <NavPath path="Settings > Global configuration > Review" /> or <NavPath path="Settings > Camera configuration > Review" /> and select your camera.
 
-| Field | Description |
-|-------|-------------|
-| **Alerts > Labels** | List of object or audio labels that qualify a review item as an alert |
+Expand **Alerts config** and configure which labels and zones should generate alerts.
 
 </TabItem>
 <TabItem value="yaml">
@@ -78,11 +76,9 @@ By default all detections that do not qualify as an alert qualify as a detection
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Review" />.
+Navigate to <NavPath path="Settings > Global configuration > Review" /> or <NavPath path="Settings > Camera configuration > Review" /> and select your camera.
 
-| Field | Description |
-|-------|-------------|
-| **Detections > Labels** | List of labels to restrict which tracked objects qualify as detections |
+Expand **Detections config** and configure which labels should qualify as detections.
 
 </TabItem>
 <TabItem value="yaml">
@@ -109,7 +105,7 @@ For example, to exclude objects on the camera _gatecamera_ from any detections:
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Review" /> and select the **gatecamera** camera.
-   - Set **Detections > Labels** to an empty list
+   - Expand **Detections config** and turn off all of the object label switches.
 
 </TabItem>
 <TabItem value="yaml">

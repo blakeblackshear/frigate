@@ -48,8 +48,8 @@ Navigate to <NavPath path="Settings > Global configuration > Motion detection" /
 
 To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera, or use the <NavPath path="Settings > Camera configuration > Motion tuner" /> to adjust it live.
 
-| Field | Description |
-|-------|-------------|
+| Field                | Description                                                                                                                                                                                                                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Motion threshold** | The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive. The value should be between 1 and 255. (default: 30) |
 
 </TabItem>
@@ -79,8 +79,8 @@ Navigate to <NavPath path="Settings > Global configuration > Motion detection" /
 
 To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera, or use the <NavPath path="Settings > Camera configuration > Motion tuner" /> to adjust it live.
 
-| Field | Description |
-|-------|-------------|
+| Field            | Description                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Contour area** | Minimum size in pixels in the resized motion image that counts as motion. Increasing this value will prevent smaller areas of motion from being detected. Decreasing will make motion detection more sensitive to smaller moving objects. As a rule of thumb: 10 = high sensitivity, 30 = medium sensitivity, 50 = low sensitivity. (default: 10) |
 
 </TabItem>
@@ -126,8 +126,8 @@ Navigate to <NavPath path="Settings > Global configuration > Motion detection" /
 
 To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera.
 
-| Field | Description |
-|-------|-------------|
+| Field                   | Description                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Lightning threshold** | The percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera. (default: 0.8) |
 
 </TabItem>
@@ -168,8 +168,8 @@ Navigate to <NavPath path="Settings > Global configuration > Motion detection" /
 
 To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera.
 
-| Field | Description |
-|-------|-------------|
+| Field                     | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Skip motion threshold** | Fraction of the frame that must change in a single update before Frigate will completely ignore any motion in that frame. Values range between 0.0 and 1.0; leave unset (null) to disable. For example, setting this to 0.7 causes Frigate to skip reporting motion boxes when more than 70% of the image appears to change (e.g. during lightning storms, IR/color mode switches, or other sudden lighting events). |
 
 </TabItem>

@@ -26,14 +26,15 @@ Each role can only be assigned to one input per camera. The options for roles ar
 
 Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
 
-| Field | Description |
-|-------|-------------|
+| Field             | Description                                                         |
+| ----------------- | ------------------------------------------------------------------- |
 | **Camera inputs** | List of input stream definitions (paths and roles) for this camera. |
+
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
-| Field | Description |
-|-------|-------------|
-| **Detect width** | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
+| Field             | Description                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| **Detect width**  | Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.  |
 | **Detect height** | Height (pixels) of frames used for the detect stream; leave empty to use the native stream resolution. |
 
 </TabItem>

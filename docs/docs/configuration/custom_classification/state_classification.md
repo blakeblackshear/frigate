@@ -42,14 +42,17 @@ State classification is configured as a custom classification model. Each model 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > Object classification" />.
+Navigate to the **Classification** page from the main navigation sidebar, select the **States** tab, then click **Add Classification**.
 
-| Field | Description |
-|-------|-------------|
-| **Custom Classification Models > Front Door > Threshold** | Minimum confidence score for a classification attempt to count (default: `0.8`) |
-| **Custom Classification Models > Front Door > State Config > Motion** | Run classification when motion overlaps the crop area |
-| **Custom Classification Models > Front Door > State Config > Interval** | Run classification every N seconds (optional) |
-| **Custom Classification Models > Front Door > State Config > Cameras > Front > Crop** | The rectangular crop region on each camera to classify |
+In the **Create New Classification** dialog:
+
+| Field       | Description                                                                          |
+| ----------- | ------------------------------------------------------------------------------------ |
+| **Name**    | A name for your state classification model (e.g., `front_door`)                      |
+| **Type**    | Select **State** for state classification                                            |
+| **Classes** | The state names the model will learn to distinguish between (e.g., `open`, `closed`) |
+
+After creating the model, the wizard will guide you through selecting the camera crop area and assigning training examples. The `threshold` (default: `0.8`), `motion`, and `interval` settings can be adjusted in the YAML configuration.
 
 </TabItem>
 <TabItem value="yaml">
@@ -94,7 +97,7 @@ Once some images are assigned, training will begin automatically.
 
 :::tip Diversity matters far more than volume
 
-Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what *that exact moment* looked like rather than what actually defines the state. This often leads to models that work perfectly under the original conditions but become unstable when day turns to night, weather changes, or seasonal lighting shifts. **This is why Frigate does not implement bulk training in the UI.**
+Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what _that exact moment_ looked like rather than what actually defines the state. This often leads to models that work perfectly under the original conditions but become unstable when day turns to night, weather changes, or seasonal lighting shifts. **This is why Frigate does not implement bulk training in the UI.**
 
 For more detail, see [Frigate Tip: Best Practices for Training Face and Custom Classification Models](https://github.com/blakeblackshear/frigate/discussions/21374).
 

@@ -27,7 +27,7 @@ Bird classification is disabled by default and must be enabled before it can be 
 Navigate to <NavPath path="Settings > Enrichments > Object classification" />.
 
 - Set **Bird classification config > Bird classification** to on
-- Set **Bird classification config > Bird classification threshold** to the desired confidence score (default: 0.9)
+- Set **Bird classification config > Minimum score** to the desired confidence score (default: 0.9)
 
 </TabItem>
 <TabItem value="yaml">

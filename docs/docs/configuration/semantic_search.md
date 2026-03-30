@@ -31,7 +31,6 @@ Semantic Search is disabled by default and must be enabled before it can be used
 Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
 
 - Set **Enable semantic search** to on
-- Set **Reindex on startup** to on if you want to reindex the embeddings database from existing tracked objects
 
 </TabItem>
 <TabItem value="yaml">
@@ -66,10 +65,10 @@ Differently weighted versions of the Jina models are available and can be select
 
 Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
 
-| Field | Description |
-|-------|-------------|
-| **Model** | Select `jinav1` to use the Jina AI CLIP V1 model |
-| **Model Size** | `small` (quantized, CPU-friendly) or `large` (full model, GPU-accelerated) |
+| Field                                            | Description                                                                |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| **Semantic search model or GenAI provider name** | Select `jinav1` to use the Jina AI CLIP V1 model                           |
+| **Model size**                                   | `small` (quantized, CPU-friendly) or `large` (full model, GPU-accelerated) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -100,10 +99,10 @@ To use the V2 model, set the model to `jinav2`.
 
 Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
 
-| Field | Description |
-|-------|-------------|
-| **Model** | Select `jinav2` to use the Jina AI CLIP V2 model |
-| **Model Size** | `large` is recommended for V2 (requires discrete GPU) |
+| Field                                            | Description                                           |
+| ------------------------------------------------ | ----------------------------------------------------- |
+| **Semantic search model or GenAI provider name** | Select `jinav2` to use the Jina AI CLIP V2 model      |
+| **Model size**                                   | `large` is recommended for V2 (requires discrete GPU) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -141,9 +140,9 @@ To use llama.cpp for semantic search:
 
 Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
 
-| Field | Description |
-|-------|-------------|
-| **Model** | Set to the GenAI config key (e.g. `default`) to use a configured GenAI provider for embeddings |
+| Field                                            | Description                                                                                    |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Semantic search model or GenAI provider name** | Set to the GenAI config key (e.g. `default`) to use a configured GenAI provider for embeddings |
 
 The GenAI provider must also be configured with the `embeddings` role under <NavPath path="Settings > Enrichments > Generative AI" />.
 
@@ -186,10 +185,10 @@ The CLIP models are downloaded in ONNX format, and the `large` model can be acce
 
 Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
 
-| Field | Description |
-|-------|-------------|
-| **Model Size** | Set to `large` to enable GPU acceleration |
-| **Device** | (Optional) Specify a GPU device index in a multi-GPU system (e.g. `0`) |
+| Field          | Description                                                            |
+| -------------- | ---------------------------------------------------------------------- |
+| **Model size** | Set to `large` to enable GPU acceleration                              |
+| **Device**     | (Optional) Specify a GPU device index in a multi-GPU system (e.g. `0`) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -242,7 +241,7 @@ Triggers are best configured through the Frigate UI.
 
 #### Managing Triggers in the UI
 
-1. Navigate to <NavPath path="Settings > Triggers" /> and select a camera from the dropdown menu.
+1. Navigate to <NavPath path="Settings > Enrichments > Triggers" /> and select a camera from the dropdown menu.
 2. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
 3. In the **Create Trigger** wizard:
    - Enter a **Name** for the trigger (e.g., "Red Car Alert").

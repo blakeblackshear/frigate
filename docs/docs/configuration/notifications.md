@@ -37,9 +37,8 @@ Notifications will be prevented if either:
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Notifications > Notifications" />.
-   - Set **Enable notifications** to on
-   - Set **Notification email** to your email address
-   - Set **Cooldown period** to the desired number of seconds to wait before sending another notification from any camera (e.g. `10`)
+   - Set **Email** to your email address
+   - Enable notifications for the desired cameras
 
 </TabItem>
 <TabItem value="yaml">
@@ -60,8 +59,8 @@ notifications:
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Notifications" /> and select the desired camera.
-   - Set **Enabled** to on
-   - Set **Cooldown** to the desired number of seconds to wait before sending another notification from this camera (e.g. `30`)
+   - Set **Enable notifications** to on
+   - Set **Cooldown period** to the desired number of seconds to wait before sending another notification from this camera (e.g. `30`)
 
 </TabItem>
 <TabItem value="yaml">

@@ -43,9 +43,9 @@ You can define custom prompts at the global level and per-object type. To config
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Global configuration > Objects" />.
-   - Expand the **GenAI** section
-   - Set **Prompt** to your custom prompt text
-   - Under **Object Prompts**, add entries keyed by object type (e.g., `person`, `car`) with custom prompts for each
+   - Expand the **GenAI object config** section
+   - Set **Caption prompt** to your custom prompt text
+   - Under **Object prompts**, add entries keyed by object type (e.g., `person`, `car`) with custom prompts for each
 
 </TabItem>
 <TabItem value="yaml">
@@ -73,13 +73,13 @@ Prompts can also be overridden at the camera level to provide a more detailed pr
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Objects" /> for the desired camera.
-   - Expand the **GenAI** section
-   - Set **Enabled** to on
-   - Set **Use Snapshot** to on if desired
-   - Set **Prompt** to a camera-specific prompt
-   - Under **Object Prompts**, add entries keyed by object type with camera-specific prompts
-   - Set **Objects** to the list of object types that should receive descriptions (e.g., `person`, `cat`)
-   - Set **Required Zones** to limit descriptions to objects in specific zones (e.g., `steps`)
+   - Expand the **GenAI object config** section
+   - Set **Enable GenAI** to on
+   - Set **Use snapshots** to on if desired
+   - Set **Caption prompt** to a camera-specific prompt
+   - Under **Object prompts**, add entries keyed by object type with camera-specific prompts
+   - Set **GenAI objects** to the list of object types that should receive descriptions (e.g., `person`, `cat`)
+   - Set **Required zones** to limit descriptions to objects in specific zones (e.g., `steps`)
 
 </TabItem>
 <TabItem value="yaml">

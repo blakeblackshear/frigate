@@ -59,8 +59,8 @@ To create an alert only when an object enters the `entire_yard` zone:
 
 Navigate to <NavPath path="Settings > Camera configuration > Review" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                              | Description                                                                               |
+| ---------------------------------- | ----------------------------------------------------------------------------------------- |
 | **Alerts config > Required zones** | Zones that an object must enter to be considered an alert; leave empty to allow any zone. |
 
 </TabItem>
@@ -89,9 +89,9 @@ You may also want to filter detections to only be created when an object enters 
 
 Navigate to <NavPath path="Settings > Camera configuration > Review" />.
 
-| Field | Description |
-|-------|-------------|
-| **Alerts config > Required zones** | Zones that an object must enter to be considered an alert; leave empty to allow any zone. |
+| Field                                  | Description                                                                                  |
+| -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Alerts config > Required zones**     | Zones that an object must enter to be considered an alert; leave empty to allow any zone.    |
 | **Detections config > Required zones** | Zones that an object must enter to be considered a detection; leave empty to allow any zone. |
 
 </TabItem>
@@ -319,8 +319,8 @@ The `distance` values are measured in meters (metric) or feet (imperial), depend
 
 Navigate to <NavPath path="Settings > System > UI" />.
 
-| Field | Description |
-|-------|-------------|
+| Field           | Description                                                          |
+| --------------- | -------------------------------------------------------------------- |
 | **Unit system** | Set to `metric` (kilometers per hour) or `imperial` (miles per hour) |
 
 </TabItem>

@@ -37,8 +37,8 @@ To include a camera in Birdseye view only for specific circumstances, or exclude
 
 | Field | Description |
 |-------|-------------|
-| **Enabled** | Whether this camera appears in Birdseye view |
-| **Mode** | When to show the camera: `continuous`, `motion`, or `objects` |
+| **Enable Birdseye** | Whether this camera appears in Birdseye view |
+| **Tracking mode** | When to show the camera: `continuous`, `motion`, or `objects` |
 
 </TabItem>
 <TabItem value="yaml">
@@ -125,7 +125,7 @@ It is possible to override the order of cameras that are being shown in the Bird
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> for each camera and set the **Order** field to control the display order.
+Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> for each camera and set the **Position** field to control the display order.
 
 </TabItem>
 <TabItem value="yaml">

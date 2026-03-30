@@ -253,7 +253,7 @@ IPv6 is disabled by default. Enable it in the Frigate configuration.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Networking" /> and enable **IPv6**.
+Navigate to <NavPath path="Settings > System > Networking" /> and expand **IPv6 configuration**, then enable **Enable IPv6**.
 
 </TabItem>
 <TabItem value="yaml">

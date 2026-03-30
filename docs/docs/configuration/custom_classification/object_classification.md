@@ -77,13 +77,19 @@ Object classification is configured as a custom classification model. Each model
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > Object classification" />.
+Navigate to the **Classification** page from the main navigation sidebar, then click **Add Classification**.
 
-| Field | Description |
-|-------|-------------|
-| **Custom Classification Models > Dog > Threshold** | Minimum confidence score for a classification attempt to count (default: `0.8`) |
-| **Custom Classification Models > Dog > Object Config > Objects** | Object labels to classify (e.g., `dog`, `person`, `car`) |
-| **Custom Classification Models > Dog > Object Config > Classification Type** | Whether to assign results as a **sub label** or **attribute** |
+In the **Create New Classification** dialog:
+
+| Field                   | Description                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| **Name**                | A name for your classification model (e.g., `dog`)            |
+| **Type**                | Select **Object** for object classification                   |
+| **Object Label**        | The object label to classify (e.g., `dog`, `person`, `car`)   |
+| **Classification Type** | Whether to assign results as a **Sub Label** or **Attribute** |
+| **Classes**             | The class names the model will learn to distinguish between   |
+
+The `threshold` (default: `0.8`) can be adjusted in the YAML configuration.
 
 </TabItem>
 <TabItem value="yaml">
@@ -125,7 +131,7 @@ If examples for some of your classes do not appear in the grid, you can continue
 
 :::tip Diversity matters far more than volume
 
-Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what *that exact moment* looked like rather than what actually defines the class. **This is why Frigate does not implement bulk training in the UI.**
+Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what _that exact moment_ looked like rather than what actually defines the class. **This is why Frigate does not implement bulk training in the UI.**
 
 For more detail, see [Frigate Tip: Best Practices for Training Face and Custom Classification Models](https://github.com/blakeblackshear/frigate/discussions/21374).
 

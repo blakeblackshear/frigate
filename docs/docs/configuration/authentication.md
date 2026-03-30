@@ -71,10 +71,10 @@ If you are running a reverse proxy in the same Docker Compose file as Frigate, c
 
 Navigate to <NavPath path="Settings > System > Authentication" />.
 
-| Field | Description |
-|-------|-------------|
-| **Failed login limits** | Rate limit string for login failures (e.g., `1/second;5/minute;20/hour`) |
-| **Trusted proxies** | List of upstream network CIDRs to trust for `X-Forwarded-For` (e.g., `172.18.0.0/16` for internal Docker Compose network) |
+| Field                   | Description                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Failed login limits** | Rate limit string for login failures (e.g., `1/second;5/minute;20/hour`)                                                  |
+| **Trusted proxies**     | List of upstream network CIDRs to trust for `X-Forwarded-For` (e.g., `172.18.0.0/16` for internal Docker Compose network) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -182,13 +182,13 @@ If you have disabled Frigate's authentication and your proxy supports passing a 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Authentication" /> and configure the proxy header mapping settings.
+Navigate to <NavPath path="Settings > System > Proxy" /> and configure the header mapping and separator settings.
 
-| Field | Description |
-|-------|-------------|
-| **Proxy > Separator** | Character separating multiple roles in the role header (default: comma). Authentik uses a pipe `\|`. |
-| **Proxy > Header Map > User** | Header name for the authenticated username (e.g., `x-forwarded-user`) |
-| **Proxy > Header Map > Role** | Header name for the authenticated role/groups (e.g., `x-forwarded-groups`) |
+| Field                            | Description                                                                                          |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Separator character**          | Character separating multiple roles in the role header (default: comma). Authentik uses a pipe `\|`. |
+| **Header mapping > User header** | Header name for the authenticated username (e.g., `x-forwarded-user`)                                |
+| **Header mapping > Role header** | Header name for the authenticated role/groups (e.g., `x-forwarded-groups`)                           |
 
 </TabItem>
 <TabItem value="yaml">
@@ -212,11 +212,11 @@ A default role can be provided. Any value in the mapped `role` header will overr
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Authentication" /> and set the default role under the proxy settings.
+Navigate to <NavPath path="Settings > System > Proxy" /> and set the default role.
 
-| Field | Description |
-|-------|-------------|
-| **Proxy > Default Role** | Fallback role when no role header is present (e.g., `viewer`) |
+| Field            | Description                                                   |
+| ---------------- | ------------------------------------------------------------- |
+| **Default role** | Fallback role when no role header is present (e.g., `viewer`) |
 
 </TabItem>
 <TabItem value="yaml">
@@ -237,11 +237,11 @@ In some environments, upstream identity providers (OIDC, SAML, LDAP, etc.) do no
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Authentication" /> and configure the role mapping under the proxy header map settings.
+Navigate to <NavPath path="Settings > System > Proxy" /> and configure the role mapping under the header mapping settings.
 
-| Field | Description |
-|-------|-------------|
-| **Proxy > Header Map > Role Map** | Maps upstream group names to Frigate roles. Each Frigate role (`admin`, `viewer`, or custom) maps to a list of upstream group names. |
+| Field                         | Description                                                                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Header mapping > Role map** | Maps upstream group names to Frigate roles. Each Frigate role (`admin`, `viewer`, or custom) maps to a list of upstream group names. |
 
 </TabItem>
 <TabItem value="yaml">
@@ -344,8 +344,8 @@ The viewer role provides read-only access to all cameras in the UI and API. Cust
 
 Navigate to <NavPath path="Settings > System > Authentication" /> and configure roles under the **Roles** section.
 
-| Field | Description |
-|-------|-------------|
+| Field     | Description                                                       |
+| --------- | ----------------------------------------------------------------- |
 | **Roles** | Define custom roles and assign which cameras each role can access |
 
 </TabItem>

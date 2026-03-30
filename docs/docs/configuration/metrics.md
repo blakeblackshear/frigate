@@ -31,12 +31,14 @@ Metrics are available at `/api/metrics` by default. No additional Frigate config
 ## Available Metrics
 
 ### System Metrics
+
 - `frigate_cpu_usage_percent{pid="", name="", process="", type="", cmdline=""}` - Process CPU usage percentage
 - `frigate_mem_usage_percent{pid="", name="", process="", type="", cmdline=""}` - Process memory usage percentage
 - `frigate_gpu_usage_percent{gpu_name=""}` - GPU utilization percentage
 - `frigate_gpu_mem_usage_percent{gpu_name=""}` - GPU memory usage percentage
 
 ### Camera Metrics
+
 - `frigate_camera_fps{camera_name=""}` - Frames per second being consumed from your camera
 - `frigate_detection_fps{camera_name=""}` - Number of times detection is run per second
 - `frigate_process_fps{camera_name=""}` - Frames per second being processed
@@ -46,21 +48,25 @@ Metrics are available at `/api/metrics` by default. No additional Frigate config
 - `frigate_audio_rms{camera_name=""}` - Audio RMS for camera
 
 ### Detector Metrics
+
 - `frigate_detector_inference_speed_seconds{name=""}` - Time spent running object detection in seconds
 - `frigate_detection_start{name=""}` - Detector start time (unix timestamp)
 
 ### Storage Metrics
+
 - `frigate_storage_free_bytes{storage=""}` - Storage free bytes
 - `frigate_storage_total_bytes{storage=""}` - Storage total bytes
 - `frigate_storage_used_bytes{storage=""}` - Storage used bytes
 - `frigate_storage_mount_type{mount_type="", storage=""}` - Storage mount type info
 
 ### Service Metrics
+
 - `frigate_service_uptime_seconds` - Uptime in seconds
 - `frigate_service_last_updated_timestamp` - Stats recorded time (unix timestamp)
 - `frigate_device_temperature{device=""}` - Device Temperature
 
 ### Event Metrics
+
 - `frigate_camera_events{camera="", label=""}` - Count of camera events since exporter started
 
 ## Configuring Prometheus
@@ -69,10 +75,10 @@ To scrape metrics from Frigate, add the following to your Prometheus configurati
 
 ```yaml
 scrape_configs:
-  - job_name: 'frigate'
-    metrics_path: '/api/metrics'
+  - job_name: "frigate"
+    metrics_path: "/api/metrics"
     static_configs:
-      - targets: ['frigate:5000']
+      - targets: ["frigate:5000"]
     scrape_interval: 15s
 ```
 

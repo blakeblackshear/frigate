@@ -226,10 +226,10 @@ The jsmpeg live view resolution and encoding quality can be adjusted globally or
 
 Navigate to <NavPath path="Settings > Global configuration > Live playback" /> for global defaults, or <NavPath path="Settings > Camera configuration > Live playback" /> and select a camera for per-camera overrides.
 
-| Field | Description |
-|-------|-------------|
-| **Live height** | Height in pixels for the jsmpeg live stream; must be less than or equal to the detect stream height |
-| **Live quality** | Encoding quality for the jsmpeg stream (1 = highest, 31 = lowest) |
+| Field            | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| **Live height**  | Height in pixels for the jsmpeg live stream; must be less than or equal to the detect stream height |
+| **Live quality** | Encoding quality for the jsmpeg stream (1 = highest, 31 = lowest)                                   |
 
 </TabItem>
 <TabItem value="yaml">

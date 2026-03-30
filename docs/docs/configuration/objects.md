@@ -70,14 +70,14 @@ Object filters help reduce false positives by constraining the size, shape, and 
 
 Navigate to <NavPath path="Settings > Global configuration > Objects" />.
 
-| Field | Description |
-|-------|-------------|
-| **Object filters > Person > Min Area** | Minimum bounding box area in pixels (or decimal for percentage of frame) |
-| **Object filters > Person > Max Area** | Maximum bounding box area in pixels (or decimal for percentage of frame) |
-| **Object filters > Person > Min Ratio** | Minimum width/height ratio of the bounding box |
-| **Object filters > Person > Max Ratio** | Maximum width/height ratio of the bounding box |
-| **Object filters > Person > Min Score** | Minimum score for the object to initiate tracking |
-| **Object filters > Person > Threshold** | Minimum computed score to be considered a true positive |
+| Field                                   | Description                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| **Object filters > Person > Min Area**  | Minimum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Max Area**  | Maximum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Min Ratio** | Minimum width/height ratio of the bounding box                           |
+| **Object filters > Person > Max Ratio** | Maximum width/height ratio of the bounding box                           |
+| **Object filters > Person > Min Score** | Minimum score for the object to initiate tracking                        |
+| **Object filters > Person > Threshold** | Minimum computed score to be considered a true positive                  |
 
 To override filters for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
@@ -118,14 +118,7 @@ Object filter masks prevent specific object types from being detected in certain
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Objects" />.
-
-| Field | Description |
-|-------|-------------|
-| **Object mask > Mask1 > Friendly Name / Enabled / Coordinates** | Global object filter mask that applies to all object types |
-| **Object filters > Person > Mask > Mask1 > Friendly Name / Enabled / Coordinates** | Per-object mask that applies only to the specified object type |
-
-To configure masks for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" />.
+Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select a camera. Use the mask editor to draw object filter masks directly on the camera feed. Global object masks and per-object masks can both be configured from this view.
 
 </TabItem>
 <TabItem value="yaml">

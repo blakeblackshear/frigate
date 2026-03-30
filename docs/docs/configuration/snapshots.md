@@ -68,15 +68,15 @@ Configure how snapshots are rendered and stored. These settings control the defa
 
 Navigate to <NavPath path="Settings > Global configuration > Snapshots" />.
 
-| Field | Description |
-|-------|-------------|
-| **Enable snapshots** | Enable or disable saving snapshots for tracked objects |
-| **Timestamp overlay** | Overlay a timestamp on snapshots from API |
-| **Bounding box overlay** | Draw bounding boxes for tracked objects on snapshots from API |
-| **Crop snapshot** | Crop snapshots from API to the detected object's bounding box |
-| **Snapshot height** | Height in pixels to resize snapshots to; leave empty to preserve original size |
-| **Snapshot quality** | Encode quality for saved snapshots (0-100) |
-| **Required zones** | Zones an object must enter for a snapshot to be saved |
+| Field                    | Description                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| **Enable snapshots**     | Enable or disable saving snapshots for tracked objects                         |
+| **Timestamp overlay**    | Overlay a timestamp on snapshots from API                                      |
+| **Bounding box overlay** | Draw bounding boxes for tracked objects on snapshots from API                  |
+| **Crop snapshot**        | Crop snapshots from API to the detected object's bounding box                  |
+| **Snapshot height**      | Height in pixels to resize snapshots to; leave empty to preserve original size |
+| **Snapshot quality**     | Encode quality for saved snapshots (0-100)                                     |
+| **Required zones**       | Zones an object must enter for a snapshot to be saved                          |
 
 </TabItem>
 <TabItem value="yaml">
@@ -104,10 +104,10 @@ Configure how long snapshots are retained on disk. Per-object retention override
 
 Navigate to <NavPath path="Settings > Global configuration > Snapshots" />.
 
-| Field | Description |
-|-------|-------------|
-| **Snapshot retention > Default retention** | Number of days to retain snapshots (default: 10) |
-| **Snapshot retention > Retention mode** | Retention mode: `all`, `motion`, or `active_objects` |
+| Field                                              | Description                                                                         |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Snapshot retention > Default retention**         | Number of days to retain snapshots (default: 10)                                    |
+| **Snapshot retention > Retention mode**            | Retention mode: `all`, `motion`, or `active_objects`                                |
 | **Snapshot retention > Object retention > Person** | Per-object overrides for retention days (e.g., keep `person` snapshots for 15 days) |
 
 </TabItem>

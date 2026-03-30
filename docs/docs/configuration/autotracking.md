@@ -46,28 +46,27 @@ Navigate to <NavPath path="Settings > Camera configuration > ONVIF" /> for the d
 
 **ONVIF Connection**
 
-| Field | Description |
-|-------|-------------|
-| **Host** | Host of the camera being connected to. HTTP is assumed by default; prefix with `https://` for HTTPS. |
-| **Port** | ONVIF port for device (default: 8000) |
-| **User** | Username for login. Some devices require admin to access ONVIF. |
-| **Password** | Password for login |
-| **TLS Insecure** | Skip TLS verification from the ONVIF server (default: false) |
-| **Profile** | ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically. |
+| Field                  | Description                                                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ONVIF host**         | Host of the camera being connected to. HTTP is assumed by default; prefix with `https://` for HTTPS.                                                        |
+| **ONVIF port**         | ONVIF port for device (default: 8000)                                                                                                                       |
+| **ONVIF username**     | Username for login. Some devices require admin to access ONVIF.                                                                                             |
+| **ONVIF password**     | Password for login                                                                                                                                          |
+| **Disable TLS verify** | Skip TLS verification and disable digest auth for ONVIF (default: false)                                                                                    |
+| **ONVIF profile**      | ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically. |
 
 **Autotracking**
 
-| Field | Description |
-|-------|-------------|
-| **Enabled** | Enable or disable object autotracking (default: false) |
-| **Calibrate on Startup** | Calibrate the camera on startup by measuring PTZ motor speed (default: false) |
-| **Zooming** | Zoom mode during autotracking: `disabled`, `absolute`, or `relative` (default: disabled) |
-| **Zoom Factor** | Controls zoom behavior on tracked objects, between 0.1 and 0.75. Lower keeps more scene visible; higher zooms in more (default: 0.3) |
-| **Track** | List of object types to track (default: person) |
-| **Required Zones** | Zones an object must enter to begin autotracking |
-| **Return Preset** | Name of ONVIF preset in camera firmware to return to when tracking ends (default: home) |
-| **Timeout** | Seconds to delay before returning to preset (default: 10) |
-| **Movement Weights** | Auto-generated calibration values. Do not modify manually. |
+| Field                   | Description                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Enable Autotracking** | Enable or disable object autotracking (default: false)                                                                               |
+| **Calibrate on start**  | Calibrate the camera on startup by measuring PTZ motor speed (default: false)                                                        |
+| **Zoom mode**           | Zoom mode during autotracking: `disabled`, `absolute`, or `relative` (default: disabled)                                             |
+| **Zoom Factor**         | Controls zoom behavior on tracked objects, between 0.1 and 0.75. Lower keeps more scene visible; higher zooms in more (default: 0.3) |
+| **Tracked objects**     | List of object types to track (default: person)                                                                                      |
+| **Required Zones**      | Zones an object must enter to begin autotracking                                                                                     |
+| **Return Preset**       | Name of ONVIF preset in camera firmware to return to when tracking ends (default: home)                                              |
+| **Return timeout**      | Seconds to delay before returning to preset (default: 10)                                                                            |
 
 </TabItem>
 <TabItem value="yaml">

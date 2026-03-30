@@ -26,13 +26,7 @@ Object filter masks can be used to filter out stubborn false positives in fixed 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Motion detection" />.
-
-| Field | Description |
-|-------|-------------|
-| **Mask coordinates > Mask1 > Friendly Name** |  |
-| **Mask coordinates > Mask1 > Enabled** |  |
-| **Mask coordinates > Mask1 > Coordinates** |  |
+Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select a camera. Use the mask editor to draw motion masks and object filter masks directly on the camera feed. Each mask can be given a friendly name and toggled on or off.
 
 </TabItem>
 <TabItem value="yaml">

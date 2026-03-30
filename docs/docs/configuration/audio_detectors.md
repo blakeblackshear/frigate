@@ -20,9 +20,9 @@ Audio events can be enabled globally or for specific cameras.
 <ConfigTabs>
 <TabItem value="ui">
 
-**Global:** Navigate to <NavPath path="Settings > Global configuration > Audio events" /> and set **Enabled** to on.
+**Global:** Navigate to <NavPath path="Settings > Global configuration > Audio events" /> and set **Enable audio detection** to on.
 
-**Per-camera:** Navigate to <NavPath path="Settings > Camera configuration > Audio events" /> and set **Enabled** to on for the desired camera.
+**Per-camera:** Navigate to <NavPath path="Settings > Camera configuration > Audio events" /> and set **Enable audio detection** to on for the desired camera.
 
 </TabItem>
 <TabItem value="yaml">
