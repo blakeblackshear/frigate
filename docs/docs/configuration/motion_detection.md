@@ -3,6 +3,10 @@ id: motion_detection
 title: Motion Detection
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 # Tuning Motion Detection
 
 Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.
@@ -21,7 +25,7 @@ First, mask areas with regular motion not caused by the objects you want to dete
 
 ## Prepare For Testing
 
-The easiest way to tune motion detection is to use the Frigate UI under Settings > Motion Tuner. This screen allows the changing of motion detection values live to easily see the immediate effect on what is detected as motion.
+The recommended way to tune motion detection is to use the built-in Motion Tuner. Navigate to <NavPath path="Settings > Camera configuration > Motion tuner" /> and select the camera you want to tune. This screen lets you adjust motion detection values live and immediately see the effect on what is detected as motion, making it the fastest way to find optimal settings for each camera.
 
 ## Tuning Motion Detection During The Day
 
@@ -37,6 +41,20 @@ Remember that motion detection is just used to determine when object detection s
 
 The threshold value dictates how much of a change in a pixels luminance is required to be considered motion.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Motion detection" /> to set the threshold globally.
+
+To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera, or use the <NavPath path="Settings > Camera configuration > Motion tuner" /> to adjust it live.
+
+| Field                | Description                                                                                                                                                                                                                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Motion threshold** | The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive. The value should be between 1 and 255. (default: 30) |
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
@@ -45,11 +63,28 @@ motion:
   threshold: 30
 ```
 
+</TabItem>
+</ConfigTabs>
+
 Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
 
 Watching the motion boxes in the debug view, increase the threshold until you only see motion that is visible to the eye. Once this is done, it is important to test and ensure that desired motion is still detected.
 
 ### Contour Area
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Motion detection" /> to set the contour area globally.
+
+To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera, or use the <NavPath path="Settings > Camera configuration > Motion tuner" /> to adjust it live.
+
+| Field            | Description                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Contour area** | Minimum size in pixels in the resized motion image that counts as motion. Increasing this value will prevent smaller areas of motion from being detected. Decreasing will make motion detection more sensitive to smaller moving objects. As a rule of thumb: 10 = high sensitivity, 30 = medium sensitivity, 50 = low sensitivity. (default: 10) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 motion:
@@ -62,6 +97,9 @@ motion:
   #  - 50 - low sensitivity
   contour_area: 10
 ```
+
+</TabItem>
+</ConfigTabs>
 
 Once the threshold calculation is run, the pixels that have changed are grouped together. The contour area value is used to decide which groups of changed pixels qualify as motion. Smaller values are more sensitive meaning people that are far away, small animals, etc. are more likely to be detected as motion, but it also means that small changes in shadows, leaves, etc. are detected as motion. Higher values are less sensitive meaning these things won't be detected as motion but with the risk that desired motion won't be detected until closer to the camera.
 
@@ -81,6 +119,20 @@ However, if the preferred day settings do not work well at night it is recommend
 
 ### Lightning Threshold
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Motion detection" /> and expand the advanced fields to find the lightning threshold setting.
+
+To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera.
+
+| Field                   | Description                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Lightning threshold** | The percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera. (default: 0.8) |
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 motion:
   # Optional: The percentage of the image used to detect lightning or
@@ -94,6 +146,9 @@ motion:
   lightning_threshold: 0.8
 ```
 
+</TabItem>
+</ConfigTabs>
+
 Large changes in motion like PTZ moves and camera switches between Color and IR mode should result in a pause in object detection. `lightning_threshold` defines the percentage of the image used to detect these substantial changes. Increasing this value makes motion detection more likely to treat large changes (like IR mode switches) as valid motion. Decreasing it makes motion detection more likely to ignore large amounts of motion, such as a person approaching a doorbell camera.
 
 Note that `lightning_threshold` does **not** stop motion-based recordings from being saved — it only prevents additional motion analysis after the threshold is exceeded, reducing false positive object detections during high-motion periods (e.g. storms or PTZ sweeps) without interfering with recordings.
@@ -106,6 +161,20 @@ Some cameras, like doorbell cameras, may have missed detections when someone wal
 
 ### Skip Motion On Large Scene Changes
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Motion detection" /> and expand the advanced fields to find the skip motion threshold setting.
+
+To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera.
+
+| Field                     | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Skip motion threshold** | Fraction of the frame that must change in a single update before Frigate will completely ignore any motion in that frame. Values range between 0.0 and 1.0; leave unset (null) to disable. For example, setting this to 0.7 causes Frigate to skip reporting motion boxes when more than 70% of the image appears to change (e.g. during lightning storms, IR/color mode switches, or other sudden lighting events). |
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 motion:
   # Optional: Fraction of the frame that must change in a single update
@@ -117,6 +186,9 @@ motion:
   #           sudden lighting events).
   skip_motion_threshold: 0.7
 ```
+
+</TabItem>
+</ConfigTabs>
 
 This option is handy when you want to prevent large transient changes from triggering recordings or object detection. It differs from `lightning_threshold` because it completely suppresses motion instead of just forcing a recalibration.
 

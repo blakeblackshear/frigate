@@ -3,13 +3,24 @@ id: index
 title: Frigate Configuration
 ---
 
-For Home Assistant App installations, the config file should be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](#accessing-app-config-dir).
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
 
-For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
+Frigate can be configured through the **Settings UI** or by editing the YAML configuration file directly. The Settings UI is the recommended approach — it provides validation and a guided experience for all configuration options.
+
+It is recommended to start with a minimal configuration and add to it as described in [the getting started guide](../guides/getting_started.md).
+
+## Configuration File Location
+
+For users who prefer to edit the YAML configuration file directly:
+
+- **Home Assistant App:** `/addon_configs/<addon_directory>/config.yml` — see [directory list](#accessing-app-config-dir)
+- **All other installations:** Map to `/config/config.yml` inside the container
 
 It can be named `config.yml` or `config.yaml`, but if both files exist `config.yml` will be preferred and `config.yaml` will be ignored.
 
-It is recommended to start with a minimal configuration and add to it as described in [this guide](../guides/getting_started.md) and use the built in configuration editor in Frigate's UI which supports validation.
+A minimal starting configuration:
 
 ```yaml
 mqtt:
@@ -38,7 +49,7 @@ When running Frigate through the HA App, the Frigate `/config` directory is mapp
 
 **Whenever you see `/config` in the documentation, it refers to this directory.**
 
-If for example you are running the standard App variant and use the [VS Code App](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory and edit the `config.yaml` file. You can also use the built-in file editor in the Frigate UI to edit the configuration file.
+If for example you are running the standard App variant and use the [VS Code App](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory and edit the `config.yaml` file. You can also use the built-in config editor in the Frigate UI.
 
 ## VS Code Configuration Schema
 
@@ -81,7 +92,7 @@ genai:
 
 ## Common configuration examples
 
-Here are some common starter configuration examples. Refer to the [reference config](./reference.md) for detailed information about all the config values.
+Here are some common starter configuration examples. These can be configured through the Settings UI or via YAML. Refer to the [reference config](./reference.md) for detailed information about all config values.
 
 ### Raspberry Pi Home Assistant App with USB Coral
 
@@ -93,6 +104,20 @@ Here are some common starter configuration examples. Refer to the [reference con
 - Continue to keep all video if it qualified as an alert or detection for 30 days
 - Save snapshots for 30 days
 - Motion mask for the camera timestamp
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > System > MQTT" /> and configure the MQTT connection to your Home Assistant Mosquitto broker
+2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Raspberry Pi (H.264)`
+3. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
+4. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
+5. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
+6. Navigate to <NavPath path="Settings > Camera configuration > Management" /> and add your camera with the appropriate RTSP stream URL
+7. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> to add a motion mask for the camera timestamp
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 mqtt:
@@ -145,16 +170,33 @@ cameras:
           coordinates: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400"
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Standalone Intel Mini PC with USB Coral
 
 - Single camera with 720p, 5fps stream for detect
-- MQTT disabled (not integrated with home assistant)
+- MQTT disabled (not integrated with Home Assistant)
 - VAAPI hardware acceleration for decoding video
 - USB Coral detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not
 - Continue to keep all video if it qualified as an alert or detection for 30 days
 - Save snapshots for 30 days
 - Motion mask for the camera timestamp
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > System > MQTT" /> and set **Enable MQTT** to off
+2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`
+3. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
+4. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
+5. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
+6. Navigate to <NavPath path="Settings > Camera configuration > Management" /> and add your camera with the appropriate RTSP stream URL
+7. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> to add a motion mask for the camera timestamp
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 mqtt:
@@ -205,16 +247,34 @@ cameras:
           coordinates: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400"
 ```
 
-### Home Assistant integrated Intel Mini PC with OpenVino
+</TabItem>
+</ConfigTabs>
+
+### Home Assistant integrated Intel Mini PC with OpenVINO
 
 - Single camera with 720p, 5fps stream for detect
-- MQTT connected to same mqtt server as home assistant
+- MQTT connected to same MQTT server as Home Assistant
 - VAAPI hardware acceleration for decoding video
-- OpenVino detector
+- OpenVINO detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not
 - Continue to keep all video if it qualified as an alert or detection for 30 days
 - Save snapshots for 30 days
 - Motion mask for the camera timestamp
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > System > MQTT" /> and configure the connection to your MQTT broker
+2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`
+3. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `openvino` and **Device** `AUTO`
+4. Navigate to <NavPath path="Settings > System > Detection model" /> and configure the OpenVINO model path and settings
+5. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
+6. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
+7. Navigate to <NavPath path="Settings > Camera configuration > Management" /> and add your camera with the appropriate RTSP stream URL
+8. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> to add a motion mask for the camera timestamp
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 mqtt:
@@ -274,3 +334,6 @@ cameras:
           enabled: true
           coordinates: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400"
 ```
+
+</TabItem>
+</ConfigTabs>

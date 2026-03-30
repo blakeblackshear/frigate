@@ -3,6 +3,10 @@ id: live
 title: Live View
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Frigate intelligently displays your camera streams on the Live view dashboard. By default, Frigate employs "smart streaming" where camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion or active objects are detected, cameras seamlessly switch to a live stream.
 
 ### Live View technologies
@@ -63,19 +67,26 @@ go2rtc:
 
 ### Setting Streams For Live UI
 
-You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage.
+You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage.
 
 Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
 
 :::note
 
-Frigate's default dashboard ("All Cameras") will always use the first entry you've defined in `streams:` when playing live streams from your cameras.
+Frigate's default dashboard ("All Cameras") will always use the first entry you've defined in streams when playing live streams from your cameras.
 
 :::
 
-Configure the `streams` option with a "friendly name" for your stream followed by the go2rtc stream name.
+Configure a "friendly name" for your stream followed by the go2rtc stream name. Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the streams configuration, only go2rtc stream names.
 
-Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the `streams` configuration, only go2rtc stream names.
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Live playback" />, then select your camera.
+   - Under **Live stream names**, add entries mapping a friendly name to each go2rtc stream name (e.g., `Main Stream` mapped to `test_cam`, `Sub Stream` mapped to `test_cam_sub`).
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {3,6,8,25-29}
 go2rtc:
@@ -108,6 +119,9 @@ cameras:
         Sub Stream: test_cam_sub
         Special Stream: test_cam_another_sub
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### WebRTC extra configuration:
 
@@ -185,7 +199,7 @@ To prevent go2rtc from blocking other applications from accessing your camera's 
 
 Frigate provides a dialog in the Camera Group Edit pane with several options for streaming on a camera group's dashboard. These settings are _per device_ and are saved in your device's local storage.
 
-- Stream selection using the `live -> streams` configuration option (see _Setting Streams For Live UI_ above)
+- Stream selection using the streams configuration option (see _Setting Streams For Live UI_ above)
 - Streaming type:
   - _No streaming_: Camera images will only update once per minute and no live streaming will occur.
   - _Smart Streaming_ (default, recommended setting): Smart streaming will update your camera image once per minute when no detectable activity is occurring to conserve bandwidth and resources, since a static picture is the same as a streaming image with no motion or objects. When motion or objects are detected, the image seamlessly switches to a live stream.
@@ -202,6 +216,40 @@ The default dashboard ("All Cameras") will always use:
 Use a camera group if you want to change any of these settings from the defaults.
 
 :::
+
+### jsmpeg Stream Quality
+
+The jsmpeg live view resolution and encoding quality can be adjusted globally or per camera. These settings only affect the jsmpeg player and do not apply when go2rtc is used for live view.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Live playback" /> for global defaults, or <NavPath path="Settings > Camera configuration > Live playback" /> and select a camera for per-camera overrides.
+
+| Field            | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| **Live height**  | Height in pixels for the jsmpeg live stream; must be less than or equal to the detect stream height |
+| **Live quality** | Encoding quality for the jsmpeg stream (1 = highest, 31 = lowest)                                   |
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+# Global defaults
+live:
+  height: 720
+  quality: 8
+
+# Per-camera override
+cameras:
+  front_door:
+    live:
+      height: 480
+      quality: 4
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Disabling cameras
 
@@ -276,7 +324,7 @@ When your browser runs into problems playing back your camera streams, it will l
    4. Look for messages prefixed with the camera name.
 
    These logs help identify if the issue is player-specific (MSE vs. WebRTC) or related to camera configuration (e.g., go2rtc streams, codecs). If you see frequent errors:
-   - Verify your camera's H.264/AAC settings (see [Frigate's camera settings recommendations](#camera_settings_recommendations)).
+   - Verify your camera's H.264/AAC settings (see [Frigate's camera settings recommendations](#camera-settings-recommendations)).
    - Check go2rtc configuration for transcoding (e.g., audio to AAC/OPUS).
    - Test with a different stream via the UI dropdown (if `live -> streams` is configured).
    - For WebRTC-specific issues, ensure port 8555 is forwarded and candidates are set (see (WebRTC Extra Configuration)(#webrtc-extra-configuration)).

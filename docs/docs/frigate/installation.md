@@ -271,7 +271,7 @@ If you are using `docker run`, add this option to your command `--device /dev/ha
 
 #### Configuration
 
-Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
+Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8) to complete the setup.
 
 ### MemryX MX3
 

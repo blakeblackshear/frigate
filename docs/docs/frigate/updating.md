@@ -5,7 +5,7 @@ title: Updating
 
 # Updating Frigate
 
-The current stable version of Frigate is **0.17.0**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.17.0).
+The current stable version of Frigate is **0.18.0**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.18.0).
 
 Keeping Frigate up to date ensures you benefit from the latest features, performance improvements, and bug fixes. The update process varies slightly depending on your installation method (Docker, Home Assistant App, etc.). Below are instructions for the most common setups.
 
@@ -31,21 +31,21 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
 
 2. **Update and Pull the Latest Image**:
    - If using Docker Compose:
-     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.17.0` instead of `0.16.4`). For example:
+     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.18.0` instead of `0.17.1`). For example:
        ```yaml
        services:
          frigate:
-           image: ghcr.io/blakeblackshear/frigate:0.17.0
+           image: ghcr.io/blakeblackshear/frigate:0.18.0
        ```
      - Then pull the image:
        ```bash
-       docker pull ghcr.io/blakeblackshear/frigate:0.17.0
+       docker pull ghcr.io/blakeblackshear/frigate:0.18.0
        ```
      - **Note for `stable` Tag Users**: If your `docker-compose.yml` uses the `stable` tag (e.g., `ghcr.io/blakeblackshear/frigate:stable`), you don’t need to update the tag manually. The `stable` tag always points to the latest stable release after pulling.
    - If using `docker run`:
-     - Pull the image with the appropriate tag (e.g., `0.17.0`, `0.17.0-tensorrt`, or `stable`):
+     - Pull the image with the appropriate tag (e.g., `0.18.0`, `0.18.0-tensorrt`, or `stable`):
        ```bash
-       docker pull ghcr.io/blakeblackshear/frigate:0.17.0
+       docker pull ghcr.io/blakeblackshear/frigate:0.18.0
        ```
 
 3. **Start the Container**:
@@ -77,6 +77,7 @@ For users running Frigate as a Home Assistant App:
    - If an update is available, you’ll see an "Update" button.
 
 2. **Update the App**:
+   - Make a backup of the current version of the app.
    - Click the "Update" button next to the Frigate app.
    - Wait for the process to complete. Home Assistant will handle downloading and installing the new version.
 
@@ -99,7 +100,7 @@ If an update causes issues:
 1. Stop Frigate.
 2. Restore your backed-up config file and database.
 3. Revert to the previous image version:
-   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.16.4`) in your `docker run` command.
+   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.17.1`) in your `docker run` command.
    - For Docker Compose: Edit your `docker-compose.yml`, specify the older version tag (e.g., `ghcr.io/blakeblackshear/frigate:0.16.4`), and re-run `docker compose up -d`.
    - For Home Assistant: Restore from the app/addon backup you took before you updated.
 4. Verify the old version is running again.

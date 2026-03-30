@@ -3,13 +3,17 @@ id: object_classification
 title: Object Classification
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Object classification allows you to train a custom MobileNetV2 classification model to run on tracked objects (persons, cars, animals, etc.) to identify a finer category or attribute for that object. Classification results are visible in the Tracked Object Details pane in Explore, through the `frigate/tracked_object_details` MQTT topic, in Home Assistant sensors via the official Frigate integration, or through the event endpoints in the HTTP API.
 
 ## Minimum System Requirements
 
 Object classification models are lightweight and run very fast on CPU.
 
-Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
+Training the model does briefly use a high amount of system resources for about 1-3 minutes per training run. On lower-power devices, training may take longer.
 
 A CPU with AVX + AVX2 instructions is required for training and inference.
 
@@ -27,7 +31,7 @@ For object classification:
 ### Classification Type
 
 - **Sub label**:
-  - Applied to the object’s `sub_label` field.
+  - Applied to the object's `sub_label` field.
   - Ideal for a single, more specific identity or type.
   - Example: `cat` → `Leo`, `Charlie`, `None`.
 
@@ -55,7 +59,7 @@ This two-step verification prevents false positives by requiring consistent pred
 
 ### Sub label
 
-- **Known pet vs unknown**: For `dog` objects, set sub label to your pet’s name (e.g., `buddy`) or `none` for others.
+- **Known pet vs unknown**: For `dog` objects, set sub label to your pet's name (e.g., `buddy`) or `none` for others.
 - **Mail truck vs normal car**: For `car`, classify as `mail_truck` vs `car` to filter important arrivals.
 - **Delivery vs non-delivery person**: For `person`, classify `delivery` vs `visitor` based on uniform/props.
 
@@ -68,7 +72,27 @@ This two-step verification prevents false positives by requiring consistent pred
 
 ## Configuration
 
-Object classification is configured as a custom classification model. Each model has its own name and settings. You must list which object labels should be classified.
+Object classification is configured as a custom classification model. Each model has its own name and settings. Specify which object labels should be classified.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to the **Classification** page from the main navigation sidebar, then click **Add Classification**.
+
+In the **Create New Classification** dialog:
+
+| Field                   | Description                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| **Name**                | A name for your classification model (e.g., `dog`)            |
+| **Type**                | Select **Object** for object classification                   |
+| **Object Label**        | The object label to classify (e.g., `dog`, `person`, `car`)   |
+| **Classification Type** | Whether to assign results as a **Sub Label** or **Attribute** |
+| **Classes**             | The class names the model will learn to distinguish between   |
+
+The `threshold` (default: `0.8`) can be adjusted in the YAML configuration.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 classification:
@@ -81,6 +105,9 @@ classification:
 ```
 
 An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For object classification models, the default is 200.
+
+</TabItem>
+</ConfigTabs>
 
 ## Training the model
 
@@ -104,18 +131,18 @@ If examples for some of your classes do not appear in the grid, you can continue
 
 :::tip Diversity matters far more than volume
 
-Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what *that exact moment* looked like rather than what actually defines the class. **This is why Frigate does not implement bulk training in the UI.**
+Selecting dozens of nearly identical images is one of the fastest ways to degrade model performance. MobileNetV2 can overfit quickly when trained on homogeneous data — the model learns what _that exact moment_ looked like rather than what actually defines the class. **This is why Frigate does not implement bulk training in the UI.**
 
 For more detail, see [Frigate Tip: Best Practices for Training Face and Custom Classification Models](https://github.com/blakeblackshear/frigate/discussions/21374).
 
 :::
 
 - **Start small and iterate**: Begin with a small, representative set of images per class. Models often begin working well with surprisingly few examples and improve naturally over time.
-- **Favor hard examples**: When images appear in the Recent Classifications tab, prioritize images scoring below 90–100% or those captured under new lighting, weather, or distance conditions.
+- **Favor hard examples**: When images appear in the Recent Classifications tab, prioritize images scoring below 90-100% or those captured under new lighting, weather, or distance conditions.
 - **Avoid bulk training similar images**: Training large batches of images that already score 100% (or close) adds little new information and increases the risk of overfitting.
-- **The wizard is just the starting point**: You don’t need to find and label every class upfront. Missing classes will naturally appear in Recent Classifications, and those images tend to be more valuable because they represent new conditions and edge cases.
+- **The wizard is just the starting point**: You don't need to find and label every class upfront. Missing classes will naturally appear in Recent Classifications, and those images tend to be more valuable because they represent new conditions and edge cases.
 - **Problem framing**: Keep classes visually distinct and relevant to the chosen object types.
-- **Preprocessing**: Ensure examples reflect object crops similar to Frigate’s boxes; keep the subject centered.
+- **Preprocessing**: Ensure examples reflect object crops similar to Frigate's boxes; keep the subject centered.
 - **Labels**: Keep label names short and consistent; include a `none` class if you plan to ignore uncertain predictions for sub labels.
 - **Threshold**: Tune `threshold` per model to reduce false assignments. Start at `0.8` and adjust based on validation.
 
@@ -125,6 +152,17 @@ To troubleshoot issues with object classification models, enable debug logging t
 
 Enable debug logs for classification models by adding `frigate.data_processing.real_time.custom_classification: debug` to your `logger` configuration. These logs are verbose, so only keep this enabled when necessary. Restart Frigate after this change.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Logging" />.
+
+- Set **Logging level** to `debug`
+- Set **Per-process log level > Frigate.Data Processing.Real Time.Custom Classification** to `debug` for verbose classification logging
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 logger:
   default: info
@@ -132,6 +170,9 @@ logger:
     # highlight-next-line
     frigate.data_processing.real_time.custom_classification: debug
 ```
+
+</TabItem>
+</ConfigTabs>
 
 The debug logs will show:
 

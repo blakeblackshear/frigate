@@ -1,5 +1,9 @@
 # Birdseye
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 In addition to Frigate's Live camera dashboard, Birdseye allows a portable heads-up view of your cameras to see what is going on around your property / space without having to watch all cameras that may have nothing happening. Birdseye allows specific modes that intelligently show and disappear based on what you care about.
 
 Birdseye can be viewed by adding the "Birdseye" camera to a Camera Group in the Web UI. Add a Camera Group by pressing the "+" icon on the Live page, and choose "Birdseye" as one of the cameras.
@@ -22,7 +26,22 @@ A custom icon can be added to the birdseye background by providing a 180x180 ima
 
 ### Birdseye view override at camera level
 
-If you want to include a camera in Birdseye view only for specific circumstances, or just don't include it at all, the Birdseye setting can be set at the camera level.
+To include a camera in Birdseye view only for specific circumstances, or exclude it entirely, configure Birdseye at the camera level.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+**Global settings:** Navigate to <NavPath path="Settings > System > Birdseye" /> to configure the default Birdseye behavior for all cameras.
+
+**Per-camera overrides:** Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> to override the mode or disable Birdseye for a specific camera.
+
+| Field | Description |
+|-------|-------------|
+| **Enable Birdseye** | Whether this camera appears in Birdseye view |
+| **Tracking mode** | When to show the camera: `continuous`, `motion`, or `objects` |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {8-10,12-14}
 # Include all cameras by default in Birdseye view
@@ -41,9 +60,24 @@ cameras:
       enabled: False
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Birdseye Inactivity
 
-By default birdseye shows all cameras that have had the configured activity in the last 30 seconds, this can be configured:
+By default birdseye shows all cameras that have had the configured activity in the last 30 seconds. This threshold can be configured.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Birdseye" />.
+
+| Field | Description |
+|-------|-------------|
+| **Inactivity threshold** | Seconds of inactivity before a camera is hidden from Birdseye (default: 30) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 birdseye:
@@ -52,11 +86,27 @@ birdseye:
   inactivity_threshold: 15
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ## Birdseye Layout
 
 ### Birdseye Dimensions
 
 The resolution and aspect ratio of birdseye can be configured. Resolution will increase the quality but does not affect the layout. Changing the aspect ratio of birdseye does affect how cameras are laid out.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Birdseye" />.
+
+| Field | Description |
+|-------|-------------|
+| **Width** | Birdseye output width in pixels (default: 1280) |
+| **Height** | Birdseye output height in pixels (default: 720) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 birdseye:
@@ -65,10 +115,20 @@ birdseye:
   height: 720
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Sorting cameras in the Birdseye view
 
-It is possible to override the order of cameras that are being shown in the Birdseye view.
-The order needs to be set at the camera level.
+It is possible to override the order of cameras that are being shown in the Birdseye view. The order is set at the camera level.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> for each camera and set the **Position** field to control the display order.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 # Include all cameras by default in Birdseye view
@@ -87,13 +147,26 @@ cameras:
       order: 2
 ```
 
+</TabItem>
+</ConfigTabs>
+
 _Note_: Cameras are sorted by default using their name to ensure a constant view inside Birdseye.
 
 ### Birdseye Cameras
 
 It is possible to limit the number of cameras shown on birdseye at one time. When this is enabled, birdseye will show the cameras with most recent activity. There is a cooldown to ensure that cameras do not switch too frequently.
 
-For example, this can be configured to only show the most recently active camera.
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Birdseye" />.
+
+| Field | Description |
+|-------|-------------|
+| **Layout > Max cameras** | Maximum number of cameras shown at once (e.g., `1` for only the most active camera) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {3-4}
 birdseye:
@@ -102,9 +175,24 @@ birdseye:
     max_cameras: 1
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Birdseye Scaling
 
 By default birdseye tries to fit 2 cameras in each row and then double in size until a suitable layout is found. The scaling can be configured with a value between 1.0 and 5.0 depending on use case.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Birdseye" />.
+
+| Field | Description |
+|-------|-------------|
+| **Layout > Scaling factor** | Camera scaling factor between 1.0 and 5.0 (default: 2.0) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {3-4}
 birdseye:
@@ -112,3 +200,6 @@ birdseye:
   layout:
     scaling_factor: 3.0
 ```
+
+</TabItem>
+</ConfigTabs>

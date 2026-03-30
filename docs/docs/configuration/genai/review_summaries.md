@@ -3,6 +3,10 @@ id: genai_review
 title: Review Summaries
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Generative AI can be used to automatically generate structured summaries of review items. These summaries will show up in Frigate's native notifications as well as in the UI. Generative AI can also be used to take a collection of summaries over a period of time and provide a report, which may be useful to get a quick report of everything that happened while out for some amount of time.
 
 Requests for a summary are requested automatically to your AI provider for alert review items when the activity has ended, they can also be optionally enabled for detections as well.
@@ -27,6 +31,30 @@ This will show in multiple places in the UI to give additional context about eac
 ### Defining Typical Activity
 
 Each installation and even camera can have different parameters for what is considered suspicious activity. Frigate allows the `activity_context_prompt` to be defined globally and at the camera level, which allows you to define more specifically what should be considered normal activity. It is important that this is not overly specific as it can sway the output of the response.
+
+To configure the activity context prompt:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Set **GenAI config > Activity context prompt** to your custom activity context text
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+review:
+  genai:
+    activity_context_prompt: |
+      ### Normal Activity Indicators (Level 0)
+      - Known/verified people in any zone at any time
+      ...
+```
+
+</TabItem>
+</ConfigTabs>
 
 <details>
   <summary>Default Activity Context Prompt</summary>
@@ -74,7 +102,18 @@ review:
 
 ### Image Source
 
-By default, review summaries use preview images (cached preview frames) which have a lower resolution but use fewer tokens per image. For better image quality and more detailed analysis, you can configure Frigate to extract frames directly from recordings at a higher resolution:
+By default, review summaries use preview images (cached preview frames) which have a lower resolution but use fewer tokens per image. For better image quality and more detailed analysis, configure Frigate to extract frames directly from recordings at a higher resolution.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Set **GenAI config > Enable GenAI descriptions** to on
+- Set **GenAI config > Review image source** to `recordings` (default is `preview`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 review:
@@ -83,6 +122,9 @@ review:
     # highlight-next-line
     image_source: recordings # Options: "preview" (default) or "recordings"
 ```
+
+</TabItem>
+</ConfigTabs>
 
 When using `recordings`, frames are extracted at 480px height while maintaining the camera's original aspect ratio, providing better detail for the LLM while being mindful of context window size. This is particularly useful for scenarios where fine details matter, such as identifying license plates, reading text, or analyzing distant objects.
 
@@ -103,7 +145,17 @@ If recordings are not available for a given time period, the system will automat
 
 ### Additional Concerns
 
-Along with the concern of suspicious activity or immediate threat, you may have concerns such as animals in your garden or a gate being left open. These concerns can be configured so that the review summaries will make note of them if the activity requires additional review. For example:
+Along with the concern of suspicious activity or immediate threat, you may have concerns such as animals in your garden or a gate being left open. Configure these concerns so that review summaries will make note of them if the activity requires additional review.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Set **GenAI config > Additional concerns** to a list of your concerns (e.g., `animals in the garden`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {4,5}
 review:
@@ -113,9 +165,22 @@ review:
       - animals in the garden
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Preferred Language
 
-By default, review summaries are generated in English. You can configure Frigate to generate summaries in your preferred language by setting the `preferred_language` option:
+By default, review summaries are generated in English. Configure Frigate to generate summaries in your preferred language by setting the `preferred_language` option.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Set **GenAI config > Preferred language** to the desired language (e.g., `Spanish`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {4}
 review:
@@ -123,6 +188,9 @@ review:
     enabled: true
     preferred_language: Spanish
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Review Reports
 

@@ -1,14 +1,29 @@
 # Stationary Objects
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 An object is considered stationary when it is being tracked and has been in a very similar position for a certain number of frames. This number is defined in the configuration under `detect -> stationary -> threshold`, and is 10x the frame rate (or 10 seconds) by default. Once an object is considered stationary, it will remain stationary until motion occurs within the object at which point object detection will start running again. If the object changes location, it will be considered active.
 
 ## Why does it matter if an object is stationary?
 
-Once an object becomes stationary, object detection will not be continually run on that object. This serves to reduce resource usage and redundant detections when there has been no motion near the tracked object. This also means that Frigate is contextually aware, and can for example [filter out recording segments](record.md#what-do-the-different-retain-modes-mean) to only when the object is considered active. Motion alone does not determine if an object is "active" for active_objects segment retention. Lighting changes for a parked car won't make an object active.
+Once an object becomes stationary, object detection will not be continually run on that object. This serves to reduce resource usage and redundant detections when there has been no motion near the tracked object. This also means that Frigate is contextually aware, and can for example [filter out recording segments](record.md#configuring-recording-retention) to only when the object is considered active. Motion alone does not determine if an object is "active" for active_objects segment retention. Lighting changes for a parked car won't make an object active.
 
 ## Tuning stationary behavior
 
-The default config is:
+Configure how Frigate handles stationary objects.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Object detection" />.
+
+- Set **Stationary objects config > Stationary interval** to the frequency for running detection on stationary objects (default: 50). Once stationary, detection runs every nth frame to verify the object is still present. There is no way to disable stationary object tracking with this value.
+- Set **Stationary objects config > Stationary threshold** to the number of frames an object must remain relatively still before it is considered stationary (default: 50)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 detect:
@@ -17,11 +32,8 @@ detect:
     threshold: 50
 ```
 
-`interval` is defined as the frequency for running detection on stationary objects. This means that by default once an object is considered stationary, detection will not be run on it until motion is detected or until the interval (every 50th frame by default). With `interval >= 1`, every nth frames detection will be run to make sure the object is still there.
-
-NOTE: There is no way to disable stationary object tracking with this value.
-
-`threshold` is the number of frames an object needs to remain relatively still before it is considered stationary.
+</TabItem>
+</ConfigTabs>
 
 ## Why does Frigate track stationary objects?
 

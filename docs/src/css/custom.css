@@ -242,3 +242,49 @@
   padding: 0 var(--ifm-pre-padding);
   border-left: 3px solid #ff000080;
 }
+
+/* ConfigTabs wrapper */
+.config-tabs-wrapper {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.config-tabs-wrapper .tabs-container {
+  margin-bottom: 0 !important;
+}
+
+.config-tabs-wrapper .tabs {
+  background: var(--ifm-color-emphasis-100);
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  margin-bottom: 0;
+  padding: 0 12px;
+}
+
+.config-tabs-wrapper .tabs__item {
+  padding: 8px 16px;
+  border-radius: 0;
+}
+
+.config-tabs-wrapper .tabs__item--active {
+  border-bottom-color: var(--ifm-color-primary);
+}
+
+.config-tabs-wrapper .config-tab-ui {
+  padding: 4px 16px 16px;
+}
+
+.config-tabs-wrapper .config-tab-ui > :last-child {
+  margin-bottom: 0;
+}
+
+.config-tabs-wrapper div[class*="codeBlockContainer"] {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin: 0;
+}
+
+.config-tabs-wrapper .tabs-container > .margin-top--md:has(.config-tab-yaml:not([hidden])) {
+  margin-top: 0 !important;
+}
