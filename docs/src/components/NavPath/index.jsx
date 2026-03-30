@@ -16,10 +16,10 @@ export default function NavPath({ path }) {
             <span
               style={{
                 margin: "0 4px",
-                color: "var(--ifm-color-emphasis-500)",
+                color: "var(--ifm-color-emphasis-800)",
               }}
             >
-              ›
+              →
             </span>
           )}
           <strong>{seg}</strong>
