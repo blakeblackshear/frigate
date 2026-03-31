@@ -1399,7 +1399,7 @@ MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the
 
 #### YOLO-NAS
 
-The [YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) model included in this detector is downloaded from the [Models Section](#downloading-yolo-nas-model) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
+The [YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) model included in this detector is downloaded from the [Models Section](#downloading-yolo-nas-model) and compiled to DFP with [mx_nc](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage).
 
 **Note:** The default model for the MemryX detector is YOLO-NAS 320x320.
 
@@ -1453,7 +1453,7 @@ model:
 
 #### YOLOv9
 
-The YOLOv9s model included in this detector is downloaded from [the original GitHub](https://github.com/WongKinYiu/yolov9) like in the [Models Section](#yolov9-1) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
+The YOLOv9s model included in this detector is downloaded from [the original GitHub](https://github.com/WongKinYiu/yolov9) like in the [Models Section](#yolov9-1) and compiled to DFP with [mx_nc](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage).
 
 ##### Configuration
 
