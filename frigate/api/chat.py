@@ -673,6 +673,8 @@ async def _execute_start_camera_watch(
     if camera not in config.cameras:
         return {"error": f"Camera '{camera}' not found."}
 
+    await require_camera_access(camera, request=request)
+
     genai_manager = request.app.genai_manager
     vision_client = genai_manager.vision_client or genai_manager.tool_client
     if vision_client is None:
