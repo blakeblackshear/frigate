@@ -142,8 +142,19 @@ def config(request: Request):
     # remove the proxy secret
     config["proxy"].pop("auth_secret", None)
 
+    # remove genai api keys
+    for genai_name, genai_cfg in config.get("genai", {}).items():
+        if isinstance(genai_cfg, dict):
+            genai_cfg.pop("api_key", None)
+
     for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
+
+        # remove onvif credentials
+        onvif_dict = camera_dict.get("onvif", {})
+        if onvif_dict:
+            onvif_dict.pop("user", None)
+            onvif_dict.pop("password", None)
 
         # clean paths
         for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
