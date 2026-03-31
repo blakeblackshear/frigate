@@ -1607,7 +1607,24 @@ To use your own model:
 
 5.  Update the `labelmap_path` to match your custom model's labels.
 
-For detailed instructions on compiling models, refer to the [MemryX Compiler](https://developer.memryx.com/tools/neural_compiler.html#usage) docs and [Tutorials](https://developer.memryx.com/tutorials/tutorials.html).
+#### Compile the Model
+
+Custom models must be compiled using **MemryX SDK 2.1**.
+
+Before compiling your model, install the MemryX Neural Compiler tools from the
+[Install Tools](https://developer.memryx.com/2p1/get_started/install_tools.html) page on the **host**.
+
+Once the SDK 2.1 environment is set up, follow the
+[MemryX Compiler](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage) documentation to compile your model.
+
+Example:
+
+```bash
+mx_nc -m ./yolov9.onnx --dfp_fname ./yolov9.dfp -is "1,3,640,640" -c 4 --autocrop -v
+```
+> **Note:** `-is` specifies the input shape. Use your model's input dimensions.
+
+For detailed instructions on compiling models, refer to the [MemryX Compiler](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage) docs and [Tutorials](https://developer.memryx.com/2p1/tutorials/tutorials.html).
 
 ```yaml
 # The detector automatically selects the default model if nothing is provided in the config.
