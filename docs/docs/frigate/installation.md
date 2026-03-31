@@ -297,7 +297,7 @@ The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVM
 
 #### Installation
 
-To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/get_started/hardware_setup.html).
+To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/2p1/get_started/hardware_setup.html).
 
 Then follow these steps for installing the correct driver/runtime configuration:
 
@@ -305,6 +305,12 @@ Then follow these steps for installing the correct driver/runtime configuration:
 2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
 3. Run the script with `./user_installation.sh`
 4. **Restart your computer** to complete driver installation.
+
+:::warning
+
+For manual setup, use **MemryX SDK 2.1** only. Other SDK versions are not supported for this setup. See the [SDK 2.1 documentation](https://developer.memryx.com/2p1/index.html)
+
+:::
 
 #### Setup
 
