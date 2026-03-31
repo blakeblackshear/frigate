@@ -36,7 +36,9 @@ logger = logging.getLogger(__name__)
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
 
-# ffmpeg flags that can read from or write to arbitrary files
+# ffmpeg flags that can read from or write to arbitrary files.
+# filter flags are blocked because source filters like movie= and
+# amovie= can read arbitrary files from the filesystem.
 BLOCKED_FFMPEG_ARGS = frozenset(
     {
         "-i",
@@ -45,6 +47,12 @@ BLOCKED_FFMPEG_ARGS = frozenset(
         "-passlogfile",
         "-sdp_file",
         "-dump_attachment",
+        "-filter_complex",
+        "-lavfi",
+        "-vf",
+        "-af",
+        "-filter",
+        "-attach",
     }
 )
 
