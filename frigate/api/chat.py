@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from frigate.api.auth import (
     allow_any_authenticated,
     get_allowed_cameras_for_filter,
+    require_camera_access,
 )
 from frigate.api.defs.query.events_query_parameters import EventsQueryParams
 from frigate.api.defs.request.chat_body import ChatCompletionRequest
@@ -672,6 +673,8 @@ async def _execute_start_camera_watch(
     if camera not in config.cameras:
         return {"error": f"Camera '{camera}' not found."}
 
+    await require_camera_access(camera, request=request)
+
     genai_manager = request.app.genai_manager
     vision_client = genai_manager.vision_client or genai_manager.tool_client
     if vision_client is None:
@@ -1155,6 +1158,8 @@ async def start_vlm_monitor(
             content={"success": False, "message": f"Camera '{body.camera}' not found."},
             status_code=404,
         )
+
+    await require_camera_access(body.camera, request=request)
 
     vision_client = genai_manager.vision_client or genai_manager.tool_client
     if vision_client is None:

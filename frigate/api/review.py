@@ -742,7 +742,7 @@ async def set_not_reviewed(
 
 @router.post(
     "/review/summarize/start/{start_ts}/end/{end_ts}",
-    dependencies=[Depends(allow_any_authenticated())],
+    dependencies=[Depends(require_role(["admin"]))],
     description="Use GenAI to summarize review items over a period of time.",
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):
