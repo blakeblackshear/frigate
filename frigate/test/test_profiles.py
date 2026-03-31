@@ -1,5 +1,6 @@
 """Tests for the profiles system."""
 
+import json
 import os
 import tempfile
 import unittest
@@ -549,10 +550,17 @@ class TestProfileManager(unittest.TestCase):
 
     def test_get_profile_info(self):
         """Profile info returns correct structure with friendly names."""
-        info = self.manager.get_profile_info()
+        with patch.object(
+            ProfileManager,
+            "_load_persisted_data",
+            return_value={"active": None, "last_activated": {}},
+        ):
+            info = self.manager.get_profile_info()
         assert "profiles" in info
         assert "active_profile" in info
+        assert "last_activated" in info
         assert info["active_profile"] is None
+        assert info["last_activated"] == {}
         names = [p["name"] for p in info["profiles"]]
         assert "armed" in names
         assert "disarmed" in names
@@ -590,39 +598,140 @@ class TestProfilePersistence(unittest.TestCase):
     """Test profile persistence to disk."""
 
     def test_persist_and_load(self):
-        """Active profile name can be persisted and loaded."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            temp_path = f.name
-
-        try:
-            from pathlib import Path
-
-            path = Path(temp_path)
-            path.write_text("armed")
-            loaded = path.read_text().strip()
-            assert loaded == "armed"
-        finally:
-            os.unlink(temp_path)
+        """Active profile name can be persisted and loaded via JSON."""
+        data = {"active": "armed", "last_activated": {"armed": 1700000000.0}}
+        with patch.object(
+            ProfileManager,
+            "_load_persisted_data",
+            return_value=data,
+        ):
+            result = ProfileManager.load_persisted_profile()
+            assert result == "armed"
 
     def test_load_empty_file(self):
         """Empty persistence file returns None."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            f.write("")
-            temp_path = f.name
-
-        try:
-            with patch.object(type(PERSISTENCE_FILE), "exists", return_value=True):
-                with patch.object(type(PERSISTENCE_FILE), "read_text", return_value=""):
-                    result = ProfileManager.load_persisted_profile()
-                    assert result is None
-        finally:
-            os.unlink(temp_path)
+        with patch.object(type(PERSISTENCE_FILE), "exists", return_value=True):
+            with patch.object(type(PERSISTENCE_FILE), "read_text", return_value=""):
+                result = ProfileManager.load_persisted_profile()
+                assert result is None
 
     def test_load_missing_file(self):
         """Missing persistence file returns None."""
         with patch.object(type(PERSISTENCE_FILE), "exists", return_value=False):
             result = ProfileManager.load_persisted_profile()
             assert result is None
+
+    def test_load_persisted_data_valid_json(self):
+        """Valid JSON file is loaded correctly."""
+        data = {"active": "home", "last_activated": {"home": 1700000000.0}}
+        with patch.object(type(PERSISTENCE_FILE), "exists", return_value=True):
+            with patch.object(
+                type(PERSISTENCE_FILE),
+                "read_text",
+                return_value=json.dumps(data),
+            ):
+                result = ProfileManager._load_persisted_data()
+                assert result == data
+
+    def test_load_persisted_data_invalid_json(self):
+        """Invalid JSON returns default structure."""
+        with patch.object(type(PERSISTENCE_FILE), "exists", return_value=True):
+            with patch.object(
+                type(PERSISTENCE_FILE), "read_text", return_value="not json"
+            ):
+                result = ProfileManager._load_persisted_data()
+                assert result == {"active": None, "last_activated": {}}
+
+    def test_load_persisted_data_missing_file(self):
+        """Missing file returns default structure."""
+        with patch.object(type(PERSISTENCE_FILE), "exists", return_value=False):
+            result = ProfileManager._load_persisted_data()
+            assert result == {"active": None, "last_activated": {}}
+
+    def test_persist_records_timestamp(self):
+        """Persisting a profile records the activation timestamp."""
+        config_data = {
+            "mqtt": {"host": "mqtt"},
+            "profiles": {"armed": {"friendly_name": "Armed"}},
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            }
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "profiles": {"armed": {"detect": {"enabled": True}}},
+                },
+            },
+        }
+        if not os.path.exists(MODEL_CACHE_DIR) and not os.path.islink(MODEL_CACHE_DIR):
+            os.makedirs(MODEL_CACHE_DIR)
+        config = FrigateConfig(**config_data)
+        manager = ProfileManager(config, MagicMock())
+
+        written_data = {}
+
+        def mock_write(content):
+            written_data.update(json.loads(content))
+
+        with patch.object(
+            ProfileManager,
+            "_load_persisted_data",
+            return_value={"active": None, "last_activated": {}},
+        ):
+            with patch.object(type(PERSISTENCE_FILE), "write_text", mock_write):
+                manager._persist_active_profile("armed")
+
+        assert written_data["active"] == "armed"
+        assert "armed" in written_data["last_activated"]
+        assert isinstance(written_data["last_activated"]["armed"], float)
+
+    def test_persist_deactivate_keeps_timestamps(self):
+        """Deactivating sets active to None but preserves last_activated."""
+        existing = {
+            "active": "armed",
+            "last_activated": {"armed": 1700000000.0},
+        }
+        written_data = {}
+
+        def mock_write(content):
+            written_data.update(json.loads(content))
+
+        config_data = {
+            "mqtt": {"host": "mqtt"},
+            "profiles": {"armed": {"friendly_name": "Armed"}},
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            }
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "profiles": {"armed": {"detect": {"enabled": True}}},
+                },
+            },
+        }
+        if not os.path.exists(MODEL_CACHE_DIR) and not os.path.islink(MODEL_CACHE_DIR):
+            os.makedirs(MODEL_CACHE_DIR)
+        config = FrigateConfig(**config_data)
+        manager = ProfileManager(config, MagicMock())
+
+        with patch.object(
+            ProfileManager, "_load_persisted_data", return_value=existing
+        ):
+            with patch.object(type(PERSISTENCE_FILE), "write_text", mock_write):
+                manager._persist_active_profile(None)
+
+        assert written_data["active"] is None
+        assert written_data["last_activated"]["armed"] == 1700000000.0
 
 
 if __name__ == "__main__":
