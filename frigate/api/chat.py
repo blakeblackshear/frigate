@@ -294,6 +294,59 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_profile_status",
+                "description": (
+                    "Get the current profile status including the active profile and "
+                    "timestamps of when each profile was last activated. Use this to "
+                    "determine time periods for recap requests — e.g. when the user asks "
+                    "'what happened while I was away?', call this first to find the relevant "
+                    "time window based on profile activation history."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_recap",
+                "description": (
+                    "Get a recap of review items (alerts and detections) for a given time period. "
+                    "Use this after calling get_profile_status to retrieve what happened during "
+                    "a specific window — e.g. 'what happened while I was away?'. Returns review "
+                    "segments grouped by camera with object labels, severity, and timestamps."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "after": {
+                            "type": "string",
+                            "description": "Start of the time period in ISO 8601 format (e.g. '2025-03-15T08:00:00').",
+                        },
+                        "before": {
+                            "type": "string",
+                            "description": "End of the time period in ISO 8601 format (e.g. '2025-03-15T17:00:00').",
+                        },
+                        "cameras": {
+                            "type": "string",
+                            "description": "Comma-separated camera IDs to include, or 'all' for all cameras. Default is 'all'.",
+                        },
+                        "severity": {
+                            "type": "string",
+                            "enum": ["alert", "detection"],
+                            "description": "Filter by severity level. Omit to include both alerts and detections.",
+                        },
+                    },
+                    "required": ["after", "before"],
+                },
+            },
+        },
     ]
 
 
@@ -646,10 +699,14 @@ async def _execute_tool_internal(
         return await _execute_start_camera_watch(request, arguments)
     elif tool_name == "stop_camera_watch":
         return _execute_stop_camera_watch()
+    elif tool_name == "get_profile_status":
+        return _execute_get_profile_status(request)
+    elif tool_name == "get_recap":
+        return _execute_get_recap(arguments, allowed_cameras)
     else:
         logger.error(
             "Tool call failed: unknown tool %r. Expected one of: search_objects, get_live_context, "
-            "start_camera_watch, stop_camera_watch. Arguments received: %s",
+            "start_camera_watch, stop_camera_watch, get_profile_status, get_recap. Arguments received: %s",
             tool_name,
             json.dumps(arguments),
         )
@@ -711,6 +768,180 @@ def _execute_stop_camera_watch() -> Dict[str, Any]:
     if cancelled:
         return {"success": True, "message": "Watch job cancelled."}
     return {"success": False, "message": "No active watch job to cancel."}
+
+
+def _execute_get_profile_status(request: Request) -> Dict[str, Any]:
+    """Return profile status including active profile and activation timestamps."""
+    profile_manager = getattr(request.app, "profile_manager", None)
+    if profile_manager is None:
+        return {"error": "Profile manager is not available."}
+
+    info = profile_manager.get_profile_info()
+
+    # Add human-readable local times for last_activated timestamps
+    last_activated = info.get("last_activated", {})
+    last_activated_local = {}
+    for name, ts in last_activated.items():
+        try:
+            dt = datetime.fromtimestamp(ts)
+            last_activated_local[name] = dt.strftime("%Y-%m-%d %I:%M:%S %p")
+        except (TypeError, ValueError, OSError):
+            pass
+
+    return {
+        "active_profile": info.get("active_profile"),
+        "profiles": info.get("profiles", []),
+        "last_activated": last_activated,
+        "last_activated_local": last_activated_local,
+    }
+
+
+def _execute_get_recap(
+    arguments: Dict[str, Any],
+    allowed_cameras: List[str],
+) -> Dict[str, Any]:
+    """Fetch review segments for a time period and return a structured recap."""
+    from functools import reduce
+
+    from peewee import operator
+
+    from frigate.models import ReviewSegment
+
+    after_str = arguments.get("after")
+    before_str = arguments.get("before")
+
+    def _parse_as_local_timestamp(s: str):
+        s = s.replace("Z", "").strip()[:19]
+        dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+        return time.mktime(dt.timetuple())
+
+    try:
+        after = _parse_as_local_timestamp(after_str)
+    except (ValueError, AttributeError, TypeError):
+        return {"error": f"Invalid 'after' timestamp: {after_str}"}
+
+    try:
+        before = _parse_as_local_timestamp(before_str)
+    except (ValueError, AttributeError, TypeError):
+        return {"error": f"Invalid 'before' timestamp: {before_str}"}
+
+    cameras = arguments.get("cameras", "all")
+    if cameras != "all":
+        requested = set(cameras.split(","))
+        camera_list = list(requested.intersection(allowed_cameras))
+        if not camera_list:
+            return {"cameras": {}, "total_alerts": 0, "total_detections": 0}
+    else:
+        camera_list = allowed_cameras
+
+    clauses = [
+        (ReviewSegment.start_time < before)
+        & ((ReviewSegment.end_time.is_null(True)) | (ReviewSegment.end_time > after)),
+        (ReviewSegment.camera << camera_list),
+    ]
+
+    severity_filter = arguments.get("severity")
+    if severity_filter:
+        clauses.append(ReviewSegment.severity == severity_filter)
+
+    try:
+        rows = (
+            ReviewSegment.select(
+                ReviewSegment.id,
+                ReviewSegment.camera,
+                ReviewSegment.start_time,
+                ReviewSegment.end_time,
+                ReviewSegment.severity,
+                ReviewSegment.data,
+            )
+            .where(reduce(operator.and_, clauses))
+            .order_by(ReviewSegment.start_time.desc())
+            .limit(100)
+            .dicts()
+            .iterator()
+        )
+
+        # Group by camera and build summary
+        cameras_summary: Dict[str, Dict[str, Any]] = {}
+        total_alerts = 0
+        total_detections = 0
+
+        for row in rows:
+            cam = row["camera"]
+            if cam not in cameras_summary:
+                cameras_summary[cam] = {
+                    "alerts": 0,
+                    "detections": 0,
+                    "objects": [],
+                    "zones": [],
+                    "items": [],
+                }
+
+            severity = row.get("severity", "detection")
+            if severity == "alert":
+                cameras_summary[cam]["alerts"] += 1
+                total_alerts += 1
+            else:
+                cameras_summary[cam]["detections"] += 1
+                total_detections += 1
+
+            data = row.get("data") or {}
+            if isinstance(data, str):
+                try:
+                    data = json.loads(data)
+                except json.JSONDecodeError:
+                    data = {}
+
+            objects = data.get("objects", [])
+            zones = data.get("zones", [])
+
+            for obj in objects:
+                if obj not in cameras_summary[cam]["objects"]:
+                    cameras_summary[cam]["objects"].append(obj)
+            for zone in zones:
+                if zone not in cameras_summary[cam]["zones"]:
+                    cameras_summary[cam]["zones"].append(zone)
+
+            # Build a concise item entry
+            item = {
+                "severity": severity,
+                "objects": objects,
+            }
+
+            start_ts = row.get("start_time")
+            end_ts = row.get("end_time")
+            if start_ts is not None:
+                try:
+                    item["start_time_local"] = datetime.fromtimestamp(
+                        start_ts
+                    ).strftime("%Y-%m-%d %I:%M:%S %p")
+                except (TypeError, ValueError, OSError):
+                    pass
+            if end_ts is not None:
+                try:
+                    item["end_time_local"] = datetime.fromtimestamp(end_ts).strftime(
+                        "%Y-%m-%d %I:%M:%S %p"
+                    )
+                except (TypeError, ValueError, OSError):
+                    pass
+
+            if zones:
+                item["zones"] = zones
+
+            audio = data.get("audio", [])
+            if audio:
+                item["audio"] = audio
+
+            cameras_summary[cam]["items"].append(item)
+
+        return {
+            "cameras": cameras_summary,
+            "total_alerts": total_alerts,
+            "total_detections": total_detections,
+        }
+    except Exception as e:
+        logger.error("Error executing get_recap: %s", e, exc_info=True)
+        return {"error": "Failed to fetch recap data."}
 
 
 async def _execute_pending_tools(
