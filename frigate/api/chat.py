@@ -317,10 +317,11 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
             "function": {
                 "name": "get_recap",
                 "description": (
-                    "Get a recap of review items (alerts and detections) for a given time period. "
+                    "Get a recap of all activity (alerts and detections) for a given time period. "
                     "Use this after calling get_profile_status to retrieve what happened during "
-                    "a specific window — e.g. 'what happened while I was away?'. Returns review "
-                    "segments grouped by camera with object labels, severity, and timestamps."
+                    "a specific window — e.g. 'what happened while I was away?'. Returns a "
+                    "chronological list of activity with camera, objects, zones, and GenAI-generated "
+                    "descriptions when available. Summarize the results for the user."
                 ),
                 "parameters": {
                     "type": "object",
@@ -778,21 +779,19 @@ def _execute_get_profile_status(request: Request) -> Dict[str, Any]:
 
     info = profile_manager.get_profile_info()
 
-    # Add human-readable local times for last_activated timestamps
-    last_activated = info.get("last_activated", {})
-    last_activated_local = {}
-    for name, ts in last_activated.items():
+    # Convert timestamps to human-readable local times inline
+    last_activated = {}
+    for name, ts in info.get("last_activated", {}).items():
         try:
             dt = datetime.fromtimestamp(ts)
-            last_activated_local[name] = dt.strftime("%Y-%m-%d %I:%M:%S %p")
+            last_activated[name] = dt.strftime("%Y-%m-%d %I:%M:%S %p")
         except (TypeError, ValueError, OSError):
-            pass
+            last_activated[name] = str(ts)
 
     return {
         "active_profile": info.get("active_profile"),
         "profiles": info.get("profiles", []),
         "last_activated": last_activated,
-        "last_activated_local": last_activated_local,
     }
 
 
@@ -800,7 +799,7 @@ def _execute_get_recap(
     arguments: Dict[str, Any],
     allowed_cameras: List[str],
 ) -> Dict[str, Any]:
-    """Fetch review segments for a time period and return a structured recap."""
+    """Fetch review segments with GenAI metadata for a time period."""
     from functools import reduce
 
     from peewee import operator
@@ -830,7 +829,7 @@ def _execute_get_recap(
         requested = set(cameras.split(","))
         camera_list = list(requested.intersection(allowed_cameras))
         if not camera_list:
-            return {"cameras": {}, "total_alerts": 0, "total_detections": 0}
+            return {"events": [], "message": "No accessible cameras matched."}
     else:
         camera_list = allowed_cameras
 
@@ -847,7 +846,6 @@ def _execute_get_recap(
     try:
         rows = (
             ReviewSegment.select(
-                ReviewSegment.id,
                 ReviewSegment.camera,
                 ReviewSegment.start_time,
                 ReviewSegment.end_time,
@@ -855,36 +853,15 @@ def _execute_get_recap(
                 ReviewSegment.data,
             )
             .where(reduce(operator.and_, clauses))
-            .order_by(ReviewSegment.start_time.desc())
+            .order_by(ReviewSegment.start_time.asc())
             .limit(100)
             .dicts()
             .iterator()
         )
 
-        # Group by camera and build summary
-        cameras_summary: Dict[str, Dict[str, Any]] = {}
-        total_alerts = 0
-        total_detections = 0
+        events: List[Dict[str, Any]] = []
 
         for row in rows:
-            cam = row["camera"]
-            if cam not in cameras_summary:
-                cameras_summary[cam] = {
-                    "alerts": 0,
-                    "detections": 0,
-                    "objects": [],
-                    "zones": [],
-                    "items": [],
-                }
-
-            severity = row.get("severity", "detection")
-            if severity == "alert":
-                cameras_summary[cam]["alerts"] += 1
-                total_alerts += 1
-            else:
-                cameras_summary[cam]["detections"] += 1
-                total_detections += 1
-
             data = row.get("data") or {}
             if isinstance(data, str):
                 try:
@@ -892,53 +869,65 @@ def _execute_get_recap(
                 except json.JSONDecodeError:
                     data = {}
 
-            objects = data.get("objects", [])
-            zones = data.get("zones", [])
-
-            for obj in objects:
-                if obj not in cameras_summary[cam]["objects"]:
-                    cameras_summary[cam]["objects"].append(obj)
-            for zone in zones:
-                if zone not in cameras_summary[cam]["zones"]:
-                    cameras_summary[cam]["zones"].append(zone)
-
-            # Build a concise item entry
-            item = {
-                "severity": severity,
-                "objects": objects,
+            camera = row["camera"]
+            event: Dict[str, Any] = {
+                "camera": camera.replace("_", " ").title(),
+                "severity": row.get("severity", "detection"),
             }
+
+            # Include GenAI metadata when available
+            metadata = data.get("metadata")
+            if metadata and isinstance(metadata, dict):
+                if metadata.get("title"):
+                    event["title"] = metadata["title"]
+                if metadata.get("scene"):
+                    event["description"] = metadata["scene"]
+                threat = metadata.get("potential_threat_level")
+                if threat is not None:
+                    threat_labels = {
+                        0: "normal",
+                        1: "needs_review",
+                        2: "security_concern",
+                    }
+                    event["threat_level"] = threat_labels.get(threat, str(threat))
+
+            # Only include objects/zones/audio when there's no GenAI description
+            # to keep the payload concise — the description already covers these
+            if "description" not in event:
+                objects = data.get("objects", [])
+                if objects:
+                    event["objects"] = objects
+                zones = data.get("zones", [])
+                if zones:
+                    event["zones"] = zones
+                audio = data.get("audio", [])
+                if audio:
+                    event["audio"] = audio
 
             start_ts = row.get("start_time")
             end_ts = row.get("end_time")
             if start_ts is not None:
                 try:
-                    item["start_time_local"] = datetime.fromtimestamp(
-                        start_ts
-                    ).strftime("%Y-%m-%d %I:%M:%S %p")
-                except (TypeError, ValueError, OSError):
-                    pass
-            if end_ts is not None:
-                try:
-                    item["end_time_local"] = datetime.fromtimestamp(end_ts).strftime(
-                        "%Y-%m-%d %I:%M:%S %p"
+                    event["time"] = datetime.fromtimestamp(start_ts).strftime(
+                        "%I:%M %p"
                     )
                 except (TypeError, ValueError, OSError):
                     pass
+            if end_ts is not None and start_ts is not None:
+                try:
+                    event["duration_seconds"] = round(end_ts - start_ts)
+                except (TypeError, ValueError):
+                    pass
 
-            if zones:
-                item["zones"] = zones
+            events.append(event)
 
-            audio = data.get("audio", [])
-            if audio:
-                item["audio"] = audio
+        if not events:
+            return {
+                "events": [],
+                "message": "No activity was found during this time period.",
+            }
 
-            cameras_summary[cam]["items"].append(item)
-
-        return {
-            "cameras": cameras_summary,
-            "total_alerts": total_alerts,
-            "total_detections": total_detections,
-        }
+        return {"events": events}
     except Exception as e:
         logger.error("Error executing get_recap: %s", e, exc_info=True)
         return {"error": "Failed to fetch recap data."}
