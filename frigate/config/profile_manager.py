@@ -1,7 +1,9 @@
 """Profile manager for activating/deactivating named config profiles."""
 
 import copy
+import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -32,7 +34,7 @@ PROFILE_SECTION_UPDATES: dict[str, CameraConfigUpdateEnum] = {
     "zones": CameraConfigUpdateEnum.zones,
 }
 
-PERSISTENCE_FILE = Path(CONFIG_DIR) / ".active_profile"
+PERSISTENCE_FILE = Path(CONFIG_DIR) / ".profiles"
 
 
 class ProfileManager:
@@ -291,25 +293,36 @@ class ProfileManager:
                     )
 
     def _persist_active_profile(self, profile_name: Optional[str]) -> None:
-        """Persist the active profile name to disk."""
+        """Persist the active profile state to disk as JSON."""
         try:
-            if profile_name is None:
-                PERSISTENCE_FILE.unlink(missing_ok=True)
-            else:
-                PERSISTENCE_FILE.write_text(profile_name)
+            data = self._load_persisted_data()
+            data["active"] = profile_name
+            if profile_name is not None:
+                data.setdefault("last_activated", {})[profile_name] = datetime.now(
+                    timezone.utc
+                ).timestamp()
+            PERSISTENCE_FILE.write_text(json.dumps(data))
         except OSError:
             logger.exception("Failed to persist active profile")
 
     @staticmethod
-    def load_persisted_profile() -> Optional[str]:
-        """Load the persisted active profile name from disk."""
+    def _load_persisted_data() -> dict:
+        """Load the full persisted profile data from disk."""
         try:
             if PERSISTENCE_FILE.exists():
-                name = PERSISTENCE_FILE.read_text().strip()
-                return name if name else None
-        except OSError:
-            logger.exception("Failed to load persisted profile")
-        return None
+                raw = PERSISTENCE_FILE.read_text().strip()
+                if raw:
+                    return json.loads(raw)
+        except (OSError, json.JSONDecodeError):
+            logger.exception("Failed to load persisted profile data")
+        return {"active": None, "last_activated": {}}
+
+    @staticmethod
+    def load_persisted_profile() -> Optional[str]:
+        """Load the persisted active profile name from disk."""
+        data = ProfileManager._load_persisted_data()
+        name = data.get("active")
+        return name if name else None
 
     def get_base_configs_for_api(self, camera_name: str) -> dict[str, dict]:
         """Return base (pre-profile) section configs for a camera.
@@ -328,7 +341,9 @@ class ProfileManager:
 
     def get_profile_info(self) -> dict:
         """Get profile state info for API responses."""
+        data = self._load_persisted_data()
         return {
             "profiles": self.get_available_profiles(),
             "active_profile": self.config.active_profile,
+            "last_activated": data.get("last_activated", {}),
         }

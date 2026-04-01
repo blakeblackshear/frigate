@@ -22,6 +22,14 @@ export function ChatStartingState({ onSendMessage }: ChatStartingStateProps) {
       label: t("starting_requests.show_camera_status"),
       prompt: t("starting_requests_prompts.show_camera_status"),
     },
+    {
+      label: t("starting_requests.recap"),
+      prompt: t("starting_requests_prompts.recap"),
+    },
+    {
+      label: t("starting_requests.watch_camera"),
+      prompt: t("starting_requests_prompts.watch_camera"),
+    },
   ];
 
   const handleRequestClick = (prompt: string) => {
