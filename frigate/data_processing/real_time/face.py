@@ -295,7 +295,15 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         res = self.recognizer.classify(face_frame)
 
         if not res:
-            logger.debug(f"Face recognizer returned no result for {id}")
+            # classify() returns None when no faces have been trained yet (empty
+            # embeddings).  Save the crop as "unknown" so the user can assign it
+            # from the UI and bootstrap face recognition after a fresh start or
+            # after deleting all known faces — otherwise the train queue stays
+            # empty forever and there is no way to add new training data.
+            self.write_face_attempt(
+                face_frame, id, datetime.datetime.now().timestamp(), "unknown", 0.0
+            )
+            logger.debug(f"Face recognizer returned no result for {id}, saved crop as unknown")
             self.__update_metrics(datetime.datetime.now().timestamp() - start)
             return
 
