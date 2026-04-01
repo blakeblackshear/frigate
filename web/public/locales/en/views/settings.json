@@ -1409,7 +1409,8 @@
       "keyDuplicate": "Detector name already exists.",
       "noSchema": "No detector schemas are available.",
       "none": "No detector instances configured.",
-      "add": "Add detector"
+      "add": "Add detector",
+      "addCustomKey": "Add custom key"
     },
     "record": {
       "title": "Recording Settings"
@@ -1637,6 +1638,10 @@
     },
     "snapshots": {
       "detectDisabled": "Object detection is disabled. Snapshots are generated from tracked objects and will not be created."
+    },
+    "detectors": {
+      "mixedTypes": "All detectors must use the same type. Remove existing detectors to use a different type.",
+      "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
     }
   }
 }
