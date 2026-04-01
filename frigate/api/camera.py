@@ -30,6 +30,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.config.env import FRIGATE_ENV_VARS
 from frigate.util.builtin import clean_camera_user_pass
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
@@ -124,7 +125,10 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
     try:
         params = {"name": stream_name}
         if src:
-            params["src"] = src
+            try:
+                params["src"] = src.format(**FRIGATE_ENV_VARS)
+            except KeyError:
+                params["src"] = src
 
         r = requests.put(
             "http://127.0.0.1:1984/api/streams",
