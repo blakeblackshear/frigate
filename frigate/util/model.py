@@ -205,6 +205,15 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
     boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2
     boxes = boxes_xyxy
 
+    # Drop degenerate boxes (zero or negative width/height).  These arise when
+    # a YOLO prediction has w=0 or h=0, which after cx±w/2 conversion gives
+    # x2<=x1 or y2<=y1.  They pass through NMS unchanged and then cause a
+    # divide-by-zero NaN in the norfair distance function (see norfair_tracker.py).
+    valid = (boxes[:, 2] > boxes[:, 0]) & (boxes[:, 3] > boxes[:, 1])
+    boxes = boxes[valid]
+    scores = scores[valid]
+    class_ids = class_ids[valid]
+
     # run NMS
     indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
     detections = np.zeros((20, 6), np.float32)
