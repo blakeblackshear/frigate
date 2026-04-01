@@ -45,6 +45,15 @@ def distance(detection: np.ndarray, estimate: np.ndarray) -> float:
     estimate_dim = np.diff(estimate, axis=0).flatten()
     detection_dim = np.diff(detection, axis=0).flatten()
 
+    # Guard against zero-dimension estimates or detections (e.g. degenerate boxes
+    # produced by the Kalman filter on the first few frames).  Dividing by zero
+    # yields NaN which propagates into norfair and causes a hard crash with
+    # "Received nan values from distance function".
+    if estimate_dim[0] <= 0 or estimate_dim[1] <= 0:
+        return float("inf")
+    if detection_dim[0] <= 0 or detection_dim[1] <= 0:
+        return float("inf")
+
     # get bottom center positions
     detection_position = np.array(
         [np.average(detection[:, 0]), np.max(detection[:, 1])]
