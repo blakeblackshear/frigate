@@ -16,7 +16,7 @@ const detectors: SectionConfigOverrides = {
     uiSchema: {
       "ui:field": "DetectorHardwareField",
       "ui:options": {
-        multiInstanceTypes: ["cpu", "onnx", "openvino"],
+        multiInstanceTypes: ["cpu", "onnx", "openvino", "edgetpu"],
         typeOrder: ["onnx", "openvino", "edgetpu"],
         hiddenByType: {},
         hiddenFields: detectorHiddenFields,
