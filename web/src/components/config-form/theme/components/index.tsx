@@ -60,7 +60,9 @@ export function AddPropertyButton({
       className="gap-2"
     >
       <LuPlus className="h-4 w-4" />
-      {t("button.add", { ns: "common", defaultValue: "Add" })}
+      {typeof uiSchema?.["ui:options"]?.addButtonText === "string"
+        ? uiSchema["ui:options"].addButtonText
+        : t("button.add", { ns: "common", defaultValue: "Add" })}
     </Button>
   );
 }
