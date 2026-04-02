@@ -156,7 +156,7 @@ export default function MotionMaskEditPane({
       message: t("masksAndZones.form.name.error.mustNotBeEmpty"),
     }),
     enabled: z.boolean(),
-    isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+    isFinished: z.boolean().refine((val) => val === true, {
       message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
     }),
   });
@@ -171,6 +171,12 @@ export default function MotionMaskEditPane({
       isFinished: polygon?.isFinished ?? false,
     },
   });
+
+  useEffect(() => {
+    if (polygon?.isFinished !== undefined) {
+      form.setValue("isFinished", polygon.isFinished, { shouldValidate: true });
+    }
+  }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
     async ({

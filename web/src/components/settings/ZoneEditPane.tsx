@@ -208,7 +208,7 @@ export default function ZoneEditPane({
         })
         .optional()
         .or(z.literal("")),
-      isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+      isFinished: z.boolean().refine((val) => val === true, {
         message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
       }),
       objects: z.array(z.string()).optional(),
@@ -333,6 +333,12 @@ export default function ZoneEditPane({
       form.setValue("speedEstimation", false);
     }
   }, [polygon, form, t, watchSpeedEstimation]);
+
+  useEffect(() => {
+    if (polygon?.isFinished !== undefined) {
+      form.setValue("isFinished", polygon.isFinished, { shouldValidate: true });
+    }
+  }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
     async (
