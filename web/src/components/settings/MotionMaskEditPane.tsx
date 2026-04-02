@@ -452,7 +452,7 @@ export default function MotionMaskEditPane({
                 <Button
                   variant="select"
                   aria-label={t("button.save", { ns: "common" })}
-                  disabled={isLoading}
+                  disabled={isLoading || !form.formState.isValid}
                   className="flex flex-1"
                   type="submit"
                 >

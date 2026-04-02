@@ -456,7 +456,7 @@ export default function ObjectMaskEditPane({
                 </Button>
                 <Button
                   variant="select"
-                  disabled={isLoading}
+                  disabled={isLoading || !form.formState.isValid}
                   className="flex flex-1"
                   aria-label={t("button.save", { ns: "common" })}
                   type="submit"
