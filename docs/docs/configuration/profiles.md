@@ -120,7 +120,7 @@ The following camera configuration sections can be overridden in a profile:
 
 :::note
 
-Only the fields you explicitly set in a profile override are applied. All other fields retain their base configuration values. For zones, profile zones are merged with the camera's base zones — any zone defined in the profile will override or add to the base zones.
+Only the fields you explicitly set in a profile override are applied. All other fields retain their base configuration values. For masks and zones, profile zones **override** the camera's base masks and zones. If configuring profiles via YAML, you should not define masks or zones in profiles that are not defined in the base config.
 
 :::
 
