@@ -201,6 +201,16 @@ export default function MasksAndZonesView({
     setUnsavedChanges(false);
   }, [editingPolygons, setUnsavedChanges]);
 
+  const handlePolygonDeleted = useCallback(() => {
+    // Temporarily clear the edit pane guard so the useEffect that
+    // rebuilds editingPolygons from config will run when the fresh
+    // config arrives via updateConfig(). This handles all cases:
+    // base deletes, profile override deletes (which revert to base),
+    // and profile-only deletes.
+    setEditPane(undefined);
+    setActivePolygonIndex(undefined);
+  }, [setEditPane, setActivePolygonIndex]);
+
   useEffect(() => {
     if (isLoading) {
       return;
@@ -806,20 +816,25 @@ export default function MasksAndZonesView({
                         </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label={t("masksAndZones.zones.add")}
-                              onClick={() => {
-                                setEditPane("zone");
-                                handleNewPolygon("zone");
-                              }}
-                            >
-                              <LuPlus />
-                            </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="secondary"
+                                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                                aria-label={t("masksAndZones.zones.add")}
+                                disabled={!!currentEditingProfile}
+                                onClick={() => {
+                                  setEditPane("zone");
+                                  handleNewPolygon("zone");
+                                }}
+                              >
+                                <LuPlus />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("masksAndZones.zones.add")}
+                            {currentEditingProfile
+                              ? t("masksAndZones.addDisabledProfile")
+                              : t("masksAndZones.zones.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -843,6 +858,7 @@ export default function MasksAndZonesView({
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
                             editingProfile={currentEditingProfile}
                             allProfileNames={profileState?.allProfileNames}
+                            onDeleted={handlePolygonDeleted}
                           />
                         ))}
                     </div>
@@ -880,20 +896,25 @@ export default function MasksAndZonesView({
                         </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label={t("masksAndZones.motionMasks.add")}
-                              onClick={() => {
-                                setEditPane("motion_mask");
-                                handleNewPolygon("motion_mask");
-                              }}
-                            >
-                              <LuPlus />
-                            </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="secondary"
+                                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                                aria-label={t("masksAndZones.motionMasks.add")}
+                                disabled={!!currentEditingProfile}
+                                onClick={() => {
+                                  setEditPane("motion_mask");
+                                  handleNewPolygon("motion_mask");
+                                }}
+                              >
+                                <LuPlus />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("masksAndZones.motionMasks.add")}
+                            {currentEditingProfile
+                              ? t("masksAndZones.addDisabledProfile")
+                              : t("masksAndZones.motionMasks.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -919,6 +940,7 @@ export default function MasksAndZonesView({
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
                             editingProfile={currentEditingProfile}
                             allProfileNames={profileState?.allProfileNames}
+                            onDeleted={handlePolygonDeleted}
                           />
                         ))}
                     </div>
@@ -956,20 +978,25 @@ export default function MasksAndZonesView({
                         </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label={t("masksAndZones.objectMasks.add")}
-                              onClick={() => {
-                                setEditPane("object_mask");
-                                handleNewPolygon("object_mask");
-                              }}
-                            >
-                              <LuPlus />
-                            </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="secondary"
+                                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                                aria-label={t("masksAndZones.objectMasks.add")}
+                                disabled={!!currentEditingProfile}
+                                onClick={() => {
+                                  setEditPane("object_mask");
+                                  handleNewPolygon("object_mask");
+                                }}
+                              >
+                                <LuPlus />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("masksAndZones.objectMasks.add")}
+                            {currentEditingProfile
+                              ? t("masksAndZones.addDisabledProfile")
+                              : t("masksAndZones.objectMasks.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -995,6 +1022,7 @@ export default function MasksAndZonesView({
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
                             editingProfile={currentEditingProfile}
                             allProfileNames={profileState?.allProfileNames}
+                            onDeleted={handlePolygonDeleted}
                           />
                         ))}
                     </div>

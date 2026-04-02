@@ -74,9 +74,11 @@ export default function MotionMaskEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const maskCamera = polygon?.camera || "";
+  const maskName = polygon?.name || "";
   const { send: sendMotionMaskState } = useMotionMaskState(
-    polygon?.camera || "",
-    polygon?.name || "",
+    maskCamera,
+    maskName,
   );
 
   const cameraConfig = useMemo(() => {
@@ -154,7 +156,7 @@ export default function MotionMaskEditPane({
       message: t("masksAndZones.form.name.error.mustNotBeEmpty"),
     }),
     enabled: z.boolean(),
-    isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+    isFinished: z.boolean().refine((val) => val === true, {
       message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
     }),
   });
@@ -169,6 +171,12 @@ export default function MotionMaskEditPane({
       isFinished: polygon?.isFinished ?? false,
     },
   });
+
+  useEffect(() => {
+    if (polygon?.isFinished !== undefined) {
+      form.setValue("isFinished", polygon.isFinished, { shouldValidate: true });
+    }
+  }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
     async ({
@@ -250,8 +258,8 @@ export default function MotionMaskEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config
-            if (!editingProfile) {
+            // Only publish WS state for base config when mask has a name
+            if (!editingProfile && maskName) {
               sendMotionMaskState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -291,6 +299,7 @@ export default function MotionMaskEditPane({
       cameraConfig,
       t,
       sendMotionMaskState,
+      maskName,
       editingProfile,
     ],
   );
@@ -449,7 +458,7 @@ export default function MotionMaskEditPane({
                 <Button
                   variant="select"
                   aria-label={t("button.save", { ns: "common" })}
-                  disabled={isLoading}
+                  disabled={isLoading || !form.formState.isValid}
                   className="flex flex-1"
                   type="submit"
                 >

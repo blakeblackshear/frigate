@@ -1224,6 +1224,15 @@ def camera_set(
             status_code=400,
         )
 
+    if not sub_command and feature in _SUB_COMMAND_FEATURES:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Feature '{feature}' requires a sub-command (e.g. mask or zone name)",
+            },
+            status_code=400,
+        )
+
     if camera_name == "*":
         cameras = list(frigate_config.cameras.keys())
     elif camera_name not in frigate_config.cameras:
