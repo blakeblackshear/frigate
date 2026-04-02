@@ -614,6 +614,10 @@
           "desc": "Are you sure you want to delete the {{type}} <em>{{name}}</em>?",
           "success": "{{name}} has been deleted."
         },
+        "revertOverride": {
+          "title": "Revert to Base Config",
+          "desc": "This will remove the profile override for the {{type}} <em>{{name}}</em> and revert to the base configuration."
+        },
         "error": {
           "mustBeFinished": "Polygon drawing must be finished before saving."
         }

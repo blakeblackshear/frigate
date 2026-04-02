@@ -30,7 +30,6 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
-import { buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { cn } from "@/lib/utils";
@@ -474,9 +473,7 @@ export default function PolygonItem({
             <AlertDialogHeader>
               <AlertDialogTitle>
                 {polygon.polygonSource === "override"
-                  ? t(
-                      "masksAndZones.form.polygonDrawing.revertOverride.title",
-                    )
+                  ? t("masksAndZones.form.polygonDrawing.revertOverride.title")
                   : t("masksAndZones.form.polygonDrawing.delete.title")}
               </AlertDialogTitle>
             </AlertDialogHeader>
@@ -514,10 +511,12 @@ export default function PolygonItem({
                 {t("button.cancel", { ns: "common" })}
               </AlertDialogCancel>
               <AlertDialogAction
-                className={buttonVariants({ variant: "destructive" })}
+                className="bg-destructive text-white hover:bg-destructive/90"
                 onClick={handleDelete}
               >
-                {t("button.delete", { ns: "common" })}
+                {polygon.polygonSource === "override"
+                  ? t("masksAndZones.form.polygonDrawing.revertOverride.title")
+                  : t("button.delete", { ns: "common" })}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -630,7 +629,9 @@ export default function PolygonItem({
                 />
               </TooltipTrigger>
               <TooltipContent>
-                {t("button.delete", { ns: "common" })}
+                {polygon.polygonSource === "override"
+                  ? t("masksAndZones.form.polygonDrawing.revertOverride.title")
+                  : t("button.delete", { ns: "common" })}
               </TooltipContent>
             </Tooltip>
           </div>
