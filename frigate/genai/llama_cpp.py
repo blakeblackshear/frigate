@@ -62,7 +62,9 @@ class LlamaCppClient(GenAIClient):
         if base_url is None:
             return None
 
-        # Query /v1/models to validate the model and extract capabilities
+        configured_model = self.genai_config.model
+
+        # Query /v1/models to validate the configured model exists
         try:
             response = requests.get(
                 f"{base_url}/v1/models",
@@ -71,17 +73,16 @@ class LlamaCppClient(GenAIClient):
             response.raise_for_status()
             models_data = response.json()
 
-            matched_model = None
-            configured_model = self.genai_config.model
+            model_found = False
             for model in models_data.get("data", []):
                 model_ids = {model.get("id")}
                 for alias in model.get("aliases", []):
                     model_ids.add(alias)
                 if configured_model in model_ids:
-                    matched_model = model
+                    model_found = True
                     break
 
-            if matched_model is None:
+            if not model_found:
                 available = []
                 for m in models_data.get("data", []):
                     available.append(m.get("id", "unknown"))
@@ -93,10 +94,37 @@ class LlamaCppClient(GenAIClient):
                     available,
                 )
                 return None
+        except Exception as e:
+            logger.warning(
+                "Failed to query llama.cpp /v1/models endpoint: %s. "
+                "Model validation skipped.",
+                e,
+            )
 
-            # Parse capabilities from the model's server launch args
-            args = matched_model.get("status", {}).get("args", [])
-            self._parse_model_args(args)
+        # Query /props for context size, modalities, and tool support
+        try:
+            response = requests.get(
+                f"{base_url}/props",
+                params={"model": configured_model},
+                timeout=10,
+            )
+            response.raise_for_status()
+            props = response.json()
+
+            # Context size from server runtime config
+            default_settings = props.get("default_generation_settings", {})
+            n_ctx = default_settings.get("n_ctx")
+            if n_ctx:
+                self._context_size = int(n_ctx)
+
+            # Modalities (vision, audio)
+            modalities = props.get("modalities", {})
+            self._supports_vision = modalities.get("vision", False)
+            self._supports_audio = modalities.get("audio", False)
+
+            # Tool support from chat template capabilities
+            chat_caps = props.get("chat_template_caps", {})
+            self._supports_tools = chat_caps.get("supports_tools", False)
 
             logger.info(
                 "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
@@ -108,25 +136,12 @@ class LlamaCppClient(GenAIClient):
             )
         except Exception as e:
             logger.warning(
-                "Failed to query llama.cpp /v1/models endpoint: %s. "
-                "Model validation skipped.",
+                "Failed to query llama.cpp /props endpoint: %s. "
+                "Using defaults for context size and capabilities.",
                 e,
             )
 
         return base_url
-
-    def _parse_model_args(self, args: list[str]) -> None:
-        """Extract context size and capabilities from llama-server launch args."""
-        for i, arg in enumerate(args):
-            if arg == "--ctx-size" and i + 1 < len(args):
-                try:
-                    self._context_size = int(args[i + 1])
-                except ValueError:
-                    pass
-            elif arg == "--mmproj":
-                self._supports_vision = True
-            elif arg == "--jinja":
-                self._supports_tools = True
 
     def _send(
         self,
