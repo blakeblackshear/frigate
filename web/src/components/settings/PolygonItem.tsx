@@ -51,6 +51,7 @@ type PolygonItemProps = {
   setLoadingPolygonIndex: (index: number | undefined) => void;
   editingProfile?: string | null;
   allProfileNames?: string[];
+  onDeleted?: () => void;
 };
 
 export default function PolygonItem({
@@ -67,6 +68,7 @@ export default function PolygonItem({
   setLoadingPolygonIndex,
   editingProfile,
   allProfileNames,
+  onDeleted,
 }: PolygonItemProps) {
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
@@ -169,6 +171,7 @@ export default function PolygonItem({
                 { position: "top-center" },
               );
               updateConfig();
+              onDeleted?.();
             } else {
               toast.error(
                 t("toast.save.error.title", {
@@ -234,6 +237,7 @@ export default function PolygonItem({
               { position: "top-center" },
             );
             updateConfig();
+            onDeleted?.();
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -267,6 +271,7 @@ export default function PolygonItem({
       index,
       setLoadingPolygonIndex,
       editingProfile,
+      onDeleted,
     ],
   );
 

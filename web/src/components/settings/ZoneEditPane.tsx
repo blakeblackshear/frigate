@@ -91,10 +91,8 @@ export default function ZoneEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
-  const { send: sendZoneState } = useZoneState(
-    polygon?.camera || "",
-    polygon?.name || "",
-  );
+  const zoneName = polygon?.name || "";
+  const { send: sendZoneState } = useZoneState(polygon?.camera || "", zoneName);
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -303,8 +301,8 @@ export default function ZoneEditPane({
         resolvedZoneData?.enabled !== undefined
           ? resolvedZoneData.enabled
           : (polygon?.enabled ?? true),
-      inertia: resolvedZoneData?.inertia,
-      loitering_time: resolvedZoneData?.loitering_time,
+      inertia: resolvedZoneData?.inertia ?? 3,
+      loitering_time: resolvedZoneData?.loitering_time ?? 0,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
       speedEstimation: !!(lineA || lineB || lineC || lineD),
@@ -516,8 +514,8 @@ export default function ZoneEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config (not profiles)
-            if (!editingProfile) {
+            // Only publish WS state for base config when zone has a name
+            if (!editingProfile && zoneName) {
               sendZoneState(enabled ? "ON" : "OFF");
             }
           } else {

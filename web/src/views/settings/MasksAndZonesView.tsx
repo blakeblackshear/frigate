@@ -201,6 +201,16 @@ export default function MasksAndZonesView({
     setUnsavedChanges(false);
   }, [editingPolygons, setUnsavedChanges]);
 
+  const handlePolygonDeleted = useCallback(() => {
+    // Temporarily clear the edit pane guard so the useEffect that
+    // rebuilds editingPolygons from config will run when the fresh
+    // config arrives via updateConfig(). This handles all cases:
+    // base deletes, profile override deletes (which revert to base),
+    // and profile-only deletes.
+    setEditPane(undefined);
+    setActivePolygonIndex(undefined);
+  }, [setEditPane, setActivePolygonIndex]);
+
   useEffect(() => {
     if (isLoading) {
       return;
@@ -843,6 +853,7 @@ export default function MasksAndZonesView({
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
                             editingProfile={currentEditingProfile}
                             allProfileNames={profileState?.allProfileNames}
+                            onDeleted={handlePolygonDeleted}
                           />
                         ))}
                     </div>
@@ -919,6 +930,7 @@ export default function MasksAndZonesView({
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
                             editingProfile={currentEditingProfile}
                             allProfileNames={profileState?.allProfileNames}
+                            onDeleted={handlePolygonDeleted}
                           />
                         ))}
                     </div>
@@ -995,6 +1007,7 @@ export default function MasksAndZonesView({
                             setLoadingPolygonIndex={setLoadingPolygonIndex}
                             editingProfile={currentEditingProfile}
                             allProfileNames={profileState?.allProfileNames}
+                            onDeleted={handlePolygonDeleted}
                           />
                         ))}
                     </div>

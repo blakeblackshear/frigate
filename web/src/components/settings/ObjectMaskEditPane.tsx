@@ -80,9 +80,10 @@ export default function ObjectMaskEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const maskName = polygon?.name || "";
   const { send: sendObjectMaskState } = useObjectMaskState(
     polygon?.camera || "",
-    polygon?.name || "",
+    maskName,
   );
 
   const cameraConfig = useMemo(() => {
@@ -256,8 +257,8 @@ export default function ObjectMaskEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config
-            if (!editingProfile) {
+            // Only publish WS state for base config when mask has a name
+            if (!editingProfile && maskName) {
               sendObjectMaskState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -300,6 +301,7 @@ export default function ObjectMaskEditPane({
       cameraConfig,
       t,
       sendObjectMaskState,
+      maskName,
       editingProfile,
     ],
   );
