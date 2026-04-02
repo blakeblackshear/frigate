@@ -539,6 +539,7 @@
     },
     "restart_required": "Restart required (masks/zones changed)",
     "disabledInConfig": "Item is disabled in the config file",
+    "addDisabledProfile": "Add to the base config first, then override in the profile",
     "profileBase": "(base)",
     "profileOverride": "(override)",
     "toast": {

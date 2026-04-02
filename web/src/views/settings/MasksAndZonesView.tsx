@@ -816,20 +816,25 @@ export default function MasksAndZonesView({
                         </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label={t("masksAndZones.zones.add")}
-                              onClick={() => {
-                                setEditPane("zone");
-                                handleNewPolygon("zone");
-                              }}
-                            >
-                              <LuPlus />
-                            </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="secondary"
+                                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                                aria-label={t("masksAndZones.zones.add")}
+                                disabled={!!currentEditingProfile}
+                                onClick={() => {
+                                  setEditPane("zone");
+                                  handleNewPolygon("zone");
+                                }}
+                              >
+                                <LuPlus />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("masksAndZones.zones.add")}
+                            {currentEditingProfile
+                              ? t("masksAndZones.addDisabledProfile")
+                              : t("masksAndZones.zones.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -891,20 +896,25 @@ export default function MasksAndZonesView({
                         </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label={t("masksAndZones.motionMasks.add")}
-                              onClick={() => {
-                                setEditPane("motion_mask");
-                                handleNewPolygon("motion_mask");
-                              }}
-                            >
-                              <LuPlus />
-                            </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="secondary"
+                                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                                aria-label={t("masksAndZones.motionMasks.add")}
+                                disabled={!!currentEditingProfile}
+                                onClick={() => {
+                                  setEditPane("motion_mask");
+                                  handleNewPolygon("motion_mask");
+                                }}
+                              >
+                                <LuPlus />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("masksAndZones.motionMasks.add")}
+                            {currentEditingProfile
+                              ? t("masksAndZones.addDisabledProfile")
+                              : t("masksAndZones.motionMasks.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -968,20 +978,25 @@ export default function MasksAndZonesView({
                         </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label={t("masksAndZones.objectMasks.add")}
-                              onClick={() => {
-                                setEditPane("object_mask");
-                                handleNewPolygon("object_mask");
-                              }}
-                            >
-                              <LuPlus />
-                            </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="secondary"
+                                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                                aria-label={t("masksAndZones.objectMasks.add")}
+                                disabled={!!currentEditingProfile}
+                                onClick={() => {
+                                  setEditPane("object_mask");
+                                  handleNewPolygon("object_mask");
+                                }}
+                              >
+                                <LuPlus />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {t("masksAndZones.objectMasks.add")}
+                            {currentEditingProfile
+                              ? t("masksAndZones.addDisabledProfile")
+                              : t("masksAndZones.objectMasks.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>

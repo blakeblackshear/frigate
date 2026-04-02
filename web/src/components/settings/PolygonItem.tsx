@@ -154,7 +154,19 @@ export default function PolygonItem({
             cameraConfig?.review.alerts.required_zones || [],
             cameraConfig?.review.detections.required_zones || [],
           );
-          url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
+          // Also delete from profiles that have overrides for this zone
+          let profileQueries = "";
+          if (allProfileNames && cameraConfig) {
+            for (const profileName of allProfileNames) {
+              if (
+                cameraConfig.profiles?.[profileName]?.zones?.[polygon.name] !==
+                undefined
+              ) {
+                profileQueries += `&cameras.${polygon.camera}.profiles.${profileName}.zones.${polygon.name}`;
+              }
+            }
+          }
+          url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}${profileQueries}`;
         }
 
         await axios
@@ -214,11 +226,41 @@ export default function PolygonItem({
                 },
               };
 
+      let cameraUpdate: Record<string, unknown>;
+      if (editingProfile) {
+        cameraUpdate = { profiles: { [editingProfile]: deleteSection } };
+      } else {
+        // Base mode: also delete from profiles that have overrides for this mask
+        const profileDeletes: Record<string, unknown> = {};
+        if (allProfileNames && cameraConfig) {
+          for (const profileName of allProfileNames) {
+            const profileData = cameraConfig.profiles?.[profileName];
+            if (!profileData) continue;
+
+            const hasMask =
+              polygon.type === "motion_mask"
+                ? profileData.motion?.mask?.[polygon.name] !== undefined
+                : polygon.type === "object_mask"
+                  ? profileData.objects?.mask?.[polygon.name] !== undefined ||
+                    Object.values(profileData.objects?.filters || {}).some(
+                      (f) => f?.mask?.[polygon.name] !== undefined,
+                    )
+                  : false;
+
+            if (hasMask) {
+              profileDeletes[profileName] = deleteSection;
+            }
+          }
+        }
+        cameraUpdate =
+          Object.keys(profileDeletes).length > 0
+            ? { ...deleteSection, profiles: profileDeletes }
+            : deleteSection;
+      }
+
       const configUpdate = {
         cameras: {
-          [polygon.camera]: editingProfile
-            ? { profiles: { [editingProfile]: deleteSection } }
-            : deleteSection,
+          [polygon.camera]: cameraUpdate,
         },
       };
 
@@ -271,6 +313,7 @@ export default function PolygonItem({
       index,
       setLoadingPolygonIndex,
       editingProfile,
+      allProfileNames,
       onDeleted,
     ],
   );
@@ -430,22 +473,41 @@ export default function PolygonItem({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {t("masksAndZones.form.polygonDrawing.delete.title")}
+                {polygon.polygonSource === "override"
+                  ? t(
+                      "masksAndZones.form.polygonDrawing.revertOverride.title",
+                    )
+                  : t("masksAndZones.form.polygonDrawing.delete.title")}
               </AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
-              <Trans
-                ns="views/settings"
-                values={{
-                  type: t(
-                    `masksAndZones.form.polygonDrawing.type.${polygon.type}`,
-                    { ns: "views/settings" },
-                  ),
-                  name: polygon.friendly_name ?? polygon.name,
-                }}
-              >
-                masksAndZones.form.polygonDrawing.delete.desc
-              </Trans>
+              {polygon.polygonSource === "override" ? (
+                <Trans
+                  ns="views/settings"
+                  values={{
+                    type: t(
+                      `masksAndZones.form.polygonDrawing.type.${polygon.type}`,
+                      { ns: "views/settings" },
+                    ),
+                    name: polygon.friendly_name ?? polygon.name,
+                  }}
+                >
+                  masksAndZones.form.polygonDrawing.revertOverride.desc
+                </Trans>
+              ) : (
+                <Trans
+                  ns="views/settings"
+                  values={{
+                    type: t(
+                      `masksAndZones.form.polygonDrawing.type.${polygon.type}`,
+                      { ns: "views/settings" },
+                    ),
+                    name: polygon.friendly_name ?? polygon.name,
+                  }}
+                >
+                  masksAndZones.form.polygonDrawing.delete.desc
+                </Trans>
+              )}
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>
