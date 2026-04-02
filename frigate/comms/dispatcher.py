@@ -118,9 +118,20 @@ class Dispatcher:
 
             try:
                 if command_type == "set":
+                    # Commands that require a sub-command (mask/zone name)
+                    sub_command_required = {
+                        "motion_mask",
+                        "object_mask",
+                        "zone",
+                    }
                     if sub_command:
                         self._camera_settings_handlers[command](
                             camera_name, sub_command, payload
+                        )
+                    elif command in sub_command_required:
+                        logger.error(
+                            "Command %s requires a sub-command (mask/zone name)",
+                            command,
                         )
                     else:
                         self._camera_settings_handlers[command](camera_name, payload)
