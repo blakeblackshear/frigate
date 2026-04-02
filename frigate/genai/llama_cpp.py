@@ -62,7 +62,7 @@ class LlamaCppClient(GenAIClient):
         if base_url is None:
             return None
 
-        # Query /v1/models to validate the configured model exists
+        # Query /v1/models to validate the model and extract capabilities
         try:
             response = requests.get(
                 f"{base_url}/v1/models",
@@ -71,22 +71,17 @@ class LlamaCppClient(GenAIClient):
             response.raise_for_status()
             models_data = response.json()
 
-            model_found = False
+            matched_model = None
             configured_model = self.genai_config.model
             for model in models_data.get("data", []):
                 model_ids = {model.get("id")}
-                # llama.cpp models can have aliases (e.g. short names)
                 for alias in model.get("aliases", []):
                     model_ids.add(alias)
                 if configured_model in model_ids:
-                    model_found = True
-                    # Extract context size from model metadata if available
-                    meta = model.get("meta", {})
-                    if meta.get("n_ctx_train"):
-                        self._context_size = int(meta["n_ctx_train"])
+                    matched_model = model
                     break
 
-            if not model_found:
+            if matched_model is None:
                 available = []
                 for m in models_data.get("data", []):
                     available.append(m.get("id", "unknown"))
@@ -98,36 +93,14 @@ class LlamaCppClient(GenAIClient):
                     available,
                 )
                 return None
-        except Exception as e:
-            logger.warning(
-                "Failed to query llama.cpp /v1/models endpoint: %s. "
-                "Model validation skipped.",
-                e,
-            )
 
-        # Query /props for server properties (context size, modalities)
-        try:
-            response = requests.get(
-                f"{base_url}/props",
-                timeout=10,
-            )
-            response.raise_for_status()
-            props = response.json()
-
-            # Context size from server runtime config
-            default_settings = props.get("default_generation_settings", {})
-            if default_settings.get("n_ctx"):
-                self._context_size = int(default_settings["n_ctx"])
-
-            # Check supported modalities
-            modalities = props.get("modalities", {})
-            self._supports_vision = modalities.get("vision", False)
-            self._supports_audio = modalities.get("audio", False)
-            self._supports_tools = modalities.get("tools", False)
+            # Parse capabilities from the model's server launch args
+            args = matched_model.get("status", {}).get("args", [])
+            self._parse_model_args(args)
 
             logger.info(
-                "llama.cpp model '%s' loaded — context: %s, vision: %s, audio: %s, tools: %s",
-                self.genai_config.model,
+                "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
+                configured_model,
                 self._context_size or "unknown",
                 self._supports_vision,
                 self._supports_audio,
@@ -135,12 +108,25 @@ class LlamaCppClient(GenAIClient):
             )
         except Exception as e:
             logger.warning(
-                "Failed to query llama.cpp /props endpoint: %s. "
-                "Using defaults for context size and modalities.",
+                "Failed to query llama.cpp /v1/models endpoint: %s. "
+                "Model validation skipped.",
                 e,
             )
 
         return base_url
+
+    def _parse_model_args(self, args: list[str]) -> None:
+        """Extract context size and capabilities from llama-server launch args."""
+        for i, arg in enumerate(args):
+            if arg == "--ctx-size" and i + 1 < len(args):
+                try:
+                    self._context_size = int(args[i + 1])
+                except ValueError:
+                    pass
+            elif arg == "--mmproj":
+                self._supports_vision = True
+            elif arg == "--jinja":
+                self._supports_tools = True
 
     def _send(
         self,
