@@ -293,7 +293,7 @@ export default function ZoneEditPane({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       name: polygon?.name ?? "",
       friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
@@ -314,18 +314,25 @@ export default function ZoneEditPane({
     },
   });
 
+  const watchSpeedEstimation = form.watch("speedEstimation");
+  const watchLineA = form.watch("lineA");
+  const watchLineB = form.watch("lineB");
+  const watchLineC = form.watch("lineC");
+  const watchLineD = form.watch("lineD");
+
+  const canSave =
+    form.formState.isValid &&
+    (!watchSpeedEstimation ||
+      (!!watchLineA && !!watchLineB && !!watchLineC && !!watchLineD));
+
   useEffect(() => {
-    if (
-      form.watch("speedEstimation") &&
-      polygon &&
-      polygon.points.length !== 4
-    ) {
+    if (watchSpeedEstimation && polygon && polygon.points.length !== 4) {
       toast.error(
         t("masksAndZones.zones.speedThreshold.toast.error.pointLengthError"),
       );
       form.setValue("speedEstimation", false);
     }
-  }, [polygon, form, t]);
+  }, [polygon, form, t, watchSpeedEstimation]);
 
   const saveToConfig = useCallback(
     async (
@@ -966,7 +973,7 @@ export default function ZoneEditPane({
             </Button>
             <Button
               variant="select"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={isLoading || !canSave}
               className="flex flex-1"
               aria-label={t("button.save", { ns: "common" })}
               type="submit"
