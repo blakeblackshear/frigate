@@ -72,8 +72,13 @@ class LlamaCppClient(GenAIClient):
             models_data = response.json()
 
             model_found = False
+            configured_model = self.genai_config.model
             for model in models_data.get("data", []):
-                if model.get("id") == self.genai_config.model:
+                model_ids = {model.get("id")}
+                # llama.cpp models can have aliases (e.g. short names)
+                for alias in model.get("aliases", []):
+                    model_ids.add(alias)
+                if configured_model in model_ids:
                     model_found = True
                     # Extract context size from model metadata if available
                     meta = model.get("meta", {})
@@ -82,12 +87,14 @@ class LlamaCppClient(GenAIClient):
                     break
 
             if not model_found:
-                available = [
-                    m.get("id", "unknown") for m in models_data.get("data", [])
-                ]
+                available = []
+                for m in models_data.get("data", []):
+                    available.append(m.get("id", "unknown"))
+                    for alias in m.get("aliases", []):
+                        available.append(alias)
                 logger.error(
                     "Model '%s' not found on llama.cpp server. Available models: %s",
-                    self.genai_config.model,
+                    configured_model,
                     available,
                 )
                 return None
