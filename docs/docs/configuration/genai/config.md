@@ -29,11 +29,11 @@ You must use a vision-capable model with Frigate. The following models are recom
 
 | Model         | Notes                                                                                                                                                                |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl`    | Strong visual and situational understanding, strong ability to identify smaller objects and interactions with object.                                                |
+| `qwen3-vl`    | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
 | `qwen3.5`     | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
+| `gemma4`      | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
 | `Intern3.5VL` | Relatively fast with good vision comprehension                                                                                                                       |
 | `gemma3`      | Slower model with good vision and temporal understanding                                                                                                             |
-| `qwen2.5-vl`  | Fast but capable model with good vision comprehension                                                                                                                |
 
 :::info
 
