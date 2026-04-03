@@ -1110,17 +1110,7 @@ model:
 
 #### Using a Custom Model
 
-To use your own model:
-
-1.  Package your compiled model into a `.zip` file.
-
-2.  The `.zip` must contain the compiled `.dfp` file.
-
-3.  Depending on the model, the compiler may also generate a cropped post-processing network. If present, it will be named with the suffix `_post.onnx`.
-
-4.  Bind-mount the `.zip` file into the container and specify its path using `model.path` in your config.
-
-5.  Update the `labelmap_path` to match your custom model's labels.
+To use your own custom model, first compile it into a [.dfp](https://developer.memryx.com/2p1/specs/files.html#dataflow-program) file, which is the format used by MemryX.
 
 #### Compile the Model
 
@@ -1129,17 +1119,30 @@ Custom models must be compiled using **MemryX SDK 2.1**.
 Before compiling your model, install the MemryX Neural Compiler tools from the
 [Install Tools](https://developer.memryx.com/2p1/get_started/install_tools.html) page on the **host**.
 
+> **Note:** It is recommended to compile the model on the host machine, or on another separate machine, rather than inside the Frigate Docker container. Installing the compiler inside Docker may conflict with container packages. It is recommended to create a Python virtual environment and install the compiler there.
+
 Once the SDK 2.1 environment is set up, follow the
 [MemryX Compiler](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage) documentation to compile your model.
 
 Example:
 
 ```bash
-mx_nc -m ./yolov9.onnx --dfp_fname ./yolov9.dfp -is "1,3,640,640" -c 4 --autocrop -v
+mx_nc -m yolonas.onnx -c 4 --autocrop -v --dfp_fname yolonas.dfp
 ```
-> **Note:** `-is` specifies the input shape. Use your model's input dimensions.
 
 For detailed instructions on compiling models, refer to the [MemryX Compiler](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage) docs and [Tutorials](https://developer.memryx.com/2p1/tutorials/tutorials.html).
+
+#### Package the Compiled Model
+
+1. Package your compiled model into a `.zip` file.
+
+2. The `.zip` file must contain the compiled `.dfp` file.
+
+3. Depending on the model, the compiler may also generate a cropped post-processing network. If present, it will be named with the suffix `_post.onnx`.
+
+4. Bind-mount the `.zip` file into the container and specify its path using `model.path` in your config.
+
+5. Update `labelmap_path` to match your custom model's labels.
 
 ```yaml
 # The detector automatically selects the default model if nothing is provided in the config.

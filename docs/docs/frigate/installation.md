@@ -297,7 +297,7 @@ The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVM
 
 #### Installation
 
-To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/2p1/get_started/hardware_setup.html).
+To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/2p1/get_started/install_hardware.html).
 
 Then follow these steps for installing the correct driver/runtime configuration:
 
