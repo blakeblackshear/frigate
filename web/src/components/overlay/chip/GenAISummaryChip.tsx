@@ -108,7 +108,7 @@ export function GenAISummaryDialog({
   return (
     <Overlay open={open} onOpenChange={setOpen}>
       <Trigger asChild>
-        <div>{children}</div>
+        <div className="min-w-0">{children}</div>
       </Trigger>
       <Content
         className={cn(

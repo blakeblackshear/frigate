@@ -525,7 +525,7 @@ function ReviewGroup({
                       }
                     }}
                   >
-                    <span className="truncate hover:underline">
+                    <span className="block truncate hover:underline">
                       {review.data.metadata.title}
                     </span>
                   </GenAISummaryDialog>
