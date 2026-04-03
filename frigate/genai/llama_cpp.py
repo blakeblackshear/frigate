@@ -126,7 +126,7 @@ class LlamaCppClient(GenAIClient):
             chat_caps = props.get("chat_template_caps", {})
             self._supports_tools = chat_caps.get("supports_tools", False)
 
-            logger.debug(
+            logger.info(
                 "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
                 configured_model,
                 self._context_size or "unknown",

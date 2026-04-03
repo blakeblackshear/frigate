@@ -2,7 +2,7 @@
 
 Manages GenAI provider clients from Frigate config. Configuration is read only
 in _update_config(); no other code should read config.genai. Exposes clients
-by role: tool_client, vision_client, embeddings_client.
+by role: chat_client, description_client, embeddings_client.
 """
 
 import logging
@@ -21,8 +21,8 @@ class GenAIClientManager:
     """Manages GenAI provider clients from Frigate config."""
 
     def __init__(self, config: FrigateConfig) -> None:
-        self._tool_client: Optional[GenAIClient] = None
-        self._vision_client: Optional[GenAIClient] = None
+        self._chat_client: Optional[GenAIClient] = None
+        self._description_client: Optional[GenAIClient] = None
         self._embeddings_client: Optional[GenAIClient] = None
         self.update_config(config)
 
@@ -30,13 +30,13 @@ class GenAIClientManager:
         """Build role clients from current Frigate config.genai.
 
         Called from __init__ and can be called again when config is reloaded.
-        Each role (tools, vision, embeddings) gets the client for the provider
-        that has that role in its roles list.
+        Each role (chat, descriptions, embeddings) gets the client for the
+        provider that has that role in its roles list.
         """
         from frigate.genai import PROVIDERS, load_providers
 
-        self._tool_client = None
-        self._vision_client = None
+        self._chat_client = None
+        self._description_client = None
         self._embeddings_client = None
 
         if not config.genai:
@@ -65,22 +65,22 @@ class GenAIClientManager:
                 continue
 
             for role in genai_cfg.roles:
-                if role == GenAIRoleEnum.tools:
-                    self._tool_client = client
-                elif role == GenAIRoleEnum.vision:
-                    self._vision_client = client
+                if role == GenAIRoleEnum.chat:
+                    self._chat_client = client
+                elif role == GenAIRoleEnum.descriptions:
+                    self._description_client = client
                 elif role == GenAIRoleEnum.embeddings:
                     self._embeddings_client = client
 
     @property
-    def tool_client(self) -> "Optional[GenAIClient]":
-        """Client configured for the tools role (e.g. chat with function calling)."""
-        return self._tool_client
+    def chat_client(self) -> "Optional[GenAIClient]":
+        """Client configured for the chat role (e.g. chat with function calling)."""
+        return self._chat_client
 
     @property
-    def vision_client(self) -> "Optional[GenAIClient]":
-        """Client configured for the vision role (e.g. review descriptions, object descriptions)."""
-        return self._vision_client
+    def description_client(self) -> "Optional[GenAIClient]":
+        """Client configured for the descriptions role (e.g. review descriptions, object descriptions)."""
+        return self._description_client
 
     @property
     def embeddings_client(self) -> "Optional[GenAIClient]":
