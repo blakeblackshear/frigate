@@ -47,7 +47,7 @@ const review: SectionConfigOverrides = {
       "detections.labels": "/configuration/review/#alerts-and-detections",
     },
     restartRequired: [],
-    fieldOrder: ["alerts", "detections", "genai"],
+    fieldOrder: ["alerts", "detections", "genai", "genai.enabled"],
     fieldGroups: {},
     hiddenFields: [
       "enabled_in_config",
