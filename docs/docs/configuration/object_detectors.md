@@ -1110,7 +1110,7 @@ model:
 
 #### Using a Custom Model
 
-To use your own custom model, first compile it into a .dfp file, which is the format used by MemryX.
+To use your own custom model, first compile it into a [.dfp](https://developer.memryx.com/2p1/specs/files.html#dataflow-program) file, which is the format used by MemryX.
 
 #### Compile the Model
 
