@@ -101,15 +101,26 @@ class LlamaCppClient(GenAIClient):
                 e,
             )
 
-        # Query /props for context size, modalities, and tool support
+        # Query /props for context size, modalities, and tool support.
+        # The standard /props?model=<name> endpoint works with llama-server.
+        # If it fails, try the llama-swap per-model passthrough endpoint which
+        # returns props for a specific model without requiring it to be loaded.
         try:
-            response = requests.get(
-                f"{base_url}/props",
-                params={"model": configured_model},
-                timeout=10,
-            )
-            response.raise_for_status()
-            props = response.json()
+            try:
+                response = requests.get(
+                    f"{base_url}/props",
+                    params={"model": configured_model},
+                    timeout=10,
+                )
+                response.raise_for_status()
+                props = response.json()
+            except Exception:
+                response = requests.get(
+                    f"{base_url}/upstream/{configured_model}/props",
+                    timeout=10,
+                )
+                response.raise_for_status()
+                props = response.json()
 
             # Context size from server runtime config
             default_settings = props.get("default_generation_settings", {})
@@ -126,7 +137,7 @@ class LlamaCppClient(GenAIClient):
             chat_caps = props.get("chat_template_caps", {})
             self._supports_tools = chat_caps.get("supports_tools", False)
 
-            logger.debug(
+            logger.info(
                 "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
                 configured_model,
                 self._context_size or "unknown",
@@ -224,6 +235,23 @@ class LlamaCppClient(GenAIClient):
     def supports_tools(self) -> bool:
         """Whether the loaded model supports tool/function calling."""
         return self._supports_tools
+
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the llama.cpp server."""
+        if self.provider is None:
+            return []
+        try:
+            response = requests.get(f"{self.provider}/v1/models", timeout=10)
+            response.raise_for_status()
+            models = []
+            for m in response.json().get("data", []):
+                models.append(m.get("id", "unknown"))
+                for alias in m.get("aliases", []):
+                    models.append(alias)
+            return sorted(models)
+        except Exception as e:
+            logger.warning("Failed to list llama.cpp models: %s", e)
+            return []
 
     def get_context_size(self) -> int:
         """Get the context window size for llama.cpp.

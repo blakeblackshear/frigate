@@ -320,6 +320,22 @@ Guidelines:
         """Submit a request to the provider."""
         return None
 
+    @property
+    def supports_vision(self) -> bool:
+        """Whether the model supports vision/image input.
+
+        Defaults to True for cloud providers. Providers that can detect
+        capability at runtime (e.g. llama.cpp) should override this.
+        """
+        return True
+
+    def list_models(self) -> list[str]:
+        """Return the list of model names available from this provider.
+
+        Providers should override this to query their backend.
+        """
+        return []
+
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
         return 4096

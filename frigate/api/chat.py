@@ -520,45 +520,14 @@ async def _execute_get_live_context(
             "detections": list(tracked_objects_dict.values()),
         }
 
-        # Grab live frame and handle based on provider configuration
+        # Grab live frame when the chat model supports vision
         image_url = await _get_live_frame_image_url(request, camera, allowed_cameras)
         if image_url:
-            genai_manager = request.app.genai_manager
-            if genai_manager.tool_client is genai_manager.vision_client:
-                # Same provider handles both roles — pass image URL so it can
-                # be injected as a user message (images can't be in tool results)
+            chat_client = request.app.genai_manager.chat_client
+            if chat_client is not None and chat_client.supports_vision:
+                # Pass image URL so it can be injected as a user message
+                # (images can't be in tool results)
                 result["_image_url"] = image_url
-            elif genai_manager.vision_client is not None:
-                # Separate vision provider — have it describe the image,
-                # providing detection context so it knows what to focus on
-                frame_bytes = _decode_data_url(image_url)
-                if frame_bytes:
-                    detections = result.get("detections", [])
-                    if detections:
-                        detection_lines = []
-                        for d in detections:
-                            parts = [d.get("label", "unknown")]
-                            if d.get("sub_label"):
-                                parts.append(f"({d['sub_label']})")
-                            if d.get("zones"):
-                                parts.append(f"in {', '.join(d['zones'])}")
-                            detection_lines.append(" ".join(parts))
-                        context = (
-                            "The following objects are currently being tracked: "
-                            + "; ".join(detection_lines)
-                            + "."
-                        )
-                    else:
-                        context = "No objects are currently being tracked."
-
-                    description = genai_manager.vision_client._send(
-                        f"Describe what you see in this security camera image. "
-                        f"{context} Focus on the scene, any visible activity, "
-                        f"and details about the tracked objects.",
-                        [frame_bytes],
-                    )
-                    if description:
-                        result["image_description"] = description
 
         return result
 
@@ -606,17 +575,6 @@ async def _get_live_frame_image_url(
         return f"data:image/jpeg;base64,{b64}"
     except Exception as e:
         logger.debug("Failed to get live frame for %s: %s", camera, e)
-        return None
-
-
-def _decode_data_url(data_url: str) -> Optional[bytes]:
-    """Decode a base64 data URL to raw bytes."""
-    try:
-        # Format: data:image/jpeg;base64,<data>
-        _, encoded = data_url.split(",", 1)
-        return base64.b64decode(encoded)
-    except (ValueError, Exception) as e:
-        logger.debug("Failed to decode data URL: %s", e)
         return None
 
 
@@ -734,9 +692,9 @@ async def _execute_start_camera_watch(
     await require_camera_access(camera, request=request)
 
     genai_manager = request.app.genai_manager
-    vision_client = genai_manager.vision_client or genai_manager.tool_client
-    if vision_client is None:
-        return {"error": "No vision/GenAI provider configured."}
+    chat_client = genai_manager.chat_client
+    if chat_client is None or not chat_client.supports_vision:
+        return {"error": "VLM watch requires a chat model with vision support."}
 
     try:
         job_id = start_vlm_watch_job(
@@ -1070,7 +1028,7 @@ async def chat_completion(
     6. Repeats until final answer
     7. Returns response to user
     """
-    genai_client = request.app.genai_manager.tool_client
+    genai_client = request.app.genai_manager.chat_client
     if not genai_client:
         return JSONResponse(
             content={
@@ -1381,12 +1339,12 @@ async def start_vlm_monitor(
 
     await require_camera_access(body.camera, request=request)
 
-    vision_client = genai_manager.vision_client or genai_manager.tool_client
-    if vision_client is None:
+    chat_client = genai_manager.chat_client
+    if chat_client is None or not chat_client.supports_vision:
         return JSONResponse(
             content={
                 "success": False,
-                "message": "No vision/GenAI provider configured.",
+                "message": "VLM watch requires a chat model with vision support.",
             },
             status_code=400,
         )

@@ -746,7 +746,7 @@ async def set_not_reviewed(
     description="Use GenAI to summarize review items over a period of time.",
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):
-    if not request.app.genai_manager.vision_client:
+    if not request.app.genai_manager.description_client:
         return JSONResponse(
             content=(
                 {

@@ -86,6 +86,14 @@ class OpenAIClient(GenAIClient):
             logger.warning("OpenAI returned an error: %s", str(e))
             return None
 
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the OpenAI-compatible API."""
+        try:
+            return sorted(m.id for m in self.provider.models.list().data)
+        except Exception as e:
+            logger.warning("Failed to list OpenAI models: %s", e)
+            return []
+
     def get_context_size(self) -> int:
         """Get the context window size for OpenAI."""
         if self.context_size is not None:

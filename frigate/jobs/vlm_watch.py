@@ -121,11 +121,12 @@ class VLMWatchRunner(threading.Thread):
 
     def _run_iteration(self) -> float:
         """Run one VLM analysis iteration. Returns seconds until next run."""
-        vision_client = (
-            self.genai_manager.vision_client or self.genai_manager.tool_client
-        )
-        if vision_client is None:
-            logger.warning("VLM watch job %s: no vision client available", self.job.id)
+        chat_client = self.genai_manager.chat_client
+        if chat_client is None or not chat_client.supports_vision:
+            logger.warning(
+                "VLM watch job %s: no chat client with vision support available",
+                self.job.id,
+            )
             return 30
 
         frame = self.frame_processor.get_current_frame(self.job.camera, {})
@@ -163,7 +164,7 @@ class VLMWatchRunner(threading.Thread):
             }
         )
 
-        response = vision_client.chat_with_tools(
+        response = chat_client.chat_with_tools(
             messages=self.conversation,
             tools=None,
             tool_choice=None,

@@ -1485,7 +1485,12 @@
       "title": "Timestamp Settings"
     },
     "searchPlaceholder": "Search...",
-    "addCustomLabel": "Add custom label..."
+    "addCustomLabel": "Add custom label...",
+    "genaiModel": {
+      "placeholder": "Select model…",
+      "search": "Search models…",
+      "noModels": "No models available"
+    }
   },
   "globalConfig": {
     "title": "Global Configuration",
