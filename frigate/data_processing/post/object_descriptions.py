@@ -16,7 +16,7 @@ from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.types import PostProcessDataEnum
-from frigate.genai import GenAIClient
+from frigate.genai.manager import GenAIClientManager
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
@@ -41,7 +41,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embeddings: "Embeddings",
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
-        client: GenAIClient,
+        genai_manager: GenAIClientManager,
         semantic_trigger_processor: SemanticTriggerProcessor | None,
     ):
         super().__init__(config, metrics, None)
@@ -49,7 +49,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         self.embeddings = embeddings
         self.requestor = requestor
         self.metrics = metrics
-        self.genai_client = client
+        self.genai_manager = genai_manager
         self.semantic_trigger_processor = semantic_trigger_processor
         self.tracked_events: dict[str, list[Any]] = {}
         self.early_request_sent: dict[str, bool] = {}
@@ -198,6 +198,9 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         if data_type != PostProcessDataEnum.tracked_object:
             return
 
+        if self.genai_manager.description_client is None:
+            return
+
         state: str | None = frame_data.get("state", None)
 
         if state is not None:
@@ -329,7 +332,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         """Embed the description for an event."""
         start = datetime.datetime.now().timestamp()
         camera_config = self.config.cameras[str(event.camera)]
-        description = self.genai_client.generate_object_description(
+        description = self.genai_manager.description_client.generate_object_description(
             camera_config, thumbnails, event
         )
 

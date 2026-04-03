@@ -44,10 +44,9 @@ export function GenAIModelWidget(props: WidgetProps) {
   const fieldClassName = getSizedFieldClassName(options, "sm");
   const providerKey = useMemo(() => getProviderKey(id), [id]);
 
-  const { data: allModels } = useSWR<Record<string, string[]>>(
-    "genai/models",
-    { revalidateOnFocus: false },
-  );
+  const { data: allModels } = useSWR<Record<string, string[]>>("genai/models", {
+    revalidateOnFocus: false,
+  });
 
   const models = useMemo(() => {
     if (!allModels || !providerKey) return [];
