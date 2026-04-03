@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Switch } from "@/components/ui/switch";
 import type { ConfigFormContext } from "@/types/configForm";
 
-const GENAI_ROLES = ["embeddings", "vision", "tools"] as const;
+const GENAI_ROLES = ["embeddings", "descriptions", "chat"] as const;
 
 function normalizeValue(value: unknown): string[] {
   if (Array.isArray(value)) {

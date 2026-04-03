@@ -37,6 +37,7 @@ const genai: SectionConfigOverrides = {
         "ui:options": { size: "lg" },
       },
       "*.model": {
+        "ui:widget": "genaiModel",
         "ui:options": { size: "xs" },
       },
       "*.provider": {

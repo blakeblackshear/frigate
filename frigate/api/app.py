@@ -125,6 +125,16 @@ def metrics(request: Request):
     return Response(content=content, media_type=content_type)
 
 
+@router.get(
+    "/genai/models",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="List available GenAI models",
+    description="Returns available models for each configured GenAI provider.",
+)
+def genai_models(request: Request):
+    return JSONResponse(content=request.app.genai_manager.list_models())
+
+
 @router.get("/config", dependencies=[Depends(allow_any_authenticated())])
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
