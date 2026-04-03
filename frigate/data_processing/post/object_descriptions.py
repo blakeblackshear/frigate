@@ -332,7 +332,12 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         """Embed the description for an event."""
         start = datetime.datetime.now().timestamp()
         camera_config = self.config.cameras[str(event.camera)]
-        description = self.genai_manager.description_client.generate_object_description(
+        client = self.genai_manager.description_client
+
+        if client is None:
+            return
+
+        description = client.generate_object_description(
             camera_config, thumbnails, event
         )
 

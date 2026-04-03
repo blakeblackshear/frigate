@@ -134,6 +134,8 @@ class OllamaClient(GenAIClient):
 
     def list_models(self) -> list[str]:
         """Return available model names from the Ollama server."""
+        if self.provider is None:
+            return []
         try:
             response = self.provider.list()
             return sorted(

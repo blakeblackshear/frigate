@@ -90,7 +90,7 @@ class GeminiClient(GenAIClient):
     def list_models(self) -> list[str]:
         """Return available model names from Gemini."""
         try:
-            return sorted(m.name for m in self.provider.models.list())
+            return sorted(m.name or "" for m in self.provider.models.list())
         except Exception as e:
             logger.warning("Failed to list Gemini models: %s", e)
             return []

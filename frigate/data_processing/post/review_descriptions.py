@@ -64,7 +64,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
         Capped at 20 frames.
         """
-        context_size = self.genai_manager.description_client.get_context_size()
+        client = self.genai_manager.description_client
+
+        if client is None:
+            return 3
+
+        context_size = client.get_context_size()
         camera_config = self.config.cameras[camera]
 
         detect_width = camera_config.detect.width
@@ -320,7 +325,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     os.path.join(CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}")
                 ).mkdir(parents=True, exist_ok=True)
 
-            return self.genai_manager.description_client.generate_review_summary(
+            client = self.genai_manager.description_client
+
+            if client is None:
+                return None
+
+            return client.generate_review_summary(
                 start_ts,
                 end_ts,
                 events_with_context,
