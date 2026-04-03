@@ -101,15 +101,26 @@ class LlamaCppClient(GenAIClient):
                 e,
             )
 
-        # Query /props for context size, modalities, and tool support
+        # Query /props for context size, modalities, and tool support.
+        # The standard /props?model=<name> endpoint works with llama-server.
+        # If it fails, try the llama-swap per-model passthrough endpoint which
+        # returns props for a specific model without requiring it to be loaded.
         try:
-            response = requests.get(
-                f"{base_url}/props",
-                params={"model": configured_model},
-                timeout=10,
-            )
-            response.raise_for_status()
-            props = response.json()
+            try:
+                response = requests.get(
+                    f"{base_url}/props",
+                    params={"model": configured_model},
+                    timeout=10,
+                )
+                response.raise_for_status()
+                props = response.json()
+            except Exception:
+                response = requests.get(
+                    f"{base_url}/upstream/{configured_model}/props",
+                    timeout=10,
+                )
+                response.raise_for_status()
+                props = response.json()
 
             # Context size from server runtime config
             default_settings = props.get("default_generation_settings", {})
