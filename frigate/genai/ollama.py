@@ -136,7 +136,9 @@ class OllamaClient(GenAIClient):
         """Return available model names from the Ollama server."""
         try:
             response = self.provider.list()
-            return sorted(m.get("name", m.get("model", "")) for m in response.get("models", []))
+            return sorted(
+                m.get("name", m.get("model", "")) for m in response.get("models", [])
+            )
         except Exception as e:
             logger.warning("Failed to list Ollama models: %s", e)
             return []
