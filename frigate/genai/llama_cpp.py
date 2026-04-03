@@ -236,6 +236,23 @@ class LlamaCppClient(GenAIClient):
         """Whether the loaded model supports tool/function calling."""
         return self._supports_tools
 
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the llama.cpp server."""
+        if self.provider is None:
+            return []
+        try:
+            response = requests.get(f"{self.provider}/v1/models", timeout=10)
+            response.raise_for_status()
+            models = []
+            for m in response.json().get("data", []):
+                models.append(m.get("id", "unknown"))
+                for alias in m.get("aliases", []):
+                    models.append(alias)
+            return sorted(models)
+        except Exception as e:
+            logger.warning("Failed to list llama.cpp models: %s", e)
+            return []
+
     def get_context_size(self) -> int:
         """Get the context window size for llama.cpp.
 

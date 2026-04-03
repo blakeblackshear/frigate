@@ -329,6 +329,13 @@ Guidelines:
         """
         return True
 
+    def list_models(self) -> list[str]:
+        """Return the list of model names available from this provider.
+
+        Providers should override this to query their backend.
+        """
+        return []
+
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
         return 4096

@@ -82,6 +82,14 @@ class OpenAIClient(GenAIClient):
             return str(result.choices[0].message.content.strip())
         return None
 
+    def list_models(self) -> list[str]:
+        """Return available model IDs from Azure OpenAI."""
+        try:
+            return sorted(m.id for m in self.provider.models.list().data)
+        except Exception as e:
+            logger.warning("Failed to list Azure OpenAI models: %s", e)
+            return []
+
     def get_context_size(self) -> int:
         """Get the context window size for Azure OpenAI."""
         return 128000

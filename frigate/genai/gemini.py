@@ -87,6 +87,14 @@ class GeminiClient(GenAIClient):
             return None
         return description
 
+    def list_models(self) -> list[str]:
+        """Return available model names from Gemini."""
+        try:
+            return sorted(m.name for m in self.provider.models.list())
+        except Exception as e:
+            logger.warning("Failed to list Gemini models: %s", e)
+            return []
+
     def get_context_size(self) -> int:
         """Get the context window size for Gemini."""
         # Gemini Pro Vision has a 1M token context window

@@ -24,6 +24,7 @@ class GenAIClientManager:
         self._chat_client: Optional[GenAIClient] = None
         self._description_client: Optional[GenAIClient] = None
         self._embeddings_client: Optional[GenAIClient] = None
+        self._clients: dict[str, "GenAIClient"] = {}
         self.update_config(config)
 
     def update_config(self, config: FrigateConfig) -> None:
@@ -38,6 +39,7 @@ class GenAIClientManager:
         self._chat_client = None
         self._description_client = None
         self._embeddings_client = None
+        self._clients = {}
 
         if not config.genai:
             return
@@ -64,6 +66,8 @@ class GenAIClientManager:
                 )
                 continue
 
+            self._clients[_name] = client
+
             for role in genai_cfg.roles:
                 if role == GenAIRoleEnum.chat:
                     self._chat_client = client
@@ -86,3 +90,7 @@ class GenAIClientManager:
     def embeddings_client(self) -> "Optional[GenAIClient]":
         """Client configured for the embeddings role."""
         return self._embeddings_client
+
+    def list_models(self) -> dict[str, list[str]]:
+        """Return available models keyed by config entry name."""
+        return {name: client.list_models() for name, client in self._clients.items()}

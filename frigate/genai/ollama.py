@@ -132,6 +132,15 @@ class OllamaClient(GenAIClient):
             logger.warning("Ollama returned an error: %s", str(e))
             return None
 
+    def list_models(self) -> list[str]:
+        """Return available model names from the Ollama server."""
+        try:
+            response = self.provider.list()
+            return sorted(m.get("name", m.get("model", "")) for m in response.get("models", []))
+        except Exception as e:
+            logger.warning("Failed to list Ollama models: %s", e)
+            return []
+
     def get_context_size(self) -> int:
         """Get the context window size for Ollama."""
         return int(
