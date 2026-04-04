@@ -75,7 +75,7 @@ export function ChatStartingState({ onSendMessage }: ChatStartingStateProps) {
         </div>
       </div>
 
-      <div className="flex w-full max-w-2xl flex-row items-center gap-2 rounded-xl bg-secondary p-4">
+      <div className="flex w-full max-w-2xl flex-row items-center gap-2 rounded-xl bg-secondary p-3">
         <Input
           className="h-12 w-full flex-1 border-transparent bg-transparent text-base shadow-none focus-visible:ring-0 dark:bg-transparent"
           placeholder={t("placeholder")}

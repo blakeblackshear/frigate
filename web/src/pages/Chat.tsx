@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FaArrowUpLong } from "react-icons/fa6";
+import { LuCircleAlert } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 import { ChatEventThumbnailsRow } from "@/components/chat/ChatEventThumbnailsRow";
 import { MessageBubble } from "@/components/chat/ChatMessage";
-import { ToolCallBubble } from "@/components/chat/ToolCallBubble";
+import { ToolCallsGroup } from "@/components/chat/ToolCallsGroup";
 import { ChatStartingState } from "@/components/chat/ChatStartingState";
 import type { ChatMessage } from "@/types/chat";
 import {
@@ -20,6 +21,21 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    document.title = t("documentTitle");
+  }, [t]);
+
+  // Auto-scroll to bottom when messages change, but only if near bottom
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (isNearBottom) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
+  }, [messages]);
 
   const submitConversation = useCallback(
     async (messagesToSend: ChatMessage[]) => {
@@ -77,7 +93,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex size-full justify-center p-2">
+    <div className="flex size-full justify-center p-2 md:p-4">
       <div className="flex size-full flex-col xl:w-[50%] 3xl:w-[35%]">
         {messages.length === 0 ? (
           <ChatStartingState
@@ -87,83 +103,83 @@ export default function ChatPage() {
             }}
           />
         ) : (
-          <div className="scrollbar-container flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto">
-            {messages.map((msg, i) => {
-              const isStreamingPlaceholder =
-                i === messages.length - 1 &&
-                msg.role === "assistant" &&
-                isLoading &&
-                !msg.content?.trim() &&
-                !(msg.toolCalls && msg.toolCalls.length > 0);
-              if (isStreamingPlaceholder) {
-                return <div key={i} />;
-              }
-              return (
-                <div key={i} className="flex flex-col gap-2">
-                  {msg.role === "assistant" && msg.toolCalls && (
-                    <>
-                      {msg.toolCalls.map((tc, tcIdx) => (
-                        <div key={tcIdx} className="flex flex-col gap-2">
-                          <ToolCallBubble
-                            name={tc.name}
-                            arguments={tc.arguments}
-                            side="left"
-                          />
-                          {tc.response && (
-                            <ToolCallBubble
-                              name={tc.name}
-                              response={tc.response}
-                              side="right"
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  <MessageBubble
-                    role={msg.role}
-                    content={msg.content}
-                    messageIndex={i}
-                    onEditSubmit={
-                      msg.role === "user" ? handleEditSubmit : undefined
-                    }
-                    isComplete={
-                      msg.role === "user" ||
-                      !isLoading ||
-                      i < messages.length - 1
-                    }
-                  />
-                  {msg.role === "assistant" &&
-                    (() => {
-                      const isComplete = !isLoading || i < messages.length - 1;
-                      if (!isComplete) return null;
-                      const events = getEventIdsFromSearchObjectsToolCalls(
-                        msg.toolCalls,
-                      );
-                      return <ChatEventThumbnailsRow events={events} />;
-                    })()}
-                </div>
-              );
-            })}
-            {(() => {
-              const lastMsg = messages[messages.length - 1];
-              const showProcessing =
-                isLoading &&
-                lastMsg?.role === "assistant" &&
-                !lastMsg.content?.trim() &&
-                !(lastMsg.toolCalls && lastMsg.toolCalls.length > 0);
-              return showProcessing ? (
-                <div className="self-start rounded-lg bg-muted px-3 py-2 text-muted-foreground">
-                  {t("processing")}
-                </div>
-              ) : null;
-            })()}
-            {error && (
-              <p className="self-start text-sm text-destructive" role="alert">
-                {error}
-              </p>
-            )}
-          </div>
+          <>
+            <div
+              ref={scrollRef}
+              className="scrollbar-container flex min-h-0 w-full flex-1 flex-col gap-3 overflow-y-auto"
+            >
+              {messages.map((msg, i) => {
+                const isLastAssistant =
+                  i === messages.length - 1 && msg.role === "assistant";
+                const isComplete =
+                  msg.role === "user" || !isLoading || !isLastAssistant;
+                const hasToolCalls = msg.toolCalls && msg.toolCalls.length > 0;
+                const hasContent = !!msg.content?.trim();
+                const showProcessing =
+                  isLastAssistant && isLoading && !hasContent;
+
+                // Hide empty placeholder only when there are no tool calls yet
+                if (
+                  isLastAssistant &&
+                  isLoading &&
+                  !hasContent &&
+                  !hasToolCalls
+                )
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 self-start rounded-2xl bg-muted px-5 py-4"
+                    >
+                      <span className="size-2.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.32s]" />
+                      <span className="size-2.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.16s]" />
+                      <span className="size-2.5 animate-bounce rounded-full bg-muted-foreground/60" />
+                    </div>
+                  );
+
+                return (
+                  <div key={i} className="flex flex-col gap-2">
+                    {msg.role === "assistant" && hasToolCalls && (
+                      <ToolCallsGroup toolCalls={msg.toolCalls!} />
+                    )}
+                    {showProcessing ? (
+                      <div className="flex items-center gap-2 self-start rounded-2xl bg-muted px-5 py-4">
+                        <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
+                        <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
+                        <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60" />
+                      </div>
+                    ) : (
+                      <MessageBubble
+                        role={msg.role}
+                        content={msg.content}
+                        messageIndex={i}
+                        onEditSubmit={
+                          msg.role === "user" ? handleEditSubmit : undefined
+                        }
+                        isComplete={isComplete}
+                      />
+                    )}
+                    {msg.role === "assistant" &&
+                      isComplete &&
+                      (() => {
+                        const events = getEventIdsFromSearchObjectsToolCalls(
+                          msg.toolCalls,
+                        );
+                        return <ChatEventThumbnailsRow events={events} />;
+                      })()}
+                  </div>
+                );
+              })}
+              {error && (
+                <p
+                  className="flex items-center gap-1.5 self-start text-sm text-destructive"
+                  role="alert"
+                >
+                  <LuCircleAlert className="size-3.5 shrink-0" />
+                  {error}
+                </p>
+              )}
+            </div>
+          </>
         )}
         {messages.length > 0 && (
           <ChatEntry
@@ -202,7 +218,7 @@ function ChatEntry({
   };
 
   return (
-    <div className="flex w-full flex-col items-center justify-center rounded-xl bg-secondary p-2">
+    <div className="mt-2 flex w-full flex-col items-center justify-center rounded-xl bg-secondary p-3">
       <div className="flex w-full flex-row items-center gap-2">
         <Input
           className="w-full flex-1 border-transparent bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"

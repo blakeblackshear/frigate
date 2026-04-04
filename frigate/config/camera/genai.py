@@ -59,11 +59,11 @@ class GenAIConfig(FrigateBaseModel):
         default={},
         title="Provider options",
         description="Additional provider-specific options to pass to the GenAI client.",
-        json_schema_extra={"additionalProperties": {"type": "string"}},
+        json_schema_extra={"additionalProperties": {}},
     )
     runtime_options: dict[str, Any] = Field(
         default={},
         title="Runtime options",
         description="Runtime options passed to the provider for each inference call.",
-        json_schema_extra={"additionalProperties": {"type": "string"}},
+        json_schema_extra={"additionalProperties": {}},
     )

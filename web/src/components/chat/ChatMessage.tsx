@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,7 @@ import copy from "copy-to-clipboard";
 import { toast } from "sonner";
 import { FaCopy, FaPencilAlt } from "react-icons/fa";
 import { FaArrowUpLong } from "react-icons/fa6";
+import { LuCheck } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -50,13 +51,17 @@ export function MessageBubble({
     }
   }, [isEditing]);
 
-  const handleCopy = () => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
     const text = content?.trim() || "";
     if (!text) return;
     if (copy(text)) {
+      setCopied(true);
       toast.success(t("button.copiedToClipboard", { ns: "common" }));
+      setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }, [content, t]);
 
   const handleEditClick = () => {
     setDraftContent(content);
@@ -93,7 +98,7 @@ export function MessageBubble({
           value={draftContent}
           onChange={(e) => setDraftContent(e.target.value)}
           onKeyDown={handleEditKeyDown}
-          className="min-h-[80px] w-full resize-y rounded-lg bg-primary px-3 py-2 text-primary-foreground placeholder:text-primary-foreground/60"
+          className="min-h-[80px] w-full resize-y rounded-2xl bg-primary px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/60"
           placeholder={t("placeholder")}
           rows={3}
         />
@@ -124,44 +129,49 @@ export function MessageBubble({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1",
+        "flex max-w-[85%] flex-col gap-1",
         isUser ? "items-end self-end" : "items-start self-start",
       )}
     >
       <div
         className={cn(
-          "rounded-lg px-3 py-2",
+          "rounded-2xl px-4 py-3",
           isUser ? "bg-primary text-primary-foreground" : "bg-muted",
         )}
       >
         {isUser ? (
           content
         ) : (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              table: ({ node: _n, ...props }) => (
-                <table
-                  className="my-2 w-full border-collapse border border-border"
-                  {...props}
-                />
-              ),
-              th: ({ node: _n, ...props }) => (
-                <th
-                  className="border border-border bg-muted/50 px-2 py-1 text-left text-sm font-medium"
-                  {...props}
-                />
-              ),
-              td: ({ node: _n, ...props }) => (
-                <td
-                  className="border border-border px-2 py-1 text-sm"
-                  {...props}
-                />
-              ),
-            }}
-          >
-            {content}
-          </ReactMarkdown>
+          <>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                table: ({ node: _n, ...props }) => (
+                  <table
+                    className="my-2 w-full border-collapse border border-border"
+                    {...props}
+                  />
+                ),
+                th: ({ node: _n, ...props }) => (
+                  <th
+                    className="border border-border bg-muted/50 px-2 py-1 text-left text-sm font-medium"
+                    {...props}
+                  />
+                ),
+                td: ({ node: _n, ...props }) => (
+                  <td
+                    className="border border-border px-2 py-1 text-sm"
+                    {...props}
+                  />
+                ),
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+            {!isComplete && (
+              <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-foreground align-middle" />
+            )}
+          </>
         )}
       </div>
       <div className="flex items-center gap-0.5">
@@ -194,7 +204,11 @@ export function MessageBubble({
                 disabled={!content?.trim()}
                 aria-label={t("button.copy", { ns: "common" })}
               >
-                <FaCopy className="size-3" />
+                {copied ? (
+                  <LuCheck className="size-3" />
+                ) : (
+                  <FaCopy className="size-3" />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
