@@ -11,7 +11,9 @@
     "frigatePlus": "Frigate+ 設定 - Frigate",
     "notifications": "通知設定 - Frigate",
     "cameraManagement": "カメラ設定 - Frigate",
-    "cameraReview": "カメラレビュー設定 - Frigate"
+    "cameraReview": "カメラレビュー設定 - Frigate",
+    "maintenance": "メンテナンス - Frigate",
+    "profiles": "プロファイル - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -26,7 +28,10 @@
     "frigateplus": "Frigate+",
     "cameraManagement": "管理",
     "cameraReview": "レビュー",
-    "roles": "区分"
+    "roles": "区分",
+    "general": "一般",
+    "globalConfig": "グローバル設定",
+    "system": "システム"
   },
   "dialog": {
     "unsavedChanges": {
