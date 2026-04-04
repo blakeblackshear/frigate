@@ -102,7 +102,7 @@
     "close": "Fermer",
     "copy": "Copier",
     "back": "Retour",
-    "history": "Chronologie",
+    "history": "Historique",
     "pictureInPicture": "Image dans l'image",
     "twoWayTalk": "Conversation bidirectionnelle",
     "off": "OFF",
@@ -243,7 +243,8 @@
     "uiPlayground": "Bac à sable de l'interface",
     "faceLibrary": "Bibliothèque de visages",
     "languages": "Langues",
-    "classification": "Classification"
+    "classification": "Classification",
+    "profiles": "Profils"
   },
   "toast": {
     "save": {

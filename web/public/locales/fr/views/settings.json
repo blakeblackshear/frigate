@@ -5,7 +5,7 @@
     "camera": "Paramètres des caméras - Frigate",
     "classification": "Paramètres de classification - Frigate",
     "motionTuner": "Réglage de la détection de mouvement - Frigate",
-    "general": "Paramètres du profil - Frigate",
+    "general": "Paramètres de l'interface - Frigate",
     "masksAndZones": "Éditeur de masques et de zones - Frigate",
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
@@ -15,7 +15,8 @@
     "cameraReview": "Paramètres des activités caméra - Frigate",
     "globalConfig": "Configuration globale - Frigate",
     "cameraConfig": "Configuration de la caméra - Frigate",
-    "maintenance": "Maintenance - Frigate"
+    "maintenance": "Maintenance - Frigate",
+    "profiles": "Profils - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -86,7 +87,9 @@
     "cameraUi": "Interface de la caméra",
     "cameraTimestampStyle": "Style d'horodatage",
     "cameraMqtt": "MQTT de la caméra",
-    "maintenance": "Maintenance"
+    "maintenance": "Maintenance",
+    "uiSettings": "Paramètres IU",
+    "profiles": "Profils"
   },
   "dialog": {
     "unsavedChanges": {
@@ -99,7 +102,7 @@
     "noCamera": "Aucune caméra"
   },
   "general": {
-    "title": "Paramètres du profil",
+    "title": "Paramètres d'interface",
     "liveDashboard": {
       "title": "Tableau de bord en direct",
       "automaticLiveView": {
@@ -222,14 +225,14 @@
     "title": "Paramètres Frigate+",
     "snapshotConfig": {
       "documentation": "Lire la documentation",
-      "desc": "La soumission à Frigate+ nécessite à la fois que les instantanés et les instantanés <code>clean_copy</code> soient activés dans votre configuration.",
+      "desc": "La soumission à Frigate+ nécessite que les instantanés soient activés dans votre configuration.",
       "title": "Configuration des instantanés",
       "table": {
         "snapshots": "Instantanés",
         "camera": "Caméra",
         "cleanCopySnapshots": "Instantanés <code>clean_copy</code>"
       },
-      "cleanCopyWarning": "Certaines caméras ont des instantanés activés, mais la copie propre est désactivée. Vous devez activer <code>clean_copy</code> dans votre configuration d'instantanés pour pouvoir envoyer les images de ces caméras à Frigate+."
+      "cleanCopyWarning": "Certaines caméras ont les instantanés désactivés"
     },
     "modelInfo": {
       "baseModel": "Modèle de base",
@@ -568,7 +571,7 @@
       }
     },
     "restart_required": "Redémarrage requis (masques/zones changés)",
-    "objectMaskLabel": "Masque d'objet {{number}} ({{label}})",
+    "objectMaskLabel": "Masque d'objet {{number}}",
     "motionMaskLabel": "Masque de mouvement {{number}}"
   },
   "motionDetectionTuner": {
@@ -1389,6 +1392,18 @@
     "value": {
       "label": "Nouvelle valeur",
       "reset": "Réinitialiser"
+    }
+  },
+  "button": {
+    "overriddenBaseConfigTooltip": "Le profil {{profile}} remplace les paramètres de configuration dans cette section",
+    "overriddenGlobalTooltip": "Cette caméra remplace les paramètres de la configuration globale dans cette section",
+    "overriddenGlobal": "Remplacé (Global)",
+    "overriddenBaseConfig": "Remplacée (Configuration de base)"
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "sync": {
+      "title": "Synchronisation du Média"
     }
   }
 }

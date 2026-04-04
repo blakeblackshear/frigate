@@ -16,11 +16,11 @@
         "description": "Contrôle la verbosité par défaut des journaux et les exceptions de niveau par composant.",
         "default": {
             "label": "Niveau de journalisation",
-            "description": "Verbosité de l'ensemble des journaux  par défaut (débogage, information, avertissement, erreur)"
+            "description": "Verbosité de l'ensemble des journaux par défaut (débogage, information, avertissement, erreur)."
         },
         "logs": {
             "label": "Niveau de journalisation par processus",
-            "description": "Outrepasser le niveau de journalisation par composant pour augmenter ou diminuer la verbosité pour des modules spécifiques"
+            "description": "Personnaliser le niveau de journalisation par composant pour augmenter ou diminuer la verbosité pour des modules spécifiques."
         }
     },
     "auth": {
@@ -29,7 +29,7 @@
             "label": "Activer l'authentification",
             "description": "Active l'authentification native de l'interface de Frigate."
         },
-        "description": "Authentification et réglages en rapport avec la session incluant les options concernant les cookies et limite de taux.",
+        "description": "Paramètres d'authentification et de session, y compris les options relatives aux cookies et à la limitation du débit.",
         "reset_admin_password": {
             "label": "réinitialiser le mot de passe administrateur",
             "description": "Si vrai, réinitialise le mot de passe utilisateur administrateur au démarrage et écrit le nouveau mot de passe dans les journaux."
@@ -48,10 +48,34 @@
         },
         "refresh_time": {
             "label": "Fenêtre de rafraichissement de session",
-            "description": "Lorsqu'une session est à moins de ce nombre de secondes de son expiration, actualisez là pour lui redonner sa durée complète."
+            "description": "Lorsqu'une session est à moins de ce nombre de secondes d'expirer, rétablissez-la à sa durée entière."
         },
         "failed_login_rate_limit": {
-            "label": "Limite de connexions échouées"
+            "label": "Limite de connexions échouées",
+            "description": "Règles limitant la fréquence des tentatives ratées d'authentification afin de réduire les attaques de type \"brute-force\"."
+        },
+        "trusted_proxies": {
+            "label": "Mandataire de confiance",
+            "description": "Liste des IP de mandataire de confiance quand il faut déterminer l'IP pour limiter le taux."
+        },
+        "hash_iterations": {
+            "label": "Itérations de hachage",
+            "description": "Nombre d'itérations PBKDF2-SHA256 à utiliser quand les mots de passe utilisateur sont hachés."
+        },
+        "roles": {
+            "label": "Correspondance des rôles",
+            "description": "Correspondance de rôles vers la liste des caméras. Une liste vide donne l'accès totale à toutes les caméras pour ce rôle."
+        },
+        "admin_first_time_login": {
+            "label": "Drapeau admin première fois",
+            "description": "Si activé, l'interface peut afficher un lien d'aide sur la page d'identification des utilisateurs indiquant comment se connecter après une réinitialisation du mot de passe administrateur. "
+        }
+    },
+    "database": {
+        "label": "Base de donnée",
+        "description": "Réglages concernant la base de donnée SQLite utilisé par Frigate pour stocker les objets suivis et enregistrer les métadonnées.",
+        "path": {
+            "label": "Chemin vers la base de donnée"
         }
     }
 }
