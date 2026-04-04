@@ -253,7 +253,8 @@
       "account": "Account",
       "anonymous": "anoniem"
     },
-    "classification": "Classificatie"
+    "classification": "Classificatie",
+    "profiles": "Profielen"
   },
   "toast": {
     "copyUrlToClipboard": "URL naar klembord gekopieerd.",

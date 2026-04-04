@@ -1,5 +1,32 @@
 {
     "minimum": "Minimale waarde van {{limit}} vereist",
     "maximum": "Mag niet meer dan {{limit}} bedragen.",
-    "exclusiveMinimum": "Waarde moet groter zijn dan {{limit}}"
+    "exclusiveMinimum": "Waarde moet groter zijn dan {{limit}}",
+    "exclusiveMaximum": "Moet minder zijn dan {{limit}}",
+    "minLength": "Moet minstens {{limit}} karakters zijn",
+    "maxLength": "Moet maximaal {{limit}} karakters zijn",
+    "minItems": "Moet minstens {{limit}} items hebben",
+    "maxItems": "Moet maximaal {{limit}} items hebben",
+    "pattern": "Ongeldig formaat",
+    "required": "Dit veld is vereist",
+    "type": "Ongeldig waarde type",
+    "enum": "Moet een van de toegestane waarden zijn",
+    "const": "Waarde komt niet overeen met de verwachte constante",
+    "uniqueItems": "Alle items moeten uniek zijn",
+    "format": "Ongeldig formaat",
+    "additionalProperties": "Onbekend kenmerk is niet toegestaan",
+    "oneOf": "Moet exact met een van de volgende schema's overeenkomen",
+    "anyOf": "Moet overeenkomen met minstens een van de toegestane schema's",
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Elke rol kan slechts tot één input stroom worden toebedeeld.",
+            "detectRequired": "Minstens één input stroom moet toegewezen zijn aan de 'detectie' rol.",
+            "hwaccelDetectOnly": "Enkel de input stroom met de detectie rol kan hardwareversnelling argumenten instellen."
+        }
+    },
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Rol titel is vereist wanneer rol bindingen zijn geconfigureerd."
+        }
+    }
 }
