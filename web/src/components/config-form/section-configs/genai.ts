@@ -5,6 +5,7 @@ const genai: SectionConfigOverrides = {
     sectionDocs: "/configuration/genai/config",
     advancedFields: ["*.base_url", "*.provider_options", "*.runtime_options"],
     hiddenFields: ["genai.enabled_in_config"],
+    restartRequired: [],
     uiSchema: {
       "ui:options": { disableNestedCard: true },
       "*": {
@@ -36,14 +37,10 @@ const genai: SectionConfigOverrides = {
         "ui:options": { size: "xs" },
       },
       "*.provider_options": {
-        additionalProperties: {
-          "ui:options": { size: "lg" },
-        },
+        "ui:field": "DictAsYamlField",
       },
       "*.runtime_options": {
-        additionalProperties: {
-          "ui:options": { size: "lg" },
-        },
+        "ui:field": "DictAsYamlField",
       },
     },
   },
