@@ -79,8 +79,8 @@
         "label": "Detecció d'objectes",
         "description": "Configuració del rol de detecció utilitzat per executar la detecció d'objectes i inicialitzar els rastrejadors.",
         "enabled": {
-            "label": "Detecció activada",
-            "description": "Activa o desactiva la detecció d'objectes per a aquesta càmera. La detecció s'ha d'activar perquè s'executi el seguiment d'objectes."
+            "label": "Habilita la detecció d'objectes",
+            "description": "Activa o desactiva la detecció d'objectes per a aquesta càmera."
         },
         "height": {
             "label": "Detecta l'alçada",
@@ -149,7 +149,7 @@
     },
     "ffmpeg": {
         "label": "FFmpeg",
-        "description": "Paràmetres del FFmpeg que inclouen camins binaris, args, opcions de hwaccel i args de sortida per rol.",
+        "description": "Paràmetres del FFmpeg que inclouen la ruta dels binaris, args, opcions de hwaccel i args de sortida per rol.",
         "path": {
             "label": "Ruta FFmpeg",
             "description": "Ruta al binari FFmpeg a usar o un àlies de versió («5.0» o «7.0»)."
@@ -192,7 +192,7 @@
         },
         "inputs": {
             "label": "Entrada de la càmera",
-            "description": "Llista de definicions de flux d'entrada (camins i rols) per a aquesta càmera.",
+            "description": "Llista de definicions de flux d'entrada (rutes i rols) per a aquesta càmera.",
             "path": {
                 "label": "Ruta d'entrada",
                 "description": "URL o camí del flux d'entrada de la càmera."
@@ -303,7 +303,7 @@
         },
         "skip_motion_threshold": {
             "label": "Omet el llindar de moviment",
-            "description": "Si més d'aquesta fracció de la imatge canvia en un sol fotograma, el detector no retornarà cap caixa de moviment i recalibrarà immediatament. Això pot estalviar CPU i reduir falsos positius durant el llamp, tempestes, etc., però pot perdre esdeveniments reals com una càmera PTZ que fa un seguiment automàtic d'un objecte. La compensació es troba entre deixar caure uns quants megabytes d'enregistraments versus revisar un parell de clips curts. Interval de 0,0 a 1,0."
+            "description": "Si s'estableix a un valor entre 0.0 i 1.0, i més d'aquesta fracció de la imatge canvia en un sol fotograma, el detector no retornarà cap caixa de moviment i recalibrarà immediatament. Això pot estalviar CPU i reduir falsos positius durant el llamp, tempestes, etc., però pot perdre esdeveniments reals com una càmera PTZ que fa un seguiment automàtic d'un objecte. La compensació es troba entre deixar caure uns quants megabytes d'enregistraments versus revisar un parell de clips curts. Deixa sense establir (Cap) per desactivar aquesta característica."
         }
     },
     "objects": {
@@ -529,7 +529,7 @@
         },
         "detections": {
             "label": "Configuració de les deteccions",
-            "description": "Paràmetres per a crear esdeveniments de detecció (no-alerta) i quant de temps conservar-los.",
+            "description": "Paràmetres per als quals els objectes rastrejats generen deteccions (sense-alerta) i com es mantenen les deteccions.",
             "enabled": {
                 "label": "Habilita les deteccions",
                 "description": "Activa o desactiva els esdeveniments de detecció d'aquesta càmera."
@@ -626,9 +626,9 @@
     },
     "snapshots": {
         "label": "Instantànies",
-        "description": "Configuració per a les instantànies JPEG desades dels objectes seguits per a aquesta càmera.",
+        "description": "Configuració per a les instantànies API-generades dels objectes seguits per a aquesta càmera.",
         "enabled": {
-            "label": "Instantànies habilitades",
+            "label": "Habilita les instantànies",
             "description": "Activa o desactiva el desament de les instantànies d'aquesta càmera."
         },
         "clean_copy": {
@@ -637,15 +637,15 @@
         },
         "timestamp": {
             "label": "Superposició de marca horària",
-            "description": "Superposa una marca horària a les instantànies desades."
+            "description": "Superposa una marca horària a les instantànies de l'API."
         },
         "bounding_box": {
             "label": "Superposició de la caixa contenidora",
-            "description": "Dibuixa caixes contenidores per als objectes seguits en les instantànies desades."
+            "description": "Dibuixa caixes contenidores per als objectes seguits en les instantànies de l'API."
         },
         "crop": {
             "label": "Retalla la instantània",
-            "description": "Retalla les instantànies desades a la caixa contenidora de l'objecte detectat."
+            "description": "Retalla les instantànies de l'API a la caixa contenidora de l'objecte detectat."
         },
         "required_zones": {
             "label": "Zones requerides",
@@ -653,11 +653,11 @@
         },
         "height": {
             "label": "Alçada de la instantània",
-            "description": "Alçada (píxels) per a canviar la mida de les instantànies desades; deixeu-ho buit per a preservar la mida original."
+            "description": "Alçada (píxels) per a canviar la mida de les instantànies de l'API; deixeu-ho buit per a preservar la mida original."
         },
         "retain": {
             "label": "Retenció de la instantània",
-            "description": "Paràmetres de retenció per a les instantànies desades, inclosos els dies predeterminats i les anul·lacions per objecte.",
+            "description": "Paràmetres de retenció per a les instantànies, inclosos els dies predeterminats i les anul·lacions per objecte.",
             "default": {
                 "label": "Retenció predeterminada",
                 "description": "Nombre predeterminat de dies per a retenir les instantànies."
@@ -672,8 +672,8 @@
             }
         },
         "quality": {
-            "label": "Qualitat JPEG",
-            "description": "Qualitat del codi JPEG per a les instantànies desades (0-100)."
+            "label": "Qualitat captura",
+            "description": "Qualitat per a les instantànies desades (0-100)."
         }
     },
     "timestamp_style": {
@@ -838,6 +838,10 @@
         "ignore_time_mismatch": {
             "label": "Ignora el desajust de temps",
             "description": "Ignora les diferències de sincronització de temps entre càmera i servidor Frigate per a la comunicació ONVIF."
+        },
+        "profile": {
+            "label": "Perfil ONVIF",
+            "description": "Perfil multimèdia ONVIF específic a utilitzar per al control PTZ, que coincideix amb el token o el nom. Si no s'estableix, el primer perfil amb configuració PTZ vàlida se selecciona automàticament."
         }
     },
     "type": {
@@ -865,7 +869,7 @@
         "description": "Les zones permeten definir una àrea específica del marc perquè pugueu determinar si un objecte es troba dins d'una àrea determinada.",
         "friendly_name": {
             "label": "Nom de la zona",
-            "description": "Un nom fàcil d'utilitzar per a la zona, que es mostra a la interfície d'usuari de la fragata. Si no s'estableix, s'utilitzarà una versió amb format del nom de la zona."
+            "description": "Un nom fàcil d'utilitzar per a la zona, que es mostra a la interfície d'usuari de Friagte. Si no s'estableix, s'utilitzarà una versió amb format del nom de la zona."
         },
         "enabled": {
             "label": "Habilitat",
@@ -937,5 +941,9 @@
     "enabled_in_config": {
         "label": "Estat original de la càmera",
         "description": "Feu un seguiment de l'estat original de la càmera."
+    },
+    "profiles": {
+        "label": "Perfils",
+        "description": "Perfils de configuració amb nom amb anul·lacions parcials que es poden activar en temps d'execució."
     }
 }

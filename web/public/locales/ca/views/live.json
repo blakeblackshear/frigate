@@ -12,7 +12,8 @@
       "clickMove": {
         "label": "Fes clic a la imatge per centrar la càmera",
         "enable": "Habilita clic per moure",
-        "disable": "Deshabilita clic per moure"
+        "disable": "Deshabilita clic per moure",
+        "enableWithZoom": "Activa el clic per moure / arrossegar per ampliar"
       },
       "left": {
         "label": "Moure la càmera PTZ a l'esquerra"
@@ -42,7 +43,9 @@
       }
     }
   },
-  "documentTitle": "Directe - Frigate",
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Directe - Frigate",
   "lowBandwidthMode": "Mode de baix ample de banda",
   "twoWayTalk": {

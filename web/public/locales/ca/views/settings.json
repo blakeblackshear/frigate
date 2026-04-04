@@ -14,7 +14,8 @@
     "cameraReview": "Configuració Revisió de Càmeres - Frigate",
     "globalConfig": "Configuració global - Frigate",
     "cameraConfig": "Configuració de la càmera - Frigate",
-    "maintenance": "Manteniment - Frigate"
+    "maintenance": "Manteniment - Frigate",
+    "profiles": "Perfils - Frigate"
   },
   "menu": {
     "ui": "Interfície d'usuari",
@@ -86,7 +87,10 @@
     "cameraMqtt": "Càmera MQTT",
     "maintenance": "Manteniment",
     "mediaSync": "Sincronització multimèdia",
-    "regionGrid": "Quadrícula de la regió"
+    "regionGrid": "Quadrícula de la regió",
+    "uiSettings": "Paràmetres de la IU",
+    "profiles": "Perfils",
+    "systemGo2rtcStreams": "go2rtc streams"
   },
   "dialog": {
     "unsavedChanges": {
@@ -99,7 +103,7 @@
     "noCamera": "Cap càmera"
   },
   "general": {
-    "title": "Configuració del perfil",
+    "title": "Paràmetres de la IU",
     "liveDashboard": {
       "title": "Panell en directe",
       "automaticLiveView": {
@@ -179,6 +183,10 @@
           "zone": "zona",
           "motion_mask": "màscara de moviment",
           "object_mask": "màscara d'objecte"
+        },
+        "revertOverride": {
+          "title": "Reverteix a la configuració base",
+          "desc": "Això eliminarà la substitució de perfil per {{type}} <em>{{name}}</em> i tornarà a la configuració base."
         }
       },
       "zoneName": {
@@ -210,6 +218,17 @@
       "loiteringTime": {
         "error": {
           "mustBeGreaterOrEqualZero": "El temps de merodeig ha de ser mes gran o igual a 0."
+        }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "L'ID no pot estar buit.",
+          "alreadyExists": "Ja existeix una màscara amb aquest ID per a aquesta càmera."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "El nom no pot estar buit."
         }
       }
     },
@@ -357,7 +376,10 @@
         "title": "Habilitat",
         "description": "Si aquesta màscara està activada al fitxer de configuració. Si està desactivat, no pot ser habilitat per MQTT. Les màscares desactivades s'ignoren en temps d'execució."
       }
-    }
+    },
+    "profileBase": "(base)",
+    "profileOverride": "(sobreescriu)",
+    "addDisabledProfile": "Afegiu primer a la configuració base i després sobreescriviu-ho al perfil"
   },
   "notification": {
     "email": {
@@ -693,8 +715,8 @@
       },
       "title": "Configuració d'instantànies",
       "documentation": "Llegir la documentació",
-      "desc": "Per a enviar a Frigate+ fa falta que tan la instantània com la instantània <code>clean_copy</code> estiguin habilitades a la configuració.",
-      "cleanCopyWarning": "Algunes càmeres tenen les captures d'imatge activades però la còpia neta desactivada. Cal habilitar <code>clean_copy</code> a la configuració de captures per poder enviar imatges d’aquestes càmeres a Frigate+."
+      "desc": "Per a enviar a Frigate+ fa falta que la instantània estigui habilitada a la configuració.",
+      "cleanCopyWarning": "Algunes càmeres tenen la captura desactivada"
     },
     "modelInfo": {
       "baseModel": "Model base",
@@ -1317,6 +1339,14 @@
       "confirmButton": "Suprimeix permanentment",
       "success": "La càmera {{cameraName}} s'ha suprimit correctament",
       "error": "No s'ha pogut suprimir la càmera {{cameraName}}"
+    },
+    "profiles": {
+      "title": "Sobreescriu la càmera de perfil",
+      "selectLabel": "Seleccioneu el perfil",
+      "description": "Configura quines càmeres estan habilitades o desactivades quan s'activa un perfil. Les càmeres establertes a «Inherit» mantenen el seu estat base habilitat.",
+      "inherit": "Hereta",
+      "enabled": "Habilitat",
+      "disabled": "Desactivat"
     }
   },
   "cameraReview": {
@@ -1371,6 +1401,9 @@
     "value": {
       "label": "Valor nou",
       "reset": "Restableix"
+    },
+    "profile": {
+      "label": "Perfil"
     }
   },
   "detectionModel": {
@@ -1427,7 +1460,9 @@
       "review_thumbnails": "Revisa les miniatures",
       "previews": "Previsualitzacions",
       "exports": "Exporta",
-      "recordings": "Enregistraments"
+      "recordings": "Enregistraments",
+      "verbose": "Verbose",
+      "verboseDesc": "Escriu una llista completa de fitxers orfes al disc per revisar-los."
     },
     "regionGrid": {
       "title": "Quadrícula de la regió",
@@ -1447,7 +1482,8 @@
     },
     "camera": {
       "title": "Configuració de la càmera",
-      "description": "Aquests paràmetres només s'apliquen a aquesta càmera i substitueixen els paràmetres globals."
+      "description": "Aquests paràmetres només s'apliquen a aquesta càmera i substitueixen els paràmetres globals.",
+      "noCameras": "No hi ha càmeres disponibles"
     },
     "advancedSettingsCount": "Configuració avançada ({{count}})",
     "advancedCount": "Avançat ({{count}})",
@@ -1478,7 +1514,35 @@
       "manual": "Arguments manuals",
       "inherit": "Hereta de la configuració de la càmera",
       "selectPreset": "Selecció de valors predefinits",
-      "manualPlaceholder": "ntroduïu els arguments FFmpeg"
+      "manualPlaceholder": "ntroduïu els arguments FFmpeg",
+      "none": "Cap",
+      "useGlobalSetting": "Hereta de l'entorn global",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "JPEG HTTP (Genèric)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generic)",
+        "preset-http-reolink": "HTTP - Reolink càmeres",
+        "preset-rtmp-generic": "RTMP (Generic)",
+        "preset-rtsp-generic": "RTSP (Generic)",
+        "preset-rtsp-restream": "RTSP - Restream de go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Restream de go2rtc (Latència baixa)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Enregistra (Genèric, sense àudio)",
+        "preset-record-generic-audio-copy": "Enregistra (Genèric + Copia l'àudio)",
+        "preset-record-generic-audio-aac": "Enregistra (Genèric + Àudio a AAC)",
+        "preset-record-mjpeg": "Registre - Càmeres MJPEG",
+        "preset-record-jpeg": "Registre - Càmeres JPEG",
+        "preset-record-ubiquiti": "Registre - Càmeres Ubiquiti"
+      }
     },
     "cameraInputs": {
       "itemTitle": "Flux {{index}}"
@@ -1510,7 +1574,8 @@
       "genai": "GenAI",
       "face_recognition": "Reconeixement de cares",
       "lpr": "Reconeixement de matrícules",
-      "birdseye": "Birdseye"
+      "birdseye": "Birdseye",
+      "masksAndZones": "Màscares / Zones"
     },
     "detect": {
       "title": "Configuració de detecció"
@@ -1522,7 +1587,8 @@
       "keyDuplicate": "El nom del detector ja existeix.",
       "noSchema": "No hi ha esquemes de detector disponibles.",
       "none": "No s'ha configurat cap instància de detector.",
-      "add": "Afegeix un detector"
+      "add": "Afegeix un detector",
+      "addCustomKey": "Afegeix una clau personalitzada"
     },
     "record": {
       "title": "Configuració de l'enregistrament"
@@ -1575,7 +1641,25 @@
     "timestamp_style": {
       "title": "Configuració de la marca horària"
     },
-    "searchPlaceholder": "Cerca..."
+    "searchPlaceholder": "Cerca...",
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Incrustació",
+        "vision": "Visió",
+        "tools": "Eines"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Selecciona el model…",
+      "builtIn": "Models integrats",
+      "genaiProviders": "Proveïdors de GenAI"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} etiquetes seleccionades",
+      "empty": "No hi ha etiquetes disponibles",
+      "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions."
+    },
+    "addCustomLabel": "Afegeix una etiqueta personalitzada..."
   },
   "globalConfig": {
     "title": "Configuració global",
@@ -1615,5 +1699,143 @@
   "unsavedChanges": "Teniu canvis sense desar",
   "confirmReset": "Confirma el restabliment",
   "resetToDefaultDescription": "Això restablirà tots els paràmetres d'aquesta secció als seus valors predeterminats. Aquesta acció no es pot desfer.",
-  "resetToGlobalDescription": "Això restablirà la configuració d'aquesta secció als valors predeterminats globals. Aquesta acció no es pot desfer."
+  "resetToGlobalDescription": "Això restablirà la configuració d'aquesta secció als valors predeterminats globals. Aquesta acció no es pot desfer.",
+  "button": {
+    "overriddenGlobal": "Sobreescrit (Global)",
+    "overriddenGlobalTooltip": "Aquesta càmera anul·la la configuració global d'aquesta secció",
+    "overriddenBaseConfig": "Sobreescrit (Configuració base)",
+    "overriddenBaseConfigTooltip": "El perfil {{profile}} substitueix la configuració d'aquesta secció"
+  },
+  "profiles": {
+    "title": "Perfils",
+    "activeProfile": "Perfil actiu",
+    "noActiveProfile": "No hi ha un perfil actiu",
+    "active": "Actiu",
+    "activated": "S'ha activat el perfil '{{profile}}'",
+    "activateFailed": "No s'ha pogut establir el perfil",
+    "deactivated": "Perfil desactivat",
+    "noProfiles": "No s'ha definit cap perfil.",
+    "noOverrides": "No hi ha excepcions",
+    "cameraCount_one": "{{count}} càmera",
+    "cameraCount_many": "{{count}} càmeres",
+    "cameraCount_other": "{{count}} càmeres",
+    "baseConfig": "Configuració base",
+    "addProfile": "Afegeix un perfil",
+    "newProfile": "Perfil nou",
+    "profileNamePlaceholder": "p. ex., Armat, lluny, mode nocturn",
+    "friendlyNameLabel": "Nom del perfil",
+    "profileIdLabel": "ID del perfil",
+    "profileIdDescription": "Identificador intern utilitzat en la configuració i les automatitzacions",
+    "nameInvalid": "Només es permeten lletres en minúscula, números i guions baixos",
+    "nameDuplicate": "Ja existeix un perfil amb aquest nom",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Ha de tenir com a mínim 2 caràcters",
+      "mustNotContainPeriod": "No ha de contenir períodes",
+      "alreadyExists": "Ja existeix un perfil amb aquest ID"
+    },
+    "renameProfile": "Canvia el nom del perfil",
+    "renameSuccess": "Perfil reanomenat a '{{profile}}'",
+    "deleteProfile": "Suprimeix el perfil",
+    "deleteProfileConfirm": "Voleu suprimir el perfil \"{{profile}}\" de totes les càmeres? Això no es pot desfer.",
+    "deleteSuccess": "S'ha suprimit el perfil '{{profile}}'",
+    "createSuccess": "S'ha creat el perfil '{{profile}}'",
+    "removeOverride": "Elimina la sobreescriptura del perfil",
+    "deleteSection": "Suprimeix les excepcions de secció",
+    "deleteSectionConfirm": "Voleu eliminar les sobreescriptures de {{section}} del perfil {{profile}} a {{camera}}?",
+    "deleteSectionSuccess": "S'han suprimit {{section}} sobreescrits per {{profile}}",
+    "enableSwitch": "Habilita els perfils",
+    "enabledDescription": "Els perfils estan habilitats. Creeu un perfil nou a continuació, navegueu a una secció de configuració de la càmera per fer els vostres canvis i deseu perquè els canvis tinguin efecte.",
+    "disabledDescription": "Els perfils permeten definir conjunts de configuracions de càmera amb nom (p. ex., armats, fora, nit) que es poden activar sota demanda.",
+    "columnCamera": "Càmara",
+    "columnOverrides": "Sobreescriu el perfil"
+  },
+  "go2rtcStreams": {
+    "title": "go2rtc Corrents",
+    "description": "Gestiona les configuracions de flux go2rtc per al restreaming de la càmera. Cada flux té un nom i un o més URL d'origen.",
+    "addStream": "Afegeix un flux",
+    "addStreamDesc": "Introduïu un nom per al flux nou. Aquest nom s'utilitzarà per a fer referència al flux en la configuració de la càmera.",
+    "addUrl": "Afegeix un URL",
+    "streamName": "Nom del flux",
+    "streamNamePlaceholder": "p. ex., porta d'entrada",
+    "streamUrlPlaceholder": "e.g., rtsp://usuari:contrasenya@192.168.1.100/flux",
+    "deleteStream": "Suprimeix el flux",
+    "deleteStreamConfirm": "Segur que voleu suprimir el flux \"{{streamName}}\"? Les càmeres que fan referència a aquest flux poden deixar de funcionar.",
+    "noStreams": "No s'ha configurat cap flux go2rtc. Afegeix un flux per començar.",
+    "validation": {
+      "nameRequired": "Es requereix el nom del flux",
+      "nameDuplicate": "Ja existeix un flux amb aquest nom",
+      "nameInvalid": "El nom del flux només pot contenir lletres, números, guions baixos i guions",
+      "urlRequired": "Es requereix com a mínim un URL"
+    },
+    "renameStream": "Canvia el nom del flux",
+    "renameStreamDesc": "Introduïu un nom nou per a aquest flux. El canvi de nom d'un flux pot trencar les càmeres o altres fluxos que el fan referència pel seu nom.",
+    "newStreamName": "Nom de flux nou",
+    "ffmpeg": {
+      "useFfmpegModule": "Usa el mode de compatibilitat (ffmpeg)",
+      "video": "Vídeo",
+      "audio": "Àudio",
+      "hardware": "Acceleració del maquinari",
+      "videoCopy": "Copia",
+      "videoH264": "Transcodifica a H.264",
+      "videoH265": "Transcodifica a H.265",
+      "videoExclude": "Exclou",
+      "audioCopy": "Copia",
+      "audioAac": "Transcodifica a l'AAC",
+      "audioOpus": "Transcodifica a Opus",
+      "audioPcmu": "Transcodifica a PCM μ-law",
+      "audioPcma": "Transcodifica a PCM A-law",
+      "audioPcm": "Transcodifica a PCM",
+      "audioMp3": "Transcodifica a MP3",
+      "audioExclude": "Exclou",
+      "hardwareNone": "Sense acceleració de hardware",
+      "hardwareAuto": "Acceleració de hardware automàtica"
+    }
+  },
+  "timestampPosition": {
+    "tl": "A dalt a l'esquerra",
+    "tr": "A dalt a la dreta",
+    "bl": "Baix a l'esquerra",
+    "br": "A baix a la dreta"
+  },
+  "onvif": {
+    "profileAuto": "Automàtic",
+    "profileLoading": "S'estan carregant perfils..."
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "L'enregistrament està desactivat, els elements de revisió no es generaran.",
+      "detectDisabled": "La detecció d'objectes està desactivada. Els elements de revisió requereixen objectes detectats per categoritzar alertes i deteccions.",
+      "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions."
+    },
+    "audio": {
+      "noAudioRole": "Cap flux té definit el rol d'àudio. Heu d'habilitar el rol d'àudio per a la detecció d'àudio perquè funcioni."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "La detecció d'àudio no està activada per a aquesta càmera. La transcripció d'àudio requereix que la detecció d'àudio estigui activa."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5."
+    },
+    "faceRecognition": {
+      "globalDisabled": "El reconeixement de cares no està habilitat a nivell global. Habilita-ho en la configuració global per al reconeixement facial a nivell de càmera per funcionar.",
+      "personNotTracked": "El reconeixement de cares requereix que l'objecte 'persona' sigui rastrejat. Assegureu-vos que «persona» estigui a la llista de seguiment d'objectes."
+    },
+    "lpr": {
+      "globalDisabled": "El reconeixement de la matrícula no està habilitat a nivell global. Habilita-ho en la configuració global per al funcionament de LPR a nivell de càmera.",
+      "vehicleNotTracked": "El reconeixement de la matrícula requereix que es faci un seguiment del 'cotxe' o de la 'motocicleta'."
+    },
+    "record": {
+      "noRecordRole": "Cap flux té el rol de registre definit. L'enregistrament no funcionarà."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye està configurat en mode 'objectes', però la detecció d'objectes està desactivada per a aquesta càmera. La càmera no apareixerà a Birdseye."
+    },
+    "snapshots": {
+      "detectDisabled": "La detecció d'objectes està desactivada. Les instantànies es generen a partir d'objectes rastrejats i no es crearan."
+    },
+    "detectors": {
+      "mixedTypes": "Tots els detectors han d'utilitzar el mateix tipus. Elimina els detectors existents per utilitzar un tipus diferent.",
+      "mixedTypesSuggestion": "Tots els detectors han d'utilitzar el mateix tipus. Suprimiu detectors existents o seleccioneu {{type}}."
+    }
+  }
 }

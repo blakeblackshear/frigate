@@ -116,5 +116,10 @@
   "nzpost": "NZPost",
   "postnord": "PostNord",
   "dpd": "DPD",
-  "gls": "GLS"
+  "gls": "GLS",
+  "canada_post": "Canada Post",
+  "royal_mail": "Royal Mail",
+  "school_bus": "Bus escolar",
+  "skunk": "Mofeta",
+  "kangaroo": "Cangur"
 }

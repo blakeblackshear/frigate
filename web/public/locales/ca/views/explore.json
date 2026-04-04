@@ -172,7 +172,8 @@
     "attributes": "Atributs de classificació",
     "title": {
       "label": "Títol"
-    }
+    },
+    "scoreInfo": "Informació de la partitura"
   },
   "searchResult": {
     "tooltip": "S'ha identificat {{type}} amb una confiança del {{confidence}}%",
@@ -238,6 +239,9 @@
     "debugReplay": {
       "label": "Depura la repetició",
       "aria": "Mostra aquest objecte rastrejat a la vista de reproducció de depuració"
+    },
+    "more": {
+      "aria": "Més"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
@@ -245,6 +249,9 @@
     "confirmDelete": {
       "title": "Confirmar la supressió",
       "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol detall de seguiment. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+    },
+    "toast": {
+      "error": "S'ha produït un error en suprimir aquest objecte rastrejat: {{errorMessage}}"
     }
   },
   "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
