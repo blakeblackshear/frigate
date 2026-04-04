@@ -116,5 +116,10 @@
   "nzpost": "新西兰邮政",
   "postnord": "北欧邮政",
   "gls": "GLS",
-  "dpd": "DPD"
+  "dpd": "DPD",
+  "canada_post": "加拿大邮政",
+  "royal_mail": "英国皇家邮政",
+  "school_bus": "校车",
+  "skunk": "臭鼬",
+  "kangaroo": "袋鼠"
 }

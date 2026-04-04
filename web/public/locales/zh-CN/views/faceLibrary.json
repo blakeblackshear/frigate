@@ -65,7 +65,8 @@
       "deletedName_other": "成功删除 {{count}} 个 人脸特征。",
       "trainedFace": "人脸特征训练成功。",
       "updatedFaceScore": "更新 {{name}} 人脸特征评分（{{score}}）成功。",
-      "renamedFace": "成功重命名人脸为{{name}}"
+      "renamedFace": "成功重命名人脸为{{name}}",
+      "reclassifiedFace": "重新分类人脸成功。"
     },
     "error": {
       "uploadingImageFailed": "图片上传失败：{{errorMessage}}",
@@ -74,7 +75,8 @@
       "deleteNameFailed": "数据集删除失败：{{errorMessage}}",
       "trainFailed": "训练失败：{{errorMessage}}",
       "updateFaceScoreFailed": "更新人脸评分失败：{{errorMessage}}",
-      "renameFaceFailed": "重命名人脸失败：{{errorMessage}}"
+      "renameFaceFailed": "重命名人脸失败：{{errorMessage}}",
+      "reclassifyFailed": "重新分类人脸失败：{{errorMessage}}"
     }
   },
   "steps": {
@@ -95,5 +97,7 @@
     "title": "删除人脸"
   },
   "pixels": "{{area}} 像素",
-  "nofaces": "没有可用的人脸"
+  "nofaces": "没有可用的人脸",
+  "reclassifyFaceAs": "将人脸重新分类为：",
+  "reclassifyFace": "重新分类人脸"
 }
