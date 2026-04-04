@@ -329,7 +329,8 @@
     "roles": "Rollid",
     "notifications": "Teavitused",
     "frigateplus": "Frigate+",
-    "cameraReview": "Ülevaatamine"
+    "cameraReview": "Ülevaatamine",
+    "profiles": "Profiilid"
   },
   "dialog": {
     "unsavedChanges": {
