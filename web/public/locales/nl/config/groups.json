@@ -5,7 +5,69 @@
             "sensitivity": "Globale sensiviteit"
         },
         "cameras": {
-            "detection": "Detectie"
+            "detection": "Detectie",
+            "sensitivity": "Gevoeligheid"
+        }
+    },
+    "motion": {
+        "global": {
+            "algorithm": "Globaal algoritme",
+            "sensitivity": "Globale gevoeligheid"
+        },
+        "cameras": {
+            "sensitivity": "Gevoeligheid",
+            "algorithm": "Algoritme"
+        }
+    },
+    "snapshots": {
+        "cameras": {
+            "display": "Weergave"
+        },
+        "global": {
+            "display": "Globale weergave"
+        }
+    },
+    "detect": {
+        "cameras": {
+            "resolution": "Resolutie",
+            "tracking": "Volgen"
+        },
+        "global": {
+            "resolution": "Globale resolutie",
+            "tracking": "Globaal volgen"
+        }
+    },
+    "objects": {
+        "cameras": {
+            "tracking": "Volgen",
+            "filtering": "Filteren"
+        },
+        "global": {
+            "tracking": "Globaal volgen",
+            "filtering": "Globaal filteren"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globaal voorkomen"
+        },
+        "cameras": {
+            "appearance": "Voorkomen"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Globale retentie",
+            "events": "Globale gebeurtenissen"
+        },
+        "cameras": {
+            "retention": "Retentie",
+            "events": "Gebeurtenissen"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Camera-specifieke FFmpeg argumenten"
         }
     }
 }

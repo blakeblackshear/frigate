@@ -13,7 +13,9 @@
     "desc": "Voer een nieuwe naam in voor deze export."
   },
   "noExports": "Geen export gevonden",
-  "deleteExport": "Verwijder Export",
+  "deleteExport": {
+    "label": "Verwijder export"
+  },
   "deleteExport.desc": "Weet je zeker dat je dit wilt wissen: {{exportName}}?",
   "tooltip": {
     "shareExport": "Deel export",

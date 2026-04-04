@@ -105,9 +105,65 @@
         }
     },
     "version": {
-        "description": "Numerieke of string-versie van de actieve configuratie om migraties of formaatwijzigingen te helpen detecteren."
+        "description": "Numerieke of string-versie van de actieve configuratie om migraties of formaatwijzigingen te helpen detecteren.",
+        "label": "Huidige configuratie versie"
     },
     "safe_mode": {
-        "label": "Veilige modus"
+        "label": "Veilige modus",
+        "description": "Wanneer ingeschakeld, start Frigate in veilige modus met verminderde functionaliteit voor probleemoplossing."
+    },
+    "environment_vars": {
+        "label": "Omgevingsvariabelen",
+        "description": "Sleutel/waarde paren van omgevingsvariabelen voor het Frigate proces in Home Assistant OS. Niet-HAOS gebruikers moeten in plaats hiervan Docker omgevingsvariabelen gebruiken."
+    },
+    "auth": {
+        "label": "Authenticatie",
+        "enabled": {
+            "label": "Authenticatie aanzetten",
+            "description": "Schakel native authenticatie in voor de Frigate UI."
+        },
+        "reset_admin_password": {
+            "label": "Reset admin wachtwoord",
+            "description": "Indien waar, reset het admin gebruiker wachtwoord tijdens opstarten en print het nieuwe wachtwoord in het logboek."
+        },
+        "description": "Authenticatie en sessie-gerelateerde instellingen inclusief cookie en tempo limiet opties.",
+        "cookie_name": {
+            "label": "JWT cookie naam",
+            "description": "Naam van de gebruikte cookie om de JWT token voor native authenticatie op te slaan."
+        },
+        "cookie_secure": {
+            "label": "Veilige cookie instelling",
+            "description": "Stel de veilige instelling in op de auth cookie; moet waar zijn indien TLS in gebruik."
+        },
+        "session_length": {
+            "label": "Sessie duratie",
+            "description": "Sessie duratie in seconden voor JWT-gebaseerde sessies."
+        },
+        "refresh_time": {
+            "label": "Sessie ververs scherm",
+            "description": "Als een sessie binnen dit aantal seconden verloopt, ververs het tot volledige duratie."
+        },
+        "failed_login_rate_limit": {
+            "label": "Gefaalde log-in pogingen",
+            "description": "Tempo-limiet regels voor gefaalde inlogpogingen om brute-force aanvallen te beperken."
+        },
+        "trusted_proxies": {
+            "label": "Vertrouwde proxies"
+        }
+    },
+    "logger": {
+        "default": {
+            "label": "Loggingsniveau",
+            "description": "Standaard globale logboek detailniveau (debug, info, waarschuwing, fout)."
+        },
+        "label": "Logging",
+        "logs": {
+            "label": "Per-proces logboek niveau",
+            "description": "Per-component logboekniveau afwijkingen om detailniveau te vergroten of verkleinen per specifieke module."
+        },
+        "description": "Beheert het standaard logboek detailniveau en afwijkende instellingen per logboek."
+    },
+    "profiles": {
+        "label": "Profielen"
     }
 }
