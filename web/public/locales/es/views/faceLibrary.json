@@ -66,7 +66,8 @@
       "deletedFace_many": "{{count}} rostros eliminados con éxito.",
       "deletedFace_other": "{{count}} rostros eliminados con éxito.",
       "uploadedImage": "Imagen subida con éxito.",
-      "renamedFace": "Rostro renombrado con éxito a {{name}}"
+      "renamedFace": "Rostro renombrado con éxito a {{name}}",
+      "reclassifiedFace": "Rostro reclasificado con éxito."
     },
     "error": {
       "uploadingImageFailed": "No se pudo subir la imagen: {{errorMessage}}",
@@ -75,7 +76,8 @@
       "deleteNameFailed": "No se pudo eliminar el nombre: {{errorMessage}}",
       "trainFailed": "No se pudo entrenar: {{errorMessage}}",
       "updateFaceScoreFailed": "No se pudo actualizar la puntuación del rostro: {{errorMessage}}",
-      "renameFaceFailed": "No se pudo renombrar el rostro: {{errorMessage}}"
+      "renameFaceFailed": "No se pudo renombrar el rostro: {{errorMessage}}",
+      "reclassifyFailed": "Error al reclasificar el rostro: {{errorMessage}}"
     }
   },
   "readTheDocs": "Leer la documentación",
@@ -101,5 +103,7 @@
   },
   "collections": "Colecciones",
   "nofaces": "No hay rostros disponibles",
-  "pixels": "{{area}}px"
+  "pixels": "{{area}}px",
+  "reclassifyFace": "Reclasificar rostro",
+  "reclassifyFaceAs": "Reclasificar rostro como:"
 }

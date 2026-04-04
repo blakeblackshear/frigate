@@ -15,7 +15,9 @@
       "description": "Solo se pueden crear elementos de revisión para una cámara cuando las grabaciones están habilitadas para esa cámara."
     }
   },
-  "timeline": "Línea de tiempo",
+  "timeline": {
+    "label": "Línea de tiempo"
+  },
   "timeline.aria": "Seleccionar línea de tiempo",
   "events": {
     "label": "Eventos",

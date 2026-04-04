@@ -82,6 +82,7 @@
     "motion": "Movimiento",
     "regions": "Regiones",
     "boundingBox": "Caja delimitadora",
-    "mask": "Máscara"
+    "mask": "Máscara",
+    "paths": "Trayectorias"
   }
 }
