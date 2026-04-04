@@ -1,5 +1,7 @@
 {
-  "deleteExport": "Export löschen",
+  "deleteExport": {
+    "label": "Export löschen"
+  },
   "editExport": {
     "title": "Export umbenennen",
     "desc": "Gib einen neuen Namen für diesen Export an.",

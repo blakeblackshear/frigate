@@ -82,7 +82,8 @@
     "attributes": "Klassifizierungsattribute",
     "title": {
       "label": "Titel"
-    }
+    },
+    "scoreInfo": "Punkte Info"
   },
   "documentTitle": "Erkunde - Frigate",
   "generativeAI": "Generative KI",
@@ -225,12 +226,18 @@
     "debugReplay": {
       "label": "Debug-Wiedergabe",
       "aria": "Dieses verfolgte Objekt in der Debug-Wiedergabeansicht anzeigen"
+    },
+    "more": {
+      "aria": "mehr"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Löschen bestätigen",
       "desc": "Beim Löschen dieses verfolgten Objekts werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Verfolgungsdetails entfernt. Aufgezeichnetes Filmmaterial dieses verfolgten Objekts in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Sind Sie sicher, dass Sie fortfahren möchten?"
+    },
+    "toast": {
+      "error": "Fehler beim Löschen dieses verfolgten Objekts: {{errorMessage}}"
     }
   },
   "searchResult": {

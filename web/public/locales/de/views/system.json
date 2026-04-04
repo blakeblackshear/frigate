@@ -38,7 +38,8 @@
         "description": "Dies ist ein bekannter Fehler in den GPU-Statistik-Tools von Intel (intel_gpu_top), bei dem das Tool ausfällt und wiederholt eine GPU-Auslastung von 0 % anzeigt, selbst wenn die Hardwarebeschleunigung und die Objekterkennung auf der (i)GPU korrekt funktionieren. Dies ist kein Fehler von Frigate. Du kannst den Host neu starten, um das Problem vorübergehend zu beheben und zu prüfen, ob die GPU korrekt funktioniert. Dies hat keine Auswirkungen auf die Leistung."
       },
       "gpuTemperature": "GPU Temperatur",
-      "npuTemperature": "NPU Temperatur"
+      "npuTemperature": "NPU Temperatur",
+      "gpuCompute": "GPU Compute / Encode"
     },
     "title": "Allgemein",
     "detector": {
@@ -119,9 +120,11 @@
       "empty": "Noch keine Nachrichten erfasst",
       "count": "{{count}} Nachrichten",
       "expanded": {
-        "payload": "Nutzlast"
+        "payload": "Nutzinhalt"
       },
-      "resume": "fortsetzen"
+      "resume": "fortsetzen",
+      "count_one": "{{count}} Nachrichten",
+      "count_other": "{{count}} Nachrichten"
     }
   },
   "metrics": "Systemmetriken",
@@ -187,7 +190,8 @@
       "cameraDetect": "{{camName}} Erkennung",
       "cameraFramesPerSecond": "{{camName}} Bilder pro Sekunde",
       "cameraDetectionsPerSecond": "{{camName}} Erkennungen pro Sekunde",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} übersprungene Erkennungen pro Sekunde"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} übersprungene Erkennungen pro Sekunde",
+      "cameraGpu": "{{camName}} GPU"
     },
     "title": "Kameras",
     "framesAndDetections": "Bilder / Erkennungen",

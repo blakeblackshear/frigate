@@ -14,7 +14,9 @@
       "description": "Überprüfungselemente können nur für eine Kamera erstellt werden, wenn Aufzeichnungen für diese Kamera aktiviert sind."
     }
   },
-  "timeline": "Zeitleiste",
+  "timeline": {
+    "label": "Zeitleiste"
+  },
   "timeline.aria": "Zeitleiste auswählen",
   "events": {
     "label": "Ereignisse",
