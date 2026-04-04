@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Vymazaná Trieda",
-      "deletedImage": "Vymazané Obrázky",
+      "deletedCategory_one": "Vymazaná Trieda",
+      "deletedCategory_few": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Vymazané Obrázky",
+      "deletedImage_few": "",
+      "deletedImage_other": "",
       "categorizedImage": "Obrázok bol úspešne klasifikovaný",
       "trainedModel": "Úspešne vyškolený model.",
       "trainingModel": "Úspešne spustené trénovanie modelu.",
