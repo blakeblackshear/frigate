@@ -1,1 +1,6 @@
-{}
+{
+    "minimum": "En az {{limit}} olmalı",
+    "maximum": "En fazla {{limit}} olmalı",
+    "exclusiveMinimum": "{{limit}}’den büyük olmalı",
+    "exclusiveMaximum": "{{limit}}’den küçük olmalı"
+}
