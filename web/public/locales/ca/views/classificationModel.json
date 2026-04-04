@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Classe suprimida",
-      "deletedImage": "Imatges suprimides",
+      "deletedCategory_one": "S'ha suprimit la classe {{count}}",
+      "deletedCategory_many": "S'han suprimit {{count}} classes",
+      "deletedCategory_other": "S'han suprimit {{count}} classes",
+      "deletedImage_one": "Imatge eliminada {{count}}",
+      "deletedImage_many": "S'han suprimit {{count}} imatges",
+      "deletedImage_other": "S'han suprimit {{count}} imatges",
       "categorizedImage": "Imatge classificada amb èxit",
       "trainedModel": "Model entrenat amb èxit.",
       "trainingModel": "S'ha iniciat amb èxit la formació de models.",
@@ -21,7 +25,8 @@
       "deletedModel_many": "S'han suprimit correctament els {{count}} models",
       "deletedModel_other": "S'han suprimit correctament els {{count}} models",
       "updatedModel": "S'ha actualitzat correctament la configuració del model",
-      "renamedCategory": "S'ha canviat el nom de la classe a {{name}}"
+      "renamedCategory": "S'ha canviat el nom de la classe a {{name}}",
+      "reclassifiedImage": "Imatge reclassificada amb èxit"
     },
     "error": {
       "deleteImageFailed": "No s'ha pogut suprimir: {{errorMessage}}",
@@ -31,7 +36,8 @@
       "deleteModelFailed": "No s'ha pogut suprimir el model: {{errorMessage}}",
       "updateModelFailed": "No s'ha pogut actualitzar el model: {{errorMessage}}",
       "renameCategoryFailed": "No s'ha pogut canviar el nom de la classe: {{errorMessage}}",
-      "trainingFailedToStart": "Errar en arrencar l'entrenament del model: {{errorMessage}}"
+      "trainingFailedToStart": "Errar en arrencar l'entrenament del model: {{errorMessage}}",
+      "reclassifyFailed": "No s'ha pogut reclassificar la imatge: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -156,8 +162,13 @@
       "allImagesRequired_other": "Classifiqueu totes les imatges. Queden {{count}} imatges.",
       "modelCreated": "El model s'ha creat correctament. Utilitzeu la vista Classificacions recents per a afegir imatges per als estats que falten i, a continuació, entrenar el model.",
       "missingStatesWarning": {
-        "title": "Falten exemples d'estat",
-        "description": "Es recomana seleccionar exemples per a tots els estats per obtenir els millors resultats. Podeu continuar sense seleccionar tots els estats, però el model no serà entrenat fins que tots els estats tinguin imatges. Després de continuar, utilitzeu la vista Classificacions recents per classificar imatges per als estats que falten, i després entrenar el model."
+        "title": "Falten exemples de classe",
+        "description": "No totes les classes tenen exemples. Proveu de generar nous exemples per a trobar la classe que falta, o continueu i utilitzeu la vista Classificacions recents per a afegir imatges més tard."
+      },
+      "refreshExamples": "Genera nous exemples",
+      "refreshConfirm": {
+        "title": "Voleu generar exemples nous?",
+        "description": "Això generarà un nou conjunt d'imatges i netejarà totes les seleccions, incloses les classes anteriors. Haureu de tornar a seleccionar exemples per a totes les classes."
       }
     }
   },
@@ -189,5 +200,7 @@
     "modelNotReady": "El model no está preparat per entrenar",
     "noChanges": "No hi ha canvis al conjunt de dades des de l'última formació."
   },
-  "none": "Cap"
+  "none": "Cap",
+  "reclassifyImageAs": "Reclassifica la imatge com a:",
+  "reclassifyImage": "Reclassifica la imatge"
 }

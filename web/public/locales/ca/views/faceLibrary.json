@@ -78,7 +78,8 @@
       "deletedFace_one": "{{count}} rostre suprimit amb èxit.",
       "deletedFace_many": "{{count}} rostres suprimits amb èxit.",
       "deletedFace_other": "{{count}} rostres suprimits amb èxit.",
-      "renamedFace": "Rostre renombrat amb èxit a {{name}}"
+      "renamedFace": "Rostre renombrat amb èxit a {{name}}",
+      "reclassifiedFace": "Cara reclassificada amb èxit."
     },
     "error": {
       "uploadingImageFailed": "No s'ha pogut penjar la imatge: {{errorMessage}}",
@@ -87,7 +88,8 @@
       "deleteNameFailed": "No s'ha pogut suprimir el nom: {{errorMessage}}",
       "updateFaceScoreFailed": "No s'ha pogut actualitzar la puntuació de rostre: {{errorMessage}}",
       "addFaceLibraryFailed": "No s'ha pogut establir el nom del rostre: {{errorMessage}}",
-      "renameFaceFailed": "No s'ha pogut renombrar el rostre: {{errorMessage}}"
+      "renameFaceFailed": "No s'ha pogut renombrar el rostre: {{errorMessage}}",
+      "reclassifyFailed": "No s'ha pogut reclassificar la cara: {{errorMessage}}"
     }
   },
   "nofaces": "No hi han rostres disponibles",
@@ -100,5 +102,7 @@
   "pixels": "{{area}}px",
   "trainFace": "Entrenar rostre",
   "readTheDocs": "Llegir la documentació",
-  "trainFaceAs": "Entrenar rostre com a:"
+  "trainFaceAs": "Entrenar rostre com a:",
+  "reclassifyFaceAs": "Reclassifica la cara com a:",
+  "reclassifyFace": "Reclassifica la cara"
 }
