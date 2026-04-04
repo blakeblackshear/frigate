@@ -6,7 +6,8 @@
       "title": "Frigate starter på nytt",
       "button": "Tving omlasting nå",
       "content": "Denne siden vil lastes inn på nytt om {{countdown}} sekunder."
-    }
+    },
+    "description": "Dette vil stoppe Frigate et øyeblikk mens det starter på nytt."
   },
   "explore": {
     "plus": {
@@ -73,7 +74,11 @@
     },
     "select": "Velg",
     "export": "Eksporter",
-    "selectOrExport": "Velg eller eksporter"
+    "selectOrExport": "Velg eller eksporter",
+    "case": {
+      "label": "Sak",
+      "placeholder": "Velg en sak"
+    }
   },
   "streaming": {
     "label": "Strøm",

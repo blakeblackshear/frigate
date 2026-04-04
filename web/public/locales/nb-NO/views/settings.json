@@ -12,7 +12,11 @@
     "notifications": "Innstillinger for meldingsvarsler - Frigate",
     "enrichments": "Innstillinger for utvidelser - Frigate",
     "cameraManagement": "Administrer kameraer - Frigate",
-    "cameraReview": "Innstillinger for kamerainspeksjon - Frigate"
+    "cameraReview": "Innstillinger for kamerainspeksjon - Frigate",
+    "globalConfig": "Global konfigurasjon - Frigate",
+    "cameraConfig": "Kamerakonfigurasjon - Frigate",
+    "profiles": "Profiler - Frigate",
+    "maintenance": "Vedlikehold - Frigate"
   },
   "menu": {
     "classification": "Klassifisering",
@@ -28,7 +32,66 @@
     "triggers": "Utløsere",
     "cameraManagement": "Administrasjon",
     "cameraReview": "Inspeksjon",
-    "roles": "Roller"
+    "roles": "Roller",
+    "profiles": "Profiler",
+    "cameraFaceRecognition": "Ansiktsgjenkjenning",
+    "integrationFaceRecognition": "Ansiktsgjenkjenning",
+    "systemAuthentication": "Autentisering",
+    "cameraMotion": "Bevegelsesdeteksjon",
+    "globalMotion": "Bevegelsesdeteksjon",
+    "systemUi": "Brukergrensesnitt",
+    "cameraUi": "Brukergrensesnitt for kamera",
+    "systemDatabase": "Database",
+    "systemDetectionModel": "Deteksjonsmodell",
+    "cameraLivePlayback": "Direkteavspilling",
+    "globalLivePlayback": "Direkteavspilling",
+    "cameraFfmpeg": "FFmpeg",
+    "globalFfmpeg": "FFmpeg",
+    "systemFfmpeg": "FFmpeg",
+    "cameraBirdseye": "Fugleperspektiv",
+    "systemBirdseye": "Fugleperspektiv",
+    "integrationGenerativeAi": "Generativ AI",
+    "general": "Generelt",
+    "globalConfig": "Global konfigurasjon",
+    "systemGo2rtcStreams": "go2rtc-strømmer",
+    "uiSettings": "Innstillinger for brukergrensesnitt",
+    "cameraConfigReview": "Inspeksjon",
+    "globalReview": "Inspeksjon",
+    "integrations": "Integrasjoner",
+    "cameraLpr": "Kjennemerke-gjenkjenning",
+    "integrationLpr": "Kjennemerke-gjenkjenning",
+    "systemLogging": "Logging",
+    "cameraAudioEvents": "Lydhendelser",
+    "globalAudioEvents": "Lydhendelser",
+    "cameraAudioTranscription": "Lydtranskripsjon",
+    "integrationAudioTranscription": "Lydtranskripsjon",
+    "systemDetectorHardware": "Maskinvare for detektor",
+    "mediaSync": "Mediesynkronisering",
+    "cameraNotifications": "Meldingsvarsler",
+    "systemEnvironmentVariables": "Miljøvariabler",
+    "cameraMqttConfig": "MQTT",
+    "systemMqtt": "MQTT",
+    "cameraMqtt": "MQTT for kamera",
+    "systemNetworking": "Nettverk",
+    "cameraDetect": "Objektdeteksjon",
+    "globalDetect": "Objektdeteksjon",
+    "cameraObjects": "Objekter",
+    "globalObjects": "Objekter",
+    "integrationObjectClassification": "Objektklassifisering",
+    "cameraOnvif": "ONVIF",
+    "cameraRecording": "Opptak",
+    "globalRecording": "Opptak",
+    "systemProxy": "Proxy",
+    "regionGrid": "Regionrutenett",
+    "integrationSemanticSearch": "Semantisk søk",
+    "cameraSnapshots": "Stillbilder",
+    "globalSnapshots": "Stillbilde",
+    "cameraTimestampStyle": "Stil for tidsstempel",
+    "globalTimestampStyle": "Stil for tidsstempel",
+    "system": "System",
+    "systemTelemetry": "Telemetri",
+    "systemTls": "TLS",
+    "maintenance": "Vedlikehold"
   },
   "dialog": {
     "unsavedChanges": {
@@ -282,6 +345,10 @@
           "zone": "sone",
           "motion_mask": "bevegelsesmaske",
           "object_mask": "objektmaske"
+        },
+        "revertOverride": {
+          "title": "Tilbakestill til basiskonfigurasjon",
+          "desc": "Dette vil fjerne profiloverstyringen for {{type}} <em>{{name}}</em> og tilbakestille til basiskonfigurasjonen."
         }
       },
       "inertia": {
@@ -297,6 +364,17 @@
       "speed": {
         "error": {
           "mustBeGreaterOrEqualTo": "Terskelverdi for hastighet må være større enn eller lik 0.1."
+        }
+      },
+      "id": {
+        "error": {
+          "alreadyExists": "En maske med denne ID-en eksisterer allerede for dette kameraet.",
+          "mustNotBeEmpty": "ID kan ikke være tom."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Navn kan ikke være tomt."
         }
       }
     },
@@ -351,6 +429,10 @@
       },
       "toast": {
         "success": "Sone ({{zoneName}}) er lagret."
+      },
+      "enabled": {
+        "title": "Aktivert",
+        "description": "Om denne sonen er aktiv og aktivert i konfigurasjonsfilen. Hvis deaktivert, kan den ikke aktiveres via MQTT. Deaktiverte soner ignoreres ved kjøring."
       }
     },
     "motionMasks": {
@@ -379,6 +461,12 @@
           "title": "{{polygonName}} er lagret.",
           "noName": "Bevegelsesmasken er lagret."
         }
+      },
+      "defaultName": "Bevegelsesmaske {{number}}",
+      "name": {
+        "description": "Et valgfritt visningsnavn for denne bevegelsesmasken.",
+        "title": "Navn",
+        "placeholder": "Skriv inn et navn..."
       }
     },
     "objectMasks": {
@@ -404,11 +492,26 @@
           "title": "{{polygonName}} er lagret.",
           "noName": "Objektmasken er lagret."
         }
+      },
+      "name": {
+        "description": "Et valgfritt visningsnavn for denne objektmasken.",
+        "title": "Navn",
+        "placeholder": "Skriv inn et navn..."
       }
     },
     "restart_required": "Omstart påkrevd (masker/soner endret)",
     "motionMaskLabel": "Bevegelsesmaske {{number}}",
-    "objectMaskLabel": "Objektmaske {{number}} ({{label}})"
+    "objectMaskLabel": "Objektmaske {{number}}",
+    "profileBase": "(basis)",
+    "profileOverride": "(overstyring)",
+    "masks": {
+      "enabled": {
+        "title": "Aktivert",
+        "description": "Om denne masken er aktivert i konfigurasjonsfilen. Hvis deaktivert, kan den ikke aktiveres via MQTT. Deaktiverte masker ignoreres ved kjøring."
+      }
+    },
+    "disabledInConfig": "Elementet er deaktivert i konfigurasjonsfilen",
+    "addDisabledProfile": "Legg til i basiskonfigurasjonen først, og overstyr deretter i profilen"
   },
   "motionDetectionTuner": {
     "title": "Finjustering av bevegelsesdeteksjon",
@@ -438,10 +541,10 @@
     "objectList": "Objektliste",
     "noObjects": "Ingen objekter",
     "boundingBoxes": {
-      "title": "Avgrensningsbokser",
-      "desc": "Vis omsluttende bokser rundt sporede objekter",
+      "title": "Markeringsrammer",
+      "desc": "Vis markeringsrammer rundt sporede objekter",
       "colors": {
-        "label": "Farge på omsluttende bokser for objekt",
+        "label": "Farge på markeringsrammer for objekt",
         "info": "<li>Ved oppstart vil forskjellige farger bli tildelt hver objekttype</li><li>En mørkeblå tynn linje indikerer at objektet ikke er detektert på dette tidspunktet</li><li>En grå tynn linje indikerer at objektet er detektert som stasjonært</li><li>En tykk linje indikerer at objektet er under autosporing (når aktivert)</li>"
       }
     },
@@ -700,14 +803,21 @@
         "snapshots": "Stillbilder",
         "cleanCopySnapshots": "<code>clean_copy</code>-stillbilder"
       },
-      "cleanCopyWarning": "Noen kameraer har stillbilder aktivert, men ren kopi er deaktivert. Du må aktivere <code>clean_copy</code> i stillbilde-konfigurasjonen for å kunne sende bilder fra disse kameraene til Frigate+."
+      "cleanCopyWarning": "Noen kameraer har stillbilder deaktivert"
     },
     "toast": {
       "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å aktivere endringene.",
       "error": "Kunne ikke lagre konfigurasjonsendringer: {{errorMessage}}"
     },
     "restart_required": "Omstart påkrevd (Frigate+ modell endret)",
-    "unsavedChanges": "Ulagrede endringer for Frigate+ innstillinger"
+    "unsavedChanges": "Ulagrede endringer for Frigate+ innstillinger",
+    "cardTitles": {
+      "otherModels": "Andre modeller",
+      "api": "API",
+      "currentModel": "Gjeldende modell",
+      "configuration": "Konfigurasjon"
+    },
+    "description": "Frigate+ er en abonnementstjeneste som gir tilgang til tilleggsfunksjoner og kapasiteter for Frigate-instansen din, inkludert muligheten til å bruke egendefinerte objektdeteksjonsmodeller trent på dine egne data. Du kan administrere innstillingene for Frigate+-modellen din her."
   },
   "enrichments": {
     "title": "Innstillinger for utvidelser",
@@ -1074,7 +1184,7 @@
       },
       "streamDetails": "Strømdetaljer",
       "probing": "Test kamera...",
-      "retry": "Prøv på nytt",
+      "retry": "Prøv igjen",
       "testing": {
         "probingMetadata": "Sjekker metadata for kamera...",
         "fetchingSnapshot": "Henter stillbilde fra kamera..."
@@ -1243,7 +1353,12 @@
     "backToSettings": "Tilbake til kamerainnstillinger",
     "streams": {
       "title": "Aktiver / Deaktiver kameraer",
-      "desc": "Midlertidig deaktiver et kamera til Frigate startes på nytt. Deaktivering av et kamera stopper Frigates behandling av dette kameraets strømmer fullstendig. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke go2rtc-restrømming.</em>"
+      "desc": "Midlertidig deaktiver et kamera til Frigate startes på nytt. Deaktivering av et kamera stopper Frigates behandling av dette kameraets strømmer fullstendig. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke go2rtc-restrømming.</em>",
+      "disableDesc": "Aktiver et kamera som for øyeblikket ikke er synlig i grensesnittet og deaktivert i konfigurasjonen. En omstart av Frigate kreves etter aktivering.",
+      "enableSuccess": "Aktiverte {{cameraName}} i konfigurasjonen. Start Frigate på nytt for å ta i bruk endringene.",
+      "enableLabel": "Aktiverte kameraer",
+      "enableDesc": "Deaktiver et aktivert kamera midlertidig frem til Frigate starter på nytt. Deaktivering av et kamera stopper all prosessering av kameraets strømmer. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke videreformidling (restream) i go2rtc.</em>",
+      "disableLabel": "Deaktiverte kameraer"
     },
     "cameraConfig": {
       "add": "Legg til kamera",
@@ -1273,7 +1388,27 @@
       "toast": {
         "success": "Kamera {{cameraName}} ble lagret"
       }
-    }
+    },
+    "profiles": {
+      "enabled": "Aktivert",
+      "inherit": "Arv",
+      "disabled": "Deaktivert",
+      "description": "Konfigurer hvilke kameraer som er aktivert eller deaktivert når en profil aktiveres. Kameraer satt til \"Arv\" beholder sin opprinnelige status.",
+      "title": "Profiloverstyringer for kamera",
+      "selectLabel": "Velg profil"
+    },
+    "deleteCameraDialog": {
+      "confirmTitle": "Er du sikker?",
+      "success": "Kamera {{cameraName}} ble slettet",
+      "error": "Kunne ikke slette kamera {{cameraName}}",
+      "title": "Slett kamera",
+      "deleteExports": "Slett også eksporterte filer for dette kameraet",
+      "confirmButton": "Slett permanent",
+      "confirmWarning": "Sletting av <strong>{{cameraName}}</strong> kan ikke angres.",
+      "description": "Sletting av et kamera vil fjerne alle opptak, sporede objekter og konfigurasjon for dette kameraet permanent. Eventuelle go2rtc-strømmer tilknyttet kameraet må eventuelt fjernes manuelt.",
+      "selectPlaceholder": "Velg kamera..."
+    },
+    "deleteCamera": "Slett kamera"
   },
   "cameraReview": {
     "title": "Innstillinger for kamerainspeksjon",
@@ -1311,5 +1446,453 @@
         "success": "Konfigurasjonen for inspeksjonsklassifisering er lagret. Start Frigate på nytt for å aktivere endringer."
       }
     }
+  },
+  "configForm": {
+    "reviewLabels": {
+      "summary": "{{count}} etiketter valgt",
+      "empty": "Ingen etiketter tilgjengelig"
+    },
+    "audioLabels": {
+      "summary": "{{count}} lydetiketter valgt",
+      "empty": "Ingen lydetiketter tilgjengelig"
+    },
+    "objectLabels": {
+      "summary": "{{count}} objekttyper valgt",
+      "empty": "Ingen objektetiketter tilgjengelig"
+    },
+    "inputRoles": {
+      "summary": "{{count}} roller valgt",
+      "options": {
+        "detect": "Deteksjon",
+        "audio": "Lyd",
+        "record": "Opptak"
+      },
+      "empty": "Ingen roller tilgjengelig"
+    },
+    "zoneNames": {
+      "summary": "{{count}} valgt",
+      "empty": "Ingen soner tilgjengelig"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} for {{label}}"
+    },
+    "sections": {
+      "face_recognition": "Ansiktsgjenkjenning",
+      "auth": "Autentisering",
+      "motion": "Bevegelse",
+      "database": "Database",
+      "detect": "Deteksjon",
+      "detectors": "Detektorer",
+      "live": "Direktevisning",
+      "ffmpeg": "FFmpeg",
+      "birdseye": "Fugleperspektiv",
+      "genai": "GenAI",
+      "go2rtc": "go2rtc",
+      "review": "Inspeksjon",
+      "lpr": "Kjennemerke-gjenkjenning",
+      "audio": "Lyd",
+      "masksAndZones": "Masker / Soner",
+      "notifications": "Meldingsvarsler",
+      "model": "Modell",
+      "mqtt": "MQTT",
+      "objects": "Objekter",
+      "record": "Opptak",
+      "proxy": "Proxy",
+      "semantic_search": "Semantisk søk",
+      "snapshots": "Stillbilder",
+      "telemetry": "Telemetri",
+      "timestamp_style": "Tidsstempler",
+      "tls": "TLS"
+    },
+    "ffmpegArgs": {
+      "useGlobalSetting": "Arv fra global innstilling",
+      "inherit": "Arv fra kamerainnstilling",
+      "preset": "Forhåndsinnstilling",
+      "presetLabels": {
+        "preset-http-reolink": "HTTP - Reolink-kameraer",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generisk)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generisk)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-record-jpeg": "Opptak - JPEG-kameraer",
+        "preset-record-mjpeg": "Opptak - MJPEG-kameraer",
+        "preset-record-ubiquiti": "Opptak - Ubiquiti-kameraer",
+        "preset-record-generic-audio-copy": "Opptak (Generisk + kopier lyd)",
+        "preset-record-generic-audio-aac": "Opptak (Generisk + lyd til AAC)",
+        "preset-record-generic": "Opptak (Generisk, uten lyd)",
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-rtmp-generic": "RTMP (Generisk)",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-restream": "RTSP - Videreformidling fra go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Videreformidling fra go2rtc (lav forsinkelse)",
+        "preset-rtsp-generic": "RTSP (Generisk)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)"
+      },
+      "none": "Ingen",
+      "manual": "Manuelle argumenter",
+      "manualPlaceholder": "Skriv inn FFmpeg-argumenter",
+      "selectPreset": "Velg forhåndsinnstilling"
+    },
+    "advancedCount": "Avansert ({{count}})",
+    "advancedSettingsCount": "Avanserte innstillinger ({{count}})",
+    "timezone": {
+      "defaultOption": "Bruk nettleserens tidssone"
+    },
+    "tabs": {
+      "sharedDefaults": "Delte standardverdier",
+      "integrations": "Integrasjoner",
+      "system": "System"
+    },
+    "detectors": {
+      "keyDuplicate": "Detektornavn eksisterer allerede.",
+      "keyRequired": "Detektornavn er påkrevd.",
+      "none": "Ingen detektor-instanser er konfigurert.",
+      "noSchema": "Ingen detektorskjemaer er tilgjengelige.",
+      "title": "Innstillinger for detektorer",
+      "singleType": "Kun én {{type}}-detektor er tillatt.",
+      "add": "Legg til detektor",
+      "addCustomKey": "Legg til egendefinert nøkkel"
+    },
+    "global": {
+      "description": "Disse innstillingene gjelder for alle kameraer med mindre de overstyres i kameraspesifikke innstillinger.",
+      "title": "Globale innstillinger"
+    },
+    "camera": {
+      "description": "Disse innstillingene gjelder kun for dette kameraet og overstyrer de globale innstillingene.",
+      "noCameras": "Ingen kameraer tilgjengelig",
+      "title": "Kamerainnstillinger"
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Vektorrepresentasjoner",
+        "tools": "Verktøy",
+        "vision": "Bildegjenkjenning"
+      }
+    },
+    "additionalProperties": {
+      "remove": "Fjern",
+      "keyPlaceholder": "Ny nøkkel",
+      "keyLabel": "Nøkkel",
+      "valueLabel": "Verdi"
+    },
+    "roleMap": {
+      "remove": "Fjern",
+      "groupsLabel": "Grupper",
+      "empty": "Ingen rolletilordninger",
+      "addMapping": "Legg til rolletilordning",
+      "roleLabel": "Rolle"
+    },
+    "semanticSearchModel": {
+      "genaiProviders": "GenAI-leverandører",
+      "builtIn": "Innebygde modeller",
+      "placeholder": "Velg modell…"
+    },
+    "motion": {
+      "title": "Innstillinger for bevegelse"
+    },
+    "detect": {
+      "title": "Innstillinger for deteksjon"
+    },
+    "live": {
+      "title": "Innstillinger for direktevisning"
+    },
+    "review": {
+      "title": "Innstillinger for inspeksjon"
+    },
+    "audio": {
+      "title": "Innstillinger for lyd"
+    },
+    "objects": {
+      "title": "Innstillinger for objekter"
+    },
+    "record": {
+      "title": "Innstillinger for opptak"
+    },
+    "snapshots": {
+      "title": "Innstillinger for stillbilder"
+    },
+    "timestamp_style": {
+      "title": "Innstillinger for tidsstempling"
+    },
+    "notifications": {
+      "title": "Innstillinger for varsler"
+    },
+    "restartRequiredFooter": "Konfigurasjon endret - Omstart påkrevd",
+    "addCustomLabel": "Legg til egendefinert etikett...",
+    "restartRequiredField": "Omstart påkrevd",
+    "cameraInputs": {
+      "itemTitle": "Strøm {{index}}"
+    },
+    "searchPlaceholder": "Søk...",
+    "showAdvanced": "Vis avanserte innstillinger"
+  },
+  "button": {
+    "overriddenBaseConfigTooltip": "{{profile}}-profilen overstyrer konfigurasjonsinnstillinger i denne seksjonen",
+    "overriddenGlobalTooltip": "Dette kameraet overstyrer globale konfigurasjonsinnstillinger i denne seksjonen",
+    "overriddenBaseConfig": "Overstyrt (Basiskonfigurasjon)",
+    "overriddenGlobal": "Overstyrt (Global)"
+  },
+  "detectionModel": {
+    "plusActive": {
+      "title": "Administrasjon av Frigate+-modell",
+      "description": "Denne instansen kjører en Frigate+-modell. Velg eller endre modell i Frigate+-innstillingene.",
+      "goToFrigatePlus": "Gå til Frigate+-innstillinger",
+      "label": "Kilde for gjeldende modell",
+      "showModelForm": "Konfigurer en modell manuelt"
+    }
+  },
+  "go2rtcStreams": {
+    "description": "Administrer go2rtc-strømkonfigurasjoner for videreformidling av kamera-strømmer. Hver strøm har ett navn og én eller flere kilde-URL-er.",
+    "ffmpeg": {
+      "hardwareAuto": "Automatisk maskinvareakselerasjon",
+      "useFfmpegModule": "Bruk kompatibilitetsmodus (ffmpeg)",
+      "audioExclude": "Ekskluder",
+      "videoExclude": "Ekskluder",
+      "hardwareNone": "Ingen maskinvareakselerasjon",
+      "audioCopy": "Kopier",
+      "videoCopy": "Kopier",
+      "audio": "Lyd",
+      "hardware": "Maskinvareakselerasjon",
+      "videoH264": "Transkod til H.264",
+      "videoH265": "Transkod til H.265",
+      "audioMp3": "Transkod til MP3",
+      "audioOpus": "Transkod til Opus",
+      "audioPcm": "Transkod til PCM",
+      "audioPcma": "Transkod til PCM A-law",
+      "audioPcmu": "Transkod til PCM μ-law",
+      "audioAac": "Transkod til AAC",
+      "video": "Video"
+    },
+    "validation": {
+      "nameDuplicate": "En strøm med dette navnet eksisterer allerede",
+      "urlRequired": "Minst én URL er påkrevd",
+      "nameRequired": "Strømnavn er påkrevd",
+      "nameInvalid": "Strømnavn kan kun inneholde bokstaver, tall, understrek og bindestrek"
+    },
+    "deleteStreamConfirm": "Er du sikker på at du vil slette strømmen \"{{streamName}}\"? Kameraer som refererer til denne strømmen kan slutte å fungere.",
+    "streamUrlPlaceholder": "f.eks. rtsp://bruker:passord@192.168.1.100/stream",
+    "streamNamePlaceholder": "f.eks. ytterdor",
+    "renameStream": "Gi strøm nytt navn",
+    "title": "go2rtc-strømmer",
+    "noStreams": "Ingen go2rtc-strømmer er konfigurert. Legg til en strøm for å komme i gang.",
+    "addStream": "Legg til strøm",
+    "addUrl": "Legg til URL",
+    "newStreamName": "Nytt strømnavn",
+    "addStreamDesc": "Skriv inn et navn for den nye strømmen. Dette navnet vil bli brukt til å referere til strømmen i kamerakonfigurasjonen din.",
+    "renameStreamDesc": "Skriv inn et nytt navn for denne strømmen. Endring av navn kan ødelegge for kameraer eller andre strømmer som refererer til den ved navn.",
+    "deleteStream": "Slett strøm",
+    "streamName": "Strømnavn"
+  },
+  "profiles": {
+    "active": "Aktiv",
+    "activeProfile": "Aktiv profil",
+    "enableSwitch": "Aktiver profiler",
+    "baseConfig": "Basiskonfigurasjon",
+    "error": {
+      "alreadyExists": "En profil med denne ID-en eksisterer allerede",
+      "mustNotContainPeriod": "Kan ikke inneholde punktum",
+      "mustBeAtLeastTwoCharacters": "Må være minst 2 tegn"
+    },
+    "nameDuplicate": "En profil med dette navnet eksisterer allerede",
+    "profileNamePlaceholder": "f.eks. Sikret, Borte, Nattmodus",
+    "deleteSectionConfirm": "Fjern {{section}}-overstyringene for profil {{profile}} på {{camera}}?",
+    "removeOverride": "Fjern profiloverstyring",
+    "deleteSectionSuccess": "Fjernet {{section}}-overstyringer for {{profile}}",
+    "renameProfile": "Gi profil nytt navn",
+    "noActiveProfile": "Ingen aktiv profil",
+    "noOverrides": "Ingen overstyringer",
+    "noProfiles": "Ingen profiler er definert.",
+    "profileIdDescription": "Intern identifikator brukt i konfigurasjon og automatiseringer",
+    "columnCamera": "Kamera",
+    "nameInvalid": "Kun små bokstaver, tall og understrek er tillatt",
+    "activateFailed": "Kunne ikke aktivere profil",
+    "addProfile": "Legg til profil",
+    "newProfile": "Ny profil",
+    "activated": "Profil '{{profile}}' aktivert",
+    "deactivated": "Profil deaktivert",
+    "createSuccess": "Profilen '{{profile}}' ble opprettet",
+    "deleteSuccess": "Profilen '{{profile}}' ble slettet",
+    "renameSuccess": "Profilen har fått nytt navn: '{{profile}}'",
+    "title": "Profiler",
+    "enabledDescription": "Profiler er aktivert. Opprett en ny profil nedenfor, naviger til en seksjon for kamerakonfigurasjon for å gjøre endringer, og lagre for at endringene skal tre i kraft.",
+    "disabledDescription": "Profiler lar deg definere navngitte sett med overstyringer for kamerakonfigurasjon (f.eks. sikret, borte, natt) som kan aktiveres ved behov.",
+    "profileIdLabel": "Profil-ID",
+    "friendlyNameLabel": "Profilnavn",
+    "columnOverrides": "Profiloverstyringer",
+    "deleteProfile": "Slett profil",
+    "deleteProfileConfirm": "Slett profilen \"{{profile}}\" fra alle kameraer? Dette kan ikke angres.",
+    "deleteSection": "Slett seksjonsoverstyringer",
+    "cameraCount_one": "{{count}} kamera",
+    "cameraCount_other": "{{count}} kameraer"
+  },
+  "configMessages": {
+    "review": {
+      "allNonAlertDetections": "All aktivitet som ikke er et varsel, vil bli inkludert som deteksjoner.",
+      "detectDisabled": "Objektdeteksjon er deaktivert. Inspeksjonselementer krever detekterte objekter for å kategorisere varsler og deteksjoner.",
+      "recordDisabled": "Opptak er deaktivert, inspeksjonselementer vil ikke bli generert."
+    },
+    "detectors": {
+      "mixedTypesSuggestion": "Alle detektorer må bruke samme type. Fjern eksisterende detektorer eller velg {{type}}.",
+      "mixedTypes": "Alle detektorer må bruke samme type. Fjern eksisterende detektorer for å bruke en annen type."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Ansiktsgjenkjenning er ikke aktivert på globalt nivå. Aktiver det i globale innstillinger for at ansiktsgjenkjenning på kameranivå skal fungere.",
+      "personNotTracked": "Ansiktsgjenkjenning krever at objektet 'person' spores. Sørg for at 'person' er i listen over objektsporing."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Det anbefales ikke å sette FPS for deteksjon høyere enn 5."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Fugleperspektiv er satt til 'objekter'-modus, men objektdeteksjon er deaktivert for dette kameraet. Kameraet vil ikke vises i Fugleperspektiv."
+    },
+    "audio": {
+      "noAudioRole": "Ingen strømmer har definert lydrolle. Du må aktivere lydrollen for at lyddeteksjon skal fungere."
+    },
+    "record": {
+      "noRecordRole": "Ingen strømmer har definert opptaksrolle. Opptak vil ikke fungere."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Lyddeteksjon er ikke aktivert for dette kameraet. Lydtranskripsjon krever at lyddeteksjon er aktiv."
+    },
+    "snapshots": {
+      "detectDisabled": "Objektdeteksjon er deaktivert. Stillbilder genereres fra sporede objekter og vil ikke bli opprettet."
+    },
+    "lpr": {
+      "globalDisabled": "Identifisering av kjennemerker er ikke aktivert på globalt nivå. Aktiver det i globale innstillinger for at identifisering på kameranivå skal fungere.",
+      "vehicleNotTracked": "Identifisering av kjnnemerker krever at 'bil' eller 'motorsykkel' spores."
+    }
+  },
+  "maintenance": {
+    "sync": {
+      "allMedia": "Alle medier",
+      "resultsFields": {
+        "aborted": "Avbrutt. Sletting ville overskredet sikkerhetsterskelen.",
+        "error": "Feil",
+        "filesChecked": "Filer kontrollert",
+        "orphansFound": "Foreldreløse filer funnet",
+        "orphansDeleted": "Foreldreløse filer slettet",
+        "totals": "Totalt"
+      },
+      "verbose": "Detaljert (Verbose)",
+      "exports": "Eksporterte filer",
+      "alreadyRunning": "En synkroniseringsjobb kjører allerede",
+      "errorLabel": "Feil",
+      "dryRunDisabled": "Filer vil bli slettet",
+      "previews": "Forhåndsvisninger",
+      "desc": "Frigate vil periodisk rydde opp i mediefiler etter en fast plan i samsvar med din konfigurasjon for bevaring. Det er normalt at noen foreldreløse filer oppstår mens Frigate kjører. Bruk denne funksjonen til å fjerne foreldreløse mediefiler fra disk som ikke lenger er referert til i databasen.",
+      "status": {
+        "completed": "Fullført",
+        "queued": "I kø",
+        "running": "Kjører",
+        "notRunning": "Kjører ikke",
+        "failed": "Mislyktes"
+      },
+      "forceDesc": "Gå utenom sikkerhetsterskelen og fullfør synkronisering selv om mer enn 50 % av filene vil bli slettet.",
+      "dryRunEnabled": "Ingen filer vil bli slettet",
+      "jobId": "Jobb-ID",
+      "error": "Kunne ikke starte synkronisering",
+      "title": "Mediesynkronisering",
+      "started": "Mediesynkronisering har startet.",
+      "mediaTypes": "Medietyper",
+      "event_thumbnails": "Miniatyrbilder av sporede objekter",
+      "review_thumbnails": "Miniatyrbilder for inspeksjon",
+      "recordings": "Opptak",
+      "results": "Resultater",
+      "verboseDesc": "Skriv en fullstendig liste over foreldreløse filer til disk for inspeksjon.",
+      "endTime": "Sluttidspunkt",
+      "event_snapshots": "Stillbilder av sporede objekter",
+      "start": "Start synkronisering",
+      "startTime": "Starttidspunkt",
+      "currentStatus": "Status",
+      "statusLabel": "Status",
+      "running": "Synkronisering kjører...",
+      "inProgress": "Synkronisering pågår. Denne siden er deaktivert.",
+      "dryRun": "Testkjøring (Dry Run)",
+      "force": "Tving"
+    },
+    "regionGrid": {
+      "clearConfirmDesc": "Det anbefales ikke å tømme regionrutenettet med mindre du nylig har endret størrelsen på detektormodellen eller har endret kameraets fysiske posisjon og har problemer med objektsporing. Rutenettet vil automatisk bli bygget opp igjen over tid etter hvert som objekter spores. En omstart av Frigate kreves for at endringene skal tre i kraft.",
+      "clearError": "Kunne ikke tømme regionrutenettet",
+      "restartRequired": "Omstart kreves for at endringer i regionrutenettet skal tre i kraft",
+      "title": "Regionrutenett",
+      "clearSuccess": "Regionrutenettet ble tømt",
+      "desc": "Regionrutenettet er en optimalisering som lærer hvor objekter av ulike størrelser vanligvis dukker opp i hvert kameras synsfelt. Frigate bruker disse dataene til å dimensjonere deteksjonsregioner effektivt. Rutenettet bygges automatisk over tid basert på data fra sporede objekter.",
+      "clear": "Tøm regionrutenett",
+      "clearConfirmTitle": "Tøm regionrutenett"
+    },
+    "title": "Vedlikehold"
+  },
+  "onvif": {
+    "profileAuto": "Auto",
+    "profileLoading": "Laster profiler..."
+  },
+  "confirmReset": "Bekreft nullstilling",
+  "resetToDefaultDescription": "Dette vil nullstille alle innstillinger i denne seksjonen til standardverdiene. Denne handlingen kan ikke angres.",
+  "resetToGlobalDescription": "Dette vil nullstille innstillingene i denne seksjonen til de globale standardverdiene. Denne handlingen kan ikke angres.",
+  "unsavedChanges": "Du har ulagrede endringer",
+  "saveAllPreview": {
+    "title": "Endringer som skal lagres",
+    "field": {
+      "label": "Felt"
+    },
+    "scope": {
+      "global": "Global",
+      "camera": "Kamera: {{cameraName}}",
+      "label": "Omfang"
+    },
+    "empty": "Ingen ventende endringer.",
+    "value": {
+      "reset": "Nullstill",
+      "label": "Ny verdi"
+    },
+    "profile": {
+      "label": "Profil"
+    },
+    "triggerLabel": "Se over ventende endringer"
+  },
+  "globalConfig": {
+    "title": "Global konfigurasjon",
+    "toast": {
+      "success": "Globale innstillinger ble lagret",
+      "error": "Kunne ikke lagre globale innstillinger",
+      "validationError": "Validering feilet"
+    },
+    "description": "Konfigurer globale innstillinger som gjelder for alle kameraer med mindre de overstyres."
+  },
+  "toast": {
+    "success": "Innstillinger lagret",
+    "successRestartRequired": "Innstillinger lagret. Start Frigate på nytt for å aktivere endringene.",
+    "applied": "Innstillinger tatt i bruk",
+    "saveAllFailure": "Kunne ikke lagre alle seksjoner.",
+    "error": "Kunne ikke lagre innstillinger",
+    "resetError": "Kunne ikke nullstille innstillinger",
+    "resetSuccess": "Nullstilt til globale standardverdier",
+    "validationError": "Validering feilet: {{message}}",
+    "saveAllPartial_one": "{{successCount}} av {{totalCount}} seksjoner lagret. {{failCount}} feilet.",
+    "saveAllPartial_other": "{{successCount}} av {{totalCount}} seksjoner lagret. {{failCount}} feilet.",
+    "saveAllSuccess_one": "{{count}} seksjon ble lagret.",
+    "saveAllSuccess_other": "{{count}} seksjoner ble lagret."
+  },
+  "cameraConfig": {
+    "toast": {
+      "success": "Kamerainnstillinger ble lagret",
+      "error": "Kunne ikke lagre kamerainnstillinger"
+    },
+    "title": "Kamerakonfigurasjon",
+    "description": "Konfigurer innstillinger for enkeltkameraer. Innstillingene overstyrer globale standardverdier.",
+    "resetToGlobal": "Nullstill til globale verdier",
+    "overriddenBadge": "Overstyrt"
+  },
+  "timestampPosition": {
+    "br": "Nederst til høyre",
+    "bl": "Nederst til venstre",
+    "tr": "Øverst til høyre",
+    "tl": "Øverst til venstre"
   }
 }

@@ -123,7 +123,19 @@
     "export": "Eksporter",
     "deleteNow": "Slett nå",
     "next": "Neste",
-    "continue": "Fortsett"
+    "continue": "Fortsett",
+    "add": "Legg til",
+    "undo": "Angre",
+    "copiedToClipboard": "Kopiert til utklippstavlen",
+    "modified": "Modifisert",
+    "saveAll": "Lagre alt",
+    "savingAll": "Lagrer alt…",
+    "undoAll": "Angre alt",
+    "applying": "Bruker…",
+    "overridden": "Overstyrt",
+    "resetToGlobal": "Tilbakestill til global",
+    "resetToDefault": "Tilbakestill til standard",
+    "retry": "Prøv igjen"
   },
   "menu": {
     "help": "Hjelp",
@@ -226,7 +238,10 @@
       "default": "Standard",
       "highcontrast": "Høy kontrast"
     },
-    "classification": "Klassifisering"
+    "classification": "Klassifisering",
+    "profiles": "Profiler",
+    "chat": "Chat",
+    "actions": "Handlinger"
   },
   "pagination": {
     "next": {
@@ -274,7 +289,8 @@
       "error": {
         "title": "Kunne ikke lagre endringer i konfigurasjonen: {{errorMessage}}",
         "noMessage": "Kunne ikke lagre endringer i konfigurasjonen"
-      }
+      },
+      "success": "Konfigurasjonsendringer lagret."
     }
   },
   "role": {
@@ -306,5 +322,7 @@
     "two": "{{0}} og {{1}}",
     "many": "{{items}}, og {{last}}",
     "separatorWithSpace": ", "
-  }
+  },
+  "validation_errors": "Valideringsfeil",
+  "no_items": "Ingen elementer"
 }

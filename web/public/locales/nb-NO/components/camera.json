@@ -77,11 +77,12 @@
       "showOptions": "Vis alternativer",
       "hideOptions": "Skjul alternativer"
     },
-    "boundingBox": "Avgrensningsboks",
+    "boundingBox": "Markeringsramme",
     "timestamp": "Tidsstempel",
     "zones": "Soner",
     "mask": "Maske",
     "motion": "Bevegelse",
-    "regions": "Regioner"
+    "regions": "Regioner",
+    "paths": "Stier"
   }
 }

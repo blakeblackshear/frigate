@@ -16,8 +16,8 @@
     },
     "downloadingModels": {
       "setup": {
-        "visionModel": "Visjonsmodell",
-        "visionModelFeatureExtractor": "Funksjonsekstraktor for visjonsmodell",
+        "visionModel": "Modell for bildegjenkjenning",
+        "visionModelFeatureExtractor": "Kjennetegnsuttrekker for bildegjenkjenning",
         "textModel": "Tekstmodell",
         "textTokenizer": "Tekst-tokeniserer"
       },
@@ -161,7 +161,8 @@
     "attributes": "Klassifiseringsattributter",
     "title": {
       "label": "Tittel"
-    }
+    },
+    "scoreInfo": "Score-informasjon"
   },
   "itemMenu": {
     "viewInHistory": {
@@ -212,6 +213,13 @@
     "downloadCleanSnapshot": {
       "label": "Last ned rent stillbilde",
       "aria": "Last ned stillbilde uten markeringer"
+    },
+    "debugReplay": {
+      "aria": "Vis dette sporede objektet i reprise for feilsøking",
+      "label": "Reprise for feilsøking"
+    },
+    "more": {
+      "aria": "Mer"
     }
   },
   "searchResult": {
@@ -238,6 +246,9 @@
     "confirmDelete": {
       "title": "Bekreft sletting",
       "desc": "Sletting av dette sporede objektet fjerner stillbildet, alle lagrede vektorrepresentasjoner og tilknyttede oppføringer for sporingsdetaljer. Opptak av dette objektet i Historikk-visningen vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?"
+    },
+    "toast": {
+      "error": "Kunne ikke slette dette sporede objektet: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Fant ingen sporede objekter",
@@ -257,7 +268,7 @@
     "createObjectMask": "Opprett objektmaske",
     "adjustAnnotationSettings": "Juster annoteringsinnstillinger",
     "scrollViewTips": "Klikk for å se de viktige øyeblikkene i dette objektets livssyklus.",
-    "autoTrackingTips": "Posisjonene til avgrensningsboksene vil være unøyaktige for kameraer med automatisk sporing.",
+    "autoTrackingTips": "Posisjonene til markeringsrammer vil være unøyaktige for kameraer med automatisk sporing.",
     "count": "{{first}} av {{second}}",
     "trackedPoint": "Sporet punkt",
     "lifecycleItemDesc": {
@@ -287,9 +298,9 @@
       },
       "offset": {
         "label": "Annoteringsforskyvning",
-        "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er lite sannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil avgrensningsboksen og opptaket ikke stemme perfekt overens. Du kan bruke denne innstillingen til å forskyve annoteringene fremover eller bakover i tid for å tilpasse dem bedre til det innspilte opptaket.",
+        "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er lite sannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil markeringsrammen og opptaket ikke stemme perfekt overens. Du kan bruke denne innstillingen til å forskyve annoteringene fremover eller bakover i tid for å tilpasse dem bedre til det innspilte opptaket.",
         "millisecondsToOffset": "Antall millisekunder deteksjonsannoteringene skal forskyves med. <em>Standard: 0</em>",
-        "tips": "TIPS: Se for deg et hendelsesklipp med en person som går fra venstre mot høyre. Hvis avgrensningsboksen på tidslinjen for hendelsen konsekvent er til venstre for personen, bør verdien reduseres. På samme måte, hvis en person går fra venstre mot høyre og avgrensningsboksen konsekvent er foran personen, bør verdien økes.",
+        "tips": "Senk verdien hvis videoen ligger foran boksene og punktene på stien, og øk den hvis videoen ligger bak. Verdien kan være negativ.",
         "toast": {
           "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen."
         }
