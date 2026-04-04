@@ -23,8 +23,8 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Class Dihapus",
-      "deletedImage": "Image dihapus",
+      "deletedCategory_other": "Class Dihapus",
+      "deletedImage_other": "Image dihapus",
       "deletedModel_other": "Berhasil menghapus {{count}} model",
       "categorizedImage": "Berhasil Mengklasifikasikan Gambar",
       "trainedModel": "Berhasil melatih model.",
