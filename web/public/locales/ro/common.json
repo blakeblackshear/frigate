@@ -187,7 +187,8 @@
     "review": "Revizuire",
     "classification": "Clasificare",
     "chat": "Chat",
-    "actions": "Acțiuni"
+    "actions": "Acțiuni",
+    "profiles": "Profile"
   },
   "button": {
     "cameraAudio": "Sunet cameră",
@@ -236,7 +237,8 @@
     "saveAll": "Salvează toate",
     "savingAll": "Se salvează toate…",
     "undoAll": "Anulează toate",
-    "applying": "Se aplică…"
+    "applying": "Se aplică…",
+    "retry": "Reîncearcă"
   },
   "unit": {
     "speed": {
@@ -291,7 +293,8 @@
       "error": {
         "noMessage": "Nu s-au putut salva modificările de configurație",
         "title": "Salvarea modificărilor de configurație a eșuat: {{errorMessage}}"
-      }
+      },
+      "success": "Modificările de configurare au fost salvate cu succes."
     }
   },
   "accessDenied": {
@@ -316,5 +319,7 @@
   "field": {
     "optional": "Opțional",
     "internalID": "ID-ul Intern pe care Frigate îl folosește în configurație și în baza de date"
-  }
+  },
+  "no_items": "Niciun element",
+  "validation_errors": "Erori de validare"
 }

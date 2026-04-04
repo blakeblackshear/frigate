@@ -111,8 +111,8 @@
         "label": "Detecție obiecte",
         "description": "Setări pentru rolul de detecție folosit pentru a rula recunoașterea obiectelor și trackerele.",
         "enabled": {
-            "label": "Detecție activată",
-            "description": "Activează detecția pentru toate camerele. Trebuie să fie activă pentru ca urmărirea obiectelor să funcționeze."
+            "label": "Activează detecția de obiecte",
+            "description": "Activează sau dezactivează detecția de obiecte pentru toate camerele; poate fi suprascrisă pentru fiecare cameră în parte."
         },
         "height": {
             "label": "Înălțime detect",
@@ -293,7 +293,7 @@
             "label": "Calitate live",
             "description": "Calitatea encodării pentru stream-ul jsmpeg (1 maxim, 31 minim)."
         },
-        "description": "Setări folosite de interfața web pentru a controla rezoluția și calitatea stream-ului live."
+        "description": "Setări pentru a controla rezoluția și calitatea stream live jsmpeg. Acest lucru nu afectează camerele retransmise care folosesc go2rtc pentru vizualizare live."
     },
     "lpr": {
         "label": "Recunoaștere numere înmatriculare",
@@ -413,7 +413,7 @@
         "description": "Setări implicite pentru detecția mișcării, aplicate dacă nu sunt suprascrise per cameră.",
         "skip_motion_threshold": {
             "label": "Ignoră pragul de mișcare",
-            "description": "Dacă se schimbă mai mult de această fracțiune din imagine într-un singur cadru, detectorul nu va returna nicio casetă de mișcare și se va recalibra imediat. Acest lucru poate economisi CPU și reduce alertele false în timpul fulgerelor, furtunilor etc., dar poate rata evenimente reale, cum ar fi o cameră PTZ care urmărește automat un obiect. Compromisul este între a pierde câțiva megaocteți de înregistrări versus a revizui câteva clipuri scurte. Interval 0.0 - 1.0."
+            "description": "Dacă este setat la o valoare între 0.0 și 1.0, și mai mult decât această fracție din imagine se modifică într-un singur cadru, detectorul nu va returna casete de mișcare și se va recalibra imediat. Acest lucru poate economisi CPU și reduce rezultatele fals pozitive în timpul fulgerelor, furtunilor etc., dar poate rata evenimente reale, cum ar fi o cameră PTZ care urmărește automat un obiect. Compromisul este între a pierde câțiva megabytes de înregistrări versus a revizui câteva clipuri scurte. Lasă nesetat (None) pentru a dezactiva această funcție."
         }
     },
     "objects": {
@@ -638,7 +638,7 @@
         },
         "detections": {
             "label": "Configurație detecții",
-            "description": "Setări pentru evenimentele de detecție (non-alertă).",
+            "description": "Setări pentru care obiecte urmărite generează detecții (fără alertă) și cum sunt păstrate detecțiile.",
             "enabled": {
                 "label": "Activare detecții",
                 "description": "Activează sau dezactivează evenimentele de detecție."
@@ -742,8 +742,8 @@
             "description": "Declanșează o reindexare completă a obiectelor istorice în baza de date de înglobări."
         },
         "model": {
-            "label": "Model căutare semantică",
-            "description": "Modelul de înglobări folosit (ex: 'jinav1')."
+            "label": "Model de căutare semantică sau nume furnizor GenAI",
+            "description": "Modelul de înglobări de folosit pentru căutarea semantică (de exemplu 'jinav1'), sau numele unui furnizor GenAI cu rolul de înglobări."
         },
         "model_size": {
             "label": "Mărime model",
@@ -757,7 +757,7 @@
     "snapshots": {
         "label": "Snapshot-uri",
         "enabled": {
-            "label": "Snapshot-uri activate",
+            "label": "Activează snapshot-urile",
             "description": "Activează sau dezactivează salvarea de snapshot-uri."
         },
         "clean_copy": {
@@ -766,15 +766,15 @@
         },
         "timestamp": {
             "label": "Overlay timestamp",
-            "description": "Pune data și ora pe snapshot-urile salvate."
+            "description": "Suprapune data și ora pe snapshot-urile din API."
         },
         "bounding_box": {
             "label": "Overlay chenar",
-            "description": "Desenează chenarele obiectelor pe snapshot-uri."
+            "description": "Desenează chenarele obiectelor urmărite pe snapshot-urile din API."
         },
         "crop": {
             "label": "Decupează snapshot-ul",
-            "description": "Decupează snapshot-ul pe mărimea obiectului detectat."
+            "description": "Decupează snapshot-urile din API pe chenarul obiectului detectat."
         },
         "required_zones": {
             "label": "Zone obligatorii",
@@ -782,11 +782,11 @@
         },
         "height": {
             "label": "Înălțime snapshot",
-            "description": "Înălțimea la care se redimensionează snapshot-ul; lasă gol pentru dimensiunea originală."
+            "description": "Înălțimea (în pixeli) la care să se redimensioneze snapshot-urile din API; lasă gol pentru a păstra dimensiunea originală."
         },
         "retain": {
             "label": "Retenție snapshot-uri",
-            "description": "Setări pentru păstrarea snapshot-urilor.",
+            "description": "Setări de reținere pentru snapshot-uri, incluzând zilele implicite și suprascrierile per obiect.",
             "default": {
                 "label": "Retenție implicită",
                 "description": "Numărul implicit de zile pentru păstrare."
@@ -801,10 +801,10 @@
             }
         },
         "quality": {
-            "label": "Calitate JPEG",
-            "description": "Calitatea encodării JPEG pentru snapshot-uri (0-100)."
+            "label": "Calitatea snapshot-ului",
+            "description": "Calitatea encodării pentru snapshot-urile salvate (0-100)."
         },
-        "description": "Setări pentru snapshot-urile JPEG ale obiectelor urmărite."
+        "description": "Setări pentru snapshot-urile obiectelor urmărite, generate prin API, pentru toate camerele; pot fi suprascrise pentru fiecare cameră în parte."
     },
     "timestamp_style": {
         "label": "Stil timestamp",
@@ -988,6 +988,10 @@
         "ignore_time_mismatch": {
             "label": "Ignoră decalaj timp",
             "description": "Ignoră diferențele de sincronizare a timpului între cameră și serverul Frigate pentru comunicarea ONVIF."
+        },
+        "profile": {
+            "label": "Profil ONVIF",
+            "description": "Profil media ONVIF specific de utilizat pentru control PTZ, potrivit după token sau nume. Dacă nu este setat, se selectează automat primul profil cu configurație PTZ validă."
         }
     },
     "version": {
@@ -1202,7 +1206,7 @@
         "label": "Hardware detector",
         "description": "Configurare pentru detectoarele de obiecte (CPU, GPU, backend-uri ONNX) și orice setări de model specifice detectorului.",
         "type": {
-            "label": "Tip detector",
+            "label": "Tip",
             "description": "Tipul de detector de folosit pentru detecția obiectelor (de exemplu, 'cpu', 'edgetpu', 'openvino')."
         },
         "cpu": {
@@ -1987,13 +1991,116 @@
                 "label": "Linger socket ZMQ (ms)",
                 "description": "Perioada de tip 'linger' a socket-ului în milisecunde."
             }
+        },
+        "axengine": {
+            "label": "NPU AXEngine",
+            "description": "Detector NPU AXERA AX650N/AX8850N care rulează fișiere .axmodel compilate prin intermediul runtime-ului AXEngine.",
+            "type": {
+                "label": "Tip"
+            },
+            "model": {
+                "label": "Configurație model specifică detectorului",
+                "description": "Opțiuni de configurare a modelului specifice detectorului (cale, dimensiune intrare etc.).",
+                "path": {
+                    "label": "Calea către modelul personalizat de detecție a obiectelor",
+                    "description": "Calea către un fișier de model de detecție personalizat (sau plus://<model_id> pentru modelele Frigate+)."
+                },
+                "labelmap_path": {
+                    "label": "Harta etichetelor pentru detectorul de obiecte personalizat",
+                    "description": "Calea către un fișier de hartă a etichetelor care asociază clasele numerice cu etichete de tip text pentru detector."
+                },
+                "width": {
+                    "label": "Lățimea de intrare a modelului de detecție a obiectelor",
+                    "description": "Lățimea tensorului de intrare al modelului în pixeli."
+                },
+                "height": {
+                    "label": "Înălțimea tensorului de intrare al modelului în pixeli",
+                    "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+                },
+                "labelmap": {
+                    "label": "Personalizarea hărții etichetelor",
+                    "description": "Suprascrieri sau reasocieri de intrări pentru a le fuziona în harta de etichete standard."
+                },
+                "attributes_map": {
+                    "label": "Harta etichetelor de obiecte către etichetele atributelor acestora",
+                    "description": "Harta de la etichetele obiectelor la etichetele atributelor utilizate pentru a atașa metadate (de exemplu „car” -> [„license_plate”])."
+                },
+                "input_tensor": {
+                    "label": "Forma tensorului de intrare al modelului",
+                    "description": "Formatul tensorului așteptat de model: „nhwc” sau „nchw”."
+                },
+                "input_pixel_format": {
+                    "label": "Format culoare pixeli pentru intrarea modelului",
+                    "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+                },
+                "input_dtype": {
+                    "label": "Tip D intrare model",
+                    "description": "Tipul de date al tensorului de intrare al modelului (de exemplu 'float32')."
+                },
+                "model_type": {
+                    "label": "Tip model detecție obiecte",
+                    "description": "Tipul arhitecturii modelului detector (ssd, yolox, yolonas) folosit de unii detectori pentru optimizare."
+                }
+            },
+            "model_path": {
+                "label": "Cale model specifică detectorului",
+                "description": "Calea fișierului către binarul modelului detector, dacă este cerută de detectorul ales."
+            }
+        },
+        "model": {
+            "label": "Configurația modelului specifică detectorului",
+            "description": "Opțiuni de configurare a modelului specifice detectorului (cale, dimensiune intrare etc.).",
+            "path": {
+                "label": "Cale model detector de obiecte personalizat",
+                "description": "Calea către un fișier al modelului personalizat de detecție (sau plus://<model_id> pentru modelele Frigate+)."
+            },
+            "labelmap_path": {
+                "label": "Harta de etichete pentru detectorul personalizat de obiecte",
+                "description": "Calea către un fișier labelmap care asociază clasele numerice cu etichete text pentru detector."
+            },
+            "width": {
+                "label": "Lățimea de intrare pentru modelul de detecție a obiectelor",
+                "description": "Lățimea tensorului de intrare al modelului în pixeli."
+            },
+            "height": {
+                "label": "Înălțimea de intrare pentru modelul de detecție a obiectelor",
+                "description": "Înălțimea tensorului de intrare al modelului în pixeli."
+            },
+            "labelmap": {
+                "label": "Personalizare labelmap",
+                "description": "Suprascrie sau remapază intrările pentru a fi combinate în labelmap-ul standard."
+            },
+            "attributes_map": {
+                "label": "Harta etichetelor obiectelor la etichetele atributelor lor",
+                "description": "Maparea de la etichetele obiectelor la etichetele atributelor folosite pentru a atașa metadate (de exemplu 'car' -> ['license_plate'])."
+            },
+            "input_tensor": {
+                "label": "Forma tensorului de intrare al modelului",
+                "description": "Formatul tensorului așteptat de model: 'nhwc' sau 'nchw'."
+            },
+            "input_pixel_format": {
+                "label": "Formatul de culoare al pixelilor de intrare pentru model",
+                "description": "Spațiul de culoare al pixelilor așteptat de model: 'rgb', 'bgr' sau 'yuv'."
+            },
+            "input_dtype": {
+                "label": "Tipul de date (D Type) de intrare pentru model",
+                "description": "Tipul de date pentru tensorul de intrare al modelului (de exemplu 'float32')."
+            },
+            "model_type": {
+                "label": "Tipul modelului de detecție a obiectelor",
+                "description": "Tipul arhitecturii modelului detectorului (ssd, yolox, yolonas) folosit de unii detectori pentru optimizare."
+            }
+        },
+        "model_path": {
+            "label": "Calea modelului specifică detectorului",
+            "description": "Calea fișierului către binarul modelului detectorului, dacă e cerută de detectorul ales."
         }
     },
     "model": {
         "label": "Model detecție",
         "description": "Setări pentru configurarea unui model personalizat de detecție și a formei intrării acestuia.",
         "path": {
-            "label": "Cale model personalizat detecție obiecte",
+            "label": "Cale model detector de obiecte personalizat",
             "description": "Calea către un fișier de model personalizat (sau plus://<model_id> pentru modelele Frigate+)."
         },
         "labelmap_path": {
@@ -2034,7 +2141,7 @@
         }
     },
     "genai": {
-        "label": "Configurație GenAI (furnizori numiți)",
+        "label": "Configurație AI generativ",
         "description": "Setări pentru furnizorii de AI generativ folosiți pentru descrieri de obiecte și rezumate.",
         "api_key": {
             "label": "Cheie API",
@@ -2188,5 +2295,17 @@
             "label": "Arată în interfață",
             "description": "Comută dacă această cameră este vizibilă peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a config-ului pentru a vedea din nou camera în interfață."
         }
+    },
+    "profiles": {
+        "label": "Profiluri",
+        "description": "Definiții de profiluri numite cu nume prietenoase. Profilurile camerelor trebuie să facă referință la numele definite aici.",
+        "friendly_name": {
+            "label": "Nume prietenos",
+            "description": "Numele afișat pentru acest profil în interfața utilizatorului (UI)."
+        }
+    },
+    "active_profile": {
+        "label": "Profil activ",
+        "description": "Numele profilului activ în prezent. Doar la rulare (runtime), nu este salvat în YAML."
     }
 }

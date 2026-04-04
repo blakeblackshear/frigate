@@ -79,8 +79,8 @@
         "label": "Detecție obiecte",
         "description": "Setări pentru rolul de detecție folosit pentru a rula recunoașterea obiectelor și trackerele.",
         "enabled": {
-            "label": "Detecție activată",
-            "description": "Activează sau dezactivează detecția obiectelor pentru această cameră. Detecția trebuie să fie activă pentru ca urmărirea obiectelor să funcționeze."
+            "label": "Activează detecția de obiecte",
+            "description": "Activează sau dezactivează detecția obiectelor pentru această cameră."
         },
         "height": {
             "label": "Înălțime detect",
@@ -303,7 +303,7 @@
         },
         "skip_motion_threshold": {
             "label": "Ignoră pragul de mișcare",
-            "description": "Dacă se schimbă mai mult de această fracțiune din imagine într-un singur cadru, detectorul nu va returna nicio casetă de mișcare și se va recalibra imediat. Acest lucru poate economisi CPU și reduce alertele false în timpul fulgerelor, furtunilor etc., dar poate rata evenimente reale, cum ar fi o cameră PTZ care urmărește automat un obiect. Compromisul este între a pierde câțiva megaocteți de înregistrări versus a revizui câteva clipuri scurte. Interval 0.0 - 1.0."
+            "description": "Dacă este setat la o valoare între 0.0 și 1.0, și mai mult decât această fracție din imagine se modifică într-un singur cadru, detectorul nu va returna casete de mișcare și se va recalibra imediat. Acest lucru poate economisi CPU și reduce rezultatele fals pozitive în timpul fulgerelor, furtunilor etc., dar poate rata evenimente reale, cum ar fi o cameră PTZ care urmărește automat un obiect. Compromisul este între a pierde câțiva megabytes de înregistrări versus a revizui câteva clipuri scurte. Lasă nesetat (None) pentru a dezactiva această funcție."
         }
     },
     "objects": {
@@ -529,7 +529,7 @@
         },
         "detections": {
             "label": "Configurație detecții",
-            "description": "Setări pentru evenimentele de detecție (non-alertă).",
+            "description": "Setări pentru care obiecte urmărite generează detecții (fără alertă) și cum sunt păstrate detecțiile.",
             "enabled": {
                 "label": "Activare detecții",
                 "description": "Activează sau dezactivează evenimentele de detecție pentru această cameră."
@@ -626,9 +626,9 @@
     },
     "snapshots": {
         "label": "Snapshot-uri",
-        "description": "Setări pentru snapshot-urile JPEG salvate ale obiectelor monitorizate de această cameră.",
+        "description": "Setări pentru snapshot-uri generate prin API ale obiectelor urmărite pentru această cameră.",
         "enabled": {
-            "label": "Snapshot-uri activate",
+            "label": "Activează snapshot-urile",
             "description": "Activează sau dezactivează salvarea de snapshots pentru această cameră."
         },
         "clean_copy": {
@@ -637,15 +637,15 @@
         },
         "timestamp": {
             "label": "Overlay timestamp",
-            "description": "Pune data și ora pe snapshot-urile salvate."
+            "description": "Suprapune data și ora pe snapshot-urile din API."
         },
         "bounding_box": {
             "label": "Overlay chenar",
-            "description": "Desenează chenarele obiectelor pe snapshot-uri."
+            "description": "Desenează chenarele obiectelor urmărite pe snapshot-urile din API."
         },
         "crop": {
             "label": "Decupează snapshot-ul",
-            "description": "Decupează snapshot-ul pe mărimea obiectului detectat."
+            "description": "Decupează snapshot-urile din API pe chenarul obiectului detectat."
         },
         "required_zones": {
             "label": "Zone obligatorii",
@@ -653,11 +653,11 @@
         },
         "height": {
             "label": "Înălțime snapshot",
-            "description": "Înălțimea la care se redimensionează snapshot-ul; lasă gol pentru dimensiunea originală."
+            "description": "Înălțimea (în pixeli) la care să se redimensioneze snapshot-urile din API; lasă gol pentru a păstra dimensiunea originală."
         },
         "retain": {
             "label": "Retenție snapshot-uri",
-            "description": "Setări pentru păstrarea snapshot-urilor.",
+            "description": "Setări de reținere pentru snapshot-uri, incluzând zilele implicite și suprascrierile per obiect.",
             "default": {
                 "label": "Retenție implicită",
                 "description": "Numărul implicit de zile pentru păstrare."
@@ -672,8 +672,8 @@
             }
         },
         "quality": {
-            "label": "Calitate JPEG",
-            "description": "Calitatea encodării JPEG pentru snapshot-uri (0-100)."
+            "label": "Calitatea snapshot-ului",
+            "description": "Calitatea encodării pentru snapshot-urile salvate (0-100)."
         }
     },
     "timestamp_style": {
@@ -838,6 +838,10 @@
         "ignore_time_mismatch": {
             "label": "Ignoră decalaj timp",
             "description": "Ignoră diferențele de sincronizare a timpului între cameră și serverul Frigate pentru comunicarea ONVIF."
+        },
+        "profile": {
+            "label": "Profil ONVIF",
+            "description": "Profil media ONVIF specific de utilizat pentru control PTZ, potrivit după token sau nume. Dacă nu este setat, se selectează automat primul profil cu configurație PTZ validă."
         }
     },
     "type": {
@@ -937,5 +941,9 @@
     "enabled_in_config": {
         "label": "Stare inițială cameră",
         "description": "Păstrează starea originală a camerei."
+    },
+    "profiles": {
+        "label": "Profiluri",
+        "description": "Profile de configurare denumite cu suprascrieri parțiale care pot fi activate la rulare."
     }
 }

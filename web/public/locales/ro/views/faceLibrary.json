@@ -76,7 +76,8 @@
       "deletedFace_few": "{{count}} fețe au fost șterse cu succes.",
       "deletedFace_other": "{{count}} de fețe au fost șterse cu succes.",
       "uploadedImage": "Imagine încărcată cu succes.",
-      "addFaceLibrary": "{{name}} a fost adăugat(ă) cu succes la biblioteca de fețe!"
+      "addFaceLibrary": "{{name}} a fost adăugat(ă) cu succes la biblioteca de fețe!",
+      "reclassifiedFace": "Față reclasificată cu succes."
     },
     "error": {
       "addFaceLibraryFailed": "Setarea numelui feței a eșuat: {{errorMessage}}",
@@ -85,7 +86,8 @@
       "renameFaceFailed": "Redenumirea feței a eșuat: {{errorMessage}}",
       "trainFailed": "Antrenarea a eșuat: {{errorMessage}}",
       "uploadingImageFailed": "Încărcarea imaginii a eșuat: {{errorMessage}}",
-      "updateFaceScoreFailed": "Nu s-a putut actualiza scorul feței: {{errorMessage}}"
+      "updateFaceScoreFailed": "Nu s-a putut actualiza scorul feței: {{errorMessage}}",
+      "reclassifyFailed": "Nu s-a putut reclasifica fața: {{errorMessage}}"
     }
   },
   "imageEntry": {
@@ -100,5 +102,7 @@
   "trainFace": "Antrenează fața",
   "readTheDocs": "Citește documentația",
   "nofaces": "Nu sunt fețe disponibile",
-  "pixels": "{{area}}px"
+  "pixels": "{{area}}px",
+  "reclassifyFaceAs": "Reclasifică fața ca:",
+  "reclassifyFace": "Reclasifică fața"
 }
