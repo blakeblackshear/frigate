@@ -28,8 +28,8 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "已刪除類別",
-      "deletedImage": "已刪除影像",
+      "deletedCategory_other": "已刪除類別",
+      "deletedImage_other": "已刪除影像",
       "deletedModel_other": "已成功刪除 {{count}} 個模型",
       "categorizedImage": "影像分類成功",
       "trainedModel": "模型訓練成功。",
