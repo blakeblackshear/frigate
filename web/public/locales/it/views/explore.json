@@ -113,7 +113,8 @@
     "attributes": "Attributi di classificazione",
     "title": {
       "label": "Titolo"
-    }
+    },
+    "scoreInfo": "Informazioni sul punteggio"
   },
   "objectLifecycle": {
     "annotationSettings": {
@@ -221,12 +222,22 @@
     "downloadCleanSnapshot": {
       "label": "Scarica istantanea pulita",
       "aria": "Scarica istantanea pulita"
+    },
+    "debugReplay": {
+      "label": "Riproduzione di correzione",
+      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione di correzione"
+    },
+    "more": {
+      "aria": "Altri"
     }
   },
   "dialog": {
     "confirmDelete": {
       "desc": "L'eliminazione di questo oggetto tracciato rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate ai dettagli di tracciamento. Il filmato registrato di questo oggetto tracciato nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi davvero procedere?",
       "title": "Conferma eliminazione"
+    },
+    "toast": {
+      "error": "Errore durante l'eliminazione di questo oggetto tracciato: {{errorMessage}}"
     }
   },
   "trackedObjectDetails": "Dettagli dell'oggetto tracciato",

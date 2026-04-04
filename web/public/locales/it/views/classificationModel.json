@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Classe eliminata",
-      "deletedImage": "Immagini eliminate",
+      "deletedCategory_one": "{{count}} classe eliminata",
+      "deletedCategory_many": "{{count}} classi eliminate",
+      "deletedCategory_other": "{{count}} classi eliminate",
+      "deletedImage_one": "{{count}} immagine eliminata",
+      "deletedImage_many": "{{count}} immagini eliminate",
+      "deletedImage_other": "{{count}} immagini eliminate",
       "categorizedImage": "Immagine classificata con successo",
       "trainedModel": "Modello addestrato con successo.",
       "trainingModel": "Avviato con successo l'addestramento del modello.",
@@ -21,7 +25,8 @@
       "deletedModel_many": "Eliminati con successo {{count}} modelli",
       "deletedModel_other": "Eliminati con successo {{count}} modelli",
       "updatedModel": "Configurazione del modello aggiornata correttamente",
-      "renamedCategory": "Classe rinominata correttamente in {{name}}"
+      "renamedCategory": "Classe rinominata correttamente in {{name}}",
+      "reclassifiedImage": "Immagine riclassificata con successo"
     },
     "error": {
       "deleteImageFailed": "Impossibile eliminare: {{errorMessage}}",
@@ -31,7 +36,8 @@
       "deleteModelFailed": "Impossibile eliminare il modello: {{errorMessage}}",
       "updateModelFailed": "Impossibile aggiornare il modello: {{errorMessage}}",
       "trainingFailedToStart": "Impossibile avviare l'addestramento del modello: {{errorMessage}}",
-      "renameCategoryFailed": "Impossibile rinominare la classe: {{errorMessage}}"
+      "renameCategoryFailed": "Impossibile rinominare la classe: {{errorMessage}}",
+      "reclassifyFailed": "Impossibile riclassificare l'immagine: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -156,8 +162,13 @@
       "allImagesRequired_other": "Classifica tutte le immagini. Rimangono {{count}} immagini.",
       "modelCreated": "Modello creato correttamente. Utilizza la vista Classificazioni recenti per aggiungere immagini per gli stati mancanti, quindi addestrare il modello.",
       "missingStatesWarning": {
-        "title": "Esempi di stati mancanti",
-        "description": "Per ottenere risultati ottimali, si consiglia di selezionare esempi per tutti gli stati. È possibile continuare senza selezionare tutti gli stati, ma il modello non verrà addestrato finché tutti gli stati non avranno immagini. Dopo aver continuato, utilizza la vista Classificazioni recenti per classificare le immagini per gli stati mancanti, quindi addestra il modello."
+        "title": "Esempi di classi mancanti",
+        "description": "Non tutte le classi hanno esempi. Prova a generare nuovi esempi per trovare la classe mancante oppure continua e usa la vista Classificazioni recenti per aggiungere immagini in seguito."
+      },
+      "refreshExamples": "Genera nuovi esempi",
+      "refreshConfirm": {
+        "title": "Generare nuovi esempi?",
+        "description": "Questo genererà una nuova serie di immagini e cancellerà tutte le selezioni, comprese le classi precedenti. Dovrai riselezionare gli esempi per tutte le classi."
       }
     }
   },
@@ -189,5 +200,7 @@
     "noNewImages": "Nessuna nuova immagine da addestrare. Classifica prima più immagini nel database.",
     "noChanges": "Nessuna modifica al database dall'ultimo addestramento."
   },
-  "none": "Nessuno"
+  "none": "Nessuno",
+  "reclassifyImageAs": "Riclassifica immagine come:",
+  "reclassifyImage": "Riclassifica immagine"
 }
