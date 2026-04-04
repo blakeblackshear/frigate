@@ -1,1 +1,41 @@
-{}
+{
+    "safe_mode": {
+        "label": "セーフモード",
+        "description": "有効にすると、トラブルシューティングのため機能を制限したセーフモードでFrigateを起動します。"
+    },
+    "environment_vars": {
+        "label": "環境変数"
+    },
+    "audio": {
+        "label": "音声イベント",
+        "enabled": {
+            "label": "音声検知を有効化"
+        },
+        "min_volume": {
+            "label": "最小ボリューム"
+        },
+        "filters": {
+            "label": "音声フィルタ"
+        }
+    },
+    "logger": {
+        "default": {
+            "label": "ログレベル"
+        },
+        "logs": {
+            "label": "プロセス毎のログレベル"
+        }
+    },
+    "auth": {
+        "label": "認証",
+        "enabled": {
+            "label": "認証を有効化"
+        },
+        "reset_admin_password": {
+            "label": "adminパスワードをリセット"
+        }
+    },
+    "version": {
+        "label": "現在の設定バージョン"
+    }
+}

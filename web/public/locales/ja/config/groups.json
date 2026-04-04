@@ -1,1 +1,48 @@
-{}
+{
+    "audio": {
+        "global": {
+            "sensitivity": "グローバル感度",
+            "detection": "グローバル検出"
+        },
+        "cameras": {
+            "detection": "検知",
+            "sensitivity": "感度"
+        }
+    },
+    "timestamp_style": {
+        "cameras": {
+            "appearance": "外観"
+        }
+    },
+    "motion": {
+        "cameras": {
+            "sensitivity": "感度",
+            "algorithm": "アルゴリズム"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "グローバル解像度",
+            "tracking": "グローバルトラッキング"
+        },
+        "cameras": {
+            "resolution": "解像度",
+            "tracking": "トラッキング"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "グローバルトラッキング",
+            "filtering": "グローバルフィルタ"
+        },
+        "cameras": {
+            "tracking": "トラッキング",
+            "filtering": "フィルタ"
+        }
+    },
+    "record": {
+        "global": {
+            "events": "グローバルイベント"
+        }
+    }
+}
