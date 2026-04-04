@@ -14,7 +14,9 @@
       "description": "Elementele de revizuire pot fi create doar pentru o cameră atunci când înregistrările sunt activate pentru acea cameră."
     }
   },
-  "timeline": "Cronologie",
+  "timeline": {
+    "label": "Cronologie"
+  },
   "timeline.aria": "Selectează cronologia",
   "events": {
     "aria": "Selectează evenimente",

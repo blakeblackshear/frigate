@@ -116,5 +116,10 @@
   "an_post": "An Post",
   "postnl": "PostNL",
   "nzpost": "NZPost",
-  "postnord": "PostNord"
+  "postnord": "PostNord",
+  "canada_post": "Canada Post",
+  "royal_mail": "Royal Mail",
+  "school_bus": "Autobus Scolar",
+  "skunk": "Sconcs",
+  "kangaroo": "Cangur"
 }

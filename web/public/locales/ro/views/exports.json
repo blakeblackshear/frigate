@@ -2,7 +2,9 @@
   "search": "Căutare",
   "documentTitle": "Exporturi - Frigate",
   "noExports": "Nu s-au găsit exporturi",
-  "deleteExport": "Șterge exportul",
+  "deleteExport": {
+    "label": "Șterge export"
+  },
   "deleteExport.desc": "Sigur vrei să ștergi {{exportName}}?",
   "editExport": {
     "title": "Redenumire export",
