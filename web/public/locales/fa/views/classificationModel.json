@@ -11,8 +11,10 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "کلاس حذف شده",
-      "deletedImage": "عکس های حذف شده",
+      "deletedCategory_one": "کلاس حذف شده",
+      "deletedCategory_other": "",
+      "deletedImage_one": "عکس های حذف شده",
+      "deletedImage_other": "",
       "categorizedImage": "تصویر طبقه بندی شده",
       "trainedModel": "مدل آموزش دیده شده.",
       "trainingModel": "آموزش دادن مدل با موفقیت شروع شد.",
