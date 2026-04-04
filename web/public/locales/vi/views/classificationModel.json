@@ -12,8 +12,8 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Lớp Đã Bị Xoá",
-      "deletedImage": "Hình ảnh đã bị xóa",
+      "deletedCategory_other": "Lớp Đã Bị Xoá",
+      "deletedImage_other": "Hình ảnh đã bị xóa",
       "deletedModel_other": "Đã xóa thành công {{count}} mô hình",
       "categorizedImage": "Phân Loại Hình Ảnh Thành Công",
       "trainedModel": "Đã huấn luyện mô hình thành công.",
