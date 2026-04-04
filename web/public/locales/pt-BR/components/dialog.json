@@ -65,6 +65,10 @@
     "fromTimeline": {
       "saveExport": "Salvar Exportação",
       "previewExport": "Pré-Visualizar Exportação"
+    },
+    "case": {
+      "label": "Caso",
+      "placeholder": "Selecione um caso"
     }
   },
   "streaming": {

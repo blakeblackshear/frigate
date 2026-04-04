@@ -39,7 +39,19 @@
       "label": "Mensagens",
       "pause": "Pausar",
       "resume": "Resumir",
-      "clear": "Limpar"
+      "clear": "Limpar",
+      "filter": {
+        "all": "Todos os tópicos",
+        "topics": "Tópicos",
+        "events": "Eventos",
+        "reviews": "Avaliações",
+        "classification": "Classificação",
+        "face_recognition": "Reconhecimento facial",
+        "lpr": "LPR",
+        "camera_activity": "Atividade da câmera",
+        "system": "Sistema",
+        "camera": "Camera"
+      }
     }
   },
   "general": {

@@ -6,7 +6,7 @@
     "subLabelScore": "Pontuação do Sub-Rótulo",
     "scoreInfo": "A pontuação do sub-rótulo é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
     "faceDesc": "Detalhes do objeto rastreado que gerou este rosto",
-    "timestamp": "Carimbo de data e hora"
+    "timestamp": "Estampa de Tempo"
   },
   "selectItem": "Selecione {{item}}",
   "imageEntry": {
@@ -60,7 +60,7 @@
     "placeholder": "Informe um nome para esta coleção",
     "addFace": "Adicione uma nova coleção à Biblioteca Facial subindo a sua primeira imagem.",
     "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens.",
-    "nameCannotContainHash": "Nome não pode conter #."
+    "nameCannotContainHash": "O nome não pode conter #."
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {

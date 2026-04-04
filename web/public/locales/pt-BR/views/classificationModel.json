@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Classe Apagada",
-      "deletedImage": "Imagens Apagadas",
+      "deletedCategory_one": "Classe Apagada",
+      "deletedCategory_many": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Imagens Apagadas",
+      "deletedImage_many": "",
+      "deletedImage_other": "",
       "categorizedImage": "Imagem Classificada com Sucesso",
       "trainedModel": "Modelo treinado com sucesso.",
       "trainingModel": "Treinamento do modelo iniciado com sucesso.",
@@ -21,7 +25,8 @@
       "deletedModel_many": "{{count}} modelos excluídos com sucesso",
       "deletedModel_other": "{{count}} modelos excluídos com sucesso",
       "updatedModel": "Configuração do modelo atualizada com sucesso",
-      "renamedCategory": "Classe renomeada para {{name}} com sucesso"
+      "renamedCategory": "Classe renomeada para {{name}} com sucesso",
+      "reclassifiedImage": "Imagem reclassificada com sucesso"
     },
     "error": {
       "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
