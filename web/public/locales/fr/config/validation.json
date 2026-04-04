@@ -1,5 +1,5 @@
 {
-    "minimum": "Doit être au minimum {{limit}}",
+    "minimum": "Doit être au moins de {{limit}}",
     "maximum": "Ne doit pas dépasser {{limit}}",
     "exclusiveMinimum": "Doit être supérieur à {{limit}}",
     "exclusiveMaximum": "Doit être inférieur à {{limit}}",
@@ -7,5 +7,26 @@
     "maxLength": "Doit contenir au maximum {{limit}} caractère(s)",
     "minItems": "Doit contenir au moins {{limit}} élément(s)",
     "maxItems": "Doit contenir au maximum {{limit}} élément(s)",
-    "pattern": "Format incorrect"
+    "pattern": "Format incorrect",
+    "required": "Ce champ est requis",
+    "type": "Type de valeur incorrect",
+    "enum": "Doit être une des valeurs autorisées",
+    "const": "La valeur ne correspond pas à la constante attendu",
+    "uniqueItems": "Tous les éléments doivent être uniques",
+    "format": "Format invalide",
+    "additionalProperties": "Une propriété inconnue est interdite",
+    "oneOf": "Doit correspondre exactement à un des schémas autorisés",
+    "anyOf": "Doit correspondre à au moins un des schémas autorisés",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "L'entête de rôle est nécessaire quand la cartographie des rôles est configurée."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Chaque rôle ne peut être assigné qu'à un flux d'entrée.",
+            "detectRequired": "Au moins un flux d'entrée doit être assigné au rôle 'detect' (détection).",
+            "hwaccelDetectOnly": "Seulement le flux d'entrée avec le rôle de détection peut définir des arguments pour l'accélération matérielle."
+        }
+    }
 }

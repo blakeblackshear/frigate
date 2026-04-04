@@ -1,7 +1,7 @@
 {
     "audio": {
         "global": {
-            "detection": "Détection globale",
+            "detection": "Détection générale",
             "sensitivity": "Sensibilité globale"
         },
         "cameras": {
@@ -23,7 +23,51 @@
             "algorithm": "Algorithme global"
         },
         "cameras": {
-            "sensitivity": "Sensibilité"
+            "sensitivity": "Sensibilité",
+            "algorithm": "Algorithme"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Affichage Global"
+        },
+        "cameras": {
+            "display": "Affichage"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Résolution globale",
+            "tracking": "Suivi global"
+        },
+        "cameras": {
+            "resolution": "Résolution",
+            "tracking": "Suivi"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Suivi Global",
+            "filtering": "Filtrage Global"
+        },
+        "cameras": {
+            "tracking": "Suivi",
+            "filtering": "Filtrage"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Rétention Globale",
+            "events": "Événements globaux"
+        },
+        "cameras": {
+            "retention": "Rétention",
+            "events": "Événements"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Arguments FFmpeg spécifiques aux caméras"
         }
     }
 }

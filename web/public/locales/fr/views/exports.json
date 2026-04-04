@@ -2,7 +2,9 @@
   "documentTitle": "Exports - Frigate",
   "search": "Rechercher",
   "noExports": "Aucune exportation trouvée",
-  "deleteExport": "Supprimer l'exportation",
+  "deleteExport": {
+    "label": "Supprimer l'exportation"
+  },
   "deleteExport.desc": "Êtes-vous sûr de vouloir supprimer {{exportName}} ?",
   "editExport": {
     "title": "Renommer l'exportation",

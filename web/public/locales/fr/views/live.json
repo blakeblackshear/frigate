@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Direct - Frigate",
+  "documentTitle": {
+    "default": "Direct - Frigate"
+  },
   "lowBandwidthMode": "Mode bande passante faible",
   "documentTitle.withCamera": "{{camera}} - Direct - Frigate",
   "twoWayTalk": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "Cliquez dans le cadre pour centrer la caméra",
         "enable": "Activer le clic pour déplacer",
-        "disable": "Désactiver le clic pour déplacer"
+        "disable": "Désactiver le clic pour déplacer",
+        "enableWithZoom": "Activer le clic pour déplacer / faire glisser vers le zoom"
       },
       "left": {
         "label": "Déplacer la caméra PTZ vers la gauche"
