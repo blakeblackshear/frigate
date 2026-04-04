@@ -167,7 +167,8 @@
     "resetToDefault": "重置为默认",
     "saveAll": "保存全部",
     "savingAll": "保存全部中…",
-    "undoAll": "撤销全部"
+    "undoAll": "撤销全部",
+    "retry": "重试"
   },
   "menu": {
     "system": "系统",
@@ -271,7 +272,8 @@
     "restart": "重启 Frigate",
     "classification": "目标分类",
     "actions": "操作",
-    "chat": "聊天"
+    "chat": "聊天",
+    "profiles": "配置模板"
   },
   "toast": {
     "copyUrlToClipboard": "已复制链接到剪贴板。",
@@ -280,7 +282,8 @@
       "error": {
         "title": "保存配置信息失败： {{errorMessage}}",
         "noMessage": "保存配置信息失败"
-      }
+      },
+      "success": "成功保存配置文件。"
     }
   },
   "role": {
@@ -312,5 +315,7 @@
   "field": {
     "optional": "可选",
     "internalID": "Frigate 在配置与数据库中使用的内部 ID"
-  }
+  },
+  "no_items": "没有项目",
+  "validation_errors": "验证错误"
 }
