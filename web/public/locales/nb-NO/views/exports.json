@@ -2,7 +2,9 @@
   "documentTitle": "Eksport - Frigate",
   "search": "Søk",
   "noExports": "Ingen eksporter funnet",
-  "deleteExport": "Slett eksport",
+  "deleteExport": {
+    "label": "Slett eksport"
+  },
   "deleteExport.desc": "Er du sikker på at du vil slette {{exportName}}?",
   "editExport": {
     "title": "Gi nytt navn til eksport",
@@ -11,13 +13,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Kunne ikke gi nytt navn til eksport: {{errorMessage}}"
+      "renameExportFailed": "Kunne ikke gi nytt navn til eksport: {{errorMessage}}",
+      "assignCaseFailed": "Kunne ikke oppdatere sakstilknytning: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Del eksport",
     "downloadVideo": "Last ned video",
     "editName": "Rediger navn",
-    "deleteExport": "Slett eksport"
+    "deleteExport": "Slett eksport",
+    "assignToCase": "Legg til i sak"
+  },
+  "caseDialog": {
+    "nameLabel": "Saksnavn",
+    "descriptionLabel": "Beskrivelse",
+    "newCaseOption": "Opprett en ny sak",
+    "selectLabel": "Sak",
+    "description": "Velg en eksisterende sak eller opprett en ny.",
+    "title": "Legg til sak"
+  },
+  "headings": {
+    "cases": "Saker",
+    "uncategorizedExports": "Eksporter uten sak"
   }
 }

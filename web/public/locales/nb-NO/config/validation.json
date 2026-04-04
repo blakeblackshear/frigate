@@ -1,1 +1,32 @@
-{}
+{
+    "minimum": "Må være minst {{limit}}",
+    "maximum": "Må være maksimalt {{limit}}",
+    "exclusiveMinimum": "Må være større enn {{limit}}",
+    "exclusiveMaximum": "Må være mindre enn {{limit}}",
+    "minItems": "Må ha minst {{limit}} elementer",
+    "maxItems": "Må ha maksimalt {{limit}} elementer",
+    "pattern": "Ugyldig format",
+    "required": "Dette feltet er obligatorisk",
+    "type": "Ugyldig verditype",
+    "enum": "Må være en av de tillatte verdiene",
+    "const": "Verdien samsvarer ikke med forventet konstant",
+    "uniqueItems": "Alle elementer må være unike",
+    "format": "Ugyldig format",
+    "additionalProperties": "Ukjent egenskap er ikke tillatt",
+    "oneOf": "Må samsvare med nøyaktig ett av de tillatte skjemaene",
+    "anyOf": "Må samsvare med minst ett av de tillatte skjemaene",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Rollehode (header) er påkrevd når rolletilordninger er konfigurert."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Hver rolle kan bare tildeles én inngangsstrøm.",
+            "detectRequired": "Minst èn inngangsstrøm må være tildelt rollen 'deteksjon'.",
+            "hwaccelDetectOnly": "Bare inngangsstrømmen med rollen 'deteksjon' kan definere argumenter for maskinvareakselerasjon."
+        }
+    },
+    "minLength": "Må være minst {{limit}} tegn",
+    "maxLength": "Må være maks {{limit}} tegn"
+}

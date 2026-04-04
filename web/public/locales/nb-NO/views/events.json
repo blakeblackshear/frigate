@@ -9,7 +9,9 @@
       "description": "Inspeksjonselementer kan kun opprettes for et kamera når opptak er aktivert for det kameraet."
     }
   },
-  "timeline": "Tidslinje",
+  "timeline": {
+    "label": "Tidslinje"
+  },
   "events": {
     "label": "Hendelser",
     "aria": "Velg hendelser",
@@ -63,5 +65,28 @@
   "normalActivity": "Normal",
   "needsReview": "Trenger inspeksjon",
   "securityConcern": "Sikkerhetsrisiko",
-  "select_all": "Alle"
+  "select_all": "Alle",
+  "motionSearch": {
+    "menuItem": "Bevegelsessøk",
+    "openMenu": "Kameravalg"
+  },
+  "motionPreviews": {
+    "menuItem": "Vis forhåndsvisning av bevegelse",
+    "title": "Bevegelsesvisning: {{camera}}",
+    "mobileSettingsTitle": "Innstillinger for forhåndsvisning",
+    "mobileSettingsDesc": "Juster avspillingshastighet og dimming, og velg en dato for å inspisere klipp med kun bevegelse.",
+    "dim": "Dimming",
+    "dimAria": "Juster dimmestyrke",
+    "dimDesc": "Øk dimming for å gjøre bevegelsesområder tydeligere.",
+    "speed": "Hastighet",
+    "speedAria": "Velg avspillingshastighet",
+    "speedDesc": "Velg hvor raskt klippene skal spilles av.",
+    "back": "Tilbake",
+    "empty": "Ingen forhåndsvisninger tilgjengelig",
+    "noPreview": "Forhåndsvisning utilgjengelig",
+    "seekAria": "Flytt {{camera}}-avspilleren til {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Velg områder for å kun vise klipp med bevegelse i disse sonene.",
+    "filterClear": "Tøm"
+  }
 }
