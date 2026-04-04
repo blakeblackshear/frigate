@@ -12,5 +12,21 @@
     "type": "Tipo de valor inválido",
     "enum": "Deve ser um dos valores permitidos",
     "const": "Valor não condiz com a constante esperada",
-    "uniqueItems": "Todos os itens devem ser únicos"
+    "uniqueItems": "Todos os itens devem ser únicos",
+    "format": "Formato inválido",
+    "additionalProperties": "Propriedade desconhecida não é permitida",
+    "oneOf": "Deve corresponder exatamente a um dos esquemas permitidos",
+    "anyOf": "Deve corresponder a pelo menos um dos esquemas permitidos",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "O cabeçalho de função é obrigatório quando os mapeamentos de função são configurados."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Cada função só pode ser atribuída a um fluxo de entrada.",
+            "detectRequired": "Pelo menos um fluxo de entrada deve ter a função 'detectar' atribuída.",
+            "hwaccelDetectOnly": "Somente o fluxo de entrada com a função de detecção pode definir argumentos de aceleração de hardware."
+        }
+    }
 }

@@ -7,14 +7,15 @@
     "masksAndZones": "Editor de Máscara e Zona - Frigate",
     "motionTuner": "Ajuste de Movimento - Frigate",
     "object": "Debug - Frigate",
-    "general": "Configurações de perfil - Frigate",
+    "general": "Configurações da interface - Frigate",
     "frigatePlus": "Frigate+ Configurações- Frigate",
     "notifications": "Configurações de notificação - Frigate",
     "cameraManagement": "Gerenciar Câmeras - Frigate",
     "cameraReview": "Configurações de Revisão de Câmera - Frigate",
     "globalConfig": "Configuração Global - Frigate",
     "cameraConfig": "Configuração da Câmera - Frigate",
-    "maintenance": "Manutenção - Frigate"
+    "maintenance": "Manutenção - Frigate",
+    "profiles": "Perfis - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -30,7 +31,10 @@
     "roles": "Papéis",
     "cameraManagement": "Gerenciamento",
     "cameraReview": "Revisar",
-    "general": "Geral"
+    "general": "Geral",
+    "globalConfig": "Configuração global",
+    "system": "Sistema",
+    "integrations": "Integrações"
   },
   "dialog": {
     "unsavedChanges": {
@@ -913,5 +917,11 @@
         "fetchingSnapshot": "Buscando a captura de imagem da câmera..."
       }
     }
+  },
+  "button": {
+    "overriddenGlobal": "Substituir (Global)",
+    "overriddenGlobalTooltip": "Esta câmera substitui as configurações globais desta seção",
+    "overriddenBaseConfig": "Substituído (Configuração base)",
+    "overriddenBaseConfigTooltip": "O perfil {{profile}} substitui as configurações desta seção"
   }
 }

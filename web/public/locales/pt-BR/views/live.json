@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Ao Vivo - Frigate",
+  "documentTitle": {
+    "default": "Ao vivo - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
   "lowBandwidthMode": "Modo de baixa largura de banda",
   "twoWayTalk": {

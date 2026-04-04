@@ -19,11 +19,32 @@
             "description": "Habilitar ou desabilitar o evento de detecção de áudio para esta câmera."
         },
         "max_not_heard": {
-            "label": "Tempo limite final"
+            "label": "Tempo limite final",
+            "description": "Quantidade de segundos sem o tipo de áudio configurado antes do término do evento de áudio."
         },
         "min_volume": {
-            "label": "Volume mínimo"
+            "label": "Volume mínimo",
+            "description": "Limiar mínimo de volume RMS necessário para executar a detecção de áudio; valores mais baixos aumentam a sensibilidade (por exemplo, 200 para volume alto, 500 para volume médio, 1000 para volume baixo)."
+        },
+        "listen": {
+            "label": "Tipos de escuta",
+            "description": "Lista de tipos de eventos de áudio a serem detectados (por exemplo: latido, alarme de incêndio, grito, fala, berro)."
+        },
+        "filters": {
+            "label": "Filtros de áudio",
+            "description": "Configurações de filtro por tipo de áudio, como limites de confiança, usadas para reduzir falsos positivos."
+        },
+        "enabled_in_config": {
+            "label": "Estado de áudio original",
+            "description": "Indica se a detecção de áudio foi originalmente ativada no arquivo de configuração estática."
+        },
+        "num_threads": {
+            "label": "Threads de detecção",
+            "description": "Número de threads a serem usadas para o processamento de detecção de áudio."
         }
     },
-    "label": "Configuração da Câmera"
+    "label": "Configuração da Câmera",
+    "audio_transcription": {
+        "label": "Transcrição de áudio"
+    }
 }
