@@ -1,1 +1,31 @@
-{}
+{
+    "label": "Configurazione telecamera",
+    "name": {
+        "label": "Nome telecamera",
+        "description": "Il nome della telecamera è necessario"
+    },
+    "friendly_name": {
+        "description": "Nome amichevole della telecamera utilizzato nell'interfaccia utente di Frigate",
+        "label": "Nome amichevole"
+    },
+    "enabled": {
+        "label": "Abilitato",
+        "description": "Abilitato"
+    },
+    "audio": {
+        "label": "Eventi audio",
+        "description": "Impostazioni per il rilevamento di eventi audio per questa telecamera.",
+        "enabled": {
+            "label": "Abilita il rilevamento audio",
+            "description": "Abilita o disabilita il rilevamento degli eventi audio per questa telecamera."
+        },
+        "min_volume": {
+            "label": "Volume minimo"
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "Percorso FFmpeg"
+        }
+    }
+}

@@ -139,7 +139,9 @@
     "resetToDefault": "Ripristina impostazioni predefinite",
     "saveAll": "Salva tutto",
     "savingAll": "Salvataggio di tutto…",
-    "undoAll": "Annulla tutto"
+    "undoAll": "Annulla tutto",
+    "applying": "Applica…",
+    "retry": "Riprova"
   },
   "unit": {
     "speed": {
@@ -271,7 +273,9 @@
     "withSystem": "Sistema",
     "faceLibrary": "Raccolta volti",
     "classification": "Classificazione",
-    "chat": "Chat"
+    "chat": "Chat",
+    "profiles": "Profili",
+    "actions": "Azioni"
   },
   "pagination": {
     "next": {
@@ -308,7 +312,8 @@
         "title": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}",
         "noMessage": "Impossibile salvare le modifiche alla configurazione"
       },
-      "title": "Salva"
+      "title": "Salva",
+      "success": "Modifiche alla configurazione salvate correttamente."
     }
   },
   "selectItem": "Seleziona {{item}}",
@@ -324,5 +329,7 @@
   "field": {
     "optional": "Opzionale",
     "internalID": "L'ID interno che Frigate utilizza nella configurazione e nel database"
-  }
+  },
+  "no_items": "Nessun elemento",
+  "validation_errors": "Errori di convalida"
 }

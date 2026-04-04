@@ -82,6 +82,7 @@
     "zones": "Zone",
     "mask": "Maschera",
     "motion": "Movimento",
-    "regions": "Regioni"
+    "regions": "Regioni",
+    "paths": "Percorsi"
   }
 }
