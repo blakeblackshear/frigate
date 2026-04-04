@@ -13,7 +13,8 @@
       "clickMove": {
         "disable": "Bewegen per Klick deaktivieren",
         "enable": "Bewegen per Klick aktivieren",
-        "label": "Zum Zentrieren der Kamera ins Bild klicken"
+        "label": "Zum Zentrieren der Kamera ins Bild klicken",
+        "enableWithZoom": "Ermögliche Bewegung durch auswählen / Vergrößern durch ziehen"
       },
       "up": {
         "label": "PTZ-Kamera nach oben bewegen"
@@ -51,7 +52,9 @@
       }
     }
   },
-  "documentTitle": "Live - Frigate",
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
   "muteCameras": {
     "disable": "Stumm aller Kameras aufheben",

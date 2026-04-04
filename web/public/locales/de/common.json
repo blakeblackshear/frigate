@@ -134,7 +134,8 @@
     "resetToDefault": "Auf Werkseinstellungen zurücksetzten",
     "saveAll": "Alle speichern",
     "savingAll": "Alle werden gespeichert…",
-    "undoAll": "Alle rückgängig"
+    "undoAll": "Alle rückgängig",
+    "retry": "Wiederholen"
   },
   "label": {
     "back": "Zurück",
@@ -248,7 +249,8 @@
     "export": "Exportieren",
     "classification": "Klassifizierung",
     "actions": "Aktion",
-    "chat": "Chat"
+    "chat": "Chat",
+    "profiles": "Profile"
   },
   "unit": {
     "speed": {
@@ -275,7 +277,8 @@
         "title": "Speichern der Konfigurationsänderungen gescheitert: {{errorMessage}}",
         "noMessage": "Speichern der Konfigurationsänderungen gescheitert"
       },
-      "title": "Speichern"
+      "title": "Speichern",
+      "success": "Die Konfigurationsänderungen wurden erfolgreich gespeichert."
     }
   },
   "role": {
@@ -319,5 +322,7 @@
     "two": "{{0}} und {{1}}",
     "many": "{{items}}, und {{last}}",
     "separatorWithSpace": ", "
-  }
+  },
+  "no_items": "Keine Artikel",
+  "validation_errors": "Validierungsfehler"
 }

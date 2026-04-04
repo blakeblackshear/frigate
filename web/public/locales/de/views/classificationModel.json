@@ -23,15 +23,18 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Klasse gelöscht",
-      "deletedImage": "Bilder gelöscht",
+      "deletedCategory_one": "Klasse gelöscht",
+      "deletedCategory_other": "Klassen {{count}} gelöscht",
+      "deletedImage_one": "{{count}} Bild gelöscht",
+      "deletedImage_other": "{{count}} Bilder gelöscht",
       "deletedModel_one": "{{count}} Modell erfolgreich gelöscht",
       "deletedModel_other": "{{count}} Modelle erfolgreich gelöscht",
       "categorizedImage": "Erfolgreich klassifizierte Bilder",
       "trainedModel": "Modell erfolgreich trainiert.",
       "trainingModel": "Modelltraining erfolgreich gestartet.",
       "updatedModel": "Modellkonfiguration erfolgreich aktualisiert",
-      "renamedCategory": "Klasse erfolgreich in {{name}} umbenannt"
+      "renamedCategory": "Klasse erfolgreich in {{name}} umbenannt",
+      "reclassifiedImage": "Erfolgreich neu klassifiziertes Bild"
     },
     "error": {
       "deleteImageFailed": "Löschen fehlgeschlagen: {{errorMessage}}",
@@ -41,7 +44,8 @@
       "updateModelFailed": "Aktualisierung des Modells fehlgeschlagen: {{errorMessage}}",
       "renameCategoryFailed": "Umbenennung der Klasse fehlgeschlagen: {{errorMessage}}",
       "categorizeFailed": "Bildkategorisierung fehlgeschlagen: {{errorMessage}}",
-      "trainingFailed": "Modelltraining fehlgeschlagen. Details sind in den Frigate-Protokollen zu finden."
+      "trainingFailed": "Modelltraining fehlgeschlagen. Details sind in den Frigate-Protokollen zu finden.",
+      "reclassifyFailed": "Die Neuklassifizierung des Bildes ist fehlgeschlagen: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -179,10 +183,17 @@
       "generateSuccess": "Erfolgreich generierte Beispielbilder",
       "modelCreated": "Modell erfolgreich erstellt. Verwenden Sie die Ansicht „Aktuelle Klassifizierungen“, um Bilder für fehlende Zustände hinzuzufügen und trainieren Sie dann das Modell erneut.",
       "missingStatesWarning": {
-        "title": "Beispiele für fehlende Zustände",
-        "description": "Es wird empfohlen für alle Zustände Beispiele auszuwählen. Das Modell wird erst trainiert, wenn für alle Zustände Bilder vorhanden sind. Fahren Sie fort und verwenden Sie die Ansicht „Aktuelle Klassifizierungen“, um Bilder für die fehlenden Zustände zu klassifizieren. Trainieren Sie anschließend das Modell."
+        "title": "Beispiele für fehlende Klassen",
+        "description": "Nicht alle Klassen enthalten Beispiele. Versuchen Sie, neue Beispiele zu generieren, um die fehlende Klasse zu finden, oder fahren Sie fort und fügen Sie Bilder später über die Ansicht „Letzte Klassifizierungen“ hinzu."
+      },
+      "refreshExamples": "Neue Beispiele erstellen",
+      "refreshConfirm": {
+        "title": "Neue Beispiele erstellen?",
+        "description": "Dadurch wird eine neue Reihe von Bildern generiert und alle Auswahlen, einschließlich aller bisherigen Klassen, werden gelöscht. Sie müssen für alle Klassen erneut Beispiele auswählen."
       }
     }
   },
-  "none": "Keiner"
+  "none": "Keiner",
+  "reclassifyImageAs": "Bild neu klassifizieren als:",
+  "reclassifyImage": "Bild neu klassifizieren"
 }

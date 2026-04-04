@@ -67,7 +67,8 @@
       "addFaceLibrary": "{{name}} wurde erfolgreich in die Gesichtsbibliothek aufgenommen!",
       "trainedFace": "Gesicht erfolgreich trainiert.",
       "updatedFaceScore": "Gesichtsbewertung erfolgreich auf {{name}} ({{score}}) aktualisiert.",
-      "renamedFace": "Gesicht erfolgreich in {{name}} umbenannt"
+      "renamedFace": "Gesicht erfolgreich in {{name}} umbenannt",
+      "reclassifiedFace": "Gesicht erfolgreich neu klassifiziert."
     },
     "error": {
       "deleteFaceFailed": "Das Löschen ist fehlgeschlagen: {{errorMessage}}",
@@ -76,7 +77,8 @@
       "trainFailed": "Ausbildung fehlgeschlagen: {{errorMessage}}",
       "updateFaceScoreFailed": "Aktualisierung der Gesichtsbewertung fehlgeschlagen: {{errorMessage}}",
       "deleteNameFailed": "Name kann nicht gelöscht werden: {{errorMessage}}",
-      "renameFaceFailed": "Gesicht konnte nicht umbenannt werden: {{errorMessage}}"
+      "renameFaceFailed": "Gesicht konnte nicht umbenannt werden: {{errorMessage}}",
+      "reclassifyFailed": "Die Gesichtsbewertung ist fehlgeschlagen: {{errorMessage}}"
     }
   },
   "steps": {
@@ -98,5 +100,7 @@
     "desc_other": "Bist du sicher, dass du {{count}} Gesichter löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "nofaces": "Keine Gesichter verfügbar",
-  "pixels": "{{area}}px"
+  "pixels": "{{area}}px",
+  "reclassifyFaceAs": "Gesicht neu klassifizieren als:",
+  "reclassifyFace": "Gesicht neu klassifizieren"
 }

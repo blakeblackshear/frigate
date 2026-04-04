@@ -82,6 +82,7 @@
     "mask": "Maske",
     "motion": "Bewegung",
     "regions": "Regionen",
-    "boundingBox": "Begrenzungsrechteck"
+    "boundingBox": "Begrenzungsrechteck",
+    "paths": "Pfad"
   }
 }

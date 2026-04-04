@@ -10,7 +10,8 @@
     "audio": {
         "label": "Audioereignisse",
         "enabled": {
-            "label": "Aktivieren der Audioerkennung"
+            "label": "Aktivieren der Audioerkennung",
+            "description": "Aktivieren oder deaktivieren Sie die Erkennung von Audioereignissen für alle Kameras; diese Einstellung kann für jede Kamera individuell überschrieben werden."
         },
         "min_volume": {
             "label": "Mindestlautstärke",
@@ -35,7 +36,8 @@
         "num_threads": {
             "label": "Erkennungsthreads",
             "description": "Anzahl der Threads, die für die Audioerkennungsverarbeitung verwendet werden sollen."
-        }
+        },
+        "description": "Einstellungen für die audiobasierte Ereigniserkennung für alle Kameras; können für jede Kamera individuell überschrieben werden."
     },
     "environment_vars": {
         "label": "Umgebungsvariablen",
@@ -109,7 +111,20 @@
             "description": "Aktivieren Sie die Live-Transkription für Audio, sobald es empfangen wird."
         },
         "enabled": {
-            "label": "Audio-Transkription aktivieren"
+            "label": "Audio-Transkription aktivieren",
+            "description": "Automatische Audio-Transkription für alle Kameras aktivieren oder deaktivieren; kann für jede Kamera einzeln überschrieben werden."
+        },
+        "language": {
+            "label": "Transkriptsprache",
+            "description": "Für die Transkription/Übersetzung verwendeter Sprachcode (z. B. „en“ für Englisch). Eine Liste der unterstützten Sprachcodes finden Sie unter https://whisper-api.com/docs/languages/."
+        },
+        "device": {
+            "label": "Transkriptionsgerät",
+            "description": "Geräteschlüssel (CPU/GPU), auf dem das Transkriptionsmodell ausgeführt werden soll. Derzeit werden für die Transkription nur NVIDIA-CUDA-GPUs unterstützt."
+        },
+        "model_size": {
+            "label": "Modellgröße",
+            "description": "Modellgröße für die Transkription von Audioereignissen im Offline-Modus."
         }
     },
     "birdseye": {
@@ -126,6 +141,42 @@
         "order": {
             "label": "Position",
             "description": "Numerische Position, die Reihenfolge der Kamera im Birdseye-Layout steuert."
+        },
+        "restream": {
+            "label": "Restream RTSP",
+            "description": "Leiten Sie den Birdseye-Ausgang als RTSP-Feed weiter; wenn Sie diese Option aktivieren, läuft Birdseye ununterbrochen weiter."
+        },
+        "width": {
+            "label": "Breite",
+            "description": "Ausgabebreite (Pixel) des zusammengesetzten Birdseye-Bildes."
+        },
+        "height": {
+            "label": "Höhe",
+            "description": "Ausgabehöhe (in Pixeln) des zusammengesetzten Birdseye-Bildes."
+        },
+        "quality": {
+            "label": "Codierungsqualität",
+            "description": "Codierungsqualität für den Birdseye-MPEG-1-Feed (1 = höchste Qualität, 31 = niedrigste Qualität)."
+        },
+        "inactivity_threshold": {
+            "label": "Schwellenwert für Inaktivität",
+            "description": "Sekunden der Inaktivität, nach denen eine Kamera nicht mehr in Birdseye angezeigt wird."
+        },
+        "layout": {
+            "label": "Layout",
+            "description": "Layoutoptionen für die Birdseye-Komposition.",
+            "scaling_factor": {
+                "label": "Skalierungsfaktor",
+                "description": "Vom Layout-Rechner verwendeter Skalierungsfaktor (Bereich 1,0 bis 5,0)."
+            },
+            "max_cameras": {
+                "label": "Max. Anzahl Kameras",
+                "description": "Maximale Anzahl der Kameras, die gleichzeitig in Birdseye angezeigt werden können; es werden die neuesten Kameras angezeigt."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "FPS im Leerlauf",
+            "description": "Bilder pro Sekunde, um das zuletzt erstellte Birdseye-Bild im Leerlauf erneut zu senden; auf 0 setzen, um die Funktion zu deaktivieren."
         }
     },
     "database": {
@@ -140,7 +191,8 @@
         "label": "Objekterkennung",
         "description": "Einstellungen für die Erkennungs-/Detektionsrolle, die zum Ausführen der Objekterkennung und zum Initialisieren von Trackern verwendet wird.",
         "enabled": {
-            "label": "Erkennung aktiviert"
+            "label": "Objekterkennung aktiviert",
+            "description": "Objekterkennung für alle Kameras aktivieren oder deaktivieren; kann für jede Kamera einzeln überschrieben werden."
         },
         "height": {
             "label": "Höhe erkennen",
@@ -258,11 +310,45 @@
     "face_recognition": {
         "label": "Gesichtserkennung",
         "enabled": {
-            "label": "Gesichtserkennung aktivieren"
+            "label": "Gesichtserkennung aktivieren",
+            "description": "Gesichtserkennung für alle Kameras aktivieren oder deaktivieren; kann für jede Kamera einzeln überschrieben werden."
         },
         "min_area": {
             "label": "Mindestfläche der Stirnseite",
             "description": "Mindestfläche (Pixel) eines erkannten Gesichtsrahmens, die für einen Erkennungsversuch erforderlich ist."
+        },
+        "description": "Einstellungen für die Gesichtserkennung und -identifizierung für alle Kameras; können für jede Kamera individuell angepasst werden.",
+        "model_size": {
+            "label": "Modellgröße",
+            "description": "Zu verwendende Modellgröße für Gesichts-Embeddings (klein/groß); bei größeren Modellen ist möglicherweise eine GPU erforderlich."
+        },
+        "unknown_score": {
+            "label": "Unbekannter Schwellenwert",
+            "description": "Abstandsschwelle, unterhalb derer ein Gesicht als potenzielle Übereinstimmung angesehen wird (höher = strenger)."
+        },
+        "detection_threshold": {
+            "label": "Erkennungsschwelle",
+            "description": "Mindestvertrauensgrad, der erforderlich ist, damit eine Gesichtserkennung als gültig angesehen wird."
+        },
+        "recognition_threshold": {
+            "label": "Erkennungsschwelle",
+            "description": "Schwellenwert für den Abstand bei der Gesichts-Einbettung, ab dem zwei Gesichter als übereinstimmend gelten."
+        },
+        "min_faces": {
+            "label": "Mindestens Gesichter",
+            "description": "Mindestanzahl an Gesichtserkennungen, die erforderlich sind, bevor einer Person ein erkanntes Unterlabel zugewiesen wird."
+        },
+        "save_attempts": {
+            "label": "Speicherungen",
+            "description": "Anzahl der Gesichtserkennungsversuche, die für die Benutzeroberfläche zur aktuellen Erkennung gespeichert werden sollen."
+        },
+        "blur_confidence_filter": {
+            "label": "Weichzeichnungsfilter",
+            "description": "Passen Sie die Konfidenzwerte anhand der Bildunschärfe an, um Fehlalarme bei Gesichtern von schlechter Qualität zu reduzieren."
+        },
+        "device": {
+            "label": "Gerät",
+            "description": "Dies ist eine Übersteuerung, um ein bestimmtes Gerät anzusprechen. Weitere Informationen finden Sie unter https://onnxruntime.ai/docs/execution-providers/"
         }
     },
     "notifications": {
@@ -426,7 +512,8 @@
         "quality": {
             "label": "Live Qualität",
             "description": "Kodierungsqualität für den jsmpeg-Stream (1 = höchst, 31 = niedrigst)."
-        }
+        },
+        "description": "Einstellungen zur Steuerung der Auflösung und Qualität des jsmpeg-Livestreams. Dies hat keine Auswirkungen auf weitergeleitete Kameras, die go2rtc für die Live-Ansicht verwenden."
     },
     "telemetry": {
         "label": "Telemetrie",
@@ -464,7 +551,8 @@
         "label": "Kennzeichenerkennung",
         "description": "Einstellungen für die Kennzeichenerkennung, einschließlich Erkennungsschwellen, Formatierung und bekannte Kennzeichen.",
         "enabled": {
-            "label": "LPR aktivieren"
+            "label": "LPR aktivieren",
+            "description": "Die Kennzeichenerkennung für alle Kameras aktivieren oder deaktivieren; die Einstellung kann für jede Kamera individuell überschrieben werden."
         },
         "expire_time": {
             "label": "Sekunden bis zum Ablauf",
@@ -477,12 +565,59 @@
         "enhancement": {
             "label": "Verbesserungsgrad",
             "description": "Verstärkungsstufe (0-10) zur Anwendung auf Plattenaufnahmen vor der OCR; höhere Werte führen nicht immer zu besseren Ergebnissen, Stufen über 5 funktionieren möglicherweise nur bei Nachtaufnahmen und sollten mit Vorsicht verwendet werden."
+        },
+        "model_size": {
+            "label": "Modellgröße",
+            "description": "Für die Texterkennung verwendete Modellgröße. Die meisten Benutzer sollten „klein“ wählen."
+        },
+        "detection_threshold": {
+            "label": "Erkennungsschwelle",
+            "description": "Schwellenwert für die Erkennungssicherheit, ab dem die OCR-Erkennung für ein verdächtiges Kennzeichen gestartet wird."
+        },
+        "recognition_threshold": {
+            "label": "Erkennungsschwelle",
+            "description": "Schwellwert für die Erkennungssicherheit, der erforderlich ist, damit der erkannte Text des Kennzeichens als Unterbezeichnung hinzugefügt wird."
+        },
+        "min_plate_length": {
+            "label": "Mindestplattenlänge",
+            "description": "Mindestanzahl an Zeichen, die ein erkanntes Kennzeichen enthalten muss, um als gültig zu gelten."
+        },
+        "format": {
+            "label": "Regulärer Ausdruck für das Plattenformat",
+            "description": "Optionaler regulärer Ausdruck zur Überprüfung der erkannten Kennzeichenfolgen auf Übereinstimmung mit einem erwarteten Format."
+        },
+        "match_distance": {
+            "label": "Entfernung",
+            "description": "Anzahl der zulässigen Zeichenabweichungen beim Vergleich erkannter Kennzeichen mit bekannten Kennzeichen."
+        },
+        "known_plates": {
+            "label": "Bekannte Schilder",
+            "description": "Liste der Kennzeichen oder regulären Ausdrücke, die besonders überwacht oder gemeldet werden sollen."
+        },
+        "debug_save_plates": {
+            "label": "Debug-Platten speichern",
+            "description": "Speichern Sie Ausschnitte aus den Plattenbildern zur Fehlerbehebung bei der LPR-Leistung."
+        },
+        "device": {
+            "label": "Gerät",
+            "description": "Dies ist eine Übersteuerung, um ein bestimmtes Gerät anzusprechen. Weitere Informationen finden Sie unter https://onnxruntime.ai/docs/execution-providers/"
+        },
+        "replace_rules": {
+            "label": "Ersatzregeln",
+            "description": "Reguläre Ausdrücke, die zur Normalisierung der erkannten Kennzeichen vor dem Abgleich verwendet werden.",
+            "pattern": {
+                "label": "Regex-Muster"
+            },
+            "replacement": {
+                "label": "Ersetzungs String"
+            }
         }
     },
     "motion": {
         "label": "Bewegungserkennung",
         "enabled": {
-            "label": "Bewegungserkennung aktivieren"
+            "label": "Bewegungserkennung aktivieren",
+            "description": "Bewegungserkennung für alle Kameras aktivieren oder deaktivieren; kann für jede Kamera einzeln überschrieben werden."
         },
         "threshold": {
             "label": "Bewegungsschwelle",
@@ -494,7 +629,7 @@
         },
         "skip_motion_threshold": {
             "label": "Schwellenwert für Bewegungsüberspringen",
-            "description": "Wenn sich mehr als dieser Anteil des Bildes in einem einzelnen Frame ändert, gibt der Detektor keine Bewegungsfelder zurück und kalibriert sich sofort neu. Dies kann CPU-Leistung sparen und Fehlalarme bei Blitzschlag, Gewittern usw. reduzieren, aber auch echte Ereignisse übersehen, wie z. B. eine PTZ-Kamera, die ein Objekt automatisch verfolgt. Der Kompromiss besteht darin, entweder einige Megabyte an Aufzeichnungen zu verlieren oder ein paar kurze Clips zu überprüfen. Bereich 0,0 bis 1,0."
+            "description": "Wenn sich mehr als dieser Anteil des Bildes in einem einzelnen Frame ändert, gibt der Detektor keine Bewegungsfelder zurück und kalibriert sich sofort neu. Dies kann CPU-Leistung sparen und Fehlalarme bei Blitzschlag, Gewittern usw. reduzieren, aber auch echte Ereignisse übersehen, wie z. B. eine PTZ-Kamera, die ein Objekt automatisch verfolgt. Der Kompromiss besteht darin, entweder einige Megabyte an Aufzeichnungen zu verlieren oder ein paar kurze Clips zu überprüfen. Leer lassen um diese Funktion zu deaktivieren."
         },
         "improve_contrast": {
             "label": "Kontrast verbessern",
@@ -530,7 +665,8 @@
         },
         "raw_mask": {
             "label": "Maskierung"
-        }
+        },
+        "description": "Die Standard-Einstellungen für die Bewegungserkennung gelten für alle Kameras, sofern sie nicht für einzelne Kameras überschrieben werden."
     },
     "tls": {
         "label": "TLS",
@@ -568,7 +704,7 @@
         "label": "Detektor-Hardware",
         "description": "Konfiguration für Objektdetektoren (CPU, GPU, ONNX-Backends) und alle detektorspezifischen Modelleinstellungen.",
         "type": {
-            "label": "Detektortyp",
+            "label": "Type",
             "description": "Art des für die Objekterkennung zu verwendenden Detektors (z. B. „cpu“, „edgetpu“, „openvino“)."
         },
         "cpu": {
@@ -690,7 +826,7 @@
             },
             "api_timeout": {
                 "label": "DeepStack-API-Zeitlimit (in Sekunden)",
-                "description": "Maximum time allowed for a DeepStack API request."
+                "description": "Maximal zulässige Zeit für eine DeepStack-API-Anfrage."
             },
             "api_key": {
                 "label": "DeepStack-API-Schlüssel (falls erforderlich)",
@@ -887,6 +1023,12 @@
                 "input_dtype": {
                     "label": "Modell-Eingangs-D-Typ"
                 }
+            },
+            "label": "RKNN",
+            "description": "RKNN-Detektor für Rockchip-NPUs; führt kompilierte RKNN-Modelle auf Rockchip-Hardware aus.",
+            "num_cores": {
+                "label": "Anzahl der zu verwendenden NPU-Kerne.",
+                "description": "Die Anzahl der zu verwendenden NPU-Kerne (0 für automatische Einstellung)."
             }
         },
         "memryx": {
@@ -930,6 +1072,110 @@
                     "label": "Standard-Pixel-Farbformat",
                     "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
                 }
+            },
+            "device": {
+                "label": "Geräte Pfad",
+                "description": "Das für die MemryX-Inferenz zu verwendende Gerät (z. B. „PCIe“)."
+            }
+        },
+        "model": {
+            "label": "Detektorspezifische Modellkonfiguration",
+            "description": "Detektorspezifische Optionen zur Modellkonfiguration (Pfad, Eingabegröße usw.). Detektorspezifische Modellkonfiguration.",
+            "path": {
+                "label": "Pfad zum benutzerdefinierten Objekterkennungsmodell",
+                "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+            },
+            "labelmap_path": {
+                "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+                "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+            },
+            "width": {
+                "label": "Eingabebreite des Objekterkennungsmodells",
+                "description": "Breite des Modell-Eingabetensors in Pixeln."
+            },
+            "height": {
+                "label": "Eingabehöhe für das Objekterkennungsmodell",
+                "description": "Höhe des Modell-Eingabetensors in Pixeln."
+            },
+            "labelmap": {
+                "label": "Anpassung der Labelmap",
+                "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+            },
+            "attributes_map": {
+                "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+                "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+            },
+            "input_tensor": {
+                "label": "Form des Modell-Eingabetensors",
+                "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+            },
+            "input_pixel_format": {
+                "label": "Standard-Pixel-Farbformat",
+                "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+            },
+            "input_dtype": {
+                "label": "Modell-Eingangs-D-Typ",
+                "description": "Datentyp des Modell-Eingabetensors (z. B. „float32“)."
+            },
+            "model_type": {
+                "label": "Typ des Objekterkennungsmodells",
+                "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+            }
+        },
+        "model_path": {
+            "label": "Detektorspezifischer Modellpfad",
+            "description": "Dateipfad zur Binärdatei des Detektormodells, falls dies für den ausgewählten Detektor erforderlich ist."
+        },
+        "axengine": {
+            "label": "AXEngine NPU",
+            "description": "AXERA AX650N/AX8850N NPU-Detektor, der kompilierte .axmodel-Dateien über die AXEngine-Laufzeitumgebung ausführt."
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "ONNX-Detektor zum Ausführen von ONNX-Modellen; nutzt verfügbare Beschleunigungs-Backends (CUDA/ROCm/OpenVINO), sofern vorhanden.",
+            "device": {
+                "label": "Gerätetyp",
+                "description": "Das für die ONNX-Inferenz zu verwendende Gerät (z. B. „AUTO“, „CPU“, „GPU“)."
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "OpenVINO-Detektor für AMD- und Intel-CPUs, Intel-GPUs und Intel-VPU-Hardware.",
+            "device": {
+                "label": "Geräte Type",
+                "description": "Das für die OpenVINO-Inferenz zu verwendende Gerät (z. B. „CPU“, „GPU“, „NPU“)."
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "Synaptics-NPU-Detektor für Modelle im .synap-Format unter Verwendung des Synap SDK auf Synaptics-Hardware."
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "Teflon-Delegate-Detektor für TFLite unter Verwendung der Mesa-Teflon-Delegate-Bibliothek zur Beschleunigung der Inferenz auf unterstützten GPUs."
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "TensorRT-Detektor für Nvidia Jetson-Geräte unter Verwendung serialisierter TensorRT-Engines zur Beschleunigung der Inferenz.",
+            "device": {
+                "label": "GPU-Geräteindex",
+                "description": "Der zu verwendende GPU-Geräteindex."
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "ZMQ-IPC-Detektor, der die Inferenz über einen ZeroMQ-IPC-Endpunkt an einen externen Prozess auslagert.",
+            "endpoint": {
+                "label": "ZMQ IPC Endpunkt",
+                "description": "Der ZMQ-Endpunkt, mit dem eine Verbindung hergestellt werden soll."
+            },
+            "request_timeout_ms": {
+                "label": "ZMQ-Anfrage-Timeout in Millisekunden",
+                "description": "Zeitlimit für ZMQ-Anfragen in Millisekunden."
+            },
+            "linger_ms": {
+                "label": "Verweilzeit des ZMQ-Sockets in Millisekunden",
+                "description": "Verweilzeit des Sockets in Millisekunden."
             }
         }
     },
@@ -937,7 +1183,8 @@
         "label": "Objekte",
         "description": "Standardeinstellungen für die Objektverfolgung, einschließlich der zu verfolgenden Labels und Filter pro Objekt.",
         "track": {
-            "label": "Zu verfolgende Objekte"
+            "label": "Zu verfolgende Objekte",
+            "description": "Liste der Objektbezeichnungen, die von allen Kameras verfolgt werden sollen; kann für jede Kamera individuell überschrieben werden."
         },
         "filters": {
             "label": "Objektfilter",
@@ -1033,7 +1280,8 @@
     "record": {
         "label": "Aufnahme",
         "enabled": {
-            "label": "Aufnahme aktivieren"
+            "label": "Aufnahme aktivieren",
+            "description": "Aufzeichnung für alle Kameras aktivieren oder deaktivieren; kann für jede Kamera einzeln überschrieben werden."
         },
         "expire_interval": {
             "label": "Bereinigungsintervall festlegen",
@@ -1122,7 +1370,8 @@
         "enabled_in_config": {
             "label": "Ursprünglicher Aufnahmestatus",
             "description": "Gibt an, ob die Aufzeichnung in der ursprünglichen statischen Konfiguration aktiviert war."
-        }
+        },
+        "description": "Die Einstellungen für Aufzeichnung und Speicherung gelten für alle Kameras, sofern sie nicht für einzelne Kameras überschrieben werden."
     },
     "review": {
         "label": "Rezension",
@@ -1130,7 +1379,8 @@
             "label": "Benachrichtigungseinstellungen",
             "description": "Einstellungen dazu, bei welchen überwachten Objekten Warnmeldungen generiert werden und wie lange diese aufbewahrt werden.",
             "enabled": {
-                "label": "Benachrichtigungen aktivieren"
+                "label": "Benachrichtigungen aktivieren",
+                "description": "Die Erzeugung von Warnmeldungen für alle Kameras aktivieren oder deaktivieren; diese Einstellung kann für jede Kamera individuell überschrieben werden."
             },
             "labels": {
                 "label": "Warnhinweise",
@@ -1151,9 +1401,10 @@
         },
         "detections": {
             "label": "Konfiguration der Erkennungen",
-            "description": "Einstellungen zum Erstellen von Erkennungsereignissen (ohne Alarm) und zur Festlegung ihrer Aufbewahrungsdauer.",
+            "description": "Einstellungen, die festlegen, bei welchen verfolgten Objekten Erkennungen (ohne Alarm) generiert werden und wie lange diese Erkennungen gespeichert bleiben.",
             "enabled": {
-                "label": "Erkennung aktivieren"
+                "label": "Erkennung aktivieren",
+                "description": "Erkennungsereignisse für alle Kameras aktivieren oder deaktivieren; kann für jede Kamera einzeln überschrieben werden."
             },
             "labels": {
                 "label": "Kennzeichnungen zur Erkennung",
@@ -1211,16 +1462,83 @@
                 "label": "Aufforderung zum Aktivitätskontext",
                 "description": "Eine benutzerdefinierte Eingabeaufforderung, die beschreibt, was als verdächtiges Verhalten gilt und was nicht, um den Zusammenfassungen der generativen KI einen Kontext zu geben."
             }
-        }
+        },
+        "description": "Einstellungen, die Benachrichtigungen, Erkennungen und GenAI-Zusammenfassungen steuern, die von der Benutzeroberfläche und dem Speicher verwendet werden."
     },
     "onvif": {
         "autotracking": {
             "required_zones": {
-                "label": "Erforderliche Zonen"
+                "label": "Erforderliche Zonen",
+                "description": "Objekte müssen in eine dieser Zonen eintreten, bevor die automatische Verfolgung beginnt."
             },
             "movement_weights": {
-                "description": "Diese Kalibrierungswerte werden automatisch durch die Kamerakalibrierung generiert. Bitte nicht manuell ändern."
+                "description": "Diese Kalibrierungswerte werden automatisch durch die Kamerakalibrierung generiert. Bitte nicht manuell ändern.",
+                "label": "Bewegungsgewichte"
+            },
+            "label": "Automatische Verfolgung",
+            "description": "Bewegliche Objekte automatisch verfolgen und sie mithilfe von PTZ-Kamerabewegungen im Bildausschnitt zentriert halten.",
+            "enabled": {
+                "label": "Automatische Verfolgung aktivieren",
+                "description": "Aktivieren oder deaktivieren Sie die automatische PTZ-Kamera-Verfolgung erkannter Objekte."
+            },
+            "calibrate_on_startup": {
+                "label": "Beim Start kalibrieren",
+                "description": "Messen Sie die Drehzahlen der PTZ-Motoren beim Start, um die Nachführgenauigkeit zu verbessern. Frigate aktualisiert die Konfiguration nach der Kalibrierung mit den Bewegungsgewichten."
+            },
+            "zooming": {
+                "label": "Zoom-Modus",
+                "description": "Zoomverhalten steuern: deaktiviert (nur Schwenken/Neigen), absolut (am besten kompatibel) oder relativ (gleichzeitiges Schwenken/Neigen/Zoomen)."
+            },
+            "zoom_factor": {
+                "label": "Zoomfaktor",
+                "description": "Steuert den Zoomfaktor bei verfolgten Objekten. Bei niedrigeren Werten bleibt mehr von der Szene im Bild; bei höheren Werten wird näher herangezoomt, wobei jedoch die Verfolgung verloren gehen kann. Werte zwischen 0,1 und 0,75."
+            },
+            "track": {
+                "label": "Verfolgte Objekte",
+                "description": "Liste der Objekttypen, die das automatische Tracking auslösen sollen."
+            },
+            "return_preset": {
+                "label": "Voreinstellung setzen",
+                "description": "Der in der Kamera-Firmware konfigurierte ONVIF-Voreinstellungsname, zu dem nach Beendigung der Verfolgung zurückgekehrt werden soll."
+            },
+            "timeout": {
+                "label": "Zeitüberschreitung bei der Rückgabe",
+                "description": "Warte nach dem Verlust der Verfolgung so viele Sekunden, bevor die Kamera in die voreingestellte Position zurückkehrt."
+            },
+            "enabled_in_config": {
+                "label": "Ursprünglicher Autotrack-Status",
+                "description": "Internes Feld zur Erfassung, ob die automatische Nachführung in der Konfiguration aktiviert wurde."
             }
+        },
+        "label": "ONVIF",
+        "description": "ONVIF-Verbindung und Einstellungen für die automatische PTZ-Verfolgung dieser Kamera.",
+        "host": {
+            "label": "ONVIF Host",
+            "description": "Host (und optional Schema) für den ONVIF-Dienst dieser Kamera."
+        },
+        "port": {
+            "label": "ONVIF Port",
+            "description": "Portnummer für den ONVIF-Dienst."
+        },
+        "user": {
+            "label": "ONVIF-Benutzername",
+            "description": "Benutzername für die ONVIF-Authentifizierung; bei einigen Geräten ist für ONVIF ein Admin-Benutzer erforderlich."
+        },
+        "password": {
+            "label": "ONVIF-Passwort",
+            "description": "Passwort für die ONVIF-Authentifizierung."
+        },
+        "tls_insecure": {
+            "label": "TLS-Überprüfung deaktivieren",
+            "description": "TLS-Überprüfung überspringen und Digest-Authentifizierung für ONVIF deaktivieren (unsicher; nur in sicheren Netzwerken verwenden)."
+        },
+        "ignore_time_mismatch": {
+            "label": "Zeitabweichung ignorieren",
+            "description": "Ignoriere Zeitunterschiede zwischen Kamera und Frigate-Server bei der ONVIF-Kommunikation."
+        },
+        "profile": {
+            "label": "ONVIF Profile",
+            "description": "Spezifisches ONVIF-Medienprofil für die PTZ-Steuerung, das anhand eines Tokens oder Namens ausgewählt wird. Ist kein Profil festgelegt, wird automatisch das erste Profil mit gültiger PTZ-Konfiguration ausgewählt."
         }
     },
     "semantic_search": {
@@ -1252,12 +1570,34 @@
                 "label": "Trigger-Aktionen",
                 "description": "Liste der Aktionen, die ausgeführt werden sollen, wenn der Trigger ausgelöst wird (Benachrichtigung, Unterbezeichnung, Attribut)."
             }
+        },
+        "description": "Einstellungen für die semantische Suche, die Objekt-Embeddings erstellt und abfragt, um ähnliche Elemente zu finden.",
+        "enabled": {
+            "label": "Semantische Suche aktivieren",
+            "description": "Aktivieren oder deaktivieren Sie die semantische Suchfunktion."
+        },
+        "reindex": {
+            "label": "Beim Start neu indizieren",
+            "description": "Lösen Sie eine vollständige Neuindizierung der historisch erfassten Objekte in der Embedding-Datenbank aus."
+        },
+        "model": {
+            "label": "Semantisches Suchmodell oder Name des GenAI-Anbieters",
+            "description": "Das für die semantische Suche zu verwendende Einbettungsmodell (z. B. „jinav1“) oder der Name eines GenAI-Anbieters mit der Rolle „Einbettungen“."
+        },
+        "model_size": {
+            "label": "Modellgröße",
+            "description": "Wählen Sie die Modellgröße aus; „small“ läuft auf der CPU, während „large“ in der Regel eine GPU erfordert."
+        },
+        "device": {
+            "label": "Gerät",
+            "description": "Dies ist eine Übersteuerung, um ein bestimmtes Gerät anzusprechen. Weitere Informationen finden Sie unter https://onnxruntime.ai/docs/execution-providers/"
         }
     },
     "snapshots": {
         "label": "Schnappschüsse",
         "enabled": {
-            "label": "Schnappschüsse aktiviert"
+            "label": "Schnappschüsse aktivieren",
+            "description": "Das Speichern von Momentaufnahmen für alle Kameras aktivieren oder deaktivieren; diese Einstellung kann für jede Kamera individuell überschrieben werden."
         },
         "clean_copy": {
             "label": "Saubere Kopie speichern",
@@ -1265,11 +1605,292 @@
         },
         "timestamp": {
             "label": "Zeitstempel-Einblendung",
-            "description": "Füge den gespeicherten Momentaufnahmen einen Zeitstempel hinzu."
+            "description": "Füge einen Zeitstempel auf die von der API abgerufenen Momentaufnahmen ein."
         },
         "bounding_box": {
             "label": "Einblendung der Begrenzungsrahmen",
-            "description": "Zeichne Begrenzungsrahmen für verfolgte Objekte auf gespeicherten Momentaufnahmen."
+            "description": "Zeichne Begrenzungsrahmen für verfolgte Objekte auf Momentaufnahmen aus der API."
+        },
+        "crop": {
+            "label": "Ertragsübersicht",
+            "description": "Schnappschüsse aus der API auf die Begrenzungsrahmen der erkannten Objekte zuschneiden."
+        },
+        "required_zones": {
+            "label": "Erforderliche Zonen",
+            "description": "Bereiche, die ein Objekt betreten muss, damit ein Schnappschuss gespeichert wird."
+        },
+        "height": {
+            "label": "Höhe der Momentaufnahme",
+            "description": "Höhe (Pixel), auf die Schnappschüsse über die API skaliert werden sollen; leer lassen, um die Originalgröße beizubehalten."
+        },
+        "retain": {
+            "label": "Aufbewahrungsdauer von Snapshots",
+            "description": "Aufbewahrungseinstellungen für Snapshots, einschließlich Standarddauer in Tagen und objektspezifischer Überschreibungen.",
+            "default": {
+                "label": "Standard-Aufbewahrungsfrist",
+                "description": "Standardmäßige Anzahl von Tagen, für die Snapshots aufbewahrt werden."
+            },
+            "mode": {
+                "label": "Speichermodus",
+                "description": "Speichermodus: „all“ (alle Segmente speichern), „motion“ (Segmente mit Bewegung speichern) oder „active_objects“ (Segmente mit aktiven Objekten speichern)."
+            },
+            "objects": {
+                "label": "Objektaufbewahrung",
+                "description": "Objektbezogene Überschreibungen für die Aufbewahrungsdauer von Snapshots."
+            }
+        },
+        "quality": {
+            "label": "Qualität der Momentaufnahme",
+            "description": "Codierungsqualität für gespeicherte Momentaufnahmen (0–100)."
+        },
+        "description": "Einstellungen für API-generierte Momentaufnahmen von verfolgten Objekten für alle Kameras; können für jede Kamera individuell überschrieben werden."
+    },
+    "model": {
+        "label": "Erkennungsmodell",
+        "description": "Einstellungen zur Konfiguration eines benutzerdefinierten Objekterkennungsmodells und seiner Eingabeform.",
+        "path": {
+            "label": "Pfad zum benutzerdefinierten Objekterkennungsmodell",
+            "description": "Pfad zu einer benutzerdefinierten Erkennungsmodelldatei (oder plus://<model_id> für Frigate+-Modelle)."
+        },
+        "labelmap_path": {
+            "label": "Label-Karte für benutzerdefinierten Objektdetektor",
+            "description": "Pfad zu einer Labelmap-Datei, die numerische Klassen dem Detektor als Zeichenfolgenbezeichnungen zuordnet."
+        },
+        "width": {
+            "label": "Eingabebreite des Objekterkennungsmodells",
+            "description": "Breite des Modell-Eingabetensors in Pixeln."
+        },
+        "height": {
+            "label": "Eingabehöhe für das Objekterkennungsmodell",
+            "description": "Höhe des Modell-Eingabetensors in Pixeln."
+        },
+        "labelmap": {
+            "label": "Anpassung der Labelmap",
+            "description": "Überschreibt oder ordnet Einträge neu zu, um sie in die Standard-Labelmap zu integrieren."
+        },
+        "attributes_map": {
+            "label": "Zuordnung der Objektbezeichnungen zu ihren Attributbezeichnungen",
+            "description": "Zuordnung von Objektbezeichnungen zu Attributbezeichnungen, die zum Hinzufügen von Metadaten verwendet werden (zum Beispiel „Auto“ -> [„Kennzeichen“])."
+        },
+        "input_tensor": {
+            "label": "Form des Modell-Eingabetensors",
+            "description": "Vom Modell erwartetes Tensor-Format: „nhwc“ oder „nchw“."
+        },
+        "input_pixel_format": {
+            "label": "Standard-Pixel-Farbformat",
+            "description": "Vom Modell erwarteter Pixel-Farbraum: „rgb“, „bgr“ oder „yuv“."
+        },
+        "input_dtype": {
+            "label": "Modell-Eingangs-D-Typ",
+            "description": "Datentyp des Modell-Eingabetensors (z. B. „float32“)."
+        },
+        "model_type": {
+            "label": "Typ des Objekterkennungsmodells",
+            "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+        }
+    },
+    "genai": {
+        "label": "Konfiguration generativer KI",
+        "description": "Einstellungen für integrierte Anbieter generativer KI, die zur Erstellung von Objektbeschreibungen und Zusammenfassungen von Rezensionen verwendet werden.",
+        "api_key": {
+            "label": "API Schlüssel",
+            "description": "Von einigen Anbietern wird ein API-Schlüssel benötigt (kann auch über Umgebungsvariablen festgelegt werden)."
+        },
+        "base_url": {
+            "label": "Base URL",
+            "description": "Basis-URL für selbst gehostete oder kompatible Anbieter (z. B. eine Ollama-Instanz)."
+        },
+        "model": {
+            "label": "Model",
+            "description": "Das vom Anbieter bereitzustellende Modell zur Erstellung von Beschreibungen oder Zusammenfassungen."
+        },
+        "provider": {
+            "label": "Anbieter",
+            "description": "Der zu verwendende GenAI-Anbieter (z. B.: Ollama, Gemini, OpenAI)."
+        },
+        "roles": {
+            "label": "Rollen",
+            "description": "GenAI-Rollen (Tools, Vision, Einbettungen); ein Anbieter pro Rolle."
+        },
+        "provider_options": {
+            "label": "Anbieter Optionen",
+            "description": "Zusätzliche anbieterspezifische Optionen, die an den GenAI-Client übergeben werden sollen."
+        },
+        "runtime_options": {
+            "label": "Laufzeit Optinenen",
+            "description": "Laufzeitoptionen, die bei jedem Inferenzaufruf an den Anbieter übergeben werden."
+        }
+    },
+    "timestamp_style": {
+        "label": "Format für Zeitstempel",
+        "position": {
+            "label": "Position des Zeitstempels",
+            "description": "Position des Zeitstempels auf dem Bild (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Zeitstempelformat",
+            "description": "Datums- und Uhrzeitformatzeichenfolge für Zeitstempel (Python-Datums- und Uhrzeitformatcodes)."
+        },
+        "color": {
+            "label": "Farbe des Zeitstempels",
+            "description": "RGB-Farbwerte für den Zeitstempeltext (alle Werte zwischen 0 und 255).",
+            "red": {
+                "label": "Rot",
+                "description": "Rotwert (0–255) für die Farbe des Zeitstempels."
+            },
+            "green": {
+                "label": "Grün",
+                "description": "Grünanteil (0–255) für die Farbe des Zeitstempels."
+            },
+            "blue": {
+                "label": "Blau",
+                "description": "Blauer Farbanteil (0–255) für die Farbe des Zeitstempels."
+            }
+        },
+        "thickness": {
+            "label": "Stärke der Zeitmarke",
+            "description": "Linienstärke des Zeitstempeltextes."
+        },
+        "effect": {
+            "label": "Zeitstempeleffekt",
+            "description": "Visuelle Darstellung des Zeitstempeltextes (keine, durchgehend, Schatten)."
+        },
+        "description": "Gestaltungsoptionen für Zeitstempel im Feed, die auf die Debug-Ansicht und Snapshots angewendet werden."
+    },
+    "profiles": {
+        "label": "Profile",
+        "description": "Benannte Profildefinitionen mit aussagekräftigen Namen. Kameraprofile müssen auf die hier definierten Namen verweisen.",
+        "friendly_name": {
+            "label": "Anzeigename",
+            "description": "Anzeigename für dieses Profil, der in der Benutzeroberfläche angezeigt wird."
+        }
+    },
+    "classification": {
+        "label": "Objektklassifizierung",
+        "description": "Einstellungen für Klassifizierungsmodelle, die zur Verfeinerung von Objektbezeichnungen oder zur Zustandsklassifizierung verwendet werden.",
+        "bird": {
+            "label": "Konfiguration der Vogelklassifizierung",
+            "description": "Einstellungen speziell für Modelle zur Klassifizierung von Vögeln.",
+            "enabled": {
+                "label": "Vogelklassifizierung",
+                "description": "Vogelklassifizierung aktivieren oder deaktivieren."
+            },
+            "threshold": {
+                "label": "Mindestpunktzahl",
+                "description": "Mindestpunktzahl, die erforderlich ist, um eine Vogelklassifizierung zu akzeptieren."
+            }
+        },
+        "custom": {
+            "label": "Benutzerdefinierte Klassifizierungsmodelle",
+            "description": "Konfiguration für benutzerdefinierte Klassifizierungsmodelle, die zur Objekt- oder Zustandserkennung verwendet werden.",
+            "enabled": {
+                "label": "Modell aktivieren",
+                "description": "Das benutzerdefinierte Klassifizierungsmodell aktivieren oder deaktivieren."
+            },
+            "name": {
+                "label": "Modellname",
+                "description": "Bezeichner für das zu verwendende benutzerdefinierte Klassifizierungsmodell."
+            },
+            "threshold": {
+                "label": "Punktschwelle",
+                "description": "Punktschwelle, die zur Änderung des Klassifizierungsstatus herangezogen wird."
+            },
+            "save_attempts": {
+                "label": "Speicherungen",
+                "description": "Wie viele Klassifizierungsversuche sollen für die Benutzeroberfläche „Letzte Klassifizierungen“ gespeichert werden?"
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Objekte klassifizieren",
+                    "description": "Liste der Objekttypen, für die eine Objektklassifizierung durchgeführt werden soll."
+                },
+                "classification_type": {
+                    "label": "Klassifizierungstyp",
+                    "description": "Verwendeter Klassifizierungstyp: „sub_label“ (fügt „sub_label“ hinzu) oder andere unterstützte Typen."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Klassifizierungskameras",
+                    "description": "Bildausschnitt und Einstellungen pro Kamera für die Klassifizierung des Laufzustands.",
+                    "crop": {
+                        "label": "Klassifizierungsfeld",
+                        "description": "Zuschneidekoordinaten, die für die Klassifizierung mit dieser Kamera verwendet werden sollen."
+                    }
+                },
+                "motion": {
+                    "description": "Falls zutreffend, führe die Klassifizierung durch, sobald innerhalb des angegebenen Ausschnitts eine Bewegung erkannt wird.",
+                    "label": "Bei Bewegung ausführen"
+                },
+                "interval": {
+                    "label": "Klassifizierungsintervall",
+                    "description": "Intervall (in Sekunden) zwischen den regelmäßigen Klassifizierungsläufen für die Zustandsklassifizierung."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "label": "Kameragruppen",
+        "description": "Konfiguration für benannte Kameragruppen, die zur Organisation der Kameras in der Benutzeroberfläche verwendet werden.",
+        "cameras": {
+            "label": "Kameraübersicht",
+            "description": "Liste der in dieser Gruppe enthaltenen Kameramodelle."
+        },
+        "icon": {
+            "label": "Gruppensymbol",
+            "description": "Symbol, das in der Benutzeroberfläche die Kameragruppe darstellt."
+        },
+        "order": {
+            "label": "Sortierreihenfolge",
+            "description": "Numerische Reihenfolge, nach der die Kameragruppen in der Benutzeroberfläche sortiert werden; höhere Zahlen erscheinen später."
+        }
+    },
+    "active_profile": {
+        "label": "Aktives Profil",
+        "description": "Name des derzeit aktiven Profils. Nur zur Laufzeit gültig, wird nicht in YAML gespeichert."
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Einstellungen für die Veröffentlichung von Bildern über MQTT.",
+        "enabled": {
+            "label": "Bild senden",
+            "description": "Aktivieren Sie für diese Kamera die Veröffentlichung von Bild-Snapshots für Objekte an MQTT-Themen."
+        },
+        "timestamp": {
+            "label": "Zeitstempel hinzufügen",
+            "description": "Füge einen Zeitstempel auf Bilder ein, die über MQTT veröffentlicht werden."
+        },
+        "bounding_box": {
+            "label": "Begrenzungsrahmen hinzufügen",
+            "description": "Zeichne Begrenzungsrahmen auf Bilder, die über MQTT veröffentlicht werden."
+        },
+        "crop": {
+            "label": "Bild zuschneiden",
+            "description": "Bilder, die über MQTT veröffentlicht werden, werden auf die Begrenzungsrahmen der erkannten Objekte zugeschnitten."
+        },
+        "height": {
+            "label": "Bildhöhe",
+            "description": "Höhe (in Pixeln) zur Größenanpassung von über MQTT veröffentlichten Bildern."
+        },
+        "required_zones": {
+            "label": "Benötigte Zonen",
+            "description": "Zonen, die ein Objekt betreten muss, damit ein MQTT-Bild veröffentlicht wird."
+        },
+        "quality": {
+            "label": "JPEG Qualität",
+            "description": "JPEG Qualität für über MQTT veröffentlichte Bilder (0–100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Kamera UI",
+        "description": "Die Reihenfolge und Sichtbarkeit dieser Kamera wird in der UI angezeigt. Die Reihenfolge wirkt sich auf das Standard-Dashboard aus. Für eine feinere Kontrolle verwenden Sie Kamera-Gruppen.",
+        "order": {
+            "label": "UI-Reihenfolge",
+            "description": "Numerische Reihenfolge, nach der die Kamera in der Benutzeroberfläche sortiert wird (Standard-Dashboard und Listen); höhere Zahlen erscheinen später."
+        },
+        "dashboard": {
+            "label": "In der Benutzeroberfläche anzeigen",
+            "description": "Schalte ein, ob diese Kamera überall in der Benutzeroberfläche von „Frigate“ sichtbar ist. Wenn du diese Option deaktivierst, musst du die Konfiguration manuell bearbeiten, um diese Kamera wieder in der Benutzeroberfläche anzuzeigen."
         }
     }
 }
