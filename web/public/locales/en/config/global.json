@@ -527,7 +527,7 @@
     },
     "roles": {
       "label": "Roles",
-      "description": "GenAI roles (tools, vision, embeddings); one provider per role."
+      "description": "GenAI roles (chat, descriptions, embeddings); one provider per role."
     },
     "provider_options": {
       "label": "Provider options",
