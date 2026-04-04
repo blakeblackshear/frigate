@@ -82,6 +82,7 @@
     "mask": "Maski",
     "regions": "Regiony",
     "motion": "Ruch",
-    "boundingBox": "Ramka Ograniczająca"
+    "boundingBox": "Ramka Ograniczająca",
+    "paths": "Ścieżki"
   }
 }

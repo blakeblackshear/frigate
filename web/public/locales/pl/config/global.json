@@ -1,1 +1,43 @@
-{}
+{
+    "audio": {
+        "label": "Zdarzenia audio",
+        "enabled": {
+            "label": "Włącz detekcję audio"
+        },
+        "max_not_heard": {
+            "label": "Limit czasu zakończenia",
+            "description": "Czas w sekundach bez wykrycia skonfigurowanego typu audio, po którym zdarzenie audio zostaje zakończone."
+        },
+        "min_volume": {
+            "label": "Minimalna głośność",
+            "description": "Minimalny próg głośności RMS wymagany do uruchomienia detekcji audio; niższe wartości zwiększają czułość (np. 200 wysoka, 500 średnia, 1000 niska)."
+        },
+        "listen": {
+            "label": "Typy nasłuchu",
+            "description": "Lista typów zdarzeń audio do wykrywania (na przykład: szczekanie, alarm pożarowy, krzyk, mowa, wrzask)."
+        },
+        "filters": {
+            "label": "Filtry audio",
+            "description": "Ustawienia filtrów dla poszczególnych typów audio, takie jak progi pewności, używane do redukcji fałszywych alarmów."
+        },
+        "enabled_in_config": {
+            "label": "Pierwotny stan audio",
+            "description": "Wskazuje, czy detekcja audio była pierwotnie włączona w statycznym pliku konfiguracyjnym."
+        },
+        "num_threads": {
+            "label": "Wątki detekcji",
+            "description": "Liczba wątków używanych do przetwarzania detekcji audio."
+        }
+    },
+    "audio_transcription": {
+        "label": "Transkrypcja audio",
+        "description": "Ustawienia transkrypcji audio na żywo i mowy, używane do zdarzeń i napisów na żywo.",
+        "live_enabled": {
+            "label": "Transkrypcja na żywo",
+            "description": "Włącz transkrypcję strumieniową audio na żywo w momencie jego odbierania."
+        }
+    },
+    "version": {
+        "label": "Aktualna wersja"
+    }
+}
