@@ -23,8 +23,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "הקטגוריה נמחקה",
-      "deletedImage": "התמונות נמחקו",
+      "deletedCategory_one": "הקטגוריה נמחקה",
+      "deletedCategory_two": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "התמונות נמחקו",
+      "deletedImage_two": "",
+      "deletedImage_other": "",
       "deletedModel_one": "נמחק בהצלחה {{count}} מודל",
       "deletedModel_two": "נמחקו בהצלחה {{count}} מודלים",
       "deletedModel_other": "",
