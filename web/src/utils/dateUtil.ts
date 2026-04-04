@@ -1,6 +1,7 @@
 import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
 import { enUS, Locale } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
+import { TFunction } from "i18next";
 import i18n from "@/utils/i18n";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
@@ -532,4 +533,25 @@ export function convertTo12Hour(time: string) {
   const ampm = hour >= 12 ? "PM" : "AM";
   const hour12 = hour % 12 || 12;
   return `${hour12}:${minutes} ${ampm}`;
+}
+
+const UNIT_SUFFIX_TO_LABEL: Record<string, string> = {
+  m: "minute",
+  h: "hour",
+  d: "day",
+  w: "week",
+};
+
+export function formatSuspendDuration(duration: string, t: TFunction): string {
+  if (duration === "until_restart") {
+    return t("time.untilRestart", { ns: "common" });
+  }
+  const match = duration.match(/^(\d+)\s*([mhdw])$/);
+  if (!match) {
+    return duration;
+  }
+  const count = parseInt(match[1], 10);
+  const unit = UNIT_SUFFIX_TO_LABEL[match[2]];
+  const plural = count === 1 ? "one" : "other";
+  return t(`time.${unit}_${plural}`, { time: count, ns: "common" });
 }

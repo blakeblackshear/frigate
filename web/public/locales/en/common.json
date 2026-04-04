@@ -41,6 +41,8 @@
     "s": "{{time}}s",
     "second_one": "{{time}} second",
     "second_other": "{{time}} seconds",
+    "week_one": "{{time}} week",
+    "week_other": "{{time}} weeks",
     "formattedTimestamp": {
       "12hour": "MMM d, h:mm:ss aaa",
       "24hour": "MMM d, HH:mm:ss"

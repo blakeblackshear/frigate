@@ -774,7 +774,7 @@ export function useNotifications(camera: string): {
 
 export function useNotificationSuspend(camera: string): {
   payload: string;
-  send: (payload: number, retain?: boolean) => void;
+  send: (payload: string, retain?: boolean) => void;
 } {
   const {
     value: { payload },

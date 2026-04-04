@@ -10,6 +10,7 @@ from frigate.camera.activity_manager import AudioActivityManager, CameraActivity
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.webpush import WebPushClient
 from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config.camera.notification import parse_duration_to_minutes
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdatePublisher,
@@ -784,11 +785,6 @@ class Dispatcher:
 
     def _on_camera_notification_suspend(self, camera_name: str, payload: str) -> None:
         """Callback for camera level notifications suspend topic."""
-        try:
-            duration = int(payload)
-        except ValueError:
-            logger.error(f"Invalid suspension duration: {payload}")
-            return
 
         if self.web_push_client is None:
             logger.error("WebPushClient not available for suspension")
@@ -800,10 +796,17 @@ class Dispatcher:
             logger.error(f"Notifications are not enabled for {camera_name}")
             return
 
-        if duration != 0:
-            self.web_push_client.suspend_notifications(camera_name, duration)
-        else:
-            self.web_push_client.unsuspend_notifications(camera_name)
+        if payload == "until_restart":
+            self._on_camera_notification_command(camera_name, "OFF")
+            return
+
+        try:
+            duration = parse_duration_to_minutes(payload)
+        except ValueError:
+            logger.error(f"Invalid suspension duration: {payload}")
+            return
+
+        self.web_push_client.suspend_notifications(camera_name, duration)
 
         self.publish(
             f"{camera_name}/notifications/suspended",

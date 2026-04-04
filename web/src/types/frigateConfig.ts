@@ -142,6 +142,7 @@ export interface CameraConfig {
     enabled: boolean;
     email?: string;
     enabled_in_config: boolean;
+    suspend_durations?: string[];
   };
   objects: {
     filters: {
@@ -549,6 +550,7 @@ export interface FrigateConfig {
     enabled: boolean;
     email?: string;
     enabled_in_config: boolean;
+    suspend_durations?: string[];
   };
 
   objects: {

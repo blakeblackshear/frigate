@@ -38,7 +38,10 @@ import {
 } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import {
+  formatSuspendDuration,
+  formatUnixTimestampToDateTime,
+} from "@/utils/dateUtil";
 import {
   useEnabledState,
   useNotifications,
@@ -239,11 +242,7 @@ export default function LiveContextMenu({
   }, [notificationSuspendUntil, notificationState]);
 
   const handleSuspend = (duration: string) => {
-    if (duration === "off") {
-      sendNotification("OFF");
-    } else {
-      sendNotificationSuspend(Number.parseInt(duration));
-    }
+    sendNotificationSuspend(duration);
   };
 
   const locale = useDateLocale();
@@ -451,7 +450,6 @@ export default function LiveContextMenu({
                           isEnabled
                             ? () => {
                                 sendNotification("ON");
-                                sendNotificationSuspend(0);
                               }
                             : undefined
                         }
@@ -476,74 +474,24 @@ export default function LiveContextMenu({
                             {t("suspend.forTime")}
                           </p>
                           <div className="space-y-1">
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled ? () => handleSuspend("5") : undefined
-                              }
-                            >
-                              {t("time.5minutes", { ns: "common" })}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled
-                                  ? () => handleSuspend("10")
-                                  : undefined
-                              }
-                            >
-                              {t("time.10minutes", { ns: "common" })}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled
-                                  ? () => handleSuspend("30")
-                                  : undefined
-                              }
-                            >
-                              {t("time.30minutes", { ns: "common" })}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled
-                                  ? () => handleSuspend("60")
-                                  : undefined
-                              }
-                            >
-                              {t("time.1hour", { ns: "common" })}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled
-                                  ? () => handleSuspend("840")
-                                  : undefined
-                              }
-                            >
-                              {t("time.12hours", { ns: "common" })}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled
-                                  ? () => handleSuspend("1440")
-                                  : undefined
-                              }
-                            >
-                              {t("time.24hours", { ns: "common" })}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={!isEnabled}
-                              onClick={
-                                isEnabled
-                                  ? () => handleSuspend("off")
-                                  : undefined
-                              }
-                            >
-                              {t("time.untilRestart", { ns: "common" })}
-                            </ContextMenuItem>
+                            {(
+                              config?.notifications.suspend_durations ?? []
+                            ).map((duration) => {
+                              const label = formatSuspendDuration(duration, t);
+                              return (
+                                <ContextMenuItem
+                                  key={duration}
+                                  disabled={!isEnabled}
+                                  onClick={
+                                    isEnabled
+                                      ? () => handleSuspend(duration)
+                                      : undefined
+                                  }
+                                >
+                                  {label}
+                                </ContextMenuItem>
+                              );
+                            })}
                           </div>
                         </div>
                       </>

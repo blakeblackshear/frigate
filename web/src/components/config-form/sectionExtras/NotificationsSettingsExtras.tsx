@@ -42,7 +42,10 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import {
+  formatSuspendDuration,
+  formatUnixTimestampToDateTime,
+} from "@/utils/dateUtil";
 import { use24HourTime } from "@/hooks/use-date-utils";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -740,16 +743,11 @@ export function CameraNotificationSwitch({
 
   const handleSuspend = (duration: string) => {
     setIsSuspended(true);
-    if (duration == "off") {
-      sendNotification("OFF");
-    } else {
-      sendNotificationSuspend(parseInt(duration));
-    }
+    sendNotificationSuspend(duration);
   };
 
   const handleCancelSuspension = () => {
     sendNotification("ON");
-    sendNotificationSuspend(0);
   };
 
   const locale = useDateLocale();
@@ -811,27 +809,14 @@ export function CameraNotificationSwitch({
             <SelectValue placeholder={t("notification.suspendTime.suspend")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="5">
-              {t("notification.suspendTime.5minutes")}
-            </SelectItem>
-            <SelectItem value="10">
-              {t("notification.suspendTime.10minutes")}
-            </SelectItem>
-            <SelectItem value="30">
-              {t("notification.suspendTime.30minutes")}
-            </SelectItem>
-            <SelectItem value="60">
-              {t("notification.suspendTime.1hour")}
-            </SelectItem>
-            <SelectItem value="840">
-              {t("notification.suspendTime.12hours")}
-            </SelectItem>
-            <SelectItem value="1440">
-              {t("notification.suspendTime.24hours")}
-            </SelectItem>
-            <SelectItem value="off">
-              {t("notification.suspendTime.untilRestart")}
-            </SelectItem>
+            {(config?.notifications.suspend_durations ?? []).map((duration) => {
+              const label = formatSuspendDuration(duration, t);
+              return (
+                <SelectItem key={duration} value={duration}>
+                  {label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       ) : (
