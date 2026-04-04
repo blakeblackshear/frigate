@@ -12,8 +12,10 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Borttagen klass",
-      "deletedImage": "Raderade bilder",
+      "deletedCategory_one": "Borttagen klass",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Raderade bilder",
+      "deletedImage_other": "",
       "categorizedImage": "Lyckades klassificera bilden",
       "trainedModel": "Modellen har tränats.",
       "trainingModel": "Modellträning har startat.",
