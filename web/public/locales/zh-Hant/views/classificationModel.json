@@ -1,9 +1,9 @@
 {
   "toast": {
     "success": {
-      "deletedImage": "已刪除的圖片",
+      "deletedImage_other": "已刪除的圖片",
       "deletedModel_other": "已成功刪除 {{count}} 個模型",
-      "deletedCategory": "已刪除分類",
+      "deletedCategory_other": "已刪除分類",
       "categorizedImage": "成功分類圖片",
       "trainedModel": "訓練模型成功。",
       "trainingModel": "已開始模型訓練。",
