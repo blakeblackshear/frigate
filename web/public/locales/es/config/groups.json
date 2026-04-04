@@ -39,6 +39,26 @@
         "global": {
             "resolution": "Resolución Global",
             "tracking": "Seguimiento Global"
+        },
+        "cameras": {
+            "resolution": "Resolución",
+            "tracking": "Seguimiento"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Seguimiento global",
+            "filtering": "Filtrado global"
+        },
+        "cameras": {
+            "filtering": "Filtrado",
+            "tracking": "Seguimiento"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Retención global",
+            "events": "Eventos globales"
         }
     }
 }

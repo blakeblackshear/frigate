@@ -112,7 +112,8 @@
     "attributes": "Atributos de clasificación",
     "title": {
       "label": "Título"
-    }
+    },
+    "scoreInfo": "Información de confianza"
   },
   "documentTitle": "Explorar - Frigate",
   "trackedObjectDetails": "Detalles del objeto rastreado",
@@ -222,12 +223,18 @@
     },
     "hideObjectDetails": {
       "label": "Ocultar la ruta del objeto"
+    },
+    "more": {
+      "aria": "Más"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar eliminación",
       "desc": "Al eliminar este objeto rastreado, se eliminan la instantánea, las incrustaciones guardadas y las entradas de detalles de seguimiento asociadas. Las grabaciones de este objeto rastreado en la vista Historial <em>NO</em> se eliminarán.<br /><br />¿Seguro que desea continuar?"
+    },
+    "toast": {
+      "error": "Error al eliminar este objeto rastreado: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "No se encontraron objetos rastreados",
