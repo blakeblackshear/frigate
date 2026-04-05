@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Dal vivo - Frigate",
+  "documentTitle": {
+    "default": "In diretta - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Dal vivo - Frigate",
   "lowBandwidthMode": "Modalità a bassa larghezza di banda",
   "twoWayTalk": {
@@ -35,7 +37,7 @@
     "autotracking": "Tracciamento automatico",
     "title": "Impostazioni di {{camera}}",
     "cameraEnabled": "Telecamera abilitata",
-    "objectDetection": "Rilevamento di oggetti",
+    "objectDetection": "Rilevamento oggetti",
     "recording": "Registrazione",
     "audioDetection": "Rilevamento audio",
     "transcription": "Trascrizione audio"
@@ -54,8 +56,9 @@
     "move": {
       "clickMove": {
         "enable": "Abilita clic per spostare",
-        "disable": "Disabilita il clic per spostare",
-        "label": "Fai clic nella cornice per centrare la telecamera"
+        "disable": "Disabilita clic per spostare",
+        "label": "Fai clic nella cornice per centrare la telecamera",
+        "enableWithZoom": "Abilita clic per muovere / trascina per ingrandire"
       },
       "left": {
         "label": "Sposta la telecamera PTZ a sinistra"
@@ -191,7 +194,7 @@
     }
   },
   "snapshot": {
-    "takeSnapshot": "Scarica l'istantanea attuale",
+    "takeSnapshot": "Scarica istantanea attuale",
     "noVideoSource": "Nessuna sorgente video disponibile per l'istantanea.",
     "captureFailed": "Impossibile catturare l'istantanea.",
     "downloadStarted": "Scaricamento istantanea avviato."

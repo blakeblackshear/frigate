@@ -133,7 +133,11 @@
       "label": "Esita taustal",
       "desc": "Kasuta seda valikut, kui tahad voogedastuse jätkumist ka siis, kui pildivaade on peidetud."
     },
-    "debugView": "Veaotsinguvaade"
+    "debugView": "Veaotsinguvaade",
+    "showStats": {
+      "label": "Näita statistikat",
+      "desc": "Selle eelistuse puhul näidatakse voogedastuse statistikat kaamerapildi peal."
+    }
   },
   "noCameras": {
     "buttonText": "Lisa kaamera",

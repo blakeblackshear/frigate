@@ -3,6 +3,10 @@ id: masks
 title: Masks
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 ## Motion masks
 
 Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the Debug feed (Settings --> Debug) with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. _Over-masking will make it more difficult for objects to be tracked._
@@ -17,17 +21,15 @@ Object filter masks can be used to filter out stubborn false positives in fixed 
 
 ![object mask](/img/bottom-center-mask.jpg)
 
-## Using the mask creator
+## Creating masks
 
-To create a poly mask:
+<ConfigTabs>
+<TabItem value="ui">
 
-1. Visit the Web UI
-2. Click/tap the gear icon and open "Settings"
-3. Select "Mask / zone editor"
-4. At the top right, select the camera you wish to create a mask or zone for
-5. Click the plus icon under the type of mask or zone you would like to create
-6. Click on the camera's latest image to create the points for a masked area. Click the first point again to close the polygon.
-7. When you've finished creating your mask, press Save.
+Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select a camera. Use the mask editor to draw motion masks and object filter masks directly on the camera feed. Each mask can be given a friendly name and toggled on or off.
+
+</TabItem>
+<TabItem value="yaml">
 
 Your config file will be updated with the relative coordinates of the mask/zone:
 
@@ -59,7 +61,7 @@ motion:
       coordinates: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456"
 ```
 
-Object filter masks can also be created through the UI or manually in the config. They are configured under the object filters section for each object type:
+Object filter masks are configured under the object filters section for each object type:
 
 ```yaml
 objects:
@@ -77,6 +79,9 @@ objects:
           enabled: true
           coordinates: "0.000,0.700,1.000,0.700,1.000,1.000,0.000,1.000"
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Enabling/Disabling Masks
 

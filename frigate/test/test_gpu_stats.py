@@ -39,8 +39,12 @@ class TestGpuStats(unittest.TestCase):
         process.stdout = self.intel_results
         sp.return_value = process
         intel_stats = get_intel_gpu_stats(False)
-        print(f"the intel stats are {intel_stats}")
+        # rc6 values: 47.844741 and 100.0 → avg 73.92 → gpu = 100 - 73.92 = 26.08%
+        # Render/3D/0: 0.0 and 0.0 → enc = 0.0%
+        # Video/0: 4.533124 and 0.0 → dec = 2.27%
         assert intel_stats == {
-            "gpu": "1.13%",
+            "gpu": "26.08%",
             "mem": "-%",
+            "compute": "0.0%",
+            "dec": "2.27%",
         }

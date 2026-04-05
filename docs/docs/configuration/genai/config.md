@@ -3,6 +3,10 @@ id: genai_config
 title: Configuring Generative AI
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 ## Configuration
 
 A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 4 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
@@ -25,11 +29,11 @@ You must use a vision-capable model with Frigate. The following models are recom
 
 | Model         | Notes                                                                                                                                                                |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl`    | Strong visual and situational understanding, strong ability to identify smaller objects and interactions with object.                                                |
+| `qwen3-vl`    | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
 | `qwen3.5`     | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
+| `gemma4`      | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
 | `Intern3.5VL` | Relatively fast with good vision comprehension                                                                                                                       |
 | `gemma3`      | Slower model with good vision and temporal understanding                                                                                                             |
-| `qwen2.5-vl`  | Fast but capable model with good vision comprehension                                                                                                                |
 
 :::info
 
@@ -69,6 +73,18 @@ You must use a vision capable model with Frigate. The llama.cpp server supports 
 
 All llama.cpp native options can be passed through `provider_options`, including `temperature`, `top_k`, `top_p`, `min_p`, `repeat_penalty`, `repeat_last_n`, `seed`, `grammar`, and more. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for a complete list of available parameters.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `llamacpp`
+   - Set **Base URL** to your llama.cpp server address (e.g., `http://localhost:8080`)
+   - Set **Model** to the name of your model
+   - Under **Provider Options**, set `context_size` to tell Frigate your context size so it can send the appropriate amount of information
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: llamacpp
@@ -77,6 +93,9 @@ genai:
   provider_options:
     context_size: 16000 # Tell Frigate your context size so it can send the appropriate amount of information.
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### Ollama
 
@@ -96,6 +115,18 @@ Note that Frigate will not automatically download the model you specify in your 
 
 #### Configuration
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `ollama`
+   - Set **Base URL** to your Ollama server address (e.g., `http://localhost:11434`)
+   - Set **Model** to the model tag (e.g., `qwen3-vl:4b`)
+   - Under **Provider Options**, set `keep_alive` (e.g., `-1`) and `options.num_ctx` to match your desired context size
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: ollama
@@ -106,6 +137,9 @@ genai:
     options:
       num_ctx: 8192 # make sure the context matches other services that are using ollama
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### OpenAI-Compatible
 
@@ -130,6 +164,18 @@ This ensures Frigate uses the correct context window size when generating prompt
 
 #### Configuration
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `openai`
+   - Set **Base URL** to your server address (e.g., `http://your-server:port`)
+   - Set **API key** if required by your server
+   - Set **Model** to the model name
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: openai
@@ -137,6 +183,9 @@ genai:
   api_key: your-api-key # May not be required for local servers
   model: your-model-name
 ```
+
+</TabItem>
+</ConfigTabs>
 
 To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
 
@@ -150,12 +199,26 @@ Ollama also supports [cloud models](https://ollama.com/cloud), where your local 
 
 #### Configuration
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `ollama`
+   - Set **Base URL** to your local Ollama address (e.g., `http://localhost:11434`)
+   - Set **Model** to the cloud model name
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: ollama
   base_url: http://localhost:11434
   model: cloud-model-name
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### Google Gemini
 
@@ -176,12 +239,26 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 
 #### Configuration
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `gemini`
+   - Set **API key** to your Gemini API key (or use an environment variable such as `{FRIGATE_GEMINI_API_KEY}`)
+   - Set **Model** to the desired model (e.g., `gemini-2.5-flash`)
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
   model: gemini-2.5-flash
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::note
 
@@ -213,12 +290,26 @@ To start using OpenAI, you must first [create an API key](https://platform.opena
 
 #### Configuration
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `openai`
+   - Set **API key** to your OpenAI API key (or use an environment variable such as `{FRIGATE_OPENAI_API_KEY}`)
+   - Set **Model** to the desired model (e.g., `gpt-4o`)
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: openai
   api_key: "{FRIGATE_OPENAI_API_KEY}"
   model: gpt-4o
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::note
 
@@ -257,6 +348,18 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 
 #### Configuration
 
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `azure_openai`
+   - Set **Base URL** to your Azure resource URL including the `api-version` parameter (e.g., `https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview`)
+   - Set **Model** to your deployed model name (e.g., `gpt-5-mini`)
+   - Set **API key** to your Azure OpenAI API key (or use an environment variable such as `{FRIGATE_OPENAI_API_KEY}`)
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 genai:
   provider: azure_openai
@@ -264,3 +367,6 @@ genai:
   model: gpt-5-mini
   api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
+
+</TabItem>
+</ConfigTabs>

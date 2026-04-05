@@ -951,7 +951,7 @@ cameras:
     onvif:
       # Required: host of the camera being connected to.
       # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
-      # NOTE: ONVIF user, and password can be specified with environment variables or docker secrets
+      # NOTE: ONVIF host, user, and password can be specified with environment variables or docker secrets
       #       that must begin with 'FRIGATE_'. e.g. host: '{FRIGATE_ONVIF_USERNAME}'
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
@@ -966,6 +966,10 @@ cameras:
       # Optional: Ignores time synchronization mismatches between the camera and the server during authentication.
       # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents.
       ignore_time_mismatch: False
+      # Optional: ONVIF media profile to use for PTZ control, matched by token or name. (default: shown below)
+      # If not set, the first profile with valid PTZ configuration is selected automatically.
+      # Use this when your camera has multiple ONVIF profiles and you need to select a specific one.
+      profile: None
       # Optional: PTZ camera object autotracking. Keeps a moving object in
       # the center of the frame by automatically moving the PTZ camera.
       autotracking:

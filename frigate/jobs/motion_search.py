@@ -6,7 +6,7 @@ import threading
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import cv2
 import numpy as np
@@ -96,7 +96,7 @@ def create_polygon_mask(
         dtype=np.int32,
     )
     mask = np.zeros((frame_height, frame_width), dtype=np.uint8)
-    cv2.fillPoly(mask, [motion_points], 255)
+    cv2.fillPoly(mask, [motion_points], (255,))
     return mask
 
 
@@ -116,7 +116,7 @@ def compute_roi_bbox_normalized(
 
 
 def heatmap_overlaps_roi(
-    heatmap: dict[str, int], roi_bbox: tuple[float, float, float, float]
+    heatmap: object, roi_bbox: tuple[float, float, float, float]
 ) -> bool:
     """Check if a sparse motion heatmap has any overlap with the ROI bounding box.
 
@@ -155,9 +155,9 @@ def segment_passes_activity_gate(recording: Recordings) -> bool:
     Returns True if any of motion, objects, or regions is non-zero/non-null.
     Returns True if all are null (old segments without data).
     """
-    motion = recording.motion
-    objects = recording.objects
-    regions = recording.regions
+    motion: Any = recording.motion
+    objects: Any = recording.objects
+    regions: Any = recording.regions
 
     # Old segments without metadata - pass through (conservative)
     if motion is None and objects is None and regions is None:
@@ -277,6 +277,9 @@ class MotionSearchRunner(threading.Thread):
 
         frame_width = camera_config.detect.width
         frame_height = camera_config.detect.height
+
+        if frame_width is None or frame_height is None:
+            raise ValueError(f"Camera {camera_name} detect dimensions not configured")
 
         # Create polygon mask
         polygon_mask = create_polygon_mask(
@@ -415,11 +418,13 @@ class MotionSearchRunner(threading.Thread):
                 if self._should_stop():
                     break
 
+                rec_start: float = recording.start_time  # type: ignore[assignment]
+                rec_end: float = recording.end_time  # type: ignore[assignment]
                 future = executor.submit(
                     self._process_recording_for_motion,
-                    recording.path,
-                    recording.start_time,
-                    recording.end_time,
+                    str(recording.path),
+                    rec_start,
+                    rec_end,
                     self.job.start_time_range,
                     self.job.end_time_range,
                     polygon_mask,
@@ -524,10 +529,12 @@ class MotionSearchRunner(threading.Thread):
                 break
 
             try:
+                rec_start: float = recording.start_time  # type: ignore[assignment]
+                rec_end: float = recording.end_time  # type: ignore[assignment]
                 results, frames = self._process_recording_for_motion(
-                    recording.path,
-                    recording.start_time,
-                    recording.end_time,
+                    str(recording.path),
+                    rec_start,
+                    rec_end,
                     self.job.start_time_range,
                     self.job.end_time_range,
                     polygon_mask,
@@ -672,7 +679,9 @@ class MotionSearchRunner(threading.Thread):
                 # Handle frame dimension changes
                 if gray.shape != polygon_mask.shape:
                     resized_mask = cv2.resize(
-                        polygon_mask, (gray.shape[1], gray.shape[0]), cv2.INTER_NEAREST
+                        polygon_mask,
+                        (gray.shape[1], gray.shape[0]),
+                        interpolation=cv2.INTER_NEAREST,
                     )
                     current_bbox = cv2.boundingRect(resized_mask)
                 else:
@@ -698,7 +707,7 @@ class MotionSearchRunner(threading.Thread):
                 )
 
                 if prev_frame_gray is not None:
-                    diff = cv2.absdiff(prev_frame_gray, masked_gray)
+                    diff = cv2.absdiff(prev_frame_gray, masked_gray)  # type: ignore[unreachable]
                     diff_blurred = cv2.GaussianBlur(diff, (3, 3), 0)
                     _, thresh = cv2.threshold(
                         diff_blurred, threshold, 255, cv2.THRESH_BINARY
@@ -825,7 +834,7 @@ def get_motion_search_job(job_id: str) -> Optional[MotionSearchJob]:
         if job_entry:
             return job_entry[0]
     # Check completed jobs via manager
-    return get_job_by_id("motion_search", job_id)
+    return cast(Optional[MotionSearchJob], get_job_by_id("motion_search", job_id))
 
 
 def cancel_motion_search_job(job_id: str) -> bool:

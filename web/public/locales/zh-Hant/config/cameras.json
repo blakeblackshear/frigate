@@ -1,1 +1,35 @@
-{}
+{
+    "name": {
+        "description": "必須填寫攝影機名稱",
+        "label": "攝影機名稱"
+    },
+    "label": "攝影機設定",
+    "friendly_name": {
+        "label": "顯示名稱",
+        "description": "攝影機在 Frigate 介面顯示的名稱"
+    },
+    "enabled": {
+        "label": "已啟用",
+        "description": "已啟用"
+    },
+    "audio": {
+        "label": "音訊事件",
+        "description": "此攝影機的音訊事件偵測設定。",
+        "enabled": {
+            "label": "啟用音訊偵測",
+            "description": "啟用或停用此攝影機的音訊事件偵測。"
+        },
+        "max_not_heard": {
+            "label": "結束逾時",
+            "description": "在未偵測到已設定音訊類型的情況下，經過多少秒後視為音訊事件結束。"
+        },
+        "min_volume": {
+            "label": "最小音量",
+            "description": "執行音訊偵測所需的最小 RMS 音量門檻；數值越低，敏感度越高（例如：200 高、500 中、1000 低）。"
+        },
+        "listen": {
+            "label": "監聽的音訊類型",
+            "description": "要偵測的音訊事件類型清單（例如：狗吠、火警、尖叫、說話、大叫）。"
+        }
+    }
+}

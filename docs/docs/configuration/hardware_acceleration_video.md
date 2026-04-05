@@ -4,6 +4,9 @@ title: Video Decoding
 ---
 
 import CommunityBadge from '@site/src/components/CommunityBadge';
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
 
 # Video Decoding
 
@@ -78,26 +81,59 @@ See [The Intel Docs](https://www.intel.com/content/www/us/en/support/articles/00
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 ffmpeg:
   hwaccel_args: preset-vaapi
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Via Quicksync
 
 #### H.264 streams
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Intel QuickSync (H.264)`. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-intel-qsv-h264
 ```
 
+</TabItem>
+</ConfigTabs>
+
 #### H.265 streams
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Intel QuickSync (H.265)`. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-intel-qsv-h265
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### Configuring Intel GPU Stats in Docker
 
@@ -196,10 +232,21 @@ You need to change the driver to `radeonsi` by adding the following environment 
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 ffmpeg:
   hwaccel_args: preset-vaapi
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## NVIDIA GPUs
 
@@ -244,10 +291,21 @@ docker run -d \
 
 Using `preset-nvidia` ffmpeg will automatically select the necessary profile for the incoming video, and will log an error if the profile is not supported by your GPU.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `NVIDIA GPU`. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 ffmpeg:
   hwaccel_args: preset-nvidia
 ```
+
+</TabItem>
+</ConfigTabs>
 
 If everything is working correctly, you should see a significant improvement in performance.
 Verify that hardware decoding is working by running `nvidia-smi`, which should show `ffmpeg`
@@ -296,6 +354,14 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
 If you are using the HA App, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Raspberry Pi (H.264)` (for H.264 streams) or `Raspberry Pi (H.265)` (for H.265/HEVC streams). For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 # if you want to decode a h264 stream
 ffmpeg:
@@ -305,6 +371,9 @@ ffmpeg:
 ffmpeg:
   hwaccel_args: preset-rpi-64-h265
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::note
 
@@ -405,10 +474,21 @@ A list of supported codecs (you can use `ffmpeg -decoders | grep nvmpi` in the c
 
 For example, for H264 video, you'll select `preset-jetson-h264`.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `NVIDIA Jetson (H.264)` (or `NVIDIA Jetson (H.265)` for HEVC streams). For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 ffmpeg:
   hwaccel_args: preset-jetson-h264
 ```
+
+</TabItem>
+</ConfigTabs>
 
 If everything is working correctly, you should see a significant reduction in ffmpeg CPU load and power consumption.
 Verify that hardware decoding is working by running `jtop` (`sudo pip3 install -U jetson-stats`), which should show
@@ -424,12 +504,23 @@ Make sure to follow the [Rockchip specific installation instructions](/frigate/i
 
 ### Configuration
 
-Add one of the following FFmpeg presets to your `config.yml` to enable hardware video processing:
+Set the FFmpeg hwaccel preset to enable hardware video processing.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Rockchip RKMPP`. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-rkmpp
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::note
 
@@ -480,7 +571,15 @@ Make sure to follow the [Synaptics specific installation instructions](/frigate/
 
 ### Configuration
 
-Add one of the following FFmpeg presets to your `config.yml` to enable hardware video processing:
+Set the FFmpeg hwaccel args to enable hardware video processing.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and configure the hardware acceleration args and input args manually for Synaptics hardware. For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml {2}
 ffmpeg:
@@ -489,6 +588,9 @@ ffmpeg:
 output_args:
   record: preset-record-generic-audio-aac
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::warning
 

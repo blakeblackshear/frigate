@@ -5,7 +5,8 @@
     "logs": {
       "frigate": "Frigate-logger - Frigate",
       "go2rtc": "Go2RTC-logger - Frigate",
-      "nginx": "Nginx-logger - Frigate"
+      "nginx": "Nginx-logger - Frigate",
+      "websocket": "Meldingslogger - Frigate"
     },
     "general": "Generell statistikk - Frigate",
     "enrichments": "Statistikk for utvidelser - Frigate"
@@ -31,7 +32,34 @@
     "download": {
       "label": "Last ned logger"
     },
-    "tips": "Logger strømmer fra serveren"
+    "tips": "Logger strømmer fra serveren",
+    "websocket": {
+      "label": "Meldinger",
+      "pause": "Pause",
+      "resume": "Gjenoppta",
+      "clear": "Tøm",
+      "filter": {
+        "all": "Alle emner",
+        "topics": "Emner",
+        "events": "Hendelser",
+        "reviews": "Inspeksjoner",
+        "classification": "Klassifisering",
+        "face_recognition": "Ansiktsgjenkjenning",
+        "lpr": "LPR",
+        "camera_activity": "Kameraaktivitet",
+        "system": "System",
+        "camera": "Kamera",
+        "all_cameras": "Alle kameraer",
+        "cameras_count_one": "{{count}} kamera",
+        "cameras_count_other": "{{count}} kameraer"
+      },
+      "empty": "Ingen meldinger fanget opp ennå",
+      "count_one": "{{count}} melding",
+      "count_other": "{{count}} meldinger",
+      "expanded": {
+        "payload": "Payload"
+      }
+    }
   },
   "general": {
     "title": "Generelt",
@@ -79,7 +107,10 @@
         "title": "Til info om Intel GPU-statistikk",
         "message": "GPU statistikk ikke tilgjengelig",
         "description": "Dette er en kjent feil i Intels verktøy for rapportering av GPU-statistikk (intel_gpu_top), der verktøyet slutter å fungere og gjentatte ganger viser 0 % GPU-bruk, selv om maskinvareakselerasjon og objektdeteksjon kjører korrekt på (i)GPU-en. Dette er ikke en feil i Frigate. Du kan starte verten på nytt for å løse problemet midlertidig, og for å bekrefte at GPU-en fungerer som den skal. Dette påvirker ikke ytelsen."
-      }
+      },
+      "gpuTemperature": "GPU-temperatur",
+      "npuTemperature": "NPU-temperatur",
+      "gpuCompute": "GPU prossesering / enkoding"
     },
     "otherProcesses": {
       "title": "Andre prosesser",
@@ -116,7 +147,11 @@
     "title": "Lagring",
     "shm": {
       "title": "SHM (delt minne) allokering",
-      "warning": "Den nåværende SHM-størrelsen på {{total}} MB er for liten. Øk den til minst {{min_shm}} MB."
+      "warning": "Den nåværende SHM-størrelsen på {{total}} MB er for liten. Øk den til minst {{min_shm}} MB.",
+      "frameLifetime": {
+        "title": "Bildelevetid",
+        "description": "Hvert kamera har {{frames}} bildeplasser i delt minne (SHM). Ved høyeste bildefrekvens er hvert bilde tilgjengelig i omtrent {{lifetime}} s før det overskrives."
+      }
     }
   },
   "cameras": {
@@ -154,7 +189,8 @@
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "overallDetectionsPerSecond": "totale deteksjoner per sekund",
       "overallSkippedDetectionsPerSecond": "totalt forkastede deteksjoner per sekund",
-      "overallFramesPerSecond": "totalt bilder per sekund"
+      "overallFramesPerSecond": "totalt bilder per sekund",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
@@ -163,6 +199,17 @@
       "error": {
         "unableToProbeCamera": "Kunne ikke hente informasjon fra kamera: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Tilkoblingskvalitet",
+      "excellent": "Utmerket",
+      "fair": "Grei",
+      "poor": "Dårlig",
+      "unusable": "Ubrukelig",
+      "fps": "BPS",
+      "expectedFps": "Forventet BPS",
+      "reconnectsLastHour": "Gjentatte tilkoblinger (siste time)",
+      "stallsLastHour": "Avbrudd (siste time)"
     }
   },
   "enrichments": {
@@ -203,6 +250,7 @@
     "cameraIsOffline": "{{camera}} er frakoblet",
     "detectIsSlow": "{{detect}} er treg ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)",
-    "shmTooLow": "/dev/shm-allokeringen ({{total}} MB) bør økes til minst {{min}} MB."
+    "shmTooLow": "/dev/shm-allokeringen ({{total}} MB) bør økes til minst {{min}} MB.",
+    "debugReplayActive": "Debug-reprise pågår"
   }
 }

@@ -1,1 +1,22 @@
-{}
+{
+    "label": "カメラ設定",
+    "name": {
+        "label": "カメラ名"
+    },
+    "enabled": {
+        "label": "有効",
+        "description": "有効"
+    },
+    "audio": {
+        "label": "音声イベント",
+        "enabled": {
+            "label": "音声検知を有効化"
+        },
+        "min_volume": {
+            "label": "最小ボリューム"
+        },
+        "filters": {
+            "label": "音声フィルタ"
+        }
+    }
+}

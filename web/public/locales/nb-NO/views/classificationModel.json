@@ -12,15 +12,18 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Klasse slettet",
-      "deletedImage": "Bilder slettet",
+      "deletedCategory_one": "Slettet {{count}} klasse",
+      "deletedCategory_other": "Slettet {{count}} klasser",
+      "deletedImage_one": "Slettet {{count}} bilde",
+      "deletedImage_other": "Slettet {{count}} bilder",
       "categorizedImage": "Klassifiserte bildet",
       "trainedModel": "Modellen ble trent.",
       "trainingModel": "Modelltrening startet.",
       "deletedModel_one": "{{count}} modell ble slettet",
       "deletedModel_other": "{{count}} modeller ble slettet",
       "updatedModel": "Modellkonfigurasjonen ble oppdatert",
-      "renamedCategory": "Klassen ble omdøpt til {{name}}"
+      "renamedCategory": "Klassen ble omdøpt til {{name}}",
+      "reclassifiedImage": "Bildet ble reklassifisert"
     },
     "error": {
       "deleteImageFailed": "Kunne ikke slette: {{errorMessage}}",
@@ -30,7 +33,8 @@
       "deleteModelFailed": "Kunne ikke slette modell: {{errorMessage}}",
       "trainingFailedToStart": "Kunne ikke starte modelltrening: {{errorMessage}}",
       "updateModelFailed": "Kunne ikke oppdatere modell: {{errorMessage}}",
-      "renameCategoryFailed": "Kunne ikke omdøpe klasse: {{errorMessage}}"
+      "renameCategoryFailed": "Kunne ikke omdøpe klasse: {{errorMessage}}",
+      "reclassifyFailed": "Kunne ikke reklassifisere bilde: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -150,8 +154,13 @@
       "allImagesRequired_other": "Vennligst klassifiser alle bildene. {{count}} bilder gjenstår.",
       "modelCreated": "Modellen ble opprettet. Bruk visningen Nylige klassifiseringer for å legge til bilder for manglende tilstander, og tren deretter modellen.",
       "missingStatesWarning": {
-        "title": "Manglende tilstandseksempler",
-        "description": "Det anbefales å velge eksempler for alle tilstander for å oppnå best mulig resultat. Du kan fortsette uten å velge alle tilstander, men modellen vil ikke bli trent før alle tilstander har bilder. Etter at du har gått videre, bruk visningen Nylige klassifiseringer for å klassifisere bilder for de manglende tilstandene, og tren deretter modellen."
+        "title": "Manglende klasseeksempler",
+        "description": "Ikke alle klasser har eksempler. Prøv å generere nye eksempler for å finne den manglende klassen, eller fortsett å bruke visningen 'Siste klassifiseringer' for å legge til bilder senere."
+      },
+      "refreshExamples": "Generer nye eksempler",
+      "refreshConfirm": {
+        "title": "Generere nye eksempler?",
+        "description": "Dette vil generere et nytt sett med bilder og tilbakestille alle valg, inkludert tidligere klasser. Du må velge eksempler på nytt for alle klasser."
       }
     }
   },
@@ -181,5 +190,7 @@
     "descriptionObject": "Rediger objekttypen og klassifiseringstypen for denne objektklassifiseringsmodellen.",
     "stateClassesInfo": "Merk: Endring av tilstandsklasser krever at modellen trenes på nytt med de oppdaterte klassene."
   },
-  "none": "Ingen"
+  "none": "Ingen",
+  "reclassifyImageAs": "Reklassifiser bilde som:",
+  "reclassifyImage": "Reklassifiser bilde"
 }

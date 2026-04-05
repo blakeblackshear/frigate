@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Rilevamento globale",
+            "sensitivity": "Sensibilità globale"
+        },
+        "cameras": {
+            "detection": "Rilevamento",
+            "sensitivity": "Sensibilità"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Aspetto globale"
+        },
+        "cameras": {
+            "appearance": "Aspetto"
+        }
+    },
+    "motion": {
+        "global": {
+            "algorithm": "Algoritmo globale",
+            "sensitivity": "Sensibilità globale"
+        },
+        "cameras": {
+            "sensitivity": "Sensibilità",
+            "algorithm": "Algoritmo"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Visualizzazione globale"
+        },
+        "cameras": {
+            "display": "Visualizzazione"
+        }
+    },
+    "detect": {
+        "global": {
+            "tracking": "Tracciamento globale",
+            "resolution": "Risoluzione globale"
+        },
+        "cameras": {
+            "resolution": "Risoluzione",
+            "tracking": "Tracciamento"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Tracciamento globale",
+            "filtering": "Filtro globale"
+        },
+        "cameras": {
+            "filtering": "Filtro",
+            "tracking": "Tracciamento"
+        }
+    },
+    "record": {
+        "global": {
+            "events": "Eventi globali",
+            "retention": "Conservazione globale"
+        },
+        "cameras": {
+            "events": "Eventi",
+            "retention": "Conservazione"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Parametri FFmpeg specifici per la telecamera"
+        }
+    }
+}

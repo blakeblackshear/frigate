@@ -12,11 +12,13 @@
   },
   "toast": {
     "success": {
-      "deletedImage": "Törölt képek",
+      "deletedImage_one": "Törölt képek",
+      "deletedImage_other": "",
       "deletedModel_one": "Sikeresen törölve {{count}} modell",
       "deletedModel_other": "Sikeresen törölve {{count}} modell",
       "categorizedImage": "A kép sikeresen osztályozva",
-      "deletedCategory": "Osztály törlése",
+      "deletedCategory_one": "Osztály törlése",
+      "deletedCategory_other": "",
       "trainedModel": "Sikeresen betanított modell.",
       "trainingModel": "A modell tanítás sikeresen megkezdődött.",
       "updatedModel": "Modellkonfiguráció sikeresen frissítve",

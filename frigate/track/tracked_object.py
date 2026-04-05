@@ -61,14 +61,15 @@ class TrackedObject:
         self.zone_loitering: dict[str, int] = {}
         self.current_zones: list[str] = []
         self.entered_zones: list[str] = []
+        self.new_zone_entered: bool = False
         self.attributes: dict[str, float] = defaultdict(float)
         self.false_positive = True
         self.has_clip = False
         self.has_snapshot = False
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data: dict[str, Any] | None = None
-        self.last_updated = 0
-        self.last_published = 0
+        self.last_updated: float = 0
+        self.last_published: float = 0
         self.frame = None
         self.active = True
         self.pending_loitering = False
@@ -278,6 +279,7 @@ class TrackedObject:
 
                             if name not in self.entered_zones:
                                 self.entered_zones.append(name)
+                                self.new_zone_entered = True
                         else:
                             self.zone_loitering[name] = loitering_score
 

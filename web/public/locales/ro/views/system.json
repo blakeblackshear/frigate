@@ -50,7 +50,8 @@
         "description": "Acesta este un bug cunoscut în instrumentele de raportare GPU Intel (intel_gpu_top), unde acestea se blochează și returnează repetat o utilizare GPU de 0% chiar și atunci când accelerarea hardware și detecția obiectelor rulează corect pe (i)GPU. Aceasta nu este o problemă Frigate. Poți reporni host-ul pentru a remedia temporar problema și a confirma că GPU-ul funcționează corect. Performanța nu este afectată."
       },
       "gpuTemperature": "Temperatură GPU",
-      "npuTemperature": "Temperatură NPU"
+      "npuTemperature": "Temperatură NPU",
+      "gpuCompute": "Calcul / Codare GPU"
     },
     "detector": {
       "temperature": "Temperatură detector",
@@ -151,7 +152,9 @@
       "count": "{{count}} mesaje",
       "expanded": {
         "payload": "Conținut"
-      }
+      },
+      "count_one": "{{count}} mesaj",
+      "count_other": "{{count}} mesaje"
     }
   },
   "metrics": "Metrici sistem",
@@ -214,7 +217,8 @@
       "detect": "detectează",
       "cameraFfmpeg": "FFmpeg {{camName}}",
       "camera": "cameră",
-      "ffmpeg": "FFmpeg"
+      "ffmpeg": "FFmpeg",
+      "cameraGpu": "{{camName}} GPU"
     },
     "title": "Camere",
     "overview": "Prezentare generală",

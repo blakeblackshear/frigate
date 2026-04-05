@@ -8,14 +8,15 @@
     "notifications": "Setări Notificări - Frigate",
     "motionTuner": "Reglaj Mișcare - Frigate",
     "object": "Depanare - Frigate",
-    "general": "Setări Profil - Frigate",
+    "general": "Setări interfață - Frigate",
     "frigatePlus": "Setări Frigate+ - Frigate",
     "enrichments": "Setări Îmbunătățiri - Frigate",
     "cameraManagement": "Gestionare Camere - Frigate",
     "cameraReview": "Setări Review Cameră - Frigate",
     "globalConfig": "Configurație Globală - Frigate",
     "cameraConfig": "Configurație Cameră - Frigate",
-    "maintenance": "Mentenanță - Frigate"
+    "maintenance": "Mentenanță - Frigate",
+    "profiles": "Profile - Frigate"
   },
   "menu": {
     "ui": "Interfață (UI)",
@@ -87,7 +88,10 @@
     "cameraMqtt": "MQTT Cameră",
     "maintenance": "Mentenanță",
     "mediaSync": "Sincronizare media",
-    "regionGrid": "Grilă regiune"
+    "regionGrid": "Grilă regiune",
+    "uiSettings": "Setări UI",
+    "profiles": "Profile",
+    "systemGo2rtcStreams": "stream-uri go2rtc"
   },
   "dialog": {
     "unsavedChanges": {
@@ -100,7 +104,7 @@
     "noCamera": "Nicio cameră"
   },
   "general": {
-    "title": "Setări Profil",
+    "title": "Setări UI",
     "liveDashboard": {
       "title": "Dashboard Live",
       "automaticLiveView": {
@@ -462,6 +466,10 @@
           "zone": "zonă",
           "motion_mask": "mască mișcare",
           "object_mask": "mască obiect"
+        },
+        "revertOverride": {
+          "desc": "Asta va elimina suprascrierea de profil pentru {{type}} <em>{{name}}</em> și va reveni la configurația de bază.",
+          "title": "Revino la configurația de bază"
         }
       },
       "distance": {
@@ -484,6 +492,17 @@
         "error": {
           "mustBeGreaterOrEqualTo": "Pragul de viteză trebuie să fie mai mare sau egal cu 0.1."
         }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID-ul nu trebuie să fie gol.",
+          "alreadyExists": "O mască cu acest ID există deja pentru această cameră."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Numele nu trebuie să fie gol."
+        }
       }
     },
     "disabledInConfig": "Elementul este dezactivat în fișierul de configurare",
@@ -492,7 +511,10 @@
         "title": "Activată",
         "description": "Specifică dacă această mască este activată în fișierul de configurare. Dacă este dezactivată, nu poate fi activată prin MQTT. Măștile dezactivate sunt ignorate la rulare."
       }
-    }
+    },
+    "profileBase": "(bază)",
+    "profileOverride": "(suprascriere)",
+    "addDisabledProfile": "Adaugă mai întâi în configurația de bază, apoi suprascrie în profil"
   },
   "debug": {
     "motion": {
@@ -741,8 +763,8 @@
         "camera": "Cameră"
       },
       "documentation": "Citește documentația",
-      "cleanCopyWarning": "Unele camere au snapshot-uri activate, dar au copia curată dezactivată. Trebuie să activezi <code>clean_copy</code> în configurația snapshot-urilor pentru a putea trimite imagini de la aceste camere către Frigate+.",
-      "desc": "Trimiterea către Frigate+ necesită ca ambele opțiuni, snapshot-uri și <code>clean_copy</code>, să fie activate în configurație."
+      "cleanCopyWarning": "Unele camere au snapshot-urile dezactivate",
+      "desc": "Trimiterea către Frigate+ necesită ca snapshot-urile să fie activate în configurația ta."
     },
     "modelInfo": {
       "title": "Informații Model",
@@ -1319,6 +1341,14 @@
       "confirmButton": "Șterge definitiv",
       "success": "Camera {{cameraName}} a fost ștearsă cu succes",
       "error": "Eroare la ștergerea camerei {{cameraName}}"
+    },
+    "profiles": {
+      "title": "Suprascrieri profil cameră",
+      "selectLabel": "Selectează profilul",
+      "description": "Configurează care camere sunt activate sau dezactivate când un profil este activat. Camerele setate pe \"Moștenire\" își păstrează starea de bază de activare.",
+      "inherit": "Moștenire",
+      "enabled": "Activat",
+      "disabled": "Dezactivat"
     }
   },
   "cameraReview": {
@@ -1373,6 +1403,9 @@
     "value": {
       "label": "Valoare nouă",
       "reset": "Resetare"
+    },
+    "profile": {
+      "label": "Profil"
     }
   },
   "detectionModel": {
@@ -1429,7 +1462,9 @@
       "review_thumbnails": "Miniaturi Review",
       "previews": "Previzualizări",
       "exports": "Exporturi",
-      "recordings": "Înregistrări"
+      "recordings": "Înregistrări",
+      "verbose": "Detaliat",
+      "verboseDesc": "Scrie pe disc o listă completă a fișierelor orfane pentru verificare."
     },
     "regionGrid": {
       "title": "Grilă regiune",
@@ -1449,7 +1484,8 @@
     },
     "camera": {
       "title": "Setări Cameră",
-      "description": "Aceste setări se aplică doar pentru această cameră și suprascriu setările globale."
+      "description": "Aceste setări se aplică doar pentru această cameră și suprascriu setările globale.",
+      "noCameras": "Nicio cameră disponibilă"
     },
     "advancedSettingsCount": "Setări Avansate ({{count}})",
     "advancedCount": "Avansat ({{count}})",
@@ -1480,7 +1516,35 @@
       "manual": "Argumente manuale",
       "inherit": "Moștenește de la setările camerei",
       "selectPreset": "Selectează presetarea",
-      "manualPlaceholder": "Introdu argumentele FFmpeg"
+      "manualPlaceholder": "Introdu argumentele FFmpeg",
+      "none": "Niciunul",
+      "useGlobalSetting": "Moștenește din setarea globală",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-vaapi": "VAAPI (GPU Intel/AMD)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "GPU NVIDIA",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generic)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generic)",
+        "preset-http-reolink": "HTTP - Camere Reolink",
+        "preset-rtmp-generic": "RTMP (Generic)",
+        "preset-rtsp-generic": "RTSP (Generic)",
+        "preset-rtsp-restream": "RTSP - Restream de la go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Restream de la go2rtc (Latență scăzută)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Înregistrare (Generic, fără audio)",
+        "preset-record-generic-audio-copy": "Înregistrare (Generic + Copiere audio)",
+        "preset-record-generic-audio-aac": "Înregistrare (Generic + Audio în AAC)",
+        "preset-record-mjpeg": "Înregistrare - Camere MJPEG",
+        "preset-record-jpeg": "Înregistrare - Camere JPEG",
+        "preset-record-ubiquiti": "Înregistrare - Camere Ubiquiti"
+      }
     },
     "cameraInputs": {
       "itemTitle": "Stream-ul {{index}}"
@@ -1512,7 +1576,8 @@
       "genai": "GenAI",
       "face_recognition": "Recunoaștere Facială",
       "lpr": "Recunoaștere Numere Înmatriculare",
-      "birdseye": "Birdseye"
+      "birdseye": "Birdseye",
+      "masksAndZones": "Măști / zone"
     },
     "detect": {
       "title": "Setări Detecție"
@@ -1524,7 +1589,8 @@
       "keyDuplicate": "Numele detectorului există deja.",
       "noSchema": "Nu sunt disponibile scheme de detectoare.",
       "none": "Nicio instanță de detector configurată.",
-      "add": "Adaugă detector"
+      "add": "Adaugă detector",
+      "addCustomKey": "Adaugă cheie personalizată"
     },
     "record": {
       "title": "Setări Înregistrare"
@@ -1577,7 +1643,25 @@
     "timestamp_style": {
       "title": "Setări Timestamp"
     },
-    "searchPlaceholder": "Caută..."
+    "searchPlaceholder": "Caută...",
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Înglobare",
+        "vision": "Viziune",
+        "tools": "Instrumente"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Selectează modelul…",
+      "builtIn": "Modele integrate",
+      "genaiProviders": "Furnizori GenAI"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} etichete selectate",
+      "empty": "Nicio etichetă disponibilă",
+      "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții."
+    },
+    "addCustomLabel": "Adaugă etichetă personalizată..."
   },
   "globalConfig": {
     "title": "Configurare Globală",
@@ -1617,5 +1701,143 @@
   "unsavedChanges": "Ai modificări nesalvate",
   "confirmReset": "Confirmă Resetarea",
   "resetToDefaultDescription": "Această acțiune va reseta toate setările din această secțiune la valorile implicite. Acțiunea este ireversibilă.",
-  "resetToGlobalDescription": "Această acțiune va reseta setările din această secțiune la valorile globale implicite. Acțiunea este ireversibilă."
+  "resetToGlobalDescription": "Această acțiune va reseta setările din această secțiune la valorile globale implicite. Acțiunea este ireversibilă.",
+  "button": {
+    "overriddenGlobal": "Suprascris (global)",
+    "overriddenGlobalTooltip": "Această cameră suprascrie setările globale de configurare din această secțiune",
+    "overriddenBaseConfig": "Suprascris (configurația de bază)",
+    "overriddenBaseConfigTooltip": "Profilul {{profile}} suprascrie setările de configurare din această secțiune"
+  },
+  "profiles": {
+    "title": "Profile",
+    "activeProfile": "Profil activ",
+    "noActiveProfile": "Niciun profil activ",
+    "active": "Activ",
+    "activated": "Profilul '{{profile}}' a fost activat",
+    "activateFailed": "Setarea profilului a eșuat",
+    "deactivated": "Profil dezactivat",
+    "noProfiles": "Niciun profil definit.",
+    "noOverrides": "Fără suprascrieri",
+    "cameraCount_one": "{{count}} cameră",
+    "cameraCount_few": "{{count}} camere",
+    "cameraCount_other": "{{count}} de camere",
+    "baseConfig": "Configurație de bază",
+    "addProfile": "Adaugă profil",
+    "newProfile": "Profil nou",
+    "profileNamePlaceholder": "de ex., Armat, Plecat, Mod noapte",
+    "friendlyNameLabel": "Nume profil",
+    "profileIdLabel": "ID profil",
+    "profileIdDescription": "Identificator intern folosit în configurație și automatizări",
+    "nameInvalid": "Sunt permise doar litere mici, numere și underscore-uri",
+    "nameDuplicate": "Un profil cu acest nume există deja",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Trebuie să aibă cel puțin 2 caractere",
+      "mustNotContainPeriod": "Nu trebuie să conțină puncte",
+      "alreadyExists": "Un profil cu acest ID există deja"
+    },
+    "renameProfile": "Redenumește profilul",
+    "renameSuccess": "Profilul a fost redenumit în '{{profile}}'",
+    "deleteProfile": "Șterge profilul",
+    "deleteProfileConfirm": "Ștergi profilul \"{{profile}}\" de pe toate camerele? Această acțiune nu poate fi anulată.",
+    "deleteSuccess": "Profilul '{{profile}}' a fost șters",
+    "createSuccess": "Profilul '{{profile}}' a fost creat",
+    "removeOverride": "Elimină suprascrierea profilului",
+    "deleteSection": "Șterge suprascrierile secțiunii",
+    "deleteSectionConfirm": "Elimini suprascrierile {{section}} pentru profilul {{profile}} de pe {{camera}}?",
+    "deleteSectionSuccess": "Au fost eliminate suprascrierile {{section}} pentru {{profile}}",
+    "enableSwitch": "Activează profilele",
+    "enabledDescription": "Profilele sunt activate. Creează un profil nou mai jos, navighează la o secțiune de configurare a camerei pentru a face modificările, și salvează pentru ca acestea să aibă efect.",
+    "disabledDescription": "Profilele îți permit să definești seturi denumite de suprascrieri pentru configurația camerei (de ex., armat, plecat, noapte) care pot fi activate la cerere.",
+    "columnCamera": "Camera",
+    "columnOverrides": "Suprascrieri profil"
+  },
+  "go2rtcStreams": {
+    "title": "Stream-uri go2rtc",
+    "description": "Gestionează configurațiile de stream-uri go2rtc pentru retransmisia camerelor. Fiecare stream are un nume și unul sau mai multe URL-uri sursă.",
+    "addStream": "Adaugă stream",
+    "addStreamDesc": "Introdu un nume pentru noul stream. Acest nume va fi folosit pentru a referenția stream-ul în configurația camerei tale.",
+    "addUrl": "Adaugă URL",
+    "streamName": "Nume stream",
+    "streamNamePlaceholder": "de ex., usa_intrare",
+    "streamUrlPlaceholder": "de ex., rtsp://user:parola@192.168.1.100/stream",
+    "deleteStream": "Șterge stream",
+    "deleteStreamConfirm": "Sigur vrei să ștergi stream-ul \"{{streamName}}\"? Camerele care referențiază acest stream s-ar putea să nu mai funcționeze.",
+    "noStreams": "Niciun stream go2rtc configurat. Adaugă un stream pentru a începe.",
+    "validation": {
+      "nameRequired": "Numele stream-ului este obligatoriu",
+      "nameDuplicate": "Un stream cu acest nume există deja",
+      "nameInvalid": "Numele stream-ului poate conține doar litere, numere, underscore-uri și cratime",
+      "urlRequired": "Cel puțin un URL este obligatoriu"
+    },
+    "renameStream": "Redenumește stream-ul",
+    "renameStreamDesc": "Introdu un nume nou pentru acest stream. Redenumirea unui stream poate strica camerele sau alte stream-uri care îl referențiază după nume.",
+    "newStreamName": "Nume nou de stream",
+    "ffmpeg": {
+      "useFfmpegModule": "Folosește modul de compatibilitate (ffmpeg)",
+      "video": "Video",
+      "audio": "Audio",
+      "hardware": "Accelerare hardware",
+      "videoCopy": "Copiază",
+      "videoH264": "Transcodează în H.264",
+      "videoH265": "Transcodează în H.265",
+      "videoExclude": "Exclude",
+      "audioCopy": "Copiază",
+      "audioAac": "Transcodează în AAC",
+      "audioOpus": "Transcodează în Opus",
+      "audioPcmu": "Transcodează în PCM μ-law",
+      "audioPcma": "Transcodează în PCM A-law",
+      "audioPcm": "Transcodează în PCM",
+      "audioMp3": "Transcodează în MP3",
+      "audioExclude": "Exclude",
+      "hardwareNone": "Fără accelerare hardware",
+      "hardwareAuto": "Accelerare hardware automată"
+    }
+  },
+  "timestampPosition": {
+    "tl": "Sus stânga",
+    "tr": "Sus dreapta",
+    "bl": "Jos stânga",
+    "br": "Jos dreapta"
+  },
+  "onvif": {
+    "profileAuto": "Auto",
+    "profileLoading": "Se încarcă profilurile..."
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "Înregistrarea este dezactivată, elementele de revizuire nu vor fi generate.",
+      "detectDisabled": "Detecția obiectelor este dezactivată. Elementele de revizuire necesită obiecte detectate pentru a categorisi alertele și detecțiile.",
+      "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții."
+    },
+    "audio": {
+      "noAudioRole": "Niciun flux nu are rolul audio definit. Trebuie să activați rolul audio pentru ca detecția audio să funcționeze."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Detecția audio nu este activată pentru această cameră. Transcrierea audio necesită ca detecția audio să fie activă."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Setarea cadrelor pe secundă pentru detecție la o valoare mai mare de 5 nu este recomandată."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Recunoașterea facială nu este activată la nivel global. Activați-o în setările globale pentru ca recunoașterea facială la nivel de cameră să funcționeze.",
+      "personNotTracked": "Recunoașterea facială necesită urmărirea obiectului „person”. Asigurați-vă că „person” este în lista de urmărire a obiectelor."
+    },
+    "lpr": {
+      "globalDisabled": "Recunoașterea plăcuțelor de înmatriculare nu este activată la nivel global. Activați-o în setările globale pentru ca recunoașterea la nivel de cameră să funcționeze.",
+      "vehicleNotTracked": "Recunoașterea plăcuțelor de înmatriculare necesită ca „car” sau „motorcycle” să fie urmărite."
+    },
+    "record": {
+      "noRecordRole": "Niciun flux nu are rolul de înregistrare definit. Înregistrarea nu va funcționa."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye este setat pe modul 'objects', dar detecția obiectelor este dezactivată pentru această cameră. Camera nu va apărea în Birdseye."
+    },
+    "snapshots": {
+      "detectDisabled": "Detecția obiectelor este dezactivată. Snapshot-urile sunt generate din obiectele urmărite și nu vor fi create."
+    },
+    "detectors": {
+      "mixedTypes": "Toți detectorii trebuie să folosească același tip. Șterge detectorii existenți pentru a folosi un alt tip.",
+      "mixedTypesSuggestion": "Toți detectorii trebuie să folosească același tip. Șterge detectorii existenți sau selectează {{type}}."
+    }
+  }
 }

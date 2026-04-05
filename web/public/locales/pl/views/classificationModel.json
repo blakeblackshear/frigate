@@ -17,8 +17,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Usunięte klasy",
-      "deletedImage": "Usunięte obrazy",
+      "deletedCategory_one": "Usunięte klasy",
+      "deletedCategory_few": "",
+      "deletedCategory_many": "",
+      "deletedImage_one": "Usunięte obrazy",
+      "deletedImage_few": "",
+      "deletedImage_many": "",
       "deletedModel_one": "Pomyślenie usunięto {{count}} model",
       "deletedModel_few": "Pomyślenie usunięto {{count}} modele",
       "deletedModel_many": "Pomyślenie usunięto {{count}} modeli",

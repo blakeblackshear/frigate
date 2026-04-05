@@ -37,6 +37,9 @@ class CameraActivityManager:
             self.__init_camera(camera_config)
 
     def __init_camera(self, camera_config: CameraConfig) -> None:
+        if camera_config.name is None:
+            return
+
         self.last_camera_activity[camera_config.name] = {}
         self.camera_all_object_counts[camera_config.name] = Counter()
         self.camera_active_object_counts[camera_config.name] = Counter()
@@ -114,7 +117,7 @@ class CameraActivityManager:
         self.last_camera_activity = new_activity
 
     def compare_camera_activity(
-        self, camera: str, new_activity: dict[str, Any]
+        self, camera: str, new_activity: list[dict[str, Any]]
     ) -> None:
         all_objects = Counter(
             obj["label"].replace("-verified", "") for obj in new_activity
@@ -175,6 +178,9 @@ class AudioActivityManager:
             self.__init_camera(camera_config)
 
     def __init_camera(self, camera_config: CameraConfig) -> None:
+        if camera_config.name is None:
+            return
+
         self.current_audio_detections[camera_config.name] = {}
 
     def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
@@ -202,7 +208,7 @@ class AudioActivityManager:
 
     def compare_audio_activity(
         self, camera: str, new_detections: list[tuple[str, float]], now: float
-    ) -> None:
+    ) -> bool:
         camera_config = self.config.cameras.get(camera)
         if camera_config is None:
             return False

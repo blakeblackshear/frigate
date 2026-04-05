@@ -7,6 +7,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { TrackingDetailsSequence } from "@/types/timeline";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { use24HourTime } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { LuCircle, LuFolderX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
@@ -428,17 +429,18 @@ export function TrackingDetails({
     [annotationOffset, displaySource, timestampToVideoTime],
   );
 
+  const is24Hour = use24HourTime(config);
+
   const formattedStart = config
     ? formatUnixTimestampToDateTime(event.start_time ?? 0, {
         timezone: config.ui.timezone,
-        date_format:
-          config.ui.time_format == "24hour"
-            ? t("time.formattedTimestamp.24hour", {
-                ns: "common",
-              })
-            : t("time.formattedTimestamp.12hour", {
-                ns: "common",
-              }),
+        date_format: is24Hour
+          ? t("time.formattedTimestamp.24hour", {
+              ns: "common",
+            })
+          : t("time.formattedTimestamp.12hour", {
+              ns: "common",
+            }),
         time_style: "medium",
         date_style: "medium",
       })
@@ -448,14 +450,13 @@ export function TrackingDetails({
     config && event.end_time != null
       ? formatUnixTimestampToDateTime(event.end_time, {
           timezone: config.ui.timezone,
-          date_format:
-            config.ui.time_format == "24hour"
-              ? t("time.formattedTimestamp.24hour", {
-                  ns: "common",
-                })
-              : t("time.formattedTimestamp.12hour", {
-                  ns: "common",
-                }),
+          date_format: is24Hour
+            ? t("time.formattedTimestamp.24hour", {
+                ns: "common",
+              })
+            : t("time.formattedTimestamp.12hour", {
+                ns: "common",
+              }),
           time_style: "medium",
           date_style: "medium",
         })
@@ -917,24 +918,25 @@ function LifecycleIconRow({
     [effectiveTime, item.timestamp],
   );
 
+  const is24Hour = use24HourTime(config);
+
   const formattedEventTimestamp = useMemo(
     () =>
       config
         ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
             timezone: config.ui.timezone,
-            date_format:
-              config.ui.time_format == "24hour"
-                ? t("time.formattedTimestampHourMinuteSecond.24hour", {
-                    ns: "common",
-                  })
-                : t("time.formattedTimestampHourMinuteSecond.12hour", {
-                    ns: "common",
-                  }),
+            date_format: is24Hour
+              ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                  ns: "common",
+                })
+              : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                  ns: "common",
+                }),
             time_style: "medium",
             date_style: "medium",
           })
         : "",
-    [config, item.timestamp, t],
+    [config, is24Hour, item.timestamp, t],
   );
 
   const ratio = useMemo(

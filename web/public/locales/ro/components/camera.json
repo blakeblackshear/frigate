@@ -82,6 +82,7 @@
     "zones": "Zone",
     "mask": "Mască",
     "motion": "Mișcare",
-    "regions": "Regiuni"
+    "regions": "Regiuni",
+    "paths": "Căi"
   }
 }

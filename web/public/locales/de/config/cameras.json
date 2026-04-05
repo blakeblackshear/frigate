@@ -79,8 +79,8 @@
         "label": "Objekterkennung",
         "description": "Einstellungen für die Erkennungs-/Detektionsrolle, die zum Ausführen der Objekterkennung und zum Initialisieren von Trackern verwendet wird.",
         "enabled": {
-            "label": "Erkennung aktiviert",
-            "description": "Aktivieren oder deaktivieren Sie die Objekterkennung für diese Kamera. Die Erkennung muss aktiviert sein, damit die Objektverfolgung ausgeführt werden kann."
+            "label": "Objekterkennung aktiviert",
+            "description": "Aktivieren oder deaktivieren Sie die Objekterkennung für diese Kamera."
         },
         "height": {
             "label": "Höhe erkennen",
@@ -140,6 +140,31 @@
         "enabled": {
             "label": "Bild senden",
             "description": "Aktivieren Sie für diese Kamera die Veröffentlichung von Bild-Snapshots für Objekte in MQTT-Themen."
+        },
+        "description": "Einstellungen für die Veröffentlichung von Bildern über MQTT.",
+        "timestamp": {
+            "label": "Zeitstempel hinzufügen",
+            "description": "Füge einen Zeitstempel auf Bilder ein, die über MQTT veröffentlicht werden."
+        },
+        "bounding_box": {
+            "label": "Begrenzungsrahmen hinzufügen",
+            "description": "Zeichne Begrenzungsrahmen auf Bilder, die über MQTT veröffentlicht werden."
+        },
+        "crop": {
+            "label": "Bild zuschneiden",
+            "description": "Bilder, die über MQTT veröffentlicht werden, werden auf die Begrenzungsrahmen der erkannten Objekte zugeschnitten."
+        },
+        "height": {
+            "label": "Bildhöhe",
+            "description": "Höhe (in Pixeln) zur Größenanpassung von über MQTT veröffentlichten Bildern."
+        },
+        "required_zones": {
+            "label": "Erforderliche Zonen",
+            "description": "Zonen, die ein Objekt betreten muss, damit ein MQTT-Bild veröffentlicht wird."
+        },
+        "quality": {
+            "label": "JPEG-Qualität",
+            "description": "JPEG-Qualität für über MQTT veröffentlichte Bilder (0–100)."
         }
     },
     "face_recognition": {
@@ -157,7 +182,8 @@
     "notifications": {
         "label": "Benachrichtigung",
         "enabled": {
-            "label": "Benachrichtigungen aktivieren"
+            "label": "Benachrichtigungen aktivieren",
+            "description": "Benachrichtigungen für diese Kamera aktivieren oder deaktivieren."
         },
         "email": {
             "label": "Benachrichtigungs-E-Mail",
@@ -170,7 +196,8 @@
         "enabled_in_config": {
             "label": "Ursprüngliche Meldungen geben an",
             "description": "Gibt an, ob Benachrichtigungen in der ursprünglichen statischen Konfiguration aktiviert waren."
-        }
+        },
+        "description": "Einstellungen zum Aktivieren und Verwalten von Benachrichtigungen für diese Kamera."
     },
     "ffmpeg": {
         "label": "FFmpeg",
@@ -293,7 +320,7 @@
         },
         "skip_motion_threshold": {
             "label": "Schwellenwert für Bewegungsüberspringen",
-            "description": "Wenn sich mehr als dieser Anteil des Bildes in einem einzelnen Frame ändert, gibt der Detektor keine Bewegungsfelder zurück und kalibriert sich sofort neu. Dies kann CPU-Leistung sparen und Fehlalarme bei Blitzschlag, Gewittern usw. reduzieren, aber auch echte Ereignisse übersehen, wie z. B. eine PTZ-Kamera, die ein Objekt automatisch verfolgt. Der Kompromiss besteht darin, entweder einige Megabyte an Aufzeichnungen zu verlieren oder ein paar kurze Clips zu überprüfen. Bereich 0,0 bis 1,0."
+            "description": "Wenn sich mehr als dieser Anteil des Bildes in einem einzelnen Frame ändert, gibt der Detektor keine Bewegungsfelder zurück und kalibriert sich sofort neu. Dies kann CPU-Leistung sparen und Fehlalarme bei Blitzschlag, Gewittern usw. reduzieren, aber auch echte Ereignisse übersehen, wie z. B. eine PTZ-Kamera, die ein Objekt automatisch verfolgt. Der Kompromiss besteht darin, entweder einige Megabyte an Aufzeichnungen zu verlieren oder ein paar kurze Clips zu überprüfen. Leer lassen um diese Funktion zu deaktivieren."
         },
         "improve_contrast": {
             "label": "Kontrast verbessern",
@@ -554,7 +581,7 @@
         },
         "detections": {
             "label": "Konfiguration der Erkennungen",
-            "description": "Einstellungen zum Erstellen von Erkennungsereignissen (ohne Alarm) und zur Festlegung ihrer Aufbewahrungsdauer.",
+            "description": "Einstellungen, die festlegen, bei welchen verfolgten Objekten Erkennungen (ohne Alarm) generiert werden und wie lange diese Erkennungen gespeichert bleiben.",
             "enabled": {
                 "label": "Erkennung aktivieren",
                 "description": "Erkennungsereignisse für diese Kamera aktivieren oder deaktivieren."
@@ -620,11 +647,77 @@
     "onvif": {
         "autotracking": {
             "required_zones": {
-                "label": "Erforderliche Zonen"
+                "label": "Erforderliche Zonen",
+                "description": "Objekte müssen in eine dieser Zonen eintreten, bevor die automatische Verfolgung beginnt."
             },
             "movement_weights": {
-                "description": "Diese Kalibrierungswerte werden automatisch durch die Kamerakalibrierung generiert. Bitte nicht manuell ändern."
+                "description": "Diese Kalibrierungswerte werden automatisch durch die Kamerakalibrierung generiert. Bitte nicht manuell ändern.",
+                "label": "Bewegungsgewichte"
+            },
+            "label": "Automatische Verfolgung",
+            "description": "Bewegliche Objekte automatisch verfolgen und sie mithilfe von PTZ-Kamerabewegungen im Bildausschnitt zentriert halten.",
+            "enabled": {
+                "label": "Automatische Verfolgung aktivieren",
+                "description": "Aktivieren oder deaktivieren Sie die automatische PTZ-Kamera-Verfolgung erkannter Objekte."
+            },
+            "calibrate_on_startup": {
+                "label": "Beim Start kalibrieren",
+                "description": "Messen Sie die Drehzahlen der PTZ-Motoren beim Start, um die Nachführgenauigkeit zu verbessern. Frigate aktualisiert die Konfiguration nach der Kalibrierung mit den Bewegungsgewichten."
+            },
+            "zooming": {
+                "label": "Zoom-Modus",
+                "description": "Zoomverhalten steuern: deaktiviert (nur Schwenken/Neigen), absolut (am besten kompatibel) oder relativ (gleichzeitiges Schwenken/Neigen/Zoomen)."
+            },
+            "zoom_factor": {
+                "label": "Zoomfaktor",
+                "description": "Steuert den Zoomfaktor bei verfolgten Objekten. Bei niedrigeren Werten bleibt mehr von der Szene im Bild; bei höheren Werten wird näher herangezoomt, wobei jedoch die Verfolgung verloren gehen kann. Werte zwischen 0,1 und 0,75."
+            },
+            "track": {
+                "label": "Verfolgte Objekte",
+                "description": "Liste der Objekttypen, die das automatische Tracking auslösen sollen."
+            },
+            "return_preset": {
+                "label": "Voreinstellung setzen",
+                "description": "Der in der Kamera-Firmware konfigurierte ONVIF-Voreinstellungsname, zu dem nach Beendigung der Verfolgung zurückgekehrt werden soll."
+            },
+            "timeout": {
+                "label": "Zeitüberschreitung bei der Rückgabe",
+                "description": "Warte nach dem Verlust der Verfolgung so viele Sekunden, bevor die Kamera in die voreingestellte Position zurückkehrt."
+            },
+            "enabled_in_config": {
+                "label": "Ursprünglicher Autotrack-Status",
+                "description": "Internes Feld zur Erfassung, ob die automatische Nachführung in der Konfiguration aktiviert wurde."
             }
+        },
+        "label": "ONVIF",
+        "description": "ONVIF-Verbindung und Einstellungen für die automatische PTZ-Verfolgung dieser Kamera.",
+        "host": {
+            "label": "ONVIF Host",
+            "description": "Host (und optional Schema) für den ONVIF-Dienst dieser Kamera."
+        },
+        "port": {
+            "label": "ONVIF Port",
+            "description": "Portnummer für den ONVIF-Dienst."
+        },
+        "user": {
+            "label": "ONVIF-Benutzername",
+            "description": "Benutzername für die ONVIF-Authentifizierung; bei einigen Geräten ist für ONVIF ein Admin-Benutzer erforderlich."
+        },
+        "password": {
+            "label": "ONVIF-Passwort",
+            "description": "Passwort für die ONVIF-Authentifizierung."
+        },
+        "tls_insecure": {
+            "label": "TLS-Überprüfung deaktivieren",
+            "description": "TLS-Überprüfung überspringen und Digest-Authentifizierung für ONVIF deaktivieren (unsicher; nur in sicheren Netzwerken verwenden)."
+        },
+        "ignore_time_mismatch": {
+            "label": "Zeitabweichung ignorieren",
+            "description": "Ignoriere Zeitunterschiede zwischen Kamera und Frigate-Server bei der ONVIF-Kommunikation."
+        },
+        "profile": {
+            "label": "ONVIF Profile",
+            "description": "Spezifisches ONVIF-Medienprofil für die PTZ-Steuerung, das anhand eines Tokens oder Namens ausgewählt wird. Ist kein Profil festgelegt, wird automatisch das erste Profil mit gültiger PTZ-Konfiguration ausgewählt."
         }
     },
     "semantic_search": {
@@ -660,13 +753,22 @@
         }
     },
     "ui": {
-        "label": "Kamera UI"
+        "label": "Kamera UI",
+        "description": "Legen Sie die Reihenfolge und Sichtbarkeit dieser Kamera in der Benutzeroberfläche fest. Die Reihenfolge wirkt sich auf das Standard-Dashboard aus. Für eine detailliertere Steuerung verwenden Sie Kameragruppen.",
+        "order": {
+            "label": "UI Reihenfolge",
+            "description": "Numerische Reihenfolge, nach der die Kamera in der Benutzeroberfläche sortiert wird (Standard-Dashboard und Listen); höhere Zahlen erscheinen später."
+        },
+        "dashboard": {
+            "label": "In der Benutzeroberfläche anzeigen",
+            "description": "Schalte ein, ob diese Kamera überall in der Benutzeroberfläche von „Frigate“ sichtbar ist. Wenn du diese Option deaktivierst, musst du die Konfiguration manuell bearbeiten, um diese Kamera wieder in der Benutzeroberfläche anzuzeigen."
+        }
     },
     "snapshots": {
         "label": "Schnappschüsse",
-        "description": "Einstellungen für gespeicherte JPEG-Schnappschüsse von verfolgten Objekten für diese Kamera.",
+        "description": "Einstellungen für API-generierte Momentaufnahmen der erfassten Objekte für diese Kamera.",
         "enabled": {
-            "label": "Schnappschüsse aktiviert",
+            "label": "Schnappschüsse aktivieren",
             "description": "Das Speichern von Momentaufnahmen für diese Kamera aktivieren oder deaktivieren."
         },
         "clean_copy": {
@@ -675,11 +777,173 @@
         },
         "timestamp": {
             "label": "Zeitstempel-Einblendung",
-            "description": "Füge den gespeicherten Momentaufnahmen einen Zeitstempel hinzu."
+            "description": "Füge einen Zeitstempel auf die von der API abgerufenen Momentaufnahmen ein."
         },
         "bounding_box": {
             "label": "Einblendung der Begrenzungsrahmen",
-            "description": "Zeichne Begrenzungsrahmen für verfolgte Objekte auf gespeicherten Momentaufnahmen."
+            "description": "Zeichne Begrenzungsrahmen für verfolgte Objekte auf Momentaufnahmen aus der API."
+        },
+        "crop": {
+            "label": "Ertragsübersicht",
+            "description": "Schnappschüsse aus der API auf die Begrenzungsrahmen der erkannten Objekte zuschneiden."
+        },
+        "required_zones": {
+            "label": "Erforderliche Zonen",
+            "description": "Bereiche, die ein Objekt betreten muss, damit ein Schnappschuss gespeichert wird."
+        },
+        "height": {
+            "label": "Höhe der Momentaufnahme",
+            "description": "Höhe (Pixel), auf die Schnappschüsse über die API skaliert werden sollen; leer lassen, um die Originalgröße beizubehalten."
+        },
+        "retain": {
+            "label": "Aufbewahrungsdauer von Snapshots",
+            "description": "Aufbewahrungseinstellungen für Snapshots, einschließlich Standarddauer in Tagen und objektspezifischer Überschreibungen.",
+            "default": {
+                "label": "Standard-Aufbewahrungsfrist",
+                "description": "Standardmäßige Anzahl von Tagen, für die Snapshots aufbewahrt werden."
+            },
+            "mode": {
+                "label": "Speichermodus",
+                "description": "Speichermodus: „all“ (alle Segmente speichern), „motion“ (Segmente mit Bewegung speichern) oder „active_objects“ (Segmente mit aktiven Objekten speichern)."
+            },
+            "objects": {
+                "label": "Objektaufbewahrung",
+                "description": "Objektbezogene Überschreibungen für die Aufbewahrungsdauer von Snapshots."
+            }
+        },
+        "quality": {
+            "label": "Qualität der Momentaufnahme",
+            "description": "Codierungsqualität für gespeicherte Momentaufnahmen (0–100)."
         }
+    },
+    "timestamp_style": {
+        "label": "Format für Zeitstempel",
+        "description": "Gestaltungsmöglichkeiten für Zeitstempel im Feed, die auf Aufzeichnungen und Momentaufnahmen angewendet werden.",
+        "position": {
+            "label": "Position des Zeitstempels",
+            "description": "Position des Zeitstempels auf dem Bild (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Zeitstempelformat",
+            "description": "Datums- und Uhrzeitformatzeichenfolge für Zeitstempel (Python-Datums- und Uhrzeitformatcodes)."
+        },
+        "color": {
+            "label": "Farbe des Zeitstempels",
+            "description": "RGB-Farbwerte für den Zeitstempeltext (alle Werte zwischen 0 und 255).",
+            "red": {
+                "label": "Rot",
+                "description": "Rotwert (0–255) für die Farbe des Zeitstempels."
+            },
+            "green": {
+                "label": "Grün",
+                "description": "Grünanteil (0–255) für die Farbe des Zeitstempels."
+            },
+            "blue": {
+                "label": "Blau",
+                "description": "Blauer Farbanteil (0–255) für die Farbe des Zeitstempels."
+            }
+        },
+        "thickness": {
+            "label": "Stärke der Zeitmarke",
+            "description": "Linienstärke des Zeitstempeltextes."
+        },
+        "effect": {
+            "label": "Zeitstempeleffekt",
+            "description": "Visuelle Darstellung des Zeitstempeltextes (keine, durchgehend, Schatten)."
+        }
+    },
+    "best_image_timeout": {
+        "label": "Optimale Zeitüberschreitung für Bilder",
+        "description": "Wie lange soll man auf das Bild mit dem höchsten Konfidenzwert warten?"
+    },
+    "type": {
+        "label": "Kameratyp",
+        "description": "Kameratyp"
+    },
+    "webui_url": {
+        "label": "URL der Kamera",
+        "description": "URL, um die Kamera direkt von der Systemseite aus aufzurufen"
+    },
+    "profiles": {
+        "label": "Profile",
+        "description": "Benannte Konfigurationsprofile mit teilweisen Überschreibungen, die zur Laufzeit aktiviert werden können."
+    },
+    "zones": {
+        "label": "Zonen",
+        "description": "Mit Zonen können Sie einen bestimmten Bereich des Bildausschnitts festlegen, um zu bestimmen, ob sich ein Objekt innerhalb dieses Bereichs befindet oder nicht.",
+        "friendly_name": {
+            "label": "Zonen Name",
+            "description": "Ein benutzerfreundlicher Name für die Zone, der in der Benutzeroberfläche von Frigate angezeigt wird. Wenn kein Name festgelegt ist, wird eine formatierte Version des Zonennamens verwendet."
+        },
+        "enabled": {
+            "label": "Aktiviert",
+            "description": "Diese Zone aktivieren oder deaktivieren. Deaktivierte Zonen werden zur Laufzeit ignoriert."
+        },
+        "enabled_in_config": {
+            "label": "Behalten Sie den ursprünglichen Zustand der Zone im Blick."
+        },
+        "filters": {
+            "label": "Zonenfilter",
+            "description": "Filter, die auf Objekte innerhalb dieser Zone angewendet werden sollen. Dienen dazu, Fehlalarme zu reduzieren oder einzuschränken, welche Objekte als in der Zone vorhanden gelten.",
+            "min_area": {
+                "label": "Mindestfläche des Objekts",
+                "description": "Mindestfläche der Begrenzungsbox (in Pixeln oder Prozent), die für diesen Objekttyp erforderlich ist. Kann als Pixelwert (Ganzzahl) oder als Prozentwert (Gleitkomma zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "max_area": {
+                "label": "Maximale Objektfläche",
+                "description": "Maximal zulässige Fläche der Begrenzungsbox (in Pixeln oder Prozent) für diesen Objekttyp. Kann als Pixelwert (Ganzzahl) oder als Prozentwert (Gleitkomma zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "min_ratio": {
+                "label": "Mindestseitenverhältnis",
+                "description": "Erforderliches Mindestverhältnis von Breite zu Höhe, damit die Begrenzungsbox die Voraussetzungen erfüllt."
+            },
+            "max_ratio": {
+                "label": "Maximales Seitenverhältnis",
+                "description": "Maximales Seitenverhältnis: Das maximal zulässige Verhältnis von Breite zu Höhe, damit die Begrenzungsbox die Anforderungen erfüllt.Maximales Seitenverhältnis: Das maximal zulässige Verhältnis von Breite zu Höhe, damit die Begrenzungsbox die Anforderungen erfüllt."
+            },
+            "threshold": {
+                "label": "Konfidenzschwelle",
+                "description": "Durchschnittlicher Schwellenwert für die Erkennungssicherheit, der erforderlich ist, damit das Objekt als echtes Positiv gewertet wird."
+            },
+            "min_score": {
+                "label": "Mindestvertrauen",
+                "description": "Erforderliche Mindestzuverlässigkeit der Einzelbilderkennung, damit das Objekt gezählt wird."
+            },
+            "mask": {
+                "label": "Filtermaske",
+                "description": "Polygonkoordinaten, die festlegen, wo dieser Filter innerhalb des Bildausschnitts angewendet wird."
+            },
+            "raw_mask": {
+                "label": "Rohmaske"
+            }
+        },
+        "coordinates": {
+            "label": "Koordinaten",
+            "description": "Polygonkoordinaten, die den Bereich der Zone definieren. Dies kann eine durch Kommas getrennte Zeichenfolge oder eine Liste von Koordinatenzeichenfolgen sein. Die Koordinaten sollten relativ (0–1) oder absolut (veraltet) sein."
+        },
+        "distances": {
+            "label": "Entfernungen in der realen Welt",
+            "description": "Optionale reale Entfernungen für jede Seite des Zonenvierecks, die für Geschwindigkeits- oder Entfernungsberechnungen verwendet werden. Bei Angabe müssen genau 4 Werte angegeben werden."
+        },
+        "inertia": {
+            "label": "Inertialkoordinatensysteme",
+            "description": "Anzahl der aufeinanderfolgenden Bilder, in denen ein Objekt in der Zone erkannt werden muss, bevor es als vorhanden gilt. Dies hilft dabei, vorübergehende Erkennungen herauszufiltern."
+        },
+        "loitering_time": {
+            "label": "Verzögerungszeit in Sekunden",
+            "description": "Anzahl der Sekunden, die sich ein Objekt in der Zone aufhalten muss, damit es als „Herumlungern“ gewertet wird. Setzen Sie den Wert auf 0, um die Erkennung von Herumlungern zu deaktivieren."
+        },
+        "speed_threshold": {
+            "label": "Mindestgeschwindigkeit",
+            "description": "Mindestgeschwindigkeit (in realen Einheiten, sofern Entfernungen festgelegt sind), die erforderlich ist, damit ein Objekt als in der Zone vorhanden gilt. Wird für geschwindigkeitsbasierte Zonenauslöser verwendet."
+        },
+        "objects": {
+            "label": "Auslöseobjekte",
+            "description": "Liste der Objekttypen (aus labelmap), die diese Zone auslösen können. Kann eine Zeichenkette oder eine Liste von Zeichenketten sein. Ist das Feld leer, werden alle Objekte berücksichtigt."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Ursprünglicher Zustand der Kamera",
+        "description": "Behalten Sie den ursprünglichen Zustand der Kamera."
     }
 }

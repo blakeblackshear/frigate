@@ -17,8 +17,10 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Silinmiş Sınıf",
-      "deletedImage": "Silinmiş Fotoğraflar",
+      "deletedCategory_one": "Silinmiş Sınıf",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Silinmiş Fotoğraflar",
+      "deletedImage_other": "",
       "deletedModel_one": "{{count}} model başarıyla silindi",
       "deletedModel_other": "{{count}} model başarıyla silindi",
       "categorizedImage": "Fotoğraf Başarıyla Sınıflandırıldı",

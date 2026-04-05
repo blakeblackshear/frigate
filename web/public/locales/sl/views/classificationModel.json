@@ -18,8 +18,14 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Razred izbrisan",
-      "deletedImage": "Slike izbrisane",
+      "deletedCategory_one": "Razred izbrisan",
+      "deletedCategory_two": "",
+      "deletedCategory_few": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Slike izbrisane",
+      "deletedImage_two": "",
+      "deletedImage_few": "",
+      "deletedImage_other": "",
       "trainedModel": "Model uspešno naučen.",
       "trainingModel": "Učenje modela se je uspešno začelo.",
       "deletedModel_one": "Model uspešno izbrisan",

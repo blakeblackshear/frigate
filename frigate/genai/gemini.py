@@ -2,10 +2,11 @@
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 
 from google import genai
 from google.genai import errors, types
+from google.genai.types import FunctionCallingConfigMode
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -19,10 +20,10 @@ class GeminiClient(GenAIClient):
 
     provider: genai.Client
 
-    def _init_provider(self):
+    def _init_provider(self) -> genai.Client:
         """Initialize the client."""
         # Merge provider_options into HttpOptions
-        http_options_dict = {
+        http_options_dict: dict[str, Any] = {
             "timeout": int(self.timeout * 1000),  # requires milliseconds
             "retry_options": types.HttpRetryOptions(
                 attempts=3,
@@ -49,12 +50,12 @@ class GeminiClient(GenAIClient):
         response_format: Optional[dict] = None,
     ) -> Optional[str]:
         """Submit a request to Gemini."""
-        contents = [
+        contents = [prompt] + [
             types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
-        ] + [prompt]
+        ]
         try:
             # Merge runtime_options into generation_config if provided
-            generation_config_dict = {"candidate_count": 1}
+            generation_config_dict: dict[str, Any] = {"candidate_count": 1}
             generation_config_dict.update(self.genai_config.runtime_options)
 
             if response_format and response_format.get("type") == "json_schema":
@@ -65,7 +66,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=contents,
+                contents=contents,  # type: ignore[arg-type]
                 config=types.GenerateContentConfig(
                     **generation_config_dict,
                 ),
@@ -78,11 +79,21 @@ class GeminiClient(GenAIClient):
             return None
 
         try:
+            if response.text is None:
+                return None
             description = response.text.strip()
         except (ValueError, AttributeError):
             # No description was generated
             return None
         return description
+
+    def list_models(self) -> list[str]:
+        """Return available model names from Gemini."""
+        try:
+            return sorted(m.name or "" for m in self.provider.models.list())
+        except Exception as e:
+            logger.warning("Failed to list Gemini models: %s", e)
+            return []
 
     def get_context_size(self) -> int:
         """Get the context window size for Gemini."""
@@ -102,7 +113,7 @@ class GeminiClient(GenAIClient):
         """
         try:
             # Convert messages to Gemini format
-            gemini_messages = []
+            gemini_messages: list[types.Content] = []
             for msg in messages:
                 role = msg.get("role", "user")
                 content = msg.get("content", "")
@@ -110,7 +121,11 @@ class GeminiClient(GenAIClient):
                 # Map roles to Gemini format
                 if role == "system":
                     # Gemini doesn't have system role, prepend to first user message
-                    if gemini_messages and gemini_messages[0].role == "user":
+                    if (
+                        gemini_messages
+                        and gemini_messages[0].role == "user"
+                        and gemini_messages[0].parts
+                    ):
                         gemini_messages[0].parts[
                             0
                         ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
@@ -136,7 +151,7 @@ class GeminiClient(GenAIClient):
                         types.Content(
                             role="function",
                             parts=[
-                                types.Part.from_function_response(function_response)
+                                types.Part.from_function_response(function_response)  # type: ignore[misc,call-arg,arg-type]
                             ],
                         )
                     )
@@ -171,19 +186,25 @@ class GeminiClient(GenAIClient):
             if tool_choice:
                 if tool_choice == "none":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="NONE")
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.NONE
+                        )
                     )
                 elif tool_choice == "auto":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="AUTO")
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.AUTO
+                        )
                     )
                 elif tool_choice == "required":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="ANY")
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.ANY
+                        )
                     )
 
             # Build request config
-            config_params = {"candidate_count": 1}
+            config_params: dict[str, Any] = {"candidate_count": 1}
 
             if gemini_tools:
                 config_params["tools"] = gemini_tools
@@ -197,7 +218,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=gemini_messages,
+                contents=gemini_messages,  # type: ignore[arg-type]
                 config=types.GenerateContentConfig(**config_params),
             )
 
@@ -291,7 +312,7 @@ class GeminiClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
-    ):
+    ) -> AsyncGenerator[tuple[str, Any], None]:
         """
         Stream chat with tools; yields content deltas then final message.
 
@@ -299,7 +320,7 @@ class GeminiClient(GenAIClient):
         """
         try:
             # Convert messages to Gemini format
-            gemini_messages = []
+            gemini_messages: list[types.Content] = []
             for msg in messages:
                 role = msg.get("role", "user")
                 content = msg.get("content", "")
@@ -307,7 +328,11 @@ class GeminiClient(GenAIClient):
                 # Map roles to Gemini format
                 if role == "system":
                     # Gemini doesn't have system role, prepend to first user message
-                    if gemini_messages and gemini_messages[0].role == "user":
+                    if (
+                        gemini_messages
+                        and gemini_messages[0].role == "user"
+                        and gemini_messages[0].parts
+                    ):
                         gemini_messages[0].parts[
                             0
                         ].text = f"{content}\n\n{gemini_messages[0].parts[0].text}"
@@ -333,7 +358,7 @@ class GeminiClient(GenAIClient):
                         types.Content(
                             role="function",
                             parts=[
-                                types.Part.from_function_response(function_response)
+                                types.Part.from_function_response(function_response)  # type: ignore[misc,call-arg,arg-type]
                             ],
                         )
                     )
@@ -368,19 +393,25 @@ class GeminiClient(GenAIClient):
             if tool_choice:
                 if tool_choice == "none":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="NONE")
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.NONE
+                        )
                     )
                 elif tool_choice == "auto":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="AUTO")
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.AUTO
+                        )
                     )
                 elif tool_choice == "required":
                     tool_config = types.ToolConfig(
-                        function_calling_config=types.FunctionCallingConfig(mode="ANY")
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode=FunctionCallingConfigMode.ANY
+                        )
                     )
 
             # Build request config
-            config_params = {"candidate_count": 1}
+            config_params: dict[str, Any] = {"candidate_count": 1}
 
             if gemini_tools:
                 config_params["tools"] = gemini_tools
@@ -399,7 +430,7 @@ class GeminiClient(GenAIClient):
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
-                contents=gemini_messages,
+                contents=gemini_messages,  # type: ignore[arg-type]
                 config=types.GenerateContentConfig(**config_params),
             )
 

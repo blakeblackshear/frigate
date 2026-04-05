@@ -8,6 +8,7 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
+import { useTimeFormat } from "@/hooks/use-date-utils";
 
 const GRAPH_COLORS = ["#3b82f6", "#ef4444"]; // RMS, dBFS
 
@@ -72,7 +73,7 @@ export function AudioLevelGraph({ cameraName }: AudioLevelGraphProps) {
     return [last.rms, last.dBFS];
   }, [audioData]);
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const formatString = useMemo(
     () =>
       t(`time.formattedTimestampHourMinuteSecond.${timeFormat}`, {

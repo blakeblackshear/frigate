@@ -3,6 +3,19 @@ import type { SectionConfigOverrides } from "./types";
 const audioTranscription: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/audio_detectors#audio-transcription",
+    messages: [
+      {
+        key: "audio-detection-disabled",
+        messageKey: "configMessages.audioTranscription.audioDetectionDisabled",
+        severity: "warning",
+        condition: (ctx) => {
+          if (ctx.level === "camera" && ctx.fullCameraConfig) {
+            return ctx.fullCameraConfig.audio.enabled === false;
+          }
+          return false;
+        },
+      },
+    ],
     restartRequired: [],
     fieldOrder: ["enabled", "language", "device", "model_size"],
     hiddenFields: ["enabled_in_config", "live_enabled"],

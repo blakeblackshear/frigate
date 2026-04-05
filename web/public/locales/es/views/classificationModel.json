@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Clase Borrada",
-      "deletedImage": "Imágenes Borradas",
+      "deletedCategory_one": "Clase Borrada",
+      "deletedCategory_many": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Imágenes Borradas",
+      "deletedImage_many": "",
+      "deletedImage_other": "",
       "deletedModel_one": "Borrado con éxito {{count}} modelo",
       "deletedModel_many": "Borrados con éxito {{count}} modelos",
       "deletedModel_other": "Borrados con éxito {{count}} modelos",
@@ -21,7 +25,8 @@
       "trainedModel": "Modelo entrenado correctamente.",
       "trainingModel": "Entrenamiento del modelo iniciado correctamente.",
       "updatedModel": "Configuración del modelo actualizada correctamente",
-      "renamedCategory": "Clase renombrada correctamente a {{name}}"
+      "renamedCategory": "Clase renombrada correctamente a {{name}}",
+      "reclassifiedImage": "Imagen reclasificada con éxito"
     },
     "error": {
       "deleteImageFailed": "Fallo al borrar: {{errorMessage}}",
@@ -31,7 +36,8 @@
       "trainingFailed": "El entrenamiento del modelo ha fallado. Revisa los registros de Frigate para más detalles.",
       "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}",
       "trainingFailedToStart": "No se pudo iniciar el entrenamiento del modelo: {{errorMessage}}",
-      "renameCategoryFailed": "Falló el renombrado de la clase: {{errorMessage}}"
+      "renameCategoryFailed": "Falló el renombrado de la clase: {{errorMessage}}",
+      "reclassifyFailed": "Error al reclasificar la imagen: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -144,7 +150,12 @@
       },
       "allImagesRequired_one": "Por favor clasifique todas las imágenes. Queda {{count}} imagen.",
       "allImagesRequired_many": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes.",
-      "allImagesRequired_other": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes."
+      "allImagesRequired_other": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes.",
+      "refreshConfirm": {
+        "description": "Esta acción generará un nuevo conjunto de imágenes y eliminará todas las selecciones, incluidas las clases anteriores. Deberás volver a seleccionar ejemplos para todas las clases.",
+        "title": "¿Generar nuevos ejemplos?"
+      },
+      "refreshExamples": "Generar nuevos ejemplos"
     },
     "title": "Crear nueva Clasificación"
   },
@@ -188,5 +199,7 @@
       "description": "Cree un modelo personalizado para monitorear y clasificar los cambios de estado en áreas específicas de la cámara.",
       "buttonText": "Crear modelo de estado"
     }
-  }
+  },
+  "reclassifyImage": "Reclasificar imagen",
+  "reclassifyImageAs": "Reclasificar imagen como:"
 }

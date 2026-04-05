@@ -1,6 +1,12 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useFrigateStats } from "@/api/ws";
 import { EmbeddingThreshold, GenAIThreshold, Threshold } from "@/types/graph";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,16 +18,18 @@ import { EventsPerSecondsLineGraph } from "@/components/graph/LineGraph";
 type EnrichmentMetricsProps = {
   lastUpdated: number;
   setLastUpdated: (last: number) => void;
+  isActive: boolean;
 };
 export default function EnrichmentMetrics({
   lastUpdated,
   setLastUpdated,
+  isActive,
 }: EnrichmentMetricsProps) {
   // stats
   const { t } = useTranslation(["views/system"]);
 
-  const { data: initialStats } = useSWR<FrigateStats[]>(
-    ["stats/history", { keys: "embeddings,service" }],
+  const { data: initialStats, mutate: refreshStats } = useSWR<FrigateStats[]>(
+    ["stats/history", { keys: "embeddings,service.last_updated" }],
     {
       revalidateOnFocus: false,
     },
@@ -36,19 +44,38 @@ export default function EnrichmentMetrics({
     }
 
     if (statsHistory.length == 0) {
-      setStatsHistory(initialStats);
+      startTransition(() => setStatsHistory(initialStats));
       return;
     }
 
-    if (!updatedStats) {
+    if (!isActive || !updatedStats) {
       return;
     }
 
     if (updatedStats.service.last_updated > lastUpdated) {
       setStatsHistory([...statsHistory.slice(1), updatedStats]);
-      setLastUpdated(Date.now() / 1000);
+      setLastUpdated(updatedStats.service.last_updated);
     }
-  }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);
+  }, [
+    initialStats,
+    updatedStats,
+    statsHistory,
+    lastUpdated,
+    setLastUpdated,
+    isActive,
+  ]);
+
+  useEffect(() => {
+    if (isActive && statsHistory.length > 0) {
+      refreshStats().then((freshStats) => {
+        if (freshStats && freshStats.length > 0) {
+          setStatsHistory(freshStats);
+        }
+      });
+    }
+    // only re-fetch when tab becomes active, not on data changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   const getThreshold = useCallback((key: string) => {
     if (key.includes("description")) {
@@ -205,6 +232,7 @@ export default function EnrichmentMetrics({
                         threshold={group.speedSeries.metrics}
                         updateTimes={updateTimes}
                         data={[group.speedSeries]}
+                        isActive={isActive}
                       />
                     )}
                     {group.eventsSeries && (
@@ -215,6 +243,7 @@ export default function EnrichmentMetrics({
                         name={t("enrichments.infPerSecond")}
                         updateTimes={updateTimes}
                         data={[group.eventsSeries]}
+                        isActive={isActive}
                       />
                     )}
                   </div>

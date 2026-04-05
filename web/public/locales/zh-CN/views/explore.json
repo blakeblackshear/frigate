@@ -169,7 +169,8 @@
     "attributes": "分类属性",
     "title": {
       "label": "标题"
-    }
+    },
+    "scoreInfo": "分数信息"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -224,12 +225,18 @@
     "debugReplay": {
       "label": "调试回放",
       "aria": "在调试回放视图中查看此被追踪对象"
+    },
+    "more": {
+      "aria": "更多"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "确认删除",
       "desc": "删除此追踪目标后，将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中追踪目标的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
+    },
+    "toast": {
+      "error": "删除该追踪目标时出错：{{errorMessage}}"
     }
   },
   "noTrackedObjects": "未找到追踪目标",

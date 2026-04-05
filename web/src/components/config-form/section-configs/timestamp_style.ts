@@ -4,12 +4,13 @@ const timestampStyle: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/reference",
     restartRequired: [],
-    fieldOrder: ["position", "format", "color", "thickness"],
+    fieldOrder: ["position", "format", "thickness", "color"],
     hiddenFields: ["effect", "enabled_in_config"],
     advancedFields: [],
     uiSchema: {
       position: {
         "ui:size": "xs",
+        "ui:options": { enumI18nPrefix: "timestampPosition" },
       },
       format: {
         "ui:size": "xs",
@@ -17,7 +18,7 @@ const timestampStyle: SectionConfigOverrides = {
     },
   },
   global: {
-    restartRequired: ["position", "format", "color", "thickness", "effect"],
+    restartRequired: [],
   },
   camera: {
     restartRequired: [],

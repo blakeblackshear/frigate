@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -55,9 +55,10 @@ export default function ReviewCard({
   const { t } = useTranslation(["components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const is24Hour = use24HourTime(config);
   const formattedDate = useFormattedTimestamp(
     event.start_time,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestampHourMinute.24hour", { ns: "common" })
       : t("time.formattedTimestampHourMinute.12hour", { ns: "common" }),
     config?.ui.timezone,

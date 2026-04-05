@@ -116,8 +116,7 @@ export default function Statusbar() {
             case "amd-vaapi":
               gpuTitle = "AMD GPU";
               break;
-            case "intel-vaapi":
-            case "intel-qsv":
+            case "intel-gpu":
               gpuTitle = "Intel GPU";
               break;
             case "rockchip":

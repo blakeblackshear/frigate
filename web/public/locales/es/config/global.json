@@ -33,11 +33,80 @@
             "description": "Cantidad de segundos sin el tipo de audio configurado antes de que finalice el evento de audio."
         },
         "min_volume": {
-            "label": "Volumen mínimo"
+            "label": "Volumen mínimo",
+            "description": "Umbral mínimo de volumen RMS requerido para ejecutar la detección de audio; los valores más bajos aumentan la sensibilidad (p. ej., 200 alta, 500 media, 1000 baja)."
+        },
+        "listen": {
+            "label": "Tipos de escucha",
+            "description": "Lista de tipos de eventos de audio a detectar (por ejemplo: ladrido, alarma de incendios, grito, voz, alarido)."
+        },
+        "filters": {
+            "label": "Filtros de audio",
+            "description": "Ajustes de filtrado por tipo de audio, como umbrales de confianza utilizados para reducir los falsos positivos."
+        },
+        "enabled_in_config": {
+            "description": "Indica si la detección de audio estaba habilitada originalmente en el archivo de configuración estática.",
+            "label": "Estado original del audio"
+        },
+        "num_threads": {
+            "label": "Hilos de detección"
         }
     },
     "auth": {
         "label": "Autenticación",
-        "description": "Configuración relacionada con la autenticación y la sesión, incluidas las opciones de cookies y límite de peticiones."
+        "description": "Configuración relacionada con la autenticación y la sesión, incluidas las opciones de cookies y límite de peticiones.",
+        "enabled": {
+            "label": "Activar autenticación",
+            "description": "Activar la autenticación nativa para la interfaz de Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Restablecer contraseña de administrador",
+            "description": "Si se activa, restablece la contraseña del administrador al iniciar y muestra la nueva contraseña en los registros."
+        },
+        "cookie_name": {
+            "description": "Nombre de la cookie utilizada para almacenar el token JWT para la autenticación nativa.",
+            "label": "Nombre de la cookie JWT"
+        },
+        "cookie_secure": {
+            "label": "Flag de cookie segura",
+            "description": "Establece el flag de seguridad en la cookie de autenticación; debe ser 'true' cuando se utilice TLS."
+        }
+    },
+    "onvif": {
+        "profile": {
+            "label": "Perfil ONVIF"
+        }
+    },
+    "objects": {
+        "raw_mask": {
+            "label": "Máscara en bruto"
+        },
+        "genai": {
+            "label": "Configuración de objetos GenAI",
+            "description": "Opciones de GenAI para describir objetos rastreados y enviar fotogramas para su generación.",
+            "enabled": {
+                "label": "Activar GenAI",
+                "description": "Activar por defecto la generación de descripciones de GenAI para los objetos rastreados."
+            },
+            "use_snapshot": {
+                "label": "Usar instantáneas",
+                "description": "Usar instantáneas de objetos en lugar de miniaturas para la generación de descripciones de GenAI."
+            }
+        }
+    },
+    "detectors": {
+        "deepstack": {
+            "description": "Detector DeepStack/CodeProject.AI que envía imágenes a una API HTTP remota de DeepStack para la inferencia. No recomendado.",
+            "api_url": {
+                "description": "La URL de la API de DeepStack."
+            },
+            "api_timeout": {
+                "label": "Tiempo de espera de la API de DeepStack (en segundos)",
+                "description": "Tiempo máximo permitido para una solicitud a la API de DeepStack."
+            },
+            "api_key": {
+                "label": "Clave de API de DeepStack (si es necesaria)"
+            }
+        }
     }
 }

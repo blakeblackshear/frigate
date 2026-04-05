@@ -16,7 +16,9 @@
       "description": "Només es poden revisar temes quan s'han activat les gravacions de la càmera."
     }
   },
-  "timeline": "Línia de temps",
+  "timeline": {
+    "label": "Línia de temps"
+  },
   "timeline.aria": "Seleccionar línia de temps",
   "events": {
     "label": "Esdeveniments",

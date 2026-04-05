@@ -724,6 +724,7 @@ export default function Settings() {
 
   // Save All state
   const [isSavingAll, setIsSavingAll] = useState(false);
+  const [isAnySectionSaving, setIsAnySectionSaving] = useState(false);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const { send: sendRestart } = useRestart();
   const { data: fullSchema } = useSWR<RJSFSchema>("config/schema.json");
@@ -1299,6 +1300,10 @@ export default function Settings() {
     [],
   );
 
+  const handleSectionSavingChange = useCallback((saving: boolean) => {
+    setIsAnySectionSaving(saving);
+  }, []);
+
   // The active profile being edited for the selected camera
   const activeEditingProfile = selectedCamera
     ? (editingProfile[selectedCamera] ?? null)
@@ -1508,7 +1513,7 @@ export default function Settings() {
                     onClick={handleUndoAll}
                     variant="outline"
                     size="sm"
-                    disabled={isSavingAll}
+                    disabled={isSavingAll || isAnySectionSaving}
                     className="flex w-full items-center justify-center gap-2"
                   >
                     {t("button.undoAll", {
@@ -1520,7 +1525,11 @@ export default function Settings() {
                     onClick={handleSaveAll}
                     variant="select"
                     size="sm"
-                    disabled={isSavingAll || hasPendingValidationErrors}
+                    disabled={
+                      isSavingAll ||
+                      isAnySectionSaving ||
+                      hasPendingValidationErrors
+                    }
                     className="flex w-full items-center justify-center gap-2"
                   >
                     {isSavingAll ? (
@@ -1606,6 +1615,8 @@ export default function Settings() {
                     }
                     profilesUIEnabled={profilesUIEnabled}
                     setProfilesUIEnabled={setProfilesUIEnabled}
+                    isSavingAll={isSavingAll}
+                    onSectionSavingChange={handleSectionSavingChange}
                   />
                 );
               })()}
@@ -1674,7 +1685,7 @@ export default function Settings() {
                 onClick={handleUndoAll}
                 variant="outline"
                 size="sm"
-                disabled={isSavingAll}
+                disabled={isSavingAll || isAnySectionSaving}
                 className="flex items-center justify-center gap-2"
               >
                 {t("button.undoAll", {
@@ -1686,7 +1697,11 @@ export default function Settings() {
                 variant="select"
                 size="sm"
                 onClick={handleSaveAll}
-                disabled={isSavingAll || hasPendingValidationErrors}
+                disabled={
+                  isSavingAll ||
+                  isAnySectionSaving ||
+                  hasPendingValidationErrors
+                }
                 className="flex items-center justify-center gap-2"
               >
                 {isSavingAll ? (
@@ -1843,6 +1858,8 @@ export default function Settings() {
                   onDeleteProfileSection={handleDeleteProfileForCurrentSection}
                   profilesUIEnabled={profilesUIEnabled}
                   setProfilesUIEnabled={setProfilesUIEnabled}
+                  isSavingAll={isSavingAll}
+                  onSectionSavingChange={handleSectionSavingChange}
                 />
               );
             })()}

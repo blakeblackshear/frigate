@@ -39,6 +39,10 @@ export type SettingsPageProps = {
   onDeleteProfileSection?: (profileName: string) => void;
   profilesUIEnabled?: boolean;
   setProfilesUIEnabled?: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Whether a SaveAll operation is in progress */
+  isSavingAll?: boolean;
+  /** Callback when a section's saving state changes */
+  onSectionSavingChange?: (isSaving: boolean) => void;
 };
 
 export type SectionStatus = {
@@ -73,6 +77,8 @@ export function SingleSectionPage({
   onPendingDataChange,
   profileState,
   onDeleteProfileSection,
+  isSavingAll,
+  onSectionSavingChange,
 }: SingleSectionPageProps) {
   const sectionNamespace =
     level === "camera" ? "config/cameras" : "config/global";
@@ -95,9 +101,10 @@ export function SingleSectionPage({
     ? getLocaleDocUrl(resolvedSectionConfig.sectionDocs)
     : undefined;
 
-  const currentEditingProfile = selectedCamera
-    ? (profileState?.editingProfile[selectedCamera] ?? null)
-    : null;
+  const currentEditingProfile =
+    level === "camera" && selectedCamera
+      ? (profileState?.editingProfile[selectedCamera] ?? null)
+      : null;
 
   const profileColor = useMemo(
     () =>
@@ -273,6 +280,8 @@ export function SingleSectionPage({
         onDeleteProfileSection={
           currentEditingProfile ? handleDeleteProfileSection : undefined
         }
+        isSavingAll={isSavingAll}
+        onSavingChange={onSectionSavingChange}
       />
     </div>
   );

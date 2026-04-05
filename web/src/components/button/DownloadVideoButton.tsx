@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { useTimeFormat } from "@/hooks/use-date-utils";
 import { useMemo } from "react";
 
 type DownloadVideoButtonProps = {
@@ -26,7 +27,7 @@ export function DownloadVideoButton({
   const { data: config } = useSWR<FrigateConfig>("config");
   const locale = useDateLocale();
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampFilename.${timeFormat}`, { ns: "common" });
   }, [t, timeFormat]);

@@ -1,12 +1,12 @@
 {
-    "label": "Camera Config",
+    "label": "CameraConfiguratie",
     "name": {
         "label": "Camera naam",
-        "description": "Camera naam is verplicht"
+        "description": "Camera naam is vereist"
     },
     "friendly_name": {
         "description": "Camera naam te gebruiken in de Frigate UI",
-        "label": "Herkenbare naam"
+        "label": "Eenvoudige naam"
     },
     "enabled": {
         "label": "Geactiveerd",
@@ -124,6 +124,28 @@
                     "label": "Object‑maximum aantal frames",
                     "description": "Per‑object overschrijden voor het maximum aantal frames voor tracking van stationaire objecten."
                 }
+            }
+        }
+    },
+    "profiles": {
+        "label": "Profielen"
+    },
+    "zones": {
+        "label": "Zones",
+        "description": "Met zones kun je een specifiek deel van het frame definiëren, zodat je kunt bepalen of een object zich binnen dat specifieke gebied bevindt.",
+        "friendly_name": {
+            "label": "Zone naam",
+            "description": "Een gebruiksvriendelijke naam voor de zone, die wordt weergegeven in de Frigate-gebruikersinterface. Als deze niet is ingesteld, wordt een opgemaakte versie van de zonenaam gebruikt."
+        },
+        "enabled": {
+            "label": "Ingeschakeld",
+            "description": "Schakel deze zone in of uit. Uitgeschakelde zones worden tijdens de uitvoering genegeerd."
+        },
+        "filters": {
+            "label": "Zone filters",
+            "description": "Filters die op objecten binnen deze zone moeten worden toegepast. Worden gebruikt om het aantal valse positieven te verminderen of om te beperken welke objecten als aanwezig in de zone worden beschouwd.",
+            "min_area": {
+                "label": "Minimale oppervlakte van het object"
             }
         }
     }

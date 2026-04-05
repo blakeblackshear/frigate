@@ -19,6 +19,7 @@ from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     calculate_shm_requirements,
     get_amd_gpu_stats,
+    get_axcl_npu_stats,
     get_bandwidth_stats,
     get_cpu_stats,
     get_fs_type,
@@ -260,45 +261,33 @@ async def set_gpu_stats(
             else:
                 stats["jetson-gpu"] = {"gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
-        elif "qsv" in args:
+        elif "qsv" in args or ("vaapi" in args and not is_vaapi_amd_driver()):
             if not config.telemetry.stats.intel_gpu_stats:
                 continue
 
-            # intel QSV GPU
-            intel_usage = get_intel_gpu_stats(config.telemetry.stats.intel_gpu_device)
-
-            if intel_usage is not None:
-                stats["intel-qsv"] = intel_usage or {"gpu": "", "mem": ""}
-            else:
-                stats["intel-qsv"] = {"gpu": "", "mem": ""}
-                hwaccel_errors.append(args)
-        elif "vaapi" in args:
-            if is_vaapi_amd_driver():
-                if not config.telemetry.stats.amd_gpu_stats:
-                    continue
-
-                # AMD VAAPI GPU
-                amd_usage = get_amd_gpu_stats()
-
-                if amd_usage:
-                    stats["amd-vaapi"] = amd_usage
-                else:
-                    stats["amd-vaapi"] = {"gpu": "", "mem": ""}
-                    hwaccel_errors.append(args)
-            else:
-                if not config.telemetry.stats.intel_gpu_stats:
-                    continue
-
-                # intel VAAPI GPU
+            if "intel-gpu" not in stats:
+                # intel GPU (QSV or VAAPI both use the same physical GPU)
                 intel_usage = get_intel_gpu_stats(
                     config.telemetry.stats.intel_gpu_device
                 )
 
                 if intel_usage is not None:
-                    stats["intel-vaapi"] = intel_usage or {"gpu": "", "mem": ""}
+                    stats["intel-gpu"] = intel_usage or {"gpu": "", "mem": ""}
                 else:
-                    stats["intel-vaapi"] = {"gpu": "", "mem": ""}
+                    stats["intel-gpu"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
+        elif "vaapi" in args:
+            if not config.telemetry.stats.amd_gpu_stats:
+                continue
+
+            # AMD VAAPI GPU
+            amd_usage = get_amd_gpu_stats()
+
+            if amd_usage:
+                stats["amd-vaapi"] = amd_usage
+            else:
+                stats["amd-vaapi"] = {"gpu": "", "mem": ""}
+                hwaccel_errors.append(args)
         elif "preset-rk" in args:
             rga_usage = get_rockchip_gpu_stats()
 
@@ -324,6 +313,10 @@ async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> No
             # OpenVINO NPU usage
             ov_usage = get_openvino_npu_stats()
             stats["openvino"] = ov_usage
+        elif detector.type == "axengine":
+            # AXERA NPU usage
+            axcl_usage = get_axcl_npu_stats()
+            stats["axengine"] = axcl_usage
 
     if stats:
         all_stats["npu_usages"] = stats
@@ -504,5 +497,31 @@ def stats_snapshot(
         stats["processes"][name] = {
             "pid": pid,
         }
+
+    # Embed cpu/mem stats into detectors, cameras, and processes
+    # so history consumers don't need the full cpu_usages dict
+    cpu_usages = stats.get("cpu_usages", {})
+
+    for det_stats in stats["detectors"].values():
+        pid_str = str(det_stats.get("pid", ""))
+        usage = cpu_usages.get(pid_str, {})
+        det_stats["cpu"] = usage.get("cpu")
+        det_stats["mem"] = usage.get("mem")
+
+    for cam_stats in stats["cameras"].values():
+        for pid_key, field in [
+            ("ffmpeg_pid", "ffmpeg_cpu"),
+            ("capture_pid", "capture_cpu"),
+            ("pid", "detect_cpu"),
+        ]:
+            pid_str = str(cam_stats.get(pid_key, ""))
+            usage = cpu_usages.get(pid_str, {})
+            cam_stats[field] = usage.get("cpu")
+
+    for proc_stats in stats["processes"].values():
+        pid_str = str(proc_stats.get("pid", ""))
+        usage = cpu_usages.get(pid_str, {})
+        proc_stats["cpu"] = usage.get("cpu")
+        proc_stats["mem"] = usage.get("mem")
 
     return stats

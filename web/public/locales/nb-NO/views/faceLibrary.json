@@ -43,7 +43,8 @@
       "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsscore: {{errorMessage}}",
       "addFaceLibraryFailed": "Kunne ikke angi ansiktsnavn: {{errorMessage}}",
       "deleteNameFailed": "Kunne ikke slette navn: {{errorMessage}}",
-      "renameFaceFailed": "Kunne ikke gi nytt navn til ansikt: {{errorMessage}}"
+      "renameFaceFailed": "Kunne ikke gi nytt navn til ansikt: {{errorMessage}}",
+      "reclassifyFailed": "Kunne ikke reklassifisere ansikt: {{errorMessage}}"
     },
     "success": {
       "deletedFace_one": "Slettet {{count}} ansikt.",
@@ -54,7 +55,8 @@
       "updatedFaceScore": "Oppdaterte ansiktsscore for {{name}} ({{score}}).",
       "uploadedImage": "Bildet ble lastet opp.",
       "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!",
-      "renamedFace": "Nytt navn ble gitt til ansikt {{name}}"
+      "renamedFace": "Nytt navn ble gitt til ansikt {{name}}",
+      "reclassifiedFace": "Ansikt ble reklassifisert."
     }
   },
   "imageEntry": {
@@ -98,5 +100,7 @@
     "desc_other": "Er du sikker på at du vil slette {{count}} ansikter? Denne handlingen kan ikke angres."
   },
   "nofaces": "Ingen ansikter tilgjengelig",
-  "pixels": "{{area}}piksler"
+  "pixels": "{{area}}piksler",
+  "reclassifyFaceAs": "Reklassifiser ansikt som:",
+  "reclassifyFace": "Reklassifiser ansikt"
 }

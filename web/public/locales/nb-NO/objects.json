@@ -112,9 +112,14 @@
   "fedex": "FedEx",
   "dhl": "DHL",
   "an_post": "An Post",
-  "purolator": "Filter",
+  "purolator": "Purolator",
   "postnl": "PostNL",
   "nzpost": "NZPost",
   "postnord": "PostNord",
-  "dpd": "DPD"
+  "dpd": "DPD",
+  "kangaroo": "Kenguru",
+  "skunk": "Skunk",
+  "school_bus": "Skolebuss",
+  "royal_mail": "Royal Mail",
+  "canada_post": "Canada Post"
 }

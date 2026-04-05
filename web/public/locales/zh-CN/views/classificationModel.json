@@ -12,14 +12,15 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "删除类别",
-      "deletedImage": "删除图片",
+      "deletedCategory_other": "删除 {{count}} 个类别",
+      "deletedImage_other": "删除 {{count}} 张图片",
       "categorizedImage": "成功分类图片",
       "trainedModel": "训练模型成功。",
       "trainingModel": "已开始训练模型。",
       "deletedModel_other": "已删除 {{count}} 个模型",
       "updatedModel": "已更新模型配置",
-      "renamedCategory": "成功修改类别名称为 {{name}}"
+      "renamedCategory": "成功修改类别名称为 {{name}}",
+      "reclassifiedImage": "成功重新分类图片"
     },
     "error": {
       "deleteImageFailed": "删除失败：{{errorMessage}}",
@@ -29,7 +30,8 @@
       "deleteModelFailed": "删除模型失败：{{errorMessage}}",
       "updateModelFailed": "更新模型失败：{{errorMessage}}",
       "trainingFailedToStart": "开始训练模型失败：{{errorMessage}}",
-      "renameCategoryFailed": "修改类别名称失败：{{errorMessage}}"
+      "renameCategoryFailed": "修改类别名称失败：{{errorMessage}}",
+      "reclassifyFailed": "重新分类图片失败：{{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -148,8 +150,13 @@
       "allImagesRequired_other": "请对所有图片进行分类。还有 {{count}} 张图片需要分类。",
       "modelCreated": "模型创建成功。请在“最近分类”页面为缺失的状态添加图片，然后训练模型。",
       "missingStatesWarning": {
-        "title": "缺失状态示例",
-        "description": "建议为所有状态都选择示例图片以获得最佳效果。你也可以跳过当前为分类状态选择图片，但需要所有状态都有对应的图片，模型才能够进行训练。跳过后你可通过“最近分类”页面为缺失的状态分类添加图片，然后再训练模型。"
+        "title": "缺失分类示例",
+        "description": "并非所有类别都有示例。可尝试生成新示例以查找缺失的类别，或继续该步骤，之后通过 “最近分类” 页面添加图片。"
+      },
+      "refreshExamples": "生成新示例",
+      "refreshConfirm": {
+        "title": "需要生成新示例？",
+        "description": "此操作将生成一组新的图片，并清除所有选择内容（包括之前的所有类别）。你需要为所有类别重新选择示例。"
       }
     }
   },
@@ -179,5 +186,7 @@
     "noChanges": "自上次训练以来，数据集未作任何更改。",
     "modelNotReady": "模型尚未准备好进行训练"
   },
-  "none": "无标签"
+  "none": "无标签",
+  "reclassifyImageAs": "重新分类图片为：",
+  "reclassifyImage": "重新分类图片"
 }

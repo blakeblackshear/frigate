@@ -5,7 +5,7 @@
     },
     "safe_mode": {
         "label": "安全模式",
-        "description": "启用后，Frigate 将以安全模式启动，将会关闭部分功能，以便排查问题。"
+        "description": "开启后，Frigate 将以安全模式启动，将会关闭部分功能，以便排查问题。"
     },
     "environment_vars": {
         "label": "环境变量",
@@ -52,7 +52,7 @@
         },
         "enabled_in_config": {
             "label": "原始音频状态",
-            "description": "指示原始静态配置文件中是否启用了音频检测。"
+            "description": "指示原始静态配置文件中是否开启了音频检测。"
         }
     },
     "auth": {
@@ -68,7 +68,7 @@
         },
         "reset_admin_password": {
             "label": "重置管理员密码",
-            "description": "启用后，启动时将重置管理员用户密码，并在日志中打印新密码。"
+            "description": "开启后，启动时将重置管理员用户密码，并在日志中打印新密码。"
         },
         "cookie_name": {
             "label": "JWT Cookie 名称",
@@ -183,8 +183,8 @@
         "label": "目标检测",
         "description": "用于运行目标检测、初始化追踪器的检测模块设置。",
         "enabled": {
-            "label": "开启检测",
-            "description": "为所有摄像头启用或禁用目标检测；可按摄像头覆盖。必须启用检测才能运行目标追踪。"
+            "label": "开启目标检测",
+            "description": "为所有摄像头启用或禁用目标检测，可按摄像头覆盖。"
         },
         "height": {
             "label": "检测画面高度",
@@ -536,7 +536,7 @@
         "description": "Frigate Web 端点（端口 8971）的 TLS 设置。",
         "enabled": {
             "label": "开启 TLS",
-            "description": "在配置的 TLS 端口上为 Frigate 的 Web UI 和 API 启用 TLS。"
+            "description": "为 Frigate 的 Web 页面和 API 的端口开启 TLS 加密。"
         }
     },
     "ui": {
@@ -567,7 +567,7 @@
         "label": "检测器硬件",
         "description": "目标检测器（CPU、GPU、ONNX 后端）的配置以及任何检测器特定的模型设置。",
         "type": {
-            "label": "检测器类型",
+            "label": "类型",
             "description": "用于目标检测的检测器类型（例如 'cpu'、'edgetpu'、'openvino'）。"
         },
         "cpu": {
@@ -1352,6 +1352,61 @@
                 "label": "ZMQ 套接字逗留时间（毫秒）",
                 "description": "套接字逗留时间（毫秒）。"
             }
+        },
+        "axengine": {
+            "label": "爱芯元智 NPU",
+            "description": "AXERA AX650N/AX8850N NPU 检测器，通过 AXEngine 运行库加载并执行编译后的 .axmodel 模型文件。",
+            "type": {
+                "label": "类型"
+            }
+        },
+        "model": {
+            "label": "检测器特定的模型配置",
+            "description": "检测器特定的模型配置选项（路径、输入尺寸等）。",
+            "path": {
+                "label": "自定义目标检测模型路径",
+                "description": "自定义检测模型文件的路径（或使用 plus://<model_id> 指定 Frigate+ 模型）。"
+            },
+            "labelmap_path": {
+                "label": "自定义目标检测器的标签映射（labelmap）",
+                "description": "检测器标签映射文件（labelmap）路径，用于将数字类别映射为文字标签。"
+            },
+            "width": {
+                "label": "目标检测模型输入宽度",
+                "description": "模型输入张量（input tensor）的宽度（以像素为单位）。"
+            },
+            "height": {
+                "label": "目标检测模型输入高度",
+                "description": "模型输入张量（input tensor）的高度（以像素为单位）。"
+            },
+            "labelmap": {
+                "label": "标签映射（labelmap）自定义",
+                "description": "合并到标准标签映射表中的覆盖 / 重映射规则。"
+            },
+            "attributes_map": {
+                "label": "目标标签到其属性标签的映射",
+                "description": "用于绑定元数据的目标标签 → 属性标签映射关系（例如：'car'→ ['license_plate'] 为将车牌属性绑定到车辆上）。"
+            },
+            "input_tensor": {
+                "label": "模型输入张量形状",
+                "description": "模型期望的张量格式（Tensor format）：'nhwc' 或 'nchw'。"
+            },
+            "input_pixel_format": {
+                "label": "模型输入像素颜色格式",
+                "description": "模型期望的像素颜色空间：'rgb'、'bgr' 或 'yuv'。"
+            },
+            "input_dtype": {
+                "label": "模型输入数据类型",
+                "description": "模型输入张量的数据类型（例如 'float32'）。"
+            },
+            "model_type": {
+                "label": "目标检测模型类型",
+                "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+            }
+        },
+        "model_path": {
+            "label": "检测器专用模型路径",
+            "description": "所选检测器需要时，需填写其模型文件的路径。"
         }
     },
     "model": {
@@ -1399,7 +1454,7 @@
         }
     },
     "genai": {
-        "label": "生成式 AI 配置（命名提供商）。",
+        "label": "生成式 AI 配置",
         "description": "用于生成目标描述和核查摘要的集成生成式 AI 提供商设置。",
         "api_key": {
             "label": "API 密钥",
@@ -1432,7 +1487,7 @@
     },
     "live": {
         "label": "实时回放",
-        "description": "Web UI 用于控制实时监控流分辨率和质量的设置。",
+        "description": "用于控制 JSMPEG 实时流分辨率与画质的设置。此设置不影响使用 go2rtc 进行实时预览的摄像头。",
         "streams": {
             "label": "实时监控流名称",
             "description": "配置的流名称到用于实时监控播放的 restream/go2rtc 名称的映射。"
@@ -1463,7 +1518,7 @@
         },
         "skip_motion_threshold": {
             "label": "跳过画面变动阈值",
-            "description": "如果单帧中图像变化超过此比例，检测器将返回无画面变动框并立即重新校准。这可以节省 CPU 并减少闪电、风暴等情况下的误报，但可能会错过真实事件，如 PTZ 摄像头自动追踪目标。权衡的是丢弃几兆字节的录像与查看几个短片之间的取舍。范围 0.0 到 1.0。"
+            "description": "如果单帧中画面变化超过此比例，检测器将判定为无画面变动并立即重新校准。这可以节省 CPU 并减少闪电、风暴等情况下的误报，但也可能会错过真正的事件，如 PTZ 摄像头自动追踪目标。你需要权衡取舍：是否牺牲少量录制片段，换取更少无效视频与更低的误检。保持为空即可关闭该功能。"
         },
         "improve_contrast": {
             "label": "改善对比度",
@@ -1724,7 +1779,7 @@
         },
         "detections": {
             "label": "检测配置",
-            "description": "创建检测事件（非警报）以及保留多长时间的设置。",
+            "description": "用于设置哪些追踪目标会生成检测记录（非警报类），以及检测记录的保留方式。",
             "enabled": {
                 "label": "开启检测",
                 "description": "为所有摄像头启用或禁用检测事件；可按摄像头覆盖。"
@@ -1789,7 +1844,7 @@
     },
     "snapshots": {
         "label": "快照",
-        "description": "所有摄像头的追踪目标 JPEG 快照保存设置；可按摄像头覆盖。",
+        "description": "所有摄像头的追踪目标 API 快照设置；可摄像头单独配置覆盖全局配置。",
         "enabled": {
             "label": "开启快照",
             "description": "为所有摄像头启用或禁用保存快照；可按摄像头覆盖。"
@@ -1800,15 +1855,15 @@
         },
         "timestamp": {
             "label": "时间戳叠加",
-            "description": "在保存的快照上叠加时间戳。"
+            "description": "在 API 生成的快照上叠加时间戳。"
         },
         "bounding_box": {
             "label": "边界框叠加",
-            "description": "在保存的快照上绘制追踪目标的边界框。"
+            "description": "在 API 生成的快照上绘制追踪目标的边界框。"
         },
         "crop": {
             "label": "裁剪快照",
-            "description": "将保存的快照裁剪到检测到的目标边界框。"
+            "description": "在 API 生成的快照裁剪到检测到的目标边界框。"
         },
         "required_zones": {
             "label": "必需区域",
@@ -1816,11 +1871,11 @@
         },
         "height": {
             "label": "快照高度",
-            "description": "将保存的快照调整到的目标高度（像素）；留空则保持原始大小。"
+            "description": "将 API 生成的快照调整到的目标高度（像素）；留空则保持原始大小。"
         },
         "retain": {
             "label": "快照保留",
-            "description": "保存快照的保留设置，包括默认天数和按目标覆盖。",
+            "description": "快照的保留设置，包括默认天数和按目标覆盖。",
             "default": {
                 "label": "默认保留",
                 "description": "保留快照的默认天数。"
@@ -1835,8 +1890,8 @@
             }
         },
         "quality": {
-            "label": "JPEG 质量",
-            "description": "保存快照的 JPEG 编码质量（0-100）。"
+            "label": "快照质量",
+            "description": "保存快照的编码质量（0-100）。"
         }
     },
     "timestamp_style": {
@@ -1951,8 +2006,8 @@
             "description": "触发将历史追踪目标完全重新索引到嵌入数据库。"
         },
         "model": {
-            "label": "语义搜索模型",
-            "description": "用于语义搜索的嵌入模型（例如 'jinav1'）。"
+            "label": "语义搜索模型或生成式 AI 服务名称",
+            "description": "用于语义搜索的嵌入模型（例如 'jinav1'），或具有嵌入功能（embeddings）的生成式 AI 服务名称。"
         },
         "model_size": {
             "label": "模型大小",
@@ -1995,12 +2050,12 @@
         "label": "车牌识别",
         "description": "车牌识别设置，包括检测阈值、格式化和已知车牌。",
         "enabled": {
-            "label": "开启 LPR",
+            "label": "开启车牌识别",
             "description": "为所有摄像头启用或禁用车牌识别；可按摄像头覆盖。"
         },
         "model_size": {
             "label": "模型大小",
-            "description": "用于文本检测/识别的模型大小。大多数用户应使用 'small'。"
+            "description": "用于文本检测/识别的模型大小，大多数用户应使用 'small'，只有'small'模型支持中文。"
         },
         "detection_threshold": {
             "label": "检测阈值",
@@ -2187,6 +2242,22 @@
         "ignore_time_mismatch": {
             "label": "忽略时间不匹配",
             "description": "忽略 ONVIF 通信中摄像头和 Frigate 服务器之间的时间同步差异。"
+        },
+        "profile": {
+            "label": "ONVIF 配置文件",
+            "description": "用于 PTZ 控制的指定 ONVIF 媒体配置，将通过 Token 或名称匹配。如果未手动指定，将自动选择第一个包含有效 PTZ 配置的媒体配置。"
         }
+    },
+    "profiles": {
+        "label": "配置模板",
+        "description": "带有别名的命名配置模板定义。摄像头配置模板必须引用此处定义的名称。",
+        "friendly_name": {
+            "label": "别名",
+            "description": "在界面中显示的此配置模板名称，可以使用中文。"
+        }
+    },
+    "active_profile": {
+        "label": "激活配置模板",
+        "description": "当前激活的配置模板名称。仅在运行时使用，不会写入 YAML 配置文件中。"
     }
 }

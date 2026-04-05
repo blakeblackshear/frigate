@@ -4,11 +4,28 @@ title: Advanced Options
 sidebar_label: Advanced Options
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 ### Logging
 
 #### Frigate `logger`
 
 Change the default log level for troubleshooting purposes.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Logging" />.
+
+| Field                     | Description                                             |
+| ------------------------- | ------------------------------------------------------- |
+| **Logging level**         | The default log level for all modules (default: `info`) |
+| **Per-process log level** | Override the log level for specific modules             |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 logger:
@@ -18,6 +35,9 @@ logger:
   logs:
     frigate.mqtt: error
 ```
+
+</TabItem>
+</ConfigTabs>
 
 Available log levels are: `debug`, `info`, `warning`, `error`, `critical`
 
@@ -48,7 +68,20 @@ This section can be used to set environment variables for those unable to modify
 
 Variables prefixed with `FRIGATE_` can be referenced in config fields that support environment variable substitution (such as MQTT host and credentials, camera stream URLs, and ONVIF host and credentials) using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
-Example:
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Environment variables" /> to add or edit environment variables.
+
+| Field     | Description                                               |
+| --------- | --------------------------------------------------------- |
+| **Key**   | The environment variable name (e.g., `FRIGATE_MQTT_USER`) |
+| **Value** | The value for the variable                                |
+
+Variables defined here can be referenced elsewhere in your configuration using the `{FRIGATE_VARIABLE_NAME}` syntax.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 environment_vars:
@@ -61,9 +94,26 @@ mqtt:
   password: "{FRIGATE_MQTT_PASSWORD}"
 ```
 
+</TabItem>
+</ConfigTabs>
+
 #### TensorFlow Thread Configuration
 
 If you encounter thread creation errors during classification model training, you can limit TensorFlow's thread usage:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Environment variables" /> and add the following variables:
+
+| Variable                          | Description                                    |
+| --------------------------------- | ---------------------------------------------- |
+| `TF_INTRA_OP_PARALLELISM_THREADS` | Threads within operations (`0` = use default)  |
+| `TF_INTER_OP_PARALLELISM_THREADS` | Threads between operations (`0` = use default) |
+| `TF_DATASET_THREAD_POOL_SIZE`     | Data pipeline threads (`0` = use default)      |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 environment_vars:
@@ -72,18 +122,34 @@ environment_vars:
   TF_DATASET_THREAD_POOL_SIZE: "2" # Data pipeline threads (0 = use default)
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### `database`
 
 Tracked object and recording information is managed in a sqlite database at `/config/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
 
-If you are storing your database on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
+If you are storing your database on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database if necessary.
 
 This may need to be in a custom location if network storage is used for the media folder.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Database" />.
+
+- Set **Database path** to the custom path for the Frigate database file (default: `/config/frigate.db`)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 database:
   path: /path/to/frigate.db
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ### `model`
 
@@ -103,6 +169,22 @@ Custom models may also require different input tensor formats. The colorspace co
 |            "nhwc"             |
 |            "nchw"             |
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detection model" /> to configure the model path, dimensions, and input format.
+
+| Field                                         | Description                          |
+| --------------------------------------------- | ------------------------------------ |
+| **Custom object detector model path**         | Path to the custom model file        |
+| **Object detection model input width**        | Model input width (default: 320)     |
+| **Object detection model input height**       | Model input height (default: 320)    |
+| **Advanced > Model Input Tensor Shape**       | Input tensor shape: `nhwc` or `nchw` |
+| **Advanced > Model Input Pixel Color Format** | Pixel format: `rgb`, `bgr`, or `yuv` |
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 # Optional: model config
 model:
@@ -112,6 +194,9 @@ model:
   input_tensor: "nhwc"
   input_pixel_format: "bgr"
 ```
+
+</TabItem>
+</ConfigTabs>
 
 #### `labelmap`
 
@@ -163,7 +248,15 @@ services:
 
 ### Enabling IPv6
 
-IPv6 is disabled by default, to enable IPv6 modify your Frigate configuration as follows:
+IPv6 is disabled by default. Enable it in the Frigate configuration.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Networking" /> and expand **IPv6 configuration**, then enable **Enable IPv6**.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 networking:
@@ -171,11 +264,25 @@ networking:
     enabled: True
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Listen on different ports
 
-You can change the ports Nginx uses for listening using Frigate's configuration file. The internal port (unauthenticated) and external port (authenticated) can be changed independently. You can also specify an IP address using the format `ip:port` if you wish to bind the port to a specific interface. This may be useful for example to prevent exposing the internal port outside the container.
+You can change the ports Nginx uses for listening. The internal port (unauthenticated) and external port (authenticated) can be changed independently. You can also specify an IP address using the format `ip:port` if you wish to bind the port to a specific interface. This may be useful for example to prevent exposing the internal port outside the container.
 
-For example:
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Networking" /> to configure the listen ports.
+
+| Field             | Description                                               |
+| ----------------- | --------------------------------------------------------- |
+| **Internal port** | The unauthenticated listen address/port (default: `5000`) |
+| **External port** | The authenticated listen address/port (default: `8971`)   |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 networking:
@@ -183,6 +290,9 @@ networking:
     internal: 127.0.0.1:5000
     external: 8971
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::warning
 

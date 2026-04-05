@@ -41,7 +41,7 @@
         },
         "enabled_in_config": {
             "label": "原始音频状态",
-            "description": "指示原始静态配置文件中是否启用了音频检测。"
+            "description": "指示原始静态配置文件中是否开启了音频检测。"
         }
     },
     "audio_transcription": {
@@ -79,8 +79,8 @@
         "label": "目标检测",
         "description": "用于运行目标检测、初始化追踪器的检测模块设置。",
         "enabled": {
-            "label": "开启检测",
-            "description": "开启或关闭该摄像头的目标检测。如需运行目标追踪，必须先开启检测。"
+            "label": "开启目标检测",
+            "description": "开启或关闭该摄像头的目标检测。"
         },
         "height": {
             "label": "检测画面高度",
@@ -299,7 +299,7 @@
         },
         "skip_motion_threshold": {
             "label": "跳过画面变动阈值",
-            "description": "如果单帧中图像变化超过此比例，检测器将返回无画面变动框并立即重新校准。这可以节省 CPU 并减少闪电、风暴等情况下的误报，但可能会错过真实事件，如 PTZ 摄像头自动追踪目标。权衡的是丢弃几兆字节的录像与查看几个短片之间的取舍。范围 0.0 到 1.0。"
+            "description": "如果单帧中画面变化超过此比例，检测器将判定为无画面变动并立即重新校准。这可以节省 CPU 并减少闪电、风暴等情况下的误报，但也可能会错过真正的事件，如 PTZ 摄像头自动追踪目标。你需要权衡取舍：是否牺牲少量录制片段，换取更少无效视频与更低的误检。保持为空即可关闭该功能。"
         },
         "improve_contrast": {
             "label": "改善对比度",
@@ -560,7 +560,7 @@
         },
         "detections": {
             "label": "检测配置",
-            "description": "创建检测事件（非警报）以及保留多长时间的设置。",
+            "description": "用于设置哪些追踪目标会生成检测记录（非警报类），以及检测记录的保留方式。",
             "enabled": {
                 "label": "开启检测",
                 "description": "开启或关闭此摄像头的检测事件。"
@@ -636,15 +636,15 @@
         },
         "timestamp": {
             "label": "时间戳叠加",
-            "description": "在保存的快照上叠加时间戳。"
+            "description": "在 API 生成的快照上叠加时间戳。"
         },
         "bounding_box": {
             "label": "边界框叠加",
-            "description": "在保存的快照上绘制追踪目标的边界框。"
+            "description": "在 API 生成的快照上绘制追踪目标的边界框。"
         },
         "crop": {
             "label": "裁剪快照",
-            "description": "将保存的快照裁剪到检测到的目标边界框。"
+            "description": "在 API 生成的快照裁剪到检测到的目标边界框。"
         },
         "required_zones": {
             "label": "必需区域",
@@ -652,11 +652,11 @@
         },
         "height": {
             "label": "快照高度",
-            "description": "将保存的快照调整到的目标高度（像素）；留空则保持原始大小。"
+            "description": "将 API 生成的快照调整到的目标高度（像素）；留空则保持原始大小。"
         },
         "retain": {
             "label": "快照保留",
-            "description": "保存快照的保留设置，包括默认天数和按目标覆盖。",
+            "description": "快照的保留设置，包括默认天数和按目标覆盖。",
             "default": {
                 "label": "默认保留",
                 "description": "保留快照的默认天数。"
@@ -671,10 +671,10 @@
             }
         },
         "quality": {
-            "label": "JPEG 质量",
-            "description": "保存快照的 JPEG 编码质量（0-100）。"
+            "label": "快照质量",
+            "description": "保存快照的编码质量（0-100）。"
         },
-        "description": "此摄像头保存的追踪目标 JPEG 快照设置。"
+        "description": "此摄像头的追踪目标 API 快照设置。"
     },
     "timestamp_style": {
         "label": "时间戳样式",
@@ -748,8 +748,8 @@
         "label": "车牌识别",
         "description": "车牌识别设置，包括检测阈值、格式化和已知车牌。",
         "enabled": {
-            "label": "开启 LPR",
-            "description": "在此摄像头上启用或禁用 LPR。"
+            "label": "开启车牌识别",
+            "description": "在此摄像头上启用或禁用车牌识别。"
         },
         "min_area": {
             "label": "最小车牌区域",
@@ -834,6 +834,10 @@
         "ignore_time_mismatch": {
             "label": "忽略时间不匹配",
             "description": "忽略 ONVIF 通信中摄像头和 Frigate 服务器之间的时间同步差异。"
+        },
+        "profile": {
+            "label": "ONVIF 配置文件",
+            "description": "用于 PTZ 控制的指定 ONVIF 媒体配置，将通过 Token 或名称匹配。如果未手动指定，将自动选择第一个包含有效 PTZ 配置的媒体配置。"
         }
     },
     "ui": {
@@ -937,5 +941,9 @@
     "enabled_in_config": {
         "label": "原始摄像头状态",
         "description": "保持摄像头的原始状态跟踪。"
+    },
+    "profiles": {
+        "label": "配置模板",
+        "description": "可在运行时切换指定命名的配置模板，支持局部覆盖参数。"
     }
 }

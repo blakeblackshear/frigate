@@ -71,6 +71,13 @@ import {
 } from "@/utils/configUtil";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useRestart } from "@/api/ws";
+import type {
+  ConditionalMessage,
+  FieldConditionalMessage,
+  MessageConditionContext,
+} from "../section-configs/types";
+import { useConfigMessages } from "@/hooks/use-config-messages";
+import { ConfigMessageBanner } from "../ConfigMessageBanner";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -100,6 +107,10 @@ export interface SectionConfig {
     formData: unknown,
     errors: FormValidation,
   ) => FormValidation;
+  /** Conditional messages displayed as banners above the section form */
+  messages?: ConditionalMessage[];
+  /** Conditional messages displayed inline with specific fields */
+  fieldMessages?: FieldConditionalMessage[];
 }
 
 export interface BaseSectionProps {
@@ -152,6 +163,10 @@ export interface BaseSectionProps {
   profileBorderColor?: string;
   /** Callback to delete the current profile's overrides for this section */
   onDeleteProfileSection?: () => void;
+  /** Whether a SaveAll operation is in progress (disables individual Save) */
+  isSavingAll?: boolean;
+  /** Callback when this section's saving state changes */
+  onSavingChange?: (isSaving: boolean) => void;
 }
 
 export interface CreateSectionOptions {
@@ -186,6 +201,8 @@ export function ConfigSection({
   profileFriendlyName,
   profileBorderColor,
   onDeleteProfileSection,
+  isSavingAll = false,
+  onSavingChange,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -246,6 +263,7 @@ export function ConfigSection({
     [onPendingDataChange, effectiveSectionPath, cameraName],
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isResettingToDefault, setIsResettingToDefault] = useState(false);
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
   const [extraHasChanges, setExtraHasChanges] = useState(false);
   const [formKey, setFormKey] = useState(0);
@@ -529,6 +547,65 @@ export function ConfigSection({
   const currentFormData = pendingData || formData;
   const effectiveBaselineFormData = baselineSnapshot;
 
+  // Build context for conditional messages
+  const messageContext = useMemo<MessageConditionContext | undefined>(() => {
+    if (!config || !currentFormData) return undefined;
+    return {
+      fullConfig: config,
+      fullCameraConfig:
+        effectiveLevel === "camera" && cameraName
+          ? config.cameras?.[cameraName]
+          : undefined,
+      level: effectiveLevel,
+      cameraName,
+      formData: currentFormData as ConfigSectionData,
+    };
+  }, [config, currentFormData, effectiveLevel, cameraName]);
+
+  const { activeMessages, activeFieldMessages } = useConfigMessages(
+    sectionConfig.messages,
+    sectionConfig.fieldMessages,
+    messageContext,
+  );
+
+  // Merge field-level conditional messages into uiSchema
+  const effectiveUiSchema = useMemo(() => {
+    if (activeFieldMessages.length === 0) return sectionConfig.uiSchema;
+    const merged = { ...(sectionConfig.uiSchema ?? {}) };
+    for (const msg of activeFieldMessages) {
+      const segments = msg.field.split(".");
+      // Navigate to the nested uiSchema node, shallow-cloning along the way
+      let node = merged;
+      for (let i = 0; i < segments.length - 1; i++) {
+        const seg = segments[i];
+        node[seg] = { ...(node[seg] as Record<string, unknown>) };
+        node = node[seg] as Record<string, unknown>;
+      }
+      const leafKey = segments[segments.length - 1];
+      const existing = node[leafKey] as Record<string, unknown> | undefined;
+      const existingMessages = ((existing?.["ui:messages"] as unknown[]) ??
+        []) as Array<{
+        key: string;
+        messageKey: string;
+        severity: string;
+        position?: string;
+      }>;
+      node[leafKey] = {
+        ...existing,
+        "ui:messages": [
+          ...existingMessages,
+          {
+            key: msg.key,
+            messageKey: msg.messageKey,
+            severity: msg.severity,
+            position: msg.position ?? "before",
+          },
+        ],
+      };
+    }
+    return merged;
+  }, [sectionConfig.uiSchema, activeFieldMessages]);
+
   const currentOverrides = useMemo(() => {
     if (!currentFormData || typeof currentFormData !== "object") {
       return undefined;
@@ -577,6 +654,7 @@ export function ConfigSection({
     if (!pendingData) return;
 
     setIsSaving(true);
+    onSavingChange?.(true);
     try {
       const basePath =
         effectiveLevel === "camera" && cameraName
@@ -659,8 +737,8 @@ export function ConfigSection({
         );
       }
 
+      await refreshConfig();
       setPendingData(null);
-      refreshConfig();
       onSave?.();
     } catch (error) {
       // Parse Pydantic validation errors from API response
@@ -699,6 +777,7 @@ export function ConfigSection({
       }
     } finally {
       setIsSaving(false);
+      onSavingChange?.(false);
     }
   }, [
     sectionPath,
@@ -718,12 +797,14 @@ export function ConfigSection({
     setPendingData,
     requiresRestartForOverrides,
     skipSave,
+    onSavingChange,
   ]);
 
   // Handle reset to global/defaults - removes camera-level override or resets global to defaults
   const handleResetToGlobal = useCallback(async () => {
     if (effectiveLevel === "camera" && !cameraName) return;
 
+    setIsResettingToDefault(true);
     try {
       const basePath =
         effectiveLevel === "camera" && cameraName
@@ -758,6 +839,8 @@ export function ConfigSection({
           defaultValue: "Failed to reset settings",
         }),
       );
+    } finally {
+      setIsResettingToDefault(false);
     }
   }, [
     effectiveSectionPath,
@@ -861,6 +944,7 @@ export function ConfigSection({
 
   const sectionContent = (
     <div className="space-y-6">
+      <ConfigMessageBanner messages={activeMessages} />
       <ConfigForm
         key={formKey}
         schema={modifiedSchema}
@@ -872,7 +956,7 @@ export function ConfigSection({
         hiddenFields={effectiveHiddenFields}
         advancedFields={sectionConfig.advancedFields}
         liveValidate={sectionConfig.liveValidate}
-        uiSchema={sectionConfig.uiSchema}
+        uiSchema={effectiveUiSchema}
         disabled={disabled || isSaving}
         readonly={readonly}
         showSubmit={false}
@@ -945,9 +1029,12 @@ export function ConfigSection({
                 <Button
                   onClick={() => setIsResetDialogOpen(true)}
                   variant="outline"
-                  disabled={isSaving || disabled}
+                  disabled={isSaving || isResettingToDefault || disabled}
                   className="flex flex-1 gap-2"
                 >
+                  {isResettingToDefault && (
+                    <ActivityIndicator className="h-4 w-4" />
+                  )}
                   {effectiveLevel === "global"
                     ? t("button.resetToDefault", {
                         ns: "common",
@@ -980,7 +1067,7 @@ export function ConfigSection({
               <Button
                 onClick={handleReset}
                 variant="outline"
-                disabled={isSaving || disabled}
+                disabled={isSaving || isSavingAll || disabled}
                 className="flex min-w-36 flex-1 gap-2"
               >
                 {t("button.undo", { ns: "common", defaultValue: "Undo" })}
@@ -990,7 +1077,11 @@ export function ConfigSection({
               onClick={handleSave}
               variant="select"
               disabled={
-                !hasChanges || hasValidationErrors || isSaving || disabled
+                !hasChanges ||
+                hasValidationErrors ||
+                isSaving ||
+                isSavingAll ||
+                disabled
               }
               className="flex min-w-36 flex-1 gap-2"
             >

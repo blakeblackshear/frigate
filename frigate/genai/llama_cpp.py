@@ -4,7 +4,7 @@ import base64
 import io
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 
 import httpx
 import numpy as np
@@ -23,7 +23,7 @@ def _to_jpeg(img_bytes: bytes) -> bytes | None:
     try:
         img = Image.open(io.BytesIO(img_bytes))
         if img.mode != "RGB":
-            img = img.convert("RGB")
+            img = img.convert("RGB")  # type: ignore[assignment]
         buf = io.BytesIO()
         img.save(buf, format="JPEG", quality=85)
         return buf.getvalue()
@@ -36,19 +36,123 @@ def _to_jpeg(img_bytes: bytes) -> bytes | None:
 class LlamaCppClient(GenAIClient):
     """Generative AI client for Frigate using llama.cpp server."""
 
-    provider: str  # base_url
+    provider: str | None  # base_url
     provider_options: dict[str, Any]
+    _context_size: int | None
+    _supports_vision: bool
+    _supports_audio: bool
+    _supports_tools: bool
 
-    def _init_provider(self):
-        """Initialize the client."""
+    def _init_provider(self) -> str | None:
+        """Initialize the client and query model metadata from the server."""
         self.provider_options = {
             **self.genai_config.provider_options,
         }
-        return (
+        self._context_size = None
+        self._supports_vision = False
+        self._supports_audio = False
+        self._supports_tools = False
+
+        base_url = (
             self.genai_config.base_url.rstrip("/")
             if self.genai_config.base_url
             else None
         )
+
+        if base_url is None:
+            return None
+
+        configured_model = self.genai_config.model
+
+        # Query /v1/models to validate the configured model exists
+        try:
+            response = requests.get(
+                f"{base_url}/v1/models",
+                timeout=10,
+            )
+            response.raise_for_status()
+            models_data = response.json()
+
+            model_found = False
+            for model in models_data.get("data", []):
+                model_ids = {model.get("id")}
+                for alias in model.get("aliases", []):
+                    model_ids.add(alias)
+                if configured_model in model_ids:
+                    model_found = True
+                    break
+
+            if not model_found:
+                available = []
+                for m in models_data.get("data", []):
+                    available.append(m.get("id", "unknown"))
+                    for alias in m.get("aliases", []):
+                        available.append(alias)
+                logger.error(
+                    "Model '%s' not found on llama.cpp server. Available models: %s",
+                    configured_model,
+                    available,
+                )
+                return None
+        except Exception as e:
+            logger.warning(
+                "Failed to query llama.cpp /v1/models endpoint: %s. "
+                "Model validation skipped.",
+                e,
+            )
+
+        # Query /props for context size, modalities, and tool support.
+        # The standard /props?model=<name> endpoint works with llama-server.
+        # If it fails, try the llama-swap per-model passthrough endpoint which
+        # returns props for a specific model without requiring it to be loaded.
+        try:
+            try:
+                response = requests.get(
+                    f"{base_url}/props",
+                    params={"model": configured_model},
+                    timeout=10,
+                )
+                response.raise_for_status()
+                props = response.json()
+            except Exception:
+                response = requests.get(
+                    f"{base_url}/upstream/{configured_model}/props",
+                    timeout=10,
+                )
+                response.raise_for_status()
+                props = response.json()
+
+            # Context size from server runtime config
+            default_settings = props.get("default_generation_settings", {})
+            n_ctx = default_settings.get("n_ctx")
+            if n_ctx:
+                self._context_size = int(n_ctx)
+
+            # Modalities (vision, audio)
+            modalities = props.get("modalities", {})
+            self._supports_vision = modalities.get("vision", False)
+            self._supports_audio = modalities.get("audio", False)
+
+            # Tool support from chat template capabilities
+            chat_caps = props.get("chat_template_caps", {})
+            self._supports_tools = chat_caps.get("supports_tools", False)
+
+            logger.info(
+                "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
+                configured_model,
+                self._context_size or "unknown",
+                self._supports_vision,
+                self._supports_audio,
+                self._supports_tools,
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to query llama.cpp /props endpoint: %s. "
+                "Using defaults for context size and capabilities.",
+                e,
+            )
+
+        return base_url
 
     def _send(
         self,
@@ -75,7 +179,7 @@ class LlamaCppClient(GenAIClient):
                 content.append(
                     {
                         "type": "image_url",
-                        "image_url": {
+                        "image_url": {  # type: ignore[dict-item]
                             "url": f"data:image/jpeg;base64,{encoded_image}",
                         },
                     }
@@ -111,15 +215,57 @@ class LlamaCppClient(GenAIClient):
             ):
                 choice = result["choices"][0]
                 if "message" in choice and "content" in choice["message"]:
-                    return choice["message"]["content"].strip()
+                    return str(choice["message"]["content"].strip())
             return None
         except Exception as e:
             logger.warning("llama.cpp returned an error: %s", str(e))
             return None
 
+    @property
+    def supports_vision(self) -> bool:
+        """Whether the loaded model supports vision/image input."""
+        return self._supports_vision
+
+    @property
+    def supports_audio(self) -> bool:
+        """Whether the loaded model supports audio input."""
+        return self._supports_audio
+
+    @property
+    def supports_tools(self) -> bool:
+        """Whether the loaded model supports tool/function calling."""
+        return self._supports_tools
+
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the llama.cpp server."""
+        if self.provider is None:
+            return []
+        try:
+            response = requests.get(f"{self.provider}/v1/models", timeout=10)
+            response.raise_for_status()
+            models = []
+            for m in response.json().get("data", []):
+                models.append(m.get("id", "unknown"))
+                for alias in m.get("aliases", []):
+                    models.append(alias)
+            return sorted(models)
+        except Exception as e:
+            logger.warning("Failed to list llama.cpp models: %s", e)
+            return []
+
     def get_context_size(self) -> int:
-        """Get the context window size for llama.cpp."""
-        return int(self.provider_options.get("context_size", 4096))
+        """Get the context window size for llama.cpp.
+
+        Resolution order:
+        1. provider_options["context_size"] (user override)
+        2. Value queried from llama.cpp server at init
+        3. Default fallback of 4096
+        """
+        if "context_size" in self.provider_options:
+            return int(self.provider_options["context_size"])
+        if self._context_size is not None:
+            return self._context_size
+        return 4096
 
     def _build_payload(
         self,
@@ -229,7 +375,7 @@ class LlamaCppClient(GenAIClient):
             content.append(
                 {
                     "prompt_string": "<__media__>\n",
-                    "multimodal_data": [encoded],
+                    "multimodal_data": [encoded],  # type: ignore[dict-item]
                 }
             )
 
@@ -367,7 +513,7 @@ class LlamaCppClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
-    ):
+    ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools via OpenAI-compatible streaming API."""
         if self.provider is None:
             logger.warning(

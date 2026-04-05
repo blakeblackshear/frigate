@@ -2,7 +2,7 @@ import logging
 import threading
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Dict
+from typing import Any, Dict
 
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from frigate.config import FrigateConfig
@@ -15,7 +15,7 @@ from frigate.util.builtin import to_relative_box
 logger = logging.getLogger(__name__)
 
 
-def should_update_db(prev_event: Event, current_event: Event) -> bool:
+def should_update_db(prev_event: dict[str, Any], current_event: dict[str, Any]) -> bool:
     """If current_event has updated fields and (clip or snapshot)."""
     # If event is ending and was previously saved, always update to set end_time
     # This ensures events are properly ended even when alerts/detections are disabled
@@ -47,7 +47,9 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
     return False
 
 
-def should_update_state(prev_event: Event, current_event: Event) -> bool:
+def should_update_state(
+    prev_event: dict[str, Any], current_event: dict[str, Any]
+) -> bool:
     """If current event should update state, but not necessarily update the db."""
     if prev_event["stationary"] != current_event["stationary"]:
         return True
@@ -74,7 +76,7 @@ class EventProcessor(threading.Thread):
         super().__init__(name="event_processor")
         self.config = config
         self.timeline_queue = timeline_queue
-        self.events_in_process: Dict[str, Event] = {}
+        self.events_in_process: Dict[str, dict[str, Any]] = {}
         self.stop_event = stop_event
 
         self.event_receiver = EventUpdateSubscriber()
@@ -92,7 +94,7 @@ class EventProcessor(threading.Thread):
             if update == None:
                 continue
 
-            source_type, event_type, camera, _, event_data = update
+            source_type, event_type, camera, _, event_data = update  # type: ignore[misc]
 
             logger.debug(
                 f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
@@ -140,7 +142,7 @@ class EventProcessor(threading.Thread):
         self,
         event_type: str,
         camera: str,
-        event_data: Event,
+        event_data: dict[str, Any],
     ) -> None:
         """handle tracked object event updates."""
         updated_db = False
@@ -150,8 +152,13 @@ class EventProcessor(threading.Thread):
             camera_config = self.config.cameras.get(camera)
             if camera_config is None:
                 return
+
             width = camera_config.detect.width
             height = camera_config.detect.height
+
+            if width is None or height is None:
+                return
+
             first_detector = list(self.config.detectors.values())[0]
 
             start_time = event_data["start_time"]
@@ -222,8 +229,12 @@ class EventProcessor(threading.Thread):
                 Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
-                Event.model_hash: first_detector.model.model_hash,
-                Event.model_type: first_detector.model.model_type,
+                Event.model_hash: first_detector.model.model_hash
+                if first_detector.model
+                else None,
+                Event.model_type: first_detector.model.model_type
+                if first_detector.model
+                else None,
                 Event.detector_type: first_detector.type,
                 Event.data: {
                     "box": box,
@@ -287,10 +298,10 @@ class EventProcessor(threading.Thread):
 
         if event_type == EventStateEnum.end:
             del self.events_in_process[event_data["id"]]
-            self.event_end_publisher.publish((event_data["id"], camera, updated_db))
+            self.event_end_publisher.publish((event_data["id"], camera, updated_db))  # type: ignore[arg-type]
 
     def handle_external_detection(
-        self, event_type: EventStateEnum, event_data: Event
+        self, event_type: EventStateEnum, event_data: dict[str, Any]
     ) -> None:
         # Skip replay cameras
         if event_data.get("camera", "").startswith(REPLAY_CAMERA_PREFIX):

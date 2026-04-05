@@ -2,12 +2,13 @@ import { useTheme } from "@/context/theme-provider";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
+import { useTimeFormat } from "@/hooks/use-date-utils";
 
 const GRAPH_COLORS = ["#5C7CFA", "#ED5CFA", "#FAD75C"];
 
@@ -17,6 +18,7 @@ type CameraLineGraphProps = {
   dataLabels: string[];
   updateTimes: number[];
   data: ApexAxisChartSeries;
+  isActive?: boolean;
 };
 export function CameraLineGraph({
   graphId,
@@ -24,6 +26,7 @@ export function CameraLineGraph({
   dataLabels,
   updateTimes,
   data,
+  isActive = true,
 }: CameraLineGraphProps) {
   const { t } = useTranslation(["views/system", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -46,7 +49,7 @@ export function CameraLineGraph({
 
   const locale = useDateLocale();
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
       ns: "common",
@@ -134,6 +137,16 @@ export function CameraLineGraph({
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
   }, [graphId, options]);
 
+  const hasBeenActive = useRef(isActive);
+  useEffect(() => {
+    if (isActive && hasBeenActive.current === false) {
+      ApexCharts.exec(graphId, "updateSeries", data, true);
+    }
+    hasBeenActive.current = isActive;
+    // only replay animation on visibility change, not data updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, graphId]);
+
   return (
     <div className="flex w-full flex-col">
       {lastValues && (
@@ -166,6 +179,7 @@ type EventsPerSecondLineGraphProps = {
   name: string;
   updateTimes: number[];
   data: ApexAxisChartSeries;
+  isActive?: boolean;
 };
 export function EventsPerSecondsLineGraph({
   graphId,
@@ -173,6 +187,7 @@ export function EventsPerSecondsLineGraph({
   name,
   updateTimes,
   data,
+  isActive = true,
 }: EventsPerSecondLineGraphProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -189,7 +204,7 @@ export function EventsPerSecondsLineGraph({
   const locale = useDateLocale();
   const { t } = useTranslation(["common"]);
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
       ns: "common",
@@ -276,6 +291,16 @@ export function EventsPerSecondsLineGraph({
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
   }, [graphId, options]);
+
+  const hasBeenActive = useRef(isActive);
+  useEffect(() => {
+    if (isActive && hasBeenActive.current === false) {
+      ApexCharts.exec(graphId, "updateSeries", data, true);
+    }
+    hasBeenActive.current = isActive;
+    // only replay animation on visibility change, not data updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, graphId]);
 
   return (
     <div className="flex w-full flex-col">

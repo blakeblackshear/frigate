@@ -1,4 +1,5 @@
 {
+  "documentTitle": "Chat - Frigate",
   "title": "Frigate Chat",
   "subtitle": "Your AI assistant for camera management and insights",
   "placeholder": "Ask anything...",
@@ -15,10 +16,14 @@
   "suggested_requests": "Try asking:",
   "starting_requests": {
     "show_recent_events": "Show recent events",
-    "show_camera_status": "Show camera status"
+    "show_camera_status": "Show camera status",
+    "recap": "What happened while I was away?",
+    "watch_camera": "Watch a camera for activity"
   },
   "starting_requests_prompts": {
     "show_recent_events": "Show me the recent events from the last hour",
-    "show_camera_status": "What is the current status of my cameras?"
+    "show_camera_status": "What is the current status of my cameras?",
+    "recap": "What happened while I was away?",
+    "watch_camera": "Watch the front door and let me know if anyone shows up"
   }
 }

@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { FrigateStats, GpuInfo } from "@/types/stats";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
 import {
   DetectorCpuThreshold,
@@ -26,10 +26,12 @@ import { CiCircleAlert } from "react-icons/ci";
 type GeneralMetricsProps = {
   lastUpdated: number;
   setLastUpdated: (last: number) => void;
+  isActive: boolean;
 };
 export default function GeneralMetrics({
   lastUpdated,
   setLastUpdated,
+  isActive,
 }: GeneralMetricsProps) {
   // extra info
   const { t } = useTranslation(["views/system"]);
@@ -37,10 +39,12 @@ export default function GeneralMetrics({
 
   // stats
 
-  const { data: initialStats } = useSWR<FrigateStats[]>(
+  const { data: initialStats, mutate: refreshStats } = useSWR<FrigateStats[]>(
     [
       "stats/history",
-      { keys: "cpu_usages,detectors,gpu_usages,npu_usages,processes,service" },
+      {
+        keys: "detectors.inference_speed,detectors.temperature,detectors.cpu,detectors.mem,gpu_usages,npu_usages,processes.cpu,processes.mem,service.last_updated",
+      },
     ],
     {
       revalidateOnFocus: false,
@@ -56,19 +60,38 @@ export default function GeneralMetrics({
     }
 
     if (statsHistory.length == 0) {
-      setStatsHistory(initialStats);
+      startTransition(() => setStatsHistory(initialStats));
       return;
     }
 
-    if (!updatedStats) {
+    if (!isActive || !updatedStats) {
       return;
     }
 
     if (updatedStats.service.last_updated > lastUpdated) {
       setStatsHistory([...statsHistory.slice(1), updatedStats]);
-      setLastUpdated(Date.now() / 1000);
+      setLastUpdated(updatedStats.service.last_updated);
     }
-  }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);
+  }, [
+    initialStats,
+    updatedStats,
+    statsHistory,
+    lastUpdated,
+    setLastUpdated,
+    isActive,
+  ]);
+
+  useEffect(() => {
+    if (isActive && statsHistory.length > 0) {
+      refreshStats().then((freshStats) => {
+        if (freshStats && freshStats.length > 0) {
+          setStatsHistory(freshStats);
+        }
+      });
+    }
+    // only re-fetch when tab becomes active, not on data changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   const [canGetGpuInfo, gpuType] = useMemo<[boolean, GpuInfo]>(() => {
     let vaCount = 0;
@@ -76,7 +99,7 @@ export default function GeneralMetrics({
 
     statsHistory.length > 0 &&
       Object.keys(statsHistory[0]?.gpu_usages ?? {}).forEach((key) => {
-        if (key == "amd-vaapi" || key == "intel-vaapi" || key == "intel-qsv") {
+        if (key == "amd-vaapi" || key == "intel-gpu") {
           vaCount += 1;
         }
 
@@ -181,7 +204,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        const data = stats.cpu_usages[detStats.pid.toString()]?.cpu;
+        const data = detStats.cpu;
 
         if (data != undefined) {
           series[key].data.push({
@@ -213,10 +236,12 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({
-          x: statsIdx + 1,
-          y: stats.cpu_usages[detStats.pid.toString()].mem,
-        });
+        if (detStats.mem != undefined) {
+          series[key].data.push({
+            x: statsIdx + 1,
+            y: detStats.mem,
+          });
+        }
       });
     });
     return Object.values(series);
@@ -265,7 +290,7 @@ export default function GeneralMetrics({
 
     if (
       Object.keys(statsHistory?.at(0)?.gpu_usages ?? {}).length == 1 &&
-      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {})[0].includes("intel")
+      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {})[0] === "intel-gpu"
     ) {
       // intel gpu stats do not support memory
       return undefined;
@@ -323,6 +348,43 @@ export default function GeneralMetrics({
         if (stats.enc) {
           hasValidGpu = true;
           series[key].data.push({ x: statsIdx + 1, y: stats.enc.slice(0, -1) });
+        }
+      });
+    });
+
+    if (!hasValidGpu) {
+      return [];
+    }
+
+    return Object.keys(series).length > 0 ? Object.values(series) : undefined;
+  }, [statsHistory]);
+
+  const gpuComputeSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: number; y: string }[] };
+    } = {};
+    let hasValidGpu = false;
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        if (stats.compute) {
+          hasValidGpu = true;
+          series[key].data.push({
+            x: statsIdx + 1,
+            y: stats.compute.slice(0, -1),
+          });
         }
       });
     });
@@ -409,9 +471,7 @@ export default function GeneralMetrics({
     }
 
     const gpuKeys = Object.keys(statsHistory[0]?.gpu_usages ?? {});
-    const hasIntelGpu = gpuKeys.some(
-      (key) => key === "intel-vaapi" || key === "intel-qsv",
-    );
+    const hasIntelGpu = gpuKeys.some((key) => key === "intel-gpu");
 
     if (!hasIntelGpu) {
       return false;
@@ -427,7 +487,7 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.gpu_usages || {}).forEach(([key, gpuStats]) => {
-        if (key === "intel-vaapi" || key === "intel-qsv") {
+        if (key === "intel-gpu") {
           if (gpuStats.gpu) {
             hasDataPoints = true;
             const gpuValue = parseFloat(gpuStats.gpu.slice(0, -1));
@@ -546,22 +606,18 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.processes).forEach(([key, procStats]) => {
-        if (procStats.pid.toString() in stats.cpu_usages) {
-          if (!(key in series)) {
-            series[key] = {
-              name: t(`general.otherProcesses.series.${key}`),
-              data: [],
-            };
-          }
+        if (!(key in series)) {
+          series[key] = {
+            name: t(`general.otherProcesses.series.${key}`),
+            data: [],
+          };
+        }
 
-          const data = stats.cpu_usages[procStats.pid.toString()]?.cpu;
-
-          if (data != undefined) {
-            series[key].data.push({
-              x: statsIdx + 1,
-              y: data,
-            });
-          }
+        if (procStats.cpu != undefined) {
+          series[key].data.push({
+            x: statsIdx + 1,
+            y: procStats.cpu,
+          });
         }
       });
     });
@@ -583,22 +639,18 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.processes).forEach(([key, procStats]) => {
-        if (procStats.pid.toString() in stats.cpu_usages) {
-          if (!(key in series)) {
-            series[key] = {
-              name: t(`general.otherProcesses.series.${key}`),
-              data: [],
-            };
-          }
+        if (!(key in series)) {
+          series[key] = {
+            name: t(`general.otherProcesses.series.${key}`),
+            data: [],
+          };
+        }
 
-          const data = stats.cpu_usages[procStats.pid.toString()]?.mem;
-
-          if (data) {
-            series[key].data.push({
-              x: statsIdx + 1,
-              y: data,
-            });
-          }
+        if (procStats.mem) {
+          series[key].data.push({
+            x: statsIdx + 1,
+            y: procStats.mem,
+          });
         }
       });
     });
@@ -635,6 +687,7 @@ export default function GeneralMetrics({
                   threshold={InferenceThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
+                  isActive={isActive}
                 />
               ))}
             </div>
@@ -657,6 +710,7 @@ export default function GeneralMetrics({
                       threshold={DetectorTempThreshold}
                       updateTimes={updateTimes}
                       data={[series]}
+                      isActive={isActive}
                     />
                   ))}
                 </div>
@@ -695,6 +749,7 @@ export default function GeneralMetrics({
                   threshold={DetectorCpuThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
+                  isActive={isActive}
                 />
               ))}
             </div>
@@ -713,6 +768,7 @@ export default function GeneralMetrics({
                   threshold={DetectorMemThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
+                  isActive={isActive}
                 />
               ))}
             </div>
@@ -744,8 +800,9 @@ export default function GeneralMetrics({
               className={cn(
                 "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
                 gpuTempSeries?.length && "md:grid-cols-3",
-                gpuEncSeries?.length && "xl:grid-cols-4",
-                gpuEncSeries?.length &&
+                (gpuEncSeries?.length || gpuComputeSeries?.length) &&
+                  "xl:grid-cols-4",
+                (gpuEncSeries?.length || gpuComputeSeries?.length) &&
                   gpuTempSeries?.length &&
                   "3xl:grid-cols-5",
               )}
@@ -804,6 +861,7 @@ export default function GeneralMetrics({
                           threshold={GPUUsageThreshold}
                           updateTimes={updateTimes}
                           data={[series]}
+                          isActive={isActive}
                         />
                       ))}
                     </div>
@@ -826,6 +884,7 @@ export default function GeneralMetrics({
                               threshold={GPUMemThreshold}
                               updateTimes={updateTimes}
                               data={[series]}
+                              isActive={isActive}
                             />
                           ))}
                         </div>
@@ -850,6 +909,32 @@ export default function GeneralMetrics({
                               threshold={GPUMemThreshold}
                               updateTimes={updateTimes}
                               data={[series]}
+                              isActive={isActive}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
+                  {statsHistory.length != 0 ? (
+                    <>
+                      {gpuComputeSeries && gpuComputeSeries?.length != 0 && (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">
+                            {t("general.hardwareInfo.gpuCompute")}
+                          </div>
+                          {gpuComputeSeries.map((series) => (
+                            <ThresholdBarGraph
+                              key={series.name}
+                              graphId={`${series.name}-compute`}
+                              unit="%"
+                              name={series.name}
+                              threshold={GPUMemThreshold}
+                              updateTimes={updateTimes}
+                              data={[series]}
+                              isActive={isActive}
                             />
                           ))}
                         </div>
@@ -874,6 +959,7 @@ export default function GeneralMetrics({
                               threshold={GPUMemThreshold}
                               updateTimes={updateTimes}
                               data={[series]}
+                              isActive={isActive}
                             />
                           ))}
                         </div>
@@ -898,6 +984,7 @@ export default function GeneralMetrics({
                               threshold={DetectorTempThreshold}
                               updateTimes={updateTimes}
                               data={[series]}
+                              isActive={isActive}
                             />
                           ))}
                         </div>
@@ -923,6 +1010,7 @@ export default function GeneralMetrics({
                               threshold={GPUUsageThreshold}
                               updateTimes={updateTimes}
                               data={[series]}
+                              isActive={isActive}
                             />
                           ))}
                         </div>
@@ -945,6 +1033,7 @@ export default function GeneralMetrics({
                                   threshold={DetectorTempThreshold}
                                   updateTimes={updateTimes}
                                   data={[series]}
+                                  isActive={isActive}
                                 />
                               ))}
                             </div>
@@ -978,6 +1067,7 @@ export default function GeneralMetrics({
                   threshold={DetectorCpuThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
+                  isActive={isActive}
                 />
               ))}
             </div>
@@ -997,6 +1087,7 @@ export default function GeneralMetrics({
                   threshold={DetectorMemThreshold}
                   updateTimes={updateTimes}
                   data={[series]}
+                  isActive={isActive}
                 />
               ))}
             </div>

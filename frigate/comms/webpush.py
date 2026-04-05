@@ -542,9 +542,9 @@ class WebPushClient(Communicator):
 
         self.check_registrations()
 
-        reasoning: str = payload.get("reasoning", "")
+        text: str = payload.get("message") or payload.get("reasoning", "")
         title = f"{camera_name}: Monitoring Alert"
-        message = (reasoning[:197] + "...") if len(reasoning) > 200 else reasoning
+        message = (text[:197] + "...") if len(text) > 200 else text
 
         logger.debug(f"Sending camera monitoring push notification for {camera_name}")
 

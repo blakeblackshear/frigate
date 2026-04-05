@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 
 from httpx import RemoteProtocolError, TimeoutException
 from ollama import AsyncClient as OllamaAsyncClient
@@ -28,10 +28,10 @@ class OllamaClient(GenAIClient):
         },
     }
 
-    provider: ApiClient
+    provider: ApiClient | None
     provider_options: dict[str, Any]
 
-    def _init_provider(self):
+    def _init_provider(self) -> ApiClient | None:
         """Initialize the client."""
         self.provider_options = {
             **self.LOCAL_OPTIMIZED_OPTIONS,
@@ -73,7 +73,7 @@ class OllamaClient(GenAIClient):
             "exclusiveMinimum",
             "exclusiveMaximum",
         }
-        result = {}
+        result: dict[str, Any] = {}
         for key, value in schema.items():
             if not _is_properties and key in STRIP_KEYS:
                 continue
@@ -122,7 +122,7 @@ class OllamaClient(GenAIClient):
             logger.debug(
                 f"Ollama tokens used: eval_count={result.get('eval_count')}, prompt_eval_count={result.get('prompt_eval_count')}"
             )
-            return result["response"].strip()
+            return str(result["response"]).strip()
         except (
             TimeoutException,
             ResponseError,
@@ -131,6 +131,19 @@ class OllamaClient(GenAIClient):
         ) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
+
+    def list_models(self) -> list[str]:
+        """Return available model names from the Ollama server."""
+        if self.provider is None:
+            return []
+        try:
+            response = self.provider.list()
+            return sorted(
+                m.get("name", m.get("model", "")) for m in response.get("models", [])
+            )
+        except Exception as e:
+            logger.warning("Failed to list Ollama models: %s", e)
+            return []
 
     def get_context_size(self) -> int:
         """Get the context window size for Ollama."""
@@ -263,7 +276,7 @@ class OllamaClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
-    ):
+    ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools; yields content deltas then final message.
 
         When tools are provided, Ollama streaming does not include tool_calls

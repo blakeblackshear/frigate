@@ -78,6 +78,7 @@
       "gpuUsage": "GPU Usage",
       "gpuMemory": "GPU Memory",
       "gpuEncoder": "GPU Encoder",
+      "gpuCompute": "GPU Compute / Encode",
       "gpuDecoder": "GPU Decoder",
       "gpuTemperature": "GPU Temperature",
       "gpuInfo": {
@@ -188,6 +189,7 @@
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "{{camName}} capture",
       "cameraDetect": "{{camName}} detect",
+      "cameraGpu": "{{camName}} GPU",
       "cameraFramesPerSecond": "{{camName}} frames per second",
       "cameraDetectionsPerSecond": "{{camName}} detections per second",
       "cameraSkippedDetectionsPerSecond": "{{camName}} skipped detections per second"

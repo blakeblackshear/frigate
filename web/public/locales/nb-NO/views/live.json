@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Direkte - Frigate",
+  "documentTitle": {
+    "default": "Direkte - Frigate"
+  },
   "lowBandwidthMode": "Lav båndbreddemodus",
   "documentTitle.withCamera": "{{camera}} - Direkte - Frigate",
   "ptz": {
@@ -7,7 +9,8 @@
       "clickMove": {
         "label": "Klikk i rammen for å sentrere kameraet",
         "enable": "Aktiver klikk for å flytte",
-        "disable": "Deaktiver klikk for å flytte"
+        "disable": "Deaktiver klikk for å flytte",
+        "enableWithZoom": "Aktiver \"klikk for å flytte\" / \"dra for å zoome\""
       },
       "left": {
         "label": "Flytt PTZ-kameraet til venstre"

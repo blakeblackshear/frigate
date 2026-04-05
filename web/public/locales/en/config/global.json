@@ -293,7 +293,7 @@
       "label": "Detector specific model configuration",
       "description": "Detector-specific model configuration options (path, input size, etc.).",
       "path": {
-        "label": "Custom Object detection model path",
+        "label": "Custom object detector model path",
         "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
       },
       "labelmap_path": {
@@ -466,7 +466,7 @@
     "label": "Detection model",
     "description": "Settings to configure a custom object detection model and its input shape.",
     "path": {
-      "label": "Custom Object detection model path",
+      "label": "Custom object detector model path",
       "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
     },
     "labelmap_path": {
@@ -527,7 +527,7 @@
     },
     "roles": {
       "label": "Roles",
-      "description": "GenAI roles (tools, vision, embeddings); one provider per role."
+      "description": "GenAI roles (chat, descriptions, embeddings); one provider per role."
     },
     "provider_options": {
       "label": "Provider options",
@@ -752,7 +752,7 @@
   },
   "live": {
     "label": "Live playback",
-    "description": "Settings used by the Web UI to control live stream resolution and quality.",
+    "description": "Settings to control the jsmpeg live stream resolution and quality. This does not affect restreamed cameras that use go2rtc for live view.",
     "streams": {
       "label": "Live stream names",
       "description": "Mapping of configured stream names to restream/go2rtc names used for live playback."
@@ -1044,7 +1044,7 @@
     },
     "detections": {
       "label": "Detections config",
-      "description": "Settings for creating detection events (non-alert) and how long to keep them.",
+      "description": "Settings for which tracked objects generate detections (non-alert) and how detections are retained.",
       "enabled": {
         "label": "Enable detections",
         "description": "Enable or disable detection events for all cameras; can be overridden per-camera."
@@ -1535,6 +1535,10 @@
     "tls_insecure": {
       "label": "Disable TLS verify",
       "description": "Skip TLS verification and disable digest auth for ONVIF (unsafe; use in safe networks only)."
+    },
+    "profile": {
+      "label": "ONVIF profile",
+      "description": "Specific ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically."
     },
     "autotracking": {
       "label": "Autotracking",

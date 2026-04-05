@@ -1,26 +1,27 @@
 import multiprocessing as mp
-from multiprocessing.managers import SyncManager
+import queue
+from multiprocessing.managers import SyncManager, ValueProxy
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.synchronize import Event
 
 
 class CameraMetrics:
-    camera_fps: Synchronized
-    detection_fps: Synchronized
-    detection_frame: Synchronized
-    process_fps: Synchronized
-    skipped_fps: Synchronized
-    read_start: Synchronized
-    audio_rms: Synchronized
-    audio_dBFS: Synchronized
+    camera_fps: ValueProxy[float]
+    detection_fps: ValueProxy[float]
+    detection_frame: ValueProxy[float]
+    process_fps: ValueProxy[float]
+    skipped_fps: ValueProxy[float]
+    read_start: ValueProxy[float]
+    audio_rms: ValueProxy[float]
+    audio_dBFS: ValueProxy[float]
 
-    frame_queue: mp.Queue
+    frame_queue: queue.Queue
 
-    process_pid: Synchronized
-    capture_process_pid: Synchronized
-    ffmpeg_pid: Synchronized
-    reconnects_last_hour: Synchronized
-    stalls_last_hour: Synchronized
+    process_pid: ValueProxy[int]
+    capture_process_pid: ValueProxy[int]
+    ffmpeg_pid: ValueProxy[int]
+    reconnects_last_hour: ValueProxy[int]
+    stalls_last_hour: ValueProxy[int]
 
     def __init__(self, manager: SyncManager):
         self.camera_fps = manager.Value("d", 0)
@@ -56,14 +57,14 @@ class PTZMetrics:
     reset: Event
 
     def __init__(self, *, autotracker_enabled: bool):
-        self.autotracker_enabled = mp.Value("i", autotracker_enabled)
+        self.autotracker_enabled = mp.Value("i", autotracker_enabled)  # type: ignore[assignment]
 
-        self.start_time = mp.Value("d", 0)
-        self.stop_time = mp.Value("d", 0)
-        self.frame_time = mp.Value("d", 0)
-        self.zoom_level = mp.Value("d", 0)
-        self.max_zoom = mp.Value("d", 0)
-        self.min_zoom = mp.Value("d", 0)
+        self.start_time = mp.Value("d", 0)  # type: ignore[assignment]
+        self.stop_time = mp.Value("d", 0)  # type: ignore[assignment]
+        self.frame_time = mp.Value("d", 0)  # type: ignore[assignment]
+        self.zoom_level = mp.Value("d", 0)  # type: ignore[assignment]
+        self.max_zoom = mp.Value("d", 0)  # type: ignore[assignment]
+        self.min_zoom = mp.Value("d", 0)  # type: ignore[assignment]
 
         self.tracking_active = mp.Event()
         self.motor_stopped = mp.Event()

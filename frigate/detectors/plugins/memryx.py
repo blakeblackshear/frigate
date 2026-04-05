@@ -317,7 +317,7 @@ class MemryXDetector(DetectionApi):
                             f"Failed to remove downloaded zip {zip_path}: {e}"
                         )
 
-    def send_input(self, connection_id, tensor_input: np.ndarray):
+    def send_input(self, connection_id, tensor_input: np.ndarray) -> None:
         """Pre-process (if needed) and send frame to MemryX input queue"""
         if tensor_input is None:
             raise ValueError("[send_input] No image data provided for inference")

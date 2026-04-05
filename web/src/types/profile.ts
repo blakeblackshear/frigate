@@ -14,6 +14,7 @@ export type ProfileInfo = {
 export type ProfilesApiResponse = {
   profiles: ProfileInfo[];
   active_profile: string | null;
+  last_activated: Record<string, number>;
 };
 
 export type ProfileState = {

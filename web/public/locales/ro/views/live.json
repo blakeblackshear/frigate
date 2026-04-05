@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Frigate - Live",
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Frigate - Live",
   "lowBandwidthMode": "Mod Latime de Banda Limitata",
   "twoWayTalk": {
@@ -19,7 +21,8 @@
       "clickMove": {
         "label": "Apasă în cadrul imaginii pentru a centra camera",
         "enable": "Activează mutarea prin clic",
-        "disable": "Dezactivează mutarea prin clic"
+        "disable": "Dezactivează mutarea prin clic",
+        "enableWithZoom": "Activează clic pentru mutare / trage pentru zoom"
       },
       "left": {
         "label": "Mișcă camera PTZ spre stânga"

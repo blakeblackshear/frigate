@@ -3,6 +3,10 @@ id: semantic_search
 title: Semantic Search
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
 
 Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings to Frigate's database. All of this runs locally.
@@ -19,13 +23,26 @@ For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
 
 ## Configuration
 
-Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Enrichments Settings page before it can be used. Semantic Search is a global configuration setting.
+Semantic Search is disabled by default and must be enabled before it can be used. Semantic Search is a global configuration setting.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
+
+- Set **Enable semantic search** to on
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 semantic_search:
   enabled: True
   reindex: False
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::tip
 
@@ -41,7 +58,20 @@ The [V1 model from Jina](https://huggingface.co/jinaai/jina-clip-v1) has a visio
 
 The V1 text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Explore page when clicking on thumbnail of a tracked object. See [the object description docs](/configuration/genai/objects.md) for more information on how to automatically generate tracked object descriptions.
 
-Differently weighted versions of the Jina models are available and can be selected by setting the `model_size` config option as `small` or `large`:
+Differently weighted versions of the Jina models are available and can be selected by setting the model size.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
+
+| Field                                            | Description                                                                |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| **Semantic search model or GenAI provider name** | Select `jinav1` to use the Jina AI CLIP V1 model                           |
+| **Model size**                                   | `small` (quantized, CPU-friendly) or `large` (full model, GPU-accelerated) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 semantic_search:
@@ -49,6 +79,9 @@ semantic_search:
   model: "jinav1"
   model_size: small
 ```
+
+</TabItem>
+</ConfigTabs>
 
 - Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
 - Configuring the `small` model employs a quantized version of the Jina model that uses less RAM and runs on CPU with a very negligible difference in embedding quality.
@@ -59,7 +92,20 @@ Frigate also supports the [V2 model from Jina](https://huggingface.co/jinaai/jin
 
 V2 offers only a 3% performance improvement over V1 in both text-image and text-text retrieval tasks, an upgrade that is unlikely to yield noticeable real-world benefits. Additionally, V2 has _significantly_ higher RAM and GPU requirements, leading to increased inference time and memory usage. If you plan to use V2, ensure your system has ample RAM and a discrete GPU. CPU inference (with the `small` model) using V2 is not recommended.
 
-To use the V2 model, update the `model` parameter in your config:
+To use the V2 model, set the model to `jinav2`.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
+
+| Field                                            | Description                                           |
+| ------------------------------------------------ | ----------------------------------------------------- |
+| **Semantic search model or GenAI provider name** | Select `jinav2` to use the Jina AI CLIP V2 model      |
+| **Model size**                                   | `large` is recommended for V2 (requires discrete GPU) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 semantic_search:
@@ -67,6 +113,9 @@ semantic_search:
   model: "jinav2"
   model_size: large
 ```
+
+</TabItem>
+</ConfigTabs>
 
 For most users, especially native English speakers, the V1 model remains the recommended choice.
 
@@ -82,9 +131,23 @@ Frigate can use a GenAI provider for semantic search embeddings when that provid
 
 To use llama.cpp for semantic search:
 
-1. Configure a GenAI provider in your config with `embeddings` in its `roles`.
-2. Set `semantic_search.model` to the GenAI config key (e.g. `default`).
-3. Start the llama.cpp server with `--embeddings` and `--mmproj` for image support:
+1. Configure a GenAI provider with `embeddings` in its `roles`.
+2. Set the semantic search model to the GenAI config key (e.g. `default`).
+3. Start the llama.cpp server with `--embeddings` and `--mmproj` for image support.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
+
+| Field                                            | Description                                                                                    |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Semantic search model or GenAI provider name** | Set to the GenAI config key (e.g. `default`) to use a configured GenAI provider for embeddings |
+
+The GenAI provider must also be configured with the `embeddings` role under <NavPath path="Settings > Enrichments > Generative AI" />.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 genai:
@@ -102,6 +165,9 @@ semantic_search:
   model: default
 ```
 
+</TabItem>
+</ConfigTabs>
+
 The llama.cpp server must be started with `--embeddings` for the embeddings API, and a multi-modal embeddings model. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
 
 :::note
@@ -114,6 +180,19 @@ Switching between Jina models and a GenAI provider requires reindexing. Embeddin
 
 The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used. You can also target a specific device in a multi-GPU installation.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Enrichments > Semantic search" />.
+
+| Field          | Description                                                            |
+| -------------- | ---------------------------------------------------------------------- |
+| **Model size** | Set to `large` to enable GPU acceleration                              |
+| **Device**     | (Optional) Specify a GPU device index in a multi-GPU system (e.g. `0`) |
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 semantic_search:
   enabled: True
@@ -121,6 +200,9 @@ semantic_search:
   # Optional, if using the 'large' model in a multi-GPU installation
   device: 0
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::info
 
@@ -153,16 +235,15 @@ Semantic Search must be enabled to use Triggers.
 
 ### Configuration
 
-Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `friendly_name`, a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires - `notification`, `sub_label`, and `attribute`.
+Triggers are defined within the `semantic_search` configuration for each camera. Each trigger consists of a `friendly_name`, a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires - `notification`, `sub_label`, and `attribute`.
 
 Triggers are best configured through the Frigate UI.
 
 #### Managing Triggers in the UI
 
-1. Navigate to the **Settings** page and select the **Triggers** tab.
-2. Choose a camera from the dropdown menu to view or manage its triggers.
-3. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
-4. In the **Create Trigger** wizard:
+1. Navigate to <NavPath path="Settings > Enrichments > Triggers" /> and select a camera from the dropdown menu.
+2. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
+3. In the **Create Trigger** wizard:
    - Enter a **Name** for the trigger (e.g., "Red Car Alert").
    - Enter a descriptive **Friendly Name** for the trigger (e.g., "Red car on the driveway camera").
    - Select the **Type** (`Thumbnail` or `Description`).
@@ -173,14 +254,14 @@ Triggers are best configured through the Frigate UI.
      If native webpush notifications are enabled, check the `Send Notification` box to send a notification.
      Check the `Add Sub Label` box to add the trigger's friendly name as a sub label to any triggering tracked objects.
      Check the `Add Attribute` box to add the trigger's internal ID (e.g., "red_car_alert") to a data attribute on the tracked object that can be processed via the API or MQTT.
-5. Save the trigger to update the configuration and store the embedding in the database.
+4. Save the trigger to update the configuration and store the embedding in the database.
 
 When a trigger fires, the UI highlights the trigger with a blue dot for 3 seconds for easy identification. Additionally, the UI will show the last date/time and tracked object ID that activated your trigger. The last triggered timestamp is not saved to the database or persisted through restarts of Frigate.
 
 ### Usage and Best Practices
 
 1. **Thumbnail Triggers**: Select a representative image (event ID) from the Explore page that closely matches the object you want to detect. For best results, choose images where the object is prominent and fills most of the frame.
-2. **Description Triggers**: Write concise, specific text descriptions (e.g., "Person in a red jacket") that align with the tracked object’s description. Avoid vague terms to improve matching accuracy.
+2. **Description Triggers**: Write concise, specific text descriptions (e.g., "Person in a red jacket") that align with the tracked object's description. Avoid vague terms to improve matching accuracy.
 3. **Threshold Tuning**: Adjust the threshold to balance sensitivity and specificity. A higher threshold (e.g., 0.8) requires closer matches, reducing false positives but potentially missing similar objects. A lower threshold (e.g., 0.6) is more inclusive but may trigger more often.
 4. **Using Explore**: Use the context menu or right-click / long-press on a tracked object in the Grid View in Explore to quickly add a trigger based on the tracked object's thumbnail.
 5. **Editing triggers**: For the best experience, triggers should be edited via the UI. However, Frigate will ensure triggers edited in the config will be synced with triggers created and edited in the UI.
@@ -195,6 +276,6 @@ When a trigger fires, the UI highlights the trigger with a blue dot for 3 second
 
 #### Why can't I create a trigger on thumbnails for some text, like "person with a blue shirt" and have it trigger when a person with a blue shirt is detected?
 
-TL;DR: Text-to-image triggers aren’t supported because CLIP can confuse similar images and give inconsistent scores, making automation unreliable. The same word–image pair can give different scores and the score ranges can be too close together to set a clear cutoff.
+TL;DR: Text-to-image triggers aren't supported because CLIP can confuse similar images and give inconsistent scores, making automation unreliable. The same word-image pair can give different scores and the score ranges can be too close together to set a clear cutoff.
 
-Text-to-image triggers are not supported due to fundamental limitations of CLIP-based similarity search. While CLIP works well for exploratory, manual queries, it is unreliable for automated triggers based on a threshold. Issues include embedding drift (the same text–image pair can yield different cosine distances over time), lack of true semantic grounding (visually similar but incorrect matches), and unstable thresholding (distance distributions are dataset-dependent and often too tightly clustered to separate relevant from irrelevant results). Instead, it is recommended to set up a workflow with thumbnail triggers: first use text search to manually select 3–5 representative reference tracked objects, then configure thumbnail triggers based on that visual similarity. This provides robust automation without the semantic ambiguity of text to image matching.
+Text-to-image triggers are not supported due to fundamental limitations of CLIP-based similarity search. While CLIP works well for exploratory, manual queries, it is unreliable for automated triggers based on a threshold. Issues include embedding drift (the same text-image pair can yield different cosine distances over time), lack of true semantic grounding (visually similar but incorrect matches), and unstable thresholding (distance distributions are dataset-dependent and often too tightly clustered to separate relevant from irrelevant results). Instead, it is recommended to set up a workflow with thumbnail triggers: first use text search to manually select 3-5 representative reference tracked objects, then configure thumbnail triggers based on that visual similarity. This provides robust automation without the semantic ambiguity of text to image matching.

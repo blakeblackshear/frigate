@@ -61,6 +61,7 @@
     "i18next-http-backend": "^3.0.1",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
+    "js-yaml": "^4.1.1",
     "konva": "^10.2.3",
     "lodash": "^4.17.23",
     "lucide-react": "^0.577.0",
@@ -99,6 +100,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.9",
     "@testing-library/jest-dom": "^6.6.2",
+    "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.12",
     "@types/node": "^20.14.10",
     "@types/react": "^19.2.14",

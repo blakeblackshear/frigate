@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Clasă ștearsă",
-      "deletedImage": "Imagini șterse",
+      "deletedCategory_one": "Am șters {{count}} clasă",
+      "deletedCategory_few": "Am șters {{count}} clase",
+      "deletedCategory_other": "Am șters {{count}} de clase",
+      "deletedImage_one": "Am șters {{count}} imagine",
+      "deletedImage_few": "Am șters {{count}} imagini",
+      "deletedImage_other": "Am șters {{count}} de imagini",
       "categorizedImage": "Imagine clasificată cu succes",
       "trainedModel": "Model antrenat cu succes.",
       "trainingModel": "Antrenamentul modelului a fost pornit cu succes.",
@@ -21,7 +25,8 @@
       "deletedModel_few": "{{count}} modele șterse cu succes",
       "deletedModel_other": "{{count}} modele șterse cu succes",
       "updatedModel": "Configurația modelului a fost actualizată cu succes",
-      "renamedCategory": "Clasa a fost redenumită cu succes în {{name}}"
+      "renamedCategory": "Clasa a fost redenumită cu succes în {{name}}",
+      "reclassifiedImage": "Imagine reclasificată cu succes"
     },
     "error": {
       "deleteImageFailed": "Ștergerea a eșuat: {{errorMessage}}",
@@ -31,7 +36,8 @@
       "deleteModelFailed": "Ștergerea modelului a eșuat: {{errorMessage}}",
       "updateModelFailed": "Actualizarea modelului a eșuat: {{errorMessage}}",
       "renameCategoryFailed": "Redenumirea clasei a eșuat: {{errorMessage}}",
-      "trainingFailedToStart": "Nu s-a putut porni antrenarea modelului: {{errorMessage}}"
+      "trainingFailedToStart": "Nu s-a putut porni antrenarea modelului: {{errorMessage}}",
+      "reclassifyFailed": "Nu am putut reclasifica imaginea: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -156,8 +162,13 @@
       "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase.",
       "modelCreated": "Modelul a fost creat cu succes. Folosește vizualizarea Clasificări recente pentru a adăuga imagini pentru stările lipsă, apoi antrenează modelul.",
       "missingStatesWarning": {
-        "title": "Exemple de stări lipsă",
-        "description": "Este recomandat să alegi exemple pentru toate stările pentru rezultate optime. Poți continua fără a selecta toate stările, dar modelul nu va fi antrenat până când toate stările nu au imagini. După continuare, folosește vizualizarea Clasificări recente pentru a clasifica imagini pentru stările lipsă, apoi antrenează modelul."
+        "title": "Exemple de clase lipsă",
+        "description": "Nu toate clasele au exemple. Încearcă să generezi exemple noi pentru a găsi clasa lipsă, sau continuă și folosește vizualizarea Clasificări recente pentru a adăuga imagini mai târziu."
+      },
+      "refreshExamples": "Generează exemple noi",
+      "refreshConfirm": {
+        "title": "Generezi exemple noi?",
+        "description": "Asta va genera un set nou de imagini și va goli toate selecțiile, inclusiv clasele anterioare. Va trebui să selectezi din nou exemple pentru toate clasele."
       }
     }
   },
@@ -189,5 +200,7 @@
     "modelNotReady": "Modelul nu este pregătit pentru antrenare",
     "noChanges": "Nicio modificare a setului de date de la ultima antrenare."
   },
-  "none": "Niciuna"
+  "none": "Niciuna",
+  "reclassifyImageAs": "Reclasifică imaginea ca:",
+  "reclassifyImage": "Reclasifică imaginea"
 }

@@ -529,7 +529,7 @@
     },
     "detections": {
       "label": "Detections config",
-      "description": "Settings for creating detection events (non-alert) and how long to keep them.",
+      "description": "Settings for which tracked objects generate detections (non-alert) and how detections are retained.",
       "enabled": {
         "label": "Enable detections",
         "description": "Enable or disable detection events for this camera."
@@ -786,6 +786,10 @@
     "tls_insecure": {
       "label": "Disable TLS verify",
       "description": "Skip TLS verification and disable digest auth for ONVIF (unsafe; use in safe networks only)."
+    },
+    "profile": {
+      "label": "ONVIF profile",
+      "description": "Specific ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically."
     },
     "autotracking": {
       "label": "Autotracking",

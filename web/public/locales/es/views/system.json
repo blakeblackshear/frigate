@@ -37,7 +37,18 @@
       "label": "Mensajes",
       "pause": "Pausar",
       "resume": "Continuar",
-      "clear": "Limpiar"
+      "clear": "Limpiar",
+      "filter": {
+        "all": "Todos los temas",
+        "topics": "Temas",
+        "events": "Eventos",
+        "reviews": "Revisiones",
+        "face_recognition": "Reconocimiento facial",
+        "camera_activity": "Actividad de cámara",
+        "classification": "Clasificación"
+      },
+      "count_other": "{{count}} mensajes",
+      "count_one": "{{count}} mensaje"
     }
   },
   "title": "Sistema",

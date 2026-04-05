@@ -3,6 +3,10 @@ id: authentication
 title: Authentication
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 # Authentication
 
 Frigate stores user information in its database. Password hashes are generated using industry standard PBKDF2-SHA256 with 600,000 iterations. Upon successful login, a JWT token is issued with an expiration date and set as a cookie. The cookie is refreshed as needed automatically. This JWT token can also be passed in the Authorization header as a bearer token.
@@ -22,12 +26,25 @@ On startup, an admin user and password are generated and printed in the logs. It
 
 ## Resetting admin password
 
-In the event that you are locked out of your instance, you can tell Frigate to reset the admin password and print it in the logs on next startup using the `reset_admin_password` setting in your config file.
+In the event that you are locked out of your instance, you can tell Frigate to reset the admin password and print it in the logs on next startup.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Authentication" />.
+
+- Set **Reset admin password** to on to reset the admin password and print it in the logs on next startup
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 auth:
   reset_admin_password: true
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Password guidance
 
@@ -47,7 +64,20 @@ Restarting Frigate will reset the rate limits.
 
 If you are running Frigate behind a proxy, you will want to set `trusted_proxies` or these rate limits will apply to the upstream proxy IP address. This means that a brute force attack will rate limit login attempts from other devices and could temporarily lock you out of your instance. In order to ensure rate limits only apply to the actual IP address where the requests are coming from, you will need to list the upstream networks that you want to trust. These trusted proxies are checked against the `X-Forwarded-For` header when looking for the IP address where the request originated.
 
-If you are running a reverse proxy in the same Docker Compose file as Frigate, here is an example of how your auth config might look:
+If you are running a reverse proxy in the same Docker Compose file as Frigate, configure rate limiting and trusted proxies as follows:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Authentication" />.
+
+| Field                   | Description                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Failed login limits** | Rate limit string for login failures (e.g., `1/second;5/minute;20/hour`)                                                  |
+| **Trusted proxies**     | List of upstream network CIDRs to trust for `X-Forwarded-For` (e.g., `172.18.0.0/16` for internal Docker Compose network) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 auth:
@@ -55,6 +85,9 @@ auth:
   trusted_proxies:
     - 172.18.0.0/16 # <---- this is the subnet for the internal Docker Compose network
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Session Length
 
@@ -67,10 +100,23 @@ The default value of `86400` will expire the authentication session after 24 hou
 - `0`: Setting the session length to 0 will require a user to log in every time they access the application or after a very short, immediate timeout.
 - `604800`: Setting the session length to 604800 will require a user to log in if the token is not refreshed for 7 days.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Authentication" />.
+
+- Set **Session length** to the duration in seconds before the authentication session expires (default: 86400 / 24 hours)
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 auth:
   session_length: 86400
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## JWT Token Secret
 
@@ -99,7 +145,18 @@ Frigate can be configured to leverage features of common upstream authentication
 
 If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication as there is no correspondence between users in Frigate's database and users authenticated via the proxy. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
 
-Here is an example of how to disable Frigate's authentication and also ensure the requests come only from your known proxy.
+To disable Frigate's authentication and ensure requests come only from your known proxy:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > System > Authentication" />.
+   - Set **Enable authentication** to off
+2. Navigate to <NavPath path="Settings > System > Proxy" />.
+   - Set **Proxy secret** to `<some random long string>`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 auth:
@@ -108,6 +165,9 @@ auth:
 proxy:
   auth_secret: <some random long string>
 ```
+
+</TabItem>
+</ConfigTabs>
 
 You can use the following code to generate a random secret.
 
@@ -119,6 +179,20 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 
 If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Groups` values. Header names are not case sensitive. Multiple values can be included in the role header. Frigate expects that the character separating the roles is a comma, but this can be specified using the `separator` config entry.
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Proxy" /> and configure the header mapping and separator settings.
+
+| Field                            | Description                                                                                          |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Separator character**          | Character separating multiple roles in the role header (default: comma). Authentik uses a pipe `\|`. |
+| **Header mapping > User header** | Header name for the authenticated username (e.g., `x-forwarded-user`)                                |
+| **Header mapping > Role header** | Header name for the authenticated role/groups (e.g., `x-forwarded-groups`)                           |
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml
 proxy:
   ...
@@ -128,9 +202,24 @@ proxy:
     role: x-forwarded-groups
 ```
 
+</TabItem>
+</ConfigTabs>
+
 Frigate supports `admin`, `viewer`, and custom roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
 
 A default role can be provided. Any value in the mapped `role` header will override the default.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Proxy" /> and set the default role.
+
+| Field            | Description                                                   |
+| ---------------- | ------------------------------------------------------------- |
+| **Default role** | Fallback role when no role header is present (e.g., `viewer`) |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 proxy:
@@ -138,9 +227,12 @@ proxy:
   default_role: viewer
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ## Role mapping
 
-In some environments, upstream identity providers (OIDC, SAML, LDAP, etc.) do not pass a Frigate-compatible role directly, but instead pass one or more group claims. To handle this, Frigate supports a `role_map` that translates upstream group names into Frigate’s internal roles (`admin`, `viewer`, or custom).
+In some environments, upstream identity providers (OIDC, SAML, LDAP, etc.) do not pass a Frigate-compatible role directly, but instead pass one or more group claims. To handle this, Frigate supports a `role_map` that translates upstream group names into Frigate's internal roles (`admin`, `viewer`, or custom). This is configurable via YAML in the configuration file:
 
 ```yaml
 proxy:
@@ -175,7 +267,7 @@ In this example:
 **Authenticated Port (8971)**
 
 - Header mapping is **fully supported**.
-- The `remote-role` header determines the user’s privileges:
+- The `remote-role` header determines the user's privileges:
   - **admin** → Full access (user management, configuration changes).
   - **viewer** → Read-only access.
   - **Custom roles** → Read-only access limited to the cameras defined in `auth.roles[role]`.
@@ -232,6 +324,14 @@ The viewer role provides read-only access to all cameras in the UI and API. Cust
 
 ### Role Configuration Example
 
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Users > Roles" /> to define custom roles and assign which cameras each role can access.
+
+</TabItem>
+<TabItem value="yaml">
+
 ```yaml {11-16}
 cameras:
   front_door:
@@ -251,13 +351,16 @@ auth:
       - side_yard
 ```
 
+</TabItem>
+</ConfigTabs>
+
 If you want to provide access to all cameras to a specific user, just use the **viewer** role.
 
 ### Managing User Roles
 
 1. Log in as an **admin** user via port `8971` (preferred), or unauthenticated via port `5000`.
 2. Navigate to **Settings**.
-3. In the **Users** section, edit a user’s role by selecting from available roles (admin, viewer, or custom).
+3. In the **Users** section, edit a user's role by selecting from available roles (admin, viewer, or custom).
 4. In the **Roles** section, add/edit/delete custom roles (select cameras via switches). Deleting a role auto-reassigns users to "viewer".
 
 ### Role Enforcement
@@ -277,7 +380,7 @@ To use role-based access control, you must connect to Frigate via the **authenti
 
 1. Log in as an **admin** user via port `8971`.
 2. Navigate to **Settings > Users**.
-3. Edit a user’s role by selecting **admin** or **viewer**.
+3. Edit a user's role by selecting **admin** or **viewer**.
 
 ## API Authentication Guide
 

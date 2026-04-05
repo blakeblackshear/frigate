@@ -20,15 +20,18 @@ import { TextareaWidget } from "./widgets/TextareaWidget";
 import { SwitchesWidget } from "./widgets/SwitchesWidget";
 import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
 import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
+import { ReviewLabelSwitchesWidget } from "./widgets/ReviewLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
+import { GenAIModelWidget } from "./widgets/GenAIModelWidget";
 import { GenAIRolesWidget } from "./widgets/GenAIRolesWidget";
 import { InputRolesWidget } from "./widgets/InputRolesWidget";
 import { TimezoneSelectWidget } from "./widgets/TimezoneSelectWidget";
 import { CameraPathWidget } from "./widgets/CameraPathWidget";
 import { OptionalFieldWidget } from "./widgets/OptionalFieldWidget";
 import { SemanticSearchModelWidget } from "./widgets/SemanticSearchModelWidget";
+import { OnvifProfileWidget } from "./widgets/OnvifProfileWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -45,6 +48,7 @@ import { LayoutGridField } from "./fields/LayoutGridField";
 import { DetectorHardwareField } from "./fields/DetectorHardwareField";
 import { ReplaceRulesField } from "./fields/ReplaceRulesField";
 import { CameraInputsField } from "./fields/CameraInputsField";
+import { DictAsYamlField } from "./fields/DictAsYamlField";
 
 export interface FrigateTheme {
   widgets: RegistryWidgetsType;
@@ -62,6 +66,7 @@ export const frigateTheme: FrigateTheme = {
     ArrayAsTextWidget: ArrayAsTextWidget,
     FfmpegArgsWidget: FfmpegArgsWidget,
     CameraPathWidget: CameraPathWidget,
+    genaiModel: GenAIModelWidget,
     genaiRoles: GenAIRolesWidget,
     inputRoles: InputRolesWidget,
     // Custom widgets
@@ -75,10 +80,12 @@ export const frigateTheme: FrigateTheme = {
     switches: SwitchesWidget,
     objectLabels: ObjectLabelSwitchesWidget,
     audioLabels: AudioLabelSwitchesWidget,
+    reviewLabels: ReviewLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
     timezoneSelect: TimezoneSelectWidget,
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
+    onvifProfile: OnvifProfileWidget,
   },
   templates: {
     FieldTemplate: FieldTemplate as React.ComponentType<FieldTemplateProps>,
@@ -97,5 +104,6 @@ export const frigateTheme: FrigateTheme = {
     DetectorHardwareField: DetectorHardwareField,
     ReplaceRulesField: ReplaceRulesField,
     CameraInputsField: CameraInputsField,
+    DictAsYamlField: DictAsYamlField,
   },
 };

@@ -896,6 +896,7 @@ async def event_thumbnail(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
+                        await require_camera_access(camera_state.name, request=request)
                         thumbnail_bytes = tracked_obj.get_thumbnail(extension.value)
         except Exception:
             return JSONResponse(
@@ -1066,7 +1067,7 @@ def grid_snapshot(
 
 
 @router.delete(
-    "/{camera_name}/region_grid", dependencies=[Depends(require_role("admin"))]
+    "/{camera_name}/region_grid", dependencies=[Depends(require_role(["admin"]))]
 )
 def clear_region_grid(request: Request, camera_name: str):
     """Clear the region grid for a camera."""

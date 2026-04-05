@@ -59,7 +59,9 @@
       "count": "{{count}} 条消息",
       "expanded": {
         "payload": "Payload"
-      }
+      },
+      "count_one": "{{count}} 条消息",
+      "count_other": "{{count}} 条消息"
     }
   },
   "general": {
@@ -110,7 +112,8 @@
         "description": "这是 Intel 的 GPU 状态报告工具（intel_gpu_top）的已知问题：该工具会失效并反复返回 GPU 使用率为 0%，即使在硬件加速和目标检测已在 (i)GPU 上正常运行的情况下也是如此，这并不是 Frigate 的 bug。你可以通过重启主机来临时修复该问题，并确认 GPU 正常工作。该问题并不会影响性能。"
       },
       "gpuTemperature": "GPU 温度",
-      "npuTemperature": "NPU 温度"
+      "npuTemperature": "NPU 温度",
+      "gpuCompute": "GPU 计算 / 编码"
     },
     "otherProcesses": {
       "title": "其他进程",
@@ -189,7 +192,8 @@
       "cameraDetectionsPerSecond": "{{camName}} 每秒检测数",
       "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒跳过检测数",
       "cameraFfmpeg": "{{camName}} FFmpeg",
-      "cameraFramesPerSecond": "{{camName}} 每秒帧数"
+      "cameraFramesPerSecond": "{{camName}} 每秒帧数",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {

@@ -102,7 +102,7 @@ class CameraMaintainer(threading.Thread):
                 f"recommend increasing it to at least {shm_stats['min_shm']}MB."
             )
 
-        return shm_stats["shm_frame_count"]
+        return int(shm_stats["shm_frame_count"])
 
     def __start_camera_processor(
         self, name: str, config: CameraConfig, runtime: bool = False
@@ -152,10 +152,10 @@ class CameraMaintainer(threading.Thread):
             camera_stop_event,
             self.config.logger,
         )
-        self.camera_processes[config.name] = camera_process
+        self.camera_processes[name] = camera_process
         camera_process.start()
-        self.camera_metrics[config.name].process_pid.value = camera_process.pid
-        logger.info(f"Camera processor started for {config.name}: {camera_process.pid}")
+        self.camera_metrics[name].process_pid.value = camera_process.pid
+        logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
     def __start_camera_capture(
         self, name: str, config: CameraConfig, runtime: bool = False
@@ -219,7 +219,7 @@ class CameraMaintainer(threading.Thread):
             logger.info(f"Closing frame queue for {camera}")
             empty_and_close_queue(self.camera_metrics[camera].frame_queue)
 
-    def run(self):
+    def run(self) -> None:
         self.__init_historical_regions()
 
         # start camera processes

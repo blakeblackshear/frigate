@@ -116,5 +116,10 @@
   "nzpost": "NZPost-i sõiduk",
   "postnord": "PostNordi sõiduk",
   "gls": "GLS-i sõiduk",
-  "dpd": "DPD sõiduk"
+  "dpd": "DPD sõiduk",
+  "canada_post": "Canada Post",
+  "royal_mail": "Royal Mail",
+  "school_bus": "Koolibuss",
+  "skunk": "Vinukloom (skunk)",
+  "kangaroo": "Känguru"
 }

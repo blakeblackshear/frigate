@@ -26,8 +26,10 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Slettet kategori",
-      "deletedImage": "Slettede billeder",
+      "deletedCategory_one": "Slettet kategori",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Slettede billeder",
+      "deletedImage_other": "",
       "deletedModel_one": "{{count}} model er nu slettet",
       "deletedModel_other": "{{count}} modeller er nu slettet",
       "categorizedImage": "Billedet er nu kategoriseret",

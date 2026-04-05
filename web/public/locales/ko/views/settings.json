@@ -112,7 +112,8 @@
     "cameraTimestampStyle": "타임스탬프 스타일",
     "cameraMqtt": "카메라 MQTT",
     "mediaSync": "미디어 동기화",
-    "regionGrid": "영역 격자"
+    "regionGrid": "영역 격자",
+    "profiles": "프로필"
   },
   "dialog": {
     "unsavedChanges": {

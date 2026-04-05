@@ -13,10 +13,10 @@ class RequestStore:
     A thread-safe hash-based response store that handles creating requests.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.request_counter = 0
         self.request_counter_lock = threading.Lock()
-        self.input_queue = queue.Queue()
+        self.input_queue: queue.Queue[tuple[int, ndarray]] = queue.Queue()
 
     def __get_request_id(self) -> int:
         with self.request_counter_lock:
@@ -45,17 +45,19 @@ class ResponseStore:
     their request's result appears.
     """
 
-    def __init__(self):
-        self.responses = {}  # Maps request_id -> (original_input, infer_results)
+    def __init__(self) -> None:
+        self.responses: dict[
+            int, ndarray
+        ] = {}  # Maps request_id -> (original_input, infer_results)
         self.lock = threading.Lock()
         self.cond = threading.Condition(self.lock)
 
-    def put(self, request_id: int, response: ndarray):
+    def put(self, request_id: int, response: ndarray) -> None:
         with self.cond:
             self.responses[request_id] = response
             self.cond.notify_all()
 
-    def get(self, request_id: int, timeout=None) -> ndarray:
+    def get(self, request_id: int, timeout: float | None = None) -> ndarray:
         with self.cond:
             if not self.cond.wait_for(
                 lambda: request_id in self.responses, timeout=timeout
@@ -65,7 +67,9 @@ class ResponseStore:
             return self.responses.pop(request_id)
 
 
-def tensor_transform(desired_shape: InputTensorEnum):
+def tensor_transform(
+    desired_shape: InputTensorEnum,
+) -> tuple[int, int, int, int] | None:
     # Currently this function only supports BHWC permutations
     if desired_shape == InputTensorEnum.nhwc:
         return None

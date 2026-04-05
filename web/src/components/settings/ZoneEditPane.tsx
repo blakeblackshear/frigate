@@ -91,10 +91,8 @@ export default function ZoneEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
-  const { send: sendZoneState } = useZoneState(
-    polygon?.camera || "",
-    polygon?.name || "",
-  );
+  const zoneName = polygon?.name || "";
+  const { send: sendZoneState } = useZoneState(polygon?.camera || "", zoneName);
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -210,7 +208,7 @@ export default function ZoneEditPane({
         })
         .optional()
         .or(z.literal("")),
-      isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+      isFinished: z.boolean().refine((val) => val === true, {
         message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
       }),
       objects: z.array(z.string()).optional(),
@@ -295,7 +293,7 @@ export default function ZoneEditPane({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       name: polygon?.name ?? "",
       friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
@@ -303,8 +301,8 @@ export default function ZoneEditPane({
         resolvedZoneData?.enabled !== undefined
           ? resolvedZoneData.enabled
           : (polygon?.enabled ?? true),
-      inertia: resolvedZoneData?.inertia,
-      loitering_time: resolvedZoneData?.loitering_time,
+      inertia: resolvedZoneData?.inertia ?? 3,
+      loitering_time: resolvedZoneData?.loitering_time ?? 0,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
       speedEstimation: !!(lineA || lineB || lineC || lineD),
@@ -316,18 +314,31 @@ export default function ZoneEditPane({
     },
   });
 
+  const watchSpeedEstimation = form.watch("speedEstimation");
+  const watchLineA = form.watch("lineA");
+  const watchLineB = form.watch("lineB");
+  const watchLineC = form.watch("lineC");
+  const watchLineD = form.watch("lineD");
+
+  const canSave =
+    form.formState.isValid &&
+    (!watchSpeedEstimation ||
+      (!!watchLineA && !!watchLineB && !!watchLineC && !!watchLineD));
+
   useEffect(() => {
-    if (
-      form.watch("speedEstimation") &&
-      polygon &&
-      polygon.points.length !== 4
-    ) {
+    if (watchSpeedEstimation && polygon && polygon.points.length !== 4) {
       toast.error(
         t("masksAndZones.zones.speedThreshold.toast.error.pointLengthError"),
       );
       form.setValue("speedEstimation", false);
     }
-  }, [polygon, form, t]);
+  }, [polygon, form, t, watchSpeedEstimation]);
+
+  useEffect(() => {
+    if (polygon?.isFinished !== undefined) {
+      form.setValue("isFinished", polygon.isFinished, { shouldValidate: true });
+    }
+  }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
     async (
@@ -516,8 +527,8 @@ export default function ZoneEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config (not profiles)
-            if (!editingProfile) {
+            // Only publish WS state for base config when zone has a name
+            if (!editingProfile && zoneName) {
               sendZoneState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -968,7 +979,7 @@ export default function ZoneEditPane({
             </Button>
             <Button
               variant="select"
-              disabled={isLoading}
+              disabled={isLoading || !canSave}
               className="flex flex-1"
               aria-label={t("button.save", { ns: "common" })}
               type="submit"

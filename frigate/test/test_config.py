@@ -10,7 +10,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
-from frigate.util.builtin import deep_merge
+from frigate.util.builtin import deep_merge, load_labels
 
 
 class TestConfig(unittest.TestCase):
@@ -287,6 +287,65 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.filters
+
+    def test_default_audio_filters(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "audio": {"listen": ["speech", "yell"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        all_audio_labels = {
+            label
+            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
+            if label
+        }
+
+        assert all_audio_labels.issubset(
+            set(frigate_config.cameras["back"].audio.filters.keys())
+        )
+
+    def test_override_audio_filters(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "audio": {
+                        "listen": ["speech", "yell"],
+                        "filters": {"speech": {"threshold": 0.9}},
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert "speech" in frigate_config.cameras["back"].audio.filters
+        assert frigate_config.cameras["back"].audio.filters["speech"].threshold == 0.9
+        assert "babbling" in frigate_config.cameras["back"].audio.filters
 
     def test_inherit_object_filters(self):
         config = {
@@ -1129,7 +1188,7 @@ class TestConfig(unittest.TestCase):
     def test_global_detect_merge(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "detect": {"max_disappeared": 1, "height": 720},
+            "detect": {"max_disappeared": 1, "height": 720, "width": 1280},
             "cameras": {
                 "back": {
                     "ffmpeg": {

@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 _MIN_INTERVAL = 1
 _MAX_INTERVAL = 300
 
+# Minimum seconds between VLM iterations when woken by detections (no zone filter)
+_DETECTION_COOLDOWN_WITHOUT_ZONE = 10
+
 # Max user/assistant turn pairs to keep in conversation history
 _MAX_HISTORY = 10
 
@@ -40,6 +43,7 @@ class VLMWatchJob(Job):
     labels: list = field(default_factory=list)
     zones: list = field(default_factory=list)
     last_reasoning: str = ""
+    notification_message: str = ""
     iteration_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
@@ -54,9 +58,9 @@ class VLMWatchRunner(threading.Thread):
         job: VLMWatchJob,
         config: FrigateConfig,
         cancel_event: threading.Event,
-        frame_processor,
-        genai_manager,
-        dispatcher,
+        frame_processor: Any,
+        genai_manager: Any,
+        dispatcher: Any,
     ) -> None:
         super().__init__(daemon=True, name=f"vlm_watch_{job.id}")
         self.job = job
@@ -117,11 +121,12 @@ class VLMWatchRunner(threading.Thread):
 
     def _run_iteration(self) -> float:
         """Run one VLM analysis iteration. Returns seconds until next run."""
-        vision_client = (
-            self.genai_manager.vision_client or self.genai_manager.tool_client
-        )
-        if vision_client is None:
-            logger.warning("VLM watch job %s: no vision client available", self.job.id)
+        chat_client = self.genai_manager.chat_client
+        if chat_client is None or not chat_client.supports_vision:
+            logger.warning(
+                "VLM watch job %s: no chat client with vision support available",
+                self.job.id,
+            )
             return 30
 
         frame = self.frame_processor.get_current_frame(self.job.camera, {})
@@ -159,7 +164,7 @@ class VLMWatchRunner(threading.Thread):
             }
         )
 
-        response = vision_client.chat_with_tools(
+        response = chat_client.chat_with_tools(
             messages=self.conversation,
             tools=None,
             tool_choice=None,
@@ -196,6 +201,7 @@ class VLMWatchRunner(threading.Thread):
                 min(_MAX_INTERVAL, int(parsed.get("next_run_in", 30))),
             )
             reasoning = str(parsed.get("reasoning", ""))
+            notification_message = str(parsed.get("notification_message", ""))
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             logger.warning(
                 "VLM watch job %s: failed to parse VLM response: %s", self.job.id, e
@@ -203,6 +209,7 @@ class VLMWatchRunner(threading.Thread):
             return 30
 
         self.job.last_reasoning = reasoning
+        self.job.notification_message = notification_message
         self.job.iteration_count += 1
         self._broadcast_status()
 
@@ -213,22 +220,41 @@ class VLMWatchRunner(threading.Thread):
                 self.job.camera,
                 reasoning,
             )
-            self._send_notification(reasoning)
+            self._send_notification(notification_message or reasoning)
             self.job.status = JobStatusTypesEnum.success
             return 0
 
         return next_run_in
 
     def _wait_for_trigger(self, max_wait: float) -> None:
-        """Wait up to max_wait seconds, returning early if a relevant detection fires on the target camera."""
-        deadline = time.time() + max_wait
+        """Wait up to max_wait seconds, returning early if a relevant detection fires on the target camera.
+
+        With zones configured, a matching detection wakes immediately (events
+        are already filtered).  Without zones, detections are frequent so a
+        cooldown is enforced: messages are continuously drained to prevent
+        queue backup, but the loop only exits once a match has been seen
+        *and* the cooldown period has elapsed.
+        """
+        now = time.time()
+        deadline = now + max_wait
+        use_cooldown = not self.job.zones
+        earliest_wake = now + _DETECTION_COOLDOWN_WITHOUT_ZONE if use_cooldown else 0
+        triggered = False
+
         while not self.cancel_event.is_set():
             remaining = deadline - time.time()
             if remaining <= 0:
                 break
-            topic, payload = self.detection_subscriber.check_for_update(
+
+            if triggered and time.time() >= earliest_wake:
+                break
+
+            result = self.detection_subscriber.check_for_update(
                 timeout=min(1.0, remaining)
             )
+            if result is None:
+                continue
+            topic, payload = result
             if topic is None or payload is None:
                 continue
             # payload = (camera, frame_name, frame_time, tracked_objects, motion_boxes, regions)
@@ -247,12 +273,22 @@ class VLMWatchRunner(threading.Thread):
             if cam != self.job.camera or not tracked_objects:
                 continue
             if self._detection_matches_filters(tracked_objects):
-                logger.debug(
-                    "VLM watch job %s: woken early by detection event on %s",
-                    self.job.id,
-                    self.job.camera,
-                )
-                break
+                if not use_cooldown:
+                    logger.debug(
+                        "VLM watch job %s: woken early by detection event on %s",
+                        self.job.id,
+                        self.job.camera,
+                    )
+                    break
+
+                if not triggered:
+                    logger.debug(
+                        "VLM watch job %s: detection match on %s, draining for %.0fs",
+                        self.job.id,
+                        self.job.camera,
+                        max(0, earliest_wake - time.time()),
+                    )
+                    triggered = True
 
     def _detection_matches_filters(self, tracked_objects: list) -> bool:
         """Return True if any tracked object passes the label and zone filters."""
@@ -281,7 +317,11 @@ class VLMWatchRunner(threading.Thread):
             f"You will receive a sequence of frames over time. Use the conversation history to understand "
             f"what is stationary vs. actively changing.\n\n"
             f"For each frame respond with JSON only:\n"
-            f'{{"condition_met": <true/false>, "next_run_in": <integer seconds 1-300>, "reasoning": "<brief explanation>"}}\n\n'
+            f'{{"condition_met": <true/false>, "next_run_in": <integer seconds 1-300>, "reasoning": "<brief explanation>", "notification_message": "<natural language notification>"}}\n\n'
+            f"Guidelines for notification_message:\n"
+            f"- Only required when condition_met is true.\n"
+            f"- Write a short, natural notification a user would want to receive on their phone.\n"
+            f'- Example: "Your package has been delivered to the front porch."\n\n'
             f"Guidelines for next_run_in:\n"
             f"- Scene is empty / nothing of interest visible: 60-300.\n"
             f"- Relevant object(s) visible anywhere in frame (even outside the target zone): 3-10. "
@@ -291,12 +331,13 @@ class VLMWatchRunner(threading.Thread):
             f"- Keep reasoning to 1-2 sentences."
         )
 
-    def _send_notification(self, reasoning: str) -> None:
+    def _send_notification(self, message: str) -> None:
         """Publish a camera_monitoring event so downstream handlers (web push, MQTT) can notify users."""
         payload = {
             "camera": self.job.camera,
             "condition": self.job.condition,
-            "reasoning": reasoning,
+            "message": message,
+            "reasoning": self.job.last_reasoning,
             "job_id": self.job.id,
         }
 
@@ -328,9 +369,9 @@ def start_vlm_watch_job(
     condition: str,
     max_duration_minutes: int,
     config: FrigateConfig,
-    frame_processor,
-    genai_manager,
-    dispatcher,
+    frame_processor: Any,
+    genai_manager: Any,
+    dispatcher: Any,
     labels: list[str] | None = None,
     zones: list[str] | None = None,
 ) -> str:

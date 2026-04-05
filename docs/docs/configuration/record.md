@@ -3,7 +3,11 @@ id: record
 title: Recording
 ---
 
-Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy in the config. Frigate chooses the largest matching retention value between the recording retention and the tracked object retention when determining if a recording should be removed.
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
+Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy. Frigate chooses the largest matching retention value between the recording retention and the tracked object retention when determining if a recording should be removed.
 
 New recording segments are written from the camera stream to cache, they are only moved to disk if they match the setup recording retention policy.
 
@@ -13,7 +17,23 @@ H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other br
 
 ### Most conservative: Ensure all video is saved
 
-For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following config will store all video for 3 days. After 3 days, only video containing motion will be saved for 7 days. After 7 days, only video containing motion and overlapping with alerts or detections will be retained until 30 days have passed.
+For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following configuration will store all video for 3 days. After 3 days, only video containing motion will be saved for 7 days. After 7 days, only video containing motion and overlapping with alerts or detections will be retained until 30 days have passed.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+- Set **Enable recording** to on
+- Set **Continuous retention > Retention days** to `3`
+- Set **Motion retention > Retention days** to `7`
+- Set **Alert retention > Event retention > Retention days** to `30`
+- Set **Alert retention > Event retention > Retention mode** to `all`
+- Set **Detection retention > Event retention > Retention days** to `30`
+- Set **Detection retention > Event retention > Retention mode** to `all`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -32,9 +52,27 @@ record:
       mode: all
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Reduced storage: Only saving video when motion is detected
 
-In order to reduce storage requirements, you can adjust your config to only retain video where motion / activity was detected.
+To reduce storage requirements, configure recording to only retain video where motion or activity was detected.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+- Set **Enable recording** to on
+- Set **Motion retention > Retention days** to `3`
+- Set **Alert retention > Event retention > Retention days** to `30`
+- Set **Alert retention > Event retention > Retention mode** to `motion`
+- Set **Detection retention > Event retention > Retention days** to `30`
+- Set **Detection retention > Event retention > Retention mode** to `motion`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -51,9 +89,25 @@ record:
       mode: motion
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Minimum: Alerts only
 
-If you only want to retain video that occurs during activity caused by tracked object(s), this config will discard video unless an alert is ongoing.
+If you only want to retain video that occurs during activity caused by tracked object(s), this configuration will discard video unless an alert is ongoing.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+- Set **Enable recording** to on
+- Set **Continuous retention > Retention days** to `0`
+- Set **Alert retention > Event retention > Retention days** to `30`
+- Set **Alert retention > Event retention > Retention mode** to `motion`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -65,6 +119,9 @@ record:
       days: 30
       mode: motion
 ```
+
+</TabItem>
+</ConfigTabs>
 
 ## Will Frigate delete old recordings if my storage runs out?
 
@@ -82,7 +139,21 @@ Retention configs support decimals meaning they can be configured to retain `0.5
 
 ### Continuous and Motion Recording
 
-The number of days to retain continuous and motion recordings can be set via the following config where X is a number, by default continuous recording is disabled.
+The number of days to retain continuous and motion recordings can be configured. By default, continuous recording is disabled.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+| Field                                     | Description                                  |
+| ----------------------------------------- | -------------------------------------------- |
+| **Enable recording**                      | Enable or disable recording for all cameras  |
+| **Continuous retention > Retention days** | Number of days to keep continuous recordings |
+| **Motion retention > Retention days**     | Number of days to keep motion recordings     |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -93,11 +164,28 @@ record:
     days: 2 # <- number of days to keep motion recordings
 ```
 
-Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
+</TabItem>
+</ConfigTabs>
+
+Continuous recording supports different retention modes [which are described below](#configuring-recording-retention).
 
 ### Object Recording
 
-The number of days to record review items can be specified for review items classified as alerts as well as tracked objects.
+The number of days to retain recordings for review items can be specified for items classified as alerts as well as tracked objects.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+| Field                                                      | Description                                 |
+| ---------------------------------------------------------- | ------------------------------------------- |
+| **Enable recording**                                       | Enable or disable recording for all cameras |
+| **Alert retention > Event retention > Retention days**     | Number of days to keep alert recordings     |
+| **Detection retention > Event retention > Retention days** | Number of days to keep detection recordings |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -110,9 +198,10 @@ record:
       days: 10 # <- number of days to keep detections recordings
 ```
 
-This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
+</TabItem>
+</ConfigTabs>
 
-**WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
+This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
 
 ## Can I have "continuous" recordings, but only at certain times?
 
@@ -128,7 +217,7 @@ Time lapse exporting is available only via the [HTTP API](../integrations/api/ex
 
 When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means that every 25 seconds of (real-time) recording is condensed into 1 second of time-lapse video (always without audio) with a smoothness of 30 FPS.
 
-To configure the speed-up factor, the frame rate and further custom settings, the configuration parameter `timelapse_args` can be used. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
+To configure the speed-up factor, the frame rate and further custom settings, use the `timelapse_args` parameter. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
 
 ```yaml {3-4}
 record:
@@ -139,7 +228,7 @@ record:
 
 :::tip
 
-When using `hwaccel_args`, hardware encoding is used for timelapse generation. This setting can be overridden for a specific camera (e.g., when camera resolution exceeds hardware encoder limits); set `cameras.<camera>.record.export.hwaccel_args` with the appropriate settings. Using an unrecognized value or empty string will fall back to software encoding (libx264).
+When using `hwaccel_args`, hardware encoding is used for timelapse generation. This setting can be overridden for a specific camera (e.g., when camera resolution exceeds hardware encoder limits); set the camera-level export hwaccel_args with the appropriate settings. Using an unrecognized value or empty string will fall back to software encoding (libx264).
 
 :::
 

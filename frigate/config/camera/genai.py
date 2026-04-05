@@ -18,8 +18,8 @@ class GenAIProviderEnum(str, Enum):
 
 
 class GenAIRoleEnum(str, Enum):
-    tools = "tools"
-    vision = "vision"
+    chat = "chat"
+    descriptions = "descriptions"
     embeddings = "embeddings"
 
 
@@ -49,21 +49,21 @@ class GenAIConfig(FrigateBaseModel):
     roles: list[GenAIRoleEnum] = Field(
         default_factory=lambda: [
             GenAIRoleEnum.embeddings,
-            GenAIRoleEnum.vision,
-            GenAIRoleEnum.tools,
+            GenAIRoleEnum.descriptions,
+            GenAIRoleEnum.chat,
         ],
         title="Roles",
-        description="GenAI roles (tools, vision, embeddings); one provider per role.",
+        description="GenAI roles (chat, descriptions, embeddings); one provider per role.",
     )
     provider_options: dict[str, Any] = Field(
         default={},
         title="Provider options",
         description="Additional provider-specific options to pass to the GenAI client.",
-        json_schema_extra={"additionalProperties": {"type": "string"}},
+        json_schema_extra={"additionalProperties": {}},
     )
     runtime_options: dict[str, Any] = Field(
         default={},
         title="Runtime options",
         description="Runtime options passed to the provider for each inference call.",
-        json_schema_extra={"additionalProperties": {"type": "string"}},
+        json_schema_extra={"additionalProperties": {}},
     )

@@ -16,7 +16,7 @@
   },
   "frigatePlus": {
     "snapshotConfig": {
-      "cleanCopyWarning": "Alcune telecamere hanno le istantanee abilitate ma la copia pulita disabilitata. È necessario abilitare <code>clean_copy</code> nella configurazione delle istantanee per poter inviare le immagini da queste telecamere a Frigate+.",
+      "cleanCopyWarning": "Alcune telecamere hanno la funzione di istantanea disabilitata",
       "table": {
         "snapshots": "Istantanee",
         "camera": "Telecamera",
@@ -297,7 +297,7 @@
     },
     "restart_required": "Riavvio richiesto (maschere/zone modificate)",
     "motionMaskLabel": "Maschera di movimento {{number}}",
-    "objectMaskLabel": "Maschera di oggetto {{number}} ({{label}})"
+    "objectMaskLabel": "Maschera di oggetto {{number}}"
   },
   "cameraSetting": {
     "camera": "Telecamera",
@@ -389,7 +389,8 @@
     "triggers": "Inneschi",
     "roles": "Ruoli",
     "cameraManagement": "Gestione",
-    "cameraReview": "Rivedi"
+    "cameraReview": "Rivedi",
+    "profiles": "Profili"
   },
   "users": {
     "dialog": {

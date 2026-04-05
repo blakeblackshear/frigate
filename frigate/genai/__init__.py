@@ -5,7 +5,7 @@ import importlib
 import logging
 import os
 import re
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import numpy as np
 from playhouse.shortcuts import model_to_dict
@@ -31,10 +31,10 @@ __all__ = [
 PROVIDERS = {}
 
 
-def register_genai_provider(key: GenAIProviderEnum):
+def register_genai_provider(key: GenAIProviderEnum) -> Callable:
     """Register a GenAI provider."""
 
-    def decorator(cls):
+    def decorator(cls: type) -> type:
         PROVIDERS[key] = cls
         return cls
 
@@ -297,7 +297,7 @@ Guidelines:
         """Generate a description for the frame."""
         try:
             prompt = camera_config.objects.genai.object_prompts.get(
-                event.label,
+                str(event.label),
                 camera_config.objects.genai.prompt,
             ).format(**model_to_dict(event))
         except KeyError as e:
@@ -307,7 +307,7 @@ Guidelines:
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(prompt, thumbnails)
 
-    def _init_provider(self):
+    def _init_provider(self) -> Any:
         """Initialize the client."""
         return None
 
@@ -319,6 +319,22 @@ Guidelines:
     ) -> Optional[str]:
         """Submit a request to the provider."""
         return None
+
+    @property
+    def supports_vision(self) -> bool:
+        """Whether the model supports vision/image input.
+
+        Defaults to True for cloud providers. Providers that can detect
+        capability at runtime (e.g. llama.cpp) should override this.
+        """
+        return True
+
+    def list_models(self) -> list[str]:
+        """Return the list of model names available from this provider.
+
+        Providers should override this to query their backend.
+        """
+        return []
 
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
@@ -402,7 +418,7 @@ Guidelines:
         }
 
 
-def load_providers():
+def load_providers() -> None:
     package_dir = os.path.dirname(__file__)
     for filename in os.listdir(package_dir):
         if filename.endswith(".py") and filename != "__init__.py":

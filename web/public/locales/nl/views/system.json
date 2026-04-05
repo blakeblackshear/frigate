@@ -4,7 +4,8 @@
     "logs": {
       "nginx": "Nginx Logboeken - Frigate",
       "go2rtc": "Go2RTC Logboeken - Frigate",
-      "frigate": "Frigate Logboek - Frigate"
+      "frigate": "Frigate Logboek - Frigate",
+      "websocket": "Berichten Logboeken - Frigate"
     },
     "storage": "Opslag Statistieken - Frigate",
     "cameras": "Camera Statistieken - Frigate",
@@ -33,7 +34,30 @@
         "fetchingLogsFailed": "Fout bij ophalen van logs: {{errorMessage}}"
       }
     },
-    "tips": "Logs worden gestreamd vanaf de server"
+    "tips": "Logs worden gestreamd vanaf de server",
+    "websocket": {
+      "label": "Berichten",
+      "pause": "Pauze",
+      "resume": "Hervatten",
+      "clear": "Leegmaken",
+      "filter": {
+        "all": "Alle onderwerpen",
+        "topics": "Onderwerpen",
+        "events": "Gebeurtenissen",
+        "reviews": "Beoordelingen",
+        "classification": "Classificatie",
+        "face_recognition": "Gezichtsherkenning",
+        "lpr": "Kentekenplaatherkenning",
+        "camera_activity": "Camera activiteit",
+        "system": "Systeem",
+        "camera": "Camera",
+        "all_cameras": "Alle camera's",
+        "cameras_count_one": "{{count}} Camera",
+        "cameras_count_other": "{{count}} Cameras"
+      },
+      "empty": "Nog geen berichten ontvangen",
+      "count_one": "{{count}} berichten"
+    }
   },
   "general": {
     "detector": {

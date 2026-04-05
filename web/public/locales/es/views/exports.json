@@ -2,7 +2,9 @@
   "search": "Búsqueda",
   "documentTitle": "Exportar - Frigate",
   "noExports": "No se encontraron exportaciones",
-  "deleteExport": "Eliminar exportación",
+  "deleteExport": {
+    "label": "Eliminar exportación"
+  },
   "editExport": {
     "desc": "Introduce un nuevo nombre para esta exportación.",
     "saveExport": "Guardar exportación",
@@ -25,5 +27,12 @@
   "headings": {
     "cases": "Casos",
     "uncategorizedExports": "Exportaciones sin categorizar"
+  },
+  "caseDialog": {
+    "title": "Añadir al caso",
+    "newCaseOption": "Crear nuevo caso",
+    "nameLabel": "Nombre del caso",
+    "description": "Elige un caso existente o crea uno nuevo.",
+    "selectLabel": "Caso"
   }
 }

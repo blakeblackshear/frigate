@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Global deteksjon",
+            "sensitivity": "Global følsomhet"
+        },
+        "cameras": {
+            "detection": "Deteksjon",
+            "sensitivity": "Følsomhet"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globalt utseende"
+        },
+        "cameras": {
+            "appearance": "Utseende"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Global følsomhet",
+            "algorithm": "Global algoritme"
+        },
+        "cameras": {
+            "sensitivity": "Følsomhet",
+            "algorithm": "Algoritme"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Global visning"
+        },
+        "cameras": {
+            "display": "Visning"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Global oppløsning",
+            "tracking": "Global sporing"
+        },
+        "cameras": {
+            "resolution": "Oppløsning",
+            "tracking": "Sporing"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Global sporing",
+            "filtering": "Global filtrering"
+        },
+        "cameras": {
+            "tracking": "Sporing",
+            "filtering": "Filtrering"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Global opptaksbevaring",
+            "events": "Globale hendelser"
+        },
+        "cameras": {
+            "retention": "Opptaksbevaring",
+            "events": "Hendelser"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Kamera-spesifikke FFmpeg argumenter"
+        }
+    }
+}

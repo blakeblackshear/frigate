@@ -539,6 +539,7 @@
     },
     "restart_required": "Restart required (masks/zones changed)",
     "disabledInConfig": "Item is disabled in the config file",
+    "addDisabledProfile": "Add to the base config first, then override in the profile",
     "profileBase": "(base)",
     "profileOverride": "(override)",
     "toast": {
@@ -612,6 +613,10 @@
           "title": "Confirm Delete",
           "desc": "Are you sure you want to delete the {{type}} <em>{{name}}</em>?",
           "success": "{{name}} has been deleted."
+        },
+        "revertOverride": {
+          "title": "Revert to Base Config",
+          "desc": "This will remove the profile override for the {{type}} <em>{{name}}</em> and revert to the base configuration."
         },
         "error": {
           "mustBeFinished": "Polygon drawing must be finished before saving."
@@ -824,6 +829,12 @@
       "ratio": "Ratio",
       "area": "Area"
     }
+  },
+  "timestampPosition": {
+    "tl": "Top left",
+    "tr": "Top right",
+    "bl": "Bottom left",
+    "br": "Bottom right"
   },
   "users": {
     "title": "Users",
@@ -1342,7 +1353,22 @@
         "preset-nvidia": "NVIDIA GPU",
         "preset-jetson-h264": "NVIDIA Jetson (H.264)",
         "preset-jetson-h265": "NVIDIA Jetson (H.265)",
-        "preset-rkmpp": "Rockchip RKMPP"
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generic)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generic)",
+        "preset-http-reolink": "HTTP - Reolink Cameras",
+        "preset-rtmp-generic": "RTMP (Generic)",
+        "preset-rtsp-generic": "RTSP (Generic)",
+        "preset-rtsp-restream": "RTSP - Restream from go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Restream from go2rtc (Low Latency)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Record (Generic, no audio)",
+        "preset-record-generic-audio-copy": "Record (Generic + Copy Audio)",
+        "preset-record-generic-audio-aac": "Record (Generic + Audio to AAC)",
+        "preset-record-mjpeg": "Record - MJPEG Cameras",
+        "preset-record-jpeg": "Record - JPEG Cameras",
+        "preset-record-ubiquiti": "Record - Ubiquiti Cameras"
       }
     },
     "cameraInputs": {
@@ -1388,7 +1414,8 @@
       "keyDuplicate": "Detector name already exists.",
       "noSchema": "No detector schemas are available.",
       "none": "No detector instances configured.",
-      "add": "Add detector"
+      "add": "Add detector",
+      "addCustomKey": "Add custom key"
     },
     "record": {
       "title": "Recording Settings"
@@ -1409,6 +1436,10 @@
     "objectLabels": {
       "summary": "{{count}} object types selected",
       "empty": "No object labels available"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} labels selected",
+      "empty": "No labels available"
     },
     "filters": {
       "objectFieldLabel": "{{field}} for {{label}}"
@@ -1453,7 +1484,13 @@
     "timestamp_style": {
       "title": "Timestamp Settings"
     },
-    "searchPlaceholder": "Search..."
+    "searchPlaceholder": "Search...",
+    "addCustomLabel": "Add custom label...",
+    "genaiModel": {
+      "placeholder": "Select model…",
+      "search": "Search models…",
+      "noModels": "No models available"
+    }
   },
   "globalConfig": {
     "title": "Global Configuration",
@@ -1500,6 +1537,8 @@
     "noOverrides": "No overrides",
     "cameraCount_one": "{{count}} camera",
     "cameraCount_other": "{{count}} cameras",
+    "columnCamera": "Camera",
+    "columnOverrides": "Profile Overrides",
     "baseConfig": "Base Config",
     "addProfile": "Add Profile",
     "newProfile": "New Profile",
@@ -1572,6 +1611,47 @@
       "audioExclude": "Exclude",
       "hardwareNone": "No hardware acceleration",
       "hardwareAuto": "Automatic hardware acceleration"
+    }
+  },
+  "onvif": {
+    "profileAuto": "Auto",
+    "profileLoading": "Loading profiles..."
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "Recording is disabled, review items will not be generated.",
+      "detectDisabled": "Object detection is disabled. Review items require detected objects to categorize alerts and detections.",
+      "allNonAlertDetections": "All non-alert activity will be included as detections."
+    },
+    "audio": {
+      "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in global settings for camera-level face recognition to function.",
+      "personNotTracked": "Face recognition requires the 'person' object to be tracked. Ensure 'person' is in the object tracking list."
+    },
+    "lpr": {
+      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in global settings for camera-level LPR to function.",
+      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked."
+    },
+    "record": {
+      "noRecordRole": "No streams have the record role defined. Recording will not function."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye is set to 'objects' mode, but object detection is disabled for this camera. The camera will not appear in Birdseye."
+    },
+    "snapshots": {
+      "detectDisabled": "Object detection is disabled. Snapshots are generated from tracked objects and will not be created."
+    },
+    "detectors": {
+      "mixedTypes": "All detectors must use the same type. Remove existing detectors to use a different type.",
+      "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
     }
   }
 }

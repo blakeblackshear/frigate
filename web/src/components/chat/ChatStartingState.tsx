@@ -22,6 +22,14 @@ export function ChatStartingState({ onSendMessage }: ChatStartingStateProps) {
       label: t("starting_requests.show_camera_status"),
       prompt: t("starting_requests_prompts.show_camera_status"),
     },
+    {
+      label: t("starting_requests.recap"),
+      prompt: t("starting_requests_prompts.recap"),
+    },
+    {
+      label: t("starting_requests.watch_camera"),
+      prompt: t("starting_requests_prompts.watch_camera"),
+    },
   ];
 
   const handleRequestClick = (prompt: string) => {
@@ -67,7 +75,7 @@ export function ChatStartingState({ onSendMessage }: ChatStartingStateProps) {
         </div>
       </div>
 
-      <div className="flex w-full max-w-2xl flex-row items-center gap-2 rounded-xl bg-secondary p-4">
+      <div className="flex w-full max-w-2xl flex-row items-center gap-2 rounded-xl bg-secondary p-3">
         <Input
           className="h-12 w-full flex-1 border-transparent bg-transparent text-base shadow-none focus-visible:ring-0 dark:bg-transparent"
           placeholder={t("placeholder")}

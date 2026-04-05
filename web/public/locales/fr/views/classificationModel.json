@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Classe supprimée",
-      "deletedImage": "Images supprimées",
+      "deletedCategory_one": "{{count}} classe supprimée",
+      "deletedCategory_many": "{{count}} classes supprimées",
+      "deletedCategory_other": "{{count}} classes supprimées",
+      "deletedImage_one": "{{count}} image supprimée",
+      "deletedImage_many": "{{count}} images supprimées",
+      "deletedImage_other": "{{count}} images supprimées",
       "categorizedImage": "Image classifiée avec succès",
       "trainedModel": "Modèle entraîné avec succès.",
       "trainingModel": "L'entraînement du modèle a démarré avec succès.",
@@ -21,7 +25,8 @@
       "deletedModel_many": "{{count}} modèles supprimés avec succès",
       "deletedModel_other": "{{count}} modèles supprimés avec succès",
       "updatedModel": "Configuration du modèle mise à jour avec succès",
-      "renamedCategory": "Classe renommée en {{name}} avec succès"
+      "renamedCategory": "Classe renommée en {{name}} avec succès",
+      "reclassifiedImage": "Image reclassifiée avec succès"
     },
     "error": {
       "deleteImageFailed": "Échec de la suppression : {{errorMessage}}",
@@ -31,7 +36,8 @@
       "deleteModelFailed": "Impossible de supprimer le modèle : {{errorMessage}}",
       "updateModelFailed": "Impossible de mettre à jour le modèle : {{errorMessage}}",
       "renameCategoryFailed": "Impossible de renommer la classe : {{errorMessage}}",
-      "trainingFailedToStart": "Impossible de démarrer l'entraînement du modèle : {{errorMessage}}"
+      "trainingFailedToStart": "Impossible de démarrer l'entraînement du modèle : {{errorMessage}}",
+      "reclassifyFailed": "Échec de reclassification de l'image : {{errorMessage}}"
     }
   },
   "deleteCategory": {

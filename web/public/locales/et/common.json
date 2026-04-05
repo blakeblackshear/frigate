@@ -180,7 +180,8 @@
     "faceLibrary": "Näoteek",
     "classification": "Klassifikatsioon",
     "chat": "Vestlus",
-    "actions": "Tegevused"
+    "actions": "Tegevused",
+    "profiles": "Profiilid"
   },
   "unit": {
     "speed": {
@@ -247,7 +248,8 @@
     "resetToGlobal": "Lähtesta üldiseks väärtusteks",
     "savingAll": "Salvestan kõiki…",
     "undoAll": "Pööra kõik tegevused tagasi",
-    "applying": "Võtan kasutusele…"
+    "applying": "Võtan kasutusele…",
+    "retry": "Proovi uuesti"
   },
   "label": {
     "back": "Mine tagasi",
@@ -274,7 +276,8 @@
       "error": {
         "title": "Seadistuste muudatuste salvestamine ei õnnestunud: {{errorMessage}}",
         "noMessage": "Seadistuste muudatuste salvestamine ei õnnestunud"
-      }
+      },
+      "success": "Seadistuste muudatuste salvestamine õnnestus."
     }
   },
   "role": {
@@ -309,5 +312,7 @@
   "readTheDocumentation": "Loe dokumentatsiooni ja juhendit",
   "information": {
     "pixels": "{{area}} px"
-  }
+  },
+  "no_items": "Objekte pole",
+  "validation_errors": "Valideerimise vead"
 }

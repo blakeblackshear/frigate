@@ -1,1 +1,8 @@
-{}
+{
+    "minimum": "Deve essere almeno {{limit}}",
+    "maximum": "Deve essere al massimo {{limit}}",
+    "exclusiveMinimum": "Deve essere maggiore di {{limit}}",
+    "exclusiveMaximum": "Deve essere minore di {{limit}}",
+    "minLength": "Deve essere almeno {{limit}} carattere(i)",
+    "maxLength": "Deve essere al massimo {{limit}} carattere(i)"
+}

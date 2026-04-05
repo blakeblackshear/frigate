@@ -184,7 +184,8 @@
     "faceLibrary": "얼굴 라이브러리",
     "classification": "분류",
     "chat": "채팅",
-    "actions": "작업"
+    "actions": "작업",
+    "profiles": "프로필"
   },
   "unit": {
     "speed": {
@@ -260,7 +261,8 @@
     "saveAll": "모두 저장",
     "savingAll": "모두 저장 중. …",
     "undoAll": "모두 실행 취소",
-    "applying": "적용 중…"
+    "applying": "적용 중…",
+    "retry": "재시도"
   },
   "toast": {
     "copyUrlToClipboard": "클립보드에 URL이 복사되었습니다.",
@@ -269,7 +271,8 @@
       "error": {
         "title": "설정 저장 실패: {{errorMessage}}",
         "noMessage": "설정 저장이 실패했습니다"
-      }
+      },
+      "success": "설정 변경이 성공적으로 저장되었습니다."
     }
   },
   "role": {
@@ -302,5 +305,7 @@
   "field": {
     "optional": "선택",
     "internalID": "Frigate 내부 ID는 구성 및 데이터베이스에서 사용됩니다"
-  }
+  },
+  "no_items": "내역 없음",
+  "validation_errors": "검증 오류"
 }

@@ -81,6 +81,7 @@
     "zones": "Tsoonid",
     "mask": "Mask",
     "motion": "Liikumine",
-    "regions": "Alad"
+    "regions": "Alad",
+    "paths": "Asukohad"
   }
 }

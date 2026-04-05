@@ -7,7 +7,7 @@
     "camera": "Configuración de cámara - Frigate",
     "motionTuner": "Ajuste de movimiento - Frigate",
     "classification": "Configuración de clasificación - Frigate",
-    "general": "Configuración de Interfaz de Usuario - Frigate",
+    "general": "Configuración de la interfaz - Frigate",
     "frigatePlus": "Configuración de Frigate+ - Frigate",
     "notifications": "Configuración de Notificaciones - Frigate",
     "enrichments": "Configuración de Análisis Avanzado - Frigate",
@@ -15,7 +15,8 @@
     "cameraReview": "Revisar Configuración de Cámaras - Frigate",
     "globalConfig": "Configuración Global - Frigate",
     "cameraConfig": "Configuración de Cámara - Frigate",
-    "maintenance": "Mantenimiento - Frigate"
+    "maintenance": "Mantenimiento - Frigate",
+    "profiles": "Perfiles - Frigate"
   },
   "menu": {
     "cameras": "Configuración de Cámara",
@@ -292,6 +293,11 @@
       "speed": {
         "error": {
           "mustBeGreaterOrEqualTo": "El umbral de velocidad debe ser mayor o igual a 0,1."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "El nombre no puede estar vacío."
         }
       }
     },
@@ -1233,6 +1239,26 @@
       "toast": {
         "success": "Se ha guardado la configuración de la clasificación de revisión. Reinicie Frigate para aplicar los cambios."
       }
+    }
+  },
+  "button": {
+    "overriddenGlobal": "Sobrescrito (Global)",
+    "overriddenBaseConfigTooltip": "El perfil {{profile}} sobrescribe los ajustes de configuración de esta sección",
+    "overriddenGlobalTooltip": "Esta cámara sobrescribe los ajustes de configuración global en esta sección",
+    "overriddenBaseConfig": "Sobrescrito (Configuración Base)"
+  },
+  "onvif": {
+    "profileLoading": "Cargando perfiles..."
+  },
+  "maintenance": {
+    "sync": {
+      "verboseDesc": "Escribe una lista completa de archivos huérfanos en el disco para su revisión.",
+      "verbose": "Detallado"
+    }
+  },
+  "configForm": {
+    "camera": {
+      "noCameras": "No hay cámaras disponibles"
     }
   }
 }

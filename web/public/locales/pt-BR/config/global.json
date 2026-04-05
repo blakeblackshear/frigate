@@ -19,18 +19,61 @@
             "description": "Padrão global de verbosidade de registro (debug, info, aviso, erro)."
         },
         "logs": {
-            "label": "Nível de registro por processo"
+            "label": "Nível de registro por processo",
+            "description": "Configurações de nível de registro por componente para aumentar ou diminuir a verbosidade de módulos específicos."
         }
     },
     "audio": {
         "max_not_heard": {
-            "label": "Tempo limite final"
+            "label": "Tempo limite final",
+            "description": "Quantidade de segundos sem o tipo de áudio configurado antes do término do evento de áudio."
         },
         "min_volume": {
-            "label": "Volume mínimo"
+            "label": "Volume mínimo",
+            "description": "Limiar mínimo de volume RMS necessário para executar a detecção de áudio; valores mais baixos aumentam a sensibilidade (por exemplo, 200 para volume alto, 500 para volume médio, 1000 para volume baixo)."
+        },
+        "listen": {
+            "label": "Tipos de escuta",
+            "description": "Lista de tipos de eventos de áudio a serem detectados (por exemplo: latido, alarme de incêndio, grito, fala, berro)."
+        },
+        "filters": {
+            "label": "Filtros de áudio",
+            "description": "Configurações de filtro por tipo de áudio, como limites de confiança, usadas para reduzir falsos positivos."
+        },
+        "enabled_in_config": {
+            "label": "Estado de áudio original",
+            "description": "Indica se a detecção de áudio foi originalmente ativada no arquivo de configuração estática."
+        },
+        "num_threads": {
+            "label": "Threads de detecção",
+            "description": "Número de threads a serem usadas para o processamento de detecção de áudio."
         }
     },
     "auth": {
-        "label": "Autenticação"
+        "label": "Autenticação",
+        "description": "Configurações de autenticação e relacionadas à sessão, incluindo opções de cookies e limite de taxa.",
+        "enabled": {
+            "label": "Habilitar autenticação",
+            "description": "Ative a autenticação nativa para a interface do usuário do Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Redefinir senha de administrador",
+            "description": "Se verdadeiro, redefina a senha do usuário administrador na inicialização e imprima a nova senha nos registros."
+        },
+        "cookie_name": {
+            "label": "nome do cookie JWT",
+            "description": "Nome do cookie usado para armazenar o token JWT para autenticação nativa."
+        },
+        "cookie_secure": {
+            "label": "Sinalizador de cookie seguro",
+            "description": "Defina o atributo \"secure\" no cookie de autenticação; ele deve ser verdadeiro ao usar TLS."
+        },
+        "session_length": {
+            "label": "Duração da sessão",
+            "description": "Duração da sessão em segundos para sessões baseadas em JWT."
+        }
+    },
+    "audio_transcription": {
+        "label": "Transcrição de áudio"
     }
 }

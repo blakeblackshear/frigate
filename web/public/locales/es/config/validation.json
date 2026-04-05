@@ -12,5 +12,20 @@
     "type": "Tipo de valor no válido",
     "enum": "Debe ser uno de los valores permitidos",
     "const": "El valor no coincide con la constante esperada",
-    "uniqueItems": "Todos los objetos deben ser únicos"
+    "uniqueItems": "Todos los objetos deben ser únicos",
+    "format": "Formato no válido",
+    "additionalProperties": "No se permite una propiedad desconocida",
+    "oneOf": "Debe coincidir exactamente con uno de los esquemas permitidos",
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Cada rol solo puede asignarse a un flujo de entrada.",
+            "detectRequired": "Al menos un flujo de entrada debe tener asignado el rol 'detect'."
+        }
+    },
+    "anyOf": "Debe coincidir con al menos uno de los esquemas permitidos",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Se requiere el encabezado de rol cuando hay mapeos de roles configurados."
+        }
+    }
 }

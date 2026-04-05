@@ -82,6 +82,7 @@
     "zones": "区域",
     "mask": "遮罩",
     "motion": "画面变动",
-    "regions": "区域"
+    "regions": "区域",
+    "paths": "行动轨迹"
   }
 }

@@ -170,7 +170,8 @@
     "attributes": "Atribute de clasificare",
     "title": {
       "label": "Titlu"
-    }
+    },
+    "scoreInfo": "Informații scor"
   },
   "exploreMore": "Explorează mai multe obiecte cu {{label}}",
   "trackedObjectDetails": "Detalii despre obiectul urmărit",
@@ -230,12 +231,18 @@
     "debugReplay": {
       "label": "Reluare de depanare",
       "aria": "Vezi acest obiect urmărit în vizualizarea de reluare de depanare"
+    },
+    "more": {
+      "aria": "Mai mult"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmă ștergerea",
       "desc": "Ștergerea acestui obiect urmărit elimină snapshot-ul, orice înglobări salvate și orice intrări asociate detaliilor de urmărire. Materialul video înregistrat al acestui obiect urmărit în vizualizarea Istoric <em>NU</em> va fi șters.<br /><br />Ești sigur că vrei să continui?"
+    },
+    "toast": {
+      "error": "Eroare la ștergerea acestui obiect urmărit: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Nu au fost găsite obiecte urmărite",

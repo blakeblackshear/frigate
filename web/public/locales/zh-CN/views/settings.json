@@ -7,7 +7,7 @@
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
     "motionTuner": "画面变动调整 - Frigate",
     "object": "调试 - Frigate",
-    "general": "配置文件设置 - Frigate",
+    "general": "界面设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
     "notifications": "通知设置 - Frigate",
     "enrichments": "增强功能设置 - Frigate",
@@ -15,7 +15,8 @@
     "cameraReview": "摄像头核查设置 - Frigate",
     "globalConfig": "全局配置 - Frigate",
     "cameraConfig": "摄像头配置 - Frigate",
-    "maintenance": "维护 - Frigate"
+    "maintenance": "维护 - Frigate",
+    "profiles": "配置模板 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -87,7 +88,11 @@
     "cameraTimestampStyle": "时间戳样式",
     "cameraMqtt": "摄像头 MQTT",
     "mediaSync": "媒体同步",
-    "regionGrid": "区域网格"
+    "regionGrid": "区域网格",
+    "uiSettings": "界面设置",
+    "profiles": "配置模板",
+    "systemGo2rtcStreams": "go2rtc 视频流",
+    "maintenance": "维护"
   },
   "dialog": {
     "unsavedChanges": {
@@ -100,7 +105,7 @@
     "noCamera": "没有摄像头"
   },
   "general": {
-    "title": "配置文件设置",
+    "title": "界面设置",
     "liveDashboard": {
       "title": "实时监控面板",
       "automaticLiveView": {
@@ -351,11 +356,25 @@
           "zone": "区域",
           "motion_mask": "画面变动遮罩",
           "object_mask": "目标遮罩"
+        },
+        "revertOverride": {
+          "title": "恢复为默认配置"
         }
       },
       "speed": {
         "error": {
           "mustBeGreaterOrEqualTo": "速度阈值必须大于或等于0.1。"
+        }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID 不能为空。",
+          "alreadyExists": "此摄像头已存在使用该 ID 的遮罩。"
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "名称不能为空。"
         }
       }
     },
@@ -486,7 +505,10 @@
         "title": "开启",
         "description": "指示该遮罩在配置文件中是否处于激活并启用的状态。若被禁用，则无法通过 MQTT 启用。禁用的遮罩在运行时会被忽略。"
       }
-    }
+    },
+    "profileBase": "（基础）",
+    "profileOverride": "（覆盖）",
+    "addDisabledProfile": "先添加到基础配置中，然后在配置模板中进行覆盖"
   },
   "motionDetectionTuner": {
     "title": "画面变动检测调整",
@@ -753,9 +775,9 @@
     },
     "snapshotConfig": {
       "title": "快照配置",
-      "desc": "提交到 Frigate+ 需要同时在配置中启用快照和 <code>clean_copy</code> 快照。",
+      "desc": "提交到 Frigate+ 需要同时在配置中开启快照功能。",
       "documentation": "阅读文档",
-      "cleanCopyWarning": "部分摄像头已启用快照但未启用 clean_copy。您需要在快照配置中启用 <code>clean_copy</code>，才能将这些摄像头的图像提交到 Frigate+。",
+      "cleanCopyWarning": "部分摄像头未开启快照功能",
       "table": {
         "camera": "摄像头",
         "snapshots": "快照",
@@ -1374,6 +1396,14 @@
       "confirmButton": "永久删除",
       "success": "摄像头 {{cameraName}} 删除完成",
       "error": "删除摄像头 {{cameraName}} 失败"
+    },
+    "profiles": {
+      "title": "配置模板的摄像头覆盖项",
+      "selectLabel": "选择配置模板",
+      "description": "配置在启用某个配置模板时，哪些摄像头应被开启或关闭。设置为“继承”的摄像头会沿用它原本的启用/禁用状态。",
+      "inherit": "继承",
+      "enabled": "开启",
+      "disabled": "关闭"
     }
   },
   "cameraReview": {
@@ -1428,6 +1458,9 @@
     "value": {
       "label": "新值",
       "reset": "重置"
+    },
+    "profile": {
+      "label": "配置"
     }
   },
   "detectionModel": {
@@ -1465,7 +1498,8 @@
       "genai": "生成式 AI",
       "face_recognition": "人脸识别",
       "lpr": "车牌识别",
-      "birdseye": "鸟瞰图"
+      "birdseye": "鸟瞰图",
+      "masksAndZones": "遮罩 / 区域"
     },
     "global": {
       "title": "全局设置",
@@ -1473,7 +1507,8 @@
     },
     "camera": {
       "title": "摄像头设置",
-      "description": "这些设置仅适用于此摄像头，并会覆盖全局设置。"
+      "description": "这些设置仅适用于此摄像头，并会覆盖全局设置。",
+      "noCameras": "没有可用的摄像头"
     },
     "advancedSettingsCount": "高级设置 ({{count}})",
     "advancedCount": "高级选项 ({{count}})",
@@ -1495,7 +1530,35 @@
       "manual": "手动参数",
       "inherit": "继承摄像头设置",
       "selectPreset": "选择预设",
-      "manualPlaceholder": "输入 FFmpeg 参数"
+      "manualPlaceholder": "输入 FFmpeg 参数",
+      "none": "无",
+      "useGlobalSetting": "继承全局设置",
+      "presetLabels": {
+        "preset-rpi-64-h264": "树莓派（H.264）",
+        "preset-rpi-64-h265": "树莓派（H.265）",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "瑞芯微 RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG（通用）",
+        "preset-http-mjpeg-generic": "HTTP MJPEG（通用）",
+        "preset-http-reolink": "HTTP - Reolink 摄像头",
+        "preset-rtmp-generic": "RTMP（通用）",
+        "preset-rtsp-generic": "RTSP（通用）",
+        "preset-rtsp-restream": "RTSP - 从 go2rtc 转流",
+        "preset-rtsp-restream-low-latency": "RTSP - 从 go2rtc 转流（低延迟）",
+        "preset-rtsp-udp": "RTSP - UDP协议",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "录制（通用，无音频）",
+        "preset-record-generic-audio-copy": "录制（通用，不转码音频）",
+        "preset-record-generic-audio-aac": "录制（通用并将音频转码为 AAC）",
+        "preset-record-mjpeg": "录制 - MJPEG 流摄像头",
+        "preset-record-jpeg": "录制 - JPEG 流摄像头",
+        "preset-record-ubiquiti": "录制 - 优必飞摄像头"
+      }
     },
     "cameraInputs": {
       "itemTitle": "视频流 {{index}}"
@@ -1512,7 +1575,8 @@
       "keyDuplicate": "检测器名称已存在。",
       "noSchema": "没有可用的检测器架构。",
       "none": "未配置检测器实例。",
-      "add": "添加检测器"
+      "add": "添加检测器",
+      "addCustomKey": "添加自定义键（Key）"
     },
     "record": {
       "title": "录制设置"
@@ -1574,7 +1638,24 @@
     "timestamp_style": {
       "title": "时间戳设置"
     },
-    "searchPlaceholder": "搜索…"
+    "searchPlaceholder": "搜索…",
+    "genaiRoles": {
+      "options": {
+        "embeddings": "嵌入（Embedding）",
+        "vision": "视觉（Vision）",
+        "tools": "工具（Tools）"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "选择模型…",
+      "builtIn": "内置模型",
+      "genaiProviders": "生成式 AI 服务"
+    },
+    "reviewLabels": {
+      "summary": "已选择 {{count}} 个标签",
+      "empty": "暂无可用标签"
+    },
+    "addCustomLabel": "添加自定义标签…"
   },
   "cameraConfig": {
     "title": "摄像头配置",
@@ -1631,7 +1712,9 @@
       "review_thumbnails": "核查缩略图",
       "previews": "预览",
       "exports": "导出",
-      "recordings": "录像"
+      "recordings": "录像",
+      "verbose": "详细模式",
+      "verboseDesc": "将所有孤立文件的完整清单写入硬盘以供核查。"
     },
     "regionGrid": {
       "title": "区域网格",
@@ -1668,5 +1751,140 @@
   "unsavedChanges": "您有未保存的更改",
   "confirmReset": "确认重置",
   "resetToDefaultDescription": "这将把此部分的所有设置重置为默认值。此操作无法撤销。",
-  "resetToGlobalDescription": "这将把此部分的设置重置为全局默认值。此操作无法撤销。"
+  "resetToGlobalDescription": "这将把此部分的设置重置为全局默认值。此操作无法撤销。",
+  "button": {
+    "overriddenGlobal": "已覆盖全局通用配置",
+    "overriddenGlobalTooltip": "当前摄像头配置，将优先覆盖全局通用设置",
+    "overriddenBaseConfigTooltip": "当前 {{profile}} 配置模板会覆盖本节所有设置",
+    "overriddenBaseConfig": "已覆盖默认配置"
+  },
+  "profiles": {
+    "title": "配置模板",
+    "activeProfile": "激活配置模板",
+    "noActiveProfile": "无激活的配置模板",
+    "active": "激活",
+    "activated": "配置模板 {{profile}} 已激活",
+    "activateFailed": "配置模板设置失败",
+    "deactivated": "配置模板已停用",
+    "noProfiles": "未定义任何配置模板。",
+    "noOverrides": "无覆盖项",
+    "cameraCount_other": "{{count}} 个摄像头",
+    "baseConfig": "基础配置",
+    "addProfile": "添加配置模板",
+    "newProfile": "新配置模板",
+    "profileNamePlaceholder": "例如：布防、外出、夜间模式",
+    "friendlyNameLabel": "配置模板名称",
+    "profileIdLabel": "配置模板 ID",
+    "profileIdDescription": "用于配置和自动化的内部标识符",
+    "nameInvalid": "仅允许使用小写字母、数字和下划线",
+    "nameDuplicate": "已存在同名配置模板",
+    "columnCamera": "摄像头",
+    "columnOverrides": "配置文件覆盖",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "至少需要 2 个字符",
+      "mustNotContainPeriod": "不得包含英文句号（\".\"）",
+      "alreadyExists": "已存在使用此 ID 的配置文件"
+    },
+    "renameProfile": "重命名配置文件",
+    "renameSuccess": "已将配置文件重命名为 “{{profile}}”",
+    "deleteProfile": "删除配置文件",
+    "deleteProfileConfirm": "确定要为所有摄像头删除配置文件“{{profile}}”吗？该步骤无法撤销。",
+    "deleteSuccess": "配置文件“{{profile}}”已删除",
+    "createSuccess": "配置文件“{{profile}}”已创建",
+    "removeOverride": "移除配置文件覆盖",
+    "deleteSection": "删除节点覆盖",
+    "deleteSectionConfirm": "是否要移除摄像机 {{camera}} 上针对配置文件 {{profile}} 的 {{section}} 覆盖设置？",
+    "deleteSectionSuccess": "已移除 {{profile}} 的 {{section}} 覆盖设置",
+    "enableSwitch": "开启配置文件",
+    "enabledDescription": "配置文件功能已启用。请在下方创建新的配置文件，进入摄像头配置页面进行修改并保存，修改即可生效。",
+    "disabledDescription": "配置文件功能可以让你创建一组带名称的摄像头自定义参数（比如布防、离家、夜间模式），并随时切换启用。"
+  },
+  "timestampPosition": {
+    "tl": "左上角",
+    "tr": "右上角",
+    "bl": "左下角",
+    "br": "右下角"
+  },
+  "go2rtcStreams": {
+    "title": "go2rtc 视频流",
+    "description": "管理用于摄像头转流的 go2rtc 流配置。每个视频流包含一个名称以及一个或多个源地址 URL。",
+    "addStream": "添加视频流",
+    "addStreamDesc": "为新的视频流输入一个名称，该名称将用于在摄像头配置中引用该视频流。",
+    "addUrl": "添加 URL 地址",
+    "streamName": "视频流名称",
+    "streamNamePlaceholder": "例如：front_door，此处只能使用英文",
+    "streamUrlPlaceholder": "例如：rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "删除视频流",
+    "deleteStreamConfirm": "确定要删除视频流 “{{streamName}}” 吗？引用该视频流的摄像头可能会停止工作。",
+    "noStreams": "未配置任何 go2rtc 流。请添加一个视频流以开始使用。",
+    "validation": {
+      "nameRequired": "视频流名称为必填",
+      "nameDuplicate": "已存在同名的视频流",
+      "nameInvalid": "视频流名称只能使用字母、数字、下划线和连字符",
+      "urlRequired": "至少需要填写一个 URL 地址"
+    },
+    "renameStream": "重命名视频流",
+    "renameStreamDesc": "为此视频流输入新名称。重命名视频流可能会导致通过名称引用它的摄像头或其他流无法正常工作。",
+    "newStreamName": "新视频流名称",
+    "ffmpeg": {
+      "useFfmpegModule": "使用兼容模式（ffmpeg）",
+      "video": "视频",
+      "audio": "音频",
+      "hardware": "硬件加速",
+      "videoCopy": "直接复制",
+      "videoH264": "转码为 H.264",
+      "videoH265": "转码为 H.265",
+      "videoExclude": "排除",
+      "audioCopy": "直接复制",
+      "audioAac": "转码为 AAC",
+      "audioOpus": "转码为 Opus",
+      "audioPcmu": "转码为 PCM μ-law",
+      "audioPcma": "转码为 PCM A-law",
+      "audioPcm": "转码为 PCM",
+      "audioMp3": "转码为 MP3",
+      "audioExclude": "排除",
+      "hardwareNone": "无硬件加速",
+      "hardwareAuto": "自动选择硬件加速"
+    }
+  },
+  "onvif": {
+    "profileAuto": "自动",
+    "profileLoading": "正在加载配置文件…"
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "录制已禁用，不会生成核查记录项。",
+      "detectDisabled": "目标检测已禁用。核查记录需要依靠检测到的目标来对警报和检测事件进行分类。",
+      "allNonAlertDetections": "所有非警报类活动都将被记录为检测事件。"
+    },
+    "lpr": {
+      "vehicleNotTracked": "车牌识别需要先开启对 “汽车” 或 “摩托车” 的目标追踪。",
+      "globalDisabled": "车牌识别未在全局开启。请在全局设置中开启该功能，才能在摄像头下单独配置车牌识别是否开启。"
+    },
+    "audio": {
+      "noAudioRole": "暂无任何流已开启音频（audio）功能（role）。必须在视频流上启用音频功能，音频检测才能正常工作。"
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "该摄像头未开启音频检测功能。音频转录需要先开启音频检测。"
+    },
+    "detect": {
+      "fpsGreaterThanFive": "不建议设置检测帧率高于 5。"
+    },
+    "faceRecognition": {
+      "globalDisabled": "人脸识别未在全局开启。请在全局设置中开启该功能，才能在摄像头下单独配置人脸识别是否开启。",
+      "personNotTracked": "人脸识别需要检测到 “人”（person） 后才能工作。请确保 “person” 已添加到目标追踪列表中。"
+    },
+    "record": {
+      "noRecordRole": "暂无任何视频流已配置录制功能，录制功能将无法正常工作。"
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "鸟瞰图已设置为 “目标” 模式，但此摄像头未开启目标检测。该摄像头将不会显示在鸟瞰画面中。"
+    },
+    "snapshots": {
+      "detectDisabled": "目标检测已禁用。快照是根据追踪到的目标生成的，因此将不会创建快照。"
+    },
+    "detectors": {
+      "mixedTypes": "所有检测器必须为同一类型。若要更换为其他类型，请先移除现有的检测器。"
+    }
+  }
 }

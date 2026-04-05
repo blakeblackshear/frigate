@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Ištrinta Klasę",
-      "deletedImage": "Ištrinti Nuotraukas",
+      "deletedCategory_one": "Ištrinta Klasę",
+      "deletedCategory_few": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Ištrinti Nuotraukas",
+      "deletedImage_few": "",
+      "deletedImage_other": "",
       "categorizedImage": "Sekmingai Klasifikuotas Nuotrauka",
       "trainedModel": "Modelis sėkmingai apmokytas.",
       "trainingModel": "Sėkmingai pradėtas modelio apmokymas.",

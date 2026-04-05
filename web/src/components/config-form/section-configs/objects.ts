@@ -29,6 +29,11 @@ const objects: SectionConfigOverrides = {
     ],
     advancedFields: ["genai"],
     uiSchema: {
+      filters: {
+        "ui:options": {
+          expandable: false,
+        },
+      },
       "filters.*.min_area": {
         "ui:options": {
           suppressMultiSchema: true,

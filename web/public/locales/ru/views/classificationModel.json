@@ -17,8 +17,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Класс удалён",
-      "deletedImage": "Изображения удалены",
+      "deletedCategory_one": "Класс удалён",
+      "deletedCategory_few": "",
+      "deletedCategory_many": "",
+      "deletedImage_one": "Изображения удалены",
+      "deletedImage_few": "",
+      "deletedImage_many": "",
       "deletedModel_one": "Успешно удалена {{count}} модель",
       "deletedModel_few": "Успешно удалены {{count}} модели",
       "deletedModel_many": "Успешно удалены {{count}} моделей",

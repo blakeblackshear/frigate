@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 
 type ToolCallBubbleProps = {
   name: string;
@@ -34,7 +34,7 @@ export function ToolCallBubble({
   return (
     <div
       className={cn(
-        "rounded-lg px-3 py-2",
+        "rounded-2xl px-3 py-2",
         isLeft
           ? "self-start bg-muted"
           : "self-end bg-primary text-primary-foreground",
@@ -51,9 +51,9 @@ export function ToolCallBubble({
             )}
           >
             {open ? (
-              <ChevronDown size={12} className="shrink-0" />
+              <LuChevronDown className="size-3 shrink-0" />
             ) : (
-              <ChevronRight size={12} className="shrink-0" />
+              <LuChevronRight className="size-3 shrink-0" />
             )}
             <span className="break-words font-medium">
               {isLeft ? t("call") : t("result")} {normalizedName}

@@ -19,12 +19,88 @@
             "description": "Cantidad de segundos sin el tipo de audio configurado antes de que finalice el evento de audio."
         },
         "min_volume": {
-            "label": "Volumen mínimo"
+            "label": "Volumen mínimo",
+            "description": "Umbral mínimo de volumen RMS requerido para ejecutar la detección de audio; los valores más bajos aumentan la sensibilidad (p. ej., 200 alta, 500 media, 1000 baja)."
+        },
+        "listen": {
+            "label": "Tipos de escucha",
+            "description": "Lista de tipos de eventos de audio a detectar (por ejemplo: ladrido, alarma de incendios, grito, voz, alarido)."
+        },
+        "filters": {
+            "label": "Filtros de audio",
+            "description": "Ajustes de filtrado por tipo de audio, como umbrales de confianza utilizados para reducir los falsos positivos."
+        },
+        "enabled_in_config": {
+            "description": "Indica si la detección de audio estaba habilitada originalmente en el archivo de configuración estática.",
+            "label": "Estado original del audio"
+        },
+        "num_threads": {
+            "label": "Hilos de detección"
         }
     },
     "friendly_name": {
         "label": "Nombre descriptivo",
         "description": "Nombre descriptivo de la cámara utilizado en la interfaz de usuario de Frigate"
     },
-    "label": "Configuración de Cámara"
+    "label": "Configuración de Cámara",
+    "onvif": {
+        "profile": {
+            "label": "Perfil ONVIF"
+        }
+    },
+    "zones": {
+        "distances": {
+            "label": "Distancias reales"
+        },
+        "coordinates": {
+            "description": "Coordenadas del polígono que definen el área de la zona. Puede ser una cadena separada por comas o una lista de cadenas de coordenadas. Las coordenadas deben ser relativas (0-1) o absolutas (heredadas).",
+            "label": "Coordenadas"
+        },
+        "filters": {
+            "raw_mask": {
+                "label": "Máscara en bruto"
+            },
+            "mask": {
+                "description": "Coordenadas del polígono que definen dónde se aplica este filtro dentro del fotograma.",
+                "label": "Máscara de filtro"
+            },
+            "min_score": {
+                "description": "Confianza mínima en un solo fotograma requerida para que el objeto sea contabilizado.",
+                "label": "Confianza mínima"
+            },
+            "threshold": {
+                "description": "Umbral de confianza promedio requerido para que el objeto sea considerado un positivo real.",
+                "label": "Umbral de confianza"
+            },
+            "max_ratio": {
+                "description": "Relación máxima de ancho/alto permitida para que el cuadro delimitador califique.",
+                "label": "Relación de aspecto máxima"
+            },
+            "min_ratio": {
+                "description": "Relación mínima de ancho/alto requerida para que el cuadro delimitador califique.",
+                "label": "Relación de aspecto mínima"
+            },
+            "max_area": {
+                "description": "Área máxima del cuadro delimitador (píxeles o porcentaje) permitida para este tipo de objeto. Puede expresarse en píxeles (entero) o como porcentaje (decimal entre 0,000001 y 0,99).",
+                "label": "Área máxima del objeto"
+            }
+        }
+    },
+    "objects": {
+        "raw_mask": {
+            "label": "Máscara en bruto"
+        },
+        "genai": {
+            "label": "Configuración de objetos GenAI",
+            "description": "Opciones de GenAI para describir objetos rastreados y enviar fotogramas para su generación.",
+            "enabled": {
+                "label": "Activar GenAI",
+                "description": "Activar por defecto la generación de descripciones de GenAI para los objetos rastreados."
+            },
+            "use_snapshot": {
+                "label": "Usar instantáneas",
+                "description": "Usar instantáneas de objetos en lugar de miniaturas para la generación de descripciones de GenAI."
+            }
+        }
+    }
 }

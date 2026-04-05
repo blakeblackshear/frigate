@@ -80,9 +80,10 @@ export default function ObjectMaskEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const maskName = polygon?.name || "";
   const { send: sendObjectMaskState } = useObjectMaskState(
     polygon?.camera || "",
-    polygon?.name || "",
+    maskName,
   );
 
   const cameraConfig = useMemo(() => {
@@ -143,7 +144,7 @@ export default function ObjectMaskEditPane({
     }),
     enabled: z.boolean(),
     objects: z.string(),
-    isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+    isFinished: z.boolean().refine((val) => val === true, {
       message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
     }),
   });
@@ -159,6 +160,12 @@ export default function ObjectMaskEditPane({
       isFinished: polygon?.isFinished ?? false,
     },
   });
+
+  useEffect(() => {
+    if (polygon?.isFinished !== undefined) {
+      form.setValue("isFinished", polygon.isFinished, { shouldValidate: true });
+    }
+  }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
     async ({
@@ -256,8 +263,8 @@ export default function ObjectMaskEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config
-            if (!editingProfile) {
+            // Only publish WS state for base config when mask has a name
+            if (!editingProfile && maskName) {
               sendObjectMaskState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -300,6 +307,7 @@ export default function ObjectMaskEditPane({
       cameraConfig,
       t,
       sendObjectMaskState,
+      maskName,
       editingProfile,
     ],
   );
@@ -454,7 +462,7 @@ export default function ObjectMaskEditPane({
                 </Button>
                 <Button
                   variant="select"
-                  disabled={isLoading}
+                  disabled={isLoading || !form.formState.isValid}
                   className="flex flex-1"
                   aria-label={t("button.save", { ns: "common" })}
                   type="submit"

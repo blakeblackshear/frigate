@@ -1,7 +1,7 @@
 import { CombinedStorageGraph } from "@/components/graph/CombinedStorageGraph";
 import { StorageGraph } from "@/components/graph/StorageGraph";
 import { FrigateStats } from "@/types/stats";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Popover,
   PopoverContent,
@@ -10,7 +10,11 @@ import {
 import useSWR from "swr";
 import { CiCircleAlert } from "react-icons/ci";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useFormattedTimestamp, useTimezone } from "@/hooks/use-date-utils";
+import {
+  useFormattedTimestamp,
+  useTimeFormat,
+  useTimezone,
+} from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { useTranslation } from "react-i18next";
 import { TZDate } from "react-day-picker";
@@ -56,9 +60,14 @@ export default function StorageMetrics({
     Object.values(cameraStorage).forEach(
       (cam) => (totalStorage.camera += cam.usage),
     );
-    setLastUpdated(Date.now() / 1000);
     return totalStorage;
-  }, [cameraStorage, stats, setLastUpdated]);
+  }, [cameraStorage, stats]);
+
+  useEffect(() => {
+    if (totalStorage) {
+      setLastUpdated(Math.floor(Date.now() / 1000));
+    }
+  }, [totalStorage, setLastUpdated]);
 
   // recordings summary
 
@@ -76,7 +85,7 @@ export default function StorageMetrics({
       : null;
   }, [recordingsSummary, timezone]);
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     return t(`time.formattedTimestampMonthDayYear.${timeFormat}`, {
       ns: "common",

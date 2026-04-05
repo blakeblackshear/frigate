@@ -1,1 +1,51 @@
-{}
+{
+    "safe_mode": {
+        "label": "Modalità sicura",
+        "description": "Quando abilitata, avvia Frigate in modalità sicura con funzionalità ridotte per la risoluzione dei problemi."
+    },
+    "environment_vars": {
+        "label": "Variabili d'ambiente",
+        "description": "Coppie chiave/valore di variabili d'ambiente da impostare per il processo Frigate in Home Assistant OS. Gli utenti non HAOS devono utilizzare la configurazione delle variabili d'ambiente di Docker."
+    },
+    "version": {
+        "label": "Versione configurazione attuale",
+        "description": "Versione numerica o stringa della configurazione attiva per facilitare il rilevamento di migrazioni o modifiche di formato."
+    },
+    "audio": {
+        "label": "Eventi audio",
+        "enabled": {
+            "label": "Abilita il rilevamento audio"
+        },
+        "min_volume": {
+            "label": "Volume minimo"
+        }
+    },
+    "logger": {
+        "description": "Consente di controllare il livello di dettaglio predefinito dei registri e le opzioni di sovrascrittura per ciascun componente.",
+        "default": {
+            "label": "Livello di registrazione",
+            "description": "Livello di dettaglio predefinito del registro globale (debug, info, warning, error)."
+        },
+        "logs": {
+            "label": "Livello di registro per processo",
+            "description": "Opzioni di sovrsacrittura del livello di registro per ciascun componente, per aumentare o diminuire il livello di dettaglio dei singoli moduli."
+        }
+    },
+    "auth": {
+        "label": "Autenticazione",
+        "description": "Impostazioni di autenticazione e relative alla sessione, incluse le opzioni relative ai cookie e al limite di frequenza.",
+        "enabled": {
+            "label": "Abilita autenticazione",
+            "description": "Abilita l'autenticazione nativa per l'interfaccia utente di Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Reimposta la password di amministratore",
+            "description": "Se la condizione è vera, reimposta la password dell'utente amministratore all'avvio e stampa la nuova password nei registri."
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "Percorso FFmpeg"
+        }
+    }
+}

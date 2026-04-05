@@ -122,6 +122,11 @@ import {
   SnapshotResult,
 } from "@/utils/snapshotUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { Stage, Layer, Rect } from "react-konva";
+import type { KonvaEventObject } from "konva/lib/Node";
+
+/** Pixel threshold to distinguish drag from click. */
+const DRAG_MIN_PX = 15;
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -213,44 +218,111 @@ export default function LiveCameraView({
     };
   }, [audioTranscriptionState, sendTranscription]);
 
-  // click overlay for ptzs
+  // click-to-move / drag-to-zoom overlay for PTZ cameras
 
   const [clickOverlay, setClickOverlay] = useState(false);
   const clickOverlayRef = useRef<HTMLDivElement>(null);
   const { send: sendPtz } = usePtzCommand(camera.name);
 
-  const handleOverlayClick = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
-      if (!clickOverlay) {
-        return;
-      }
+  // drag rectangle state in stage-local coordinates
+  const [ptzRect, setPtzRect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [isPtzDrawing, setIsPtzDrawing] = useState(false);
+  // raw origin to determine drag direction (not min/max corrected)
+  const ptzOriginRef = useRef<{ x: number; y: number } | null>(null);
 
-      let clientX;
-      let clientY;
-      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
-        clientX = e.nativeEvent.touches[0].clientX;
-        clientY = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        clientX = e.nativeEvent.clientX;
-        clientY = e.nativeEvent.clientY;
-      }
+  const [overlaySize] = useResizeObserver(clickOverlayRef);
 
-      if (clickOverlayRef.current && clientX && clientY) {
-        const rect = clickOverlayRef.current.getBoundingClientRect();
-
-        const normalizedX = (clientX - rect.left) / rect.width;
-        const normalizedY = (clientY - rect.top) / rect.height;
-
-        const pan = (normalizedX - 0.5) * 2;
-        const tilt = (0.5 - normalizedY) * 2;
-
-        sendPtz(`move_relative_${pan}_${tilt}`);
+  const onPtzStageDown = useCallback(
+    (e: KonvaEventObject<MouseEvent> | KonvaEventObject<TouchEvent>) => {
+      const pos = e.target.getStage()?.getPointerPosition();
+      if (pos) {
+        setIsPtzDrawing(true);
+        ptzOriginRef.current = { x: pos.x, y: pos.y };
+        setPtzRect({ x: pos.x, y: pos.y, width: 0, height: 0 });
       }
     },
-    [clickOverlayRef, clickOverlay, sendPtz],
+    [],
   );
+
+  const onPtzStageMove = useCallback(
+    (e: KonvaEventObject<MouseEvent> | KonvaEventObject<TouchEvent>) => {
+      if (!isPtzDrawing || !ptzRect) return;
+      const pos = e.target.getStage()?.getPointerPosition();
+      if (pos) {
+        setPtzRect({
+          ...ptzRect,
+          width: pos.x - ptzRect.x,
+          height: pos.y - ptzRect.y,
+        });
+      }
+    },
+    [isPtzDrawing, ptzRect],
+  );
+
+  const onPtzStageUp = useCallback(() => {
+    setIsPtzDrawing(false);
+
+    if (!ptzRect || !ptzOriginRef.current || overlaySize.width === 0) {
+      setPtzRect(null);
+      ptzOriginRef.current = null;
+      return;
+    }
+
+    const endX = ptzRect.x + ptzRect.width;
+    const endY = ptzRect.y + ptzRect.height;
+    const distX = Math.abs(ptzRect.width);
+    const distY = Math.abs(ptzRect.height);
+
+    if (distX < DRAG_MIN_PX && distY < DRAG_MIN_PX) {
+      // click — pan/tilt to point without zoom
+      const normX = endX / overlaySize.width;
+      const normY = endY / overlaySize.height;
+      const pan = (normX - 0.5) * 2;
+      const tilt = (0.5 - normY) * 2;
+      sendPtz(`move_relative_${pan}_${tilt}`);
+    } else {
+      // drag — pan/tilt to box center, zoom based on box size
+      const origin = ptzOriginRef.current;
+
+      const n0x = Math.min(origin.x, endX) / overlaySize.width;
+      const n0y = Math.min(origin.y, endY) / overlaySize.height;
+      const n1x = Math.max(origin.x, endX) / overlaySize.width;
+      const n1y = Math.max(origin.y, endY) / overlaySize.height;
+
+      let boxW = n1x - n0x;
+      let boxH = n1y - n0y;
+
+      // correct box to match camera aspect ratio so zoom is uniform
+      const frameAR = overlaySize.width / overlaySize.height;
+      const boxAR = boxW / boxH;
+      if (boxAR > frameAR) {
+        boxH = boxW / frameAR;
+      } else {
+        boxW = boxH * frameAR;
+      }
+
+      const centerX = (n0x + n1x) / 2;
+      const centerY = (n0y + n1y) / 2;
+      const pan = (centerX - 0.5) * 2;
+      const tilt = (0.5 - centerY) * 2;
+
+      // zoom magnitude from box size (small box = more zoom)
+      let zoom = Math.max(0.01, Math.min(1, Math.max(boxW, boxH)));
+      // drag direction: top-left → bottom-right = zoom in, reverse = zoom out
+      const zoomIn = endX > origin.x && endY > origin.y;
+      if (!zoomIn) zoom = -zoom;
+
+      sendPtz(`move_relative_${pan}_${tilt}_${zoom}`);
+    }
+
+    setPtzRect(null);
+    ptzOriginRef.current = null;
+  }, [ptzRect, overlaySize, sendPtz]);
 
   // pip state
 
@@ -440,7 +512,8 @@ export default function LiveCameraView({
     <TransformWrapper
       minScale={1.0}
       wheel={{ smoothStep: 0.005 }}
-      disabled={debug}
+      disabled={debug || clickOverlay}
+      panning={{ disabled: clickOverlay }}
     >
       <Toaster position="top-center" closeButton={true} />
       <div
@@ -634,13 +707,50 @@ export default function LiveCameraView({
               }}
             >
               <div
-                className={`flex flex-col items-center justify-center ${growClassName}`}
+                className={cn(
+                  "flex flex-col items-center justify-center",
+                  growClassName,
+                )}
                 ref={clickOverlayRef}
-                onClick={handleOverlayClick}
                 style={{
                   aspectRatio: constrainedAspectRatio,
                 }}
               >
+                {clickOverlay && overlaySize.width > 0 && (
+                  <div
+                    className="absolute z-40 cursor-crosshair"
+                    style={{
+                      width: overlaySize.width,
+                      height: overlaySize.height,
+                    }}
+                  >
+                    <Stage
+                      width={overlaySize.width}
+                      height={overlaySize.height}
+                      onMouseDown={onPtzStageDown}
+                      onMouseMove={onPtzStageMove}
+                      onMouseUp={onPtzStageUp}
+                      onTouchStart={onPtzStageDown}
+                      onTouchMove={onPtzStageMove}
+                      onTouchEnd={onPtzStageUp}
+                    >
+                      <Layer>
+                        {ptzRect && (
+                          <Rect
+                            x={ptzRect.x}
+                            y={ptzRect.y}
+                            width={ptzRect.width}
+                            height={ptzRect.height}
+                            stroke="white"
+                            strokeWidth={2}
+                            dash={[6, 4]}
+                            opacity={0.8}
+                          />
+                        )}
+                      </Layer>
+                    </Stage>
+                  </div>
+                )}
                 <LivePlayer
                   key={camera.name}
                   className={`${fullscreen ? "*:rounded-none" : ""}`}

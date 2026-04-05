@@ -265,14 +265,30 @@ def get_amd_gpu_stats() -> Optional[dict[str, str]]:
 
 
 def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, str]]:
-    """Get stats using intel_gpu_top."""
+    """Get stats using intel_gpu_top.
+
+    Returns overall GPU usage derived from rc6 residency (idle time),
+    plus individual engine breakdowns:
+      - enc: Render/3D engine (compute/shader encoder, used by QSV)
+      - dec: Video engines (fixed-function codec, used by VAAPI)
+    """
 
     def get_stats_manually(output: str) -> dict[str, str]:
         """Find global stats via regex when json fails to parse."""
         reading = "".join(output)
         results: dict[str, str] = {}
 
-        # render is used for qsv
+        # rc6 residency for overall GPU usage
+        rc6_match = re.search(r'"rc6":\{"value":([\d.]+)', reading)
+        if rc6_match:
+            rc6_value = float(rc6_match.group(1))
+            results["gpu"] = f"{round(100.0 - rc6_value, 2)}%"
+        else:
+            results["gpu"] = "-%"
+
+        results["mem"] = "-%"
+
+        # Render/3D is the compute/encode engine
         render = []
         for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[14:])
@@ -280,11 +296,9 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             render.append(float(single))
 
         if render:
-            render_avg = sum(render) / len(render)
-        else:
-            render_avg = 1
+            results["compute"] = f"{round(sum(render) / len(render), 2)}%"
 
-        # video is used for vaapi
+        # Video engines are the fixed-function decode engines
         video = []
         for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[10:])
@@ -292,12 +306,8 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             video.append(float(single))
 
         if video:
-            video_avg = sum(video) / len(video)
-        else:
-            video_avg = 1
+            results["dec"] = f"{round(sum(video) / len(video), 2)}%"
 
-        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
-        results["mem"] = "-%"
         return results
 
     intel_gpu_top_command = [
@@ -336,10 +346,18 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
             return get_stats_manually(output)
 
         results: dict[str, str] = {}
-        render = {"global": []}
-        video = {"global": []}
+        rc6_values = []
+        render_global = []
+        video_global = []
+        # per-client: {pid: [total_busy_per_sample, ...]}
+        client_usages: dict[str, list[float]] = {}
 
         for block in data:
+            # rc6 residency: percentage of time GPU is idle
+            rc6 = block.get("rc6", {}).get("value")
+            if rc6 is not None:
+                rc6_values.append(float(rc6))
+
             global_engine = block.get("engines")
 
             if global_engine:
@@ -347,48 +365,53 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
                 video_frame = global_engine.get("Video/0", {}).get("busy")
 
                 if render_frame is not None:
-                    render["global"].append(float(render_frame))
+                    render_global.append(float(render_frame))
 
                 if video_frame is not None:
-                    video["global"].append(float(video_frame))
+                    video_global.append(float(video_frame))
 
             clients = block.get("clients", {})
 
-            if clients and len(clients):
+            if clients:
                 for client_block in clients.values():
-                    key = client_block["pid"]
+                    pid = client_block["pid"]
 
-                    if render.get(key) is None:
-                        render[key] = []
-                        video[key] = []
+                    if pid not in client_usages:
+                        client_usages[pid] = []
 
-                    client_engine = client_block.get("engine-classes", {})
+                    # Sum all engine-class busy values for this client
+                    total_busy = 0.0
+                    for engine in client_block.get("engine-classes", {}).values():
+                        busy = engine.get("busy")
+                        if busy is not None:
+                            total_busy += float(busy)
 
-                    render_frame = client_engine.get("Render/3D", {}).get("busy")
-                    video_frame = client_engine.get("Video", {}).get("busy")
+                    client_usages[pid].append(total_busy)
 
-                    if render_frame is not None:
-                        render[key].append(float(render_frame))
+        # Overall GPU usage from rc6 (idle) residency
+        if rc6_values:
+            rc6_avg = sum(rc6_values) / len(rc6_values)
+            results["gpu"] = f"{round(100.0 - rc6_avg, 2)}%"
 
-                    if video_frame is not None:
-                        video[key].append(float(video_frame))
+        results["mem"] = "-%"
 
-        if render["global"] and video["global"]:
-            results["gpu"] = (
-                f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
-            )
-            results["mem"] = "-%"
+        # Compute: Render/3D engine (compute/shader workloads and QSV encode)
+        if render_global:
+            results["compute"] = f"{round(sum(render_global) / len(render_global), 2)}%"
 
-        if len(render.keys()) > 1:
+        # Decoder: Video engine (fixed-function codec)
+        if video_global:
+            results["dec"] = f"{round(sum(video_global) / len(video_global), 2)}%"
+
+        # Per-client GPU usage (sum of all engines per process)
+        if client_usages:
             results["clients"] = {}
 
-            for key in render.keys():
-                if key == "global" or not render[key] or not video[key]:
-                    continue
-
-                results["clients"][key] = (
-                    f"{round(((sum(render[key]) / len(render[key])) + (sum(video[key]) / len(video[key]))) / 2, 2)}%"
-                )
+            for pid, samples in client_usages.items():
+                if samples:
+                    results["clients"][pid] = (
+                        f"{round(sum(samples) / len(samples), 2)}%"
+                    )
 
         return results
 
@@ -486,6 +509,43 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
         pass
 
     return stats
+
+
+def get_axcl_npu_stats() -> Optional[dict[str, str | float]]:
+    """Get NPU stats using axcl."""
+    # Check if axcl-smi exists
+    axcl_smi_path = "/usr/bin/axcl/axcl-smi"
+    if not os.path.exists(axcl_smi_path):
+        return None
+
+    try:
+        # Run axcl-smi command to get NPU stats
+        axcl_command = [axcl_smi_path, "sh", "cat", "/proc/ax_proc/npu/top"]
+        p = sp.run(
+            axcl_command,
+            capture_output=True,
+            text=True,
+        )
+
+        if p.returncode != 0:
+            pass
+        else:
+            utilization = None
+
+            for line in p.stdout.strip().splitlines():
+                line = line.strip()
+                if line.startswith("utilization:"):
+                    match = re.search(r"utilization:(\d+)%", line)
+                    if match:
+                        utilization = float(match.group(1))
+
+            if utilization is not None:
+                stats: dict[str, str | float] = {"npu": utilization, "mem": "-%"}
+                return stats
+    except Exception:
+        pass
+
+    return None
 
 
 def try_get_info(f, h, default="N/A", sensor=None):

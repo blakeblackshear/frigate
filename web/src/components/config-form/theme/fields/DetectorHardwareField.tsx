@@ -374,6 +374,18 @@ export function DetectorHardwareField(props: FieldProps) {
     [detectors],
   );
 
+  const getExistingType = useCallback(
+    (excludeKey?: string): string | undefined => {
+      for (const [key, value] of Object.entries(detectors)) {
+        if (excludeKey && key === excludeKey) continue;
+        const type = getInstanceType(value);
+        if (type) return type;
+      }
+      return undefined;
+    },
+    [detectors],
+  );
+
   const handleAdd = useCallback(() => {
     if (!addType) {
       setAddError(
@@ -396,6 +408,28 @@ export function DetectorHardwareField(props: FieldProps) {
           defaultValue: "Only one {{type}} detector is allowed.",
           type: getTypeLabel(addType),
         }),
+      );
+      return;
+    }
+
+    const existingType = getExistingType();
+    if (existingType && existingType !== addType) {
+      const canAddExisting =
+        multiInstanceSet.has(existingType) ||
+        !resolveDuplicateType(existingType);
+      setAddError(
+        canAddExisting
+          ? t("configMessages.detectors.mixedTypesSuggestion", {
+              ns: "views/settings",
+              defaultValue:
+                "All detectors must use the same type. Remove existing detectors or select {{type}}.",
+              type: getTypeLabel(existingType),
+            })
+          : t("configMessages.detectors.mixedTypes", {
+              ns: "views/settings",
+              defaultValue:
+                "All detectors must use the same type. Remove existing detectors to use a different type.",
+            }),
       );
       return;
     }
@@ -427,8 +461,10 @@ export function DetectorHardwareField(props: FieldProps) {
     configNamespace,
     detectors,
     getDetectorDefaults,
+    getExistingType,
     getTypeLabel,
     isSingleInstanceType,
+    multiInstanceSet,
     resolveDuplicateType,
     updateDetectors,
   ]);
@@ -523,6 +559,29 @@ export function DetectorHardwareField(props: FieldProps) {
         return;
       }
 
+      const existingType = getExistingType(key);
+      if (existingType && existingType !== nextType) {
+        const canAddExisting =
+          multiInstanceSet.has(existingType) ||
+          !resolveDuplicateType(existingType, key);
+        setTypeErrors((prev) => ({
+          ...prev,
+          [key]: canAddExisting
+            ? t("configMessages.detectors.mixedTypesSuggestion", {
+                ns: "views/settings",
+                defaultValue:
+                  "All detectors must use the same type. Remove existing detectors or select {{type}}.",
+                type: getTypeLabel(existingType),
+              })
+            : t("configMessages.detectors.mixedTypes", {
+                ns: "views/settings",
+                defaultValue:
+                  "All detectors must use the same type. Remove existing detectors to use a different type.",
+              }),
+        }));
+        return;
+      }
+
       setTypeErrors((prev) => {
         const { [key]: _, ...rest } = prev;
         return rest;
@@ -538,8 +597,10 @@ export function DetectorHardwareField(props: FieldProps) {
     [
       detectors,
       getDetectorDefaults,
+      getExistingType,
       getTypeLabel,
       isSingleInstanceType,
+      multiInstanceSet,
       resolveDuplicateType,
       t,
       updateDetectors,
@@ -556,6 +617,10 @@ export function DetectorHardwareField(props: FieldProps) {
       const nestedOverrides = {
         "ui:options": {
           disableNestedCard: true,
+          addButtonText: t("configForm.detectors.addCustomKey", {
+            ns: "views/settings",
+            defaultValue: "Add custom key",
+          }),
         },
       } as UiSchema;
 
@@ -567,7 +632,7 @@ export function DetectorHardwareField(props: FieldProps) {
       );
       return mergeUiSchema(withTypeHiddenAndOptions, nestedOverrides);
     },
-    [globalHiddenFields, hiddenByType, uiSchema?.additionalProperties],
+    [globalHiddenFields, hiddenByType, t, uiSchema?.additionalProperties],
   );
 
   const renderInstanceForm = useCallback(

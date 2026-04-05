@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Directo - Frigate",
+  "documentTitle": {
+    "default": "En vivo - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Directo - Frigate",
   "twoWayTalk": {
     "enable": "Habilitar conversación bidireccional",
@@ -14,7 +16,8 @@
       "clickMove": {
         "label": "Haz clic en el marco para centrar la cámara",
         "enable": "Habilitar clic para mover",
-        "disable": "Deshabilitar clic para mover"
+        "disable": "Deshabilitar clic para mover",
+        "enableWithZoom": "Activar clic para mover / arrastrar para hacer zoom"
       },
       "up": {
         "label": "Mover la cámara PTZ hacia arriba"

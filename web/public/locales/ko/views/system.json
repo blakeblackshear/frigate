@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Frigate 로그 -Frigate",
       "go2rtc": "Go2RTC 로그 - Frigate",
-      "nginx": "Nginx 로그 - Frigate"
+      "nginx": "Nginx 로그 - Frigate",
+      "websocket": "메세지 로그 - Frigate"
     }
   },
   "title": "시스템",
@@ -33,6 +34,29 @@
         "fetchingLogsFailed": "로그 가져오기 오류: {{errorMessage}}",
         "whileStreamingLogs": "스크리밍 로그 중 오류: {{errorMessage}}"
       }
+    },
+    "websocket": {
+      "label": "메세지",
+      "pause": "일시중지",
+      "resume": "재개",
+      "clear": "비우기",
+      "filter": {
+        "all": "전체 항목",
+        "topics": "항목",
+        "events": "이벤트",
+        "reviews": "리뷰",
+        "classification": "분류",
+        "face_recognition": "얼굴 인식",
+        "lpr": "번호판 인식",
+        "system": "시스템",
+        "camera": "카메라",
+        "all_cameras": "모든 카메라",
+        "cameras_count_one": "{{count}} 카메라",
+        "cameras_count_other": "{{count}} 카메라"
+      },
+      "empty": "수신된 메시지 없음",
+      "count_one": "{{count}} 메세지",
+      "count_other": "{{count}} 메세지"
     }
   },
   "general": {

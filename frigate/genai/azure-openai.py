@@ -3,7 +3,7 @@
 import base64
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 from urllib.parse import parse_qs, urlparse
 
 from openai import AzureOpenAI
@@ -20,10 +20,10 @@ class OpenAIClient(GenAIClient):
 
     provider: AzureOpenAI
 
-    def _init_provider(self):
+    def _init_provider(self) -> AzureOpenAI | None:
         """Initialize the client."""
         try:
-            parsed_url = urlparse(self.genai_config.base_url)
+            parsed_url = urlparse(self.genai_config.base_url or "")
             query_params = parse_qs(parsed_url.query)
             api_version = query_params.get("api-version", [None])[0]
             azure_endpoint = f"{parsed_url.scheme}://{parsed_url.netloc}/"
@@ -79,8 +79,16 @@ class OpenAIClient(GenAIClient):
             logger.warning("Azure OpenAI returned an error: %s", str(e))
             return None
         if len(result.choices) > 0:
-            return result.choices[0].message.content.strip()
+            return str(result.choices[0].message.content.strip())
         return None
+
+    def list_models(self) -> list[str]:
+        """Return available model IDs from Azure OpenAI."""
+        try:
+            return sorted(m.id for m in self.provider.models.list().data)
+        except Exception as e:
+            logger.warning("Failed to list Azure OpenAI models: %s", e)
+            return []
 
     def get_context_size(self) -> int:
         """Get the context window size for Azure OpenAI."""
@@ -113,7 +121,7 @@ class OpenAIClient(GenAIClient):
                 if openai_tool_choice is not None:
                     request_params["tool_choice"] = openai_tool_choice
 
-            result = self.provider.chat.completions.create(**request_params)
+            result = self.provider.chat.completions.create(**request_params)  # type: ignore[call-overload]
 
             if (
                 result is None
@@ -181,7 +189,7 @@ class OpenAIClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
-    ):
+    ) -> AsyncGenerator[tuple[str, Any], None]:
         """
         Stream chat with tools; yields content deltas then final message.
 
@@ -214,7 +222,7 @@ class OpenAIClient(GenAIClient):
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
 
-            stream = self.provider.chat.completions.create(**request_params)
+            stream = self.provider.chat.completions.create(**request_params)  # type: ignore[call-overload]
 
             for chunk in stream:
                 if not chunk or not chunk.choices:

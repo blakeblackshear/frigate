@@ -649,8 +649,11 @@ const mergeSectionConfig = (
       return srcValue ?? objValue;
     }
 
-    if (key === "uiSchema" && srcValue !== undefined) {
-      return srcValue;
+    if (key === "uiSchema") {
+      if (objValue && srcValue) {
+        return merge({}, objValue, srcValue);
+      }
+      return srcValue ?? objValue;
     }
 
     return undefined;

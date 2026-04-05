@@ -125,6 +125,16 @@ def metrics(request: Request):
     return Response(content=content, media_type=content_type)
 
 
+@router.get(
+    "/genai/models",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="List available GenAI models",
+    description="Returns available models for each configured GenAI provider.",
+)
+def genai_models(request: Request):
+    return JSONResponse(content=request.app.genai_manager.list_models())
+
+
 @router.get("/config", dependencies=[Depends(allow_any_authenticated())])
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
@@ -142,8 +152,19 @@ def config(request: Request):
     # remove the proxy secret
     config["proxy"].pop("auth_secret", None)
 
+    # remove genai api keys
+    for genai_name, genai_cfg in config.get("genai", {}).items():
+        if isinstance(genai_cfg, dict):
+            genai_cfg.pop("api_key", None)
+
     for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
+
+        # remove onvif credentials
+        onvif_dict = camera_dict.get("onvif", {})
+        if onvif_dict:
+            onvif_dict.pop("user", None)
+            onvif_dict.pop("password", None)
 
         # clean paths
         for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
@@ -613,6 +634,34 @@ def config_set(request: Request, body: AppConfigSetBody):
 
                 try:
                     config = FrigateConfig.parse(new_raw_config)
+                except ValidationError as e:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                        f.close()
+                    logger.error(
+                        f"Config Validation Error:\n\n{str(traceback.format_exc())}"
+                    )
+                    error_messages = []
+                    for err in e.errors():
+                        msg = err.get("msg", "")
+                        # Strip pydantic "Value error, " prefix for cleaner display
+                        if msg.startswith("Value error, "):
+                            msg = msg[len("Value error, ") :]
+                        error_messages.append(msg)
+                    message = (
+                        "; ".join(error_messages)
+                        if error_messages
+                        else "Check logs for error message."
+                    )
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": f"Error saving config: {message}",
+                            }
+                        ),
+                        status_code=400,
+                    )
                 except Exception:
                     with open(config_file, "w") as f:
                         f.write(old_raw_config)

@@ -483,9 +483,20 @@ function generateUiSchema(
 
   const schemaObj = schema as Record<string, unknown>;
 
-  // Set field ordering
+  // Set field ordering — supports dot notation (e.g. "genai.enabled")
   if (fieldOrder && fieldOrder.length > 0) {
-    uiSchema["ui:order"] = [...fieldOrder, "*"];
+    const depth = currentPath.length;
+    const localOrder = fieldOrder
+      .map((f) => f.split("."))
+      .filter((segments) => {
+        if (segments.length !== depth + 1) return false;
+        return currentPath.every((p, i) => segments[i] === p);
+      })
+      .map((segments) => segments[depth]);
+
+    if (localOrder.length > 0) {
+      uiSchema["ui:order"] = [...localOrder, "*"];
+    }
   }
 
   if (!isSchemaObject(schemaObj.properties)) {

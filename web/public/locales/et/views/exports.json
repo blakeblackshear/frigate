@@ -2,7 +2,9 @@
   "documentTitle": "Eksport Frigate'ist",
   "search": "Otsi",
   "noExports": "Eksporditud sisu ei leidu",
-  "deleteExport": "Kustuta eksporditud sisu",
+  "deleteExport": {
+    "label": "Kustuta eksporditud sisu"
+  },
   "deleteExport.desc": "Kas sa oled kindel et soovid „{{exportName}}“ kustutada?",
   "editExport": {
     "title": "Muuda eksporditud sisu nime",

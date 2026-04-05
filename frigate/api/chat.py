@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from frigate.api.auth import (
     allow_any_authenticated,
     get_allowed_cameras_for_filter,
+    require_camera_access,
 )
 from frigate.api.defs.query.events_query_parameters import EventsQueryParams
 from frigate.api.defs.request.chat_body import ChatCompletionRequest
@@ -293,6 +294,60 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_profile_status",
+                "description": (
+                    "Get the current profile status including the active profile and "
+                    "timestamps of when each profile was last activated. Use this to "
+                    "determine time periods for recap requests — e.g. when the user asks "
+                    "'what happened while I was away?', call this first to find the relevant "
+                    "time window based on profile activation history."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_recap",
+                "description": (
+                    "Get a recap of all activity (alerts and detections) for a given time period. "
+                    "Use this after calling get_profile_status to retrieve what happened during "
+                    "a specific window — e.g. 'what happened while I was away?'. Returns a "
+                    "chronological list of activity with camera, objects, zones, and GenAI-generated "
+                    "descriptions when available. Summarize the results for the user."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "after": {
+                            "type": "string",
+                            "description": "Start of the time period in ISO 8601 format (e.g. '2025-03-15T08:00:00').",
+                        },
+                        "before": {
+                            "type": "string",
+                            "description": "End of the time period in ISO 8601 format (e.g. '2025-03-15T17:00:00').",
+                        },
+                        "cameras": {
+                            "type": "string",
+                            "description": "Comma-separated camera IDs to include, or 'all' for all cameras. Default is 'all'.",
+                        },
+                        "severity": {
+                            "type": "string",
+                            "enum": ["alert", "detection"],
+                            "description": "Filter by severity level. Omit to include both alerts and detections.",
+                        },
+                    },
+                    "required": ["after", "before"],
+                },
+            },
+        },
     ]
 
 
@@ -465,45 +520,14 @@ async def _execute_get_live_context(
             "detections": list(tracked_objects_dict.values()),
         }
 
-        # Grab live frame and handle based on provider configuration
+        # Grab live frame when the chat model supports vision
         image_url = await _get_live_frame_image_url(request, camera, allowed_cameras)
         if image_url:
-            genai_manager = request.app.genai_manager
-            if genai_manager.tool_client is genai_manager.vision_client:
-                # Same provider handles both roles — pass image URL so it can
-                # be injected as a user message (images can't be in tool results)
+            chat_client = request.app.genai_manager.chat_client
+            if chat_client is not None and chat_client.supports_vision:
+                # Pass image URL so it can be injected as a user message
+                # (images can't be in tool results)
                 result["_image_url"] = image_url
-            elif genai_manager.vision_client is not None:
-                # Separate vision provider — have it describe the image,
-                # providing detection context so it knows what to focus on
-                frame_bytes = _decode_data_url(image_url)
-                if frame_bytes:
-                    detections = result.get("detections", [])
-                    if detections:
-                        detection_lines = []
-                        for d in detections:
-                            parts = [d.get("label", "unknown")]
-                            if d.get("sub_label"):
-                                parts.append(f"({d['sub_label']})")
-                            if d.get("zones"):
-                                parts.append(f"in {', '.join(d['zones'])}")
-                            detection_lines.append(" ".join(parts))
-                        context = (
-                            "The following objects are currently being tracked: "
-                            + "; ".join(detection_lines)
-                            + "."
-                        )
-                    else:
-                        context = "No objects are currently being tracked."
-
-                    description = genai_manager.vision_client._send(
-                        f"Describe what you see in this security camera image. "
-                        f"{context} Focus on the scene, any visible activity, "
-                        f"and details about the tracked objects.",
-                        [frame_bytes],
-                    )
-                    if description:
-                        result["image_description"] = description
 
         return result
 
@@ -551,17 +575,6 @@ async def _get_live_frame_image_url(
         return f"data:image/jpeg;base64,{b64}"
     except Exception as e:
         logger.debug("Failed to get live frame for %s: %s", camera, e)
-        return None
-
-
-def _decode_data_url(data_url: str) -> Optional[bytes]:
-    """Decode a base64 data URL to raw bytes."""
-    try:
-        # Format: data:image/jpeg;base64,<data>
-        _, encoded = data_url.split(",", 1)
-        return base64.b64decode(encoded)
-    except (ValueError, Exception) as e:
-        logger.debug("Failed to decode data URL: %s", e)
         return None
 
 
@@ -645,10 +658,14 @@ async def _execute_tool_internal(
         return await _execute_start_camera_watch(request, arguments)
     elif tool_name == "stop_camera_watch":
         return _execute_stop_camera_watch()
+    elif tool_name == "get_profile_status":
+        return _execute_get_profile_status(request)
+    elif tool_name == "get_recap":
+        return _execute_get_recap(arguments, allowed_cameras)
     else:
         logger.error(
             "Tool call failed: unknown tool %r. Expected one of: search_objects, get_live_context, "
-            "start_camera_watch, stop_camera_watch. Arguments received: %s",
+            "start_camera_watch, stop_camera_watch, get_profile_status, get_recap. Arguments received: %s",
             tool_name,
             json.dumps(arguments),
         )
@@ -672,10 +689,12 @@ async def _execute_start_camera_watch(
     if camera not in config.cameras:
         return {"error": f"Camera '{camera}' not found."}
 
+    await require_camera_access(camera, request=request)
+
     genai_manager = request.app.genai_manager
-    vision_client = genai_manager.vision_client or genai_manager.tool_client
-    if vision_client is None:
-        return {"error": "No vision/GenAI provider configured."}
+    chat_client = genai_manager.chat_client
+    if chat_client is None or not chat_client.supports_vision:
+        return {"error": "VLM watch requires a chat model with vision support."}
 
     try:
         job_id = start_vlm_watch_job(
@@ -708,6 +727,168 @@ def _execute_stop_camera_watch() -> Dict[str, Any]:
     if cancelled:
         return {"success": True, "message": "Watch job cancelled."}
     return {"success": False, "message": "No active watch job to cancel."}
+
+
+def _execute_get_profile_status(request: Request) -> Dict[str, Any]:
+    """Return profile status including active profile and activation timestamps."""
+    profile_manager = getattr(request.app, "profile_manager", None)
+    if profile_manager is None:
+        return {"error": "Profile manager is not available."}
+
+    info = profile_manager.get_profile_info()
+
+    # Convert timestamps to human-readable local times inline
+    last_activated = {}
+    for name, ts in info.get("last_activated", {}).items():
+        try:
+            dt = datetime.fromtimestamp(ts)
+            last_activated[name] = dt.strftime("%Y-%m-%d %I:%M:%S %p")
+        except (TypeError, ValueError, OSError):
+            last_activated[name] = str(ts)
+
+    return {
+        "active_profile": info.get("active_profile"),
+        "profiles": info.get("profiles", []),
+        "last_activated": last_activated,
+    }
+
+
+def _execute_get_recap(
+    arguments: Dict[str, Any],
+    allowed_cameras: List[str],
+) -> Dict[str, Any]:
+    """Fetch review segments with GenAI metadata for a time period."""
+    from functools import reduce
+
+    from peewee import operator
+
+    from frigate.models import ReviewSegment
+
+    after_str = arguments.get("after")
+    before_str = arguments.get("before")
+
+    def _parse_as_local_timestamp(s: str):
+        s = s.replace("Z", "").strip()[:19]
+        dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+        return time.mktime(dt.timetuple())
+
+    try:
+        after = _parse_as_local_timestamp(after_str)
+    except (ValueError, AttributeError, TypeError):
+        return {"error": f"Invalid 'after' timestamp: {after_str}"}
+
+    try:
+        before = _parse_as_local_timestamp(before_str)
+    except (ValueError, AttributeError, TypeError):
+        return {"error": f"Invalid 'before' timestamp: {before_str}"}
+
+    cameras = arguments.get("cameras", "all")
+    if cameras != "all":
+        requested = set(cameras.split(","))
+        camera_list = list(requested.intersection(allowed_cameras))
+        if not camera_list:
+            return {"events": [], "message": "No accessible cameras matched."}
+    else:
+        camera_list = allowed_cameras
+
+    clauses = [
+        (ReviewSegment.start_time < before)
+        & ((ReviewSegment.end_time.is_null(True)) | (ReviewSegment.end_time > after)),
+        (ReviewSegment.camera << camera_list),
+    ]
+
+    severity_filter = arguments.get("severity")
+    if severity_filter:
+        clauses.append(ReviewSegment.severity == severity_filter)
+
+    try:
+        rows = (
+            ReviewSegment.select(
+                ReviewSegment.camera,
+                ReviewSegment.start_time,
+                ReviewSegment.end_time,
+                ReviewSegment.severity,
+                ReviewSegment.data,
+            )
+            .where(reduce(operator.and_, clauses))
+            .order_by(ReviewSegment.start_time.asc())
+            .limit(100)
+            .dicts()
+            .iterator()
+        )
+
+        events: List[Dict[str, Any]] = []
+
+        for row in rows:
+            data = row.get("data") or {}
+            if isinstance(data, str):
+                try:
+                    data = json.loads(data)
+                except json.JSONDecodeError:
+                    data = {}
+
+            camera = row["camera"]
+            event: Dict[str, Any] = {
+                "camera": camera.replace("_", " ").title(),
+                "severity": row.get("severity", "detection"),
+            }
+
+            # Include GenAI metadata when available
+            metadata = data.get("metadata")
+            if metadata and isinstance(metadata, dict):
+                if metadata.get("title"):
+                    event["title"] = metadata["title"]
+                if metadata.get("scene"):
+                    event["description"] = metadata["scene"]
+                threat = metadata.get("potential_threat_level")
+                if threat is not None:
+                    threat_labels = {
+                        0: "normal",
+                        1: "needs_review",
+                        2: "security_concern",
+                    }
+                    event["threat_level"] = threat_labels.get(threat, str(threat))
+
+            # Only include objects/zones/audio when there's no GenAI description
+            # to keep the payload concise — the description already covers these
+            if "description" not in event:
+                objects = data.get("objects", [])
+                if objects:
+                    event["objects"] = objects
+                zones = data.get("zones", [])
+                if zones:
+                    event["zones"] = zones
+                audio = data.get("audio", [])
+                if audio:
+                    event["audio"] = audio
+
+            start_ts = row.get("start_time")
+            end_ts = row.get("end_time")
+            if start_ts is not None:
+                try:
+                    event["time"] = datetime.fromtimestamp(start_ts).strftime(
+                        "%I:%M %p"
+                    )
+                except (TypeError, ValueError, OSError):
+                    pass
+            if end_ts is not None and start_ts is not None:
+                try:
+                    event["duration_seconds"] = round(end_ts - start_ts)
+                except (TypeError, ValueError):
+                    pass
+
+            events.append(event)
+
+        if not events:
+            return {
+                "events": [],
+                "message": "No activity was found during this time period.",
+            }
+
+        return {"events": events}
+    except Exception as e:
+        logger.error("Error executing get_recap: %s", e, exc_info=True)
+        return {"error": "Failed to fetch recap data."}
 
 
 async def _execute_pending_tools(
@@ -847,7 +1028,7 @@ async def chat_completion(
     6. Repeats until final answer
     7. Returns response to user
     """
-    genai_client = request.app.genai_manager.tool_client
+    genai_client = request.app.genai_manager.chat_client
     if not genai_client:
         return JSONResponse(
             content={
@@ -1156,12 +1337,14 @@ async def start_vlm_monitor(
             status_code=404,
         )
 
-    vision_client = genai_manager.vision_client or genai_manager.tool_client
-    if vision_client is None:
+    await require_camera_access(body.camera, request=request)
+
+    chat_client = genai_manager.chat_client
+    if chat_client is None or not chat_client.supports_vision:
         return JSONResponse(
             content={
                 "success": False,
-                "message": "No vision/GenAI provider configured.",
+                "message": "VLM watch requires a chat model with vision support.",
             },
             status_code=400,
         )
