@@ -195,6 +195,7 @@ export default function LivePlayer({
   }, [preferredLiveMode]);
 
   const [key, setKey] = useState(0);
+  const prevStreamNameRef = useRef(streamName);
 
   const resetPlayer = () => {
     setLiveReady(false);
@@ -202,8 +203,11 @@ export default function LivePlayer({
   };
 
   useEffect(() => {
-    if (streamName) {
-      resetPlayer();
+    if (prevStreamNameRef.current !== streamName) {
+      prevStreamNameRef.current = streamName;
+      if (streamName) {
+        resetPlayer();
+      }
     }
   }, [streamName]);
 
