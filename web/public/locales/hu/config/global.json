@@ -40,5 +40,8 @@
     "environment_vars": {
         "label": "Környezeti változók",
         "description": "A Home Assistant OS rendszerben a Frigate folyamat számára beállítandó környezeti változói. A nem HAOS-felhasználóknak helyette a Docker konfigurációját kell használniuk."
+    },
+    "logger": {
+        "label": "Naplózás"
     }
 }
