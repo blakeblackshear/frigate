@@ -272,7 +272,7 @@ export default function LiveContextMenu({
 
   return (
     <div className={cn("w-full", className)}>
-      <ContextMenu key={camera} onOpenChange={handleOpenChange}>
+      <ContextMenu key={camera} modal={false} onOpenChange={handleOpenChange}>
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
           <div className="flex flex-col items-start gap-1 py-1 pl-2">

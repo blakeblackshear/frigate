@@ -20,7 +20,7 @@ When a profile is activated, Frigate merges each camera's profile overrides on t
 
 :::info
 
-Profile changes are applied in-memory and take effect immediately — no restart is required. The active profile is persisted across Frigate restarts (stored in the `/config/.active_profile` file).
+Profile changes are applied in-memory and take effect immediately — no restart is required. The active profile is persisted across Frigate restarts (stored in the `/config/.profiles` file).
 
 :::
 
@@ -130,14 +130,14 @@ Profiles can be activated and deactivated from the Frigate UI. Open the Settings
 
 ## Example: Home / Away Setup
 
-A common use case is having different detection and notification settings based on whether you are home or away.
+A common use case is having different detection and notification settings based on whether you are home or away. This example below is for a system with two cameras, `front_door` and `indoor_cam`.
 
 <ConfigTabs>
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Profiles" /> and create two profiles: **Home** and **Away**.
-2. For the **front_door** camera, configure the **Away** profile to enable notifications and set alert labels to `person` and `car`. Configure the **Home** profile to disable notifications.
-3. For the **indoor_cam** camera, configure the **Away** profile to enable the camera, detection, and recording. Configure the **Home** profile to disable the camera entirely for privacy.
+2. From to the Camera configuration section in Settings, choose the **front_door** camera, and select the **Away** profile from the profile dropdown. Then, enable notifications from the Notifications pane, and set alert labels to `person` and `car` from the Review pane. Then, from the profile dropdown choose **Home** profile, then navigate to Notifications to disable notifications.
+3. For the **indoor_cam** camera, perform similar steps - configure the **Away** profile to enable the camera, detection, and recording. Configure the **Home** profile to disable the camera entirely for privacy.
 4. Activate the desired profile from <NavPath path="Settings > Camera configuration > Profiles" /> or from the **Profiles** option in Frigate's main menu.
 
 </TabItem>

@@ -199,6 +199,9 @@ Each line represents a detection state, not necessarily unique individuals. The 
                 )
                 return None
         else:
+            logger.debug(
+                f"Invalid response received from GenAI provider for review description on {review_data['camera']}. Response: {response}",
+            )
             return None
 
     def generate_review_summary(
