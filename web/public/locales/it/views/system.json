@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Registri Frigate - Frigate",
       "go2rtc": "Registri Go2RTC - Frigate",
-      "nginx": "Registri Nginx - Frigate"
+      "nginx": "Registri Nginx - Frigate",
+      "websocket": "Registri dei messaggi - Frigate"
     }
   },
   "logs": {
@@ -31,6 +32,33 @@
       "label": "Copia negli appunti",
       "success": "Registri copiati negli appunti",
       "error": "Impossibile copiare i registri negli appunti"
+    },
+    "websocket": {
+      "label": "Messaggi",
+      "pause": "Pausa",
+      "resume": "Riprendi",
+      "clear": "Pulisci",
+      "filter": {
+        "all": "Tutti gli argomenti",
+        "topics": "Argomenti",
+        "events": "Eventi",
+        "reviews": "Rivisti",
+        "classification": "Classificazione",
+        "face_recognition": "Riconoscimento facciale",
+        "lpr": "Risconoscimento targhe (LPR)",
+        "camera_activity": "Attività della telecamera",
+        "system": "Sistema",
+        "camera": "Telecamera",
+        "all_cameras": "Tutte le telecamere",
+        "cameras_count_one": "{{count}} telecamera",
+        "cameras_count_other": "{{count}} telecamere"
+      },
+      "empty": "Nessun messaggio ancora catturato",
+      "count_one": "{{count}} messaggio",
+      "count_other": "{{count}} messaggi",
+      "expanded": {
+        "payload": "Carico"
+      }
     }
   },
   "general": {
@@ -72,7 +100,8 @@
         "description": "Si tratta di un problema noto negli strumenti di reportistica delle statistiche GPU di Intel (intel_gpu_top), che si interrompe e restituisce ripetutamente un utilizzo della GPU pari a 0% anche nei casi in cui l'accelerazione hardware e il rilevamento degli oggetti funzionano correttamente sulla (i)GPU. Non si tratta di un problema di Frigate. È possibile riavviare il sistema per risolvere temporaneamente il problema e verificare che la GPU funzioni correttamente. Ciò non influisce sulle prestazioni."
       },
       "gpuTemperature": "Temperatura GPU",
-      "npuTemperature": "Temperatura NPU"
+      "npuTemperature": "Temperatura NPU",
+      "gpuCompute": "Calcolo / Codifica GPU"
     },
     "detector": {
       "inferenceSpeed": "Velocità inferenza rilevatore",
@@ -158,7 +187,8 @@
       "cameraFramesPerSecond": "{{camName}} fotogrammi al secondo",
       "cameraDetectionsPerSecond": "{{camName}} rilevamenti al secondo",
       "cameraSkippedDetectionsPerSecond": "{{camName}} rilevamenti saltati al secondo",
-      "cameraFfmpeg": "{{camName}} FFmpeg"
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraGpu": "GPU {{camName}}"
     },
     "toast": {
       "success": {
@@ -188,7 +218,8 @@
     "cameraIsOffline": "{{camera}} è disconnessa",
     "detectIsSlow": "{{detect}} è lento ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)",
-    "shmTooLow": "L'allocazione /dev/shm ({{total}} MB) dovrebbe essere aumentata almeno a {{min}} MB."
+    "shmTooLow": "L'allocazione /dev/shm ({{total}} MB) dovrebbe essere aumentata almeno a {{min}} MB.",
+    "debugReplayActive": "La sessione di riproduzione delle correzioni è attiva"
   },
   "title": "Sistema",
   "metrics": "Metriche di sistema",
@@ -215,7 +246,11 @@
     "shm": {
       "title": "Allocazione SHM (memoria condivisa)",
       "warning": "La dimensione SHM attuale di {{total}} MB è troppo piccola. Aumentarla ad almeno {{min_shm}} MB.",
-      "readTheDocumentation": "Leggi la documentazione"
+      "readTheDocumentation": "Leggi la documentazione",
+      "frameLifetime": {
+        "title": "Durata del fotogramma",
+        "description": "Ogni telecamera dispone di {{frames}} posti per i fotogrammi nella memoria condivisa. Alla frequenza di fotogrammi più elevata della telecamera, ogni fotogramma è disponibile per circa {{lifetime}} secondi prima di essere sovrascritto."
+      }
     }
   },
   "lastRefreshed": "Ultimo aggiornamento: "

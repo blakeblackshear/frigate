@@ -17,7 +17,28 @@
             "label": "Abilita il rilevamento audio"
         },
         "min_volume": {
-            "label": "Volume minimo"
+            "label": "Volume minimo",
+            "description": "È richiesta una soglia minima di volume RMS per eseguire il rilevamento audio; valori inferiori aumentano la sensibilità (ad esempio, 200 alta, 500 media, 1000 bassa)."
+        },
+        "max_not_heard": {
+            "label": "Fine pausa",
+            "description": "Numero di secondi senza il tipo di audio configurato prima che l'evento audio termini."
+        },
+        "listen": {
+            "label": "Tipi di ascolto",
+            "description": "Elenco dei tipi di eventi audio da rilevare (ad esempio: abbaio, allarme antincendio, urlo, parlato, grido)."
+        },
+        "filters": {
+            "label": "Filtri audio",
+            "description": "Impostazioni di filtro per ciascun tipo di audio, come le soglie di confidenza utilizzate per ridurre i falsi positivi."
+        },
+        "enabled_in_config": {
+            "label": "Stato audio originale",
+            "description": "Indica se il rilevamento audio era originariamente abilitato nel file di configurazione statico."
+        },
+        "num_threads": {
+            "label": "Processi di rilevamento",
+            "description": "Numero di processi da utilizzare per l'elaborazione del rilevamento audio."
         }
     },
     "logger": {
@@ -29,7 +50,8 @@
         "logs": {
             "label": "Livello di registro per processo",
             "description": "Opzioni di sovrsacrittura del livello di registro per ciascun componente, per aumentare o diminuire il livello di dettaglio dei singoli moduli."
-        }
+        },
+        "label": "Registro"
     },
     "auth": {
         "label": "Autenticazione",
@@ -41,11 +63,39 @@
         "reset_admin_password": {
             "label": "Reimposta la password di amministratore",
             "description": "Se la condizione è vera, reimposta la password dell'utente amministratore all'avvio e stampa la nuova password nei registri."
+        },
+        "cookie_name": {
+            "label": "Nome del cookie JWT",
+            "description": "Nome del cookie utilizzato per memorizzare il token JWT per l'autenticazione nativa."
+        },
+        "cookie_secure": {
+            "label": "Attributo dei cookie sicuri",
+            "description": "Imposta l'attributo 'sicuro' sul cookie di autenticazione; deve essere impostato su 'vero' quando si utilizza TLS."
+        },
+        "session_length": {
+            "label": "Durata della sessione",
+            "description": "Durata della sessione in secondi per le sessioni basate su JWT."
+        },
+        "refresh_time": {
+            "label": "Finestra di aggiornamento della sessione",
+            "description": "Quando una sessione sta per scadere entro questo numero di secondi, aggiornala per ripristinarne la durata completa."
         }
     },
     "ffmpeg": {
         "path": {
             "label": "Percorso FFmpeg"
         }
+    },
+    "detectors": {
+        "cpu": {
+            "num_threads": {
+                "label": "Numero di processi di rilevamento",
+                "description": "Il numero di processi utilizzati per l'inferenza basata sulla CPU."
+            }
+        }
+    },
+    "audio_transcription": {
+        "label": "Trascrizione audio",
+        "description": "Impostazioni per la trascrizione audio in tempo reale e del parlato utilizzata per eventi e sottotitoli in tempo reale."
     }
 }
