@@ -45,10 +45,17 @@
         "reviews": "Revisiones",
         "face_recognition": "Reconocimiento facial",
         "camera_activity": "Actividad de cámara",
-        "classification": "Clasificación"
+        "classification": "Clasificación",
+        "system": "Sistema",
+        "camera": "Cámara",
+        "all_cameras": "Todas las cámaras",
+        "cameras_count_one": "{{count}} Cámara",
+        "cameras_count_other": "{{count}} Cámaras",
+        "lpr": "Reconocimiento de matriculas"
       },
       "count_other": "{{count}} mensajes",
-      "count_one": "{{count}} mensaje"
+      "count_one": "{{count}} mensaje",
+      "empty": "No se han capturado mensaje aún"
     }
   },
   "title": "Sistema",
@@ -99,7 +106,10 @@
         "title": "Aviso de estadísticas Intel GPU",
         "message": "Estadísticas de GPU no disponibles",
         "description": "Este es un error conocido en las herramientas de informes de estadísticas de GPU de Intel (intel_gpu_top). El error se produce y muestra repetidamente un uso de GPU del 0 %, incluso cuando la aceleración de hardware y la detección de objetos se ejecutan correctamente en la (i)GPU. No se trata de un error de Frigate. Puede reiniciar el host para solucionar el problema temporalmente y confirmar que la GPU funciona correctamente. Esto no afecta al rendimiento."
-      }
+      },
+      "npuTemperature": "Temperatura NPU",
+      "gpuCompute": "Cálculo GPU / Codificación",
+      "gpuTemperature": "Temperatura GPU"
     },
     "otherProcesses": {
       "title": "Otros Procesos",
@@ -136,7 +146,11 @@
     },
     "shm": {
       "title": "Asignación de SHM (memoria compartida)",
-      "warning": "El tamaño actual de SHM de {{total}}MB es muy pequeño. Aumente al menos a {{min_shm}}MB."
+      "warning": "El tamaño actual de SHM de {{total}}MB es muy pequeño. Aumente al menos a {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Tiempo de vida del fotograma",
+        "description": "Cada cámara tiene espacio en la memoria compartida para {{frames}} cuadros. Si la velocidad de cuadros de la cámara es alta, cada cuadro se guarda aproximadamente {{lifetime}} antes de ser sobreescrito."
+      }
     }
   },
   "cameras": {
@@ -174,7 +188,8 @@
       "cameraDetect": "{{camName}} detectar",
       "cameraFramesPerSecond": "{{camName}} cuadros por segundo",
       "cameraDetectionsPerSecond": "{{camName}} detecciones por segundo",
-      "overallSkippedDetectionsPerSecond": "detecciones omitidas por segundo totales"
+      "overallSkippedDetectionsPerSecond": "detecciones omitidas por segundo totales",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
@@ -183,6 +198,16 @@
       "error": {
         "unableToProbeCamera": "No se pudo sondear la cámara: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "excellent": "Excelente",
+      "poor": "Debil",
+      "title": "Calidad de la conexión",
+      "fps": "Cuadros por segundo",
+      "expectedFps": "Cuadros por segundo esperados",
+      "reconnectsLastHour": "Reconexiones (última hora)",
+      "unusable": "No usable",
+      "fair": "Normal"
     }
   },
   "lastRefreshed": "Última actualización: ",
