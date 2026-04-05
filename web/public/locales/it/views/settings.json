@@ -12,7 +12,11 @@
     "notifications": "Impostazioni di notifiche - Frigate",
     "enrichments": "Impostazioni di miglioramento - Frigate",
     "cameraManagement": "Gestisci telecamere - Frigate",
-    "cameraReview": "Impostazioni revisione telecamera - Frigate"
+    "cameraReview": "Impostazioni revisione telecamera - Frigate",
+    "globalConfig": "Configurazione globale - Frigate",
+    "cameraConfig": "Configurazione telecamera - Frigate",
+    "maintenance": "Manutenzione - Frigate",
+    "profiles": "Profili - Frigate"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -230,7 +234,7 @@
         "desc": "Specifica una velocità minima affinché gli oggetti vengano presi in considerazione in questa zona.",
         "toast": {
           "error": {
-            "pointLengthError": "La stima della velocità è stata disattivata per questa zona. Le zone con stima della velocità devono avere esattamente 4 punti.",
+            "pointLengthError": "La stima della velocità è stata disabilitata per questa zona. Le zone con stima della velocità devono avere esattamente 4 punti.",
             "loiteringTimeError": "Le zone con tempi di permanenza superiori a 0 non devono essere utilizzate per la stima della velocità."
           }
         },
@@ -390,7 +394,12 @@
     "roles": "Ruoli",
     "cameraManagement": "Gestione",
     "cameraReview": "Rivedi",
-    "profiles": "Profili"
+    "profiles": "Profili",
+    "general": "Generale",
+    "globalConfig": "Configurazione globale",
+    "system": "Sistema",
+    "integrations": "Integrazioni",
+    "uiSettings": "Impostazioni interfaccia utente"
   },
   "users": {
     "dialog": {
@@ -511,12 +520,12 @@
   "general": {
     "liveDashboard": {
       "automaticLiveView": {
-        "desc": "Passa automaticamente alla visualizzazione dal vivo di una telecamera quando viene rilevata attività. Disattivando questa opzione, le immagini statiche della telecamera nella schermata dal vivo verranno aggiornate solo una volta al minuto.",
+        "desc": "Passa automaticamente alla visualizzazione dal vivo di una telecamera quando viene rilevata attività. Disabilitando questa opzione, le immagini statiche della telecamera nella schermata dal vivo verranno aggiornate solo una volta al minuto.",
         "label": "Visualizzazione automatica dal vivo"
       },
       "playAlertVideos": {
         "label": "Riproduci video di avvisi",
-        "desc": "Per impostazione predefinita, gli avvisi recenti nella schermata dal vivo vengono riprodotti come brevi video in ciclo. Disattiva questa opzione per visualizzare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
+        "desc": "Per impostazione predefinita, gli avvisi recenti nella schermata dal vivo vengono riprodotti come brevi video in ciclo. Disabilita questa opzione per visualizzare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
       },
       "title": "Schermata dal vivo",
       "displayCameraNames": {
@@ -1315,5 +1324,11 @@
       "addUrl": "Aggiungi URL",
       "addGo2rtcStream": "Aggiungi flusso go2rtc"
     }
+  },
+  "button": {
+    "overriddenGlobal": "Sovrascritto (Globale)",
+    "overriddenGlobalTooltip": "Questa telecamera sovrascrive le impostazioni di configurazione globali in questa sezione",
+    "overriddenBaseConfig": "Sovrascritto (Configurazione di base)",
+    "overriddenBaseConfigTooltip": "Il profilo {{profile}} sovrascrive le impostazioni di configurazione in questa sezione"
   }
 }
