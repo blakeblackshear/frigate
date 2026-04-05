@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, useTimeFormat } from "@/hooks/use-date-utils";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getUTCOffset } from "@/utils/dateUtil";
@@ -120,9 +120,10 @@ export function ShareTimestampContent({
 }: Readonly<ShareTimestampContentProps>) {
   const { t } = useTranslation(["common", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const timeFormat = useTimeFormat(config);
   const currentTimestampLabel = useFormattedTimestamp(
     currentTime,
-    config?.ui.time_format == "24hour"
+    timeFormat == "24hour"
       ? t("time.formattedTimestamp.24hour")
       : t("time.formattedTimestamp.12hour"),
     config?.ui.timezone,
@@ -236,6 +237,7 @@ function CustomTimestampSelector({
 }: Readonly<CustomTimestampSelectorProps>) {
   const { t } = useTranslation(["common"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const timeFormat = useTimeFormat(config);
 
   const timezoneOffset = useMemo(
     () =>
@@ -271,7 +273,7 @@ function CustomTimestampSelector({
 
   const formattedTimestamp = useFormattedTimestamp(
     displayTimestamp,
-    config?.ui.time_format == "24hour"
+    timeFormat == "24hour"
       ? t("time.formattedTimestamp.24hour")
       : t("time.formattedTimestamp.12hour"),
   );
