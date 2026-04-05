@@ -39,6 +39,7 @@
         "description": "A Frigate felhasználói felületén használt, könnyen megjegyezhető kamera név"
     },
     "enabled": {
-        "label": "Engedélyezve"
+        "label": "Engedélyezve",
+        "description": "Engedélyezve"
     }
 }
