@@ -1659,7 +1659,12 @@
       "empty": "No hi ha etiquetes disponibles",
       "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions."
     },
-    "addCustomLabel": "Afegeix una etiqueta personalitzada..."
+    "addCustomLabel": "Afegeix una etiqueta personalitzada...",
+    "genaiModel": {
+      "placeholder": "Selecciona el model…",
+      "search": "Cerca models…",
+      "noModels": "No hi ha models disponibles"
+    }
   },
   "globalConfig": {
     "title": "Configuració global",
