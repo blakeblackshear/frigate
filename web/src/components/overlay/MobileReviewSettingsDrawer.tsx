@@ -518,12 +518,6 @@ export default function MobileReviewSettingsDrawer({
     content = (
       <div className="w-full">
         <div className="relative h-8 w-full">
-          <div
-            className="absolute left-0 text-selected"
-            onClick={() => setDrawerMode("select")}
-          >
-            {t("button.back", { ns: "common" })}
-          </div>
           <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
             {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
           </div>
