@@ -1661,7 +1661,12 @@
       "empty": "Nicio etichetă disponibilă",
       "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții."
     },
-    "addCustomLabel": "Adaugă etichetă personalizată..."
+    "addCustomLabel": "Adaugă etichetă personalizată...",
+    "genaiModel": {
+      "placeholder": "Selectează modelul…",
+      "search": "Caută modele…",
+      "noModels": "Niciun model disponibil"
+    }
   },
   "globalConfig": {
     "title": "Configurare Globală",
