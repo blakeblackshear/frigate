@@ -1,6 +1,6 @@
 // Combobox widget for genai *.model fields.
 // Fetches available models from the provider's backend and shows them in a dropdown.
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type { WidgetProps } from "@rjsf/utils";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import type { ConfigFormContext } from "@/types/configForm";
 import { getSizedFieldClassName } from "../utils";
 
 /**
@@ -37,16 +38,44 @@ function getProviderKey(widgetId: string): string | undefined {
 }
 
 export function GenAIModelWidget(props: WidgetProps) {
-  const { id, value, disabled, readonly, onChange, options } = props;
+  const { id, value, disabled, readonly, onChange, options, registry } = props;
   const { t } = useTranslation(["views/settings"]);
   const [open, setOpen] = useState(false);
 
   const fieldClassName = getSizedFieldClassName(options, "sm");
   const providerKey = useMemo(() => getProviderKey(id), [id]);
 
-  const { data: allModels } = useSWR<Record<string, string[]>>("genai/models", {
+  const formContext = registry?.formContext as ConfigFormContext | undefined;
+
+  // Build a fingerprint from the saved config's provider + base_url so the
+  // SWR key changes (and models are refetched) whenever those fields are saved.
+  const configFingerprint = useMemo(() => {
+    if (!providerKey) return "";
+    const genai = (
+      formContext?.fullConfig as Record<string, unknown> | undefined
+    )?.genai;
+    if (!genai || typeof genai !== "object" || Array.isArray(genai)) return "";
+    const entry = (genai as Record<string, unknown>)[providerKey];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return "";
+    const e = entry as Record<string, unknown>;
+    return `${e.provider ?? ""}|${e.base_url ?? ""}`;
+  }, [providerKey, formContext?.fullConfig]);
+
+  const { data: allModels, mutate: mutateModels } = useSWR<
+    Record<string, string[]>
+  >("genai/models", {
     revalidateOnFocus: false,
   });
+
+  // Revalidate models when the saved config fingerprint changes (e.g. after
+  // switching provider or base_url and saving).
+  const prevFingerprint = useRef(configFingerprint);
+  useEffect(() => {
+    if (configFingerprint !== prevFingerprint.current) {
+      prevFingerprint.current = configFingerprint;
+      mutateModels();
+    }
+  }, [configFingerprint, mutateModels]);
 
   const models = useMemo(() => {
     if (!allModels || !providerKey) return [];
