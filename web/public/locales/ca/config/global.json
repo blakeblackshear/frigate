@@ -1951,7 +1951,7 @@
         },
         "roles": {
             "label": "Rols",
-            "description": "Funcions genAI (eines, visió, incrustacions); un proveïdor per rol."
+            "description": "Rols de GenAI (xat, descripcions, incrustacions); un proveïdor per rol."
         },
         "provider_options": {
             "label": "Opcions del proveïdor",
