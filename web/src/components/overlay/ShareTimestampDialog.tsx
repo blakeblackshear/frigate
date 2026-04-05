@@ -84,7 +84,7 @@ export default function ShareTimestampDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:rounded-lg md:rounded-2xl">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="whitespace-nowrap">
             {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
           </DialogTitle>
           <DialogDescription className="sr-only">

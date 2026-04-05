@@ -101,7 +101,7 @@
   "recording": {
     "shareTimestamp": {
       "label": "Share Timestamp",
-      "title": "Share Review Timestamp",
+      "title": "Share Timestamp",
       "description": "Share a timestamped URL of current player position or choose a custom timestamp. Note that this is not a public share URL and is only accessible to users with access to Frigate and this camera.",
       "current": "Current Player Timestamp",
       "custom": "Custom Timestamp",
