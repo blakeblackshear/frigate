@@ -71,9 +71,15 @@
         "session_length": {
             "label": "Duração da sessão",
             "description": "Duração da sessão em segundos para sessões baseadas em JWT."
+        },
+        "failed_login_rate_limit": {
+            "label": "Limites de falha de login"
         }
     },
     "audio_transcription": {
-        "label": "Transcrição de áudio"
+        "label": "Transcrição de áudio",
+        "live_enabled": {
+            "label": "Transcrição em tempo real"
+        }
     }
 }
