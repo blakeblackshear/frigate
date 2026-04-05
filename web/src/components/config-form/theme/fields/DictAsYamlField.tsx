@@ -2,7 +2,7 @@ import type { FieldPathList, FieldProps } from "@rjsf/utils";
 import yaml from "js-yaml";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function formatYaml(value: unknown): string {
   if (
@@ -54,10 +54,14 @@ export function DictAsYamlField(props: FieldProps) {
 
   const [text, setText] = useState(() => formatYaml(formData));
   const [error, setError] = useState<string>();
+  const focusedRef = useRef(false);
 
   useEffect(() => {
-    setText(formatYaml(formData));
-    setError(undefined);
+    // Only sync from external formData changes, not our own onChange
+    if (!focusedRef.current) {
+      setText(formatYaml(formData));
+      setError(undefined);
+    }
   }, [formData]);
 
   const handleChange = useCallback(
@@ -73,8 +77,13 @@ export function DictAsYamlField(props: FieldProps) {
     [onChange, fieldPath],
   );
 
+  const handleFocus = useCallback(() => {
+    focusedRef.current = true;
+  }, []);
+
   const handleBlur = useCallback(
     (_e: React.FocusEvent<HTMLTextAreaElement>) => {
+      focusedRef.current = false;
       // Reformat on blur if valid
       const { value } = parseYaml(text);
       if (value !== undefined) {
@@ -101,6 +110,7 @@ export function DictAsYamlField(props: FieldProps) {
         placeholder={"key: value"}
         rows={Math.max(3, text.split("\n").length + 1)}
         onChange={handleChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
       />
       {error && <p className="text-xs text-destructive">{error}</p>}
