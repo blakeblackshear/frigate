@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Логи Frigate - Frigate",
       "go2rtc": "Логи Go2RTC - Frigate",
-      "nginx": "Логи Nginx - Frigate"
+      "nginx": "Логи Nginx - Frigate",
+      "websocket": "Логи сообщений - Frigate"
     }
   },
   "title": "Система",
@@ -33,6 +34,27 @@
         "fetchingLogsFailed": "Ошибка получения логов: {{errorMessage}}",
         "whileStreamingLogs": "Ошибка при потоковой передаче логов: {{errorMessage}}"
       }
+    },
+    "websocket": {
+      "label": "Сообщения",
+      "pause": "Пауза",
+      "resume": "Продолжить",
+      "clear": "Очистить",
+      "filter": {
+        "all": "Все топики",
+        "topics": "Топики",
+        "events": "События",
+        "classification": "Классификация",
+        "face_recognition": "Распознавание лиц",
+        "lpr": "Распознавание номерных знаков",
+        "camera_activity": "Активность камеры",
+        "system": "Система",
+        "camera": "Камера",
+        "all_cameras": "Все камеры",
+        "cameras_count_one": "{{count}} камера",
+        "cameras_count_other": "{{count}} камеры"
+      },
+      "empty": "Сообщения ещё не были получены"
     }
   },
   "general": {
