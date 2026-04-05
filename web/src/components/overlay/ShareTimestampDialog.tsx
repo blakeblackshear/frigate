@@ -199,7 +199,7 @@ export function ShareTimestampContent({
         className={cn("mt-4", !isDesktop && "flex flex-col-reverse gap-4")}
       >
         {onCancel && (
-          <Button
+          <button
             type="button"
             className={cn(
               "cursor-pointer p-2 text-center",
@@ -208,7 +208,7 @@ export function ShareTimestampContent({
             onClick={onCancel}
           >
             {t("button.cancel", { ns: "common" })}
-          </Button>
+          </button>
         )}
         <Button
           className={cn(!isDesktop && "w-full")}
