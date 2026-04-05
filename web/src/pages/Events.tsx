@@ -280,6 +280,7 @@ export default function Events() {
         // this pattern is also used LiveCameraView to enter recording view
         severity: "alert",
         timelineType: notificationTab,
+        navigationSource: "shared-link",
       },
       true,
     );

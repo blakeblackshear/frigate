@@ -40,6 +40,7 @@ export type RecordingStartingPoint = {
   startTime: number;
   severity: ReviewSeverity;
   timelineType?: TimelineType;
+  navigationSource?: "shared-link";
 };
 
 export type RecordingPlayerError = "stalled" | "startup";

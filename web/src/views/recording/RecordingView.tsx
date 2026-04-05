@@ -349,6 +349,16 @@ export function RecordingView({
     [location.pathname, mainCamera, t],
   );
 
+  const handleBack = useCallback(() => {
+    // if we came from a direct share link, there is no history to go back to, so navigate to the homepage instead
+    if (recording?.navigationSource === "shared-link") {
+      navigate("/");
+      return;
+    }
+
+    navigate(-1);
+  }, [navigate, recording?.navigationSource]);
+
   useEffect(() => {
     if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
@@ -599,7 +609,7 @@ export function RecordingView({
               className="flex items-center gap-2.5 rounded-lg"
               aria-label={t("label.back", { ns: "common" })}
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
             >
               <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
               {isDesktop && (
