@@ -471,8 +471,17 @@ class CameraWatchdog(threading.Thread):
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
 
-            # Update stall metrics based on last processed frame timestamp
+            # Prune expired reconnect timestamps
             now = datetime.now().timestamp()
+            while (
+                self.reconnect_timestamps
+                and self.reconnect_timestamps[0] < now - 3600
+            ):
+                self.reconnect_timestamps.popleft()
+            if self.reconnects:
+                self.reconnects.value = len(self.reconnect_timestamps)
+
+            # Update stall metrics based on last processed frame timestamp
             processed_ts = (
                 float(self.detection_frame.value) if self.detection_frame else 0.0
             )
