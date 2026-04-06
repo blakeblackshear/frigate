@@ -474,8 +474,7 @@ class CameraWatchdog(threading.Thread):
             # Prune expired reconnect timestamps
             now = datetime.now().timestamp()
             while (
-                self.reconnect_timestamps
-                and self.reconnect_timestamps[0] < now - 3600
+                self.reconnect_timestamps and self.reconnect_timestamps[0] < now - 3600
             ):
                 self.reconnect_timestamps.popleft()
             if self.reconnects:
