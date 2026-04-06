@@ -556,7 +556,7 @@ def run_analysis(
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
-            object_type = titlecase(label.replace("_", " "))
+            object_type = label.replace("_", " ")
 
             if label in attribute_labels:
                 unified_objects.append(f"{object_type} (delivery/service)")
