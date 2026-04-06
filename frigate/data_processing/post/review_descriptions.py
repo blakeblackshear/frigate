@@ -19,7 +19,12 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.camera import CameraConfig
 from frigate.config.camera.review import GenAIReviewConfig, ImageSourceEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
+from frigate.const import (
+    ATTRIBUTE_LABEL_DISPLAY_MAP,
+    CACHE_DIR,
+    CLIPS_DIR,
+    UPDATE_REVIEW_DESCRIPTION,
+)
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
 from frigate.genai.manager import GenAIClientManager
@@ -559,7 +564,8 @@ def run_analysis(
             object_type = label.replace("_", " ")
 
             if label in attribute_labels:
-                unified_objects.append(f"{object_type} (delivery/service)")
+                display_name = ATTRIBUTE_LABEL_DISPLAY_MAP.get(label, object_type)
+                unified_objects.append(f"{display_name} (delivery/service)")
             else:
                 unified_objects.append(object_type)
 
