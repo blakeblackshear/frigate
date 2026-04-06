@@ -92,6 +92,7 @@ class EmbeddingMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
                 CameraConfigUpdateEnum.object_genai,
+                CameraConfigUpdateEnum.review,
                 CameraConfigUpdateEnum.review_genai,
                 CameraConfigUpdateEnum.semantic_search,
             ],
