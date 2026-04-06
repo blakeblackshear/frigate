@@ -190,6 +190,7 @@ Each line represents a detection state, not necessarily unique individuals. The 
                 if any("←" in obj for obj in review_data["unified_objects"]):
                     metadata.potential_threat_level = 0
 
+                metadata.title = metadata.title[0].upper() + metadata.title[1:]
                 metadata.time = review_data["start"]
                 return metadata
             except Exception as e:
