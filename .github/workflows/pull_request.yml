@@ -68,10 +68,6 @@ jobs:
       - name: Build web for E2E
         run: npm run e2e:build
         working-directory: ./web
-      - name: Generate mock data
-        run: |
-          pip install -r docker/main/requirements-dev.txt 2>/dev/null || true
-          PYTHONPATH=. python3 web/e2e/fixtures/mock-data/generate-mock-data.py
       - name: Run E2E tests
         run: npm run e2e
         working-directory: ./web
