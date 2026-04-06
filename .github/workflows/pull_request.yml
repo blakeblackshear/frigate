@@ -50,6 +50,41 @@ jobs:
       #   run: npm run test
       #   working-directory: ./web
 
+  web_e2e:
+    name: Web - E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+      - run: npm install
+        working-directory: ./web
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+        working-directory: ./web
+      - name: Build web for E2E
+        run: npm run e2e:build
+        working-directory: ./web
+      - name: Generate mock data
+        run: |
+          pip install -r docker/main/requirements-dev.txt 2>/dev/null || true
+          PYTHONPATH=. python3 web/e2e/fixtures/mock-data/generate-mock-data.py
+      - name: Run E2E tests
+        run: npm run e2e
+        working-directory: ./web
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            web/test-results/
+            web/playwright-report/
+          retention-days: 7
+
   python_checks:
     runs-on: ubuntu-latest
     name: Python Checks
