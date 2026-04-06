@@ -37,23 +37,10 @@ export default function CameraReviewStatusToggles({
   const { payload: revDescState, send: sendRevDesc } =
     useReviewDescriptionState(cameraId);
 
-  // Sync WS runtime state when genai transitions from disabled to enabled in config
-  const prevObjGenaiEnabled = useRef(
-    cameraConfig?.objects?.genai?.enabled_in_config,
-  );
+  // Sync WS runtime state when review genai transitions from disabled to enabled in config
   const prevRevGenaiEnabled = useRef(
     cameraConfig?.review?.genai?.enabled_in_config,
   );
-
-  useEffect(() => {
-    const wasEnabled = prevObjGenaiEnabled.current;
-    const isEnabled = cameraConfig?.objects?.genai?.enabled_in_config;
-    prevObjGenaiEnabled.current = isEnabled;
-
-    if (!wasEnabled && isEnabled) {
-      sendObjDesc("ON");
-    }
-  }, [cameraConfig?.objects?.genai?.enabled_in_config, sendObjDesc]);
 
   useEffect(() => {
     const wasEnabled = prevRevGenaiEnabled.current;
