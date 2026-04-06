@@ -548,23 +548,27 @@ def export_recording_custom(
 
     export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
 
-    # Validate user-provided ffmpeg args to prevent injection
-    for args_label, args_value in [
-        ("input", ffmpeg_input_args),
-        ("output", ffmpeg_output_args),
-    ]:
-        if args_value is not None:
-            valid, message = validate_ffmpeg_args(args_value)
-            if not valid:
-                return JSONResponse(
-                    content=(
-                        {
-                            "success": False,
-                            "message": f"Invalid ffmpeg {args_label} arguments: {message}",
-                        }
-                    ),
-                    status_code=400,
-                )
+    # Validate user-provided ffmpeg args to prevent injection.
+    # Admin users are trusted and skip validation.
+    is_admin = request.headers.get("remote-role", "") == "admin"
+
+    if not is_admin:
+        for args_label, args_value in [
+            ("input", ffmpeg_input_args),
+            ("output", ffmpeg_output_args),
+        ]:
+            if args_value is not None:
+                valid, message = validate_ffmpeg_args(args_value)
+                if not valid:
+                    return JSONResponse(
+                        content=(
+                            {
+                                "success": False,
+                                "message": f"Invalid ffmpeg {args_label} arguments: {message}",
+                            }
+                        ),
+                        status_code=400,
+                    )
 
     # Set default values if not provided (timelapse defaults)
     if ffmpeg_input_args is None:

@@ -36,22 +36,20 @@ logger = logging.getLogger(__name__)
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
 
-# ffmpeg flags that can read from or write to arbitrary files.
-# filter flags are blocked because source filters like movie= and
-# amovie= can read arbitrary files from the filesystem.
+# ffmpeg flags that can read from or write to arbitrary files
 BLOCKED_FFMPEG_ARGS = frozenset(
     {
         "-i",
         "-filter_script",
-        "-vstats_file",
-        "-passlogfile",
-        "-sdp_file",
-        "-dump_attachment",
         "-filter_complex",
         "-lavfi",
         "-vf",
         "-af",
         "-filter",
+        "-vstats_file",
+        "-passlogfile",
+        "-sdp_file",
+        "-dump_attachment",
         "-attach",
     }
 )
@@ -62,8 +60,11 @@ def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
 
     Blocks:
     - The -i flag and other flags that read/write arbitrary files
+    - Filter flags (can read files via movie=/amovie= source filters)
     - Absolute/relative file paths (potential extra outputs)
     - URLs and ffmpeg protocol references (data exfiltration)
+
+    Admin users skip this validation entirely since they are trusted.
     """
     if not args or not args.strip():
         return True, ""
