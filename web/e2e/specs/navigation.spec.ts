@@ -201,7 +201,7 @@ test.describe("Navigation - Settings Menu @critical", () => {
       if (await menuItem.isVisible().catch(() => false)) {
         await menuItem.click();
         await expect(frigateApp.page).toHaveURL(
-          new RegExp(target.url.replace(/\//g, "\\/")),
+          new RegExp(target.url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
         );
       }
     }
