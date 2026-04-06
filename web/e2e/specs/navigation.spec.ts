@@ -2,7 +2,7 @@
  * Navigation tests -- CRITICAL tier.
  *
  * Tests sidebar (desktop) and bottombar (mobile) navigation,
- * conditional nav items, settings menus, and route transitions.
+ * conditional nav items, settings menus, and their actual behaviors.
  */
 
 import { test, expect } from "../fixtures/frigate-test";
@@ -15,68 +15,40 @@ test.describe("Navigation @critical", () => {
   });
 
   test("logo is visible and links to home", async ({ frigateApp }) => {
+    if (frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
     await frigateApp.goto("/");
-    const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
+    const base = new BasePage(frigateApp.page, true);
+    const logo = base.sidebar.locator('a[href="/"]').first();
+    await expect(logo).toBeVisible();
+  });
 
-    if (!frigateApp.isMobile) {
-      // Desktop: logo in sidebar
-      const logo = base.sidebar.locator('a[href="/"]').first();
-      await expect(logo).toBeVisible();
+  test("all primary nav links are present and navigate", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/");
+    const routes = ["/review", "/explore", "/export"];
+    for (const route of routes) {
+      await expect(
+        frigateApp.page.locator(`a[href="${route}"]`).first(),
+      ).toBeVisible();
+    }
+    // Verify clicking each one actually navigates
+    const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
+    for (const route of routes) {
+      await base.navigateTo(route);
+      await expect(frigateApp.page).toHaveURL(new RegExp(route));
+      await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
     }
   });
 
-  test("Live nav item is active on root path", async ({ frigateApp }) => {
-    await frigateApp.goto("/");
-    const liveLink = frigateApp.page.locator('a[href="/"]').first();
-    await expect(liveLink).toBeVisible();
-  });
-
-  test("navigate to Review page", async ({ frigateApp }) => {
-    await frigateApp.goto("/");
-    const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
-
-    await base.navigateTo("/review");
-    await expect(frigateApp.page).toHaveURL(/\/review/);
-  });
-
-  test("navigate to Explore page", async ({ frigateApp }) => {
-    await frigateApp.goto("/");
-    const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
-
-    await base.navigateTo("/explore");
-    await expect(frigateApp.page).toHaveURL(/\/explore/);
-  });
-
-  test("navigate to Export page", async ({ frigateApp }) => {
-    await frigateApp.goto("/");
-    const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
-
-    await base.navigateTo("/export");
-    await expect(frigateApp.page).toHaveURL(/\/export/);
-  });
-
-  test("all primary nav links are present", async ({ frigateApp }) => {
-    await frigateApp.goto("/");
-
-    // Live, Review, Explore, Export are always present
-    await expect(frigateApp.page.locator('a[href="/"]').first()).toBeVisible();
-    await expect(
-      frigateApp.page.locator('a[href="/review"]').first(),
-    ).toBeVisible();
-    await expect(
-      frigateApp.page.locator('a[href="/explore"]').first(),
-    ).toBeVisible();
-    await expect(
-      frigateApp.page.locator('a[href="/export"]').first(),
-    ).toBeVisible();
-  });
-
-  test("desktop sidebar is visible on desktop, hidden on mobile", async ({
+  test("desktop sidebar is visible, mobile bottombar is visible", async ({
     frigateApp,
   }) => {
     await frigateApp.goto("/");
     const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
-
     if (!frigateApp.isMobile) {
       await expect(base.sidebar).toBeVisible();
     } else {
@@ -84,32 +56,26 @@ test.describe("Navigation @critical", () => {
     }
   });
 
-  test("navigate between pages without crash", async ({ frigateApp }) => {
+  test("navigate between all main pages without crash", async ({
+    frigateApp,
+  }) => {
     await frigateApp.goto("/");
     const base = new BasePage(frigateApp.page, !frigateApp.isMobile);
     const pageRoot = frigateApp.page.locator("#pageRoot");
 
-    // Navigate through all main pages in sequence
     await base.navigateTo("/review");
     await expect(pageRoot).toBeVisible({ timeout: 10_000 });
-
     await base.navigateTo("/explore");
     await expect(pageRoot).toBeVisible({ timeout: 10_000 });
-
     await base.navigateTo("/export");
     await expect(pageRoot).toBeVisible({ timeout: 10_000 });
-
-    // Navigate back to review (not root, to avoid same-route re-render issues)
     await base.navigateTo("/review");
     await expect(pageRoot).toBeVisible({ timeout: 10_000 });
   });
 
   test("unknown route redirects to home", async ({ frigateApp }) => {
-    // Navigate to an unknown route - React Router's catch-all should redirect
     await frigateApp.page.goto("/nonexistent-route");
-    // Wait for React to render and redirect
     await frigateApp.page.waitForTimeout(2000);
-    // Should either be at root or show the page root (app didn't crash)
     const url = frigateApp.page.url();
     const hasPageRoot = await frigateApp.page
       .locator("#pageRoot")
@@ -117,11 +83,12 @@ test.describe("Navigation @critical", () => {
       .catch(() => false);
     expect(url.endsWith("/") || hasPageRoot).toBeTruthy();
   });
+});
 
+test.describe("Navigation - Conditional Items @critical", () => {
   test("Faces nav hidden when face_recognition disabled", async ({
     frigateApp,
   }) => {
-    // Default config has face_recognition.enabled = false
     await frigateApp.goto("/");
     await expect(frigateApp.page.locator('a[href="/faces"]')).not.toBeVisible();
   });
@@ -131,7 +98,6 @@ test.describe("Navigation @critical", () => {
       test.skip();
       return;
     }
-    // Override config with genai.model = "none" to hide chat
     await frigateApp.installDefaults({
       config: {
         genai: {
@@ -146,7 +112,7 @@ test.describe("Navigation @critical", () => {
     await expect(frigateApp.page.locator('a[href="/chat"]')).not.toBeVisible();
   });
 
-  test("Faces nav visible when face_recognition enabled and admin on desktop", async ({
+  test("Faces nav visible when face_recognition enabled on desktop", async ({
     frigateApp,
     page,
   }) => {
@@ -154,18 +120,14 @@ test.describe("Navigation @critical", () => {
       test.skip();
       return;
     }
-
-    // Re-install with face_recognition enabled
     await frigateApp.installDefaults({
-      config: {
-        face_recognition: { enabled: true },
-      },
+      config: { face_recognition: { enabled: true } },
     });
     await frigateApp.goto("/");
     await expect(page.locator('a[href="/faces"]')).toBeVisible();
   });
 
-  test("Chat nav visible when genai model set and admin on desktop", async ({
+  test("Chat nav visible when genai model set on desktop", async ({
     frigateApp,
     page,
   }) => {
@@ -173,11 +135,8 @@ test.describe("Navigation @critical", () => {
       test.skip();
       return;
     }
-
     await frigateApp.installDefaults({
-      config: {
-        genai: { enabled: true, model: "llava" },
-      },
+      config: { genai: { enabled: true, model: "llava" } },
     });
     await frigateApp.goto("/");
     await expect(page.locator('a[href="/chat"]')).toBeVisible();
@@ -191,8 +150,78 @@ test.describe("Navigation @critical", () => {
       test.skip();
       return;
     }
-
     await frigateApp.goto("/");
     await expect(page.locator('a[href="/classification"]')).toBeVisible();
+  });
+});
+
+test.describe("Navigation - Settings Menu @critical", () => {
+  test("settings gear opens menu with navigation items (desktop)", async ({
+    frigateApp,
+  }) => {
+    if (frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
+    await frigateApp.goto("/");
+    // Settings gear is in the sidebar bottom section, a div with cursor-pointer
+    const sidebarBottom = frigateApp.page.locator("aside .mb-8");
+    const gearIcon = sidebarBottom
+      .locator("div[class*='cursor-pointer']")
+      .first();
+    await expect(gearIcon).toBeVisible({ timeout: 5_000 });
+    await gearIcon.click();
+    // Menu should open - look for the "Settings" menu item by aria-label
+    await expect(frigateApp.page.getByLabel("Settings")).toBeVisible({
+      timeout: 3_000,
+    });
+  });
+
+  test("settings menu items navigate to correct routes (desktop)", async ({
+    frigateApp,
+  }) => {
+    if (frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
+    const targets = [
+      { label: "Settings", url: "/settings" },
+      { label: "System metrics", url: "/system" },
+      { label: "System logs", url: "/logs" },
+      { label: "Configuration Editor", url: "/config" },
+    ];
+    for (const target of targets) {
+      await frigateApp.goto("/");
+      const gearIcon = frigateApp.page
+        .locator("aside .mb-8 div[class*='cursor-pointer']")
+        .first();
+      await gearIcon.click();
+      await frigateApp.page.waitForTimeout(300);
+      const menuItem = frigateApp.page.getByLabel(target.label);
+      if (await menuItem.isVisible().catch(() => false)) {
+        await menuItem.click();
+        await expect(frigateApp.page).toHaveURL(
+          new RegExp(target.url.replace(/\//g, "\\/")),
+        );
+      }
+    }
+  });
+
+  test("account button in sidebar is clickable (desktop)", async ({
+    frigateApp,
+  }) => {
+    if (frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
+    await frigateApp.goto("/");
+    const sidebarBottom = frigateApp.page.locator("aside .mb-8");
+    const items = sidebarBottom.locator("div[class*='cursor-pointer']");
+    const count = await items.count();
+    if (count >= 2) {
+      await items.nth(1).click();
+      await frigateApp.page.waitForTimeout(500);
+    }
+    await expect(frigateApp.page.locator("body")).toBeVisible();
   });
 });

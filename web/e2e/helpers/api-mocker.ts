@@ -6,6 +6,9 @@
  */
 
 import type { Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   BASE_CONFIG,
   type DeepPartial,
@@ -13,6 +16,13 @@ import {
 } from "../fixtures/mock-data/config";
 import { adminProfile, type UserProfile } from "../fixtures/mock-data/profile";
 import { BASE_STATS, statsFactory } from "../fixtures/mock-data/stats";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const MOCK_DATA_DIR = resolve(__dirname, "../fixtures/mock-data");
+
+function loadMockJson(filename: string): unknown {
+  return JSON.parse(readFileSync(resolve(MOCK_DATA_DIR, filename), "utf-8"));
+}
 
 // 1x1 transparent PNG
 const PLACEHOLDER_PNG = Buffer.from(
@@ -44,6 +54,14 @@ export class ApiMocker {
     const config = configFactory(overrides?.config);
     const profile = overrides?.profile ?? adminProfile();
     const stats = statsFactory(overrides?.stats);
+    const reviews =
+      overrides?.reviews ?? (loadMockJson("reviews.json") as unknown[]);
+    const events =
+      overrides?.events ?? (loadMockJson("events.json") as unknown[]);
+    const exports =
+      overrides?.exports ?? (loadMockJson("exports.json") as unknown[]);
+    const cases = overrides?.cases ?? (loadMockJson("cases.json") as unknown[]);
+    const reviewSummary = loadMockJson("review-summary.json");
 
     // Config endpoint
     await this.page.route("**/api/config", (route) => {
@@ -65,23 +83,51 @@ export class ApiMocker {
     );
 
     // Reviews
-    await this.page.route("**/api/reviews**", (route) =>
-      route.fulfill({ json: overrides?.reviews ?? [] }),
+    await this.page.route("**/api/reviews**", (route) => {
+      const url = route.request().url();
+      if (url.includes("summary")) {
+        return route.fulfill({ json: reviewSummary });
+      }
+      return route.fulfill({ json: reviews });
+    });
+
+    // Recordings summary
+    await this.page.route("**/api/recordings/summary**", (route) =>
+      route.fulfill({ json: {} }),
+    );
+
+    // Previews (needed for review page event cards)
+    await this.page.route("**/api/preview/**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+
+    // Sub-labels and attributes (for explore filters)
+    await this.page.route("**/api/sub_labels", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await this.page.route("**/api/labels", (route) =>
+      route.fulfill({ json: ["person", "car"] }),
+    );
+    await this.page.route("**/api/*/attributes", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await this.page.route("**/api/recognized_license_plates", (route) =>
+      route.fulfill({ json: [] }),
     );
 
     // Events / search
     await this.page.route("**/api/events**", (route) =>
-      route.fulfill({ json: overrides?.events ?? [] }),
+      route.fulfill({ json: events }),
     );
 
     // Exports
     await this.page.route("**/api/export**", (route) =>
-      route.fulfill({ json: overrides?.exports ?? [] }),
+      route.fulfill({ json: exports }),
     );
 
     // Cases
     await this.page.route("**/api/cases", (route) =>
-      route.fulfill({ json: overrides?.cases ?? [] }),
+      route.fulfill({ json: cases }),
     );
 
     // Faces

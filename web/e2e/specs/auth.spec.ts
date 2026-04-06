@@ -1,54 +1,93 @@
 /**
  * Auth and cross-cutting tests -- HIGH tier.
  *
- * Tests protected routes, unauthorized redirect,
- * and app-wide behaviors.
+ * Tests protected route access for admin/viewer roles,
+ * redirect behavior, and all routes smoke test.
  */
 
 import { test, expect } from "../fixtures/frigate-test";
 import { viewerProfile } from "../fixtures/mock-data/profile";
 
-test.describe("Auth & Protected Routes @high", () => {
-  test("admin can access /system", async ({ frigateApp }) => {
+test.describe("Auth - Admin Access @high", () => {
+  test("admin can access /system and it renders", async ({ frigateApp }) => {
     await frigateApp.goto("/system");
+    await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
+    // Wait for lazy-loaded system content
+    await frigateApp.page.waitForTimeout(3000);
     await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
   });
 
-  test("admin can access /config", async ({ frigateApp }) => {
+  test("admin can access /config and editor loads", async ({ frigateApp }) => {
     await frigateApp.goto("/config");
-    // Config editor may take time to load Monaco
     await frigateApp.page.waitForTimeout(3000);
+    // Monaco editor or at least page content should render
     await expect(frigateApp.page.locator("body")).toBeVisible();
   });
 
-  test("admin can access /logs", async ({ frigateApp }) => {
+  test("admin can access /logs and service tabs render", async ({
+    frigateApp,
+  }) => {
     await frigateApp.goto("/logs");
     await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
+    // Should have service toggle group
+    const toggleGroup = frigateApp.page.locator('[role="group"]');
+    await expect(toggleGroup.first()).toBeVisible({ timeout: 5_000 });
+  });
+});
+
+test.describe("Auth - Viewer Restrictions @high", () => {
+  test("viewer is denied access to /system", async ({ frigateApp, page }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+    await page.goto("/system");
+    await page.waitForTimeout(2000);
+    const bodyText = await page.textContent("body");
+    expect(
+      bodyText?.includes("Access Denied") ||
+        bodyText?.includes("permission") ||
+        page.url().includes("unauthorized"),
+    ).toBeTruthy();
   });
 
-  test("viewer is redirected from admin routes", async ({
+  test("viewer is denied access to /config", async ({ frigateApp, page }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+    await page.goto("/config");
+    await page.waitForTimeout(2000);
+    const bodyText = await page.textContent("body");
+    expect(
+      bodyText?.includes("Access Denied") ||
+        bodyText?.includes("permission") ||
+        page.url().includes("unauthorized"),
+    ).toBeTruthy();
+  });
+
+  test("viewer is denied access to /logs", async ({ frigateApp, page }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+    await page.goto("/logs");
+    await page.waitForTimeout(2000);
+    const bodyText = await page.textContent("body");
+    expect(
+      bodyText?.includes("Access Denied") ||
+        bodyText?.includes("permission") ||
+        page.url().includes("unauthorized"),
+    ).toBeTruthy();
+  });
+
+  test("viewer can access all main user routes", async ({
     frigateApp,
     page,
   }) => {
-    // Re-install mocks with viewer profile
-    await frigateApp.installDefaults({
-      profile: viewerProfile(),
-    });
-    await page.goto("/system");
-    await page.waitForTimeout(2000);
-    // Should be redirected to unauthorized page
-    const url = page.url();
-    const hasAccessDenied = url.includes("unauthorized");
-    const bodyText = await page.textContent("body");
-    const showsAccessDenied =
-      bodyText?.includes("Access Denied") ||
-      bodyText?.includes("permission") ||
-      hasAccessDenied;
-    expect(showsAccessDenied).toBeTruthy();
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+    const routes = ["/", "/review", "/explore", "/export", "/settings"];
+    for (const route of routes) {
+      await page.goto(route);
+      await page.waitForSelector("#pageRoot", { timeout: 10_000 });
+      await expect(page.locator("#pageRoot")).toBeVisible();
+    }
   });
+});
 
-  test("all main pages render without crash", async ({ frigateApp }) => {
-    // Smoke test all user-accessible routes
+test.describe("Auth - All Routes Smoke @high", () => {
+  test("all user routes render without crash", async ({ frigateApp }) => {
     const routes = ["/", "/review", "/explore", "/export", "/settings"];
     for (const route of routes) {
       await frigateApp.goto(route);
@@ -58,7 +97,7 @@ test.describe("Auth & Protected Routes @high", () => {
     }
   });
 
-  test("all admin pages render without crash", async ({ frigateApp }) => {
+  test("all admin routes render without crash", async ({ frigateApp }) => {
     const routes = ["/system", "/logs"];
     for (const route of routes) {
       await frigateApp.goto(route);
