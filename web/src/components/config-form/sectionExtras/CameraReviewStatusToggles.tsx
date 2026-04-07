@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import { Trans } from "react-i18next";
 import Heading from "@/components/ui/heading";
@@ -36,6 +36,21 @@ export default function CameraReviewStatusToggles({
     useObjectDescriptionState(cameraId);
   const { payload: revDescState, send: sendRevDesc } =
     useReviewDescriptionState(cameraId);
+
+  // Sync WS runtime state when review genai transitions from disabled to enabled in config
+  const prevRevGenaiEnabled = useRef(
+    cameraConfig?.review?.genai?.enabled_in_config,
+  );
+
+  useEffect(() => {
+    const wasEnabled = prevRevGenaiEnabled.current;
+    const isEnabled = cameraConfig?.review?.genai?.enabled_in_config;
+    prevRevGenaiEnabled.current = isEnabled;
+
+    if (!wasEnabled && isEnabled) {
+      sendRevDesc("ON");
+    }
+  }, [cameraConfig?.review?.genai?.enabled_in_config, sendRevDesc]);
 
   if (!selectedCamera || !cameraConfig) {
     return null;

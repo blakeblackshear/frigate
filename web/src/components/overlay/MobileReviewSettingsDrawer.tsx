@@ -23,7 +23,7 @@ import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import { toast } from "sonner";
 import axios, { AxiosError } from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
-import { isIOS, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -505,7 +505,6 @@ export default function MobileReviewSettingsDrawer({
         setShowPreview={setShowExportPreview}
       />
       <Drawer
-        modal={!(isIOS && drawerMode == "export")}
         open={drawerMode != "none"}
         onOpenChange={(open) => {
           if (!open) {
