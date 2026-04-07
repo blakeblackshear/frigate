@@ -400,6 +400,7 @@ class TrackedObject:
             "start_time": self.obj_data["start_time"],
             "end_time": self.obj_data.get("end_time", None),
             "score": self.obj_data["score"],
+            "computed_score": self.computed_score,
             "box": self.obj_data["box"],
             "area": self.obj_data["area"],
             "ratio": self.obj_data["ratio"],
