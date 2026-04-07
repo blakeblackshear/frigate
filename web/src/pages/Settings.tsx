@@ -818,6 +818,27 @@ export default function Settings() {
     [],
   );
 
+  // Show save/undo all buttons only when changes span multiple sections
+  // or the single changed section is not the one currently being viewed
+  const showSaveAllButtons = useMemo(() => {
+    const pendingKeys = Object.keys(pendingDataBySection);
+    if (pendingKeys.length === 0) return false;
+    if (pendingKeys.length >= 2) return true;
+
+    // Exactly one pending section — check if it matches the current view
+    const key = pendingKeys[0];
+    const menuKey = pendingKeyToMenuKey(key);
+    if (menuKey !== pageToggle) return true;
+
+    // For camera-scoped keys, also check if the camera matches
+    if (key.includes("::")) {
+      const cameraName = key.slice(0, key.indexOf("::"));
+      return cameraName !== selectedCamera;
+    }
+
+    return false;
+  }, [pendingDataBySection, pendingKeyToMenuKey, pageToggle, selectedCamera]);
+
   const handleSaveAll = useCallback(async () => {
     if (
       !config ||
@@ -1491,7 +1512,7 @@ export default function Settings() {
                 );
               })}
             </div>
-            {hasPendingChanges && (
+            {showSaveAllButtons && (
               <div className="sticky bottom-0 z-50 mt-2 bg-background p-4">
                 <div className="flex flex-col items-center gap-2">
                   <div className="flex items-center gap-2">
@@ -1667,7 +1688,7 @@ export default function Settings() {
           </Heading>
         </div>
         <div className="flex items-center gap-2">
-          {hasPendingChanges && (
+          {showSaveAllButtons && (
             <div
               className={cn(
                 "flex flex-row items-center gap-2",
