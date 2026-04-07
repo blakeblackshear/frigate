@@ -116,6 +116,8 @@ class TimelineProcessor(threading.Thread):
                 ),
                 "attribute": "",
                 "score": event_data["score"],
+                "computed_score": event_data.get("computed_score"),
+                "top_score": event_data.get("top_score"),
             },
         }
 
