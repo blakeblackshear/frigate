@@ -67,6 +67,13 @@ const lpr: SectionConfigOverrides = {
       format: {
         "ui:options": { size: "md" },
       },
+      known_plates: {
+        "ui:field": "KnownPlatesField",
+        "ui:options": {
+          label: false,
+          suppressDescription: true,
+        },
+      },
       replace_rules: {
         "ui:field": "ReplaceRulesField",
         "ui:options": {
