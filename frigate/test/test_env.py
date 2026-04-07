@@ -127,16 +127,12 @@ class TestEnvString(unittest.TestCase):
         result = validate_env_string(
             "exec:ffmpeg -i /media/file.mp4 -f rtsp {{output}}"
         )
-        self.assertEqual(
-            result, "exec:ffmpeg -i /media/file.mp4 -f rtsp {output}"
-        )
+        self.assertEqual(result, "exec:ffmpeg -i /media/file.mp4 -f rtsp {output}")
 
     def test_double_brace_around_frigate_var(self):
         """`{{FRIGATE_FOO}}` stays literal — escape takes precedence."""
         FRIGATE_ENV_VARS["FRIGATE_FOO"] = "bar"
-        self.assertEqual(
-            validate_env_string("{{FRIGATE_FOO}}"), "{FRIGATE_FOO}"
-        )
+        self.assertEqual(validate_env_string("{{FRIGATE_FOO}}"), "{FRIGATE_FOO}")
 
     def test_mixed_frigate_var_and_braces(self):
         """A FRIGATE_ var alongside literal single braces substitutes only the var."""
