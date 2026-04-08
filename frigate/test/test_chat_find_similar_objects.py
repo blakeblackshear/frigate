@@ -10,12 +10,14 @@ from unittest.mock import MagicMock
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.api.chat import (
+    _execute_find_similar_objects,
+    get_tool_definitions,
+)
+from frigate.api.chat_util import (
     DESCRIPTION_WEIGHT,
     VISUAL_WEIGHT,
-    _distance_to_score,
-    _execute_find_similar_objects,
-    _fuse_scores,
-    get_tool_definitions,
+    distance_to_score,
+    fuse_scores,
 )
 from frigate.embeddings.util import ZScoreNormalization
 from frigate.models import Event
@@ -31,8 +33,8 @@ class TestDistanceToScore(unittest.TestCase):
         # Seed the stats with a small distribution so stddev > 0.
         stats._update([0.1, 0.2, 0.3, 0.4, 0.5])
 
-        close_score = _distance_to_score(0.1, stats)
-        far_score = _distance_to_score(0.5, stats)
+        close_score = distance_to_score(0.1, stats)
+        far_score = distance_to_score(0.5, stats)
 
         self.assertGreater(close_score, far_score)
         self.assertGreaterEqual(close_score, 0.0)
@@ -42,7 +44,7 @@ class TestDistanceToScore(unittest.TestCase):
 
     def test_uninitialized_stats_returns_neutral_score(self):
         stats = ZScoreNormalization()  # n == 0, stddev == 0
-        self.assertEqual(_distance_to_score(0.3, stats), 0.5)
+        self.assertEqual(distance_to_score(0.3, stats), 0.5)
 
 
 class TestFuseScores(unittest.TestCase):
@@ -50,20 +52,20 @@ class TestFuseScores(unittest.TestCase):
         self.assertAlmostEqual(VISUAL_WEIGHT + DESCRIPTION_WEIGHT, 1.0)
 
     def test_fuses_both_sides(self):
-        fused = _fuse_scores(visual_score=0.8, description_score=0.4)
+        fused = fuse_scores(visual_score=0.8, description_score=0.4)
         expected = VISUAL_WEIGHT * 0.8 + DESCRIPTION_WEIGHT * 0.4
         self.assertAlmostEqual(fused, expected)
 
     def test_missing_description_uses_visual_only(self):
-        fused = _fuse_scores(visual_score=0.7, description_score=None)
+        fused = fuse_scores(visual_score=0.7, description_score=None)
         self.assertAlmostEqual(fused, 0.7)
 
     def test_missing_visual_uses_description_only(self):
-        fused = _fuse_scores(visual_score=None, description_score=0.6)
+        fused = fuse_scores(visual_score=None, description_score=0.6)
         self.assertAlmostEqual(fused, 0.6)
 
     def test_both_missing_returns_none(self):
-        self.assertIsNone(_fuse_scores(visual_score=None, description_score=None))
+        self.assertIsNone(fuse_scores(visual_score=None, description_score=None))
 
 
 class TestToolDefinition(unittest.TestCase):
