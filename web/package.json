@@ -13,6 +13,10 @@
     "prettier:write": "prettier -u -w --ignore-path .gitignore \"*.{ts,tsx,js,jsx,css,html}\"",
     "test": "vitest",
     "coverage": "vitest run --coverage",
+    "e2e:build": "tsc && vite build --base=/",
+    "e2e": "playwright test --config e2e/playwright.config.ts",
+    "e2e:ui": "playwright test --config e2e/playwright.config.ts --ui",
+    "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
     "i18n:extract": "i18next-cli extract",
     "i18n:extract:ci": "i18next-cli extract --ci",
     "i18n:status": "i18next-cli status"
@@ -98,6 +102,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/forms": "^0.5.9",
     "@testing-library/jest-dom": "^6.6.2",
     "@types/js-yaml": "^4.0.9",
@@ -130,7 +135,7 @@
     "prettier-plugin-tailwindcss": "^0.6.5",
     "tailwindcss": "^3.4.9",
     "typescript": "^5.9.3",
-    "vite": "^6.4.1",
+    "vite": "^6.4.2",
     "vitest": "^3.0.7"
   },
   "overrides": {

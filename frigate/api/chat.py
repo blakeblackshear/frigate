@@ -407,7 +407,7 @@ async def _execute_search_objects(
     query_params = EventsQueryParams(
         cameras=arguments.get("camera", "all"),
         labels=arguments.get("label", "all"),
-        sub_labels=arguments.get("sub_label", "all").lower(),
+        sub_labels=arguments.get("sub_label", "all"),  # case-insensitive on the backend
         zones=zones,
         zone=zones,
         after=after,

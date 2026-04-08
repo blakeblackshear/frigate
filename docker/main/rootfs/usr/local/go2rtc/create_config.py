@@ -9,6 +9,7 @@ from typing import Any
 from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
+from frigate.config.env import substitute_frigate_vars
 from frigate.const import (
     BIRDSEYE_PIPE,
     DEFAULT_FFMPEG_VERSION,
@@ -47,14 +48,6 @@ ALLOW_ARBITRARY_EXEC = allow_arbitrary_exec is not None and str(
     allow_arbitrary_exec
 ).lower() in ("true", "1", "yes")
 
-FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
-# read docker secret files as env vars too
-if os.path.isdir("/run/secrets"):
-    for secret_file in os.listdir("/run/secrets"):
-        if secret_file.startswith("FRIGATE_"):
-            FRIGATE_ENV_VARS[secret_file] = (
-                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
-            )
 
 config_file = find_config_file()
 
@@ -103,13 +96,13 @@ if go2rtc_config["webrtc"].get("candidates") is None:
     go2rtc_config["webrtc"]["candidates"] = default_candidates
 
 if go2rtc_config.get("rtsp", {}).get("username") is not None:
-    go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
-        **FRIGATE_ENV_VARS
+    go2rtc_config["rtsp"]["username"] = substitute_frigate_vars(
+        go2rtc_config["rtsp"]["username"]
     )
 
 if go2rtc_config.get("rtsp", {}).get("password") is not None:
-    go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
-        **FRIGATE_ENV_VARS
+    go2rtc_config["rtsp"]["password"] = substitute_frigate_vars(
+        go2rtc_config["rtsp"]["password"]
     )
 
 # ensure ffmpeg path is set correctly
@@ -145,7 +138,7 @@ for name in list(go2rtc_config.get("streams", {})):
 
     if isinstance(stream, str):
         try:
-            formatted_stream = stream.format(**FRIGATE_ENV_VARS)
+            formatted_stream = substitute_frigate_vars(stream)
             if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
                 print(
                     f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
@@ -164,7 +157,7 @@ for name in list(go2rtc_config.get("streams", {})):
         filtered_streams = []
         for i, stream_item in enumerate(stream):
             try:
-                formatted_stream = stream_item.format(**FRIGATE_ENV_VARS)
+                formatted_stream = substitute_frigate_vars(stream_item)
                 if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
                     print(
                         f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "

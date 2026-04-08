@@ -49,6 +49,7 @@ import { DetectorHardwareField } from "./fields/DetectorHardwareField";
 import { ReplaceRulesField } from "./fields/ReplaceRulesField";
 import { CameraInputsField } from "./fields/CameraInputsField";
 import { DictAsYamlField } from "./fields/DictAsYamlField";
+import { KnownPlatesField } from "./fields/KnownPlatesField";
 
 export interface FrigateTheme {
   widgets: RegistryWidgetsType;
@@ -105,5 +106,6 @@ export const frigateTheme: FrigateTheme = {
     ReplaceRulesField: ReplaceRulesField,
     CameraInputsField: CameraInputsField,
     DictAsYamlField: DictAsYamlField,
+    KnownPlatesField: KnownPlatesField,
   },
 };

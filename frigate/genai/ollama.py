@@ -134,10 +134,20 @@ class OllamaClient(GenAIClient):
 
     def list_models(self) -> list[str]:
         """Return available model names from the Ollama server."""
-        if self.provider is None:
-            return []
+        client = self.provider
+        if client is None:
+            # Provider init may have failed due to invalid model, but we can
+            # still list available models with a fresh client.
+            if not self.genai_config.base_url:
+                return []
+            try:
+                client = ApiClient(
+                    host=self.genai_config.base_url, timeout=self.timeout
+                )
+            except Exception:
+                return []
         try:
-            response = self.provider.list()
+            response = client.list()
             return sorted(
                 m.get("name", m.get("model", "")) for m in response.get("models", [])
             )

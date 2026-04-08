@@ -1326,6 +1326,10 @@
       "keyPlaceholder": "New key",
       "remove": "Remove"
     },
+    "knownPlates": {
+      "namePlaceholder": "e.g., Wife's Car",
+      "platePlaceholder": "Plate number or regex"
+    },
     "timezone": {
       "defaultOption": "Use browser timezone"
     },

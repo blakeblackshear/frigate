@@ -62,7 +62,10 @@
         "zones": "Zones",
         "ratio": "Ratio",
         "area": "Area",
-        "score": "Score"
+        "score": "Score",
+        "computedScore": "Computed Score",
+        "topScore": "Top Score",
+        "toggleAdvancedScores": "Toggle advanced scores"
       }
     },
     "annotationSettings": {

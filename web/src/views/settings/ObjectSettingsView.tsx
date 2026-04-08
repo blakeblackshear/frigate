@@ -370,7 +370,7 @@ type ObjectListProps = {
 };
 
 function ObjectList({ cameraConfig, objects }: ObjectListProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation(["views/settings", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const colormap = useMemo(() => {
@@ -440,17 +440,21 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                       {obj.area ? (
                         <div className="text-end">
                           <div className="text-xs">
-                            px: {obj.area.toString()}
+                            {t("information.pixels", {
+                              ns: "common",
+                              area: obj.area,
+                            })}
                           </div>
                           <div className="text-xs">
-                            %:{" "}
                             {(
-                              obj.area /
-                              (cameraConfig.detect.width *
-                                cameraConfig.detect.height)
+                              (obj.area /
+                                (cameraConfig.detect.width *
+                                  cameraConfig.detect.height)) *
+                              100
                             )
-                              .toFixed(4)
+                              .toFixed(2)
                               .toString()}
+                            %
                           </div>
                         </div>
                       ) : (

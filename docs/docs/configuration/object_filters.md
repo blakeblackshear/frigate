@@ -24,6 +24,12 @@ For object filters, any single detection below `min_score` will be ignored as a 
 
 In frame 2, the score is below the `min_score` value, so Frigate ignores it and it becomes a 0.0. The computed score is the median of the score history (padding to at least 3 values), and only when that computed score crosses the `threshold` is the object marked as a true positive. That happens in frame 4 in the example.
 
+The **top score** is the highest computed score the tracked object has ever reached during its lifetime. Because the computed score rises and falls as new frames come in, the top score can be thought of as the peak confidence Frigate had in the object. In Frigate's UI (such as the Tracking Details pane in Explore), you may see all three values:
+
+- **Score** — the raw detector score for that single frame.
+- **Computed Score** — the median of the most recent score history at that moment. This is the value compared against `threshold`.
+- **Top Score** — the highest computed score reached so far for the tracked object.
+
 ### Minimum Score
 
 Any detection below `min_score` will be immediately thrown out and never tracked because it is considered a false positive. If `min_score` is too low then false positives may be detected and tracked which can confuse the object tracker and may lead to wasted resources. If `min_score` is too high then lower scoring true positives like objects that are further away or partially occluded may be thrown out which can also confuse the tracker and cause valid tracked objects to be lost or disjointed.

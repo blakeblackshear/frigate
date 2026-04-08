@@ -44,6 +44,22 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
     ],
     "motorcycle": ["license_plate"],
 }
+ATTRIBUTE_LABEL_DISPLAY_MAP = {
+    "amazon": "Amazon",
+    "an_post": "An Post",
+    "canada_post": "Canada Post",
+    "dhl": "DHL",
+    "dpd": "DPD",
+    "fedex": "FedEx",
+    "gls": "GLS",
+    "nzpost": "NZ Post",
+    "postnl": "PostNL",
+    "postnord": "PostNord",
+    "purolator": "Purolator",
+    "royal_mail": "Royal Mail",
+    "ups": "UPS",
+    "usps": "USPS",
+}
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
     "face": 0.5,

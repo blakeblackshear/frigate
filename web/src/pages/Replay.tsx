@@ -41,6 +41,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { Card } from "@/components/ui/card";
 import { ObjectType } from "@/types/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
 import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
@@ -633,7 +634,7 @@ type ObjectListProps = {
 };
 
 function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation(["views/settings", "common"]);
 
   const colormap = useMemo(() => {
     if (!config) {
@@ -660,73 +661,80 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="scrollbar-container relative flex w-full flex-col overflow-y-auto">
       {objects.map((obj: ObjectType) => {
         return (
-          <div
-            key={obj.id}
-            className="flex flex-col rounded-lg bg-secondary/30 p-2"
-          >
+          <Card className="mb-1 p-2 text-sm" key={obj.id}>
             <div className="flex flex-row items-center gap-3 pb-1">
-              <div
-                className="rounded-lg p-2"
-                style={{
-                  backgroundColor: obj.stationary
-                    ? "rgb(110,110,110)"
-                    : getColorForObjectName(obj.label),
-                }}
-              >
-                {getIconForLabel(obj.label, "object", "size-4 text-white")}
+              <div className="flex flex-1 flex-row items-center justify-start p-3 pl-1">
+                <div
+                  className="rounded-lg p-2"
+                  style={{
+                    backgroundColor: obj.stationary
+                      ? "rgb(110,110,110)"
+                      : getColorForObjectName(obj.label),
+                  }}
+                >
+                  {getIconForLabel(obj.label, "object", "size-5 text-white")}
+                </div>
+                <div className="ml-3 text-lg">
+                  {getTranslatedLabel(obj.label)}
+                </div>
               </div>
-              <div className="text-sm font-medium">
-                {getTranslatedLabel(obj.label)}
+              <div className="flex w-8/12 flex-row items-center justify-end">
+                <div className="text-md mr-2 w-1/3">
+                  <div className="flex flex-col items-end justify-end">
+                    <p className="mb-1.5 text-sm text-primary-variant">
+                      {t("debug.objectShapeFilterDrawing.score", {
+                        ns: "views/settings",
+                      })}
+                    </p>
+                    {obj.score ? (obj.score * 100).toFixed(1).toString() : "-"}%
+                  </div>
+                </div>
+                <div className="text-md mr-2 w-1/3">
+                  <div className="flex flex-col items-end justify-end">
+                    <p className="mb-1.5 text-sm text-primary-variant">
+                      {t("debug.objectShapeFilterDrawing.ratio", {
+                        ns: "views/settings",
+                      })}
+                    </p>
+                    {obj.ratio ? obj.ratio.toFixed(2).toString() : "-"}
+                  </div>
+                </div>
+                <div className="text-md mr-2 w-1/3">
+                  <div className="flex flex-col items-end justify-end">
+                    <p className="mb-1.5 text-sm text-primary-variant">
+                      {t("debug.objectShapeFilterDrawing.area", {
+                        ns: "views/settings",
+                      })}
+                    </p>
+                    {obj.area && cameraConfig ? (
+                      <div className="text-end">
+                        <div className="text-xs">
+                          {t("information.pixels", {
+                            ns: "common",
+                            area: obj.area,
+                          })}
+                        </div>
+                        <div className="text-xs">
+                          {(
+                            (obj.area /
+                              (cameraConfig.detect.width *
+                                cameraConfig.detect.height)) *
+                            100
+                          ).toFixed(2)}
+                          %
+                        </div>
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col gap-1 pl-1 text-xs text-primary-variant">
-              <div className="flex items-center justify-between">
-                <span>
-                  {t("debug.objectShapeFilterDrawing.score", {
-                    ns: "views/settings",
-                  })}
-                  :
-                </span>
-                <span className="text-primary">
-                  {obj.score ? (obj.score * 100).toFixed(1) : "-"}%
-                </span>
-              </div>
-              {obj.ratio && (
-                <div className="flex items-center justify-between">
-                  <span>
-                    {t("debug.objectShapeFilterDrawing.ratio", {
-                      ns: "views/settings",
-                    })}
-                    :
-                  </span>
-                  <span className="text-primary">{obj.ratio.toFixed(2)}</span>
-                </div>
-              )}
-              {obj.area && cameraConfig && (
-                <div className="flex items-center justify-between">
-                  <span>
-                    {t("debug.objectShapeFilterDrawing.area", {
-                      ns: "views/settings",
-                    })}
-                    :
-                  </span>
-                  <span className="text-primary">
-                    {obj.area} px (
-                    {(
-                      (obj.area /
-                        (cameraConfig.detect.width *
-                          cameraConfig.detect.height)) *
-                      100
-                    ).toFixed(2)}
-                    %)
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+          </Card>
         );
       })}
     </div>

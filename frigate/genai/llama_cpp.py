@@ -238,10 +238,15 @@ class LlamaCppClient(GenAIClient):
 
     def list_models(self) -> list[str]:
         """Return available model IDs from the llama.cpp server."""
-        if self.provider is None:
+        base_url = self.provider or (
+            self.genai_config.base_url.rstrip("/")
+            if self.genai_config.base_url
+            else None
+        )
+        if base_url is None:
             return []
         try:
-            response = requests.get(f"{self.provider}/v1/models", timeout=10)
+            response = requests.get(f"{base_url}/v1/models", timeout=10)
             response.raise_for_status()
             models = []
             for m in response.json().get("data", []):
