@@ -12,6 +12,10 @@
   "result": "Result",
   "arguments": "Arguments:",
   "response": "Response:",
+  "anchor": "Reference",
+  "similarity_score": "Similarity",
+  "no_similar_objects_found": "No similar objects found.",
+  "semantic_search_required": "Semantic search must be enabled to find similar objects.",
   "send": "Send",
   "suggested_requests": "Try asking:",
   "starting_requests": {
