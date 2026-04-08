@@ -12,6 +12,7 @@ import { ChatStartingState } from "@/components/chat/ChatStartingState";
 import type { ChatMessage } from "@/types/chat";
 import {
   getEventIdsFromSearchObjectsToolCalls,
+  getFindSimilarObjectsFromToolCalls,
   streamChatCompletion,
 } from "@/utils/chatUtil";
 
@@ -161,6 +162,17 @@ export default function ChatPage() {
                     {msg.role === "assistant" &&
                       isComplete &&
                       (() => {
+                        const similar = getFindSimilarObjectsFromToolCalls(
+                          msg.toolCalls,
+                        );
+                        if (similar) {
+                          return (
+                            <ChatEventThumbnailsRow
+                              events={similar.results}
+                              anchor={similar.anchor}
+                            />
+                          );
+                        }
                         const events = getEventIdsFromSearchObjectsToolCalls(
                           msg.toolCalls,
                         );
