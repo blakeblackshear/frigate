@@ -150,47 +150,47 @@ export function ShareTimestampContent({
           setSelectedOption(value as "current" | "custom")
         }
       >
-        <div className="space-y-2 rounded-lg border bg-secondary/40 p-3">
-          <div className="flex items-start gap-2">
-            <RadioGroupItem id="share-current" value="current" />
-            <Label className="cursor-pointer space-y-1" htmlFor="share-current">
-              <div className="text-sm font-medium">
-                {t("recording.shareTimestamp.current", {
-                  ns: "components/dialog",
-                })}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {currentTimestampLabel}
-              </div>
-            </Label>
-          </div>
+        <div className="flex items-start gap-2">
+          <RadioGroupItem
+            className={
+              selectedOption == "current"
+                ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+            }
+            id="share-current"
+            value="current"
+          />
+          <Label className="cursor-pointer text-sm" htmlFor="share-current">
+            {currentTimestampLabel}
+          </Label>
         </div>
 
-        <div className="space-y-3 rounded-lg border bg-secondary/40 p-3">
-          <div className="flex items-start gap-2">
-            <RadioGroupItem id="share-custom" value="custom" />
-            <Label className="cursor-pointer space-y-1" htmlFor="share-custom">
-              <div className="text-sm font-medium">
-                {t("recording.shareTimestamp.custom", {
-                  ns: "components/dialog",
-                })}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {t("recording.shareTimestamp.customDescription", {
-                  ns: "components/dialog",
-                })}
-              </div>
-            </Label>
-          </div>
-          {selectedOption === "custom" && (
-            <CustomTimestampSelector
-              timestamp={customTimestamp}
-              setTimestamp={setCustomTimestamp}
-              label={t("recording.shareTimestamp.custom", {
+        <div className="flex items-start gap-2">
+          <RadioGroupItem
+            className={
+              selectedOption == "custom"
+                ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+            }
+            id="share-custom"
+            value="custom"
+          />
+          <div className="space-y-3">
+            <Label className="cursor-pointer text-sm" htmlFor="share-custom">
+              {t("recording.shareTimestamp.custom", {
                 ns: "components/dialog",
               })}
-            />
-          )}
+            </Label>
+            {selectedOption === "custom" && (
+              <CustomTimestampSelector
+                timestamp={customTimestamp}
+                setTimestamp={setCustomTimestamp}
+                label={t("recording.shareTimestamp.custom", {
+                  ns: "components/dialog",
+                })}
+              />
+            )}
+          </div>
         </div>
       </RadioGroup>
 
