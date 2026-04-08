@@ -177,9 +177,7 @@ def _build_similar_candidates_query(
         clauses.append(Event.sub_label.in_(sub_labels))
     if zones:
         # Mirror the pattern used by frigate/api/event.py for JSON-array zone match.
-        zone_clauses = [
-            Event.zones.cast("text") % f'*"{zone}"*' for zone in zones
-        ]
+        zone_clauses = [Event.zones.cast("text") % f'*"{zone}"*' for zone in zones]
         clauses.append(reduce(operator.or_, zone_clauses))
 
     query = (
@@ -809,6 +807,13 @@ async def execute_tool(
     if tool_name == "search_objects":
         return await _execute_search_objects(arguments, allowed_cameras)
 
+    if tool_name == "find_similar_objects":
+        result = await _execute_find_similar_objects(
+            request, arguments, allowed_cameras
+        )
+        status_code = 200 if "error" not in result else 400
+        return JSONResponse(content=result, status_code=status_code)
+
     if tool_name == "set_camera_state":
         result = await _execute_set_camera_state(request, arguments)
         return JSONResponse(
@@ -992,6 +997,8 @@ async def _execute_tool_internal(
         except (json.JSONDecodeError, AttributeError) as e:
             logger.warning(f"Failed to extract tool result: {e}")
             return {"error": "Failed to parse tool result"}
+    elif tool_name == "find_similar_objects":
+        return await _execute_find_similar_objects(request, arguments, allowed_cameras)
     elif tool_name == "set_camera_state":
         return await _execute_set_camera_state(request, arguments)
     elif tool_name == "get_live_context":
@@ -1014,8 +1021,9 @@ async def _execute_tool_internal(
         return _execute_get_recap(arguments, allowed_cameras)
     else:
         logger.error(
-            "Tool call failed: unknown tool %r. Expected one of: search_objects, get_live_context, "
-            "start_camera_watch, stop_camera_watch, get_profile_status, get_recap. Arguments received: %s",
+            "Tool call failed: unknown tool %r. Expected one of: search_objects, find_similar_objects, "
+            "get_live_context, start_camera_watch, stop_camera_watch, get_profile_status, get_recap. "
+            "Arguments received: %s",
             tool_name,
             json.dumps(arguments),
         )
