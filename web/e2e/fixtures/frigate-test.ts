@@ -91,13 +91,24 @@ type FrigateFixtures = {
 export const test = base.extend<FrigateFixtures>({
   expectedErrors: [[], { option: true }],
 
-  errorCollector: async ({ page, expectedErrors }, use) => {
+  errorCollector: async ({ page, expectedErrors }, use, testInfo) => {
     const collector = installErrorCollector(page, [
       ...GLOBAL_ALLOWLIST,
       ...expectedErrors,
     ]);
     await use(collector);
-    collector.assertClean();
+    if (process.env.E2E_STRICT_ERRORS === "1") {
+      collector.assertClean();
+    } else if (collector.errors.length > 0) {
+      // Soft mode: attach errors to the test report so they're visible
+      // without failing the run. Used during the rollout phase.
+      await testInfo.attach("collected-errors.txt", {
+        body: collector.errors
+          .map((e) => `[${e.kind}] ${e.message}${e.url ? ` (${e.url})` : ""}`)
+          .join("\n"),
+        contentType: "text/plain",
+      });
+    }
   },
 
   frigateApp: async ({ page, errorCollector }, use, testInfo) => {
