@@ -192,6 +192,23 @@ export function getEventIdsFromSearchObjectsToolCalls(
   return results;
 }
 
+const ATTACHED_EVENT_MARKER = /^\[attached_event:([A-Za-z0-9._-]+)\]\s*\n?/;
+
+export function parseAttachedEvent(content: string): {
+  eventId: string | null;
+  body: string;
+} {
+  if (!content) return { eventId: null, body: content };
+  const match = content.match(ATTACHED_EVENT_MARKER);
+  if (!match) return { eventId: null, body: content };
+  const body = content.slice(match[0].length).replace(/^\n+/, "");
+  return { eventId: match[1], body };
+}
+
+export function prependAttachment(body: string, eventId: string): string {
+  return `[attached_event:${eventId}]\n\n${body}`;
+}
+
 export type FindSimilarObjectsResult = {
   anchor: { id: string } | null;
   results: { id: string; score?: number }[];
