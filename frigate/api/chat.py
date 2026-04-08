@@ -254,6 +254,76 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
         {
             "type": "function",
             "function": {
+                "name": "find_similar_objects",
+                "description": (
+                    "Find tracked objects that are visually and semantically similar "
+                    "to a specific past event. Use this when the user references a "
+                    "particular object they have seen and wants to find other "
+                    "sightings of the same or similar one ('that green car', 'the "
+                    "person in the red jacket', 'the package that was delivered'). "
+                    "Prefer this over search_objects whenever the user's intent is "
+                    "'find more like this specific one.' Use search_objects first "
+                    "only if you need to locate the anchor event. Requires semantic "
+                    "search to be enabled."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "event_id": {
+                            "type": "string",
+                            "description": "The id of the anchor event to find similar objects to.",
+                        },
+                        "after": {
+                            "type": "string",
+                            "description": "Start time in ISO 8601 format (e.g., '2024-01-01T00:00:00Z').",
+                        },
+                        "before": {
+                            "type": "string",
+                            "description": "End time in ISO 8601 format (e.g., '2024-01-01T23:59:59Z').",
+                        },
+                        "cameras": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional list of cameras to restrict to. Defaults to all.",
+                        },
+                        "labels": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional list of labels to restrict to. Defaults to the anchor event's label.",
+                        },
+                        "sub_labels": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional list of sub_labels (names) to restrict to.",
+                        },
+                        "zones": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional list of zones. An event matches if any of its zones overlap.",
+                        },
+                        "similarity_mode": {
+                            "type": "string",
+                            "enum": ["visual", "semantic", "fused"],
+                            "description": "Which similarity signal(s) to use. 'fused' (default) combines visual and semantic.",
+                            "default": "fused",
+                        },
+                        "min_score": {
+                            "type": "number",
+                            "description": "Drop matches with a similarity score below this threshold (0.0-1.0).",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of matches to return (default: 10).",
+                            "default": 10,
+                        },
+                    },
+                    "required": ["event_id"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
                 "name": "set_camera_state",
                 "description": (
                     "Change a camera's feature state (e.g., turn detection on/off, enable/disable recordings). "

@@ -202,5 +202,38 @@ class TestBuildSimilarCandidatesQuery(unittest.TestCase):
         self.assertNotIn("e0000", ids)
 
 
+from frigate.api.chat import get_tool_definitions
+
+
+class TestToolDefinition(unittest.TestCase):
+    def test_find_similar_objects_is_registered(self):
+        tools = get_tool_definitions()
+        names = [t["function"]["name"] for t in tools]
+        self.assertIn("find_similar_objects", names)
+
+    def test_find_similar_objects_schema(self):
+        tools = get_tool_definitions()
+        tool = next(
+            t for t in tools if t["function"]["name"] == "find_similar_objects"
+        )
+        params = tool["function"]["parameters"]["properties"]
+        self.assertIn("event_id", params)
+        self.assertIn("after", params)
+        self.assertIn("before", params)
+        self.assertIn("cameras", params)
+        self.assertIn("labels", params)
+        self.assertIn("sub_labels", params)
+        self.assertIn("zones", params)
+        self.assertIn("similarity_mode", params)
+        self.assertIn("min_score", params)
+        self.assertIn("limit", params)
+        self.assertEqual(
+            tool["function"]["parameters"]["required"], ["event_id"]
+        )
+        self.assertEqual(
+            params["similarity_mode"]["enum"], ["visual", "semantic", "fused"]
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
