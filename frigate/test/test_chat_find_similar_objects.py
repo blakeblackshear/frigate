@@ -10,10 +10,8 @@ from unittest.mock import MagicMock
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.api.chat import (
-    CANDIDATE_CAP,
     DESCRIPTION_WEIGHT,
     VISUAL_WEIGHT,
-    _build_similar_candidates_query,
     _distance_to_score,
     _execute_find_similar_objects,
     _fuse_scores,
@@ -66,145 +64,6 @@ class TestFuseScores(unittest.TestCase):
 
     def test_both_missing_returns_none(self):
         self.assertIsNone(_fuse_scores(visual_score=None, description_score=None))
-
-
-class TestBuildSimilarCandidatesQuery(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
-        self.tmp.close()
-        self.db = SqliteExtDatabase(self.tmp.name)
-        Event.bind(self.db, bind_refs=False, bind_backrefs=False)
-        self.db.connect()
-        self.db.create_tables([Event])
-
-        # Minimal helper for creating events.
-        def make_event(
-            event_id,
-            camera="driveway",
-            label="car",
-            sub_label=None,
-            start=1_700_000_000,
-            zones=None,
-        ):
-            Event.create(
-                id=event_id,
-                label=label,
-                sub_label=sub_label,
-                camera=camera,
-                start_time=start,
-                end_time=start + 10,
-                top_score=0.9,
-                score=0.9,
-                false_positive=False,
-                zones=zones or [],
-                thumbnail="",
-                has_clip=True,
-                has_snapshot=True,
-                region=[0, 0, 1, 1],
-                box=[0, 0, 1, 1],
-                area=1,
-                retain_indefinitely=False,
-                ratio=1.0,
-                plus_id="",
-                model_hash="",
-                detector_type="",
-                model_type="",
-                data={},
-            )
-
-        self.make_event = make_event
-
-    def tearDown(self):
-        self.db.close()
-        os.unlink(self.tmp.name)
-
-    def test_excludes_anchor(self):
-        self.make_event("anchor")
-        self.make_event("other")
-        ids = _build_similar_candidates_query(
-            anchor_id="anchor",
-            after=None,
-            before=None,
-            cameras=None,
-            labels=["car"],
-            sub_labels=None,
-            zones=None,
-        )
-        self.assertEqual(ids, ["other"])
-
-    def test_time_range_filters(self):
-        self.make_event("in_range", start=1_700_000_500)
-        self.make_event("too_early", start=1_699_999_000)
-        self.make_event("too_late", start=1_700_001_000)
-        ids = _build_similar_candidates_query(
-            anchor_id="nonexistent",
-            after=1_700_000_000,
-            before=1_700_000_999,
-            cameras=None,
-            labels=["car"],
-            sub_labels=None,
-            zones=None,
-        )
-        self.assertEqual(ids, ["in_range"])
-
-    def test_camera_filter(self):
-        self.make_event("driveway_a", camera="driveway")
-        self.make_event("porch_a", camera="porch")
-        ids = _build_similar_candidates_query(
-            anchor_id="nonexistent",
-            after=None,
-            before=None,
-            cameras=["driveway"],
-            labels=["car"],
-            sub_labels=None,
-            zones=None,
-        )
-        self.assertEqual(ids, ["driveway_a"])
-
-    def test_label_filter(self):
-        self.make_event("car_a", label="car")
-        self.make_event("person_a", label="person")
-        ids = _build_similar_candidates_query(
-            anchor_id="nonexistent",
-            after=None,
-            before=None,
-            cameras=None,
-            labels=["car"],
-            sub_labels=None,
-            zones=None,
-        )
-        self.assertEqual(ids, ["car_a"])
-
-    def test_zone_any_match(self):
-        self.make_event("in_zone", zones=["driveway_zone"])
-        self.make_event("other_zone", zones=["porch_zone"])
-        ids = _build_similar_candidates_query(
-            anchor_id="nonexistent",
-            after=None,
-            before=None,
-            cameras=None,
-            labels=["car"],
-            sub_labels=None,
-            zones=["driveway_zone"],
-        )
-        self.assertEqual(ids, ["in_zone"])
-
-    def test_respects_candidate_cap(self):
-        for i in range(CANDIDATE_CAP + 20):
-            self.make_event(f"e{i:04d}", start=1_700_000_000 + i)
-        ids = _build_similar_candidates_query(
-            anchor_id="nonexistent",
-            after=None,
-            before=None,
-            cameras=None,
-            labels=["car"],
-            sub_labels=None,
-            zones=None,
-        )
-        self.assertEqual(len(ids), CANDIDATE_CAP)
-        # Most recent first, so we should keep the latest CANDIDATE_CAP events.
-        self.assertIn(f"e{CANDIDATE_CAP + 19:04d}", ids)
-        self.assertNotIn("e0000", ids)
 
 
 class TestToolDefinition(unittest.TestCase):
