@@ -191,3 +191,55 @@ export function getEventIdsFromSearchObjectsToolCalls(
   }
   return results;
 }
+
+export type FindSimilarObjectsResult = {
+  anchor: { id: string } | null;
+  results: { id: string; score?: number }[];
+};
+
+/**
+ * Parse find_similar_objects tool call response(s) into anchor + ranked results.
+ * Returns null if no find_similar_objects call is present so the caller can
+ * decide whether to render.
+ */
+export function getFindSimilarObjectsFromToolCalls(
+  toolCalls: ToolCall[] | undefined,
+): FindSimilarObjectsResult | null {
+  if (!toolCalls?.length) return null;
+  for (const tc of toolCalls) {
+    if (tc.name !== "find_similar_objects" || !tc.response?.trim()) continue;
+    try {
+      const parsed = JSON.parse(tc.response) as {
+        anchor?: { id?: unknown };
+        results?: unknown;
+      };
+      const anchorId =
+        parsed.anchor && typeof parsed.anchor.id === "string"
+          ? parsed.anchor.id
+          : null;
+      const anchor = anchorId ? { id: anchorId } : null;
+      const results: { id: string; score?: number }[] = [];
+      if (Array.isArray(parsed.results)) {
+        for (const item of parsed.results) {
+          if (
+            item &&
+            typeof item === "object" &&
+            "id" in item &&
+            typeof (item as { id: unknown }).id === "string"
+          ) {
+            const entry: { id: string; score?: number } = {
+              id: (item as { id: string }).id,
+            };
+            const rawScore = (item as { score?: unknown }).score;
+            if (typeof rawScore === "number") entry.score = rawScore;
+            results.push(entry);
+          }
+        }
+      }
+      return { anchor, results };
+    } catch {
+      // ignore parse errors
+    }
+  }
+  return null;
+}
