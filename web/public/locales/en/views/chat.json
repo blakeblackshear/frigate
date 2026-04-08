@@ -13,6 +13,8 @@
   "arguments": "Arguments:",
   "response": "Response:",
   "attachment_chip_remove": "Remove attachment",
+  "open_in_explore": "Open in Explore",
+  "attach_event_aria": "Attach event {{eventId}}",
   "attachment_picker_paste_label": "Or paste event ID",
   "attachment_picker_attach": "Attach",
   "attachment_picker_placeholder": "Attach an event",
