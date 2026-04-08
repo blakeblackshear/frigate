@@ -597,6 +597,193 @@ async def _execute_search_objects(
         )
 
 
+def _parse_iso_to_timestamp(value: Optional[str]) -> Optional[float]:
+    """Parse an ISO-8601 string as server-local time -> unix timestamp.
+
+    Mirrors the parsing _execute_search_objects uses so both tools accept the
+    same format from the LLM.
+    """
+    if value is None:
+        return None
+    try:
+        s = value.replace("Z", "").strip()[:19]
+        dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+        return time.mktime(dt.timetuple())
+    except (ValueError, AttributeError, TypeError):
+        logger.warning("Invalid timestamp format: %s", value)
+        return None
+
+
+def _hydrate_event(event: Event, score: Optional[float] = None) -> Dict[str, Any]:
+    """Convert an Event row into the dict shape returned by find_similar_objects."""
+    data: Dict[str, Any] = {
+        "id": event.id,
+        "camera": event.camera,
+        "label": event.label,
+        "sub_label": event.sub_label,
+        "start_time": event.start_time,
+        "end_time": event.end_time,
+        "zones": event.zones,
+    }
+    if score is not None:
+        data["score"] = score
+    return data
+
+
+async def _execute_find_similar_objects(
+    request: Request,
+    arguments: Dict[str, Any],
+    allowed_cameras: List[str],
+) -> Dict[str, Any]:
+    """Execute the find_similar_objects tool.
+
+    Returns a plain dict (not JSONResponse) so the chat loop can embed it
+    directly in tool-result messages.
+    """
+    # 1. Semantic search enabled?
+    config = request.app.frigate_config
+    if not getattr(config.semantic_search, "enabled", False):
+        return {
+            "error": "semantic_search_disabled",
+            "message": (
+                "Semantic search must be enabled to find similar objects. "
+                "Enable it in the Frigate config under semantic_search."
+            ),
+        }
+
+    context = request.app.embeddings
+    if context is None:
+        return {
+            "error": "semantic_search_disabled",
+            "message": "Embeddings context is not available.",
+        }
+
+    # 2. Anchor lookup.
+    event_id = arguments.get("event_id")
+    if not event_id:
+        return {"error": "missing_event_id", "message": "event_id is required."}
+
+    try:
+        anchor = Event.get(Event.id == event_id)
+    except Event.DoesNotExist:
+        return {
+            "error": "anchor_not_found",
+            "message": f"Could not find event {event_id}.",
+        }
+
+    # 3. Parse params.
+    after = _parse_iso_to_timestamp(arguments.get("after"))
+    before = _parse_iso_to_timestamp(arguments.get("before"))
+
+    cameras = arguments.get("cameras")
+    if cameras:
+        # Respect RBAC: intersect with the user's allowed cameras.
+        cameras = [c for c in cameras if c in allowed_cameras]
+    else:
+        cameras = list(allowed_cameras) if allowed_cameras else None
+
+    labels = arguments.get("labels") or [anchor.label]
+    sub_labels = arguments.get("sub_labels")
+    zones = arguments.get("zones")
+
+    similarity_mode = arguments.get("similarity_mode", "fused")
+    if similarity_mode not in ("visual", "semantic", "fused"):
+        similarity_mode = "fused"
+
+    min_score = arguments.get("min_score")
+    limit = int(arguments.get("limit", 10))
+    limit = max(1, min(limit, 50))
+
+    # 4. Pre-filter candidates.
+    candidate_ids = _build_similar_candidates_query(
+        anchor_id=anchor.id,
+        after=after,
+        before=before,
+        cameras=cameras,
+        labels=labels,
+        sub_labels=sub_labels,
+        zones=zones,
+    )
+    candidate_truncated = len(candidate_ids) == CANDIDATE_CAP
+
+    if not candidate_ids:
+        return {
+            "anchor": _hydrate_event(anchor),
+            "results": [],
+            "similarity_mode": similarity_mode,
+            "candidate_truncated": False,
+        }
+
+    # 5. Run similarity searches.
+    visual_distances: Dict[str, float] = {}
+    description_distances: Dict[str, float] = {}
+
+    try:
+        if similarity_mode in ("visual", "fused"):
+            rows = context.search_thumbnail(anchor, event_ids=candidate_ids)
+            visual_distances = {row[0]: row[1] for row in rows}
+
+        if similarity_mode in ("semantic", "fused"):
+            query_text = (
+                (anchor.data or {}).get("description")
+                or anchor.sub_label
+                or anchor.label
+            )
+            rows = context.search_description(query_text, event_ids=candidate_ids)
+            description_distances = {row[0]: row[1] for row in rows}
+    except Exception:
+        logger.exception("Similarity search failed")
+        return {
+            "error": "similarity_search_failed",
+            "message": "Failed to run similarity search.",
+        }
+
+    # 6. Fuse and rank.
+    scored: List[tuple[str, float]] = []
+    matched_ids = set(visual_distances) | set(description_distances)
+    for eid in matched_ids:
+        v_score = (
+            _distance_to_score(visual_distances[eid], context.thumb_stats)
+            if eid in visual_distances
+            else None
+        )
+        d_score = (
+            _distance_to_score(description_distances[eid], context.desc_stats)
+            if eid in description_distances
+            else None
+        )
+        fused = _fuse_scores(v_score, d_score)
+        if fused is None:
+            continue
+        if min_score is not None and fused < min_score:
+            continue
+        scored.append((eid, fused))
+
+    scored.sort(key=lambda pair: pair[1], reverse=True)
+    scored = scored[:limit]
+
+    # 7. Hydrate.
+    if scored:
+        event_rows = {
+            e.id: e
+            for e in Event.select().where(Event.id.in_([eid for eid, _ in scored]))
+        }
+        results = [
+            _hydrate_event(event_rows[eid], score=score)
+            for eid, score in scored
+            if eid in event_rows
+        ]
+    else:
+        results = []
+
+    return {
+        "anchor": _hydrate_event(anchor),
+        "results": results,
+        "similarity_mode": similarity_mode,
+        "candidate_truncated": candidate_truncated,
+    }
+
+
 @router.post(
     "/chat/execute",
     dependencies=[Depends(allow_any_authenticated())],
