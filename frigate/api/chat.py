@@ -1438,7 +1438,9 @@ Do not start your response with phrases like "I will check...", "Let me see...",
 Always present times to the user in the server's local timezone. When tool results include start_time_local and end_time_local, use those exact strings when listing or describing detection times—do not convert or invent timestamps. Do not use UTC or ISO format with Z for the user-facing answer unless the tool result only provides Unix timestamps without local time fields.
 When users ask about "today", "yesterday", "this week", etc., use the current date above as reference.
 When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
-Always be accurate with time calculations based on the current date provided.{cameras_section}"""
+Always be accurate with time calculations based on the current date provided.
+
+When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects.{cameras_section}"""
 
     conversation.append(
         {
