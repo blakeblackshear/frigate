@@ -3,6 +3,7 @@
 import base64
 import json
 import logging
+import math
 import time
 from datetime import datetime
 from typing import Any, Dict, Generator, List, Optional
@@ -26,6 +27,7 @@ from frigate.api.defs.response.chat_response import (
 )
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
+from frigate.embeddings.util import ZScoreNormalization
 from frigate.genai.utils import build_assistant_message_for_conversation
 from frigate.jobs.vlm_watch import (
     get_vlm_watch_job,
@@ -96,6 +98,52 @@ class VLMMonitorRequest(BaseModel):
     max_duration_minutes: int = 60
     labels: List[str] = []
     zones: List[str] = []
+
+
+# Similarity fusion weights for find_similar_objects.
+# Visual dominates because the feature's primary use case is "same specific object."
+# If these change, update the test in test_chat_find_similar_objects.py.
+VISUAL_WEIGHT = 0.65
+DESCRIPTION_WEIGHT = 0.35
+
+# Must match or stay <= the k used by EmbeddingsContext vec searches
+# (see frigate/embeddings/__init__.py search_thumbnail/search_description).
+# Pre-filtering a larger pool is wasted work — vec will only rank top-k anyway.
+CANDIDATE_CAP = 100
+
+
+def _distance_to_score(distance: float, stats: ZScoreNormalization) -> float:
+    """Convert a cosine distance to a [0, 1] similarity score.
+
+    Uses the existing ZScoreNormalization stats maintained by EmbeddingsContext
+    to normalize across deployments, then a bounded sigmoid. Lower distance ->
+    higher score. If stats are uninitialized (stddev == 0), returns a neutral
+    0.5 so the fallback ordering by raw distance still dominates.
+    """
+    if stats.stddev == 0:
+        return 0.5
+    z = (distance - stats.mean) / stats.stddev
+    # Sigmoid on -z so that small distance (good) -> high score.
+    return 1.0 / (1.0 + math.exp(z))
+
+
+def _fuse_scores(
+    visual_score: Optional[float],
+    description_score: Optional[float],
+) -> Optional[float]:
+    """Weighted fusion of visual and description similarity scores.
+
+    If one side is missing (e.g., no description embedding for this event),
+    the other side's score is returned alone with no penalty. If both are
+    missing, returns None and the caller should drop the event.
+    """
+    if visual_score is None and description_score is None:
+        return None
+    if visual_score is None:
+        return description_score
+    if description_score is None:
+        return visual_score
+    return VISUAL_WEIGHT * visual_score + DESCRIPTION_WEIGHT * description_score
 
 
 def get_tool_definitions() -> List[Dict[str, Any]]:
