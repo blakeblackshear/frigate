@@ -22,10 +22,7 @@ import {
   type ApiMockOverrides,
 } from "../helpers/api-mocker";
 import { WsMocker } from "../helpers/ws-mocker";
-import {
-  installErrorCollector,
-  type ErrorCollector,
-} from "./error-collector";
+import { installErrorCollector, type ErrorCollector } from "./error-collector";
 import { GLOBAL_ALLOWLIST } from "./error-allowlist";
 
 export class FrigateApp {

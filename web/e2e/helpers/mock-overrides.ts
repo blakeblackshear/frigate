@@ -21,9 +21,7 @@ export async function mockEmpty(
   page: Page,
   urlPattern: string | RegExp,
 ): Promise<void> {
-  await page.route(urlPattern, (route) =>
-    route.fulfill({ json: [] }),
-  );
+  await page.route(urlPattern, (route) => route.fulfill({ json: [] }));
 }
 
 /** Return an HTTP error for the matched endpoint. Default status 500. */

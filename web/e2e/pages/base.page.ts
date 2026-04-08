@@ -123,7 +123,7 @@ export class BasePage {
     if (this.isDesktop) {
       return this.pageRoot;
     }
-    return this.page.locator('[vaul-drawer]').first();
+    return this.page.locator("[vaul-drawer]").first();
   }
 
   /** Close any currently-open mobile overlay (drawer, sheet, dialog). */

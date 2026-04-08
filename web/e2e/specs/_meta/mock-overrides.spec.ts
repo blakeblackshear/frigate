@@ -4,11 +4,7 @@
  */
 
 import { test, expect } from "../../fixtures/frigate-test";
-import {
-  mockEmpty,
-  mockError,
-  mockDelay,
-} from "../../helpers/mock-overrides";
+import { mockEmpty, mockError, mockDelay } from "../../helpers/mock-overrides";
 
 test.describe("Mock Overrides — empty @meta", () => {
   test("mockEmpty returns []", async ({ page, frigateApp }) => {

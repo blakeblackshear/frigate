@@ -32,7 +32,10 @@ function isAllowlisted(message: string, allowlist: RegExp[]): boolean {
 
 function firstStackFrame(stack: string | undefined): string | undefined {
   if (!stack) return undefined;
-  const lines = stack.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = stack
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   // Skip the error message line (line 0); return the first "at ..." frame
   return lines.find((l) => l.startsWith("at "));
 }
