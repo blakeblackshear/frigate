@@ -30,13 +30,13 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
 from frigate.embeddings.util import ZScoreNormalization
-from frigate.models import Event
 from frigate.genai.utils import build_assistant_message_for_conversation
 from frigate.jobs.vlm_watch import (
     get_vlm_watch_job,
     start_vlm_watch_job,
     stop_vlm_watch_job,
 )
+from frigate.models import Event
 
 logger = logging.getLogger(__name__)
 
