@@ -44,8 +44,6 @@ const PHASE_3_PENDING = new Set([
   "replay.spec.ts",
   "review.spec.ts",
   "system.spec.ts",
-  // export.spec.ts is rewritten in Task 13; remove it before Task 13
-  "export.spec.ts",
 ]);
 
 const BANNED_PATTERNS = [
