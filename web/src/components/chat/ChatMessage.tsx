@@ -15,6 +15,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { ChatAttachmentChip } from "@/components/chat/ChatAttachmentChip";
+import { parseAttachedEvent } from "@/utils/chatUtil";
 
 type MessageBubbleProps = {
   role: "user" | "assistant";
@@ -126,6 +128,10 @@ export function MessageBubble({
     );
   }
 
+  const { eventId: attachedEventId, body: displayContent } = isUser
+    ? parseAttachedEvent(content)
+    : { eventId: null, body: content };
+
   return (
     <div
       className={cn(
@@ -140,7 +146,12 @@ export function MessageBubble({
         )}
       >
         {isUser ? (
-          content
+          <div className="flex flex-col gap-2">
+            {attachedEventId && (
+              <ChatAttachmentChip eventId={attachedEventId} mode="bubble" />
+            )}
+            <div className="whitespace-pre-wrap">{displayContent}</div>
+          </div>
         ) : (
           <>
             <ReactMarkdown
