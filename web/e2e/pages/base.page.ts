@@ -79,4 +79,57 @@ export class BasePage {
   async waitForPageLoad() {
     await this.page.waitForSelector("#pageRoot", { timeout: 10_000 });
   }
+
+  /**
+   * Open the mobile-only export pane / sheet that slides up from the
+   * bottom on the export page. No-op on desktop. Returns the pane locator
+   * so the caller can assert against its contents.
+   */
+  async openMobilePane(): Promise<Locator> {
+    if (this.isDesktop) {
+      // Return the desktop equivalent (the main content area itself)
+      return this.pageRoot;
+    }
+    // Look for any element that opens a sheet/dialog on tap.
+    // Specific views override this with their own selector.
+    const pane = this.page.locator('[role="dialog"]').first();
+    return pane;
+  }
+
+  /**
+   * Open a side drawer (e.g. mobile filter drawer). View-specific page
+   * objects should override this with their actual trigger selector.
+   * The default implementation looks for a button labelled "Open menu"
+   * or "Filters" and clicks it, then returns the drawer locator.
+   */
+  async openDrawer(): Promise<Locator> {
+    if (this.isDesktop) {
+      return this.pageRoot;
+    }
+    const trigger = this.page
+      .getByRole("button", { name: /menu|filter/i })
+      .first();
+    if (await trigger.count()) {
+      await trigger.click();
+    }
+    return this.page.locator('[role="dialog"], [data-state="open"]').first();
+  }
+
+  /**
+   * Open a bottom sheet (vaul). View-specific page objects should
+   * override this with their actual trigger selector.
+   */
+  async openBottomSheet(): Promise<Locator> {
+    if (this.isDesktop) {
+      return this.pageRoot;
+    }
+    return this.page.locator('[vaul-drawer]').first();
+  }
+
+  /** Close any currently-open mobile overlay (drawer, sheet, dialog). */
+  async closeMobileOverlay(): Promise<void> {
+    if (this.isDesktop) return;
+    // Press Escape — Radix dialogs and vaul both close on Escape
+    await this.page.keyboard.press("Escape");
+  }
 }
