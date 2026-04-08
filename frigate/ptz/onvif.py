@@ -152,21 +152,12 @@ class OnvifController:
 
         cam = self.camera_configs[cam_name]
         try:
-            user = cam.onvif.user
-            password = cam.onvif.password
-
-            if user is not None and isinstance(user, bytes):
-                user = user.decode("utf-8")
-
-            if password is not None and isinstance(password, bytes):
-                password = password.decode("utf-8")
-
             self.cams[cam_name] = {
                 "onvif": ONVIFCamera(
                     cam.onvif.host,
                     cam.onvif.port,
-                    user,
-                    password,
+                    cam.onvif.user,
+                    cam.onvif.password,
                     wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
                     adjust_time=cam.onvif.ignore_time_mismatch,
                     encrypt=not cam.onvif.tls_insecure,
@@ -459,15 +450,15 @@ class OnvifController:
             presets = []
 
         for preset in presets:
-            # Ensure preset name is a Unicode string and handle UTF-8 characters correctly
             preset_name = getattr(preset, "Name") or f"preset {preset['token']}"
-
-            if isinstance(preset_name, bytes):
-                preset_name = preset_name.decode("utf-8")
-
-            # Convert to lowercase while preserving UTF-8 characters
-            preset_name_lower = preset_name.lower()
-            self.cams[camera_name]["presets"][preset_name_lower] = preset["token"]
+            # Some cameras (e.g. Reolink) return UTF-8 bytes that zeep decodes
+            # as latin-1, producing mojibake. Detect that and repair it by
+            # round-tripping through latin-1 -> utf-8.
+            try:
+                preset_name = preset_name.encode("latin-1").decode("utf-8")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                pass
+            self.cams[camera_name]["presets"][preset_name.lower()] = preset["token"]
 
         # get list of supported features
         supported_features = []
@@ -695,9 +686,6 @@ class OnvifController:
         self.cams[camera_name]["active"] = False
 
     async def _move_to_preset(self, camera_name: str, preset: str) -> None:
-        if isinstance(preset, bytes):
-            preset = preset.decode("utf-8")
-
         preset = preset.lower()
 
         if preset not in self.cams[camera_name]["presets"]:
