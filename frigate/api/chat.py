@@ -4,8 +4,10 @@ import base64
 import json
 import logging
 import math
+import operator
 import time
 from datetime import datetime
+from functools import reduce
 from typing import Any, Dict, Generator, List, Optional
 
 import cv2
@@ -28,6 +30,7 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
 from frigate.embeddings.util import ZScoreNormalization
+from frigate.models import Event
 from frigate.genai.utils import build_assistant_message_for_conversation
 from frigate.jobs.vlm_watch import (
     get_vlm_watch_job,
@@ -144,6 +147,48 @@ def _fuse_scores(
     if description_score is None:
         return visual_score
     return VISUAL_WEIGHT * visual_score + DESCRIPTION_WEIGHT * description_score
+
+
+def _build_similar_candidates_query(
+    anchor_id: str,
+    after: Optional[float],
+    before: Optional[float],
+    cameras: Optional[List[str]],
+    labels: Optional[List[str]],
+    sub_labels: Optional[List[str]],
+    zones: Optional[List[str]],
+) -> List[str]:
+    """Return up to CANDIDATE_CAP event ids eligible as similarity candidates.
+
+    Pre-filters events by the structured fields, excludes the anchor itself,
+    and orders by most recent first so over-cap queries keep recent events.
+    """
+    clauses = [Event.id != anchor_id]
+
+    if after is not None:
+        clauses.append(Event.start_time >= after)
+    if before is not None:
+        clauses.append(Event.start_time <= before)
+    if cameras:
+        clauses.append(Event.camera.in_(cameras))
+    if labels:
+        clauses.append(Event.label.in_(labels))
+    if sub_labels:
+        clauses.append(Event.sub_label.in_(sub_labels))
+    if zones:
+        # Mirror the pattern used by frigate/api/event.py for JSON-array zone match.
+        zone_clauses = [
+            Event.zones.cast("text") % f'*"{zone}"*' for zone in zones
+        ]
+        clauses.append(reduce(operator.or_, zone_clauses))
+
+    query = (
+        Event.select(Event.id)
+        .where(reduce(operator.and_, clauses))
+        .order_by(Event.start_time.desc())
+        .limit(CANDIDATE_CAP)
+    )
+    return [row.id for row in query]
 
 
 def get_tool_definitions() -> List[Dict[str, Any]]:
