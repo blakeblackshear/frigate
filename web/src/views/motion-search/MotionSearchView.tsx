@@ -994,15 +994,20 @@ export default function MotionSearchView({
   );
 
   const progressMetrics = jobStatus?.metrics ?? searchMetrics;
-  const progressValue =
-    progressMetrics && progressMetrics.segments_scanned > 0
-      ? Math.min(
-          100,
-          (progressMetrics.segments_processed /
-            progressMetrics.segments_scanned) *
-            100,
-        )
-      : 0;
+  const progressValue = (() => {
+    if (!progressMetrics || progressMetrics.segments_scanned <= 0) {
+      return 0;
+    }
+    const skipped =
+      progressMetrics.heatmap_roi_skip_segments +
+      progressMetrics.metadata_inactive_segments;
+    const totalWork = progressMetrics.segments_scanned - skipped;
+    const doneWork = progressMetrics.segments_processed - skipped;
+    if (totalWork <= 0) {
+      return 100;
+    }
+    return Math.min(100, Math.max(0, (doneWork / totalWork) * 100));
+  })();
 
   const resultsPanel = (
     <>
@@ -1036,8 +1041,8 @@ export default function MotionSearchView({
             <Progress className="h-1" value={progressValue} />
           </div>
         )}
-        {searchMetrics && searchResults.length > 0 && (
-          <div className="mx-2 rounded-lg border bg-secondary p-2">
+        {searchMetrics && (isSearching || searchResults.length > 0) && (
+          <div className="mx-2 my-3 rounded-lg border bg-secondary p-2">
             <div className="space-y-0.5 text-xs text-muted-foreground">
               <div className="flex justify-between">
                 <span>{t("metrics.segmentsScanned")}</span>

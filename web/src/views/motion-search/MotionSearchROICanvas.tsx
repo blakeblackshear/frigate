@@ -1,10 +1,9 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Stage, Layer, Line, Circle, Image } from "react-konva";
 import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { flattenPoints } from "@/utils/canvasUtil";
 import { cn } from "@/lib/utils";
-import { useResizeObserver } from "@/hooks/resize-observer";
 
 type MotionSearchROICanvasProps = {
   camera: string;
@@ -30,18 +29,40 @@ export default function MotionSearchROICanvas({
   motionHeatmap,
   showMotionHeatmap = false,
 }: MotionSearchROICanvasProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(containerRef);
-
-  const stageSize = useMemo(
-    () => ({
-      width: containerWidth > 0 ? Math.ceil(containerWidth) : 0,
-      height: containerHeight > 0 ? Math.ceil(containerHeight) : 0,
-    }),
-    [containerHeight, containerWidth],
+  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(
+    null,
   );
+  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!containerNode) {
+      return;
+    }
+
+    const apply = (width: number, height: number) => {
+      setStageSize((prev) => {
+        const next = {
+          width: width > 0 ? Math.ceil(width) : 0,
+          height: height > 0 ? Math.ceil(height) : 0,
+        };
+        if (prev.width === next.width && prev.height === next.height) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    apply(containerNode.clientWidth, containerNode.clientHeight);
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      apply(entry.contentRect.width, entry.contentRect.height);
+    });
+    observer.observe(containerNode);
+    return () => observer.disconnect();
+  }, [containerNode]);
 
   const videoRect = useMemo(() => {
     const stageWidth = stageSize.width;
@@ -317,7 +338,7 @@ export default function MotionSearchROICanvas({
 
   return (
     <div
-      ref={containerRef}
+      ref={setContainerNode}
       className={cn(
         "absolute inset-0 z-10",
         isInteractive ? "pointer-events-auto" : "pointer-events-none",
@@ -385,6 +406,8 @@ export default function MotionSearchROICanvas({
                   stroke="white"
                   strokeWidth={2}
                   draggable={!isDrawing}
+                  onMouseDown={(e) => e.evt.stopPropagation()}
+                  onTouchStart={(e) => e.evt.stopPropagation()}
                   onDragMove={(e) => handlePointDragMove(e, index)}
                   onMouseOver={(e) => handleMouseOverPoint(e, index)}
                   onMouseOut={(e) => handleMouseOutPoint(e, index)}

@@ -199,13 +199,18 @@ def events(
             sub_label_clauses.append((Event.sub_label.is_null()))
 
         for label in filtered_sub_labels:
+            lowered = label.lower()
             sub_label_clauses.append(
-                (Event.sub_label.cast("text") == label)
-            )  # include exact matches
+                (fn.LOWER(Event.sub_label.cast("text")) == lowered)
+            )  # include exact matches (case-insensitive)
 
-            # include this label when part of a list
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*, {label}*"))
+            # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
+            sub_label_clauses.append(
+                (fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*")
+            )
+            sub_label_clauses.append(
+                (fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*")
+            )
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
         clauses.append((sub_label_clause))
@@ -609,13 +614,18 @@ def events_search(
             sub_label_clauses.append((Event.sub_label.is_null()))
 
         for label in filtered_sub_labels:
+            lowered = label.lower()
             sub_label_clauses.append(
-                (Event.sub_label.cast("text") == label)
-            )  # include exact matches
+                (fn.LOWER(Event.sub_label.cast("text")) == lowered)
+            )  # include exact matches (case-insensitive)
 
-            # include this label when part of a list
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*, {label}*"))
+            # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
+            sub_label_clauses.append(
+                (fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*")
+            )
+            sub_label_clauses.append(
+                (fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*")
+            )
 
         event_filters.append((reduce(operator.or_, sub_label_clauses)))
 

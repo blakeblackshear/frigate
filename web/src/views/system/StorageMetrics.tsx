@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { LuExternalLink } from "react-icons/lu";
 import { FaExclamationTriangle } from "react-icons/fa";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type CameraStorage = {
   [key: string]: {
@@ -128,7 +129,11 @@ export default function StorageMetrics({
   }, [stats, config]);
 
   if (!cameraStorage || !stats || !totalStorage || !config) {
-    return;
+    return (
+      <div className="flex size-full items-center justify-center">
+        <ActivityIndicator />
+      </div>
+    );
   }
 
   return (

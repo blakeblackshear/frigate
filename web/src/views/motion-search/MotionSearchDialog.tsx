@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
 import { FaArrowRight, FaCalendarAlt, FaCheckCircle } from "react-icons/fa";
@@ -42,7 +42,6 @@ import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { TimezoneAwareCalendar } from "@/components/overlay/ReviewActivityCalendar";
 
 import { useApiHost } from "@/api";
-import { useResizeObserver } from "@/hooks/resize-observer";
 import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { getUTCOffset } from "@/utils/dateUtil";
 import useSWR from "swr";
@@ -113,10 +112,34 @@ export default function MotionSearchDialog({
 }: MotionSearchDialogProps) {
   const { t } = useTranslation(["views/motionSearch", "common"]);
   const apiHost = useApiHost();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(containerRef);
+  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const containerWidth = containerSize.width;
+  const containerHeight = containerSize.height;
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!containerNode) {
+      return;
+    }
+
+    const measure = () => {
+      const rect = containerNode.getBoundingClientRect();
+      setContainerSize((prev) =>
+        prev.width === rect.width && prev.height === rect.height
+          ? prev
+          : { width: rect.width, height: rect.height },
+      );
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(containerNode);
+    return () => observer.disconnect();
+  }, [containerNode]);
 
   const cameraConfig = useMemo(() => {
     if (!selectedCamera) return undefined;
@@ -258,16 +281,16 @@ export default function MotionSearchDialog({
                     }}
                   >
                     <div
-                      ref={containerRef}
+                      ref={setContainerNode}
                       className="relative flex w-full items-center justify-center overflow-hidden rounded-lg border bg-secondary"
                       style={{ aspectRatio: "16 / 9" }}
                     >
-                      {selectedCamera && cameraConfig && imageSize.width > 0 ? (
+                      {selectedCamera && cameraConfig ? (
                         <div
                           className="relative"
                           style={{
-                            width: imageSize.width,
-                            height: imageSize.height,
+                            width: imageSize.width || "100%",
+                            height: imageSize.height || "100%",
                           }}
                         >
                           <img
@@ -277,6 +300,11 @@ export default function MotionSearchDialog({
                             src={`${apiHost}api/${selectedCamera}/latest.jpg?h=500`}
                             className="h-full w-full object-contain"
                             onLoad={() => setImageLoaded(true)}
+                            ref={(node) => {
+                              if (node?.complete && node.naturalWidth > 0) {
+                                setImageLoaded(true);
+                              }
+                            }}
                           />
                           {!imageLoaded && (
                             <div className="absolute inset-0 flex items-center justify-center">
