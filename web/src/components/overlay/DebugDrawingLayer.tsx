@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/popover";
 import Konva from "konva";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { useTranslation } from "react-i18next";
 
 type DebugDrawingLayerProps = {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -28,6 +29,7 @@ function DebugDrawingLayer({
   } | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
+  const { t } = useTranslation(["common"]);
   const stageRef = useRef<Konva.Stage>(null);
 
   const [{ width: containerWidth }] = useResizeObserver(containerRef);
@@ -153,10 +155,13 @@ function DebugDrawingLayer({
               <div className="flex flex-col text-primary">
                 Area:{" "}
                 <span className="text-sm text-primary-variant">
-                  px: {calculateArea().toFixed(0)}
+                  {t("information.pixels", {
+                    ns: "common",
+                    area: calculateArea().toFixed(0),
+                  })}
                 </span>
                 <span className="text-sm text-primary-variant">
-                  %: {calculateAreaPercentage().toFixed(4)}
+                  {(calculateAreaPercentage() * 100).toFixed(2)}%
                 </span>
               </div>
               <div className="flex flex-col text-primary">
