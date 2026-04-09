@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Lint script for e2e specs. Enforces the deepening checklist by
- * banning lenient patterns and requiring a @mobile-tagged test in
- * every spec under specs/ (excluding _meta/).
+ * Lint script for e2e specs. Bans lenient test patterns and requires
+ * a @mobile-tagged test in every spec under specs/ (excluding _meta/).
  *
  * Banned patterns:
  *   - page.waitForTimeout(   — use expect().toPass() or waitFor instead
@@ -16,9 +15,9 @@
  * @mobile rule: every .spec.ts under specs/ (not specs/_meta/) must
  * contain at least one test title or describe with the substring "@mobile".
  *
- * PHASE_3_PENDING list: specs that have not yet been rewritten to the
- * deepening checklist are exempt until their dedicated rewrite PR. Each
- * entry MUST be removed when its corresponding spec is rewritten.
+ * Specs in PENDING_REWRITE are exempt from all rules until they are
+ * rewritten with proper assertions and mobile coverage. Remove each
+ * entry when its spec is updated.
  */
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -29,9 +28,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SPECS_DIR = resolve(__dirname, "..", "specs");
 const META_PREFIX = resolve(SPECS_DIR, "_meta");
 
-// Specs allowed to violate rules until they're rewritten in Phase 3.
-// Each entry MUST be removed when its corresponding spec is rewritten.
-const PHASE_3_PENDING = new Set([
+// Specs exempt from lint rules until they are rewritten with proper
+// assertions and mobile coverage. Remove each entry when its spec is updated.
+const PENDING_REWRITE = new Set([
   "auth.spec.ts",
   "chat.spec.ts",
   "classification.spec.ts",
@@ -90,7 +89,7 @@ function walk(dir) {
 
 function lintFile(file) {
   const basename = file.split("/").pop();
-  if (PHASE_3_PENDING.has(basename)) return [];
+  if (PENDING_REWRITE.has(basename)) return [];
   if (file.includes("/specs/settings/")) return [];
 
   const errors = [];

@@ -98,7 +98,7 @@ export const test = base.extend<FrigateFixtures>({
       collector.assertClean();
     } else if (collector.errors.length > 0) {
       // Soft mode: attach errors to the test report so they're visible
-      // without failing the run. Used during the rollout phase.
+      // without failing the run.
       await testInfo.attach("collected-errors.txt", {
         body: collector.errors
           .map((e) => `[${e.kind}] ${e.message}${e.url ? ` (${e.url})` : ""}`)

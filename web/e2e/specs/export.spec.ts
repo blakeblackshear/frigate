@@ -1,13 +1,8 @@
 /**
- * Export page tests — deepened per the test deepening spec.
+ * Export page tests.
  *
- * Covers the deepening checklist:
- *  1. Clean render (auto via error fixture)
- *  2. Mobile + desktop parity (@mobile test)
- *  3. Primary interactions: search, delete, case open, case close
- *  4. Empty / loading / error states (via mock-overrides)
- *  5. No lenient waits — only real conditions
- *  6. Data-driven assertions against fixtures/mock-data/exports.json
+ * Covers rendering, search, delete confirmation, empty/loading/error
+ * states, and mobile-specific interactions (video pane, case detail).
  */
 
 import { test, expect } from "../fixtures/frigate-test";
