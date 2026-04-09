@@ -11,15 +11,20 @@ import useDeepMemo from "./use-deep-memo";
 import { capitalizeAll, capitalizeFirstLetter } from "@/utils/stringUtil";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import { useFrigateStats } from "@/api/ws";
+import { useIsAdmin } from "./use-is-admin";
 
 import { useTranslation } from "react-i18next";
 
 export default function useStats(stats: FrigateStats | undefined) {
   const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { data: debugReplayStatus } = useSWR("debug_replay/status", {
-    revalidateOnFocus: false,
-  });
+  const isAdmin = useIsAdmin();
+  const { data: debugReplayStatus } = useSWR(
+    isAdmin ? "debug_replay/status" : null,
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   const memoizedStats = useDeepMemo(stats);
 
