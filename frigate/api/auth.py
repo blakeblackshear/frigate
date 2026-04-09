@@ -64,6 +64,7 @@ def require_admin_by_default():
         "/logout",
         # Authenticated user endpoints (allow_any_authenticated)
         "/profile",
+        "/profiles",
         # Public info endpoints (allow_public)
         "/",
         "/version",
