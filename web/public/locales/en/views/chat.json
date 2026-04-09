@@ -12,6 +12,7 @@
   "result": "Result",
   "arguments": "Arguments:",
   "response": "Response:",
+  "attachment_chip_label": "{{label}} on {{camera}}",
   "attachment_chip_remove": "Remove attachment",
   "open_in_explore": "Open in Explore",
   "attach_event_aria": "Attach event {{eventId}}",

@@ -1,6 +1,11 @@
 import { useApiHost } from "@/api";
 import { useTranslation } from "react-i18next";
 import { LuExternalLink } from "react-icons/lu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 type ChatEvent = { id: string; score?: number };
@@ -50,21 +55,21 @@ export function ChatEventThumbnailsRow({
           loading="lazy"
         />
       </button>
-      <a
-        href={`/explore?event_id=${event.id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        className="absolute right-1 top-1 flex size-6 items-center justify-center rounded bg-black/60 text-white hover:bg-black/80"
-        aria-label={t("open_in_explore")}
-      >
-        <LuExternalLink className="size-3" />
-      </a>
-      {typeof event.score === "number" && !isAnchor && (
-        <span className="pointer-events-none absolute bottom-1 right-1 rounded bg-black/60 px-1 text-[10px] text-white">
-          {Math.round(event.score * 100)}%
-        </span>
-      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <a
+            href={`/explore?event_id=${event.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-1 top-1 flex size-6 items-center justify-center rounded bg-black/60 text-white hover:bg-black/80"
+            aria-label={t("open_in_explore")}
+          >
+            <LuExternalLink className="size-3" />
+          </a>
+        </TooltipTrigger>
+        <TooltipContent>{t("open_in_explore")}</TooltipContent>
+      </Tooltip>
       {isAnchor && (
         <span className="pointer-events-none absolute left-1 top-1 rounded bg-primary px-1 text-[10px] text-primary-foreground">
           {t("anchor")}
