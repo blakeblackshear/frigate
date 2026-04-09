@@ -1,5 +1,7 @@
 import { useApiHost } from "@/api";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 import { LuX, LuExternalLink } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,7 +9,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { cn } from "@/lib/utils";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ChatAttachmentChipProps = {
   eventId: string;
@@ -17,8 +21,8 @@ type ChatAttachmentChipProps = {
 
 /**
  * Small horizontal chip rendering an event as an "attachment": a thumbnail,
- * a short label, an optional remove X (composer mode), and an external-link
- * icon that opens the event in Explore.
+ * a friendly label like "Person on driveway", an optional remove X (composer
+ * mode), and an external-link icon that opens the event in Explore.
  */
 export function ChatAttachmentChip({
   eventId,
@@ -27,6 +31,18 @@ export function ChatAttachmentChip({
 }: ChatAttachmentChipProps) {
   const apiHost = useApiHost();
   const { t } = useTranslation(["views/chat"]);
+
+  const { data: eventData } = useSWR<{ label: string; camera: string }[]>(
+    `event_ids?ids=${eventId}`,
+  );
+  const evt = eventData?.[0];
+  const cameraName = useCameraFriendlyName(evt?.camera);
+  const displayLabel = evt
+    ? t("attachment_chip_label", {
+        label: getTranslatedLabel(evt.label),
+        camera: cameraName,
+      })
+    : eventId;
 
   return (
     <div
@@ -46,15 +62,20 @@ export function ChatAttachmentChip({
           }}
         />
       </div>
-      <span
-        className={cn(
-          "truncate text-xs",
-          mode === "bubble" ? "text-primary-foreground/90" : "text-foreground",
-        )}
-        title={eventId}
-      >
-        {eventId}
-      </span>
+      {evt ? (
+        <span
+          className={cn(
+            "truncate text-xs",
+            mode === "bubble"
+              ? "text-primary-foreground/90"
+              : "text-foreground",
+          )}
+        >
+          {displayLabel}
+        </span>
+      ) : (
+        <ActivityIndicator className="size-4" />
+      )}
       <Tooltip>
         <TooltipTrigger asChild>
           <a
