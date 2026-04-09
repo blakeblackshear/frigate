@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FaArrowUpLong } from "react-icons/fa6";
+import { FaArrowUpLong, FaStop } from "react-icons/fa6";
 import { LuCircleAlert } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
@@ -28,6 +28,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [attachedEventId, setAttachedEventId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     document.title = t("documentTitle");
@@ -70,12 +71,24 @@ export default function ChatPage() {
         ...(axios.defaults.headers.common as Record<string, string>),
       };
 
-      await streamChatCompletion(url, headers, apiMessages, {
-        updateMessages: (updater) => setMessages(updater),
-        onError: (message) => setError(message),
-        onDone: () => setIsLoading(false),
-        defaultErrorMessage: t("error"),
-      });
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      await streamChatCompletion(
+        url,
+        headers,
+        apiMessages,
+        {
+          updateMessages: (updater) => setMessages(updater),
+          onError: (message) => setError(message),
+          onDone: () => {
+            abortRef.current = null;
+            setIsLoading(false);
+          },
+          defaultErrorMessage: t("error"),
+        },
+        controller.signal,
+      );
     },
     [isLoading, t],
   );
@@ -105,6 +118,12 @@ export default function ChatPage() {
     },
     [attachedEventId, input, isLoading, messages, submitConversation],
   );
+
+  const stopGeneration = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsLoading(false);
+  }, []);
 
   const handleEditSubmit = useCallback(
     (messageIndex: number, newContent: string) => {
@@ -237,6 +256,7 @@ export default function ChatPage() {
             attachedEventId={attachedEventId}
             onClearAttachment={handleClearAttachment}
             onAttach={setAttachedEventId}
+            onStop={stopGeneration}
             recentEventIds={recentEventIds}
           />
         )}
@@ -254,6 +274,7 @@ type ChatEntryProps = {
   attachedEventId: string | null;
   onClearAttachment: () => void;
   onAttach: (eventId: string) => void;
+  onStop: () => void;
   recentEventIds: string[];
 };
 
@@ -266,6 +287,7 @@ function ChatEntry({
   attachedEventId,
   onClearAttachment,
   onAttach,
+  onStop,
   recentEventIds,
 }: ChatEntryProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -306,14 +328,24 @@ function ChatEntry({
           onKeyDown={handleKeyDown}
           aria-busy={isLoading}
         />
-        <Button
-          variant="select"
-          className="size-10 shrink-0 rounded-full"
-          disabled={!input.trim() || isLoading}
-          onClick={() => sendMessage()}
-        >
-          <FaArrowUpLong size="16" />
-        </Button>
+        {isLoading ? (
+          <Button
+            variant="destructive"
+            className="size-10 shrink-0 rounded-full"
+            onClick={onStop}
+          >
+            <FaStop className="size-3" />
+          </Button>
+        ) : (
+          <Button
+            variant="select"
+            className="size-10 shrink-0 rounded-full"
+            disabled={!input.trim()}
+            onClick={() => sendMessage()}
+          >
+            <FaArrowUpLong className="size-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

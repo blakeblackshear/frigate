@@ -1328,6 +1328,9 @@ When a user refers to a specific object they have seen or describe with identify
         async def stream_body_llm():
             nonlocal conversation, stream_tool_calls, stream_iterations
             while stream_iterations < max_iterations:
+                if await request.is_disconnected():
+                    logger.debug("Client disconnected, stopping chat stream")
+                    return
                 logger.debug(
                     f"Streaming LLM (iteration {stream_iterations + 1}/{max_iterations}) "
                     f"with {len(conversation)} message(s)"
@@ -1337,6 +1340,9 @@ When a user refers to a specific object they have seen or describe with identify
                     tools=tools if tools else None,
                     tool_choice="auto",
                 ):
+                    if await request.is_disconnected():
+                        logger.debug("Client disconnected, stopping chat stream")
+                        return
                     kind, value = event
                     if kind == "content_delta":
                         yield (
@@ -1366,6 +1372,11 @@ When a user refers to a specific object they have seen or describe with identify
                                     msg.get("content"), pending
                                 )
                             )
+                            if await request.is_disconnected():
+                                logger.debug(
+                                    "Client disconnected before tool execution"
+                                )
+                                return
                             (
                                 executed_calls,
                                 tool_results,
