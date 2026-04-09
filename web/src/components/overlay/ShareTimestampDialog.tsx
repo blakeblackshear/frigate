@@ -150,7 +150,7 @@ export function ShareTimestampContent({
           setSelectedOption(value as "current" | "custom")
         }
       >
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2">
           <RadioGroupItem
             className={
               selectedOption == "current"
@@ -165,7 +165,7 @@ export function ShareTimestampContent({
           </Label>
         </div>
 
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2">
           <RadioGroupItem
             className={
               selectedOption == "custom"
