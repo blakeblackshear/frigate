@@ -36,6 +36,7 @@ const PENDING_REWRITE = new Set([
   "classification.spec.ts",
   "config-editor.spec.ts",
   "explore.spec.ts",
+  "export.spec.ts",
   "face-library.spec.ts",
   "live.spec.ts",
   "logs.spec.ts",

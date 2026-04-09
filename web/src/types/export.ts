@@ -6,7 +6,7 @@ export type Export = {
   video_path: string;
   thumb_path: string;
   in_progress: boolean;
-  export_case_id?: string;
+  export_case?: string;
 };
 
 export type ExportCase = {

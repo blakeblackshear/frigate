@@ -71,7 +71,7 @@ function Exports() {
   const exportsByCase = useMemo<{ [caseId: string]: Export[] }>(() => {
     const grouped: { [caseId: string]: Export[] } = {};
     (rawExports ?? []).forEach((exp) => {
-      const caseId = exp.export_case_id || "none";
+      const caseId = exp.export_case || "none";
       if (!grouped[caseId]) {
         grouped[caseId] = [];
       }
@@ -477,7 +477,7 @@ function CaseView({
 }: CaseViewProps) {
   const filteredExports = useMemo<Export[]>(() => {
     const caseExports = (exports || []).filter(
-      (e) => e.export_case_id == selectedCase.id,
+      (e) => e.export_case == selectedCase.id,
     );
 
     if (!search) {
