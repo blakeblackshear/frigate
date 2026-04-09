@@ -25,6 +25,7 @@ export async function streamChatCompletion(
   headers: Record<string, string>,
   apiMessages: { role: string; content: string }[],
   callbacks: StreamChatCallbacks,
+  signal?: AbortSignal,
 ): Promise<void> {
   const {
     updateMessages,
@@ -38,6 +39,7 @@ export async function streamChatCompletion(
       method: "POST",
       headers,
       body: JSON.stringify({ messages: apiMessages, stream: true }),
+      signal,
     });
 
     if (!res.ok) {
@@ -152,11 +154,15 @@ export async function streamChatCompletion(
         return next;
       });
     }
-  } catch {
-    onError(defaultErrorMessage);
-    updateMessages((prev) =>
-      prev.filter((m) => !(m.role === "assistant" && m.content === "")),
-    );
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      // User stopped generation — not an error
+    } else {
+      onError(defaultErrorMessage);
+      updateMessages((prev) =>
+        prev.filter((m) => !(m.role === "assistant" && m.content === "")),
+      );
+    }
   } finally {
     onDone();
   }
