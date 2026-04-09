@@ -15,6 +15,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { ChatAttachmentChip } from "@/components/chat/ChatAttachmentChip";
+import { parseAttachedEvent } from "@/utils/chatUtil";
 
 type MessageBubbleProps = {
   role: "user" | "assistant";
@@ -126,6 +128,10 @@ export function MessageBubble({
     );
   }
 
+  const { eventId: attachedEventId, body: displayContent } = isUser
+    ? parseAttachedEvent(content)
+    : { eventId: null, body: content };
+
   return (
     <div
       className={cn(
@@ -140,9 +146,20 @@ export function MessageBubble({
         )}
       >
         {isUser ? (
-          content
+          <div className="flex flex-col gap-2">
+            {attachedEventId && (
+              <ChatAttachmentChip eventId={attachedEventId} mode="bubble" />
+            )}
+            <div className="whitespace-pre-wrap">{displayContent}</div>
+          </div>
         ) : (
-          <>
+          <div
+            className={cn(
+              "[&>*:last-child]:inline",
+              !isComplete &&
+                "after:ml-0.5 after:inline-block after:h-4 after:w-2 after:animate-cursor-blink after:rounded-sm after:bg-foreground after:align-middle after:content-['']",
+            )}
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -168,10 +185,7 @@ export function MessageBubble({
             >
               {content}
             </ReactMarkdown>
-            {!isComplete && (
-              <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-foreground align-middle" />
-            )}
-          </>
+          </div>
         )}
       </div>
       <div className="flex items-center gap-0.5">
