@@ -149,6 +149,8 @@ FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 ARG DEBUG=false
+ARG HAILORT_VERSION=4.21.0
+ARG HAILORT_GIT_REPO=frigate-nvr/hailort
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -331,6 +333,8 @@ CMD ["sleep", "infinity"]
 # Frigate web build
 # This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
 FROM --platform=$BUILDPLATFORM node:20 AS web-build
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./

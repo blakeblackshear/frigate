@@ -12,6 +12,10 @@ services:
     build:
       context: .
       dockerfile: docker/main/Dockerfile
+      # Use args to specify hailort version ans location
+      args:
+        HAILORT_VERSION: "5.1.1"
+        HAILORT_GIT_REPO: "mathieu-d/hailort"
       # Use target devcontainer-trt for TensorRT dev
       target: devcontainer
     ## Uncomment this block for nvidia gpu support
@@ -27,6 +31,8 @@ services:
     # devices:
       # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+    devices:
+      - /dev/hailo0
     volumes:
       - .:/workspace/frigate:cached
       - ./web/dist:/opt/frigate/web:cached

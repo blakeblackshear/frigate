@@ -21,6 +21,13 @@ local: version
 		--tag frigate:latest \
 		--load
 
+localh10: version
+	docker buildx build --target=frigate --file docker/main/Dockerfile . \
+	    --build-arg HAILORT_VERSION=5.1.1 \
+		--build-arg HAILORT_GIT_REPO=mathieu-d/hailort \
+		--tag frigate:latest \
+		--load
+
 debug: version
 	docker buildx build --target=frigate --file docker/main/Dockerfile . \
 	    --build-arg DEBUG=true \
