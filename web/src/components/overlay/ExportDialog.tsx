@@ -53,6 +53,7 @@ import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -322,8 +323,9 @@ export function ExportContent({
 }: ExportContentProps) {
   const { t } = useTranslation(["components/dialog"]);
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
-  const { data: cases } = useSWR<ExportCase[]>("cases");
+  const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [debouncedRange, setDebouncedRange] = useState<TimeRange | undefined>(
     range,
@@ -555,16 +557,20 @@ export function ExportContent({
     }
 
     const payload: BatchExportBody = {
-      start_time: Math.round(range.after),
-      end_time: Math.round(range.before),
-      camera_ids: selectedCameraIds,
-      name: name || undefined,
+      items: selectedCameraIds.map((cameraId) => ({
+        camera: cameraId,
+        start_time: Math.round(range.after),
+        end_time: Math.round(range.before),
+        friendly_name: name
+          ? `${name} - ${resolveCameraName(config, cameraId)}`
+          : undefined,
+      })),
     };
 
     if (batchCaseSelection === "new") {
       payload.new_case_name = newCaseName.trim();
       payload.new_case_description = newCaseDescription.trim() || undefined;
-    } else if (batchCaseSelection !== "none") {
+    } else {
       payload.export_case_id = batchCaseSelection;
     }
 
@@ -752,33 +758,35 @@ export function ExportContent({
             onChange={(e) => setName(e.target.value)}
           />
 
-          <div className="space-y-2">
-            <Label className="text-sm text-secondary-foreground">
-              {t("export.case.label")}
-            </Label>
-            <Select
-              value={selectedCaseId || "none"}
-              onValueChange={(value) =>
-                setSelectedCaseId(value === "none" ? undefined : value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("export.case.placeholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">
-                  {t("label.none", { ns: "common" })}
-                </SelectItem>
-                {cases
-                  ?.sort((a, b) => a.name.localeCompare(b.name))
-                  .map((caseItem) => (
-                    <SelectItem key={caseItem.id} value={caseItem.id}>
-                      {caseItem.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {isAdmin && (
+            <div className="space-y-2">
+              <Label className="text-sm text-secondary-foreground">
+                {t("export.case.label")}
+              </Label>
+              <Select
+                value={selectedCaseId || "none"}
+                onValueChange={(value) =>
+                  setSelectedCaseId(value === "none" ? undefined : value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("export.case.placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    {t("label.none", { ns: "common" })}
+                  </SelectItem>
+                  {cases
+                    ?.sort((a, b) => a.name.localeCompare(b.name))
+                    .map((caseItem) => (
+                      <SelectItem key={caseItem.id} value={caseItem.id}>
+                        {caseItem.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent
@@ -927,29 +935,55 @@ export function ExportContent({
             <Label className="text-sm text-secondary-foreground">
               {t("export.case.label")}
             </Label>
-            <Select
-              value={batchCaseSelection}
-              onValueChange={(value) => setBatchCaseSelection(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("export.case.placeholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                {cases
-                  ?.sort((a, b) => a.name.localeCompare(b.name))
-                  .map((caseItem) => (
-                    <SelectItem key={caseItem.id} value={caseItem.id}>
-                      {caseItem.name}
+            {isAdmin ? (
+              <>
+                <Select
+                  value={batchCaseSelection}
+                  onValueChange={(value) => setBatchCaseSelection(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("export.case.placeholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cases
+                      ?.sort((a, b) => a.name.localeCompare(b.name))
+                      .map((caseItem) => (
+                        <SelectItem key={caseItem.id} value={caseItem.id}>
+                          {caseItem.name}
+                        </SelectItem>
+                      ))}
+                    <SelectSeparator />
+                    <SelectItem value="new">
+                      {t("export.case.newCaseOption")}
                     </SelectItem>
-                  ))}
-                <SelectSeparator />
-                <SelectItem value="new">
-                  {t("export.case.newCaseOption")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {batchCaseSelection === "new" && (
+                  </SelectContent>
+                </Select>
+                {batchCaseSelection === "new" && (
+                  <div className="space-y-2 pt-1">
+                    <Input
+                      className="text-md"
+                      placeholder={t("export.case.newCaseNamePlaceholder")}
+                      value={newCaseName}
+                      onChange={(event) => setNewCaseName(event.target.value)}
+                    />
+                    <Textarea
+                      className="text-md"
+                      placeholder={t(
+                        "export.case.newCaseDescriptionPlaceholder",
+                      )}
+                      value={newCaseDescription}
+                      onChange={(event) =>
+                        setNewCaseDescription(event.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
               <div className="space-y-2 pt-1">
+                <div className="text-xs text-muted-foreground">
+                  {t("export.case.nonAdminHelp")}
+                </div>
                 <Input
                   className="text-md"
                   placeholder={t("export.case.newCaseNamePlaceholder")}

@@ -19,13 +19,21 @@ export type ExportCase = {
 };
 
 export type BatchExportBody = {
-  start_time: number;
-  end_time: number;
-  camera_ids: string[];
-  name?: string;
+  items: BatchExportItem[];
   export_case_id?: string;
   new_case_name?: string;
   new_case_description?: string;
+};
+
+export const MAX_BATCH_EXPORT_ITEMS = 50;
+
+export type BatchExportItem = {
+  camera: string;
+  start_time: number;
+  end_time: number;
+  image_path?: string;
+  friendly_name?: string;
+  client_item_id?: string;
 };
 
 export type BatchExportResult = {
@@ -34,6 +42,8 @@ export type BatchExportResult = {
   success: boolean;
   status?: string | null;
   error?: string | null;
+  item_index?: number | null;
+  client_item_id?: string | null;
 };
 
 export type BatchExportResponse = {
