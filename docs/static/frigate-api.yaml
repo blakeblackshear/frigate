@@ -2728,10 +2728,11 @@ paths:
     post:
       tags:
         - Export
-      summary: Start multi-camera recording export
+      summary: Start recording export batch
       description: >-
-        Starts recording exports for multiple cameras for the same time range and
-        assigns them to a single export case.
+        Starts recording exports for a batch of items, each with its own camera
+        and time range, and assigns them to a single export case. Attaching to
+        an existing case is temporarily admin-only until case-level ACLs exist.
       operationId: export_recordings_batch_exports_batch_post
       requestBody:
         required: true
@@ -2740,12 +2741,36 @@ paths:
             schema:
               $ref: "#/components/schemas/BatchExportBody"
       responses:
-        "200":
+        "202":
           description: Successful Response
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/BatchExportResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "503":
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
         "422":
           description: Validation Error
           content:
@@ -6531,32 +6556,21 @@ components:
       title: EventsLPRBody
     BatchExportBody:
       properties:
-        start_time:
-          type: number
-          title: Start time
-        end_time:
-          type: number
-          title: End time
-        camera_ids:
+        items:
           items:
-            type: string
+            $ref: "#/components/schemas/BatchExportItem"
           type: array
           minItems: 1
-          title: Camera IDs
-        name:
-          anyOf:
-            - type: string
-              maxLength: 256
-            - type: "null"
-          title: Friendly name template
-          description: Base export name. Each export is saved as '<name> - <camera>'
+          maxItems: 50
+          title: Items
+          description: List of export items. Each item has its own camera and time range.
         export_case_id:
           anyOf:
             - type: string
               maxLength: 30
             - type: "null"
           title: Export case ID
-          description: Existing export case ID to assign all exports to
+          description: Existing export case ID to assign all exports to. Attaching to an existing case is temporarily admin-only until case-level ACLs exist.
         new_case_name:
           anyOf:
             - type: string
@@ -6572,14 +6586,51 @@ components:
           description: Optional description for a newly created export case
       type: object
       required:
+        - items
+      title: BatchExportBody
+    BatchExportItem:
+      properties:
+        camera:
+          type: string
+          title: Camera name
+        start_time:
+          type: number
+          title: Start time
+        end_time:
+          type: number
+          title: End time
+        image_path:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Existing thumbnail path
+          description: Optional existing image to use as the export thumbnail
+        friendly_name:
+          anyOf:
+            - type: string
+              maxLength: 256
+            - type: "null"
+          title: Friendly name
+          description: Optional friendly name for this specific export item
+        client_item_id:
+          anyOf:
+            - type: string
+              maxLength: 128
+            - type: "null"
+          title: Client item ID
+          description: Optional opaque client identifier echoed back in results
+      type: object
+      required:
+        - camera
         - start_time
         - end_time
-        - camera_ids
-      title: BatchExportBody
+      title: BatchExportItem
     BatchExportResponse:
       properties:
         export_case_id:
-          type: string
+          anyOf:
+            - type: string
+            - type: "null"
           title: Export Case Id
           description: Export case ID associated with the batch
         export_ids:
@@ -6593,14 +6644,13 @@ components:
             $ref: "#/components/schemas/BatchExportResultModel"
           type: array
           title: Results
-          description: Per-camera batch export results
+          description: Per-item batch export results
       type: object
       required:
-        - export_case_id
         - export_ids
         - results
       title: BatchExportResponse
-      description: Response model for starting a multi-camera export batch.
+      description: Response model for starting an export batch.
     BatchExportResultModel:
       properties:
         camera:
@@ -6617,18 +6667,36 @@ components:
           type: boolean
           title: Success
           description: Whether the export was successfully queued
+        status:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Status
+          description: Queue status for this camera export
         error:
           anyOf:
             - type: string
             - type: "null"
           title: Error
-          description: Validation or queueing error for this camera, if any
+          description: Validation or queueing error for this item, if any
+        item_index:
+          anyOf:
+            - type: integer
+            - type: "null"
+          title: Item Index
+          description: Zero-based index of this result within the request items list
+        client_item_id:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Client Item Id
+          description: Opaque client-supplied item identifier echoed from the request
       type: object
       required:
         - camera
         - success
       title: BatchExportResultModel
-      description: Per-camera result for a batch export request.
+      description: Per-item result for a batch export request.
     EventsSubLabelBody:
       properties:
         subLabel:

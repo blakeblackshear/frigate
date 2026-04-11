@@ -82,14 +82,26 @@ export class ApiMocker {
       route.fulfill({ json: stats }),
     );
 
-    // Reviews
-    await this.page.route("**/api/reviews**", (route) => {
-      const url = route.request().url();
-      if (url.includes("summary")) {
-        return route.fulfill({ json: reviewSummary });
-      }
-      return route.fulfill({ json: reviews });
-    });
+    // Reviews. The real backend exposes /review (singular) for the main
+    // list and /review/summary for the summary — the previous plural glob
+    // (**/api/reviews**) never matched either endpoint, so review-dependent
+    // tests silently ran without data. The POST mutations at /reviews/viewed
+    // and /reviews/delete (plural) still fall through to the generic
+    // mutation catch-all further down the file.
+    await this.page.route(/\/api\/review\/summary/, (route) =>
+      route.fulfill({ json: reviewSummary }),
+    );
+    await this.page.route(/\/api\/review(\?|$)/, (route) =>
+      route.fulfill({ json: reviews }),
+    );
+
+    // Export jobs. The Exports page polls this every 2s while any export
+    // is in_progress; without a mock route it falls through to the preview
+    // server which returns 500 and makes the page flap between loading and
+    // rendered state, breaking tests that navigate to /export.
+    await this.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({ json: [] }),
+    );
 
     // Recordings summary
     await this.page.route("**/api/recordings/summary**", (route) =>

@@ -102,10 +102,20 @@ class TestHttpExport(BaseTestHttp):
                 response = client.post(
                     "/exports/batch",
                     json={
-                        "start_time": 110,
-                        "end_time": 150,
-                        "camera_ids": ["front_door", "backyard"],
-                        "name": "Incident",
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                                "friendly_name": "Incident - Front Door",
+                            },
+                            {
+                                "camera": "backyard",
+                                "start_time": 110,
+                                "end_time": 150,
+                                "friendly_name": "Incident - Backyard",
+                            },
+                        ],
                         "new_case_name": "Case Alpha",
                         "new_case_description": "Batch export",
                     },
@@ -121,6 +131,8 @@ class TestHttpExport(BaseTestHttp):
                 "success": True,
                 "status": "queued",
                 "error": None,
+                "item_index": 0,
+                "client_item_id": None,
             },
             {
                 "camera": "backyard",
@@ -128,6 +140,8 @@ class TestHttpExport(BaseTestHttp):
                 "success": False,
                 "status": None,
                 "error": "No recordings found for time range",
+                "item_index": 1,
+                "client_item_id": None,
             },
         ]
         start_export_job.assert_called_once()
@@ -196,9 +210,18 @@ class TestHttpExport(BaseTestHttp):
                     response = client.post(
                         "/exports/batch",
                         json={
-                            "start_time": 110,
-                            "end_time": 150,
-                            "camera_ids": ["front_door", "backyard"],
+                            "items": [
+                                {
+                                    "camera": "front_door",
+                                    "start_time": 110,
+                                    "end_time": 150,
+                                },
+                                {
+                                    "camera": "backyard",
+                                    "start_time": 110,
+                                    "end_time": 150,
+                                },
+                            ],
                             "new_case_name": "Overflow Case",
                         },
                     )
@@ -372,9 +395,13 @@ class TestHttpExport(BaseTestHttp):
             response = client.post(
                 "/exports/batch",
                 json={
-                    "start_time": 110,
-                    "end_time": 150,
-                    "camera_ids": ["front_door"],
+                    "items": [
+                        {
+                            "camera": "front_door",
+                            "start_time": 110,
+                            "end_time": 150,
+                        }
+                    ],
                 },
             )
 
@@ -383,3 +410,587 @@ class TestHttpExport(BaseTestHttp):
             response.json()["detail"][0]["msg"]
             == "Value error, Either export_case_id or new_case_name must be provided"
         )
+
+    # --- /exports/batch (item-shaped multi-export) ---------------------------
+
+    def test_batch_export_happy_path_creates_case_and_queues_all(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        self._insert_recording("rec-back", "backyard", 100, 400)
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            },
+                            {
+                                "camera": "front_door",
+                                "start_time": 200,
+                                "end_time": 240,
+                            },
+                            {
+                                "camera": "backyard",
+                                "start_time": 300,
+                                "end_time": 340,
+                            },
+                        ],
+                        "new_case_name": "Incident Apr 11",
+                        "new_case_description": "Review items",
+                    },
+                )
+
+        assert response.status_code == 202
+        response_json = response.json()
+        assert len(response_json["export_ids"]) == 3
+        assert all(r["success"] for r in response_json["results"])
+        assert [r["item_index"] for r in response_json["results"]] == [0, 1, 2]
+        assert start_export_job.call_count == 3
+
+        case = ExportCase.get(ExportCase.id == response_json["export_case_id"])
+        assert case.name == "Incident Apr 11"
+        assert case.description == "Review items"
+
+    def test_batch_export_existing_case_does_not_create_new_case(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        ExportCase.create(
+            id="existing_case",
+            name="Existing",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                        "export_case_id": "existing_case",
+                    },
+                )
+
+        assert response.status_code == 202
+        assert response.json()["export_case_id"] == "existing_case"
+        # No additional case was created
+        assert ExportCase.select().count() == 1
+
+    def test_batch_export_empty_items_rejected(self):
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/batch",
+                json={"items": [], "new_case_name": "Empty"},
+            )
+
+        assert response.status_code == 422
+
+    def test_batch_export_over_limit_rejected(self):
+        items = [
+            {"camera": "front_door", "start_time": 100 + i, "end_time": 100 + i + 5}
+            for i in range(51)
+        ]
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/batch",
+                json={"items": items, "new_case_name": "Too many"},
+            )
+
+        assert response.status_code == 422
+
+    def test_batch_export_end_before_start_rejected(self):
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/batch",
+                json={
+                    "items": [
+                        {
+                            "camera": "front_door",
+                            "start_time": 200,
+                            "end_time": 100,
+                        }
+                    ],
+                    "new_case_name": "Bad range",
+                },
+            )
+
+        assert response.status_code == 422
+        assert (
+            response.json()["detail"][0]["msg"]
+            == "Value error, end_time must be after start_time"
+        )
+
+    def test_batch_export_missing_case_target_rejected(self):
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/batch",
+                json={
+                    "items": [
+                        {
+                            "camera": "front_door",
+                            "start_time": 100,
+                            "end_time": 150,
+                        }
+                    ],
+                },
+            )
+
+        assert response.status_code == 422
+        assert (
+            response.json()["detail"][0]["msg"]
+            == "Value error, Either export_case_id or new_case_name must be provided"
+        )
+
+    def test_batch_export_camera_access_denied_fails_closed(self):
+        from fastapi import Request
+
+        from frigate.api.auth import get_allowed_cameras_for_filter
+
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        async def restricted(request: Request):
+            return ["front_door"]
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = restricted
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            },
+                            {
+                                "camera": "backyard",  # not in allowed list
+                                "start_time": 110,
+                                "end_time": 150,
+                            },
+                        ],
+                        "new_case_name": "Nope",
+                    },
+                )
+
+        assert response.status_code == 403
+        start_export_job.assert_not_called()
+        # No case created
+        assert ExportCase.select().count() == 0
+
+    def test_batch_export_case_not_found(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/batch",
+                json={
+                    "items": [
+                        {
+                            "camera": "front_door",
+                            "start_time": 110,
+                            "end_time": 150,
+                        }
+                    ],
+                    "export_case_id": "does_not_exist",
+                },
+            )
+
+        assert response.status_code == 404
+
+    def test_batch_export_per_item_missing_recordings_partial_success(self):
+        self._insert_recording("rec-front", "front_door", 100, 200)
+        # backyard has no recordings at all
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            },
+                            {
+                                "camera": "backyard",
+                                "start_time": 110,
+                                "end_time": 150,
+                            },
+                        ],
+                        "new_case_name": "Partial",
+                    },
+                )
+
+        assert response.status_code == 202
+        response_json = response.json()
+        assert len(response_json["export_ids"]) == 1
+        results_by_camera = {r["camera"]: r for r in response_json["results"]}
+        assert results_by_camera["front_door"]["success"] is True
+        assert results_by_camera["backyard"]["success"] is False
+        assert (
+            results_by_camera["backyard"]["error"]
+            == "No recordings found for time range"
+        )
+        start_export_job.assert_called_once()
+
+        # Case is still created because at least one item succeeded
+        assert (
+            ExportCase.get(ExportCase.id == response_json["export_case_id"]) is not None
+        )
+
+    def test_batch_export_same_camera_different_ranges_one_missing(self):
+        # Recording covers 100-200 only. First item fits, second does not.
+        self._insert_recording("rec-front", "front_door", 100, 200)
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            },
+                            {
+                                "camera": "front_door",
+                                "start_time": 500,
+                                "end_time": 540,
+                            },
+                        ],
+                        "new_case_name": "Split recordings",
+                    },
+                )
+
+        assert response.status_code == 202
+        response_json = response.json()
+        assert len(response_json["export_ids"]) == 1
+        results = response_json["results"]
+        assert results[0]["success"] is True
+        assert results[0]["item_index"] == 0
+        assert results[1]["success"] is False
+        assert results[1]["item_index"] == 1
+        assert results[1]["error"] == "No recordings found for time range"
+        # Both results carry the same camera — item_index is the only way
+        # the client can tell them apart.
+        assert results[0]["camera"] == results[1]["camera"] == "front_door"
+        start_export_job.assert_called_once()
+
+    def test_batch_export_all_missing_recordings_rolls_back_case(self):
+        # No recordings inserted at all
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                        "new_case_name": "Should rollback",
+                    },
+                )
+
+        assert response.status_code == 400
+        start_export_job.assert_not_called()
+        assert ExportCase.select().count() == 0
+
+    def test_batch_export_preflight_queue_full(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        self._insert_recording("rec-back", "backyard", 100, 400)
+
+        with patch(
+            "frigate.api.export.available_export_queue_slots",
+            return_value=1,
+        ):
+            with patch(
+                "frigate.api.export.start_export_job",
+                side_effect=lambda _config, job: job.id,
+            ) as start_export_job:
+                with AuthTestClient(self.app) as client:
+                    response = client.post(
+                        "/exports/batch",
+                        json={
+                            "items": [
+                                {
+                                    "camera": "front_door",
+                                    "start_time": 110,
+                                    "end_time": 150,
+                                },
+                                {
+                                    "camera": "backyard",
+                                    "start_time": 110,
+                                    "end_time": 150,
+                                },
+                            ],
+                            "new_case_name": "Queue full",
+                        },
+                    )
+
+        assert response.status_code == 503
+        start_export_job.assert_not_called()
+        assert ExportCase.select().count() == 0
+
+    def test_batch_export_all_enqueue_calls_fail_rolls_back_case(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        def boom(_config, _job):
+            raise RuntimeError("simulated enqueue failure")
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=boom,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                        "new_case_name": "Will fail",
+                    },
+                )
+
+        assert response.status_code == 202
+        response_json = response.json()
+        assert response_json["export_ids"] == []
+        assert response_json["export_case_id"] is None
+        assert ExportCase.select().count() == 0
+
+    def test_batch_export_rejects_invalid_image_path(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/batch",
+                json={
+                    "items": [
+                        {
+                            "camera": "front_door",
+                            "start_time": 110,
+                            "end_time": 150,
+                            "image_path": "/etc/passwd",
+                        }
+                    ],
+                    "new_case_name": "Bad image",
+                },
+            )
+
+        assert response.status_code == 400
+        assert ExportCase.select().count() == 0
+
+    def test_batch_export_non_admin_can_queue(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    headers={"remote-user": "viewer", "remote-role": "viewer"},
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                        "new_case_name": "Viewer export",
+                    },
+                )
+
+        assert response.status_code == 202
+        assert len(response.json()["export_ids"]) == 1
+
+    def test_batch_export_non_admin_cannot_attach_to_existing_case(self):
+        """Non-admins can create cases via new_case_name but cannot attach
+        to existing cases they did not create. Closes a write-path hole that
+        would otherwise be reachable through the unfiltered GET /cases list.
+        """
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        ExportCase.create(
+            id="admins_only_case",
+            name="Admins only",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    headers={"remote-user": "viewer", "remote-role": "viewer"},
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                        "export_case_id": "admins_only_case",
+                    },
+                )
+
+        assert response.status_code == 403
+        start_export_job.assert_not_called()
+        # No exports should have been created in the target case
+        assert Export.select().count() == 0
+
+    def test_batch_export_admin_can_attach_to_existing_case(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        ExportCase.create(
+            id="shared_case",
+            name="Shared",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                        "export_case_id": "shared_case",
+                    },
+                )
+
+        assert response.status_code == 202
+        assert response.json()["export_case_id"] == "shared_case"
+        # No additional case created
+        assert ExportCase.select().count() == 1
+
+    def test_batch_export_roundtrips_client_item_id(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                                "client_item_id": "review-123",
+                            }
+                        ],
+                        "new_case_name": "Client id test",
+                    },
+                )
+
+        assert response.status_code == 202
+        assert response.json()["results"][0]["client_item_id"] == "review-123"
+
+    def test_single_export_non_admin_cannot_attach_to_existing_case(self):
+        """The single-export route has the same hole: non-admins should not
+        be able to smuggle exports into an existing case via export_case_id.
+        Admin-gating this matches /exports/batch.
+        """
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        ExportCase.create(
+            id="admins_only_case",
+            name="Admins only",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/export/front_door/start/110/end/150",
+                    headers={"remote-user": "viewer", "remote-role": "viewer"},
+                    json={"export_case_id": "admins_only_case"},
+                )
+
+        assert response.status_code == 403
+        start_export_job.assert_not_called()
+        assert Export.select().count() == 0
+
+    def test_single_export_non_admin_can_still_export_without_case(self):
+        """Regression guard: the admin gate only applies to export_case_id,
+        not to single exports in general. Non-admins should still be able
+        to start a single export for a camera they have access to.
+        """
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/export/front_door/start/110/end/150",
+                    headers={"remote-user": "viewer", "remote-role": "viewer"},
+                    json={},
+                )
+
+        assert response.status_code == 202
+        assert response.json()["success"] is True
