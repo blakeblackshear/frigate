@@ -1068,9 +1068,7 @@ function CaseAddExportDialog({
 
     setIsAdding(true);
     try {
-      await Promise.all(
-        selectedIds.map((id) => onAssign(id, exportCase.id)),
-      );
+      await Promise.all(selectedIds.map((id) => onAssign(id, exportCase.id)));
       onClose();
     } finally {
       setIsAdding(false);
