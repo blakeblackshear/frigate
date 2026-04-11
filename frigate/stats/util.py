@@ -205,11 +205,23 @@ async def set_bandwidth_stats(config: FrigateConfig, all_stats: dict[str, Any]) 
         all_stats["bandwidth_usages"] = bandwidth_stats
 
 
+def _detector_uses_nvidia_gpu(detector) -> bool:
+    """Check if a detector is configured to use an NVIDIA GPU."""
+    if detector.type == "tensorrt":
+        return True
+    if detector.type == "onnx":
+        device = str(getattr(detector, "device", "")).lower()
+        if device in ("tensorrt", "cuda"):
+            return True
+    return False
+
+
 async def set_gpu_stats(
     config: FrigateConfig, all_stats: dict[str, Any], hwaccel_errors: list[str]
 ) -> None:
     """Parse GPUs from hwaccel args and use for stats."""
     hwaccel_args = []
+    nvidia_stats_collected = False
 
     for camera in config.cameras.values():
         args = camera.ffmpeg.hwaccel_args
@@ -237,6 +249,7 @@ async def set_gpu_stats(
             stats["error-gpu"] = {"gpu": "", "mem": ""}
         elif "cuvid" in args or "nvidia" in args:
             # nvidia GPU
+            nvidia_stats_collected = True
             nvidia_usage = get_nvidia_gpu_stats()
 
             if nvidia_usage:
@@ -296,6 +309,29 @@ async def set_gpu_stats(
         elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
             stats["rpi-v4l2m2m"] = {"gpu": "", "mem": ""}
+
+    # Report NVIDIA GPU stats when an NVIDIA-backed detector (TensorRT or
+    # ONNX with CUDA/TensorRT EP) is configured but camera decode uses a
+    # different accelerator (e.g., Intel VAAPI). Without this, split-GPU
+    # setups never call get_nvidia_gpu_stats() because the hwaccel_args
+    # loop only sees the decode accelerator, not the detector device.
+    if not nvidia_stats_collected:
+        for detector in config.detectors.values():
+            if _detector_uses_nvidia_gpu(detector):
+                nvidia_usage = get_nvidia_gpu_stats()
+
+                if nvidia_usage:
+                    for i in range(len(nvidia_usage)):
+                        stats[nvidia_usage[i]["name"]] = {
+                            "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
+                            "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
+                            "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
+                            "dec": str(round(float(nvidia_usage[i]["dec"]), 2)) + "%",
+                            "temp": str(nvidia_usage[i]["temp"]),
+                        }
+                else:
+                    stats["nvidia-gpu"] = {"gpu": "", "mem": ""}
+                break
 
     if stats:
         all_stats["gpu_usages"] = stats
