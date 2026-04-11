@@ -30,4 +30,29 @@ class StartExportResponse(BaseModel):
     )
 
 
+class BatchExportResultModel(BaseModel):
+    """Per-camera result for a batch export request."""
+
+    camera: str = Field(description="Camera name for this export attempt")
+    export_id: Optional[str] = Field(
+        default=None,
+        description="The export ID when the export was successfully queued",
+    )
+    success: bool = Field(description="Whether the export was successfully queued")
+    error: Optional[str] = Field(
+        default=None,
+        description="Validation or queueing error for this camera, if any",
+    )
+
+
+class BatchExportResponse(BaseModel):
+    """Response model for starting a multi-camera export batch."""
+
+    export_case_id: str = Field(description="Export case ID associated with the batch")
+    export_ids: List[str] = Field(description="Export IDs successfully queued")
+    results: List[BatchExportResultModel] = Field(
+        description="Per-camera batch export results"
+    )
+
+
 ExportsResponse = List[ExportModel]
