@@ -2724,6 +2724,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /exports/batch:
+    post:
+      tags:
+        - Export
+      summary: Start multi-camera recording export
+      description: >-
+        Starts recording exports for multiple cameras for the same time range and
+        assigns them to a single export case.
+      operationId: export_recordings_batch_exports_batch_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchExportBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchExportResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
   /cases:
     get:
       tags:
@@ -6501,6 +6529,106 @@ components:
       required:
         - recognizedLicensePlate
       title: EventsLPRBody
+    BatchExportBody:
+      properties:
+        start_time:
+          type: number
+          title: Start time
+        end_time:
+          type: number
+          title: End time
+        camera_ids:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          title: Camera IDs
+        name:
+          anyOf:
+            - type: string
+              maxLength: 256
+            - type: "null"
+          title: Friendly name template
+          description: Base export name. Each export is saved as '<name> - <camera>'
+        export_case_id:
+          anyOf:
+            - type: string
+              maxLength: 30
+            - type: "null"
+          title: Export case ID
+          description: Existing export case ID to assign all exports to
+        new_case_name:
+          anyOf:
+            - type: string
+              maxLength: 100
+            - type: "null"
+          title: New case name
+          description: Name of a new export case to create when export_case_id is omitted
+        new_case_description:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: New case description
+          description: Optional description for a newly created export case
+      type: object
+      required:
+        - start_time
+        - end_time
+        - camera_ids
+      title: BatchExportBody
+    BatchExportResponse:
+      properties:
+        export_case_id:
+          type: string
+          title: Export Case Id
+          description: Export case ID associated with the batch
+        export_ids:
+          items:
+            type: string
+          type: array
+          title: Export Ids
+          description: Export IDs successfully queued
+        results:
+          items:
+            $ref: "#/components/schemas/BatchExportResultModel"
+          type: array
+          title: Results
+          description: Per-camera batch export results
+      type: object
+      required:
+        - export_case_id
+        - export_ids
+        - results
+      title: BatchExportResponse
+      description: Response model for starting a multi-camera export batch.
+    BatchExportResultModel:
+      properties:
+        camera:
+          type: string
+          title: Camera
+          description: Camera name for this export attempt
+        export_id:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Export Id
+          description: The export ID when the export was successfully queued
+        success:
+          type: boolean
+          title: Success
+          description: Whether the export was successfully queued
+        error:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Error
+          description: Validation or queueing error for this camera, if any
+      type: object
+      required:
+        - camera
+        - success
+      title: BatchExportResultModel
+      description: Per-camera result for a batch export request.
     EventsSubLabelBody:
       properties:
         subLabel:
