@@ -48,7 +48,13 @@ import { isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { LuFolderX } from "react-icons/lu";
+import {
+  LuFolderPlus,
+  LuFolderX,
+  LuPencil,
+  LuPlus,
+  LuTrash2,
+} from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 import ExportFilterGroup from "@/components/filter/ExportFilterGroup";
@@ -74,12 +80,25 @@ function Exports() {
   const { data: activeExportJobs } = useSWR<ExportJob[]>("jobs/export", {
     refreshInterval: 2000,
   });
+  // Keep polling exports while there are queued/running jobs OR while any
+  // existing export is still marked in_progress. Without the second clause,
+  // a stale in_progress=true snapshot can stick if the activeExportJobs poll
+  // clears before the rawExports poll fires — SWR cancels the pending
+  // rawExports refresh and the UI freezes on spinners until a manual reload.
   const { data: rawExports, mutate: updateExports } = useSWR<Export[]>(
     exportSearchParams && Object.keys(exportSearchParams).length > 0
       ? ["exports", exportSearchParams]
       : "exports",
     {
-      refreshInterval: (activeExportJobs?.length ?? 0) > 0 ? 2000 : 0,
+      refreshInterval: (latestExports) => {
+        if ((activeExportJobs?.length ?? 0) > 0) {
+          return 2000;
+        }
+        if ((latestExports ?? []).some((exp) => exp.in_progress)) {
+          return 2000;
+        }
+        return 0;
+      },
     },
   );
 
@@ -352,6 +371,29 @@ function Exports() {
     [mutate, t],
   );
 
+  const handleRemoveExportFromCase = useCallback(
+    async (exportedRecording: Export) => {
+      try {
+        await axios.patch(`export/${exportedRecording.id}/case`, {
+          export_case_id: null,
+        });
+        mutate();
+      } catch (error) {
+        const apiError = error as {
+          response?: { data?: { message?: string; detail?: string } };
+        };
+        const errorMessage =
+          apiError.response?.data?.message ||
+          apiError.response?.data?.detail ||
+          "Unknown error";
+        toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
+          position: "top-center",
+        });
+      }
+    },
+    [mutate, t],
+  );
+
   const resetCaseDialog = useCallback(() => {
     setExportToAssign(undefined);
   }, []);
@@ -515,11 +557,13 @@ function Exports() {
               onUpdateFilter={setExportFilter}
             />
             <Button
+              className="flex items-center gap-2.5 rounded-lg"
               variant="default"
               size="sm"
               onClick={() => setCaseDialog({ mode: "create" })}
             >
-              {t("toolbar.newCase")}
+              <LuFolderPlus className="size-4 text-secondary-foreground" />
+              <div className="text-primary">{t("toolbar.newCase")}</div>
             </Button>
           </div>
         )}
@@ -530,6 +574,7 @@ function Exports() {
               size="sm"
               onClick={() => setCaseForAddExport(selectedCase)}
             >
+              <LuPlus className="size-4 text-secondary-foreground" />
               <div className="text-primary">{t("toolbar.addExport")}</div>
             </Button>
             <Button
@@ -539,6 +584,7 @@ function Exports() {
                 setCaseDialog({ mode: "edit", exportCase: selectedCase })
               }
             >
+              <LuPencil className="size-4 text-secondary-foreground" />
               <div className="text-primary">{t("toolbar.editCase")}</div>
             </Button>
             <Button
@@ -546,6 +592,7 @@ function Exports() {
               size="sm"
               onClick={() => setCaseToDelete(selectedCase)}
             >
+              <LuTrash2 className="size-4 text-secondary-foreground" />
               <div className="text-primary">{t("toolbar.deleteCase")}</div>
             </Button>
           </div>
@@ -564,6 +611,7 @@ function Exports() {
           renameClip={onHandleRename}
           setDeleteClip={setDeleteClip}
           onAssignToCase={setExportToAssign}
+          onRemoveFromCase={handleRemoveExportFromCase}
           onAddExport={() => setCaseForAddExport(selectedCase)}
         />
       ) : (
@@ -730,6 +778,7 @@ type CaseViewProps = {
   renameClip: (id: string, update: string) => void;
   setDeleteClip: (d: DeleteClipType | undefined) => void;
   onAssignToCase: (e: Export) => void;
+  onRemoveFromCase: (e: Export) => void;
   onAddExport: () => void;
 };
 function CaseView({
@@ -743,6 +792,7 @@ function CaseView({
   renameClip,
   setDeleteClip,
   onAssignToCase,
+  onRemoveFromCase,
   onAddExport,
 }: CaseViewProps) {
   const { t } = useTranslation(["views/exports", "common"]);
@@ -868,6 +918,7 @@ function CaseView({
                 setDeleteClip({ file, exportName })
               }
               onAssignToCase={onAssignToCase}
+              onRemoveFromCase={onRemoveFromCase}
             />
           ))}
         </div>
@@ -939,7 +990,7 @@ function CaseEditorDialog({
               {t("button.cancel", { ns: "common" })}
             </Button>
             <Button
-              variant="default"
+              variant="select"
               disabled={name.trim().length === 0}
               onClick={() =>
                 void onSave({
@@ -979,11 +1030,15 @@ function CaseAddExportDialog({
   }, [exportCase?.id]);
 
   const filteredExports = useMemo(() => {
+    const completedExports = availableExports.filter(
+      (exportItem) => !exportItem.in_progress,
+    );
+
     if (!search) {
-      return availableExports;
+      return completedExports;
     }
 
-    return availableExports.filter((exportItem) =>
+    return completedExports.filter((exportItem) =>
       exportItem.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [availableExports, search]);

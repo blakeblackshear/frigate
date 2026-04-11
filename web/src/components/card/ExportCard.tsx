@@ -27,11 +27,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { FaFolder } from "react-icons/fa";
+import { FaFolder, FaVideo } from "react-icons/fa";
+import { HiSquare2Stack } from "react-icons/hi2";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
-import { useFormattedTimestamp, useTimeFormat } from "@/hooks/use-date-utils";
-import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
 
 type CaseCardProps = {
   className: string;
@@ -74,12 +72,14 @@ export function CaseCard({
         <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/80 to-muted" />
       )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute left-2 top-2 z-20 flex flex-wrap gap-2 text-xs text-white">
-        <div className="rounded-full bg-black/55 px-2 py-1">
-          {t("caseCard.exportCount", { count: exports.length })}
+      <div className="absolute right-1 top-1 z-40 flex items-center gap-2 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+        <div className="flex items-center gap-1">
+          <HiSquare2Stack className="size-3" />
+          <div>{exports.length}</div>
         </div>
-        <div className="rounded-full bg-black/55 px-2 py-1">
-          {t("caseCard.cameraCount", { count: cameraCount })}
+        <div className="flex items-center gap-1">
+          <FaVideo className="size-3" />
+          <div>{cameraCount}</div>
         </div>
       </div>
       <div className="absolute inset-x-2 bottom-2 z-20 text-white">
@@ -104,6 +104,7 @@ type ExportCardProps = {
   onRename: (original: string, update: string) => void;
   onDelete: ({ file, exportName }: DeleteClipType) => void;
   onAssignToCase?: (selected: Export) => void;
+  onRemoveFromCase?: (selected: Export) => void;
 };
 export function ExportCard({
   className,
@@ -112,19 +113,10 @@ export function ExportCard({
   onRename,
   onDelete,
   onAssignToCase,
+  onRemoveFromCase,
 }: ExportCardProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
-  const cameraName = useCameraFriendlyName(exportedRecording.camera);
-  const { data: config } = useSWR<FrigateConfig>("config");
-  const timeFormat = useTimeFormat(config);
-  const formattedDate = useFormattedTimestamp(
-    exportedRecording.date,
-    t(`time.formattedTimestampMonthDayYearHourMinute.${timeFormat}`, {
-      ns: "common",
-    }),
-    config?.ui.timezone,
-  );
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
@@ -291,6 +283,18 @@ export function ExportCard({
                     {t("tooltip.assignToCase")}
                   </DropdownMenuItem>
                 )}
+                {isAdmin && onRemoveFromCase && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("tooltip.removeFromCase")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveFromCase(exportedRecording);
+                    }}
+                  >
+                    {t("tooltip.removeFromCase")}
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && (
                   <DropdownMenuItem
                     className="cursor-pointer"
@@ -328,15 +332,11 @@ export function ExportCard({
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="absolute left-3 top-3 z-30 rounded-full bg-black/55 px-2 py-1 text-xs text-white">
-          {cameraName}
-        </div>
         <ImageShadowOverlay />
         <div className="absolute bottom-2 left-3 z-30 text-white">
           <div className="flex items-end smart-capitalize">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>
-          <div className="mt-1 text-xs text-white/80">{formattedDate}</div>
         </div>
       </div>
     </>
@@ -354,15 +354,6 @@ export function ActiveExportJobCard({
 }: ActiveExportJobCardProps) {
   const { t } = useTranslation(["views/exports", "common"]);
   const cameraName = useCameraFriendlyName(job.camera);
-  const { data: config } = useSWR<FrigateConfig>("config");
-  const timeFormat = useTimeFormat(config);
-  const formattedDate = useFormattedTimestamp(
-    job.request_start_time,
-    t(`time.formattedTimestampMonthDayYearHourMinute.${timeFormat}`, {
-      ns: "common",
-    }),
-    config?.ui.timezone,
-  );
   const displayName = useMemo(() => {
     if (job.name && job.name.length > 0) {
       return job.name.replaceAll("_", " ");
@@ -382,16 +373,12 @@ export function ActiveExportJobCard({
         className,
       )}
     >
-      <div className="absolute left-3 top-3 z-30 rounded-full bg-black/55 px-2 py-1 text-xs text-white">
-        {cameraName}
-      </div>
       <div className="absolute right-3 top-3 z-30 rounded-full bg-selected/90 px-2 py-1 text-xs text-selected-foreground">
         {statusLabel}
       </div>
       <div className="flex flex-col items-center gap-3 px-6 text-center">
         <ActivityIndicator />
         <div className="text-sm font-medium text-primary">{displayName}</div>
-        <div className="text-xs text-muted-foreground">{formattedDate}</div>
       </div>
     </div>
   );

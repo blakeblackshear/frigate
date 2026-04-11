@@ -20,7 +20,8 @@
     "downloadVideo": "Download video",
     "editName": "Edit name",
     "deleteExport": "Delete export",
-    "assignToCase": "Add to case"
+    "assignToCase": "Add to case",
+    "removeFromCase": "Remove from case"
   },
   "toolbar": {
     "newCase": "New Case",
@@ -49,10 +50,6 @@
     "descriptionLabel": "Description"
   },
   "caseCard": {
-    "exportCount_one": "1 export",
-    "exportCount_other": "{{count}} exports",
-    "cameraCount_one": "1 camera",
-    "cameraCount_other": "{{count}} cameras",
     "emptyCase": "No exports yet"
   },
   "jobCard": {
