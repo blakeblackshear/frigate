@@ -28,6 +28,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { FaFolder } from "react-icons/fa";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { useFormattedTimestamp, useTimeFormat } from "@/hooks/use-date-utils";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type CaseCardProps = {
   className: string;
@@ -41,8 +45,13 @@ export function CaseCard({
   exports,
   onSelect,
 }: CaseCardProps) {
+  const { t } = useTranslation(["views/exports"]);
   const firstExport = useMemo(
     () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
+    [exports],
+  );
+  const cameraCount = useMemo(
+    () => new Set(exports.map((exp) => exp.camera)).size,
     [exports],
   );
 
@@ -61,10 +70,28 @@ export function CaseCard({
           alt=""
         />
       )}
+      {!firstExport && (
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/80 to-muted" />
+      )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute bottom-2 left-2 z-20 flex items-center justify-start gap-2 text-white">
-        <FaFolder />
-        <div className="capitalize">{exportCase.name}</div>
+      <div className="absolute left-2 top-2 z-20 flex flex-wrap gap-2 text-xs text-white">
+        <div className="rounded-full bg-black/55 px-2 py-1">
+          {t("caseCard.exportCount", { count: exports.length })}
+        </div>
+        <div className="rounded-full bg-black/55 px-2 py-1">
+          {t("caseCard.cameraCount", { count: cameraCount })}
+        </div>
+      </div>
+      <div className="absolute inset-x-2 bottom-2 z-20 text-white">
+        <div className="flex items-center justify-start gap-2">
+          <FaFolder />
+          <div className="truncate smart-capitalize">{exportCase.name}</div>
+        </div>
+        <div className="mt-1 line-clamp-2 text-xs text-white/80">
+          {exports.length === 0
+            ? t("caseCard.emptyCase")
+            : exportCase.description}
+        </div>
       </div>
     </div>
   );
@@ -88,6 +115,16 @@ export function ExportCard({
 }: ExportCardProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
+  const cameraName = useCameraFriendlyName(exportedRecording.camera);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timeFormat = useTimeFormat(config);
+  const formattedDate = useFormattedTimestamp(
+    exportedRecording.date,
+    t(`time.formattedTimestampMonthDayYearHourMinute.${timeFormat}`, {
+      ns: "common",
+    }),
+    config?.ui.timezone,
+  );
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
@@ -291,9 +328,15 @@ export function ExportCard({
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
+        <div className="absolute left-3 top-3 z-30 rounded-full bg-black/55 px-2 py-1 text-xs text-white">
+          {cameraName}
+        </div>
         <ImageShadowOverlay />
-        <div className="absolute bottom-2 left-3 flex items-end text-white smart-capitalize">
-          {exportedRecording.name.replaceAll("_", " ")}
+        <div className="absolute bottom-2 left-3 z-30 text-white">
+          <div className="flex items-end smart-capitalize">
+            {exportedRecording.name.replaceAll("_", " ")}
+          </div>
+          <div className="mt-1 text-xs text-white/80">{formattedDate}</div>
         </div>
       </div>
     </>

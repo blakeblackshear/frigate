@@ -270,7 +270,10 @@ export default function MotionSearchView({
   );
 
   useEffect(() => {
-    if (exportMode !== "timeline" || exportRange) {
+    if (
+      (exportMode !== "timeline" && exportMode !== "timeline_multi") ||
+      exportRange
+    ) {
       return;
     }
 
@@ -955,9 +958,25 @@ export default function MotionSearchView({
 
       <SaveExportOverlay
         className="pointer-events-none absolute inset-x-0 top-0 z-30"
-        show={exportMode === "timeline" && Boolean(exportRange)}
+        show={
+          (exportMode === "timeline" || exportMode === "timeline_multi") &&
+          Boolean(exportRange)
+        }
+        hidePreview={exportMode === "timeline_multi"}
+        saveLabel={
+          exportMode === "timeline_multi"
+            ? t("export.fromTimeline.useThisRange", { ns: "components/dialog" })
+            : undefined
+        }
         onPreview={handleExportPreview}
-        onSave={handleExportSave}
+        onSave={() => {
+          if (exportMode === "timeline_multi") {
+            setExportMode("select");
+            return;
+          }
+
+          handleExportSave();
+        }}
         onCancel={handleExportCancel}
       />
 
@@ -976,7 +995,10 @@ export default function MotionSearchView({
           noRecordingRanges={noRecordings ?? []}
           contentRef={contentRef}
           onHandlebarDraggingChange={(dragging) => setScrubbing(dragging)}
-          showExportHandles={exportMode === "timeline" && Boolean(exportRange)}
+          showExportHandles={
+            (exportMode === "timeline" || exportMode === "timeline_multi") &&
+            Boolean(exportRange)
+          }
           exportStartTime={exportRange?.after}
           exportEndTime={exportRange?.before}
           setExportStartTime={setExportStartTime}
@@ -1408,7 +1430,11 @@ export default function MotionSearchView({
                 onControllerReady={(controller) => {
                   mainControllerRef.current = controller;
                 }}
-                isScrubbing={scrubbing || exportMode == "timeline"}
+                isScrubbing={
+                  scrubbing ||
+                  exportMode == "timeline" ||
+                  exportMode == "timeline_multi"
+                }
                 supportsFullscreen={supportsFullScreen}
                 setFullResolution={setFullResolution}
                 toggleFullscreen={toggleFullscreen}

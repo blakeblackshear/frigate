@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
 import { LuBug } from "react-icons/lu";
 import { TimeRange } from "@/types/timeline";
-import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
+import { ExportContent, ExportPreviewDialog, ExportTab } from "./ExportDialog";
 import {
   DebugReplayContent,
   SaveDebugReplayOverlay,
@@ -102,6 +102,7 @@ export default function MobileReviewSettingsDrawer({
   ]);
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
+  const [exportTab, setExportTab] = useState<ExportTab>("export");
   const [selectedReplayOption, setSelectedReplayOption] = useState<
     "1" | "5" | "custom" | "timeline"
   >("1");
@@ -115,16 +116,26 @@ export default function MobileReviewSettingsDrawer({
   );
   const onStartExport = useCallback(() => {
     if (!range) {
-      toast.error(t("toast.error.noValidTimeSelected"), {
-        position: "top-center",
-      });
+      toast.error(
+        t("export.toast.error.noVaildTimeSelected", {
+          ns: "components/dialog",
+        }),
+        {
+          position: "top-center",
+        },
+      );
       return;
     }
 
     if (range.before < range.after) {
-      toast.error(t("toast.error.endTimeMustAfterStartTime"), {
-        position: "top-center",
-      });
+      toast.error(
+        t("export.toast.error.endTimeMustAfterStartTime", {
+          ns: "components/dialog",
+        }),
+        {
+          position: "top-center",
+        },
+      );
       return;
     }
 
@@ -166,7 +177,7 @@ export default function MobileReviewSettingsDrawer({
         toast.error(
           t("export.toast.error.failed", {
             ns: "components/dialog",
-            errorMessage,
+            error: errorMessage,
           }),
           {
             position: "top-center",
@@ -267,6 +278,7 @@ export default function MobileReviewSettingsDrawer({
             className="flex w-full items-center justify-center gap-2"
             aria-label={t("export")}
             onClick={() => {
+              setExportTab("export");
               setDrawerMode("export");
               setMode("select");
             }}
@@ -331,14 +343,16 @@ export default function MobileReviewSettingsDrawer({
         range={range}
         name={name}
         selectedCaseId={selectedCaseId}
+        activeTab={exportTab}
         onStartExport={onStartExport}
+        setActiveTab={setExportTab}
         setName={setName}
         setSelectedCaseId={setSelectedCaseId}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
 
-          if (mode == "timeline") {
+          if (mode == "timeline" || mode == "timeline_multi") {
             setDrawerMode("none");
           }
         }}
@@ -346,6 +360,7 @@ export default function MobileReviewSettingsDrawer({
           setMode("none");
           setRange(undefined);
           setSelectedCaseId(undefined);
+          setExportTab("export");
           setDrawerMode("select");
         }}
       />
@@ -483,9 +498,28 @@ export default function MobileReviewSettingsDrawer({
     <>
       <SaveExportOverlay
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
-        show={mode == "timeline"}
-        onSave={() => onStartExport()}
-        onCancel={() => setMode("none")}
+        show={mode == "timeline" || mode == "timeline_multi"}
+        hidePreview={mode == "timeline_multi"}
+        saveLabel={
+          mode == "timeline_multi"
+            ? t("export.fromTimeline.useThisRange", { ns: "components/dialog" })
+            : undefined
+        }
+        onSave={() => {
+          if (mode == "timeline_multi") {
+            setExportTab("multi");
+            setDrawerMode("export");
+            setMode("select");
+            return;
+          }
+
+          onStartExport();
+        }}
+        onCancel={() => {
+          setExportTab("export");
+          setRange(undefined);
+          setMode("none");
+        }}
         onPreview={() => setShowExportPreview(true)}
       />
       <SaveDebugReplayOverlay

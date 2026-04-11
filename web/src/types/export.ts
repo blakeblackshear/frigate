@@ -6,7 +6,8 @@ export type Export = {
   video_path: string;
   thumb_path: string;
   in_progress: boolean;
-  export_case?: string;
+  export_case?: string | null;
+  export_case_id?: string | null;
 };
 
 export type ExportCase = {
@@ -15,6 +16,36 @@ export type ExportCase = {
   description: string;
   created_at: number;
   updated_at: number;
+};
+
+export type BatchExportBody = {
+  start_time: number;
+  end_time: number;
+  camera_ids: string[];
+  name?: string;
+  export_case_id?: string;
+  new_case_name?: string;
+  new_case_description?: string;
+};
+
+export type BatchExportResult = {
+  camera: string;
+  export_id?: string | null;
+  success: boolean;
+  error?: string | null;
+};
+
+export type BatchExportResponse = {
+  export_case_id: string;
+  export_ids: string[];
+  results: BatchExportResult[];
+};
+
+export type CameraActivity = {
+  camera: string;
+  count: number;
+  intensity: number;
+  hasDetections: boolean;
 };
 
 export type DeleteClipType = {

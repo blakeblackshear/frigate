@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 type SaveExportOverlayProps = {
   className: string;
   show: boolean;
+  hidePreview?: boolean;
+  saveLabel?: string;
   onPreview: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -14,6 +16,8 @@ type SaveExportOverlayProps = {
 export default function SaveExportOverlay({
   className,
   show,
+  hidePreview = false,
+  saveLabel,
   onPreview,
   onSave,
   onCancel,
@@ -37,24 +41,26 @@ export default function SaveExportOverlay({
           <LuX />
           {t("button.cancel", { ns: "common" })}
         </Button>
+        {!hidePreview && (
+          <Button
+            className="flex items-center gap-1"
+            aria-label={t("export.fromTimeline.previewExport")}
+            size="sm"
+            onClick={onPreview}
+          >
+            <LuVideo />
+            {t("export.fromTimeline.previewExport")}
+          </Button>
+        )}
         <Button
           className="flex items-center gap-1"
-          aria-label={t("export.fromTimeline.previewExport")}
-          size="sm"
-          onClick={onPreview}
-        >
-          <LuVideo />
-          {t("export.fromTimeline.previewExport")}
-        </Button>
-        <Button
-          className="flex items-center gap-1"
-          aria-label={t("export.fromTimeline.saveExport")}
+          aria-label={saveLabel || t("export.fromTimeline.saveExport")}
           variant="select"
           size="sm"
           onClick={onSave}
         >
           <FaCompactDisc />
-          {t("export.fromTimeline.saveExport")}
+          {saveLabel || t("export.fromTimeline.saveExport")}
         </Button>
       </div>
     </div>

@@ -50,15 +50,40 @@
       "placeholder": "Name the Export"
     },
     "case": {
+      "newCaseOption": "Create new case",
+      "newCaseNamePlaceholder": "New case name",
+      "newCaseDescriptionPlaceholder": "Case description",
       "label": "Case",
       "placeholder": "Select a case"
     },
     "select": "Select",
     "export": "Export",
     "selectOrExport": "Select or Export",
+    "tabs": {
+      "export": "Single Camera",
+      "multiCamera": "Multi-Camera"
+    },
+    "multiCamera": {
+      "timeRange": "Time range",
+      "selectFromTimeline": "Select from Timeline",
+      "cameraSelection": "Cameras",
+      "selectedCount_one": "1 selected",
+      "selectedCount_other": "{{count}} selected",
+      "checkingActivity": "Checking camera activity...",
+      "noCameras": "No cameras available",
+      "detectionCount_one": "1 detection",
+      "detectionCount_other": "{{count}} detections",
+      "namePlaceholder": "Optional base name for these exports",
+      "exportButton_one": "Export 1 Camera",
+      "exportButton_other": "Export {{count}} Cameras"
+    },
     "toast": {
       "success": "Successfully started export. View the file in the exports page.",
       "view": "View",
+      "batchSuccess_one": "Started 1 export. Opening the case now.",
+      "batchSuccess_other": "Started {{count}} exports. Opening the case now.",
+      "batchPartial": "Started {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
+      "batchFailed": "Failed to start {{total}} exports. Failed cameras: {{failedCameras}}",
       "error": {
         "failed": "Failed to start export: {{error}}",
         "endTimeMustAfterStartTime": "End time must be after start time",
@@ -67,7 +92,8 @@
     },
     "fromTimeline": {
       "saveExport": "Save Export",
-      "previewExport": "Preview Export"
+      "previewExport": "Preview Export",
+      "useThisRange": "Use This Range"
     }
   },
   "streaming": {

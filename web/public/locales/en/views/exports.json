@@ -22,11 +22,23 @@
     "deleteExport": "Delete export",
     "assignToCase": "Add to case"
   },
+  "toolbar": {
+    "newCase": "New Case",
+    "addExport": "Add Export",
+    "editCase": "Edit Case",
+    "deleteCase": "Delete Case"
+  },
   "toast": {
     "error": {
       "renameExportFailed": "Failed to rename export: {{errorMessage}}",
-      "assignCaseFailed": "Failed to update case assignment: {{errorMessage}}"
+      "assignCaseFailed": "Failed to update case assignment: {{errorMessage}}",
+      "caseSaveFailed": "Failed to save case: {{errorMessage}}",
+      "caseDeleteFailed": "Failed to delete case: {{errorMessage}}"
     }
+  },
+  "deleteCase": {
+    "label": "Delete Case",
+    "desc": "Are you sure you want to delete {{caseName}}? Exports will remain available as uncategorized exports."
   },
   "caseDialog": {
     "title": "Add to case",
@@ -35,5 +47,36 @@
     "newCaseOption": "Create new case",
     "nameLabel": "Case name",
     "descriptionLabel": "Description"
+  },
+  "caseCard": {
+    "exportCount_one": "1 export",
+    "exportCount_other": "{{count}} exports",
+    "cameraCount_one": "1 camera",
+    "cameraCount_other": "{{count}} cameras",
+    "emptyCase": "No exports yet"
+  },
+  "caseView": {
+    "noDescription": "No description",
+    "createdAt": "Created {{value}}",
+    "exportCount_one": "1 export",
+    "exportCount_other": "{{count}} exports",
+    "cameraCount_one": "1 camera",
+    "cameraCount_other": "{{count}} cameras",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "emptyTitle": "This case is empty",
+    "emptyDescription": "Add existing uncategorized exports to keep the case organized.",
+    "emptyDescriptionNoExports": "There are no uncategorized exports available to add yet."
+  },
+  "caseEditor": {
+    "createTitle": "Create Case",
+    "editTitle": "Edit Case",
+    "namePlaceholder": "Case name",
+    "descriptionPlaceholder": "Add notes or context for this case"
+  },
+  "addExportDialog": {
+    "title": "Add Export to {{caseName}}",
+    "searchPlaceholder": "Search uncategorized exports",
+    "empty": "No uncategorized exports match this search."
   }
 }
