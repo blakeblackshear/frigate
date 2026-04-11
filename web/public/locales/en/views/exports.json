@@ -79,6 +79,9 @@
   "addExportDialog": {
     "title": "Add Export to {{caseName}}",
     "searchPlaceholder": "Search uncategorized exports",
-    "empty": "No uncategorized exports match this search."
+    "empty": "No uncategorized exports match this search.",
+    "addButton_one": "Add 1 Export",
+    "addButton_other": "Add {{count}} Exports",
+    "adding": "Adding..."
   }
 }

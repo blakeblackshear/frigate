@@ -14,7 +14,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1024,9 +1029,14 @@ function CaseAddExportDialog({
 }: CaseAddExportDialogProps) {
   const { t } = useTranslation(["views/exports", "common"]);
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isAdding, setIsAdding] = useState(false);
 
+  // Reset dialog state whenever the target case changes or the dialog reopens.
   useEffect(() => {
     setSearch("");
+    setSelectedIds([]);
+    setIsAdding(false);
   }, [exportCase?.id]);
 
   const filteredExports = useMemo(() => {
@@ -1043,51 +1053,73 @@ function CaseAddExportDialog({
     );
   }, [availableExports, search]);
 
+  const toggleSelection = useCallback((exportId: string) => {
+    setSelectedIds((previous) =>
+      previous.includes(exportId)
+        ? previous.filter((id) => id !== exportId)
+        : [...previous, exportId],
+    );
+  }, []);
+
+  const handleAdd = useCallback(async () => {
+    if (!exportCase || selectedIds.length === 0 || isAdding) {
+      return;
+    }
+
+    setIsAdding(true);
+    try {
+      await Promise.all(
+        selectedIds.map((id) => onAssign(id, exportCase.id)),
+      );
+      onClose();
+    } finally {
+      setIsAdding(false);
+    }
+  }, [exportCase, isAdding, onAssign, onClose, selectedIds]);
+
   return (
     <Dialog
       open={exportCase != undefined}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="max-h-[80dvh] overflow-hidden">
+      <DialogContent className="flex max-h-[80dvh] flex-col overflow-hidden">
         <DialogTitle>
           {t("addExportDialog.title", { caseName: exportCase?.name })}
         </DialogTitle>
-        <div className="space-y-3 overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
           <Input
             placeholder={t("addExportDialog.searchPlaceholder")}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
-          <div className="scrollbar-container max-h-[50dvh] space-y-2 overflow-y-auto">
+          <div className="scrollbar-container min-h-0 flex-1 space-y-2 overflow-y-auto py-1 pr-1">
             {filteredExports.length > 0 ? (
-              filteredExports.map((exportItem) => (
-                <div
-                  key={exportItem.id}
-                  className="flex items-center justify-between rounded-lg border border-border p-3"
-                >
-                  <div className="min-w-0 pr-4">
-                    <div className="truncate font-medium">
-                      {exportItem.name}
-                    </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {exportItem.camera.replaceAll("_", " ")}
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="select"
-                    onClick={() => {
-                      if (!exportCase) {
-                        return;
-                      }
-
-                      void onAssign(exportItem.id, exportCase.id).then(onClose);
-                    }}
+              filteredExports.map((exportItem) => {
+                const isSelected = selectedIds.includes(exportItem.id);
+                return (
+                  <button
+                    key={exportItem.id}
+                    type="button"
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition-colors",
+                      isSelected
+                        ? "border-selected bg-selected/10 ring-1 ring-selected"
+                        : "border-transparent bg-secondary/40 hover:bg-secondary/70",
+                    )}
+                    onClick={() => toggleSelection(exportItem.id)}
                   >
-                    {t("button.add", { ns: "common" })}
-                  </Button>
-                </div>
-              ))
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium text-primary">
+                        {exportItem.name}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {exportItem.camera.replaceAll("_", " ")}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })
             ) : (
               <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
                 {t("addExportDialog.empty")}
@@ -1095,6 +1127,23 @@ function CaseAddExportDialog({
             )}
           </div>
         </div>
+        <DialogFooter className="flex-row justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            {t("button.cancel", { ns: "common" })}
+          </Button>
+          <Button
+            variant="select"
+            size="sm"
+            disabled={selectedIds.length === 0 || isAdding}
+            onClick={() => void handleAdd()}
+          >
+            {isAdding
+              ? t("addExportDialog.adding")
+              : t("addExportDialog.addButton", {
+                  count: selectedIds.length || 1,
+                })}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
