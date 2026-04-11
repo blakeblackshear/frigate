@@ -13,7 +13,7 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { DeleteClipType, Export, ExportCase } from "@/types/export";
+import { DeleteClipType, Export, ExportCase, ExportJob } from "@/types/export";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
@@ -340,5 +340,59 @@ export function ExportCard({
         </div>
       </div>
     </>
+  );
+}
+
+type ActiveExportJobCardProps = {
+  className?: string;
+  job: ExportJob;
+};
+
+export function ActiveExportJobCard({
+  className = "",
+  job,
+}: ActiveExportJobCardProps) {
+  const { t } = useTranslation(["views/exports", "common"]);
+  const cameraName = useCameraFriendlyName(job.camera);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timeFormat = useTimeFormat(config);
+  const formattedDate = useFormattedTimestamp(
+    job.request_start_time,
+    t(`time.formattedTimestampMonthDayYearHourMinute.${timeFormat}`, {
+      ns: "common",
+    }),
+    config?.ui.timezone,
+  );
+  const displayName = useMemo(() => {
+    if (job.name && job.name.length > 0) {
+      return job.name.replaceAll("_", " ");
+    }
+
+    return t("jobCard.defaultName", {
+      camera: cameraName,
+    });
+  }, [cameraName, job.name, t]);
+  const statusLabel =
+    job.status === "queued" ? t("jobCard.queued") : t("jobCard.running");
+
+  return (
+    <div
+      className={cn(
+        "relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-secondary/40 md:rounded-2xl",
+        className,
+      )}
+    >
+      <div className="absolute left-3 top-3 z-30 rounded-full bg-black/55 px-2 py-1 text-xs text-white">
+        {cameraName}
+      </div>
+      <div className="absolute right-3 top-3 z-30 rounded-full bg-selected/90 px-2 py-1 text-xs text-selected-foreground">
+        {statusLabel}
+      </div>
+      <div className="flex flex-col items-center gap-3 px-6 text-center">
+        <ActivityIndicator />
+        <div className="text-sm font-medium text-primary">{displayName}</div>
+        <div className="text-xs text-muted-foreground">{formattedDate}</div>
+      </div>
+    </div>
   );
 }

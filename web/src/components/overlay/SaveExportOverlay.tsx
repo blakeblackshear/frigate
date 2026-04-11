@@ -9,6 +9,7 @@ type SaveExportOverlayProps = {
   show: boolean;
   hidePreview?: boolean;
   saveLabel?: string;
+  isSaving?: boolean;
   onPreview: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -18,6 +19,7 @@ export default function SaveExportOverlay({
   show,
   hidePreview = false,
   saveLabel,
+  isSaving = false,
   onPreview,
   onSave,
   onCancel,
@@ -36,6 +38,7 @@ export default function SaveExportOverlay({
           className="flex items-center gap-1 text-primary"
           aria-label={t("button.cancel", { ns: "common" })}
           size="sm"
+          disabled={isSaving}
           onClick={onCancel}
         >
           <LuX />
@@ -46,6 +49,7 @@ export default function SaveExportOverlay({
             className="flex items-center gap-1"
             aria-label={t("export.fromTimeline.previewExport")}
             size="sm"
+            disabled={isSaving}
             onClick={onPreview}
           >
             <LuVideo />
@@ -57,10 +61,13 @@ export default function SaveExportOverlay({
           aria-label={saveLabel || t("export.fromTimeline.saveExport")}
           variant="select"
           size="sm"
+          disabled={isSaving}
           onClick={onSave}
         >
           <FaCompactDisc />
-          {saveLabel || t("export.fromTimeline.saveExport")}
+          {isSaving
+            ? t("export.fromTimeline.queueingExport")
+            : saveLabel || t("export.fromTimeline.saveExport")}
         </Button>
       </div>
     </div>

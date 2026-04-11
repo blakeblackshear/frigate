@@ -32,20 +32,55 @@ export type BatchExportResult = {
   camera: string;
   export_id?: string | null;
   success: boolean;
+  status?: string | null;
   error?: string | null;
 };
 
 export type BatchExportResponse = {
-  export_case_id: string;
+  export_case_id?: string | null;
   export_ids: string[];
   results: BatchExportResult[];
+};
+
+export type StartExportResponse = {
+  success: boolean;
+  message: string;
+  export_id?: string | null;
+  status?: string | null;
+};
+
+export type ExportJob = {
+  id: string;
+  job_type: string;
+  status: string;
+  camera: string;
+  name?: string | null;
+  export_case_id?: string | null;
+  request_start_time: number;
+  request_end_time: number;
+  start_time?: number | null;
+  end_time?: number | null;
+  error_message?: string | null;
+  results?: {
+    export_id?: string;
+    export_case_id?: string | null;
+    video_path?: string;
+    thumb_path?: string;
+  } | null;
+};
+
+export type CameraActivitySegment = {
+  /** Fractional start position within the time range, 0-1 inclusive. */
+  start: number;
+  /** Fractional end position within the time range, 0-1 inclusive. */
+  end: number;
 };
 
 export type CameraActivity = {
   camera: string;
   count: number;
-  intensity: number;
   hasDetections: boolean;
+  segments: CameraActivitySegment[];
 };
 
 export type DeleteClipType = {

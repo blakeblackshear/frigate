@@ -1,5 +1,9 @@
 import { baseUrl } from "@/api/baseUrl";
-import { CaseCard, ExportCard } from "@/components/card/ExportCard";
+import {
+  ActiveExportJobCard,
+  CaseCard,
+  ExportCard,
+} from "@/components/card/ExportCard";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -26,6 +30,7 @@ import {
   Export,
   ExportCase,
   ExportFilter,
+  ExportJob,
 } from "@/types/export";
 import OptionAndInputDialog from "@/components/overlay/dialog/OptionAndInputDialog";
 import axios from "axios";
@@ -66,11 +71,49 @@ function Exports() {
   // Data
 
   const { data: cases, mutate: updateCases } = useSWR<ExportCase[]>("cases");
+  const { data: activeExportJobs } = useSWR<ExportJob[]>("jobs/export", {
+    refreshInterval: 2000,
+  });
   const { data: rawExports, mutate: updateExports } = useSWR<Export[]>(
     exportSearchParams && Object.keys(exportSearchParams).length > 0
       ? ["exports", exportSearchParams]
       : "exports",
+    {
+      refreshInterval: (activeExportJobs?.length ?? 0) > 0 ? 2000 : 0,
+    },
   );
+
+  const visibleActiveJobs = useMemo<ExportJob[]>(() => {
+    const existingExportIds = new Set((rawExports ?? []).map((exp) => exp.id));
+    const filteredCameras = exportFilter?.cameras;
+
+    return (activeExportJobs ?? []).filter((job) => {
+      if (existingExportIds.has(job.id)) {
+        return false;
+      }
+
+      if (filteredCameras && filteredCameras.length > 0) {
+        return filteredCameras.includes(job.camera);
+      }
+
+      return true;
+    });
+  }, [activeExportJobs, exportFilter?.cameras, rawExports]);
+
+  const activeJobsByCase = useMemo<{ [caseId: string]: ExportJob[] }>(() => {
+    const grouped: { [caseId: string]: ExportJob[] } = {};
+
+    visibleActiveJobs.forEach((job) => {
+      const caseId = job.export_case_id ?? "none";
+      if (!grouped[caseId]) {
+        grouped[caseId] = [];
+      }
+
+      grouped[caseId].push(job);
+    });
+
+    return grouped;
+  }, [visibleActiveJobs]);
 
   const exportsByCase = useMemo<{ [caseId: string]: Export[] }>(() => {
     const grouped: { [caseId: string]: Export[] } = {};
@@ -515,6 +558,7 @@ function Exports() {
           selectedCase={selectedCase}
           exports={exportsByCase[selectedCase.id] || []}
           availableExports={uncategorizedExports}
+          activeJobs={activeJobsByCase[selectedCase.id] || []}
           search={search}
           setSelected={setSelected}
           renameClip={onHandleRename}
@@ -529,6 +573,7 @@ function Exports() {
           cases={filteredCases}
           exports={exports}
           exportsByCase={exportsByCase}
+          activeJobs={activeJobsByCase["none"] || []}
           setSelectedCaseId={setSelectedCaseId}
           setSelected={setSelected}
           renameClip={onHandleRename}
@@ -546,6 +591,7 @@ type AllExportsViewProps = {
   cases?: ExportCase[];
   exports: Export[];
   exportsByCase: { [caseId: string]: Export[] };
+  activeJobs: ExportJob[];
   setSelectedCaseId: (id: string) => void;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
@@ -558,6 +604,7 @@ function AllExportsView({
   cases,
   exports,
   exportsByCase,
+  activeJobs,
   setSelectedCaseId,
   setSelected,
   renameClip,
@@ -594,9 +641,24 @@ function AllExportsView({
     );
   }, [exports, search]);
 
+  const filteredActiveJobs = useMemo<ExportJob[]>(() => {
+    if (!search) {
+      return activeJobs;
+    }
+
+    return activeJobs.filter((job) =>
+      (job.name || job.camera)
+        .toLowerCase()
+        .replaceAll("_", " ")
+        .includes(search.toLowerCase()),
+    );
+  }, [activeJobs, search]);
+
   return (
     <div className="w-full overflow-hidden">
-      {filteredCases?.length || filteredExports.length ? (
+      {filteredCases?.length ||
+      filteredActiveJobs.length ||
+      filteredExports.length ? (
         <div
           ref={contentRef}
           className="scrollbar-container flex size-full flex-col gap-4 overflow-y-auto"
@@ -620,13 +682,16 @@ function AllExportsView({
             </div>
           )}
 
-          {filteredExports.length > 0 && (
+          {(filteredActiveJobs.length > 0 || filteredExports.length > 0) && (
             <div className="space-y-4">
               <Heading as="h4">{t("headings.uncategorizedExports")}</Heading>
               <div
                 ref={contentRef}
                 className="scrollbar-container grid gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               >
+                {filteredActiveJobs.map((job) => (
+                  <ActiveExportJobCard key={job.id} job={job} />
+                ))}
                 {filteredExports.map((item) => (
                   <ExportCard
                     key={item.name}
@@ -659,6 +724,7 @@ type CaseViewProps = {
   selectedCase: ExportCase;
   exports?: Export[];
   availableExports: Export[];
+  activeJobs: ExportJob[];
   search: string;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
@@ -671,6 +737,7 @@ function CaseView({
   selectedCase,
   exports,
   availableExports,
+  activeJobs,
   search,
   setSelected,
   renameClip,
@@ -703,6 +770,23 @@ function CaseView({
         .includes(search.toLowerCase()),
     );
   }, [selectedCase, exports, search]);
+
+  const filteredActiveJobs = useMemo<ExportJob[]>(() => {
+    const caseJobs = activeJobs.filter(
+      (job) => job.export_case_id === selectedCase.id,
+    );
+
+    if (!search) {
+      return caseJobs;
+    }
+
+    return caseJobs.filter((job) =>
+      (job.name || job.camera)
+        .toLowerCase()
+        .replaceAll("_", " ")
+        .includes(search.toLowerCase()),
+    );
+  }, [activeJobs, search, selectedCase.id]);
 
   const cameraCount = useMemo(
     () => new Set(filteredExports.map((exp) => exp.camera)).size,
@@ -765,11 +849,14 @@ function CaseView({
           </div>
         )}
       </div>
-      {filteredExports.length > 0 ? (
+      {filteredExports.length > 0 || filteredActiveJobs.length > 0 ? (
         <div
           ref={contentRef}
           className="scrollbar-container grid min-h-0 flex-1 content-start gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
+          {filteredActiveJobs.map((job) => (
+            <ActiveExportJobCard key={job.id} job={job} />
+          ))}
           {filteredExports.map((item) => (
             <ExportCard
               key={item.id}

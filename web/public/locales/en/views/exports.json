@@ -55,6 +55,11 @@
     "cameraCount_other": "{{count}} cameras",
     "emptyCase": "No exports yet"
   },
+  "jobCard": {
+    "defaultName": "{{camera}} export",
+    "queued": "Queued",
+    "running": "Running"
+  },
   "caseView": {
     "noDescription": "No description",
     "createdAt": "Created {{value}}",

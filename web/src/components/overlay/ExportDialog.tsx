@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { ExportMode } from "@/types/filter";
 import { FaArrowDown } from "react-icons/fa";
+import { LuAudioLines } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
@@ -23,6 +24,7 @@ import {
   BatchExportResponse,
   CameraActivity,
   ExportCase,
+  StartExportResponse,
 } from "@/types/export";
 import {
   Select,
@@ -32,6 +34,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import SaveExportOverlay from "./SaveExportOverlay";
@@ -43,7 +50,6 @@ import { CustomTimeSelector } from "./CustomTimeSelector";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
-import { Checkbox } from "../ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
@@ -87,6 +93,7 @@ export default function ExportDialog({
   const [name, setName] = useState("");
   const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>();
   const [activeTab, setActiveTab] = useState<ExportTab>("export");
+  const [isStartingExport, setIsStartingExport] = useState(false);
   const previousModeRef = useRef<ExportMode>(mode);
 
   useEffect(() => {
@@ -107,59 +114,78 @@ export default function ExportDialog({
     previousModeRef.current = mode;
   }, [mode]);
 
-  const onStartExport = useCallback(() => {
+  const onStartExport = useCallback(async () => {
+    if (isStartingExport) {
+      return false;
+    }
+
     if (!range) {
       toast.error(t("export.toast.error.noVaildTimeSelected"), {
         position: "top-center",
       });
-      return;
+      return false;
     }
 
     if (range.before < range.after) {
       toast.error(t("export.toast.error.endTimeMustAfterStartTime"), {
         position: "top-center",
       });
-      return;
+      return false;
     }
 
-    axios
-      .post(
+    setIsStartingExport(true);
+
+    try {
+      await axios.post<StartExportResponse>(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
-          playback: "realtime",
+          source: "recordings",
           name,
           export_case_id: selectedCaseId || undefined,
         },
-      )
-      .then((response) => {
-        if (response.status == 200) {
-          toast.success(t("export.toast.success"), {
-            position: "top-center",
-            action: (
-              <a href="/export" target="_blank" rel="noopener noreferrer">
-                <Button>{t("export.toast.view")}</Button>
-              </a>
-            ),
-          });
-          setName("");
-          setSelectedCaseId(undefined);
-          setRange(undefined);
-          setMode("none");
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(
-          t("export.toast.error.failed", {
-            error: errorMessage,
-          }),
-          { position: "top-center" },
-        );
+      );
+
+      toast.success(t("export.toast.queued"), {
+        position: "top-center",
+        action: (
+          <a href="/export" target="_blank" rel="noopener noreferrer">
+            <Button>{t("export.toast.view")}</Button>
+          </a>
+        ),
       });
-  }, [camera, name, range, selectedCaseId, setMode, setRange, t]);
+      setName("");
+      setSelectedCaseId(undefined);
+      setRange(undefined);
+      setMode("none");
+      return true;
+    } catch (error) {
+      const apiError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.detail ||
+        "Unknown error";
+      toast.error(
+        t("export.toast.error.failed", {
+          error: errorMessage,
+        }),
+        { position: "top-center" },
+      );
+      return false;
+    } finally {
+      setIsStartingExport(false);
+    }
+  }, [
+    camera,
+    isStartingExport,
+    name,
+    range,
+    selectedCaseId,
+    setMode,
+    setRange,
+    t,
+  ]);
 
   const handleCancel = useCallback(() => {
     setName("");
@@ -185,6 +211,7 @@ export default function ExportDialog({
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
         show={mode == "timeline" || mode == "timeline_multi"}
         hidePreview={mode == "timeline_multi"}
+        isSaving={isStartingExport}
         saveLabel={
           mode == "timeline_multi"
             ? t("export.fromTimeline.useThisRange")
@@ -198,7 +225,7 @@ export default function ExportDialog({
             return;
           }
 
-          onStartExport();
+          void onStartExport();
         }}
         onCancel={handleCancel}
       />
@@ -245,6 +272,7 @@ export default function ExportDialog({
             name={name}
             selectedCaseId={selectedCaseId}
             activeTab={activeTab}
+            isStartingExport={isStartingExport}
             onStartExport={onStartExport}
             setActiveTab={setActiveTab}
             setName={setName}
@@ -266,7 +294,8 @@ type ExportContentProps = {
   name: string;
   selectedCaseId?: string;
   activeTab: ExportTab;
-  onStartExport: () => void;
+  isStartingExport: boolean;
+  onStartExport: () => Promise<boolean>;
   setActiveTab: (tab: ExportTab) => void;
   setName: (name: string) => void;
   setSelectedCaseId: (caseId: string | undefined) => void;
@@ -282,6 +311,7 @@ export function ExportContent({
   name,
   selectedCaseId,
   activeTab,
+  isStartingExport,
   onStartExport,
   setActiveTab,
   setName,
@@ -300,12 +330,13 @@ export function ExportContent({
   );
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
   const [batchCaseSelection, setBatchCaseSelection] = useState<string>(
-    selectedCaseId || "none",
+    selectedCaseId || "new",
   );
   const [hasManualCameraSelection, setHasManualCameraSelection] =
     useState(false);
   const [newCaseName, setNewCaseName] = useState("");
   const [newCaseDescription, setNewCaseDescription] = useState("");
+  const [isStartingBatchExport, setIsStartingBatchExport] = useState(false);
   const multiRangeKey = useMemo(() => {
     if (activeTab !== "multi" || !range) {
       return undefined;
@@ -380,24 +411,47 @@ export function ExportContent({
 
   const cameraActivities = useMemo<CameraActivity[]>(() => {
     const allCameraIds = Object.keys(config?.cameras ?? {});
-    const counts = new Map<string, number>();
+    const byCamera = new Map<string, Event[]>();
 
     events?.forEach((event) => {
-      counts.set(event.camera, (counts.get(event.camera) ?? 0) + 1);
+      const bucket = byCamera.get(event.camera);
+      if (bucket) {
+        bucket.push(event);
+      } else {
+        byCamera.set(event.camera, [event]);
+      }
     });
 
-    const maxCount = Math.max(1, ...Array.from(counts.values()), 1);
+    const rangeStart = debouncedRange?.after ?? 0;
+    const rangeEnd = debouncedRange?.before ?? 0;
+    const rangeDuration = Math.max(1, rangeEnd - rangeStart);
 
     return allCameraIds.map((cameraId) => {
-      const count = counts.get(cameraId) ?? 0;
+      const cameraEvents = byCamera.get(cameraId) ?? [];
+      const segments = cameraEvents
+        .map((event) => {
+          // Event end_time is null for in-progress events; fall back to start.
+          const eventEnd = event.end_time ?? event.start_time;
+          const start = Math.max(
+            0,
+            Math.min(1, (event.start_time - rangeStart) / rangeDuration),
+          );
+          const end = Math.max(
+            0,
+            Math.min(1, (eventEnd - rangeStart) / rangeDuration),
+          );
+          return { start, end: Math.max(end, start) };
+        })
+        .sort((a, b) => a.start - b.start);
+
       return {
         camera: cameraId,
-        count,
-        intensity: count / maxCount,
-        hasDetections: count > 0,
+        count: cameraEvents.length,
+        hasDetections: cameraEvents.length > 0,
+        segments,
       };
     });
-  }, [config?.cameras, events]);
+  }, [config?.cameras, debouncedRange, events]);
 
   useEffect(() => {
     if (
@@ -426,8 +480,8 @@ export function ExportContent({
   const canStartBatchExport =
     Boolean(range && range.before > range.after) &&
     selectedCameraCount > 0 &&
-    ((batchCaseSelection !== "none" && batchCaseSelection !== "new") ||
-      (batchCaseSelection === "new" && newCaseName.trim().length > 0));
+    !isStartingBatchExport &&
+    (batchCaseSelection !== "new" || newCaseName.trim().length > 0);
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -482,6 +536,10 @@ export function ExportContent({
   }, []);
 
   const startBatchExport = useCallback(async () => {
+    if (isStartingBatchExport) {
+      return;
+    }
+
     if (!range) {
       toast.error(t("export.toast.error.noVaildTimeSelected"), {
         position: "top-center",
@@ -510,6 +568,8 @@ export function ExportContent({
       payload.export_case_id = batchCaseSelection;
     }
 
+    setIsStartingBatchExport(true);
+
     try {
       const response = await axios.post<BatchExportResponse>(
         "exports/batch",
@@ -527,7 +587,7 @@ export function ExportContent({
 
       if (failedResults.length > 0 && successfulResults.length > 0) {
         toast.success(
-          t("export.toast.batchPartial", {
+          t("export.toast.batchQueuedPartial", {
             successful: successfulResults.length,
             total: results.length,
             failedCameras: failedResults
@@ -541,7 +601,7 @@ export function ExportContent({
         );
       } else if (failedResults.length > 0) {
         toast.error(
-          t("export.toast.batchFailed", {
+          t("export.toast.batchQueueFailed", {
             total: results.length,
             failedCameras: failedResults
               .map((result) => resolveCameraName(config, result.camera))
@@ -554,7 +614,7 @@ export function ExportContent({
         );
       } else {
         toast.success(
-          t("export.toast.batchSuccess", {
+          t("export.toast.batchQueuedSuccess", {
             count: successfulResults.length,
           }),
           { position: "top-center" },
@@ -564,13 +624,15 @@ export function ExportContent({
       if (successfulResults.length > 0) {
         setName("");
         setSelectedCaseId(undefined);
-        setBatchCaseSelection("none");
+        setBatchCaseSelection("new");
         setNewCaseName("");
         setNewCaseDescription("");
         setRange(undefined);
         setMode("none");
         setActiveTab("export");
-        navigate(`/export?caseId=${response.data.export_case_id}`);
+        if (response.data.export_case_id) {
+          navigate(`/export?caseId=${response.data.export_case_id}`);
+        }
       }
     } catch (error) {
       const apiError = error as {
@@ -587,10 +649,13 @@ export function ExportContent({
         }),
         { position: "top-center" },
       );
+    } finally {
+      setIsStartingBatchExport(false);
     }
   }, [
     batchCaseSelection,
     config,
+    isStartingBatchExport,
     name,
     newCaseDescription,
     newCaseName,
@@ -606,20 +671,22 @@ export function ExportContent({
   ]);
 
   return (
-    <div className="w-full">
+    <div
+      className={cn(
+        "flex w-full flex-col",
+        !isDesktop && "max-h-[80dvh] min-h-0",
+      )}
+    >
       {isDesktop && (
-        <>
-          <DialogHeader>
-            <DialogTitle>{t("menu.export", { ns: "common" })}</DialogTitle>
-          </DialogHeader>
-          <SelectSeparator className="my-4 bg-secondary" />
-        </>
+        <DialogHeader className="mb-4">
+          <DialogTitle>{t("menu.export", { ns: "common" })}</DialogTitle>
+        </DialogHeader>
       )}
 
       <Tabs
         value={activeTab}
         onValueChange={(value) => setActiveTab(value as ExportTab)}
-        className="w-full"
+        className={cn("w-full", !isDesktop && "flex min-h-0 flex-1 flex-col")}
       >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="export">{t("export.tabs.export")}</TabsTrigger>
@@ -628,7 +695,13 @@ export function ExportContent({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="export" className="mt-4 space-y-4">
+        <TabsContent
+          value="export"
+          className={cn(
+            "mt-4 space-y-4",
+            !isDesktop && "min-h-0 flex-1 overflow-y-auto pr-1",
+          )}
+        >
           <RadioGroup
             className={`flex flex-col gap-4 ${isDesktop ? "" : "mt-1"}`}
             onValueChange={(value) => onSelectTime(value as ExportOption)}
@@ -708,49 +781,69 @@ export function ExportContent({
           </div>
         </TabsContent>
 
-        <TabsContent value="multi" className="mt-4 space-y-4">
+        <TabsContent
+          value="multi"
+          className={cn(
+            "mt-4 space-y-4",
+            !isDesktop && "min-h-0 flex-1 overflow-y-auto pr-1",
+          )}
+        >
           <div className="space-y-2">
             <Label className="text-sm text-secondary-foreground">
               {t("export.multiCamera.timeRange")}
             </Label>
-            <CustomTimeSelector
-              latestTime={latestTime}
-              range={range}
-              setRange={setRange}
-              startLabel={t("export.time.start.title")}
-              endLabel={t("export.time.end.title")}
-            />
-            <Button
-              size="sm"
-              className="mt-2"
-              onClick={() => {
-                if (!range) {
-                  setRange({
-                    before: currentTime + 30,
-                    after: currentTime - 30,
-                  });
-                }
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1 [&>div]:!mx-0 [&>div]:!mt-0">
+                <CustomTimeSelector
+                  latestTime={latestTime}
+                  range={range}
+                  setRange={setRange}
+                  startLabel={t("export.time.start.title")}
+                  endLabel={t("export.time.end.title")}
+                />
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="size-9 shrink-0 p-0"
+                    aria-label={t("export.multiCamera.selectFromTimeline")}
+                    onClick={() => {
+                      if (!range) {
+                        setRange({
+                          before: currentTime + 30,
+                          after: currentTime - 30,
+                        });
+                      }
 
-                setActiveTab("multi");
-                setMode("timeline_multi");
-              }}
-            >
-              {t("export.multiCamera.selectFromTimeline")}
-            </Button>
+                      setActiveTab("multi");
+                      setMode("timeline_multi");
+                    }}
+                  >
+                    <LuAudioLines className="size-4 -rotate-90" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("export.multiCamera.selectFromTimeline")}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm text-secondary-foreground">
-                {t("export.multiCamera.cameraSelection")}
-              </Label>
-              <div className="text-xs text-muted-foreground">
-                {t("export.multiCamera.selectedCount", {
-                  count: selectedCameraCount,
-                })}
-              </div>
+            <Label className="text-sm text-secondary-foreground">
+              {t("export.multiCamera.cameraSelection")}
+            </Label>
+            <div className="text-xs text-muted-foreground">
+              {t("export.multiCamera.cameraSelectionHelp")}
             </div>
-            <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-border bg-background/50 p-2">
+            <div
+              className={cn(
+                "scrollbar-container space-y-2",
+                isDesktop && "max-h-64 overflow-y-auto pr-1",
+              )}
+            >
               {isEventsLoading && (
                 <div className="px-2 py-4 text-sm text-muted-foreground">
                   {t("export.multiCamera.checkingActivity")}
@@ -768,15 +861,18 @@ export function ExportContent({
                   <button
                     key={activity.camera}
                     type="button"
+                    aria-pressed={isSelected}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-md border border-border px-3 py-2 text-left transition-colors",
-                      activity.hasDetections
-                        ? "bg-secondary/40 hover:bg-secondary/70"
-                        : "bg-background text-muted-foreground",
+                      "flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition-colors",
+                      isSelected
+                        ? "border-selected bg-selected/10 ring-1 ring-selected"
+                        : "border-transparent bg-secondary/40 hover:bg-secondary/70",
+                      !activity.hasDetections &&
+                        !isSelected &&
+                        "text-muted-foreground",
                     )}
                     onClick={() => toggleCameraSelection(activity.camera)}
                   >
-                    <Checkbox checked={isSelected} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-sm font-medium text-primary">
@@ -788,16 +884,24 @@ export function ExportContent({
                           })}
                         </span>
                       </div>
-                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                        <div
-                          className={cn(
-                            "h-full rounded-full",
-                            activity.hasDetections ? "bg-selected" : "bg-muted",
-                          )}
-                          style={{
-                            width: `${Math.max(activity.intensity * 100, activity.hasDetections ? 8 : 0)}%`,
-                          }}
-                        />
+                      <div className="relative mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                        {activity.segments.map((segment, index) => {
+                          const leftPct = segment.start * 100;
+                          const widthPct = Math.max(
+                            (segment.end - segment.start) * 100,
+                            1,
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="absolute top-0 h-full rounded-full bg-selected"
+                              style={{
+                                left: `${leftPct}%`,
+                                width: `${widthPct}%`,
+                              }}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   </button>
@@ -806,13 +910,18 @@ export function ExportContent({
             </div>
           </div>
 
-          <Input
-            className="text-md"
-            type="search"
-            placeholder={t("export.multiCamera.namePlaceholder")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <div className="space-y-2">
+            <Label className="text-sm text-secondary-foreground">
+              {t("export.multiCamera.nameLabel")}
+            </Label>
+            <Input
+              className="text-md"
+              type="search"
+              placeholder={t("export.multiCamera.namePlaceholder")}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label className="text-sm text-secondary-foreground">
@@ -826,9 +935,6 @@ export function ExportContent({
                 <SelectValue placeholder={t("export.case.placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">
-                  {t("label.none", { ns: "common" })}
-                </SelectItem>
                 {cases
                   ?.sort((a, b) => a.name.localeCompare(b.name))
                   .map((caseItem) => (
@@ -843,13 +949,15 @@ export function ExportContent({
               </SelectContent>
             </Select>
             {batchCaseSelection === "new" && (
-              <div className="space-y-2 rounded-lg border border-border bg-background/50 p-3">
+              <div className="space-y-2 pt-1">
                 <Input
+                  className="text-md"
                   placeholder={t("export.case.newCaseNamePlaceholder")}
                   value={newCaseName}
                   onChange={(event) => setNewCaseName(event.target.value)}
                 />
                 <Textarea
+                  className="text-md"
                   placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                   value={newCaseDescription}
                   onChange={(event) =>
@@ -878,20 +986,24 @@ export function ExportContent({
             aria-label={t("export.selectOrExport")}
             variant="select"
             size="sm"
-            onClick={() => {
+            disabled={isStartingExport}
+            onClick={async () => {
               if (selectedOption == "timeline") {
                 setRange({ before: currentTime + 30, after: currentTime - 30 });
                 setMode("timeline");
               } else {
-                onStartExport();
-                setSelectedOption("1");
-                setMode("none");
+                const didQueue = await onStartExport();
+                if (didQueue) {
+                  setSelectedOption("1");
+                }
               }
             }}
           >
-            {selectedOption == "timeline"
-              ? t("export.select")
-              : t("export.export")}
+            {isStartingExport
+              ? t("export.queueing")
+              : selectedOption == "timeline"
+                ? t("export.select")
+                : t("export.export")}
           </Button>
         ) : (
           <Button
@@ -904,9 +1016,11 @@ export function ExportContent({
             disabled={!canStartBatchExport}
             onClick={() => void startBatchExport()}
           >
-            {t("export.multiCamera.exportButton", {
-              count: selectedCameraCount,
-            })}
+            {isStartingBatchExport
+              ? t("export.multiCamera.queueingButton")
+              : t("export.multiCamera.exportButton", {
+                  count: selectedCameraCount,
+                })}
           </Button>
         )}
       </DialogFooter>

@@ -26,6 +26,7 @@ import SaveExportOverlay from "./SaveExportOverlay";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { StartExportResponse } from "@/types/export";
 
 type DrawerMode =
   | "none"
@@ -114,7 +115,12 @@ export default function MobileReviewSettingsDrawer({
   const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(
     undefined,
   );
-  const onStartExport = useCallback(() => {
+  const [isStartingExport, setIsStartingExport] = useState(false);
+  const onStartExport = useCallback(async () => {
+    if (isStartingExport) {
+      return false;
+    }
+
     if (!range) {
       toast.error(
         t("export.toast.error.noVaildTimeSelected", {
@@ -124,7 +130,7 @@ export default function MobileReviewSettingsDrawer({
           position: "top-center",
         },
       );
-      return;
+      return false;
     }
 
     if (range.before < range.after) {
@@ -136,55 +142,67 @@ export default function MobileReviewSettingsDrawer({
           position: "top-center",
         },
       );
-      return;
+      return false;
     }
 
-    axios
-      .post(
+    setIsStartingExport(true);
+
+    try {
+      await axios.post<StartExportResponse>(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
-          playback: "realtime",
+          source: "recordings",
           name,
           export_case_id: selectedCaseId || undefined,
         },
-      )
-      .then((response) => {
-        if (response.status == 200) {
-          toast.success(
-            t("export.toast.success", { ns: "components/dialog" }),
-            {
-              position: "top-center",
-              action: (
-                <a href="/export" target="_blank" rel="noopener noreferrer">
-                  <Button>
-                    {t("export.toast.view", { ns: "components/dialog" })}
-                  </Button>
-                </a>
-              ),
-            },
-          );
-          setName("");
-          setSelectedCaseId(undefined);
-          setRange(undefined);
-          setMode("none");
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(
-          t("export.toast.error.failed", {
-            ns: "components/dialog",
-            error: errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
+      );
+
+      toast.success(t("export.toast.queued", { ns: "components/dialog" }), {
+        position: "top-center",
+        action: (
+          <a href="/export" target="_blank" rel="noopener noreferrer">
+            <Button>
+              {t("export.toast.view", { ns: "components/dialog" })}
+            </Button>
+          </a>
+        ),
       });
-  }, [camera, name, range, selectedCaseId, setRange, setName, setMode, t]);
+      setName("");
+      setSelectedCaseId(undefined);
+      setRange(undefined);
+      setMode("none");
+      return true;
+    } catch (error) {
+      const apiError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.detail ||
+        "Unknown error";
+      toast.error(
+        t("export.toast.error.failed", {
+          ns: "components/dialog",
+          error: errorMessage,
+        }),
+        {
+          position: "top-center",
+        },
+      );
+      return false;
+    } finally {
+      setIsStartingExport(false);
+    }
+  }, [
+    camera,
+    isStartingExport,
+    name,
+    range,
+    selectedCaseId,
+    setRange,
+    setMode,
+    t,
+  ]);
 
   const onStartDebugReplay = useCallback(async () => {
     if (
@@ -344,6 +362,7 @@ export default function MobileReviewSettingsDrawer({
         name={name}
         selectedCaseId={selectedCaseId}
         activeTab={exportTab}
+        isStartingExport={isStartingExport}
         onStartExport={onStartExport}
         setActiveTab={setExportTab}
         setName={setName}
@@ -500,6 +519,7 @@ export default function MobileReviewSettingsDrawer({
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
         show={mode == "timeline" || mode == "timeline_multi"}
         hidePreview={mode == "timeline_multi"}
+        isSaving={isStartingExport}
         saveLabel={
           mode == "timeline_multi"
             ? t("export.fromTimeline.useThisRange", { ns: "components/dialog" })
@@ -513,7 +533,7 @@ export default function MobileReviewSettingsDrawer({
             return;
           }
 
-          onStartExport();
+          void onStartExport();
         }}
         onCancel={() => {
           setExportTab("export");

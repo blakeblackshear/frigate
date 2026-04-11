@@ -58,6 +58,7 @@
     },
     "select": "Select",
     "export": "Export",
+    "queueing": "Queueing Export...",
     "selectOrExport": "Select or Export",
     "tabs": {
       "export": "Single Camera",
@@ -67,31 +68,38 @@
       "timeRange": "Time range",
       "selectFromTimeline": "Select from Timeline",
       "cameraSelection": "Cameras",
-      "selectedCount_one": "1 selected",
-      "selectedCount_other": "{{count}} selected",
+      "cameraSelectionHelp": "Cameras with tracked objects in this time range are pre-selected",
       "checkingActivity": "Checking camera activity...",
       "noCameras": "No cameras available",
-      "detectionCount_one": "1 detection",
-      "detectionCount_other": "{{count}} detections",
+      "detectionCount_one": "1 tracked object",
+      "detectionCount_other": "{{count}} tracked objects",
+      "nameLabel": "Export name",
       "namePlaceholder": "Optional base name for these exports",
+      "queueingButton": "Queueing Exports...",
       "exportButton_one": "Export 1 Camera",
       "exportButton_other": "Export {{count}} Cameras"
     },
     "toast": {
       "success": "Successfully started export. View the file in the exports page.",
+      "queued": "Export queued. View progress in the exports page.",
       "view": "View",
       "batchSuccess_one": "Started 1 export. Opening the case now.",
       "batchSuccess_other": "Started {{count}} exports. Opening the case now.",
       "batchPartial": "Started {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
       "batchFailed": "Failed to start {{total}} exports. Failed cameras: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Queued 1 export. Opening the case now.",
+      "batchQueuedSuccess_other": "Queued {{count}} exports. Opening the case now.",
+      "batchQueuedPartial": "Queued {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
+      "batchQueueFailed": "Failed to queue {{total}} exports. Failed cameras: {{failedCameras}}",
       "error": {
-        "failed": "Failed to start export: {{error}}",
+        "failed": "Failed to queue export: {{error}}",
         "endTimeMustAfterStartTime": "End time must be after start time",
         "noVaildTimeSelected": "No valid time range selected"
       }
     },
     "fromTimeline": {
       "saveExport": "Save Export",
+      "queueingExport": "Queueing Export...",
       "previewExport": "Preview Export",
       "useThisRange": "Use This Range"
     }
