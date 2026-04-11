@@ -928,7 +928,7 @@ function CaseView({
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[16rem] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background/40 p-6 text-center">
+        <div className="flex min-h-[16rem] flex-col items-center justify-center p-6 text-center">
           <LuFolderX className="size-12" />
           <div className="mt-3 text-lg font-medium">
             {t("caseView.emptyTitle")}
