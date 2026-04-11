@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -28,6 +28,10 @@ class StartExportResponse(BaseModel):
     export_id: Optional[str] = Field(
         default=None, description="The export ID if successfully started"
     )
+    status: Optional[str] = Field(
+        default=None,
+        description="Queue status for the export job",
+    )
 
 
 class BatchExportResultModel(BaseModel):
@@ -39,6 +43,10 @@ class BatchExportResultModel(BaseModel):
         description="The export ID when the export was successfully queued",
     )
     success: bool = Field(description="Whether the export was successfully queued")
+    status: Optional[str] = Field(
+        default=None,
+        description="Queue status for this camera export",
+    )
     error: Optional[str] = Field(
         default=None,
         description="Validation or queueing error for this camera, if any",
@@ -48,11 +56,52 @@ class BatchExportResultModel(BaseModel):
 class BatchExportResponse(BaseModel):
     """Response model for starting a multi-camera export batch."""
 
-    export_case_id: str = Field(description="Export case ID associated with the batch")
+    export_case_id: Optional[str] = Field(
+        default=None,
+        description="Export case ID associated with the batch",
+    )
     export_ids: List[str] = Field(description="Export IDs successfully queued")
     results: List[BatchExportResultModel] = Field(
         description="Per-camera batch export results"
     )
+
+
+class ExportJobModel(BaseModel):
+    """Model representing a queued or running export job."""
+
+    id: str = Field(description="Unique identifier for the export job")
+    job_type: str = Field(description="Job type")
+    status: str = Field(description="Current job status")
+    camera: str = Field(description="Camera associated with this export job")
+    name: Optional[str] = Field(
+        default=None,
+        description="Friendly name for the export",
+    )
+    export_case_id: Optional[str] = Field(
+        default=None,
+        description="ID of the export case this export belongs to",
+    )
+    request_start_time: float = Field(description="Requested export start time")
+    request_end_time: float = Field(description="Requested export end time")
+    start_time: Optional[float] = Field(
+        default=None,
+        description="Unix timestamp when execution started",
+    )
+    end_time: Optional[float] = Field(
+        default=None,
+        description="Unix timestamp when execution completed",
+    )
+    error_message: Optional[str] = Field(
+        default=None,
+        description="Error message for failed jobs",
+    )
+    results: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="Result metadata for completed jobs",
+    )
+
+
+ExportJobsResponse = List[ExportJobModel]
 
 
 ExportsResponse = List[ExportModel]

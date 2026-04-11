@@ -92,6 +92,12 @@ class RecordExportConfig(FrigateBaseModel):
         title="Export hwaccel args",
         description="Hardware acceleration args to use for export/transcode operations.",
     )
+    max_concurrent: int = Field(
+        default=3,
+        ge=1,
+        title="Maximum concurrent exports",
+        description="Maximum number of export jobs to process at the same time.",
+    )
 
 
 class RecordConfig(FrigateBaseModel):

@@ -4,7 +4,6 @@ import datetime
 import logging
 import random
 import string
-import threading
 import time
 from pathlib import Path
 from typing import List, Optional
@@ -39,6 +38,8 @@ from frigate.api.defs.response.export_case_response import (
 )
 from frigate.api.defs.response.export_response import (
     BatchExportResponse,
+    ExportJobModel,
+    ExportJobsResponse,
     ExportModel,
     ExportsResponse,
     StartExportResponse,
@@ -46,11 +47,18 @@ from frigate.api.defs.response.export_response import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.const import CLIPS_DIR, EXPORT_DIR
+from frigate.jobs.export import (
+    ExportJob,
+    ExportQueueFullError,
+    available_export_queue_slots,
+    get_export_job,
+    list_active_export_jobs,
+    start_export_job,
+)
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.record.export import (
     DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
     PlaybackSourceEnum,
-    RecordingExporter,
     validate_ffmpeg_args,
 )
 from frigate.util.time import is_current_hour
@@ -58,18 +66,6 @@ from frigate.util.time import is_current_hour
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.export])
-
-EXPORT_START_SEMAPHORE = threading.Semaphore(3)
-
-
-class ManagedRecordingExporter(RecordingExporter):
-    """Recording exporter that releases the shared concurrency slot on exit."""
-
-    def run(self) -> None:
-        try:
-            super().run()
-        finally:
-            EXPORT_START_SEMAPHORE.release()
 
 
 def _generate_id(length: int = 12) -> str:
@@ -219,8 +215,7 @@ def _get_batch_recording_export_errors(
     return errors
 
 
-def _build_exporter(
-    request: Request,
+def _build_export_job(
     camera_name: str,
     start_time: float,
     end_time: float,
@@ -231,30 +226,20 @@ def _build_exporter(
     ffmpeg_input_args: Optional[str] = None,
     ffmpeg_output_args: Optional[str] = None,
     cpu_fallback: bool = False,
-) -> ManagedRecordingExporter:
-    return ManagedRecordingExporter(
-        request.app.frigate_config,
-        _generate_export_id(camera_name),
-        camera_name,
-        friendly_name,
-        existing_image,
-        int(start_time),
-        int(end_time),
-        playback_source,
-        export_case_id,
-        ffmpeg_input_args,
-        ffmpeg_output_args,
-        cpu_fallback,
+) -> ExportJob:
+    return ExportJob(
+        id=_generate_export_id(camera_name),
+        camera=camera_name,
+        name=friendly_name,
+        image_path=existing_image,
+        export_case_id=export_case_id,
+        request_start_time=int(start_time),
+        request_end_time=int(end_time),
+        playback_source=playback_source.value,
+        ffmpeg_input_args=ffmpeg_input_args,
+        ffmpeg_output_args=ffmpeg_output_args,
+        cpu_fallback=cpu_fallback,
     )
-
-
-def _start_exporter(exporter: ManagedRecordingExporter) -> None:
-    EXPORT_START_SEMAPHORE.acquire()
-    try:
-        exporter.start()
-    except Exception:
-        EXPORT_START_SEMAPHORE.release()
-        raise
 
 
 def _export_case_to_dict(case: ExportCase) -> dict[str, object]:
@@ -448,6 +433,43 @@ async def assign_export_case(
     )
 
 
+@router.get(
+    "/jobs/export",
+    response_model=ExportJobsResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get active export jobs",
+    description="Gets queued and running export jobs.",
+)
+def get_active_export_jobs(
+    request: Request,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
+    jobs = list_active_export_jobs(request.app.frigate_config)
+    return JSONResponse(
+        content=[job.to_dict() for job in jobs if job.camera in allowed_cameras]
+    )
+
+
+@router.get(
+    "/jobs/export/{export_id}",
+    response_model=ExportJobModel,
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get export job status",
+    description="Gets queued, running, or completed status for a specific export job.",
+)
+async def get_export_job_status(export_id: str, request: Request):
+    job = get_export_job(request.app.frigate_config, export_id)
+    if job is None:
+        return JSONResponse(
+            content={"success": False, "message": "Job not found"},
+            status_code=404,
+        )
+
+    await require_camera_access(job.camera, request=request)
+
+    return JSONResponse(content=job.to_dict())
+
+
 @router.post(
     "/exports/batch",
     response_model=BatchExportResponse,
@@ -463,14 +485,6 @@ def export_recordings_batch(request: Request, body: BatchExportBody):
     if case_validation_error is not None:
         return case_validation_error
 
-    export_case_id = body.export_case_id
-    if export_case_id is None:
-        export_case = _create_export_case_record(
-            body.new_case_name or body.name or "New Case",
-            body.new_case_description,
-        )
-        export_case_id = export_case.id
-
     export_ids: list[str] = []
     results: list[dict[str, Optional[str] | bool]] = []
     camera_errors = _get_batch_recording_export_errors(
@@ -480,6 +494,35 @@ def export_recordings_batch(request: Request, body: BatchExportBody):
         body.end_time,
     )
 
+    cameras_to_queue = [
+        camera_name
+        for camera_name in dict.fromkeys(body.camera_ids)
+        if camera_errors.get(camera_name) is None
+    ]
+
+    # Preflight admission: reject the whole batch if we can't fit every
+    # queueable camera. Prevents creating a case we'd just roll back and
+    # avoids partial batches where the tail all fails with "queue full".
+    if cameras_to_queue and available_export_queue_slots(
+        request.app.frigate_config
+    ) < len(cameras_to_queue):
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Export queue is full. Try again once current exports finish.",
+            },
+            status_code=503,
+        )
+
+    export_case = None
+    export_case_id = body.export_case_id
+    if export_case_id is None and cameras_to_queue:
+        export_case = _create_export_case_record(
+            body.new_case_name or body.name or "New Case",
+            body.new_case_description,
+        )
+        export_case_id = export_case.id
+
     for camera_name in dict.fromkeys(body.camera_ids):
         camera_error = camera_errors.get(camera_name)
         if camera_error is not None:
@@ -488,13 +531,13 @@ def export_recordings_batch(request: Request, body: BatchExportBody):
                     "camera": camera_name,
                     "export_id": None,
                     "success": False,
+                    "status": None,
                     "error": camera_error,
                 }
             )
             continue
 
-        exporter = _build_exporter(
-            request,
+        export_job = _build_export_job(
             camera_name,
             body.start_time,
             body.end_time,
@@ -503,24 +546,43 @@ def export_recordings_batch(request: Request, body: BatchExportBody):
             PlaybackSourceEnum.recordings,
             export_case_id,
         )
-        _start_exporter(exporter)
+        try:
+            start_export_job(request.app.frigate_config, export_job)
+        except Exception as err:
+            logger.exception("Failed to queue export job %s", export_job.id)
+            results.append(
+                {
+                    "camera": camera_name,
+                    "export_id": None,
+                    "success": False,
+                    "status": None,
+                    "error": str(err),
+                }
+            )
+            continue
 
-        export_ids.append(exporter.export_id)
+        export_ids.append(export_job.id)
         results.append(
             {
                 "camera": camera_name,
-                "export_id": exporter.export_id,
+                "export_id": export_job.id,
                 "success": True,
+                "status": "queued",
                 "error": None,
             }
         )
+
+    if export_case is not None and not export_ids:
+        export_case.delete_instance()
+        export_case_id = None
 
     return JSONResponse(
         content={
             "export_case_id": export_case_id,
             "export_ids": export_ids,
             "results": results,
-        }
+        },
+        status_code=202,
     )
 
 
@@ -568,8 +630,7 @@ def export_recording(
             status_code=400,
         )
 
-    exporter = _build_exporter(
-        request,
+    export_job = _build_export_job(
         camera_name,
         start_time,
         end_time,
@@ -578,17 +639,28 @@ def export_recording(
         playback_source,
         export_case_id,
     )
-    _start_exporter(exporter)
+    try:
+        start_export_job(request.app.frigate_config, export_job)
+    except ExportQueueFullError:
+        logger.warning("Export queue is full; rejecting %s", export_job.id)
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Export queue is full. Try again once current exports finish.",
+            },
+            status_code=503,
+        )
 
     return JSONResponse(
         content=(
             {
                 "success": True,
-                "message": "Starting export of recording.",
-                "export_id": exporter.export_id,
+                "message": "Export queued.",
+                "export_id": export_job.id,
+                "status": "queued",
             }
         ),
-        status_code=200,
+        status_code=202,
     )
 
 
@@ -765,8 +837,7 @@ def export_recording_custom(
     if ffmpeg_output_args is None:
         ffmpeg_output_args = DEFAULT_TIME_LAPSE_FFMPEG_ARGS
 
-    exporter = _build_exporter(
-        request,
+    export_job = _build_export_job(
         camera_name,
         start_time,
         end_time,
@@ -778,17 +849,28 @@ def export_recording_custom(
         ffmpeg_output_args,
         cpu_fallback,
     )
-    _start_exporter(exporter)
+    try:
+        start_export_job(request.app.frigate_config, export_job)
+    except ExportQueueFullError:
+        logger.warning("Export queue is full; rejecting %s", export_job.id)
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Export queue is full. Try again once current exports finish.",
+            },
+            status_code=503,
+        )
 
     return JSONResponse(
         content=(
             {
                 "success": True,
-                "message": "Starting export of recording.",
-                "export_id": exporter.export_id,
+                "message": "Export queued.",
+                "export_id": export_job.id,
+                "status": "queued",
             }
         ),
-        status_code=200,
+        status_code=202,
     )
 
 
