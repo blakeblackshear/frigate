@@ -1,9 +1,11 @@
 """Export job management with queued background execution."""
 
 import logging
+import os
 import threading
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from queue import Full, Queue
 from typing import Any, Optional
 
@@ -228,6 +230,88 @@ _job_manager_lock = threading.Lock()
 
 def _get_max_concurrent(config: FrigateConfig) -> int:
     return int(config.record.export.max_concurrent)
+
+
+def reap_stale_exports() -> None:
+    """Sweep Export rows stuck with in_progress=True from previous sessions.
+
+    On Frigate startup no export job is alive yet, so any in_progress=True
+    row must be a leftover from a previous session that crashed, was killed
+    mid-export, or returned early from RecordingExporter.run() without
+    flipping the flag. For each stale row we either:
+
+    - delete the row (and any thumb) if the video file is missing or empty,
+      since there is nothing worth recovering
+    - flip in_progress to False if the video file exists on disk and is
+      non-empty, treating it as a completed export the user can manage
+      through the normal UI
+
+    Must only be called when the export job manager is certain to have no
+    active jobs — i.e., at Frigate startup, before any worker runs.
+
+    All exceptions are caught and logged; the caller does not need to wrap
+    this in a try/except. A failure on a single row will not stop the rest
+    of the sweep, and a failure in the top-level query will log and return.
+    """
+    try:
+        stale_exports = list(Export.select().where(Export.in_progress == True))  # noqa: E712
+    except Exception:
+        logger.exception("Failed to query stale in-progress exports")
+        return
+
+    if not stale_exports:
+        logger.debug("No stale in-progress exports found on startup")
+        return
+
+    flipped = 0
+    deleted = 0
+    errored = 0
+
+    for export in stale_exports:
+        try:
+            video_path = export.video_path
+            has_usable_file = False
+
+            if video_path:
+                try:
+                    has_usable_file = os.path.getsize(video_path) > 0
+                except OSError:
+                    has_usable_file = False
+
+            if has_usable_file:
+                # Unassign from any case on recovery: the user should
+                # re-triage a recovered export rather than have it silently
+                # reappear inside a case they curated.
+                Export.update(
+                    {Export.in_progress: False, Export.export_case: None}
+                ).where(Export.id == export.id).execute()
+                flipped += 1
+                logger.info(
+                    "Recovered stale in-progress export %s (file intact on disk)",
+                    export.id,
+                )
+                continue
+
+            if export.thumb_path:
+                Path(export.thumb_path).unlink(missing_ok=True)
+            if video_path:
+                Path(video_path).unlink(missing_ok=True)
+            Export.delete().where(Export.id == export.id).execute()
+            deleted += 1
+            logger.info(
+                "Deleted stale in-progress export %s (no usable file on disk)",
+                export.id,
+            )
+        except Exception:
+            errored += 1
+            logger.exception("Failed to reap stale export %s", export.id)
+
+    logger.info(
+        "Stale export cleanup complete: %d recovered, %d deleted, %d errored",
+        flipped,
+        deleted,
+        errored,
+    )
 
 
 def get_export_job_manager(config: FrigateConfig) -> ExportJobManager:

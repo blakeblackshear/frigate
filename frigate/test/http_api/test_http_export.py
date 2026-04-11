@@ -1,6 +1,8 @@
+import os
+import tempfile
 from unittest.mock import patch
 
-from frigate.jobs.export import ExportJob
+from frigate.jobs.export import ExportJob, reap_stale_exports
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -226,6 +228,144 @@ class TestHttpExport(BaseTestHttp):
 
         assert response.status_code == 200
         assert response.json() == [queued_job.to_dict()]
+
+    def test_reap_stale_exports_deletes_rows_with_no_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            stale_video = os.path.join(tmpdir, "stale.mp4")
+            stale_thumb = os.path.join(tmpdir, "stale.webp")
+            # stale_video is intentionally NOT created
+            with open(stale_thumb, "w") as handle:
+                handle.write("thumb")
+
+            Export.create(
+                id="stale_no_file",
+                camera="front_door",
+                name="Stuck export",
+                date=100,
+                video_path=stale_video,
+                thumb_path=stale_thumb,
+                in_progress=True,
+            )
+
+            reap_stale_exports()
+
+            assert Export.get_or_none(Export.id == "stale_no_file") is None
+            assert not os.path.exists(stale_thumb)
+
+    def test_reap_stale_exports_recovers_rows_with_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            intact_video = os.path.join(tmpdir, "intact.mp4")
+            intact_thumb = os.path.join(tmpdir, "intact.webp")
+            with open(intact_video, "wb") as handle:
+                handle.write(b"not actually an mp4 but non-empty")
+            with open(intact_thumb, "wb") as handle:
+                handle.write(b"thumb")
+
+            case = ExportCase.create(
+                id="case_for_stale",
+                name="Curated case",
+                description="",
+                created_at=10,
+                updated_at=10,
+            )
+
+            Export.create(
+                id="stale_with_file",
+                camera="front_door",
+                name="Recoverable export",
+                date=200,
+                video_path=intact_video,
+                thumb_path=intact_thumb,
+                in_progress=True,
+                export_case=case,
+            )
+
+            reap_stale_exports()
+
+            recovered = Export.get(Export.id == "stale_with_file")
+            assert recovered.in_progress is False
+            # Case link must be cleared so the user re-triages the recovered row
+            assert recovered.export_case is None
+            # The case itself is untouched
+            assert ExportCase.get_or_none(ExportCase.id == "case_for_stale") is not None
+            # Recovered files must NOT be unlinked
+            assert os.path.exists(intact_video)
+            assert os.path.exists(intact_thumb)
+
+    def test_reap_stale_exports_delete_path_severs_case_link(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            missing_video = os.path.join(tmpdir, "missing.mp4")
+            # file intentionally not created
+
+            case = ExportCase.create(
+                id="case_losing_member",
+                name="Case losing a member",
+                description="",
+                created_at=20,
+                updated_at=20,
+            )
+
+            Export.create(
+                id="stale_in_case_no_file",
+                camera="front_door",
+                name="Stuck and in a case",
+                date=250,
+                video_path=missing_video,
+                thumb_path="",
+                in_progress=True,
+                export_case=case,
+            )
+
+            reap_stale_exports()
+
+            # The export row is gone entirely
+            assert Export.get_or_none(Export.id == "stale_in_case_no_file") is None
+            # The case stays but has no exports pointing at it
+            remaining_case = ExportCase.get(ExportCase.id == "case_losing_member")
+            assert list(remaining_case.exports) == []
+
+    def test_reap_stale_exports_deletes_rows_with_empty_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            empty_video = os.path.join(tmpdir, "empty.mp4")
+            # Create a zero-byte file — partial ffmpeg output
+            open(empty_video, "w").close()
+
+            Export.create(
+                id="stale_empty_file",
+                camera="front_door",
+                name="Zero byte export",
+                date=300,
+                video_path=empty_video,
+                thumb_path="",
+                in_progress=True,
+            )
+
+            reap_stale_exports()
+
+            assert Export.get_or_none(Export.id == "stale_empty_file") is None
+            assert not os.path.exists(empty_video)
+
+    def test_reap_stale_exports_skips_completed_rows(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            done_video = os.path.join(tmpdir, "done.mp4")
+            with open(done_video, "wb") as handle:
+                handle.write(b"done")
+
+            Export.create(
+                id="already_done",
+                camera="front_door",
+                name="Completed export",
+                date=400,
+                video_path=done_video,
+                thumb_path="",
+                in_progress=False,
+            )
+
+            reap_stale_exports()
+
+            row = Export.get(Export.id == "already_done")
+            assert row.in_progress is False
+            assert os.path.exists(done_video)
 
     def test_batch_export_requires_case_target(self):
         with AuthTestClient(self.app) as client:
