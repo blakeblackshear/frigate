@@ -1,6 +1,6 @@
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Button } from "../ui/button";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { FiMoreVertical } from "react-icons/fi";
 import { Skeleton } from "../ui/skeleton";
@@ -30,6 +30,7 @@ import {
 import { FaFolder, FaVideo } from "react-icons/fa";
 import { HiSquare2Stack } from "react-icons/hi2";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import useContextMenu from "@/hooks/use-contextmenu";
 
 type CaseCardProps = {
   className: string;
@@ -100,7 +101,10 @@ export function CaseCard({
 type ExportCardProps = {
   className: string;
   exportedRecording: Export;
+  isSelected?: boolean;
+  selectionMode?: boolean;
   onSelect: (selected: Export) => void;
+  onContextSelect?: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
   onDelete: ({ file, exportName }: DeleteClipType) => void;
   onAssignToCase?: (selected: Export) => void;
@@ -109,7 +113,10 @@ type ExportCardProps = {
 export function ExportCard({
   className,
   exportedRecording,
+  isSelected,
+  selectionMode,
   onSelect,
+  onContextSelect,
   onRename,
   onDelete,
   onAssignToCase,
@@ -120,6 +127,15 @@ export function ExportCard({
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
+
+  // selection
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  useContextMenu(cardRef, () => {
+    if (!exportedRecording.in_progress && onContextSelect) {
+      onContextSelect(exportedRecording);
+    }
+  });
 
   // editing name
 
@@ -209,13 +225,18 @@ export function ExportCard({
       </Dialog>
 
       <div
+        ref={cardRef}
         className={cn(
           "relative flex aspect-video cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl",
           className,
         )}
-        onClick={() => {
+        onClick={(e) => {
           if (!exportedRecording.in_progress) {
-            onSelect(exportedRecording);
+            if ((selectionMode || e.ctrlKey || e.metaKey) && onContextSelect) {
+              onContextSelect(exportedRecording);
+            } else {
+              onSelect(exportedRecording);
+            }
           }
         }}
       >
@@ -234,7 +255,7 @@ export function ExportCard({
             )}
           </>
         )}
-        {!exportedRecording.in_progress && (
+        {!exportedRecording.in_progress && !selectionMode && (
           <div className="absolute bottom-2 right-3 z-40">
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger>
@@ -333,6 +354,14 @@ export function ExportCard({
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
         <ImageShadowOverlay />
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] md:rounded-2xl",
+            isSelected
+              ? "shadow-selected outline-selected"
+              : "outline-transparent duration-500",
+          )}
+        />
         <div className="absolute bottom-2 left-3 right-12 z-30 text-white">
           <div className="truncate smart-capitalize">
             {exportedRecording.name.replaceAll("_", " ")}

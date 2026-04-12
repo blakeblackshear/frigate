@@ -16,9 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 type Option = {
@@ -36,8 +37,8 @@ type OptionAndInputDialogProps = {
   nameLabel: string;
   descriptionLabel: string;
   setOpen: (open: boolean) => void;
-  onSave: (value: string) => void;
-  onCreateNew: (name: string, description: string) => void;
+  onSave: (value: string) => Promise<void>;
+  onCreateNew: (name: string, description: string) => Promise<void>;
 };
 
 export default function OptionAndInputDialog({
@@ -70,10 +71,12 @@ export default function OptionAndInputDialog({
     }
   }, [open, initialValue, firstOption]);
 
+  const [isLoading, setIsLoading] = useState(false);
   const isNew = selectedValue === newValueKey;
-  const disableSave = !selectedValue || (isNew && name.trim().length === 0);
+  const disableSave =
+    !selectedValue || (isNew && name.trim().length === 0) || isLoading;
 
-  const handleSave = () => {
+  const handleSave = useCallback(async () => {
     if (!selectedValue) {
       return;
     }
@@ -81,13 +84,26 @@ export default function OptionAndInputDialog({
     const trimmedName = name.trim();
     const trimmedDescription = descriptionValue.trim();
 
-    if (isNew) {
-      onCreateNew(trimmedName, trimmedDescription);
-    } else {
-      onSave(selectedValue);
+    setIsLoading(true);
+    try {
+      if (isNew) {
+        await onCreateNew(trimmedName, trimmedDescription);
+      } else {
+        await onSave(selectedValue);
+      }
+      setOpen(false);
+    } finally {
+      setIsLoading(false);
     }
-    setOpen(false);
-  };
+  }, [
+    selectedValue,
+    name,
+    descriptionValue,
+    isNew,
+    onCreateNew,
+    onSave,
+    setOpen,
+  ]);
 
   return (
     <Dialog open={open} defaultOpen={false} onOpenChange={setOpen}>
@@ -128,13 +144,18 @@ export default function OptionAndInputDialog({
               <label className="text-sm font-medium text-secondary-foreground">
                 {nameLabel}
               </label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
+              <Input
+                className="text-md"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-secondary-foreground">
                 {descriptionLabel}
               </label>
               <Textarea
+                className="text-md"
                 value={descriptionValue}
                 onChange={(e) => setDescriptionValue(e.target.value)}
                 rows={2}
@@ -147,6 +168,7 @@ export default function OptionAndInputDialog({
           <Button
             type="button"
             variant="outline"
+            disabled={isLoading}
             onClick={() => {
               setOpen(false);
             }}
@@ -157,9 +179,13 @@ export default function OptionAndInputDialog({
             type="button"
             variant="select"
             disabled={disableSave}
-            onClick={handleSave}
+            onClick={() => void handleSave()}
           >
-            {t("button.save")}
+            {isLoading ? (
+              <ActivityIndicator className="size-4" />
+            ) : (
+              t("button.save")
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

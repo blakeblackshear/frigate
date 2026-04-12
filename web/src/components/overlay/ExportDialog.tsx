@@ -567,11 +567,13 @@ export function ExportContent({
       })),
     };
 
-    if (batchCaseSelection === "new") {
-      payload.new_case_name = newCaseName.trim();
-      payload.new_case_description = newCaseDescription.trim() || undefined;
-    } else {
-      payload.export_case_id = batchCaseSelection;
+    if (isAdmin) {
+      if (batchCaseSelection === "new") {
+        payload.new_case_name = newCaseName.trim();
+        payload.new_case_description = newCaseDescription.trim() || undefined;
+      } else {
+        payload.export_case_id = batchCaseSelection;
+      }
     }
 
     setIsStartingBatchExport(true);
@@ -661,6 +663,7 @@ export function ExportContent({
   }, [
     batchCaseSelection,
     config,
+    isAdmin,
     isStartingBatchExport,
     name,
     newCaseDescription,
@@ -931,76 +934,52 @@ export function ExportContent({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm text-secondary-foreground">
-              {t("export.case.label")}
-            </Label>
-            {isAdmin ? (
-              <>
-                <Select
-                  value={batchCaseSelection}
-                  onValueChange={(value) => setBatchCaseSelection(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("export.case.placeholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cases
-                      ?.sort((a, b) => a.name.localeCompare(b.name))
-                      .map((caseItem) => (
-                        <SelectItem key={caseItem.id} value={caseItem.id}>
-                          {caseItem.name}
-                        </SelectItem>
-                      ))}
-                    <SelectSeparator />
-                    <SelectItem value="new">
-                      {t("export.case.newCaseOption")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {batchCaseSelection === "new" && (
-                  <div className="space-y-2 pt-1">
-                    <Input
-                      className="text-md"
-                      placeholder={t("export.case.newCaseNamePlaceholder")}
-                      value={newCaseName}
-                      onChange={(event) => setNewCaseName(event.target.value)}
-                    />
-                    <Textarea
-                      className="text-md"
-                      placeholder={t(
-                        "export.case.newCaseDescriptionPlaceholder",
-                      )}
-                      value={newCaseDescription}
-                      onChange={(event) =>
-                        setNewCaseDescription(event.target.value)
-                      }
-                    />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="space-y-2 pt-1">
-                <div className="text-xs text-muted-foreground">
-                  {t("export.case.nonAdminHelp")}
+          {isAdmin && (
+            <div className="space-y-2">
+              <Label className="text-sm text-secondary-foreground">
+                {t("export.case.label")}
+              </Label>
+              <Select
+                value={batchCaseSelection}
+                onValueChange={(value) => setBatchCaseSelection(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("export.case.placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cases
+                    ?.sort((a, b) => a.name.localeCompare(b.name))
+                    .map((caseItem) => (
+                      <SelectItem key={caseItem.id} value={caseItem.id}>
+                        {caseItem.name}
+                      </SelectItem>
+                    ))}
+                  <SelectSeparator />
+                  <SelectItem value="new">
+                    {t("export.case.newCaseOption")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {batchCaseSelection === "new" && (
+                <div className="space-y-2 pt-1">
+                  <Input
+                    className="text-md"
+                    placeholder={t("export.case.newCaseNamePlaceholder")}
+                    value={newCaseName}
+                    onChange={(event) => setNewCaseName(event.target.value)}
+                  />
+                  <Textarea
+                    className="text-md"
+                    placeholder={t("export.case.newCaseDescriptionPlaceholder")}
+                    value={newCaseDescription}
+                    onChange={(event) =>
+                      setNewCaseDescription(event.target.value)
+                    }
+                  />
                 </div>
-                <Input
-                  className="text-md"
-                  placeholder={t("export.case.newCaseNamePlaceholder")}
-                  value={newCaseName}
-                  onChange={(event) => setNewCaseName(event.target.value)}
-                />
-                <Textarea
-                  className="text-md"
-                  placeholder={t("export.case.newCaseDescriptionPlaceholder")}
-                  value={newCaseDescription}
-                  onChange={(event) =>
-                    setNewCaseDescription(event.target.value)
-                  }
-                />
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

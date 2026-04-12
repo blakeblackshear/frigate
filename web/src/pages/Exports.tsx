@@ -64,13 +64,16 @@ import {
 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
+import ExportActionGroup from "@/components/filter/ExportActionGroup";
 import ExportFilterGroup from "@/components/filter/ExportFilterGroup";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 // always parse these as string arrays
 const EXPORT_FILTER_ARRAY_KEYS = ["cameras"];
 
 function Exports() {
   const { t } = useTranslation(["views/exports"]);
+  const isAdmin = useIsAdmin();
 
   useEffect(() => {
     document.title = t("documentTitle");
@@ -224,6 +227,54 @@ function Exports() {
     return true;
   });
 
+  // Bulk selection
+
+  const [selectedExports, setSelectedExports] = useState<Export[]>([]);
+  const selectionMode = selectedExports.length > 0;
+
+  // Clear selection when switching views
+  useEffect(() => {
+    setSelectedExports([]);
+  }, [selectedCaseId]);
+
+  const onSelectExport = useCallback(
+    (exportItem: Export) => {
+      const index = selectedExports.findIndex((e) => e.id === exportItem.id);
+      if (index !== -1) {
+        if (selectedExports.length === 1) {
+          setSelectedExports([]);
+        } else {
+          setSelectedExports([
+            ...selectedExports.slice(0, index),
+            ...selectedExports.slice(index + 1),
+          ]);
+        }
+      } else {
+        setSelectedExports([...selectedExports, exportItem]);
+      }
+    },
+    [selectedExports],
+  );
+
+  const onSelectAllExports = useCallback(() => {
+    const currentExports = selectedCaseId
+      ? exportsByCase[selectedCaseId] || []
+      : exports;
+    const visibleExports = currentExports.filter((e) => {
+      if (e.in_progress) return false;
+      if (!search) return true;
+      return e.name
+        .toLowerCase()
+        .replaceAll("_", " ")
+        .includes(search.toLowerCase());
+    });
+    if (selectedExports.length < visibleExports.length) {
+      setSelectedExports(visibleExports);
+    } else {
+      setSelectedExports([]);
+    }
+  }, [selectedCaseId, exportsByCase, exports, search, selectedExports]);
+
   // Modifying
 
   const [deleteClip, setDeleteClip] = useState<DeleteClipType | undefined>();
@@ -242,12 +293,14 @@ function Exports() {
       return;
     }
 
-    axios.delete(`export/${deleteClip.file}`).then((response) => {
-      if (response.status == 200) {
-        setDeleteClip(undefined);
-        mutate();
-      }
-    });
+    axios
+      .post("exports/delete", { ids: [deleteClip.file] })
+      .then((response) => {
+        if (response.status == 200) {
+          setDeleteClip(undefined);
+          mutate();
+        }
+      });
   }, [deleteClip, mutate]);
 
   const onHandleRename = useCallback(
@@ -278,7 +331,27 @@ function Exports() {
   // Keyboard Listener
 
   const contentRef = useRef<HTMLDivElement | null>(null);
-  useKeyboardListener([], undefined, contentRef);
+  useKeyboardListener(
+    ["a", "Escape"],
+    (key, modifiers) => {
+      if (!modifiers.down) return true;
+
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl && !modifiers.repeat) {
+            onSelectAllExports();
+            return true;
+          }
+          break;
+        case "Escape":
+          setSelectedExports([]);
+          return true;
+      }
+
+      return false;
+    },
+    contentRef,
+  );
 
   const selectedCase = useMemo(
     () => cases?.find((c) => c.id === selectedCaseId),
@@ -372,33 +445,11 @@ function Exports() {
     }
   }, [caseToDelete, deleteExportsWithCase, mutate, selectedCaseId, t]);
 
-  const handleAssignExportToCase = useCallback(
-    async (exportId: string, caseId: string) => {
-      try {
-        await axios.patch(`export/${exportId}/case`, {
-          export_case_id: caseId,
-        });
-        mutate();
-      } catch (error) {
-        const apiError = error as {
-          response?: { data?: { message?: string; detail?: string } };
-        };
-        const errorMessage =
-          apiError.response?.data?.message ||
-          apiError.response?.data?.detail ||
-          "Unknown error";
-        toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
-          position: "top-center",
-        });
-      }
-    },
-    [mutate, t],
-  );
-
   const handleRemoveExportFromCase = useCallback(
     async (exportedRecording: Export) => {
       try {
-        await axios.patch(`export/${exportedRecording.id}/case`, {
+        await axios.post("exports/reassign", {
+          ids: [exportedRecording.id],
           export_case_id: null,
         });
         mutate();
@@ -436,7 +487,7 @@ function Exports() {
         exportCase={caseForAddExport}
         availableExports={uncategorizedExports}
         onClose={() => setCaseForAddExport(undefined)}
-        onAssign={handleAssignExportToCase}
+        mutate={mutate}
       />
 
       <CaseAssignmentDialog
@@ -570,94 +621,120 @@ function Exports() {
           isMobileOnly && "mb-2 h-auto flex-wrap gap-2 space-y-0",
         )}
       >
-        <div className="flex w-full items-center gap-2">
-          {selectedCase && (
-            <Button
-              className="flex items-center gap-2.5 rounded-lg"
-              aria-label={t("label.back", { ns: "common" })}
-              size="sm"
-              onClick={() => setSelectedCaseId(undefined)}
-            >
-              <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-              {!isMobileOnly && (
-                <div className="text-primary">
-                  {t("button.back", { ns: "common" })}
-                </div>
-              )}
-            </Button>
-          )}
-          <Input
-            className="text-md w-full bg-muted md:w-1/2"
-            placeholder={t("search")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+        {selectionMode ? (
+          <ExportActionGroup
+            selectedExports={selectedExports}
+            setSelectedExports={setSelectedExports}
+            context={selectedCase ? "case" : "uncategorized"}
+            cases={cases}
+            currentCaseId={selectedCaseId}
+            mutate={mutate}
           />
-        </div>
-        {!selectedCase && (
-          <div className="flex w-full items-center justify-between gap-2 md:justify-start lg:justify-end">
-            <ExportFilterGroup
-              className="justify-start"
-              filter={exportFilter}
-              filters={["cameras"]}
-              onUpdateFilter={setExportFilter}
-            />
-            <Button
-              className="flex items-center gap-2.5 rounded-lg"
-              variant="default"
-              size="sm"
-              onClick={() => setCaseDialog({ mode: "create" })}
-            >
-              <LuFolderPlus className="size-4 text-secondary-foreground" />
-              <div className="text-primary">{t("toolbar.newCase")}</div>
-            </Button>
-          </div>
-        )}
-        {selectedCase && (
-          <div className="flex w-full items-center justify-end gap-2">
-            <ExportFilterGroup
-              className="justify-start"
-              filter={exportFilter}
-              filters={["cameras"]}
-              onUpdateFilter={setExportFilter}
-            />
-            <div className="flex items-center gap-1 md:gap-2">
-              <Button
-                className="flex items-center gap-2 p-2"
-                size="sm"
-                aria-label={t("toolbar.addExport")}
-                onClick={() => setCaseForAddExport(selectedCase)}
-              >
-                <LuPlus className="size-4 text-secondary-foreground" />
-                {!isMobile && (
-                  <div className="text-primary">{t("toolbar.addExport")}</div>
-                )}
-              </Button>
-              <Button
-                className="flex items-center gap-2 p-2"
-                size="sm"
-                aria-label={t("toolbar.editCase")}
-                onClick={() =>
-                  setCaseDialog({ mode: "edit", exportCase: selectedCase })
-                }
-              >
-                <LuPencil className="size-4 text-secondary-foreground" />
-                {!isMobile && (
-                  <div className="text-primary">{t("toolbar.editCase")}</div>
-                )}
-              </Button>
-              <Button
-                className="flex items-center gap-2 p-2"
-                size="sm"
-                aria-label={t("toolbar.deleteCase")}
-                onClick={() => setCaseToDelete(selectedCase)}
-              >
-                <LuTrash2 className="size-4 text-secondary-foreground" />
-                {!isMobile && (
-                  <div className="text-primary">{t("toolbar.deleteCase")}</div>
-                )}
-              </Button>
+        ) : (
+          <>
+            <div className="flex w-full items-center gap-2">
+              {selectedCase && (
+                <Button
+                  className="flex items-center gap-2.5 rounded-lg"
+                  aria-label={t("label.back", { ns: "common" })}
+                  size="sm"
+                  onClick={() => setSelectedCaseId(undefined)}
+                >
+                  <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+                  {!isMobileOnly && (
+                    <div className="text-primary">
+                      {t("button.back", { ns: "common" })}
+                    </div>
+                  )}
+                </Button>
+              )}
+              <Input
+                className="text-md w-full bg-muted md:w-1/2"
+                placeholder={t("search")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
-          </div>
+            {!selectedCase && (
+              <div className="flex w-full items-center justify-end gap-2">
+                <ExportFilterGroup
+                  className="justify-start"
+                  filter={exportFilter}
+                  filters={["cameras"]}
+                  onUpdateFilter={setExportFilter}
+                />
+                {isAdmin && (
+                  <Button
+                    className="flex items-center gap-2.5 rounded-lg"
+                    variant="default"
+                    size="sm"
+                    onClick={() => setCaseDialog({ mode: "create" })}
+                  >
+                    <LuFolderPlus className="text-secondary-foreground" />
+                    <div className="text-primary">{t("toolbar.newCase")}</div>
+                  </Button>
+                )}
+              </div>
+            )}
+            {selectedCase && (
+              <div className="flex w-full items-center justify-end gap-2">
+                <ExportFilterGroup
+                  className="justify-start"
+                  filter={exportFilter}
+                  filters={["cameras"]}
+                  onUpdateFilter={setExportFilter}
+                />
+                {isAdmin && (
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <Button
+                      className="flex items-center gap-2 p-2"
+                      size="sm"
+                      aria-label={t("toolbar.addExport")}
+                      onClick={() => setCaseForAddExport(selectedCase)}
+                    >
+                      <LuPlus className="text-secondary-foreground" />
+                      {!isMobile && (
+                        <div className="text-primary">
+                          {t("toolbar.addExport")}
+                        </div>
+                      )}
+                    </Button>
+                    <Button
+                      className="flex items-center gap-2 p-2"
+                      size="sm"
+                      aria-label={t("toolbar.editCase")}
+                      onClick={() =>
+                        setCaseDialog({
+                          mode: "edit",
+                          exportCase: selectedCase,
+                        })
+                      }
+                    >
+                      <LuPencil className="text-secondary-foreground" />
+                      {!isMobile && (
+                        <div className="text-primary">
+                          {t("toolbar.editCase")}
+                        </div>
+                      )}
+                    </Button>
+                    <Button
+                      className="flex items-center gap-2 p-2"
+                      size="sm"
+                      aria-label={t("toolbar.deleteCase")}
+                      onClick={() => setCaseToDelete(selectedCase)}
+                    >
+                      <LuTrash2 className="text-secondary-foreground" />
+                      {!isMobile && (
+                        <div className="text-primary">
+                          {t("toolbar.deleteCase")}
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -669,6 +746,9 @@ function Exports() {
           availableExports={uncategorizedExports}
           activeJobs={activeJobsByCase[selectedCase.id] || []}
           search={search}
+          selectedExports={selectedExports}
+          selectionMode={selectionMode}
+          onSelectExport={onSelectExport}
           setSelected={setSelected}
           renameClip={onHandleRename}
           setDeleteClip={setDeleteClip}
@@ -684,6 +764,9 @@ function Exports() {
           exports={exports}
           exportsByCase={exportsByCase}
           activeJobs={activeJobsByCase["none"] || []}
+          selectedExports={selectedExports}
+          selectionMode={selectionMode}
+          onSelectExport={onSelectExport}
           setSelectedCaseId={setSelectedCaseId}
           setSelected={setSelected}
           renameClip={onHandleRename}
@@ -702,6 +785,9 @@ type AllExportsViewProps = {
   exports: Export[];
   exportsByCase: { [caseId: string]: Export[] };
   activeJobs: ExportJob[];
+  selectedExports: Export[];
+  selectionMode: boolean;
+  onSelectExport: (e: Export) => void;
   setSelectedCaseId: (id: string) => void;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
@@ -715,6 +801,9 @@ function AllExportsView({
   exports,
   exportsByCase,
   activeJobs,
+  selectedExports,
+  selectionMode,
+  onSelectExport,
   setSelectedCaseId,
   setSelected,
   renameClip,
@@ -807,6 +896,9 @@ function AllExportsView({
                     key={item.name}
                     className=""
                     exportedRecording={item}
+                    isSelected={selectedExports.some((e) => e.id === item.id)}
+                    selectionMode={selectionMode}
+                    onContextSelect={onSelectExport}
                     onSelect={setSelected}
                     onRename={renameClip}
                     onDelete={({ file, exportName }) =>
@@ -836,6 +928,9 @@ type CaseViewProps = {
   availableExports: Export[];
   activeJobs: ExportJob[];
   search: string;
+  selectedExports: Export[];
+  selectionMode: boolean;
+  onSelectExport: (e: Export) => void;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
   setDeleteClip: (d: DeleteClipType | undefined) => void;
@@ -850,6 +945,9 @@ function CaseView({
   availableExports,
   activeJobs,
   search,
+  selectedExports,
+  selectionMode,
+  onSelectExport,
   setSelected,
   renameClip,
   setDeleteClip,
@@ -974,6 +1072,9 @@ function CaseView({
               key={item.id}
               className=""
               exportedRecording={item}
+              isSelected={selectedExports.some((e) => e.id === item.id)}
+              selectionMode={selectionMode}
+              onContextSelect={onSelectExport}
               onSelect={setSelected}
               onRename={renameClip}
               onDelete={({ file, exportName }) =>
@@ -1076,13 +1177,13 @@ type CaseAddExportDialogProps = {
   exportCase?: ExportCase;
   availableExports: Export[];
   onClose: () => void;
-  onAssign: (exportId: string, caseId: string) => Promise<void>;
+  mutate: () => void;
 };
 function CaseAddExportDialog({
   exportCase,
   availableExports,
   onClose,
-  onAssign,
+  mutate,
 }: CaseAddExportDialogProps) {
   const { t } = useTranslation(["views/exports", "common"]);
   const [search, setSearch] = useState("");
@@ -1125,12 +1226,27 @@ function CaseAddExportDialog({
 
     setIsAdding(true);
     try {
-      await Promise.all(selectedIds.map((id) => onAssign(id, exportCase.id)));
+      await axios.post("exports/reassign", {
+        ids: selectedIds,
+        export_case_id: exportCase.id,
+      });
+      mutate();
       onClose();
+    } catch (error) {
+      const apiError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.detail ||
+        "Unknown error";
+      toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
+        position: "top-center",
+      });
     } finally {
       setIsAdding(false);
     }
-  }, [exportCase, isAdding, onAssign, onClose, selectedIds]);
+  }, [exportCase, isAdding, mutate, onClose, selectedIds, t]);
 
   return (
     <Dialog
@@ -1240,7 +1356,8 @@ function CaseAssignmentDialog({
       if (!exportToAssign) return;
 
       try {
-        await axios.patch(`export/${exportToAssign.id}/case`, {
+        await axios.post("exports/reassign", {
+          ids: [exportToAssign.id],
           export_case_id: caseId,
         });
         mutate();
@@ -1256,6 +1373,7 @@ function CaseAssignmentDialog({
         toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
           position: "top-center",
         });
+        throw error;
       }
     },
     [exportToAssign, mutate, onClose, t],
@@ -1274,7 +1392,8 @@ function CaseAssignmentDialog({
         const newCaseId: string | undefined = createResp.data?.id;
 
         if (newCaseId) {
-          await axios.patch(`export/${exportToAssign.id}/case`, {
+          await axios.post("exports/reassign", {
+            ids: [exportToAssign.id],
             export_case_id: newCaseId,
           });
         }
@@ -1292,6 +1411,7 @@ function CaseAssignmentDialog({
         toast.error(t("toast.error.assignCaseFailed", { errorMessage }), {
           position: "top-center",
         });
+        throw error;
       }
     },
     [exportToAssign, mutate, onClose, t],

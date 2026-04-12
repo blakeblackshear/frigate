@@ -165,11 +165,12 @@ export default function MultiExportDialog({
   const canSubmit = useMemo(() => {
     if (isExporting) return false;
     if (count === 0) return false;
+    if (!isAdmin) return true;
     if (isNewCase) {
       return newCaseName.trim().length > 0;
     }
     return caseSelection.length > 0;
-  }, [caseSelection, count, isExporting, isNewCase, newCaseName]);
+  }, [caseSelection, count, isAdmin, isExporting, isNewCase, newCaseName]);
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
@@ -182,15 +183,16 @@ export default function MultiExportDialog({
       client_item_id: review.id,
     }));
 
-    const payload: BatchExportBody = {
-      items,
-      ...(isNewCase
-        ? {
-            new_case_name: newCaseName.trim(),
-            new_case_description: newCaseDescription.trim() || undefined,
-          }
-        : { export_case_id: caseSelection }),
-    };
+    const payload: BatchExportBody = { items };
+
+    if (isAdmin) {
+      if (isNewCase) {
+        payload.new_case_name = newCaseName.trim();
+        payload.new_case_description = newCaseDescription.trim() || undefined;
+      } else {
+        payload.export_case_id = caseSelection;
+      }
+    }
 
     setIsExporting(true);
     try {
@@ -205,10 +207,15 @@ export default function MultiExportDialog({
 
       if (successful.length > 0 && failed.length === 0) {
         toast.success(
-          t("export.multi.toast.started", {
-            ns: "components/dialog",
-            count: successful.length,
-          }),
+          t(
+            isAdmin
+              ? "export.multi.toast.started"
+              : "export.multi.toast.startedNoCase",
+            {
+              ns: "components/dialog",
+              count: successful.length,
+            },
+          ),
           { position: "top-center" },
         );
       } else if (successful.length > 0 && failed.length > 0) {
@@ -267,6 +274,7 @@ export default function MultiExportDialog({
     canSubmit,
     caseSelection,
     formatFailureLabel,
+    isAdmin,
     isNewCase,
     navigate,
     newCaseDescription,
@@ -302,7 +310,7 @@ export default function MultiExportDialog({
 
   const body = (
     <div className="flex flex-col gap-4">
-      {isAdmin ? (
+      {isAdmin && (
         <div className="space-y-2">
           <Label className="text-sm text-secondary-foreground">
             {t("export.case.label")}
@@ -327,16 +335,6 @@ export default function MultiExportDialog({
             </SelectContent>
           </Select>
           {isNewCase && newCaseInputs}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <Label className="text-sm text-secondary-foreground">
-            {t("export.case.label")}
-          </Label>
-          <div className="text-xs text-muted-foreground">
-            {t("export.case.nonAdminHelp")}
-          </div>
-          {newCaseInputs}
         </div>
       )}
     </div>
@@ -372,7 +370,9 @@ export default function MultiExportDialog({
           <DialogHeader>
             <DialogTitle>{t("export.multi.title", { count })}</DialogTitle>
             <DialogDescription>
-              {t("export.multi.description")}
+              {isAdmin
+                ? t("export.multi.description")
+                : t("export.multi.descriptionNoCase")}
             </DialogDescription>
           </DialogHeader>
           {body}
@@ -388,7 +388,11 @@ export default function MultiExportDialog({
       <DrawerContent className="px-4 pb-6">
         <DrawerHeader className="px-0">
           <DrawerTitle>{t("export.multi.title", { count })}</DrawerTitle>
-          <DrawerDescription>{t("export.multi.description")}</DrawerDescription>
+          <DrawerDescription>
+            {isAdmin
+              ? t("export.multi.description")
+              : t("export.multi.descriptionNoCase")}
+          </DrawerDescription>
         </DrawerHeader>
         {body}
         <div className="mt-4 flex flex-col-reverse gap-2">{footer}</div>
