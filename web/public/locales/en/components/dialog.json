@@ -84,6 +84,7 @@
       "title_one": "Export 1 review",
       "title_other": "Export {{count}} reviews",
       "description": "Export each selected review. All exports will be grouped under a single case.",
+      "descriptionNoCase": "Export each selected review.",
       "caseNamePlaceholder": "Review export - {{date}}",
       "exportButton_one": "Export 1 review",
       "exportButton_other": "Export {{count}} reviews",
@@ -91,6 +92,8 @@
       "toast": {
         "started_one": "Started 1 export. Opening the case now.",
         "started_other": "Started {{count}} exports. Opening the case now.",
+        "startedNoCase_one": "Started 1 export.",
+        "startedNoCase_other": "Started {{count}} exports.",
         "partial": "Started {{successful}} of {{total}} exports. Failed: {{failedItems}}",
         "failed": "Failed to start {{total}} exports. Failed: {{failedItems}}"
       }

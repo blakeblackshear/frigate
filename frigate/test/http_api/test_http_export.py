@@ -504,26 +504,32 @@ class TestHttpExport(BaseTestHttp):
             assert row.in_progress is False
             assert os.path.exists(done_video)
 
-    def test_batch_export_requires_case_target(self):
-        with AuthTestClient(self.app) as client:
-            response = client.post(
-                "/exports/batch",
-                json={
-                    "items": [
-                        {
-                            "camera": "front_door",
-                            "start_time": 110,
-                            "end_time": 150,
-                        }
-                    ],
-                },
-            )
+    def test_batch_export_without_case_goes_to_uncategorized(self):
+        """Exports without a case target go to uncategorized."""
+        self._insert_recording("rec-front", "front_door", 100, 400)
 
-        assert response.status_code == 422
-        assert (
-            response.json()["detail"][0]["msg"]
-            == "Value error, Either export_case_id or new_case_name must be provided"
-        )
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                            }
+                        ],
+                    },
+                )
+
+        assert response.status_code == 202
+        response_json = response.json()
+        assert response_json["export_case_id"] is None
+        assert ExportCase.select().count() == 0
 
     # --- /exports/batch (item-shaped multi-export) ---------------------------
 
@@ -651,26 +657,33 @@ class TestHttpExport(BaseTestHttp):
             == "Value error, end_time must be after start_time"
         )
 
-    def test_batch_export_missing_case_target_rejected(self):
-        with AuthTestClient(self.app) as client:
-            response = client.post(
-                "/exports/batch",
-                json={
-                    "items": [
-                        {
-                            "camera": "front_door",
-                            "start_time": 100,
-                            "end_time": 150,
-                        }
-                    ],
-                },
-            )
+    def test_batch_export_non_admin_without_case_goes_to_uncategorized(self):
+        """Non-admin batch exports go to uncategorized."""
+        self._insert_recording("rec-front", "front_door", 100, 400)
 
-        assert response.status_code == 422
-        assert (
-            response.json()["detail"][0]["msg"]
-            == "Value error, Either export_case_id or new_case_name must be provided"
-        )
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    headers={"remote-user": "viewer", "remote-role": "viewer"},
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 100,
+                                "end_time": 150,
+                            }
+                        ],
+                    },
+                )
+
+        assert response.status_code == 202
+        response_json = response.json()
+        assert response_json["export_case_id"] is None
+        assert ExportCase.select().count() == 0
 
     def test_batch_export_camera_access_denied_fails_closed(self):
         from fastapi import Request
@@ -1108,3 +1121,313 @@ class TestHttpExport(BaseTestHttp):
 
         assert response.status_code == 202
         assert response.json()["success"] is True
+
+    # ── Bulk delete exports ────────────────────────────────────────
+
+    def test_bulk_delete_exports_success(self):
+        """All IDs exist, none in-progress → 200, all deleted."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+        Export.create(
+            id="exp2",
+            camera="front_door",
+            name="export_2",
+            date=200,
+            video_path="/tmp/exp2.mp4",
+            thumb_path="/tmp/exp2.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/delete",
+                json={"ids": ["exp1", "exp2"]},
+            )
+
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        assert Export.select().count() == 0
+
+    def test_bulk_delete_exports_single_item(self):
+        """Regression: single-item delete via batch endpoint."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/delete",
+                json={"ids": ["exp1"]},
+            )
+
+        assert response.status_code == 200
+        assert Export.select().count() == 0
+
+    def test_bulk_delete_exports_some_missing(self):
+        """Some IDs don't exist → 404, nothing deleted."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/delete",
+                json={"ids": ["exp1", "nonexistent"]},
+            )
+
+        assert response.status_code == 404
+        # Nothing deleted
+        assert Export.select().count() == 1
+
+    def test_bulk_delete_exports_all_missing(self):
+        """All IDs don't exist → 404."""
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/delete",
+                json={"ids": ["nope1", "nope2"]},
+            )
+
+        assert response.status_code == 404
+
+    def test_bulk_delete_exports_in_progress(self):
+        """Some exports in-progress → 400, nothing deleted."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path=f"{os.environ.get('EXPORT_DIR', '/media/frigate/exports')}/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=True,
+        )
+
+        with patch(
+            "frigate.api.export._get_files_in_use",
+            return_value={"exp1.mp4"},
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/delete",
+                    json={"ids": ["exp1"]},
+                )
+
+        assert response.status_code == 400
+        assert Export.select().count() == 1
+
+    def test_bulk_delete_exports_non_admin_rejected(self):
+        """Non-admin users cannot bulk delete."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/delete",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+                json={"ids": ["exp1"]},
+            )
+
+        assert response.status_code == 403
+        assert Export.select().count() == 1
+
+    # ── Bulk reassign exports ──────────────────────────────────────
+
+    def test_bulk_reassign_exports_to_case(self):
+        """All IDs exist, case exists → 200, all reassigned."""
+        ExportCase.create(
+            id="case1",
+            name="Test Case",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+        Export.create(
+            id="exp2",
+            camera="front_door",
+            name="export_2",
+            date=200,
+            video_path="/tmp/exp2.mp4",
+            thumb_path="/tmp/exp2.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/reassign",
+                json={"ids": ["exp1", "exp2"], "export_case_id": "case1"},
+            )
+
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        for exp_id in ["exp1", "exp2"]:
+            exp = Export.get(Export.id == exp_id)
+            assert exp.export_case_id == "case1"
+
+    def test_bulk_reassign_exports_to_null(self):
+        """Reassign to null (uncategorize) → 200."""
+        ExportCase.create(
+            id="case1",
+            name="Test Case",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+            export_case="case1",
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/reassign",
+                json={"ids": ["exp1"], "export_case_id": None},
+            )
+
+        assert response.status_code == 200
+        exp = Export.get(Export.id == "exp1")
+        assert exp.export_case_id is None
+
+    def test_bulk_reassign_exports_single_item(self):
+        """Regression: single-item reassign via batch endpoint."""
+        ExportCase.create(
+            id="case1",
+            name="Test Case",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/reassign",
+                json={"ids": ["exp1"], "export_case_id": "case1"},
+            )
+
+        assert response.status_code == 200
+        exp = Export.get(Export.id == "exp1")
+        assert exp.export_case_id == "case1"
+
+    def test_bulk_reassign_exports_some_missing(self):
+        """Some IDs don't exist → 404, nothing reassigned."""
+        ExportCase.create(
+            id="case1",
+            name="Test Case",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/reassign",
+                json={
+                    "ids": ["exp1", "nonexistent"],
+                    "export_case_id": "case1",
+                },
+            )
+
+        assert response.status_code == 404
+        # Nothing reassigned
+        exp = Export.get(Export.id == "exp1")
+        assert exp.export_case_id is None
+
+    def test_bulk_reassign_exports_case_not_found(self):
+        """Target case doesn't exist → 404."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/reassign",
+                json={"ids": ["exp1"], "export_case_id": "nonexistent"},
+            )
+
+        assert response.status_code == 404
+        exp = Export.get(Export.id == "exp1")
+        assert exp.export_case_id is None
+
+    def test_bulk_reassign_exports_non_admin_rejected(self):
+        """Non-admin users cannot bulk reassign."""
+        Export.create(
+            id="exp1",
+            camera="front_door",
+            name="export_1",
+            date=100,
+            video_path="/tmp/exp1.mp4",
+            thumb_path="/tmp/exp1.jpg",
+            in_progress=False,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.post(
+                "/exports/reassign",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+                json={"ids": ["exp1"], "export_case_id": None},
+            )
+
+        assert response.status_code == 403

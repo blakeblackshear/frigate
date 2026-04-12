@@ -86,5 +86,38 @@
     "addButton_one": "Add 1 Export",
     "addButton_other": "Add {{count}} Exports",
     "adding": "Adding..."
+  },
+  "selected_one": "{{count}} selected",
+  "selected_other": "{{count}} selected",
+  "bulkActions": {
+    "addToCase": "Add to Case",
+    "moveToCase": "Move to Case",
+    "removeFromCase": "Remove from Case",
+    "delete": "Delete",
+    "deleteNow": "Delete Now"
+  },
+  "bulkDelete": {
+    "title": "Delete Exports",
+    "desc_one": "Are you sure you want to delete {{count}} export?",
+    "desc_other": "Are you sure you want to delete {{count}} exports?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Remove from Case",
+    "desc_one": "Remove {{count}} export from this case?",
+    "desc_other": "Remove {{count}} exports from this case?",
+    "descKeepExports": "Exports will be moved to uncategorized.",
+    "descDeleteExports": "Exports will be permanently deleted.",
+    "deleteExports": "Delete exports instead"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Successfully deleted exports",
+      "reassign": "Successfully updated case assignment",
+      "remove": "Successfully removed exports from case"
+    },
+    "error": {
+      "deleteFailed": "Failed to delete exports: {{errorMessage}}",
+      "reassignFailed": "Failed to update case assignment: {{errorMessage}}"
+    }
   }
 }
