@@ -26,8 +26,11 @@ from frigate.api.defs.request.batch_export_body import (
     BatchExportBody,
     BatchExportItem,
 )
+from frigate.api.defs.request.export_bulk_body import (
+    ExportBulkDeleteBody,
+    ExportBulkReassignBody,
+)
 from frigate.api.defs.request.export_case_body import (
-    ExportCaseAssignBody,
     ExportCaseCreateBody,
     ExportCaseUpdateBody,
 )
@@ -424,48 +427,6 @@ def delete_export_case(case_id: str, request: Request, delete_exports: bool = Fa
     )
 
 
-@router.patch(
-    "/export/{export_id}/case",
-    response_model=GenericResponse,
-    dependencies=[Depends(require_role(["admin"]))],
-    summary="Assign export to case",
-    description=(
-        "Assigns an export to a case, or unassigns it if export_case_id is null."
-    ),
-)
-async def assign_export_case(
-    export_id: str,
-    body: ExportCaseAssignBody,
-    request: Request,
-):
-    try:
-        export: Export = Export.get(Export.id == export_id)
-        await require_camera_access(export.camera, request=request)
-    except DoesNotExist:
-        return JSONResponse(
-            content={"success": False, "message": "Export not found."},
-            status_code=404,
-        )
-
-    if body.export_case_id is not None:
-        try:
-            ExportCase.get(ExportCase.id == body.export_case_id)
-        except DoesNotExist:
-            return JSONResponse(
-                content={"success": False, "message": "Export case not found."},
-                status_code=404,
-            )
-        export.export_case = body.export_case_id
-    else:
-        export.export_case = None
-
-    export.save()
-
-    return JSONResponse(
-        content={"success": True, "message": "Successfully updated export case."}
-    )
-
-
 @router.get(
     "/jobs/export",
     response_model=ExportJobsResponse,
@@ -600,9 +561,9 @@ def export_recordings_batch(
 
     export_case = None
     export_case_id = body.export_case_id
-    if export_case_id is None:
+    if export_case_id is None and body.new_case_name:
         export_case = _create_export_case_record(
-            body.new_case_name or "New Case",
+            body.new_case_name,
             body.new_case_description,
         )
         export_case_id = export_case.id
@@ -809,65 +770,6 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
     )
 
 
-@router.delete(
-    "/export/{event_id}",
-    response_model=GenericResponse,
-    dependencies=[Depends(require_role(["admin"]))],
-    summary="Delete export",
-)
-async def export_delete(event_id: str, request: Request):
-    try:
-        export: Export = Export.get(Export.id == event_id)
-        await require_camera_access(export.camera, request=request)
-    except DoesNotExist:
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "Export not found.",
-                }
-            ),
-            status_code=404,
-        )
-
-    files_in_use = []
-    for process in psutil.process_iter():
-        try:
-            if process.name() != "ffmpeg":
-                continue
-            file_list = process.open_files()
-            if file_list:
-                for nt in file_list:
-                    if nt.path.startswith(EXPORT_DIR):
-                        files_in_use.append(nt.path.split("/")[-1])
-        except psutil.Error:
-            continue
-
-    if export.video_path.split("/")[-1] in files_in_use:
-        return JSONResponse(
-            content=(
-                {"success": False, "message": "Can not delete in progress export."}
-            ),
-            status_code=400,
-        )
-
-    Path(export.video_path).unlink(missing_ok=True)
-
-    if export.thumb_path:
-        Path(export.thumb_path).unlink(missing_ok=True)
-
-    export.delete_instance()
-    return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Successfully deleted export.",
-            }
-        ),
-        status_code=200,
-    )
-
-
 @router.post(
     "/export/custom/{camera_name}/start/{start_time}/end/{end_time}",
     response_model=StartExportResponse,
@@ -1000,3 +902,102 @@ async def get_export(export_id: str, request: Request):
             content={"success": False, "message": "Export not found"},
             status_code=404,
         )
+
+
+def _get_files_in_use() -> set[str]:
+    """Get set of export filenames currently in use by ffmpeg."""
+    files_in_use: set[str] = set()
+    for process in psutil.process_iter():
+        try:
+            if process.name() != "ffmpeg":
+                continue
+            file_list = process.open_files()
+            if file_list:
+                for nt in file_list:
+                    if nt.path.startswith(EXPORT_DIR):
+                        files_in_use.add(nt.path.split("/")[-1])
+        except psutil.Error:
+            continue
+    return files_in_use
+
+
+@router.post(
+    "/exports/delete",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Bulk delete exports",
+    description="Deletes one or more exports by ID. All IDs must exist and none can be in-progress.",
+)
+def bulk_delete_exports(body: ExportBulkDeleteBody):
+    exports = list(Export.select().where(Export.id << body.ids))
+
+    if len(exports) != len(body.ids):
+        return JSONResponse(
+            content={"success": False, "message": "One or more exports not found."},
+            status_code=404,
+        )
+
+    files_in_use = _get_files_in_use()
+
+    for export in exports:
+        if export.video_path.split("/")[-1] in files_in_use:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Can not delete in-progress export.",
+                },
+                status_code=400,
+            )
+
+    for export in exports:
+        Path(export.video_path).unlink(missing_ok=True)
+        if export.thumb_path:
+            Path(export.thumb_path).unlink(missing_ok=True)
+
+    Export.delete().where(Export.id << body.ids).execute()
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Successfully deleted {len(exports)} export(s).",
+        },
+        status_code=200,
+    )
+
+
+@router.post(
+    "/exports/reassign",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Bulk reassign exports to a case",
+    description="Assigns or unassigns one or more exports to/from a case. All IDs must exist.",
+)
+def bulk_reassign_exports(body: ExportBulkReassignBody):
+    exports = list(Export.select().where(Export.id << body.ids))
+
+    if len(exports) != len(body.ids):
+        return JSONResponse(
+            content={"success": False, "message": "One or more exports not found."},
+            status_code=404,
+        )
+
+    if body.export_case_id is not None:
+        try:
+            ExportCase.get(ExportCase.id == body.export_case_id)
+        except DoesNotExist:
+            return JSONResponse(
+                content={"success": False, "message": "Export case not found."},
+                status_code=404,
+            )
+
+    Export.update(export_case=body.export_case_id).where(
+        Export.id << body.ids
+    ).execute()
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Successfully updated {len(exports)} export(s).",
+        },
+        status_code=200,
+    )

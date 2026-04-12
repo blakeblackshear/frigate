@@ -62,7 +62,4 @@ class BatchExportBody(BaseModel):
             if item.end_time <= item.start_time:
                 raise ValueError("end_time must be after start_time")
 
-        if self.export_case_id is None and self.new_case_name is None:
-            raise ValueError("Either export_case_id or new_case_name must be provided")
-
         return self
