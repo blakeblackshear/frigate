@@ -137,6 +137,133 @@ test.describe("Export Page - Case Detail @high", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog.getByText(/Package Theft Investigation/)).toBeVisible();
   });
+
+  test("delete case can also delete its exports", async ({ frigateApp }) => {
+    let deleteRequestUrl: string | null = null;
+    let deleteCaseCompleted = false;
+
+    const initialCases = [
+      {
+        id: "case-001",
+        name: "Package Theft Investigation",
+        description: "Review of suspicious activity near the front porch",
+        created_at: 1775407931.3863528,
+        updated_at: 1775483531.3863528,
+      },
+    ];
+
+    const initialExports = [
+      {
+        id: "export-001",
+        camera: "front_door",
+        name: "Front Door - Person Alert",
+        date: 1775490731.3863528,
+        video_path: "/exports/export-001.mp4",
+        thumb_path: "/exports/export-001-thumb.jpg",
+        in_progress: false,
+        export_case_id: null,
+      },
+      {
+        id: "export-002",
+        camera: "backyard",
+        name: "Backyard - Car Detection",
+        date: 1775483531.3863528,
+        video_path: "/exports/export-002.mp4",
+        thumb_path: "/exports/export-002-thumb.jpg",
+        in_progress: false,
+        export_case_id: "case-001",
+      },
+      {
+        id: "export-003",
+        camera: "garage",
+        name: "Garage - In Progress",
+        date: 1775492531.3863528,
+        video_path: "/exports/export-003.mp4",
+        thumb_path: "/exports/export-003-thumb.jpg",
+        in_progress: true,
+        export_case_id: null,
+      },
+    ];
+
+    await frigateApp.page.route(/\/api\/cases(?:$|\?|\/)/, async (route) => {
+      const request = route.request();
+
+      if (request.method() === "DELETE") {
+        deleteRequestUrl = request.url();
+        deleteCaseCompleted = true;
+        return route.fulfill({ json: { success: true } });
+      }
+
+      if (request.method() === "GET") {
+        return route.fulfill({
+          json: deleteCaseCompleted ? [] : initialCases,
+        });
+      }
+
+      return route.fallback();
+    });
+
+    await frigateApp.page.route("**/api/exports**", async (route) => {
+      if (route.request().method() !== "GET") {
+        return route.fallback();
+      }
+
+      return route.fulfill({
+        json: deleteCaseCompleted
+          ? initialExports.filter((exp) => exp.export_case_id !== "case-001")
+          : initialExports,
+      });
+    });
+
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Package Theft Investigation")
+      .first()
+      .click();
+    await frigateApp.page.getByRole("button", { name: "Delete Case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("alertdialog")
+      .filter({ hasText: "Delete Case" });
+    await expect(dialog).toBeVisible();
+
+    const deleteExportsSwitch = dialog.getByRole("switch", {
+      name: "Also delete exports",
+    });
+    await expect(deleteExportsSwitch).toHaveAttribute("aria-checked", "false");
+    await expect(
+      dialog.getByText(
+        "Exports will remain available as uncategorized exports.",
+      ),
+    ).toBeVisible();
+
+    await deleteExportsSwitch.click();
+
+    await expect(deleteExportsSwitch).toHaveAttribute("aria-checked", "true");
+    await expect(
+      dialog.getByText("All exports in this case will be permanently deleted."),
+    ).toBeVisible();
+
+    await dialog.getByRole("button", { name: /^delete$/i }).click();
+
+    await expect
+      .poll(() => deleteRequestUrl)
+      .toContain("/api/cases/case-001?delete_exports=true");
+
+    await expect(dialog).toBeHidden();
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Backyard - Car Detection"),
+    ).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Front Door - Person Alert"),
+    ).toBeVisible();
+  });
 });
 
 test.describe("Export Page - Empty State @high", () => {
