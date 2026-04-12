@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -133,9 +134,10 @@ export default function OptionAndInputDialog({
               <label className="text-sm font-medium text-secondary-foreground">
                 {descriptionLabel}
               </label>
-              <Input
+              <Textarea
                 value={descriptionValue}
                 onChange={(e) => setDescriptionValue(e.target.value)}
+                rows={2}
               />
             </div>
           </div>

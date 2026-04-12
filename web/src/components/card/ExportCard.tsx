@@ -87,11 +87,11 @@ export function CaseCard({
           <FaFolder />
           <div className="truncate smart-capitalize">{exportCase.name}</div>
         </div>
-        <div className="mt-1 line-clamp-2 text-xs text-white/80">
-          {exports.length === 0
-            ? t("caseCard.emptyCase")
-            : exportCase.description}
-        </div>
+        {exports.length === 0 && (
+          <div className="mt-1 text-xs text-white/80">
+            {t("caseCard.emptyCase")}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -333,8 +333,8 @@ export function ExportCard({
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
         <ImageShadowOverlay />
-        <div className="absolute bottom-2 left-3 z-30 text-white">
-          <div className="flex items-end smart-capitalize">
+        <div className="absolute bottom-2 left-3 right-12 z-30 text-white">
+          <div className="truncate smart-capitalize">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>
         </div>

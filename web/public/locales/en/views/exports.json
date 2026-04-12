@@ -39,7 +39,10 @@
   },
   "deleteCase": {
     "label": "Delete Case",
-    "desc": "Are you sure you want to delete {{caseName}}? Exports will remain available as uncategorized exports."
+    "desc": "Are you sure you want to delete {{caseName}}?",
+    "descKeepExports": "Exports will remain available as uncategorized exports.",
+    "descDeleteExports": "All exports in this case will be permanently deleted.",
+    "deleteExports": "Also delete exports"
   },
   "caseDialog": {
     "title": "Add to case",

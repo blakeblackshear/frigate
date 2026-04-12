@@ -23,6 +23,8 @@ import {
 import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Toaster } from "@/components/ui/sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
@@ -83,7 +85,7 @@ function Exports() {
 
   const { data: cases, mutate: updateCases } = useSWR<ExportCase[]>("cases");
   const { data: activeExportJobs } = useSWR<ExportJob[]>("jobs/export", {
-    refreshInterval: 2000,
+    refreshInterval: (latestJobs) => ((latestJobs ?? []).length > 0 ? 2000 : 0),
   });
   // Keep polling exports while there are queued/running jobs OR while any
   // existing export is still marked in_progress. Without the second clause,
@@ -153,8 +155,21 @@ function Exports() {
   }, [rawExports]);
 
   const filteredCases = useMemo<ExportCase[]>(() => {
-    return cases || [];
-  }, [cases]);
+    if (!cases) return [];
+
+    const hasCameraFilter =
+      exportFilter?.cameras && exportFilter.cameras.length > 0;
+
+    if (!hasCameraFilter) return cases;
+
+    // When a camera filter is active, hide cases that have zero exports
+    // and zero active jobs matching the filter — they're just noise.
+    return cases.filter(
+      (c) =>
+        (exportsByCase[c.id]?.length ?? 0) > 0 ||
+        (activeJobsByCase[c.id]?.length ?? 0) > 0,
+    );
+  }, [activeJobsByCase, cases, exportFilter?.cameras, exportsByCase]);
 
   const exports = useMemo<Export[]>(
     () => exportsByCase["none"] || [],
@@ -217,6 +232,7 @@ function Exports() {
     { mode: "create" | "edit"; exportCase?: ExportCase } | undefined
   >();
   const [caseToDelete, setCaseToDelete] = useState<ExportCase | undefined>();
+  const [deleteExportsWithCase, setDeleteExportsWithCase] = useState(false);
   const [caseForAddExport, setCaseForAddExport] = useState<
     ExportCase | undefined
   >();
@@ -333,11 +349,14 @@ function Exports() {
     }
 
     try {
-      await axios.delete(`cases/${caseToDelete.id}`);
+      await axios.delete(`cases/${caseToDelete.id}`, {
+        params: deleteExportsWithCase ? { delete_exports: true } : undefined,
+      });
       if (selectedCaseId === caseToDelete.id) {
         setSelectedCaseId(undefined);
       }
       setCaseToDelete(undefined);
+      setDeleteExportsWithCase(false);
       mutate();
     } catch (error) {
       const apiError = error as {
@@ -351,7 +370,7 @@ function Exports() {
         position: "top-center",
       });
     }
-  }, [caseToDelete, mutate, selectedCaseId, t]);
+  }, [caseToDelete, deleteExportsWithCase, mutate, selectedCaseId, t]);
 
   const handleAssignExportToCase = useCallback(
     async (exportId: string, caseId: string) => {
@@ -457,7 +476,12 @@ function Exports() {
 
       <AlertDialog
         open={caseToDelete != undefined}
-        onOpenChange={() => setCaseToDelete(undefined)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCaseToDelete(undefined);
+            setDeleteExportsWithCase(false);
+          }
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -465,9 +489,25 @@ function Exports() {
             <AlertDialogDescription>
               {t("deleteCase.desc", {
                 caseName: caseToDelete?.name,
-              })}
+              })}{" "}
+              {deleteExportsWithCase
+                ? t("deleteCase.descDeleteExports")
+                : t("deleteCase.descKeepExports")}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="flex items-center justify-start gap-6">
+            <Label
+              htmlFor="delete-exports-switch"
+              className="cursor-pointer text-sm"
+            >
+              {t("deleteCase.deleteExports")}
+            </Label>
+            <Switch
+              id="delete-exports-switch"
+              checked={deleteExportsWithCase}
+              onCheckedChange={setDeleteExportsWithCase}
+            />
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>
               {t("button.cancel", { ns: "common" })}
@@ -526,7 +566,7 @@ function Exports() {
 
       <div
         className={cn(
-          "flex w-full flex-col items-start space-y-2 pr-2 md:mb-2 lg:relative lg:h-10 lg:flex-row lg:items-center lg:space-y-0",
+          "flex w-full flex-col items-start space-y-2 md:mb-2 lg:relative lg:h-10 lg:flex-row lg:items-center lg:space-y-0",
           isMobileOnly && "mb-2 h-auto flex-wrap gap-2 space-y-0",
         )}
       >
@@ -574,32 +614,49 @@ function Exports() {
         )}
         {selectedCase && (
           <div className="flex w-full items-center justify-end gap-2">
-            <Button
-              className="flex items-center gap-2.5 rounded-lg"
-              size="sm"
-              onClick={() => setCaseForAddExport(selectedCase)}
-            >
-              <LuPlus className="size-4 text-secondary-foreground" />
-              <div className="text-primary">{t("toolbar.addExport")}</div>
-            </Button>
-            <Button
-              className="flex items-center gap-2.5 rounded-lg"
-              size="sm"
-              onClick={() =>
-                setCaseDialog({ mode: "edit", exportCase: selectedCase })
-              }
-            >
-              <LuPencil className="size-4 text-secondary-foreground" />
-              <div className="text-primary">{t("toolbar.editCase")}</div>
-            </Button>
-            <Button
-              className="flex items-center gap-2.5 rounded-lg"
-              size="sm"
-              onClick={() => setCaseToDelete(selectedCase)}
-            >
-              <LuTrash2 className="size-4 text-secondary-foreground" />
-              <div className="text-primary">{t("toolbar.deleteCase")}</div>
-            </Button>
+            <ExportFilterGroup
+              className="justify-start"
+              filter={exportFilter}
+              filters={["cameras"]}
+              onUpdateFilter={setExportFilter}
+            />
+            <div className="flex items-center gap-1 md:gap-2">
+              <Button
+                className="flex items-center gap-2 p-2"
+                size="sm"
+                aria-label={t("toolbar.addExport")}
+                onClick={() => setCaseForAddExport(selectedCase)}
+              >
+                <LuPlus className="size-4 text-secondary-foreground" />
+                {!isMobile && (
+                  <div className="text-primary">{t("toolbar.addExport")}</div>
+                )}
+              </Button>
+              <Button
+                className="flex items-center gap-2 p-2"
+                size="sm"
+                aria-label={t("toolbar.editCase")}
+                onClick={() =>
+                  setCaseDialog({ mode: "edit", exportCase: selectedCase })
+                }
+              >
+                <LuPencil className="size-4 text-secondary-foreground" />
+                {!isMobile && (
+                  <div className="text-primary">{t("toolbar.editCase")}</div>
+                )}
+              </Button>
+              <Button
+                className="flex items-center gap-2 p-2"
+                size="sm"
+                aria-label={t("toolbar.deleteCase")}
+                onClick={() => setCaseToDelete(selectedCase)}
+              >
+                <LuTrash2 className="size-4 text-secondary-foreground" />
+                {!isMobile && (
+                  <div className="text-primary">{t("toolbar.deleteCase")}</div>
+                )}
+              </Button>
+            </div>
           </div>
         )}
       </div>
