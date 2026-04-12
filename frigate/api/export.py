@@ -55,6 +55,7 @@ from frigate.jobs.export import (
     ExportJob,
     ExportQueueFullError,
     available_export_queue_slots,
+    cancel_queued_export_jobs_for_case,
     get_export_job,
     list_active_export_jobs,
     start_export_job,
@@ -394,7 +395,7 @@ def update_export_case(case_id: str, body: ExportCaseUpdateBody):
     summary="Delete export case",
     description="""Deletes an export case.\n    Exports that reference this case will have their export_case set to null.\n    """,
 )
-def delete_export_case(case_id: str):
+def delete_export_case(case_id: str, request: Request, delete_exports: bool = False):
     try:
         case = ExportCase.get(ExportCase.id == case_id)
     except DoesNotExist:
@@ -403,8 +404,18 @@ def delete_export_case(case_id: str):
             status_code=404,
         )
 
-    # Unassign exports from this case but keep the exports themselves
-    Export.update(export_case=None).where(Export.export_case == case).execute()
+    if delete_exports:
+        cancel_queued_export_jobs_for_case(request.app.frigate_config, case_id)
+
+        exports = list(Export.select().where(Export.export_case == case_id))
+        for export in exports:
+            Path(export.video_path).unlink(missing_ok=True)
+            if export.thumb_path:
+                Path(export.thumb_path).unlink(missing_ok=True)
+            export.delete_instance()
+    else:
+        # Unassign exports from this case but keep the exports themselves
+        Export.update(export_case=None).where(Export.export_case == case_id).execute()
 
     case.delete_instance()
 

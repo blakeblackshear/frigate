@@ -167,6 +167,41 @@ class ExportJobManager:
                 if job.status in (JobStatusTypesEnum.queued, JobStatusTypesEnum.running)
             ]
 
+    def cancel_queued_jobs_for_case(self, case_id: str) -> list[ExportJob]:
+        """Cancel queued export jobs assigned to a deleted case."""
+        cancelled_jobs: list[ExportJob] = []
+
+        with self.lock:
+            with self.queue.mutex:
+                retained_jobs: list[ExportJob] = []
+
+                while self.queue.queue:
+                    job = self.queue.queue.popleft()
+
+                    if (
+                        job.export_case_id == case_id
+                        and job.status == JobStatusTypesEnum.queued
+                    ):
+                        job.status = JobStatusTypesEnum.cancelled
+                        job.end_time = time.time()
+                        cancelled_jobs.append(job)
+                        continue
+
+                    retained_jobs.append(job)
+
+                self.queue.queue.extend(retained_jobs)
+
+                if cancelled_jobs:
+                    self.queue.unfinished_tasks = max(
+                        0,
+                        self.queue.unfinished_tasks - len(cancelled_jobs),
+                    )
+                    if self.queue.unfinished_tasks == 0:
+                        self.queue.all_tasks_done.notify_all()
+                    self.queue.not_full.notify_all()
+
+        return cancelled_jobs
+
     def available_slots(self) -> int:
         """Approximate number of additional jobs that could be queued right now.
 
@@ -338,6 +373,13 @@ def get_export_job(config: FrigateConfig, job_id: str) -> Optional[ExportJob]:
 def list_active_export_jobs(config: FrigateConfig) -> list[ExportJob]:
     """List queued and running export jobs."""
     return get_export_job_manager(config).list_active_jobs()
+
+
+def cancel_queued_export_jobs_for_case(
+    config: FrigateConfig, case_id: str
+) -> list[ExportJob]:
+    """Cancel queued export jobs that still point at a deleted case."""
+    return get_export_job_manager(config).cancel_queued_jobs_for_case(case_id)
 
 
 def available_export_queue_slots(config: FrigateConfig) -> int:

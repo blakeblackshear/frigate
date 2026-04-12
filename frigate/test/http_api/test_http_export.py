@@ -2,7 +2,12 @@ import os
 import tempfile
 from unittest.mock import patch
 
-from frigate.jobs.export import ExportJob, reap_stale_exports
+from frigate.jobs.export import (
+    ExportJob,
+    get_export_job_manager,
+    reap_stale_exports,
+    start_export_job,
+)
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -90,6 +95,115 @@ class TestHttpExport(BaseTestHttp):
         assert refreshed.name == "New name"
         assert refreshed.description == "Updated"
         assert refreshed.updated_at.timestamp() == 2222.0
+
+    def test_delete_export_case_delete_exports_cancels_queued_jobs(self):
+        case = ExportCase.create(
+            id="case_delete_me",
+            name="Delete me",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+        other_case = ExportCase.create(
+            id="case_keep_me",
+            name="Keep me",
+            description="",
+            created_at=20,
+            updated_at=20,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video_path = os.path.join(tmpdir, "case_export.mp4")
+            thumb_path = os.path.join(tmpdir, "case_export.webp")
+            other_video_path = os.path.join(tmpdir, "other_export.mp4")
+            other_thumb_path = os.path.join(tmpdir, "other_export.webp")
+
+            with open(video_path, "wb") as handle:
+                handle.write(b"case")
+            with open(thumb_path, "wb") as handle:
+                handle.write(b"thumb")
+            with open(other_video_path, "wb") as handle:
+                handle.write(b"other")
+            with open(other_thumb_path, "wb") as handle:
+                handle.write(b"thumb")
+
+            Export.create(
+                id="export_in_case",
+                camera="front_door",
+                name="Case export",
+                date=100,
+                video_path=video_path,
+                thumb_path=thumb_path,
+                in_progress=False,
+                export_case=case,
+            )
+            Export.create(
+                id="export_other_case",
+                camera="front_door",
+                name="Other export",
+                date=110,
+                video_path=other_video_path,
+                thumb_path=other_thumb_path,
+                in_progress=False,
+                export_case=other_case,
+            )
+
+            with (
+                patch("frigate.jobs.export._job_manager", None),
+                patch(
+                    "frigate.jobs.export.ExportJobManager.ensure_started",
+                    autospec=True,
+                    return_value=None,
+                ),
+            ):
+                start_export_job(
+                    self.app.frigate_config,
+                    ExportJob(
+                        id="queued_case_job",
+                        camera="front_door",
+                        export_case_id=case.id,
+                        request_start_time=100,
+                        request_end_time=120,
+                    ),
+                )
+                start_export_job(
+                    self.app.frigate_config,
+                    ExportJob(
+                        id="queued_other_job",
+                        camera="front_door",
+                        export_case_id=other_case.id,
+                        request_start_time=130,
+                        request_end_time=150,
+                    ),
+                )
+
+                manager = get_export_job_manager(self.app.frigate_config)
+                assert {job.id for job in manager.list_active_jobs()} == {
+                    "queued_case_job",
+                    "queued_other_job",
+                }
+
+                with AuthTestClient(self.app) as client:
+                    response = client.delete(f"/cases/{case.id}?delete_exports=true")
+
+            assert response.status_code == 200
+            assert ExportCase.get_or_none(ExportCase.id == case.id) is None
+            assert ExportCase.get_or_none(ExportCase.id == other_case.id) is not None
+            assert Export.get_or_none(Export.id == "export_in_case") is None
+            assert Export.get_or_none(Export.id == "export_other_case") is not None
+            assert not os.path.exists(video_path)
+            assert not os.path.exists(thumb_path)
+
+            cancelled_job = manager.get_job("queued_case_job")
+            assert cancelled_job is not None
+            assert cancelled_job.status == "cancelled"
+
+            remaining_job = manager.get_job("queued_other_job")
+            assert remaining_job is not None
+            assert remaining_job.status == "queued"
+            assert [job.id for job in manager.list_active_jobs()] == [
+                "queued_other_job"
+            ]
 
     def test_batch_export_creates_case_and_reports_partial_success(self):
         self._insert_recording("rec-front", "front_door", 100, 200)
