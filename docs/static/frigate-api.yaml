@@ -2731,8 +2731,9 @@ paths:
       summary: Start recording export batch
       description: >-
         Starts recording exports for a batch of items, each with its own camera
-        and time range, and assigns them to a single export case. Attaching to
-        an existing case is temporarily admin-only until case-level ACLs exist.
+        and time range. Optionally assigns them to a new or existing export case.
+        When neither export_case_id nor new_case_name is provided, exports are
+        added as uncategorized. Attaching to an existing case is admin-only.
       operationId: export_recordings_batch_exports_batch_post
       requestBody:
         required: true
@@ -2767,6 +2768,81 @@ paths:
                 $ref: "#/components/schemas/GenericResponse"
         "503":
           description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /exports/delete:
+    post:
+      tags:
+        - Export
+      summary: Bulk delete exports
+      description: >-
+        Deletes one or more exports by ID. All IDs must exist and none can be
+        in-progress. Admin-only.
+      operationId: bulk_delete_exports_exports_delete_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportBulkDeleteBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "400":
+          description: Bad Request - one or more exports are in-progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "404":
+          description: Not Found - one or more export IDs do not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /exports/reassign:
+    post:
+      tags:
+        - Export
+      summary: Bulk reassign exports to a case
+      description: >-
+        Assigns or unassigns one or more exports to/from a case. All IDs must
+        exist. Pass export_case_id as null to unassign (move to uncategorized).
+        Admin-only.
+      operationId: bulk_reassign_exports_exports_reassign_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportBulkReassignBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "404":
+          description: Not Found - one or more export IDs or the target case do not exist
           content:
             application/json:
               schema:
@@ -2906,39 +2982,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/export/{export_id}/case":
-    patch:
-      tags:
-        - Export
-      summary: Assign export to case
-      description: "Assigns an export to a case, or unassigns it if export_case_id is null."
-      operationId: assign_export_case_export__export_id__case_patch
-      parameters:
-        - name: export_id
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Export Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ExportCaseAssignBody"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericResponse"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
   "/export/{camera_name}/start/{start_time}/end/{end_time}":
     post:
       tags:
@@ -3013,32 +3056,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ExportRenameBody"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GenericResponse"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
-  "/export/{event_id}":
-    delete:
-      tags:
-        - Export
-      summary: Delete export
-      operationId: export_delete_export__event_id__delete
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Event Id
       responses:
         "200":
           description: Successful Response
@@ -6719,18 +6736,41 @@ components:
       required:
         - subLabel
       title: EventsSubLabelBody
-    ExportCaseAssignBody:
+    ExportBulkDeleteBody:
       properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
+      type: object
+      required:
+        - ids
+      title: ExportBulkDeleteBody
+      description: Request body for bulk deleting exports.
+    ExportBulkReassignBody:
+      properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
         export_case_id:
           anyOf:
             - type: string
               maxLength: 30
             - type: "null"
           title: Export Case Id
-          description: "Case ID to assign to the export, or null to unassign"
+          description: "Case ID to assign to, or null to unassign from current case"
       type: object
-      title: ExportCaseAssignBody
-      description: Request body for assigning or unassigning an export to a case.
+      required:
+        - ids
+      title: ExportBulkReassignBody
+      description: Request body for bulk reassigning exports to a case.
     ExportCaseCreateBody:
       properties:
         name:
