@@ -115,6 +115,8 @@ export default function MobileReviewSettingsDrawer({
   const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(
     undefined,
   );
+  const [singleNewCaseName, setSingleNewCaseName] = useState("");
+  const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
   const [isStartingExport, setIsStartingExport] = useState(false);
   const onStartExport = useCallback(async () => {
     if (isStartingExport) {
@@ -148,12 +150,24 @@ export default function MobileReviewSettingsDrawer({
     setIsStartingExport(true);
 
     try {
+      let exportCaseId: string | undefined = selectedCaseId;
+
+      if (selectedCaseId === "new" && singleNewCaseName.trim().length > 0) {
+        const caseResp = await axios.post("cases", {
+          name: singleNewCaseName.trim(),
+          description: singleNewCaseDescription.trim() || undefined,
+        });
+        exportCaseId = caseResp.data?.id;
+      } else if (selectedCaseId === "new" || selectedCaseId === "none") {
+        exportCaseId = undefined;
+      }
+
       await axios.post<StartExportResponse>(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
           source: "recordings",
           name,
-          export_case_id: selectedCaseId || undefined,
+          export_case_id: exportCaseId,
         },
       );
 
@@ -169,6 +183,8 @@ export default function MobileReviewSettingsDrawer({
       });
       setName("");
       setSelectedCaseId(undefined);
+      setSingleNewCaseName("");
+      setSingleNewCaseDescription("");
       setRange(undefined);
       setMode("none");
       return true;
@@ -199,6 +215,8 @@ export default function MobileReviewSettingsDrawer({
     name,
     range,
     selectedCaseId,
+    singleNewCaseDescription,
+    singleNewCaseName,
     setRange,
     setMode,
     t,
@@ -361,12 +379,16 @@ export default function MobileReviewSettingsDrawer({
         range={range}
         name={name}
         selectedCaseId={selectedCaseId}
+        singleNewCaseName={singleNewCaseName}
+        singleNewCaseDescription={singleNewCaseDescription}
         activeTab={exportTab}
         isStartingExport={isStartingExport}
         onStartExport={onStartExport}
         setActiveTab={setExportTab}
         setName={setName}
         setSelectedCaseId={setSelectedCaseId}
+        setSingleNewCaseName={setSingleNewCaseName}
+        setSingleNewCaseDescription={setSingleNewCaseDescription}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
@@ -379,6 +401,8 @@ export default function MobileReviewSettingsDrawer({
           setMode("none");
           setRange(undefined);
           setSelectedCaseId(undefined);
+          setSingleNewCaseName("");
+          setSingleNewCaseDescription("");
           setExportTab("export");
           setDrawerMode("select");
         }}

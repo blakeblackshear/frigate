@@ -93,6 +93,8 @@ export default function ExportDialog({
   const { t } = useTranslation(["components/dialog"]);
   const [name, setName] = useState("");
   const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>();
+  const [singleNewCaseName, setSingleNewCaseName] = useState("");
+  const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
   const [activeTab, setActiveTab] = useState<ExportTab>("export");
   const [isStartingExport, setIsStartingExport] = useState(false);
   const previousModeRef = useRef<ExportMode>(mode);
@@ -137,12 +139,24 @@ export default function ExportDialog({
     setIsStartingExport(true);
 
     try {
+      let exportCaseId: string | undefined = selectedCaseId;
+
+      if (selectedCaseId === "new" && singleNewCaseName.trim().length > 0) {
+        const caseResp = await axios.post("cases", {
+          name: singleNewCaseName.trim(),
+          description: singleNewCaseDescription.trim() || undefined,
+        });
+        exportCaseId = caseResp.data?.id;
+      } else if (selectedCaseId === "new" || selectedCaseId === "none") {
+        exportCaseId = undefined;
+      }
+
       await axios.post<StartExportResponse>(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
           source: "recordings",
           name,
-          export_case_id: selectedCaseId || undefined,
+          export_case_id: exportCaseId,
         },
       );
 
@@ -156,6 +170,8 @@ export default function ExportDialog({
       });
       setName("");
       setSelectedCaseId(undefined);
+      setSingleNewCaseName("");
+      setSingleNewCaseDescription("");
       setRange(undefined);
       setMode("none");
       return true;
@@ -183,6 +199,8 @@ export default function ExportDialog({
     name,
     range,
     selectedCaseId,
+    singleNewCaseDescription,
+    singleNewCaseName,
     setMode,
     setRange,
     t,
@@ -191,6 +209,8 @@ export default function ExportDialog({
   const handleCancel = useCallback(() => {
     setName("");
     setSelectedCaseId(undefined);
+    setSingleNewCaseName("");
+    setSingleNewCaseDescription("");
     setMode("none");
     setRange(undefined);
     setActiveTab("export");
@@ -272,12 +292,16 @@ export default function ExportDialog({
             range={range}
             name={name}
             selectedCaseId={selectedCaseId}
+            singleNewCaseName={singleNewCaseName}
+            singleNewCaseDescription={singleNewCaseDescription}
             activeTab={activeTab}
             isStartingExport={isStartingExport}
             onStartExport={onStartExport}
             setActiveTab={setActiveTab}
             setName={setName}
             setSelectedCaseId={setSelectedCaseId}
+            setSingleNewCaseName={setSingleNewCaseName}
+            setSingleNewCaseDescription={setSingleNewCaseDescription}
             setRange={setRange}
             setMode={setMode}
             onCancel={handleCancel}
@@ -294,12 +318,16 @@ type ExportContentProps = {
   range?: TimeRange;
   name: string;
   selectedCaseId?: string;
+  singleNewCaseName: string;
+  singleNewCaseDescription: string;
   activeTab: ExportTab;
   isStartingExport: boolean;
   onStartExport: () => Promise<boolean>;
   setActiveTab: (tab: ExportTab) => void;
   setName: (name: string) => void;
   setSelectedCaseId: (caseId: string | undefined) => void;
+  setSingleNewCaseName: (name: string) => void;
+  setSingleNewCaseDescription: (description: string) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
   onCancel: () => void;
@@ -311,12 +339,16 @@ export function ExportContent({
   range,
   name,
   selectedCaseId,
+  singleNewCaseName,
+  singleNewCaseDescription,
   activeTab,
   isStartingExport,
   onStartExport,
   setActiveTab,
   setName,
   setSelectedCaseId,
+  setSingleNewCaseName,
+  setSingleNewCaseDescription,
   setRange,
   setMode,
   onCancel,
@@ -332,7 +364,7 @@ export function ExportContent({
   );
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
   const [batchCaseSelection, setBatchCaseSelection] = useState<string>(
-    selectedCaseId || "new",
+    selectedCaseId || "none",
   );
   const [hasManualCameraSelection, setHasManualCameraSelection] =
     useState(false);
@@ -483,7 +515,8 @@ export function ExportContent({
     Boolean(range && range.before > range.after) &&
     selectedCameraCount > 0 &&
     !isStartingBatchExport &&
-    (batchCaseSelection !== "new" || newCaseName.trim().length > 0);
+    (batchCaseSelection !== "new" || newCaseName.trim().length > 0) &&
+    batchCaseSelection.length > 0;
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -567,7 +600,7 @@ export function ExportContent({
       })),
     };
 
-    if (isAdmin) {
+    if (isAdmin && batchCaseSelection !== "none") {
       if (batchCaseSelection === "new") {
         payload.new_case_name = newCaseName.trim();
         payload.new_case_description = newCaseDescription.trim() || undefined;
@@ -786,8 +819,30 @@ export function ExportContent({
                         {caseItem.name}
                       </SelectItem>
                     ))}
+                  <SelectSeparator />
+                  <SelectItem value="new">
+                    {t("export.case.newCaseOption")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
+              {selectedCaseId === "new" && (
+                <div className="space-y-2 pt-1">
+                  <Input
+                    className="text-md"
+                    placeholder={t("export.case.newCaseNamePlaceholder")}
+                    value={singleNewCaseName}
+                    onChange={(e) => setSingleNewCaseName(e.target.value)}
+                  />
+                  <Textarea
+                    className="text-md"
+                    placeholder={t("export.case.newCaseDescriptionPlaceholder")}
+                    value={singleNewCaseDescription}
+                    onChange={(e) =>
+                      setSingleNewCaseDescription(e.target.value)
+                    }
+                  />
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -947,6 +1002,9 @@ export function ExportContent({
                   <SelectValue placeholder={t("export.case.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">
+                    {t("label.none", { ns: "common" })}
+                  </SelectItem>
                   {cases
                     ?.sort((a, b) => a.name.localeCompare(b.name))
                     .map((caseItem) => (

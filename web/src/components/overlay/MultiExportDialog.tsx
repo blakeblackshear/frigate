@@ -55,6 +55,7 @@ type MultiExportDialogProps = {
   children: React.ReactNode;
 };
 
+const NONE_CASE_OPTION = "none";
 const NEW_CASE_OPTION = "new";
 
 export default function MultiExportDialog({
@@ -74,10 +75,7 @@ export default function MultiExportDialog({
   const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
 
   const [open, setOpen] = useState(false);
-  // Single unified state: either NEW_CASE_OPTION or an existing case id.
-  // Defaults to NEW_CASE_OPTION, which is also the only valid value for
-  // non-admins since they can't attach to existing cases.
-  const [caseSelection, setCaseSelection] = useState<string>(NEW_CASE_OPTION);
+  const [caseSelection, setCaseSelection] = useState<string>(NONE_CASE_OPTION);
   const [newCaseName, setNewCaseName] = useState("");
   const [newCaseDescription, setNewCaseDescription] = useState("");
   const [isExporting, setIsExporting] = useState(false);
@@ -134,7 +132,7 @@ export default function MultiExportDialog({
   }, [t, locale]);
 
   const resetState = useCallback(() => {
-    setCaseSelection(NEW_CASE_OPTION);
+    setCaseSelection(NONE_CASE_OPTION);
     setNewCaseName("");
     setNewCaseDescription("");
     setIsExporting(false);
@@ -146,7 +144,7 @@ export default function MultiExportDialog({
         resetState();
       } else {
         // Freshly reset each time so the default name reflects "now"
-        setCaseSelection(NEW_CASE_OPTION);
+        setCaseSelection(NONE_CASE_OPTION);
         setNewCaseName(defaultCaseName);
         setNewCaseDescription("");
         setIsExporting(false);
@@ -185,7 +183,7 @@ export default function MultiExportDialog({
 
     const payload: BatchExportBody = { items };
 
-    if (isAdmin) {
+    if (isAdmin && caseSelection !== NONE_CASE_OPTION) {
       if (isNewCase) {
         payload.new_case_name = newCaseName.trim();
         payload.new_case_description = newCaseDescription.trim() || undefined;
@@ -323,12 +321,15 @@ export default function MultiExportDialog({
               <SelectValue placeholder={t("export.case.placeholder")} />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value={NONE_CASE_OPTION}>
+                {t("label.none", { ns: "common" })}
+              </SelectItem>
               {existingCases.map((caseItem) => (
                 <SelectItem key={caseItem.id} value={caseItem.id}>
                   {caseItem.name}
                 </SelectItem>
               ))}
-              {existingCases.length > 0 && <SelectSeparator />}
+              <SelectSeparator />
               <SelectItem value={NEW_CASE_OPTION}>
                 {t("export.case.newCaseOption")}
               </SelectItem>
