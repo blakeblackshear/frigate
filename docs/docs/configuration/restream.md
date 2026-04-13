@@ -208,7 +208,7 @@ Enabling arbitrary exec sources allows execution of arbitrary commands through g
 
 ## Advanced Restream Configurations
 
-The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.10#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
+The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.10#source-exec) source in go2rtc can be used for custom ffmpeg commands and other applications. An example is below:
 
 :::warning
 
@@ -216,16 +216,11 @@ The `exec:`, `echo:`, and `expr:` sources are disabled by default for security. 
 
 :::
 
-:::warning
-
-The `exec:`, `echo:`, and `expr:` sources are disabled by default for security. You must set `GO2RTC_ALLOW_ARBITRARY_EXEC=true` to use them. See [Security: Restricted Stream Sources](#security-restricted-stream-sources) for more information.
-
-:::
-
-NOTE: The output will need to be passed with two curly braces `{{output}}`
+NOTE: RTSP output will need to be passed with two curly braces `{{output}}`, whereas pipe output must be passed without curly braces.
 
 ```yaml
 go2rtc:
   streams:
     stream1: exec:ffmpeg -hide_banner -re -stream_loop -1 -i /media/BigBuckBunny.mp4 -c copy -rtsp_transport tcp -f rtsp {{output}}
+    stream2: exec:rpicam-vid -t 0 --libav-format h264 -o - #raspberry pi 5b cam output via pipe
 ```
