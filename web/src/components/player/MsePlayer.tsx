@@ -51,6 +51,12 @@ function MSEPlayer({
     "avc1.640029", // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
     "avc1.64002A", // H.264 high 4.2 (Chromecast 3rd Gen)
     "avc1.640033", // H.264 high 5.1 (Chromecast with Google TV)
+    "avc1.640829", // H.264 progressive high 4.1 (Intel VAAPI/QSV)
+    "avc1.64082A", // H.264 progressive high 4.2 (Intel VAAPI/QSV)
+    "avc1.4D4029", // H.264 main 4.1
+    "avc1.4D402A", // H.264 main 4.2
+    "avc1.42C029", // H.264 constrained baseline 4.1 (libx264 ultrafast preset)
+    "avc1.42C02A", // H.264 constrained baseline 4.2 (libx264 ultrafast preset)
     "hvc1.1.6.L153.B0", // H.265 main 5.1 (Chromecast Ultra)
     "mp4a.40.2", // AAC LC
     "mp4a.40.5", // AAC HE
