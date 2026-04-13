@@ -460,10 +460,9 @@ test.describe("Multi-Review Export @high", () => {
       .filter({ hasText: /Export 2 reviews/i });
     await expect(dialog).toBeVisible({ timeout: 5_000 });
     // The dialog uses a Select trigger for case selection (admins). The
-    // default "Create new case" value is shown on the trigger and the
-    // New-case inputs render directly below.
+    // default "None" value is shown on the trigger.
     await expect(dialog.locator("button[role='combobox']")).toBeVisible();
-    await expect(dialog.getByText(/Create new case/i)).toBeVisible();
+    await expect(dialog.getByText(/None/)).toBeVisible();
   });
 
   test("starting an export posts the expected payload and navigates to the case", async ({
@@ -512,6 +511,12 @@ test.describe("Multi-Review Export @high", () => {
       .getByRole("dialog")
       .filter({ hasText: /Export 2 reviews/i });
     await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    // Select "Create new case" from the case dropdown (default is "None")
+    await dialog.locator("button[role='combobox']").click();
+    await frigateApp.page
+      .getByRole("option", { name: /Create new case/i })
+      .click();
 
     const nameInput = dialog.locator("input").first();
     await nameInput.fill("E2E Incident");
