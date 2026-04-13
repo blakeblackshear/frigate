@@ -596,7 +596,7 @@ def export_recordings_batch(
         )
         try:
             start_export_job(request.app.frigate_config, export_job)
-        except Exception as err:
+        except Exception:
             logger.exception("Failed to queue export job %s", export_job.id)
             results.append(
                 {
