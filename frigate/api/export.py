@@ -604,7 +604,7 @@ def export_recordings_batch(
                     "export_id": None,
                     "success": False,
                     "status": None,
-                    "error": str(err),
+                    "error": "Failed to queue export job",
                     "item_index": index,
                     "client_item_id": item.client_item_id,
                 }
