@@ -52,6 +52,7 @@ from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
+from frigate.jobs.export import reap_stale_exports
 from frigate.jobs.motion_search import stop_all_motion_search_jobs
 from frigate.log import _stop_logging
 from frigate.models import (
@@ -610,6 +611,11 @@ class FrigateApp:
 
         # Clean up any stale replay camera artifacts (filesystem + DB)
         cleanup_replay_cameras()
+
+        # Reap any Export rows still marked in_progress from a previous
+        # session (crash, kill, broken migration). Runs synchronously before
+        # uvicorn binds so no API request can observe a stale row.
+        reap_stale_exports()
 
         self.init_inter_process_communicator()
         self.start_detectors()
