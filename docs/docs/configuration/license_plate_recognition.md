@@ -11,6 +11,12 @@ Frigate can recognize license plates on vehicles and automatically add the detec
 
 LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. When a vehicle becomes stationary, LPR continues to run for a short time after to attempt recognition.
 
+:::info
+
+License plate recognition requires a one-time internet connection to download OCR and detection models from GitHub. Once cached, models work fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
+
 When a plate is recognized, the details are:
 
 - Added as a `sub_label` (if [known](#matching)) or the `recognized_license_plate` field (if unknown) to a tracked object.

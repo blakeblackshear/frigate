@@ -21,6 +21,12 @@ The jsmpeg live view will use more browser and client GPU resources. Using go2rt
 | mse    | native                                | native     | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only. This is Frigate's default when go2rtc is configured.                                                              |
 | webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration. Frigate attempts to use WebRTC when MSE fails or when using a camera's two-way talk feature.                                          |
 
+:::info
+
+WebRTC may use an external STUN server for NAT traversal. MSE and HLS streaming do not require any internet access. See [Network Requirements](/frigate/network_requirements#webrtc-stun) for details.
+
+:::
+
 ### Camera Settings Recommendations
 
 If you are using go2rtc, you should adjust the following settings in your camera's firmware for the best experience with Live view:

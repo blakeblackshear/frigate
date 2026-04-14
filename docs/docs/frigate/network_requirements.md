@@ -1,6 +1,6 @@
 ---
 id: network_requirements
-title: Network and Internet Requirements
+title: Network Requirements
 ---
 
 # Network Requirements

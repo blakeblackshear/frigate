@@ -5,6 +5,12 @@ title: Frigate+
 
 For more information about how to use Frigate+ to improve your model, see the [Frigate+ docs](/plus/).
 
+:::info
+
+Frigate+ requires an active internet connection to communicate with `https://api.frigate.video` for model downloads, image uploads, and annotations. See [Network Requirements](/frigate/network_requirements#frigate) for details.
+
+:::
+
 ## Setup
 
 ### Create an account
