@@ -334,8 +334,6 @@ CMD ["sleep", "infinity"]
 # This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
 FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
 RUN npm install
