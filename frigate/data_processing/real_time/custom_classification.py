@@ -434,9 +434,13 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                     return
 
                 input = np.expand_dims(crop, axis=0)
-                self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
+                self.interpreter.set_tensor(
+                    self.tensor_input_details[0]["index"], input
+                )
                 self.interpreter.invoke()
-                res = self.interpreter.get_tensor(self.tensor_output_details[0]["index"])[0]
+                res = self.interpreter.get_tensor(
+                    self.tensor_output_details[0]["index"]
+                )[0]
                 probs = res / res.sum(axis=0)
 
                 best_id = int(np.argmax(probs))
@@ -472,14 +476,18 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                     if object_id not in self.classification_history:
                         self.classification_history[object_id] = []
 
-                    self.classification_history[object_id].append((label, score, timestamp))
+                    self.classification_history[object_id].append(
+                        (label, score, timestamp)
+                    )
                     logger.debug(
                         f"Added classification result for {object_id}: {label} ({score}) at {timestamp}"
                     )
 
                 self._publish_result(object_id, camera, label, score, timestamp)
         except Exception as e:
-            logger.error(f"Error in inference thread for {object_id}: {e}", exc_info=True)
+            logger.error(
+                f"Error in inference thread for {object_id}: {e}", exc_info=True
+            )
         finally:
             with self.interpreter_lock:
                 self.active_tasks[object_id] = self.active_tasks.get(object_id, 1) - 1
@@ -661,7 +669,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         with self.interpreter_lock:
             current_tasks = self.active_tasks.get(object_id, 0)
             if current_tasks >= MAX_CONCURRENT_CLASSIFICATIONS_PER_OBJECT:
-                logger.debug(f"Object {object_id} has {current_tasks}/{MAX_CONCURRENT_CLASSIFICATIONS_PER_OBJECT} active tasks")
+                logger.debug(
+                    f"Object {object_id} has {current_tasks}/{MAX_CONCURRENT_CLASSIFICATIONS_PER_OBJECT} active tasks"
+                )
                 return
 
         now = datetime.datetime.now().timestamp()
