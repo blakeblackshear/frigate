@@ -430,7 +430,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         """Run inference in a separate thread to avoid blocking."""
         try:
             with self.interpreter_lock:
-                if self.interpreter is None:
+                if (
+                    self.interpreter is None
+                    or not self.tensor_input_details
+                    or not self.tensor_output_details
+                ):
                     return
 
                 input = np.expand_dims(crop, axis=0)
@@ -512,6 +516,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         logger.debug(
             f"{self.model_config.name}: Publishing sub_label={consensus_label} for object {object_id} on {camera}"
         )
+
+        if not self.model_config.object_config:
+            return
 
         if (
             self.model_config.object_config.classification_type
