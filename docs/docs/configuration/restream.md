@@ -222,5 +222,5 @@ NOTE: RTSP output will need to be passed with two curly braces `{{output}}`, whe
 go2rtc:
   streams:
     stream1: exec:ffmpeg -hide_banner -re -stream_loop -1 -i /media/BigBuckBunny.mp4 -c copy -rtsp_transport tcp -f rtsp {{output}}
-    stream2: exec:rpicam-vid -t 0 --libav-format h264 -o - #raspberry pi 5b cam output via pipe
+    stream2: exec:rpicam-vid -t 0 --libav-format h264 -o -
 ```
