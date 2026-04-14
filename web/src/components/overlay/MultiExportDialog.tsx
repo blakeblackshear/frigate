@@ -354,11 +354,11 @@ export default function MultiExportDialog({
         variant="select"
         onClick={handleSubmit}
         disabled={!canSubmit}
-        aria-label={t("export.multi.exportButton", { count })}
+        aria-label={t("export.multi.exportButton", { count: count })}
       >
         {isExporting
           ? t("export.multi.exportingButton")
-          : t("export.multi.exportButton", { count })}
+          : t("export.multi.exportButton", { count: count })}
       </Button>
     </>
   );
@@ -369,7 +369,9 @@ export default function MultiExportDialog({
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("export.multi.title", { count })}</DialogTitle>
+            <DialogTitle>
+              {t("export.multi.title", { count: count })}
+            </DialogTitle>
             <DialogDescription>
               {isAdmin
                 ? t("export.multi.description")
@@ -388,7 +390,7 @@ export default function MultiExportDialog({
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent className="px-4 pb-6">
         <DrawerHeader className="px-0">
-          <DrawerTitle>{t("export.multi.title", { count })}</DrawerTitle>
+          <DrawerTitle>{t("export.multi.title", { count: count })}</DrawerTitle>
           <DrawerDescription>
             {isAdmin
               ? t("export.multi.description")

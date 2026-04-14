@@ -81,13 +81,11 @@
       "exportButton_other": "Export {{count}} Cameras"
     },
     "multi": {
-      "title": "Export {{count}} reviews",
       "title_one": "Export 1 review",
       "title_other": "Export {{count}} reviews",
       "description": "Export each selected review. All exports will be grouped under a single case.",
       "descriptionNoCase": "Export each selected review.",
       "caseNamePlaceholder": "Review export - {{date}}",
-      "exportButton": "Export {{count}} reviews",
       "exportButton_one": "Export 1 review",
       "exportButton_other": "Export {{count}} reviews",
       "exportingButton": "Exporting...",
