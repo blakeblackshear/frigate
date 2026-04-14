@@ -3,7 +3,7 @@ id: network_requirements
 title: Network and Internet Requirements
 ---
 
-# Network and Internet Requirements
+# Network Requirements
 
 Frigate is designed to run locally and does not require a persistent internet connection for core functionality. However, certain features need internet access for initial setup or ongoing operation. This page describes what connects to the internet, when, and how to control it.
 
