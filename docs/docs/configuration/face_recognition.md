@@ -9,6 +9,12 @@ import NavPath from "@site/src/components/NavPath";
 
 Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
+:::info
+
+Face recognition requires a one-time internet connection to download detection and embedding models from GitHub. Once cached, models work fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
+
 ## Model Requirements
 
 ### Face Detection

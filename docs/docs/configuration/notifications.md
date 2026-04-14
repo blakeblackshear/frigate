@@ -11,6 +11,12 @@ import NavPath from "@site/src/components/NavPath";
 
 Frigate offers native notifications using the [WebPush Protocol](https://web.dev/articles/push-notifications-web-push-protocol) which uses the [VAPID spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid) to deliver notifications to web apps using encryption.
 
+:::info
+
+Push notifications require internet access from the Frigate server to the browser vendor's push service (e.g., Google FCM, Mozilla autopush). See [Network Requirements](/frigate/network_requirements#push-notifications) for details.
+
+:::
+
 ## Setting up Notifications
 
 In order to use notifications the following requirements must be met:
