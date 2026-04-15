@@ -330,7 +330,7 @@ export default function Events() {
   // reload when a review item ends so in-progress spinners clear
   // update review items in place when a review segment ends
   const reviewUpdate = useFrigateReviews();
-  const [reviewEndCount, setReviewEndCount] = useState(0);
+  const [lastEndedReviewId, setLastEndedReviewId] = useState<string>();
 
   useEffect(() => {
     if (reviewUpdate?.type === "end") {
@@ -343,7 +343,7 @@ export default function Events() {
         },
         { revalidate: false, populateCache: true },
       );
-      setReviewEndCount((c) => c + 1);
+      setLastEndedReviewId(reviewUpdate.after.id);
     }
   }, [reviewUpdate, updateSegments]);
 
@@ -375,7 +375,7 @@ export default function Events() {
     reviewFilter,
     showReviewed,
     reviewItems?.all.length,
-    reviewEndCount,
+    lastEndedReviewId,
   ]);
 
   // review summary
