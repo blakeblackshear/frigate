@@ -146,16 +146,10 @@ A single Coral can handle many cameras using the default model and will be suffi
 The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
-- x86 hosts with an Intel Arc GPU
+- x86 hosts with an Intel Arc GPU (including Arc A-series and B-series Battlemage)
 - Intel NPUs
 - Most modern AMD CPUs (though this is officially not supported by Intel)
 - x86 & Arm64 hosts via CPU (generally not recommended)
-
-:::note
-
-Intel B-series (Battlemage) GPUs are not officially supported with Frigate 0.17, though a user has [provided steps to rebuild the Frigate container](https://github.com/blakeblackshear/frigate/discussions/21257) with support for them.
-
-:::
 
 More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
 

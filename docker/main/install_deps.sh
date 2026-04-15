@@ -91,8 +91,10 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/gpu/ubuntu jammy client" | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
     apt-get -qq update
+    # intel-media-va-driver-non-free is built from source in the
+    # intel-media-driver Dockerfile stage for Battlemage (Xe2) support
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        intel-media-va-driver-non-free libmfx1 libmfxgen1 libvpl2
+        libmfx1 libmfxgen1 libvpl2
 
     apt-get -qq install -y ocl-icd-libopencl1
 
