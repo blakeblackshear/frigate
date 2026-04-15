@@ -1,7 +1,6 @@
 """Real time processor that works with classification tflite models."""
 
 import datetime
-import json
 import logging
 import os
 from typing import Any
@@ -10,25 +9,18 @@ import cv2
 import numpy as np
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
-from frigate.comms.event_metadata_updater import (
-    EventMetadataPublisher,
-    EventMetadataTypeEnum,
-)
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.config.classification import (
-    CustomClassificationConfig,
-    ObjectClassificationType,
-)
+from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import suppress_stderr_during
-from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.image import calculate_region
 from frigate.util.object import box_overlaps
 
 from ..types import DataProcessorMetrics
-from .api import RealTimeProcessorApi
+from .api import DeferredRealtimeProcessorApi
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -40,7 +32,7 @@ logger = logging.getLogger(__name__)
 MAX_OBJECT_CLASSIFICATIONS = 16
 
 
-class CustomStateClassificationProcessor(RealTimeProcessorApi):
+class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
@@ -48,7 +40,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
     ):
-        super().__init__(config, metrics)
+        super().__init__(config, metrics, max_queue=4)
         self.model_config = model_config
 
         if not self.model_config.name:
@@ -259,14 +251,34 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             )
             return
 
-        frame = rgb[y1:y2, x1:x2]
+        cropped_frame = rgb[y1:y2, x1:x2]
 
         try:
-            resized_frame = cv2.resize(frame, (224, 224))
+            resized_frame = cv2.resize(cropped_frame, (224, 224))
         except Exception:
             logger.warning("Failed to resize image for state classification")
             return
 
+        # Copy for training image saves on worker thread
+        crop_bgr = cv2.cvtColor(cropped_frame, cv2.COLOR_RGB2BGR)
+
+        self._enqueue_task(("classify", camera, now, resized_frame, crop_bgr))
+
+    def _process_task(self, task: Any) -> None:
+        kind = task[0]
+        if kind == "classify":
+            _, camera, timestamp, resized_frame, crop_bgr = task
+            self._classify_state(camera, timestamp, resized_frame, crop_bgr)
+        elif kind == "reload":
+            self.__build_detector()
+
+    def _classify_state(
+        self,
+        camera: str,
+        timestamp: float,
+        resized_frame: np.ndarray,
+        crop_bgr: np.ndarray,
+    ) -> None:
         if self.interpreter is None:
             # When interpreter is None, always save (score is 0.0, which is < 1.0)
             if self._should_save_image(camera, "unknown", 0.0):
@@ -277,9 +289,9 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
                 )
                 write_classification_attempt(
                     self.train_dir,
-                    cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+                    crop_bgr,
                     "none-none",
-                    now,
+                    timestamp,
                     "unknown",
                     0.0,
                     max_files=save_attempts,
@@ -298,7 +310,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         )
         best_id = int(np.argmax(probs))
         score = round(probs[best_id], 2)
-        self.__update_metrics(datetime.datetime.now().timestamp() - now)
+        self.__update_metrics(datetime.datetime.now().timestamp() - timestamp)
 
         detected_state = self.labelmap[best_id]
 
@@ -310,9 +322,9 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             )
             write_classification_attempt(
                 self.train_dir,
-                cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+                crop_bgr,
                 "none-none",
-                now,
+                timestamp,
                 detected_state,
                 score,
                 max_files=save_attempts,
@@ -327,9 +339,14 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         verified_state = self.verify_state_change(camera, detected_state)
 
         if verified_state is not None:
-            self.requestor.send_data(
-                f"{camera}/classification/{self.model_config.name}",
-                verified_state,
+            self._emit_result(
+                {
+                    "type": "classification",
+                    "processor": "state",
+                    "model_name": self.model_config.name,
+                    "camera": camera,
+                    "state": verified_state,
+                }
             )
 
     def handle_request(
@@ -337,14 +354,18 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
     ) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
-                self.__build_detector()
-                logger.info(
-                    f"Successfully loaded updated model for {self.model_config.name}"
-                )
-                return {
-                    "success": True,
-                    "message": f"Loaded {self.model_config.name} model.",
-                }
+
+                def _do_reload(data):
+                    self.__build_detector()
+                    logger.info(
+                        f"Successfully loaded updated model for {self.model_config.name}"
+                    )
+                    return {
+                        "success": True,
+                        "message": f"Loaded {self.model_config.name} model.",
+                    }
+
+                return self._enqueue_request(_do_reload, request_data)
             else:
                 return None
         else:
@@ -354,7 +375,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         pass
 
 
-class CustomObjectClassificationProcessor(RealTimeProcessorApi):
+class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
@@ -363,7 +384,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
     ):
-        super().__init__(config, metrics)
+        super().__init__(config, metrics, max_queue=8)
         self.model_config = model_config
 
         if not self.model_config.name:
@@ -536,18 +557,41 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
 
         rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
-        crop = rgb[
-            y:y2,
-            x:x2,
-        ]
+        crop = rgb[y:y2, x:x2]
 
-        if crop.shape != (224, 224):
-            try:
-                resized_crop = cv2.resize(crop, (224, 224))
-            except Exception:
-                logger.warning("Failed to resize image for state classification")
-                return
+        try:
+            resized_crop = cv2.resize(crop, (224, 224))
+        except Exception:
+            logger.warning("Failed to resize image for object classification")
+            return
 
+        # Copy crop for training images (will be used on worker thread)
+        crop_bgr = cv2.cvtColor(crop, cv2.COLOR_RGB2BGR)
+
+        self._enqueue_task(
+            ("classify", object_id, obj_data["camera"], now, resized_crop, crop_bgr)
+        )
+
+    def _process_task(self, task: Any) -> None:
+        kind = task[0]
+        if kind == "classify":
+            _, object_id, camera, timestamp, resized_crop, crop_bgr = task
+            self._classify_object(object_id, camera, timestamp, resized_crop, crop_bgr)
+        elif kind == "expire":
+            _, object_id = task
+            if object_id in self.classification_history:
+                self.classification_history.pop(object_id)
+        elif kind == "reload":
+            self.__build_detector()
+
+    def _classify_object(
+        self,
+        object_id: str,
+        camera: str,
+        timestamp: float,
+        resized_crop: np.ndarray,
+        crop_bgr: np.ndarray,
+    ) -> None:
         if self.interpreter is None:
             save_attempts = (
                 self.model_config.save_attempts
@@ -556,9 +600,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             )
             write_classification_attempt(
                 self.train_dir,
-                cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
+                crop_bgr,
                 object_id,
-                now,
+                timestamp,
                 "unknown",
                 0.0,
                 max_files=save_attempts,
@@ -569,7 +613,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             if object_id not in self.classification_history:
                 self.classification_history[object_id] = []
 
-            self.classification_history[object_id].append(("unknown", 0.0, now))
+            self.classification_history[object_id].append(("unknown", 0.0, timestamp))
             return
 
         input = np.expand_dims(resized_crop, axis=0)
@@ -584,7 +628,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
         best_id = int(np.argmax(probs))
         score = round(probs[best_id], 2)
-        self.__update_metrics(datetime.datetime.now().timestamp() - now)
+        self.__update_metrics(datetime.datetime.now().timestamp() - timestamp)
 
         save_attempts = (
             self.model_config.save_attempts
@@ -593,9 +637,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
         write_classification_attempt(
             self.train_dir,
-            cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
+            crop_bgr,
             object_id,
-            now,
+            timestamp,
             self.labelmap[best_id],
             score,
             max_files=save_attempts,
@@ -610,11 +654,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         sub_label = self.labelmap[best_id]
 
         logger.debug(
-            f"{self.model_config.name}: Object {object_id} (label={obj_data['label']}) passed threshold with sub_label={sub_label}, score={score}"
+            f"{self.model_config.name}: Object {object_id} passed threshold with sub_label={sub_label}, score={score}"
         )
 
         consensus_label, consensus_score = self.get_weighted_score(
-            object_id, sub_label, score, now
+            object_id, sub_label, score, timestamp
         )
 
         logger.debug(
@@ -622,80 +666,42 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
 
         if consensus_label is not None:
-            camera = obj_data["camera"]
-            logger.debug(
-                f"{self.model_config.name}: Publishing sub_label={consensus_label} for {obj_data['label']} object {object_id} on {camera}"
+            self._emit_result(
+                {
+                    "type": "classification",
+                    "processor": "object",
+                    "model_name": self.model_config.name,
+                    "classification_type": self.model_config.object_config.classification_type,
+                    "object_id": object_id,
+                    "camera": camera,
+                    "timestamp": timestamp,
+                    "label": consensus_label,
+                    "score": consensus_score,
+                }
             )
-
-            if (
-                self.model_config.object_config.classification_type
-                == ObjectClassificationType.sub_label
-            ):
-                self.sub_label_publisher.publish(
-                    (object_id, consensus_label, consensus_score),
-                    EventMetadataTypeEnum.sub_label,
-                )
-                self.requestor.send_data(
-                    "tracked_object_update",
-                    json.dumps(
-                        {
-                            "type": TrackedObjectUpdateTypesEnum.classification,
-                            "id": object_id,
-                            "camera": camera,
-                            "timestamp": now,
-                            "model": self.model_config.name,
-                            "sub_label": consensus_label,
-                            "score": consensus_score,
-                        }
-                    ),
-                )
-            elif (
-                self.model_config.object_config.classification_type
-                == ObjectClassificationType.attribute
-            ):
-                self.sub_label_publisher.publish(
-                    (
-                        object_id,
-                        self.model_config.name,
-                        consensus_label,
-                        consensus_score,
-                    ),
-                    EventMetadataTypeEnum.attribute.value,
-                )
-                self.requestor.send_data(
-                    "tracked_object_update",
-                    json.dumps(
-                        {
-                            "type": TrackedObjectUpdateTypesEnum.classification,
-                            "id": object_id,
-                            "camera": camera,
-                            "timestamp": now,
-                            "model": self.model_config.name,
-                            "attribute": consensus_label,
-                            "score": consensus_score,
-                        }
-                    ),
-                )
 
     def handle_request(self, topic: str, request_data: dict) -> dict | None:
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
-                self.__build_detector()
-                logger.info(
-                    f"Successfully loaded updated model for {self.model_config.name}"
-                )
-                return {
-                    "success": True,
-                    "message": f"Loaded {self.model_config.name} model.",
-                }
+
+                def _do_reload(data):
+                    self.__build_detector()
+                    logger.info(
+                        f"Successfully loaded updated model for {self.model_config.name}"
+                    )
+                    return {
+                        "success": True,
+                        "message": f"Loaded {self.model_config.name} model.",
+                    }
+
+                return self._enqueue_request(_do_reload, request_data)
             else:
                 return None
         else:
             return None
 
     def expire_object(self, object_id: str, camera: str) -> None:
-        if object_id in self.classification_history:
-            self.classification_history.pop(object_id)
+        self._enqueue_task(("expire", object_id))
 
 
 def write_classification_attempt(
