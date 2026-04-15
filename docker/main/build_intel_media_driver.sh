@@ -13,12 +13,7 @@ MEDIA_DRIVER_VERSION="intel-media-25.2.6"
 GMMLIB_VERSION="intel-gmmlib-22.7.2"
 
 apt-get -qq update
-apt-get -qq install -y wget gnupg ca-certificates cmake g++ make pkg-config ccache
-
-export CCACHE_DIR=/root/.ccache
-export PATH="/usr/lib/ccache:$PATH"
-ccache --max-size=2G
-ccache --zero-stats
+apt-get -qq install -y wget gnupg ca-certificates cmake g++ make pkg-config
 
 # Use Intel's jammy repo for newer libva-dev (2.22) which provides the
 # VVC/VVC-decode headers required by media-driver 25.x
@@ -51,5 +46,3 @@ make -C /tmp/media-driver/build -j"$(nproc)"
 
 # Install driver to rootfs for COPY --from
 make -C /tmp/media-driver/build install DESTDIR=/rootfs
-
-ccache --show-stats

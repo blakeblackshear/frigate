@@ -58,7 +58,6 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM base AS intel-media-driver
 ARG DEBIAN_FRONTEND
 RUN --mount=type=bind,source=docker/main/build_intel_media_driver.sh,target=/deps/build_intel_media_driver.sh \
-    --mount=type=cache,target=/root/.ccache \
     /deps/build_intel_media_driver.sh
 
 FROM scratch AS go2rtc
