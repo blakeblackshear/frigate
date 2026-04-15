@@ -372,7 +372,7 @@ class RecordingMaintainer(threading.Thread):
             )
 
         record_config = self.config.cameras[camera].record
-        segment_info: SegmentInfo | None = None
+        segment_stats: SegmentInfo | None = None
         highest = None
 
         if record_config.continuous.days > 0:
@@ -402,18 +402,18 @@ class RecordingMaintainer(threading.Thread):
                     if highest == "continuous"
                     else RetainModeEnum.motion
                 )
-                segment_info = self.segment_stats(camera, start_time, end_time)
+                segment_stats = self.segment_stats(camera, start_time, end_time)
 
                 # Here we only check if we should move the segment based on non-object recording retention
                 # we will always want to check for overlapping review items below before dropping the segment
-                if not segment_info.should_discard_segment(record_mode):
+                if not segment_stats.should_discard_segment(record_mode):
                     return await self.move_segment(
                         camera,
                         start_time,
                         end_time,
                         duration,
                         cache_path,
-                        segment_info,
+                        segment_stats,
                     )
 
         # we fell through the continuous / motion check, so we need to check the review items
@@ -447,10 +447,10 @@ class RecordingMaintainer(threading.Thread):
                 else record_config.detections.retain.mode
             )
 
-            if segment_info is None:
-                segment_info = self.segment_stats(camera, start_time, end_time)
+            if segment_stats is None:
+                segment_stats = self.segment_stats(camera, start_time, end_time)
 
-            if not segment_info.should_discard_segment(record_mode):
+            if not segment_stats.should_discard_segment(record_mode):
                 # move from cache to recordings immediately
                 return await self.move_segment(
                     camera,
@@ -458,7 +458,7 @@ class RecordingMaintainer(threading.Thread):
                     end_time,
                     duration,
                     cache_path,
-                    segment_info,
+                    segment_stats,
                 )
             else:
                 self.drop_segment(cache_path)
