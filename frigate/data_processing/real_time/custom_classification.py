@@ -298,6 +298,9 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
                 )
             return
 
+        if not self.tensor_input_details or not self.tensor_output_details:
+            return
+
         input = np.expand_dims(resized_frame, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
@@ -355,7 +358,7 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
 
-                def _do_reload(data):
+                def _do_reload(data: dict[str, Any]) -> dict[str, Any]:
                     self.__build_detector()
                     logger.info(
                         f"Successfully loaded updated model for {self.model_config.name}"
@@ -365,7 +368,8 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
                         "message": f"Loaded {self.model_config.name} model.",
                     }
 
-                return self._enqueue_request(_do_reload, request_data)
+                result: dict[str, Any] = self._enqueue_request(_do_reload, request_data)
+                return result
             else:
                 return None
         else:
@@ -616,6 +620,9 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
             self.classification_history[object_id].append(("unknown", 0.0, timestamp))
             return
 
+        if not self.tensor_input_details or not self.tensor_output_details:
+            return
+
         input = np.expand_dims(resized_crop, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
@@ -665,7 +672,7 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
             f"{self.model_config.name}: get_weighted_score returned consensus_label={consensus_label}, consensus_score={consensus_score} for {object_id}"
         )
 
-        if consensus_label is not None:
+        if consensus_label is not None and self.model_config.object_config is not None:
             self._emit_result(
                 {
                     "type": "classification",
@@ -680,11 +687,13 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
                 }
             )
 
-    def handle_request(self, topic: str, request_data: dict) -> dict | None:
+    def handle_request(
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
 
-                def _do_reload(data):
+                def _do_reload(data: dict[str, Any]) -> dict[str, Any]:
                     self.__build_detector()
                     logger.info(
                         f"Successfully loaded updated model for {self.model_config.name}"
@@ -694,7 +703,8 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
                         "message": f"Loaded {self.model_config.name} model.",
                     }
 
-                return self._enqueue_request(_do_reload, request_data)
+                result: dict[str, Any] = self._enqueue_request(_do_reload, request_data)
+                return result
             else:
                 return None
         else:
