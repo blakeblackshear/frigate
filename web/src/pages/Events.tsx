@@ -327,10 +327,11 @@ export default function Events() {
     };
   }, [reviews]);
 
-  // reload when a review item ends so in-progress spinners clear
   // update review items in place when a review segment ends
   const reviewUpdate = useFrigateReviews();
-  const [lastEndedReviewId, setLastEndedReviewId] = useState<string>();
+  const [endedReviews, setEndedReviews] = useState(
+    new Map<string, ReviewSegment>(),
+  );
 
   useEffect(() => {
     if (reviewUpdate?.type === "end") {
@@ -343,7 +344,9 @@ export default function Events() {
         },
         { revalidate: false, populateCache: true },
       );
-      setLastEndedReviewId(reviewUpdate.after.id);
+      setEndedReviews((prev) =>
+        new Map(prev).set(reviewUpdate.after.id, reviewUpdate.after),
+      );
     }
   }, [reviewUpdate, updateSegments]);
 
@@ -369,14 +372,16 @@ export default function Events() {
     } else {
       return current;
     }
+    // only refresh when severity or filter changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    severity,
-    reviewFilter,
-    showReviewed,
-    reviewItems?.all.length,
-    lastEndedReviewId,
-  ]);
+  }, [severity, reviewFilter, showReviewed, reviewItems?.all.length]);
+
+  // overlay end_time updates onto currentItems without re-running
+  // the has_been_reviewed filter, so hover-reviewed items stay visible
+  const displayItems = useMemo(() => {
+    if (!currentItems || endedReviews.size === 0) return currentItems;
+    return currentItems.map((seg) => endedReviews.get(seg.id) ?? seg);
+  }, [currentItems, endedReviews]);
 
   // review summary
 
@@ -629,7 +634,7 @@ export default function Events() {
     ) : (
       <EventView
         reviewItems={reviewItems}
-        currentReviewItems={currentItems}
+        currentReviewItems={displayItems}
         reviewSummary={reviewSummary}
         recordingsSummary={recordingsSummary}
         relevantPreviews={allPreviews}
