@@ -24,6 +24,7 @@ import {
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
+import { useFrigateReviews } from "@/api/ws";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -326,6 +327,26 @@ export default function Events() {
     };
   }, [reviews]);
 
+  // reload when a review item ends so in-progress spinners clear
+  // update review items in place when a review segment ends
+  const reviewUpdate = useFrigateReviews();
+  const [reviewEndCount, setReviewEndCount] = useState(0);
+
+  useEffect(() => {
+    if (reviewUpdate?.type === "end") {
+      updateSegments(
+        (data) => {
+          if (!data) return data;
+          return data.map((seg) =>
+            seg.id === reviewUpdate.after.id ? reviewUpdate.after : seg,
+          );
+        },
+        { revalidate: false, populateCache: true },
+      );
+      setReviewEndCount((c) => c + 1);
+    }
+  }, [reviewUpdate, updateSegments]);
+
   const currentItems = useMemo(() => {
     if (!reviewItems || !severity) {
       return null;
@@ -348,9 +369,14 @@ export default function Events() {
     } else {
       return current;
     }
-    // only refresh when severity or filter changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity, reviewFilter, showReviewed, reviewItems?.all.length]);
+  }, [
+    severity,
+    reviewFilter,
+    showReviewed,
+    reviewItems?.all.length,
+    reviewEndCount,
+  ]);
 
   // review summary
 
