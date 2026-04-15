@@ -24,6 +24,7 @@ import {
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
+import { useFrigateReviews } from "@/api/ws";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -326,6 +327,29 @@ export default function Events() {
     };
   }, [reviews]);
 
+  // update review items in place when a review segment ends
+  const reviewUpdate = useFrigateReviews();
+  const [endedReviews, setEndedReviews] = useState(
+    new Map<string, ReviewSegment>(),
+  );
+
+  useEffect(() => {
+    if (reviewUpdate?.type === "end") {
+      updateSegments(
+        (data) => {
+          if (!data) return data;
+          return data.map((seg) =>
+            seg.id === reviewUpdate.after.id ? reviewUpdate.after : seg,
+          );
+        },
+        { revalidate: false, populateCache: true },
+      );
+      setEndedReviews((prev) =>
+        new Map(prev).set(reviewUpdate.after.id, reviewUpdate.after),
+      );
+    }
+  }, [reviewUpdate, updateSegments]);
+
   const currentItems = useMemo(() => {
     if (!reviewItems || !severity) {
       return null;
@@ -351,6 +375,13 @@ export default function Events() {
     // only refresh when severity or filter changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity, reviewFilter, showReviewed, reviewItems?.all.length]);
+
+  // overlay end_time updates onto currentItems without re-running
+  // the has_been_reviewed filter, so hover-reviewed items stay visible
+  const displayItems = useMemo(() => {
+    if (!currentItems || endedReviews.size === 0) return currentItems;
+    return currentItems.map((seg) => endedReviews.get(seg.id) ?? seg);
+  }, [currentItems, endedReviews]);
 
   // review summary
 
@@ -603,7 +634,7 @@ export default function Events() {
     ) : (
       <EventView
         reviewItems={reviewItems}
-        currentReviewItems={currentItems}
+        currentReviewItems={displayItems}
         reviewSummary={reviewSummary}
         recordingsSummary={recordingsSummary}
         relevantPreviews={allPreviews}
