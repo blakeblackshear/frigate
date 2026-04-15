@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import json
 import logging
 import threading
 from multiprocessing.synchronize import Event as MpEvent
@@ -33,6 +34,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
+from frigate.config.classification import ObjectClassificationType
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
 )
@@ -61,6 +63,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import GenAIClientManager
 from frigate.models import Event, Recordings, ReviewSegment, Trigger
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import SharedMemoryFrameManager
@@ -274,9 +277,14 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_recordings_updates()
             self._process_review_updates()
             self._process_frame_updates()
+            self._process_deferred_results()
             self._expire_dedicated_lpr()
             self._process_finalized()
             self._process_event_metadata()
+
+        # Shutdown deferred processors
+        for processor in self.realtime_processors:
+            processor.shutdown()
 
         self.config_updater.stop()
         self.enrichment_config_subscriber.stop()
@@ -316,10 +324,9 @@ class EmbeddingMaintainer(threading.Thread):
         model_name = topic.split("/")[-1]
 
         if model_config is None:
-            self.realtime_processors = [
-                processor
-                for processor in self.realtime_processors
-                if not (
+            remaining = []
+            for processor in self.realtime_processors:
+                if (
                     isinstance(
                         processor,
                         (
@@ -328,8 +335,11 @@ class EmbeddingMaintainer(threading.Thread):
                         ),
                     )
                     and processor.model_config.name == model_name
-                )
-            ]
+                ):
+                    processor.shutdown()
+                else:
+                    remaining.append(processor)
+            self.realtime_processors = remaining
 
             logger.info(
                 f"Successfully removed classification processor for model: {model_name}"
@@ -696,6 +706,68 @@ class EmbeddingMaintainer(threading.Thread):
                 )
 
         self.frame_manager.close(frame_name)
+
+    def _process_deferred_results(self) -> None:
+        """Drain results from deferred processors and perform IPC side-effects."""
+        for processor in self.realtime_processors:
+            results = processor.drain_results()
+
+            for result in results:
+                if result.get("type") != "classification":
+                    continue
+
+                if result["processor"] == "state":
+                    self.requestor.send_data(
+                        f"{result['camera']}/classification/{result['model_name']}",
+                        result["state"],
+                    )
+                elif result["processor"] == "object":
+                    object_id = result["object_id"]
+                    camera = result["camera"]
+                    timestamp = result["timestamp"]
+                    model_name = result["model_name"]
+                    label = result["label"]
+                    score = result["score"]
+                    classification_type = result["classification_type"]
+
+                    if classification_type == ObjectClassificationType.sub_label:
+                        self.event_metadata_publisher.publish(
+                            (object_id, label, score),
+                            EventMetadataTypeEnum.sub_label,
+                        )
+                        self.requestor.send_data(
+                            "tracked_object_update",
+                            json.dumps(
+                                {
+                                    "type": TrackedObjectUpdateTypesEnum.classification,
+                                    "id": object_id,
+                                    "camera": camera,
+                                    "timestamp": timestamp,
+                                    "model": model_name,
+                                    "sub_label": label,
+                                    "score": score,
+                                }
+                            ),
+                        )
+                    elif classification_type == ObjectClassificationType.attribute:
+                        self.event_metadata_publisher.publish(
+                            (object_id, model_name, label, score),
+                            EventMetadataTypeEnum.attribute.value,
+                        )
+                        self.requestor.send_data(
+                            "tracked_object_update",
+                            json.dumps(
+                                {
+                                    "type": TrackedObjectUpdateTypesEnum.classification,
+                                    "id": object_id,
+                                    "camera": camera,
+                                    "timestamp": timestamp,
+                                    "model": model_name,
+                                    "attribute": label,
+                                    "score": score,
+                                }
+                            ),
+                        )
 
     def _embed_thumbnail(self, event_id: str, thumbnail: bytes) -> None:
         """Embed the thumbnail for an event."""
