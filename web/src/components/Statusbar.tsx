@@ -7,6 +7,7 @@ import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
 import { cn } from "@/lib/utils";
 import type { ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useContext, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
@@ -18,6 +19,7 @@ import { Link } from "react-router-dom";
 
 export default function Statusbar() {
   const { t } = useTranslation(["views/system"]);
+  const isAdmin = useIsAdmin();
 
   const { messages, addMessage, clearMessages } = useContext(
     StatusBarMessagesContext,
@@ -154,9 +156,23 @@ export default function Statusbar() {
             </Link>
           );
         })}
-        {activeProfile && (
-          <Link to="/settings?page=profiles">
-            <div className="flex cursor-pointer items-center gap-2 text-sm hover:underline">
+        {activeProfile &&
+          (isAdmin ? (
+            <Link to="/settings?page=profiles">
+              <div className="flex cursor-pointer items-center gap-2 text-sm hover:underline">
+                <span
+                  className={cn(
+                    "size-2 shrink-0 rounded-full",
+                    activeProfile.color.dot,
+                  )}
+                />
+                <span className="max-w-[150px] truncate">
+                  {activeProfile.friendlyName}
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2 text-sm">
               <span
                 className={cn(
                   "size-2 shrink-0 rounded-full",
@@ -167,8 +183,7 @@ export default function Statusbar() {
                 {activeProfile.friendlyName}
               </span>
             </div>
-          </Link>
-        )}
+          ))}
       </div>
       <div className="no-scrollbar flex h-full max-w-[50%] items-center gap-2 overflow-x-auto">
         {Object.entries(messages).length === 0 ? (

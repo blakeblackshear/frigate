@@ -281,31 +281,52 @@ Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only reco
 
 Footage can be exported from Frigate by right-clicking (desktop) or long pressing (mobile) on a review item in the Review pane or by clicking the Export button in the History view. Exported footage is then organized and searchable through the Export view, accessible from the main navigation bar.
 
-### Time-lapse export
+### Custom export with FFmpeg arguments
 
-Time lapse exporting is available only via the [HTTP API](../integrations/api/export-recording-export-camera-name-start-start-time-end-end-time-post.api.mdx).
+For advanced use cases, the [custom export HTTP API](../integrations/api/export-recording-custom-export-custom-camera-name-start-start-time-end-end-time-post.api.mdx) lets you pass custom FFmpeg arguments when exporting a recording:
 
-When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means that every 25 seconds of (real-time) recording is condensed into 1 second of time-lapse video (always without audio) with a smoothness of 30 FPS.
-
-To configure the speed-up factor, the frame rate and further custom settings, use the `timelapse_args` parameter. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
-
-```yaml {3-4}
-record:
-  enabled: True
-  export:
-    timelapse_args: "-vf setpts=PTS/60 -r 25"
+```
+POST /export/custom/{camera_name}/start/{start_time}/end/{end_time}
 ```
 
-:::tip
+The request body accepts `ffmpeg_input_args` and `ffmpeg_output_args` to control encoding, frame rate, filters, and other FFmpeg options. If neither is provided, Frigate defaults to time-lapse output settings (25x speed, 30 FPS).
 
-When using `hwaccel_args`, hardware encoding is used for timelapse generation. This setting can be overridden for a specific camera (e.g., when camera resolution exceeds hardware encoder limits); set the camera-level export hwaccel_args with the appropriate settings. Using an unrecognized value or empty string will fall back to software encoding (libx264).
+The following example exports a time-lapse at 60x speed with 25 FPS:
+
+```json
+{
+  "name": "Front Door Time-lapse",
+  "ffmpeg_output_args": "-vf setpts=PTS/60 -r 25"
+}
+```
+
+#### CPU fallback
+
+If hardware acceleration is configured and the export fails (e.g., the GPU is unavailable), set `cpu_fallback: true` in the request body to automatically retry using software encoding.
+
+```json
+{
+  "name": "My Export",
+  "ffmpeg_output_args": "-c:v libx264 -crf 23",
+  "cpu_fallback": true
+}
+```
+
+:::note
+
+Non-admin users are restricted from using FFmpeg arguments that can access the filesystem (e.g., `-filter_complex`, file paths, and protocol references). Admin users have full control over FFmpeg arguments.
 
 :::
 
 :::tip
 
-The encoder determines its own behavior so the resulting file size may be undesirably large.
-To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
+When `hwaccel_args` is configured, hardware encoding is used for exports. This can be overridden per camera (e.g., when camera resolution exceeds hardware encoder limits) by setting a camera-level `hwaccel_args`. Using an unrecognized value or empty string falls back to software encoding (libx264).
+
+:::
+
+:::tip
+
+To reduce output file size, add the FFmpeg parameter `-qp n` to `ffmpeg_output_args` (where `n` is the quantization parameter). Adjust the value to balance quality and file size for your scenario.
 
 :::
 

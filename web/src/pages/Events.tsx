@@ -334,7 +334,7 @@ export default function Events() {
   );
 
   useEffect(() => {
-    if (reviewUpdate?.type === "end") {
+    if (reviewUpdate?.type === "end" && reviews) {
       updateSegments(
         (data) => {
           if (!data) return data;
@@ -348,6 +348,9 @@ export default function Events() {
         new Map(prev).set(reviewUpdate.after.id, reviewUpdate.after),
       );
     }
+    // reviews is intentionally excluded - only used to guard against
+    // updating the SWR cache before data has loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviewUpdate, updateSegments]);
 
   const currentItems = useMemo(() => {
