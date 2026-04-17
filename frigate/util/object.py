@@ -62,11 +62,12 @@ def get_camera_regions_grid(
         .where((Event.false_positive == None) | (Event.false_positive == False))
         .where(Event.start_time > last_update)
     )
-    valid_event_ids = [e["id"] for e in events.dicts()]
-    logger.debug(f"Found {len(valid_event_ids)} new events for {name}")
+
+    event_count = events.count()
+    logger.debug(f"Found {event_count} new events for {name}")
 
     # no new events, return as is
-    if not valid_event_ids:
+    if event_count == 0:
         return grid
 
     new_update = datetime.datetime.now().timestamp()
@@ -78,7 +79,7 @@ def get_camera_regions_grid(
                 Timeline.data,
             ]
         )
-        .where(Timeline.source_id << valid_event_ids)
+        .where(Timeline.source_id << events)
         .limit(10000)
         .dicts()
     )

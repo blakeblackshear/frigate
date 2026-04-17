@@ -9,6 +9,12 @@ import NavPath from "@site/src/components/NavPath";
 
 Object classification allows you to train a custom MobileNetV2 classification model to run on tracked objects (persons, cars, animals, etc.) to identify a finer category or attribute for that object. Classification results are visible in the Tracked Object Details pane in Explore, through the `frigate/tracked_object_details` MQTT topic, in Home Assistant sensors via the official Frigate integration, or through the event endpoints in the HTTP API.
 
+:::info
+
+Training a custom object classification model requires a one-time internet connection to download MobileNetV2 base weights. Once trained, the model runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
+
 ## Minimum System Requirements
 
 Object classification models are lightweight and run very fast on CPU.

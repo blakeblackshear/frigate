@@ -52,6 +52,14 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_sqlite_vec.sh
 
+# Build intel-media-driver from source against bookworm's system libva so it
+# works with Debian 12's glibc/libstdc++ (pre-built noble/trixie packages
+# require glibc 2.38 which is not available on bookworm).
+FROM base AS intel-media-driver
+ARG DEBIAN_FRONTEND
+RUN --mount=type=bind,source=docker/main/build_intel_media_driver.sh,target=/deps/build_intel_media_driver.sh \
+    /deps/build_intel_media_driver.sh
+
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
@@ -200,6 +208,7 @@ RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=sqlite-vec /usr/local/lib/ /usr/local/lib/
+COPY --from=intel-media-driver /rootfs/ /
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /

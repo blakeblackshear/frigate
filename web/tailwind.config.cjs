@@ -49,6 +49,7 @@ module.exports = {
         scale4: "scale4 3s ease-in-out infinite",
         "timeline-zoom-in": "timeline-zoom-in 0.3s ease-out",
         "timeline-zoom-out": "timeline-zoom-out 0.3s ease-out",
+        "cursor-blink": "cursor-blink 1s step-end infinite",
       },
       aspectRatio: {
         wide: "32 / 9",
@@ -188,6 +189,10 @@ module.exports = {
           "0%": { transform: "translateY(0)", opacity: "1" },
           "50%": { transform: "translateY(0%)", opacity: "0.5" },
           "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "cursor-blink": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
         },
       },
       screens: {

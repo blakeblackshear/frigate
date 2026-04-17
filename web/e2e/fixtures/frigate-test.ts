@@ -6,6 +6,11 @@
  * @playwright/test directly. The `frigateApp` fixture provides a
  * fully mocked Frigate frontend ready for interaction.
  *
+ * The fixture also installs the error collector (see error-collector.ts).
+ * Any console error, page error, or same-origin failed request that is
+ * not on the global allowlist or the test's `expectedErrors` list will
+ * fail the test in the fixture's teardown.
+ *
  * CRITICAL: All route/WS handlers are registered before page.goto()
  * to prevent AuthProvider from redirecting to login.html.
  */
@@ -17,6 +22,8 @@ import {
   type ApiMockOverrides,
 } from "../helpers/api-mocker";
 import { WsMocker } from "../helpers/ws-mocker";
+import { installErrorCollector, type ErrorCollector } from "./error-collector";
+import { GLOBAL_ALLOWLIST } from "./error-allowlist";
 
 export class FrigateApp {
   public api: ApiMocker;
@@ -67,10 +74,43 @@ export class FrigateApp {
 
 type FrigateFixtures = {
   frigateApp: FrigateApp;
+  /**
+   * Per-test additional allowlist regex patterns. Tests that intentionally
+   * trigger errors (e.g. error-state tests that hit a mocked 500) declare
+   * their expected errors here so the collector ignores them.
+   *
+   * Default is `[]` — most tests should not need this.
+   */
+  expectedErrors: RegExp[];
+  errorCollector: ErrorCollector;
 };
 
 export const test = base.extend<FrigateFixtures>({
-  frigateApp: async ({ page }, use, testInfo) => {
+  expectedErrors: [[], { option: true }],
+
+  errorCollector: async ({ page, expectedErrors }, use, testInfo) => {
+    const collector = installErrorCollector(page, [
+      ...GLOBAL_ALLOWLIST,
+      ...expectedErrors,
+    ]);
+    await use(collector);
+    if (process.env.E2E_STRICT_ERRORS === "1") {
+      collector.assertClean();
+    } else if (collector.errors.length > 0) {
+      // Soft mode: attach errors to the test report so they're visible
+      // without failing the run.
+      await testInfo.attach("collected-errors.txt", {
+        body: collector.errors
+          .map((e) => `[${e.kind}] ${e.message}${e.url ? ` (${e.url})` : ""}`)
+          .join("\n"),
+        contentType: "text/plain",
+      });
+    }
+  },
+
+  frigateApp: async ({ page, errorCollector }, use, testInfo) => {
+    // Reference the collector so its `use()` runs and teardown fires
+    void errorCollector;
     const app = new FrigateApp(page, testInfo.project.name);
     await app.installDefaults();
     await use(app);

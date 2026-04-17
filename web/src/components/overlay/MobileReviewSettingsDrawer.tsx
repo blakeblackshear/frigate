@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
 import { LuBug, LuShare2 } from "react-icons/lu";
 import { TimeRange } from "@/types/timeline";
-import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
+import { ExportContent, ExportPreviewDialog, ExportTab } from "./ExportDialog";
 import {
   DebugReplayContent,
   SaveDebugReplayOverlay,
@@ -26,6 +26,7 @@ import SaveExportOverlay from "./SaveExportOverlay";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { StartExportResponse } from "@/types/export";
 import { ShareTimestampContent } from "./ShareTimestampDialog";
 
 type DrawerMode =
@@ -109,6 +110,7 @@ export default function MobileReviewSettingsDrawer({
   ]);
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
+  const [exportTab, setExportTab] = useState<ExportTab>("export");
   const [selectedReplayOption, setSelectedReplayOption] = useState<
     "1" | "5" | "custom" | "timeline"
   >("1");
@@ -129,67 +131,112 @@ export default function MobileReviewSettingsDrawer({
   const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(
     undefined,
   );
-  const onStartExport = useCallback(() => {
+  const [singleNewCaseName, setSingleNewCaseName] = useState("");
+  const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
+  const [isStartingExport, setIsStartingExport] = useState(false);
+  const onStartExport = useCallback(async () => {
+    if (isStartingExport) {
+      return false;
+    }
+
     if (!range) {
-      toast.error(t("toast.error.noValidTimeSelected"), {
-        position: "top-center",
-      });
-      return;
+      toast.error(
+        t("export.toast.error.noVaildTimeSelected", {
+          ns: "components/dialog",
+        }),
+        {
+          position: "top-center",
+        },
+      );
+      return false;
     }
 
     if (range.before < range.after) {
-      toast.error(t("toast.error.endTimeMustAfterStartTime"), {
-        position: "top-center",
-      });
-      return;
+      toast.error(
+        t("export.toast.error.endTimeMustAfterStartTime", {
+          ns: "components/dialog",
+        }),
+        {
+          position: "top-center",
+        },
+      );
+      return false;
     }
 
-    axios
-      .post(
+    setIsStartingExport(true);
+
+    try {
+      let exportCaseId: string | undefined = selectedCaseId;
+
+      if (selectedCaseId === "new" && singleNewCaseName.trim().length > 0) {
+        const caseResp = await axios.post("cases", {
+          name: singleNewCaseName.trim(),
+          description: singleNewCaseDescription.trim() || undefined,
+        });
+        exportCaseId = caseResp.data?.id;
+      } else if (selectedCaseId === "new" || selectedCaseId === "none") {
+        exportCaseId = undefined;
+      }
+
+      await axios.post<StartExportResponse>(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
-          playback: "realtime",
+          source: "recordings",
           name,
-          export_case_id: selectedCaseId || undefined,
+          export_case_id: exportCaseId,
         },
-      )
-      .then((response) => {
-        if (response.status == 200) {
-          toast.success(
-            t("export.toast.success", { ns: "components/dialog" }),
-            {
-              position: "top-center",
-              action: (
-                <a href="/export" target="_blank" rel="noopener noreferrer">
-                  <Button>
-                    {t("export.toast.view", { ns: "components/dialog" })}
-                  </Button>
-                </a>
-              ),
-            },
-          );
-          setName("");
-          setSelectedCaseId(undefined);
-          setRange(undefined);
-          setMode("none");
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(
-          t("export.toast.error.failed", {
-            ns: "components/dialog",
-            errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
+      );
+
+      toast.success(t("export.toast.queued", { ns: "components/dialog" }), {
+        position: "top-center",
+        action: (
+          <a href="/export" target="_blank" rel="noopener noreferrer">
+            <Button>
+              {t("export.toast.view", { ns: "components/dialog" })}
+            </Button>
+          </a>
+        ),
       });
-  }, [camera, name, range, selectedCaseId, setRange, setName, setMode, t]);
+      setName("");
+      setSelectedCaseId(undefined);
+      setSingleNewCaseName("");
+      setSingleNewCaseDescription("");
+      setRange(undefined);
+      setMode("none");
+      return true;
+    } catch (error) {
+      const apiError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.detail ||
+        "Unknown error";
+      toast.error(
+        t("export.toast.error.failed", {
+          ns: "components/dialog",
+          error: errorMessage,
+        }),
+        {
+          position: "top-center",
+        },
+      );
+      return false;
+    } finally {
+      setIsStartingExport(false);
+    }
+  }, [
+    camera,
+    isStartingExport,
+    name,
+    range,
+    selectedCaseId,
+    singleNewCaseDescription,
+    singleNewCaseName,
+    setRange,
+    setMode,
+    t,
+  ]);
 
   const onStartDebugReplay = useCallback(async () => {
     if (
@@ -283,6 +330,7 @@ export default function MobileReviewSettingsDrawer({
             className="flex w-full items-center justify-center gap-2"
             aria-label={t("export")}
             onClick={() => {
+              setExportTab("export");
               setDrawerMode("export");
               setMode("select");
             }}
@@ -368,14 +416,21 @@ export default function MobileReviewSettingsDrawer({
         range={range}
         name={name}
         selectedCaseId={selectedCaseId}
+        singleNewCaseName={singleNewCaseName}
+        singleNewCaseDescription={singleNewCaseDescription}
+        activeTab={exportTab}
+        isStartingExport={isStartingExport}
         onStartExport={onStartExport}
+        setActiveTab={setExportTab}
         setName={setName}
         setSelectedCaseId={setSelectedCaseId}
+        setSingleNewCaseName={setSingleNewCaseName}
+        setSingleNewCaseDescription={setSingleNewCaseDescription}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
 
-          if (mode == "timeline") {
+          if (mode == "timeline" || mode == "timeline_multi") {
             setDrawerMode("none");
           }
         }}
@@ -383,6 +438,9 @@ export default function MobileReviewSettingsDrawer({
           setMode("none");
           setRange(undefined);
           setSelectedCaseId(undefined);
+          setSingleNewCaseName("");
+          setSingleNewCaseDescription("");
+          setExportTab("export");
           setDrawerMode("select");
         }}
       />
@@ -542,9 +600,29 @@ export default function MobileReviewSettingsDrawer({
     <>
       <SaveExportOverlay
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
-        show={mode == "timeline"}
-        onSave={() => onStartExport()}
-        onCancel={() => setMode("none")}
+        show={mode == "timeline" || mode == "timeline_multi"}
+        hidePreview={mode == "timeline_multi"}
+        isSaving={isStartingExport}
+        saveLabel={
+          mode == "timeline_multi"
+            ? t("export.fromTimeline.useThisRange", { ns: "components/dialog" })
+            : undefined
+        }
+        onSave={() => {
+          if (mode == "timeline_multi") {
+            setExportTab("multi");
+            setDrawerMode("export");
+            setMode("select");
+            return;
+          }
+
+          void onStartExport();
+        }}
+        onCancel={() => {
+          setExportTab("export");
+          setRange(undefined);
+          setMode("none");
+        }}
         onPreview={() => setShowExportPreview(true)}
       />
       <SaveDebugReplayOverlay

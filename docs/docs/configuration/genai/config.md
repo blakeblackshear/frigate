@@ -193,6 +193,12 @@ To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` env
 
 Cloud providers run on remote infrastructure and require an API key for authentication. These services handle all model inference on their servers.
 
+:::info
+
+Cloud Generative AI providers require an active internet connection to send images and prompts for processing. Local providers like llama.cpp and Ollama (with local models) do not require internet. See [Network Requirements](/frigate/network_requirements#generative-ai) for details.
+
+:::
+
 ### Ollama Cloud
 
 Ollama also supports [cloud models](https://ollama.com/cloud), where your local Ollama instance handles requests from Frigate, but model inference is performed in the cloud. Set up Ollama locally, sign in with your Ollama account, and specify the cloud model name in your Frigate config. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).

@@ -9,6 +9,12 @@ import NavPath from "@site/src/components/NavPath";
 
 State classification allows you to train a custom MobileNetV2 classification model on a fixed region of your camera frame(s) to determine a current state. The model can be configured to run on a schedule and/or when motion is detected in that region. Classification results are available through the `frigate/<camera_name>/classification/<model_name>` MQTT topic and in Home Assistant sensors via the official Frigate integration.
 
+:::info
+
+Training a custom state classification model requires a one-time internet connection to download MobileNetV2 base weights. Once trained, the model runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
+
 ## Minimum System Requirements
 
 State classification models are lightweight and run very fast on CPU.

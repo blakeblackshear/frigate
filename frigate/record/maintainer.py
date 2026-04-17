@@ -372,6 +372,7 @@ class RecordingMaintainer(threading.Thread):
             )
 
         record_config = self.config.cameras[camera].record
+        segment_stats: SegmentInfo | None = None
         highest = None
 
         if record_config.continuous.days > 0:
@@ -401,9 +402,19 @@ class RecordingMaintainer(threading.Thread):
                     if highest == "continuous"
                     else RetainModeEnum.motion
                 )
-                return await self.move_segment(
-                    camera, start_time, end_time, duration, cache_path, record_mode
-                )
+                segment_stats = self.segment_stats(camera, start_time, end_time)
+
+                # Here we only check if we should move the segment based on non-object recording retention
+                # we will always want to check for overlapping review items below before dropping the segment
+                if not segment_stats.should_discard_segment(record_mode):
+                    return await self.move_segment(
+                        camera,
+                        start_time,
+                        end_time,
+                        duration,
+                        cache_path,
+                        segment_stats,
+                    )
 
         # we fell through the continuous / motion check, so we need to check the review items
         # if the cached segment overlaps with the review items:
@@ -435,15 +446,24 @@ class RecordingMaintainer(threading.Thread):
                 if review.severity == "alert"
                 else record_config.detections.retain.mode
             )
-            # move from cache to recordings immediately
-            return await self.move_segment(
-                camera,
-                start_time,
-                end_time,
-                duration,
-                cache_path,
-                record_mode,
-            )
+
+            if segment_stats is None:
+                segment_stats = self.segment_stats(camera, start_time, end_time)
+
+            if not segment_stats.should_discard_segment(record_mode):
+                # move from cache to recordings immediately
+                return await self.move_segment(
+                    camera,
+                    start_time,
+                    end_time,
+                    duration,
+                    cache_path,
+                    segment_stats,
+                )
+            else:
+                self.drop_segment(cache_path)
+                return None
+
         # if it doesn't overlap with an review item, go ahead and drop the segment
         # if it ends more than the configured pre_capture for the camera
         # BUT only if continuous/motion is NOT enabled (otherwise wait for processing)
@@ -455,6 +475,7 @@ class RecordingMaintainer(threading.Thread):
             retain_cutoff = datetime.datetime.fromtimestamp(
                 most_recently_processed_frame_time - record_config.event_pre_capture
             ).astimezone(datetime.timezone.utc)
+
             if end_time < retain_cutoff:
                 self.drop_segment(cache_path)
 
@@ -578,15 +599,8 @@ class RecordingMaintainer(threading.Thread):
         end_time: datetime.datetime,
         duration: float,
         cache_path: str,
-        store_mode: RetainModeEnum,
+        segment_info: SegmentInfo,
     ) -> Optional[dict[str, Any]]:
-        segment_info = self.segment_stats(camera, start_time, end_time)
-
-        # check if the segment shouldn't be stored
-        if segment_info.should_discard_segment(store_mode):
-            self.drop_segment(cache_path)
-            return None
-
         # directory will be in utc due to start_time being in utc
         directory = os.path.join(
             RECORD_DIR,

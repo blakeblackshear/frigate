@@ -9,6 +9,12 @@ import NavPath from "@site/src/components/NavPath";
 
 Bird classification identifies known birds using a quantized Tensorflow model. When a known bird is recognized, its common name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
+:::info
+
+Bird classification requires a one-time internet connection to download the classification model and label map from GitHub. Once cached, models work fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
+
 ## Minimum System Requirements
 
 Bird classification runs a lightweight tflite model on the CPU, there are no significantly different system requirements than running Frigate itself.

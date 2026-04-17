@@ -20,13 +20,29 @@
     "downloadVideo": "Download video",
     "editName": "Edit name",
     "deleteExport": "Delete export",
-    "assignToCase": "Add to case"
+    "assignToCase": "Add to case",
+    "removeFromCase": "Remove from case"
+  },
+  "toolbar": {
+    "newCase": "New Case",
+    "addExport": "Add Export",
+    "editCase": "Edit Case",
+    "deleteCase": "Delete Case"
   },
   "toast": {
     "error": {
       "renameExportFailed": "Failed to rename export: {{errorMessage}}",
-      "assignCaseFailed": "Failed to update case assignment: {{errorMessage}}"
+      "assignCaseFailed": "Failed to update case assignment: {{errorMessage}}",
+      "caseSaveFailed": "Failed to save case: {{errorMessage}}",
+      "caseDeleteFailed": "Failed to delete case: {{errorMessage}}"
     }
+  },
+  "deleteCase": {
+    "label": "Delete Case",
+    "desc": "Are you sure you want to delete {{caseName}}?",
+    "descKeepExports": "Exports will remain available as uncategorized exports.",
+    "descDeleteExports": "All exports in this case will be permanently deleted.",
+    "deleteExports": "Also delete exports"
   },
   "caseDialog": {
     "title": "Add to case",
@@ -35,5 +51,73 @@
     "newCaseOption": "Create new case",
     "nameLabel": "Case name",
     "descriptionLabel": "Description"
+  },
+  "caseCard": {
+    "emptyCase": "No exports yet"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} export",
+    "queued": "Queued",
+    "running": "Running"
+  },
+  "caseView": {
+    "noDescription": "No description",
+    "createdAt": "Created {{value}}",
+    "exportCount_one": "1 export",
+    "exportCount_other": "{{count}} exports",
+    "cameraCount_one": "1 camera",
+    "cameraCount_other": "{{count}} cameras",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "emptyTitle": "This case is empty",
+    "emptyDescription": "Add existing uncategorized exports to keep the case organized.",
+    "emptyDescriptionNoExports": "There are no uncategorized exports available to add yet."
+  },
+  "caseEditor": {
+    "createTitle": "Create Case",
+    "editTitle": "Edit Case",
+    "namePlaceholder": "Case name",
+    "descriptionPlaceholder": "Add notes or context for this case"
+  },
+  "addExportDialog": {
+    "title": "Add Export to {{caseName}}",
+    "searchPlaceholder": "Search uncategorized exports",
+    "empty": "No uncategorized exports match this search.",
+    "addButton_one": "Add 1 Export",
+    "addButton_other": "Add {{count}} Exports",
+    "adding": "Adding..."
+  },
+  "selected_one": "{{count}} selected",
+  "selected_other": "{{count}} selected",
+  "bulkActions": {
+    "addToCase": "Add to Case",
+    "moveToCase": "Move to Case",
+    "removeFromCase": "Remove from Case",
+    "delete": "Delete",
+    "deleteNow": "Delete Now"
+  },
+  "bulkDelete": {
+    "title": "Delete Exports",
+    "desc_one": "Are you sure you want to delete {{count}} export?",
+    "desc_other": "Are you sure you want to delete {{count}} exports?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Remove from Case",
+    "desc_one": "Remove {{count}} export from this case?",
+    "desc_other": "Remove {{count}} exports from this case?",
+    "descKeepExports": "Exports will be moved to uncategorized.",
+    "descDeleteExports": "Exports will be permanently deleted.",
+    "deleteExports": "Delete exports instead"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Successfully deleted exports",
+      "reassign": "Successfully updated case assignment",
+      "remove": "Successfully removed exports from case"
+    },
+    "error": {
+      "deleteFailed": "Failed to delete exports: {{errorMessage}}",
+      "reassignFailed": "Failed to update case assignment: {{errorMessage}}"
+    }
   }
 }

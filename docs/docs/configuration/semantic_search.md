@@ -13,6 +13,12 @@ Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and 
 
 Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
+:::info
+
+Semantic search requires a one-time internet connection to download embedding models from HuggingFace. Once cached, models work fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
+
 ## Minimum System Requirements
 
 Semantic Search works by running a large AI model locally on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.

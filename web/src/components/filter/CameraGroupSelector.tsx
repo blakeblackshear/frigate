@@ -89,6 +89,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
   const { t } = useTranslation(["components/camera"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const allowedCameras = useAllowedCameras();
+  const hasFullCameraAccess = useHasFullCameraAccess();
   const isAdmin = useIsAdmin();
 
   // tooltip
@@ -125,7 +126,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     const allGroups = Object.entries(config.camera_groups);
 
     // If custom role, filter out groups where user has no accessible cameras
-    if (!isAdmin) {
+    if (!hasFullCameraAccess) {
       return allGroups
         .filter(([, groupConfig]) => {
           // Check if user has access to at least one camera in this group
@@ -137,7 +138,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     }
 
     return allGroups.sort((a, b) => a[1].order - b[1].order);
-  }, [config, allowedCameras, isAdmin]);
+  }, [config, allowedCameras, hasFullCameraAccess]);
 
   // add group
 

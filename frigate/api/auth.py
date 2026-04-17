@@ -64,6 +64,7 @@ def require_admin_by_default():
         "/logout",
         # Authenticated user endpoints (allow_any_authenticated)
         "/profile",
+        "/profiles",
         # Public info endpoints (allow_public)
         "/",
         "/version",
@@ -87,7 +88,9 @@ def require_admin_by_default():
         "/go2rtc/streams",
         "/event_ids",
         "/events",
+        "/cases",
         "/exports",
+        "/jobs/export",
     }
 
     # Path prefixes that should be exempt (for paths with parameters)
@@ -100,7 +103,9 @@ def require_admin_by_default():
         "/go2rtc/streams/",  # /go2rtc/streams/{camera}
         "/users/",  # /users/{username}/password (has own auth)
         "/preview/",  # /preview/{file}/thumbnail.jpg
+        "/cases/",  # /cases/{case_id}
         "/exports/",  # /exports/{export_id}
+        "/jobs/export/",  # /jobs/export/{export_id}
         "/vod/",  # /vod/{camera_name}/...
         "/notifications/",  # /notifications/pubkey, /notifications/register
     )

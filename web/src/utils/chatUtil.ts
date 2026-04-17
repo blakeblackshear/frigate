@@ -25,6 +25,7 @@ export async function streamChatCompletion(
   headers: Record<string, string>,
   apiMessages: { role: string; content: string }[],
   callbacks: StreamChatCallbacks,
+  signal?: AbortSignal,
 ): Promise<void> {
   const {
     updateMessages,
@@ -38,6 +39,7 @@ export async function streamChatCompletion(
       method: "POST",
       headers,
       body: JSON.stringify({ messages: apiMessages, stream: true }),
+      signal,
     });
 
     if (!res.ok) {
@@ -152,11 +154,15 @@ export async function streamChatCompletion(
         return next;
       });
     }
-  } catch {
-    onError(defaultErrorMessage);
-    updateMessages((prev) =>
-      prev.filter((m) => !(m.role === "assistant" && m.content === "")),
-    );
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      // User stopped generation — not an error
+    } else {
+      onError(defaultErrorMessage);
+      updateMessages((prev) =>
+        prev.filter((m) => !(m.role === "assistant" && m.content === "")),
+      );
+    }
   } finally {
     onDone();
   }
@@ -190,4 +196,73 @@ export function getEventIdsFromSearchObjectsToolCalls(
     }
   }
   return results;
+}
+
+const ATTACHED_EVENT_MARKER = /^\[attached_event:([A-Za-z0-9._-]+)\]\s*\n?/;
+
+export function parseAttachedEvent(content: string): {
+  eventId: string | null;
+  body: string;
+} {
+  if (!content) return { eventId: null, body: content };
+  const match = content.match(ATTACHED_EVENT_MARKER);
+  if (!match) return { eventId: null, body: content };
+  const body = content.slice(match[0].length).replace(/^\n+/, "");
+  return { eventId: match[1], body };
+}
+
+export function prependAttachment(body: string, eventId: string): string {
+  return `[attached_event:${eventId}]\n\n${body}`;
+}
+
+export type FindSimilarObjectsResult = {
+  anchor: { id: string } | null;
+  results: { id: string; score?: number }[];
+};
+
+/**
+ * Parse find_similar_objects tool call response(s) into anchor + ranked results.
+ * Returns null if no find_similar_objects call is present so the caller can
+ * decide whether to render.
+ */
+export function getFindSimilarObjectsFromToolCalls(
+  toolCalls: ToolCall[] | undefined,
+): FindSimilarObjectsResult | null {
+  if (!toolCalls?.length) return null;
+  for (const tc of toolCalls) {
+    if (tc.name !== "find_similar_objects" || !tc.response?.trim()) continue;
+    try {
+      const parsed = JSON.parse(tc.response) as {
+        anchor?: { id?: unknown };
+        results?: unknown;
+      };
+      const anchorId =
+        parsed.anchor && typeof parsed.anchor.id === "string"
+          ? parsed.anchor.id
+          : null;
+      const anchor = anchorId ? { id: anchorId } : null;
+      const results: { id: string; score?: number }[] = [];
+      if (Array.isArray(parsed.results)) {
+        for (const item of parsed.results) {
+          if (
+            item &&
+            typeof item === "object" &&
+            "id" in item &&
+            typeof (item as { id: unknown }).id === "string"
+          ) {
+            const entry: { id: string; score?: number } = {
+              id: (item as { id: string }).id,
+            };
+            const rawScore = (item as { score?: unknown }).score;
+            if (typeof rawScore === "number") entry.score = rawScore;
+            results.push(entry);
+          }
+        }
+      }
+      return { anchor, results };
+    } catch {
+      // ignore parse errors
+    }
+  }
+  return null;
 }

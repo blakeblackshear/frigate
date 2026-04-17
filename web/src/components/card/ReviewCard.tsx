@@ -81,7 +81,7 @@ export default function ReviewCard({
 
     axios
       .post(
-        `export/${event.camera}/start/${event.start_time + REVIEW_PADDING}/end/${endTime}`,
+        `export/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${endTime}`,
         { playback: "realtime" },
       )
       .then((response) => {

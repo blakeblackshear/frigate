@@ -288,6 +288,12 @@ This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleratio
 
 See the [installation docs](../frigate/installation.md#hailo-8) for information on configuring the Hailo hardware.
 
+:::info
+
+If no custom model is provided, the Hailo detector downloads a default model from the Hailo Model Zoo on first startup. Once cached, the model works fully offline. See [Network Requirements](/frigate/network_requirements#hardware-specific-detector-models) for details.
+
+:::
+
 ### Configuration
 
 When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
@@ -1793,6 +1799,12 @@ Hardware accelerated object detection is supported on the following SoCs:
 
 This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.3.2.
 
+:::info
+
+If no custom model is provided, the RKNN detector downloads a default model from GitHub on first startup. Once cached, the model works fully offline. See [Network Requirements](/frigate/network_requirements#hardware-specific-detector-models) for details.
+
+:::
+
 :::tip
 
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming NPU resources are available. An example configuration would be:
@@ -2175,6 +2187,12 @@ Hardware accelerated object detection is supported on the following SoCs:
 This implementation uses the [AXera Pulsar2 Toolchain](https://huggingface.co/AXERA-TECH/Pulsar2).
 
 See the [installation docs](../frigate/installation.md#axera) for information on configuring the AXEngine hardware.
+
+:::info
+
+The AXEngine detector downloads its default model from HuggingFace on first startup. Once cached, the model works fully offline. See [Network Requirements](/frigate/network_requirements#hardware-specific-detector-models) for details.
+
+:::
 
 ### Configuration
 

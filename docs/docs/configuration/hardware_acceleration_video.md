@@ -59,13 +59,14 @@ Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video 
 
 **Recommended hwaccel Preset**
 
-| CPU Generation | Intel Driver | Recommended Preset  | Notes                                       |
-| -------------- | ------------ | ------------------- | ------------------------------------------- |
-| gen1 - gen5    | i965         | preset-vaapi        | qsv is not supported, may not support H.265 |
-| gen6 - gen7    | iHD          | preset-vaapi        | qsv is not supported                        |
-| gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used        |
-| gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                             |
-| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                             |
+| CPU Generation     | Intel Driver | Recommended Preset  | Notes                                       |
+| ------------------ | ------------ | ------------------- | ------------------------------------------- |
+| gen1 - gen5        | i965         | preset-vaapi        | qsv is not supported, may not support H.265 |
+| gen6 - gen7        | iHD          | preset-vaapi        | qsv is not supported                        |
+| gen8 - gen12       | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used        |
+| gen13+             | iHD / Xe     | preset-intel-qsv-\* |                                             |
+| Intel Arc A-series | iHD / Xe     | preset-intel-qsv-\* |                                             |
+| Intel Arc B-series | iHD / Xe     | preset-intel-qsv-\* | Requires host kernel 6.12+                  |
 
 :::
 

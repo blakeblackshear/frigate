@@ -896,6 +896,7 @@ export function RecordingView({
                   isScrubbing={
                     scrubbing ||
                     exportMode == "timeline" ||
+                    exportMode == "timeline_multi" ||
                     debugReplayMode == "timeline"
                   }
                   supportsFullscreen={supportsFullScreen}
@@ -974,7 +975,7 @@ export function RecordingView({
             activeReviewItem={activeReviewItem}
             currentTime={currentTime}
             exportRange={
-              exportMode == "timeline"
+              exportMode == "timeline" || exportMode == "timeline_multi"
                 ? exportRange
                 : debugReplayMode == "timeline"
                   ? debugReplayRange
