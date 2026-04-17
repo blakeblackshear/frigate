@@ -7,11 +7,13 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from queue import Full, Queue
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from peewee import DoesNotExist
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.const import UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.models import Export
 from frigate.record.export import PlaybackSourceEnum, RecordingExporter
@@ -22,6 +24,16 @@ logger = logging.getLogger(__name__)
 # Maximum number of jobs that can sit in the queue waiting to run.
 # Prevents a runaway client from unbounded memory growth.
 MAX_QUEUED_EXPORT_JOBS = 100
+
+# Minimum interval between progress broadcasts. FFmpeg can emit progress
+# events many times per second; we coalesce them so the WebSocket isn't
+# flooded with redundant updates.
+PROGRESS_BROADCAST_MIN_INTERVAL = 1.0
+
+# Delay before removing a completed job from the in-memory map. Gives the
+# frontend a chance to receive the final state via WebSocket before SWR
+# polling takes over.
+COMPLETED_JOB_CLEANUP_DELAY = 5.0
 
 
 class ExportQueueFullError(RuntimeError):
@@ -43,6 +55,8 @@ class ExportJob(Job):
     ffmpeg_input_args: Optional[str] = None
     ffmpeg_output_args: Optional[str] = None
     cpu_fallback: bool = False
+    current_step: str = "queued"
+    progress_percent: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API responses.
@@ -64,6 +78,8 @@ class ExportJob(Job):
             "end_time": self.end_time,
             "error_message": self.error_message,
             "results": self.results,
+            "current_step": self.current_step,
+            "progress_percent": self.progress_percent,
         }
 
 
@@ -91,6 +107,38 @@ class ExportQueueWorker(threading.Thread):
                 self.manager.queue.task_done()
 
 
+class JobStatePublisher:
+    """Publishes a single job state payload to the dispatcher.
+
+    Each call opens a short-lived :py:class:`InterProcessRequestor`, sends
+    the payload, and closes the socket. The short-lived design avoids
+    REQ/REP state corruption that would arise from sharing a single REQ
+    socket across the API thread and worker threads (REQ sockets must
+    strictly alternate send/recv).
+
+    With the 1s broadcast throttle in place, socket creation overhead is
+    negligible. The class also exists so tests can substitute a no-op
+    instance instead of stubbing ZMQ — see ``BaseTestHttp.setUp``.
+    """
+
+    def publish(self, payload: dict[str, Any]) -> None:
+        try:
+            requestor = InterProcessRequestor()
+        except Exception as err:
+            logger.warning("Failed to open job state requestor: %s", err)
+            return
+
+        try:
+            requestor.send_data(UPDATE_JOB_STATE, payload)
+        except Exception as err:
+            logger.debug("Job state broadcast failed: %s", err)
+        finally:
+            try:
+                requestor.stop()
+            except Exception:
+                pass
+
+
 class ExportJobManager:
     """Concurrency-limited manager for queued export jobs."""
 
@@ -99,6 +147,7 @@ class ExportJobManager:
         config: FrigateConfig,
         max_concurrent: int,
         max_queued: int = MAX_QUEUED_EXPORT_JOBS,
+        publisher: Optional[JobStatePublisher] = None,
     ) -> None:
         self.config = config
         self.max_concurrent = max(1, max_concurrent)
@@ -107,6 +156,68 @@ class ExportJobManager:
         self.lock = threading.Lock()
         self.workers: list[ExportQueueWorker] = []
         self.started = False
+        self.publisher = publisher if publisher is not None else JobStatePublisher()
+        self._last_broadcast_monotonic: float = 0.0
+        self._broadcast_throttle_lock = threading.Lock()
+
+    def _broadcast_all_jobs(self, force: bool = False) -> None:
+        """Publish aggregate export job state via the job_state WS topic.
+
+        When ``force`` is False, broadcasts within
+        ``PROGRESS_BROADCAST_MIN_INTERVAL`` of the previous one are skipped
+        to avoid flooding the WebSocket with rapid progress updates.
+        ``force`` bypasses the throttle and is used for status transitions
+        (enqueue/start/finish) where the frontend needs the latest state.
+        """
+        now = time.monotonic()
+        with self._broadcast_throttle_lock:
+            if (
+                not force
+                and now - self._last_broadcast_monotonic
+                < PROGRESS_BROADCAST_MIN_INTERVAL
+            ):
+                return
+            self._last_broadcast_monotonic = now
+
+        with self.lock:
+            active = [
+                j
+                for j in self.jobs.values()
+                if j.status in (JobStatusTypesEnum.queued, JobStatusTypesEnum.running)
+            ]
+
+        any_running = any(j.status == JobStatusTypesEnum.running for j in active)
+        payload: dict[str, Any] = {
+            "job_type": "export",
+            "status": "running" if any_running else "queued",
+            "results": {"jobs": [j.to_dict() for j in active]},
+        }
+
+        try:
+            self.publisher.publish(payload)
+        except Exception as err:
+            logger.warning("Publisher raised during job state broadcast: %s", err)
+
+    def _make_progress_callback(self, job: ExportJob) -> Callable[[str, float], None]:
+        """Build a callback the exporter can invoke during execution."""
+
+        def on_progress(step: str, percent: float) -> None:
+            job.current_step = step
+            job.progress_percent = percent
+            self._broadcast_all_jobs()
+
+        return on_progress
+
+    def _schedule_job_cleanup(self, job_id: str) -> None:
+        """Drop a completed job from ``self.jobs`` after a short delay."""
+
+        def cleanup() -> None:
+            with self.lock:
+                self.jobs.pop(job_id, None)
+
+        timer = threading.Timer(COMPLETED_JOB_CLEANUP_DELAY, cleanup)
+        timer.daemon = True
+        timer.start()
 
     def ensure_started(self) -> None:
         """Ensure worker threads are started exactly once."""
@@ -150,6 +261,8 @@ class ExportJobManager:
 
         with self.lock:
             self.jobs[job.id] = job
+
+        self._broadcast_all_jobs(force=True)
 
         return job.id
 
@@ -215,6 +328,7 @@ class ExportJobManager:
         """Execute a queued export job."""
         job.status = JobStatusTypesEnum.running
         job.start_time = time.time()
+        self._broadcast_all_jobs(force=True)
 
         exporter = RecordingExporter(
             self.config,
@@ -229,6 +343,7 @@ class ExportJobManager:
             job.ffmpeg_input_args,
             job.ffmpeg_output_args,
             job.cpu_fallback,
+            on_progress=self._make_progress_callback(job),
         )
 
         try:
@@ -257,6 +372,8 @@ class ExportJobManager:
             job.error_message = str(err)
         finally:
             job.end_time = time.time()
+            self._broadcast_all_jobs(force=True)
+            self._schedule_job_cleanup(job.id)
 
 
 _job_manager: Optional[ExportJobManager] = None

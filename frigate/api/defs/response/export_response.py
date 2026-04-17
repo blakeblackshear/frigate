@@ -107,6 +107,14 @@ class ExportJobModel(BaseModel):
         default=None,
         description="Result metadata for completed jobs",
     )
+    current_step: str = Field(
+        default="queued",
+        description="Current execution step (queued, preparing, encoding, encoding_retry, finalizing)",
+    )
+    progress_percent: float = Field(
+        default=0.0,
+        description="Progress percentage of the current step (0.0 - 100.0)",
+    )
 
 
 ExportJobsResponse = List[ExportJobModel]
