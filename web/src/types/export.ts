@@ -59,6 +59,14 @@ export type StartExportResponse = {
   status?: string | null;
 };
 
+export type ExportJobStep =
+  | "queued"
+  | "preparing"
+  | "copying"
+  | "encoding"
+  | "encoding_retry"
+  | "finalizing";
+
 export type ExportJob = {
   id: string;
   job_type: string;
@@ -77,6 +85,8 @@ export type ExportJob = {
     video_path?: string;
     thumb_path?: string;
   } | null;
+  current_step?: ExportJobStep;
+  progress_percent?: number;
 };
 
 export type CameraActivitySegment = {

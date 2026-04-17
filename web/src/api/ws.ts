@@ -811,10 +811,10 @@ export function useTriggers(): { payload: TriggerStatus } {
   return { payload: parsed };
 }
 
-export function useJobStatus(
+export function useJobStatus<TResults = unknown>(
   jobType: string,
   revalidateOnFocus: boolean = true,
-): { payload: Job | null } {
+): { payload: Job<TResults> | null } {
   const {
     value: { payload },
     send: sendCommand,
@@ -846,7 +846,7 @@ export function useJobStatus(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revalidateOnFocus]);
 
-  return { payload: currentJob as Job | null };
+  return { payload: currentJob as Job<TResults> | null };
 }
 
 export function useWsMessageSubscribe(callback: (msg: WsFeedMessage) => void) {
