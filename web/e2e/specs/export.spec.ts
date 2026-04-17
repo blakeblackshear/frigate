@@ -732,3 +732,200 @@ test.describe("Multi-Review Export @high", () => {
     });
   });
 });
+
+test.describe("Export Page - Active Job Progress @medium", () => {
+  test("encoding job renders percent label and progress bar", async ({
+    frigateApp,
+  }) => {
+    // Override the default empty mock with an encoding job. Per-test
+    // page.route registrations win over those set by the api-mocker.
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-encoding",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Encoding Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding",
+            progress_percent: 42,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Encoding Sample")).toBeVisible();
+    // Step label and percent are rendered together as text near the
+    // progress bar (separated by a middle dot), not in a corner badge.
+    await expect(frigateApp.page.getByText(/Encoding\s*·\s*42%/)).toBeVisible();
+  });
+
+  test("queued job shows queued badge", async ({ frigateApp }) => {
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-queued",
+            job_type: "export",
+            status: "queued",
+            camera: "front_door",
+            name: "Queued Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: null,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "queued",
+            progress_percent: 0,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Queued Sample")).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Queued", { exact: true }),
+    ).toBeVisible();
+  });
+
+  test("active job hides matching in_progress export row", async ({
+    frigateApp,
+  }) => {
+    // The backend inserts the Export row with in_progress=True before
+    // FFmpeg starts encoding, so the same id appears in BOTH /jobs/export
+    // and /exports during the run. The page must show the rich progress
+    // card from the active jobs feed and suppress the binary-spinner
+    // ExportCard from the exports feed; otherwise the older binary
+    // spinner replaces the percent label as soon as SWR re-polls.
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "shared-id",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Shared Id Encoding",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding",
+            progress_percent: 67,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.page.route("**/api/exports**", (route) => {
+      if (route.request().method() !== "GET") {
+        return route.fallback();
+      }
+      return route.fulfill({
+        json: [
+          {
+            id: "shared-id",
+            camera: "front_door",
+            name: "Shared Id Encoding",
+            date: 1775407931,
+            video_path: "/exports/shared-id.mp4",
+            thumb_path: "/exports/shared-id-thumb.jpg",
+            in_progress: true,
+            export_case_id: null,
+          },
+        ],
+      });
+    });
+
+    await frigateApp.goto("/export");
+
+    // The progress label must be present — proving the rich card won.
+    await expect(frigateApp.page.getByText(/Encoding\s*·\s*67%/)).toBeVisible();
+
+    // And only ONE card should be visible for that id, not two.
+    const titles = frigateApp.page.getByText("Shared Id Encoding");
+    await expect(titles).toHaveCount(1);
+  });
+
+  test("stream copy job shows copying label", async ({ frigateApp }) => {
+    // Default (non-custom) exports use `-c copy`, which is a remux, not
+    // a real encode. The step label should read "Copying" so users
+    // aren't misled into thinking re-encoding is happening.
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-copying",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Copy Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "copying",
+            progress_percent: 80,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Copy Sample")).toBeVisible();
+    await expect(frigateApp.page.getByText(/Copying\s*·\s*80%/)).toBeVisible();
+  });
+
+  test("encoding retry job shows retry label", async ({ frigateApp }) => {
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-retry",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Retry Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding_retry",
+            progress_percent: 12,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Retry Sample")).toBeVisible();
+    await expect(
+      frigateApp.page.getByText(/Encoding \(retry\)\s*·\s*12%/),
+    ).toBeVisible();
+  });
+});
