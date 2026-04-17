@@ -1,3 +1,4 @@
+import datetime
 import sys
 import unittest
 from unittest.mock import MagicMock, patch
@@ -73,6 +74,46 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                             len(matching),
                             f"Expected a single warning for unexpected files, got {len(matching)}",
                         )
+
+    async def test_drops_quiet_segment_when_only_motion_retention(self):
+        # Regression: when motion retention is enabled but a segment has no
+        # motion and no review overlaps it, the segment must still be dropped.
+        # Otherwise it sits in cache forever, accumulates, and triggers the
+        # "Unable to keep up with recording segments in cache" warning every
+        # ~10s as the overflow trim in move_files discards the oldest one.
+        config = MagicMock(spec=FrigateConfig)
+
+        camera_config = MagicMock()
+        camera_config.record.enabled = True
+        camera_config.record.continuous.days = 0
+        camera_config.record.motion.days = 1
+        camera_config.record.event_pre_capture = 5
+        config.cameras = {"test_cam": camera_config}
+
+        stop_event = MagicMock()
+        maintainer = RecordingMaintainer(config, stop_event)
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        start_time = now - datetime.timedelta(seconds=20)
+        end_time = now - datetime.timedelta(seconds=10)
+        cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
+
+        maintainer.end_time_cache = {cache_path: (end_time, 10.0)}
+        # Single processed frame well past end_time with no motion/objects.
+        maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
+        maintainer.audio_recordings_info["test_cam"] = []
+
+        maintainer.drop_segment = MagicMock()
+        maintainer.recordings_publisher = MagicMock()
+
+        result = await maintainer.validate_and_move_segment(
+            "test_cam",
+            reviews=[],
+            recording={"start_time": start_time, "cache_path": cache_path},
+        )
+
+        self.assertIsNone(result)
+        maintainer.drop_segment.assert_called_once_with(cache_path)
 
 
 if __name__ == "__main__":
