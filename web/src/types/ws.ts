@@ -146,11 +146,11 @@ export type MediaSyncResults = {
   totals: MediaSyncTotals;
 };
 
-export type Job = {
+export type Job<TResults = unknown> = {
   id: string;
   job_type: string;
   status: string;
-  results?: MediaSyncResults;
+  results?: TResults;
   start_time?: number;
   end_time?: number;
   error_message?: string;

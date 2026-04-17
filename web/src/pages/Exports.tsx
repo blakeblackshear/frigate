@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import { useJobStatus } from "@/api/ws";
 import {
   ActiveExportJobCard,
   CaseCard,
@@ -87,23 +88,45 @@ function Exports() {
   // Data
 
   const { data: cases, mutate: updateCases } = useSWR<ExportCase[]>("cases");
-  const { data: activeExportJobs } = useSWR<ExportJob[]>("jobs/export", {
-    refreshInterval: (latestJobs) => ((latestJobs ?? []).length > 0 ? 2000 : 0),
-  });
-  // Keep polling exports while there are queued/running jobs OR while any
-  // existing export is still marked in_progress. Without the second clause,
-  // a stale in_progress=true snapshot can stick if the activeExportJobs poll
-  // clears before the rawExports poll fires — SWR cancels the pending
-  // rawExports refresh and the UI freezes on spinners until a manual reload.
+
+  // The HTTP fetch hydrates the page on first paint and on focus. Once the
+  // WebSocket is connected, the `job_state` topic delivers progress updates
+  // in real time, so periodic polling here would only add noise.
+  const { data: pollExportJobs, mutate: updateActiveJobs } = useSWR<
+    ExportJob[]
+  >("jobs/export", { refreshInterval: 0 });
+
+  const { payload: exportJobState } = useJobStatus<{ jobs: ExportJob[] }>(
+    "export",
+  );
+  const wsExportJobs = useMemo<ExportJob[]>(
+    () => exportJobState?.results?.jobs ?? [],
+    [exportJobState],
+  );
+
+  // Merge: a job present in the WS payload is authoritative (it has the
+  // freshest progress); the SWR snapshot fills in jobs that haven't yet
+  // arrived over the socket (e.g. before the first WS message after a
+  // page load). Once we've seen at least one WS message, we trust the WS
+  // payload as the complete active set.
+  const hasWsState = exportJobState !== null;
+  const activeExportJobs = useMemo<ExportJob[]>(() => {
+    if (hasWsState) {
+      return wsExportJobs;
+    }
+    return pollExportJobs ?? [];
+  }, [hasWsState, wsExportJobs, pollExportJobs]);
+
+  // Keep polling exports while any existing export is still marked
+  // in_progress so the UI flips from spinner to playable card without a
+  // manual reload. Once active jobs disappear from the WS feed we also
+  // mutate() below to fetch newly-completed exports immediately.
   const { data: rawExports, mutate: updateExports } = useSWR<Export[]>(
     exportSearchParams && Object.keys(exportSearchParams).length > 0
       ? ["exports", exportSearchParams]
       : "exports",
     {
       refreshInterval: (latestExports) => {
-        if ((activeExportJobs?.length ?? 0) > 0) {
-          return 2000;
-        }
         if ((latestExports ?? []).some((exp) => exp.in_progress)) {
           return 2000;
         }
@@ -112,22 +135,40 @@ function Exports() {
     },
   );
 
+  // When one or more active jobs disappear from the WS feed, refresh the
+  // exports list so newly-finished items appear without waiting for focus-
+  // based SWR revalidation. Clear the HTTP jobs snapshot once the live set is
+  // empty so a stale poll result does not resurrect completed jobs.
+  const previousActiveJobIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const previousIds = previousActiveJobIdsRef.current;
+    const currentIds = new Set(activeExportJobs.map((job) => job.id));
+    const removedJob = Array.from(previousIds).some(
+      (id) => !currentIds.has(id),
+    );
+
+    if (removedJob) {
+      updateExports();
+      updateCases();
+    }
+
+    if (previousIds.size > 0 && currentIds.size === 0) {
+      updateActiveJobs([], false);
+    }
+    previousActiveJobIdsRef.current = currentIds;
+  }, [activeExportJobs, updateExports, updateCases, updateActiveJobs]);
+
   const visibleActiveJobs = useMemo<ExportJob[]>(() => {
-    const existingExportIds = new Set((rawExports ?? []).map((exp) => exp.id));
     const filteredCameras = exportFilter?.cameras;
 
     return (activeExportJobs ?? []).filter((job) => {
-      if (existingExportIds.has(job.id)) {
-        return false;
-      }
-
       if (filteredCameras && filteredCameras.length > 0) {
         return filteredCameras.includes(job.camera);
       }
 
       return true;
     });
-  }, [activeExportJobs, exportFilter?.cameras, rawExports]);
+  }, [activeExportJobs, exportFilter?.cameras]);
 
   const activeJobsByCase = useMemo<{ [caseId: string]: ExportJob[] }>(() => {
     const grouped: { [caseId: string]: ExportJob[] } = {};
@@ -144,9 +185,26 @@ function Exports() {
     return grouped;
   }, [visibleActiveJobs]);
 
+  // The backend inserts the Export row with in_progress=True before the
+  // FFmpeg encode kicks off, so the same id is briefly present in BOTH
+  // rawExports and the active job list. The ActiveExportJobCard renders
+  // step + percent; the ExportCard would render a binary spinner. To
+  // avoid that downgrade, hide the rawExport entry while there's a
+  // matching active job — once the job leaves the active list the
+  // exports SWR refresh kicks in and the regular card takes over.
+  const activeJobIds = useMemo<Set<string>>(
+    () => new Set(visibleActiveJobs.map((job) => job.id)),
+    [visibleActiveJobs],
+  );
+
+  const visibleExports = useMemo<Export[]>(
+    () => (rawExports ?? []).filter((exp) => !activeJobIds.has(exp.id)),
+    [activeJobIds, rawExports],
+  );
+
   const exportsByCase = useMemo<{ [caseId: string]: Export[] }>(() => {
     const grouped: { [caseId: string]: Export[] } = {};
-    (rawExports ?? []).forEach((exp) => {
+    visibleExports.forEach((exp) => {
       const caseId = exp.export_case ?? exp.export_case_id ?? "none";
       if (!grouped[caseId]) {
         grouped[caseId] = [];
@@ -155,7 +213,7 @@ function Exports() {
       grouped[caseId].push(exp);
     });
     return grouped;
-  }, [rawExports]);
+  }, [visibleExports]);
 
   const filteredCases = useMemo<ExportCase[]>(() => {
     if (!cases) return [];
@@ -184,6 +242,34 @@ function Exports() {
     updateCases();
   }, [updateExports, updateCases]);
 
+  // Deletes one or more exports and keeps the UI in sync. SWR's default
+  // mutate() keeps the stale list visible until the revalidation GET
+  // returns, which can be seconds for large batches — long enough for
+  // users to click on a card whose underlying file is already gone.
+  // Strip the deleted ids from the cache up front, then fire the POST,
+  // then revalidate to reconcile with server truth.
+  const deleteExports = useCallback(
+    async (ids: string[]): Promise<void> => {
+      const idSet = new Set(ids);
+      const removeDeleted = (current: Export[] | undefined) =>
+        current ? current.filter((exp) => !idSet.has(exp.id)) : current;
+
+      await updateExports(removeDeleted, { revalidate: false });
+
+      try {
+        await axios.post("exports/delete", { ids });
+        await updateExports();
+        await updateCases();
+      } catch (err) {
+        // On failure, pull fresh state from the server so any items that
+        // weren't actually deleted reappear in the UI.
+        await updateExports();
+        throw err;
+      }
+    },
+    [updateExports, updateCases],
+  );
+
   // Search
 
   const [search, setSearch] = useState("");
@@ -208,7 +294,9 @@ function Exports() {
       return false;
     }
 
-    setSelected(rawExports.find((exp) => exp.id == id));
+    // Use visibleExports so deep links to a still-encoding id don't try
+    // to open a player against a half-written video file.
+    setSelected(visibleExports.find((exp) => exp.id == id));
     return true;
   });
 
@@ -260,7 +348,7 @@ function Exports() {
     const currentExports = selectedCaseId
       ? exportsByCase[selectedCaseId] || []
       : exports;
-    const visibleExports = currentExports.filter((e) => {
+    const selectable = currentExports.filter((e) => {
       if (e.in_progress) return false;
       if (!search) return true;
       return e.name
@@ -268,8 +356,8 @@ function Exports() {
         .replaceAll("_", " ")
         .includes(search.toLowerCase());
     });
-    if (selectedExports.length < visibleExports.length) {
-      setSelectedExports(visibleExports);
+    if (selectedExports.length < selectable.length) {
+      setSelectedExports(selectable);
     } else {
       setSelectedExports([]);
     }
@@ -293,15 +381,19 @@ function Exports() {
       return;
     }
 
-    axios
-      .post("exports/delete", { ids: [deleteClip.file] })
-      .then((response) => {
-        if (response.status == 200) {
-          setDeleteClip(undefined);
-          mutate();
-        }
+    deleteExports([deleteClip.file])
+      .then(() => setDeleteClip(undefined))
+      .catch((error) => {
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("bulkToast.error.deleteFailed", { errorMessage: errorMessage }),
+          { position: "top-center" },
+        );
       });
-  }, [deleteClip, mutate]);
+  }, [deleteClip, deleteExports, t]);
 
   const onHandleRename = useCallback(
     (id: string, update: string) => {
@@ -629,6 +721,7 @@ function Exports() {
             cases={cases}
             currentCaseId={selectedCaseId}
             mutate={mutate}
+            deleteExports={deleteExports}
           />
         ) : (
           <>
@@ -893,7 +986,7 @@ function AllExportsView({
                 ))}
                 {filteredExports.map((item) => (
                   <ExportCard
-                    key={item.name}
+                    key={item.id}
                     className=""
                     exportedRecording={item}
                     isSelected={selectedExports.some((e) => e.id === item.id)}

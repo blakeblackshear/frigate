@@ -30,6 +30,7 @@ type ExportActionGroupProps = {
   cases?: ExportCase[];
   currentCaseId?: string;
   mutate: () => void;
+  deleteExports: (ids: string[]) => Promise<void>;
 };
 export default function ExportActionGroup({
   selectedExports,
@@ -38,6 +39,7 @@ export default function ExportActionGroup({
   cases,
   currentCaseId,
   mutate,
+  deleteExports,
 }: ExportActionGroupProps) {
   const { t } = useTranslation(["views/exports", "common"]);
   const isAdmin = useIsAdmin();
@@ -50,27 +52,24 @@ export default function ExportActionGroup({
 
   const onDelete = useCallback(() => {
     const ids = selectedExports.map((e) => e.id);
-    axios
-      .post("exports/delete", { ids })
-      .then((resp) => {
-        if (resp.status === 200) {
-          toast.success(t("bulkToast.success.delete"), {
-            position: "top-center",
-          });
-          setSelectedExports([]);
-          mutate();
-        }
+    deleteExports(ids)
+      .then(() => {
+        toast.success(t("bulkToast.success.delete"), {
+          position: "top-center",
+        });
+        setSelectedExports([]);
       })
       .catch((error) => {
         const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
+          error?.response?.data?.message ||
+          error?.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("bulkToast.error.deleteFailed", { errorMessage }), {
-          position: "top-center",
-        });
+        toast.error(
+          t("bulkToast.error.deleteFailed", { errorMessage: errorMessage }),
+          { position: "top-center" },
+        );
       });
-  }, [selectedExports, setSelectedExports, mutate, t]);
+  }, [selectedExports, setSelectedExports, deleteExports, t]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bypassDialog, setBypassDialog] = useState(false);
@@ -92,36 +91,54 @@ export default function ExportActionGroup({
 
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [deleteExportsOnRemove, setDeleteExportsOnRemove] = useState(false);
+  const [isRemovingFromCase, setIsRemovingFromCase] = useState(false);
 
   const handleRemoveFromCase = useCallback(() => {
     const ids = selectedExports.map((e) => e.id);
+    const deleting = deleteExportsOnRemove;
+    setIsRemovingFromCase(true);
 
-    const request = deleteExportsOnRemove
-      ? axios.post("exports/delete", { ids })
-      : axios.post("exports/reassign", { ids, export_case_id: null });
+    const request = deleting
+      ? deleteExports(ids)
+      : axios
+          .post("exports/reassign", { ids, export_case_id: null })
+          .then(() => {
+            mutate();
+          });
 
     request
-      .then((resp) => {
-        if (resp.status === 200) {
-          toast.success(t("bulkToast.success.remove"), {
-            position: "top-center",
-          });
-          setSelectedExports([]);
-          mutate();
-          setRemoveDialogOpen(false);
-          setDeleteExportsOnRemove(false);
-        }
+      .then(() => {
+        const successKey = deleting
+          ? "bulkToast.success.delete"
+          : "bulkToast.success.remove";
+        toast.success(t(successKey), { position: "top-center" });
+        setSelectedExports([]);
+        setRemoveDialogOpen(false);
+        setDeleteExportsOnRemove(false);
       })
       .catch((error) => {
         const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
+          error?.response?.data?.message ||
+          error?.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("bulkToast.error.reassignFailed", { errorMessage }), {
+        const errorKey = deleting
+          ? "bulkToast.error.deleteFailed"
+          : "bulkToast.error.reassignFailed";
+        toast.error(t(errorKey, { errorMessage: errorMessage }), {
           position: "top-center",
         });
+      })
+      .finally(() => {
+        setIsRemovingFromCase(false);
       });
-  }, [selectedExports, deleteExportsOnRemove, setSelectedExports, mutate, t]);
+  }, [
+    selectedExports,
+    deleteExportsOnRemove,
+    setSelectedExports,
+    mutate,
+    deleteExports,
+    t,
+  ]);
 
   // ── Case picker ─────────────────────────────────────────────────
 
@@ -243,6 +260,7 @@ export default function ExportActionGroup({
         <AlertDialog
           open={removeDialogOpen}
           onOpenChange={(open) => {
+            if (isRemovingFromCase) return;
             if (!open) {
               setRemoveDialogOpen(false);
               setDeleteExportsOnRemove(false);
@@ -274,15 +292,17 @@ export default function ExportActionGroup({
                 id="bulk-delete-exports-switch"
                 checked={deleteExportsOnRemove}
                 onCheckedChange={setDeleteExportsOnRemove}
+                disabled={isRemovingFromCase}
               />
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>
+              <AlertDialogCancel disabled={isRemovingFromCase}>
                 {t("button.cancel", { ns: "common" })}
               </AlertDialogCancel>
               <AlertDialogAction
                 className={buttonVariants({ variant: "destructive" })}
                 onClick={handleRemoveFromCase}
+                disabled={isRemovingFromCase}
               >
                 {t("button.delete", { ns: "common" })}
               </AlertDialogAction>

@@ -4,13 +4,14 @@ import datetime
 import logging
 import os
 import random
+import re
 import shutil
 import string
 import subprocess as sp
 import threading
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 from peewee import DoesNotExist
 
@@ -35,6 +36,10 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
+
+# Matches the setpts factor used in timelapse exports (e.g. setpts=0.04*PTS).
+# Captures the floating-point factor so we can scale expected duration.
+SETPTS_FACTOR_RE = re.compile(r"setpts=([0-9]*\.?[0-9]+)\*PTS")
 
 # ffmpeg flags that can read from or write to arbitrary files
 BLOCKED_FFMPEG_ARGS = frozenset(
@@ -116,6 +121,7 @@ class RecordingExporter(threading.Thread):
         ffmpeg_input_args: Optional[str] = None,
         ffmpeg_output_args: Optional[str] = None,
         cpu_fallback: bool = False,
+        on_progress: Optional[Callable[[str, float], None]] = None,
     ) -> None:
         super().__init__()
         self.config = config
@@ -130,9 +136,212 @@ class RecordingExporter(threading.Thread):
         self.ffmpeg_input_args = ffmpeg_input_args
         self.ffmpeg_output_args = ffmpeg_output_args
         self.cpu_fallback = cpu_fallback
+        self.on_progress = on_progress
 
         # ensure export thumb dir
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
+
+    def _emit_progress(self, step: str, percent: float) -> None:
+        """Invoke the progress callback if one was supplied."""
+        if self.on_progress is None:
+            return
+        try:
+            self.on_progress(step, max(0.0, min(100.0, percent)))
+        except Exception:
+            logger.exception("Export progress callback failed")
+
+    def _expected_output_duration_seconds(self) -> float:
+        """Compute the expected duration of the output video in seconds.
+
+        Users often request a wide time range (e.g. a full hour) when only
+        a few minutes of recordings actually live on disk for that span,
+        so the requested range overstates the work and progress would
+        plateau very early. We sum the actual saved seconds from the
+        Recordings/Previews tables and use that as the input duration.
+        Timelapse exports then scale this by the setpts factor.
+        """
+        requested_duration = max(0.0, float(self.end_time - self.start_time))
+
+        recorded = self._sum_source_duration_seconds()
+        input_duration = (
+            recorded if recorded is not None and recorded > 0 else requested_duration
+        )
+
+        if not self.ffmpeg_output_args:
+            return input_duration
+
+        match = SETPTS_FACTOR_RE.search(self.ffmpeg_output_args)
+        if match is None:
+            return input_duration
+
+        try:
+            factor = float(match.group(1))
+        except ValueError:
+            return input_duration
+
+        if factor <= 0:
+            return input_duration
+
+        return input_duration * factor
+
+    def _sum_source_duration_seconds(self) -> Optional[float]:
+        """Sum saved-video seconds inside [start_time, end_time].
+
+        Queries Recordings or Previews depending on the playback source,
+        clamps each segment to the requested range, and returns the total.
+        Returns ``None`` on any error so the caller can fall back to the
+        requested range duration without losing progress reporting.
+        """
+        try:
+            if self.playback_source == PlaybackSourceEnum.recordings:
+                rows = (
+                    Recordings.select(Recordings.start_time, Recordings.end_time)
+                    .where(
+                        Recordings.start_time.between(self.start_time, self.end_time)
+                        | Recordings.end_time.between(self.start_time, self.end_time)
+                        | (
+                            (self.start_time > Recordings.start_time)
+                            & (self.end_time < Recordings.end_time)
+                        )
+                    )
+                    .where(Recordings.camera == self.camera)
+                    .iterator()
+                )
+            else:
+                rows = (
+                    Previews.select(Previews.start_time, Previews.end_time)
+                    .where(
+                        Previews.start_time.between(self.start_time, self.end_time)
+                        | Previews.end_time.between(self.start_time, self.end_time)
+                        | (
+                            (self.start_time > Previews.start_time)
+                            & (self.end_time < Previews.end_time)
+                        )
+                    )
+                    .where(Previews.camera == self.camera)
+                    .iterator()
+                )
+        except Exception:
+            logger.exception(
+                "Failed to sum source duration for export %s", self.export_id
+            )
+            return None
+
+        total = 0.0
+        try:
+            for row in rows:
+                clipped_start = max(float(row.start_time), float(self.start_time))
+                clipped_end = min(float(row.end_time), float(self.end_time))
+                if clipped_end > clipped_start:
+                    total += clipped_end - clipped_start
+        except Exception:
+            logger.exception(
+                "Failed to read recording rows for export %s", self.export_id
+            )
+            return None
+
+        return total
+
+    def _inject_progress_flags(self, ffmpeg_cmd: list[str]) -> list[str]:
+        """Insert FFmpeg progress reporting flags before the output path.
+
+        ``-progress pipe:2`` writes structured key=value lines to stderr,
+        ``-nostats`` suppresses the noisy default stats output.
+        """
+        if not ffmpeg_cmd:
+            return ffmpeg_cmd
+        return ffmpeg_cmd[:-1] + ["-progress", "pipe:2", "-nostats", ffmpeg_cmd[-1]]
+
+    def _run_ffmpeg_with_progress(
+        self,
+        ffmpeg_cmd: list[str],
+        playlist_lines: str | list[str],
+        step: str = "encoding",
+    ) -> tuple[int, str]:
+        """Run an FFmpeg export command, parsing progress events from stderr.
+
+        Returns ``(returncode, captured_stderr)``. Stdout is left attached to
+        the parent process so we don't have to drain it (and risk a deadlock
+        if the buffer fills). Progress percent is computed against the
+        expected output duration; values are clamped to [0, 100] inside
+        :py:meth:`_emit_progress`.
+        """
+        cmd = ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + self._inject_progress_flags(
+            ffmpeg_cmd
+        )
+
+        if isinstance(playlist_lines, list):
+            stdin_payload = "\n".join(playlist_lines)
+        else:
+            stdin_payload = playlist_lines
+
+        expected_duration = self._expected_output_duration_seconds()
+
+        self._emit_progress(step, 0.0)
+
+        proc = sp.Popen(
+            cmd,
+            stdin=sp.PIPE,
+            stderr=sp.PIPE,
+            text=True,
+            encoding="ascii",
+            errors="replace",
+        )
+
+        assert proc.stdin is not None
+        assert proc.stderr is not None
+
+        try:
+            proc.stdin.write(stdin_payload)
+        except (BrokenPipeError, OSError):
+            # FFmpeg may have rejected the input early; still wait for it
+            # to terminate so the returncode is meaningful.
+            pass
+        finally:
+            try:
+                proc.stdin.close()
+            except (BrokenPipeError, OSError):
+                pass
+
+        captured: list[str] = []
+
+        try:
+            for raw_line in proc.stderr:
+                captured.append(raw_line)
+                line = raw_line.strip()
+
+                if not line:
+                    continue
+
+                if line.startswith("out_time_us="):
+                    if expected_duration <= 0:
+                        continue
+                    try:
+                        out_time_us = int(line.split("=", 1)[1])
+                    except (ValueError, IndexError):
+                        continue
+                    if out_time_us < 0:
+                        continue
+                    out_seconds = out_time_us / 1_000_000.0
+                    percent = (out_seconds / expected_duration) * 100.0
+                    self._emit_progress(step, percent)
+                elif line == "progress=end":
+                    self._emit_progress(step, 100.0)
+                    break
+        except Exception:
+            logger.exception("Failed reading FFmpeg progress for %s", self.export_id)
+
+        proc.wait()
+
+        # Drain any remaining stderr so callers can log it on failure.
+        try:
+            remaining = proc.stderr.read()
+            if remaining:
+                captured.append(remaining)
+        except Exception:
+            pass
+
+        return proc.returncode, "".join(captured)
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         # return in iso format
@@ -406,6 +615,7 @@ class RecordingExporter(threading.Thread):
         logger.debug(
             f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
         )
+        self._emit_progress("preparing", 0.0)
         export_name = (
             self.user_provided_name
             or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
@@ -443,16 +653,23 @@ class RecordingExporter(threading.Thread):
         except DoesNotExist:
             return
 
-        p = sp.run(
-            ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + ffmpeg_cmd,
-            input="\n".join(playlist_lines),
-            encoding="ascii",
-            capture_output=True,
+        # When neither custom ffmpeg arg is set the default path uses
+        # `-c copy` (stream copy — no re-encoding). Report that as a
+        # distinct step so the UI doesn't mislabel a remux as encoding.
+        # The retry branch below always re-encodes because cpu_fallback
+        # requires custom args; it stays "encoding_retry".
+        is_stream_copy = (
+            self.ffmpeg_input_args is None and self.ffmpeg_output_args is None
+        )
+        initial_step = "copying" if is_stream_copy else "encoding"
+
+        returncode, stderr = self._run_ffmpeg_with_progress(
+            ffmpeg_cmd, playlist_lines, step=initial_step
         )
 
         # If export failed and cpu_fallback is enabled, retry without hwaccel
         if (
-            p.returncode != 0
+            returncode != 0
             and self.cpu_fallback
             and self.ffmpeg_input_args is not None
             and self.ffmpeg_output_args is not None
@@ -470,23 +687,21 @@ class RecordingExporter(threading.Thread):
                     video_path, use_hwaccel=False
                 )
 
-            p = sp.run(
-                ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + ffmpeg_cmd,
-                input="\n".join(playlist_lines),
-                encoding="ascii",
-                capture_output=True,
+            returncode, stderr = self._run_ffmpeg_with_progress(
+                ffmpeg_cmd, playlist_lines, step="encoding_retry"
             )
 
-        if p.returncode != 0:
+        if returncode != 0:
             logger.error(
                 f"Failed to export {self.playback_source.value} for command {' '.join(ffmpeg_cmd)}"
             )
-            logger.error(p.stderr)
+            logger.error(stderr)
             Path(video_path).unlink(missing_ok=True)
             Export.delete().where(Export.id == self.export_id).execute()
             Path(thumb_path).unlink(missing_ok=True)
             return
         else:
+            self._emit_progress("finalizing", 100.0)
             Export.update({Export.in_progress: False}).where(
                 Export.id == self.export_id
             ).execute()

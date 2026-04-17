@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import unittest
+from unittest.mock import patch
 
 from fastapi import Request
 from fastapi.testclient import TestClient
@@ -14,6 +15,7 @@ from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
 from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.debug_replay import DebugReplayManager
+from frigate.jobs.export import JobStatePublisher
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
@@ -43,6 +45,19 @@ class BaseTestHttp(unittest.TestCase):
         migrate_db.close()
         self.db = SqliteQueueDatabase(TEST_DB)
         self.db.bind(models)
+
+        # The export job manager broadcasts via JobStatePublisher on
+        # enqueue/start/finish. There is no dispatcher process bound to
+        # the IPC socket in tests, so a real publish() would block on
+        # recv_json forever. Replace publish with a no-op for the
+        # lifetime of this test; the lookup goes through the class so any
+        # already-instantiated publisher (the singleton manager's) picks
+        # up the no-op too.
+        publisher_patch = patch.object(
+            JobStatePublisher, "publish", lambda self, payload: None
+        )
+        publisher_patch.start()
+        self.addCleanup(publisher_patch.stop)
 
         self.minimal_config = {
             "mqtt": {"host": "mqtt"},

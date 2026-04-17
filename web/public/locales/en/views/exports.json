@@ -58,7 +58,12 @@
   "jobCard": {
     "defaultName": "{{camera}} export",
     "queued": "Queued",
-    "running": "Running"
+    "running": "Running",
+    "preparing": "Preparing",
+    "copying": "Copying",
+    "encoding": "Encoding",
+    "encodingRetry": "Encoding (retry)",
+    "finalizing": "Finalizing"
   },
   "caseView": {
     "noDescription": "No description",

@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { LuCheck, LuX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { MediaSyncStats } from "@/types/ws";
+import { MediaSyncResults, MediaSyncStats } from "@/types/ws";
 
 export default function MediaSyncSettingsView() {
   const { t } = useTranslation("views/settings");
@@ -35,7 +35,8 @@ export default function MediaSyncSettingsView() {
   ];
 
   // Subscribe to media sync status via WebSocket
-  const { payload: currentJob } = useJobStatus("media_sync");
+  const { payload: currentJob } = useJobStatus<MediaSyncResults>("media_sync");
+  const mediaSyncResults = currentJob?.results;
 
   const isJobRunning = Boolean(
     currentJob &&
@@ -301,7 +302,7 @@ export default function MediaSyncSettingsView() {
                       </span>
                     </div>
                   )}
-                  {currentJob?.results && (
+                  {mediaSyncResults && (
                     <div className="mt-2 space-y-2 md:mr-2">
                       <p className="text-sm font-medium text-muted-foreground">
                         {t("maintenance.sync.results")}
@@ -309,7 +310,7 @@ export default function MediaSyncSettingsView() {
                       <div className="rounded-md border border-secondary">
                         {/* Individual media type results */}
                         <div className="divide-y divide-secondary">
-                          {Object.entries(currentJob.results)
+                          {Object.entries(mediaSyncResults)
                             .filter(([key]) => key !== "totals")
                             .map(([mediaType, stats]) => {
                               const mediaStats = stats as MediaSyncStats;
@@ -386,7 +387,7 @@ export default function MediaSyncSettingsView() {
                             })}
                         </div>
                         {/* Totals */}
-                        {currentJob.results.totals && (
+                        {mediaSyncResults.totals && (
                           <div className="border-t border-secondary bg-background_alt p-3">
                             <p className="mb-1 font-medium">
                               {t("maintenance.sync.resultsFields.totals")}
@@ -399,7 +400,7 @@ export default function MediaSyncSettingsView() {
                                   )}
                                 </span>
                                 <span className="font-medium">
-                                  {currentJob.results.totals.files_checked}
+                                  {mediaSyncResults.totals.files_checked}
                                 </span>
                               </div>
                               <div className="flex justify-between">
@@ -410,12 +411,12 @@ export default function MediaSyncSettingsView() {
                                 </span>
                                 <span
                                   className={
-                                    currentJob.results.totals.orphans_found > 0
+                                    mediaSyncResults.totals.orphans_found > 0
                                       ? "font-medium text-yellow-500"
                                       : "font-medium"
                                   }
                                 >
-                                  {currentJob.results.totals.orphans_found}
+                                  {mediaSyncResults.totals.orphans_found}
                                 </span>
                               </div>
                               <div className="flex justify-between">
@@ -427,13 +428,12 @@ export default function MediaSyncSettingsView() {
                                 <span
                                   className={cn(
                                     "text-medium",
-                                    currentJob.results.totals.orphans_deleted >
-                                      0
+                                    mediaSyncResults.totals.orphans_deleted > 0
                                       ? "text-success"
                                       : "text-muted-foreground",
                                   )}
                                 >
-                                  {currentJob.results.totals.orphans_deleted}
+                                  {mediaSyncResults.totals.orphans_deleted}
                                 </span>
                               </div>
                             </div>

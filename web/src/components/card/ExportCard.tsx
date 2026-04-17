@@ -1,6 +1,7 @@
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Button } from "../ui/button";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Progress } from "../ui/progress";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { FiMoreVertical } from "react-icons/fi";
 import { Skeleton } from "../ui/skeleton";
@@ -127,6 +128,14 @@ export function ExportCard({
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
+
+  // Resync the skeleton state whenever the backing export changes. The
+  // list keys by id now, so in practice the component remounts instead
+  // of receiving new props — but this keeps the card honest if a parent
+  // ever reuses the instance across different exports.
+  useEffect(() => {
+    setLoading(exportedRecording.thumb_path.length > 0);
+  }, [exportedRecording.thumb_path]);
 
   // selection
 
@@ -392,8 +401,35 @@ export function ActiveExportJobCard({
       camera: cameraName,
     });
   }, [cameraName, job.name, t]);
-  const statusLabel =
-    job.status === "queued" ? t("jobCard.queued") : t("jobCard.running");
+
+  const step = job.current_step
+    ? job.current_step
+    : job.status === "queued"
+      ? "queued"
+      : "preparing";
+  const percent = Math.round(job.progress_percent ?? 0);
+
+  const stepLabel = useMemo(() => {
+    switch (step) {
+      case "queued":
+        return t("jobCard.queued");
+      case "preparing":
+        return t("jobCard.preparing");
+      case "copying":
+        return t("jobCard.copying");
+      case "encoding":
+        return t("jobCard.encoding");
+      case "encoding_retry":
+        return t("jobCard.encodingRetry");
+      case "finalizing":
+        return t("jobCard.finalizing");
+      default:
+        return t("jobCard.running");
+    }
+  }, [step, t]);
+
+  const hasDeterminateProgress =
+    step === "copying" || step === "encoding" || step === "encoding_retry";
 
   return (
     <div
@@ -402,11 +438,20 @@ export function ActiveExportJobCard({
         className,
       )}
     >
-      <div className="absolute right-3 top-3 z-30 rounded-full bg-selected/90 px-2 py-1 text-xs text-selected-foreground">
-        {statusLabel}
-      </div>
-      <div className="flex flex-col items-center gap-3 px-6 text-center">
-        <ActivityIndicator />
+      <div className="flex w-full max-w-xs flex-col items-center gap-2 space-y-2 px-6 text-center">
+        <div className="text-xs text-muted-foreground">
+          {stepLabel}
+          {hasDeterminateProgress && ` · ${percent}%`}
+        </div>
+        {step === "queued" ? (
+          <ActivityIndicator className="size-5" />
+        ) : hasDeterminateProgress ? (
+          <Progress value={percent} className="h-2 w-full" />
+        ) : (
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="absolute inset-y-0 left-0 w-1/2 animate-pulse bg-primary" />
+          </div>
+        )}
         <div className="text-sm font-medium text-primary">{displayName}</div>
       </div>
     </div>
