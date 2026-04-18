@@ -19,7 +19,7 @@ Face recognition requires a one-time internet connection to download detection a
 
 ### Face Detection
 
-When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/index.md#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
+When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
 
 When running a default COCO model or another model that does not include `face` as a detectable label, face detection will run via CV2 using a lightweight DNN model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
 
