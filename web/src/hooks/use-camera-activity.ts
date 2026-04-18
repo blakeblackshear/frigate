@@ -137,9 +137,11 @@ export function useCameraActivity(
           }
         }
 
-        newObjects[updatedEventIndex].label = label;
-        newObjects[updatedEventIndex].stationary =
-          updatedEvent.after.stationary;
+        newObjects[updatedEventIndex] = {
+          ...newObjects[updatedEventIndex],
+          label,
+          stationary: updatedEvent.after.stationary,
+        };
       }
     }
 

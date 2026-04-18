@@ -464,10 +464,12 @@ class RecordingMaintainer(threading.Thread):
                 self.drop_segment(cache_path)
                 return None
 
-        # if it doesn't overlap with an review item, go ahead and drop the segment
-        # if it ends more than the configured pre_capture for the camera
-        # BUT only if continuous/motion is NOT enabled (otherwise wait for processing)
-        elif highest is None:
+        # if it doesn't overlap with a review item, drop the segment once it
+        # ends more than event_pre_capture before the most recently processed
+        # frame. at this point we've already decided not to keep it for
+        # continuous/motion retention (either disabled or segment_stats said
+        # discard), so waiting longer just fills the cache.
+        else:
             camera_info = self.object_recordings_info[camera]
             most_recently_processed_frame_time = (
                 camera_info[-1][0] if len(camera_info) > 0 else 0

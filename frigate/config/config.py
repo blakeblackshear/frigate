@@ -730,6 +730,9 @@ class FrigateConfig(FrigateBaseModel):
                 )
 
                 if need_detect_dimensions:
+                    logger.info(
+                        f"detect.width and detect.height not set for {camera_config.name}, probing detect stream to determine resolution."
+                    )
                     stream_info = {"width": 0, "height": 0, "fourcc": None}
                     try:
                         stream_info = stream_info_retriever.get_stream_info(
