@@ -867,6 +867,7 @@ export function TrackingDetails({
                             getZoneColor={getZoneColor}
                             effectiveTime={effectiveTime}
                             isTimelineActive={isWithinEventRange}
+                            annotationOffset={annotationOffset}
                           />
                         </div>
                       );
@@ -890,6 +891,7 @@ type LifecycleIconRowProps = {
   getZoneColor: (zoneName: string) => number[] | undefined;
   effectiveTime?: number;
   isTimelineActive?: boolean;
+  annotationOffset: number;
 };
 
 function LifecycleIconRow({
@@ -900,6 +902,7 @@ function LifecycleIconRow({
   getZoneColor,
   effectiveTime,
   isTimelineActive,
+  annotationOffset,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -1206,7 +1209,7 @@ function LifecycleIconRow({
                         className="cursor-pointer"
                         onSelect={async () => {
                           const resp = await axios.post(
-                            `/${item.camera}/plus/${item.timestamp}`,
+                            `/${item.camera}/plus/${item.timestamp + annotationOffset / 1000}`,
                           );
 
                           if (resp && resp.status == 200) {
