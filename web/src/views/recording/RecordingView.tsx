@@ -77,6 +77,7 @@ import {
   GenAISummaryDialog,
   GenAISummaryChip,
 } from "@/components/overlay/chip/GenAISummaryChip";
+import { useMobileVideoSplit } from "./useMobileVideoSplit";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
 
@@ -370,6 +371,15 @@ export function RecordingView({
 
   const { fullscreen, toggleFullscreen, supportsFullScreen } =
     useFullscreen(mainLayoutRef);
+  const {
+    cameraSectionStyle,
+    isDraggingMobileSplit,
+    onHandlePointerDown,
+    usePortraitSplitLayout,
+  } = useMobileVideoSplit({
+    fullscreen,
+    mainLayoutRef,
+  });
 
   // layout
 
@@ -765,8 +775,14 @@ export function RecordingView({
               "flex flex-1 flex-wrap overflow-hidden",
               isDesktop
                 ? "min-w-0 px-4"
-                : "portrait:max-h-[50dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
+                : cn(
+                    "portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
+                    usePortraitSplitLayout
+                      ? "portrait:flex-none"
+                      : "portrait:max-h-[50dvh]",
+                  ),
             )}
+            style={cameraSectionStyle}
           >
             <div
               className={cn(
@@ -786,17 +802,21 @@ export function RecordingView({
                       useHeightBased
                       ? "h-full"
                       : "w-full"
-                    : cn(
-                        "flex-shrink-0 portrait:w-full landscape:h-full",
-                        mainCameraAspect == "wide"
-                          ? "aspect-wide"
-                          : mainCameraAspect == "tall"
-                            ? "aspect-tall portrait:h-full"
-                            : "aspect-video",
-                      ),
+                    : usePortraitSplitLayout
+                      ? "size-full"
+                      : cn(
+                          "flex-shrink-0 portrait:w-full landscape:h-full",
+                          mainCameraAspect == "wide"
+                            ? "aspect-wide"
+                            : mainCameraAspect == "tall"
+                              ? "aspect-tall portrait:h-full"
+                              : "aspect-video",
+                        ),
                 )}
                 style={{
-                  aspectRatio: getCameraAspect(mainCamera),
+                  aspectRatio: usePortraitSplitLayout
+                    ? undefined
+                    : getCameraAspect(mainCamera),
                 }}
               >
                 {(isDesktop || isTablet) && (
@@ -810,6 +830,9 @@ export function RecordingView({
 
                 <DynamicVideoPlayer
                   className={grow}
+                  videoClassName={
+                    usePortraitSplitLayout ? "object-contain" : undefined
+                  }
                   camera={mainCamera}
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
@@ -899,6 +922,19 @@ export function RecordingView({
               )}
             </div>
           </div>
+          {usePortraitSplitLayout && (
+            <button
+              type="button"
+              aria-label={t("recordings.resizeSplit")}
+              onPointerDown={onHandlePointerDown}
+              className={cn(
+                "relative z-30 mx-auto h-4 w-full flex-shrink-0 touch-none",
+                isDraggingMobileSplit ? "cursor-grabbing" : "cursor-grab",
+              )}
+            >
+              <span className="absolute inset-x-1/2 top-1/2 h-1 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground/60" />
+            </button>
+          )}
           <Timeline
             contentRef={contentRef}
             mainCamera={mainCamera}

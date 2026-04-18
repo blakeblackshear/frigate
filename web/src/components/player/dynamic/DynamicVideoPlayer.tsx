@@ -32,6 +32,7 @@ import { isFirefox } from "react-device-detect";
  */
 type DynamicVideoPlayerProps = {
   className?: string;
+  videoClassName?: string;
   camera: string;
   timeRange: TimeRange;
   cameraPreviews: Preview[];
@@ -51,6 +52,7 @@ type DynamicVideoPlayerProps = {
 };
 export default function DynamicVideoPlayer({
   className,
+  videoClassName,
   camera,
   timeRange,
   cameraPreviews,
@@ -279,13 +281,38 @@ export default function DynamicVideoPlayer({
     [onClipEnded, controller, recordings],
   );
 
+  const showPreview = isScrubbing || isLoading;
+  const renderPreviewPlayer = (previewClassName: string) => (
+    <PreviewPlayer
+      className={previewClassName}
+      camera={camera}
+      timeRange={timeRange}
+      cameraPreviews={cameraPreviews}
+      startTime={startTimestamp}
+      isScrubbing={isScrubbing}
+      onControllerReady={(previewController) =>
+        setPreviewController(previewController)
+      }
+    />
+  );
+  const previewOverlay = renderPreviewPlayer(
+    cn(
+      "pointer-events-none absolute inset-0 z-20",
+      showPreview ? "visible" : "invisible",
+    ),
+  );
+
   return (
     <>
       {source && (
         <HlsVideoPlayer
           videoRef={playerRef}
+          videoClassName={videoClassName}
           containerRef={containerRef}
-          visible={!(isScrubbing || isLoading)}
+          // Keep transform wrapper mounted while scrubbing/loading
+          // so zoom and pan position are preserved.
+          visible={true}
+          showControls={!isScrubbing && !isLoading}
           currentSource={source}
           hotKeys={hotKeys}
           supportsFullscreen={supportsFullscreen}
@@ -321,23 +348,16 @@ export default function DynamicVideoPlayer({
           isDetailMode={isDetailMode}
           camera={contextCamera || camera}
           currentTimeOverride={currentTime}
-          transformedOverlay={transformedOverlay}
+          transformedOverlay={
+            <>
+              {transformedOverlay}
+              {previewOverlay}
+            </>
+          }
         />
       )}
-      <PreviewPlayer
-        className={cn(
-          className,
-          isScrubbing || isLoading ? "visible" : "hidden",
-        )}
-        camera={camera}
-        timeRange={timeRange}
-        cameraPreviews={cameraPreviews}
-        startTime={startTimestamp}
-        isScrubbing={isScrubbing}
-        onControllerReady={(previewController) =>
-          setPreviewController(previewController)
-        }
-      />
+      {!source &&
+        renderPreviewPlayer(cn(className, showPreview ? "visible" : "hidden"))}
       {!isScrubbing && (isLoading || isBuffering) && !noRecording && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}
