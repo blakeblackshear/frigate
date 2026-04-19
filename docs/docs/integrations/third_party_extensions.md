@@ -17,6 +17,10 @@ Please use your own knowledge to assess and vet them before you install anything
 
 The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant dashboard card with deep Frigate integration.
 
+## [cctvQL](https://github.com/arunrajiah/cctvql)
+
+[cctvQL](https://github.com/arunrajiah/cctvql) is a natural language query layer for Frigate and other CCTV systems. It connects to Frigate's REST API and MQTT broker to let you ask conversational questions about cameras and events (e.g. "Was there motion at the front door last night?"), with support for real-time event streaming, anomaly detection, PTZ control, alert rules, and a Home Assistant custom component.
+
 ## [Double Take](https://github.com/skrashevich/double-take)
 
 [Double Take](https://github.com/skrashevich/double-take) provides an unified UI and API for processing and training images for facial recognition.
