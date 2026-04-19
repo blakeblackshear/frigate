@@ -16,6 +16,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from joserfc import jwt
+from joserfc.jwk import OctKey
 from peewee import DoesNotExist
 from slowapi import Limiter
 
@@ -401,10 +402,14 @@ def validate_password_strength(password: str) -> tuple[bool, Optional[str]]:
 
 
 def create_encoded_jwt(user, role, expiration, secret):
+    # joserfc 1.x requires an OctKey for symmetric algorithms instead of a
+    # raw string; passing the string raises joserfc.errors.MissingKeyError
+    # (surfaces as a 500 on POST /api/login). See requirements pin
+    # `joserfc == 1.2.*`.
     return jwt.encode(
         {"alg": "HS256"},
         {"sub": user, "role": role, "exp": expiration, "iat": int(time.time())},
-        secret,
+        OctKey.import_key(secret),
     )
 
 
@@ -677,7 +682,7 @@ def auth(request: Request):
         return fail_response
 
     try:
-        token = jwt.decode(encoded_token, request.app.jwt_token)
+        token = jwt.decode(encoded_token, OctKey.import_key(request.app.jwt_token))
         if "sub" not in token.claims:
             logger.debug("user not set in jwt token")
             return fail_response
