@@ -53,6 +53,7 @@ type HlsVideoPlayerProps = {
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
+  getSnapshotUrl?: (playTime: number) => string | undefined;
   toggleFullscreen?: () => void;
   onError?: (error: RecordingPlayerError) => void;
   isDetailMode?: boolean;
@@ -78,6 +79,7 @@ export default function HlsVideoPlayer({
   onSeekToTime,
   setFullResolution,
   onUploadFrame,
+  getSnapshotUrl,
   toggleFullscreen,
   onError,
   isDetailMode = false,
@@ -330,6 +332,13 @@ export default function HlsVideoPlayer({
             if (videoRef.current) {
               videoRef.current.playbackRate = rate;
             }
+          }}
+          getSnapshotUrl={() => {
+            const frameTime = getVideoTime();
+            if (!frameTime || !getSnapshotUrl) {
+              return undefined;
+            }
+            return getSnapshotUrl(frameTime);
           }}
           onUploadFrame={async () => {
             const frameTime = getVideoTime();

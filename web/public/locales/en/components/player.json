@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Submit this frame to Frigate+?",
-    "submit": "Submit"
+    "submit": "Submit",
+    "previewError": "Could not load snapshot preview. The recording may not be available at this time."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
   "streamOffline": {

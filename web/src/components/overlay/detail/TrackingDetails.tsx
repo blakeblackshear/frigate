@@ -636,6 +636,13 @@ export function TrackingDetails({
     return axios.post(`/${event.camera}/plus/${currentTime}`);
   }, [event.camera, currentTime]);
 
+  const getSnapshotUrlForPlus = useCallback(() => {
+    if (!currentTime) {
+      return undefined;
+    }
+    return `${apiHost}api/${event.camera}/recordings/${currentTime}/snapshot.jpg?height=500`;
+  }, [apiHost, event.camera, currentTime]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -683,6 +690,7 @@ export function TrackingDetails({
                 onTimeUpdate={handleTimeUpdate}
                 onSeekToTime={handleSeekToTime}
                 onUploadFrame={onUploadFrameToPlus}
+                getSnapshotUrl={getSnapshotUrlForPlus}
                 onPlaying={() => setIsVideoLoading(false)}
                 setFullResolution={setFullResolution}
                 toggleFullscreen={toggleFullscreen}
