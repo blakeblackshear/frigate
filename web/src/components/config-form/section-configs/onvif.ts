@@ -3,6 +3,11 @@ import type { SectionConfigOverrides } from "./types";
 const onvif: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/cameras#setting-up-camera-ptz-controls",
+    fieldDocs: {
+      autotracking: "/configuration/autotracking",
+      "autotracking.calibrate_on_startup":
+        "/configuration/autotracking#calibration",
+    },
     fieldOrder: [
       "host",
       "port",

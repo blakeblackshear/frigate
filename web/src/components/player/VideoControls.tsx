@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import { LuFolderX } from "react-icons/lu";
 import { isDesktop, isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
@@ -71,6 +72,7 @@ type VideoControlsProps = {
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
+  getSnapshotUrl?: () => string | undefined;
   toggleFullscreen?: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
@@ -92,6 +94,7 @@ export default function VideoControls({
   onSeek,
   onSetPlaybackRate,
   onUploadFrame,
+  getSnapshotUrl,
   toggleFullscreen,
   containerRef,
 }: VideoControlsProps) {
@@ -288,6 +291,7 @@ export default function VideoControls({
             }
           }}
           onUploadFrame={onUploadFrame}
+          getSnapshotUrl={getSnapshotUrl}
           containerRef={containerRef}
           fullscreen={fullscreen}
         />
@@ -306,6 +310,7 @@ type FrigatePlusUploadButtonProps = {
   onOpen: () => void;
   onClose: () => void;
   onUploadFrame: () => void;
+  getSnapshotUrl?: () => string | undefined;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   fullscreen?: boolean;
 };
@@ -314,12 +319,14 @@ function FrigatePlusUploadButton({
   onOpen,
   onClose,
   onUploadFrame,
+  getSnapshotUrl,
   containerRef,
   fullscreen,
 }: FrigatePlusUploadButtonProps) {
   const { t } = useTranslation(["components/player"]);
 
-  const [videoImg, setVideoImg] = useState<string>();
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [previewError, setPreviewError] = useState(false);
 
   return (
     <AlertDialog
@@ -334,6 +341,13 @@ function FrigatePlusUploadButton({
           className="size-5 cursor-pointer"
           onClick={() => {
             onOpen();
+            setPreviewError(false);
+
+            const snapshotUrl = getSnapshotUrl?.();
+            if (snapshotUrl) {
+              setPreviewUrl(snapshotUrl);
+              return;
+            }
 
             if (video) {
               const videoSize = [video.clientWidth, video.clientHeight];
@@ -345,7 +359,7 @@ function FrigatePlusUploadButton({
 
               if (context) {
                 context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
-                setVideoImg(canvas.toDataURL("image/webp"));
+                setPreviewUrl(canvas.toDataURL("image/webp"));
               }
             }
           }}
@@ -362,14 +376,29 @@ function FrigatePlusUploadButton({
         <AlertDialogHeader>
           <AlertDialogTitle>{t("submitFrigatePlus.title")}</AlertDialogTitle>
         </AlertDialogHeader>
-        <img className="aspect-video w-full object-contain" src={videoImg} />
+        {previewError ? (
+          <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+            <LuFolderX className="size-12" />
+            <span>{t("submitFrigatePlus.previewError")}</span>
+          </div>
+        ) : (
+          <img
+            className="aspect-video w-full object-contain"
+            src={previewUrl}
+            onError={() => setPreviewError(true)}
+          />
+        )}
         <AlertDialogFooter>
-          <AlertDialogAction className="bg-selected" onClick={onUploadFrame}>
-            {t("submitFrigatePlus.submit")}
-          </AlertDialogAction>
           <AlertDialogCancel>
             {t("button.cancel", { ns: "common" })}
           </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-selected text-white"
+            onClick={onUploadFrame}
+            disabled={previewError}
+          >
+            {t("submitFrigatePlus.submit")}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

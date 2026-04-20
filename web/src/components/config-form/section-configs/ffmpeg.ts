@@ -31,6 +31,8 @@ const ffmpeg: SectionConfigOverrides = {
       "inputs.output_args": "/configuration/ffmpeg_presets#output-args-presets",
       "output_args.record": "/configuration/ffmpeg_presets#output-args-presets",
       "inputs.roles": "/configuration/cameras/#setting-up-camera-inputs",
+      apple_compatibility:
+        "/configuration/camera_specific#h265-cameras-via-safari",
     },
     restartRequired: [],
     fieldOrder: [

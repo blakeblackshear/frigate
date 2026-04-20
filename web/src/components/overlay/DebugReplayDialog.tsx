@@ -113,18 +113,19 @@ export function DebugReplayContent({
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
 
       <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
+        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-2"}
       >
-        <div
-          className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
+        <Button
+          className={isDesktop ? "" : "w-full"}
+          aria-label={t("button.cancel", { ns: "common" })}
+          variant="outline"
           onClick={onCancel}
         >
           {t("button.cancel", { ns: "common" })}
-        </div>
+        </Button>
         <Button
           className={isDesktop ? "" : "w-full"}
           variant="select"
-          size="sm"
           disabled={isStarting}
           onClick={() => {
             if (selectedOption === "timeline") {

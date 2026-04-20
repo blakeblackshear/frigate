@@ -181,6 +181,21 @@ export default function DynamicVideoPlayer({
     [camera, controller],
   );
 
+  const getSnapshotUrlForPlus = useCallback(
+    (playTime: number) => {
+      if (!controller) {
+        return undefined;
+      }
+
+      const time = controller.getProgress(playTime);
+      if (!time) {
+        return undefined;
+      }
+      return `${apiHost}api/${camera}/recordings/${time}/snapshot.jpg?height=500`;
+    },
+    [apiHost, camera, controller],
+  );
+
   // state of playback player
 
   const recordingParams = useMemo(
@@ -312,6 +327,7 @@ export default function DynamicVideoPlayer({
           }}
           setFullResolution={setFullResolution}
           onUploadFrame={onUploadFrameToPlus}
+          getSnapshotUrl={getSnapshotUrlForPlus}
           toggleFullscreen={toggleFullscreen}
           onError={(error) => {
             if (error == "stalled" && !isScrubbing) {

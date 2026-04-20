@@ -9,11 +9,13 @@ import {
 import { Children, useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
-import { LuChevronDown, LuChevronRight } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuExternalLink } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { requiresRestartForFieldPath } from "@/utils/configUtil";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 import { ConfigFormContext } from "@/types/configForm";
 import {
   buildTranslationPath,
@@ -178,6 +180,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     "views/settings",
     "common",
   ]);
+  const { getLocaleDocUrl } = useDocDomain();
   const objectRequiresRestart = requiresRestartForFieldPath(
     fieldPath,
     restartRequired,
@@ -299,6 +302,17 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     (typeof description === "string" ? description : undefined) ||
     schemaDescription;
   inferredDescription = inferredDescription ?? fallbackDescription;
+
+  const pathStringSegments =
+    path?.filter((segment): segment is string => typeof segment === "string") ??
+    [];
+  const fieldDocsKey = translationPath || pathStringSegments.join(".");
+  const fieldDocsPath = fieldDocsKey
+    ? formContext?.fieldDocs?.[fieldDocsKey]
+    : undefined;
+  const fieldDocsUrl = fieldDocsPath
+    ? getLocaleDocUrl(fieldDocsPath)
+    : undefined;
 
   const renderGroupedFields = (items: (typeof properties)[number][]) => {
     if (!items.length) {
@@ -465,6 +479,20 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {inferredDescription}
                   </p>
+                )}
+                {fieldDocsUrl && (
+                  <div className="mt-1 flex items-center text-xs text-primary-variant">
+                    <Link
+                      to={fieldDocsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
                 )}
               </div>
               {isOpen ? (
