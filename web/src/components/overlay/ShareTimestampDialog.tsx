@@ -197,24 +197,21 @@ export function ShareTimestampContent({
       {isDesktop && <Separator className="my-4 bg-secondary" />}
 
       <DialogFooter
-        className={cn("mt-4", !isDesktop && "flex flex-col-reverse gap-4")}
+        className={cn("mt-4", !isDesktop && "flex flex-col-reverse gap-2")}
       >
         {onCancel && (
-          <button
-            type="button"
-            className={cn(
-              "cursor-pointer p-2 text-center",
-              !isDesktop && "w-full",
-            )}
+          <Button
+            className={cn(!isDesktop && "w-full")}
+            aria-label={t("button.cancel", { ns: "common" })}
+            variant="outline"
             onClick={onCancel}
           >
             {t("button.cancel", { ns: "common" })}
-          </button>
+          </Button>
         )}
         <Button
           className={cn(!isDesktop && "w-full")}
           variant="select"
-          size="sm"
           onClick={() => onShareTimestamp(Math.floor(selectedTimestamp))}
         >
           {t("recording.shareTimestamp.button", { ns: "components/dialog" })}

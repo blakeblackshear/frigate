@@ -1043,20 +1043,21 @@ export function ExportContent({
 
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
       <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
+        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-2"}
       >
-        <div
-          className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
+        <Button
+          className={isDesktop ? "" : "w-full"}
+          aria-label={t("button.cancel", { ns: "common" })}
+          variant="outline"
           onClick={onCancel}
         >
           {t("button.cancel", { ns: "common" })}
-        </div>
+        </Button>
         {activeTab === "export" ? (
           <Button
             className={isDesktop ? "" : "w-full"}
             aria-label={t("export.selectOrExport")}
             variant="select"
-            size="sm"
             disabled={isStartingExport}
             onClick={async () => {
               if (selectedOption == "timeline") {
