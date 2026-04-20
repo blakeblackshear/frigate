@@ -1164,7 +1164,7 @@ function FrigateCameraFeatures({
           loading={isSnapshotLoading}
         />
         {!fullscreen && (
-          <DropdownMenu modal={false}>
+          <DropdownMenu>
             <DropdownMenuTrigger>
               <div
                 className={cn(
