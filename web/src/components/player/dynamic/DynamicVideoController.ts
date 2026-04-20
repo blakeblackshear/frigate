@@ -6,6 +6,7 @@ import {
   calculateInpointOffset,
   calculateSeekPosition,
 } from "@/utils/videoUtil";
+import { playWithTemporaryMuteFallback } from "@/utils/videoUtil.ts";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -107,7 +108,7 @@ export class DynamicVideoController {
     return new Promise((resolve) => {
       const onSeekedHandler = () => {
         this.playerController.removeEventListener("seeked", onSeekedHandler);
-        this.playerController.play();
+        playWithTemporaryMuteFallback(this.playerController);
         resolve(undefined);
       };
 

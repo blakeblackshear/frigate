@@ -216,7 +216,11 @@ export default function HlsVideoPlayer({
 
   const [tallCamera, setTallCamera] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [muted, setMuted] = useUserPersistence("hlsPlayerMuted", true);
+  const [persistedMuted, setPersistedMuted] = useUserPersistence(
+    "hlsPlayerMuted",
+    true,
+  );
+  const [temporaryMuted, setTemporaryMuted] = useState(false);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
   const [defaultPlaybackRate] = useUserPersistence("playbackRate", 1);
   const [playbackRate, setPlaybackRate] = useOverlayState(
@@ -231,6 +235,16 @@ export default function HlsVideoPlayer({
     width: number;
     height: number;
   }>({ width: 0, height: 0 });
+
+  const muted = persistedMuted || temporaryMuted;
+
+  const onSetMuted = useCallback(
+    (muted: boolean) => {
+      setTemporaryMuted(false);
+      setPersistedMuted(muted);
+    },
+    [setPersistedMuted],
+  );
 
   useEffect(() => {
     if (!isDesktop) {
@@ -297,7 +311,7 @@ export default function HlsVideoPlayer({
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}
-          setMuted={(muted) => setMuted(muted)}
+          setMuted={onSetMuted}
           playbackRate={playbackRate ?? 1}
           hotKeys={hotKeys}
           onPlayPause={onPlayPause}
@@ -404,9 +418,20 @@ export default function HlsVideoPlayer({
                 : undefined
             }
             onVolumeChange={() => {
-              setVolume(videoRef.current?.volume ?? 1.0, true);
-              if (!frigateControls) {
-                setMuted(videoRef.current?.muted);
+              if (!videoRef.current) {
+                return;
+              }
+
+              setVolume(videoRef.current.volume ?? 1.0, true);
+
+              if (frigateControls) {
+                if (videoRef.current.muted && !persistedMuted) {
+                  setTemporaryMuted(true);
+                } else if (!videoRef.current.muted && temporaryMuted) {
+                  setTemporaryMuted(false);
+                }
+              } else {
+                setPersistedMuted(videoRef.current.muted);
               }
             }}
             onPlay={() => {

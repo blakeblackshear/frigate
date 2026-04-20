@@ -21,6 +21,10 @@ import {
   getBeginningOfDayTimestamp,
   getEndOfDayTimestamp,
 } from "@/utils/dateUtil";
+import {
+  parseRecordingReviewLink,
+  RECORDING_REVIEW_LINK_PARAM,
+} from "@/utils/recordingReviewUrl";
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
@@ -28,6 +32,7 @@ import { useFrigateReviews } from "@/api/ws";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function Events() {
@@ -128,6 +133,14 @@ export default function Events() {
   const [notificationTab, setNotificationTab] =
     useState<TimelineType>("timeline");
 
+  const getReviewDayBounds = useCallback((date: Date) => {
+    const now = Date.now() / 1000;
+    return {
+      after: getBeginningOfDayTimestamp(date),
+      before: Math.min(getEndOfDayTimestamp(date), now),
+    };
+  }, []);
+
   useSearchEffect("tab", (tab: string) => {
     if (tab === "timeline" || tab === "events" || tab === "detail") {
       setNotificationTab(tab as TimelineType);
@@ -143,10 +156,7 @@ export default function Events() {
           const startTime = resp.data.start_time - REVIEW_PADDING;
           const date = new Date(startTime * 1000);
 
-          setReviewFilter({
-            after: getBeginningOfDayTimestamp(date),
-            before: getEndOfDayTimestamp(date),
-          });
+          setReviewFilter(getReviewDayBounds(date));
           setRecording(
             {
               camera: resp.data.camera,
@@ -233,6 +243,51 @@ export default function Events() {
     },
     [recording, setRecording, setReviewFilter],
   );
+
+  useSearchEffect(RECORDING_REVIEW_LINK_PARAM, (reviewLinkValue: string) => {
+    if (!config) {
+      return false;
+    }
+
+    const reviewLink = parseRecordingReviewLink(reviewLinkValue);
+
+    if (!reviewLink) {
+      toast.error(t("recordings.invalidSharedLink"), {
+        position: "top-center",
+      });
+      return true;
+    }
+
+    const validCamera =
+      config.cameras[reviewLink.camera] &&
+      allowedCameras.includes(reviewLink.camera);
+
+    if (!validCamera) {
+      toast.error(t("recordings.invalidSharedCamera"), {
+        position: "top-center",
+      });
+      return true;
+    }
+
+    setReviewFilter({
+      ...reviewFilter,
+      ...getReviewDayBounds(new Date(reviewLink.timestamp * 1000)),
+    });
+    setRecording(
+      {
+        camera: reviewLink.camera,
+        startTime: reviewLink.timestamp,
+        // severity not actually applicable here, but the type requires it
+        // this pattern is also used LiveCameraView to enter recording view
+        severity: "alert",
+        timelineType: notificationTab,
+        navigationSource: "shared-link",
+      },
+      true,
+    );
+
+    return true;
+  });
 
   // review paging
 

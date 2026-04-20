@@ -152,6 +152,14 @@
     }
   },
   "recording": {
+    "shareTimestamp": {
+      "label": "Share Timestamp",
+      "title": "Share Timestamp",
+      "description": "Share a timestamped URL of current player position or choose a custom timestamp. Note that this is not a public share URL and is only accessible to users with access to Frigate and this camera.",
+      "custom": "Custom Timestamp",
+      "button": "Share Timestamp URL",
+      "shareTitle": "Frigate Review Timestamp: {{camera}}"
+    },
     "confirmDelete": {
       "title": "Confirm Delete",
       "desc": {
