@@ -5,3 +5,5 @@
 /docker/rockchip/ @MarcA711
 /docker/rocm/ @harakas
 /docker/hailo8l/ @spanner3003
+/docker/qcs6490/ @notori0us
+/frigate/detectors/plugins/qnn.py @notori0us

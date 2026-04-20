@@ -295,6 +295,14 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 | ---------------- | ----------------------------------- |
 | yolov9-tiny      | ~ 4 ms                              |
 
+### Qualcomm Hexagon NPU
+
+Frigate supports hardware accelerated object detection on Qualcomm Hexagon NPUs via the [QNN detector](/configuration/object_detectors#qualcomm-hexagon-npu). Tested on the QCS6490 (Hexagon v68) on a [Radxa Dragon Q6A](https://radxa.com/products/dragon/q6a/).
+
+| Name              | Inference Time |
+| ----------------- | -------------- |
+| QCS6490 / YOLOv8n | ~ 10–25 ms     |
+
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
 This is taken from a [user question on reddit](https://www.reddit.com/r/homeassistant/comments/q8mgau/comment/hgqbxh5/?utm_source=share&utm_medium=web2x&context=3). Modified slightly for clarity.

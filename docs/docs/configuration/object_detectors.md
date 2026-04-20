@@ -2045,6 +2045,88 @@ Explanation of the paramters:
   - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
 - `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.2/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.2_EN.pdf).
 
+## Qualcomm Hexagon NPU
+
+Hardware accelerated object detection is supported on the following Qualcomm SoCs:
+
+- QCS6490 (Hexagon v68, ~12 TOPS) — including the [Radxa Dragon Q6A](https://radxa.com/products/dragon/q6a/) and similar boards
+
+This implementation uses the [Qualcomm AI Engine Direct (QNN) SDK](https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk) (QAIRT 2.37.1) via the [`qai_appbuilder`](https://github.com/quic/ai-engine-direct-helper) Python bindings. Models are pre-compiled QNN context binaries (`.bin`) downloaded from [Qualcomm AI Hub](https://aihub.qualcomm.com/).
+
+:::warning
+
+The pre-compiled YOLOv8 weights from Qualcomm AI Hub originate from Ultralytics and are subject to the AGPL-3.0 license. They cannot be used commercially without a separate license from Ultralytics.
+
+:::
+
+### Prerequisites
+
+Make sure to follow the [Qualcomm specific installation instructions](/frigate/installation#qualcomm-platform).
+
+### Downloading a Model
+
+Frigate does not bundle the YOLOv8 weights. Download a QNN context binary for your SoC from Qualcomm AI Hub once and mount it into the container:
+
+```bash
+mkdir -p ./models
+# from https://aihub.qualcomm.com/compute/models/yolov8_det
+# (sign in, choose target "qualcomm-qcs6490-proxy", download .bin)
+mv ~/Downloads/yolov8_det.bin ./models/
+```
+
+Mount `./models` into the container at `/models` and reference the file from your config.
+
+### Configuration
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detector hardware" /> and select **QNN** from the detector type dropdown and click **Add**. Then navigate to <NavPath path="Settings > System > Detection model" /> and configure:
+
+| Field                                    | Value                       |
+| ---------------------------------------- | --------------------------- |
+| **Custom object detector model path**    | `/models/yolov8_det.bin`    |
+| **Object Detection Model Type**          | `yolo-generic`              |
+| **Object detection model input width**   | `640`                       |
+| **Object detection model input height**  | `640`                       |
+| **Model Input Tensor Shape**             | `nhwc`                      |
+| **Model Input D Type**                   | `float`                     |
+| **Label map for custom object detector** | `/labelmap/coco-80.txt`     |
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  hexagon:
+    type: qnn
+    soc_id: "6490"
+
+model:
+  path: /models/yolov8_det.bin
+  model_type: yolo-generic
+  width: 640
+  height: 640
+  input_tensor: nhwc
+  input_dtype: float
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+</TabItem>
+</ConfigTabs>
+
+The inference time on a Radxa Dragon Q6A (QCS6490, Hexagon v68) is approximately 10–25 ms per frame at 640×640 — varying with system load and the number of cameras pumping frames into the detector.
+
+### Compiling Your Own Model
+
+To compile a different model — or to compile YOLOv8 for a Qualcomm SoC other than QCS6490 — use [Qualcomm AI Hub](https://aihub.qualcomm.com/). The workflow is:
+
+1. Sign in to AI Hub and find a model (for example, [YOLOv8 Detection](https://aihub.qualcomm.com/compute/models/yolov8_det)).
+2. Submit a compile job for your target device (e.g. `qualcomm-qcs6490-proxy`). The job emits a QNN context binary (`.bin`) sized for that SoC's Hexagon variant.
+3. Download the `.bin` and mount it into the container as above.
+
+The output-tensor ordering of YOLOv8 differs by SoC: QCS6490 yields `[scores, classes, boxes]` (handled by `soc_id: "6490"`); other SoCs yield `[boxes, scores, classes]` (use `soc_id: "other"`).
+
 ## DeGirum
 
 DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through a DeGirum AI Server, or through the use of `@local`. You can also connect directly to DeGirum's AI Hub to run inferences. **Please Note:** This detector _cannot_ be used for commercial purposes.

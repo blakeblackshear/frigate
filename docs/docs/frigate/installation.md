@@ -428,6 +428,70 @@ or add these options to your `docker run` command:
 
 Next, you should configure [hardware object detection](/configuration/object_detectors#synaptics) and [hardware video processing](/configuration/hardware_acceleration_video#synaptics).
 
+### Qualcomm platform
+
+Hardware accelerated object detection on the Hexagon NPU is supported on the following Qualcomm SoCs:
+
+- QCS6490 (Hexagon v68) — including the Radxa Dragon Q6A and similar boards
+
+Make sure your kernel exposes the FastRPC bridges to the cDSP. On a configured board you should see:
+
+```
+$ ls /dev/fastrpc-*
+/dev/fastrpc-adsp  /dev/fastrpc-cdsp  /dev/fastrpc-cdsp-secure
+```
+
+#### Installation
+
+Hexagon NPU access requires the QAIRT runtime libraries (shipped in the Frigate `-qcs6490` image), the FastRPC user-space (`libcdsprpc.so`, `cdsprpcd`), and the cDSP firmware/skel libraries that the QNN HTP backend dlopens at runtime. The latter two live on the host. We provide a convenient script to install them on Debian/Armbian-based systems.
+
+Follow these steps:
+
+1. Download [`user_installation.sh`](https://raw.githubusercontent.com/blakeblackshear/frigate/dev/docker/qcs6490/user_installation.sh).
+2. Make it executable: `sudo chmod +x user_installation.sh`
+3. Run the script: `sudo ./user_installation.sh`
+4. Log out and back in so your user picks up the `fastrpc` group.
+
+The script installs the [`fastrpc`](https://github.com/radxa-pkg/fastrpc) user-space, the [`radxa-firmware-qcs6490`](https://github.com/radxa-pkg/radxa-firmware) firmware, disables the conflicting `hexagonrpcd` services, and starts a `cdsprpcd` systemd service.
+
+#### Setup
+
+Follow Frigate's default installation instructions, but use a docker image with `-qcs6490` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-qcs6490`.
+
+Grant the container access to the FastRPC devices and the host's cDSP firmware paths. Add the following to your `docker-compose.yml`:
+
+```yaml
+group_add:
+  - "107" # fastrpc group GID. Verify with `getent group fastrpc`.
+devices:
+  - /dev/fastrpc-cdsp
+  - /dev/fastrpc-cdsp-secure
+  - /dev/fastrpc-adsp
+  - /dev/dma_heap/system
+volumes:
+  # cDSP firmware refuses to load skels from any path other than these on
+  # the host. Bind-mount them into the container so they appear at the
+  # expected locations.
+  - /usr/lib/dsp:/usr/lib/dsp:ro
+  - /usr/lib/rfsa:/usr/lib/rfsa:ro
+```
+
+Or, with `docker run`:
+
+```
+--group-add $(getent group fastrpc | cut -d: -f3) \
+--device /dev/fastrpc-cdsp \
+--device /dev/fastrpc-cdsp-secure \
+--device /dev/fastrpc-adsp \
+--device /dev/dma_heap/system \
+-v /usr/lib/dsp:/usr/lib/dsp:ro \
+-v /usr/lib/rfsa:/usr/lib/rfsa:ro
+```
+
+#### Configuration
+
+Next, configure [hardware object detection](/configuration/object_detectors#qualcomm-hexagon-npu) to complete the setup.
+
 ### AXERA
 
 AXERA accelerators are available in an M.2 form factor, compatible with both Raspberry Pi and Orange Pi. This form factor has also been successfully tested on x86 platforms, making it a versatile choice for various computing environments.
