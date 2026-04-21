@@ -79,7 +79,20 @@ export class WsMocker {
       this.send("model_state", JSON.stringify({}));
     }
     if (data.topic === "embeddingsReindexProgress") {
-      this.send("embeddings_reindex_progress", JSON.stringify(null));
+      // Send a completed reindex state so Explore renders when
+      // semantic_search.enabled is true. A null payload leaves the page
+      // in a permanent loading spinner because !reindexState is truthy.
+      this.send(
+        "embeddings_reindex_progress",
+        JSON.stringify({
+          status: "completed",
+          processed_objects: 0,
+          total_objects: 0,
+          thumbnails: 0,
+          descriptions: 0,
+          time_remaining: null,
+        }),
+      );
     }
     if (data.topic === "birdseyeLayout") {
       this.send("birdseye_layout", JSON.stringify(null));
