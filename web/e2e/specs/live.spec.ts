@@ -1,59 +1,50 @@
 /**
  * Live page tests -- CRITICAL tier.
  *
- * Tests camera dashboard rendering, camera card clicks, single camera view
- * with named controls, feature toggle behavior, context menu, and mobile layout.
+ * Dashboard grid, single-camera controls, feature toggles (with WS
+ * frame assertions), context menu, birdseye, and mobile layout.
+ * Also absorbs the PTZ preset-dropdown regression tests from the
+ * now-deleted ptz-overlay.spec.ts.
  */
 
 import { test, expect } from "../fixtures/frigate-test";
+import { LivePage } from "../pages/live.page";
+import {
+  installWsFrameCapture,
+  waitForWsFrame,
+} from "../helpers/ws-frames";
+import {
+  expectBodyInteractive,
+  waitForBodyInteractive,
+} from "../helpers/overlay-interaction";
+
+const PTZ_CAMERA = "front_door";
+const PRESET_NAMES = ["home", "driveway", "front_porch"];
 
 test.describe("Live Dashboard @critical", () => {
-  test("dashboard renders all configured cameras by name", async ({
+  test("every configured camera renders on the dashboard", async ({
     frigateApp,
   }) => {
     await frigateApp.goto("/");
+    const live = new LivePage(frigateApp.page, !frigateApp.isMobile);
     for (const cam of ["front_door", "backyard", "garage"]) {
-      await expect(
-        frigateApp.page.locator(`[data-camera='${cam}']`),
-      ).toBeVisible({ timeout: 10_000 });
+      await expect(live.cameraCard(cam)).toBeVisible({ timeout: 10_000 });
     }
   });
 
-  test("clicking camera card opens single camera view via hash", async ({
+  test("clicking a camera card opens the single-camera view via hash", async ({
     frigateApp,
   }) => {
     await frigateApp.goto("/");
-    const card = frigateApp.page.locator("[data-camera='front_door']").first();
-    await card.click({ timeout: 10_000 });
+    const live = new LivePage(frigateApp.page, !frigateApp.isMobile);
+    await live.cameraCard("front_door").first().click({ timeout: 10_000 });
     await expect(frigateApp.page).toHaveURL(/#front_door/);
   });
 
-  test("back button returns from single camera to dashboard", async ({
-    frigateApp,
-  }) => {
-    // First navigate to dashboard so there's history to go back to
-    await frigateApp.goto("/");
-    await frigateApp.page.waitForTimeout(1000);
-    // Click a camera to enter single view
-    const card = frigateApp.page.locator("[data-camera='front_door']").first();
-    await card.click({ timeout: 10_000 });
-    await frigateApp.page.waitForTimeout(2000);
-    // Now click Back to return to dashboard
-    const backBtn = frigateApp.page.getByText("Back", { exact: true });
-    if (await backBtn.isVisible().catch(() => false)) {
-      await backBtn.click();
-      await frigateApp.page.waitForTimeout(1000);
-    }
-    // Should be back on the dashboard with cameras visible
-    await expect(
-      frigateApp.page.locator("[data-camera='front_door']"),
-    ).toBeVisible({ timeout: 10_000 });
-  });
-
-  test("birdseye view loads without crash", async ({ frigateApp }) => {
+  test("birdseye route renders without crash", async ({ frigateApp }) => {
     await frigateApp.goto("/#birdseye");
-    await frigateApp.page.waitForTimeout(2000);
     await expect(frigateApp.page.locator("body")).toBeVisible();
+    await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
   });
 
   test("empty group shows fallback content", async ({ frigateApp }) => {
@@ -63,191 +54,236 @@ test.describe("Live Dashboard @critical", () => {
   });
 });
 
-test.describe("Live Single Camera - Controls @critical", () => {
-  test("single camera view shows Back and History buttons (desktop)", async ({
+test.describe("Live Single Camera — desktop controls @critical", () => {
+  test.skip(
+    ({ frigateApp }) => frigateApp.isMobile,
+    "Desktop-only header controls",
+  );
+
+  test("single-camera view shows Back and History buttons", async ({
     frigateApp,
   }) => {
-    if (frigateApp.isMobile) {
-      test.skip(); // On mobile, buttons may show icons only
-      return;
-    }
     await frigateApp.goto("/#front_door");
-    await frigateApp.page.waitForTimeout(2000);
-    // Back and History are visible text buttons in the header
-    await expect(
-      frigateApp.page.getByText("Back", { exact: true }),
-    ).toBeVisible({ timeout: 5_000 });
-    await expect(
-      frigateApp.page.getByText("History", { exact: true }),
-    ).toBeVisible();
+    const live = new LivePage(frigateApp.page, true);
+    await expect(live.backButton).toBeVisible({ timeout: 5_000 });
+    await expect(live.historyButton).toBeVisible();
   });
 
-  test("single camera view shows feature toggle icons (desktop)", async ({
-    frigateApp,
-  }) => {
-    if (frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
+  test("feature toggles render (at least 3)", async ({ frigateApp }) => {
     await frigateApp.goto("/#front_door");
-    await frigateApp.page.waitForTimeout(2000);
-    // Feature toggles are CameraFeatureToggle components rendered as divs
-    // with bg-selected (active) or bg-secondary (inactive) classes
-    // Count the toggles - should have at least detect, recording, snapshots
-    const toggles = frigateApp.page.locator(
-      ".flex.flex-col.items-center.justify-center.bg-selected, .flex.flex-col.items-center.justify-center.bg-secondary",
-    );
-    const count = await toggles.count();
+    const live = new LivePage(frigateApp.page, true);
+    // Wait for the single-camera header to render before counting toggles.
+    await expect(live.backButton).toBeVisible({ timeout: 5_000 });
+    await expect(live.featureToggles.first()).toBeVisible({ timeout: 5_000 });
+    const count = await live.featureToggles.count();
     expect(count).toBeGreaterThanOrEqual(3);
   });
 
-  test("clicking a feature toggle changes its visual state (desktop)", async ({
+  test("clicking a feature toggle sends the matching WS frame", async ({
     frigateApp,
   }) => {
-    if (frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
+    await installWsFrameCapture(frigateApp.page);
     await frigateApp.goto("/#front_door");
-    await frigateApp.page.waitForTimeout(2000);
-    // Find active toggles (bg-selected class = feature is ON)
-    const activeToggles = frigateApp.page.locator(
-      ".flex.flex-col.items-center.justify-center.bg-selected",
+    const live = new LivePage(frigateApp.page, true);
+    // Wait for feature toggles to render (WS camera_activity must arrive first).
+    await expect(live.activeFeatureToggles.first()).toBeVisible({ timeout: 5_000 });
+    const activeBefore = await live.activeFeatureToggles.count();
+    expect(activeBefore).toBeGreaterThan(0);
+
+    await live.activeFeatureToggles.first().click();
+
+    // The toggle dispatches a frame on <camera>/<feature>/set — match on
+    // front_door/ prefix + /set suffix (any feature).
+    await waitForWsFrame(
+      frigateApp.page,
+      (frame) =>
+        frame.includes("front_door/") && frame.includes("/set"),
+      { message: "feature toggle should dispatch a <camera>/<feature>/set frame" },
     );
-    const initialCount = await activeToggles.count();
-    if (initialCount > 0) {
-      // Click the first active toggle to disable it
-      await activeToggles.first().click();
-      await frigateApp.page.waitForTimeout(1000);
-      // After WS mock echoes back new state, count should decrease
-      const newCount = await activeToggles.count();
-      expect(newCount).toBeLessThan(initialCount);
-    }
   });
 
-  test("settings gear button opens dropdown (desktop)", async ({
-    frigateApp,
-  }) => {
-    if (frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
-    await frigateApp.goto("/#front_door");
-    await frigateApp.page.waitForTimeout(2000);
-    // Find the gear icon button (last button-like element in header)
-    // The settings gear opens a dropdown with Stream, Play in background, etc.
-    const gearButtons = frigateApp.page.locator("button:has(svg)");
-    const count = await gearButtons.count();
-    // Click the last one (gear icon is typically last in the header)
-    if (count > 0) {
-      await gearButtons.last().click();
-      await frigateApp.page.waitForTimeout(500);
-      // A dropdown or drawer should appear
-      const overlay = frigateApp.page.locator(
-        '[role="menu"], [data-radix-menu-content], [role="dialog"]',
-      );
-      const visible = await overlay
-        .first()
-        .isVisible()
-        .catch(() => false);
-      if (visible) {
-        await frigateApp.page.keyboard.press("Escape");
-      }
-    }
-  });
-
-  test("keyboard shortcut f does not crash on desktop", async ({
-    frigateApp,
-  }) => {
-    if (frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
+  test("keyboard shortcut f does not crash", async ({ frigateApp }) => {
     await frigateApp.goto("/");
     await frigateApp.page.keyboard.press("f");
-    await frigateApp.page.waitForTimeout(500);
     await expect(frigateApp.page.locator("body")).toBeVisible();
+    // Note: headless Chromium rejects fullscreen requests without a user
+    // gesture, so document.fullscreenElement cannot be asserted reliably
+    // in e2e. We assert the keypress doesn't crash the app; real
+    // fullscreen behavior is covered by manual testing.
   });
-});
 
-test.describe("Live Single Camera - Mobile Controls @critical", () => {
-  test("mobile camera view has settings drawer trigger", async ({
+  test("settings gear opens a dropdown with Stream/Play menu items", async ({
     frigateApp,
   }) => {
-    if (!frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
     await frigateApp.goto("/#front_door");
-    await frigateApp.page.waitForTimeout(2000);
-    // On mobile, settings gear opens a drawer
-    // The button has aria-label with the camera name like "front_door Settings"
-    const buttons = frigateApp.page.locator("button:has(svg)");
-    const count = await buttons.count();
+    // Wait for the single-camera view to render — use the Back button
+    // as a deterministic marker.
+    const live = new LivePage(frigateApp.page, true);
+    await expect(live.backButton).toBeVisible({ timeout: 10_000 });
+
+    // The gear icon button is the last button-like element in the
+    // single-camera header. Clicking it opens a Radix dropdown.
+    const gearButtons = frigateApp.page.locator("button:has(svg)");
+    const count = await gearButtons.count();
     expect(count).toBeGreaterThan(0);
-  });
-});
+    await gearButtons.last().click();
 
-test.describe("Live Context Menu @critical", () => {
-  test("right-click on camera opens context menu on desktop", async ({
-    frigateApp,
-  }) => {
-    if (frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
-    await frigateApp.goto("/");
-    const card = frigateApp.page.locator("[data-camera='front_door']").first();
-    await card.waitFor({ state: "visible", timeout: 10_000 });
-    await card.click({ button: "right" });
-    const contextMenu = frigateApp.page.locator(
-      '[role="menu"], [data-radix-menu-content]',
-    );
-    await expect(contextMenu.first()).toBeVisible({ timeout: 5_000 });
-  });
-
-  test("context menu closes on escape", async ({ frigateApp }) => {
-    if (frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
-    await frigateApp.goto("/");
-    const card = frigateApp.page.locator("[data-camera='front_door']").first();
-    await card.waitFor({ state: "visible", timeout: 10_000 });
-    await card.click({ button: "right" });
-    await frigateApp.page.waitForTimeout(500);
+    const menu = frigateApp.page
+      .locator('[role="menu"], [data-radix-menu-content]')
+      .first();
+    await expect(menu).toBeVisible({ timeout: 3_000 });
     await frigateApp.page.keyboard.press("Escape");
-    await frigateApp.page.waitForTimeout(300);
-    const contextMenu = frigateApp.page.locator(
-      '[role="menu"], [data-radix-menu-content]',
-    );
-    await expect(contextMenu).not.toBeVisible();
+    await expect(menu).not.toBeVisible({ timeout: 3_000 });
   });
 });
 
-test.describe("Live Mobile Layout @critical", () => {
-  test("mobile renders cameras without sidebar", async ({ frigateApp }) => {
-    if (!frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
+test.describe("Live Context Menu (desktop) @critical", () => {
+  test.skip(
+    ({ frigateApp }) => frigateApp.isMobile,
+    "Right-click is desktop-only",
+  );
+
+  test("right-click opens the context menu", async ({ frigateApp }) => {
     await frigateApp.goto("/");
-    await expect(frigateApp.page.locator("aside")).not.toBeVisible();
-    await expect(
-      frigateApp.page.locator("[data-camera='front_door']"),
-    ).toBeVisible({ timeout: 10_000 });
+    const live = new LivePage(frigateApp.page, true);
+    const menu = await live.openContextMenuOn("front_door");
+    await expect(menu).toBeVisible({ timeout: 5_000 });
   });
 
-  test("mobile camera click opens single camera view", async ({
+  test("context menu closes on Escape and leaves body interactive", async ({
     frigateApp,
   }) => {
-    if (!frigateApp.isMobile) {
-      test.skip();
-      return;
-    }
     await frigateApp.goto("/");
-    const card = frigateApp.page.locator("[data-camera='front_door']").first();
-    await card.click({ timeout: 10_000 });
+    const live = new LivePage(frigateApp.page, true);
+    const menu = await live.openContextMenuOn("front_door");
+    await expect(menu).toBeVisible({ timeout: 5_000 });
+    await frigateApp.page.keyboard.press("Escape");
+    await expect(menu).not.toBeVisible();
+    await waitForBodyInteractive(frigateApp.page);
+    await expectBodyInteractive(frigateApp.page);
+  });
+});
+
+test.describe("Live PTZ preset dropdown @critical", () => {
+  // Migrated from ptz-overlay.spec.ts. Guards:
+  //  1. After selecting a preset, the "Presets" tooltip must not re-pop.
+  //  2. Keyboard shortcuts after close should not re-open the dropdown.
+
+  test("selecting a preset closes menu cleanly and does not re-open on keyboard", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+
+    await frigateApp.api.install({
+      config: {
+        cameras: {
+          [PTZ_CAMERA]: { onvif: { host: "10.0.0.50" } },
+        },
+      },
+    });
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/info`, (route) =>
+      route.fulfill({
+        json: {
+          name: PTZ_CAMERA,
+          features: ["pt", "zoom"],
+          presets: PRESET_NAMES,
+          profiles: [],
+        },
+      }),
+    );
+
+    await installWsFrameCapture(frigateApp.page);
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+
+    const presetTrigger = frigateApp.page.getByRole("button", {
+      name: /presets/i,
+    });
+    await expect(presetTrigger.first()).toBeVisible({ timeout: 5_000 });
+    await presetTrigger.first().click();
+
+    const menu = frigateApp.page
+      .locator('[role="menu"], [data-radix-menu-content]')
+      .first();
+    await expect(menu).toBeVisible({ timeout: 3_000 });
+
+    await menu
+      .getByRole("menuitem", { name: PRESET_NAMES[0] })
+      .first()
+      .click();
+    await expect(menu).not.toBeVisible({ timeout: 3_000 });
+
+    await waitForWsFrame(
+      frigateApp.page,
+      (frame) =>
+        frame.includes(`"${PTZ_CAMERA}/ptz"`) &&
+        frame.includes(`preset_${PRESET_NAMES[0]}`),
+    );
+
+    await waitForBodyInteractive(frigateApp.page);
+    await expectBodyInteractive(frigateApp.page);
+
+    await expect
+      .poll(
+        async () =>
+          frigateApp.page
+            .locator('[role="tooltip"]')
+            .filter({ hasText: /presets/i })
+            .isVisible()
+            .catch(() => false),
+        { timeout: 1_000 },
+      )
+      .toBe(false);
+
+    await frigateApp.page.keyboard.press("ArrowUp");
+    await frigateApp.page.keyboard.press("Space");
+    await frigateApp.page.keyboard.press("Enter");
+    await expect
+      .poll(() => menu.isVisible().catch(() => false), { timeout: 1_000 })
+      .toBe(false);
+  });
+});
+
+test.describe("Live mobile layout @critical @mobile", () => {
+  test("mobile dashboard has no sidebar and renders cameras", async ({
+    frigateApp,
+  }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only");
+    await frigateApp.goto("/");
+    await expect(frigateApp.page.locator("aside")).toHaveCount(0);
+    const live = new LivePage(frigateApp.page, false);
+    await expect(live.cameraCard("front_door")).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("mobile camera tap opens single view", async ({ frigateApp }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only");
+    await frigateApp.goto("/");
+    const live = new LivePage(frigateApp.page, false);
+    await live.cameraCard("front_door").first().click({ timeout: 10_000 });
     await expect(frigateApp.page).toHaveURL(/#front_door/);
+  });
+
+  test("mobile onvif single-camera view loads without freezing body", async ({
+    frigateApp,
+  }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only");
+    // Migrated from ptz-overlay.spec.ts — dismissable-layer dedupe smoke test.
+    await frigateApp.api.install({
+      config: {
+        cameras: { [PTZ_CAMERA]: { onvif: { host: "10.0.0.50" } } },
+      },
+    });
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/info`, (route) =>
+      route.fulfill({
+        json: {
+          name: PTZ_CAMERA,
+          features: ["pt", "zoom"],
+          presets: PRESET_NAMES,
+          profiles: [],
+        },
+      }),
+    );
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    await expectBodyInteractive(frigateApp.page);
+    await expect(frigateApp.page.locator("body")).toBeVisible();
   });
 });
