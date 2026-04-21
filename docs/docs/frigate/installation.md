@@ -4,6 +4,8 @@ title: Installation
 ---
 
 import ShmCalculator from '@site/src/components/ShmCalculator'
+import DockerComposeGenerator from '@site/src/components/DockerComposeGenerator'
+
 
 Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/apps/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
 
@@ -70,6 +72,13 @@ services:
 Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder.
 
 :::
+
+### Docker Compose Generator
+
+Generate a Frigate Docker Compose configuration based on your hardware and requirements.
+
+<DockerComposeGenerator/>
+
 
 ### Calculating required shm-size
 

@@ -22,3 +22,8 @@ core
 !/web/**/*.ts
 .idea/*
 .ipynb_checkpoints
+
+# Auto-generated Docker Compose Generator config files
+docs/src/components/DockerComposeGenerator/config/devices.ts
+docs/src/components/DockerComposeGenerator/config/hardware.ts
+docs/src/components/DockerComposeGenerator/config/ports.ts

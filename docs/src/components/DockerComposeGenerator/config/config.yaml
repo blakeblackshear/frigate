@@ -1,0 +1,276 @@
+# Unified configuration for Docker Compose Generator
+# This file defines all devices, hardware options, and ports for Frigate Docker Compose generation
+
+devices:
+  - id: "stable"
+    name: "Standard x86_64"
+    description: "Generic PC / server"
+    icon: "💻"
+    imageTag: "stable"
+    autoHardware: []
+
+  - id: "intel"
+    name: "Intel Device"
+    description: "Intel GPU / NPU"
+    icon: "🖥️"
+    imageTag: "stable"
+    autoHardware:
+      - "gpu"
+      - "intelNpu"
+    helpText: "Intel Device automatically configures /dev/dri and /dev/accel device mappings."
+    helpType: "info"
+
+  - id: "stable-tensorrt"
+    name: "NVIDIA GPU"
+    description: "NVIDIA acceleration"
+    icon: "🟢"
+    imageTag: "stable-tensorrt"
+    autoHardware: []
+    helpText: "Requires the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) to be installed. GPU deploy resources are configured automatically."
+    helpType: "warning"
+    needsNvidiaConfig: true
+
+  - id: "stable-tensorrt-jp6"
+    name: "NVIDIA Jetson"
+    description: "Jetson development board"
+    icon: "🟢"
+    imageTag: "stable-tensorrt-jp6"
+    autoHardware: []
+    helpText: "NVIDIA Jetson devices automatically configure runtime: nvidia."
+    helpType: "info"
+    runtime: "nvidia"
+
+  - id: "stable-rocm"
+    name: "AMD GPU"
+    description: "ROCm acceleration"
+    icon: "🔴"
+    imageTag: "stable-rocm"
+    autoHardware:
+      - "gpu"
+    helpText: "AMD GPU automatically configures LIBVA_DRIVER_NAME environment variable and /dev/dri device mapping."
+    helpType: "info"
+    env:
+      LIBVA_DRIVER_NAME: "radeonsi"
+
+  - id: "apple-silicon"
+    name: "Apple Silicon"
+    description: "Mac M-series processor"
+    icon: "🍎"
+    imageTag: "stable"
+    imageTagSuffix: "-standard-arm64"
+    autoHardware: []
+    helpText: "Apple Silicon (M-series) requires an [external detector](/configuration/object_detectors#apple-silicon-detector) running on the host."
+    helpType: "warning"
+    extraHosts:
+      - "host.docker.internal:host-gateway"
+
+  - id: "raspberry-pi"
+    name: "Raspberry Pi"
+    description: "ARM device"
+    icon: "🍓"
+    imageTag: "stable"
+    imageTagSuffix: "-standard-arm64"
+    autoHardware:
+      - "video11"
+    helpText: "Raspberry Pi automatically configures the Video11 device and uses the arm64 image."
+    helpType: "info"
+
+  - id: "stable-rk"
+    name: "Rockchip"
+    description: "Rockchip SoC board"
+    icon: "🪨"
+    imageTag: "stable-rk"
+    autoHardware:
+      - "gpu"
+    helpText: "Rockchip devices automatically configure /dev/dri device mapping."
+    helpType: "info"
+    devices:
+      - host: "/dev/dma_heap"
+        comment: "Rockchip DMA heap"
+      - host: "/dev/rga"
+        comment: "Rockchip RGA"
+      - host: "/dev/mpp_service"
+        comment: "Rockchip MPP service"
+    volumes:
+      - host: "/sys/"
+        container: "/sys/"
+        readOnly: true
+        comment: "Rockchip system info"
+    securityOpt:
+      - "apparmor=unconfined"
+      - "systempaths=unconfined"
+
+  - id: "stable-synaptics"
+    name: "Synaptics"
+    description: "Synaptics NPU"
+    icon: "🔷"
+    imageTag: "stable-synaptics"
+    autoHardware: []
+    helpText: "Synaptics devices automatically configure /dev/synap and video devices."
+    helpType: "info"
+    devices:
+      - host: "/dev/synap"
+        comment: "Synaptics NPU"
+      - host: "/dev/video0"
+        comment: "Video device 0"
+      - host: "/dev/video1"
+        comment: "Video device 1"
+
+hardware:
+  - id: "usbCoral"
+    label: "USB Coral (TPU)"
+    description: "Enable this if you have a Google Coral USB TPU. Other Coral versions require different device paths."
+    disabledWhen:
+      - "apple-silicon"
+      - "stable-synaptics"
+    devices:
+      - host: "/dev/bus/usb"
+        container: "/dev/bus/usb"
+        comment: "USB Coral — modify for other versions"
+
+  - id: "pcieCoral"
+    label: "PCIe Coral (TPU)"
+    description: "Enable this if you have a Google Coral PCIe/M.2 TPU. You also need to [install the driver](https://github.com/jnicolson/gasket-builder)."
+    disabledWhen:
+      - "apple-silicon"
+      - "stable-synaptics"
+    devices:
+      - host: "/dev/apex_0"
+        container: "/dev/apex_0"
+        comment: "PCIe Coral — follow driver instructions at https://github.com/jnicolson/gasket-builder"
+
+  - id: "gpu"
+    label: "GPU Acceleration (/dev/dri)"
+    description: "Pass through /dev/dri for GPU hardware acceleration (Intel/AMD)."
+    disabledWhen:
+      - "stable-tensorrt-jp6"
+      - "apple-silicon"
+    devices:
+      - host: "/dev/dri"
+        container: "/dev/dri"
+        comment: "GPU hardware acceleration"
+
+  - id: "intelNpu"
+    label: "Intel NPU (/dev/accel)"
+    description: "Pass through /dev/accel for Intel NPU acceleration."
+    disabledWhen:
+      - "stable-tensorrt-jp6"
+      - "apple-silicon"
+      - "stable-rocm"
+      - "stable-rk"
+      - "stable-synaptics"
+    devices:
+      - host: "/dev/accel"
+        container: "/dev/accel"
+        comment: "Intel NPU"
+
+  - id: "hailo"
+    label: "Hailo NPU (/dev/hailo0)"
+    description: "Pass through /dev/hailo0 for Hailo-8 / Hailo-8L NPU acceleration."
+    disabledWhen:
+      - "apple-silicon"
+      - "stable-synaptics"
+    devices:
+      - host: "/dev/hailo0"
+        comment: "Hailo NPU"
+
+  - id: "memryx"
+    label: "MemryX MX3 (/dev/memx0)"
+    description: "Pass through /dev/memx0 for MemryX MX3 NPU acceleration."
+    disabledWhen:
+      - "apple-silicon"
+      - "stable-synaptics"
+    devices:
+      - host: "/dev/memx0"
+        comment: "MemryX MX3 NPU"
+    volumes:
+      - host: "/run/mxa_manager"
+        container: "/run/mxa_manager"
+        comment: "MemryX manager"
+
+  - id: "axera"
+    label: "AXERA Accelerator"
+    description: "Pass through AXERA accelerator devices. Requires the [AXCL driver](#axera) to be installed first."
+    disabledWhen:
+      - "apple-silicon"
+      - "stable-synaptics"
+    devices:
+      - host: "/dev/axcl_host"
+        comment: "AXERA accelerator device"
+      - host: "/dev/ax_mmb_dev"
+        comment: "AXERA MMB device"
+      - host: "/dev/msg_userdev"
+        comment: "AXERA message device"
+    volumes:
+      - host: "/usr/bin/axcl"
+        container: "/usr/bin/axcl"
+        comment: "AXERA binaries"
+      - host: "/usr/lib/axcl"
+        container: "/usr/lib/axcl"
+        comment: "AXERA libraries"
+
+  - id: "video11"
+    label: "Raspberry Pi Video11"
+    description: "Pass through /dev/video11 for Raspberry Pi 4B hardware acceleration."
+    disabledWhen:
+      - "stable-tensorrt"
+      - "stable-tensorrt-jp6"
+      - "stable-rocm"
+      - "stable-rk"
+      - "stable-synaptics"
+      - "intel"
+      - "apple-silicon"
+      - "stable"
+    devices:
+      - host: "/dev/video11"
+        container: "/dev/video11"
+        comment: "Raspberry Pi 4B"
+
+ports:
+  - id: "8971"
+    host: 8971
+    container: 8971
+    protocol: "tcp"
+    description: "Authenticated UI and API access (default HTTPS)"
+    defaultEnabled: true
+    locked: true
+
+  - id: "5000"
+    host: 5000
+    container: 5000
+    protocol: "tcp"
+    description: "Unauthenticated Web UI port (not recommended)"
+    defaultEnabled: false
+    requiresConfirmation: true
+    warningType: "danger"
+    warningContent: "Exposing port 5000 allows **unauthenticated access** to your Frigate instance. Anyone on your network (or the internet if you have a public IP) could access it without any credentials. This may lead to **unauthorized access**, **privacy leaks**, or further attacks. Ensure you have proper firewall rules or VPN in place before enabling this."
+    confirmationLabel: "I understand the risk and confirm enabling port 5000"
+    cooldownSeconds: 10
+
+  - id: "8554"
+    host: 8554
+    container: 8554
+    protocol: "tcp"
+    description: "RTSP feeds"
+    defaultEnabled: true
+
+  - id: "8555-tcp"
+    host: 8555
+    container: 8555
+    protocol: "tcp"
+    description: "WebRTC over TCP"
+    defaultEnabled: true
+
+  - id: "8555-udp"
+    host: 8555
+    container: 8555
+    protocol: "udp"
+    description: "WebRTC over UDP"
+    defaultEnabled: true
+
+  - id: "1984"
+    host: 1984
+    container: 1984
+    protocol: "tcp"
+    description: "Go2RTC Web UIport"
+    defaultEnabled: false
