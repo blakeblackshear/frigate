@@ -180,6 +180,40 @@
   justify-content: center;
 }
 
+.deviceIconSvg {
+  margin-bottom: 0.25rem;
+  height: 40px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  /* Allow iconStyle width/height to override */
+  flex-shrink: 0;
+}
+
+.deviceIconSvg svg {
+  width: var(--svg-width, 100%);
+  height: var(--svg-height, 100%);
+  fill: var(--svg-fill, currentColor);
+  transform: var(--svg-transform, none);
+}
+
+.deviceIconImage {
+  margin-bottom: 0.25rem;
+  height: 40px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deviceIconImage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .deviceName {
   font-weight: var(--ifm-font-weight-semibold);
   color: var(--ifm-font-color-base);
