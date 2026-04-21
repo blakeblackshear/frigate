@@ -238,11 +238,7 @@ export default function Step2StateArea({
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">{t("wizard.step2.cameras")}</h3>
             {availableCameras.length > 0 ? (
-              <Popover
-                open={isPopoverOpen}
-                onOpenChange={setIsPopoverOpen}
-                modal={true}
-              >
+              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"

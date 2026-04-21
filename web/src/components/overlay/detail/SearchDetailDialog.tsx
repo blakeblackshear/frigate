@@ -241,7 +241,7 @@ function AnnotationSettings({
 
   return (
     <div className="ml-2">
-      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+      <Overlay open={open} onOpenChange={handleOpenChange}>
         <Trigger asChild>
           <Button
             type="button"
