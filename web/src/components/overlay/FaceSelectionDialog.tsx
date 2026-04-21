@@ -91,6 +91,7 @@ export default function FaceSelectionDialog({
           </SelectorTrigger>
           <SelectorContent
             className={cn("", isMobile && "mx-1 gap-2 rounded-t-2xl px-4")}
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             {isMobile && (
               <DrawerHeader className="sr-only">

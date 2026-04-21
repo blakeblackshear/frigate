@@ -306,7 +306,10 @@ export default function PtzControlPanel({
             </TooltipContent>
           </Tooltip>
 
-          <DropdownMenuContent className="scrollbar-container max-h-[40dvh] overflow-y-auto">
+          <DropdownMenuContent
+            className="scrollbar-container max-h-[40dvh] overflow-y-auto"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
             {ptz?.presets.map((preset) => (
               <DropdownMenuItem
                 key={preset}
