@@ -7,27 +7,25 @@
  */
 
 import { test, expect } from "../fixtures/frigate-test";
-import {
-  installWsFrameCapture,
-  waitForWsFrame,
-} from "../helpers/ws-frames";
-import {
-  grantClipboardPermissions,
-  readClipboard,
-} from "../helpers/clipboard";
+import { installWsFrameCapture, waitForWsFrame } from "../helpers/ws-frames";
+import { grantClipboardPermissions, readClipboard } from "../helpers/clipboard";
 import {
   getMonacoVisibleText,
   replaceMonacoValue,
   waitForErrorMarker,
 } from "../helpers/monaco";
 
-const SAMPLE_CONFIG = "mqtt:\n  host: mqtt\ncameras:\n  front_door:\n    enabled: true\n";
+const SAMPLE_CONFIG =
+  "mqtt:\n  host: mqtt\ncameras:\n  front_door:\n    enabled: true\n";
 
 async function installSaveRoute(
   app: { page: import("@playwright/test").Page },
   status: number,
   body: Record<string, unknown>,
-): Promise<{ capturedUrl: () => string | null; capturedBody: () => string | null }> {
+): Promise<{
+  capturedUrl: () => string | null;
+  capturedBody: () => string | null;
+}> {
   let lastUrl: string | null = null;
   let lastBody: string | null = null;
   await app.page.route("**/api/config/save**", async (route) => {
@@ -42,14 +40,12 @@ async function installSaveRoute(
 }
 
 test.describe("Config Editor — Monaco @medium", () => {
-  test("editor loads with mocked configRaw content", async ({
-    frigateApp,
-  }) => {
+  test("editor loads with mocked configRaw content", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ configRaw: SAMPLE_CONFIG });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
     // Assert via DOM-rendered visible text (Monaco virtualizes — works
     // for short configs which covers our mocked content).
     await expect
@@ -72,17 +68,17 @@ test.describe("Config Editor — Save @medium", () => {
       message: "Config saved",
     });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
     await frigateApp.page.getByLabel("Save Only").click();
-    await expect.poll(() => capture.capturedUrl(), { timeout: 5_000 }).toMatch(
-      /config\/save\?save_option=saveonly/,
-    );
+    await expect
+      .poll(() => capture.capturedUrl(), { timeout: 5_000 })
+      .toMatch(/config\/save\?save_option=saveonly/);
     // Body is the raw YAML as text/plain
-    await expect.poll(() => capture.capturedBody(), { timeout: 5_000 }).toContain(
-      "front_door",
-    );
+    await expect
+      .poll(() => capture.capturedBody(), { timeout: 5_000 })
+      .toContain("front_door");
   });
 
   test("Save error shows the server message in the error area", async ({
@@ -93,13 +89,13 @@ test.describe("Config Editor — Save @medium", () => {
       message: "Invalid field `cameras.front_door`",
     });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
     await frigateApp.page.getByLabel("Save Only").click();
-    await expect(
-      frigateApp.page.getByText(/Invalid field/i),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(frigateApp.page.getByText(/Invalid field/i)).toBeVisible({
+      timeout: 5_000,
+    });
   });
 });
 
@@ -117,9 +113,9 @@ test.describe("Config Editor — Save and Restart @medium", () => {
     await installWsFrameCapture(frigateApp.page);
 
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     await frigateApp.page.getByLabel("Save & Restart").click();
     const dialog = frigateApp.page.getByRole("alertdialog");
@@ -140,9 +136,9 @@ test.describe("Config Editor — Save and Restart @medium", () => {
     await installSaveRoute(frigateApp, 200, { message: "Saved" });
 
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     await frigateApp.page.getByLabel("Save & Restart").click();
     const dialog = frigateApp.page.getByRole("alertdialog");
@@ -168,14 +164,14 @@ test.describe("Config Editor — Copy @medium", () => {
     await grantClipboardPermissions(context);
     await frigateApp.installDefaults({ configRaw: SAMPLE_CONFIG });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     await frigateApp.page.getByLabel("Copy Config").click();
-    await expect.poll(() => readClipboard(frigateApp.page), { timeout: 5_000 }).toContain(
-      "front_door",
-    );
+    await expect
+      .poll(() => readClipboard(frigateApp.page), { timeout: 5_000 })
+      .toContain("front_door");
   });
 });
 
@@ -190,9 +186,9 @@ test.describe("Config Editor — schema markers @medium", () => {
   }) => {
     await frigateApp.installDefaults({ configRaw: SAMPLE_CONFIG });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     // Replace editor contents with clearly invalid YAML via keyboard.
     await replaceMonacoValue(
@@ -219,17 +215,17 @@ test.describe("Config Editor — Cmd+S keyboard shortcut @medium", () => {
       message: "Saved",
     });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     // Focus the editor so Monaco's keybinding receives the shortcut.
     await frigateApp.page.locator(".monaco-editor").first().click();
     await frigateApp.page.keyboard.press("ControlOrMeta+s");
 
-    await expect.poll(() => capture.capturedUrl(), { timeout: 5_000 }).toMatch(
-      /config\/save\?save_option=saveonly/,
-    );
+    await expect
+      .poll(() => capture.capturedUrl(), { timeout: 5_000 })
+      .toMatch(/config\/save\?save_option=saveonly/);
   });
 });
 
@@ -257,9 +253,9 @@ test.describe("Config Editor — Safe Mode auto-validation @medium", () => {
     });
 
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
     await expect.poll(() => autoSaveCalled, { timeout: 10_000 }).toBe(true);
     await expect(
       frigateApp.page.getByText(/safe-mode validation failure/i),
@@ -268,16 +264,13 @@ test.describe("Config Editor — Safe Mode auto-validation @medium", () => {
 });
 
 test.describe("Config Editor — mobile @medium @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("editor renders at narrow viewport", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ configRaw: SAMPLE_CONFIG });
     await frigateApp.goto("/config");
-    await expect(
-      frigateApp.page.locator(".monaco-editor").first(),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.locator(".monaco-editor").first()).toBeVisible(
+      { timeout: 15_000 },
+    );
   });
 });

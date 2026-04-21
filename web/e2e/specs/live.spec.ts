@@ -9,10 +9,7 @@
 
 import { test, expect } from "../fixtures/frigate-test";
 import { LivePage } from "../pages/live.page";
-import {
-  installWsFrameCapture,
-  waitForWsFrame,
-} from "../helpers/ws-frames";
+import { installWsFrameCapture, waitForWsFrame } from "../helpers/ws-frames";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -86,7 +83,9 @@ test.describe("Live Single Camera — desktop controls @critical", () => {
     await frigateApp.goto("/#front_door");
     const live = new LivePage(frigateApp.page, true);
     // Wait for feature toggles to render (WS camera_activity must arrive first).
-    await expect(live.activeFeatureToggles.first()).toBeVisible({ timeout: 5_000 });
+    await expect(live.activeFeatureToggles.first()).toBeVisible({
+      timeout: 5_000,
+    });
     const activeBefore = await live.activeFeatureToggles.count();
     expect(activeBefore).toBeGreaterThan(0);
 
@@ -96,9 +95,11 @@ test.describe("Live Single Camera — desktop controls @critical", () => {
     // front_door/ prefix + /set suffix (any feature).
     await waitForWsFrame(
       frigateApp.page,
-      (frame) =>
-        frame.includes("front_door/") && frame.includes("/set"),
-      { message: "feature toggle should dispatch a <camera>/<feature>/set frame" },
+      (frame) => frame.includes("front_door/") && frame.includes("/set"),
+      {
+        message:
+          "feature toggle should dispatch a <camera>/<feature>/set frame",
+      },
     );
   });
 
@@ -206,10 +207,7 @@ test.describe("Live PTZ preset dropdown @critical", () => {
       .first();
     await expect(menu).toBeVisible({ timeout: 3_000 });
 
-    await menu
-      .getByRole("menuitem", { name: PRESET_NAMES[0] })
-      .first()
-      .click();
+    await menu.getByRole("menuitem", { name: PRESET_NAMES[0] }).first().click();
     await expect(menu).not.toBeVisible({ timeout: 3_000 });
 
     await waitForWsFrame(
@@ -251,7 +249,9 @@ test.describe("Live mobile layout @critical @mobile", () => {
     await frigateApp.goto("/");
     await expect(frigateApp.page.locator("aside")).toHaveCount(0);
     const live = new LivePage(frigateApp.page, false);
-    await expect(live.cameraCard("front_door")).toBeVisible({ timeout: 10_000 });
+    await expect(live.cameraCard("front_door")).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("mobile camera tap opens single view", async ({ frigateApp }) => {

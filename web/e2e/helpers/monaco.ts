@@ -14,10 +14,7 @@ import { expect, type Page } from "@playwright/test";
  * lines. For short configs (our mocks) that's the full content.
  */
 export async function getMonacoVisibleText(page: Page): Promise<string> {
-  return page
-    .locator(".monaco-editor .view-lines")
-    .first()
-    .innerText();
+  return page.locator(".monaco-editor .view-lines").first().innerText();
 }
 
 /**

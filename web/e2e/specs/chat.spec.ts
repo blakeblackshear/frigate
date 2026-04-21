@@ -8,13 +8,6 @@
 import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
 
 /**
- * Join NDJSON chunks into a single body (for non-streaming tests).
- */
-function ndjsonBody(chunks: Array<Record<string, unknown>>): string {
-  return chunks.map((c) => JSON.stringify(c)).join("\n") + "\n";
-}
-
-/**
  * Install a window.fetch override on the page so that POSTs to
  * chat/completion resolve with a real ReadableStream that emits the
  * given chunks over time. This is the only way to validate
@@ -153,9 +146,9 @@ test.describe("Chat — streaming @medium", () => {
     await input.fill("greet me");
     await input.press("Enter");
 
-    await expect(
-      frigateApp.page.getByText(/Hello, world!/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText(/Hello, world!/i)).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("tool_calls chunks render a ToolCallsGroup", async ({ frigateApp }) => {
@@ -180,9 +173,9 @@ test.describe("Chat — streaming @medium", () => {
 
     // ToolCallsGroup normalizes "search_objects" → "Search Objects" via
     // normalizeName(). Match the rendered display label instead.
-    await expect(
-      frigateApp.page.getByText(/search objects/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText(/search objects/i)).toBeVisible({
+      timeout: 10_000,
+    });
     await expect(
       frigateApp.page.getByText(/searching for people/i),
     ).toBeVisible({ timeout: 5_000 });
@@ -210,9 +203,9 @@ test.describe("Chat — stop @medium", () => {
     await input.press("Enter");
 
     // Wait for the first chunk to render
-    await expect(
-      frigateApp.page.getByText(/First chunk\./),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText(/First chunk\./)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // The Stop button is a destructive rounded button shown while isLoading.
     // It contains only an FaStop SVG icon (no visible text). Find it by the
@@ -228,9 +221,7 @@ test.describe("Chat — stop @medium", () => {
     });
 
     // Third chunk should never appear.
-    await expect(
-      frigateApp.page.getByText(/Third chunk\./),
-    ).toHaveCount(0);
+    await expect(frigateApp.page.getByText(/Third chunk\./)).toHaveCount(0);
   });
 });
 
@@ -308,10 +299,7 @@ test.describe("Chat — attachment chip @medium", () => {
 });
 
 test.describe("Chat — mobile @medium @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("chat input is focusable at mobile viewport", async ({ frigateApp }) => {
     await frigateApp.goto("/chat");

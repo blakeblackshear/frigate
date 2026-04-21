@@ -49,9 +49,9 @@ test.describe("Classification — model list @medium", () => {
     await installDatasetRoute(frigateApp, "state_classifier");
     await frigateApp.goto("/classification");
     await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
-    await expect(
-      frigateApp.page.getByText("object_classifier"),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText("object_classifier")).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("empty custom map renders without crash", async ({ frigateApp }) => {
@@ -74,12 +74,10 @@ test.describe("Classification — model list @medium", () => {
     await installDatasetRoute(frigateApp, "state_classifier");
     await frigateApp.goto("/classification");
     // Objects is default — object_classifier visible, state_classifier hidden.
-    await expect(
-      frigateApp.page.getByText("object_classifier"),
-    ).toBeVisible({ timeout: 10_000 });
-    await expect(
-      frigateApp.page.getByText("state_classifier"),
-    ).toHaveCount(0);
+    await expect(frigateApp.page.getByText("object_classifier")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(frigateApp.page.getByText("state_classifier")).toHaveCount(0);
 
     // Click the "states" toggle. Radix ToggleGroup type="single" uses role="radio".
     const statesToggle = frigateApp.page
@@ -88,12 +86,10 @@ test.describe("Classification — model list @medium", () => {
     await expect(statesToggle).toBeVisible({ timeout: 5_000 });
     await statesToggle.click();
 
-    await expect(
-      frigateApp.page.getByText("state_classifier"),
-    ).toBeVisible({ timeout: 5_000 });
-    await expect(
-      frigateApp.page.getByText("object_classifier"),
-    ).toHaveCount(0);
+    await expect(frigateApp.page.getByText("state_classifier")).toBeVisible({
+      timeout: 5_000,
+    });
+    await expect(frigateApp.page.getByText("object_classifier")).toHaveCount(0);
   });
 });
 
@@ -109,9 +105,7 @@ test.describe("Classification — model detail navigation @medium", () => {
     await installTrainRoute(frigateApp, "object_classifier");
     await frigateApp.goto("/classification");
 
-    const objectCard = frigateApp.page
-      .getByText("object_classifier")
-      .first();
+    const objectCard = frigateApp.page.getByText("object_classifier").first();
     await expect(objectCard).toBeVisible({ timeout: 10_000 });
     await objectCard.click();
 
@@ -123,9 +117,7 @@ test.describe("Classification — model detail navigation @medium", () => {
     ).toBeVisible({ timeout: 5_000 });
 
     // The model grid is no longer shown; state_classifier card is gone.
-    await expect(
-      frigateApp.page.getByText("state_classifier"),
-    ).toHaveCount(0);
+    await expect(frigateApp.page.getByText("state_classifier")).toHaveCount(0);
   });
 });
 
@@ -167,18 +159,16 @@ test.describe("Classification — delete model (desktop) @medium", () => {
       await route.fulfill({ json: { success: true, require_restart: false } });
     });
     await frigateApp.goto("/classification");
-    await expect(
-      frigateApp.page.getByText("object_classifier"),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText("object_classifier")).toBeVisible({
+      timeout: 10_000,
+    });
 
     // The card-level actions menu (FiMoreVertical three-dot icon) is a
     // DropdownMenuTrigger with asChild on a BlurredIconButton div.
     // Radix forwards aria-haspopup="menu" to the child element.
     // Scope the selector to the model card grid to avoid hitting the
     // settings sidebar trigger.
-    const cardGrid = frigateApp.page.locator(
-      ".grid.auto-rows-max",
-    );
+    const cardGrid = frigateApp.page.locator(".grid.auto-rows-max");
     await expect(cardGrid).toBeVisible({ timeout: 5_000 });
     const trigger = cardGrid.locator('[aria-haspopup="menu"]').first();
     await expect(trigger).toBeVisible({ timeout: 5_000 });
@@ -192,7 +182,10 @@ test.describe("Classification — delete model (desktop) @medium", () => {
     // Confirm the AlertDialog.
     const alert = frigateApp.page.getByRole("alertdialog");
     await expect(alert).toBeVisible({ timeout: 5_000 });
-    await alert.getByRole("button", { name: /delete|confirm/i }).first().click();
+    await alert
+      .getByRole("button", { name: /delete|confirm/i })
+      .first()
+      .click();
 
     await expect.poll(() => deleteCalled, { timeout: 5_000 }).toBe(true);
     await expect.poll(() => configSetCalled, { timeout: 5_000 }).toBe(true);
@@ -219,10 +212,7 @@ test.describe("Classification — admin only @medium", () => {
 });
 
 test.describe("Classification — mobile @medium @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("page renders at mobile viewport", async ({ frigateApp }) => {
     await frigateApp.installDefaults({

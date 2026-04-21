@@ -163,9 +163,7 @@ test.describe("Review — filters (desktop) @critical", () => {
     // Radix popper wrapper), so scope by the grid role instead.
     const calendarGrid = frigateApp.page.locator('[role="grid"]').first();
     await expect(calendarGrid).toBeVisible({ timeout: 3_000 });
-    const dayButton = calendarGrid
-      .locator('[role="gridcell"] button')
-      .first();
+    const dayButton = calendarGrid.locator('[role="gridcell"] button').first();
     await expect(dayButton).toBeVisible({ timeout: 3_000 });
     await frigateApp.page.keyboard.press("Escape");
   });
@@ -183,7 +181,8 @@ test.describe("Review — filters (desktop) @critical", () => {
     await expect(showReviewedSwitch).toBeVisible({ timeout: 5_000 });
 
     // Record initial checked state and click to toggle
-    const initialChecked = await showReviewedSwitch.getAttribute("aria-checked");
+    const initialChecked =
+      await showReviewedSwitch.getAttribute("aria-checked");
     await showReviewedSwitch.click();
     const flippedChecked = initialChecked === "true" ? "false" : "true";
     await expect(showReviewedSwitch).toHaveAttribute(
@@ -211,10 +210,7 @@ test.describe("Review — timeline (desktop) @critical", () => {
 });
 
 test.describe("Review — mobile @critical @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("severity tabs render on mobile", async ({ frigateApp }) => {
     await frigateApp.goto("/review");

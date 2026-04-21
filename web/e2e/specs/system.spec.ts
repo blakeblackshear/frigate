@@ -104,11 +104,9 @@ test.describe("System — tabs @medium", () => {
     } else {
       // Mobile: tab activation (data-state "on") already asserted above.
       // Additionally confirm general tab is no longer the active tab.
-      await expect(frigateApp.page.getByLabel("Select general")).toHaveAttribute(
-        "data-state",
-        "off",
-        { timeout: 5_000 },
-      );
+      await expect(
+        frigateApp.page.getByLabel("Select general"),
+      ).toHaveAttribute("data-state", "off", { timeout: 5_000 });
     }
   });
 
@@ -129,7 +127,9 @@ test.describe("System — tabs @medium", () => {
     // mock has front_door, backyard, garage.
     for (const cam of ["front_door", "backyard", "garage"]) {
       await expect(
-        frigateApp.page.getByText(new RegExp(cam.replace("_", ".?"), "i")).first(),
+        frigateApp.page
+          .getByText(new RegExp(cam.replace("_", ".?"), "i"))
+          .first(),
       ).toBeVisible({ timeout: 10_000 });
     }
   });
@@ -211,16 +211,13 @@ test.describe("System — RestartDialog @medium", () => {
 });
 
 test.describe("System — mobile @medium @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("tabs render at mobile viewport", async ({ frigateApp }) => {
     await frigateApp.goto("/system#general");
-    await expect(
-      frigateApp.page.getByLabel("Select general"),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.getByLabel("Select general")).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("switching tabs works at mobile viewport", async ({ frigateApp }) => {

@@ -68,9 +68,7 @@ test.describe("Replay — active session @medium", () => {
       frigateApp.page.getByRole("heading", { level: 3, name: /Debug Replay/i }),
     ).toBeVisible({ timeout: 10_000 });
     // Three tabs (Debug / Objects / Messages) in TabsList
-    await expect(
-      frigateApp.page.locator('[role="tab"]'),
-    ).toHaveCount(3);
+    await expect(frigateApp.page.locator('[role="tab"]')).toHaveCount(3);
   });
 
   test("debug toggles render with bbox ON by default", async ({
@@ -126,7 +124,9 @@ test.describe("Replay — active session @medium", () => {
     // On mobile the Configuration button text span is hidden (md:inline).
     // It is the first button inside the right-side action group div
     // (the flex container that holds Config + Stop, sibling of the Back button).
-    const actionGroup = frigateApp.page.locator(".flex.items-center.gap-2 button");
+    const actionGroup = frigateApp.page.locator(
+      ".flex.items-center.gap-2 button",
+    );
     await actionGroup.first().click();
 
     const dialog = frigateApp.page.getByRole("dialog");
@@ -172,9 +172,9 @@ test.describe("Replay — active session @medium", () => {
     });
 
     // The object row renders the label.
-    await expect(
-      frigateApp.page.getByText(/person/i).first(),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(frigateApp.page.getByText(/person/i).first()).toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   test("Messages tab renders WsMessageFeed container", async ({
@@ -287,10 +287,7 @@ test.describe("Replay — stop button (mobile) @medium @mobile", () => {
 });
 
 test.describe("Replay — mobile @medium @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("no-session state renders at mobile viewport", async ({
     frigateApp,

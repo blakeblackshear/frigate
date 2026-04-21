@@ -190,9 +190,9 @@ test.describe("Face Library — delete flow (desktop) @high", () => {
       .first()
       .click();
 
-    await expect.poll(() => deleteUrl, { timeout: 5_000 }).toMatch(
-      /\/faces\/alice\/delete/,
-    );
+    await expect
+      .poll(() => deleteUrl, { timeout: 5_000 })
+      .toMatch(/\/faces\/alice\/delete/);
     expect(deleteBody).toMatchObject({ ids: expect.any(Array) });
   });
 });
@@ -245,9 +245,9 @@ test.describe("Face Library — rename flow (desktop) @high", () => {
       .first()
       .click();
 
-    await expect.poll(() => renameUrl, { timeout: 5_000 }).toMatch(
-      /\/faces\/alice\/rename/,
-    );
+    await expect
+      .poll(() => renameUrl, { timeout: 5_000 })
+      .toMatch(/\/faces\/alice\/rename/);
     expect(renameBody).toEqual({ new_name: "alice_renamed" });
   });
 });
@@ -361,10 +361,7 @@ test.describe("FaceSelectionDialog @high", () => {
 });
 
 test.describe("Face Library — mobile @high @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("mobile library selector dropdown closes cleanly on Escape", async ({
     frigateApp,

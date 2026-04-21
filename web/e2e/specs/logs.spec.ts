@@ -7,10 +7,7 @@
  */
 
 import { test, expect } from "../fixtures/frigate-test";
-import {
-  grantClipboardPermissions,
-  readClipboard,
-} from "../helpers/clipboard";
+import { grantClipboardPermissions, readClipboard } from "../helpers/clipboard";
 
 function logsJsonBody(lines: string[]) {
   return { lines, totalLines: lines.length };
@@ -29,17 +26,16 @@ test.describe("Logs — service tabs @medium", () => {
       }),
     );
     // Silence the streaming fetch so it doesn't hang the test.
-    await frigateApp.page.route(
-      /\/api\/logs\/frigate\?stream=true/,
-      (route) => route.fulfill({ status: 200, body: "" }),
+    await frigateApp.page.route(/\/api\/logs\/frigate\?stream=true/, (route) =>
+      route.fulfill({ status: 200, body: "" }),
     );
     await frigateApp.goto("/logs");
     await expect(frigateApp.page.getByLabel("Select frigate")).toBeVisible({
       timeout: 5_000,
     });
-    await expect(
-      frigateApp.page.getByText(/Frigate started/),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText(/Frigate started/)).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("switching to go2rtc fires a GET to /logs/go2rtc", async ({
@@ -85,14 +81,13 @@ test.describe("Logs — actions @medium", () => {
         ]),
       }),
     );
-    await frigateApp.page.route(
-      /\/api\/logs\/frigate\?stream=true/,
-      (route) => route.fulfill({ status: 200, body: "" }),
+    await frigateApp.page.route(/\/api\/logs\/frigate\?stream=true/, (route) =>
+      route.fulfill({ status: 200, body: "" }),
     );
     await frigateApp.goto("/logs");
-    await expect(
-      frigateApp.page.getByText(/Frigate started/),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText(/Frigate started/)).toBeVisible({
+      timeout: 10_000,
+    });
 
     const copyBtn = frigateApp.page.getByLabel("Copy to Clipboard");
     await expect(copyBtn).toBeVisible({ timeout: 5_000 });
@@ -112,9 +107,8 @@ test.describe("Logs — actions @medium", () => {
       }
       return route.fulfill({ json: logsJsonBody(["frigate line"]) });
     });
-    await frigateApp.page.route(
-      /\/api\/logs\/frigate\?stream=true/,
-      (route) => route.fulfill({ status: 200, body: "" }),
+    await frigateApp.page.route(/\/api\/logs\/frigate\?stream=true/, (route) =>
+      route.fulfill({ status: 200, body: "" }),
     );
 
     await frigateApp.goto("/logs");
@@ -132,9 +126,8 @@ test.describe("Logs — websocket tab @medium", () => {
     await frigateApp.page.route(/\/api\/logs\/frigate(\?|$)/, (route) =>
       route.fulfill({ json: logsJsonBody(["frigate line"]) }),
     );
-    await frigateApp.page.route(
-      /\/api\/logs\/frigate\?stream=true/,
-      (route) => route.fulfill({ status: 200, body: "" }),
+    await frigateApp.page.route(/\/api\/logs\/frigate\?stream=true/, (route) =>
+      route.fulfill({ status: 200, body: "" }),
     );
     await frigateApp.goto("/logs");
     const wsTab = frigateApp.page.getByLabel("Select websocket");
@@ -152,9 +145,7 @@ test.describe("Logs — streaming @medium", () => {
         return route.fallback();
       }
       return route.fulfill({
-        json: logsJsonBody([
-          "[2026-04-06 10:00:00] INFO: initial batch line",
-        ]),
+        json: logsJsonBody(["[2026-04-06 10:00:00] INFO: initial batch line"]),
       });
     });
 
@@ -179,11 +170,15 @@ test.describe("Logs — streaming @medium", () => {
             async start(controller) {
               await new Promise((r) => setTimeout(r, 30));
               controller.enqueue(
-                encoder.encode("[2026-04-06 10:00:02] INFO: streamed line one\n"),
+                encoder.encode(
+                  "[2026-04-06 10:00:02] INFO: streamed line one\n",
+                ),
               );
               await new Promise((r) => setTimeout(r, 30));
               controller.enqueue(
-                encoder.encode("[2026-04-06 10:00:03] INFO: streamed line two\n"),
+                encoder.encode(
+                  "[2026-04-06 10:00:03] INFO: streamed line two\n",
+                ),
               );
               controller.close();
             },
@@ -197,35 +192,31 @@ test.describe("Logs — streaming @medium", () => {
     await frigateApp.goto("/logs");
     // The initial batch line is parsed by LogLineData and its content is
     // rendered in a .log-content cell — assert against that element.
-    await expect(
-      frigateApp.page.getByText("initial batch line"),
-    ).toBeVisible({ timeout: 10_000 });
-    await expect(
-      frigateApp.page.getByText(/streamed line one/),
-    ).toBeVisible({ timeout: 10_000 });
-    await expect(
-      frigateApp.page.getByText(/streamed line two/),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(frigateApp.page.getByText("initial batch line")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(frigateApp.page.getByText(/streamed line one/)).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(frigateApp.page.getByText(/streamed line two/)).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });
 
 test.describe("Logs — mobile @medium @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("service tabs render at mobile viewport", async ({ frigateApp }) => {
     await frigateApp.page.route(/\/api\/logs\/frigate(\?|$)/, (route) =>
       route.fulfill({ json: logsJsonBody(["frigate line"]) }),
     );
-    await frigateApp.page.route(
-      /\/api\/logs\/frigate\?stream=true/,
-      (route) => route.fulfill({ status: 200, body: "" }),
+    await frigateApp.page.route(/\/api\/logs\/frigate\?stream=true/, (route) =>
+      route.fulfill({ status: 200, body: "" }),
     );
     await frigateApp.goto("/logs");
-    await expect(
-      frigateApp.page.getByLabel("Select frigate"),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(frigateApp.page.getByLabel("Select frigate")).toBeVisible({
+      timeout: 5_000,
+    });
   });
 });

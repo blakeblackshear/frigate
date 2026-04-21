@@ -9,14 +9,6 @@
 import { test, expect } from "../fixtures/frigate-test";
 import { viewerProfile } from "../fixtures/mock-data/profile";
 
-const ADMIN_ROUTES = [
-  { path: "/system", marker: () => ({ label: "Select general" }) },
-  {
-    path: "/logs",
-    marker: () => ({ label: "Select frigate" }),
-  },
-] as const;
-
 test.describe("Auth — admin access @high", () => {
   test("admin /system renders general tab", async ({ frigateApp }) => {
     await frigateApp.goto("/system");
@@ -92,10 +84,7 @@ test.describe("Auth — viewer restrictions @high", () => {
 });
 
 test.describe("Auth — viewer nav restrictions (desktop) @high", () => {
-  test.skip(
-    ({ frigateApp }) => frigateApp.isMobile,
-    "Sidebar only on desktop",
-  );
+  test.skip(({ frigateApp }) => frigateApp.isMobile, "Sidebar only on desktop");
 
   test("viewer sidebar hides admin routes", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ profile: viewerProfile() });

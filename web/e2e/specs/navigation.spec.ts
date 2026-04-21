@@ -75,7 +75,12 @@ test.describe("Navigation — conditional items @critical", () => {
     test.skip(frigateApp.isMobile, "Desktop sidebar");
     await frigateApp.installDefaults({
       config: {
-        genai: { enabled: false, provider: "ollama", model: "none", base_url: "" },
+        genai: {
+          enabled: false,
+          provider: "ollama",
+          model: "none",
+          base_url: "",
+        },
       },
     });
     await frigateApp.goto("/");

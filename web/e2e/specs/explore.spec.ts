@@ -78,10 +78,7 @@ test.describe("Explore — search @high", () => {
 // ---------------------------------------------------------------------------
 
 test.describe("Explore — filters (desktop) @high", () => {
-  test.skip(
-    ({ frigateApp }) => frigateApp.isMobile,
-    "Desktop popovers",
-  );
+  test.skip(({ frigateApp }) => frigateApp.isMobile, "Desktop popovers");
 
   test("Cameras popover lists configured cameras", async ({ frigateApp }) => {
     // Navigate with a labels filter param so the filter bar renders.
@@ -136,7 +133,9 @@ test.describe("Explore — filters (desktop) @high", () => {
     );
     await expect(overlay.first()).toBeVisible({ timeout: 3_000 });
     // "Sub Labels" section heading always renders inside the dialog.
-    await expect(frigateApp.page.getByText(/sub.?label/i).first()).toBeVisible();
+    await expect(
+      frigateApp.page.getByText(/sub.?label/i).first(),
+    ).toBeVisible();
     await frigateApp.page.keyboard.press("Escape");
   });
 
@@ -251,10 +250,7 @@ test.describe("Explore — similarity search (desktop) @high", () => {
 // ---------------------------------------------------------------------------
 
 test.describe("Explore — mobile @high @mobile", () => {
-  test.skip(
-    ({ frigateApp }) => !frigateApp.isMobile,
-    "Mobile-only",
-  );
+  test.skip(({ frigateApp }) => !frigateApp.isMobile, "Mobile-only");
 
   test("search input is focusable at mobile viewport", async ({
     frigateApp,
