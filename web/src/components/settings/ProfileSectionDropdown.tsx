@@ -41,7 +41,7 @@ export function ProfileSectionDropdown({
     : null;
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {iconOnly ? (
           <Button variant="outline" size="sm">

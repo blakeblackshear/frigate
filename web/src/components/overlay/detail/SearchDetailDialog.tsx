@@ -241,7 +241,7 @@ function AnnotationSettings({
 
   return (
     <div className="ml-2">
-      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+      <Overlay open={open} onOpenChange={handleOpenChange}>
         <Trigger asChild>
           <Button
             type="button"
@@ -269,7 +269,6 @@ function AnnotationSettings({
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
           {...contentProps}
-          {...(isDesktop ? { disablePortal: true } : {})}
           data-annotation-popover
         >
           <AnnotationSettingsPane

@@ -342,7 +342,7 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
           {config.name}
         </div>
         <div className="absolute bottom-2 right-2 z-40">
-          <DropdownMenu modal={false}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <BlurredIconButton>
                 <FiMoreVertical className="size-5 text-white" />

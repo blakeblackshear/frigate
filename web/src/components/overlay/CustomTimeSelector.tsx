@@ -127,7 +127,7 @@ export function CustomTimeSelector({
               {formattedStart}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center" disablePortal>
+          <PopoverContent className="flex flex-col items-center">
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(startTime * 1000)}
@@ -193,7 +193,7 @@ export function CustomTimeSelector({
               {formattedEnd}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center" disablePortal>
+          <PopoverContent className="flex flex-col items-center">
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(endTime * 1000)}

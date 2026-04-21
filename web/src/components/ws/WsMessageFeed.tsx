@@ -351,7 +351,6 @@ function TopicFilterButton({
 
   return (
     <DropdownMenu
-      modal={false}
       open={open}
       onOpenChange={(open) => {
         if (!open) setCurrentTopics(selectedTopics);
@@ -517,7 +516,6 @@ function WsCamerasFilterButton({
 
   return (
     <DropdownMenu
-      modal={false}
       open={open}
       onOpenChange={(open) => {
         if (!open) setCurrentCameras(selectedCameras);

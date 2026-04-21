@@ -14,7 +14,7 @@ import {
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraPtzInfo } from "@/types/ptz";
 import React, { useCallback } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   FaAngleDown,
@@ -292,7 +292,7 @@ export default function PtzControlPanel({
         </Tooltip>
       )}
       {(ptz?.presets?.length ?? 0) > 0 && (
-        <DropdownMenu modal={!isDesktop}>
+        <DropdownMenu>
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
