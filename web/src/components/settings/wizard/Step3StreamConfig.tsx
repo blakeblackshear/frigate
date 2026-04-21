@@ -415,10 +415,7 @@ export default function Step3StreamConfig({
                               </Button>
                             </div>
                           </PopoverTrigger>
-                          <PopoverContent
-                            className="w-[--radix-popover-trigger-width] p-2"
-                            disablePortal
-                          >
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-2">
                             <Command>
                               <CommandInput
                                 placeholder={t(

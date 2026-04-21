@@ -598,7 +598,6 @@ function SearchRangeSelector({
                 setStartOpen(false);
               }
             }}
-            modal={false}
           >
             <PopoverTrigger asChild>
               <Button
@@ -614,10 +613,7 @@ function SearchRangeSelector({
                 {formattedStart}
               </Button>
             </PopoverTrigger>
-            <PopoverContent
-              disablePortal
-              className="flex flex-col items-center"
-            >
+            <PopoverContent className="flex flex-col items-center">
               <TimezoneAwareCalendar
                 timezone={timezone}
                 selectedDay={new Date(startTime * 1000)}
@@ -668,7 +664,6 @@ function SearchRangeSelector({
                 setEndOpen(false);
               }
             }}
-            modal={false}
           >
             <PopoverTrigger asChild>
               <Button
@@ -684,10 +679,7 @@ function SearchRangeSelector({
                 {formattedEnd}
               </Button>
             </PopoverTrigger>
-            <PopoverContent
-              disablePortal
-              className="flex flex-col items-center"
-            >
+            <PopoverContent className="flex flex-col items-center">
               <TimezoneAwareCalendar
                 timezone={timezone}
                 selectedDay={new Date(endTime * 1000)}
