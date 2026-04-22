@@ -1516,7 +1516,7 @@ export default function Settings() {
               <div className="sticky bottom-0 z-50 mt-2 bg-background p-4">
                 <div className="flex flex-col items-center gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-danger">
+                    <span className="text-sm text-unsaved">
                       {t("unsavedChanges", {
                         ns: "views/settings",
                         defaultValue: "You have unsaved changes",
