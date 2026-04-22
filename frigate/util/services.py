@@ -807,10 +807,15 @@ async def get_video_properties(
 ) -> dict[str, Any]:
     async def probe_with_ffprobe(
         url: str,
+        rtsp_transport: Optional[str] = None,
     ) -> tuple[bool, int, int, Optional[str], float]:
         """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
-        cmd = [
-            ffmpeg.ffprobe_path,
+        cmd = [ffmpeg.ffprobe_path]
+        if rtsp_transport:
+            cmd += ["-rtsp_transport", rtsp_transport]
+        cmd += [
+            "-rw_timeout",
+            "5000000",
             "-v",
             "quiet",
             "-print_format",
@@ -878,6 +883,12 @@ async def get_video_properties(
     # fallback to ffprobe if needed
     if not has_video or (get_duration and duration < 0):
         has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+
+    # last resort for RTSP: try TCP transport, since default UDP may be blocked
+    if (not has_video or (get_duration and duration < 0)) and url.startswith("rtsp://"):
+        has_video, width, height, fourcc, duration = await probe_with_ffprobe(
+            url, rtsp_transport="tcp"
+        )
 
     result: dict[str, Any] = {"has_valid_video": has_video}
     if has_video:

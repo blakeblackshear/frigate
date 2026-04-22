@@ -607,23 +607,38 @@ function StreamIssues({
       }
     }
 
-    if (stream.roles.includes("detect") && stream.resolution) {
-      const [width, height] = stream.resolution.split("x").map(Number);
-      if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
-        const minDimension = Math.min(width, height);
-        const maxDimension = Math.max(width, height);
+    if (stream.roles.includes("detect") && stream.testResult) {
+      const probedResolution = stream.testResult.resolution;
+      let probedWidth = 0;
+      let probedHeight = 0;
+      if (probedResolution) {
+        const [w, h] = probedResolution.split("x").map(Number);
+        if (!isNaN(w) && !isNaN(h)) {
+          probedWidth = w;
+          probedHeight = h;
+        }
+      }
+
+      if (probedWidth <= 0 || probedHeight <= 0) {
+        result.push({
+          type: "error",
+          message: t("cameraWizard.step4.issues.resolutionUnknown"),
+        });
+      } else {
+        const minDimension = Math.min(probedWidth, probedHeight);
+        const maxDimension = Math.max(probedWidth, probedHeight);
         if (minDimension > 1080) {
           result.push({
             type: "warning",
             message: t("cameraWizard.step4.issues.resolutionHigh", {
-              resolution: stream.resolution,
+              resolution: probedResolution,
             }),
           });
         } else if (maxDimension < 640) {
           result.push({
             type: "error",
             message: t("cameraWizard.step4.issues.resolutionLow", {
-              resolution: stream.resolution,
+              resolution: probedResolution,
             }),
           });
         }
