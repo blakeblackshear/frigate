@@ -877,15 +877,23 @@ async def get_video_properties(
         cap.release()
         return valid, width, height, fourcc, duration
 
-    # try cv2 first
-    has_video, width, height, fourcc, duration = probe_with_cv2(url)
+    is_rtsp = url.startswith("rtsp://")
 
-    # fallback to ffprobe if needed
-    if not has_video or (get_duration and duration < 0):
+    if is_rtsp:
+        # skip cv2 for RTSP: its FFmpeg backend has a hardcoded ~30s internal
+        # timeout that cannot be shortened per-call, and ffprobe bounded by
+        # -rw_timeout handles RTSP probing reliably
         has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+    else:
+        # try cv2 first for local files, HTTP, RTMP
+        has_video, width, height, fourcc, duration = probe_with_cv2(url)
+
+        # fallback to ffprobe if needed
+        if not has_video or (get_duration and duration < 0):
+            has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
 
     # last resort for RTSP: try TCP transport, since default UDP may be blocked
-    if (not has_video or (get_duration and duration < 0)) and url.startswith("rtsp://"):
+    if (not has_video or (get_duration and duration < 0)) and is_rtsp:
         has_video, width, height, fourcc, duration = await probe_with_ffprobe(
             url, rtsp_transport="tcp"
         )
