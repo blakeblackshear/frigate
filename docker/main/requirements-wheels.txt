@@ -11,7 +11,7 @@ joserfc == 1.2.*
 cryptography == 44.0.*
 pathvalidate == 3.3.*
 markupsafe == 3.0.*
-python-multipart == 0.0.20
+python-multipart == 0.0.26
 # Classification Model Training
 tensorflow == 2.19.* ; platform_machine == 'aarch64'
 tensorflow-cpu == 2.19.* ; platform_machine == 'x86_64'
