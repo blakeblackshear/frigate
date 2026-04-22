@@ -154,7 +154,7 @@ export function KnownPlatesField(props: FieldProps) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle
-                  className={cn("text-sm", isModified && "text-danger")}
+                  className={cn("text-sm", isModified && "text-unsaved")}
                 >
                   {title}
                 </CardTitle>

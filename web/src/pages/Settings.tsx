@@ -1435,7 +1435,7 @@ export default function Settings() {
                 />
               )}
               {showUnsavedDot && (
-                <span className="inline-block size-2 rounded-full bg-danger" />
+                <span className="inline-block size-2 rounded-full bg-unsaved" />
               )}
             </div>
           )}

@@ -1012,7 +1012,7 @@ export function ConfigSection({
         >
           {hasChanges && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-danger">
+              <span className="text-sm text-unsaved">
                 {t("unsavedChanges", {
                   ns: "views/settings",
                   defaultValue: "You have unsaved changes",
@@ -1299,7 +1299,7 @@ export function ConfigSection({
                 {hasChanges && (
                   <Badge
                     variant="secondary"
-                    className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+                    className="cursor-default bg-unsaved text-xs text-black hover:bg-unsaved"
                   >
                     {t("button.modified", {
                       ns: "common",
