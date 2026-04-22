@@ -711,23 +711,31 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
     else:
         format_entries = None
 
-    ffprobe_cmd = [
-        ffmpeg.ffprobe_path,
-        "-timeout",
-        "1000000",
-        "-print_format",
-        "json",
-        "-show_entries",
-        f"stream={stream_entries}",
-    ]
+    def run(rtsp_transport: Optional[str] = None) -> sp.CompletedProcess:
+        cmd = [ffmpeg.ffprobe_path]
+        if rtsp_transport:
+            cmd += ["-rtsp_transport", rtsp_transport]
+        cmd += [
+            "-timeout",
+            "1000000",
+            "-print_format",
+            "json",
+            "-show_entries",
+            f"stream={stream_entries}",
+        ]
+        if detailed and format_entries:
+            cmd.extend(["-show_entries", f"format={format_entries}"])
+        cmd.extend(["-loglevel", "error", clean_path])
+        return sp.run(cmd, capture_output=True)
 
-    # Add format entries for detailed mode
-    if detailed and format_entries:
-        ffprobe_cmd.extend(["-show_entries", f"format={format_entries}"])
+    result = run()
 
-    ffprobe_cmd.extend(["-loglevel", "error", clean_path])
+    # For RTSP: retry with explicit TCP transport if the first attempt failed
+    # (default UDP may be blocked)
+    if result.returncode != 0 and clean_path.startswith("rtsp://"):
+        result = run(rtsp_transport="tcp")
 
-    return sp.run(ffprobe_cmd, capture_output=True)
+    return result
 
 
 def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
