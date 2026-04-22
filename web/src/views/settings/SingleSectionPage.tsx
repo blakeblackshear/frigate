@@ -212,7 +212,7 @@ export function SingleSectionPage({
             {sectionStatus.hasChanges && (
               <Badge
                 variant="secondary"
-                className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+                className="cursor-default bg-unsaved text-xs text-black hover:bg-unsaved"
               >
                 {t("button.modified", {
                   ns: "common",
@@ -250,7 +250,7 @@ export function SingleSectionPage({
           {sectionStatus.hasChanges && (
             <Badge
               variant="secondary"
-              className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+              className="cursor-default bg-unsaved text-xs text-black hover:bg-unsaved"
             >
               {t("button.modified", { ns: "common", defaultValue: "Modified" })}
             </Badge>

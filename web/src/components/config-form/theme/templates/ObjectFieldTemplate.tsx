@@ -467,7 +467,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                 <CardTitle
                   className={cn(
                     "flex items-center text-sm",
-                    hasModifiedDescendants && "text-danger",
+                    hasModifiedDescendants && "text-unsaved",
                   )}
                 >
                   {inferredLabel}
