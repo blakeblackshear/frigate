@@ -35,6 +35,10 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.
 
+## [kiosk-monitor](https://github.com/extremeshok/kiosk-monitor)
+
+[kiosk-monitor](https://github.com/extremeshok/kiosk-monitor) is a Raspberry Pi watchdog that runs Chromium fullscreen on a Frigate dashboard (optionally with VLC on a second monitor for an RTSP camera stream), auto-restarts on frozen screens or unreachable URLs, and ships a Birdseye-aware Chromium helper that auto-sizes the grid to the display.
+
 ## [Periscope](https://github.com/maksz42/periscope)
 
 [Periscope](https://github.com/maksz42/periscope) is a lightweight Android app that turns old devices into live viewers for Frigate. It works on Android 2.2 and above, including Android TV. It supports authentication and HTTPS.
