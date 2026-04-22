@@ -42,7 +42,8 @@ opencv-python-headless == 4.11.0.*
 opencv-contrib-python == 4.11.0.*
 scipy == 1.16.*
 # OpenVino & ONNX
-onnxruntime-openvino == 1.24.*
+openvino == 2025.4.*
+onnxruntime == 1.22.*
 # Embeddings
 transformers == 4.45.*
 # Generative AI
