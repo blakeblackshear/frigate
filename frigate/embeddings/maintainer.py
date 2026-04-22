@@ -310,6 +310,10 @@ class EmbeddingMaintainer(threading.Thread):
             self._handle_custom_classification_update(topic, payload)
             return
 
+        if topic == "config/genai":
+            self.config.genai = payload
+            self.genai_manager.update_config(self.config)
+
         # Broadcast to all processors — each decides if the topic is relevant
         for processor in self.realtime_processors:
             processor.update_config(topic, payload)

@@ -113,6 +113,15 @@ class OllamaClient(GenAIClient):
                 schema = response_format.get("json_schema", {}).get("schema")
                 if schema:
                     ollama_options["format"] = self._clean_schema_for_ollama(schema)
+            logger.debug(
+                "Ollama generate request: model=%s, prompt_len=%s, image_count=%s, "
+                "has_format=%s, options=%s",
+                self.genai_config.model,
+                len(prompt),
+                len(images) if images else 0,
+                "format" in ollama_options,
+                {k: v for k, v in ollama_options.items() if k != "format"},
+            )
             result = self.provider.generate(
                 self.genai_config.model,
                 prompt,
@@ -120,9 +129,24 @@ class OllamaClient(GenAIClient):
                 **ollama_options,
             )
             logger.debug(
-                f"Ollama tokens used: eval_count={result.get('eval_count')}, prompt_eval_count={result.get('prompt_eval_count')}"
+                "Ollama generate response: done=%s, done_reason=%s, eval_count=%s, "
+                "prompt_eval_count=%s, response_len=%s",
+                result.get("done"),
+                result.get("done_reason"),
+                result.get("eval_count"),
+                result.get("prompt_eval_count"),
+                len(result.get("response", "") or ""),
             )
-            return str(result["response"]).strip()
+            response_text = str(result["response"]).strip()
+            if not response_text:
+                logger.warning(
+                    "Ollama returned a blank response for model %s (done_reason=%s, "
+                    "eval_count=%s). Check model output, ensure thinking is disabled.",
+                    self.genai_config.model,
+                    result.get("done_reason"),
+                    result.get("eval_count"),
+                )
+            return response_text
         except (
             TimeoutException,
             ResponseError,
