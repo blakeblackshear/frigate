@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.recordings])
 
 
-@router.get("/recordings/storage", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/recordings/storage", dependencies=[Depends(require_role(["admin"]))])
 def get_recordings_storage_usage(request: Request):
     recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
         "storage"
