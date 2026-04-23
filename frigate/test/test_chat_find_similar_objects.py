@@ -145,9 +145,12 @@ class TestExecuteFindSimilarObjects(unittest.TestCase):
             embeddings=embeddings,
             frigate_config=SimpleNamespace(
                 semantic_search=SimpleNamespace(enabled=semantic_enabled),
+                cameras={"driveway": object()},
+                auth=SimpleNamespace(roles={"admin": [], "viewer": ["driveway"]}),
+                proxy=SimpleNamespace(separator=","),
             ),
         )
-        return SimpleNamespace(app=app)
+        return SimpleNamespace(app=app, headers={})
 
     def test_semantic_search_disabled_returns_error(self):
         req = self._make_request(semantic_enabled=False)
@@ -180,7 +183,7 @@ class TestExecuteFindSimilarObjects(unittest.TestCase):
             _execute_find_similar_objects(
                 req,
                 {"event_id": "anchor", "cameras": ["nonexistent_cam"]},
-                allowed_cameras=["nonexistent_cam"],
+                allowed_cameras=["driveway"],
             )
         )
         self.assertEqual(result["results"], [])

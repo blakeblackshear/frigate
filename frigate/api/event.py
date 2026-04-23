@@ -754,6 +754,15 @@ def events_search(
                 status_code=404,
             )
 
+        if search_event.camera not in allowed_cameras:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Event not found",
+                },
+                status_code=404,
+            )
+
         thumb_result = context.search_thumbnail(search_event)
         thumb_ids = {result[0]: result[1] for result in thumb_result}
         search_results = {

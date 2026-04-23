@@ -19,6 +19,7 @@ import numpy as np
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR, UPDATE_BIRDSEYE_LAYOUT
+from frigate.output.ws_auth import ws_has_camera_access
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -236,12 +237,14 @@ class BroadcastThread(threading.Thread):
         converter: FFMpegConverter,
         websocket_server: Any,
         stop_event: MpEvent,
+        config: FrigateConfig,
     ):
         super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
         self.stop_event = stop_event
+        self.config = config
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -256,6 +259,7 @@ class BroadcastThread(threading.Thread):
                     if (
                         not ws.terminated
                         and ws.environ["PATH_INFO"] == f"/{self.camera}"
+                        and ws_has_camera_access(ws, self.camera, self.config)
                     ):
                         try:
                             ws.send(buf, binary=True)
@@ -806,7 +810,11 @@ class Birdseye:
             config.birdseye.restream,
         )
         self.broadcaster = BroadcastThread(
-            "birdseye", self.converter, websocket_server, stop_event
+            "birdseye",
+            self.converter,
+            websocket_server,
+            stop_event,
+            config,
         )
         self.birdseye_manager = BirdsEyeFrameManager(self.config, stop_event)
         self.frame_manager = SharedMemoryFrameManager()

@@ -32,6 +32,7 @@ from frigate.const import (
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
+from frigate.output.ws_auth import ws_has_camera_access
 from frigate.util.image import SharedMemoryFrameManager, get_blank_yuv_frame
 from frigate.util.process import FrigateProcess
 
@@ -102,7 +103,7 @@ class OutputProcess(FrigateProcess):
     ) -> None:
         camera_config = self.config.cameras[camera]
         jsmpeg_cameras[camera] = JsmpegCamera(
-            camera_config, self.stop_event, websocket_server
+            camera_config, self.config, self.stop_event, websocket_server
         )
         preview_recorders[camera] = PreviewRecorder(camera_config)
         preview_write_times[camera] = 0
@@ -262,6 +263,7 @@ class OutputProcess(FrigateProcess):
             # send camera frame to ffmpeg process if websockets are connected
             if any(
                 ws.environ["PATH_INFO"].endswith(camera)
+                and ws_has_camera_access(ws, camera, self.config)
                 for ws in websocket_server.manager
             ):
                 # write to the converter for the camera if clients are listening to the specific camera
@@ -275,6 +277,7 @@ class OutputProcess(FrigateProcess):
                     self.config.birdseye.restream
                     or any(
                         ws.environ["PATH_INFO"].endswith("birdseye")
+                        and ws_has_camera_access(ws, "birdseye", self.config)
                         for ws in websocket_server.manager
                     )
                 )
