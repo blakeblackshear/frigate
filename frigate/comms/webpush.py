@@ -549,6 +549,14 @@ class WebPushClient(Communicator):
         logger.debug(f"Sending camera monitoring push notification for {camera_name}")
 
         for user in self.web_pushers:
+            if not self._user_has_camera_access(user, camera):
+                logger.debug(
+                    "Skipping notification for user %s - no access to camera %s",
+                    user,
+                    camera,
+                )
+                continue
+
             self.send_push_notification(
                 user=user,
                 payload=payload,
