@@ -726,7 +726,20 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
         if detailed and format_entries:
             cmd.extend(["-show_entries", f"format={format_entries}"])
         cmd.extend(["-loglevel", "error", clean_path])
-        return sp.run(cmd, capture_output=True)
+        try:
+            return sp.run(cmd, capture_output=True, timeout=6)
+        except sp.TimeoutExpired as e:
+            logger.info(
+                "ffprobe timed out while probing %s (transport=%s)",
+                clean_camera_user_pass(path),
+                rtsp_transport or "default",
+            )
+            return sp.CompletedProcess(
+                args=cmd,
+                returncode=1,
+                stdout=e.stdout or b"",
+                stderr=(e.stderr or b"") + b"\nffprobe timed out",
+            )
 
     result = run()
 
@@ -832,11 +845,23 @@ async def get_video_properties(
             "-show_streams",
             url,
         ]
+        proc = None
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, _ = await proc.communicate()
+            try:
+                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=6)
+            except asyncio.TimeoutError:
+                logger.info(
+                    "ffprobe timed out while probing %s (transport=%s)",
+                    clean_camera_user_pass(url),
+                    rtsp_transport or "default",
+                )
+                proc.kill()
+                await proc.wait()
+                return False, 0, 0, None, -1
+
             if proc.returncode != 0:
                 return False, 0, 0, None, -1
 
