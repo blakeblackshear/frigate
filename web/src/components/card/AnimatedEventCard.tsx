@@ -17,6 +17,9 @@ import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { FaCircleCheck } from "react-icons/fa6";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { MdOutlinePersonSearch } from "react-icons/md";
+import { ThreatLevel } from "@/types/review";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -127,6 +130,11 @@ export function AnimatedEventCard({
     true,
   );
 
+  const threatLevel = useMemo<ThreatLevel>(
+    () => (event.data.metadata?.potential_threat_level ?? 0) as ThreatLevel,
+    [event],
+  );
+
   const aspectRatio = useMemo(() => {
     if (
       !config ||
@@ -152,7 +160,15 @@ export function AnimatedEventCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="pointer-events-none absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
+                className={cn(
+                  "absolute left-2 top-1 z-40 transition-opacity",
+                  threatLevel === ThreatLevel.SECURITY_CONCERN &&
+                    "pointer-events-auto bg-severity_alert opacity-100 hover:bg-severity_alert",
+                  threatLevel === ThreatLevel.NEEDS_REVIEW &&
+                    "pointer-events-auto bg-severity_detection opacity-100 hover:bg-severity_detection",
+                  threatLevel === ThreatLevel.NORMAL &&
+                    "pointer-events-none bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100",
+                )}
                 size="xs"
                 aria-label={t("markAsReviewed")}
                 onClick={async () => {
@@ -160,7 +176,13 @@ export function AnimatedEventCard({
                   updateEvents();
                 }}
               >
-                <FaCircleCheck className="size-3 text-white" />
+                {threatLevel === ThreatLevel.SECURITY_CONCERN ? (
+                  <FaExclamationTriangle className="size-3 text-white" />
+                ) : threatLevel === ThreatLevel.NEEDS_REVIEW ? (
+                  <MdOutlinePersonSearch className="size-3 text-white" />
+                ) : (
+                  <FaCircleCheck className="size-3 text-white" />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t("markAsReviewed")}</TooltipContent>
