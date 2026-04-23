@@ -53,7 +53,5 @@ class TestWsHasCameraAccess(unittest.TestCase):
             ws_has_camera_access(self._make_ws("viewer"), "birdseye", self.config)
         )
         self.assertFalse(
-            ws_has_camera_access(
-                self._make_ws("limited_user"), "birdseye", self.config
-            )
+            ws_has_camera_access(self._make_ws("limited_user"), "birdseye", self.config)
         )
