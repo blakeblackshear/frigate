@@ -133,6 +133,61 @@ class FaceRecognizer(ABC):
             return 0.0
 
 
+def build_class_mean(
+    embs: list[np.ndarray],
+    trim: float = 0.15,
+    outlier_threshold: float = 0.30,
+    min_keep_frac: float = 0.7,
+    max_iters: int = 3,
+) -> np.ndarray:
+    """Build a class-mean embedding with two-layer outlier protection.
+
+    Layer 1 (iterative, vector-wise): drop whole embeddings whose cosine
+    similarity to the current class mean is below ``outlier_threshold``.
+    Catches mislabeled or corrupted training samples (wrong face in the
+    folder, full-frame screenshots, extreme crops) that per-dimension
+    trimming cannot detect.
+
+    Layer 2 (per-dimension): ``scipy.stats.trim_mean`` on the retained set
+    to smooth per-component noise (lighting, expression, alignment jitter).
+
+    Collections with fewer than 5 images bypass outlier rejection — too few
+    samples to establish a reliable class center.
+    """
+    arr = np.stack(embs, axis=0)
+
+    if len(arr) < 5:
+        return np.asarray(stats.trim_mean(arr, trim, axis=0))
+
+    keep = np.ones(len(arr), dtype=bool)
+    floor = max(5, int(np.ceil(min_keep_frac * len(arr))))
+
+    for _ in range(max_iters):
+        mean = stats.trim_mean(arr[keep], trim, axis=0)
+        m_norm = mean / (np.linalg.norm(mean) + 1e-9)
+        e_norms = arr / (np.linalg.norm(arr, axis=1, keepdims=True) + 1e-9)
+        cos = e_norms @ m_norm
+        new_keep = cos >= outlier_threshold
+
+        if new_keep.sum() < floor:
+            top = np.argsort(-cos)[:floor]
+            new_keep = np.zeros(len(arr), dtype=bool)
+            new_keep[top] = True
+
+        if np.array_equal(new_keep, keep):
+            break
+        keep = new_keep
+
+    dropped = int((~keep).sum())
+
+    if dropped:
+        logger.debug(
+            f"Vector-wise outlier filter dropped {dropped}/{len(arr)} embeddings"
+        )
+
+    return np.asarray(stats.trim_mean(arr[keep], trim, axis=0))
+
+
 def similarity_to_confidence(
     cosine_similarity: float,
     median: float = 0.3,
@@ -229,7 +284,7 @@ class FaceNetRecognizer(FaceRecognizer):
 
         for name, embs in face_embeddings_map.items():
             if embs:
-                self.mean_embs[name] = stats.trim_mean(embs, 0.15)
+                self.mean_embs[name] = build_class_mean(embs)
 
         logger.debug("Finished building ArcFace model")
 
@@ -340,7 +395,7 @@ class ArcFaceRecognizer(FaceRecognizer):
 
         for name, embs in face_embeddings_map.items():
             if embs:
-                self.mean_embs[name] = stats.trim_mean(embs, 0.15)
+                self.mean_embs[name] = build_class_mean(embs)
 
         logger.debug("Finished building ArcFace model")
 
