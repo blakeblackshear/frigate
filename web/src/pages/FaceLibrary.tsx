@@ -594,7 +594,7 @@ function LibrarySelector({
         forbiddenErrorMessage={t("description.nameCannotContainHash")}
       />
 
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageTitle}

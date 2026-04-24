@@ -275,7 +275,7 @@ export default function ReviewCard({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <ContextMenu key={event.id}>
+        <ContextMenu key={event.id} modal={false}>
           <ContextMenuTrigger asChild>{content}</ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem>
