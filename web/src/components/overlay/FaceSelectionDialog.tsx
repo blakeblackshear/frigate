@@ -85,7 +85,7 @@ export default function FaceSelectionDialog({
       )}
 
       <Tooltip>
-        <Selector>
+        <Selector {...(isDesktop ? { modal: false } : {})}>
           <SelectorTrigger asChild>
             <TooltipTrigger asChild={isChildButton}>{children}</TooltipTrigger>
           </SelectorTrigger>
