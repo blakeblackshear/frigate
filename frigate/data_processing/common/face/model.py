@@ -157,7 +157,7 @@ def build_class_mean(
     arr = np.stack(embs, axis=0)
 
     if len(arr) < 5:
-        return stats.trim_mean(arr, trim, axis=0)
+        return np.asarray(stats.trim_mean(arr, trim, axis=0))
 
     keep = np.ones(len(arr), dtype=bool)
     floor = max(5, int(np.ceil(min_keep_frac * len(arr))))
@@ -185,7 +185,7 @@ def build_class_mean(
             f"Vector-wise outlier filter dropped {dropped}/{len(arr)} embeddings"
         )
 
-    return stats.trim_mean(arr[keep], trim, axis=0)
+    return np.asarray(stats.trim_mean(arr[keep], trim, axis=0))
 
 
 def similarity_to_confidence(
