@@ -358,6 +358,156 @@ test.describe("FaceSelectionDialog @high", () => {
     await frigateApp.page.keyboard.press("Escape");
     await expect(menu).not.toBeVisible({ timeout: 3_000 });
   });
+
+  test("classifying the last image in a group leaves body interactive", async ({
+    frigateApp,
+  }) => {
+    // Regression guard for the stuck body pointer-events bug when the
+    // last image in a grouped-recognition detail Dialog is classified.
+    // Tracked upstream at radix-ui/primitives#3445.
+    //
+    // Root cause: when the user clicks a FaceSelectionDialog menu item,
+    // the modal DropdownMenu enters its exit animation (Radix's Presence
+    // keeps it in the DOM with data-state="closed" until animationend).
+    // While that is in flight the classify axios resolves, SWR removes
+    // the image from /api/faces, the parent's map no longer renders the
+    // grouped card, and React unmounts the subtree — including the still-
+    // animating DropdownMenu's Presence container. DismissableLayer's
+    // shared modal-layer stack can't reconcile the interrupted exit, so
+    // the `body { pointer-events: none }` entry it put on mount is never
+    // popped and the rest of the UI becomes unclickable.
+    //
+    // The fix is `modal={false}` on the FaceSelectionDialog's
+    // DropdownMenu (desktop path only). With modal=false the DropdownMenu
+    // never puts an entry on DismissableLayer's body-pointer-events stack
+    // in the first place, so there's nothing to leak when its Presence is
+    // torn down mid-animation. The Radix-community-documented workaround
+    // for #3445.
+    //
+    // The bug only reproduces when the mock resolves fast enough that
+    // the parent unmounts before the dropdown's exit animation finishes.
+    // Measured window via a 3x sweep on the pre-fix build: 0–200 ms
+    // triggers it; 300 ms+ no longer reproduces. Production LAN networks
+    // sit comfortably inside the bad window, while `npm run dev` seems
+    // to mask it via React StrictMode's double-effect scheduling.
+    const EVENT_ID = "1775487131.3863528-race";
+    const initialFaces = withGroupedTrainingAttempt(basicFacesMock(), {
+      eventId: EVENT_ID,
+      attempts: [
+        { timestamp: 1775487131.3863528, label: "unknown", score: 0.95 },
+      ],
+    });
+
+    let classified = false;
+
+    await frigateApp.installDefaults({
+      faces: initialFaces,
+      events: [
+        {
+          id: EVENT_ID,
+          label: "person",
+          sub_label: null,
+          camera: "front_door",
+          start_time: 1775487131.3863528,
+          end_time: 1775487161.3863528,
+          false_positive: false,
+          zones: ["front_yard"],
+          thumbnail: null,
+          has_clip: true,
+          has_snapshot: true,
+          retain_indefinitely: false,
+          plus_id: null,
+          model_hash: "abc123",
+          detector_type: "cpu",
+          model_type: "ssd",
+          data: {
+            top_score: 0.92,
+            score: 0.92,
+            region: [0.1, 0.1, 0.5, 0.8],
+            box: [0.2, 0.15, 0.45, 0.75],
+            area: 0.18,
+            ratio: 0.6,
+            type: "object",
+            path_data: [],
+          },
+        },
+      ],
+    });
+
+    // Re-route /api/faces to flip to the "train empty" payload once the
+    // classify POST has been received. Registered AFTER installDefaults so
+    // Playwright's LIFO route matching hits this handler first.
+    await frigateApp.page.route("**/api/faces", async (route) => {
+      const payload = classified ? basicFacesMock() : initialFaces;
+      await route.fulfill({ json: payload });
+    });
+
+    // Hold the classify POST briefly. The race opens when the parent
+    // unmounts before the dropdown's exit animation finishes (~200ms
+    // in Radix). 100ms keeps us comfortably inside that window and
+    // reliably triggered the bug in a 3x sweep across 0/50/100/200ms
+    // on the pre-fix build. CLASSIFY_DELAY_MS overrides for local sweeps.
+    const delayMs = Number(
+      (globalThis as { process?: { env?: Record<string, string> } }).process
+        ?.env?.CLASSIFY_DELAY_MS ?? "100",
+    );
+    await frigateApp.page.route(
+      "**/api/faces/train/*/classify",
+      async (route) => {
+        classified = true;
+        if (delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+        await route.fulfill({ json: { success: true } });
+      },
+    );
+
+    await frigateApp.goto("/faces");
+
+    // Open the grouped detail Dialog.
+    const groupedImage = frigateApp.page
+      .locator('img[src*="clips/faces/train/"]')
+      .first();
+    await expect(groupedImage).toBeVisible({ timeout: 5_000 });
+    await groupedImage.locator("xpath=..").click();
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ has: frigateApp.page.locator('img[src*="clips/faces/train/"]') })
+      .first();
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    // Single attempt → single `+` trigger.
+    const triggers = dialog.locator('[aria-haspopup="menu"]');
+    await expect(triggers).toHaveCount(1);
+    await triggers.first().click();
+
+    const menu = frigateApp.page
+      .locator('[role="menu"], [data-radix-menu-content]')
+      .first();
+    await expect(menu).toBeVisible({ timeout: 5_000 });
+    await menu.getByRole("menuitem", { name: /^alice$/i }).click();
+
+    // The Dialog must leave the tree cleanly, and body must recover.
+    await expect(dialog).not.toBeVisible({ timeout: 5_000 });
+
+    // Give Radix's exit animation + cleanup a comfortable margin on top of
+    // the ~300ms simulated network delay.
+    await waitForBodyInteractive(frigateApp.page, 5_000);
+    await expectBodyInteractive(frigateApp.page);
+
+    // User-visible confirmation: click something outside the dialog
+    // and assert it actually responds.
+    const librarySelector = frigateApp.page
+      .getByRole("button")
+      .filter({ hasText: /\(\d+\)/ })
+      .first();
+    await librarySelector.click();
+    await expect(
+      frigateApp.page
+        .locator('[role="menu"], [data-radix-menu-content]')
+        .first(),
+    ).toBeVisible({ timeout: 3_000 });
+  });
 });
 
 test.describe("Face Library — mobile @high @mobile", () => {
