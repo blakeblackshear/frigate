@@ -8,7 +8,9 @@ class ReviewMetadata(BaseModel):
         description="A short title characterizing what took place and where, under 10 words."
     )
     scene: str = Field(
-        description="A chronological narrative of what happens from start to finish."
+        min_length=120,
+        max_length=600,
+        description="A chronological narrative of what happens from start to finish.",
     )
     shortSummary: str = Field(
         description="A brief 2-sentence summary of the scene, suitable for notifications."
