@@ -161,13 +161,13 @@ export function AnimatedEventCard({
             <TooltipTrigger asChild>
               <Button
                 className={cn(
-                  "absolute left-2 top-1 z-40 transition-opacity",
+                  "absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 transition-opacity",
                   threatLevel === ThreatLevel.SECURITY_CONCERN &&
-                    "pointer-events-auto bg-severity_alert opacity-100 hover:bg-severity_alert",
+                    "pointer-events-auto opacity-100",
                   threatLevel === ThreatLevel.NEEDS_REVIEW &&
-                    "pointer-events-auto bg-severity_detection opacity-100 hover:bg-severity_detection",
+                    "pointer-events-auto opacity-100",
                   threatLevel === ThreatLevel.NORMAL &&
-                    "pointer-events-none bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100",
+                    "pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100",
                 )}
                 size="xs"
                 aria-label={t("markAsReviewed")}
