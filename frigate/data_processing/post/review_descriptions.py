@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 MIN_RECORDING_DURATION = 10
+MAX_IMAGE_TOKENS = 24000
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -65,9 +66,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     ) -> int:
         """Calculate optimal number of frames based on context size, image source, and resolution.
 
-        Token usage varies by resolution: larger images (ultra-wide aspect ratios) use more tokens.
-        Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
-        Capped at 20 frames.
+        Per-image token cost is asked of the GenAI provider so providers that know
+        their model's true cost (e.g. llama.cpp can probe the loaded mmproj) can
+        diverge from the default ~1-token-per-1250-pixels heuristic. The frame
+        budget is bounded by both the remaining context window and a fixed
+        MAX_IMAGE_TOKENS ceiling so cheap-per-image models get more frames while
+        expensive-per-image models stay reined in.
         """
         client = self.genai_manager.description_client
 
@@ -105,14 +109,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 width = target_width
                 height = int(target_width / aspect_ratio)
 
-        pixels_per_image = width * height
-        tokens_per_image = pixels_per_image / 1250
+        tokens_per_image = client.estimate_image_tokens(width, height)
         prompt_tokens = 3800
         response_tokens = 300
-        available_tokens = context_size - prompt_tokens - response_tokens
-        max_frames = int(available_tokens / tokens_per_image)
-
-        return min(max(max_frames, 3), 20)
+        context_budget = context_size - prompt_tokens - response_tokens
+        image_token_budget = min(context_budget, MAX_IMAGE_TOKENS)
+        max_frames = int(image_token_budget / tokens_per_image)
+        return max(max_frames, 3)
 
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum

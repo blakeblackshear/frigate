@@ -356,6 +356,14 @@ Guidelines:
         """Get the context window size for this provider in tokens."""
         return 4096
 
+    def estimate_image_tokens(self, width: int, height: int) -> float:
+        """Estimate prompt tokens consumed by a single image of the given dimensions.
+
+        Default heuristic: ~1 token per 1250 pixels. Providers that can measure or
+        know their model's exact image-token cost should override.
+        """
+        return (width * height) / 1250
+
     def embed(
         self,
         texts: list[str] | None = None,
