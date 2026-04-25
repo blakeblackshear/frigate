@@ -151,6 +151,18 @@ Each line represents a detection state, not necessarily unique individuals. The 
             if "other_concerns" in schema.get("required", []):
                 schema["required"].remove("other_concerns")
 
+        # Length hints injected into the schema as suggestions to the model
+        # (enforced by grammar-based providers like llama.cpp) but kept off the
+        # Pydantic model so a non-compliant response does not fail validation.
+        length_hints = {
+            "scene": {"minLength": 120, "maxLength": 600},
+            "shortSummary": {"minLength": 70, "maxLength": 100},
+        }
+        for field, hints in length_hints.items():
+            prop = schema.get("properties", {}).get(field)
+            if prop is not None:
+                prop.update(hints)
+
         # OpenAI strict mode requires additionalProperties: false on all objects
         schema["additionalProperties"] = False
 
