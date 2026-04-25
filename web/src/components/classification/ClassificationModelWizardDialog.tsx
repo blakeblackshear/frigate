@@ -14,7 +14,6 @@ import Step3ChooseExamples, {
   Step3FormData,
 } from "./wizard/Step3ChooseExamples";
 import { cn } from "@/lib/utils";
-import { isDesktop } from "react-device-detect";
 import axios from "axios";
 
 const OBJECT_STEPS = [
@@ -153,13 +152,9 @@ export default function ClassificationModelWizardDialog({
     >
       <DialogContent
         className={cn(
-          "",
-          isDesktop &&
-            wizardState.currentStep == 0 &&
-            "max-h-[90%] overflow-y-auto xl:max-h-[80%]",
-          isDesktop &&
-            wizardState.currentStep > 0 &&
-            "max-h-[90%] max-w-[70%] overflow-y-auto xl:max-h-[80%]",
+          "scrollbar-container max-h-[90%] overflow-y-auto",
+          wizardState.currentStep == 0 && "xl:max-h-[80%]",
+          wizardState.currentStep > 0 && "md:max-w-[70%] xl:max-h-[80%]",
         )}
         onInteractOutside={(e) => {
           e.preventDefault();

@@ -6,6 +6,7 @@ import {
   LuLifeBuoy,
   LuList,
   LuLogOut,
+  LuMessageSquare,
   LuMoon,
   LuSquarePen,
   LuScanFace,
@@ -482,21 +483,25 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   </Link>
                 </>
               )}
-              {isAdmin && isMobile && config?.face_recognition.enabled && (
-                <>
-                  <Link to="/faces">
-                    <MenuItem
-                      className="flex w-full items-center p-2 text-sm"
-                      aria-label={t("menu.faceLibrary")}
-                    >
-                      <LuScanFace className="mr-2 size-4" />
-                      <span>{t("menu.faceLibrary")}</span>
-                    </MenuItem>
-                  </Link>
-                </>
-              )}
-              {isAdmin && isMobile && (
-                <>
+            </DropdownMenuGroup>
+            {isMobile && isAdmin && (
+              <>
+                <DropdownMenuLabel className="mt-1">
+                  {t("menu.features")}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup className="flex flex-col">
+                  {config?.face_recognition.enabled && (
+                    <Link to="/faces">
+                      <MenuItem
+                        className="flex w-full items-center p-2 text-sm"
+                        aria-label={t("menu.faceLibrary")}
+                      >
+                        <LuScanFace className="mr-2 size-4" />
+                        <span>{t("menu.faceLibrary")}</span>
+                      </MenuItem>
+                    </Link>
+                  )}
                   <Link to="/classification">
                     <MenuItem
                       className="flex w-full items-center p-2 text-sm"
@@ -506,9 +511,20 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span>{t("menu.classification")}</span>
                     </MenuItem>
                   </Link>
-                </>
-              )}
-            </DropdownMenuGroup>
+                  {config?.genai?.model !== "none" && (
+                    <Link to="/chat">
+                      <MenuItem
+                        className="flex w-full items-center p-2 text-sm"
+                        aria-label={t("menu.chat")}
+                      >
+                        <LuMessageSquare className="mr-2 size-4" />
+                        <span>{t("menu.chat")}</span>
+                      </MenuItem>
+                    </Link>
+                  )}
+                </DropdownMenuGroup>
+              </>
+            )}
             <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
               {t("menu.appearance")}
             </DropdownMenuLabel>
