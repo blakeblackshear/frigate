@@ -102,7 +102,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     # upgrade libva2, oneVPL runtime, and libvpl2 from trixie for Battlemage support
     echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
     apt-get -qq update
-    apt-get -qq install -y -t trixie libva2 libva-drm2 libzstd1
+    apt-get -qq install -y -t trixie libva2 libva-drm2
     apt-get -qq install -y -t trixie libmfx-gen1.2 libvpl2
     rm -f /etc/apt/sources.list.d/trixie.list
     apt-get -qq update
@@ -113,10 +113,14 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
 
     # install legacy and standard intel compute packages
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
+    # standard compute-runtime stays on 25.13 to preserve Gen9.5/Gen11 legacy GPU
+    # support (newer 26.x packages interfere with legacy Level Zero detection).
+    # Battlemage QSV is provided by libmfx-gen1.2 from trixie above; OpenCL on
+    # Battlemage uses 25.13's compute-runtime which has Battlemage support.
     # needed core package
-    wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/libigdgmm12_22.9.0_amd64.deb
-    dpkg -i libigdgmm12_22.9.0_amd64.deb
-    rm libigdgmm12_22.9.0_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/libigdgmm12_22.7.0_amd64.deb
+    dpkg -i libigdgmm12_22.7.0_amd64.deb
+    rm libigdgmm12_22.7.0_amd64.deb
 
     # legacy compute-runtime packages
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.36/intel-opencl-icd-legacy1_24.35.30872.36_amd64.deb
@@ -124,10 +128,10 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-opencl_1.0.17537.24_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-core_1.0.17537.24_amd64.deb
     # standard compute-runtime packages
-    wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/intel-opencl-icd_26.14.37833.4-0_amd64.deb
-    wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/libze-intel-gpu1_26.14.37833.4-0_amd64.deb
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.32.7/intel-igc-opencl-2_2.32.7+21184_amd64.deb
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.32.7/intel-igc-core-2_2.32.7+21184_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/intel-opencl-icd_25.13.33276.19_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/intel-level-zero-gpu_1.6.33276.19_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.10.10/intel-igc-opencl-2_2.10.10+18926_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.10.10/intel-igc-core-2_2.10.10+18926_amd64.deb
     # npu packages
     wget https://github.com/oneapi-src/level-zero/releases/download/v1.28.2/level-zero_1.28.2+u22.04_amd64.deb
     wget https://github.com/intel/linux-npu-driver/releases/download/v1.19.0/intel-driver-compiler-npu_1.19.0.20250707-16111289554_ubuntu22.04_amd64.deb
