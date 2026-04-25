@@ -163,6 +163,38 @@ Each line represents a detection state, not necessarily unique individuals. The 
             if prop is not None:
                 prop.update(hints)
 
+        # observations is a chain-of-thought-by-schema field: forcing the model
+        # to enumerate concrete facts before writing scene/title surfaces details
+        # the narrative would otherwise gloss past (e.g. brief vehicle arrivals
+        # overshadowed by a longer activity). The minItems floor scales with
+        # event duration so longer clips get more observations.
+        observations_prop = schema.get("properties", {}).get("observations")
+        if observations_prop is not None:
+            duration_seconds = float(review_data.get("duration") or 0)
+            min_observations = max(3, round(duration_seconds / 5))
+            max_observations = min_observations + 8
+            observations_prop["description"] = (
+                "Enumerate the significant observations across all frames, in "
+                "chronological order, BEFORE composing the scene narrative. "
+                "Include the very start of the activity — for example, a "
+                "vehicle entering the frame or pulling into the driveway — "
+                "even if it lasts only a few frames and the rest of the clip "
+                "is dominated by a longer activity. Include each arrival, "
+                "departure, motion event, object handled, and notable change "
+                "in position or state. Each item is a single concrete fact "
+                "written as a complete sentence (e.g., 'A blue sedan turns "
+                "from the street into the driveway', 'Nick exits the driver "
+                "side carrying a plant pot'). Do not summarize, interpret, or "
+                "assign meaning here — that belongs in the scene field."
+            )
+            observations_prop["minItems"] = min_observations
+            observations_prop["maxItems"] = max_observations
+            observations_prop["items"] = {"type": "string", "minLength": 20}
+
+            required = schema.setdefault("required", [])
+            if "observations" not in required:
+                required.append("observations")
+
         # OpenAI strict mode requires additionalProperties: false on all objects
         schema["additionalProperties"] = False
 
@@ -355,6 +387,14 @@ Guidelines:
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
         return 4096
+
+    def estimate_image_tokens(self, width: int, height: int) -> float:
+        """Estimate prompt tokens consumed by a single image of the given dimensions.
+
+        Default heuristic: ~1 token per 1250 pixels. Providers that can measure or
+        know their model's exact image-token cost should override.
+        """
+        return (width * height) / 1250
 
     def embed(
         self,

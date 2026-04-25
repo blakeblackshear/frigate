@@ -39,6 +39,8 @@ logger = logging.getLogger(__name__)
 
 RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 MIN_RECORDING_DURATION = 10
+MAX_IMAGE_TOKENS = 24000
+MAX_FRAMES_PER_SECOND = 2
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -60,14 +62,22 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     def calculate_frame_count(
         self,
         camera: str,
+        duration: float,
         image_source: ImageSourceEnum = ImageSourceEnum.preview,
         height: int = 480,
     ) -> int:
-        """Calculate optimal number of frames based on context size, image source, and resolution.
+        """Calculate optimal number of frames based on event duration, context size,
+        image source, and resolution.
 
-        Token usage varies by resolution: larger images (ultra-wide aspect ratios) use more tokens.
-        Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
-        Capped at 20 frames.
+        Per-image token cost is asked of the GenAI provider so providers that know
+        their model's true cost (e.g. llama.cpp can probe the loaded mmproj) can
+        diverge from the default ~1-token-per-1250-pixels heuristic. The frame
+        budget is bounded by:
+          - remaining context window after prompt + response reservations
+          - a fixed MAX_IMAGE_TOKENS ceiling
+          - MAX_FRAMES_PER_SECOND x duration, to avoid drowning short events in
+            near-duplicate frames where the model latches onto the redundant middle
+            and skips the start/end action
         """
         client = self.genai_manager.description_client
 
@@ -105,14 +115,15 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 width = target_width
                 height = int(target_width / aspect_ratio)
 
-        pixels_per_image = width * height
-        tokens_per_image = pixels_per_image / 1250
+        tokens_per_image = client.estimate_image_tokens(width, height)
         prompt_tokens = 3800
         response_tokens = 300
-        available_tokens = context_size - prompt_tokens - response_tokens
-        max_frames = int(available_tokens / tokens_per_image)
-
-        return min(max(max_frames, 3), 20)
+        context_budget = context_size - prompt_tokens - response_tokens
+        image_token_budget = min(context_budget, MAX_IMAGE_TOKENS)
+        max_frames_by_tokens = int(image_token_budget / tokens_per_image)
+        max_frames_by_duration = int(duration * MAX_FRAMES_PER_SECOND)
+        max_frames = min(max_frames_by_tokens, max_frames_by_duration)
+        return max(max_frames, 3)
 
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum
@@ -376,7 +387,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             all_frames.append(os.path.join(preview_dir, file))
 
         frame_count = len(all_frames)
-        desired_frame_count = self.calculate_frame_count(camera)
+        desired_frame_count = self.calculate_frame_count(
+            camera, duration=end_time - start_time
+        )
 
         if frame_count <= desired_frame_count:
             return all_frames
@@ -400,7 +413,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         """Get frames from recordings at specified timestamps."""
         duration = end_time - start_time
         desired_frame_count = self.calculate_frame_count(
-            camera, ImageSourceEnum.recordings, height
+            camera, duration, ImageSourceEnum.recordings, height
         )
 
         # Calculate evenly spaced timestamps throughout the duration

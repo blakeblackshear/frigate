@@ -4,6 +4,10 @@ from pydantic import BaseModel, ConfigDict, Field
 class ReviewMetadata(BaseModel):
     model_config = ConfigDict(extra="ignore", protected_namespaces=())
 
+    observations: list[str] = Field(
+        default_factory=list,
+        description="Chronological list of significant observations from the frames, written before the scene narrative is composed.",
+    )
     title: str = Field(
         description="A short title characterizing what took place and where, under 10 words."
     )
