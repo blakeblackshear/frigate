@@ -472,7 +472,9 @@ test.describe("FaceSelectionDialog @high", () => {
     await groupedImage.locator("xpath=..").click();
     const dialog = frigateApp.page
       .getByRole("dialog")
-      .filter({ has: frigateApp.page.locator('img[src*="clips/faces/train/"]') })
+      .filter({
+        has: frigateApp.page.locator('img[src*="clips/faces/train/"]'),
+      })
       .first();
     await expect(dialog).toBeVisible({ timeout: 5_000 });
 

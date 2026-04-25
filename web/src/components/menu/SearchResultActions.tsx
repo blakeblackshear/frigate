@@ -258,13 +258,13 @@ export default function SearchResultActions({
         </AlertDialogContent>
       </AlertDialog>
       {isContextMenu ? (
-        <ContextMenu modal={false}>
+        <ContextMenu>
           <ContextMenuTrigger>{children}</ContextMenuTrigger>
           <ContextMenuContent>{menuItems}</ContextMenuContent>
         </ContextMenu>
       ) : (
         <>
-          <DropdownMenu modal={false}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <BlurredIconButton aria-label={t("itemMenu.more.aria")}>
                 <FiMoreVertical className="size-5" />
