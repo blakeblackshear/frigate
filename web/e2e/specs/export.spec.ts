@@ -1,4 +1,114 @@
 import { test, expect } from "../fixtures/frigate-test";
+import {
+  expectBodyInteractive,
+  waitForBodyInteractive,
+} from "../helpers/overlay-interaction";
+
+test.describe("Export Page - Delete race @high", () => {
+  // Empirical guard for radix-ui/primitives#3445: when a modal DropdownMenu
+  // opens an AlertDialog and the AlertDialog's confirm action causes the
+  // parent's optimistic cache update to unmount the card, we want to know
+  // whether the deduped react-dismissable-layer (1.1.11) handles the
+  // pointer-events stack cleanup or whether `modal={false}` is still
+  // required on the DropdownMenu. The classic "canonical" pattern, distinct
+  // from the FaceSelectionDialog auto-unmount race already covered by
+  // face-library.spec.ts.
+  test("deleting an export via dropdown→alert→confirm leaves body interactive", async ({
+    frigateApp,
+  }) => {
+    if (frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
+
+    const initialExports = [
+      {
+        id: "export-race-001",
+        camera: "front_door",
+        name: "Race - Test Export",
+        date: 1775490731.3863528,
+        video_path: "/exports/export-race-001.mp4",
+        thumb_path: "/exports/export-race-001-thumb.jpg",
+        in_progress: false,
+        export_case_id: null,
+      },
+    ];
+    let deleted = false;
+
+    await frigateApp.installDefaults({
+      exports: initialExports,
+    });
+
+    // Flip /api/export to empty after the delete POST is observed so the
+    // page's SWR mutate sees the export gone.
+    await frigateApp.page.route("**/api/export**", async (route) => {
+      const payload = deleted ? [] : initialExports;
+      await route.fulfill({ json: payload });
+    });
+    await frigateApp.page.route("**/api/exports/delete", async (route) => {
+      deleted = true;
+      const delayMs = Number(
+        (globalThis as { process?: { env?: Record<string, string> } }).process
+          ?.env?.DELETE_DELAY_MS ?? "100",
+      );
+      if (delayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+      await route.fulfill({ json: { success: true } });
+    });
+
+    await frigateApp.goto("/export");
+    await expect(frigateApp.page.getByText("Race - Test Export")).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Open the kebab menu on the export card. The kebab uses the
+    // (misleading) aria-label "Edit name" from ExportCard's source — it
+    // wraps the FiMoreVertical icon. There is exactly one such button on
+    // the page once we have a single export rendered.
+    const kebab = frigateApp.page
+      .getByRole("button", { name: /edit name/i })
+      .first();
+    await expect(kebab).toBeVisible({ timeout: 5_000 });
+    await kebab.click();
+
+    const menu = frigateApp.page
+      .locator('[role="menu"], [data-radix-menu-content]')
+      .first();
+    await expect(menu).toBeVisible({ timeout: 3_000 });
+
+    // Delete Export
+    await menu
+      .getByRole("menuitem", { name: /delete export/i })
+      .first()
+      .click();
+
+    // AlertDialog at page level. The confirm button's accessible name is
+    // "Delete Export" (its aria-label), the visible text is just "Delete".
+    const confirm = frigateApp.page.getByRole("alertdialog");
+    await expect(confirm).toBeVisible({ timeout: 3_000 });
+    await confirm
+      .getByRole("button", { name: /^delete export$/i })
+      .first()
+      .click();
+
+    // The card optimistically disappears, the dialog closes, and body
+    // pointer-events must come unstuck.
+    await expect(
+      frigateApp.page.getByText("Race - Test Export"),
+    ).not.toBeVisible({ timeout: 5_000 });
+    await waitForBodyInteractive(frigateApp.page, 5_000);
+    await expectBodyInteractive(frigateApp.page);
+
+    // Sanity: another page-level button still responds.
+    const newCase = frigateApp.page.getByRole("button", { name: /new case/i });
+    await expect(newCase).toBeVisible({ timeout: 3_000 });
+    await newCase.click();
+    await expect(
+      frigateApp.page.getByRole("dialog").filter({ hasText: /create case/i }),
+    ).toBeVisible({ timeout: 3_000 });
+  });
+});
 
 test.describe("Export Page - Overview @high", () => {
   test("renders uncategorized exports and case cards from mock data", async ({
