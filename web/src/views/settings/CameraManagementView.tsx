@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import CameraEditForm from "@/components/settings/CameraEditForm";
 import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
-import { LuPlus, LuTrash2 } from "react-icons/lu";
+import { LuPencil, LuPlus, LuTrash2 } from "react-icons/lu";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
@@ -26,6 +26,12 @@ import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { cn } from "@/lib/utils";
@@ -161,7 +167,13 @@ export default function CameraManagementView({
                             key={camera}
                             className="flex flex-row items-center justify-between"
                           >
-                            <CameraNameLabel camera={camera} />
+                            <div className="flex items-center gap-1">
+                              <CameraNameLabel camera={camera} />
+                              <CameraFriendlyNameEditor
+                                cameraName={camera}
+                                onConfigChanged={updateConfig}
+                              />
+                            </div>
                             <CameraEnableSwitch cameraName={camera} />
                           </div>
                         ))}
@@ -294,6 +306,103 @@ function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
         }}
       />
     </div>
+  );
+}
+
+type CameraFriendlyNameEditorProps = {
+  cameraName: string;
+  onConfigChanged: () => Promise<unknown>;
+};
+
+function CameraFriendlyNameEditor({
+  cameraName,
+  onConfigChanged,
+}: CameraFriendlyNameEditorProps) {
+  const { t } = useTranslation(["views/settings", "common"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [open, setOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const currentFriendlyName = config?.cameras?.[cameraName]?.friendly_name;
+
+  const onSave = useCallback(
+    async (text: string) => {
+      if (isSaving) return;
+      setIsSaving(true);
+
+      try {
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: {
+            cameras: {
+              [cameraName]: {
+                friendly_name: text.trim() || null,
+              },
+            },
+          },
+        });
+
+        await onConfigChanged();
+        setOpen(false);
+
+        toast.success(t("toast.save.success", { ns: "common" }), {
+          position: "top-center",
+        });
+      } catch (error) {
+        const errorMessage =
+          axios.isAxiosError(error) &&
+          (error.response?.data?.message || error.response?.data?.detail)
+            ? error.response?.data?.message || error.response?.data?.detail
+            : t("toast.save.error.noMessage", { ns: "common" });
+
+        toast.error(
+          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          { position: "top-center" },
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [cameraName, isSaving, onConfigChanged, t],
+  );
+
+  const renameLabel = t("cameraManagement.streams.friendlyName.rename", {
+    ns: "views/settings",
+  });
+
+  return (
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            aria-label={renameLabel}
+            onClick={() => setOpen(true)}
+            disabled={isSaving}
+          >
+            <LuPencil className="size-3.5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{renameLabel}</TooltipContent>
+      </Tooltip>
+      <TextEntryDialog
+        open={open}
+        setOpen={setOpen}
+        title={t("cameraManagement.streams.friendlyName.title", {
+          ns: "views/settings",
+        })}
+        description={t("cameraManagement.streams.friendlyName.description", {
+          ns: "views/settings",
+        })}
+        defaultValue={currentFriendlyName ?? ""}
+        placeholder={currentFriendlyName ? undefined : cameraName}
+        allowEmpty
+        isSaving={isSaving}
+        onSave={onSave}
+      />
+    </>
   );
 }
 
