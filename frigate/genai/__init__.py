@@ -199,9 +199,7 @@ Each line represents a detection state, not necessarily unique individuals. The 
                 try:
                     raw = json.loads(clean_json)
                 except json.JSONDecodeError as je:
-                    logger.error(
-                        "Failed to parse review description JSON: %s", je
-                    )
+                    logger.error("Failed to parse review description JSON: %s", je)
                     return None
                 # observations is required on the model; fill an empty default
                 # if the response omitted it so attribute access stays safe.
@@ -226,9 +224,7 @@ Each line represents a detection state, not necessarily unique individuals. The 
                 metadata.time = review_data["start"]
                 return metadata
             except Exception as e:
-                logger.error(
-                    f"Failed to post-process review metadata: {e}"
-                )
+                logger.error(f"Failed to post-process review metadata: {e}")
                 return None
         else:
             logger.debug(
