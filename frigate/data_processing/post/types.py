@@ -30,8 +30,8 @@ class ReviewMetadata(BaseModel):
         description="A short title characterizing what took place and where, under 10 words.",
     )
     scene: str = Field(
-        min_length=120,
-        max_length=600,
+        min_length=150,
+        max_length=400,
         description="A chronological narrative of what happens from start to finish, drawing directly from the items in observations.",
     )
     shortSummary: str = Field(
@@ -41,6 +41,7 @@ class ReviewMetadata(BaseModel):
     )
     confidence: float = Field(
         ge=0.0,
+        le=1.0,
         description="Confidence in the analysis as a decimal between 0.0 and 1.0, where 0.0 means no confidence and 1.0 means complete confidence. Express ONLY as a decimal.",
     )
     potential_threat_level: int = Field(
