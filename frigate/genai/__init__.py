@@ -2,6 +2,7 @@
 
 import datetime
 import importlib
+import json
 import logging
 import os
 import re
@@ -9,6 +10,7 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 from playhouse.shortcuts import model_to_dict
+from pydantic import ValidationError
 
 from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
 from frigate.const import CLIPS_DIR
@@ -151,50 +153,6 @@ Each line represents a detection state, not necessarily unique individuals. The 
             if "other_concerns" in schema.get("required", []):
                 schema["required"].remove("other_concerns")
 
-        # Length hints injected into the schema as suggestions to the model
-        # (enforced by grammar-based providers like llama.cpp) but kept off the
-        # Pydantic model so a non-compliant response does not fail validation.
-        length_hints = {
-            "scene": {"minLength": 120, "maxLength": 600},
-            "shortSummary": {"minLength": 70, "maxLength": 100},
-        }
-        for field, hints in length_hints.items():
-            prop = schema.get("properties", {}).get(field)
-            if prop is not None:
-                prop.update(hints)
-
-        # observations is a chain-of-thought-by-schema field: forcing the model
-        # to enumerate concrete facts before writing scene/title surfaces details
-        # the narrative would otherwise gloss past (e.g. brief vehicle arrivals
-        # overshadowed by a longer activity). The minItems floor scales with
-        # event duration so longer clips get more observations.
-        observations_prop = schema.get("properties", {}).get("observations")
-        if observations_prop is not None:
-            duration_seconds = float(review_data.get("duration") or 0)
-            min_observations = max(3, round(duration_seconds / 5))
-            max_observations = min_observations + 8
-            observations_prop["description"] = (
-                "Enumerate the significant observations across all frames, in "
-                "chronological order, BEFORE composing the scene narrative. "
-                "Include the very start of the activity — for example, a "
-                "vehicle entering the frame or pulling into the driveway — "
-                "even if it lasts only a few frames and the rest of the clip "
-                "is dominated by a longer activity. Include each arrival, "
-                "departure, motion event, object handled, and notable change "
-                "in position or state. Each item is a single concrete fact "
-                "written as a complete sentence (e.g., 'A blue sedan turns "
-                "from the street into the driveway', 'Nick exits the driver "
-                "side carrying a plant pot'). Do not summarize, interpret, or "
-                "assign meaning here — that belongs in the scene field."
-            )
-            observations_prop["minItems"] = min_observations
-            observations_prop["maxItems"] = max_observations
-            observations_prop["items"] = {"type": "string", "minLength": 20}
-
-            required = schema.setdefault("required", [])
-            if "observations" not in required:
-                required.append("observations")
-
         # OpenAI strict mode requires additionalProperties: false on all objects
         schema["additionalProperties"] = False
 
@@ -225,7 +183,37 @@ Each line represents a detection state, not necessarily unique individuals. The 
 
             try:
                 metadata = ReviewMetadata.model_validate_json(clean_json)
+            except ValidationError as ve:
+                # Constraint violations (length, item count, ranges) are logged
+                # at debug and the response is kept anyway — a slightly
+                # off-spec answer is still usable, and dropping the whole
+                # response loses the narrative content the model produced.
+                for err in ve.errors():
+                    loc = ".".join(str(p) for p in err["loc"]) or "<root>"
+                    logger.debug(
+                        "Review metadata soft validation: %s — %s (input: %r)",
+                        loc,
+                        err["msg"],
+                        err.get("input"),
+                    )
+                try:
+                    raw = json.loads(clean_json)
+                except json.JSONDecodeError as je:
+                    logger.error(
+                        "Failed to parse review description JSON: %s", je
+                    )
+                    return None
+                # observations is required on the model; fill an empty default
+                # if the response omitted it so attribute access stays safe.
+                raw.setdefault("observations", [])
+                metadata = ReviewMetadata.model_construct(**raw)
+            except Exception as e:
+                logger.error(
+                    f"Failed to parse review description as the response did not match expected format. {e}"
+                )
+                return None
 
+            try:
                 # Normalize confidence if model returned a percentage (e.g. 85 instead of 0.85)
                 if metadata.confidence > 1.0:
                     metadata.confidence = min(metadata.confidence / 100.0, 1.0)
@@ -238,9 +226,8 @@ Each line represents a detection state, not necessarily unique individuals. The 
                 metadata.time = review_data["start"]
                 return metadata
             except Exception as e:
-                # rarely LLMs can fail to follow directions on output format
-                logger.warning(
-                    f"Failed to parse review description as the response did not match expected format. {e}"
+                logger.error(
+                    f"Failed to post-process review metadata: {e}"
                 )
                 return None
         else:
