@@ -31,7 +31,7 @@ class ReviewMetadata(BaseModel):
     )
     scene: str = Field(
         min_length=150,
-        max_length=400,
+        max_length=600,
         description="A chronological narrative of what happens from start to finish, drawing directly from the items in observations.",
     )
     shortSummary: str = Field(
