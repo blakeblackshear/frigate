@@ -28,11 +28,7 @@ import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
-import type {
-  ConfigSectionData,
-  JsonObject,
-  JsonValue,
-} from "@/types/configForm";
+import type { ConfigSectionData, JsonObject } from "@/types/configForm";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
@@ -93,6 +89,7 @@ import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
 import {
   buildConfigDataForPath,
+  flattenOverrides,
   parseProfileFromSectionPath,
   prepareSectionSavePayload,
   PROFILE_ELIGIBLE_SECTIONS,
@@ -188,25 +185,6 @@ const parsePendingDataKey = (pendingDataKey: string) => {
     cameraName: undefined,
     sectionPath: pendingDataKey,
   };
-};
-
-const flattenOverrides = (
-  value: JsonValue | undefined,
-  path: string[] = [],
-): Array<{ path: string; value: JsonValue }> => {
-  if (value === undefined) return [];
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    return [{ path: path.join("."), value }];
-  }
-
-  const entries = Object.entries(value);
-  if (entries.length === 0) {
-    return [{ path: path.join("."), value: {} }];
-  }
-
-  return entries.flatMap(([key, entryValue]) =>
-    flattenOverrides(entryValue, [...path, key]),
-  );
 };
 
 const createSectionPage = (

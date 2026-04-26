@@ -220,6 +220,32 @@ export function buildOverrides(
 }
 
 // ---------------------------------------------------------------------------
+// flattenOverrides — turn an overrides object into a list of leaf paths
+// ---------------------------------------------------------------------------
+
+// Walks a nested overrides value and produces a flat list of `{ path, value }`
+// entries, one per leaf.  Used by save/preview UIs to enumerate the individual
+// fields that will be changed.
+export function flattenOverrides(
+  value: JsonValue | undefined,
+  path: string[] = [],
+): Array<{ path: string; value: JsonValue }> {
+  if (value === undefined) return [];
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return [{ path: path.join("."), value }];
+  }
+
+  const entries = Object.entries(value);
+  if (entries.length === 0) {
+    return [{ path: path.join("."), value: {} }];
+  }
+
+  return entries.flatMap(([key, entryValue]) =>
+    flattenOverrides(entryValue, [...path, key]),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // sanitizeSectionData — normalize config values and strip hidden fields
 // ---------------------------------------------------------------------------
 

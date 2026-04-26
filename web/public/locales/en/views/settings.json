@@ -457,7 +457,13 @@
       "enableDesc": "Temporarily disable an enabled camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>",
       "disableLabel": "Disabled cameras",
       "disableDesc": "Enable a camera that is currently not visible in the UI and disabled in the configuration. A restart of Frigate is required after enabling.",
-      "enableSuccess": "Enabled {{cameraName}} in configuration. Restart Frigate to apply the changes."
+      "enableSuccess": "Enabled {{cameraName}} in configuration. Restart Frigate to apply the changes.",
+      "friendlyName": {
+        "edit": "Edit camera display name",
+        "title": "Edit Display Name",
+        "description": "Set the friendly name shown for this camera throughout the Frigate UI. Leave blank to use the camera ID.",
+        "rename": "Rename"
+      }
     },
     "cameraConfig": {
       "add": "Add Camera",

@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 MIN_RECORDING_DURATION = 10
 MAX_IMAGE_TOKENS = 24000
-MAX_FRAMES_PER_SECOND = 2
+MAX_FRAMES_PER_SECOND = 1
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
