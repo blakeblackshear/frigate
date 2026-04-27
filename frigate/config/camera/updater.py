@@ -33,6 +33,7 @@ class CameraConfigUpdateEnum(str, Enum):
     lpr = "lpr"
     snapshots = "snapshots"
     timestamp_style = "timestamp_style"
+    ui = "ui"
     zones = "zones"
 
 
