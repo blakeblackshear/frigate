@@ -20,6 +20,7 @@ class CameraConfigUpdateEnum(str, Enum):
     ffmpeg = "ffmpeg"
     live = "live"
     motion = "motion"  # includes motion and motion masks
+    mqtt = "mqtt"
     notifications = "notifications"
     objects = "objects"
     object_genai = "object_genai"
