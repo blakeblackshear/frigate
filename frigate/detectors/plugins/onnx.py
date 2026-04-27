@@ -14,6 +14,7 @@ from frigate.detectors.detector_config import (
 )
 from frigate.util.model import (
     post_process_dfine,
+    post_process_nanodet_plus,
     post_process_rfdetr,
     post_process_yolo,
     post_process_yolox,
@@ -136,6 +137,12 @@ class ONNXDetector(DetectionApi):
                 self.height,
                 self.grids,
                 self.expanded_strides,
+            )
+        elif self.onnx_model_type == ModelTypeEnum.nanodet_plus:
+            return post_process_nanodet_plus(
+                tensor_output[0],
+                self.width,
+                self.height,
             )
         else:
             raise Exception(

@@ -1,5 +1,6 @@
 """Model Utils"""
 
+import functools
 import logging
 import os
 from typing import Any
@@ -7,6 +8,7 @@ from typing import Any
 import cv2
 import numpy as np
 import onnxruntime as ort
+import scipy.special
 
 from frigate.const import MODEL_CACHE_DIR
 
@@ -14,6 +16,51 @@ logger = logging.getLogger(__name__)
 
 
 ### Post Processing
+
+
+@functools.lru_cache
+def nanodet_center_priors(
+    input_height: int, input_width: int, strides: tuple, dtype: type
+):
+    def get_single_level_center_priors(featmap_size, stride, dtype):
+        """Generate centers of a single stage feature map.
+        Args:
+            batch_size (int): Number of images in one batch.
+            featmap_size (tuple[int]): height and width of the feature map
+            stride (int): down sample stride of the feature map
+            dtype (obj:`torch.dtype`): data type of the tensors
+            device (obj:`torch.device`): device of the tensors
+        Return:
+            priors (Tensor): center priors of a single level feature map.
+        """
+        h, w = featmap_size
+        x_range = (np.arange(w, dtype=dtype)) * stride
+        y_range = (np.arange(h, dtype=dtype)) * stride
+        y, x = np.meshgrid(y_range, x_range, indexing="ij")
+        y = y.flatten()
+        x = x.flatten()
+        strides = np.full(x.shape[0], stride)
+        priors = np.stack([x, y, strides, strides], axis=-1)
+        return priors
+
+    featmap_sizes = [
+        (
+            int(np.ceil(input_height / stride)),
+            int(np.ceil(input_width) / stride),
+        )
+        for stride in strides
+    ]
+    mlvl_center_priors = [
+        get_single_level_center_priors(
+            featmap_sizes[i],
+            stride,
+            dtype,
+        )
+        for i, stride in enumerate(strides)
+    ]
+    center_priors = np.concatenate(mlvl_center_priors, axis=0)
+
+    return center_priors
 
 
 def post_process_dfine(
@@ -277,6 +324,66 @@ def post_process_yolox(
             bbox[2] / width,
         ]
 
+    return detections
+
+
+def post_process_nanodet_plus(
+    predictions: np.ndarray,
+    width: int,
+    height: int,
+):
+    def distance2bbox(points, distance, max_shape=None):
+        """Decode distance prediction to bounding box.
+
+        Args:
+            points (Tensor): Shape (n, 2), [x, y].
+            distance (Tensor): Distance from the given point to 4
+                boundaries (left, top, right, bottom).
+            max_shape (tuple): Shape of the image.
+
+        Returns:
+            Tensor: Decoded bboxes.
+        """
+        x1 = points[..., 0] - distance[..., 0]
+        y1 = points[..., 1] - distance[..., 1]
+        x2 = points[..., 0] + distance[..., 2]
+        y2 = points[..., 1] + distance[..., 3]
+        if max_shape is not None:
+            x1 = np.clip(x1, 0, max_shape[1])
+            y1 = np.clip(y1, 0, max_shape[0])
+            x2 = np.clip(x2, 0, max_shape[1])
+            y2 = np.clip(y2, 0, max_shape[0])
+        return np.stack([x1, y1, x2, y2], -1)
+
+    predictions = predictions[0]
+
+    # TODO From parameters
+    reg_max = 7
+    strides = (8, 16, 32, 64)
+
+    num_classes = predictions.shape[-1] - 4 * (reg_max + 1)
+    cls_scores, bbox_preds = predictions[:, :num_classes], predictions[:, num_classes:]
+
+    center_priors = nanodet_center_priors(height, width, strides, predictions[0].dtype)
+
+    x = bbox_preds.reshape(bbox_preds.shape[0], 4, reg_max + 1)
+    x = scipy.special.softmax(x, axis=-1)
+    x = np.dot(x, np.linspace(0, reg_max, reg_max + 1))
+
+    dis_preds = x * center_priors[..., 2, None]
+    bboxes = distance2bbox(center_priors[..., :2], dis_preds, max_shape=(height, width))
+
+    class_ids = np.argmax(cls_scores, axis=1)
+    scores = np.max(cls_scores, axis=1)
+
+    detections = np.zeros((20, 6), dtype=np.float32)
+    for i, j in enumerate(np.argsort(scores)[::-1][:20]):
+        detections[i, 0] = class_ids[j]
+        detections[i, 1] = scores[j]
+        detections[i, 2] = bboxes[j, 1] / height
+        detections[i, 3] = bboxes[j, 0] / width
+        detections[i, 4] = bboxes[j, 3] / height
+        detections[i, 5] = bboxes[j, 2] / width
     return detections
 
 
