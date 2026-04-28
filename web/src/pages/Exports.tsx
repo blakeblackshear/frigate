@@ -57,6 +57,7 @@ import { useTranslation } from "react-i18next";
 
 import { IoMdArrowRoundBack } from "react-icons/io";
 import {
+  LuDownload,
   LuFolderPlus,
   LuFolderX,
   LuPencil,
@@ -777,54 +778,76 @@ function Exports() {
                   filters={["cameras"]}
                   onUpdateFilter={setExportFilter}
                 />
-                {isAdmin && (
-                  <div className="flex items-center gap-1 md:gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
+                  {(exportsByCase[selectedCase.id]?.length ?? 0) > 0 && (
                     <Button
+                      asChild
                       className="flex items-center gap-2 p-2"
                       size="sm"
-                      aria-label={t("toolbar.addExport")}
-                      onClick={() => setCaseForAddExport(selectedCase)}
+                      aria-label={t("button.download", { ns: "common" })}
                     >
-                      <LuPlus className="text-secondary-foreground" />
-                      {!isMobile && (
-                        <div className="text-primary">
-                          {t("toolbar.addExport")}
-                        </div>
-                      )}
+                      <a
+                        download
+                        href={`${baseUrl}api/cases/${selectedCase.id}/download`}
+                      >
+                        <LuDownload className="text-secondary-foreground" />
+                        {!isMobile && (
+                          <div className="text-primary">
+                            {t("button.download", { ns: "common" })}
+                          </div>
+                        )}
+                      </a>
                     </Button>
-                    <Button
-                      className="flex items-center gap-2 p-2"
-                      size="sm"
-                      aria-label={t("toolbar.editCase")}
-                      onClick={() =>
-                        setCaseDialog({
-                          mode: "edit",
-                          exportCase: selectedCase,
-                        })
-                      }
-                    >
-                      <LuPencil className="text-secondary-foreground" />
-                      {!isMobile && (
-                        <div className="text-primary">
-                          {t("toolbar.editCase")}
-                        </div>
-                      )}
-                    </Button>
-                    <Button
-                      className="flex items-center gap-2 p-2"
-                      size="sm"
-                      aria-label={t("toolbar.deleteCase")}
-                      onClick={() => setCaseToDelete(selectedCase)}
-                    >
-                      <LuTrash2 className="text-secondary-foreground" />
-                      {!isMobile && (
-                        <div className="text-primary">
-                          {t("toolbar.deleteCase")}
-                        </div>
-                      )}
-                    </Button>
-                  </div>
-                )}
+                  )}
+                  {isAdmin && (
+                    <>
+                      <Button
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("toolbar.addExport")}
+                        onClick={() => setCaseForAddExport(selectedCase)}
+                      >
+                        <LuPlus className="text-secondary-foreground" />
+                        {!isMobile && (
+                          <div className="text-primary">
+                            {t("toolbar.addExport")}
+                          </div>
+                        )}
+                      </Button>
+                      <Button
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("toolbar.editCase")}
+                        onClick={() =>
+                          setCaseDialog({
+                            mode: "edit",
+                            exportCase: selectedCase,
+                          })
+                        }
+                      >
+                        <LuPencil className="text-secondary-foreground" />
+                        {!isMobile && (
+                          <div className="text-primary">
+                            {t("toolbar.editCase")}
+                          </div>
+                        )}
+                      </Button>
+                      <Button
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("toolbar.deleteCase")}
+                        onClick={() => setCaseToDelete(selectedCase)}
+                      >
+                        <LuTrash2 className="text-secondary-foreground" />
+                        {!isMobile && (
+                          <div className="text-primary">
+                            {t("toolbar.deleteCase")}
+                          </div>
+                        )}
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </>
