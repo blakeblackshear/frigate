@@ -42,7 +42,7 @@ function HardwareCheckbox({
 export default function HardwareOptions({ deviceId, hardwareEnabled, onToggle, isDisabled }: Props) {
   return (
     <div className={styles.formSection}>
-      <h4>Generic Hardware Acceleration</h4>
+      <h4>Generic Hardware Devices</h4>
       {deviceId !== "stable" && (
         <p className={styles.helpText}>
           Some options have been auto-configured based on your device type.
