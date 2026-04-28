@@ -180,7 +180,7 @@ hardware:
     devices:
       - host: "/dev/dri"
         container: "/dev/dri"
-        comment: "GPU hardware acceleration"
+        comment: "Intel/AMD GPU hardware acceleration"
 
   - id: "intelNpu"
     label: "Intel NPU (/dev/accel)"
