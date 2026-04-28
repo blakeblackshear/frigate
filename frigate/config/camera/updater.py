@@ -20,6 +20,7 @@ class CameraConfigUpdateEnum(str, Enum):
     ffmpeg = "ffmpeg"
     live = "live"
     motion = "motion"  # includes motion and motion masks
+    mqtt = "mqtt"
     notifications = "notifications"
     objects = "objects"
     object_genai = "object_genai"
@@ -33,6 +34,7 @@ class CameraConfigUpdateEnum(str, Enum):
     lpr = "lpr"
     snapshots = "snapshots"
     timestamp_style = "timestamp_style"
+    ui = "ui"
     zones = "zones"
 
 

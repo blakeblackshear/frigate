@@ -517,10 +517,16 @@ class EmbeddingMaintainer(threading.Thread):
                 try:
                     event: Event = Event.get(Event.id == event_id)
                 except DoesNotExist:
+                    for processor in self.post_processors:
+                        if isinstance(processor, ObjectDescriptionProcessor):
+                            processor.cleanup_event(event_id)
                     continue
 
                 # Skip the event if not an object
                 if event.data.get("type") != "object":
+                    for processor in self.post_processors:
+                        if isinstance(processor, ObjectDescriptionProcessor):
+                            processor.cleanup_event(event_id)
                     continue
 
                 # Extract valid thumbnail

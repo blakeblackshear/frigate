@@ -27,7 +27,7 @@ class ReviewMetadata(BaseModel):
     )
     title: str = Field(
         max_length=80,
-        description="A short title characterizing what took place and where, under 10 words.",
+        description="Under 10 words. Name the apparent purpose or outcome of the activity together with the location involved. Do not narrate or list the sequence of actions step by step.",
     )
     scene: str = Field(
         min_length=150,
@@ -36,7 +36,7 @@ class ReviewMetadata(BaseModel):
     )
     shortSummary: str = Field(
         min_length=70,
-        max_length=100,
+        max_length=120,
         description="A brief 2-sentence summary of the scene, suitable for notifications.",
     )
     confidence: float = Field(

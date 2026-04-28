@@ -205,6 +205,7 @@ class AudioEventMaintainer(threading.Thread):
             self.transcription_thread.start()
 
         self.was_enabled = camera.enabled
+        self.was_audio_enabled = camera.audio.enabled
 
     def detect_audio(self, audio: np.ndarray) -> None:
         if not self.camera_config.audio.enabled or self.stop_event.is_set():
@@ -362,6 +363,17 @@ class AudioEventMaintainer(threading.Thread):
             if not enabled:
                 time.sleep(0.1)
                 continue
+
+            audio_enabled = self.camera_config.audio.enabled
+            if audio_enabled != self.was_audio_enabled:
+                if not audio_enabled:
+                    self.logger.debug(
+                        f"Disabling audio detections for {self.camera_config.name}, ending events"
+                    )
+                    self.requestor.send_data(
+                        EXPIRE_AUDIO_ACTIVITY, self.camera_config.name
+                    )
+                self.was_audio_enabled = audio_enabled
 
             self.read_audio()
 
