@@ -355,12 +355,7 @@ export default function SetPasswordDialog({
                         </p>
                         <ul className="space-y-1">
                           {(
-                            [
-                              "length",
-                              "uppercase",
-                              "digit",
-                              "special",
-                            ] as const
+                            ["length", "uppercase", "digit", "special"] as const
                           ).map((req) => (
                             <li
                               key={req}

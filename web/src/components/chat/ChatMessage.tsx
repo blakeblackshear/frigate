@@ -156,7 +156,7 @@ export function MessageBubble({
           <div
             className={cn(
               !isComplete &&
-                "[&>p:last-child]:inline after:ml-0.5 after:inline-block after:h-4 after:w-2 after:animate-cursor-blink after:rounded-sm after:bg-foreground after:align-middle after:content-['']",
+                "after:ml-0.5 after:inline-block after:h-4 after:w-2 after:animate-cursor-blink after:rounded-sm after:bg-foreground after:align-middle after:content-[''] [&>p:last-child]:inline",
             )}
           >
             <ReactMarkdown
