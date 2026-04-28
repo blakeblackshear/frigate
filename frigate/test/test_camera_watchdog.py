@@ -89,16 +89,30 @@ class TestProcessSegmentUpdates(unittest.TestCase):
         self.assertEqual(watchdog.latest_invalid_segment_time, 0.0)
         self.assertEqual(watchdog.latest_cache_segment_time, 0.0)
 
+    def test_out_of_order_invalid_segments(self):
+        """Out-of-order invalid segments still result in the maximum timestamp."""
+        watchdog = _make_watchdog()
+        watchdog.segment_subscriber.check_for_update.side_effect = [
+            _msg(RecordingsDataTypeEnum.invalid, "front_door", 5.0),
+            _msg(RecordingsDataTypeEnum.invalid, "front_door", 15.0),
+            _msg(RecordingsDataTypeEnum.invalid, "front_door", 8.0),
+            (None, None),
+        ]
+        watchdog._drain_segment_updates()
+        self.assertEqual(watchdog.latest_invalid_segment_time, 15.0)
+
     def test_mixed_types_tracked_independently(self):
-        """Valid and cache segment times are each tracked independently."""
+        """Valid, invalid, and cache segment times are each tracked independently."""
         watchdog = _make_watchdog()
         watchdog.segment_subscriber.check_for_update.side_effect = [
             _msg(RecordingsDataTypeEnum.valid, "front_door", 10.0),
+            _msg(RecordingsDataTypeEnum.invalid, "front_door", 20.0),
             _msg(RecordingsDataTypeEnum.latest, "front_door", 30.0),
             (None, None),
         ]
         watchdog._drain_segment_updates()
         self.assertEqual(watchdog.latest_valid_segment_time, 10.0)
+        self.assertEqual(watchdog.latest_invalid_segment_time, 20.0)
         self.assertEqual(watchdog.latest_cache_segment_time, 30.0)
 
 
