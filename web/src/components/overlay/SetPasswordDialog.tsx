@@ -354,24 +354,36 @@ export default function SetPasswordDialog({
                           {t("users.dialog.form.password.requirements.title")}
                         </p>
                         <ul className="space-y-1">
-                          <li className="flex items-center gap-2 text-xs">
-                            {requirements.length ? (
-                              <LuCheck className="size-3.5 text-green-500" />
-                            ) : (
-                              <LuX className="size-3.5 text-red-500" />
-                            )}
-                            <span
-                              className={
-                                requirements.length
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }
+                          {(
+                            [
+                              "length",
+                              "uppercase",
+                              "digit",
+                              "special",
+                            ] as const
+                          ).map((req) => (
+                            <li
+                              key={req}
+                              className="flex items-center gap-2 text-xs"
                             >
-                              {t(
-                                "users.dialog.form.password.requirements.length",
+                              {requirements[req] ? (
+                                <LuCheck className="size-3.5 text-green-500" />
+                              ) : (
+                                <LuX className="size-3.5 text-red-500" />
                               )}
-                            </span>
-                          </li>
+                              <span
+                                className={
+                                  requirements[req]
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                                }
+                              >
+                                {t(
+                                  `users.dialog.form.password.requirements.${req}`,
+                                )}
+                              </span>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     </div>

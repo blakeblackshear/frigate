@@ -4,7 +4,7 @@ export const calculatePasswordStrength = (password: string): number => {
   if (!password) return 0;
 
   let strength = 0;
-  if (password.length >= 8) strength += 1;
+  if (password.length >= 12) strength += 1;
   if (/\d/.test(password)) strength += 1;
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 1;
   if (/[A-Z]/.test(password)) strength += 1;
@@ -14,6 +14,9 @@ export const calculatePasswordStrength = (password: string): number => {
 
 export const getPasswordRequirements = (password: string) => ({
   length: password?.length >= 12,
+  uppercase: /[A-Z]/.test(password),
+  digit: /\d/.test(password),
+  special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
 });
 
 export const getPasswordStrengthLabel = (

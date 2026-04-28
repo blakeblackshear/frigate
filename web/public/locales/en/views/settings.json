@@ -899,7 +899,10 @@
           },
           "requirements": {
             "title": "Password requirements:",
-            "length": "At least 12 characters"
+            "length": "At least 12 characters",
+            "uppercase": "At least one uppercase letter",
+            "digit": "At least one digit",
+            "special": "At least one special character (!@#$%^&*(),.?\":{}|<>)"
           },
           "match": "Passwords match",
           "notMatch": "Passwords don't match"
