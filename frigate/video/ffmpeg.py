@@ -317,16 +317,16 @@ class CameraWatchdog(threading.Thread):
                     if camera != self.config.name:
                         continue
 
-                    if topic.endswith(RecordingsDataTypeEnum.valid.value):
-                        self.logger.debug(
-                            f"Latest valid recording segment time on {camera}: {segment_time}"
-                        )
-                        self.latest_valid_segment_time = segment_time
-                    elif topic.endswith(RecordingsDataTypeEnum.invalid.value):
+                    if topic.endswith(RecordingsDataTypeEnum.invalid.value):
                         self.logger.warning(
                             f"Invalid recording segment detected for {camera} at {segment_time}"
                         )
                         self.latest_invalid_segment_time = segment_time
+                    elif topic.endswith(RecordingsDataTypeEnum.valid.value):
+                        self.logger.debug(
+                            f"Latest valid recording segment time on {camera}: {segment_time}"
+                        )
+                        self.latest_valid_segment_time = segment_time
                     elif topic.endswith(RecordingsDataTypeEnum.latest.value):
                         if segment_time is not None:
                             self.latest_cache_segment_time = segment_time
