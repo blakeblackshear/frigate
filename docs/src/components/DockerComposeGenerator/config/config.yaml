@@ -104,7 +104,7 @@ devices:
     imageTagSuffix: "-standard-arm64"
     autoHardware:
       - "video11"
-    helpText: "Raspberry Pi automatically configures the Video11 device and uses the arm64 image."
+    helpText: "Raspberry Pi automatically configures the video11 device (RPi 4) and uses the arm64 image."
     helpType: "info"
 
   - id: "stable-rk"
