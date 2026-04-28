@@ -202,6 +202,44 @@ class CameraWatchdog(threading.Thread):
         self._check_config_updates()
         return self.config.enabled
 
+    def _drain_segment_updates(self) -> None:
+        """Drain the segment subscriber queue and update latest segment timestamps."""
+        while True:
+            update = self.segment_subscriber.check_for_update(timeout=0)
+
+            if update == (None, None):
+                break
+
+            raw_topic, payload = update
+            if raw_topic and payload:
+                topic = str(raw_topic)
+                camera, segment_time, _ = payload
+
+                if camera != self.config.name:
+                    continue
+
+                if topic.endswith(RecordingsDataTypeEnum.valid.value):
+                    self.logger.debug(
+                        f"Latest valid recording segment time on {camera}: {segment_time}"
+                    )
+                    self.latest_valid_segment_time = max(
+                        self.latest_valid_segment_time, segment_time
+                    )
+                elif topic.endswith(RecordingsDataTypeEnum.invalid.value):
+                    self.logger.warning(
+                        f"Invalid recording segment detected for {camera} at {segment_time}"
+                    )
+                    self.latest_invalid_segment_time = max(
+                        self.latest_invalid_segment_time, segment_time
+                    )
+                elif topic.endswith(RecordingsDataTypeEnum.latest.value):
+                    if segment_time is not None:
+                        self.latest_cache_segment_time = max(
+                            self.latest_cache_segment_time, segment_time
+                        )
+                    else:
+                        self.latest_cache_segment_time = 0
+
     def reset_capture_thread(
         self, terminate: bool = True, drain_output: bool = True
     ) -> None:
@@ -303,35 +341,7 @@ class CameraWatchdog(threading.Thread):
             if not enabled:
                 continue
 
-            while True:
-                update = self.segment_subscriber.check_for_update(timeout=0)
-
-                if update == (None, None):
-                    break
-
-                raw_topic, payload = update
-                if raw_topic and payload:
-                    topic = str(raw_topic)
-                    camera, segment_time, _ = payload
-
-                    if camera != self.config.name:
-                        continue
-
-                    if topic.endswith(RecordingsDataTypeEnum.valid.value):
-                        self.logger.debug(
-                            f"Latest valid recording segment time on {camera}: {segment_time}"
-                        )
-                        self.latest_valid_segment_time = segment_time
-                    elif topic.endswith(RecordingsDataTypeEnum.invalid.value):
-                        self.logger.warning(
-                            f"Invalid recording segment detected for {camera} at {segment_time}"
-                        )
-                        self.latest_invalid_segment_time = segment_time
-                    elif topic.endswith(RecordingsDataTypeEnum.latest.value):
-                        if segment_time is not None:
-                            self.latest_cache_segment_time = segment_time
-                        else:
-                            self.latest_cache_segment_time = 0
+            self._drain_segment_updates()
 
             now = datetime.now().timestamp()
 
