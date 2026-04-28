@@ -267,18 +267,6 @@ ports:
     defaultEnabled: true
     locked: true
 
-  - id: "5000"
-    host: 5000
-    container: 5000
-    protocol: "tcp"
-    description: "Unauthenticated Web UI port (not recommended)"
-    defaultEnabled: false
-    requiresConfirmation: true
-    warningType: "danger"
-    warningContent: "Exposing port 5000 allows **unauthenticated access** to your Frigate instance. Anyone on your network (or the internet if you have a public IP) could access it without any credentials. This may lead to **unauthorized access**, **privacy leaks**, or further attacks. Ensure you have proper firewall rules or VPN in place before enabling this."
-    confirmationLabel: "I understand the risk and confirm enabling port 5000"
-    cooldownSeconds: 10
-
   - id: "8554"
     host: 8554
     container: 8554
