@@ -44,6 +44,7 @@ class LlamaCppClient(GenAIClient):
     _supports_tools: bool
     _image_token_cache: dict[tuple[int, int], int]
     _text_baseline_tokens: int | None
+    _media_marker: str
 
     def _init_provider(self) -> str | None:
         """Initialize the client and query model metadata from the server."""
@@ -56,6 +57,7 @@ class LlamaCppClient(GenAIClient):
         self._supports_tools = False
         self._image_token_cache = {}
         self._text_baseline_tokens = None
+        self._media_marker = "<__media__>"
 
         base_url = (
             self.genai_config.base_url.rstrip("/")
@@ -140,6 +142,13 @@ class LlamaCppClient(GenAIClient):
             # Tool support from chat template capabilities
             chat_caps = props.get("chat_template_caps", {})
             self._supports_tools = chat_caps.get("supports_tools", False)
+
+            # Media marker for multimodal embeddings; the server randomizes this
+            # per startup unless LLAMA_MEDIA_MARKER is set, so we must read it
+            # from /props rather than hardcoding "<__media__>".
+            media_marker = props.get("media_marker")
+            if isinstance(media_marker, str) and media_marker:
+                self._media_marker = media_marker
 
             logger.info(
                 "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
@@ -465,10 +474,11 @@ class LlamaCppClient(GenAIClient):
             jpeg_bytes = _to_jpeg(img)
             to_encode = jpeg_bytes if jpeg_bytes is not None else img
             encoded = base64.b64encode(to_encode).decode("utf-8")
-            # prompt_string must contain <__media__> placeholder for image tokenization
+            # prompt_string must contain the server's media marker placeholder.
+            # The marker is randomized per server startup (read from /props).
             content.append(
                 {
-                    "prompt_string": "<__media__>\n",
+                    "prompt_string": f"{self._media_marker}\n",
                     "multimodal_data": [encoded],  # type: ignore[dict-item]
                 }
             )
