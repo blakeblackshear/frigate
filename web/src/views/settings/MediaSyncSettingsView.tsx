@@ -10,13 +10,16 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useJobStatus } from "@/api/ws";
 import { Switch } from "@/components/ui/switch";
-import { LuCheck, LuX } from "react-icons/lu";
+import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { MediaSyncResults, MediaSyncStats } from "@/types/ws";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { Link } from "react-router-dom";
 
 export default function MediaSyncSettingsView() {
   const { t } = useTranslation("views/settings");
+  const { getLocaleDocUrl } = useDocDomain();
   const [selectedMediaTypes, setSelectedMediaTypes] = useState<string[]>([
     "all",
   ]);
@@ -109,13 +112,25 @@ export default function MediaSyncSettingsView() {
               <Heading as="h4" className="mb-2 hidden md:block">
                 {t("maintenance.sync.title")}
               </Heading>
-
               <div className="max-w-6xl">
-                <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-muted-foreground">
+                <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
                   <p>{t("maintenance.sync.desc")}</p>
+
+                  <div className="flex items-center text-primary">
+                    <Link
+                      to={getLocaleDocUrl(
+                        "configuration/record#syncing-media-files-with-disk",
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
                 </div>
               </div>
-
               <div className="space-y-6">
                 {/* Media Types Selection */}
                 <div>
