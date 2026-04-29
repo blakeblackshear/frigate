@@ -265,7 +265,8 @@ ports:
     protocol: "tcp"
     description: "Authenticated UI and API access (default HTTPS)"
     defaultEnabled: true
-    locked: true
+    warningContent: "This is the access port for Frigate. Closing it means you will no longer be able to access the instance."
+    warningWhen: "unchecked"
 
   - id: "8554"
     host: 8554

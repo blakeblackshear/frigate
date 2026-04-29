@@ -29,7 +29,6 @@ export function useConfigGenerator() {
     return initial;
   });
 
-  const [port5000Confirmed, setPort5000Confirmed] = useState(false);
   const [nvidiaGpuCount, setNvidiaGpuCount] = useState("all");
   const [nvidiaGpuDeviceId, setNvidiaGpuDeviceId] = useState("");
   const [configPath, setConfigPath] = useState("");
@@ -69,13 +68,7 @@ export function useConfigGenerator() {
   const togglePort = useCallback((portId: string) => {
     const port = portMap.get(portId);
     if (port?.locked) return;
-    setPortEnabled((prev) => {
-      const next = { ...prev, [portId]: !prev[portId] };
-      if (portId === "5000" && !next[portId]) {
-        setPort5000Confirmed(false);
-      }
-      return next;
-    });
+    setPortEnabled((prev) => ({ ...prev, [portId]: !prev[portId] }));
   }, []);
 
   const isHardwareDisabled = useCallback(
@@ -149,7 +142,6 @@ export function useConfigGenerator() {
     const lines: string[] = [];
     for (const [id, enabled] of Object.entries(portEnabled)) {
       if (!enabled) continue;
-      if (id === "5000" && !port5000Confirmed) continue;
       const p = portMap.get(id);
       if (!p) continue;
       const proto = p.protocol && p.protocol !== "tcp" ? `/${p.protocol}` : "";
@@ -157,7 +149,7 @@ export function useConfigGenerator() {
       lines.push(`      - "${p.host}:${p.container}${proto}"${comment}`);
     }
     return lines;
-  }, [portEnabled, port5000Confirmed]);
+  }, [portEnabled]);
 
   const selectedHardwareIds = useMemo(() => {
     return Object.entries(hardwareEnabled)
@@ -195,11 +187,11 @@ export function useConfigGenerator() {
 
   return {
     deviceId, device, hardwareEnabled, portEnabled,
-    port5000Confirmed, nvidiaGpuCount, nvidiaGpuDeviceId,
+    nvidiaGpuCount, nvidiaGpuDeviceId,
     configPath, mediaPath, rtspPassword, timezone, shmSize,
     shmSizeError, gpuDeviceIdError, configPathError, mediaPathError,
     hasAnyHardware, generatedYaml,
-    selectDevice, toggleHardware, togglePort, setPort5000Confirmed,
+    selectDevice, toggleHardware, togglePort,
     handleShmSizeChange, handleConfigPathChange, handleMediaPathChange,
     handleNvidiaGpuCountChange, handleNvidiaGpuDeviceIdChange,
     setRtspPassword, setTimezone, isHardwareDisabled,

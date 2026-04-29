@@ -32,12 +32,12 @@ function renderHelpText(text: string): React.ReactNode {
 export default function DockerComposeGenerator() {
   const {
     deviceId, device, hardwareEnabled,
-    portEnabled, port5000Confirmed,
+    portEnabled,
     nvidiaGpuCount, nvidiaGpuDeviceId,
     configPath, mediaPath, rtspPassword, timezone, shmSize,
     shmSizeError, gpuDeviceIdError, configPathError, mediaPathError,
     hasAnyHardware, generatedYaml,
-    selectDevice, toggleHardware, togglePort, setPort5000Confirmed,
+    selectDevice, toggleHardware, togglePort,
     handleShmSizeChange, handleConfigPathChange, handleMediaPathChange,
     handleNvidiaGpuCountChange, handleNvidiaGpuDeviceIdChange,
     setRtspPassword, setTimezone, isHardwareDisabled,
@@ -82,9 +82,7 @@ export default function DockerComposeGenerator() {
 
         <PortConfigSection
           portEnabled={portEnabled}
-          port5000Confirmed={port5000Confirmed}
           onTogglePort={togglePort}
-          onConfirm5000={setPort5000Confirmed}
         />
 
         <OtherOptions

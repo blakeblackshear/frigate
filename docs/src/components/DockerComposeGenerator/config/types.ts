@@ -145,14 +145,10 @@ export interface PortConfig {
   defaultEnabled: boolean;
   /** Whether this port is locked (always enabled, cannot be toggled off) */
   locked?: boolean;
-  /** Whether this port requires a confirmation step before enabling */
-  requiresConfirmation?: boolean;
   /** Admonition type for the warning */
   warningType?: "warning" | "danger";
   /** Warning content (markdown) */
   warningContent?: string;
-  /** Confirmation checkbox label */
-  confirmationLabel?: string;
-  /** Cooldown in seconds before the confirmation checkbox becomes available */
-  cooldownSeconds?: number;
+  /** When to show the warning: when the port is checked or unchecked */
+  warningWhen?: "checked" | "unchecked";
 }
