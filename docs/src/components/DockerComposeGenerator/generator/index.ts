@@ -123,7 +123,7 @@ function buildEnvironment(
 function buildDeploy(device: DeviceConfig, input: GeneratorInput): string[] {
   if (device.id === "stable-tensorrt") {
     const count = input.nvidiaGpuCount || "all";
-    const isAll = count.toLowerCase() === "all";
+    const isAll = count === "all";
     const deviceId = input.nvidiaGpuDeviceId?.trim();
 
     if (isAll) {

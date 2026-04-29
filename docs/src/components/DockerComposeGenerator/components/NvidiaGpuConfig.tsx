@@ -16,6 +16,8 @@ export default function NvidiaGpuConfig({
   onGpuCountChange,
   onGpuDeviceIdChange,
 }: Props) {
+  const showDeviceId = gpuCount !== "";
+
   return (
     <div className={styles.nvidiaConfig}>
       <div className={styles.formGroup}>
@@ -25,16 +27,15 @@ export default function NvidiaGpuConfig({
         <input
           id="dcg-gpu-count"
           type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           className={styles.input}
           value={gpuCount}
-          placeholder="1 or all"
-          onChange={(e) => onGpuCountChange(e.target.value)}
+          placeholder="all"
+          onChange={(e) => onGpuCountChange(e.target.value.replace(/\D/g, ""))}
         />
-        <p className={styles.helpText}>
-          Enter a number (e.g. 1, 2, 3) or &quot;all&quot; to use all GPUs
-        </p>
       </div>
-      {gpuCount !== "all" && (
+      {showDeviceId && (
         <div className={styles.formGroup}>
           <label htmlFor="dcg-gpu-device-id" className={styles.label}>
             GPU device IDs (required, comma-separated):

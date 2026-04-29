@@ -29,7 +29,7 @@ export function useConfigGenerator() {
     return initial;
   });
 
-  const [nvidiaGpuCount, setNvidiaGpuCount] = useState("all");
+  const [nvidiaGpuCount, setNvidiaGpuCount] = useState("");
   const [nvidiaGpuDeviceId, setNvidiaGpuDeviceId] = useState("");
   const [configPath, setConfigPath] = useState("");
   const [mediaPath, setMediaPath] = useState("");
@@ -56,7 +56,7 @@ export function useConfigGenerator() {
       }
       return next;
     });
-    setNvidiaGpuCount("all");
+    setNvidiaGpuCount("");
     setNvidiaGpuDeviceId("");
     setGpuDeviceIdError(false);
   }, []);
@@ -121,15 +121,13 @@ export function useConfigGenerator() {
   );
 
   const handleNvidiaGpuCountChange = useCallback((value: string) => {
-    const lower = value.trim().toLowerCase();
-    if (lower === "all" || lower === "" || /^[0-9]+$/.test(lower)) {
-      setNvidiaGpuCount(lower || "all");
-      if (lower === "all") {
-        setNvidiaGpuDeviceId("");
-        setGpuDeviceIdError(false);
-      } else if (/^[0-9]+$/.test(lower)) {
-        setGpuDeviceIdError(false);
-      }
+    // Only allow digits
+    setNvidiaGpuCount(value);
+    if (value === "") {
+      setNvidiaGpuDeviceId("");
+      setGpuDeviceIdError(false);
+    } else {
+      setGpuDeviceIdError(false);
     }
   }, []);
 
