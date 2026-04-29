@@ -171,7 +171,7 @@ When choosing images to include in the face training set it is recommended to al
 - If it is difficult to make out details in a persons face it will not be helpful in training.
 - Avoid images with extreme under/over-exposure.
 - Avoid blurry / pixelated images.
-- Avoid training on infrared (gray-scale). The models are trained on color images and will be able to extract features from gray-scale images.
+- Avoid training on infrared (gray-scale). The models are trained on color images and will not be able to extract features from gray-scale images.
 - Using images of people wearing hats / sunglasses may confuse the model.
 - Do not upload too many similar images at the same time, it is recommended to train no more than 4-6 similar images for each person to avoid over-fitting.
 

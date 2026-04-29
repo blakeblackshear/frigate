@@ -143,15 +143,17 @@ class GeminiClient(GenAIClient):
                     )
                 elif role == "tool":
                     # Handle tool response
-                    function_response = {
-                        "name": msg.get("name", ""),
-                        "response": content,
-                    }
+                    response_payload = (
+                        content if isinstance(content, dict) else {"result": content}
+                    )
                     gemini_messages.append(
                         types.Content(
                             role="function",
                             parts=[
-                                types.Part.from_function_response(function_response)  # type: ignore[misc,call-arg,arg-type]
+                                types.Part.from_function_response(
+                                    name=msg.get("name", ""),
+                                    response=response_payload,
+                                )
                             ],
                         )
                     )
@@ -350,15 +352,17 @@ class GeminiClient(GenAIClient):
                     )
                 elif role == "tool":
                     # Handle tool response
-                    function_response = {
-                        "name": msg.get("name", ""),
-                        "response": content,
-                    }
+                    response_payload = (
+                        content if isinstance(content, dict) else {"result": content}
+                    )
                     gemini_messages.append(
                         types.Content(
                             role="function",
                             parts=[
-                                types.Part.from_function_response(function_response)  # type: ignore[misc,call-arg,arg-type]
+                                types.Part.from_function_response(
+                                    name=msg.get("name", ""),
+                                    response=response_payload,
+                                )
                             ],
                         )
                     )

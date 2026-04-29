@@ -28,6 +28,7 @@ class MonitoredProcess:
     restart_timestamps: deque[float] = field(
         default_factory=lambda: deque(maxlen=MAX_RESTARTS)
     )
+    clean_exit_logged: bool = False
 
     def is_restarting_too_fast(self, now: float) -> bool:
         while (
@@ -72,7 +73,9 @@ class FrigateWatchdog(threading.Thread):
 
         exitcode = entry.process.exitcode
         if exitcode == 0:
-            logger.info("Process %s exited cleanly, not restarting", entry.name)
+            if not entry.clean_exit_logged:
+                logger.info("Process %s exited cleanly, not restarting", entry.name)
+                entry.clean_exit_logged = True
             return
 
         logger.warning(
