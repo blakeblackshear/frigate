@@ -116,7 +116,7 @@ export default function MediaSyncSettingsView() {
                 <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-muted-foreground">
                   <p>{t("maintenance.sync.desc")}</p>
 
-                  <div className="flex items-center text-primary">
+                  <div className="flex items-center text-primary-variant">
                     <Link
                       to={getLocaleDocUrl(
                         "configuration/record#syncing-media-files-with-disk",
